@@ -78,8 +78,8 @@ namespace Metalama.Framework.Engine.Linking
                     if ( declaration is IMethod )
                     {
                         var signatureComparison = string.CompareOrdinal(
-                            declaration.ToDisplayString( CodeDisplayFormat.MinimallyQualified ).TrimEnd( "" ),
-                            otherDeclaration.ToDisplayString( CodeDisplayFormat.MinimallyQualified ).TrimEnd( "" ) );
+                            declaration.ToDisplayString( CodeDisplayFormat.MinimallyQualified ).TrimSuffix( "" ),
+                            otherDeclaration.ToDisplayString( CodeDisplayFormat.MinimallyQualified ).TrimSuffix( "" ) );
 
                         if ( signatureComparison != 0 )
                         {

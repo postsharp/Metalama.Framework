@@ -3,7 +3,6 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
@@ -44,11 +43,11 @@ namespace Metalama.Framework.Engine.CompileTime
         private static readonly ImmutableDictionary<string, (TemplatingScope Scope, bool IncludeDescendants)> _wellKnownNamespaces =
             new (string Namespace, TemplatingScope Scope, bool IncludeDescendants)[]
             {
-                ("System", TemplatingScope.Both, false),
-                ("System.Reflection", TemplatingScope.Both, true),
-                ("System.Text", TemplatingScope.Both, true),
-                ("System.Collections", TemplatingScope.Both, true),
-                ("System.Linq", TemplatingScope.Both, true),
+                ("System", TemplatingScope.RunTimeOrCompileTime, false),
+                ("System.Reflection", TemplatingScope.RunTimeOrCompileTime, true),
+                ("System.Text", TemplatingScope.RunTimeOrCompileTime, true),
+                ("System.Collections", TemplatingScope.RunTimeOrCompileTime, true),
+                ("System.Linq", TemplatingScope.RunTimeOrCompileTime, true),
                 ("Microsoft.CodeAnalysis", TemplatingScope.RunTimeOnly, true)
             }.ToImmutableDictionary( t => t.Namespace, t => (t.Scope, t.IncludeDescendants), StringComparer.Ordinal );
 
@@ -66,20 +65,20 @@ namespace Metalama.Framework.Engine.CompileTime
         /// <summary>
         /// Initializes a new instance of the <see cref="SymbolClassifier"/> class.
         /// </summary>
-        /// <param name="serviceProvider">Service provider.</param>
+        /// <param name="referenceAssemblyLocator"></param>
         /// <param name="compilation">The compilation, or null if the compilation has no reference to Metalama.</param>
-        public SymbolClassifier( IServiceProvider serviceProvider, Compilation? compilation )
+        public SymbolClassifier( ReferenceAssemblyLocator referenceAssemblyLocator, Compilation? compilation )
         {
+            this._referenceAssemblyLocator = referenceAssemblyLocator;
+
             if ( compilation != null )
             {
                 this._compilation = compilation;
-                this._compileTimeAttribute = this._compilation.GetTypeByMetadataName( typeof(CompileTimeAttribute).FullName ).AssertNotNull();
-                this._compileTimeOnlyAttribute = this._compilation.GetTypeByMetadataName( typeof(CompileTimeOnlyAttribute).FullName ).AssertNotNull();
+                this._compileTimeAttribute = this._compilation.GetTypeByMetadataName( typeof(RunTimeOrCompileTimeAttribute).FullName ).AssertNotNull();
+                this._compileTimeOnlyAttribute = this._compilation.GetTypeByMetadataName( typeof(CompileTimeAttribute).FullName ).AssertNotNull();
                 this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof(TemplateAttribute).FullName ).AssertNotNull();
                 this._ignoreUnlessOverriddenAttribute = this._compilation.GetTypeByMetadataName( typeof(AbstractAttribute).FullName ).AssertNotNull();
             }
-
-            this._referenceAssemblyLocator = serviceProvider.GetRequiredService<ReferenceAssemblyLocator>();
         }
 
         public TemplateInfo GetTemplateInfo( ISymbol symbol ) => this.GetTemplateInfo( symbol, false );
@@ -168,7 +167,7 @@ namespace Metalama.Framework.Engine.CompileTime
             }
             else if ( this._compilation.HasImplicitConversion( attribute.AttributeClass, this._compileTimeAttribute ) )
             {
-                return TemplatingScope.Both;
+                return TemplatingScope.RunTimeOrCompileTime;
             }
             else
             {
@@ -231,7 +230,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         case TemplatingScope.RunTimeOnly:
                             return TemplatingScope.CompileTimeOnlyReturningRuntimeOnly;
 
-                        case TemplatingScope.Both:
+                        case TemplatingScope.RunTimeOrCompileTime:
                             return TemplatingScope.CompileTimeOnlyReturningBoth;
                     }
                 }
@@ -324,7 +323,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                                     break;
 
-                                case TemplatingScope.Both:
+                                case TemplatingScope.RunTimeOrCompileTime:
                                     break;
 
                                 default:
@@ -348,7 +347,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                     }
                                     else
                                     {
-                                        return TemplatingScope.Both;
+                                        return TemplatingScope.RunTimeOrCompileTime;
                                     }
                                 }
                         }
@@ -372,7 +371,7 @@ namespace Metalama.Framework.Engine.CompileTime
             // From attributes.
             var scopeFromAttributes = this.GetScopeFromAttributes( symbol ) ?? TemplatingScope.RunTimeOnly;
 
-            if ( scopeFromAttributes != TemplatingScope.Both )
+            if ( scopeFromAttributes != TemplatingScope.RunTimeOrCompileTime )
             {
                 return scopeFromAttributes;
             }
@@ -383,15 +382,22 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private TemplatingScope GetScopeFromSignature( ISymbol symbol, int recursion )
         {
-            var signatureScope = TemplatingScope.Both;
+            var signatureScope = TemplatingScope.RunTimeOrCompileTime;
 
             void CombineScope( ITypeSymbol type )
             {
                 var typeScope = this.GetTemplatingScopeCore( type, recursion + 1 );
 
-                if ( typeScope != TemplatingScope.Both )
+                if ( typeScope != TemplatingScope.RunTimeOrCompileTime )
                 {
-                    signatureScope = signatureScope == TemplatingScope.Both ? typeScope : TemplatingScope.Conflict;
+                    if ( signatureScope == TemplatingScope.RunTimeOrCompileTime )
+                    {
+                        signatureScope = typeScope;
+                    }
+                    else
+                    {
+                        signatureScope = TemplatingScope.Conflict;
+                    }
                 }
             }
 
@@ -424,7 +430,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     return this.GetTemplatingScopeCore( @event.Type, recursion + 1 );
 
                 default:
-                    return TemplatingScope.Both;
+                    return TemplatingScope.RunTimeOrCompileTime;
             }
         }
 
@@ -527,7 +533,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 case INamespaceSymbol:
                     // Namespace can be either run-time, build-time or both. We don't do more now but we may have to do it based on assemblies defining the namespace.
-                    return AddToCache( TemplatingScope.Both );
+                    return AddToCache( TemplatingScope.RunTimeOrCompileTime );
             }
 
             return AddToCache( null );

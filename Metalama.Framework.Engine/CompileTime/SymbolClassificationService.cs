@@ -11,14 +11,18 @@ namespace Metalama.Framework.Engine.CompileTime
 {
     internal class SymbolClassificationService : IService
     {
-        private readonly IServiceProvider _serviceProvider;
         private readonly ConditionalWeakTable<Compilation, ISymbolClassifier> _instances = new();
         private readonly SymbolClassifier _noMetalamaReferenceClassifier;
+        private readonly ReferenceAssemblyLocator _referenceAssemblyLocator;
 
         public SymbolClassificationService( IServiceProvider serviceProvider )
         {
-            this._serviceProvider = serviceProvider;
-            this._noMetalamaReferenceClassifier = new SymbolClassifier( serviceProvider, null );
+            // It is essential not to store the IServiceProvider in the object, otherwise we are making it impossible to
+            // unload the AppDomain. The reason is that the IServiceProvider is project-specific, but the current object
+            // is cached as project-neutral. Therefore, we cannot store anything project-specific.
+
+            this._referenceAssemblyLocator = serviceProvider.GetRequiredService<ReferenceAssemblyLocator>();
+            this._noMetalamaReferenceClassifier = new SymbolClassifier( this._referenceAssemblyLocator, null );
         }
 
         /// <summary>
@@ -29,9 +33,9 @@ namespace Metalama.Framework.Engine.CompileTime
                 compilation,
                 c =>
                 {
-                    var hasMetalamaReference = compilation.GetTypeByMetadataName( typeof(CompileTimeAttribute).FullName ) != null;
+                    var hasMetalamaReference = compilation.GetTypeByMetadataName( typeof(RunTimeOrCompileTimeAttribute).FullName ) != null;
 
-                    return hasMetalamaReference ? new SymbolClassifier( this._serviceProvider, c ) : this._noMetalamaReferenceClassifier;
+                    return hasMetalamaReference ? new SymbolClassifier( this._referenceAssemblyLocator, c ) : this._noMetalamaReferenceClassifier;
                 } );
     }
 }

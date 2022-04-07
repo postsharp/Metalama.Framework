@@ -28,6 +28,7 @@ namespace Metalama.Framework.Engine.CompileTime
         private const string _compileTimeFrameworkAssemblyName = "Metalama.Framework";
         private readonly string _cacheDirectory;
         private readonly ILogger _logger;
+        private readonly string? _dotNetSdkDirectory;
 
         /// <summary>
         /// Gets the name (without path and extension) of Metalama assemblies.
@@ -65,7 +66,19 @@ namespace Metalama.Framework.Engine.CompileTime
         public ReferenceAssemblyLocator( IServiceProvider serviceProvider )
         {
             this._cacheDirectory = serviceProvider.GetRequiredService<IPathOptions>().AssemblyLocatorCacheDirectory;
-            this._logger = serviceProvider.GetLoggerFactory().CompileTime();
+            this._logger = serviceProvider.GetLoggerFactory().GetLogger( nameof(ReferenceAssemblyLocator) );
+
+            var projectOptions = serviceProvider.GetService<IProjectOptions>();
+
+            if ( projectOptions != null )
+            {
+                this._dotNetSdkDirectory = projectOptions.DotNetSdkDirectory;
+                this._logger.Trace?.Log( $"Project options available. DotNetSdkDirectory = '{this._dotNetSdkDirectory}'." );
+            }
+            else
+            {
+                this._logger.Trace?.Log( $"No project options available." );
+            }
 
             // Get Metalama implementation assemblies (but not the public API, for which we need a special compile-time build).
             var metalamaImplementationAssemblies = new Dictionary<string, string>()
@@ -109,10 +122,8 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private IEnumerable<string> GetSystemAssemblyPaths()
         {
-            var tempProjectDirectory = Path.Combine( this._cacheDirectory, nameof(ReferenceAssemblyLocator) );
-
-            using var mutex = MutexHelper.WithGlobalLock( tempProjectDirectory, this._logger );
-            var referenceAssemblyListFile = Path.Combine( tempProjectDirectory, "assemblies.txt" );
+            using var mutex = MutexHelper.WithGlobalLock( this._cacheDirectory, this._logger );
+            var referenceAssemblyListFile = Path.Combine( this._cacheDirectory, "assemblies.txt" );
 
             if ( File.Exists( referenceAssemblyListFile ) )
             {
@@ -124,9 +135,9 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
             }
 
-            Directory.CreateDirectory( tempProjectDirectory );
+            Directory.CreateDirectory( this._cacheDirectory );
 
-            GlobalJsonWriter.TryWriteCurrentVersion( tempProjectDirectory );
+            GlobalJsonWriter.TryWriteCurrentVersion( this._cacheDirectory );
 
             var metadataReader = AssemblyMetadataReader.GetInstance( typeof(ReferenceAssemblyLocator).Assembly );
 
@@ -147,42 +158,29 @@ namespace Metalama.Framework.Engine.CompileTime
   </Target>
 </Project>";
 
-            File.WriteAllText( Path.Combine( tempProjectDirectory, "TempProject.csproj" ), projectText );
+            File.WriteAllText( Path.Combine( this._cacheDirectory, "TempProject.csproj" ), projectText );
 
-            string dotnetPath;
-
-            if ( RuntimeInformation.IsOSPlatform( OSPlatform.Windows ) )
-            {
-                dotnetPath = Environment.ExpandEnvironmentVariables( "%ProgramFiles%\\dotnet\\dotnet.exe" );
-
-                if ( !File.Exists( dotnetPath ) )
-                {
-                    dotnetPath = Environment.ExpandEnvironmentVariables( "%ProgramFiles(x86)%\\dotnet\\dotnet.exe" );
-                }
-
-                if ( !File.Exists( dotnetPath ) )
-                {
-                    dotnetPath = "dotnet";
-                }
-            }
-            else
-            {
-                dotnetPath = "dotnet";
-            }
+            var dotnetPath = this.GetDotNetPath();
 
             // We may consider executing msbuild.exe instead of dotnet.exe when the build itself runs using msbuild.exe.
             // This way we wouldn't need to require a .NET SDK to be installed. Also, it seems that Rider requires the full path.
-            // TODO 29508: Make this cross-platform.
-            var psi = new ProcessStartInfo( dotnetPath, "build -t:WriteReferenceAssemblies" )
+            const string arguments = "build -t:WriteReferenceAssemblies";
+
+            var psi = new ProcessStartInfo( dotnetPath, arguments )
             {
                 // We cannot call dotnet.exe with a \\?\-prefixed path because MSBuild would fail.
-                WorkingDirectory = tempProjectDirectory, UseShellExecute = false, CreateNoWindow = true, RedirectStandardOutput = true
+                WorkingDirectory = this._cacheDirectory,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
             };
 
             var process = Process.Start( psi ).AssertNotNull();
 
             var lines = new List<string>();
             process.OutputDataReceived += ( _, e ) => lines.Add( e.Data );
+            process.ErrorDataReceived += ( _, e ) => lines.Add( e.Data );
 
             process.BeginOutputReadLine();
             process.WaitForExit();
@@ -190,11 +188,80 @@ namespace Metalama.Framework.Engine.CompileTime
             if ( process.ExitCode != 0 )
             {
                 throw new InvalidOperationException(
-                    "Error while building temporary project to locate reference assemblies:" + Environment.NewLine
-                                                                                             + string.Join( Environment.NewLine, lines ) );
+                    $"Error while building temporary project to locate reference assemblies: `{dotnetPath} {arguments}` returned {process.ExitCode}"
+                    + Environment.NewLine + string.Join( Environment.NewLine, lines ) );
             }
 
             return File.ReadAllLines( referenceAssemblyListFile );
+        }
+
+        private string GetDotNetPath()
+        {
+            string dotnetPath;
+            string fileName;
+
+            if ( RuntimeInformation.IsOSPlatform( OSPlatform.Windows ) )
+            {
+                // Find dotnet.exe at well-known locations.
+
+                dotnetPath = Environment.ExpandEnvironmentVariables( "%ProgramFiles%\\dotnet\\dotnet.exe" );
+
+                if ( File.Exists( dotnetPath ) )
+                {
+                    this._logger.Trace?.Log( $"dotnet.exe found in '{dotnetPath}'." );
+
+                    return dotnetPath;
+                }
+                else
+                {
+                    this._logger.Trace?.Log( $"Looked for dotnet.exe in '{dotnetPath}' but it did not exist." );
+                }
+
+                dotnetPath = Environment.ExpandEnvironmentVariables( "%ProgramFiles(x86)%\\dotnet\\dotnet.exe" );
+
+                if ( File.Exists( dotnetPath ) )
+                {
+                    this._logger.Trace?.Log( $"dotnet.exe found in '{dotnetPath}'." );
+
+                    return dotnetPath;
+                }
+                else
+                {
+                    this._logger.Trace?.Log( $"Looked for dotnet.exe in '{dotnetPath}' but it did not exist." );
+                }
+
+                fileName = "dotnet.exe";
+            }
+            else
+            {
+                fileName = "dotnet";
+            }
+
+            // Look in the DotNetSdkDirectory, if we know it.
+
+            if ( this._dotNetSdkDirectory != null )
+            {
+                for ( var directory = this._dotNetSdkDirectory; directory != null; directory = Path.GetDirectoryName( directory ) )
+                {
+                    dotnetPath = Path.Combine( directory, fileName );
+
+                    if ( File.Exists( dotnetPath ) )
+                    {
+                        this._logger.Trace?.Log( $"dotnet.exe found in '{dotnetPath}'." );
+
+                        return dotnetPath;
+                    }
+                    else
+                    {
+                        this._logger.Trace?.Log( $"Looked for {fileName} in '{dotnetPath}' but it did not exist." );
+                    }
+                }
+            }
+
+            // The file was not found.
+            this._logger.Trace?.Log( $"{fileName} was found nowhere. We hope it will be in the path." );
+
+            return "dotnet";
         }
     }
 }

@@ -10,7 +10,7 @@ namespace Metalama.Framework.Eligibility
     /// Enumeration of scenarios in which an aspect can be used.
     /// </summary>
     /// <seealso href="@eligibility"/>
-    [CompileTimeOnly]
+    [CompileTime]
     [Flags]
     public enum EligibleScenarios
     {

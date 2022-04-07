@@ -11,7 +11,7 @@ namespace Metalama.Framework.Aspects
     /// Represents an instance of an aspect. The instance of the <see cref="IAspect"/> itself is in the <see cref="Aspect"/> property.
     /// </summary>
     [InternalImplement]
-    [CompileTimeOnly]
+    [CompileTime]
     public interface IAspectInstance : IAspectPredecessor
     {
         /// <summary>

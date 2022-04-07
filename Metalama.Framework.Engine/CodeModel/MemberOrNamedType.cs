@@ -75,5 +75,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public string Name => this.Symbol.Name;
 
         INamedType? IMemberOrNamedType.DeclaringType => this.DeclaringType;
+
+        public override SyntaxTree? PrimarySyntaxTree => this.Symbol.GetPrimarySyntaxReference()?.SyntaxTree;
     }
 }

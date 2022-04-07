@@ -1,67 +1,49 @@
-[NotifyPropertyChanged]
+    [NotifyPropertyChanged]
     internal class Car:global::System.ComponentModel.INotifyPropertyChanged    {
-
-
-private string? _make;
-        public string? Make {get    {
+        public string? Make 
+{ get
+{ 
         return this.Make_Source;
-    }
 
-set    {
+}
+set
+{ 
         var value_1 = value;
         if (value_1 != this.Make_Source)
         {
             this.OnPropertyChanged("Make");
-            this.Make_Source= value;
+            this.Make_Source = value;
         }
 
         return;
-    }
+
+}
 }
 
-private string? Make_Source
-{
-    get
-    {
-        return this._make;
-    }
+private string? Make_Source { get; set; }
 
-    set
-    {
-        this._make = value;
-    }
-}
-
-private double _power;
-
-        public double Power {get    {
+        public double Power 
+{ get
+{ 
         return this.Power_Source;
-    }
 
-set    {
+}
+set
+{ 
         var value_1 = value;
         if (value_1 != this.Power_Source)
         {
             this.OnPropertyChanged("Power");
-            this.Power_Source= value;
+            this.Power_Source = value;
         }
 
         return;
-    }
+
+}
 }
 
-private double Power_Source
-{
-    get
-    {
-        return this._power;
-    }
+private double Power_Source { get; set; }
 
-    set
-    {
-        this._power = value;
-    }
-}
 
 protected void OnPropertyChanged(global::System.String name)
 {

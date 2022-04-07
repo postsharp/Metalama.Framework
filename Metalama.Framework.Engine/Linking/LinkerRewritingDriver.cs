@@ -489,10 +489,6 @@ namespace Metalama.Framework.Engine.Linking
         /// <summary>
         /// Gets rewritten member and any additional induced members (e.g. backing field of auto property).
         /// </summary>
-        /// <param name="syntax"></param>
-        /// <param name="symbol"></param>
-        /// <param name="generationContext"></param>
-        /// <returns></returns>
         public IReadOnlyList<MemberDeclarationSyntax> RewriteMember( MemberDeclarationSyntax syntax, ISymbol symbol, SyntaxGenerationContext generationContext )
         {
             switch ( symbol )
@@ -561,9 +557,6 @@ namespace Metalama.Framework.Engine.Linking
         /// <summary>
         /// Gets a syntax node that will the the source of trivia of the specified declaration root block.
         /// </summary>
-        /// <param name="semantic"></param>
-        /// <param name="shouldRemoveExistingTrivia"></param>
-        /// <returns></returns>
         private SyntaxNode? ResolveBodyBlockTriviaSource( IntermediateSymbolSemantic<IMethodSymbol> semantic, out bool shouldRemoveExistingTrivia )
         {
             ISymbol? symbol;
@@ -619,9 +612,6 @@ namespace Metalama.Framework.Engine.Linking
         /// <summary>
         /// Gets an expression that replaces the expression represented by the aspect reference. This for cases where the reference is not inlined.
         /// </summary>
-        /// <param name="aspectReference"></param>
-        /// <param name="syntaxGenerationContext"></param>
-        /// <returns></returns>
         private ExpressionSyntax GetLinkedExpression( ResolvedAspectReference aspectReference, SyntaxGenerationContext syntaxGenerationContext )
         {
             // IMPORTANT: This method needs to always strip trivia if rewriting the existing expression.

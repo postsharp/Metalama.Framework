@@ -9,7 +9,7 @@ namespace Metalama.Framework.Code.SyntaxBuilders
     /// <summary>
     /// Compile-time object that allows to build a run-time interpolated string.
     /// </summary>
-    [CompileTimeOnly]
+    [CompileTime]
     public sealed partial class InterpolatedStringBuilder : INotNullExpressionBuilder
     {
         private readonly List<object?> _items = new();

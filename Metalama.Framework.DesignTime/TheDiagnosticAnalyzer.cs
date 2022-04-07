@@ -8,6 +8,7 @@ using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -78,7 +79,6 @@ namespace Metalama.Framework.DesignTime
 
             try
             {
-                // Execute the analysis that are not performed in the pipeline.
                 var projectOptions = new ProjectOptions( context.Options.AnalyzerConfigOptionsProvider );
 
                 if ( !projectOptions.IsDesignTimeEnabled )
@@ -101,6 +101,28 @@ namespace Metalama.Framework.DesignTime
                     return;
                 }
 
+                var diagnosticCount = 0;
+
+                // Execute the analysis that are not performed in the pipeline.
+                void ReportDiagnostic( Diagnostic diagnostic )
+                {
+                    this._logger.Trace?.Log(
+                        $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): TemplatingCodeValidator reported {diagnostic.Id}." );
+
+                    diagnosticCount++;
+
+                    context.ReportDiagnostic( diagnostic );
+                }
+
+                TemplatingCodeValidator.Validate(
+                    pipeline.ServiceProvider,
+                    context.SemanticModel,
+                    ReportDiagnostic,
+                    pipeline.MustReportPausedPipelineAsErrors && pipeline.IsCompileTimeSyntaxTreeOutdated( context.SemanticModel.SyntaxTree.FilePath ),
+                    true,
+                    cancellationToken );
+
+                // Run the pipeline.
                 if ( !this._pipelineFactory.TryExecute(
                         projectOptions,
                         compilation,
@@ -133,6 +155,8 @@ namespace Metalama.Framework.DesignTime
 
                         if ( location is not null )
                         {
+                            diagnosticCount++;
+
                             context.ReportDiagnostic(
                                 DesignTimeDiagnosticDescriptors.UnregisteredSuppression.CreateRoslynDiagnostic(
                                     location,
@@ -140,6 +164,9 @@ namespace Metalama.Framework.DesignTime
                         }
                     }
                 }
+
+                this._logger.Trace?.Log(
+                    $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): completed. {diagnosticCount} diagnostic(s) reported." );
             }
             catch ( Exception e )
             {

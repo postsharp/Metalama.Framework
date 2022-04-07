@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Testing;
 using Metalama.TestFramework;
+using Metalama.TestFramework.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -83,25 +84,25 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
             stringBuilder.AppendLine( syntaxTreeResult.SyntaxTree.FilePath + ":" );
 
             // Diagnostics
-            stringBuilder.AppendLine( $"{syntaxTreeResult.Diagnostics.Length} diagnostic(s):" );
+            stringBuilder.AppendLineInvariant( $"{syntaxTreeResult.Diagnostics.Length} diagnostic(s):" );
 
             foreach ( var diagnostic in syntaxTreeResult.Diagnostics )
             {
-                stringBuilder.AppendLine(
+                stringBuilder.AppendLineInvariant(
                     $"   {diagnostic.Severity} {diagnostic.Id} on `{GetTextUnderDiagnostic( diagnostic )}`: `{diagnostic.GetMessage()}`" );
             }
 
             // Suppressions
-            stringBuilder.AppendLine( $"{syntaxTreeResult.Suppressions.Length} suppression(s):" );
+            stringBuilder.AppendLineInvariant( $"{syntaxTreeResult.Suppressions.Length} suppression(s):" );
 
             foreach ( var suppression in syntaxTreeResult.Suppressions )
             {
-                stringBuilder.AppendLine( $"   {suppression.Definition.SuppressedDiagnosticId} on {suppression.SymbolId}" );
+                stringBuilder.AppendLineInvariant( $"   {suppression.Definition.SuppressedDiagnosticId} on {suppression.SymbolId}" );
             }
 
             // Introductions
 
-            stringBuilder.AppendLine( $"{syntaxTreeResult.Introductions.Length} introductions(s):" );
+            stringBuilder.AppendLineInvariant( $"{syntaxTreeResult.Introductions.Length} introductions(s):" );
 
             foreach ( var introduction in syntaxTreeResult.Introductions )
             {

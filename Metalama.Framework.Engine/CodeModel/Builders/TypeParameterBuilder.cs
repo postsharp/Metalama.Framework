@@ -3,8 +3,12 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using SpecialType = Metalama.Framework.Code.SpecialType;
+using TypeKind = Metalama.Framework.Code.TypeKind;
+using VarianceKind = Metalama.Framework.Code.VarianceKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
@@ -48,6 +52,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override DeclarationKind DeclarationKind => DeclarationKind.TypeParameter;
 
+        public override bool CanBeInherited => ((IDeclarationImpl) this.ContainingDeclaration).CanBeInherited;
+
+        public override SyntaxTree PrimarySyntaxTree => ((MethodBuilder) this.ContainingDeclaration).TargetSyntaxTree;
+
         public TypeParameterBuilder( MethodBuilder containingMethod, int index, string name ) : base( containingMethod.ParentAdvice )
         {
             this.ContainingDeclaration = containingMethod;
@@ -60,7 +68,5 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         {
             return this.Name;
         }
-
-        public override bool CanBeInherited => ((IDeclarationImpl) this.ContainingDeclaration).CanBeInherited;
     }
 }

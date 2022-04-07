@@ -222,6 +222,8 @@ public class TargetClass
 
             public string? AdditionalCompilationOutputDirectory => null;
 
+            public string? DotNetSdkDirectory => null;
+
             public DesignTimeFallbackProjectOptions( IProjectOptions underlying )
             {
                 this._underlying = underlying;

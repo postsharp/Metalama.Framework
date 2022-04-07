@@ -33,8 +33,6 @@ namespace Metalama.Framework.Engine.CodeModel
         /// <summary>
         /// Gets the type of the result of an awaitable.
         /// </summary>
-        /// <param name="awaitableType"></param>
-        /// <returns></returns>
         private static bool TryGetAsyncInfo( IType awaitableType, out IType? awaitableResultType, out bool hasMethodBuilder )
         {
             var returnType = awaitableType.GetSymbol();

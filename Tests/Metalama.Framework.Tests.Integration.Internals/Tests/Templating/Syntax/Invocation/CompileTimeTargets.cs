@@ -37,7 +37,7 @@ namespace Metalama.Framework.Tests.InternalPipeline.Templating.Syntax.Invocation
         static IExpression? BuildTimeMethod( int x, int y) => null;
     }
     
-    [CompileTimeOnly]
+    [CompileTime]
     class CompileTimeClass
     {
         public static Action<int,int> Field = (x, y) => {};

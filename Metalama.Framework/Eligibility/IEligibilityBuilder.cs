@@ -12,7 +12,7 @@ namespace Metalama.Framework.Eligibility
     /// </summary>
     /// <seealso href="@eligibility"/> 
     [InternalImplement]
-    [CompileTimeOnly]
+    [CompileTime]
     public interface IEligibilityBuilder
     {
         /// <summary>

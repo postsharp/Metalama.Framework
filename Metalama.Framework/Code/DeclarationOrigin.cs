@@ -8,7 +8,7 @@ namespace Metalama.Framework.Code
     /// <summary>
     /// Origins of a declaration.
     /// </summary>
-    [CompileTimeOnly]
+    [CompileTime]
     public enum DeclarationOrigin
     {
         /// <summary>

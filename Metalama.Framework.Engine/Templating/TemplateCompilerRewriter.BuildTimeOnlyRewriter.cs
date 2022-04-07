@@ -32,6 +32,7 @@ namespace Metalama.Framework.Engine.Templating
                         _ => throw new AssertionFailedException( $"Don't know how to get the member name in {node.Expression.GetType().Name}" )
                     };
 
+                    // ReSharper disable once RedundantSuppressNullableWarningExpression
                     transformedNode =
                         node.CopyAnnotationsTo(
                             InvocationExpression(

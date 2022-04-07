@@ -21,7 +21,7 @@ public abstract class ProjectHandler : IDisposable
         this.ProjectOptions = projectOptions;
     }
 
-    public abstract void GenerateSources( Compilation compilation, GeneratorExecutionContext context );
+    public abstract SourceGeneratorResult GenerateSources( Compilation compilation, CancellationToken cancellationToken );
 
     protected virtual void Dispose( bool disposing ) { }
 

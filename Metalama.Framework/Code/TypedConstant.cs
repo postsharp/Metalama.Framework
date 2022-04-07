@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Aspects;
 using System;
+using System.Collections.Generic;
 
 namespace Metalama.Framework.Code
 {
@@ -12,7 +13,7 @@ namespace Metalama.Framework.Code
     /// Represents a typed value that can be defined, defined to null, or undefined. Used to represent default values,
     /// for instance <see cref="IParameter.DefaultValue"/>, or custom attribute arguments.
     /// </summary>
-    [CompileTimeOnly]
+    [CompileTime]
     public readonly struct TypedConstant : IHasType
     {
         // ReSharper disable once UnassignedReadonlyField
@@ -72,7 +73,7 @@ namespace Metalama.Framework.Code
         /// For enum values whose type is compile-time, <see cref="Value"/> is of enum type.
         /// </para>
         /// <para>
-        /// Arrays are represented as an <c>IReadOnlyList</c>.
+        /// Arrays are represented as an <see cref="IReadOnlyList{T}" />.
         /// </para>
         /// </remarks>
         public object? Value

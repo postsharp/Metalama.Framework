@@ -12,7 +12,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Misc.CompileTimeRecord
         }
     }
 
-    [CompileTimeOnly]
+    [CompileTime]
     internal record CompileTimeRecord( int a, string b );
 
     internal record RunTimeRecord( int a, string b );

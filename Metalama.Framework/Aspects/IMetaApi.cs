@@ -11,7 +11,7 @@ namespace Metalama.Framework.Aspects
     /// Exposes information about the declaration to which a template was applied.
     /// This interface is exposed by the <see cref="meta"/> static type.
     /// </summary>
-    [CompileTimeOnly]
+    [CompileTime]
     [InternalImplement]
     internal interface IMetaApi : ISyntaxBuilderImpl
     {

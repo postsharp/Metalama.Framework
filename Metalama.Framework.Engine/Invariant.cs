@@ -88,10 +88,6 @@ namespace Metalama.Framework.Engine
         /// <summary>
         /// Checks that a nullable value is non-null and throws an <see cref="AssertionFailedException"/> if it is not.
         /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="obj"></param>
-        /// <param name="justification"></param>
-        /// <returns></returns>
 #if !DEBUG
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif

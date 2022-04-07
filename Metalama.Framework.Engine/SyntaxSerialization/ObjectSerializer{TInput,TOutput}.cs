@@ -20,6 +20,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
         /// Serializes an object of a type supported by this object serializer into a Roslyn expression that creates such an object.
         /// </summary>
         /// <param name="obj">An object to serialize. Not null.</param>
+        /// <param name="serializationContext"></param>
         /// <returns>An expression that creates such an object.</returns>
         public abstract ExpressionSyntax Serialize( TInput obj, SyntaxSerializationContext serializationContext );
 

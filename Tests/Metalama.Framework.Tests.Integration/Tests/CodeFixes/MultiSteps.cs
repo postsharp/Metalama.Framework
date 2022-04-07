@@ -7,7 +7,7 @@ using Metalama.Framework.CodeFixes;
 namespace Metalama.Framework.Tests.Integration.CodeFixes.MultiSteps
 {
     [AttributeUsage( AttributeTargets.Field | AttributeTargets.Property )]
-    [CompileTime] // TODO: should not be necessary to add [CompileTime]
+    [RunTimeOrCompileTime] // TODO: should not be necessary to add [CompileTime]
     public class NotToStringAttribute : Attribute { }
 
     public class ToStringAttribute : TypeAspect
@@ -27,6 +27,7 @@ namespace Metalama.Framework.Tests.Integration.CodeFixes.MultiSteps
             }
         }
 
+        [CompileTime]
         private async Task ImplementManually( ICodeActionBuilder builder, INamedType targetType )
         {
             await builder.ApplyAspectAsync( targetType, this );

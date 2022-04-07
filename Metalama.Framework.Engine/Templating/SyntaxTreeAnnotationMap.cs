@@ -1,11 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Engine.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Templating
     /// Caches the <see cref="SemanticModel"/> of a syntax tree annotations (<see cref="SyntaxAnnotation"/>)
     /// so that the <see cref="SemanticModel"/> does not need to re-evaluated everything the syntax tree
     /// has changes that don't affect symbols. It also caches the <see cref="Location"/> of nodes, so that diagnostics
-    /// on transformed node can be reported to their original location. A syntax tree can be annotated using <see cref="AnnotateTemplate"/>
+    /// on transformed node can be reported to their original location. A syntax tree can be annotated using <see cref="TryAnnotateTemplate"/>
     /// and the symbols can then be retrieved using <see cref="GetSymbol"/>,
     /// <see cref="GetExpressionType"/>, <see cref="GetDeclaredSymbol"/> and <see cref="GetLocation"/>.
     /// </summary>
@@ -55,16 +55,19 @@ namespace Metalama.Framework.Engine.Templating
         /// <param name="root">Root of the syntax tree.</param>
         /// <param name="semanticModel">The <see cref="SemanticModel"/> for <paramref name="root"/>.</param>
         /// <returns>The annotated syntax tree.</returns>
-        public SyntaxNode AnnotateTemplate( SyntaxNode root, SemanticModel semanticModel )
+        public bool TryAnnotateTemplate( SyntaxNode root, SemanticModel semanticModel, IDiagnosticAdder diagnostics, out SyntaxNode annotatedRoot )
         {
-            var rewriter = new AnnotatingRewriter( semanticModel, this, true );
+            var rewriter = new AnnotatingRewriter( semanticModel, this, true, diagnostics );
 
-            return rewriter.Visit( root )!;
+            annotatedRoot = rewriter.Visit( root )!;
+
+            return rewriter.Success;
         }
 
+        // Not sure what this is used for.
         public SyntaxNode AddLocationAnnotationsRecursive( SyntaxNode node )
         {
-            var rewriter = new AnnotatingRewriter( null, this, false );
+            var rewriter = new AnnotatingRewriter( null, this, false, NullDiagnosticAdder.Instance );
 
             return rewriter.Visit( node )!;
         }
@@ -113,80 +116,6 @@ namespace Metalama.Framework.Engine.Templating
 
         public SyntaxNode AddLocationAnnotation( SyntaxNode originalNode, SyntaxNode transformedNode )
             => this.AddLocationAnnotation( (SyntaxNodeOrToken) originalNode, transformedNode ).AsNode()!;
-
-        /// <summary>
-        /// Get the annotated node for an original node.
-        /// </summary>
-        /// <param name="originalNode">The original, untransformed node.</param>
-        /// <param name="transformedNode">A copy of <paramref name="originalNode"/> where the children nodes have been transformed.</param>
-        /// <param name="semanticModel">The <see cref="SemanticModel"/>.</param>
-        /// <param name="isTemplate">Determines whether the code is a template and will be transformed. If <c>false</c>, only location annotations are added, not semantic ones.</param>
-        /// <returns><paramref name="transformedNode"/> extended with relevant annotations, if any.</returns>
-        private SyntaxNode GetAnnotatedNode( SyntaxNode originalNode, SyntaxNode transformedNode, SemanticModel? semanticModel, bool isTemplate )
-        {
-            // Don't run twice.
-            if ( transformedNode.HasAnnotations( AnnotationKinds ) )
-            {
-                throw new AssertionFailedException();
-            }
-
-            // Cache location.
-            var annotatedNode = this.AddLocationAnnotation( originalNode, transformedNode );
-
-            if ( isTemplate )
-            {
-                if ( semanticModel == null )
-                {
-                    throw new ArgumentNullException( nameof(semanticModel), "'semanticModel' must be non-null when 'isTemplate' is true." );
-                }
-
-                // Get info from the semantic mode.
-                var symbolInfo = semanticModel.GetSymbolInfo( originalNode );
-                var typeInfo = semanticModel.GetTypeInfo( originalNode );
-                var declaredSymbol = semanticModel.GetDeclaredSymbol( originalNode );
-
-                // Cache semanticModel.GetSymbolInfo
-                if ( symbolInfo.Symbol != null )
-                {
-                    if ( !this._symbolToAnnotationMap.TryGetValue( symbolInfo.Symbol, out var annotation ) )
-                    {
-                        annotation = new SyntaxAnnotation( _symbolAnnotationKind, this._symbolIdGenerator.GetId( symbolInfo.Symbol ) );
-                        this._symbolToAnnotationMap[symbolInfo.Symbol] = annotation;
-                        this._annotationToSymbolMap[annotation] = symbolInfo.Symbol;
-                    }
-
-                    annotatedNode = annotatedNode.WithAdditionalAnnotations( annotation );
-                }
-
-                // Cache semanticModel.GetDeclaredSymbol
-                if ( declaredSymbol != null )
-                {
-                    if ( !this._declaredSymbolToAnnotationMap.TryGetValue( declaredSymbol, out var annotation ) )
-                    {
-                        annotation = new SyntaxAnnotation( _declaredSymbolAnnotationKind, this._symbolIdGenerator.GetId( declaredSymbol ) );
-                        this._declaredSymbolToAnnotationMap[declaredSymbol] = annotation;
-                        this._annotationToDeclaredSymbolMap[annotation] = declaredSymbol;
-                    }
-
-                    annotatedNode = annotatedNode.WithAdditionalAnnotations( annotation );
-                }
-
-                // Cache semanticModel.GetTypeInfo.
-                if ( typeInfo.Type != null )
-                {
-                    if ( !this._typeToAnnotationMap.TryGetValue( typeInfo.Type, out var annotation ) )
-                    {
-                        annotation = new SyntaxAnnotation( _expressionTypeAnnotationKind, this._symbolIdGenerator.GetId( typeInfo.Type ) );
-                        this._typeToAnnotationMap[typeInfo.Type] = annotation;
-                        this._annotationToTypeMap[annotation] = typeInfo.Type;
-                    }
-
-                    annotatedNode = annotatedNode.WithAdditionalAnnotations( annotation );
-                }
-            }
-
-            return annotatedNode;
-        }
 
         public Location? GetLocation( SyntaxNodeOrToken node )
         {

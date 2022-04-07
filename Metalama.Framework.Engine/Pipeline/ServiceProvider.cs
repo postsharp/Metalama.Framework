@@ -25,12 +25,12 @@ namespace Metalama.Framework.Engine.Pipeline
         private readonly IServiceProvider? _nextProvider;
 
         // This field is not readonly because we use two-phase initialization to resolve the problem of cyclic dependencies.
-        private ImmutableDictionary<Type, Lazy<IService, Type>> _services;
+        private readonly ImmutableDictionary<Type, ServiceNode> _services;
 
         public static ServiceProvider Empty { get; } =
-            new ServiceProvider( ImmutableDictionary<Type, Lazy<IService, Type>>.Empty, null ).WithMark( ServiceProviderMark.Other );
+            new ServiceProvider( ImmutableDictionary<Type, ServiceNode>.Empty, null ).WithMark( ServiceProviderMark.Other );
 
-        private ServiceProvider( ImmutableDictionary<Type, Lazy<IService, Type>> services, IServiceProvider? nextProvider )
+        private ServiceProvider( ImmutableDictionary<Type, ServiceNode> services, IServiceProvider? nextProvider )
         {
             this._services = services;
             this._nextProvider = nextProvider;
@@ -41,7 +41,7 @@ namespace Metalama.Framework.Engine.Pipeline
         /// </summary>
         public ServiceProvider WithMark( ServiceProviderMark mark ) => this.WithService( mark );
 
-        private ServiceProvider WithService( Lazy<IService, Type> service )
+        private ServiceProvider WithService( ServiceNode service )
         {
             var builder = this._services.ToBuilder();
 
@@ -50,9 +50,9 @@ namespace Metalama.Framework.Engine.Pipeline
             return new ServiceProvider( builder.ToImmutable(), this._nextProvider );
         }
 
-        private static void AddService( Lazy<IService, Type> service, ImmutableDictionary<Type, Lazy<IService, Type>>.Builder builder )
+        private static void AddService( ServiceNode service, ImmutableDictionary<Type, ServiceNode>.Builder builder )
         {
-            var interfaces = service.Metadata.GetInterfaces();
+            var interfaces = service.ServiceType.GetInterfaces();
 
             foreach ( var interfaceType in interfaces )
             {
@@ -62,7 +62,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 }
             }
 
-            for ( var cursorType = service.Metadata;
+            for ( var cursorType = service.ServiceType;
                   cursorType != null && typeof(IService).IsAssignableFrom( cursorType );
                   cursorType = cursorType.BaseType )
             {
@@ -74,19 +74,18 @@ namespace Metalama.Framework.Engine.Pipeline
         /// Returns a new <see cref="ServiceProvider"/> where a service have been added to the current <see cref="ServiceProvider"/>.
         /// If the new service is already present in the current <see cref="ServiceProvider"/>, it is replaced in the new <see cref="ServiceProvider"/>.
         /// </summary>
-        public ServiceProvider WithService( IService service )
-        {
-            var lazy = new Lazy<IService, Type>( () => service, service.GetType() );
+        public ServiceProvider WithService( IService service ) => this.WithService( new ServiceNode( _ => service, service.GetType() ) );
 
-            return this.WithService( lazy );
-        }
+        public ServiceProvider WithExternalService<T>( T service )
+            where T : notnull
+            => new( this._services.Add( typeof(T), new ServiceNode( _ => service, typeof(T) ) ), this._nextProvider );
 
         object? IServiceProvider.GetService( Type serviceType ) => this.GetService( serviceType ) ?? this._nextProvider?.GetService( serviceType );
 
         /// <summary>
         /// Gets the implementation of a given service type.
         /// </summary>
-        private IService? GetService( Type serviceType ) => this._services.TryGetValue( serviceType, out var instance ) ? instance.Value : null;
+        private object? GetService( Type serviceType ) => this._services.TryGetValue( serviceType, out var instance ) ? instance.GetService( this ) : null;
 
         /// <summary>
         /// Returns a new <see cref="ServiceProvider"/> where some given services have been added to the current <see cref="ServiceProvider"/>.
@@ -110,38 +109,21 @@ namespace Metalama.Framework.Engine.Pipeline
         }
 
         /// <summary>
+        /// Returns a new <see cref="ServiceProvider"/> with a new lazily-initialized service registration. The service, when
+        /// initialized, will be given the <see cref="ServiceProvider"/> that requests the service. However, the service instantiated
+        /// at this moment will be shared by all service providers that have been derived from the service provider returned by this method.
+        /// </summary>
+        public ServiceProvider WithSharedLazyInitializedService<T>( Func<IServiceProvider, T> func )
+            where T : IService
+        {
+            return this.WithService( new ServiceNode( serviceProvider => func( serviceProvider ), typeof(T) ) );
+        }
+
+        /// <summary>
         /// Returns a new <see cref="ServiceProvider"/> where some given services have been added to the current <see cref="ServiceProvider"/>.
         /// If some of the new services are already present in the current <see cref="ServiceProvider"/>, they are replaced in the new <see cref="ServiceProvider"/>.
         /// </summary>
         public ServiceProvider WithServices( IService service, params IService[] services ) => this.WithService( service ).WithServices( services );
-
-        /// <summary>
-        /// Adds a set of services that depend on each other (additionally of depending on prior services in the current
-        /// <see cref="ServiceProvider"/> instance) and returns the resulting immutable <see cref="ServiceProvider"/>.
-        /// If some of the new services are already present in the current <see cref="ServiceProvider"/>, they are replaced in the new <see cref="ServiceProvider"/>. 
-        /// </summary>
-        internal ServiceProvider WithLateBoundServices( params LateBoundService[] services )
-        {
-            if ( services.Length == 0 )
-            {
-                return this;
-            }
-
-            // We need the reference to the new ServiceProvider before we know its content, so we're creating
-            // an invalid object.
-            var serviceProvider = new ServiceProvider( null!, null );
-
-            var servicesBuilder = this._services.ToBuilder();
-
-            foreach ( var s in services )
-            {
-                AddService( new Lazy<IService, Type>( () => s.CreateFunc( serviceProvider ), s.Type ), servicesBuilder );
-            }
-
-            serviceProvider._services = servicesBuilder.ToImmutable();
-
-            return serviceProvider;
-        }
 
         /// <summary>
         /// Adds the services that have the same scope as the project processing itself.
@@ -178,6 +160,36 @@ namespace Metalama.Framework.Engine.Pipeline
             var mark = this.GetService<ServiceProviderMark>();
 
             return $"ServiceProvider Mark='{mark}', Entries={this._services.Count}";
+        }
+
+        private class ServiceNode
+        {
+            private readonly Func<IServiceProvider, object> _func;
+            private object? _service;
+
+            public Type ServiceType { get; }
+
+            public ServiceNode( Func<IServiceProvider, object> func, Type serviceType )
+            {
+                this._func = func;
+                this.ServiceType = serviceType;
+            }
+
+            public object GetService( IServiceProvider serviceProvider )
+            {
+                if ( this._service == null )
+                {
+                    lock ( this )
+                    {
+                        if ( this._service == null )
+                        {
+                            this._service = this._func( serviceProvider );
+                        }
+                    }
+                }
+
+                return this._service;
+            }
         }
     }
 }

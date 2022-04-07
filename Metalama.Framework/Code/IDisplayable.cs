@@ -10,7 +10,7 @@ namespace Metalama.Framework.Code
     /// Defines a method <see cref="ToDisplayString"/> that renders the current declaration into a human-readable
     /// string.
     /// </summary>
-    [CompileTimeOnly]
+    [CompileTime]
     [InternalImplement]
     public interface IDisplayable
     {

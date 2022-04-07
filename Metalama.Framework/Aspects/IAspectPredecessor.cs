@@ -9,7 +9,7 @@ namespace Metalama.Framework.Aspects
     /// Base interface for objects that can cause aspects to be added to a compilation. Predecessors are exposed on
     /// the <see cref="IAspectInstance.Predecessors"/> property.
     /// </summary>
-    [CompileTimeOnly]
+    [CompileTime]
     [InternalImplement]
     public interface IAspectPredecessor { }
 }

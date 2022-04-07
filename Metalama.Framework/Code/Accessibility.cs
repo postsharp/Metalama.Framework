@@ -8,7 +8,7 @@ namespace Metalama.Framework.Code
     /// <summary>
     /// Accessibility of types and members, for instance <see cref="Private"/> or <see cref="Public"/>.
     /// </summary>
-    [CompileTimeOnly]
+    [CompileTime]
     public enum Accessibility
     {
         // IMPORTANT: Don't change. Comparisons depend on the order.        

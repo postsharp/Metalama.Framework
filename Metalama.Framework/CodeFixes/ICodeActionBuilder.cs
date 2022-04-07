@@ -13,7 +13,7 @@ namespace Metalama.Framework.CodeFixes
     /// <summary>
     /// Argument of the delegate passed to <see cref="CodeFix"/> constructor. Exposes methods that allow to modify the current solution. 
     /// </summary>
-    [CompileTimeOnly]
+    [CompileTime]
     [InternalImplement]
     public interface ICodeActionBuilder
     {

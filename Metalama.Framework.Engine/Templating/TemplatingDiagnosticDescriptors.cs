@@ -128,7 +128,7 @@ namespace Metalama.Framework.Engine.Templating
                     "LAMA0117",
                     "Cannot reference a compile-time-only declaration in a non-compile-time-only declaration.",
                     "Cannot reference '{1}' in '{0}' because '{1}' is compile-time-only but '{0}' is not. " +
-                    "Consider adding [CompileTimeOnly] to '{0}', or do not use '{1}' in '{0}'.'",
+                    "Consider adding [CompileTime] to '{0}', or do not use '{1}' in '{0}'.'",
                     _category,
                     Error );
 
@@ -240,7 +240,7 @@ namespace Metalama.Framework.Engine.Templating
             = new(
                 "LAMA0229",
                 "Types that are both compile-time and run-time are forbidden in run-time-only types.",
-                "The type '{0}' cannot be [CompileTime] because it is nested in a run-time-type. It can however be [CompileTimeOnly].",
+                "The type '{0}' cannot be [CompileTime] because it is nested in a run-time-type. It can however be [CompileTime].",
                 _category,
                 Error );
 
@@ -265,6 +265,22 @@ namespace Metalama.Framework.Engine.Templating
                 "LAMA0232",
                 "Template code must be written in the specified C# version.",
                 "Template code must be written in C# {0}.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<IDeclaration> CannotUseProceedOutOfTemplate
+            = new(
+                "LAMA0233",
+                "Cannot use the 'meta.Proceed' method out of a template.",
+                "Cannot use the 'meta.Proceed' method in '{0}' because it is not a template.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<ISymbol> PartiallyUnresolvedSymbolInTemplate
+            = new(
+                "LAMA0235",
+                "The definition of a type or member used in a template is partially invalid.",
+                "The definition of the type or member '{0}' is invalid. Metalama could report irrelevant errors in the current template.",
                 _category,
                 Error );
     }

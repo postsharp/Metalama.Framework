@@ -121,7 +121,7 @@ namespace Metalama.Framework.Engine.Templating
             switch ( symbol )
             {
                 case IDiscardSymbol:
-                    return TemplatingScope.Both;
+                    return TemplatingScope.RunTimeOrCompileTime;
 
                 // For local variables, we decide based on  _buildTimeLocals only. This collection is updated
                 // at each iteration of the algorithm based on inferences from _requireMetaExpressionStack.
@@ -181,7 +181,7 @@ namespace Metalama.Framework.Engine.Templating
 
             TemplatingScope GetMoreSpecificScope( TemplatingScope scope )
             {
-                if ( scope != TemplatingScope.Both )
+                if ( scope != TemplatingScope.RunTimeOrCompileTime )
                 {
                     return scope;
                 }
@@ -198,7 +198,7 @@ namespace Metalama.Framework.Engine.Templating
                         }
                     }
 
-                    return TemplatingScope.Both;
+                    return TemplatingScope.RunTimeOrCompileTime;
                 }
             }
         }
@@ -223,7 +223,7 @@ namespace Metalama.Framework.Engine.Templating
         {
             if ( node == null )
             {
-                return TemplatingScope.Both;
+                return TemplatingScope.RunTimeOrCompileTime;
             }
 
             // If the node is dynamic, it is run-time only.
@@ -289,7 +289,7 @@ namespace Metalama.Framework.Engine.Templating
             }
             else
             {
-                return TemplatingScope.Both;
+                return TemplatingScope.RunTimeOrCompileTime;
             }
         }
 
@@ -315,7 +315,7 @@ namespace Metalama.Framework.Engine.Templating
 
             if ( childrenScopes == null )
             {
-                return TemplatingScope.Both;
+                return TemplatingScope.RunTimeOrCompileTime;
             }
 
             var compileTimeOnlyCount = 0;
@@ -358,7 +358,7 @@ namespace Metalama.Framework.Engine.Templating
                     case TemplatingScope.RunTimeOnly:
                         return TemplatingScope.CompileTimeOnlyReturningRuntimeOnly;
 
-                    case TemplatingScope.Both:
+                    case TemplatingScope.RunTimeOrCompileTime:
                         return TemplatingScope.CompileTimeOnlyReturningBoth;
 
                     default:
@@ -368,7 +368,7 @@ namespace Metalama.Framework.Engine.Templating
             }
             else
             {
-                return TemplatingScope.Both;
+                return TemplatingScope.RunTimeOrCompileTime;
             }
         }
 
@@ -648,7 +648,7 @@ namespace Metalama.Framework.Engine.Templating
 
             var nameScope = this.GetNodeScope( transformedRight );
             ScopeContext? context = null;
-            scope = TemplatingScope.Both;
+            scope = TemplatingScope.RunTimeOrCompileTime;
 
             switch ( nameScope )
             {
@@ -685,7 +685,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 transformedLeft = this.Visit( left );
 
-                if ( scope == TemplatingScope.Both )
+                if ( scope == TemplatingScope.RunTimeOrCompileTime )
                 {
                     scope = this.GetNodeScope( transformedLeft );
                 }
@@ -714,7 +714,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 context = ScopeContext.CreateForcedCompileTimeScope( this._currentScopeContext, $"element of the compile-time collection '{node.Expression}'" );
             }
-            else if ( scope.IsDynamic() )
+            else if ( scope.IsCompileTimeMemberReturningRunTimeValue() )
             {
                 scope = TemplatingScope.Dynamic;
 
@@ -740,7 +740,7 @@ namespace Metalama.Framework.Engine.Templating
             // nameof() is always compile-time.
             if ( node.IsNameOf() )
             {
-                return node.AddScopeAnnotation( TemplatingScope.Both );
+                return node.AddScopeAnnotation( TemplatingScope.RunTimeOrCompileTime );
             }
 
             // If we have any out/ref argument that assigns a compile-time variable, the whole method call is compile-time, and we cannot
@@ -822,7 +822,7 @@ namespace Metalama.Framework.Engine.Templating
 
             InvocationExpressionSyntax updatedInvocation;
 
-            if ( expressionScope.GetExpressionExecutionScope() != TemplatingScope.Both )
+            if ( expressionScope.GetExpressionExecutionScope() != TemplatingScope.RunTimeOrCompileTime )
             {
                 // If the scope of the expression on the left side is known (because of rules on the symbol),
                 // we know the scope of arguments upfront. Otherwise, we need to decide of the invocation scope based on arguments (else branch of this if).
@@ -851,7 +851,7 @@ namespace Metalama.Framework.Engine.Templating
                     ExpressionSyntax transformedArgumentValue;
 
                     // Transform the argument value.
-                    if ( expressionScope.IsDynamic() || TemplateMemberClassifier.IsDynamicParameter( argumentType ) )
+                    if ( expressionScope.IsCompileTimeMemberReturningRunTimeValue() || TemplateMemberClassifier.IsDynamicParameter( argumentType ) )
                     {
                         // dynamic or dynamic[]
 
@@ -863,7 +863,7 @@ namespace Metalama.Framework.Engine.Templating
                             transformedArgumentValue = this.Visit( argument.Expression );
                         }
                     }
-                    else if ( expressionScope.IsRunTime() )
+                    else if ( expressionScope.EvaluatesToRunTimeValue() )
                     {
                         using ( this.WithScopeContext(
                                    ScopeContext.CreatePreferredRunTimeScope(
@@ -1428,7 +1428,7 @@ namespace Metalama.Framework.Engine.Templating
             }
 
             // If we have a discard assignment, take the scope from the right.
-            if ( scope == TemplatingScope.Both
+            if ( scope == TemplatingScope.RunTimeOrCompileTime
                  && this._syntaxTreeAnnotationMap.GetSymbol( node.Left ) is IDiscardSymbol )
             {
                 scope = this.GetNodeScope( transformedRight );
@@ -1499,7 +1499,7 @@ namespace Metalama.Framework.Engine.Templating
 
         private SyntaxNode? AnnotateCastExpression( SyntaxNode transformedCastNode, TypeSyntax annotatedType, ExpressionSyntax annotatedExpression )
         {
-            var combinedScope = this.GetNodeScope( annotatedType ) == TemplatingScope.Both
+            var combinedScope = this.GetNodeScope( annotatedType ) == TemplatingScope.RunTimeOrCompileTime
                 ? this.GetNodeScope( annotatedExpression ).GetExpressionValueScope()
                 : this.GetExpressionScope( new[] { annotatedExpression }, transformedCastNode );
 
@@ -1520,7 +1520,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 ScopeContext context;
 
-                if ( leftScope.IsRunTime() )
+                if ( leftScope.EvaluatesToRunTimeValue() )
                 {
                     context = ScopeContext.CreatePreferredRunTimeScope( this._currentScopeContext, $"right part of the run-time '{node.Left} ??'" );
                     combinedScope = TemplatingScope.RunTimeOnly;
@@ -1920,7 +1920,7 @@ namespace Metalama.Framework.Engine.Templating
             existingScope = existingScope.GetExpressionValueScope();
             requiredScope = requiredScope.GetExpressionExecutionScope();
 
-            if ( existingScope != TemplatingScope.Both && existingScope != requiredScope )
+            if ( existingScope != TemplatingScope.RunTimeOrCompileTime && existingScope != requiredScope )
             {
                 // Don't emit an error if any descendant node already has an error because this creates redundant messages.
                 if ( !node.DescendantNodes().Any( n => n.HasScopeMismatchAnnotation() ) )
@@ -2193,8 +2193,8 @@ namespace Metalama.Framework.Engine.Templating
             var arrayRankScope = sizeScope.GetExpressionValueScope() switch
             {
                 TemplatingScope.RunTimeOnly => TemplatingScope.RunTimeOnly,
-                TemplatingScope.CompileTimeOnly => TemplatingScope.Both,
-                TemplatingScope.Both => TemplatingScope.Both,
+                TemplatingScope.CompileTimeOnly => TemplatingScope.RunTimeOrCompileTime,
+                TemplatingScope.RunTimeOrCompileTime => TemplatingScope.RunTimeOrCompileTime,
                 _ => throw new AssertionFailedException( $"Unexpected scope: {sizeScope}." )
             };
 

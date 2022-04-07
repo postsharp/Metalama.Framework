@@ -34,7 +34,6 @@ namespace Metalama.Framework.Engine.Formatting
         /// <summary>
         /// Adds a marked <see cref="TextSpan"/>.
         /// </summary>
-        /// <param name="span"></param>
         public void Add( in TextSpan span, TextSpanClassification classification )
         {
             this.SetSpanImpl( span, classification, null, null );

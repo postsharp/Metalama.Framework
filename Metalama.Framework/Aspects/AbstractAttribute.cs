@@ -9,6 +9,6 @@ namespace Metalama.Framework.Aspects
     /// Custom attribute to be used besides <see cref="TemplateAttribute"/>, which means that the target method has no implementation and should be ignored.
     /// </summary>
     [AttributeUsage( AttributeTargets.Method | AttributeTargets.Property )]
-    [CompileTimeOnly]
+    [CompileTime]
     internal sealed class AbstractAttribute : Attribute { }
 }

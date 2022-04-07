@@ -10,7 +10,7 @@ namespace Metalama.Framework.Aspects
     /// <summary>
     /// A list of <see cref="IAnnotation"/>.
     /// </summary>
-    [CompileTimeOnly]
+    [CompileTime]
     [InternalImplement]
     [Obsolete( "Not implemented." )]
     public interface IAnnotationList : IReadOnlyList<IAnnotation>

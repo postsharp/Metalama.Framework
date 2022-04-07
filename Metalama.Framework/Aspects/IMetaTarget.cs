@@ -10,7 +10,7 @@ using System;
 
 namespace Metalama.Framework.Aspects
 {
-    [CompileTimeOnly]
+    [CompileTime]
     [InternalImplement]
     public interface IMetaTarget
     {

@@ -99,7 +99,7 @@ namespace Metalama.Framework.Engine.Utilities
                     reportFile = "(none)";
                 }
 
-                var exceptionMessage = userException.Message.TrimEnd( "." );
+                var exceptionMessage = userException.Message.TrimSuffix( "." );
                 var exceptionType = userException.GetType().Name;
 
                 if ( context.TargetDeclaration != null )

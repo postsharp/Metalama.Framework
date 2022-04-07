@@ -71,5 +71,7 @@ namespace Metalama.Framework.Engine.CodeModel
             => this.DeclaringMember.ToDisplayString( format, context ) + "/" + this.Name;
 
         public override string ToString() => this.DeclaringMember + "/" + this.Name;
+
+        public override SyntaxTree? PrimarySyntaxTree => ((IDeclarationImpl) this.DeclaringMember).PrimarySyntaxTree;
     }
 }

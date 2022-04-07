@@ -14,12 +14,15 @@ namespace Metalama.Framework.Engine.Utilities
 
         public static void Update( this XXH64 hash, string value ) => hash.Update( Encoding.UTF8.GetBytes( value ) );
 
-        public static unsafe void Update( this XXH64 hash, int value ) => hash.Update( (byte*) &value, sizeof(int) );
-
         public static unsafe void Update<T>( this XXH64 hash, T value )
             where T : unmanaged
             => hash.Update( (byte*) &value, sizeof(T) );
 
+        public static unsafe void Update( this XXH64 hash, long value ) => hash.Update( (byte*) &value, sizeof(long) );
+
+        // The following overloads are redundant but they work around a compiler bug.
         public static void Update( this XXH64 hash, ImmutableArray<byte> bytes ) => hash.Update( bytes.AsSpan() );
+
+        public static unsafe void Update( this XXH64 hash, int value ) => hash.Update( (byte*) &value, sizeof(int) );
     }
 }

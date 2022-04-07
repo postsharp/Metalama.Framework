@@ -27,7 +27,7 @@
 
         <!-- We don't want Metalama to customize the build of SDK projects, so we have to list private assets.
              Note that this is not sufficient because SDK projects will likely transitively import Metalama.Framework,
-             so we have the MetalamaCompileTimeOnlyProject property defined in Metalama.Framework.Sdk.props.
+             so we have the MetalamaCompileTimeProject property defined in Metalama.Framework.Sdk.props.
          -->
         <ProjectReference Include="..\Metalama.Framework\Metalama.Framework.csproj" PrivateAssets="Analyzers;Build;BuildTransitive"/>
 

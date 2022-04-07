@@ -74,7 +74,7 @@ namespace Metalama.Framework.Engine.Testing
 
         public string? ProjectPath => null;
 
-        public string? TargetFramework => "net5.0";
+        public string? TargetFramework => "net6.0";
 
         public string? Configuration => "Debug";
 
@@ -85,6 +85,8 @@ namespace Metalama.Framework.Engine.Testing
         public bool IsDesignTimeEnabled => true;
 
         public string? AdditionalCompilationOutputDirectory => null;
+
+        public string? DotNetSdkDirectory => null;
 
         public bool TryGetProperty( string name, [NotNullWhen( true )] out string? value ) => this._properties.TryGetValue( name, out value );
 

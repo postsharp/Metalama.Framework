@@ -82,7 +82,7 @@ namespace Metalama.Framework.Engine.Formatting
         {
             var scope = node.GetScopeFromAnnotation();
 
-            if ( scope is TemplatingScope.CompileTimeOnly or TemplatingScope.Both )
+            if ( scope is TemplatingScope.CompileTimeOnly or TemplatingScope.RunTimeOrCompileTime )
             {
                 var oldIsInCompileTimeType = this._isInCompileTimeType;
 
@@ -129,7 +129,7 @@ namespace Metalama.Framework.Engine.Formatting
         {
             var scope = node.GetScopeFromAnnotation();
 
-            if ( scope is TemplatingScope.CompileTimeOnly or TemplatingScope.Both )
+            if ( scope is TemplatingScope.CompileTimeOnly or TemplatingScope.RunTimeOrCompileTime )
             {
                 this.Mark( node, TextSpanClassification.CompileTime );
             }

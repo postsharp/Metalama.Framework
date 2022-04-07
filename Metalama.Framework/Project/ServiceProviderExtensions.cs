@@ -12,7 +12,7 @@ namespace Metalama.Framework.Project
     /// Provides extensions methods to the <see cref="IServiceProvider"/> interface.
     /// </summary>
     /// <seealso cref="IService"/>
-    [CompileTimeOnly]
+    [CompileTime]
     public static class ServiceProviderExtensions
     {
         /// <summary>

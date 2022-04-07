@@ -82,7 +82,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
             foreach ( var classification in Enum.GetValues( typeof(TextSpanClassification) ) )
             {
-                epilogueBuilder.AppendLine( $"<span class='cr-{classification}'>{classification}</span>" );
+                epilogueBuilder.AppendLine( FormattableString.Invariant( $"<span class='cr-{classification}'>{classification}</span>" ) );
             }
 
             epilogueBuilder.AppendLine( "       </pre>" );

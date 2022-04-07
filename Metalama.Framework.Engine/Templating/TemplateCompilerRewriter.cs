@@ -163,7 +163,7 @@ namespace Metalama.Framework.Engine.Templating
             var scope = node.GetScopeFromAnnotation().GetValueOrDefault();
 
             // Take a decision from the node if we can.
-            if ( scope != TemplatingScope.Both && scope != TemplatingScope.Unknown )
+            if ( scope != TemplatingScope.RunTimeOrCompileTime && scope != TemplatingScope.Unknown )
             {
                 return scope.MustBeTransformed() ? TransformationKind.Transform : TransformationKind.None;
             }
@@ -1013,6 +1013,7 @@ namespace Metalama.Framework.Engine.Templating
         /// <param name="generateExpression"><c>true</c> if the returned <see cref="SyntaxNode"/> must be an
         /// expression (in this case, a delegate invocation is returned), or <c>false</c> if it can be a statement
         /// (in this case, a return statement is returned).</param>
+        /// <param name="isVoid"></param>
         /// <returns></returns>
         private SyntaxNode BuildRunTimeBlock( ExpressionSyntax node, bool generateExpression, bool isVoid )
         {

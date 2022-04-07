@@ -14,7 +14,7 @@ namespace Metalama.Framework.Aspects
     /// interface.
     /// (Not implemented.)
     /// </summary>
-    [CompileTimeOnly]
+    [CompileTime]
     [Obsolete( "Not implemented." )]
     public interface IAnnotation { }
 
@@ -27,7 +27,7 @@ namespace Metalama.Framework.Aspects
     /// </summary>
     /// <typeparam name="TTarget">The type of declarations on which the declaration can be added.</typeparam>
     /// <typeparam name="TAspect">The type of aspects for which the annotation is meaningful.</typeparam>
-    [CompileTimeOnly]
+    [CompileTime]
     [Obsolete( "Not implemented." )]
     public interface IAnnotation<in TTarget, TAspect> : IEligible<TTarget>, IAnnotation
         where TAspect : IAspect

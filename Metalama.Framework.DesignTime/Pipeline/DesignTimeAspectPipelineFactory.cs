@@ -28,6 +28,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
     {
         private readonly ConcurrentDictionary<string, DesignTimeAspectPipeline> _pipelinesByProjectId = new();
         private readonly ILogger _logger;
+
+        public IServiceProvider ServiceProvider { get; }
+
         private readonly bool _isTest;
 
         private volatile int _numberOfPipelinesEditingCompileTimeCode;
@@ -37,6 +40,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         public DesignTimeAspectPipelineFactory( IServiceProvider serviceProvider, CompileTimeDomain domain, bool isTest = false )
         {
             this.Domain = domain;
+            this.ServiceProvider = serviceProvider;
             this._isTest = isTest;
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
         }
@@ -46,8 +50,6 @@ namespace Metalama.Framework.DesignTime.Pipeline
         /// <summary>
         /// Gets the pipeline for a given project, and creates it if necessary.
         /// </summary>
-        /// <param name="projectOptions"></param>
-        /// <returns></returns>
         internal DesignTimeAspectPipeline? GetOrCreatePipeline( IProjectOptions projectOptions, Compilation compilation, CancellationToken cancellationToken )
         {
             if ( !projectOptions.IsFrameworkEnabled )

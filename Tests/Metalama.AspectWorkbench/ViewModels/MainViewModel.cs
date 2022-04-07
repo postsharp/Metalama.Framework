@@ -27,7 +27,11 @@ namespace Metalama.AspectWorkbench.ViewModels
     [NotifyPropertyChanged]
     public class MainViewModel
     {
-        private static readonly TestProjectProperties _projectProperties = new( null, ImmutableArray.Create( "NET5_0_OR_GREATER" ), "net5.0" );
+        private static readonly TestProjectProperties _projectProperties = new(
+            null,
+            ImmutableArray.Create( "NET5_0_OR_GREATER", "NET6_0_OR_GREATER" ),
+            "net6.0" );
+
         private TemplateTest? _currentTest;
 
         public string Title => this.CurrentPath == null ? "Aspect Workbench" : $"Aspect Workbench - {this.CurrentPath}";
@@ -122,43 +126,47 @@ namespace Metalama.AspectWorkbench.ViewModels
                 compilationStopwatch.Stop();
             }
 
-            var testSyntaxTree = testResult.SyntaxTrees.First();
-
-            var annotatedTemplateSyntax = testSyntaxTree.AnnotatedSyntaxRoot;
-
-            if ( annotatedTemplateSyntax != null )
-            {
-                // Display the annotated syntax tree.
-                this.ColoredSourceCodeDocument = await syntaxColorizer.WriteSyntaxColoringAsync(
-                    testResult.SyntaxTrees.First().InputDocument,
-                    diagnostics: testResult.Diagnostics );
-            }
-
             var errorsDocument = new FlowDocument();
 
-            var transformedTemplateSyntax = testSyntaxTree.OutputCompileTimeSyntaxRoot;
+            var testSyntaxTree = testResult.SyntaxTrees.FirstOrDefault();
 
-            if ( transformedTemplateSyntax != null )
+            if ( testSyntaxTree != null )
             {
-                if ( testResult.CompileTimeCompilation != null )
+                var annotatedTemplateSyntax = testSyntaxTree.AnnotatedSyntaxRoot;
+
+                if ( annotatedTemplateSyntax != null )
                 {
-                    SyntaxTreeStructureVerifier.Verify( testResult.CompileTimeCompilation, serviceProvider );
+                    // Display the annotated syntax tree.
+                    this.ColoredSourceCodeDocument = await syntaxColorizer.WriteSyntaxColoringAsync(
+                        testResult.SyntaxTrees.First().InputDocument,
+                        diagnostics: testResult.Diagnostics );
                 }
 
-                // Render the transformed tree.
-                var project3 = testRunner.CreateProject( testInput.Options );
+                var transformedTemplateSyntax = testSyntaxTree.OutputCompileTimeSyntaxRoot;
 
-                var document3 = project3.AddDocument(
-                    testSyntaxTree.OutputCompileTimePath ?? "TransformedTemplate.cs",
-                    transformedTemplateSyntax,
-                    filePath: testSyntaxTree.OutputCompileTimePath );
+                if ( transformedTemplateSyntax != null )
+                {
+                    if ( testResult.CompileTimeCompilation != null )
+                    {
+                        SyntaxTreeStructureVerifier.Verify( testResult.CompileTimeCompilation, serviceProvider );
+                    }
 
-                var formattedDocument3 = await OutputCodeFormatter.FormatToDocumentAsync( document3, testResult.CompileTimeCompilationDiagnostics );
+                    // Render the transformed tree.
+                    var project3 = testRunner.CreateProject( testInput.Options );
 
-                this.CompiledTemplateDocument = await syntaxColorizer.WriteSyntaxColoringAsync( formattedDocument3.Document, true );
+                    var document3 = project3.AddDocument(
+                        testSyntaxTree.OutputCompileTimePath ?? "TransformedTemplate.cs",
+                        transformedTemplateSyntax,
+                        filePath: testSyntaxTree.OutputCompileTimePath );
+
+                    var formattedDocument3 = await OutputCodeFormatter.FormatToDocumentAsync( document3, testResult.CompileTimeCompilationDiagnostics );
+
+                    this.CompiledTemplateDocument = await syntaxColorizer.WriteSyntaxColoringAsync( formattedDocument3.Document, true );
+                }
             }
 
-            var consolidatedOutputSyntax = testResult.GetConsolidatedTestOutput();
+            // Multi file tests are not supported.
+            var consolidatedOutputSyntax = testResult.GetConsolidatedTestOutput().Single().GetRoot();
             var consolidatedOutputText = await consolidatedOutputSyntax.SyntaxTree.GetTextAsync();
 
             var project = testResult.OutputProject ?? testResult.InputProject;

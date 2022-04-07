@@ -11,15 +11,20 @@ namespace Metalama.Framework.Engine.CompileTime
             => scope.GetExpressionExecutionScope().ReplaceIndeterminate( TemplatingScope.RunTimeOnly ) is
                 TemplatingScope.RunTimeOnly;
 
-        public static bool IsDynamic( this TemplatingScope scope ) => scope is TemplatingScope.CompileTimeOnlyReturningRuntimeOnly or TemplatingScope.Dynamic;
+        public static bool IsCompileTimeMemberReturningRunTimeValue( this TemplatingScope scope )
+            => scope is TemplatingScope.CompileTimeOnlyReturningRuntimeOnly or TemplatingScope.Dynamic;
 
-        public static bool IsRunTime( this TemplatingScope scope )
+        public static bool EvaluatesToRunTimeValue( this TemplatingScope scope )
             => scope is TemplatingScope.Dynamic or TemplatingScope.CompileTimeOnlyReturningRuntimeOnly or TemplatingScope.RunTimeOnly;
+
+        public static bool ExecutesAtCompileTimeOnly( this TemplatingScope scope )
+            => scope is TemplatingScope.CompileTimeOnly or TemplatingScope.CompileTimeOnlyReturningBoth or TemplatingScope.CompileTimeOnlyReturningRuntimeOnly
+                or TemplatingScope.Dynamic;
 
         public static TemplatingScope ReplaceIndeterminate( this TemplatingScope scope, TemplatingScope defaultScope )
             => IsUndetermined( scope ) ? defaultScope : scope;
 
-        public static bool IsUndetermined( this TemplatingScope scope ) => scope == TemplatingScope.Both || scope == TemplatingScope.Unknown;
+        public static bool IsUndetermined( this TemplatingScope scope ) => scope == TemplatingScope.RunTimeOrCompileTime || scope == TemplatingScope.Unknown;
 
         public static TemplatingScope GetExpressionExecutionScope( this TemplatingScope scope )
             => scope switch
@@ -34,7 +39,7 @@ namespace Metalama.Framework.Engine.CompileTime
             => scope switch
             {
                 TemplatingScope.CompileTimeOnlyReturningBoth when preferCompileTime => TemplatingScope.CompileTimeOnly,
-                TemplatingScope.CompileTimeOnlyReturningBoth when !preferCompileTime => TemplatingScope.Both,
+                TemplatingScope.CompileTimeOnlyReturningBoth when !preferCompileTime => TemplatingScope.RunTimeOrCompileTime,
                 TemplatingScope.Dynamic => TemplatingScope.RunTimeOnly,
                 TemplatingScope.CompileTimeOnlyReturningRuntimeOnly => TemplatingScope.RunTimeOnly,
                 _ => scope
@@ -47,7 +52,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 TemplatingScope.CompileTimeOnly => "compile-time",
                 TemplatingScope.CompileTimeOnlyReturningRuntimeOnly => "compile-time",
                 TemplatingScope.CompileTimeOnlyReturningBoth => "compile-time",
-                TemplatingScope.Both => "both",
+                TemplatingScope.RunTimeOrCompileTime => "both",
                 TemplatingScope.Unknown => "unknown",
                 TemplatingScope.Dynamic => "dynamic",
 

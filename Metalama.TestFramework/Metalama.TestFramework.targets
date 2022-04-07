@@ -30,15 +30,20 @@
             <_Parameter1>TargetFramework</_Parameter1>
             <_Parameter2>$(TargetFramework)</_Parameter2>
         </AssemblyAttribute>
-        <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
-            <_Parameter1>DefineConstants</_Parameter1>
-            <_Parameter2>$(DefineConstants)</_Parameter2>
-        </AssemblyAttribute>
     </ItemGroup>
+
+    <Target Name="AddAttributeForDefineConstants" DependsOnTargets="AddImplicitDefineConstants" BeforeTargets="CoreGenerateAssemblyInfo">
+        <ItemGroup>
+            <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+                <_Parameter1>DefineConstants</_Parameter1>
+                <_Parameter2>$(DefineConstants)</_Parameter2>
+            </AssemblyAttribute>
+        </ItemGroup>
+    </Target>
 
     <Target Name='WriteReferenceAssemblies' AfterTargets="Build">
         <WriteLinesToFile File='$(IntermediateOutputPath)assemblies.txt' Overwrite='true'
-                          Lines='@(ReferencePathWithRefAssemblies)' />
+                          Lines='@(ReferencePathWithRefAssemblies)'/>
     </Target>
 
     <Target Name="GenerateMetalamaTestDefaultRunner" BeforeTargets="CoreCompile"
@@ -74,12 +79,12 @@ namespace $(RootNamespace)
         </PropertyGroup>
 
         <WriteLinesToFile
-            File="$(IntermediateOutputPath)DefaultTestRunner.g.cs"
-            Overwrite="true"
-            Lines="$(_DefaultRunner)" />
+                File="$(IntermediateOutputPath)DefaultTestRunner.g.cs"
+                Overwrite="true"
+                Lines="$(_DefaultRunner)"/>
 
         <ItemGroup>
-            <Compile Include="$(IntermediateOutputPath)DefaultTestRunner.g.cs" />
+            <Compile Include="$(IntermediateOutputPath)DefaultTestRunner.g.cs"/>
         </ItemGroup>
 
     </Target>
@@ -87,34 +92,34 @@ namespace $(RootNamespace)
 
     <Target Name="CleanTestOutput">
         <ItemGroup>
-            <_CleanTestOutput Include="obj\\transformed\**\*.*" />
-            <_CleanTestOutput Include="obj\\html\**\*.*" />
+            <_CleanTestOutput Include="obj\\transformed\**\*.*"/>
+            <_CleanTestOutput Include="obj\\html\**\*.*"/>
         </ItemGroup>
-        <RemoveDir Directories="obj\\transformed" />
-        <RemoveDir Directories="obj\\html" />
-        <Delete Files="@(_CleanTestOutput)" />
+        <RemoveDir Directories="obj\\transformed"/>
+        <RemoveDir Directories="obj\\html"/>
+        <Delete Files="@(_CleanTestOutput)"/>
     </Target>
 
     <Target Name="AcceptTestOutput">
         <ItemGroup>
-            <_AcceptTestOutput Include="obj\\transformed\net5.0\**\*.cs" />
-            <_AcceptTestOutput Include="obj\\transformed\net5.0\**\*.txt" />
-            <_AcceptTestOutput Include="obj\\transformed\netframework4.8\**\*.cs" />
-            <_AcceptTestOutput Include="obj\\transformed\netframework4.8\**\*.txt" />
+            <_AcceptTestOutput Include="obj\\transformed\net6.0\**\*.cs"/>
+            <_AcceptTestOutput Include="obj\\transformed\net6.0\**\*.txt"/>
+            <_AcceptTestOutput Include="obj\\transformed\netframework4.8\**\*.cs"/>
+            <_AcceptTestOutput Include="obj\\transformed\netframework4.8\**\*.txt"/>
         </ItemGroup>
         <Copy
-            SourceFiles="@(_AcceptTestOutput)"
-            DestinationFiles="@(_AcceptTestOutput->'%(RecursiveDir)%(Filename)%(Extension)')" />
+                SourceFiles="@(_AcceptTestOutput)"
+                DestinationFiles="@(_AcceptTestOutput->'%(RecursiveDir)%(Filename)%(Extension)')"/>
     </Target>
 
     <Target Name="AcceptTestHtml">
         <ItemGroup>
-            <_AcceptTestOutput Include="obj\\html\$(TargetFramework)\net5.0\**\*.cs.html" />
-            <_AcceptTestOutput Include="obj\\html\$(TargetFramework)\netframework4.8\**\*.cs.html" />
+            <_AcceptTestOutput Include="obj\\html\$(TargetFramework)\net6.0\**\*.cs.html"/>
+            <_AcceptTestOutput Include="obj\\html\$(TargetFramework)\netframework4.8\**\*.cs.html"/>
         </ItemGroup>
         <Copy
-            SourceFiles="@(_AcceptTestOutput)"
-            DestinationFiles="@(_AcceptTestOutput->'%(RecursiveDir)%(Filename)%(Extension)')" />
+                SourceFiles="@(_AcceptTestOutput)"
+                DestinationFiles="@(_AcceptTestOutput->'%(RecursiveDir)%(Filename)%(Extension)')"/>
     </Target>
 
 
@@ -126,7 +131,7 @@ namespace $(RootNamespace)
          We need this to build the HTML titles when the option is enabled.
          -->
             <ReferenceCopyLocalPaths Include="@(ReferenceCopyLocalPaths->'%(RootDir)%(Directory)%(Filename).xml')"
-                                     Condition="'%(ReferenceCopyLocalPaths.NuGetPackageId)'!='' and Exists('%(RootDir)%(Directory)%(Filename).xml')" />
+                                     Condition="'%(ReferenceCopyLocalPaths.NuGetPackageId)'!='' and Exists('%(RootDir)%(Directory)%(Filename).xml')"/>
         </ItemGroup>
     </Target>
 

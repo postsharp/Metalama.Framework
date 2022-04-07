@@ -15,7 +15,7 @@ namespace Metalama.Framework.Aspects
     /// </summary>
     /// <seealso href="@advising-code"/>
     [InternalImplement]
-    [CompileTimeOnly]
+    [CompileTime]
     public interface IAdviceFactory
     {
         /// <summary>

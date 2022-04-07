@@ -11,7 +11,7 @@ namespace Metalama.Framework.Code.SyntaxBuilders
     /// or the <see cref="ExpressionBuilderExtensions.ToValue(Metalama.Framework.Code.SyntaxBuilders.IExpressionBuilder)"/> methods converts it to a dynamic expression that can be used in the C# code
     /// of the template. 
     /// </summary>
-    [CompileTimeOnly]
+    [CompileTime]
     public sealed class ExpressionBuilder : SyntaxBuilder, IExpressionBuilder
     {
         public ExpressionBuilder() { }

@@ -6,7 +6,7 @@ namespace Metalama.Framework.Aspects
     /// <summary>
     /// Conflict behavior of introduction advices.
     /// </summary>
-    [CompileTimeOnly]
+    [CompileTime]
     public enum OverrideStrategy
     {
         /// <summary>

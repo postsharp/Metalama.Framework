@@ -5,5 +5,5 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal interface IFieldImpl : IField, IDeclarationImpl { }
+    internal interface IFieldImpl : IField, IFieldOrPropertyImpl { }
 }

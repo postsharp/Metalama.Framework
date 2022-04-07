@@ -13,7 +13,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Highlighting.Declarati
         }
     }
 
-    [CompileTime]
+    [RunTimeOrCompileTime]
     class Aspect
     {
         [TestTemplate]

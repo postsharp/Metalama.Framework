@@ -13,7 +13,7 @@ namespace Metalama.Framework.Project
     /// The implementation must not allow modifications of the state after the object has been made read only.
     /// </remarks>
     /// <seealso href="@exposing-configuration"/>
-    [CompileTimeOnly]
+    [CompileTime]
     public abstract class ProjectExtension
     {
         /// <summary>

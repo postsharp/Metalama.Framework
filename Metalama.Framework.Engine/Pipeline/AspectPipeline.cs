@@ -42,17 +42,15 @@ namespace Metalama.Framework.Engine.Pipeline
 
         // This member is intentionally protected because there can be one ServiceProvider per project,
         // but the pipeline can be used by many projects.
-        protected internal ServiceProvider ServiceProvider { get; }
+        public ServiceProvider ServiceProvider { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AspectPipeline"/> class.
         /// </summary>
-        /// <param name="projectOptions"></param>
+        /// <param name="serviceProvider"></param>
         /// <param name="executionScenario"></param>
         /// <param name="isTest"></param>
         /// <param name="domain">If <c>null</c>, the instance is created from the <see cref="ICompileTimeDomainFactory"/> service.</param>
-        /// <param name="directoryOptions"></param>
-        /// <param name="assemblyLocator"></param>
         protected AspectPipeline(
             ServiceProvider serviceProvider,
             IExecutionScenario executionScenario,

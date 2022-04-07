@@ -9,7 +9,7 @@ using System;
 namespace Metalama.Framework.Engine.CodeModel
 {
     /// <summary>
-    /// Exposes the <see cref="ISymbol"/> from <see cref="IDeclaration"/>.
+    /// Exposes the <see cref="ISymbol" /> from <see cref="IDeclaration"/>.
     /// </summary>
     public static class SymbolExtensions
     {
