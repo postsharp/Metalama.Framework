@@ -6,25 +6,26 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Validation;
+using Metalama.Framework.Validation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.Fabrics;
 
-internal class AspectTargetSelector<T> : IAspectTargetSelector<T>
+internal class AspectReceiverSelector<T> : IAspectReceiverSelector<T>
     where T : class, IDeclaration
 {
     private readonly CompilationModelVersion _version;
     private readonly Ref<T> _targetDeclaration;
     private readonly IAspectReceiverParent _parent;
 
-    public AspectTargetSelector( Ref<T> targetDeclaration, IAspectReceiverParent parent ) : this(
+    public AspectReceiverSelector( Ref<T> targetDeclaration, IAspectReceiverParent parent ) : this(
         CompilationModelVersion.Current,
         targetDeclaration,
         parent ) { }
 
-    internal AspectTargetSelector( CompilationModelVersion version, Ref<T> targetDeclaration, IAspectReceiverParent parent )
+    internal AspectReceiverSelector( CompilationModelVersion version, Ref<T> targetDeclaration, IAspectReceiverParent parent )
     {
         this._version = version;
         this._targetDeclaration = targetDeclaration;
@@ -58,20 +59,20 @@ internal class AspectTargetSelector<T> : IAspectTargetSelector<T>
             } );
     }
 
-    IValidatorReceiver<T> IValidatorTargetSelector<T>.WithTarget() => this.WithTarget();
+    IValidatorReceiver<T> IValidatorReceiverSelector<T>.WithTarget() => this.WithTarget();
 
-    IValidatorReceiver<TMember> IValidatorTargetSelector<T>.WithTargetMembers<TMember>( Func<T, IEnumerable<TMember>> selector )
+    IValidatorReceiver<TMember> IValidatorReceiverSelector<T>.WithTargetMembers<TMember>( Func<T, IEnumerable<TMember>> selector )
         => this.WithTargetMembers( selector );
 
     public IAspectReceiver<T> WithTarget() => this.WithTargetMembers( x => new[] { x } );
 
-    public IValidatorTargetSelector<T> AfterAllAspects()
+    public IValidatorReceiverSelector<T> AfterAllAspects()
         => this._version == CompilationModelVersion.Final
             ? this
-            : new AspectTargetSelector<T>( CompilationModelVersion.Final, this._targetDeclaration, this._parent );
+            : new AspectReceiverSelector<T>( CompilationModelVersion.Final, this._targetDeclaration, this._parent );
 
-    public IValidatorTargetSelector<T> BeforeAnyAspect()
+    public IValidatorReceiverSelector<T> BeforeAnyAspect()
         => this._version == CompilationModelVersion.Initial
             ? this
-            : new AspectTargetSelector<T>( CompilationModelVersion.Initial, this._targetDeclaration, this._parent );
+            : new AspectReceiverSelector<T>( CompilationModelVersion.Initial, this._targetDeclaration, this._parent );
 }

@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.Aspects
         private readonly AspectPipelineConfiguration _configuration;
         private readonly ImmutableArray<Advice> _declarativeAdvices;
         private bool _skipped;
-        private AspectTargetSelector<T>? _declarationSelector;
+        private AspectReceiverSelector<T>? _declarationSelector;
 
         public AspectBuilder(
             T target,
@@ -83,22 +83,22 @@ namespace Metalama.Framework.Engine.Aspects
 
         public T Target { get; }
 
-        private AspectTargetSelector<T> GetDeclarationSelector() => this._declarationSelector ??= new AspectTargetSelector<T>( this.Target.ToTypedRef(), this );
+        private AspectReceiverSelector<T> GetValidatorReceiverSelector() => this._declarationSelector ??= new AspectReceiverSelector<T>( this.Target.ToTypedRef(), this );
 
         public IAspectReceiver<TMember> WithTargetMembers<TMember>( Func<T, IEnumerable<TMember>> selector )
             where TMember : class, IDeclaration
-            => this.GetDeclarationSelector().WithTargetMembers( selector );
+            => this.GetValidatorReceiverSelector().WithTargetMembers( selector );
 
-        IValidatorReceiver<T> IValidatorTargetSelector<T>.WithTarget() => this.WithTarget();
+        IValidatorReceiver<T> IValidatorReceiverSelector<T>.WithTarget() => this.WithTarget();
 
-        IValidatorReceiver<TMember> IValidatorTargetSelector<T>.WithTargetMembers<TMember>( Func<T, IEnumerable<TMember>> selector )
+        IValidatorReceiver<TMember> IValidatorReceiverSelector<T>.WithTargetMembers<TMember>( Func<T, IEnumerable<TMember>> selector )
             => this.WithTargetMembers( selector );
 
-        public IAspectReceiver<T> WithTarget() => this.GetDeclarationSelector().WithTarget();
+        public IAspectReceiver<T> WithTarget() => this.GetValidatorReceiverSelector().WithTarget();
 
-        public IValidatorTargetSelector<T> AfterAllAspects() => this.GetDeclarationSelector().AfterAllAspects();
+        public IValidatorReceiverSelector<T> AfterAllAspects() => this.GetValidatorReceiverSelector().AfterAllAspects();
 
-        public IValidatorTargetSelector<T> BeforeAnyAspect() => this.GetDeclarationSelector().BeforeAnyAspect();
+        public IValidatorReceiverSelector<T> BeforeAnyAspect() => this.GetValidatorReceiverSelector().BeforeAnyAspect();
 
         IDeclaration IAspectLayerBuilder.Target => this.Target;
 

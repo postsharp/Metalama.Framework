@@ -26,7 +26,7 @@ internal abstract partial class FabricDriver
         private readonly FabricInstance _fabricInstance;
         private readonly Ref<T> _targetDeclaration;
         private readonly FabricManager _fabricManager;
-        private AspectTargetSelector<T>? _declarationSelector;
+        private AspectReceiverSelector<T>? _declarationSelector;
 
         protected BaseAmender(
             IProject project,
@@ -40,7 +40,7 @@ internal abstract partial class FabricDriver
             this.Project = project;
         }
 
-        private AspectTargetSelector<T> GetAspectTargetSelector() => this._declarationSelector ??= new AspectTargetSelector<T>( CompilationModelVersion.Initial, this._targetDeclaration, this );
+        private AspectReceiverSelector<T> GetAspectTargetSelector() => this._declarationSelector ??= new AspectReceiverSelector<T>( CompilationModelVersion.Initial, this._targetDeclaration, this );
 
         public IProject Project { get; }
 
@@ -52,16 +52,16 @@ internal abstract partial class FabricDriver
             where TChild : class, IDeclaration
             => this.GetAspectTargetSelector().WithTargetMembers( selector );
 
-        IValidatorReceiver<T> IValidatorTargetSelector<T>.WithTarget() => this.WithTarget();
+        IValidatorReceiver<T> IValidatorReceiverSelector<T>.WithTarget() => this.WithTarget();
 
-        IValidatorReceiver<TMember> IValidatorTargetSelector<T>.WithTargetMembers<TMember>( Func<T, IEnumerable<TMember>> selector )
+        IValidatorReceiver<TMember> IValidatorReceiverSelector<T>.WithTargetMembers<TMember>( Func<T, IEnumerable<TMember>> selector )
             => this.WithTargetMembers( selector );
 
         public IAspectReceiver<T> WithTarget() => this.GetAspectTargetSelector().WithTarget();
 
-        IValidatorTargetSelector<T> IAspectTargetSelector<T>.AfterAllAspects() => this.GetAspectTargetSelector().AfterAllAspects();
+        IValidatorReceiverSelector<T> IAspectReceiverSelector<T>.AfterAllAspects() => this.GetAspectTargetSelector().AfterAllAspects();
 
-        IValidatorTargetSelector<T> IAspectTargetSelector<T>.BeforeAnyAspect() => this.GetAspectTargetSelector().BeforeAnyAspect();
+        IValidatorReceiverSelector<T> IAspectReceiverSelector<T>.BeforeAnyAspect() => this.GetAspectTargetSelector().BeforeAnyAspect();
 
         IServiceProvider IAspectReceiverParent.ServiceProvider => this._fabricManager.ServiceProvider;
 

@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Validation;
 using System;
 using System.Collections.Generic;
 
@@ -10,7 +11,7 @@ namespace Metalama.Framework.Aspects;
 /// <summary>
 /// An interface that allows aspects and fabrics to register validators for current compilation version.
 /// </summary>
-public interface IAspectTargetSelector<out TTarget> : IValidatorTargetSelector<TTarget>
+public interface IAspectReceiverSelector<out TTarget> : IValidatorReceiverSelector<TTarget>
     where TTarget : class, IDeclaration
 {
     /// <summary>
@@ -33,10 +34,10 @@ public interface IAspectTargetSelector<out TTarget> : IValidatorTargetSelector<T
     /// <summary>
     /// Gets an interface that allows to validate the final compilation, after all aspects have been applied.
     /// </summary>
-    IValidatorTargetSelector<TTarget> AfterAllAspects();
+    IValidatorReceiverSelector<TTarget> AfterAllAspects();
 
     /// <summary>
     /// Gets an interface that allows to validate the initial compilation, after before any aspect has been applied.
     /// </summary>
-    IValidatorTargetSelector<TTarget> BeforeAnyAspect();
+    IValidatorReceiverSelector<TTarget> BeforeAnyAspect();
 }

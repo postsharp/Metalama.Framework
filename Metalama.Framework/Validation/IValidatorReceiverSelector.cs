@@ -2,17 +2,16 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Validation;
 using System;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Aspects;
+namespace Metalama.Framework.Validation;
 
 /// <summary>
 /// An interface that allows aspects and fabrics to register validators for the initial or final compilation version.
 /// </summary>
 [InternalImplement]
-public interface IValidatorTargetSelector<out TTarget>
+public interface IValidatorReceiverSelector<out TTarget>
     where TTarget : class, IDeclaration
 {
     /// <summary>
