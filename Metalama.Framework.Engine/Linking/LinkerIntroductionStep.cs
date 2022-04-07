@@ -345,7 +345,12 @@ namespace Metalama.Framework.Engine.Linking
                                 }
 
                                 ((List<LinkerInsertedStatement>) list).Add(
-                                    new LinkerInsertedStatement( insertStatementTransformation, primaryDeclaration, insertedStatement.Value.Position, insertedStatement.Value.Statement ) );
+                                    new LinkerInsertedStatement( 
+                                        insertStatementTransformation, 
+                                        primaryDeclaration, 
+                                        insertedStatement.Value.Position, 
+                                        insertedStatement.Value.Statement,
+                                        insertedStatement.Value.ContextDeclaration ) );
                             }
 
                             break;
@@ -371,7 +376,12 @@ namespace Metalama.Framework.Engine.Linking
                                 }
 
                                 ((List<LinkerInsertedStatement>) list).Add(
-                                    new LinkerInsertedStatement( insertStatementTransformation, constructorBuilder, insertedStatement.Value.Position, insertedStatement.Value.Statement ) );
+                                    new LinkerInsertedStatement( 
+                                        insertStatementTransformation, 
+                                        constructorBuilder, 
+                                        insertedStatement.Value.Position, 
+                                        insertedStatement.Value.Statement,
+                                        insertedStatement.Value.ContextDeclaration ) );
                             }
 
                             break;

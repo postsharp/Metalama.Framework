@@ -13,7 +13,6 @@ using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
-using System;
 
 namespace Metalama.Framework.Engine.Transformations
 {
@@ -34,8 +33,7 @@ namespace Metalama.Framework.Engine.Transformations
             Advice advice,
             IMemberOrNamedType initializedDeclaration,
             IConstructor targetConstructor,
-            TemplateMember<IMethod> template,
-            InitializationReason reason )
+            TemplateMember<IMethod> template )
         {
             this.ContextDeclaration = initializedDeclaration;
             this._targetConstructor = targetConstructor;
@@ -80,7 +78,8 @@ namespace Metalama.Framework.Engine.Transformations
                 InsertedStatementPosition.Beginning, 
                 expandedBody
                 .WithGeneratedCodeAnnotation()
-                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ) );
+                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
+                this.ContextDeclaration );
         }
     }
 }

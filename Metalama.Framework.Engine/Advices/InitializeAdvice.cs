@@ -11,7 +11,6 @@ using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -104,8 +103,7 @@ namespace Metalama.Framework.Engine.Advices
                     this,
                     this.TargetDeclaration,
                     targetCtor,
-                    this.Template,
-                    this.Reason );
+                    this.Template );
 
                 transformations.Add( initialization );
             }
