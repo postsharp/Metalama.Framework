@@ -1,14 +1,14 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
-using Metalama.Framework.Tests.Integration.Validation.DeclarationValidation;
+using Metalama.Framework.Tests.Integration.Validation.Aspect_AfterAllAspects;
 using Metalama.Framework.Validation;
 
 #pragma warning disable CS0168, CS8618, CS0169
 
 [assembly: AspectOrder( typeof(ValidateAspect), typeof(IntroduceAspect) )]
 
-namespace Metalama.Framework.Tests.Integration.Validation.DeclarationValidation
+namespace Metalama.Framework.Tests.Integration.Validation.Aspect_AfterAllAspects
 {
     internal class ValidateAspect : TypeAspect
     {
@@ -17,7 +17,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.DeclarationValidation
 
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.WithTargetMembers( t => t.Methods ).RegisterFinalValidator( Validate );
+            builder.AfterAllAspects().WithTargetMembers( t => t.Methods ).Validate( Validate );
         }
 
         private static void Validate( in DeclarationValidationContext context )

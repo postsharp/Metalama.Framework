@@ -1,17 +1,11 @@
 internal class T
+{
+    [Aspect]
+    private protected class TargetCode
     {
-        [Aspect]
-        public partial class TargetCode
+        private int Method(int a)
         {
-
-            private int Method( int a )
-            {
-                return a;
-            }
-        }
-
-        public partial class TargetCode
-        {
-            
+            return a;
         }
     }
+}

@@ -15,7 +15,7 @@ public class TransitiveValidatorInstance : ILamaSerializable
     {
         this.ValidatedDeclaration = instance.ValidatedDeclaration.ToRef();
         this.ReferenceKinds = instance.ReferenceKinds;
-        this.MethodName = instance.Driver.ValidateMethod.Name;
+        this.MethodName = ((ReferenceValidatorDriver) instance.Driver).MethodName;
         this.Object = instance.Implementation.Implementation;
         this.State = instance.Implementation.State;
     }

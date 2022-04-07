@@ -1,4 +1,4 @@
-class TargetCode
+internal class TargetCode
 {
     internal class MovingVertex
     {

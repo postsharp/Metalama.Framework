@@ -6,7 +6,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Globalization;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using System.Threading;
 
 namespace Metalama.Framework.Engine.CompileTime
@@ -27,10 +26,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         public CompileTimeDomain()
         {
-            if ( RuntimeInformation.FrameworkDescription.StartsWith( ".NET Framework", StringComparison.Ordinal ) )
-            {
-                AppDomain.CurrentDomain.AssemblyResolve += this.OnAssemblyResolve;
-            }
+            AppDomain.CurrentDomain.AssemblyResolve += this.OnAssemblyResolve;
         }
 
         private Assembly? OnAssemblyResolve( object sender, ResolveEventArgs args )

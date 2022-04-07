@@ -12,22 +12,23 @@ using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
+using Metalama.Framework.Validation;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using System.Reflection;
 using System.Threading;
 
 namespace Metalama.Framework.Engine.Aspects
 {
-    internal class AspectBuilder<T> : IAspectBuilder<T>, IAspectBuilderInternal, IDeclarationSelectorInternal
+    internal class AspectBuilder<T> : IAspectBuilder<T>, IAspectBuilderInternal, ICompilationSelectorParent
         where T : class, IDeclaration
     {
         private readonly UserDiagnosticSink _diagnosticSink;
         private readonly AspectPipelineConfiguration _configuration;
         private readonly ImmutableArray<Advice> _declarativeAdvices;
         private bool _skipped;
+        private AspectTargetSelector<T>? _declarationSelector;
 
         public AspectBuilder(
             T target,
@@ -56,12 +57,12 @@ namespace Metalama.Framework.Engine.Aspects
 
         public ImmutableArray<IValidatorSource> ValidatorSources { get; private set; } = ImmutableArray<IValidatorSource>.Empty;
 
-        public void AddAspectSource( IAspectSource aspectSource )
+        void IAspectOrValidatorSourceCollector.AddAspectSource( IAspectSource aspectSource )
         {
             this.AspectSources = this.AspectSources.Add( aspectSource );
         }
 
-        public void AddValidatorSource( IValidatorSource validatorSource )
+        void IAspectOrValidatorSourceCollector.AddValidatorSource( IValidatorSource validatorSource )
         {
             this.ValidatorSources = this.ValidatorSources.Add( validatorSource );
         }
@@ -82,32 +83,22 @@ namespace Metalama.Framework.Engine.Aspects
 
         public T Target { get; }
 
-        public IDeclarationSelection<TMember> WithTargetMembers<TMember>( Func<T, IEnumerable<TMember>> selector )
+        private AspectTargetSelector<T> GetDeclarationSelector() => this._declarationSelector ??= new AspectTargetSelector<T>( this.Target.ToTypedRef(), this );
+
+        public IAspectReceiver<TMember> WithTargetMembers<TMember>( Func<T, IEnumerable<TMember>> selector )
             where TMember : class, IDeclaration
-        {
-            var executionContext = UserCodeExecutionContext.Current;
+            => this.GetDeclarationSelector().WithTargetMembers( selector );
 
-            return new DeclarationSelection<TMember>(
-                this.Target.ToTypedRef(),
-                this,
-                this.AddAspectSource,
-                this.AddValidatorSource,
-                ( compilation, diagnostics ) =>
-                {
-                    var translatedTarget = compilation.Factory.GetDeclaration( this.Target );
+        IValidatorReceiver<T> IValidatorTargetSelector<T>.WithTarget() => this.WithTarget();
 
-                    this._configuration.UserCodeInvoker.TryInvokeEnumerable(
-                        () => selector( translatedTarget ),
-                        executionContext.WithDiagnosticAdder( diagnostics ),
-                        out var items );
+        IValidatorReceiver<TMember> IValidatorTargetSelector<T>.WithTargetMembers<TMember>( Func<T, IEnumerable<TMember>> selector )
+            => this.WithTargetMembers( selector );
 
-                    return items ?? Enumerable.Empty<TMember>();
-                },
-                this._configuration.BoundAspectClasses,
-                this._configuration.ServiceProvider );
-        }
+        public IAspectReceiver<T> WithTarget() => this.GetDeclarationSelector().WithTarget();
 
-        public IDeclarationSelection<T> WithTarget() => this.WithTargetMembers( declaration => new[] { declaration } );
+        public IValidatorTargetSelector<T> AfterAllAspects() => this.GetDeclarationSelector().AfterAllAspects();
+
+        public IValidatorTargetSelector<T> BeforeAnyAspect() => this.GetDeclarationSelector().BeforeAnyAspect();
 
         IDeclaration IAspectLayerBuilder.Target => this.Target;
 
@@ -148,9 +139,18 @@ namespace Metalama.Framework.Engine.Aspects
 
         public AspectPredecessor AspectPredecessor { get; private set; }
 
-        Type IDeclarationSelectorInternal.Type => this.AspectInstance.AspectClass.Type;
+        Type ICompilationSelectorParent.Type => this.AspectInstance.AspectClass.Type;
 
-        public ValidatorDriver<TContext> GetValidatorDriver<TContext>( MethodInfo validateMethod )
-            => ((IValidatorDriverFactory) this.AspectInstance.AspectClass).GetValidatorDriver<TContext>( validateMethod );
+        UserCodeInvoker ICompilationSelectorParent.UserCodeInvoker => this._configuration.UserCodeInvoker;
+
+        IServiceProvider ICompilationSelectorParent.ServiceProvider => this._configuration.ServiceProvider;
+
+        BoundAspectClassCollection ICompilationSelectorParent.AspectClasses => this._configuration.BoundAspectClasses;
+
+        public ReferenceValidatorDriver GetReferenceValidatorDriver( MethodInfo validateMethod )
+            => ((IValidatorDriverFactory) this.AspectInstance.AspectClass).GetReferenceValidatorDriver( validateMethod );
+
+        public DeclarationValidatorDriver GetDeclarationValidatorDriver( ValidatorDelegate<DeclarationValidationContext> validate )
+            => ((IValidatorDriverFactory) this.AspectInstance.AspectClass).GetDeclarationValidatorDriver( validate );
     }
 }

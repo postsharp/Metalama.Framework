@@ -14,7 +14,7 @@ namespace Metalama.Framework.Fabrics
     /// </summary>
     [InternalImplement]
     [CompileTime]
-    public interface IAmender<T> : IDeclarationSelector<T>
+    public interface IAmender<T> : IAspectTargetSelector<T>
         where T : class, IDeclaration
     {
         /// <summary>

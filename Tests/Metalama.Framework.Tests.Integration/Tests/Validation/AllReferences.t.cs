@@ -12,7 +12,7 @@
 // Warning MY001 on `InstanceField`: `Reference constraint of type 'Other' in declaration 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)' (SyntaxKind=IdentifierName).`
 // Warning MY001 on `x.InstanceField`: `Reference constraint of type 'Assignment' in declaration 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)' (SyntaxKind=SimpleMemberAccessExpression).`
 // Warning MY001 on `x.InstanceField`: `Reference constraint of type 'Assignment' in declaration 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)' (SyntaxKind=SimpleMemberAccessExpression).`
-// Warning MY001 on `ValidatedClass.StaticField`: `Reference constraint of type 'Assignment' in declaration 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)' (SyntaxKind=SimpleMemberAccessExpression).`
+// Warning MY001 on `StaticField`: `Reference constraint of type 'Assignment' in declaration 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)' (SyntaxKind=IdentifierName).`
 // Warning MY001 on `Method`: `Reference constraint of type 'Invocation' in declaration 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)' (SyntaxKind=IdentifierName).`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'TypeOf' in declaration 'DerivedClass.Method(ValidatedClass[], List<ValidatedClass>)' (SyntaxKind=IdentifierName).`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'LocalVariableType' in declaration 'ReferencingClass.ReferencingMethod()' (SyntaxKind=IdentifierName).`
@@ -33,7 +33,7 @@ internal class DerivedClass : ValidatedClass
             _ = x.InstanceField;
             x.InstanceField = 5;
             x.InstanceField += 5;
-            ValidatedClass.StaticField = 5;
+            StaticField = 5;
             Method( typeof(ValidatedClass) );
 
             return null;

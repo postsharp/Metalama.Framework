@@ -8,16 +8,7 @@ namespace Metalama.Framework.Engine.Validation;
 
 internal interface IValidatorDriverFactory
 {
-    ValidatorDriver<TContext> GetValidatorDriver<TContext>( MethodInfo validateMethod );
-}
+    ReferenceValidatorDriver GetReferenceValidatorDriver( MethodInfo validateMethod );
 
-internal static class ValidatorDriverFactoryExtensions
-{
-    public static ValidatorDriver GetValidatorDriver( this IValidatorDriverFactory factory, MethodInfo method, ValidatorKind kind )
-        => kind switch
-        {
-            ValidatorKind.Definition => factory.GetValidatorDriver<DeclarationValidationContext>( method ),
-            ValidatorKind.Reference => factory.GetValidatorDriver<ReferenceValidationContext>( method ),
-            _ => throw new AssertionFailedException()
-        };
+    DeclarationValidatorDriver GetDeclarationValidatorDriver( ValidatorDelegate<DeclarationValidationContext> validate );
 }

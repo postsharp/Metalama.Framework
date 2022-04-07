@@ -4,8 +4,10 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Validation;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace Metalama.Framework.Engine.Validation;
@@ -21,18 +23,60 @@ internal class ProgrammaticValidatorSource : IValidatorSource
     public ProgrammaticValidatorSource(
         IValidatorDriverFactory driverFactory,
         ValidatorKind validatorKind,
+        CompilationModelVersion compilationModelVersion,
         AspectPredecessor predecessor,
         MethodInfo method,
         Func<ProgrammaticValidatorSource, CompilationModel, IDiagnosticSink, IEnumerable<ValidatorInstance>> func )
     {
-        this.Driver = driverFactory.GetValidatorDriver( method, validatorKind );
+        if ( validatorKind != ValidatorKind.Reference )
+        {
+            throw new ArgumentOutOfRangeException( nameof(validatorKind) );
+        }
+
+        this.Driver = driverFactory.GetReferenceValidatorDriver( method );
         this.Kind = validatorKind;
+        this.CompilationModelVersion = compilationModelVersion;
         this.Predecessor = predecessor;
         this._func = func;
     }
 
-    public IEnumerable<ValidatorInstance> GetValidators( CompilationModel compilation, IDiagnosticSink diagnosticAdder )
-        => this._func.Invoke( this, compilation, diagnosticAdder );
+    public ProgrammaticValidatorSource(
+        IValidatorDriverFactory driverFactory,
+        ValidatorKind validatorKind,
+        CompilationModelVersion compilationModelVersion,
+        AspectPredecessor predecessor,
+        ValidatorDelegate<DeclarationValidationContext> method,
+        Func<ProgrammaticValidatorSource, CompilationModel, IDiagnosticSink, IEnumerable<ValidatorInstance>> func )
+    {
+        if ( validatorKind != ValidatorKind.Definition )
+        {
+            throw new ArgumentOutOfRangeException( nameof(validatorKind) );
+        }
+
+        this.Driver = driverFactory.GetDeclarationValidatorDriver( method );
+        this.Kind = validatorKind;
+        this.CompilationModelVersion = compilationModelVersion;
+        this.Predecessor = predecessor;
+        this._func = func;
+    }
+
+    public IEnumerable<ValidatorInstance> GetValidators(
+        ValidatorKind kind,
+        CompilationModelVersion compilationModelVersion,
+        CompilationModel compilation,
+        IDiagnosticSink diagnosticAdder )
+    {
+        if ( kind == this.Kind && this.CompilationModelVersion == compilationModelVersion )
+        {
+            return this._func.Invoke( this, compilation, diagnosticAdder );
+        }
+        else
+        {
+            return Enumerable.Empty<ValidatorInstance>();
+        }
+    }
 
     public ValidatorKind Kind { get; }
+
+    public CompilationModelVersion CompilationModelVersion { get; set; }
 }

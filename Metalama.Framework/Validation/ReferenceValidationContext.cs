@@ -11,7 +11,7 @@ using System;
 namespace Metalama.Framework.Validation
 {
     /// <summary>
-    /// The context object passed to the single parameter of validators added using <see cref="IDeclarationSelection{TDeclaration}.RegisterReferenceValidator"/>.
+    /// The context object passed to the single parameter of validators added using <see cref="IValidatorReceiver{TDeclaration}.ValidateReferences"/>.
     /// </summary>
     /// <seealso href="@validation"/>
     [CompileTime]

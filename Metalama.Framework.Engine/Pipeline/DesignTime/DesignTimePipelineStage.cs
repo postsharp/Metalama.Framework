@@ -42,7 +42,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                 var validatorRunner = new ValidationRunner( pipelineConfiguration, validatorSources, cancellationToken );
                 var initialCompilation = pipelineStepsResult.Compilations[0];
                 var finalCompilation = pipelineStepsResult.Compilations[pipelineStepsResult.Compilations.Length - 1];
-                validatorRunner.RunDeclarationValidators( finalCompilation, diagnosticSink );
+                validatorRunner.RunDeclarationValidators( initialCompilation, finalCompilation, diagnosticSink );
                 referenceValidators = validatorRunner.GetReferenceValidators( initialCompilation, diagnosticSink ).ToImmutableArray();
             }
             else

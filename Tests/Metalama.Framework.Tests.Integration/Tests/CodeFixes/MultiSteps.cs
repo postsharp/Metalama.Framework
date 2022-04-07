@@ -1,3 +1,6 @@
+// Do not remove!
+// @ApplyCodeFix
+
 using System;
 using System.Threading.Tasks;
 using Metalama.Framework.Aspects;

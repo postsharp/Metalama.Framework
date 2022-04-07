@@ -11,7 +11,6 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
-using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -29,7 +28,7 @@ namespace Metalama.Framework.Engine.Aspects;
 internal class TransitiveAspectSource : IAspectSource, IValidatorSource
 {
     private readonly ImmutableDictionaryOfArray<IAspectClass, InheritableAspectInstance> _inheritedAspects;
-    private readonly ImmutableArray<TransitiveValidatorInstance> _validators;
+    private readonly ImmutableArray<TransitiveValidatorInstance> _referenceValidators;
 
     public TransitiveAspectSource(
         Compilation compilation,
@@ -92,7 +91,7 @@ internal class TransitiveAspectSource : IAspectSource, IValidatorSource
         }
 
         this._inheritedAspects = inheritedAspectsBuilder.ToImmutable();
-        this._validators = validatorsBuilder.ToImmutable();
+        this._referenceValidators = validatorsBuilder.ToImmutable();
     }
 
     public ImmutableArray<IAspectClass> AspectClasses => this._inheritedAspects.Keys.ToImmutableArray();
@@ -132,18 +131,29 @@ internal class TransitiveAspectSource : IAspectSource, IValidatorSource
         return new AspectSourceResult( aspectInstances );
     }
 
-    IEnumerable<ValidatorInstance> IValidatorSource.GetValidators( CompilationModel compilation, IDiagnosticSink diagnosticAdder )
-        => this._validators.Select(
-            v => new ReferenceValidatorInstance(
-                v.ValidatedDeclaration.GetTarget( compilation ),
-                GetValidatorDriver( v.Object.GetType(), v.MethodName ),
-                ValidatorImplementation.Create( v.Object, v.State ),
-                v.ReferenceKinds ) );
+    IEnumerable<ValidatorInstance> IValidatorSource.GetValidators(
+        ValidatorKind kind,
+        CompilationModelVersion version,
+        CompilationModel compilation,
+        IDiagnosticSink diagnosticAdder )
+    {
+        if ( kind == ValidatorKind.Reference )
+        {
+            return this._referenceValidators.Select(
+                v => new ReferenceValidatorInstance(
+                    v.ValidatedDeclaration.GetTarget( compilation ),
+                    GetReferenceValidatorDriver( v.Object.GetType(), v.MethodName ),
+                    ValidatorImplementation.Create( v.Object, v.State ),
+                    v.ReferenceKinds ) );
+        }
+        else
+        {
+            return Enumerable.Empty<ValidatorInstance>();
+        }
+    }
 
-    public ValidatorKind Kind => ValidatorKind.Reference;
-
-    private static ValidatorDriver<ReferenceValidationContext> GetValidatorDriver( Type type, string methodName )
+    private static ReferenceValidatorDriver GetReferenceValidatorDriver( Type type, string methodName )
         => ValidatorDriverFactory.GetInstance( type )
-            .GetValidatorDriver<ReferenceValidationContext>(
+            .GetReferenceValidatorDriver(
                 type.GetMethod( methodName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic ) );
 }
