@@ -64,38 +64,46 @@ namespace Metalama.Framework.Engine.Advices
                     .ToReadOnlyList();
 
             var constructors =
-                (this.Reason & InitializationReason.TypeConstructing) != 0
+                ( (this.Reason & InitializationReason.TypeConstructing) != 0
                     ? new[] { containingType.StaticConstructor }
-                    : Array.Empty<IConstructor>()
+                    : Array.Empty<IConstructor>() )
                 .Concat(
                     containingType.Constructors
-                    .Where( x =>
-                        !x.IsStatic
-                        && this.Reason.HasFlag( InitializationReason.Constructing )
-                        && x.InitializerKind != ConstructorInitializerKind.This ) )
-                .Where(c => !(c.Parameters.Count == 0 && localConstructors.Any(cc => cc.Parameters.Count == 0 && c.IsStatic == cc.IsStatic) ) )
+                    .Where( c =>
+                        !c.IsStatic == ((this.Reason & InitializationReason.Constructing) != 0)
+                        && c.InitializerKind != ConstructorInitializerKind.This ) )
+                .Where( c => !(c.Parameters.Count == 0 && localConstructors.Any( cc => cc.Parameters.Count == 0 && c.IsStatic == cc.IsStatic )) )
                 .Concat( localConstructors );
 
             var transformations = new List<ITransformation>();
 
             foreach ( var ctor in constructors )
             {
-                if (ctor.IsStatic && ctor.GetSymbol() == null && ctor is not IConstructorBuilder )
+                IConstructor targetCtor;
+
+                if ( ctor.IsStatic && ctor.GetSymbol() == null && ctor is not IConstructorBuilder )
                 {
                     // Missing static ctor.
-                    transformations.Add( new ConstructorBuilder( this, ctor.DeclaringType ) { IsStatic = true } );
+                    var builder = new ConstructorBuilder( this, ctor.DeclaringType ) { IsStatic = true };
+                    transformations.Add( builder );
+                    targetCtor = builder;
                 }
-
-                if ( !ctor.IsStatic && ctor.GetSymbol() != null && ctor.GetSymbol()!.GetPrimaryDeclaration() == null)
+                else if ( !ctor.IsStatic && ctor.GetSymbol() != null && ctor.GetSymbol()!.GetPrimaryDeclaration() == null )
                 {
                     // Missing implicit ctor.
-                    transformations.Add( new ConstructorBuilder( this, ctor.DeclaringType ) );
+                    var builder = new ConstructorBuilder( this, ctor.DeclaringType );
+                    transformations.Add( builder );
+                    targetCtor = builder;
+                }
+                else
+                {
+                    targetCtor = ctor;
                 }
 
                 var initialization = new InitializationTransformation(
                     this,
                     this.TargetDeclaration,
-                    ctor,
+                    targetCtor,
                     this.Template,
                     this.Reason );
 

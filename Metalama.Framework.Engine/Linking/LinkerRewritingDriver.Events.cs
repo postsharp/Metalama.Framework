@@ -144,7 +144,7 @@ namespace Metalama.Framework.Engine.Linking
                             .WithOpenBraceToken( Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ) )
                             .WithCloseBraceToken( Token( closeBraceLeadingTrivia, SyntaxKind.CloseBraceToken, closeBraceTrailingTrivia ) )
                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
-                            .AddGeneratedCodeAnnotation() )
+                            .WithGeneratedCodeAnnotation() )
                     .WithSemicolonToken( default );
             }
         }
@@ -192,13 +192,13 @@ namespace Metalama.Framework.Engine.Linking
                 .NormalizeWhitespace()
                 .WithLeadingTrivia( ElasticLineFeed )
                 .WithTrailingTrivia( ElasticLineFeed, ElasticLineFeed )
-                .AddGeneratedCodeAnnotation();
+                .WithGeneratedCodeAnnotation();
 
         private static MemberDeclarationSyntax GetOriginalImplEvent( EventDeclarationSyntax @event, IEventSymbol symbol )
         {
             return GetSpecialImplEvent(
                 @event.Type,
-                @event.AccessorList.AssertNotNull().AddSourceCodeAnnotation(),
+                @event.AccessorList.AssertNotNull().WithSourceCodeAnnotation(),
                 symbol,
                 GetOriginalImplMemberName( symbol ) );
         }
@@ -224,7 +224,7 @@ namespace Metalama.Framework.Engine.Linking
                     .WithLeadingTrivia( ElasticLineFeed )
                     .WithTrailingTrivia( ElasticLineFeed )
                     .WithAccessorList( accessorList )
-                    .AddGeneratedCodeAnnotation();
+                    .WithGeneratedCodeAnnotation();
         }
     }
 }

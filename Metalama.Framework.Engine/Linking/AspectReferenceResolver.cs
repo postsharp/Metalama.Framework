@@ -184,8 +184,8 @@ namespace Metalama.Framework.Engine.Linking
                             expression,
                             referenceSpecification );
                     }
-                    else if ( targetMemberIntroduction.Introduction is IReplaceMember replaceMember
-                              && replaceMember.ReplacedMember.GetTarget( this._finalCompilationModel ).GetSymbol() != null )
+                    else if ( targetMemberIntroduction.Introduction is IReplaceMember { ReplacedMember: { } replacedMember }
+                              && replacedMember.GetTarget( this._finalCompilationModel ).GetSymbol() != null )
                     {
                         // Introduction replaced existing source member, resolve to default semantics, i.e. source symbol.
 
@@ -402,9 +402,9 @@ namespace Metalama.Framework.Engine.Linking
                 return null;
             }
 
-            if ( introducedMember.Introduction is IReplaceMember replaceMember )
+            if ( introducedMember.Introduction is IReplaceMember { ReplacedMember: { } replacedMemberRef } )
             {
-                var replacedMember = replaceMember.ReplacedMember.GetTarget( this._finalCompilationModel );
+                var replacedMember = replacedMemberRef.GetTarget( this._finalCompilationModel );
 
                 IDeclaration canonicalReplacedMember = replacedMember switch
                 {
@@ -541,7 +541,6 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         /// <param name="symbol">The hiding symbol.</param>
         /// <param name="hiddenSymbol">The hidden symbol.</param>
-        /// <param name="hiddenSymbol">Hidden symbol.</param>
         /// <returns>Hidden symbol or null.</returns>
         private bool TryGetHiddenSymbol( ISymbol symbol, [NotNullWhen( true )] out ISymbol? hiddenSymbol )
         {

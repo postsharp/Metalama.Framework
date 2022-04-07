@@ -19,6 +19,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.InstanceCo
         }
     }
 
+    // <target>
     [Aspect]
     public partial class TargetCode
     {
@@ -32,6 +33,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.InstanceCo
         }
     }
 
+    // <target>
     public partial class TargetCode
     {
         public TargetCode(int x)
@@ -39,6 +41,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.InstanceCo
         }
     }
 
+    // <target>
     public partial class TargetCode
     {
     }

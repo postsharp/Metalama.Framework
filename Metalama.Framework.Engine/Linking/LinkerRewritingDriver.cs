@@ -27,7 +27,6 @@ namespace Metalama.Framework.Engine.Linking
     {
         private readonly LinkerIntroductionRegistry _introductionRegistry;
         private readonly LinkerAnalysisRegistry _analysisRegistry;
-        private readonly LinkerCodeTransformationRegistry _codeTransformationRegistry;
         private readonly IServiceProvider _serviceProvider;
         private readonly Compilation _intermediateCompilation;
         private readonly UserDiagnosticSink _diagnosticSink;
@@ -36,13 +35,11 @@ namespace Metalama.Framework.Engine.Linking
             Compilation intermediateCompilation,
             LinkerIntroductionRegistry introductionRegistry,
             LinkerAnalysisRegistry analysisRegistry,
-            LinkerCodeTransformationRegistry codeTransformationRegistry,
             UserDiagnosticSink diagnosticSink,
             IServiceProvider serviceProvider )
         {
             this._introductionRegistry = introductionRegistry;
             this._analysisRegistry = analysisRegistry;
-            this._codeTransformationRegistry = codeTransformationRegistry;
             this._intermediateCompilation = intermediateCompilation;
             this._diagnosticSink = diagnosticSink;
             this._serviceProvider = serviceProvider;
@@ -97,7 +94,7 @@ namespace Metalama.Framework.Engine.Linking
             // Add the SourceCode annotation, if it is source code.
             if ( !(symbol.GetPrimarySyntaxReference() is { } primarySyntax && primarySyntax.GetSyntax().HasAnnotation( FormattingAnnotations.GeneratedCode )) )
             {
-                rewrittenBody = rewrittenBody.AddSourceCodeAnnotation();
+                rewrittenBody = rewrittenBody.WithSourceCodeAnnotation();
             }
 
             if ( triviaSource == null )
@@ -266,7 +263,7 @@ namespace Metalama.Framework.Engine.Linking
                                 Token( TriviaList( ElasticSpace ), SyntaxKind.EqualsToken, TriviaList( ElasticSpace ) ),
                                 expression ),
                             Token( SyntaxKind.SemicolonToken ).WithTrailingTrivia( ElasticLineFeed ) )
-                        .AddGeneratedCodeAnnotation();
+                        .WithGeneratedCodeAnnotation();
             }
 
             GotoStatementSyntax CreateGotoStatement()
@@ -278,7 +275,7 @@ namespace Metalama.Framework.Engine.Linking
                             default,
                             IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ),
                             Token( SyntaxKind.SemicolonToken ).WithTrailingTrivia( ElasticLineFeed ) )
-                        .AddGeneratedCodeAnnotation();
+                        .WithGeneratedCodeAnnotation();
             }
         }
 
@@ -472,8 +469,7 @@ namespace Metalama.Framework.Engine.Linking
         public bool IsRewriteTarget( ISymbol symbol )
         {
             if ( this._introductionRegistry.IsOverride( symbol )
-                 || this._introductionRegistry.IsOverrideTarget( symbol )
-                 || this._codeTransformationRegistry.HasCodeTransformations( symbol ) )
+                 || this._introductionRegistry.IsOverrideTarget( symbol ) )
             {
                 return true;
             }
@@ -493,9 +489,6 @@ namespace Metalama.Framework.Engine.Linking
         {
             switch ( symbol )
             {
-                case IMethodSymbol { MethodKind: MethodKind.Constructor or MethodKind.StaticConstructor } constructorSymbol:
-                    return this.RewriteConstructor( (ConstructorDeclarationSyntax) syntax, constructorSymbol, generationContext );
-
                 case IMethodSymbol methodSymbol:
                     return this.RewriteMethod( (MethodDeclarationSyntax) syntax, methodSymbol, generationContext );
 

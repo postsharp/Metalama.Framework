@@ -78,8 +78,8 @@ namespace Metalama.Framework.Engine.Linking
                         {
                             finalStatements.Add(
                                 LabeledStatement(
-                                    labeledStatement.Identifier.AddGeneratedCodeAnnotation(),
-                                    Token( SyntaxKind.ColonToken ).AddGeneratedCodeAnnotation(),
+                                    labeledStatement.Identifier.WithGeneratedCodeAnnotation(),
+                                    Token( SyntaxKind.ColonToken ).WithGeneratedCodeAnnotation(),
                                     newStatements[i + 1] ) );
 
                             i++;

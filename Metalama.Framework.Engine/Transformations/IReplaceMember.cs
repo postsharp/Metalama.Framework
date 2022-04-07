@@ -8,6 +8,6 @@ namespace Metalama.Framework.Engine.Transformations
 {
     internal interface IReplaceMember : IObservableTransformation
     {
-        MemberRef<IMemberOrNamedType> ReplacedMember { get; }
+        MemberRef<IMemberOrNamedType>? ReplacedMember { get; }
     }
 }

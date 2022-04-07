@@ -5,6 +5,8 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.MetaModel;
@@ -19,7 +21,6 @@ namespace Metalama.Framework.Engine.Transformations
     {
         private readonly IConstructor _targetConstructor;
         private readonly TemplateMember<IMethod> _template;
-        private readonly InitializationReason _reason;
 
         public Advice Advice { get; }
 
@@ -27,7 +28,7 @@ namespace Metalama.Framework.Engine.Transformations
 
         public SyntaxTree TargetSyntaxTree => this._targetConstructor.GetPrimaryDeclaration()?.SyntaxTree ?? this._targetConstructor.DeclaringType.GetPrimaryDeclaration().AssertNotNull().SyntaxTree;
 
-        public IMethodBase TargetDeclaration => throw new NotImplementedException();
+        public IMethodBase TargetDeclaration => this._targetConstructor;
 
         public InitializationTransformation(
             Advice advice,
@@ -39,7 +40,6 @@ namespace Metalama.Framework.Engine.Transformations
             this.ContextDeclaration = initializedDeclaration;
             this._targetConstructor = targetConstructor;
             this._template = template;
-            this._reason = reason;
             this.Advice = advice;
         }
 
@@ -76,7 +76,11 @@ namespace Metalama.Framework.Engine.Transformations
                 return default;
             }
 
-            return new InsertedStatement( InsertedStatementPosition.Beginning, expandedBody );
+            return new InsertedStatement( 
+                InsertedStatementPosition.Beginning, 
+                expandedBody
+                .WithGeneratedCodeAnnotation()
+                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ) );
         }
     }
 }

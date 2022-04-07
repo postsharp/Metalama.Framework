@@ -81,9 +81,7 @@ namespace Metalama.Framework.Engine.Pipeline
                             introductionNameProvider,
                             lexicalScopeFactory,
                             syntaxGenerationContext,
-                            serviceProvider,
-                            null,
-                            ImmutableDictionary<IHierarchicalTransformation, TransformationInitializationResult?>.Empty );
+                            serviceProvider );
 
                         var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext )
                             .Select( m => m.Syntax.NormalizeWhitespace() )

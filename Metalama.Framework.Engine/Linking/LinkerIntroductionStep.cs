@@ -100,19 +100,25 @@ namespace Metalama.Framework.Engine.Linking
 
             ProcessReplaceTransformations( input, allTransformations, syntaxTransformationCollection, out var replacedTransformations );
 
-            ProcessInsertStatementTransformations(
-                input,
-                syntaxTransformationCollection,
-                out var memberIntroductionInsertStatements,
-                out var syntaxNodeInsertStatements );
+            var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
+
 
             this.ProcessIntroduceTransformations(
                 input,
                 allTransformations,
                 diagnostics,
+                lexicalScopeFactory,
                 nameProvider,
                 syntaxTransformationCollection,
                 replacedTransformations );
+
+            this.ProcessInsertStatementTransformations(
+                input,
+                diagnostics,
+                lexicalScopeFactory,
+                allTransformations,
+                out var syntaxNodeInsertStatements,
+                out var memberIntroductionInsertStatements );
 
             // Group diagnostic suppressions by target.
             var suppressionsByTarget = input.DiagnosticSuppressions.ToMultiValueDictionary(
@@ -124,8 +130,8 @@ namespace Metalama.Framework.Engine.Linking
                 suppressionsByTarget,
                 input.CompilationModel,
                 input.OrderedAspectLayers,
-                markedNodes,
-                typesWithRequiredImplicitConstructors );
+                syntaxNodeInsertStatements,
+                memberIntroductionInsertStatements );
 
             var syntaxTreeMapping = new Dictionary<SyntaxTree, SyntaxTree>();
 
@@ -145,10 +151,6 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            var codeTransformationRegistry = new LinkerCodeTransformationRegistry(
-                input.CompilationModel,
-                markedNodes.ToDictionary( x => x.Value.Id, x => x.Value.Marks ) );
-
             intermediateCompilation = intermediateCompilation.Update(
                 syntaxTreeMapping.Select( p => new SyntaxTreeModification( p.Value, p.Key ) ).ToList(),
                 Array.Empty<SyntaxTree>() );
@@ -166,7 +168,6 @@ namespace Metalama.Framework.Engine.Linking
                 input.CompilationModel,
                 intermediateCompilation,
                 introductionRegistry,
-                codeTransformationRegistry,
                 input.OrderedAspectLayers,
                 projectOptions );
         }
@@ -181,7 +182,12 @@ namespace Metalama.Framework.Engine.Linking
 
             foreach ( var transformation in allTransformations.OfType<IReplaceMember>() )
             {
-                var replacedMember = transformation.ReplacedMember.GetTarget( input.CompilationModel );
+                if ( transformation.ReplacedMember == null )
+                {
+                    continue;
+                }
+
+                var replacedMember = transformation.ReplacedMember.Value.GetTarget( input.CompilationModel );
 
                 IDeclaration canonicalReplacedMember = replacedMember switch
                 {
@@ -205,6 +211,10 @@ namespace Metalama.Framework.Engine.Linking
 
                         break;
 
+                    case Constructor replacedConstructor:
+                        Invariant.Assert( replacedConstructor.Symbol.GetPrimarySyntaxReference() == null );
+                        break;
+
                     case ISyntaxTreeTransformation replacedTransformation:
                         replacedTransformations.Add( replacedTransformation );
 
@@ -220,12 +230,11 @@ namespace Metalama.Framework.Engine.Linking
             AspectLinkerInput input,
             List<ITransformation> allTransformations,
             UserDiagnosticSink diagnostics,
+            LexicalScopeFactory lexicalScopeFactory,
             LinkerIntroductionNameProvider nameProvider,
             SyntaxTransformationCollection syntaxTransformationCollection,
             HashSet<ISyntaxTreeTransformation> replacedTransformations )
         {
-            var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
-
             // Visit all transformations, respect aspect part ordering.
             foreach ( var transformation in allTransformations )
             {
@@ -300,46 +309,88 @@ namespace Metalama.Framework.Engine.Linking
 
         private void ProcessInsertStatementTransformations(
             AspectLinkerInput input,
+            UserDiagnosticSink diagnostics, 
+            LexicalScopeFactory lexicalScopeFactory,
             List<ITransformation> allTransformations,
-            out IReadOnlyList<LinkerInsertedStatement> insertedStatements,
-            out Dictionary<ISymbol, IReadOnlyList<LinkerInsertedStatement>> symbolInsertedStatements,
+            out Dictionary<SyntaxNode, IReadOnlyList<LinkerInsertedStatement>> symbolInsertedStatements,
             out Dictionary<IMemberIntroduction, IReadOnlyList<LinkerInsertedStatement>> introductionInsertedStatements )
         {
-            symbolInsertedStatements = new Dictionary<ISymbol, IReadOnlyList<LinkerInsertedStatement>>();
+            symbolInsertedStatements = new Dictionary<SyntaxNode, IReadOnlyList<LinkerInsertedStatement>>();
             introductionInsertedStatements = new Dictionary<IMemberIntroduction, IReadOnlyList<LinkerInsertedStatement>>();
 
             foreach ( var insertStatementTransformation in allTransformations.OfType<IInsertStatementTransformation>() )
             {
-                var positionInSyntaxTree = GetSyntaxTreePosition( memberIntroduction.InsertPosition );
-
-                var syntaxGenerationContext = SyntaxGenerationContext.Create(
-                    this._serviceProvider,
-                    input.InitialCompilation.Compilation,
-                    memberIntroduction.TargetSyntaxTree,
-                    positionInSyntaxTree );
-
-                var context = new InsertStatementTransformationContext(
-                    diagnosticSunk,
-                    lexicalScopeProvider,
-                    syntaxGenerationContext,
-                    serviceProvider)
-                insertStatementTransformation.GetInsertedStatement( )
-
-                switch ( insertStatementTransformation.TargetDeclaration )
+                // TODO: Supports only constructors without overrides.
+                //       Needs to be generalized for anything else (take into account overrides).
+                switch (insertStatementTransformation.TargetDeclaration)
                 {
-                    case Declaration sourceDeclaration:
-                        var symbol = sourceDeclaration.Symbol;
-
-                        if ( !symbolInsertedStatements.TryGetValue( symbol, out var list ) )
+                    case Constructor constructor:
                         {
-                            symbolInsertedStatements[symbol] = list = new List<LinkerInsertedStatement>();
+                            var primaryDeclaration = constructor.GetPrimaryDeclaration().AssertNotNull();
+
+                            var syntaxGenerationContext = SyntaxGenerationContext.Create(
+                                this._serviceProvider,
+                                input.InitialCompilation.Compilation,
+                                primaryDeclaration );
+
+                            var insertedStatement = GetInsertedStatement( syntaxGenerationContext );
+
+                            if ( insertedStatement != null )
+                            {
+                                var syntaxNode = constructor.GetPrimaryDeclaration().AssertNotNull();
+
+                                if ( !symbolInsertedStatements.TryGetValue( syntaxNode, out var list ) )
+                                {
+                                    symbolInsertedStatements[syntaxNode] = list = new List<LinkerInsertedStatement>();
+                                }
+
+                                ((List<LinkerInsertedStatement>) list).Add(
+                                    new LinkerInsertedStatement( insertStatementTransformation, primaryDeclaration, insertedStatement.Value.Position, insertedStatement.Value.Statement ) );
+                            }
+
+                            break;
                         }
 
-                        ((List<LinkerInsertedStatement>) list).Add(  );
+                    case ConstructorBuilder constructorBuilder:
+                        {
+                            var positionInSyntaxTree = GetSyntaxTreePosition( constructorBuilder.InsertPosition );
 
-                        break;
+                            var syntaxGenerationContext = SyntaxGenerationContext.Create(
+                                this._serviceProvider,
+                                input.InitialCompilation.Compilation,
+                                constructorBuilder.PrimarySyntaxTree.AssertNotNull(),
+                                positionInSyntaxTree );
+
+                            var insertedStatement = GetInsertedStatement( syntaxGenerationContext );
+
+                            if ( insertedStatement != null )
+                            {
+                                if ( !introductionInsertedStatements.TryGetValue( constructorBuilder, out var list ) )
+                                {
+                                    introductionInsertedStatements[constructorBuilder] = list = new List<LinkerInsertedStatement>();
+                                }
+
+                                ((List<LinkerInsertedStatement>) list).Add(
+                                    new LinkerInsertedStatement( insertStatementTransformation, constructorBuilder, insertedStatement.Value.Position, insertedStatement.Value.Statement ) );
+                            }
+
+                            break;
+                        }
+
+                    default:
+                        throw new AssertionFailedException();
                 }
-                
+
+                InsertedStatement? GetInsertedStatement(SyntaxGenerationContext syntaxGenerationContext)
+                {
+                    var context = new InsertStatementTransformationContext(
+                        diagnostics,
+                        lexicalScopeFactory,
+                        syntaxGenerationContext,
+                        this._serviceProvider );
+
+                    return insertStatementTransformation.GetInsertedStatement( context );
+                }         
             }
         }
 

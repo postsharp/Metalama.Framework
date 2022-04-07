@@ -1,18 +1,12 @@
-    [Aspect]
-    public class TargetCode
-    {
-        public TargetCode()
-        {
-    this.Constructing_Aspect();
-        }
-
-        private int Method(int a)
-        {
-            return a;
-        }
-
-
-private void Constructing_Aspect()
+[Aspect]
+public class TargetCode
 {
-    global::System.Console.WriteLine($"TargetCode {this}: Aspect");
-}    }
+    public TargetCode()
+    {
+        global::System.Console.WriteLine($"TargetCode {this}: Aspect");
+    }
+    private int Method(int a)
+    {
+        return a;
+    }
+}

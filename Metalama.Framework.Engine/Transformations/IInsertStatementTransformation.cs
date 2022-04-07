@@ -27,5 +27,8 @@ namespace Metalama.Framework.Engine.Transformations
         /// <param name="context"></param>
         /// <returns>Inserted statement or <c>null</c> if an error has occured.</returns>
         InsertedStatement? GetInsertedStatement( InsertStatementTransformationContext context );
+
+        // TODO: There is currently no notion of order of inserted statements, they are just inserted in transformation order.
+        //       This is fine for initialization, whcih is currently the only use case.
     }
 }

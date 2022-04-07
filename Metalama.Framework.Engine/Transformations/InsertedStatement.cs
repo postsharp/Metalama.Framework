@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Code;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Transformations
@@ -18,12 +19,18 @@ namespace Metalama.Framework.Engine.Transformations
         /// <summary>
         /// Gets the operand syntax.
         /// </summary>
-        public StatementSyntax? Statement { get; }
+        public StatementSyntax Statement { get; }
 
-        public InsertedStatement( InsertedStatementPosition position, StatementSyntax newNode )
+        /// <summary>
+        /// Gets the declaration to which the statement relates to. Statements are first ordered by hierarchy and then by aspect order.
+        /// </summary>
+        public IDeclaration ContextDeclaration { get; }
+
+        public InsertedStatement( InsertedStatementPosition position, StatementSyntax newNode, IDeclaration contextDeclaration )
         {
             this.Position = position;
             this.Statement = newNode;
+            this.ContextDeclaration = contextDeclaration;
         }
     }
 }

@@ -1,17 +1,14 @@
-    [Aspect]
-    public class TargetCode
+[Aspect]
+public class TargetCode
+{
+    private int Method(int a)
     {
-static TargetCode()
-{
-    TypeConstructing_Aspect();
+        return a;
+    }
+
+
+    static TargetCode()
+    {
+        global::System.Console.WriteLine($"TargetCode: Aspect");
+    }
 }
-        private int Method( int a )
-        {
-            return a;
-        }
-
-
-private static void TypeConstructing_Aspect()
-{
-    global::System.Console.WriteLine($"TargetCode: Aspect");
-}    }

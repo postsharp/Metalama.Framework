@@ -38,14 +38,14 @@ namespace Metalama.Framework.Engine.Formatting
         }
 
         [return: NotNullIfNotNull( "node" )]
-        private static T? AddAnnotationInsideBlock<T>( this T? node, SyntaxAnnotation annotation, bool addToBrackets = false )
+        private static T? WithAnnotationInsideBlock<T>( this T? node, SyntaxAnnotation annotation, bool addToBrackets = false )
             where T : SyntaxNode
         {
             switch ( node )
             {
                 case BlockSyntax block:
                     var annotatedBlock = (T) (object) block.WithStatements(
-                        SyntaxFactory.List( block.Statements.Select( s => s.AddAnnotationInsideBlock( annotation, true ) ) ) );
+                        SyntaxFactory.List( block.Statements.Select( s => s.WithAnnotationInsideBlock( annotation, true ) ) ) );
 
                     if ( addToBrackets )
                     {
@@ -59,32 +59,39 @@ namespace Metalama.Framework.Engine.Formatting
             }
         }
 
-        public static SyntaxToken AddGeneratedCodeAnnotation( this SyntaxToken node ) => node.WithAdditionalAnnotations( GeneratedCode );
+        public static SyntaxToken WithGeneratedCodeAnnotation( this SyntaxToken node ) => node.WithAdditionalAnnotations( GeneratedCode );
 
         [return: NotNullIfNotNull( "node" )]
-        public static T? AddGeneratedCodeAnnotation<T>( this T? node )
+        public static T? WithGeneratedCodeAnnotation<T>( this T? node )
             where T : SyntaxNode
-            => node?.AddAnnotationInsideBlock( GeneratedCode );
+            => node?.WithAnnotationInsideBlock( GeneratedCode );
 
-        public static SyntaxTrivia AddGeneratedCodeAnnotation( this SyntaxTrivia node ) => node.WithAdditionalAnnotations( GeneratedCode );
+        public static SyntaxTrivia WithGeneratedCodeAnnotation( this SyntaxTrivia node ) => node.WithAdditionalAnnotations( GeneratedCode );
 
         [return: NotNullIfNotNull( "node" )]
-        public static T? AddSourceCodeAnnotation<T>( this T? node )
+        public static T? WithSourceCodeAnnotation<T>( this T? node )
             where T : SyntaxNode
-            => node?.AddAnnotationInsideBlock( SourceCode );
+            => node?.WithAnnotationInsideBlock( SourceCode );
 
-        public static SyntaxTrivia AddSourceCodeAnnotation( this SyntaxTrivia node ) => node.WithAdditionalAnnotations( SourceCode );
+        public static SyntaxTrivia WithSourceCodeAnnotation( this SyntaxTrivia node ) => node.WithAdditionalAnnotations( SourceCode );
+
+        [return: NotNullIfNotNull( "node" )]
+        public static T? WithSourceCodeAnnotationIfNotGenerated<T>( this T node )
+            where T : SyntaxNode
+            => !node.HasAnnotation( GeneratedCode )
+            ? node.WithSourceCodeAnnotation()
+            : node;
 
         public static T WithFormattingAnnotationsFrom<T>( this T node, SyntaxNode source )
             where T : SyntaxNode
         {
             if ( source.HasAnnotation( SourceCode ) )
             {
-                return node.AddSourceCodeAnnotation();
+                return node.WithSourceCodeAnnotation();
             }
             else if ( source.HasAnnotation( GeneratedCode ) )
             {
-                return node.AddGeneratedCodeAnnotation();
+                return node.WithGeneratedCodeAnnotation();
             }
             else
             {

@@ -6,6 +6,8 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.CodeModel.Collections;
+using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
@@ -13,12 +15,13 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class ConstructorBuilder : MemberBuilder, IConstructorBuilder, IConstructorImpl
+    internal class ConstructorBuilder : MemberBuilder, IConstructorBuilder, IConstructorImpl, IReplaceMember
     {
         public ConstructorInitializerKind InitializerKind => ConstructorInitializerKind.Undetermined;
 
@@ -46,11 +49,18 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 InsertPositionRelation.Within,
                 (MemberDeclarationSyntax) ((NamedType) this.DeclaringType).Symbol.GetPrimaryDeclaration().AssertNotNull() );
 
-        public override DeclarationKind DeclarationKind => throw new NotImplementedException();
+        public override DeclarationKind DeclarationKind => DeclarationKind.Constructor;
+
+        public MemberRef<IMemberOrNamedType>? ReplacedMember { get; }
 
         public ConstructorBuilder( Advice parentAdvice, INamedType targetType )
             : base( parentAdvice, targetType )
         {
+            if ( targetType.Constructors.Any( c => c.GetSymbol().AssertNotNull().GetPrimarySyntaxReference() == null ) )
+            {
+                Invariant.Assert(targetType.Constructors.Count == 1);
+                this.ReplacedMember = targetType.Constructors.Single().ToMemberRef<IMemberOrNamedType>();
+            }
         }
 
         public IParameterBuilder AddParameter( string name, IType type, Code.RefKind refKind = Code.RefKind.None, Code.TypedConstant defaultValue = default )
@@ -74,10 +84,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                         ((TypeDeclarationSyntax) this.DeclaringType.GetPrimaryDeclaration().AssertNotNull()).Identifier,
                         ParameterList(),
                         null,
-                        Block(),
-                        null )
-                    .NormalizeWhitespace()
-                    .WithTrailingTrivia( ElasticLineFeed );
+                        Block().WithGeneratedCodeAnnotation(),
+                        null );
 
                 return new[]
                 {
@@ -93,10 +101,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                         ((TypeDeclarationSyntax) this.DeclaringType.GetPrimaryDeclaration().AssertNotNull()).Identifier,
                         ParameterList(),
                         null,
-                        Block(),
-                        null )
-                    .NormalizeWhitespace()
-                    .WithTrailingTrivia( ElasticLineFeed );
+                        Block().WithGeneratedCodeAnnotation(),
+                        null );
 
                 return new[]
                 {
