@@ -10,46 +10,30 @@ using System.Linq.Expressions;
 namespace Metalama.Framework.Aspects
 {
     /// <summary>
-    /// Represents a set of declarations and offers the ability to add aspects, annotations or validators to them.
+    /// Represents a set of declarations and offers the ability to add aspects, annotations to them. It inherits from <see cref="IValidatorReceiver{TDeclaration}"/>,
+    /// which allows to add validators.
     /// </summary>
-    /// <typeparam name="TDeclaration"></typeparam>
     [InternalImplement]
     [CompileTime]
-    public interface IDeclarationSelection<out TDeclaration>
+    public interface IAspectReceiver<out TDeclaration> : IValidatorReceiver<TDeclaration>
         where TDeclaration : class, IDeclaration
     {
         /// <summary>
-        /// Registers a method that will be invoked to validate references to any declaration in the current set. This method
-        /// must have a parameter of type <c>in</c> <see cref="ReferenceValidationContext"/>. Only source code references
-        /// are validated. References added by aspects are ignored by design.
-        /// </summary>
-        /// <param name="validateMethod"></param>
-        /// <param name="referenceKinds">Kinds of references that this method is interested to analyze.</param>
-        void RegisterReferenceValidator( ValidatorDelegate<ReferenceValidationContext> validateMethod, ReferenceKinds referenceKinds );
-
-        /// <summary>
-        /// Registers a method that will be invoked to validate the final state (i.e. the state including the transformation by all aspects) of any declaration
-        /// in the current set. This method must have a parameter of type <c>in</c> <see cref="DeclarationValidationContext"/>.  
-        /// </summary>
-        /// <param name="validateMethod"></param>
-        void RegisterFinalValidator( ValidatorDelegate<DeclarationValidationContext> validateMethod );
-
-        /// <summary>
         /// Adds an aspect to the current set of declarations. This overload allows adding inherited aspects.
         /// </summary>
-        IDeclarationSelection<TDeclaration> AddAspect<TAspect>( Func<TDeclaration, Expression<Func<TAspect>>> createAspect )
+        void AddAspect<TAspect>( Func<TDeclaration, Expression<Func<TAspect>>> createAspect )
             where TAspect : Attribute, IAspect<TDeclaration>;
 
         /// <summary>
         /// Adds an aspect to the current set of declarations. This overload does not allow adding inherited aspects.
         /// </summary>
-        IDeclarationSelection<TDeclaration> AddAspect<TAspect>( Func<TDeclaration, TAspect> createAspect )
+        void AddAspect<TAspect>( Func<TDeclaration, TAspect> createAspect )
             where TAspect : Attribute, IAspect<TDeclaration>;
 
         /// <summary>
         /// Adds an aspect to the current set of declarations using the default constructor of the aspect type.
         /// </summary>
-        IDeclarationSelection<TDeclaration> AddAspect<TAspect>()
+        void AddAspect<TAspect>()
             where TAspect : Attribute, IAspect<TDeclaration>, new();
 
         /// <summary>
@@ -64,7 +48,7 @@ namespace Metalama.Framework.Aspects
         /// <typeparam name="TTarget">Type of the target declaration.</typeparam>
         /// <typeparam name="TAspect">Type of the aspect. The type must be ordered after the aspect type calling this method.</typeparam>
         [Obsolete( "Not implemented." )]
-        IDeclarationSelection<TDeclaration> RequireAspect<TTarget, TAspect>( TTarget target )
+        void RequireAspect<TTarget, TAspect>( TTarget target )
             where TTarget : class, IDeclaration
             where TAspect : IAspect<TTarget>, new();
 
@@ -75,7 +59,7 @@ namespace Metalama.Framework.Aspects
         /// <typeparam name="TAspect">The type of the aspect for which the annotation is meant.</typeparam>
         /// <typeparam name="TAnnotation">The type of the annotation.</typeparam>
         [Obsolete( "Not implemented." )]
-        IDeclarationSelection<TDeclaration> AddAnnotation<TAspect, TAnnotation>( Func<TDeclaration, TAnnotation> getAnnotation )
+        void AddAnnotation<TAspect, TAnnotation>( Func<TDeclaration, TAnnotation> getAnnotation )
             where TAspect : IAspect
             where TAnnotation : IAnnotation<TDeclaration, TAspect>, IEligible<TDeclaration>;
     }

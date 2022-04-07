@@ -28,7 +28,8 @@ public interface IDiagnostic
     object? Arguments { get; }
 
     /// <summary>
-    /// Adds a set of code fixes to the current instance, and returns the current augmented instance.
+    /// Adds a set of code fixes to the current instance, and returns the current augmented instance. To create a one-step
+    /// code fix, use the <see cref="CodeFixFactory"/> class.
     /// </summary>
     IDiagnostic WithCodeFixes( params CodeFix[] codeFixes );
 }

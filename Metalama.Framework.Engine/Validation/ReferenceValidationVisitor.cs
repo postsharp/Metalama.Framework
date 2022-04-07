@@ -369,7 +369,7 @@ public class ReferenceValidationVisitor : CSharpSyntaxWalker, IDisposable
         {
             if ( (validator.ReferenceKinds & referenceKinds) != 0 )
             {
-                this._userCodeExecutionContext.InvokedMember = UserCodeMemberInfo.FromMemberInfo( validator.Driver.ValidateMethod );
+                this._userCodeExecutionContext.InvokedMember = validator.Driver.UserCodeMemberInfo;
                 validator.Validate( currentDeclaration, node, referenceKinds, this._diagnosticAdder, this._userCodeInvoker, null );
             }
         }

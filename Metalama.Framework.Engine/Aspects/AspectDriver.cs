@@ -201,12 +201,29 @@ namespace Metalama.Framework.Engine.Aspects
                             ImmutableArray<IAspectSource>.Empty,
                             ImmutableArray<IValidatorSource>.Empty );
                 }
-
+                
                 var aspectResult = aspectBuilder.ToResult();
 
                 if ( !aspectResult.Success )
                 {
                     aspectInstance.Skip();
+                }
+                else
+                {
+                    // Validators on the current version of the compilation must be executed now.
+
+                    if ( !aspectResult.ValidatorSources.IsDefaultOrEmpty )
+                    {
+                        diagnosticSink.Reset();
+
+                        var validationRunner = new ValidationRunner( pipelineConfiguration, aspectResult.ValidatorSources, CancellationToken.None );
+                        validationRunner.RunDeclarationValidators( compilationModelRevision, CompilationModelVersion.Current, diagnosticSink );
+
+                        if ( !diagnosticSink.IsEmpty )
+                        {
+                            aspectResult = aspectResult.WithAdditionalDiagnostics( diagnosticSink.ToImmutable() );
+                        }
+                    }
                 }
 
                 return aspectResult;

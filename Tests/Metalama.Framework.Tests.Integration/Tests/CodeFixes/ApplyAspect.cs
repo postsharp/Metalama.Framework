@@ -1,3 +1,6 @@
+// Do not remove!
+// @ApplyCodeFix
+
 using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -33,6 +36,7 @@ namespace Metalama.Framework.Tests.Integration.CodeFixes.ApplyAspect
 
     internal class MyAttribute : Attribute { }
 
+    // <target>
     internal class TargetCode
     {
         [Aspect1]

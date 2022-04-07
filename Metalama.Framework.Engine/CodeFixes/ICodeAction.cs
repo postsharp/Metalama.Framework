@@ -11,5 +11,5 @@ namespace Metalama.Framework.Engine.CodeFixes;
 /// </summary>
 internal interface ICodeAction
 {
-    Task<bool> ExecuteAsync( CodeActionContext context );
+    Task ExecuteAsync( CodeActionContext context );
 }

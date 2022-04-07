@@ -90,7 +90,7 @@ namespace Metalama.Framework.Engine.Fabrics
             // If that happens, we sort by name of the fabric class. They are guaranteed to have the same parent type or
             // namespace, so the symbol name is sufficient.
 
-            return string.Compare( this.FabricSymbol.Name, other.FabricSymbol.Name, StringComparison.Ordinal );
+            return string.Compare( this.FabricSymbol.GetReflectionName(), other.FabricSymbol.GetReflectionName(), StringComparison.Ordinal );
         }
 
         public abstract FormattableString FormatPredecessor();

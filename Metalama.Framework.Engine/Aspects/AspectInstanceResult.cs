@@ -5,7 +5,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Validation;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Aspects
@@ -20,7 +19,7 @@ namespace Metalama.Framework.Engine.Aspects
 
         public ImmutableArray<Advice> Advices { get; }
 
-        public IReadOnlyList<IAspectSource> AspectSources { get; }
+        public ImmutableArray<IAspectSource> AspectSources { get; }
 
         public ImmutableArray<IValidatorSource> ValidatorSources { get; }
 
@@ -39,5 +38,8 @@ namespace Metalama.Framework.Engine.Aspects
             this.AspectSources = aspectSources;
             this.ValidatorSources = validatorSources;
         }
+
+        public AspectInstanceResult WithAdditionalDiagnostics( ImmutableUserDiagnosticList diagnostics )
+            => new( this.AspectInstance, this.Success, this.Diagnostics.Concat( diagnostics ), this.Advices, this.AspectSources, this.ValidatorSources );
     }
 }

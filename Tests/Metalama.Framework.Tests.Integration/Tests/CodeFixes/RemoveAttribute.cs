@@ -1,3 +1,6 @@
+// Do not remove!
+// @ApplyCodeFix
+
 using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -22,29 +25,33 @@ namespace Metalama.Framework.Tests.Integration.CodeFixes.RemoveAttribute
 
     internal class YourAttribute : Attribute { }
 
-    internal partial class TargetCode
+// <target>
+    internal class T
     {
-        [Aspect]
-        [My]
-        private int Method1( int a )
+        internal partial class TargetCode
         {
-            return a;
+            [Aspect]
+            [My]
+            private int Method1( int a )
+            {
+                return a;
+            }
+
+            [My]
+            private int Method2( int a )
+            {
+                return a;
+            }
         }
 
-        [My]
-        private int Method2( int a )
+        internal partial class TargetCode
         {
-            return a;
-        }
-    }
-
-    internal partial class TargetCode
-    {
-        [My]
-        [Your]
-        private int Method3( int a )
-        {
-            return a;
+            [My]
+            [Your]
+            private int Method3( int a )
+            {
+                return a;
+            }
         }
     }
 }

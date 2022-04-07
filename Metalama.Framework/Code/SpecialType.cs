@@ -19,7 +19,7 @@ namespace Metalama.Framework.Code
         None,
 
         /// <summary>
-        /// <see cref="void" />.
+        /// <see cref="System.Void" />.
         /// </summary>
         Void,
 

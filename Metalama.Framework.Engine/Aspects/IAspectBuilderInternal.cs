@@ -5,7 +5,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Engine.Validation;
 
 namespace Metalama.Framework.Engine.Aspects
 {
@@ -14,12 +13,8 @@ namespace Metalama.Framework.Engine.Aspects
     /// exists because the only implementation <see cref="AspectBuilder{T}"/> is generic, and some parts of the
     /// code need a common, non-generic interface.
     /// </summary>
-    internal interface IAspectBuilderInternal : IAspectBuilder
+    internal interface IAspectBuilderInternal : IAspectBuilder, IAspectOrValidatorSourceCollector
     {
-        void AddAspectSource( IAspectSource aspectSource );
-
-        void AddValidatorSource( IValidatorSource validatorSource );
-
         AdviceFactory AdviceFactory { get; }
 
         DisposeAction WithPredecessor( in AspectPredecessor predecessor );

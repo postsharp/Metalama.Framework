@@ -69,10 +69,9 @@ namespace Metalama.Framework.Engine.Fabrics
 
             public IAdviceFactory Advices { get; }
 
-            protected override void AddAspectSource( IAspectSource aspectSource ) => this._aspectBuilder.AddAspectSource( aspectSource );
+            public override void AddAspectSource( IAspectSource aspectSource ) => this._aspectBuilder.AddAspectSource( aspectSource );
 
-            protected override void AddValidatorSource( ProgrammaticValidatorSource validatorSource )
-                => this._aspectBuilder.AddValidatorSource( validatorSource );
+            public override void AddValidatorSource( IValidatorSource validatorSource ) => this._aspectBuilder.AddValidatorSource( validatorSource );
         }
     }
 }
