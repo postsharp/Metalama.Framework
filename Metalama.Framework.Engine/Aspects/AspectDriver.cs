@@ -223,7 +223,6 @@ namespace Metalama.Framework.Engine.Aspects
                         {
                             aspectResult = aspectResult.WithAdditionalDiagnostics( diagnosticSink.ToImmutable() );
                         }
-                        
                     }
                 }
 

@@ -17,14 +17,14 @@ internal class AspectTargetSelector<T> : IAspectTargetSelector<T>
 {
     private readonly CompilationModelVersion _version;
     private readonly Ref<T> _targetDeclaration;
-    private readonly ICompilationSelectorParent _parent;
+    private readonly IAspectReceiverParent _parent;
 
-    public AspectTargetSelector( Ref<T> targetDeclaration, ICompilationSelectorParent parent ) : this(
+    public AspectTargetSelector( Ref<T> targetDeclaration, IAspectReceiverParent parent ) : this(
         CompilationModelVersion.Current,
         targetDeclaration,
         parent ) { }
 
-    internal AspectTargetSelector( CompilationModelVersion version, Ref<T> targetDeclaration, ICompilationSelectorParent parent )
+    internal AspectTargetSelector( CompilationModelVersion version, Ref<T> targetDeclaration, IAspectReceiverParent parent )
     {
         this._version = version;
         this._targetDeclaration = targetDeclaration;
@@ -36,7 +36,7 @@ internal class AspectTargetSelector<T> : IAspectTargetSelector<T>
     {
         var executionContext = UserCodeExecutionContext.Current;
 
-        return new CompilationSelection<TMember>(
+        return new AspectReceiver<TMember>(
             this._targetDeclaration,
             this._parent,
             this._version,
@@ -63,7 +63,7 @@ internal class AspectTargetSelector<T> : IAspectTargetSelector<T>
     IValidatorReceiver<TMember> IValidatorTargetSelector<T>.WithTargetMembers<TMember>( Func<T, IEnumerable<TMember>> selector )
         => this.WithTargetMembers( selector );
 
-    public IAspectReceiver<T> WithTarget() => this.WithTargetMembers<T>( x => new[] { x } );
+    public IAspectReceiver<T> WithTarget() => this.WithTargetMembers( x => new[] { x } );
 
     public IValidatorTargetSelector<T> AfterAllAspects()
         => this._version == CompilationModelVersion.Final

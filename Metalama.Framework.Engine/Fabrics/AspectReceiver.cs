@@ -28,17 +28,17 @@ namespace Metalama.Framework.Engine.Fabrics
     /// API to programmatically add children aspects.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    internal class CompilationSelection<T> : IAspectReceiver<T>
+    internal class AspectReceiver<T> : IAspectReceiver<T>
         where T : class, IDeclaration
     {
         private readonly ISdkRef<IDeclaration> _containingDeclaration;
-        private readonly ICompilationSelectorParent _parent;
+        private readonly IAspectReceiverParent _parent;
         private readonly CompilationModelVersion _compilationModelVersion;
         private readonly Func<CompilationModel, IDiagnosticAdder, IEnumerable<T>> _selector;
 
-        public CompilationSelection(
+        public AspectReceiver(
             ISdkRef<IDeclaration> containingDeclaration,
-            ICompilationSelectorParent parent,
+            IAspectReceiverParent parent,
             CompilationModelVersion compilationModelVersion,
             Func<CompilationModel, IDiagnosticAdder, IEnumerable<T>> selectTargets )
         {

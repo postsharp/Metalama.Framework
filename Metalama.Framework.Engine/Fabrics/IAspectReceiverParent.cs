@@ -10,7 +10,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Fabrics;
 
-internal interface ICompilationSelectorParent : IValidatorDriverFactory, IAspectOrValidatorSourceCollector
+internal interface IAspectReceiverParent : IValidatorDriverFactory, IAspectOrValidatorSourceCollector
 {
     IServiceProvider ServiceProvider { get; }
 

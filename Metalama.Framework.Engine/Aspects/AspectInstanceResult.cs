@@ -5,7 +5,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Validation;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Aspects

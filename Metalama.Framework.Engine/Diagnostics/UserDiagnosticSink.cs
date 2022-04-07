@@ -72,6 +72,7 @@ namespace Metalama.Framework.Engine.Diagnostics
         }
 
         public int ErrorCount { get; private set; }
+
         public int Revision { get; private set; }
 
         public void Report( Diagnostic diagnostic )

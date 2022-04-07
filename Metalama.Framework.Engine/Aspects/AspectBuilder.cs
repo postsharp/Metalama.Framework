@@ -21,7 +21,7 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.Aspects
 {
-    internal class AspectBuilder<T> : IAspectBuilder<T>, IAspectBuilderInternal, ICompilationSelectorParent
+    internal class AspectBuilder<T> : IAspectBuilder<T>, IAspectBuilderInternal, IAspectReceiverParent
         where T : class, IDeclaration
     {
         private readonly UserDiagnosticSink _diagnosticSink;
@@ -139,13 +139,13 @@ namespace Metalama.Framework.Engine.Aspects
 
         public AspectPredecessor AspectPredecessor { get; private set; }
 
-        Type ICompilationSelectorParent.Type => this.AspectInstance.AspectClass.Type;
+        Type IAspectReceiverParent.Type => this.AspectInstance.AspectClass.Type;
 
-        UserCodeInvoker ICompilationSelectorParent.UserCodeInvoker => this._configuration.UserCodeInvoker;
+        UserCodeInvoker IAspectReceiverParent.UserCodeInvoker => this._configuration.UserCodeInvoker;
 
-        IServiceProvider ICompilationSelectorParent.ServiceProvider => this._configuration.ServiceProvider;
+        IServiceProvider IAspectReceiverParent.ServiceProvider => this._configuration.ServiceProvider;
 
-        BoundAspectClassCollection ICompilationSelectorParent.AspectClasses => this._configuration.BoundAspectClasses;
+        BoundAspectClassCollection IAspectReceiverParent.AspectClasses => this._configuration.BoundAspectClasses;
 
         public ReferenceValidatorDriver GetReferenceValidatorDriver( MethodInfo validateMethod )
             => ((IValidatorDriverFactory) this.AspectInstance.AspectClass).GetReferenceValidatorDriver( validateMethod );

@@ -128,7 +128,7 @@ internal class ChangeVisibilityCodeAction : ICodeAction
                 {
                     var token = SyntaxFactory.Token( kind ).WithTrailingTrivia( SyntaxFactory.ElasticSpace );
 
-                    if ( newModifiers!.Count == 0 && modifiers.Count > 0 )
+                    if ( newModifiers.Count == 0 && modifiers.Count > 0 )
                     {
                         token = token.WithLeadingTrivia( modifiers[0].LeadingTrivia );
                     }

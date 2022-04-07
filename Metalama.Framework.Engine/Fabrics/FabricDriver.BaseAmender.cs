@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.Fabrics;
 
 internal abstract partial class FabricDriver
 {
-    protected abstract class BaseAmender<T> : IAmender<T>, ICompilationSelectorParent
+    protected abstract class BaseAmender<T> : IAmender<T>, IAspectReceiverParent
         where T : class, IDeclaration
     {
         // The Target property is protected (and not exposed to the API) because
@@ -63,15 +63,15 @@ internal abstract partial class FabricDriver
 
         IValidatorTargetSelector<T> IAspectTargetSelector<T>.BeforeAnyAspect() => this.GetAspectTargetSelector().BeforeAnyAspect();
 
-        IServiceProvider ICompilationSelectorParent.ServiceProvider => this._fabricManager.ServiceProvider;
+        IServiceProvider IAspectReceiverParent.ServiceProvider => this._fabricManager.ServiceProvider;
 
-        BoundAspectClassCollection ICompilationSelectorParent.AspectClasses => this._fabricManager.AspectClasses;
+        BoundAspectClassCollection IAspectReceiverParent.AspectClasses => this._fabricManager.AspectClasses;
 
-        UserCodeInvoker ICompilationSelectorParent.UserCodeInvoker => this._fabricManager.UserCodeInvoker;
+        UserCodeInvoker IAspectReceiverParent.UserCodeInvoker => this._fabricManager.UserCodeInvoker;
 
         public AspectPredecessor AspectPredecessor => new( AspectPredecessorKind.Fabric, this._fabricInstance );
 
-        Type ICompilationSelectorParent.Type => this._fabricInstance.Fabric.GetType();
+        Type IAspectReceiverParent.Type => this._fabricInstance.Fabric.GetType();
 
         ReferenceValidatorDriver IValidatorDriverFactory.GetReferenceValidatorDriver( MethodInfo validateMethod )
             => this._fabricInstance.ValidatorDriverFactory.GetReferenceValidatorDriver( validateMethod );
