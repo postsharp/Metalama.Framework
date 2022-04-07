@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
                 (this._common.Template.Declaration!, "meta." + memberName, this.Declaration, this.Declaration.DeclarationKind,
                  description ?? "I" + memberName) );
 
-        public IConstructor Constructor => this.Constructor ?? throw this.CreateInvalidOperationException( nameof( this.Constructor ) );
+        public IConstructor Constructor => this._constructor ?? throw this.CreateInvalidOperationException( nameof( this.Constructor ) );
 
         public IMethodBase MethodBase => this._method ?? throw this.CreateInvalidOperationException( nameof(this.MethodBase) );
 

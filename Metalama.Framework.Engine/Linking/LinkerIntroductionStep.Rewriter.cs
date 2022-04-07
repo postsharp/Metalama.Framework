@@ -211,7 +211,7 @@ namespace Metalama.Framework.Engine.Linking
                             case ConstructorDeclarationSyntax constructorDeclaration:
                                 if ( this._introductionInsertedStatements.TryGetValue( introducedMember.Introduction, out var insertedStatements ) )
                                 {
-                                    introducedNode = WithInsertedStatements( constructorDeclaration, insertedStatements );
+                                    introducedNode = this.WithInsertedStatements( constructorDeclaration, insertedStatements );
                                 }
 
                                 break;
@@ -251,6 +251,7 @@ namespace Metalama.Framework.Engine.Linking
                         return
                             constructorDeclaration
                             .WithExpressionBody( null )
+                            .WithSemicolonToken( default )
                             .WithBody(
                                 Block(
                                     beginningStatements
@@ -374,7 +375,7 @@ namespace Metalama.Framework.Engine.Linking
             {
                 if (this._symbolInsertedStatements.TryGetValue(node, out var insertedStatements) )
                 {
-                    node = WithInsertedStatements( node, insertedStatements );
+                    node = this.WithInsertedStatements( node, insertedStatements );
                 }
 
                 return base.VisitConstructorDeclaration( node );

@@ -38,10 +38,7 @@ namespace Metalama.Framework.Engine.Advices
             this.Reason = reason;
         }
 
-        public override void Initialize( IDiagnosticAdder diagnosticAdder )
-        {
-            // TODO: Everything.
-        }
+        public override void Initialize( IDiagnosticAdder diagnosticAdder ) { }
 
         public override AdviceResult ToResult( ICompilation compilation, IReadOnlyList<IObservableTransformation> observableTransformations )
         {
