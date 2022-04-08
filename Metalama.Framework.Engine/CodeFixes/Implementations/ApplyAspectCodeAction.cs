@@ -28,7 +28,7 @@ internal class ApplyAspectCodeAction<TTarget> : ICodeAction
         this.Aspect = aspect;
     }
 
-    public Task<bool> ExecuteAsync( CodeActionContext context )
+    public Task ExecuteAsync( CodeActionContext context )
     {
         var compilation = context.Compilation;
 

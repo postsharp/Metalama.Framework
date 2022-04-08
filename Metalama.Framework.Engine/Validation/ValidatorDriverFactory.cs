@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Validation;
 using System;
 using System.Collections.Concurrent;
 using System.Linq.Expressions;
@@ -12,7 +13,7 @@ namespace Metalama.Framework.Engine.Validation;
 internal class ValidatorDriverFactory : IValidatorDriverFactory
 {
     private readonly Type _type;
-    private readonly ConcurrentDictionary<MethodInfo, ValidatorDriver> _drivers = new();
+    private readonly ConcurrentDictionary<MethodInfo, ReferenceValidatorDriver> _drivers = new();
     private static readonly ConditionalWeakTable<Type, ValidatorDriverFactory> _instances = new();
 
     public static ValidatorDriverFactory GetInstance( Type type )
@@ -49,21 +50,23 @@ internal class ValidatorDriverFactory : IValidatorDriverFactory
         this._type = type;
     }
 
-    public ValidatorDriver<TContext> GetValidatorDriver<TContext>( MethodInfo validateMethod )
-        => (ValidatorDriver<TContext>) this._drivers.GetOrAdd( validateMethod, this.GetValidatorDriverImpl<TContext> );
+    public ReferenceValidatorDriver GetReferenceValidatorDriver( MethodInfo validateMethod )
+        => this._drivers.GetOrAdd( validateMethod, this.GetReferenceValidatorDriverImpl );
 
-    private ValidatorDriver<TContext> GetValidatorDriverImpl<TContext>( MethodInfo method )
+    public DeclarationValidatorDriver GetDeclarationValidatorDriver( ValidatorDelegate<DeclarationValidationContext> validate ) => new( validate );
+
+    private ReferenceValidatorDriver GetReferenceValidatorDriverImpl( MethodInfo method )
     {
         var instanceParameter = Expression.Parameter( typeof(object), "instance" );
-        var contextParameter = Expression.Parameter( typeof(TContext).MakeByRefType(), "context" );
+        var contextParameter = Expression.Parameter( typeof(ReferenceValidationContext).MakeByRefType(), "context" );
 
         var invocation = method.IsStatic
             ? Expression.Call( method, contextParameter )
             : Expression.Call( Expression.Convert( instanceParameter, this._type ), method, contextParameter );
 
-        var lambda = Expression.Lambda<InvokeValidatorDelegate<TContext>>( invocation, instanceParameter, contextParameter );
+        var lambda = Expression.Lambda<InvokeValidatorDelegate<ReferenceValidationContext>>( invocation, instanceParameter, contextParameter );
         var compiled = lambda.Compile();
 
-        return new ValidatorDriver<TContext>( this._type, method, compiled );
+        return new ReferenceValidatorDriver( this._type, method, compiled );
     }
 }

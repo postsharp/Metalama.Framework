@@ -31,11 +31,7 @@
         <Compile Remove="Tests\**\__*.cs" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Compile Remove="Tests\Aspects\Initialization\InstanceConstructing - Copy.t.cs" />
-      <Compile Remove="Tests\Aspects\Initialization\InstanceConstructing_ExpressionBody - Copy.t.cs" />
-      <Compile Remove="Tests\Aspects\Initialization\InstanceConstructing_Implicit - Copy.t.cs" />
-    </ItemGroup>
+
 
     <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
@@ -48,14 +44,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Include="Tests\Aspects\Initialization\TypeConstructing_ExpressionBody.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>TypeConstructing_ExpressionBody.cs</DependentUpon>
-      </None>
-      <None Include="Tests\Aspects\Initialization\InstanceConstructing_ExpressionBody.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>InstanceConstructing_ExpressionBody.cs</DependentUpon>
-      </None>
+
+
     </ItemGroup>
 
     <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets" />

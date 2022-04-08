@@ -7,9 +7,18 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Validation;
 
+internal enum CompilationModelVersion
+{
+    Initial,
+    Current,
+    Final
+}
+
 internal interface IValidatorSource
 {
-    IEnumerable<ValidatorInstance> GetValidators( CompilationModel compilation, IDiagnosticSink diagnosticAdder );
-
-    ValidatorKind Kind { get; }
+    IEnumerable<ValidatorInstance> GetValidators(
+        ValidatorKind kind,
+        CompilationModelVersion compilationModelVersion,
+        CompilationModel compilation,
+        IDiagnosticSink diagnosticAdder );
 }

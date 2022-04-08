@@ -46,7 +46,7 @@ namespace Metalama.Framework.Engine.Templating
                     return null;
                 }
 
-                var originalNode = node!;
+                var originalNode = node;
                 var transformedNode = base.Visit( node );
 
                 // Don't run twice.

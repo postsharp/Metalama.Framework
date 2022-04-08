@@ -14,6 +14,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
+using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -449,11 +450,18 @@ namespace Metalama.Framework.Engine.Aspects
 
         public override string ToString() => this.FullName;
 
-        ValidatorDriver<TContext> IValidatorDriverFactory.GetValidatorDriver<TContext>( MethodInfo validateMethod )
+        ReferenceValidatorDriver IValidatorDriverFactory.GetReferenceValidatorDriver( MethodInfo validateMethod )
         {
             this._validatorDriverFactory ??= ValidatorDriverFactory.GetInstance( this.AspectType );
 
-            return this._validatorDriverFactory.GetValidatorDriver<TContext>( validateMethod );
+            return this._validatorDriverFactory.GetReferenceValidatorDriver( validateMethod );
+        }
+
+        DeclarationValidatorDriver IValidatorDriverFactory.GetDeclarationValidatorDriver( ValidatorDelegate<DeclarationValidationContext> validate )
+        {
+            this._validatorDriverFactory ??= ValidatorDriverFactory.GetInstance( this.AspectType );
+
+            return this._validatorDriverFactory.GetDeclarationValidatorDriver( validate );
         }
 
         private class LocalFunctionEligibilityRule : IEligibilityRule<IDeclaration>

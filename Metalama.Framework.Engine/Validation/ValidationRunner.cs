@@ -40,27 +40,32 @@ internal class ValidationRunner
     public ValidationResult RunAll( CompilationModel initialCompilation, CompilationModel finalCompilation )
     {
         var userDiagnosticSink = new UserDiagnosticSink( this._configuration.CompileTimeProject, this._configuration.CodeFixFilter );
-        this.RunDeclarationValidators( finalCompilation, userDiagnosticSink );
+        this.RunDeclarationValidators( initialCompilation, finalCompilation, userDiagnosticSink );
 
         var transitiveValidators = this.RunReferenceValidators( initialCompilation, userDiagnosticSink );
 
         return new ValidationResult( transitiveValidators, userDiagnosticSink.ToImmutable() );
     }
 
-    public void RunDeclarationValidators( CompilationModel finalCompilation, UserDiagnosticSink diagnosticAdder )
+    public void RunDeclarationValidators( CompilationModel initialCompilation, CompilationModel finalCompilation, UserDiagnosticSink diagnosticAdder )
+    {
+        this.RunDeclarationValidators( initialCompilation, CompilationModelVersion.Initial, diagnosticAdder );
+        this.RunDeclarationValidators( finalCompilation, CompilationModelVersion.Final, diagnosticAdder );
+    }
+
+    public void RunDeclarationValidators( CompilationModel compilation, CompilationModelVersion version, UserDiagnosticSink diagnosticAdder )
     {
         var validators = this._sources
-            .Where( s => s.Kind == ValidatorKind.Definition )
-            .SelectMany( s => s.GetValidators( finalCompilation, diagnosticAdder ) )
+            .SelectMany( s => s.GetValidators( ValidatorKind.Definition, version, compilation, diagnosticAdder ) )
             .Cast<DeclarationValidatorInstance>();
 
-        var userCodeExecutionContext = new UserCodeExecutionContext( this._serviceProvider, diagnosticAdder, default, compilationModel: finalCompilation );
+        var userCodeExecutionContext = new UserCodeExecutionContext( this._serviceProvider, diagnosticAdder, default, compilationModel: compilation );
 
         using ( UserCodeExecutionContext.WithContext( userCodeExecutionContext ) )
         {
             foreach ( var validator in validators )
             {
-                userCodeExecutionContext.InvokedMember = UserCodeMemberInfo.FromMemberInfo( validator.Driver.ValidateMethod );
+                userCodeExecutionContext.InvokedMember = validator.Driver.UserCodeMemberInfo;
 
                 validator.Validate( diagnosticAdder, this._userCodeInvoker, null );
             }
@@ -100,7 +105,7 @@ internal class ValidationRunner
     }
 
     public IEnumerable<ReferenceValidatorInstance> GetReferenceValidators( CompilationModel initialCompilation, IDiagnosticSink diagnosticAdder )
-        => this._sources.Where( s => s.Kind == ValidatorKind.Reference )
-            .SelectMany( s => s.GetValidators( initialCompilation, diagnosticAdder ) )
+        => this._sources
+            .SelectMany( s => s.GetValidators( ValidatorKind.Reference, CompilationModelVersion.Current, initialCompilation, diagnosticAdder ) )
             .Cast<ReferenceValidatorInstance>();
 }

@@ -27,7 +27,6 @@
         <MetalamaFormatOutput Condition="'$(MetalamaFormatOutput)'==''">True</MetalamaFormatOutput>
         <MetalamaDebugTransformedCode>True</MetalamaDebugTransformedCode>
         <MetalamaEmitCompilerTransformedFiles Condition="'$(MetalamaEmitCompilerTransformedFiles)'==''">True</MetalamaEmitCompilerTransformedFiles>
-        <MetalamaCompilerTransformedFilesOutputPath Condition="'$(MetalamaCompilerTransformedFilesOutputPath)'==''">$(IntermediateOutputPath)metalama</MetalamaCompilerTransformedFilesOutputPath>
     </PropertyGroup>
 
     <ItemGroup Condition="'$(MetalamaCompileTimeProject)'=='True'">
