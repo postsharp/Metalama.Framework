@@ -31,9 +31,11 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 null => ConstructorInitializerKind.Undetermined,
                 ConstructorDeclarationSyntax { Initializer: null } => ConstructorInitializerKind.Undetermined,
-                ConstructorDeclarationSyntax { Initializer: { } initializer } when initializer.Kind() == SyntaxKind.ThisConstructorInitializer => ConstructorInitializerKind.This,
-                ConstructorDeclarationSyntax { Initializer: { } initializer } when initializer.Kind() == SyntaxKind.BaseConstructorInitializer => ConstructorInitializerKind.Base,
-                _ => throw new AssertionFailedException(),
+                ConstructorDeclarationSyntax { Initializer: { } initializer } when initializer.Kind() == SyntaxKind.ThisConstructorInitializer =>
+                    ConstructorInitializerKind.This,
+                ConstructorDeclarationSyntax { Initializer: { } initializer } when initializer.Kind() == SyntaxKind.BaseConstructorInitializer =>
+                    ConstructorInitializerKind.Base,
+                _ => throw new AssertionFailedException()
             };
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Constructor;

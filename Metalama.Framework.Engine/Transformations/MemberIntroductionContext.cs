@@ -4,7 +4,6 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using System;
-using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Transformations
 {

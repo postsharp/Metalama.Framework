@@ -4,11 +4,7 @@
 namespace Metalama.Framework.Code.Advised
 {
     /// <summary>
-    /// Represents the method being overwritten or introduced. This interface extends <see cref="IMethod"/> but introduces
-    /// the <see cref="Invoke"/> method, which allows you to invoke the method.
-    /// It also overrides the <see cref="Parameters"/> property to expose their <see cref="IExpression.Value"/> property.
+    /// Represents the constructor being overwritten or introduced. This interface extends <see cref="IConstructor"/>.
     /// </summary>
-    public interface IAdvisedConstructor : IConstructor
-    {
-    }
+    public interface IAdvisedConstructor : IConstructor { }
 }

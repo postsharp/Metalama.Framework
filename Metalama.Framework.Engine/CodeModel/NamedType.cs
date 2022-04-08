@@ -219,12 +219,13 @@ namespace Metalama.Framework.Engine.CodeModel
         [Memo]
         public IConstructor StaticConstructor // TODO: This is a bit of a hack (VirtualStaticConstructor disappears is ConstructorBuilder is used).
             => this.TransformMembers<IConstructor, IConstructorBuilder, IMethodSymbol>(
-                   this.TypeSymbol
-                   .GetMembers()
-                   .OfType<IMethodSymbol>()
-                   .Where( m => m.MethodKind == MethodKind.StaticConstructor )
-                   .ToReadOnlyList() )
-               .Select(c => c.GetTarget( this.Compilation )).SingleOrDefault()
+                       this.TypeSymbol
+                           .GetMembers()
+                           .OfType<IMethodSymbol>()
+                           .Where( m => m.MethodKind == MethodKind.StaticConstructor )
+                           .ToReadOnlyList() )
+                   .Select( c => c.GetTarget( this.Compilation ) )
+                   .SingleOrDefault()
                ?? new VirtualStaticConstructor( this );
 
         public bool IsPartial

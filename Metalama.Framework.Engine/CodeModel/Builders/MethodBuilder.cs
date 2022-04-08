@@ -110,6 +110,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             : base( parentAdvice, targetType )
         {
             this.Name = name;
+
             this.ReturnParameter =
                 new ParameterBuilder(
                     this,

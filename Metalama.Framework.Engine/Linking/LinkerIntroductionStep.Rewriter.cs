@@ -230,11 +230,11 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            private ConstructorDeclarationSyntax WithInsertedStatements( 
-                ConstructorDeclarationSyntax constructorDeclaration, 
+            private ConstructorDeclarationSyntax WithInsertedStatements(
+                ConstructorDeclarationSyntax constructorDeclaration,
                 IReadOnlyList<LinkerInsertedStatement>? insertedStatements )
             {
-                if (insertedStatements == null)
+                if ( insertedStatements == null )
                 {
                     return constructorDeclaration;
                 }
@@ -242,7 +242,9 @@ namespace Metalama.Framework.Engine.Linking
                 // TODO: The order here is correct for initialization, i.e. first aspects (transformation order) are initialized first.
                 //       This would not be, however, correct for other uses, but we don't have those.
 
-                var beginningStatements = Order( insertedStatements.Where( s => s.Position == InsertedStatementPosition.Beginning ) ).Select( s => s.Statement );
+                var beginningStatements = Order( insertedStatements.Where( s => s.Position == InsertedStatementPosition.Beginning ) )
+                    .Select( s => s.Statement );
+
                 var endStatements = Order( insertedStatements.Where( s => s.Position == InsertedStatementPosition.End ) ).Select( s => s.Statement );
 
                 switch ( constructorDeclaration )
@@ -250,29 +252,31 @@ namespace Metalama.Framework.Engine.Linking
                     case { ExpressionBody: { } expressionBody }:
                         return
                             constructorDeclaration
-                            .WithExpressionBody( null )
-                            .WithSemicolonToken( default )
-                            .WithBody(
-                                Block(
-                                    beginningStatements
-                                    .Append( ExpressionStatement( expressionBody.Expression.WithSourceCodeAnnotationIfNotGenerated() ) )
-                                    .Concat( endStatements ) )
-                                .WithGeneratedCodeAnnotation() );
+                                .WithExpressionBody( null )
+                                .WithSemicolonToken( default )
+                                .WithBody(
+                                    Block(
+                                            beginningStatements
+                                                .Append( ExpressionStatement( expressionBody.Expression.WithSourceCodeAnnotationIfNotGenerated() ) )
+                                                .Concat( endStatements ) )
+                                        .WithGeneratedCodeAnnotation() );
 
                     case { Body: { } body }:
                         return
                             constructorDeclaration
-                            .WithBody(
-                                Block(
-                                    beginningStatements
-                                    .Append( body.WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ).WithSourceCodeAnnotationIfNotGenerated() )
-                                    .Concat( endStatements ) ) );
+                                .WithBody(
+                                    Block(
+                                        beginningStatements
+                                            .Append(
+                                                body.WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
+                                                    .WithSourceCodeAnnotationIfNotGenerated() )
+                                            .Concat( endStatements ) ) );
                 }
 
                 return constructorDeclaration;
 
-                IEnumerable<LinkerInsertedStatement> Order(IEnumerable<LinkerInsertedStatement> statements)
-                {        
+                IEnumerable<LinkerInsertedStatement> Order( IEnumerable<LinkerInsertedStatement> statements )
+                {
                     // TODO: This sort is intended only for beginning statements.
                     var memberStatements = new Dictionary<IMember, List<LinkerInsertedStatement>>( this._compilation.InvariantComparer );
                     var typeStatements = new List<LinkerInsertedStatement>();
@@ -373,7 +377,7 @@ namespace Metalama.Framework.Engine.Linking
 
             public override SyntaxNode? VisitConstructorDeclaration( ConstructorDeclarationSyntax node )
             {
-                if (this._symbolInsertedStatements.TryGetValue(node, out var insertedStatements) )
+                if ( this._symbolInsertedStatements.TryGetValue( node, out var insertedStatements ) )
                 {
                     node = this.WithInsertedStatements( node, insertedStatements );
                 }

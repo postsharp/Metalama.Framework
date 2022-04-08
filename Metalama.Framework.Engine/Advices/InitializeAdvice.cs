@@ -54,20 +54,22 @@ namespace Metalama.Framework.Engine.Advices
             var localConstructors =
                 observableTransformations
                     .OfType<IConstructorBuilder>()
-                    .Where( c =>
-                        c.IsStatic == ((this.Reason & InitializationReason.TypeConstructing) != 0)
-                        || !c.IsStatic == ((this.Reason & InitializationReason.Constructing) != 0) )
+                    .Where(
+                        c =>
+                            c.IsStatic == ((this.Reason & InitializationReason.TypeConstructing) != 0)
+                            || !c.IsStatic == ((this.Reason & InitializationReason.Constructing) != 0) )
                     .ToReadOnlyList();
 
             var constructors =
-                ( (this.Reason & InitializationReason.TypeConstructing) != 0
+                ((this.Reason & InitializationReason.TypeConstructing) != 0
                     ? new[] { containingType.StaticConstructor }
-                    : Array.Empty<IConstructor>() )
+                    : Array.Empty<IConstructor>())
                 .Concat(
                     containingType.Constructors
-                    .Where( c =>
-                        !c.IsStatic == ((this.Reason & InitializationReason.Constructing) != 0)
-                        && c.InitializerKind != ConstructorInitializerKind.This ) )
+                        .Where(
+                            c =>
+                                !c.IsStatic == ((this.Reason & InitializationReason.Constructing) != 0)
+                                && c.InitializerKind != ConstructorInitializerKind.This ) )
                 .Where( c => !(c.Parameters.Count == 0 && localConstructors.Any( cc => cc.Parameters.Count == 0 && c.IsStatic == cc.IsStatic )) )
                 .Concat( localConstructors );
 
@@ -77,14 +79,14 @@ namespace Metalama.Framework.Engine.Advices
             {
                 IConstructor targetCtor;
 
-                if ( ctor.IsStatic && ctor.GetSymbol() == null && ctor is not IConstructorBuilder )
+                if ( ctor.IsImplicitStaticConstructor() )
                 {
                     // Missing static ctor.
                     var builder = new ConstructorBuilder( this, ctor.DeclaringType ) { IsStatic = true };
                     transformations.Add( builder );
                     targetCtor = builder;
                 }
-                else if ( !ctor.IsStatic && ctor.GetSymbol() != null && ctor.GetSymbol()!.GetPrimaryDeclaration() == null )
+                else if ( ctor.IsImplicitInstanceConstructor() )
                 {
                     // Missing implicit ctor.
                     var builder = new ConstructorBuilder( this, ctor.DeclaringType );

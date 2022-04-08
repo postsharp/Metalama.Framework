@@ -166,6 +166,7 @@ namespace Metalama.Framework.Engine.Linking
 
                     case Constructor replacedConstructor:
                         Invariant.Assert( replacedConstructor.Symbol.GetPrimarySyntaxReference() == null );
+
                         break;
 
                     case ISyntaxTreeTransformation replacedTransformation:
@@ -262,7 +263,7 @@ namespace Metalama.Framework.Engine.Linking
 
         private void ProcessInsertStatementTransformations(
             AspectLinkerInput input,
-            UserDiagnosticSink diagnostics, 
+            UserDiagnosticSink diagnostics,
             LexicalScopeFactory lexicalScopeFactory,
             List<ITransformation> allTransformations,
             out Dictionary<SyntaxNode, IReadOnlyList<LinkerInsertedStatement>> symbolInsertedStatements,
@@ -275,7 +276,7 @@ namespace Metalama.Framework.Engine.Linking
             {
                 // TODO: Supports only constructors without overrides.
                 //       Needs to be generalized for anything else (take into account overrides).
-                switch (insertStatementTransformation.TargetDeclaration)
+                switch ( insertStatementTransformation.TargetDeclaration )
                 {
                     case Constructor constructor:
                         {
@@ -298,10 +299,10 @@ namespace Metalama.Framework.Engine.Linking
                                 }
 
                                 ((List<LinkerInsertedStatement>) list).Add(
-                                    new LinkerInsertedStatement( 
-                                        insertStatementTransformation, 
-                                        primaryDeclaration, 
-                                        insertedStatement.Value.Position, 
+                                    new LinkerInsertedStatement(
+                                        insertStatementTransformation,
+                                        primaryDeclaration,
+                                        insertedStatement.Value.Position,
                                         insertedStatement.Value.Statement,
                                         insertedStatement.Value.ContextDeclaration ) );
                             }
@@ -329,10 +330,10 @@ namespace Metalama.Framework.Engine.Linking
                                 }
 
                                 ((List<LinkerInsertedStatement>) list).Add(
-                                    new LinkerInsertedStatement( 
-                                        insertStatementTransformation, 
-                                        constructorBuilder, 
-                                        insertedStatement.Value.Position, 
+                                    new LinkerInsertedStatement(
+                                        insertStatementTransformation,
+                                        constructorBuilder,
+                                        insertedStatement.Value.Position,
                                         insertedStatement.Value.Statement,
                                         insertedStatement.Value.ContextDeclaration ) );
                             }
@@ -344,7 +345,7 @@ namespace Metalama.Framework.Engine.Linking
                         throw new AssertionFailedException();
                 }
 
-                InsertedStatement? GetInsertedStatement(SyntaxGenerationContext syntaxGenerationContext)
+                InsertedStatement? GetInsertedStatement( SyntaxGenerationContext syntaxGenerationContext )
                 {
                     var context = new InsertStatementTransformationContext(
                         diagnostics,
@@ -353,7 +354,7 @@ namespace Metalama.Framework.Engine.Linking
                         this._serviceProvider );
 
                     return insertStatementTransformation.GetInsertedStatement( context );
-                }         
+                }
             }
         }
 

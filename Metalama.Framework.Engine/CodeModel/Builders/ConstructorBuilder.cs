@@ -10,7 +10,6 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -18,6 +17,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using ParameterList = Metalama.Framework.Engine.CodeModel.Collections.ParameterList;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
@@ -29,18 +29,18 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IMethodList LocalFunctions => MethodList.Empty;
 
-        public Code.MethodKind MethodKind => this.IsStatic ? Code.MethodKind.StaticConstructor : Code.MethodKind.Constructor;
+        public MethodKind MethodKind => this.IsStatic ? MethodKind.StaticConstructor : MethodKind.Constructor;
 
-        public IParameterList Parameters => Collections.ParameterList.Empty;
+        public IParameterList Parameters => ParameterList.Empty;
 
         public override bool IsExplicitInterfaceImplementation => false;
 
         public override IMember? OverriddenMember => null;
 
-        public override string Name 
-        { 
-            get => this.IsStatic ? ".cctor" : ".ctor"; 
-            set => throw new NotSupportedException(); 
+        public override string Name
+        {
+            get => this.IsStatic ? ".cctor" : ".ctor";
+            set => throw new NotSupportedException();
         }
 
         // TODO: Temporary.
@@ -58,24 +58,24 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         {
             if ( targetType.Constructors.Any( c => c.GetSymbol().AssertNotNull().GetPrimarySyntaxReference() == null ) )
             {
-                Invariant.Assert(targetType.Constructors.Count == 1);
+                Invariant.Assert( targetType.Constructors.Count == 1 );
                 this.ReplacedMember = targetType.Constructors.Single().ToMemberRef<IMemberOrNamedType>();
             }
         }
 
-        public IParameterBuilder AddParameter( string name, IType type, Code.RefKind refKind = Code.RefKind.None, Code.TypedConstant defaultValue = default )
+        public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant defaultValue = default )
         {
             throw new NotImplementedException();
         }
 
-        public IParameterBuilder AddParameter( string name, Type type, Code.RefKind refKind = Code.RefKind.None, object? defaultValue = null )
+        public IParameterBuilder AddParameter( string name, Type type, RefKind refKind = RefKind.None, object? defaultValue = null )
         {
             throw new NotImplementedException();
         }
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
-            if ( this.IsStatic)
+            if ( this.IsStatic )
             {
                 var syntax =
                     ConstructorDeclaration(
@@ -87,10 +87,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                         Block().WithGeneratedCodeAnnotation(),
                         null );
 
-                return new[]
-                {
-                    new IntroducedMember(this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this )
-                };
+                return new[] { new IntroducedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
             }
             else
             {
@@ -104,10 +101,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                         Block().WithGeneratedCodeAnnotation(),
                         null );
 
-                return new[]
-                {
-                    new IntroducedMember(this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this )
-                };
+                return new[] { new IntroducedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
             }
         }
 

@@ -41,7 +41,7 @@ namespace Metalama.Framework.Engine.Linking
             ITransformation parentTransformation,
             SyntaxNode targetNode,
             InsertedStatementPosition position,
-            StatementSyntax statement, 
+            StatementSyntax statement,
             IDeclaration contextDeclaration )
         {
             this.ParentTransformation = parentTransformation;

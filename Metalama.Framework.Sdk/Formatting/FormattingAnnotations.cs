@@ -79,8 +79,8 @@ namespace Metalama.Framework.Engine.Formatting
         public static T? WithSourceCodeAnnotationIfNotGenerated<T>( this T node )
             where T : SyntaxNode
             => !node.HasAnnotation( GeneratedCode )
-            ? node.WithSourceCodeAnnotation()
-            : node;
+                ? node.WithSourceCodeAnnotation()
+                : node;
 
         public static T WithFormattingAnnotationsFrom<T>( this T node, SyntaxNode source )
             where T : SyntaxNode

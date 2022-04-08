@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
                 (this._common.Template.Declaration!, "meta." + memberName, this.Declaration, this.Declaration.DeclarationKind,
                  description ?? "I" + memberName) );
 
-        public IConstructor Constructor => this._constructor ?? throw this.CreateInvalidOperationException( nameof( this.Constructor ) );
+        public IConstructor Constructor => this._constructor ?? throw this.CreateInvalidOperationException( nameof(this.Constructor) );
 
         public IMethodBase MethodBase => this._method ?? throw this.CreateInvalidOperationException( nameof(this.MethodBase) );
 
@@ -187,7 +187,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
                 IMethod method => new MetaApi( method, common ),
                 IFieldOrProperty fieldOrProperty => new MetaApi( fieldOrProperty, common ),
                 IEvent @event => new MetaApi( @event, common ),
-                IConstructor constructor => new MetaApi(constructor, common ),
+                IConstructor constructor => new MetaApi( constructor, common ),
                 _ => throw new AssertionFailedException()
             };
 

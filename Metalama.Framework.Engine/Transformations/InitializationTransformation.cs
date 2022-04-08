@@ -9,7 +9,6 @@ using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.MetaModel;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 
@@ -24,7 +23,9 @@ namespace Metalama.Framework.Engine.Transformations
 
         public IMemberOrNamedType ContextDeclaration { get; private set; }
 
-        public SyntaxTree TargetSyntaxTree => this._targetConstructor.GetPrimaryDeclaration()?.SyntaxTree ?? this._targetConstructor.DeclaringType.GetPrimaryDeclaration().AssertNotNull().SyntaxTree;
+        public SyntaxTree TargetSyntaxTree
+            => this._targetConstructor.GetPrimaryDeclaration()?.SyntaxTree
+               ?? this._targetConstructor.DeclaringType.GetPrimaryDeclaration().AssertNotNull().SyntaxTree;
 
         public IMethodBase TargetDeclaration => this._targetConstructor;
 
@@ -73,11 +74,11 @@ namespace Metalama.Framework.Engine.Transformations
                 return default;
             }
 
-            return new InsertedStatement( 
-                InsertedStatementPosition.Beginning, 
+            return new InsertedStatement(
+                InsertedStatementPosition.Beginning,
                 expandedBody
-                .WithGeneratedCodeAnnotation()
-                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
+                    .WithGeneratedCodeAnnotation()
+                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
                 this.ContextDeclaration );
         }
     }

@@ -6,7 +6,6 @@ using Metalama.Framework.Code.Advised;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Project;
 using Metalama.Framework.Validation;
-using System;
 
 namespace Metalama.Framework.Aspects
 {

@@ -4,7 +4,5 @@
 namespace Metalama.Framework.Code.DeclarationBuilders
 {
     // Intentionally internal.
-    internal interface IConstructorBuilder : IConstructor, IMethodBaseBuilder
-    {
-    }
+    internal interface IConstructorBuilder : IConstructor, IMethodBaseBuilder { }
 }
