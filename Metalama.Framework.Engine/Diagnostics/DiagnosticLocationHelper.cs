@@ -26,7 +26,14 @@ namespace Metalama.Framework.Engine.Diagnostics
         {
             var bestDeclaration = symbol.GetPrimarySyntaxReference();
 
-            return bestDeclaration?.GetSyntax().GetDiagnosticLocation();
+            if ( bestDeclaration == null )
+            {
+                return symbol.ContainingSymbol.GetPrimarySyntaxReference()?.GetSyntax().GetDiagnosticLocation();
+            }
+            else
+            { 
+                return bestDeclaration.GetSyntax().GetDiagnosticLocation();
+            }
         }
 
         public static Location? GetDiagnosticLocation( this SyntaxNode node )
