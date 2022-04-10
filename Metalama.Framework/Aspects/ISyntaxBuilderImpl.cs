@@ -8,7 +8,7 @@ using System.Text;
 
 namespace Metalama.Framework.Aspects;
 
-[CompileTimeOnly]
+[CompileTime]
 internal interface ISyntaxBuilderImpl
 {
     ICompilation Compilation { get; }

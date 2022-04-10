@@ -11,7 +11,7 @@ namespace Metalama.Framework.Code.SyntaxBuilders
     /// <summary>
     /// A base class for <see cref="ExpressionBuilder"/> and <see cref="StatementBuilder"/>.
     /// </summary>
-    [CompileTimeOnly]
+    [CompileTime]
     public abstract class SyntaxBuilder
     {
         private static readonly AsyncLocal<ISyntaxBuilderImpl?> _currentImpl = new();

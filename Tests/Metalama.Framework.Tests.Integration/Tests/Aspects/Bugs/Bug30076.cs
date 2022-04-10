@@ -14,7 +14,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Bugs.Bug30076
     {
         #region Private Methods
 
-        [CompileTimeOnly]
+        [CompileTime]
         private static InterpolatedStringBuilder BuildInterpolatedString()
         {
             var stringBuilder = new InterpolatedStringBuilder();

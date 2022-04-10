@@ -20,7 +20,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.TypeFabric_
 
             public override void AmendType( ITypeAmender amender )
             {
-                amender.WithTarget().RegisterReferenceValidator( Validate, ReferenceKinds.All );
+                amender.WithTarget().ValidateReferences( Validate, ReferenceKinds.All );
             }
 
             private static void Validate( in ReferenceValidationContext context )

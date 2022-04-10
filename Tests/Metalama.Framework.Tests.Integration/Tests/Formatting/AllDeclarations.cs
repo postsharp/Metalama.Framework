@@ -11,7 +11,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Formatting.AllDeclarations
         public override dynamic? OverrideMethod() => null;
     }
     
-    [CompileTimeOnly]
+    [CompileTime]
     struct CompileTimeStruct
     {
         public event EventHandler FieldEvent;
@@ -36,12 +36,12 @@ namespace Metalama.Framework.Tests.Integration.Tests.Formatting.AllDeclarations
         public string Property { get; set; }
     }
 
-    [CompileTimeOnly]
+    [CompileTime]
     record CompileTimeRecord( int f );
 
     record RunTimeRecord( int f );
 
-    [CompileTimeOnly]
+    [CompileTime]
     delegate void CompileTimeDelegate();
 
     delegate void RunTimeDelegate();

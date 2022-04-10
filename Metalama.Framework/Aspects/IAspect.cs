@@ -11,7 +11,7 @@ namespace Metalama.Framework.Aspects
     /// The base interface for all aspects. A class should not implement
     /// this interface, but the strongly-typed variant <see cref="IAspect{T}"/>.
     /// </summary>
-    [CompileTime]
+    [RunTimeOrCompileTime]
     public interface IAspect : ILamaSerializable { }
 
     /// <summary>

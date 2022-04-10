@@ -63,7 +63,7 @@ namespace Metalama.Framework.Engine.AspectWeavers
         public IAspectWeaverHelper Helper { get; }
 
         /// <summary>
-        /// Adds a new <see cref="ManagedResource"/> to the compilation.
+        /// Adds a new <see cref="ManagedResource" /> to the compilation.
         /// </summary>
         /// <param name="resource"></param>
         public void AddResource( ManagedResource resource ) => this._addResource( resource );
@@ -122,7 +122,7 @@ namespace Metalama.Framework.Engine.AspectWeavers
         }
 
         /// <summary>
-        /// Reports a <see cref="Diagnostic"/>.
+        /// Reports a <see cref="Diagnostic" />.
         /// </summary>
         /// <param name="diagnostic"></param>
         public void ReportDiagnostic( Diagnostic diagnostic ) => this._addDiagnostic( diagnostic );

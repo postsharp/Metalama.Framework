@@ -10,7 +10,7 @@ namespace Metalama.Framework.Code
     /// Exposes a <see cref="Compilation"/> property.
     /// </summary>
     [InternalImplement]
-    [CompileTimeOnly]
+    [CompileTime]
     public interface ICompilationElement
     {
         /// <summary>

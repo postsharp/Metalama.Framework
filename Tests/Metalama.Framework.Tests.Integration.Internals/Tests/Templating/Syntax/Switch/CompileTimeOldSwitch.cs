@@ -4,7 +4,7 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.Switch.OldSwitchCompileTime
 {
-    [CompileTimeOnly]
+    [CompileTime]
     enum SwitchEnum
     {
         one = 1,

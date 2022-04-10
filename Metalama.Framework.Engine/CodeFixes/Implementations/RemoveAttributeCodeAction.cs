@@ -4,6 +4,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -22,7 +23,7 @@ internal partial class RemoveAttributeCodeAction : ICodeAction
 
     public INamedType AttributeType { get; }
 
-    public async Task<bool> ExecuteAsync( CodeActionContext context )
+    public async Task ExecuteAsync( CodeActionContext context )
     {
         context.CancellationToken.ThrowIfCancellationRequested();
 
@@ -32,14 +33,16 @@ internal partial class RemoveAttributeCodeAction : ICodeAction
 
         if ( attributeTypeSymbol == null )
         {
-            return false;
+            throw new InvalidOperationException(
+                $"Cannot remove attributes of type '{this.AttributeType}' because the type does not exist in the source compilation." );
         }
 
         var targetSymbol = this.TargetDeclaration.GetSymbol( compilation );
 
         if ( targetSymbol == null )
         {
-            return false;
+            throw new InvalidOperationException(
+                $"Cannot remove attributes from '{this.TargetDeclaration}' because it does not exist in the source compilation." );
         }
 
         // We need to process all syntaxes that define this symbol.
@@ -63,7 +66,5 @@ internal partial class RemoveAttributeCodeAction : ICodeAction
 
             context.UpdateTree( transformedRoot, originalTree );
         }
-
-        return true;
     }
 }

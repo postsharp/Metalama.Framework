@@ -5,7 +5,7 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Code.SyntaxBuilders
 {
-    [CompileTimeOnly]
+    [CompileTime]
     public static class ExpressionBuilderExtensions
     {
         /// <summary>

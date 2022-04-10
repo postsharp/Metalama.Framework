@@ -10,7 +10,7 @@ namespace Metalama.Framework.Code
     /// <summary>
     /// Special types, such as <see cref="Void"/>.
     /// </summary>
-    [CompileTimeOnly]
+    [CompileTime]
     public enum SpecialType
     {
         /// <summary>
@@ -19,12 +19,12 @@ namespace Metalama.Framework.Code
         None,
 
         /// <summary>
-        /// <c>void</c>.
+        /// <see cref="System.Void" />.
         /// </summary>
         Void,
 
         /// <summary>
-        /// <c>object</c>.
+        /// <see cref="object" />.
         /// </summary>
         Object,
 
@@ -53,27 +53,27 @@ namespace Metalama.Framework.Code
         Double,
 
         /// <summary>
-        /// <c>System.Collections.IEnumerable</c>.
+        /// <see cref="System.Collections.IEnumerable" />.
         /// </summary>
         IEnumerable,
 
         /// <summary>
-        /// <c>System.Collections.IEnumerator</c>.
+        /// <see cref="System.Collections.IEnumerator" />.
         /// </summary>
         IEnumerator,
 
         /// <summary>
-        /// <c>System.Collections.Generic.IEnumerable</c>.
+        /// <see cref="System.Collections.Generic.IEnumerable{T}" />.
         /// </summary>
         IEnumerable_T,
 
         /// <summary>
-        /// <c>System.Collections.Generic.IEnumerator</c>.
+        /// <see cref="System.Collections.Generic.IEnumerator{T}" />.
         /// </summary>
         IEnumerator_T,
 
         /// <summary>
-        /// <c>System.Collections.Generic.List</c>.
+        /// <see cref="System.Collections.Generic.List{T}" />.
         /// </summary>
         List_T,
 

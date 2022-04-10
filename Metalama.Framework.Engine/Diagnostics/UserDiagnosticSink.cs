@@ -73,6 +73,8 @@ namespace Metalama.Framework.Engine.Diagnostics
 
         public int ErrorCount { get; private set; }
 
+        public int Revision { get; private set; }
+
         public void Report( Diagnostic diagnostic )
         {
             this._diagnostics ??= ImmutableArray.CreateBuilder<Diagnostic>();
@@ -82,6 +84,8 @@ namespace Metalama.Framework.Engine.Diagnostics
             {
                 this.ErrorCount++;
             }
+
+            this.Revision++;
         }
 
         /// <summary>
@@ -136,6 +140,8 @@ namespace Metalama.Framework.Engine.Diagnostics
         {
             this._suppressions ??= ImmutableArray.CreateBuilder<ScopedSuppression>();
             this._suppressions.Add( suppression );
+
+            this.Revision++;
         }
 
         public void Suppress( IEnumerable<ScopedSuppression> suppressions )
@@ -203,6 +209,8 @@ namespace Metalama.Framework.Engine.Diagnostics
             {
                 this._codeFixes ??= ImmutableArray.CreateBuilder<CodeFixInstance>();
                 this._codeFixes.Add( codeFix );
+
+                this.Revision++;
             }
         }
     }

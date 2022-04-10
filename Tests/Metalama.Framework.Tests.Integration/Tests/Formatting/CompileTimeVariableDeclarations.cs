@@ -4,7 +4,7 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Highlighting.Declarations.CompileTimeVariableDeclarations
 {
-    [CompileTimeOnly]
+    [CompileTime]
     class CompileTimeClass
     {
         public void CompileTimeMethod()
@@ -12,7 +12,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Highlighting.Declarati
         }
     }
 
-    [CompileTime]
+    [RunTimeOrCompileTime]
     class Aspect
     {
         [TestTemplate]

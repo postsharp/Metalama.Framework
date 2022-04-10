@@ -22,7 +22,7 @@ using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 namespace Metalama.Framework.Engine.CodeModel.Pseudo
 {
     internal abstract class PseudoAccessor<T> : IMethodImpl
-        where T : IMemberWithAccessors
+        where T : IMemberWithAccessorsImpl
     {
         protected T DeclaringMember { get; }
 
@@ -126,9 +126,11 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public IDeclaration OriginalDefinition => throw new NotImplementedException();
 
-        public IMember? OverriddenMember => ((IMemberWithAccessors?) ((IMemberImpl) this.DeclaringMember).OverriddenMember)?.GetAccessor( this.MethodKind );
+        public IMember? OverriddenMember => ((IMemberWithAccessors?) this.DeclaringMember.OverriddenMember)?.GetAccessor( this.MethodKind );
 
         public Location? DiagnosticLocation => this.DeclaringMember.GetDiagnosticLocation();
+
+        public SyntaxTree? PrimarySyntaxTree => this.DeclaringMember.PrimarySyntaxTree;
 
         public TExtension GetMetric<TExtension>()
             where TExtension : IMetric

@@ -163,7 +163,7 @@ namespace Metalama.Framework.Engine.Templating
             var scope = node.GetScopeFromAnnotation().GetValueOrDefault();
 
             // Take a decision from the node if we can.
-            if ( scope != TemplatingScope.Both && scope != TemplatingScope.Unknown )
+            if ( scope != TemplatingScope.RunTimeOrCompileTime && scope != TemplatingScope.Unknown )
             {
                 return scope.MustBeTransformed() ? TransformationKind.Transform : TransformationKind.None;
             }

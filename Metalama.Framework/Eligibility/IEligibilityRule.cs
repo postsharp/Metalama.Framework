@@ -11,7 +11,7 @@ namespace Metalama.Framework.Eligibility
     /// </summary>
     /// <typeparam name="T">The type of object that the extension can be applied to.</typeparam>
     /// <seealso href="@eligibility"/>
-    [CompileTimeOnly]
+    [CompileTime]
     public interface IEligibilityRule<in T>
     {
         /// <summary>

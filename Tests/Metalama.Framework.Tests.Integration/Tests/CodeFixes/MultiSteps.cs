@@ -1,3 +1,6 @@
+// Do not remove!
+// @ApplyCodeFix
+
 using System;
 using System.Threading.Tasks;
 using Metalama.Framework.Aspects;
@@ -7,7 +10,7 @@ using Metalama.Framework.CodeFixes;
 namespace Metalama.Framework.Tests.Integration.CodeFixes.MultiSteps
 {
     [AttributeUsage( AttributeTargets.Field | AttributeTargets.Property )]
-    [CompileTime] // TODO: should not be necessary to add [CompileTime]
+    [RunTimeOrCompileTime] // TODO: should not be necessary to add [CompileTime]
     public class NotToStringAttribute : Attribute { }
 
     public class ToStringAttribute : TypeAspect
@@ -27,7 +30,7 @@ namespace Metalama.Framework.Tests.Integration.CodeFixes.MultiSteps
             }
         }
 
-        [CompileTimeOnly]
+        [CompileTime]
         private async Task ImplementManually( ICodeActionBuilder builder, INamedType targetType )
         {
             await builder.ApplyAspectAsync( targetType, this );
@@ -44,18 +47,22 @@ namespace Metalama.Framework.Tests.Integration.CodeFixes.MultiSteps
     }
 
     // <target>
-    [ToString]
-    internal class MovingVertex
+
+    internal class TargetCode
     {
-        [NotToString]
-        public double X;
+        [ToString]
+        internal class MovingVertex
+        {
+            [NotToString]
+            public double X;
 
-        public double Y;
+            public double Y;
 
-        public double DX;
+            public double DX;
 
-        public double DY { get; set; }
+            public double DY { get; set; }
 
-        public double Velocity => Math.Sqrt( ( DX * DX ) + ( DY * DY ) );
+            public double Velocity => Math.Sqrt( ( DX * DX ) + ( DY * DY ) );
+        }
     }
 }

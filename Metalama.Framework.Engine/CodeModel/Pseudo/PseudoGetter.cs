@@ -7,9 +7,9 @@ using Metalama.Framework.Engine.CodeModel.Collections;
 
 namespace Metalama.Framework.Engine.CodeModel.Pseudo
 {
-    internal class PseudoGetter : PseudoAccessor<IFieldOrProperty>
+    internal class PseudoGetter : PseudoAccessor<IFieldOrPropertyImpl>
     {
-        public PseudoGetter( IFieldOrProperty property ) : base( property, MethodKind.PropertyGet ) { }
+        public PseudoGetter( IFieldOrPropertyImpl property ) : base( property, MethodKind.PropertyGet ) { }
 
         public override IParameterList Parameters => ParameterList.Empty;
 

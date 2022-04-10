@@ -12,7 +12,7 @@ namespace Metalama.Framework.Code
     /// Represent a declaration.
     /// </summary>
     /// <seealso cref="DeclarationExtensions"/>
-    [CompileTimeOnly]
+    [CompileTime]
     public interface IDeclaration : IDisplayable, IDiagnosticLocation, ICompilationElement, IMeasurable
     {
         /// <summary>

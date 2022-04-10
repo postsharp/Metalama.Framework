@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.CompileTime
         public static TemplatingScope ReplaceIndeterminate( this TemplatingScope scope, TemplatingScope defaultScope )
             => IsUndetermined( scope ) ? defaultScope : scope;
 
-        public static bool IsUndetermined( this TemplatingScope scope ) => scope == TemplatingScope.Both || scope == TemplatingScope.Unknown;
+        public static bool IsUndetermined( this TemplatingScope scope ) => scope == TemplatingScope.RunTimeOrCompileTime || scope == TemplatingScope.Unknown;
 
         public static TemplatingScope GetExpressionExecutionScope( this TemplatingScope scope )
             => scope switch
@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.CompileTime
             => scope switch
             {
                 TemplatingScope.CompileTimeOnlyReturningBoth when preferCompileTime => TemplatingScope.CompileTimeOnly,
-                TemplatingScope.CompileTimeOnlyReturningBoth when !preferCompileTime => TemplatingScope.Both,
+                TemplatingScope.CompileTimeOnlyReturningBoth when !preferCompileTime => TemplatingScope.RunTimeOrCompileTime,
                 TemplatingScope.Dynamic => TemplatingScope.RunTimeOnly,
                 TemplatingScope.CompileTimeOnlyReturningRuntimeOnly => TemplatingScope.RunTimeOnly,
                 _ => scope
@@ -52,7 +52,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 TemplatingScope.CompileTimeOnly => "compile-time",
                 TemplatingScope.CompileTimeOnlyReturningRuntimeOnly => "compile-time",
                 TemplatingScope.CompileTimeOnlyReturningBoth => "compile-time",
-                TemplatingScope.Both => "both",
+                TemplatingScope.RunTimeOrCompileTime => "both",
                 TemplatingScope.Unknown => "unknown",
                 TemplatingScope.Dynamic => "dynamic",
 

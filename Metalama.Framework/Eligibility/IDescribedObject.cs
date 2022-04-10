@@ -14,7 +14,7 @@ namespace Metalama.Framework.Eligibility
     /// <typeparam name="T"></typeparam>
     /// <seealso href="@eligibility"/>
     [InternalImplement]
-    [CompileTimeOnly]
+    [CompileTime]
     public interface IDescribedObject<out T> : IFormattable
     {
         /// <summary>

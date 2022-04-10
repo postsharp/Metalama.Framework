@@ -30,11 +30,16 @@
             <_Parameter1>TargetFramework</_Parameter1>
             <_Parameter2>$(TargetFramework)</_Parameter2>
         </AssemblyAttribute>
-        <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
-            <_Parameter1>DefineConstants</_Parameter1>
-            <_Parameter2>$(DefineConstants)</_Parameter2>
-        </AssemblyAttribute>
     </ItemGroup>
+
+    <Target Name="AddAttributeForDefineConstants" DependsOnTargets="AddImplicitDefineConstants" BeforeTargets="CoreGenerateAssemblyInfo">
+        <ItemGroup>
+            <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+                <_Parameter1>DefineConstants</_Parameter1>
+                <_Parameter2>$(DefineConstants)</_Parameter2>
+            </AssemblyAttribute>
+        </ItemGroup>
+    </Target>
 
     <Target Name='WriteReferenceAssemblies' AfterTargets="Build">
         <WriteLinesToFile File='$(IntermediateOutputPath)assemblies.txt' Overwrite='true'
@@ -87,34 +92,43 @@ namespace $(RootNamespace)
 
     <Target Name="CleanTestOutput">
         <ItemGroup>
-            <_CleanTestOutput Include="obj\\transformed\**\*.*"/>
-            <_CleanTestOutput Include="obj\\html\**\*.*"/>
+            <_CleanTestOutput Include="obj\transformed\**\*.*"/>
+            <_CleanTestOutput Include="obj\html\**\*.*"/>
         </ItemGroup>
-        <RemoveDir Directories="obj\\transformed"/>
-        <RemoveDir Directories="obj\\html"/>
+        <RemoveDir Directories="obj\transformed"/>
+        <RemoveDir Directories="obj\html"/>
         <Delete Files="@(_CleanTestOutput)"/>
+    </Target>
+    
+    <Target Name="_AcceptTestOutput">
+        <ItemGroup>
+            <_AcceptTestOutput Include="obj\transformed\$(TargetFramework)\**\*.cs"/>
+            <_AcceptTestOutput Include="obj\transformed\$(TargetFramework)\**\*.txt"/>
+        </ItemGroup>
+        <Message Text="Accepting @(_AcceptTestOutput)" Importance="high"/>
+        <Copy
+                SourceFiles="@(_AcceptTestOutput)"
+                DestinationFiles="@(_AcceptTestOutput->'%(RecursiveDir)%(Filename)%(Extension)')"/>
     </Target>
 
     <Target Name="AcceptTestOutput">
+        <CallTarget Targets="_AcceptTestOutput" Condition="'$(TargetFramework)'!=''" />
+        <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="_AcceptTestOutput" Properties="TargetFramework=%(TargetFrameworks.Identity)" Condition="'$(TargetFramework)'==''"/> 
+    </Target>
+
+    <Target Name="_AcceptTestHtml">
         <ItemGroup>
-            <_AcceptTestOutput Include="obj\\transformed\net5.0\**\*.cs"/>
-            <_AcceptTestOutput Include="obj\\transformed\net5.0\**\*.txt"/>
-            <_AcceptTestOutput Include="obj\\transformed\netframework4.8\**\*.cs"/>
-            <_AcceptTestOutput Include="obj\\transformed\netframework4.8\**\*.txt"/>
+            <_AcceptTestOutput Include="obj\html\$(TargetFramework)\**\*.cs.html"/>
         </ItemGroup>
+        <Message Text="Accepting @(_AcceptTestOutput)" Importance="high"/>
         <Copy
                 SourceFiles="@(_AcceptTestOutput)"
                 DestinationFiles="@(_AcceptTestOutput->'%(RecursiveDir)%(Filename)%(Extension)')"/>
     </Target>
 
     <Target Name="AcceptTestHtml">
-        <ItemGroup>
-            <_AcceptTestOutput Include="obj\\html\$(TargetFramework)\net5.0\**\*.cs.html"/>
-            <_AcceptTestOutput Include="obj\\html\$(TargetFramework)\netframework4.8\**\*.cs.html"/>
-        </ItemGroup>
-        <Copy
-                SourceFiles="@(_AcceptTestOutput)"
-                DestinationFiles="@(_AcceptTestOutput->'%(RecursiveDir)%(Filename)%(Extension)')"/>
+        <CallTarget Targets="_AcceptTestHtml" Condition="'$(TargetFramework)'!=''" />
+        <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="_AcceptTestHtml" Properties="TargetFramework=%(TargetFrameworks.Identity)" Condition="'$(TargetFramework)'==''"/>
     </Target>
 
 

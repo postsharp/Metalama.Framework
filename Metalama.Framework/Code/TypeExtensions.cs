@@ -10,7 +10,7 @@ namespace Metalama.Framework.Code
     /// <summary>
     /// Provides extension methods for <see cref="IType"/>.
     /// </summary>
-    [CompileTimeOnly]
+    [CompileTime]
     public static class TypeExtensions
     {
         /// <summary>

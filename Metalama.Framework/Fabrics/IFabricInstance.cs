@@ -9,7 +9,7 @@ namespace Metalama.Framework.Fabrics
     /// <summary>
     /// Represents an instance of a <see cref="Fabrics.Fabric"/> type including its <see cref="TargetDeclaration"/>.
     /// </summary>
-    [CompileTimeOnly]
+    [CompileTime]
     public interface IFabricInstance : IAspectPredecessor
     {
         /// <summary>

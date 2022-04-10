@@ -2,7 +2,7 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplatingCodeValidation.UseProceedInCompileTimeOnlyNonTemplate.cs;
 
-[CompileTimeOnly]
+[CompileTime]
 internal class C
 {
     private void M()

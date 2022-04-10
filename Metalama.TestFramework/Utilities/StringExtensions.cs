@@ -1,9 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-#if NET5_0_OR_GREATER
 using System;
-#endif
+using System.Text;
 
 namespace Metalama.TestFramework.Utilities
 {
@@ -11,7 +10,7 @@ namespace Metalama.TestFramework.Utilities
     /// Extension methods to <see cref="string"/> to cope with the absence of a few methods in .NET Framework and
     /// the warnings we get when we don't use them in .NET 5.
     /// </summary>
-    internal static class StringExtensions
+    public static class StringExtensions
     {
         public static string ReplaceOrdinal( this string s, string oldValue, string newValue )
 #if NET5_0_OR_GREATER
@@ -42,5 +41,8 @@ namespace Metalama.TestFramework.Utilities
 #endif
 
         public static string NotNull( this string? s ) => s!;
+        
+        public static void AppendLineInvariant( this StringBuilder stringBuilder, FormattableString s )
+            => stringBuilder.AppendLine( FormattableString.Invariant( s ) );
     }
 }

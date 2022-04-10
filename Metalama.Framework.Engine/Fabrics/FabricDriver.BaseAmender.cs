@@ -5,26 +5,28 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
+using Metalama.Framework.Validation;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 
 namespace Metalama.Framework.Engine.Fabrics;
 
 internal abstract partial class FabricDriver
 {
-    protected abstract class BaseAmender<T> : IAmender<T>, IDeclarationSelectorInternal
+    protected abstract class BaseAmender<T> : IAmender<T>, IAspectReceiverParent
         where T : class, IDeclaration
     {
         // The Target property is protected (and not exposed to the API) because
         private readonly FabricInstance _fabricInstance;
         private readonly Ref<T> _targetDeclaration;
         private readonly FabricManager _fabricManager;
+        private AspectReceiverSelector<T>? _declarationSelector;
 
         protected BaseAmender(
             IProject project,
@@ -38,56 +40,43 @@ internal abstract partial class FabricDriver
             this.Project = project;
         }
 
+        private AspectReceiverSelector<T> GetAspectTargetSelector() => this._declarationSelector ??= new AspectReceiverSelector<T>( CompilationModelVersion.Initial, this._targetDeclaration, this );
+
         public IProject Project { get; }
 
-        protected abstract void AddAspectSource( IAspectSource aspectSource );
+        public abstract void AddAspectSource( IAspectSource aspectSource );
 
-        protected abstract void AddValidatorSource( ProgrammaticValidatorSource validatorSource );
+        public abstract void AddValidatorSource( IValidatorSource validatorSource );
 
-        public IDeclarationSelection<TChild> WithTargetMembers<TChild>( Func<T, IEnumerable<TChild>> selector )
+        public IAspectReceiver<TChild> WithTargetMembers<TChild>( Func<T, IEnumerable<TChild>> selector )
             where TChild : class, IDeclaration
-        {
-            var executionContext = UserCodeExecutionContext.Current;
+            => this.GetAspectTargetSelector().WithTargetMembers( selector );
 
-            return new DeclarationSelection<TChild>(
-                this._targetDeclaration,
-                this,
-                this.AddAspectSource,
-                this.AddValidatorSource,
-                ( compilation, diagnostics ) =>
-                {
-                    var targetDeclaration = this._targetDeclaration.GetTarget( compilation ).AssertNotNull();
+        IValidatorReceiver<T> IValidatorReceiverSelector<T>.WithTarget() => this.WithTarget();
 
-                    if ( !this._fabricManager.UserCodeInvoker.TryInvokeEnumerable(
-                            () => selector( targetDeclaration ),
-                            executionContext.WithDiagnosticAdder( diagnostics ),
-                            out var targets ) )
-                    {
-                        return Enumerable.Empty<TChild>();
-                    }
-                    else
-                    {
-                        return targets;
-                    }
-                },
-                this._fabricManager.AspectClasses,
-                this._fabricManager.ServiceProvider );
-        }
+        IValidatorReceiver<TMember> IValidatorReceiverSelector<T>.WithTargetMembers<TMember>( Func<T, IEnumerable<TMember>> selector )
+            => this.WithTargetMembers( selector );
 
-        public IDeclarationSelection<T> WithTarget() => this.WithTargetMembers( declaration => new[] { declaration } );
+        public IAspectReceiver<T> WithTarget() => this.GetAspectTargetSelector().WithTarget();
 
-        [Obsolete( "Not implemented." )]
-        public void AddAnnotation<TTarget, TAspect, TAnnotation>( Func<TTarget, TAnnotation?> provider )
-            where TTarget : class, IDeclaration
-            where TAspect : IAspect
-            where TAnnotation : IAnnotation<TTarget, TAspect>
-            => throw new NotImplementedException();
+        IValidatorReceiverSelector<T> IAspectReceiverSelector<T>.AfterAllAspects() => this.GetAspectTargetSelector().AfterAllAspects();
+
+        IValidatorReceiverSelector<T> IAspectReceiverSelector<T>.BeforeAnyAspect() => this.GetAspectTargetSelector().BeforeAnyAspect();
+
+        IServiceProvider IAspectReceiverParent.ServiceProvider => this._fabricManager.ServiceProvider;
+
+        BoundAspectClassCollection IAspectReceiverParent.AspectClasses => this._fabricManager.AspectClasses;
+
+        UserCodeInvoker IAspectReceiverParent.UserCodeInvoker => this._fabricManager.UserCodeInvoker;
 
         public AspectPredecessor AspectPredecessor => new( AspectPredecessorKind.Fabric, this._fabricInstance );
 
-        Type IDeclarationSelectorInternal.Type => this._fabricInstance.Fabric.GetType();
+        Type IAspectReceiverParent.Type => this._fabricInstance.Fabric.GetType();
 
-        public ValidatorDriver<TContext> GetValidatorDriver<TContext>( MethodInfo validateMethod )
-            => this._fabricInstance.ValidatorDriverFactory.GetValidatorDriver<TContext>( validateMethod );
+        ReferenceValidatorDriver IValidatorDriverFactory.GetReferenceValidatorDriver( MethodInfo validateMethod )
+            => this._fabricInstance.ValidatorDriverFactory.GetReferenceValidatorDriver( validateMethod );
+
+        DeclarationValidatorDriver IValidatorDriverFactory.GetDeclarationValidatorDriver( ValidatorDelegate<DeclarationValidationContext> validate )
+            => this._fabricInstance.ValidatorDriverFactory.GetDeclarationValidatorDriver( validate );
     }
 }

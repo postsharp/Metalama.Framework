@@ -8,7 +8,7 @@ namespace Metalama.Framework.Code
     /// <summary>
     /// Enumerates the different abilities of a field or property to be written (set).
     /// </summary>
-    [CompileTimeOnly]
+    [CompileTime]
     public enum Writeability
     {
         // IMPORTANT: Do not change values, comparison depends on these.

@@ -12,7 +12,7 @@ namespace Metalama.Framework.Eligibility
     /// </summary>
     /// <typeparam name="T"></typeparam>
     /// <seealso href="@eligibility"/>
-    [CompileTimeOnly]
+    [CompileTime]
     public interface IEligible<in T>
         where T : class, IDeclaration
     {

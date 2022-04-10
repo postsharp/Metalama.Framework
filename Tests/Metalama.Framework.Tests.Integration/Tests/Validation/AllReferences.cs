@@ -16,12 +16,11 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
 
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.WithTarget().RegisterReferenceValidator( Validate, ReferenceKinds.All );
+            builder.WithTarget().ValidateReferences( Validate, ReferenceKinds.All );
         }
 
         private static void Validate( in ReferenceValidationContext context )
         {
-        
             context.Diagnostics.Report( _warning.WithArguments( ( context.ReferenceKinds, context.ReferencingDeclaration, context.Syntax.Kind ) ) );
         }
     }
@@ -30,11 +29,9 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
     internal class ValidatedClass
     {
         public static void Method( object o ) { }
-        
+
         public static int StaticField;
         public int InstanceField;
-        
-        
     }
 
     // <target>
@@ -53,7 +50,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.AllReferences
             _ = x.InstanceField;
             x.InstanceField = 5;
             x.InstanceField += 5;
-            ValidatedClass.StaticField = 5;
+            StaticField = 5;
             Method( typeof(ValidatedClass) );
 
             return null;

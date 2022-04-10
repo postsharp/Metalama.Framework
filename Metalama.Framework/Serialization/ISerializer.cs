@@ -9,7 +9,7 @@ namespace Metalama.Framework.Serialization
     /// <summary>
     /// Defines the semantics of an object serializer.
     /// </summary>
-    [CompileTimeOnly]
+    [CompileTime]
     public interface ISerializer
     {
         /// <summary>

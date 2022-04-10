@@ -13,14 +13,14 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Highlighting.IfStateme
         public void RunTimeMethod() { }
     }
 
-    [CompileTimeOnly]
+    [CompileTime]
     internal class CompileTimeClass
     {
         public void CompileTimeMethod() { }
     }
 
     // Base list should be documented.
-    [CompileTime]
+    [RunTimeOrCompileTime]
     internal class Aspect : OverrideMethodAspect, IAspect<INamedType>
     {
         // Override should be documented.

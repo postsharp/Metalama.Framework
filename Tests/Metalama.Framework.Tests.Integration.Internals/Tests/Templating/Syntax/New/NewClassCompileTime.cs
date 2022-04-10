@@ -5,7 +5,7 @@ using Metalama.Framework.Aspects;
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.New.CompileTimeNewClass
 {
 
-    [CompileTimeOnly]
+    [CompileTime]
     class CompileTimeClass
     {
         public string String = "string";

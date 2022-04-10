@@ -21,34 +21,34 @@ namespace Metalama.TestFramework
         public string? InputPath { get; }
 
         /// <summary>
-        /// Gets the input <c>Document</c>.
+        /// Gets the input <see cref="Document" />.
         /// </summary>
         public Document InputDocument { get; }
 
         public Document? OutputRunTimeDocument { get; private set; }
 
         /// <summary>
-        /// Gets the input <c>SyntaxTree</c>.
+        /// Gets the input <see cref="SyntaxTree" />.
         /// </summary>
         public SyntaxTree InputSyntaxTree { get; }
 
         /// <summary>
-        /// Gets the root <c>SyntaxNode</c> of the output run-time syntax tree.
+        /// Gets the root <see cref="SyntaxNode" /> of the output run-time syntax tree.
         /// </summary>
         public CompilationUnitSyntax? OutputRunTimeSyntaxRoot { get; private set; }
 
         /// <summary>
-        /// Gets the <c>SourceText</c> of the output run-time syntax tree.
+        /// Gets the <see cref="SourceText" /> of the output run-time syntax tree.
         /// </summary>
         public SourceText? OutputRunTimeSourceText { get; private set; }
 
         /// <summary>
-        /// Gets the root <c>SyntaxNode</c> of the output compile-time syntax tree.
+        /// Gets the root <see cref="SyntaxNode" /> of the output compile-time syntax tree.
         /// </summary>
         public SyntaxNode? OutputCompileTimeSyntaxRoot { get; private set; }
 
         /// <summary>
-        /// Gets the root <c>SyntaxNode</c> for the annotated syntax tree (before transformation). This is
+        /// Gets the root <see cref="SyntaxNode" /> for the annotated syntax tree (before transformation). This is
         /// useful for syntax highlighting.
         /// </summary>
         public SyntaxNode? AnnotatedSyntaxRoot { get; internal set; }

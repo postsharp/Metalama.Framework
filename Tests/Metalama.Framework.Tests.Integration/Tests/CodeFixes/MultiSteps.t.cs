@@ -1,7 +1,7 @@
-[ToString]
+internal class TargetCode
+{
     internal class MovingVertex
     {
-        [NotToString]
         public double X;
 
         public double Y;
@@ -13,7 +13,9 @@
         public double Velocity => Math.Sqrt( ( DX * DX ) + ( DY * DY ) );
 
 
-public override global::System.String ToString()
-{
-    throw new global::System.NotImplementedException();
-}    }
+            public override string ToString()
+            {
+                throw new NotImplementedException();
+            }
+        }
+}

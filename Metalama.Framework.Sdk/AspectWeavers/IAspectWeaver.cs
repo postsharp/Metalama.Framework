@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.AspectWeavers
     /// of this class must be public, have a default constructor, and be annotated with the <see cref="AspectWeaverAttribute"/>
     /// and <see cref="MetalamaPlugInAttribute"/> custom attributes.
     /// </summary>
-    [CompileTimeOnly] /* For cases when the weaver is not in a separate compile-time assembly */
+    [CompileTime] /* For cases when the weaver is not in a separate compile-time assembly */
     public interface IAspectWeaver : IAspectDriver
     {
         /// <summary>

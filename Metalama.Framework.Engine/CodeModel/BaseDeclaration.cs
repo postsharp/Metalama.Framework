@@ -53,5 +53,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public abstract IDeclaration OriginalDefinition { get; }
 
         public abstract Location? DiagnosticLocation { get; }
+
+        public abstract SyntaxTree? PrimarySyntaxTree { get; }
     }
 }

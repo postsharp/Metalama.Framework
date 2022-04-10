@@ -8,7 +8,7 @@ namespace Metalama.Framework.Code
     /// <summary>
     /// Exposes a <see cref="Type"/> property.
     /// </summary>
-    [CompileTimeOnly]
+    [CompileTime]
     public interface IHasType
     {
         /// <summary>

@@ -9,7 +9,7 @@ namespace Metalama.Framework.Code
     /// <summary>
     /// A compile-time representation of a run-time expression.
     /// </summary>
-    [CompileTimeOnly]
+    [CompileTime]
     [InternalImplement]
     public interface IExpression : IHasType
     {

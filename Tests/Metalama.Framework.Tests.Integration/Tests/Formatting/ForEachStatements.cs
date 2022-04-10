@@ -11,13 +11,13 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Highlighting.ForEachSt
         public IEnumerable<int> runTimeEnumerable;
     }
 
-    [CompileTimeOnly]
+    [CompileTime]
     class CompileTimeClass
     {
         public IEnumerable<int> compileTimeEnumerable;
     }
 
-    [CompileTime]
+    [RunTimeOrCompileTime]
     class Aspect
     {
         [TestTemplate]

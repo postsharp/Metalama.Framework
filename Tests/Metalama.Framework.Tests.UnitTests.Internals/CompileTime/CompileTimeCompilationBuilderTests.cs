@@ -645,7 +645,7 @@ public class ReferencedClass
 using System;
 using Metalama.Framework.Aspects;
 
-[CompileTimeOnly]
+[CompileTime]
 public class CompileTimeOnlyClass
 {
    static Type Type1 = typeof(RunTimeOnlyClass);
@@ -669,7 +669,7 @@ public class RunTimeOnlyClass
 using System;
 using Metalama.Framework.Aspects;
 
-[CompileTimeOnly]
+[CompileTime]
 public class CompileTimeOnlyClass
 {
    static global::System.Type Type1 = global::Metalama.Framework.Engine.ReflectionMocks.CompileTimeType.GetCompileTimeType(""1 (D \""RunTimeOnlyClass\"" (N \""\"" 0 (U (S \""test\"" 3) 2) 1) 0 0 (% 0) 0)"",""RunTimeOnlyClass"");
@@ -715,7 +715,7 @@ public class CompileTimeOnlyClass
 using System;
 using Metalama.Framework.Aspects;
 
-[CompileTimeOnly]
+[CompileTime]
 public class Anything
 {
 }
@@ -848,7 +848,7 @@ Method();
 void Method() { }
 int field;
 
-[CompileTimeOnly]
+[CompileTime]
 class CompileTimeClass { }
 ";
 
@@ -858,7 +858,7 @@ class CompileTimeClass { }
 using System;
 using Metalama.Framework.Aspects;
 
-[CompileTimeOnly]
+[CompileTime]
 class CompileTimeClass { }
 ";
 

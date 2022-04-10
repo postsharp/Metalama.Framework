@@ -12,6 +12,6 @@ namespace Metalama.Framework.Fabrics
     /// or <see cref="TypeFabric"/>. 
     /// </summary>
     /// <seealso href="@applying-aspects"/>
-    [CompileTimeOnly]
+    [CompileTime]
     public abstract class Fabric : ILamaSerializable { }
 }

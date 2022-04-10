@@ -81,11 +81,36 @@ public static class CodeFixFactory
     /// <param name="aspect">The aspect that must be applied to the declaration.</param>
     /// <param name="title">An optional title of the <see cref="CodeFix"/>, displayed to the user in the light bulb or refactoring menu. When
     /// not specified, the title is generated from the other parameters.</param>
-    public static CodeFix ApplyAspect<T>( T targetDeclaration, IAspect<T> aspect, string? title )
+    public static CodeFix ApplyAspect<T>( T targetDeclaration, IAspect<T> aspect, string? title = null )
         where T : class, IDeclaration
         => new(
             title ?? $"Apply {aspect.GetType().Name} to {targetDeclaration.ToDisplayString( CodeDisplayFormat.MinimallyQualified )}",
             builder => builder.ApplyAspectAsync( targetDeclaration, aspect ) );
+
+    /// <summary>
+    /// Creates a <see cref="CodeFix"/> that changes the accessibility of a given type or member.
+    /// </summary>
+    /// <param name="targetMember">The type or member whose accessibility must be changed.</param>
+    /// <param name="accessibility">The new accessibility.</param>
+    /// <param name="title">An optional title of the <see cref="CodeFix"/>, displayed to the user in the light bulb or refactoring menu. When
+    /// not specified, the title is generated from the other parameters.</param>
+    public static CodeFix ChangeAccessibility( IMemberOrNamedType targetMember, Accessibility accessibility, string? title = null )
+    {
+        var accessibilityName = accessibility switch
+        {
+            Accessibility.Internal => "internal",
+            Accessibility.Private => "private",
+            Accessibility.Protected => "protected",
+            Accessibility.Public => "public",
+            Accessibility.PrivateProtected => "private protected",
+            Accessibility.ProtectedInternal => "protected internal",
+            _ => throw new ArgumentOutOfRangeException( nameof(accessibility), accessibility, null )
+        };
+
+        return new CodeFix(
+            title ?? $"Make {accessibilityName}",
+            builder => builder.ChangeAccessibilityAsync( targetMember, accessibility ) );
+    }
 
     private static string RemoveSuffix( string s, string suffix )
         => s.EndsWith( suffix, StringComparison.Ordinal ) ? s.Substring( 0, s.Length - suffix.Length ) : s;

@@ -60,6 +60,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override bool IsAsync => false;
 
+        public IMember? OverriddenMember => null;
+
         public override MemberInfo ToMemberInfo() => this.ToFieldOrPropertyInfo();
 
         public IMethod? GetAccessor( MethodKind methodKind )

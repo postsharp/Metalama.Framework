@@ -89,12 +89,14 @@ namespace Metalama.Framework.Engine.Fabrics
                 this.FabricManager,
                 new FabricInstance( this, this.FabricSymbol.ContainingAssembly.ToTypedRef( this.Compilation ) ) );
 
+            var projectFabric = (ProjectFabric) this.Fabric;
+
             var executionContext = new UserCodeExecutionContext(
                 this.FabricManager.ServiceProvider,
                 diagnosticAdder,
-                UserCodeMemberInfo.FromDelegate( new Action<IProjectAmender>( ((ProjectFabric) this.Fabric).AmendProject ) ) );
+                UserCodeMemberInfo.FromDelegate( new Action<IProjectAmender>( projectFabric.AmendProject ) ) );
 
-            if ( !this.FabricManager.UserCodeInvoker.TryInvoke( () => ((ProjectFabric) this.Fabric).AmendProject( amender ), executionContext ) )
+            if ( !this.FabricManager.UserCodeInvoker.TryInvoke( () => projectFabric.AmendProject( amender ), executionContext ) )
             {
                 result = null;
 

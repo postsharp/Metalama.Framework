@@ -79,6 +79,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         // TODO: should we locate diagnostic on the aspect attribute?
         public Location? DiagnosticLocation => null;
 
+        public abstract SyntaxTree? PrimarySyntaxTree { get; }
+
         public TExtension GetMetric<TExtension>()
             where TExtension : IMetric
             => this.GetCompilationModel().MetricManager.GetMetric<TExtension>( this );
