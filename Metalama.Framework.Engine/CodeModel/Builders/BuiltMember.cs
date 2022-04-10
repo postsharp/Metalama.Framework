@@ -24,6 +24,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public bool IsExplicitInterfaceImplementation => this.MemberBuilder.IsExplicitInterfaceImplementation;
 
+        public bool IsImplicit => false;
+
         public new INamedType DeclaringType => base.DeclaringType.AssertNotNull();
 
         public bool IsVirtual => this.MemberBuilder.IsVirtual;

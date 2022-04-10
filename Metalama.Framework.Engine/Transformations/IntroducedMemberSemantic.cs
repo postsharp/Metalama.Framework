@@ -7,14 +7,6 @@ namespace Metalama.Framework.Engine.Transformations
     {
         Introduction,
         Override,
-        GetterOverride,
-        SetterOverride,
-        EventOverride,
-        AdderOverride,
-        RemoverOverride,
-        RaiserOverride,
-        InterfaceImplementation,
         InitializerMethod,
-        Initialization
     }
 }

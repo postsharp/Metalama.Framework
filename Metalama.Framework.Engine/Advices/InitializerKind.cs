@@ -5,49 +5,48 @@ using System;
 
 namespace Metalama.Framework.Aspects
 {
-    [Flags]
-    public enum InitializationReason
+    public enum InitializerKind
     {
         /// <summary>
         /// Indicates that the advice should be executed at the beginning of the instance constructor. 
         /// The advice is executed before the instance constructor code is executed.
         /// </summary>
-        Constructing = 0x01,
+        BeforeInstanceConstructor,
 
         /// <summary>
         /// Indicates that the advice should be executed at the beginning of the type constructor. 
         /// This is before the instance constructor code is executed.
         /// </summary>
-        TypeConstructing = 0x02,
+        BeforeTypeConstructor,
 
         /// <summary>
         /// Indicates that the advice should be executed after all constructors are finished but before the initialization block.
         /// </summary>
         [Obsolete( "Not implemented" )]
-        Constructed = 0x04,
+        AfterLastInstanceConstructor,
 
         /// <summary>
         /// Indicates that the advice should be executed after all constructors are finished and after the initialization block.
         /// </summary>
         [Obsolete( "Not implemented" )]
-        Initialized = 0x08,
+        AfterObjectInitialization,
 
         /// <summary>
         /// Indicates that the advice should be executed when the instance of a target class is deserialized.
         /// </summary>
         [Obsolete( "Not implemented" )]
-        Deserialized = 0x10,
+        AfterDeserialize,
 
         /// <summary>
         /// Indicates that the advice should be executed when the instance of a target class is cloned.
         /// </summary>
         [Obsolete( "Not implemented" )]
-        Cloned = 0x20,
+        AfterMemberwiseClone,
 
         /// <summary>
         /// Indicated that the advice should be executed when the the target value type is mutated using the "with" expression.
         /// </summary>
         [Obsolete( "Not implemented" )]
-        Mutated = 0x40
+        AfterWith
     }
 }

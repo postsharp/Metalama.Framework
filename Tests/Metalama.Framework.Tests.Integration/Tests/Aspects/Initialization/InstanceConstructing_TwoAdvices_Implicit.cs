@@ -9,8 +9,8 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.InstanceCo
     {
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            builder.Advices.Initialize(builder.Target, nameof(Template), InitializationReason.Constructing, tags: new TagDictionary() { ["name"] = "first" });
-            builder.Advices.Initialize(builder.Target, nameof(Template), InitializationReason.Constructing, tags: new TagDictionary() { ["name"] = "second" });
+            builder.Advices.AddInitializerBeforeInstanceConstructor(builder.Target, nameof(Template), tags: new TagDictionary() { ["name"] = "first" });
+            builder.Advices.AddInitializerBeforeInstanceConstructor(builder.Target, nameof(Template), tags: new TagDictionary() { ["name"] = "second" });
         }
 
         [Template]

@@ -20,6 +20,6 @@ namespace Metalama.Framework.Engine.Transformations
             INamedType targetType,
             AspectLayerId aspectLayer,
             IDeclaration targetDeclaration,
-            InitializationReason reason );
+            InitializerKind reason );
     }
 }

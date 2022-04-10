@@ -16,11 +16,6 @@ namespace Metalama.Framework.Code
         public ConstructorInitializerKind InitializerKind { get; }
 
         /// <summary>
-        /// Gets a value indicating whether the constructor is explicitly defined. Returns <c>false</c> this information cannot be determined.
-        /// </summary>
-        public bool IsExplicit { get; }
-
-        /// <summary>
         /// Gets a <see cref="ConstructorInfo"/> that represents the current constructor at run time.
         /// </summary>
         /// <returns>A <see cref="ConstructorInfo"/> that can be used only in run-time code.</returns>

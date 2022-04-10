@@ -275,6 +275,22 @@ namespace Metalama.Framework.Aspects
             OverrideStrategy whenExists = OverrideStrategy.Default,
             TagDictionary? tags = null );
 
+        // TODO: Document.
+
+        /// <exclude />
+        void AddInitializerBeforeTypeConstructor(
+            IMemberOrNamedType targetDeclaration,
+            string template,
+            TagDictionary? tags = null );
+
+        // TODO: Document.
+
+        /// <exclude />
+        void AddInitializerBeforeInstanceConstructor(
+            IMemberOrNamedType targetDeclaration,
+            string template,
+            TagDictionary? tags = null );
+
         [Obsolete( "Not implemented." )]
         void ImplementInterface(
             INamedType targetType,
@@ -289,12 +305,6 @@ namespace Metalama.Framework.Aspects
             Type interfaceType,
             IReadOnlyList<InterfaceMemberSpecification> interfaceMemberSpecifications,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            TagDictionary? tags = null );
-
-        void Initialize(
-            IMemberOrNamedType targetDeclaration,
-            string template,
-            InitializationReason initializationReason,
             TagDictionary? tags = null );
 
         [Obsolete( "Not implemented." )]

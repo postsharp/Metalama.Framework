@@ -242,10 +242,8 @@ namespace Metalama.Framework.Engine.Linking
                 // TODO: The order here is correct for initialization, i.e. first aspects (transformation order) are initialized first.
                 //       This would not be, however, correct for other uses, but we don't have those.
 
-                var beginningStatements = Order( insertedStatements.Where( s => s.Position == InsertedStatementPosition.Beginning ) )
+                var beginningStatements = Order( insertedStatements )
                     .Select( s => s.Statement );
-
-                var endStatements = Order( insertedStatements.Where( s => s.Position == InsertedStatementPosition.End ) ).Select( s => s.Statement );
 
                 switch ( constructorDeclaration )
                 {
@@ -257,8 +255,7 @@ namespace Metalama.Framework.Engine.Linking
                                 .WithBody(
                                     Block(
                                             beginningStatements
-                                                .Append( ExpressionStatement( expressionBody.Expression.WithSourceCodeAnnotationIfNotGenerated() ) )
-                                                .Concat( endStatements ) )
+                                                .Append( ExpressionStatement( expressionBody.Expression.WithSourceCodeAnnotationIfNotGenerated() ) ) )
                                         .WithGeneratedCodeAnnotation() );
 
                     case { Body: { } body }:
@@ -269,8 +266,7 @@ namespace Metalama.Framework.Engine.Linking
                                         beginningStatements
                                             .Append(
                                                 body.WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
-                                                    .WithSourceCodeAnnotationIfNotGenerated() )
-                                            .Concat( endStatements ) ) );
+                                                    .WithSourceCodeAnnotationIfNotGenerated() ) ) );
                 }
 
                 return constructorDeclaration;

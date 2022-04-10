@@ -43,8 +43,8 @@ namespace Metalama.Framework.Engine.Transformations
 
         public InsertedStatement? GetInsertedStatement( InsertStatementTransformationContext context )
         {
-            var metaApi = MetaApi.ForDeclaration(
-                this.ContextDeclaration,
+            var metaApi = MetaApi.ForConstructor(
+                this._targetConstructor,
                 new MetaApiProperties(
                     context.DiagnosticSink,
                     this._template.Cast(),
@@ -75,7 +75,6 @@ namespace Metalama.Framework.Engine.Transformations
             }
 
             return new InsertedStatement(
-                InsertedStatementPosition.Beginning,
                 expandedBody
                     .WithGeneratedCodeAnnotation()
                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),

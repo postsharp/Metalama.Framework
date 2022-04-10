@@ -23,11 +23,6 @@ namespace Metalama.Framework.Engine.Linking
         public IMemberIntroduction? TargetIntroduction { get; }
 
         /// <summary>
-        /// Gets the position of the inserted statement.
-        /// </summary>
-        public InsertedStatementPosition Position { get; }
-
-        /// <summary>
         /// Gets the inserted statement.
         /// </summary>
         public StatementSyntax Statement { get; }
@@ -40,14 +35,12 @@ namespace Metalama.Framework.Engine.Linking
         public LinkerInsertedStatement(
             ITransformation parentTransformation,
             SyntaxNode targetNode,
-            InsertedStatementPosition position,
             StatementSyntax statement,
             IDeclaration contextDeclaration )
         {
             this.ParentTransformation = parentTransformation;
             this.TargetNode = targetNode;
             this.TargetIntroduction = null;
-            this.Position = position;
             this.Statement = statement;
             this.ContextDeclaration = contextDeclaration;
         }
@@ -55,14 +48,12 @@ namespace Metalama.Framework.Engine.Linking
         public LinkerInsertedStatement(
             ITransformation parentTransformation,
             IMemberIntroduction targetIntroduction,
-            InsertedStatementPosition position,
             StatementSyntax statement,
             IDeclaration contextDeclaration )
         {
             this.ParentTransformation = parentTransformation;
             this.TargetNode = null;
             this.TargetIntroduction = targetIntroduction;
-            this.Position = position;
             this.Statement = statement;
             this.ContextDeclaration = contextDeclaration;
         }

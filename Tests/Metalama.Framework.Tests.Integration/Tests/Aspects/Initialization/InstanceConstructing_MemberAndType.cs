@@ -13,7 +13,9 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.InstanceCo
         [Template]
         public void Template()
         {
-            Console.WriteLine($"{((IMemberOrNamedType)meta.Target.Declaration).Name}: {meta.AspectInstance.AspectClass.ShortName}");
+            var targetConstructorString = meta.Target.Constructor.ToDisplayString(CodeDisplayFormat.MinimallyQualified);
+            var targetDeclarationString = ((IDeclaration)meta.Tags["target"]!).ToDisplayString(CodeDisplayFormat.MinimallyQualified);
+            Console.WriteLine($"{targetConstructorString}, {targetDeclarationString}: {meta.AspectInstance.AspectClass.ShortName}");
         }
     }
 
@@ -21,7 +23,10 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.InstanceCo
     {
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            builder.Advices.Initialize(builder.Target, nameof(Template), InitializationReason.Constructing);
+            builder.Advices.AddInitializerBeforeInstanceConstructor(
+                builder.Target, 
+                nameof(Template),
+                tags: new TagDictionary() {["target"] = builder.Target });
         }
     }
 
@@ -29,7 +34,10 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.InstanceCo
     {
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            builder.Advices.Initialize(builder.Target.Properties.First(), nameof(Template), InitializationReason.Constructing);
+            builder.Advices.AddInitializerBeforeInstanceConstructor(
+                builder.Target.Properties.First(), 
+                nameof(Template), 
+                tags: new TagDictionary() { ["target"] = builder.Target.Properties.First() });
         }
     }
 

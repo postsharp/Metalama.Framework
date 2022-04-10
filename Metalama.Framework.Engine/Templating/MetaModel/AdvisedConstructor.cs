@@ -33,8 +33,6 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public ConstructorInitializerKind InitializerKind => this.Underlying.InitializerKind;
 
-        public bool IsExplicit => this.Underlying.IsExplicit;
-
         public IMember? OverriddenMember => null;
     }
 }

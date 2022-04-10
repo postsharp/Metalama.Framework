@@ -11,7 +11,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.TypeConstr
     {
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            builder.Advices.Initialize(builder.Target, nameof(Template), InitializationReason.TypeConstructing);
+            builder.Advices.AddInitializerBeforeTypeConstructor(builder.Target, nameof(Template));
         }
 
         [Template]

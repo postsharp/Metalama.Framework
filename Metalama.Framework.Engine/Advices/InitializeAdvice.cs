@@ -5,13 +5,11 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -21,7 +19,7 @@ namespace Metalama.Framework.Engine.Advices
     {
         public TemplateMember<IMethod> Template { get; }
 
-        public InitializationReason Reason { get; }
+        public InitializerKind Kind { get; }
 
         public new IMemberOrNamedType TargetDeclaration => (IMemberOrNamedType) base.TargetDeclaration;
 
@@ -30,12 +28,12 @@ namespace Metalama.Framework.Engine.Advices
             TemplateClassInstance templateInstance,
             IMemberOrNamedType targetDeclaration,
             TemplateMember<IMethod> template,
-            InitializationReason reason,
+            InitializerKind kind,
             string? layerName,
             Dictionary<string, object?>? tags ) : base( aspect, templateInstance, targetDeclaration, layerName, tags )
         {
             this.Template = template;
-            this.Reason = reason;
+            this.Kind = kind;
         }
 
         public override void Initialize( IDiagnosticAdder diagnosticAdder ) { }
@@ -47,7 +45,7 @@ namespace Metalama.Framework.Engine.Advices
                 {
                     INamedType t => t,
                     IMember m => m.DeclaringType,
-                    _ => throw new AssertionFailedException()
+                    _ => throw new AssertionFailedException(),
                 };
 
             // TODO: merging localConstructors with constructors from the compilation does not take into account signatures, only implicit instance ctor and missing static ctor.
@@ -55,23 +53,28 @@ namespace Metalama.Framework.Engine.Advices
                 observableTransformations
                     .OfType<IConstructorBuilder>()
                     .Where(
-                        c =>
-                            c.IsStatic == ((this.Reason & InitializationReason.TypeConstructing) != 0)
-                            || !c.IsStatic == ((this.Reason & InitializationReason.Constructing) != 0) )
+                        c => this.Kind switch
+                        {
+                            InitializerKind.BeforeTypeConstructor => c.IsStatic,
+                            InitializerKind.BeforeInstanceConstructor => !c.IsStatic,
+                            _ => throw new AssertionFailedException(),
+                        } )
                     .ToReadOnlyList();
 
             var constructors =
-                ((this.Reason & InitializationReason.TypeConstructing) != 0
-                    ? new[] { containingType.StaticConstructor }
-                    : Array.Empty<IConstructor>())
-                .Concat(
-                    containingType.Constructors
-                        .Where(
-                            c =>
-                                !c.IsStatic == ((this.Reason & InitializationReason.Constructing) != 0)
-                                && c.InitializerKind != ConstructorInitializerKind.This ) )
-                .Where( c => !(c.Parameters.Count == 0 && localConstructors.Any( cc => cc.Parameters.Count == 0 && c.IsStatic == cc.IsStatic )) )
-                .Concat( localConstructors );
+                this.Kind switch
+                {
+                    InitializerKind.BeforeTypeConstructor => 
+                        localConstructors.Count == 0
+                            ? new[] { containingType.StaticConstructor }
+                            : localConstructors,
+                    InitializerKind.BeforeInstanceConstructor => 
+                        containingType.Constructors
+                        .Where(c => c.InitializerKind != ConstructorInitializerKind.This )
+                        .Where( c => !(c.Parameters.Count == 0 && localConstructors.Any( cc => cc.Parameters.Count == 0 )) )
+                        .Concat( localConstructors ),
+                    _ => throw new AssertionFailedException(),
+                };
 
             var transformations = new List<ITransformation>();
 

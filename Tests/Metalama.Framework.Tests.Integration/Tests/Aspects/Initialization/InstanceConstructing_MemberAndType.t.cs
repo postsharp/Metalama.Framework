@@ -5,8 +5,8 @@ public class TargetCode
 {
     public TargetCode()
     {
-        global::System.Console.WriteLine($"Foo: Aspect2");
-        global::System.Console.WriteLine($"TargetCode: Aspect1");
+        global::System.Console.WriteLine($"TargetCode.TargetCode(), int TargetCode.Foo: Aspect2");
+        global::System.Console.WriteLine($"TargetCode.TargetCode(), TargetCode: Aspect1");
     }
     public int Foo { get; }
 }

@@ -191,7 +191,9 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
                 _ => throw new AssertionFailedException()
             };
 
-        public static MetaApi ForMethod( IMethodBase methodBase, MetaApiProperties common ) => new( (IMethod) methodBase, common );
+        public static MetaApi ForConstructor( IConstructor constructor, MetaApiProperties common ) => new( constructor, common );
+
+        public static MetaApi ForMethod( IMethod method, MetaApiProperties common ) => new( method, common );
 
         public static MetaApi ForFieldOrProperty( IFieldOrProperty fieldOrProperty, IMethod accessor, MetaApiProperties common )
             => new( fieldOrProperty, accessor, common );

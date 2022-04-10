@@ -32,6 +32,8 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public bool IsOverride => this.Underlying.IsOverride;
 
+        public bool IsImplicit => this.Underlying.IsImplicit;
+
         public bool IsExplicitInterfaceImplementation => this.Underlying.IsExplicitInterfaceImplementation;
 
         public INamedType DeclaringType => this.Underlying.DeclaringType;

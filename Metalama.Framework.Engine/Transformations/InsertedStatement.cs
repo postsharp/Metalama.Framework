@@ -12,11 +12,6 @@ namespace Metalama.Framework.Engine.Transformations
     internal readonly struct InsertedStatement
     {
         /// <summary>
-        /// Gets the operator for this code transformation.
-        /// </summary>
-        public InsertedStatementPosition Position { get; }
-
-        /// <summary>
         /// Gets the operand syntax.
         /// </summary>
         public StatementSyntax Statement { get; }
@@ -26,9 +21,8 @@ namespace Metalama.Framework.Engine.Transformations
         /// </summary>
         public IDeclaration ContextDeclaration { get; }
 
-        public InsertedStatement( InsertedStatementPosition position, StatementSyntax newNode, IDeclaration contextDeclaration )
+        public InsertedStatement( StatementSyntax newNode, IDeclaration contextDeclaration )
         {
-            this.Position = position;
             this.Statement = newNode;
             this.ContextDeclaration = contextDeclaration;
         }

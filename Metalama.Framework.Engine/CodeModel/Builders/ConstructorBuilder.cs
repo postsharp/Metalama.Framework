@@ -25,8 +25,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
     {
         public ConstructorInitializerKind InitializerKind => ConstructorInitializerKind.Undetermined;
 
-        public bool IsExplicit => false;
-
         public IMethodList LocalFunctions => MethodList.Empty;
 
         public MethodKind MethodKind => this.IsStatic ? MethodKind.StaticConstructor : MethodKind.Constructor;

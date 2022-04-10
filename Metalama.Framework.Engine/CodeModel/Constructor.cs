@@ -15,7 +15,7 @@ using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal class Constructor : MethodBase, IConstructor
+    internal class Constructor : MethodBase, IConstructorImpl
     {
         public Constructor( IMethodSymbol symbol, CompilationModel compilation ) : base( symbol, compilation )
         {
@@ -46,7 +46,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override bool IsAsync => false;
 
-        public bool IsExplicit => this.GetSymbol()?.GetPrimarySyntaxReference() != null;
+        public override bool IsImplicit => this.GetSymbol().AssertNotNull().GetPrimarySyntaxReference() == null;
+
+        public IMember? OverriddenMember => null;
 
         public ConstructorInfo ToConstructorInfo() => CompileTimeConstructorInfo.Create( this );
 

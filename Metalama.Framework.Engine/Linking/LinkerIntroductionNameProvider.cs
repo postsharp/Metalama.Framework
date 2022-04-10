@@ -68,7 +68,7 @@ namespace Metalama.Framework.Engine.Linking
             INamedType targetType,
             AspectLayerId aspectLayer,
             IDeclaration targetDeclaration,
-            InitializationReason reason )
+            InitializerKind reason )
         {
             var shortAspectName = aspectLayer.AspectShortName;
             var shortLayerName = aspectLayer.LayerName;
