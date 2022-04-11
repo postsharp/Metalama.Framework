@@ -86,7 +86,7 @@ namespace Metalama.Framework.Engine.Options
                     return null;
                 }
 
-                return Path.GetFullPath( Path.GetDirectoryName( propsFilePath ) );
+                return Path.GetFullPath( Path.GetDirectoryName( propsFilePath )! );
             }
         }
 
