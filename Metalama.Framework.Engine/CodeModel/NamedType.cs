@@ -20,7 +20,6 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
