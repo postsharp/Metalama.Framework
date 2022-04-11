@@ -3,7 +3,6 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities;
@@ -30,6 +29,10 @@ internal class IntrospectionAspectInstance : IIntrospectionAspectInstance
 
     public IAspect Aspect => this.AspectInstanceResult.AspectInstance.Aspect;
 
+    [Memo]
+    public ImmutableArray<IIntrospectionAdvice> Advices
+        => this.AspectInstanceResult.Advices.Select( x => this.Factory.GetIntrospectionAdvice( x ) ).ToImmutableArray<IIntrospectionAdvice>();
+
     IDeclaration IIntrospectionAspectInstance.TargetDeclaration => this.AspectInstanceResult.AspectInstance.TargetDeclaration.GetTarget( this.Compilation );
 
     IRef<IDeclaration> IAspectInstance.TargetDeclaration => this.AspectInstanceResult.AspectInstance.TargetDeclaration;
@@ -47,8 +50,4 @@ internal class IntrospectionAspectInstance : IIntrospectionAspectInstance
     [Memo]
     public ImmutableArray<IIntrospectionDiagnostic> Diagnostics
         => this.AspectInstanceResult.Diagnostics.ReportedDiagnostics.ToReportedDiagnostics( this.Compilation, DiagnosticSource.Metalama );
-
-    [Memo]
-    public ImmutableArray<IDeclaration> IntroducedMembers
-        => this.AspectInstanceResult.Advices.OfType<IIntroductionAdvice>().Select( x => x.Builder ).ToImmutableArray<IDeclaration>();
 }

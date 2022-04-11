@@ -9,8 +9,10 @@ using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Introspection;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Validation;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -36,6 +38,7 @@ namespace Metalama.Framework.Engine.Pipeline
         private readonly List<IValidatorSource> _validatorSources = new();
         private readonly OverflowAspectSource _overflowAspectSource = new();
         private PipelineStep? _currentStep;
+        private IntrospectionPipelineListener? _introspectionPipelineListener;
 
         public CompilationModel LastCompilation { get; private set; }
 
@@ -62,6 +65,8 @@ namespace Metalama.Framework.Engine.Pipeline
             ImmutableArray<IValidatorSource> inputValidatorSources,
             AspectPipelineConfiguration pipelineConfiguration )
         {
+            this._introspectionPipelineListener = pipelineConfiguration.ServiceProvider.GetService<IntrospectionPipelineListener>();
+
             this._diagnostics = new UserDiagnosticSink( pipelineConfiguration.CompileTimeProject, pipelineConfiguration.CodeFixFilter );
             this.LastCompilation = inputLastCompilation;
             this.PipelineConfiguration = pipelineConfiguration;
@@ -76,7 +81,7 @@ namespace Metalama.Framework.Engine.Pipeline
             {
                 if ( aspectLayer.AspectLayerId.IsDefault )
                 {
-                    var step = new EvaluateAspectSourcesPipelineStep( aspectLayer );
+                    var step = new EvaluateAspectSourcesPipelineStep( this, aspectLayer );
 
                     _ = this._steps.Add( step.Id, step );
                 }
@@ -103,7 +108,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
                 var compilation = this.LastCompilation.GetCompilationModel();
 
-                this.LastCompilation = this._currentStep!.Execute( compilation, this, cancellationToken );
+                this.LastCompilation = this._currentStep!.Execute( compilation, cancellationToken );
 
                 if ( compilation != this.LastCompilation )
                 {
@@ -201,11 +206,11 @@ namespace Metalama.Framework.Engine.Pipeline
             {
                 if ( aspectLayer.IsDefault )
                 {
-                    step = new InitializeAspectInstancesPipelineStep( stepId, aspectLayer );
+                    step = new InitializeAspectInstancesPipelineStep( this, stepId, aspectLayer );
                 }
                 else
                 {
-                    step = new AdvicePipelineStep( stepId, aspectLayer );
+                    step = new AdvicePipelineStep( this, stepId, aspectLayer );
                 }
 
                 _ = this._steps.Add( stepId, step );
@@ -294,5 +299,7 @@ namespace Metalama.Framework.Engine.Pipeline
         {
             this._aspectInstanceResults.AddRange( aspectInstanceResults );
         }
+
+        public void AddAdviceResult( Advice advice, AdviceResult result ) => this._introspectionPipelineListener?.AddAdviceResult( advice, result );
     }
 }

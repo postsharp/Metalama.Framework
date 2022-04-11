@@ -20,9 +20,7 @@ namespace Metalama.Framework.Engine.Advices
 
         public AspectLayerId AspectLayerId { get; }
 
-        public Dictionary<string, object?>? Tags { get; }
-
-        public ImmutableDictionary<string, object?> ReadOnlyTags => this.Tags?.ToImmutableDictionary() ?? ImmutableDictionary<string, object?>.Empty;
+        public ImmutableDictionary<string, object?> Tags { get; }
 
         public int Order { get; set; }
 
@@ -33,7 +31,7 @@ namespace Metalama.Framework.Engine.Advices
             string? layerName,
             Dictionary<string, object?>? tags )
         {
-            this.Tags = tags;
+            this.Tags = tags?.ToImmutableDictionary() ?? ImmutableDictionary<string, object?>.Empty;
             this.Aspect = aspect;
             this.TemplateInstance = template;
             this.TargetDeclaration = targetDeclaration.AssertNotNull();

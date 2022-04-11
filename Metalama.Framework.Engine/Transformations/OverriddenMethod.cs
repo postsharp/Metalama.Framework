@@ -52,7 +52,7 @@ namespace Metalama.Framework.Engine.Transformations
                 new MetaApiProperties(
                     context.DiagnosticSink,
                     this.Template.Cast(),
-                    this.Advice.ReadOnlyTags,
+                    this.Advice.Tags,
                     this.Advice.AspectLayerId,
                     context.SyntaxGenerationContext,
                     this.Advice.Aspect,

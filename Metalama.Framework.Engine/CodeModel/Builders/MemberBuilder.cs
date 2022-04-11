@@ -176,7 +176,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 new MetaApiProperties(
                     context.DiagnosticSink,
                     initializerTemplate.Cast(),
-                    this.ParentAdvice.ReadOnlyTags,
+                    this.ParentAdvice.Tags,
                     this.ParentAdvice.AspectLayerId,
                     context.SyntaxGenerationContext,
                     this.ParentAdvice.Aspect,
