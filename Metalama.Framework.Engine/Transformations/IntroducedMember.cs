@@ -43,14 +43,14 @@ namespace Metalama.Framework.Engine.Transformations
         /// This is used to associate diagnostic suppressions to the introduced member. If <c>null</c>, diagnostics
         /// are not suppressed from the introduced member.
         /// </summary>
-        public IMember? Declaration { get; }
+        public IMemberOrNamedType? Declaration { get; }
 
         public IntroducedMember(
             MemberBuilder introduction,
             MemberDeclarationSyntax syntax,
             AspectLayerId aspectLayerId,
             IntroducedMemberSemantic semantic,
-            IMember? declaration ) : this(
+            IMemberOrNamedType? declaration ) : this(
             introduction,
             introduction.DeclarationKind,
             syntax,
@@ -63,7 +63,7 @@ namespace Metalama.Framework.Engine.Transformations
             MemberDeclarationSyntax syntax,
             AspectLayerId aspectLayerId,
             IntroducedMemberSemantic semantic,
-            IMember? declaration ) : this(
+            IMemberOrNamedType? declaration ) : this(
             introduction,
             introduction.OverriddenDeclaration.DeclarationKind,
             syntax,
@@ -87,7 +87,7 @@ namespace Metalama.Framework.Engine.Transformations
             MemberDeclarationSyntax syntax,
             AspectLayerId aspectLayerId,
             IntroducedMemberSemantic semantic,
-            IMember? declaration )
+            IMemberOrNamedType? declaration )
         {
             this.Introduction = introduction;
             this.Syntax = syntax.NormalizeWhitespace();

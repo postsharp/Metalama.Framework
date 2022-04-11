@@ -23,6 +23,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
     {
         private readonly IAdvisedFieldOrProperty? _fieldOrProperty;
         private readonly IAdvisedMethod? _method;
+        private readonly IAdvisedConstructor? _constructor;
         private readonly IAdvisedEvent? _event;
         private readonly INamedType? _type;
         private readonly MetaApiProperties _common;
@@ -32,7 +33,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
                 (this._common.Template.Declaration!, "meta." + memberName, this.Declaration, this.Declaration.DeclarationKind,
                  description ?? "I" + memberName) );
 
-        public IConstructor Constructor => throw new NotImplementedException();
+        public IConstructor Constructor => this._constructor ?? throw this.CreateInvalidOperationException( nameof(this.Constructor) );
 
         public IMethodBase MethodBase => this._method ?? throw this.CreateInvalidOperationException( nameof(this.MethodBase) );
 
@@ -55,10 +56,20 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         public INamedType Type => this._type ?? throw this.CreateInvalidOperationException( nameof(this.Type) );
 
         private ThisInstanceUserReceiver GetThisOrBase( string expressionName, AspectReferenceSpecification linkerAnnotation )
-            => this._type switch
+            => (this._common.Staticity, this._type, this.Declaration) switch
             {
-                null => throw this.CreateInvalidOperationException( expressionName ),
-                { IsStatic: false } when this.Declaration is IMemberOrNamedType { IsStatic: false }
+                (_, null, _) => throw this.CreateInvalidOperationException( expressionName ),
+
+                (MetaApiStaticity.AlwaysInstance, _, _)
+                    => new ThisInstanceUserReceiver(
+                        this.Type,
+                        linkerAnnotation ),
+
+                (MetaApiStaticity.AlwaysStatic, _, _)
+                    => throw TemplatingDiagnosticDescriptors.CannotUseThisInStaticContext.CreateException(
+                        (this._common.Template.Declaration!, expressionName, this.Declaration, this.Declaration.DeclarationKind) ),
+
+                (MetaApiStaticity.Default, { IsStatic: false }, IMemberOrNamedType { IsStatic: false })
                     => new ThisInstanceUserReceiver(
                         this.Type,
                         linkerAnnotation ),
@@ -119,6 +130,12 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             this._type = method.DeclaringType;
         }
 
+        private MetaApi( IConstructor constructor, MetaApiProperties common ) : this( (IDeclaration) constructor, common )
+        {
+            this._constructor = new AdvisedConstructor( constructor );
+            this._type = constructor.DeclaringType;
+        }
+
         private MetaApi( IFieldOrProperty fieldOrProperty, IMethod accessor, MetaApiProperties common ) : this( accessor, common )
         {
             this._method = new AdvisedMethod( accessor );
@@ -158,7 +175,25 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             this._method = new AdvisedMethod( accessor );
         }
 
-        public static MetaApi ForMethod( IMethodBase methodBase, MetaApiProperties common ) => new( (IMethod) methodBase, common );
+        private MetaApi( INamedType type, MetaApiProperties common ) : this( (IDeclaration) type, common )
+        {
+            this._type = type;
+        }
+
+        public static MetaApi ForDeclaration( IDeclaration declaration, MetaApiProperties common )
+            => declaration switch
+            {
+                INamedType type => new MetaApi( type, common ),
+                IMethod method => new MetaApi( method, common ),
+                IFieldOrProperty fieldOrProperty => new MetaApi( fieldOrProperty, common ),
+                IEvent @event => new MetaApi( @event, common ),
+                IConstructor constructor => new MetaApi( constructor, common ),
+                _ => throw new AssertionFailedException()
+            };
+
+        public static MetaApi ForConstructor( IConstructor constructor, MetaApiProperties common ) => new( constructor, common );
+
+        public static MetaApi ForMethod( IMethod method, MetaApiProperties common ) => new( method, common );
 
         public static MetaApi ForFieldOrProperty( IFieldOrProperty fieldOrProperty, IMethod accessor, MetaApiProperties common )
             => new( fieldOrProperty, accessor, common );

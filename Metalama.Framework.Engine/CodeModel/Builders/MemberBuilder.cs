@@ -20,7 +20,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder, IMemberImpl
     {
-        protected MemberBuilder( Advice parentAdvice, INamedType declaringType, string name ) : base( parentAdvice, declaringType, name ) { }
+        protected MemberBuilder( Advice parentAdvice, INamedType declaringType ) : base( parentAdvice, declaringType ) { }
+
+        public bool IsImplicit => false;
 
         public new INamedType DeclaringType => base.DeclaringType.AssertNotNull();
 
@@ -180,7 +182,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     this.ParentAdvice.AspectLayerId,
                     context.SyntaxGenerationContext,
                     this.ParentAdvice.Aspect,
-                    context.ServiceProvider ) );
+                    context.ServiceProvider,
+                    MetaApiStaticity.Default ) );
 
             var expansionContext = new TemplateExpansionContext(
                 this.ParentAdvice.Aspect.Aspect,

@@ -100,7 +100,7 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets the static constructor.
         /// </summary>
-        IConstructor? StaticConstructor { get; }
+        IConstructor StaticConstructor { get; }
 
         /// <summary>
         /// Gets a value indicating whether the type is <c>readonly</c>.

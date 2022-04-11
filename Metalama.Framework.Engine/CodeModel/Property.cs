@@ -11,6 +11,7 @@ using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -37,6 +38,8 @@ namespace Metalama.Framework.Engine.CodeModel
         public override ISymbol Symbol => this._symbol;
 
         public RefKind RefKind => this._symbol.RefKind.ToOurRefKind();
+
+        public override bool IsImplicit => throw new NotImplementedException();
 
         public override bool IsExplicitInterfaceImplementation => !this._symbol.ExplicitInterfaceImplementations.IsEmpty;
 

@@ -46,6 +46,8 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
         [Memo]
         public IReadOnlyList<IType> TypeArguments => ImmutableArray<IType>.Empty;
 
+        public bool IsImplicit => throw new NotImplementedException();
+
         public bool IsOpenGeneric => this.DeclaringMember.DeclaringType.IsOpenGeneric;
 
         public bool IsGeneric => false;

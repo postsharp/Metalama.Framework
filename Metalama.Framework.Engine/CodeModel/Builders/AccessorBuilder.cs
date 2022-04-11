@@ -58,6 +58,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IReadOnlyList<IType> TypeArguments => ImmutableArray<IType>.Empty;
 
+        public bool IsImplicit => false;
+
         public bool IsOpenGeneric => false;
 
         public bool IsGeneric => false;

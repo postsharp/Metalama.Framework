@@ -40,6 +40,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 _ => Writeability.All
             };
 
+        public override string Name { get; set; }
+
         public bool IsAutoPropertyOrField { get; }
 
         public ParameterBuilderList Parameters { get; } = new();
@@ -93,12 +95,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             bool hasSetter,
             bool isAutoProperty,
             bool hasInitOnlySetter )
-            : base( parentAdvice, targetType, name )
+            : base( parentAdvice, targetType )
         {
             // TODO: Sanity checks.
 
             Invariant.Assert( hasGetter || hasSetter );
 
+            this.Name = name;
             this.Type = targetType.Compilation.TypeFactory.GetTypeByReflectionType( typeof(object) );
 
             if ( hasGetter )
