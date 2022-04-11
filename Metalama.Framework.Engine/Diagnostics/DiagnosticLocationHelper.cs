@@ -28,7 +28,8 @@ namespace Metalama.Framework.Engine.Diagnostics
 
             if ( bestDeclaration == null )
             {
-                return symbol.ContainingSymbol.GetPrimarySyntaxReference()?.GetSyntax().GetDiagnosticLocation();
+                // Implicit symbols do not have a syntax. In this case, we go to the parent declaration.
+                return symbol.ContainingSymbol?.GetDiagnosticLocation();
             }
             else
             { 
