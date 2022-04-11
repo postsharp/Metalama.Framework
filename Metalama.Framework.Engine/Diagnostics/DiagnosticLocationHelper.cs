@@ -22,17 +22,32 @@ namespace Metalama.Framework.Engine.Diagnostics
         /// </summary>
         /// <param name="symbol"></param>
         /// <returns></returns>
-        public static Location? GetDiagnosticLocation( this ISymbol symbol )
+        public static Location? GetDiagnosticLocation( this ISymbol symbol ) => symbol.GetDiagnosticLocationImpl( 0 );
+
+        private static Location? GetDiagnosticLocationImpl( this ISymbol symbol, int depth )
         {
+            if ( depth > 8 )
+            {
+                throw new AssertionFailedException();
+            }
+
             var bestDeclaration = symbol.GetPrimarySyntaxReference();
 
             if ( bestDeclaration == null )
             {
-                // Implicit symbols do not have a syntax. In this case, we go to the parent declaration.
-                return symbol.ContainingSymbol?.GetDiagnosticLocation();
+                if ( symbol.ContainingSymbol != null && symbol.ContainingSymbol.Kind != SymbolKind.Namespace )
+                {
+                    // Implicit symbols do not have a syntax. In this case, we go to the parent declaration.
+                    return symbol.ContainingSymbol?.GetDiagnosticLocationImpl( depth + 1 );
+                }
+                else
+                {
+                    // We don't walk lower than namespaces. This makes sense and works around a bug in configuration of linker fakes.
+                    return null;
+                }
             }
             else
-            { 
+            {
                 return bestDeclaration.GetSyntax().GetDiagnosticLocation();
             }
         }

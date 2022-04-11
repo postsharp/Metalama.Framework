@@ -172,16 +172,32 @@ namespace Metalama.Framework.Engine.Utilities
 
         // TODO: Partial methods etc.
 
-        public static SyntaxReference? GetPrimarySyntaxReference( this ISymbol symbol )
+        public static SyntaxReference? GetPrimarySyntaxReference( this ISymbol? symbol )
         {
+            if ( symbol == null )
+            {
+                return null;
+            }
+
+            static SyntaxReference? GetReferenceOfShortestPath( ISymbol s )
+            {
+                if ( s.DeclaringSyntaxReferences.IsDefaultOrEmpty )
+                {
+                    return null;
+                }
+                else
+                {
+                    return s.DeclaringSyntaxReferences.OrderBy( x => x.SyntaxTree.FilePath.Length ).First();
+                }
+            }
+
             switch ( symbol )
             {
                 case IMethodSymbol { AssociatedSymbol: not null } methodSymbol:
-                    return symbol.DeclaringSyntaxReferences.OrderBy( x => x.SyntaxTree.FilePath.Length ).FirstOrDefault()
-                           ?? methodSymbol.AssociatedSymbol!.DeclaringSyntaxReferences.OrderBy( x => x.SyntaxTree.FilePath.Length ).FirstOrDefault();
+                    return GetReferenceOfShortestPath( symbol ) ?? GetReferenceOfShortestPath( methodSymbol.AssociatedSymbol );
 
                 default:
-                    return symbol.DeclaringSyntaxReferences.OrderBy( x => x.SyntaxTree.FilePath.Length ).FirstOrDefault();
+                    return GetReferenceOfShortestPath( symbol );
             }
         }
 
