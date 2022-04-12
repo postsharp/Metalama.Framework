@@ -174,21 +174,7 @@ namespace Metalama.Compiler
         private bool MustReplaceByThrow( ISymbol symbol )
             => !symbol.IsAbstract && (this.SymbolClassifier.GetTemplatingScope( symbol ) == TemplatingScope.CompileTimeOnly ||
                                       !this.SymbolClassifier.GetTemplateInfo( symbol ).IsNone);
-
-        public override SyntaxNode? VisitIndexerDeclaration( IndexerDeclarationSyntax node )
-        {
-            throw new AssertionFailedException( "Indexers are not supported." );
-
-            /*
-            if ( this.MustReplaceByThrow( node ) )
-            {
-                return WithThrowNotSupportedExceptionBody( node, "Compile-time-only code cannot be called at run-time." );
-            }
-
-            return node;
-            */
-        }
-
+        
         public override SyntaxNode? VisitPropertyDeclaration( PropertyDeclarationSyntax node )
         {
             // Properties can be in following forms:
