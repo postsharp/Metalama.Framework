@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace Metalama.Framework.Code;
 
 /// <summary>
-/// Represents an indexer.
+/// Represents an indexer, i.e. a <c>this[*]</c> property.
 /// </summary>
 /// <seealso cref="IProperty"/>
 public interface IIndexer : IPropertyOrIndexer, IHasParameters

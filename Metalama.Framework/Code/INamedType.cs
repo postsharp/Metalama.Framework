@@ -67,6 +67,9 @@ namespace Metalama.Framework.Code
         /// </summary>
         IPropertyList Properties { get; }
 
+        /// <summary>
+        /// Gets the list of indexers defined in the current type.
+        /// </summary>
         IIndexerList Indexers { get; }
 
         /// <summary>
@@ -119,9 +122,6 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Finds the the implementation of the given interface member that is valid for this type.
         /// </summary>
-        /// <param name="interfaceMember"></param>
-        /// <param name="implementationMember"></param>
-        /// <returns></returns>
         bool TryFindImplementationForInterfaceMember( IMember interfaceMember, [NotNullWhen( true )] out IMember? implementationMember );
     }
 }

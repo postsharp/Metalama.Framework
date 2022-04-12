@@ -5,6 +5,9 @@ using System;
 
 namespace Metalama.Framework.Code.DeclarationBuilders;
 
+/// <summary>
+/// Allows to complete the construction of an indexer that has been created by an advice.
+/// </summary>
 public interface IIndexerBuilder : IPropertyOrIndexerBuilder, IIndexer
 {
     /// <summary>

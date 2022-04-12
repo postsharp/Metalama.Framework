@@ -4,7 +4,7 @@
 namespace Metalama.Framework.Code.Invokers
 {
     /// <summary>
-    /// Allows accessing the value of properties and indexers.
+    /// Allows accessing the value of indexers.
     /// </summary>
     public interface IIndexerInvoker : IInvoker
     {
