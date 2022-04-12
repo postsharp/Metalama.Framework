@@ -41,8 +41,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public Writeability Writeability { get; set; }
 
-        Writeability IHasWriteability.Writeability => this.Writeability;
-
         public bool IsAutoPropertyOrField => true;
 
         public override InsertPosition InsertPosition

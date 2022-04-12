@@ -8,4 +8,8 @@
 
     <Import Project="..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj"/>
 
+    <ItemGroup>
+        <Compile Include="..\Metalama.Framework.Engine\**\*.cs" Exclude="..\Metalama.Framework.Engine\obj\**\*.cs" />
+    </ItemGroup>
+
 </Project>
