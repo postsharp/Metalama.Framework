@@ -167,7 +167,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
 
             var compilation = testContext.Compilation;
             var targetType = compilation.Types.Single( t => t.Name == "Target" );
-            var single = targetType.Properties.Single( m => m.Name == "this[]" ).Parameters.First( p => p.Name == "target" );
+            var single = targetType.Indexers.Single().Parameters.First( p => p.Name == "target" );
             var parameter = single;
 
             var actual =

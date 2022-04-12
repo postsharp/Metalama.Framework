@@ -53,6 +53,8 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IAdvisedParameterList Parameters => this._method?.Parameters ?? throw this.CreateInvalidOperationException( nameof(this.Parameters) );
 
+        public IIndexer Indexer => this.Member as IIndexer ?? throw this.CreateInvalidOperationException( nameof(this.Indexer) );
+
         public INamedType Type => this._type ?? throw this.CreateInvalidOperationException( nameof(this.Type) );
 
         private ThisInstanceUserReceiver GetThisOrBase( string expressionName, AspectReferenceSpecification linkerAnnotation )

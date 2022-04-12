@@ -41,7 +41,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public Writeability Writeability { get; set; }
 
-        Writeability IFieldOrProperty.Writeability => this.Writeability;
+        Writeability IHasWriteability.Writeability => this.Writeability;
 
         public bool IsAutoPropertyOrField => true;
 

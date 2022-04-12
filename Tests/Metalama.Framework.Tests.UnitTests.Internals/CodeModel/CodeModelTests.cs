@@ -745,6 +745,29 @@ class Parent<TParent>
         }
 
         [Fact]
+        public void Indexer()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = @"
+public sealed class C
+{
+    public string this[string key]
+    {
+        get { return string.Empty; }
+
+        set { }
+    }
+}
+";
+
+            var compilation = testContext.CreateCompilationModel( code );
+            Assert.Single( compilation.Types );
+            Assert.Single( compilation.Types[0].Indexers );
+            Assert.Single( compilation.Types[0].Indexers[0].Parameters );
+        }
+
+        [Fact]
         public void Depth()
         {
             using var testContext = this.CreateTestContext();

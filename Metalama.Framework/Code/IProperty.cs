@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Code.Invokers;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -10,7 +9,7 @@ namespace Metalama.Framework.Code
     /// <summary>
     /// Represents a property.
     /// </summary>
-    public interface IProperty : IFieldOrProperty, IHasParameters
+    public interface IProperty : IFieldOrProperty, IPropertyOrIndexer
     {
         /// <summary>
         /// Gets the <c>in</c>, <c>ref</c>, <c>ref readonly</c> property type modifier.
@@ -27,11 +26,6 @@ namespace Metalama.Framework.Code
         /// </summary>
         /// <returns>A <see cref="PropertyInfo"/> that can be used only in run-time code.</returns>
         PropertyInfo ToPropertyInfo();
-
-        /// <summary>
-        /// Gets an object that allows to invoke the current property.
-        /// </summary>
-        new IInvokerFactory<IPropertyInvoker> Invokers { get; }
 
         /// <summary>
         /// Gets the base property that is overridden by the current property.

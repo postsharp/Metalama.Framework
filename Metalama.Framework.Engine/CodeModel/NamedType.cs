@@ -159,6 +159,18 @@ namespace Metalama.Framework.Engine.CodeModel
                     this.TypeSymbol
                         .GetMembers()
                         .OfType<IPropertySymbol>()
+                        .Where( p => !p.IsIndexer )
+                        .ToReadOnlyList() ) );
+
+        [Memo]
+        public IIndexerList Indexers
+            => new IndexerList(
+                this,
+                this.TransformMembers<IIndexer, IIndexerBuilder, IPropertySymbol>(
+                    this.TypeSymbol
+                        .GetMembers()
+                        .OfType<IPropertySymbol>()
+                        .Where( p => p.IsIndexer )
                         .ToReadOnlyList() ) );
 
         [Memo]

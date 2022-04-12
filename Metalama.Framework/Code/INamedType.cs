@@ -67,6 +67,8 @@ namespace Metalama.Framework.Code
         /// </summary>
         IPropertyList Properties { get; }
 
+        IIndexerList Indexers { get; }
+
         /// <summary>
         /// Gets the list of fields defined by the current type, but not those inherited from the base  type.
         /// Note that fields can be promoted to properties by aspects, so a source code field can be 

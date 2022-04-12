@@ -448,20 +448,6 @@ namespace Metalama.Framework.Engine.Advices
 
             propertyBuilder.Type = interfaceProperty.Type;
 
-            foreach ( var interfaceParameter in interfaceProperty.Parameters )
-            {
-                _ = interfaceParameter;
-
-                // Property parameters - we will be probably removing them and there will be a special override for indexers.
-                throw new AssertionFailedException( Justifications.CoverageMissing );
-
-                // _ = propertyBuilder.AddParameter(
-                //     interfaceParameter.Name,
-                //     interfaceParameter.ParameterType,
-                //     interfaceParameter.RefKind,
-                //     interfaceParameter.DefaultValue );
-            }
-
             if ( isExplicit )
             {
                 propertyBuilder.SetExplicitInterfaceImplementation( interfaceProperty );

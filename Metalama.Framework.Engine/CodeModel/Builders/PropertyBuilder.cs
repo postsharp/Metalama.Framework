@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Advices;
@@ -19,7 +18,6 @@ using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 using RefKind = Metalama.Framework.Code.RefKind;
-using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
@@ -44,10 +42,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public bool IsAutoPropertyOrField { get; }
 
-        public ParameterBuilderList Parameters { get; } = new();
-
-        IParameterList IHasParameters.Parameters => this.Parameters;
-
         public IType Type { get; set; }
 
         public IMethodBuilder? GetMethod { get; }
@@ -63,8 +57,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => this.Invokers;
 
         [Memo]
-        public IInvokerFactory<IPropertyInvoker> Invokers
-            => new InvokerFactory<IPropertyInvoker>( ( order, invokerOperator ) => new PropertyInvoker( this, order, invokerOperator ), this.HasBaseInvoker );
+        public IInvokerFactory<IFieldOrPropertyInvoker> Invokers
+            => new InvokerFactory<IFieldOrPropertyInvoker>(
+                ( order, invokerOperator ) => new FieldOrPropertyInvoker( this, order, invokerOperator ),
+                this.HasBaseInvoker );
 
         public IProperty? OverriddenProperty { get; set; }
 
@@ -116,43 +112,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             this.IsAutoPropertyOrField = isAutoProperty;
             this._hasInitOnlySetter = hasInitOnlySetter;
-        }
-
-        public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant defaultValue = default )
-        {
-            if ( this.IsIndexer )
-            {
-                var parameter = new ParameterBuilder( this, this.Parameters.Count, name, type, refKind );
-                parameter.DefaultValue = defaultValue;
-                this.Parameters.Add( parameter );
-
-                return parameter;
-            }
-            else
-            {
-                throw new NotSupportedException( "Adding parameters is only supported on indexers." );
-            }
-        }
-
-        public IParameterBuilder AddParameter( string name, Type type, RefKind refKind = RefKind.None, object? defaultValue = null )
-        {
-            if ( this.IsIndexer )
-            {
-                var itype = this.Compilation.Factory.GetTypeByReflectionType( type );
-
-                var parameter = new ParameterBuilder( this, this.Parameters.Count, name, itype, refKind )
-                {
-                    DefaultValue = new TypedConstant( itype, defaultValue )
-                };
-
-                this.Parameters.Add( parameter );
-
-                return parameter;
-            }
-            else
-            {
-                throw new NotSupportedException( "Adding parameters is only supported on indexers." );
-            }
         }
 
         protected virtual bool GetPropertyInitializerExpressionOrMethod(

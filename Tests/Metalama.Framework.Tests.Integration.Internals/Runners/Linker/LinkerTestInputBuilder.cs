@@ -398,7 +398,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 insertPositionNode,
                 introducedElementName );
 
-            A.CallTo( () => ((IProperty) observableTransformation).Parameters ).Returns( symbolHelperElement.Parameters );
+            //    A.CallTo( () => ((IIndexer) observableTransformation).Parameters ).Returns( symbolHelperElement.Parameters );
             A.CallTo( () => ((IProperty) observableTransformation).Type ).Returns( symbolHelperElement.Type );
         }
 

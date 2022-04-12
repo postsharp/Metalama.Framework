@@ -67,7 +67,7 @@ class C<T> : object
             AssertLocation( "set", property.SetMethod!.GetDiagnosticLocation() );
 
             // Indexer
-            AssertLocation( "this", type.Properties.OfName( "this[]" ).Single().GetDiagnosticLocation() );
+            AssertLocation( "this", type.Indexers.Single().GetDiagnosticLocation() );
 
             // Fields
             AssertLocation( "field1", type.Fields.OfName( "field1" ).Single().GetDiagnosticLocation() );

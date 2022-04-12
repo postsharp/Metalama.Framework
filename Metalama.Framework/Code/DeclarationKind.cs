@@ -37,7 +37,12 @@ namespace Metalama.Framework.Code
         Property,
 
         /// <summary>
-        /// <see cref="IProperty"/> (fields are represented as properties).
+        /// <see cref="IIndexer"/>.
+        /// </summary>
+        Indexer,
+
+        /// <summary>
+        /// <see cref="IField"/>.
         /// </summary>
         Field,
 

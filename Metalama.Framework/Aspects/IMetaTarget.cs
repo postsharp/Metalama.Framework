@@ -68,8 +68,7 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         IAdvisedParameterList Parameters { get; }
 
-        // Gets the project configuration.
-        // IProject Project { get; }
+        IIndexer Indexer { get; }
 
         /// <summary>
         /// Gets the code model of current type including the introductions of the current aspect type.

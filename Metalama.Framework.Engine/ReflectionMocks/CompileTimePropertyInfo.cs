@@ -10,16 +10,16 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.ReflectionMocks
 {
-    internal class CompileTimePropertyInfo : PropertyInfo, ICompileTimeReflectionObject<IProperty>
+    internal class CompileTimePropertyInfo : PropertyInfo, ICompileTimeReflectionObject<IPropertyOrIndexer>
     {
-        public ISdkRef<IProperty> Target { get; set; }
+        public ISdkRef<IPropertyOrIndexer> Target { get; set; }
 
-        private CompileTimePropertyInfo( IProperty property )
+        private CompileTimePropertyInfo( IPropertyOrIndexer property )
         {
             this.Target = property.ToTypedRef();
         }
 
-        public static PropertyInfo Create( IProperty property ) => new CompileTimePropertyInfo( property );
+        public static PropertyInfo Create( IPropertyOrIndexer property ) => new CompileTimePropertyInfo( property );
 
         public override object[] GetCustomAttributes( bool inherit ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
 

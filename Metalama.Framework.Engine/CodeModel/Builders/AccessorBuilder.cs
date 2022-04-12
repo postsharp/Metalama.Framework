@@ -92,8 +92,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             => (this.ContainingMember, this.MethodKind) switch
             {
                 // TODO: Indexer parameters (need to have special IParameterList implementation that would mirror adding parameters to the indexer property).
-                (IProperty property, MethodKind.PropertyGet) when property.Parameters.Count == 0 => new ParameterBuilderList(),
-                (IProperty property, MethodKind.PropertySet) when property.Parameters.Count == 0 =>
+                (IProperty property, MethodKind.PropertyGet) => new ParameterBuilderList(),
+                (IProperty property, MethodKind.PropertySet) =>
                     new ParameterBuilderList( new[] { new PropertySetValueParameter( this, 0 ) } ),
                 (FieldBuilder _, MethodKind.PropertyGet) => new ParameterBuilderList(),
                 (FieldBuilder _, MethodKind.PropertySet) => new ParameterBuilderList( new[] { new PropertySetValueParameter( this, 0 ) } ),
