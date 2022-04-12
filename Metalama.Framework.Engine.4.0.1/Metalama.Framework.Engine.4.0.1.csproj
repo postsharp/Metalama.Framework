@@ -1,15 +1,24 @@
 <Project DefaultTargets="Build">
 
-    <Import Project="..\Build\RoslynVersion\Roslyn4.0.1.props" />
+    <Import Project="..\Build\RoslynVersion\Roslyn4.0.1.props"/>
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
     </PropertyGroup>
 
-    <Import Project="..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
+    <Import Project="..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj"/>
 
     <ItemGroup>
-        <Compile Include="..\Metalama.Framework.Engine\**\*.cs" Exclude="..\Metalama.Framework.Engine\obj\**\*.cs" />
+        <Compile Include="..\Metalama.Framework.Engine\**\*.cs" Exclude="..\Metalama.Framework.Engine\obj\**\*.cs"/>
+        <Compile Update="..\Metalama.Framework.Engine\CodeModel\Collections\IndexerList.cs">
+            <Link>Metalama.Framework.Engine\CodeModel\Collections\IndexerList.cs</Link>
+        </Compile>
+        <Compile Update="..\Metalama.Framework.Engine\CodeModel\Indexer.cs">
+            <Link>Metalama.Framework.Engine\CodeModel\Indexer.cs</Link>
+        </Compile>
+        <Compile Update="..\Metalama.Framework.Engine\CodeModel\PropertyOrIndexer.cs">
+            <Link>Metalama.Framework.Engine\CodeModel\PropertyOrIndexer.cs</Link>
+        </Compile>
     </ItemGroup>
 
 </Project>

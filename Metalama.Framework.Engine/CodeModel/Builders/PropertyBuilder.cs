@@ -25,8 +25,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
     {
         private readonly bool _hasInitOnlySetter;
 
-        RefKind IProperty.RefKind => this.RefKind;
-
         public RefKind RefKind { get; set; }
 
         public Writeability Writeability
@@ -46,9 +44,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IMethodBuilder? GetMethod { get; }
 
-        IMethod? IFieldOrProperty.GetMethod => this.GetMethod;
+        IMethod? IPropertyLike.GetMethod => this.GetMethod;
 
-        IMethod? IFieldOrProperty.SetMethod => this.SetMethod;
+        IMethod? IPropertyLike.SetMethod => this.SetMethod;
 
         public IMethodBuilder? SetMethod { get; }
 

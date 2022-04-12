@@ -6,6 +6,10 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Code;
 
+/// <summary>
+/// Represents an indexer.
+/// </summary>
+/// <seealso cref="IProperty"/>
 public interface IIndexer : IPropertyOrIndexer, IHasParameters
 {
     /// <summary>
@@ -16,7 +20,7 @@ public interface IIndexer : IPropertyOrIndexer, IHasParameters
     /// <summary>
     /// Gets an object that allows to invoke the current property.
     /// </summary>
-    new IInvokerFactory<IIndexerInvoker> Invokers { get; }
+    IInvokerFactory<IIndexerInvoker> Invokers { get; }
 
     /// <summary>
     /// Gets the base property that is overridden by the current property.
