@@ -3,21 +3,11 @@
 
 namespace Metalama.Framework.Code.DeclarationBuilders;
 
-public interface IPropertyOrIndexerBuilder : IPropertyOrIndexer, IMemberBuilder
+public interface IPropertyOrIndexerBuilder : IPropertyOrIndexer, IPropertyLikeBuilder
 {
     /// <summary>
     /// Gets or sets the <see cref="Metalama.Framework.Code.RefKind"/> of the property
     /// (i.e. <see cref="Code.RefKind.Ref"/>, <see cref="Code.RefKind.Out"/>, ...).
     /// </summary>
     new RefKind RefKind { get; set; }
-
-    /// <summary>
-    /// Gets the <see cref="IMethodBuilder"/> for the getter.
-    /// </summary>
-    new IMethodBuilder? GetMethod { get; }
-
-    /// <summary>
-    /// Gets the <see cref="IMethodBuilder"/> for the setter.
-    /// </summary>
-    new IMethodBuilder? SetMethod { get; }
 }

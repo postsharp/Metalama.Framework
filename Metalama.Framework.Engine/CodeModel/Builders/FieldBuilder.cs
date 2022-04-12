@@ -17,7 +17,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
+    internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
     {
         public override DeclarationKind DeclarationKind => DeclarationKind.Field;
 

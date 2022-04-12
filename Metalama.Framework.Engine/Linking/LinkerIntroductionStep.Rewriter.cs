@@ -143,8 +143,6 @@ namespace Metalama.Framework.Engine.Linking
 
                 using ( var classSuppressions = this.WithSuppressions( node ) )
                 {
-                    var typeSymbol = this._compilation.RoslynCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node );
-
                     foreach ( var member in node.Members )
                     {
                         var visitedMember = (MemberDeclarationSyntax?) this.Visit( member );

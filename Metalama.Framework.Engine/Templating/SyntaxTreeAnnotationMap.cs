@@ -52,9 +52,6 @@ namespace Metalama.Framework.Engine.Templating
         /// <summary>
         /// Annotates a syntax tree with annotations that can later be resolved using the get methods of this class.
         /// </summary>
-        /// <param name="root">Root of the syntax tree.</param>
-        /// <param name="semanticModel">The <see cref="SemanticModel"/> for <paramref name="root"/>.</param>
-        /// <returns>The annotated syntax tree.</returns>
         public bool TryAnnotateTemplate( SyntaxNode root, SemanticModel semanticModel, IDiagnosticAdder diagnostics, out SyntaxNode annotatedRoot )
         {
             var rewriter = new AnnotatingRewriter( semanticModel, this, true, diagnostics );

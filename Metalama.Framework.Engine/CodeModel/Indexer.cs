@@ -48,8 +48,7 @@ internal sealed class Indexer : PropertyOrIndexer, IIndexerImpl
         => this.PropertySymbol.ExplicitInterfaceImplementations.Select( p => this.Compilation.Factory.GetIndexer( p ) ).ToList();
 
     [Memo]
-    public IInvokerFactory<IIndexerInvoker> Invokers
-        => new InvokerFactory<IIndexerInvoker>( ( order, invokerOperator ) => new IndexerInvoker( this, order, invokerOperator ) );
+    public IInvokerFactory<IIndexerInvoker> Invokers => new InvokerFactory<IIndexerInvoker>( ( order, _ ) => new IndexerInvoker( this, order ) );
 
     public override DeclarationKind DeclarationKind => DeclarationKind.Indexer;
 }

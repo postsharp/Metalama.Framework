@@ -24,6 +24,7 @@ namespace Metalama.Framework.Engine.Diagnostics
         /// <returns></returns>
         public static Location? GetDiagnosticLocation( this ISymbol symbol ) => symbol.GetDiagnosticLocationImpl( 0 );
 
+        // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
         private static Location? GetDiagnosticLocationImpl( this ISymbol symbol, int depth )
         {
             if ( depth > 8 )

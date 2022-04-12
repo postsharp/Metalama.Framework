@@ -201,7 +201,7 @@ namespace Metalama.Framework.Engine.Aspects
                             ImmutableArray<IAspectSource>.Empty,
                             ImmutableArray<IValidatorSource>.Empty );
                 }
-                
+
                 var aspectResult = aspectBuilder.ToResult();
 
                 if ( !aspectResult.Success )

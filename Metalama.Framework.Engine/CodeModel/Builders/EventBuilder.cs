@@ -19,7 +19,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
+    internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
     {
         private readonly bool _isEventField;
 

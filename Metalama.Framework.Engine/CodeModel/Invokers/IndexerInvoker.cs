@@ -61,7 +61,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             return new UserExpression( expression, this.Indexer.Type, syntaxGenerationContext );
         }
 
-        public IndexerInvoker( IIndexer indexer, InvokerOrder order, InvokerOperator invokerOperator ) : base( indexer, order )
+        public IndexerInvoker( IIndexer indexer, InvokerOrder order ) : base( indexer, order )
         {
             this.Indexer = indexer;
         }

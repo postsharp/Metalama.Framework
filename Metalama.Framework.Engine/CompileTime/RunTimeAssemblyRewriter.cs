@@ -174,7 +174,7 @@ namespace Metalama.Compiler
         private bool MustReplaceByThrow( ISymbol symbol )
             => !symbol.IsAbstract && (this.SymbolClassifier.GetTemplatingScope( symbol ) == TemplatingScope.CompileTimeOnly ||
                                       !this.SymbolClassifier.GetTemplateInfo( symbol ).IsNone);
-        
+
         public override SyntaxNode? VisitPropertyDeclaration( PropertyDeclarationSyntax node )
         {
             // Properties can be in following forms:

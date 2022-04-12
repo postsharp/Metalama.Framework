@@ -45,7 +45,7 @@ namespace Metalama.Framework.Engine.Advices
                 {
                     INamedType t => t,
                     IMember m => m.DeclaringType,
-                    _ => throw new AssertionFailedException(),
+                    _ => throw new AssertionFailedException()
                 };
 
             // TODO: merging localConstructors with constructors from the compilation does not take into account signatures, only implicit instance ctor and missing static ctor.
@@ -57,23 +57,23 @@ namespace Metalama.Framework.Engine.Advices
                         {
                             InitializerKind.BeforeTypeConstructor => c.IsStatic,
                             InitializerKind.BeforeInstanceConstructor => !c.IsStatic,
-                            _ => throw new AssertionFailedException(),
+                            _ => throw new AssertionFailedException()
                         } )
                     .ToReadOnlyList();
 
             var constructors =
                 this.Kind switch
                 {
-                    InitializerKind.BeforeTypeConstructor => 
+                    InitializerKind.BeforeTypeConstructor =>
                         localConstructors.Count == 0
                             ? new[] { containingType.StaticConstructor }
                             : localConstructors,
-                    InitializerKind.BeforeInstanceConstructor => 
+                    InitializerKind.BeforeInstanceConstructor =>
                         containingType.Constructors
-                        .Where(c => c.InitializerKind != ConstructorInitializerKind.This )
-                        .Where( c => !(c.Parameters.Count == 0 && localConstructors.Any( cc => cc.Parameters.Count == 0 )) )
-                        .Concat( localConstructors ),
-                    _ => throw new AssertionFailedException(),
+                            .Where( c => c.InitializerKind != ConstructorInitializerKind.This )
+                            .Where( c => !(c.Parameters.Count == 0 && localConstructors.Any( cc => cc.Parameters.Count == 0 )) )
+                            .Concat( localConstructors ),
+                    _ => throw new AssertionFailedException()
                 };
 
             var transformations = new List<ITransformation>();

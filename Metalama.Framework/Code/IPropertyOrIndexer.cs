@@ -5,13 +5,13 @@ using System.Reflection;
 
 namespace Metalama.Framework.Code;
 
-public interface IPropertyOrIndexer : IHasWriteability, IMemberWithAccessors
+public interface IPropertyOrIndexer : IPropertyLike
 {
     /// <summary>
-    /// Gets the <c>in</c>, <c>ref</c>, <c>ref readonly</c> property type modifier.
+    /// Gets a value indicating whether the property is <c>ref</c> or <c>ref in</c>.
     /// </summary>
     RefKind RefKind { get; }
-
+    
     /// <summary>
     /// Gets a <see cref="PropertyInfo"/> that represents the current property at run time.
     /// </summary>

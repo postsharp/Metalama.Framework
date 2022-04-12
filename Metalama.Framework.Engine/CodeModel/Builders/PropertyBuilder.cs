@@ -36,7 +36,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 _ => Writeability.All
             };
 
-        public override string Name { get; set; }
+        public sealed override string Name { get; set; }
 
         public bool IsAutoPropertyOrField { get; }
 

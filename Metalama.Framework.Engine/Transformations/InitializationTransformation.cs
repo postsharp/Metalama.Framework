@@ -14,14 +14,14 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Transformations
 {
-    internal class InitializationTransformation : INonObservableTransformation, IInsertStatementTransformation
+    internal class InitializationTransformation : IInsertStatementTransformation
     {
         private readonly IConstructor _targetConstructor;
         private readonly TemplateMember<IMethod> _template;
 
         public Advice Advice { get; }
 
-        public IMemberOrNamedType ContextDeclaration { get; private set; }
+        public IMemberOrNamedType ContextDeclaration { get; }
 
         public SyntaxTree TargetSyntaxTree
             => this._targetConstructor.GetPrimaryDeclaration()?.SyntaxTree

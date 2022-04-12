@@ -30,10 +30,10 @@ namespace Metalama.Framework.Engine.CodeModel
             => (ConstructorDeclarationSyntax?) this.GetPrimaryDeclaration() switch
             {
                 null => ConstructorInitializerKind.Undetermined,
-                ConstructorDeclarationSyntax { Initializer: null } => ConstructorInitializerKind.Undetermined,
-                ConstructorDeclarationSyntax { Initializer: { } initializer } when initializer.Kind() == SyntaxKind.ThisConstructorInitializer =>
+                { Initializer: null } => ConstructorInitializerKind.Undetermined,
+                { Initializer: { } initializer } when initializer.Kind() == SyntaxKind.ThisConstructorInitializer =>
                     ConstructorInitializerKind.This,
-                ConstructorDeclarationSyntax { Initializer: { } initializer } when initializer.Kind() == SyntaxKind.BaseConstructorInitializer =>
+                { Initializer: { } initializer } when initializer.Kind() == SyntaxKind.BaseConstructorInitializer =>
                     ConstructorInitializerKind.Base,
                 _ => throw new AssertionFailedException()
             };
