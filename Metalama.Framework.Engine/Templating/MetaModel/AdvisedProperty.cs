@@ -3,10 +3,8 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Advised;
-using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Utilities;
 using System.Collections.Generic;
 using System.Reflection;
 
@@ -18,16 +16,11 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public RefKind RefKind => this.Underlying.RefKind;
 
-        [Memo]
-        public IAdvisedParameterList Parameters => new AdvisedParameterList( this.Underlying );
-
-        IParameterList IHasParameters.Parameters => this.Underlying.Parameters;
-
         public IReadOnlyList<IProperty> ExplicitInterfaceImplementations => this.Underlying.ExplicitInterfaceImplementations;
 
         public PropertyInfo ToPropertyInfo() => this.Underlying.ToPropertyInfo();
 
-        public new IInvokerFactory<IPropertyInvoker> Invokers => this.Underlying.Invokers;
+        public new IInvokerFactory<IFieldOrPropertyInvoker> Invokers => this.Underlying.Invokers;
 
         public IProperty? OverriddenProperty => this.Underlying.OverriddenProperty;
     }

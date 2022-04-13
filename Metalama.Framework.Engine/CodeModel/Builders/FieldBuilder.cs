@@ -17,7 +17,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
+    internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
     {
         public override DeclarationKind DeclarationKind => DeclarationKind.Field;
 
@@ -40,8 +40,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             => new InvokerFactory<IFieldOrPropertyInvoker>( ( order, invokerOperator ) => new FieldOrPropertyInvoker( this, order, invokerOperator ), false );
 
         public Writeability Writeability { get; set; }
-
-        Writeability IFieldOrProperty.Writeability => this.Writeability;
 
         public bool IsAutoPropertyOrField => true;
 

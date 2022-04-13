@@ -83,7 +83,8 @@ namespace Metalama.Framework.Engine.Aspects
 
         public T Target { get; }
 
-        private AspectReceiverSelector<T> GetValidatorReceiverSelector() => this._declarationSelector ??= new AspectReceiverSelector<T>( this.Target.ToTypedRef(), this );
+        private AspectReceiverSelector<T> GetValidatorReceiverSelector()
+            => this._declarationSelector ??= new AspectReceiverSelector<T>( this.Target.ToTypedRef(), this );
 
         public IAspectReceiver<TMember> WithTargetMembers<TMember>( Func<T, IEnumerable<TMember>> selector )
             where TMember : class, IDeclaration

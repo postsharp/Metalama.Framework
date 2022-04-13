@@ -677,7 +677,7 @@ class Class<T>
             Assert.Equal( "Action<string>", openType.Events.Single().ForTypeInstance( typeInstance ).Type.ToString() );
             Assert.Equal( "string", openType.Methods.Single().ForTypeInstance( typeInstance ).ReturnType.ToString() );
             Assert.Equal( "string", openType.Constructors.Single().ForTypeInstance( typeInstance ).Parameters[0].Type.ToString() );
-            Assert.Equal( typeInstance, openType.StaticConstructor!.ForTypeInstance( typeInstance ).DeclaringType );
+            Assert.Equal( typeInstance, openType.StaticConstructor.ForTypeInstance( typeInstance ).DeclaringType );
         }
 
         [Fact]
@@ -742,6 +742,29 @@ class Parent<TParent>
             // Closed method in closed nested type.
             var closedMethod = openMethodOfClosedNestedType.ConstructGenericInstance( typeof(long) );
             Assert.Equal( "(string, int, long)", closedMethod.ReturnType.ToString() );
+        }
+
+        [Fact]
+        public void Indexer()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = @"
+public sealed class C
+{
+    public string this[string key]
+    {
+        get { return string.Empty; }
+
+        set { }
+    }
+}
+";
+
+            var compilation = testContext.CreateCompilationModel( code );
+            Assert.Single( compilation.Types );
+            Assert.Single( compilation.Types[0].Indexers );
+            Assert.Single( compilation.Types[0].Indexers[0].Parameters );
         }
 
         [Fact]

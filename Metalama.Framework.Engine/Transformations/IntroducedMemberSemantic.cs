@@ -7,6 +7,6 @@ namespace Metalama.Framework.Engine.Transformations
     {
         Introduction,
         Override,
-        InitializerMethod,
+        InitializerMethod
     }
 }

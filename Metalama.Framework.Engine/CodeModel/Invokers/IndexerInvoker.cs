@@ -12,29 +12,25 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.CodeModel.Invokers
 {
-    internal class PropertyInvoker : FieldOrPropertyInvoker, IPropertyInvoker
+    internal class IndexerInvoker : Invoker, IIndexerInvoker
     {
-        protected IProperty Property => (IProperty) this.Member;
-
-        protected override void AssertNoArgument() => this.Member.CheckArguments( this.Property.Parameters, null );
-
         private ExpressionSyntax CreateIndexerAccess( RuntimeExpression instance, RuntimeExpression[]? args, SyntaxGenerationContext generationContext )
         {
-            if ( this.Member.DeclaringType.IsOpenGeneric )
+            if ( this.Indexer.DeclaringType.IsOpenGeneric )
             {
                 throw new InvalidOperationException(
-                    $"Cannot invoke the '{this.Property.ToDisplayString()}' event because the declaring type has unbound type parameters." );
+                    $"Cannot invoke the '{this.Indexer.ToDisplayString()}' event because the declaring type has unbound type parameters." );
             }
 
-            var receiver = this.Member.GetReceiverSyntax( instance, generationContext );
-            var arguments = this.Member.GetArguments( this.Property.Parameters, args );
+            var receiver = this.Indexer.GetReceiverSyntax( instance, generationContext );
+            var arguments = this.Indexer.GetArguments( this.Indexer.Parameters, args );
 
             var expression = ElementAccessExpression( receiver ).AddArgumentListArguments( arguments );
 
             return expression;
         }
 
-        public object GetIndexerValue( object? instance, params object?[] args )
+        public object GetValue( object? instance, params object?[] args )
         {
             var syntaxGenerationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
@@ -43,12 +39,12 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                     RuntimeExpression.FromValue( instance, this.Compilation, syntaxGenerationContext ),
                     RuntimeExpression.FromValue( args, this.Compilation, syntaxGenerationContext ),
                     syntaxGenerationContext ),
-                this.Member.Type,
+                this.Indexer.Type,
                 syntaxGenerationContext,
-                isReferenceable: this.Member.Writeability != Writeability.None );
+                isReferenceable: this.Indexer.Writeability != Writeability.None );
         }
 
-        public object SetIndexerValue( object? instance, object value, params object?[] args )
+        public object SetValue( object? instance, object value, params object?[] args )
         {
             var syntaxGenerationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
@@ -62,9 +58,14 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 propertyAccess,
                 RuntimeExpression.GetSyntaxFromValue( value, this.Compilation, syntaxGenerationContext ) );
 
-            return new UserExpression( expression, this.Member.Type, syntaxGenerationContext );
+            return new UserExpression( expression, this.Indexer.Type, syntaxGenerationContext );
         }
 
-        public PropertyInvoker( IProperty member, InvokerOrder order, InvokerOperator invokerOperator ) : base( member, order, invokerOperator ) { }
+        public IndexerInvoker( IIndexer indexer, InvokerOrder order ) : base( indexer, order )
+        {
+            this.Indexer = indexer;
+        }
+
+        public IIndexer Indexer { get; }
     }
 }

@@ -50,14 +50,14 @@ namespace Metalama.Framework.Engine.Utilities
             return declaration.ContainingDeclaration != null && declaration.ContainingDeclaration.IsContainedIn( containingDeclaration );
         }
 
-        public static bool IsImplicitStaticConstructor(this IConstructor ctor)
+        public static bool IsImplicitStaticConstructor( this IConstructor ctor )
         {
             return ctor.IsStatic && ctor.GetSymbol() == null && ctor is not IConstructorBuilder;
         }
 
-        public static bool IsImplicitInstanceConstructor(this IConstructor ctor )
+        public static bool IsImplicitInstanceConstructor( this IConstructor ctor )
         {
-            return !ctor.IsStatic && ctor.GetSymbol() != null && ctor.GetSymbol()!.GetPrimaryDeclaration() == null;            
+            return !ctor.IsStatic && ctor.GetSymbol() != null && ctor.GetSymbol()!.GetPrimaryDeclaration() == null;
         }
     }
 }

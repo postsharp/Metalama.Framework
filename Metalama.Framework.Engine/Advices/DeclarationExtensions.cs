@@ -23,6 +23,11 @@ namespace Metalama.Framework.Engine.Advices
 
         public static bool SignatureEquals( this IProperty property, IProperty other )
         {
+            return property.Name == other.Name;
+        }
+
+        public static bool SignatureEquals( this IIndexer property, IIndexer other )
+        {
             return property.Name == other.Name
                    && property.Parameters.Count == other.Parameters.Count
                    && property.Parameters

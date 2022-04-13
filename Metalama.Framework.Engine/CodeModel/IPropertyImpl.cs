@@ -6,4 +6,6 @@ using Metalama.Framework.Code;
 namespace Metalama.Framework.Engine.CodeModel
 {
     internal interface IPropertyImpl : IProperty, IFieldOrPropertyImpl { }
+
+    internal interface IIndexerImpl : IIndexer, IMemberWithAccessorsImpl { }
 }

@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
             containingDeclaration,
             sourceItems ) { }
 
-        public ParameterList( IProperty containingDeclaration, IEnumerable<Ref<IParameter>> sourceItems ) : base(
+        public ParameterList( IIndexer containingDeclaration, IEnumerable<Ref<IParameter>> sourceItems ) : base(
             containingDeclaration,
             sourceItems ) { }
 

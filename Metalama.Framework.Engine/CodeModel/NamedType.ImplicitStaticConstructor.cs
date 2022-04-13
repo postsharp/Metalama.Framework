@@ -9,6 +9,7 @@ using System;
 using System.Reflection;
 using System.Text;
 using Accessibility = Metalama.Framework.Code.Accessibility;
+using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
@@ -23,7 +24,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             public IMethodList LocalFunctions => MethodList.Empty;
 
-            public Code.MethodKind MethodKind => Code.MethodKind.StaticConstructor;
+            public MethodKind MethodKind => MethodKind.StaticConstructor;
 
             public bool IsVirtual => false;
 
@@ -33,7 +34,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             public bool IsExplicitInterfaceImplementation => false;
 
-            public INamedType DeclaringType { get; private set; }
+            public INamedType DeclaringType { get; }
 
             public Accessibility Accessibility => Accessibility.Public;
 

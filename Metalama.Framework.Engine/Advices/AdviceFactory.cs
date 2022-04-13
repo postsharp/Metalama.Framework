@@ -818,7 +818,15 @@ namespace Metalama.Framework.Engine.Advices
             var templateRef = this.ValidateTemplateName( template, TemplateKind.Default, true )
                 .GetTemplateMember<IMethod>( this._compilation, this._serviceProvider );
 
-            var advice = new InitializeAdvice( this._aspect, this._templateInstance, targetDeclaration, templateRef, InitializerKind.BeforeTypeConstructor, _layerName, tags );
+            var advice = new InitializeAdvice(
+                this._aspect,
+                this._templateInstance,
+                targetDeclaration,
+                templateRef,
+                InitializerKind.BeforeTypeConstructor,
+                _layerName,
+                tags );
+
             advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
             this._advices.Add( advice );
@@ -838,7 +846,15 @@ namespace Metalama.Framework.Engine.Advices
             var templateRef = this.ValidateTemplateName( template, TemplateKind.Default, true )
                 .GetTemplateMember<IMethod>( this._compilation, this._serviceProvider );
 
-            var advice = new InitializeAdvice( this._aspect, this._templateInstance, targetDeclaration, templateRef, InitializerKind.BeforeInstanceConstructor, _layerName, tags );
+            var advice = new InitializeAdvice(
+                this._aspect,
+                this._templateInstance,
+                targetDeclaration,
+                templateRef,
+                InitializerKind.BeforeInstanceConstructor,
+                _layerName,
+                tags );
+
             advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
             this._advices.Add( advice );

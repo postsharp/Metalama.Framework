@@ -45,7 +45,7 @@ class C<T> : object
 
             // Constructors
             AssertLocation( "C", type.Constructors.Single().GetDiagnosticLocation() );
-            AssertLocation( "C", type.StaticConstructor!.GetDiagnosticLocation() );
+            AssertLocation( "C", type.StaticConstructor.GetDiagnosticLocation() );
 
             // Methods
             AssertLocation( "Method", method.GetDiagnosticLocation() );
@@ -67,7 +67,7 @@ class C<T> : object
             AssertLocation( "set", property.SetMethod!.GetDiagnosticLocation() );
 
             // Indexer
-            AssertLocation( "this", type.Properties.OfName( "this[]" ).Single().GetDiagnosticLocation() );
+            AssertLocation( "this", type.Indexers.Single().GetDiagnosticLocation() );
 
             // Fields
             AssertLocation( "field1", type.Fields.OfName( "field1" ).Single().GetDiagnosticLocation() );
