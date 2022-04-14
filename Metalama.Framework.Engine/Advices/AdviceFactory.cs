@@ -806,7 +806,7 @@ namespace Metalama.Framework.Engine.Advices
                 tags );
         }
 
-        public void AddInitializerBeforeTypeConstructor( IMemberOrNamedType targetDeclaration, string template, TagDictionary? tags = null )
+        public void AddInitializerBeforeTypeConstructor( IMemberOrNamedType targetType, string template, TagDictionary? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -821,7 +821,7 @@ namespace Metalama.Framework.Engine.Advices
             var advice = new InitializeAdvice(
                 this._aspect,
                 this._templateInstance,
-                targetDeclaration,
+                targetType,
                 templateRef,
                 InitializerKind.BeforeTypeConstructor,
                 _layerName,
@@ -834,7 +834,7 @@ namespace Metalama.Framework.Engine.Advices
             this._diagnosticAdder.Report( diagnosticList );
         }
 
-        public void AddInitializerBeforeInstanceConstructor( IMemberOrNamedType targetDeclaration, string template, TagDictionary? tags = null )
+        public void AddInitializerBeforeInstanceConstructor( IMemberOrNamedType targetType, string template, TagDictionary? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -849,7 +849,7 @@ namespace Metalama.Framework.Engine.Advices
             var advice = new InitializeAdvice(
                 this._aspect,
                 this._templateInstance,
-                targetDeclaration,
+                targetType,
                 templateRef,
                 InitializerKind.BeforeInstanceConstructor,
                 _layerName,
