@@ -38,7 +38,7 @@ namespace Metalama.Framework.Engine.Templating
         private readonly SerializableTypes _serializableTypes;
         private readonly TemplateMetaSyntaxFactoryImpl _templateMetaSyntaxFactory;
         private readonly TemplateMemberClassifier _templateMemberClassifier;
-        private readonly BuildTimeOnlyRewriter _buildTimeOnlyRewriter;
+        private readonly CompileTimeOnlyRewriter _compileTimeOnlyRewriter;
         private readonly TypeOfRewriter _typeOfRewriter;
 
         private MetaContext? _currentMetaContext;
@@ -65,7 +65,7 @@ namespace Metalama.Framework.Engine.Templating
             this._serializableTypes = serializableTypes;
             this._templateMetaSyntaxFactory = new TemplateMetaSyntaxFactoryImpl( this.MetaSyntaxFactory );
             this._templateMemberClassifier = new TemplateMemberClassifier( runTimeCompilation, syntaxTreeAnnotationMap, serviceProvider );
-            this._buildTimeOnlyRewriter = new BuildTimeOnlyRewriter( this );
+            this._compileTimeOnlyRewriter = new CompileTimeOnlyRewriter( this );
             this._typeOfRewriter = new TypeOfRewriter( SyntaxGenerationContext.CreateDefault( serviceProvider, compileTimeCompilation ) );
         }
 
@@ -193,6 +193,10 @@ namespace Metalama.Framework.Engine.Templating
             }
         }
 
+        private T TransformCompileTimeCode<T>( T node )
+            where T : SyntaxNode
+            => (T) this._compileTimeOnlyRewriter.Visit( node );
+
         public override SyntaxNode? Visit( SyntaxNode? node )
         {
             if ( node == null )
@@ -223,7 +227,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 // The node itself does not need to be transformed because it is compile time, but it needs to be converted
                 // into a run-time value. However, calls to variants of Proceed must be transformed into calls to the standard Proceed.
-                return this.CreateRunTimeExpression( (ExpressionSyntax) this._buildTimeOnlyRewriter.Visit( node ) );
+                return this.CreateRunTimeExpression( (ExpressionSyntax) this.TransformCompileTimeCode( node ) );
             }
             else
             {
@@ -676,8 +680,7 @@ namespace Metalama.Framework.Engine.Templating
 
                 var invocationExpression = InvocationExpression(
                         this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.DynamicDiscardAssignment) ) )
-                    .AddArgumentListArguments(
-                        Argument( this.CastToDynamicExpression( (ExpressionSyntax) this._buildTimeOnlyRewriter.Visit( assignment.Right ) ) ) );
+                    .AddArgumentListArguments( Argument( this.CastToDynamicExpression( this.TransformCompileTimeCode( assignment.Right ) ) ) );
 
                 return this.WithCallToAddSimplifierAnnotation( invocationExpression );
             }
@@ -711,7 +714,7 @@ namespace Metalama.Framework.Engine.Templating
                     return SyntaxFactoryEx.LiteralExpression( name );
                 }
             }
-            else if ( this._buildTimeOnlyRewriter.TryRewriteProceedInvocation( node, out var proceedNode ) )
+            else if ( this._compileTimeOnlyRewriter.TryRewriteProceedInvocation( node, out var proceedNode ) )
             {
                 return proceedNode;
             }
@@ -1345,9 +1348,12 @@ namespace Metalama.Framework.Engine.Templating
                 var transformedStatement = this.ToMetaStatement( node.Statement );
                 var transformedElseStatement = node.Else != null ? this.ToMetaStatement( node.Else.Statement ) : null;
 
+                // The condition may contains constructs like typeof or nameof that need to be transformed.
+                var condition = this.TransformCompileTimeCode( node.Condition );
+
                 return IfStatement(
                     node.AttributeLists,
-                    node.Condition,
+                    condition,
                     transformedStatement,
                     transformedElseStatement != null ? ElseClause( transformedElseStatement ) : null );
             }
@@ -1385,11 +1391,14 @@ namespace Metalama.Framework.Engine.Templating
 
             this.Unindent();
 
+            // The expression may contain typeof, nameof, ...
+            var expression = this.TransformCompileTimeCode( node.Expression );
+
             // It seems that trivia can be lost upstream, there can be a missing one between the 'in' keyword and the expression. Add them to be sure.
             return ForEachStatement(
                 node.Type.WithTrailingTrivia( ElasticSpace ),
                 node.Identifier.WithTrailingTrivia( ElasticSpace ),
-                node.Expression.WithLeadingTrivia( ElasticSpace ),
+                expression.WithLeadingTrivia( ElasticSpace ),
                 statement );
         }
 
