@@ -89,7 +89,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             {
                 if (method.IsExplicitInterfaceImplementation)
                 {
-                    aspectBuilder.Advices.OverrideMethod( method, nameof(Template) );
+                    aspectBuilder.Advices.Override( method, nameof(Template) );
                 }
             }
 
@@ -97,7 +97,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             {
                 if (property.IsExplicitInterfaceImplementation)
                 {
-                    aspectBuilder.Advices.OverrideFieldOrPropertyAccessors( property, nameof(Template), nameof(Template) );
+                    aspectBuilder.Advices.OverrideAccessors( property, nameof(Template), nameof(Template) );
                 }
             }
 
@@ -105,7 +105,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             {
                 if (method.IsExplicitInterfaceImplementation)
                 {
-                    aspectBuilder.Advices.OverrideEventAccessors( method, nameof(Template), nameof(Template), null );
+                    aspectBuilder.Advices.OverrideAccessors( method, nameof(Template), nameof(Template), null );
                 }
             }
         }

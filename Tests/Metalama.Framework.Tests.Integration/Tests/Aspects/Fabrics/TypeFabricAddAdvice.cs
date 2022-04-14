@@ -17,7 +17,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.TypeFabricAddA
             {
                 foreach (var method in amender.Type.Methods)
                 {
-                    amender.Advices.OverrideMethod( method, nameof(Template) );
+                    amender.Advices.Override( method, nameof(Template) );
                 }
             }
 

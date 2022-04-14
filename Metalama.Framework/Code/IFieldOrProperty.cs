@@ -9,7 +9,7 @@ namespace Metalama.Framework.Code
     /// <summary>
     /// A base interface for <see cref="IField"/> and <see cref="IProperty"/>.
     /// </summary>
-    public interface IFieldOrProperty : IPropertyLike
+    public interface IFieldOrProperty : IFieldOrPropertyOrIndexer
     {
         /// <summary>
         /// Gets a value indicating whether the declaration is an auto-property or a field.

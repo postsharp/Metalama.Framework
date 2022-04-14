@@ -6,7 +6,7 @@ namespace Metalama.Framework.Code.DeclarationBuilders;
 /// <summary>
 /// Base interface for <see cref="IFieldBuilder"/>, <see cref="IPropertyBuilder"/> and <see cref="IIndexerBuilder"/>.
 /// </summary>
-public interface IPropertyLikeBuilder : IPropertyLike, IMemberBuilder
+public interface IFieldOrPropertyOrIndexerBuilder : IFieldOrPropertyOrIndexer, IMemberBuilder
 {
     /// <summary>
     /// Gets the <see cref="IMethodBuilder"/> for the getter.

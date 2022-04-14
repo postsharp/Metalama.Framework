@@ -246,7 +246,7 @@ namespace Metalama.Framework.Engine.Advices
             return selectedTemplate.InterpretedAs( interpretedKind );
         }
 
-        private TemplateMemberRef SelectTemplate( IFieldOrProperty targetFieldOrProperty, in GetterTemplateSelector templateSelector, bool required )
+        private TemplateMemberRef SelectTemplate( IFieldOrPropertyOrIndexer targetFieldOrProperty, in GetterTemplateSelector templateSelector, bool required )
         {
             var getter = targetFieldOrProperty.GetMethod;
 
@@ -279,7 +279,7 @@ namespace Metalama.Framework.Engine.Advices
             return selectedTemplate;
         }
 
-        public void OverrideMethod( IMethod targetMethod, in MethodTemplateSelector templateSelector, TagDictionary? tags = null )
+        public void Override( IMethod targetMethod, in MethodTemplateSelector templateSelector, TagDictionary? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -348,8 +348,8 @@ namespace Metalama.Framework.Engine.Advices
             return advice.Builder;
         }
 
-        public void OverrideFieldOrProperty(
-            IFieldOrProperty targetDeclaration,
+        public void Override(
+            IFieldOrPropertyOrIndexer targetDeclaration,
             string defaultTemplate,
             TagDictionary? tags = null )
         {
@@ -391,10 +391,10 @@ namespace Metalama.Framework.Engine.Advices
             this._diagnosticAdder.Report( diagnosticList );
         }
 
-        public void OverrideFieldOrPropertyAccessors(
-            IFieldOrProperty targetDeclaration,
+        public void OverrideAccessors(
+            IFieldOrPropertyOrIndexer targetDeclaration,
             in GetterTemplateSelector getTemplateSelector,
-            string? setTemplate,
+            string? setTemplate = null,
             TagDictionary? tags = null )
         {
             if ( this._templateInstance == null )
@@ -572,7 +572,7 @@ namespace Metalama.Framework.Engine.Advices
             return advice.Builder;
         }
 
-        public void OverrideEventAccessors(
+        public void OverrideAccessors(
             IEvent targetDeclaration,
             string? addTemplate,
             string? removeTemplate,
@@ -806,7 +806,7 @@ namespace Metalama.Framework.Engine.Advices
                 tags );
         }
 
-        public void AddInitializerBeforeTypeConstructor( IMemberOrNamedType targetDeclaration, string template, TagDictionary? tags = null )
+        public void AddInitializerBeforeTypeConstructor( IMemberOrNamedType targetType, string template, TagDictionary? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -821,7 +821,7 @@ namespace Metalama.Framework.Engine.Advices
             var advice = new InitializeAdvice(
                 this._aspect,
                 this._templateInstance,
-                targetDeclaration,
+                targetType,
                 templateRef,
                 InitializerKind.BeforeTypeConstructor,
                 _layerName,
@@ -834,7 +834,7 @@ namespace Metalama.Framework.Engine.Advices
             this._diagnosticAdder.Report( diagnosticList );
         }
 
-        public void AddInitializerBeforeInstanceConstructor( IMemberOrNamedType targetDeclaration, string template, TagDictionary? tags = null )
+        public void AddInitializerBeforeInstanceConstructor( IMemberOrNamedType targetType, string template, TagDictionary? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -849,7 +849,7 @@ namespace Metalama.Framework.Engine.Advices
             var advice = new InitializeAdvice(
                 this._aspect,
                 this._templateInstance,
-                targetDeclaration,
+                targetType,
                 templateRef,
                 InitializerKind.BeforeInstanceConstructor,
                 _layerName,
@@ -862,7 +862,7 @@ namespace Metalama.Framework.Engine.Advices
             this._diagnosticAdder.Report( diagnosticList );
         }
 
-        public void OverrideConstructor( IConstructor targetConstructor, string template, TagDictionary? tags = null )
+        public void Override( IConstructor targetConstructor, string template, TagDictionary? tags = null )
         {
             throw new NotImplementedException();
         }

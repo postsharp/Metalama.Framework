@@ -25,7 +25,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Methods.AdvisedIn
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advices.OverrideMethod( builder.Target.Methods.OfName( nameof(TestIntroductionAttribute.Method) ).Single(), nameof(MethodTemplate) );
+            builder.Advices.Override( builder.Target.Methods.OfName( nameof(TestIntroductionAttribute.Method) ).Single(), nameof(MethodTemplate) );
         }
 
         [Template]
