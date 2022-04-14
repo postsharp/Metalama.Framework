@@ -44,9 +44,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IMethodBuilder? GetMethod { get; }
 
-        IMethod? IPropertyLike.GetMethod => this.GetMethod;
+        IMethod? IFieldOrPropertyOrIndexer.GetMethod => this.GetMethod;
 
-        IMethod? IPropertyLike.SetMethod => this.SetMethod;
+        IMethod? IFieldOrPropertyOrIndexer.SetMethod => this.SetMethod;
 
         public IMethodBuilder? SetMethod { get; }
 

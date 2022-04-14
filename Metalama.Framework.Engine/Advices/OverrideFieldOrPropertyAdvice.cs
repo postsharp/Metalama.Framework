@@ -10,7 +10,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Advices
 {
-    internal class OverrideFieldOrPropertyAdvice : OverrideMemberAdvice<IFieldOrProperty>
+    internal class OverrideFieldOrPropertyAdvice : OverrideMemberAdvice<IFieldOrPropertyOrIndexer>
     {
         public TemplateMember<IProperty> PropertyTemplate { get; }
 
@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Advices
         public OverrideFieldOrPropertyAdvice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
-            IFieldOrProperty targetDeclaration,
+            IFieldOrPropertyOrIndexer targetDeclaration,
             TemplateMember<IProperty> propertyTemplate,
             TemplateMember<IMethod> getTemplate,
             TemplateMember<IMethod> setTemplate,

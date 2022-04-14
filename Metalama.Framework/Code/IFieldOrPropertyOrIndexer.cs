@@ -6,7 +6,7 @@ namespace Metalama.Framework.Code;
 /// <summary>
 /// A base interface for <see cref="IProperty"/>, <see cref="IField"/> and <see cref="IIndexer"/>.
 /// </summary>
-public interface IPropertyLike : IMemberWithAccessors
+public interface IFieldOrPropertyOrIndexer : IMemberWithAccessors
 {
     /// <summary>
     /// Gets writeability of the field, property or indexer, i.e. the situations in which it can be written.

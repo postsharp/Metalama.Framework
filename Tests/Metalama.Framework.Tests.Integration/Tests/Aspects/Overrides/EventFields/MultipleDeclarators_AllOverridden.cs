@@ -11,9 +11,9 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advices.OverrideEventAccessors( builder.Target.Events.OfName( "A" ).Single(), nameof(OverrideAdd), nameof(OverrideRemove), null );
-            builder.Advices.OverrideEventAccessors( builder.Target.Events.OfName( "B" ).Single(), nameof(OverrideAdd), nameof(OverrideRemove), null );
-            builder.Advices.OverrideEventAccessors( builder.Target.Events.OfName( "C" ).Single(), nameof(OverrideAdd), nameof(OverrideRemove), null );
+            builder.Advices.OverrideAccessors( builder.Target.Events.OfName( "A" ).Single(), nameof(OverrideAdd), nameof(OverrideRemove), null );
+            builder.Advices.OverrideAccessors( builder.Target.Events.OfName( "B" ).Single(), nameof(OverrideAdd), nameof(OverrideRemove), null );
+            builder.Advices.OverrideAccessors( builder.Target.Events.OfName( "C" ).Single(), nameof(OverrideAdd), nameof(OverrideRemove), null );
         }
 
         [Template]

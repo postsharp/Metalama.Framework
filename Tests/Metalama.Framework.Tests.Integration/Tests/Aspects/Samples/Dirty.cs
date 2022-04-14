@@ -48,7 +48,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
 
             foreach (var fieldOrProperty in fieldsOrProperties)
             {
-                builder.Advices.OverrideFieldOrPropertyAccessors( fieldOrProperty, null, nameof(OverrideSetter) );
+                builder.Advices.OverrideAccessors( fieldOrProperty, null, nameof(OverrideSetter) );
             }
 
             // TODO: This aspect is not complete. We should normally not set DirtyState to Clean after the object has been initialized,

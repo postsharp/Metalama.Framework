@@ -9,7 +9,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.Advice
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advices.OverrideMethod( builder.Target.Methods.OfName( "TargetMethod" ).Single(), nameof(Template) );
+            builder.Advices.Override( builder.Target.Methods.OfName( "TargetMethod" ).Single(), nameof(Template) );
         }
 
         [Template]

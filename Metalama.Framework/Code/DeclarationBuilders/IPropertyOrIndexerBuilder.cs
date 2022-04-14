@@ -6,7 +6,7 @@ namespace Metalama.Framework.Code.DeclarationBuilders;
 /// <summary>
 /// Base interface for <see cref="IPropertyBuilder"/> and <see cref="IIndexerBuilder"/>.
 /// </summary>
-public interface IPropertyOrIndexerBuilder : IPropertyOrIndexer, IPropertyLikeBuilder
+public interface IPropertyOrIndexerBuilder : IPropertyOrIndexer, IFieldOrPropertyOrIndexerBuilder
 {
     /// <summary>
     /// Gets or sets the <see cref="Metalama.Framework.Code.RefKind"/> of the property

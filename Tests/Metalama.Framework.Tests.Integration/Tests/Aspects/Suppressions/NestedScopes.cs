@@ -23,7 +23,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Suppressions.NestedScopes
 
         public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
-            builder.Advices.OverrideMethod( builder.Target, nameof(Override) );
+            builder.Advices.Override( builder.Target, nameof(Override) );
             builder.Diagnostics.Suppress( _suppression, builder.Target );
         }
     }

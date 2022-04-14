@@ -13,7 +13,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Events.PartialTy
         {
             foreach( var @event in builder.Target.Events )
             {
-                builder.Advices.OverrideEventAccessors(@event, nameof(Template), nameof(Template), null, tags: new TagDictionary() { ["name"] = @event.Name });
+                builder.Advices.OverrideAccessors(@event, nameof(Template), nameof(Template), null, tags: new TagDictionary() { ["name"] = @event.Name });
             }
         }
 

@@ -13,7 +13,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.PartialT
         {
             foreach( var method in builder.Target.Methods )
             {
-                builder.Advices.OverrideMethod( method, nameof(Template), tags: new TagDictionary() { ["name"] = method.Name });
+                builder.Advices.Override( method, nameof(Template), tags: new TagDictionary() { ["name"] = method.Name });
             }
         }
 

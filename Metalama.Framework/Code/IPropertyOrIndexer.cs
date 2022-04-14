@@ -5,7 +5,7 @@ using System.Reflection;
 
 namespace Metalama.Framework.Code;
 
-public interface IPropertyOrIndexer : IPropertyLike
+public interface IPropertyOrIndexer : IFieldOrPropertyOrIndexer
 {
     /// <summary>
     /// Gets a value indicating whether the property is <c>ref</c> or <c>ref in</c>.

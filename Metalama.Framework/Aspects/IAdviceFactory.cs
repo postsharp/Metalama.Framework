@@ -21,7 +21,7 @@ namespace Metalama.Framework.Aspects
         /// <summary>
         /// Overrides the implementation of a method.
         /// </summary>
-        /// <param name="method">The method to override.</param>
+        /// <param name="targetMethod">The method to override.</param>
         /// <param name="templateSelector">Name of a method in the aspect class whose implementation will be used as a template.
         ///     This property must be annotated with <see cref="TemplateAttribute"/>. To select a different templates according to the kind of target method
         /// (such as async or iterator methods), use the constructor of the <see cref="MethodTemplateSelector"/> type. To specify a single
@@ -30,7 +30,7 @@ namespace Metalama.Framework.Aspects
         ///     of the <see cref="meta"/> API.</param>
         /// <remarks>When an aspect overrides the same declaration in same aspect part multiple, the order of advices is equal to the inverse of order of calls of this method.</remarks>
         /// <seealso href="@overriding-members"/>
-        void OverrideMethod( IMethod method, in MethodTemplateSelector templateSelector, TagDictionary? tags = null );
+        void Override( IMethod targetMethod, in MethodTemplateSelector templateSelector, TagDictionary? tags = null );
 
         /// <summary>
         /// Introduces a new method or overrides the implementation of the existing one.
@@ -61,13 +61,13 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         /// <param name="targetDeclaration">The field or property to override.</param>
         /// <param name="template">The name of a property of the aspect class, with a getter, a setter, or both, whose implementation will be used as a template.
-        /// This property must be annotated with <see cref="TemplateAttribute"/>.</param>
+        ///     This property must be annotated with <see cref="TemplateAttribute"/>.</param>
         /// <param name="tags">An arbitrary dictionary of tags passed to the template property and exposed under the <see cref="meta.Tags"/> property of the
-        /// <see cref="meta"/> API.</param>
+        ///     <see cref="meta"/> API.</param>
         /// <remarks>When an aspect overrides the same declaration in same aspect part multiple, the order of advices is equal to the inverse of order of calls of this method.</remarks>
         /// <seealso href="@overriding-members"/>
-        void OverrideFieldOrProperty(
-            IFieldOrProperty targetDeclaration,
+        void Override(
+            IFieldOrPropertyOrIndexer targetDeclaration,
             string template,
             TagDictionary? tags = null );
 
@@ -76,20 +76,20 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         /// <param name="targetDeclaration">The field or property to override.</param>
         /// <param name="getTemplateSelector">The name of the method of the aspect class whose implementation will be used as a template for the getter, or <c>null</c>
-        /// if the getter should not be overridden. This method must be annotated with <see cref="TemplateAttribute"/>. The signature of this method must
-        /// be <c>T Get()</c> where <c>T</c> is either <c>dynamic</c> or a type compatible with the type of the field or property.
-        /// To select a different templates for iterator getters, use the constructor of the <see cref="GetterTemplateSelector"/> type. To specify a single
-        /// template for all properties, pass a string.
+        ///     if the getter should not be overridden. This method must be annotated with <see cref="TemplateAttribute"/>. The signature of this method must
+        ///     be <c>T Get()</c> where <c>T</c> is either <c>dynamic</c> or a type compatible with the type of the field or property.
+        ///     To select a different templates for iterator getters, use the constructor of the <see cref="GetterTemplateSelector"/> type. To specify a single
+        ///     template for all properties, pass a string.
         /// </param>
         /// <param name="setTemplate">The name of the method of the aspect class whose implementation will be used as a template for the getter, or <c>null</c>
-        /// if the getter should not be overridden. This method must be annotated with <see cref="TemplateAttribute"/>. The signature of this method must
-        /// be <c>void Set(T value</c>  where <c>T</c> is either <c>dynamic</c> or a type compatible with the type of the field or property.</param>
+        ///     if the getter should not be overridden. This method must be annotated with <see cref="TemplateAttribute"/>. The signature of this method must
+        ///     be <c>void Set(T value</c>  where <c>T</c> is either <c>dynamic</c> or a type compatible with the type of the field or property.</param>
         /// <param name="tags">An arbitrary dictionary of tags passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
-        /// <see cref="meta"/> API.</param>
+        ///     <see cref="meta"/> API.</param>
         /// <remarks>When an aspect overrides the same declaration in same aspect part multiple, the order of advices is equal to the inverse of order of calls of this method.</remarks>
         /// <seealso href="@overriding-members"/>
-        void OverrideFieldOrPropertyAccessors(
-            IFieldOrProperty targetDeclaration,
+        void OverrideAccessors(
+            IFieldOrPropertyOrIndexer targetDeclaration,
             in GetterTemplateSelector getTemplateSelector = default,
             string? setTemplate = null,
             TagDictionary? tags = null );
@@ -180,7 +180,7 @@ namespace Metalama.Framework.Aspects
         /// <see cref="meta"/> API.</param>
         /// <remarks>When an aspect overrides the same declaration in same aspect part multiple, the order of advices is equal to the inverse of order of calls of this method.</remarks>
         /// <seealso href="@overriding-members"/>
-        void OverrideEventAccessors(
+        void OverrideAccessors(
             IEvent targetEvent,
             string? addTemplate,
             string? removeTemplate,
@@ -308,7 +308,7 @@ namespace Metalama.Framework.Aspects
             TagDictionary? tags = null );
 
         [Obsolete( "Not implemented." )]
-        void OverrideConstructor(
+        void Override(
             IConstructor targetConstructor,
             string template,
             TagDictionary? tags = null );
