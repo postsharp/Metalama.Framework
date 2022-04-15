@@ -25,7 +25,7 @@ var product = new Product
                 // In some cases, formatting or redundant keywords may be intentional.
                 "Tests\\Metalama.Framework.Tests.Integration\\Tests\\**\\*",
                 "Tests\\Metalama.Framework.Tests.Integration.Internals\\Tests\\**\\*",
-
+                
                 // This file should not be formatted because it contains assembly aliases, and JetBrains tools
                 // don't support them properly.
                 "Metalama.Framework.Engine\\Utilities\\SymbolId.cs"
@@ -47,7 +47,8 @@ var product = new Product
         "Metalama.LinqPad.$(PackageVersion).nupkg" ),
     Dependencies = new[] { Dependencies.PostSharpEngineering, Dependencies.MetalamaCompiler },
     Configurations = Product.DefaultConfigurations
-        .WithValue( BuildConfiguration.Debug,
+        .WithValue( 
+            BuildConfiguration.Debug,
             Product.DefaultConfigurations.Debug with
             {
                 AdditionalArtifactRules = new[]
@@ -97,6 +98,5 @@ static void OnPrepareCompleted( PrepareCompletedEventArgs arg )
     if ( !ToolInvocationHelper.InvokeTool( arg.Context.Console, toolPath, srcDirectory, toolDirectory ) )
     {
         arg.IsFailed = true;
-        return;
     }
 }
