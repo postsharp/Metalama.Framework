@@ -34,6 +34,7 @@ namespace Metalama.Framework.Engine.CompileTime
         private static readonly CompileTimeProjectManifest _frameworkProjectManifest = new(
             _frameworkAssemblyIdentity.ToString(),
             _frameworkAssemblyIdentity.ToString(),
+            "",
             new[] { typeof(InternalImplementAttribute) }
                 .Select( t => t.FullName )
                 .ToImmutableArray(),

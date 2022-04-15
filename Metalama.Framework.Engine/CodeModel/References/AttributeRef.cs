@@ -129,7 +129,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
             }
         }
 
-        ISymbol ISdkRef<IAttribute>.GetSymbol( Compilation compilation ) => throw new NotSupportedException();
+        ISymbol? ISdkRef<IAttribute>.GetSymbol( Compilation compilation ) => throw new NotSupportedException();
 
         public override string ToString() => this.Target?.ToString() ?? "null";
     }

@@ -25,13 +25,14 @@ var product = new Product
                 // In some cases, formatting or redundant keywords may be intentional.
                 "Tests\\Metalama.Framework.Tests.Integration\\Tests\\**\\*",
                 "Tests\\Metalama.Framework.Tests.Integration.Internals\\Tests\\**\\*",
-
+                
                 // This file should not be formatted because it contains assembly aliases, and JetBrains tools
                 // don't support them properly.
                 "Metalama.Framework.Engine\\Utilities\\SymbolId.cs"
             }
         },
-        new DotNetSolution( "Tests\\Metalama.Framework.TestApp\\Metalama.Framework.TestApp.sln" ) { IsTestOnly = true }
+        new DotNetSolution( "Tests\\Metalama.Framework.TestApp\\Metalama.Framework.TestApp.sln" ) { IsTestOnly = true },
+        new ManyDotNetSolutions( "Tests\\Standalone\\**\\*.sln" ) { IsTestOnly = true }
     },
     PublicArtifacts = Pattern.Create(
         "Metalama.SystemTypes.$(PackageVersion).nupkg",
@@ -46,14 +47,16 @@ var product = new Product
         "Metalama.LinqPad.$(PackageVersion).nupkg" ),
     Dependencies = new[] { Dependencies.PostSharpEngineering, Dependencies.MetalamaCompiler },
     Configurations = Product.DefaultConfigurations
-        .WithValue( BuildConfiguration.Debug, Product.DefaultConfigurations.Debug with
-        {
-            AdditionalArtifactRules = new string[]
+        .WithValue( 
+            BuildConfiguration.Debug,
+            Product.DefaultConfigurations.Debug with
             {
-                $@"+:%system.teamcity.build.tempDir%/Metalama/ExtractExceptions/**/*=>logs",
-                $@"+:%system.teamcity.build.tempDir%/Metalama/Extract/**/.completed=>logs"
-            }
-        } )
+                AdditionalArtifactRules = new[]
+                {
+                    $@"+:%system.teamcity.build.tempDir%/Metalama/ExtractExceptions/**/*=>logs",
+                    $@"+:%system.teamcity.build.tempDir%/Metalama/Extract/**/.completed=>logs"
+                }
+            } )
 };
 
 product.PrepareCompleted += OnPrepareCompleted;
@@ -95,6 +98,5 @@ static void OnPrepareCompleted( PrepareCompletedEventArgs arg )
     if ( !ToolInvocationHelper.InvokeTool( arg.Context.Console, toolPath, srcDirectory, toolDirectory ) )
     {
         arg.IsFailed = true;
-        return;
     }
 }

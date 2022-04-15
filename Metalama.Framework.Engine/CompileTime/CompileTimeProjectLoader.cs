@@ -15,6 +15,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Versioning;
 using System.Text;
 using System.Threading;
 
@@ -361,6 +362,7 @@ namespace Metalama.Framework.Engine.CompileTime
             // Deserialize the project.
             if ( !this._builder.TryCompileDeserializedProject(
                     runTimeAssemblyIdentity.Name,
+                    string.IsNullOrEmpty( manifest.TargetFramework ) ? null : new FrameworkName( manifest.TargetFramework ),
                     syntaxTrees,
                     manifest.SourceHash,
                     referenceProjects,

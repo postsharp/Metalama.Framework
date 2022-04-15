@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
@@ -23,7 +24,7 @@ namespace Metalama.Framework.Engine.Testing
         public TestProjectOptions( ImmutableDictionary<string, string>? properties = null )
         {
             this._properties = properties ?? ImmutableDictionary<string, string>.Empty;
-            var baseDirectory = Path.Combine( Path.GetTempPath(), "Metalama", "Tests", Guid.NewGuid().ToString() );
+            var baseDirectory = Path.Combine( Path.GetTempPath(), "Metalama", "Tests", RandomIdGenerator.GenerateId() );
             this._baseDirectory = CreateDirectoryLazy( baseDirectory );
 
             var compileTimeProjectCacheDirectory = Path.Combine( this.BaseDirectory, "Cache" );
