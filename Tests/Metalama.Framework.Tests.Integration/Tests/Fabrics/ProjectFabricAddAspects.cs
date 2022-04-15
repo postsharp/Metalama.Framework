@@ -21,7 +21,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.ProjectFabricA
         public override dynamic? OverrideMethod()
         {
             Console.WriteLine( "overridden" );
-            Console.WriteLine( ((IFabricInstance) meta.AspectInstance.Predecessors.Single().Instance).Fabric.ToString() );
+            Console.WriteLine( ( (IFabricInstance)meta.AspectInstance.Predecessors.Single().Instance ).Fabric.ToString() );
 
             return meta.Proceed();
         }

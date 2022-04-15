@@ -2,7 +2,7 @@ using Metalama.Framework.Fabrics;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Fabrics.TransitiveProjectFabric
 {
-    public class  Fabric : ProjectFabric
+    public class Fabric : ProjectFabric
     {
         public override void AmendProject( IProjectAmender amender )
         {

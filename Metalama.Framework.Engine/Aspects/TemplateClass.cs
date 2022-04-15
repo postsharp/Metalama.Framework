@@ -8,12 +8,14 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Reflection;
 
 namespace Metalama.Framework.Engine.Aspects
@@ -150,6 +152,15 @@ namespace Metalama.Framework.Engine.Aspects
             }
 
             return members.ToImmutable();
+        }
+
+        internal IEnumerable<TemplateClassMember> GetDeclarativeAdvices()
+        {
+            return this.Members
+                .Where( m => m.Value.TemplateInfo.AttributeType == TemplateAttributeType.Introduction )
+                .Select( m => m.Value )
+                .OrderBy( m => m.Symbol.GetPrimarySyntaxReference()?.SyntaxTree.FilePath )
+                .ThenBy( m => m.Symbol.GetPrimarySyntaxReference()?.Span.Start );
         }
     }
 }

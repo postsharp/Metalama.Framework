@@ -26,21 +26,18 @@ namespace Metalama.Framework.Engine.Aspects
     {
         private readonly UserDiagnosticSink _diagnosticSink;
         private readonly AspectPipelineConfiguration _configuration;
-        private readonly ImmutableArray<Advice> _declarativeAdvices;
         private bool _skipped;
         private AspectReceiverSelector<T>? _declarationSelector;
 
         public AspectBuilder(
             T target,
             UserDiagnosticSink diagnosticSink,
-            ImmutableArray<Advice> declarativeAdvices,
             AdviceFactory adviceFactory,
             AspectPipelineConfiguration configuration,
             IAspectInstance aspectInstance,
             CancellationToken cancellationToken )
         {
             this.Target = target;
-            this._declarativeAdvices = declarativeAdvices;
             this._diagnosticSink = diagnosticSink;
             this._configuration = configuration;
             this.AspectInstance = aspectInstance;
@@ -124,7 +121,7 @@ namespace Metalama.Framework.Engine.Aspects
                     this.AspectInstance,
                     success,
                     this._diagnosticSink.ToImmutable(),
-                    this._declarativeAdvices.AddRange( this.AdviceFactory.Advices ),
+                    this.AdviceFactory.Advices.ToImmutableArray(),
                     this.AspectSources,
                     this.ValidatorSources )
                 : new AspectInstanceResult(
