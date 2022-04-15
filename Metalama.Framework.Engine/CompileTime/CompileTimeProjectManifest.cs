@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Fabrics;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
@@ -67,12 +66,12 @@ namespace Metalama.Framework.Engine.CompileTime
         public IReadOnlyList<string> PlugInTypes { get; }
 
         /// <summary>
-        /// Gets the list of types that implement the <see cref="Fabric"/> interface, but the <see cref="TransitiveProjectFabric"/>.
+        /// Gets the list of types that implement the <see cref="Metalama.Framework.Fabrics.Fabric"/> interface, but the <see cref="Metalama.Framework.Fabrics.TransitiveProjectFabric"/>.
         /// </summary>
         public IReadOnlyList<string> FabricTypes { get; }
 
         /// <summary>
-        /// Gets the list of types that implement the <see cref="TransitiveProjectFabric"/> interface.
+        /// Gets the list of types that implement the <see cref="Metalama.Framework.Fabrics.TransitiveProjectFabric"/> interface.
         /// </summary>
         public IReadOnlyList<string> TransitiveFabricTypes { get; }
 
