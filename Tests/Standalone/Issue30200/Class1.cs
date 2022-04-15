@@ -17,9 +17,4 @@ namespace Issue30200
         }
     }
 
-    internal class Target
-    {
-        [MyAspect]
-        private static void M() { }
-    }
 }

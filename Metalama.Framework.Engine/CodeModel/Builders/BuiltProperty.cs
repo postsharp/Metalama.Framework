@@ -62,7 +62,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         IProperty IRef<IProperty>.GetTarget( ICompilation compilation ) => (IProperty) this.GetForCompilation( compilation );
 
-        ISymbol? ISdkRef<IProperty>.GetSymbol( Compilation compilation ) => throw new NotSupportedException();
+        ISymbol? ISdkRef<IProperty>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => throw new NotSupportedException();
 
         public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 

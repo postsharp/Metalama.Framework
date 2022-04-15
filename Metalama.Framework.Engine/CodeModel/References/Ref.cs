@@ -156,7 +156,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 throw new InvalidOperationException( "This reference cannot be serialized because it has no compilation." );
             }
 
-            var symbol = this.GetSymbol( this._compilation );
+            var symbol = this.GetSymbol( this._compilation, true );
 
             return DocumentationCommentId.CreateDeclarationId( symbol );
         }
@@ -187,14 +187,15 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 }
             }
 
-            var symbol = this.GetSymbol( compilation );
+            var symbol = this.GetSymbol( compilation, true );
 
             return (symbol.GetAttributes(), symbol);
         }
 
         public bool IsDefault => this.Target == null && this.TargetKind == DeclarationRefTargetKind.Default;
 
-        public ISymbol GetSymbol( Compilation compilation ) => this.GetSymbolWithKind( this.GetSymbolIgnoringKind( compilation ) );
+        public ISymbol GetSymbol( Compilation compilation, bool ignoreAssemblyKey = false )
+            => this.GetSymbolWithKind( this.GetSymbolIgnoringKind( compilation, ignoreAssemblyKey ) );
 
         private ISymbol GetSymbolIgnoringKind( Compilation compilation, bool ignoreAssemblyKey = false )
         {

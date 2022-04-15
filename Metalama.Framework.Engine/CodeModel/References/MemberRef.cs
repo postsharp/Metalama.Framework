@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public T GetTarget( ICompilation compilation ) => this._underlying.GetTarget( compilation );
 
-        public ISymbol? GetSymbol( Compilation compilation ) => this._underlying.GetSymbol( compilation );
+        public ISymbol? GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => this._underlying.GetSymbol( compilation );
 
         public override string ToString() => this._underlying.ToString();
 
