@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Versioning;
 using RoslynSpecialType = Microsoft.CodeAnalysis.SpecialType;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 
@@ -257,6 +258,25 @@ namespace Metalama.Framework.Engine.Utilities
                     INamedTypeSymbol type => type,
                     _ => otherSymbol.ContainingType
                 } );
+        }
+
+        public static FrameworkName? GetTargetFramework( this Compilation compilation )
+        {
+            var attribute = compilation.Assembly.GetAttributes().FirstOrDefault( a => a.AttributeClass?.Name == nameof(TargetFrameworkAttribute) );
+
+            if ( attribute == null )
+            {
+                return null;
+            }
+
+            var frameworkNameString = (string?) attribute.ConstructorArguments[0].Value;
+
+            if ( frameworkNameString == null )
+            {
+                return null;
+            }
+
+            return new FrameworkName( frameworkNameString );
         }
     }
 }

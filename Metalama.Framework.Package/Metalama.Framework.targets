@@ -3,7 +3,7 @@
     <PropertyGroup Condition="'$(MetalamaEnabled)'!='False'">
         <!-- MetalamaProjectId uniquely identifies a project configuration. It is used at design time by components that do not have access to the Project class.   
              This property must be defined in .targets, not in .props, because it relies on other properties and is not meant to be overwritten -->
-        <MetalamaProjectId>$(AssemblyName.Replace(".",""))_$(MetalamaProjectIdSuffix)_$(Configuration.Replace(".",""))_$(TargetFramework.Replace(".",""))</MetalamaProjectId>
+        <MetalamaProjectId>$(AssemblyName.Replace(".",""))_$(MetalamaProjectIdSuffix)_$(Configuration.Replace(".","").Replace("-",""))_$(TargetFramework.Replace(".","").Replace("-",""))</MetalamaProjectId>
 
         <!-- Define a METALAMA compilation symbol (aka constant). -->
         <DefineConstants>$(DefineConstants);METALAMA</DefineConstants>

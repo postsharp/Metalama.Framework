@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Testing;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Metalama.TestFramework.Utilities;
 using Microsoft.CodeAnalysis;
@@ -255,7 +256,7 @@ namespace Metalama.TestFramework
         private async Task<MetadataReference?> CompileDependencyAsync( string code, Project emptyProject, TestResult testResult )
         {
             // The assembly name must match the file name otherwise it wont be found bu AssemblyLocator.
-            var name = "dependency_" + Guid.NewGuid().ToString();
+            var name = "dependency_" + RandomIdGenerator.GenerateId();
             var project = emptyProject.AddDocument( "dependency.cs", code ).Project;
 
             using var domain = new UnloadableCompileTimeDomain();
@@ -599,7 +600,7 @@ namespace Metalama.TestFramework
                         Directory.CreateDirectory( directory );
                     }
 
-                    var diagnosticFile = Path.Combine( directory, Guid.NewGuid().ToString() + ".dll" );
+                    var diagnosticFile = Path.Combine( directory, RandomIdGenerator.GenerateId() + ".dll" );
 
                     using ( var diagnosticStream = File.Create( diagnosticFile ) )
                     {

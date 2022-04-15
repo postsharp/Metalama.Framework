@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Runtime.Versioning;
 using System.Text;
 
 namespace Metalama.Framework.Engine.CompileTime
@@ -19,6 +20,7 @@ namespace Metalama.Framework.Engine.CompileTime
         public CompileTimeProjectManifest(
             string runTimeAssemblyIdentity,
             string compileTimeAssemblyName,
+            string targetFramework,
             IReadOnlyList<string> aspectTypes,
             IReadOnlyList<string> plugInTypes,
             IReadOnlyList<string> fabricTypes,
@@ -29,6 +31,7 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             this.RunTimeAssemblyIdentity = runTimeAssemblyIdentity;
             this.CompileTimeAssemblyName = compileTimeAssemblyName;
+            this.TargetFramework = targetFramework;
             this.AspectTypes = aspectTypes;
             this.PlugInTypes = plugInTypes;
             this.FabricTypes = fabricTypes;
@@ -36,11 +39,22 @@ namespace Metalama.Framework.Engine.CompileTime
             this.References = references;
             this.SourceHash = sourceHash;
             this.Files = files;
+
+#if DEBUG
+
+            // Validate that we got a valid target framework.
+            if ( !string.IsNullOrEmpty( targetFramework ) )
+            {
+                _ = new FrameworkName( targetFramework );
+            }
+#endif
         }
 
         public string RunTimeAssemblyIdentity { get; }
 
         public string CompileTimeAssemblyName { get; }
+
+        public string TargetFramework { get; }
 
         /// <summary>
         /// Gets the list of all aspect types (specified by fully qualified name) of the aspect library.

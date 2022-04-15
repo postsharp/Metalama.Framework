@@ -16,6 +16,9 @@ namespace Metalama.Framework.Engine.ReflectionMocks
     // This class must be public because it is referenced from compiled templates.
     public sealed class CompileTimeType : Type, ICompileTimeReflectionObject<IType>
     {
+        // We store a reference-typed ISdkRef instead of the value-typed Ref because it is only being accessed
+        // through ICompileTimeReflectionObject, so boxing cannot be avoided anyway. It is better in this case
+        // to box only once.
         internal ISdkRef<IType> Target { get; }
 
         ISdkRef<IType> ICompileTimeReflectionObject<IType>.Target => this.Target;

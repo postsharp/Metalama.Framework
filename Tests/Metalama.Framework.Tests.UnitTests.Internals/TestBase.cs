@@ -4,6 +4,7 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Testing;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -38,7 +39,7 @@ namespace Metalama.Framework.Tests.UnitTests
             bool addMetalamaReferences = true,
             IEnumerable<string>? preprocessorSymbols = null )
             => CreateCSharpCompilation(
-                new Dictionary<string, string> { { Guid.NewGuid() + ".cs", code } },
+                new Dictionary<string, string> { { RandomIdGenerator.GenerateId() + ".cs", code } },
                 dependentCode,
                 ignoreErrors,
                 additionalReferences,

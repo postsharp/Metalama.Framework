@@ -196,7 +196,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public ISymbol GetSymbol( Compilation compilation ) => this.GetSymbolWithKind( this.GetSymbolIgnoringKind( compilation ) );
 
-        private ISymbol GetSymbolIgnoringKind( Compilation compilation )
+        private ISymbol GetSymbolIgnoringKind( Compilation compilation, bool ignoreAssemblyKey = false )
         {
             switch ( this.Target )
             {
@@ -228,12 +228,12 @@ namespace Metalama.Framework.Engine.CodeModel.References
                         {
                             var symbolKey = new SymbolId( id );
 
-                            symbol = symbolKey.Resolve( compilation );
+                            symbol = symbolKey.Resolve( compilation, ignoreAssemblyKey );
                         }
 
                         if ( symbol == null )
                         {
-                            throw new AssertionFailedException( $"Cannot resolve {id} into a symbol." );
+                            throw new SymbolNotFoundException( id, compilation );
                         }
 
                         return symbol;
@@ -336,7 +336,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
                         if ( symbol == null )
                         {
-                            throw new AssertionFailedException( $"Cannot resolve '{id}' into a symbol." );
+                            throw new SymbolNotFoundException( id, compilation.RoslynCompilation );
                         }
 
                         return (T) compilation.Factory.GetCompilationElement( symbol ).AssertNotNull();

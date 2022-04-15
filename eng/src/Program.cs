@@ -31,7 +31,8 @@ var product = new Product
                 "Metalama.Framework.Engine\\Utilities\\SymbolId.cs"
             }
         },
-        new DotNetSolution( "Tests\\Metalama.Framework.TestApp\\Metalama.Framework.TestApp.sln" ) { IsTestOnly = true }
+        new DotNetSolution( "Tests\\Metalama.Framework.TestApp\\Metalama.Framework.TestApp.sln" ) { IsTestOnly = true },
+        new ManyDotNetSolutions( "Tests\\Standalone\\**\\*.sln" ) { IsTestOnly = true }
     },
     PublicArtifacts = Pattern.Create(
         "Metalama.SystemTypes.$(PackageVersion).nupkg",
@@ -46,14 +47,15 @@ var product = new Product
         "Metalama.LinqPad.$(PackageVersion).nupkg" ),
     Dependencies = new[] { Dependencies.PostSharpEngineering, Dependencies.MetalamaCompiler },
     Configurations = Product.DefaultConfigurations
-        .WithValue( BuildConfiguration.Debug, Product.DefaultConfigurations.Debug with
-        {
-            AdditionalArtifactRules = new string[]
+        .WithValue( BuildConfiguration.Debug,
+            Product.DefaultConfigurations.Debug with
             {
-                $@"+:%system.teamcity.build.tempDir%/Metalama/ExtractExceptions/**/*=>logs",
-                $@"+:%system.teamcity.build.tempDir%/Metalama/Extract/**/.completed=>logs"
-            }
-        } )
+                AdditionalArtifactRules = new[]
+                {
+                    $@"+:%system.teamcity.build.tempDir%/Metalama/ExtractExceptions/**/*=>logs",
+                    $@"+:%system.teamcity.build.tempDir%/Metalama/Extract/**/.completed=>logs"
+                }
+            } )
 };
 
 product.PrepareCompleted += OnPrepareCompleted;

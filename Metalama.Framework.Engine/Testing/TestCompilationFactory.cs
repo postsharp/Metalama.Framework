@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.AspectWeavers;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -29,7 +30,7 @@ namespace Metalama.Framework.Engine.Testing
             string? name,
             IEnumerable<MetadataReference> metadataReferences,
             OutputKind outputKind = OutputKind.DynamicallyLinkedLibrary )
-            => CSharpCompilation.Create( name ?? "test_" + Guid.NewGuid() )
+            => CSharpCompilation.Create( name ?? "test_" + RandomIdGenerator.GenerateId() )
                 .WithOptions(
                     new CSharpCompilationOptions(
                         outputKind,
