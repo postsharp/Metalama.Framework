@@ -1,6 +1,5 @@
-
-    internal class Target
-    {
-        [MyAspect]
-        private static void M() { }
-    }
+internal class Target
+{
+    [MyAspect]
+    private static void M() { }
+}
