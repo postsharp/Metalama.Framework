@@ -84,6 +84,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         IMethod IRef<IMethod>.GetTarget( ICompilation compilation ) => (IMethod) this.GetForCompilation( compilation );
 
-        ISymbol? ISdkRef<IMethod>.GetSymbol( Compilation compilation ) => throw new NotSupportedException();
+        ISymbol? ISdkRef<IMethod>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => throw new NotSupportedException();
     }
 }

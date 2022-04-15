@@ -98,7 +98,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         IMethod IRef<IMethod>.GetTarget( ICompilation compilation ) => (IMethod) this.GetForCompilation( compilation );
 
-        ISymbol? ISdkRef<IMethod>.GetSymbol( Compilation compilation ) => this.GetSymbol();
+        ISymbol? ISdkRef<IMethod>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => this.GetSymbol();
 
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => this.AccessorBuilder.ExplicitInterfaceImplementations;
 

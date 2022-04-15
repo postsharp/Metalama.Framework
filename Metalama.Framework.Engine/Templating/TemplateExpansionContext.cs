@@ -65,7 +65,7 @@ namespace Metalama.Framework.Engine.Templating
         public MetaApi MetaApi { get; }
 
         public TemplateExpansionContext(
-            object templateInstance,
+            object templateInstance, // This is supposed to be an IAspect or a Fabric, but we may get different objects in tests.
             MetaApi metaApi,
             CompilationModel compilation,
             TemplateLexicalScope lexicalScope,
@@ -81,13 +81,6 @@ namespace Metalama.Framework.Engine.Templating
             compilation,
             metaApi.Target.Declaration )
         {
-#if DEBUG
-            if ( templateInstance is not (IAspect or Fabric) )
-            {
-                throw new ArgumentOutOfRangeException( nameof(templateInstance) );
-            }
-#endif
-
             this._templateMethod = templateMethod;
             this.TemplateInstance = templateInstance;
             this.MetaApi = metaApi;
