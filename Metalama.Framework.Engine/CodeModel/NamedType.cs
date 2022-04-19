@@ -29,7 +29,7 @@ using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal sealed class NamedType : MemberOrNamedType, INamedTypeInternal
+    internal sealed partial class NamedType : MemberOrNamedType, INamedTypeInternal
     {
         private SpecialType? _specialType;
 
@@ -159,6 +159,18 @@ namespace Metalama.Framework.Engine.CodeModel
                     this.TypeSymbol
                         .GetMembers()
                         .OfType<IPropertySymbol>()
+                        .Where( p => !p.IsIndexer )
+                        .ToReadOnlyList() ) );
+
+        [Memo]
+        public IIndexerList Indexers
+            => new IndexerList(
+                this,
+                this.TransformMembers<IIndexer, IIndexerBuilder, IPropertySymbol>(
+                    this.TypeSymbol
+                        .GetMembers()
+                        .OfType<IPropertySymbol>()
+                        .Where( p => p.IsIndexer )
                         .ToReadOnlyList() ) );
 
         [Memo]
@@ -208,20 +220,24 @@ namespace Metalama.Framework.Engine.CodeModel
         public IConstructorList Constructors
             => new ConstructorList(
                 this,
-                this.TypeSymbol
-                    .GetMembers()
-                    .OfType<IMethodSymbol>()
-                    .Where( m => m.MethodKind == MethodKind.Constructor )
-                    .Select( m => new MemberRef<IConstructor>( m, this.Compilation.RoslynCompilation ) ) );
+                this.TransformMembers<IConstructor, IConstructorBuilder, IMethodSymbol>(
+                    this.TypeSymbol
+                        .GetMembers()
+                        .OfType<IMethodSymbol>()
+                        .Where( m => m.MethodKind == MethodKind.Constructor )
+                        .ToReadOnlyList() ) );
 
         [Memo]
-        public IConstructor? StaticConstructor
-            => this.TypeSymbol
-                .GetMembers()
-                .OfType<IMethodSymbol>()
-                .Where( m => m.MethodKind == MethodKind.StaticConstructor )
-                .Select( m => this.Compilation.Factory.GetConstructor( m ) )
-                .SingleOrDefault();
+        public IConstructor StaticConstructor // TODO: This is a bit of a hack (VirtualStaticConstructor disappears is ConstructorBuilder is used).
+            => this.TransformMembers<IConstructor, IConstructorBuilder, IMethodSymbol>(
+                       this.TypeSymbol
+                           .GetMembers()
+                           .OfType<IMethodSymbol>()
+                           .Where( m => m.MethodKind == MethodKind.StaticConstructor )
+                           .ToReadOnlyList() )
+                   .Select( c => c.GetTarget( this.Compilation ) )
+                   .SingleOrDefault()
+               ?? new ImplicitStaticConstructor( this );
 
         public bool IsPartial
         {
@@ -535,9 +551,9 @@ namespace Metalama.Framework.Engine.CodeModel
             // Go through transformations, noting replaced symbols and builders.
             foreach ( var builder in transformations )
             {
-                if ( builder is IReplaceMember replace )
+                if ( builder is IReplaceMember { ReplacedMember: { } replacedMember } )
                 {
-                    if ( replace.ReplacedMember.Target is TSymbol symbol && allSymbols.Contains( replace.ReplacedMember.Target ) )
+                    if ( replacedMember.Target is TSymbol symbol && allSymbols.Contains( replacedMember.Target ) )
                     {
                         // If the MemberRef points to a symbol just remove from symbol list.
                         // This prevents needless allocation.
@@ -546,7 +562,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     else
                     {
                         // Otherwise resolve the MemberRef.
-                        var resolved = replace.ReplacedMember.GetTarget( this.Compilation );
+                        var resolved = replacedMember.GetTarget( this.Compilation );
 
                         if ( resolved is TMember )
                         {

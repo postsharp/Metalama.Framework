@@ -11,7 +11,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Inheritance.Implemente
         {
             foreach (var m in builder.Target.Methods)
             {
-                builder.Advices.OverrideMethod( m, nameof(Template) );
+                builder.Advices.Override( m, nameof(Template) );
             }
         }
 

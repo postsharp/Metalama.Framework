@@ -3,13 +3,18 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Fabrics;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.Fabrics
 {
@@ -27,9 +32,28 @@ namespace Metalama.Framework.Engine.Fabrics
 
         public bool TryExecute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass templateClass, FabricInstance fabricInstance )
         {
-            // Type fabrics execute as aspects, called from FabricAspectClass.
             var templateInstance = new TemplateClassInstance( this.Fabric, templateClass );
-            var builder = new Amender( (INamedType) aspectBuilder.Target, this.FabricManager, aspectBuilder, templateInstance, fabricInstance );
+            var targetType = (INamedType) aspectBuilder.Target;
+
+            // Add declarative advices.
+            var aspectInstance = (IAspectInstanceInternal) aspectBuilder.AspectInstance;
+
+            var declarativeAdvices =
+                templateClass.GetDeclarativeAdvices()
+                    .Select(
+                        x => CreateDeclarativeAdvice(
+                            aspectInstance,
+                            aspectInstance.TemplateInstances[x.TemplateClass],
+                            aspectBuilder.DiagnosticAdder,
+                            targetType,
+                            x.TemplateInfo,
+                            x.Symbol ) )
+                    .WhereNotNull();
+
+            aspectBuilder.AdviceFactory.Advices.AddRange( declarativeAdvices );
+
+            // Execute the AmendType.
+            var builder = new Amender( targetType, this.FabricManager, aspectBuilder, templateInstance, fabricInstance );
 
             var executionContext = new UserCodeExecutionContext(
                 this.FabricManager.ServiceProvider,
@@ -37,6 +61,26 @@ namespace Metalama.Framework.Engine.Fabrics
                 UserCodeMemberInfo.FromDelegate( new Action<ITypeAmender>( ((TypeFabric) this.Fabric).AmendType ) ) );
 
             return this.FabricManager.UserCodeInvoker.TryInvoke( () => ((TypeFabric) this.Fabric).AmendType( builder ), executionContext );
+        }
+
+        private static Advice? CreateDeclarativeAdvice(
+            IAspectInstanceInternal aspect,
+            TemplateClassInstance templateInstance,
+            IDiagnosticAdder diagnosticAdder,
+            INamedType aspectTarget,
+            TemplateInfo template,
+            ISymbol templateDeclaration )
+        {
+            template.TryCreateAdvice(
+                aspect,
+                templateInstance,
+                diagnosticAdder,
+                aspectTarget,
+                ((CompilationModel) aspectTarget.Compilation).Factory.GetDeclaration( templateDeclaration ),
+                null,
+                out var advice );
+
+            return advice;
         }
 
         public override FabricKind Kind => FabricKind.Type;

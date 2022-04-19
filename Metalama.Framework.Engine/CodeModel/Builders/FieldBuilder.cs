@@ -17,11 +17,13 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
+    internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
     {
         public override DeclarationKind DeclarationKind => DeclarationKind.Field;
 
         public IType Type { get; set; }
+
+        public override string Name { get; set; }
 
         [Memo]
         public IMethod? GetMethod => new AccessorBuilder( this, MethodKind.PropertyGet );
@@ -39,8 +41,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public Writeability Writeability { get; set; }
 
-        Writeability IFieldOrProperty.Writeability => this.Writeability;
-
         public bool IsAutoPropertyOrField => true;
 
         public override InsertPosition InsertPosition
@@ -53,8 +53,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public TemplateMember<IField> InitializerTemplate { get; set; }
 
         public FieldBuilder( Advice parentAdvice, INamedType targetType, string name )
-            : base( parentAdvice, targetType, name )
+            : base( parentAdvice, targetType )
         {
+            this.Name = name;
             this.Type = this.Compilation.Factory.GetSpecialType( SpecialType.Object );
         }
 

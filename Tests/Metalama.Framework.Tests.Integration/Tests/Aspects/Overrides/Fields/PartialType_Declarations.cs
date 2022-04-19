@@ -13,7 +13,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.PartialTy
         {
             foreach (var field in builder.Target.Fields)
             {
-                builder.Advices.OverrideFieldOrPropertyAccessors(field, nameof(Template), nameof(Template), tags: new TagDictionary() { ["name"] = field.Name });
+                builder.Advices.OverrideAccessors(field, nameof(Template), nameof(Template), tags: new TagDictionary() { ["name"] = field.Name });
             }
         }
 

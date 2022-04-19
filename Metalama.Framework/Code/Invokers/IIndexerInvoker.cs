@@ -4,14 +4,14 @@
 namespace Metalama.Framework.Code.Invokers
 {
     /// <summary>
-    /// Allows accessing the value of properties and indexers.
+    /// Allows accessing the value of indexers.
     /// </summary>
-    public interface IPropertyInvoker : IFieldOrPropertyInvoker
+    public interface IIndexerInvoker : IInvoker
     {
         /// <summary>
         /// Get the value for an indexer.
         /// </summary>
-        dynamic GetIndexerValue( dynamic? instance, params dynamic?[] args );
+        dynamic GetValue( dynamic? instance, params dynamic?[] args );
 
         /// <summary>
         /// Set the value for an indexer.
@@ -20,6 +20,6 @@ namespace Metalama.Framework.Code.Invokers
         /// Note: the order of parameters is different than in C# code:
         /// e.g. <c>instance[args] = value</c> is <c>indexer.SetIndexerValue(instance, value, args)</c>.
         /// </remarks>
-        dynamic SetIndexerValue( dynamic? instance, dynamic value, params dynamic?[] args );
+        dynamic SetValue( dynamic? instance, dynamic value, params dynamic?[] args );
     }
 }

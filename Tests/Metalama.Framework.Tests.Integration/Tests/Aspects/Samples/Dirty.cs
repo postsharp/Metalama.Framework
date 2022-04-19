@@ -28,7 +28,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
                 // If the type already implements IDirty, it must have a protected method called OnDirty, otherwise 
                 // this is a contract violation.
                 var dirtyStateProperty = builder.Target.Properties
-                    .Where( m => m.Name == nameof(DirtyState) && m.Parameters.Count == 0 && m.Type.Is( typeof(DirtyState) ) )
+                    .Where( m => m.Name == nameof(DirtyState) && m.Type.Is( typeof(DirtyState) ) )
                     .SingleOrDefault();
 
                 if (dirtyStateProperty?.SetMethod == null)
@@ -48,7 +48,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
 
             foreach (var fieldOrProperty in fieldsOrProperties)
             {
-                builder.Advices.OverrideFieldOrPropertyAccessors( fieldOrProperty, null, nameof(OverrideSetter) );
+                builder.Advices.OverrideAccessors( fieldOrProperty, null, nameof(OverrideSetter) );
             }
 
             // TODO: This aspect is not complete. We should normally not set DirtyState to Clean after the object has been initialized,

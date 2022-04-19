@@ -36,7 +36,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         IMemberOrNamedType IRef<IMemberOrNamedType>.GetTarget( ICompilation compilation ) => (IMemberOrNamedType) this.GetForCompilation( compilation );
 
-        ISymbol ISdkRef<IMemberOrNamedType>.GetSymbol( Compilation compilation ) => throw new NotSupportedException();
+        ISymbol? ISdkRef<IMemberOrNamedType>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => throw new NotSupportedException();
 
         public object? Target => throw new NotImplementedException();
     }

@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -10,18 +11,33 @@ namespace Metalama.Framework.Engine.Templating
 {
     internal sealed partial class TemplateCompilerRewriter
     {
-        private class BuildTimeOnlyRewriter : CSharpSyntaxRewriter
+        private class CompileTimeOnlyRewriter : CSharpSyntaxRewriter
         {
-            private readonly TemplateCompilerRewriter _rewriter;
+            private readonly TemplateCompilerRewriter _parent;
 
-            public BuildTimeOnlyRewriter( TemplateCompilerRewriter rewriter )
+            public CompileTimeOnlyRewriter( TemplateCompilerRewriter parent )
             {
-                this._rewriter = rewriter;
+                this._parent = parent;
+            }
+
+            public override SyntaxNode? VisitTypeOfExpression( TypeOfExpressionSyntax node )
+            {
+                if ( this._parent._syntaxTreeAnnotationMap.GetSymbol( node.Type ) is ITypeSymbol typeSymbol )
+                {
+                    var typeId = SymbolId.Create( typeSymbol ).Id;
+
+                    return this._parent._typeOfRewriter.RewriteTypeOf( typeSymbol )
+                        .WithAdditionalAnnotations( new SyntaxAnnotation( _rewrittenTypeOfAnnotation, typeId ) );
+                }
+                else
+                {
+                    return node;
+                }
             }
 
             public bool TryRewriteProceedInvocation( InvocationExpressionSyntax node, out InvocationExpressionSyntax transformedNode )
             {
-                var kind = this._rewriter._templateMemberClassifier.GetMetaMemberKind( node.Expression );
+                var kind = this._parent._templateMemberClassifier.GetMetaMemberKind( node.Expression );
 
                 if ( kind.IsAnyProceed() )
                 {
@@ -35,8 +51,7 @@ namespace Metalama.Framework.Engine.Templating
                     // ReSharper disable once RedundantSuppressNullableWarningExpression
                     transformedNode =
                         node.CopyAnnotationsTo(
-                            InvocationExpression(
-                                    this._rewriter._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.Proceed) ) )
+                            InvocationExpression( this._parent._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.Proceed) ) )
                                 .WithArgumentList( ArgumentList( SeparatedList( new[] { Argument( SyntaxFactoryEx.LiteralExpression( methodName ) ) } ) ) ) )!;
 
                     return true;
@@ -51,9 +66,21 @@ namespace Metalama.Framework.Engine.Templating
 
             public override SyntaxNode? VisitInvocationExpression( InvocationExpressionSyntax node )
             {
-                this.TryRewriteProceedInvocation( node, out var transformedNode );
+                if ( this.TryRewriteProceedInvocation( node, out var transformedNode ) )
+                {
+                    return transformedNode;
+                }
+                else if ( node.IsNameOf() )
+                {
+                    var type = this._parent._syntaxTreeAnnotationMap.GetSymbol( node.ArgumentList.Arguments[0].Expression );
 
-                return transformedNode;
+                    if ( type != null )
+                    {
+                        return SyntaxFactoryEx.LiteralExpression( type.Name );
+                    }
+                }
+
+                return base.VisitInvocationExpression( node );
             }
         }
     }

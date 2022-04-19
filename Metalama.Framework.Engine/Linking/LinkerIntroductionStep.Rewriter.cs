@@ -28,6 +28,8 @@ namespace Metalama.Framework.Engine.Linking
             private readonly ImmutableDictionary<AspectLayerId, OrderedAspectLayer> _orderedAspectLayers;
             private readonly ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> _diagnosticSuppressions;
             private readonly SyntaxTransformationCollection _introducedMemberCollection;
+            private readonly IReadOnlyDictionary<SyntaxNode, IReadOnlyList<LinkerInsertedStatement>> _symbolInsertedStatements;
+            private readonly IReadOnlyDictionary<IMemberIntroduction, IReadOnlyList<LinkerInsertedStatement>> _introductionInsertedStatements;
 
             // Maps a diagnostic id to the number of times it has been suppressed.
             private ImmutableHashSet<string> _activeSuppressions = ImmutableHashSet.Create<string>( StringComparer.OrdinalIgnoreCase );
@@ -36,12 +38,16 @@ namespace Metalama.Framework.Engine.Linking
                 SyntaxTransformationCollection introducedMemberCollection,
                 ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> diagnosticSuppressions,
                 CompilationModel compilation,
-                IReadOnlyList<OrderedAspectLayer> inputOrderedAspectLayers )
+                IReadOnlyList<OrderedAspectLayer> inputOrderedAspectLayers,
+                IReadOnlyDictionary<SyntaxNode, IReadOnlyList<LinkerInsertedStatement>> symbolInsertedStatements,
+                IReadOnlyDictionary<IMemberIntroduction, IReadOnlyList<LinkerInsertedStatement>> introductionInsertedStatements )
             {
                 this._diagnosticSuppressions = diagnosticSuppressions;
                 this._compilation = compilation;
                 this._orderedAspectLayers = inputOrderedAspectLayers.ToImmutableDictionary( e => e.AspectLayerId, e => e );
                 this._introducedMemberCollection = introducedMemberCollection;
+                this._symbolInsertedStatements = symbolInsertedStatements;
+                this._introductionInsertedStatements = introductionInsertedStatements;
             }
 
             public override bool VisitIntoStructuredTrivia => true;
@@ -105,7 +111,7 @@ namespace Metalama.Framework.Engine.Linking
                     // TODO: We are probably processing classes incorrectly.
 
                     // Since we're adding suppressions, we need to visit each `#pragma warning` of the added node to update them.
-                    transformedNode = (T) this.Visit( transformedNode );
+                    transformedNode = (T) this.Visit( transformedNode ).AssertNotNull();
                 }
 
                 if ( suppressionsOnThisElement.Any() )
@@ -164,13 +170,13 @@ namespace Metalama.Framework.Engine.Linking
                         {
                             node = node
                                 .WithIdentifier( node.Identifier.WithTrailingTrivia() )
-                                .WithBaseList( BaseList( SeparatedList( additionalBaseList ) ).AddGeneratedCodeAnnotation() )
+                                .WithBaseList( BaseList( SeparatedList( additionalBaseList ) ).WithGeneratedCodeAnnotation() )
                                 .WithTrailingTrivia( node.Identifier.TrailingTrivia );
                         }
                         else
                         {
                             node = node.WithBaseList(
-                                BaseList( node.BaseList.Types.AddRange( additionalBaseList.Select( i => i.AddGeneratedCodeAnnotation() ) ) ) );
+                                BaseList( node.BaseList.Types.AddRange( additionalBaseList.Select( i => i.WithGeneratedCodeAnnotation() ) ) ) );
                         }
                     }
 
@@ -195,7 +201,19 @@ namespace Metalama.Framework.Engine.Linking
 
                         introducedNode = introducedNode.NormalizeWhitespace()
                             .WithLeadingTrivia( ElasticLineFeed, ElasticLineFeed )
-                            .AddGeneratedCodeAnnotation();
+                            .WithGeneratedCodeAnnotation();
+
+                        // Insert inserted statements into 
+                        switch ( introducedNode )
+                        {
+                            case ConstructorDeclarationSyntax constructorDeclaration:
+                                if ( this._introductionInsertedStatements.TryGetValue( introducedMember.Introduction, out var insertedStatements ) )
+                                {
+                                    introducedNode = this.WithInsertedStatements( constructorDeclaration, insertedStatements );
+                                }
+
+                                break;
+                        }
 
                         if ( introducedMember.Declaration != null )
                         {
@@ -206,6 +224,93 @@ namespace Metalama.Framework.Engine.Linking
                         }
 
                         members.Add( introducedNode );
+                    }
+                }
+            }
+
+            private ConstructorDeclarationSyntax WithInsertedStatements(
+                ConstructorDeclarationSyntax constructorDeclaration,
+                IReadOnlyList<LinkerInsertedStatement>? insertedStatements )
+            {
+                if ( insertedStatements == null )
+                {
+                    return constructorDeclaration;
+                }
+
+                // TODO: The order here is correct for initialization, i.e. first aspects (transformation order) are initialized first.
+                //       This would not be, however, correct for other uses, but we don't have those.
+
+                var beginningStatements = Order( insertedStatements )
+                    .Select( s => s.Statement );
+
+                switch ( constructorDeclaration )
+                {
+                    case { ExpressionBody: { } expressionBody }:
+                        return
+                            constructorDeclaration
+                                .WithExpressionBody( null )
+                                .WithSemicolonToken( default )
+                                .WithBody(
+                                    Block(
+                                            beginningStatements
+                                                .Append( ExpressionStatement( expressionBody.Expression.WithSourceCodeAnnotationIfNotGenerated() ) ) )
+                                        .WithGeneratedCodeAnnotation() );
+
+                    case { Body: { } body }:
+                        return
+                            constructorDeclaration
+                                .WithBody(
+                                    Block(
+                                        beginningStatements
+                                            .Append(
+                                                body.WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
+                                                    .WithSourceCodeAnnotationIfNotGenerated() ) ) );
+                }
+
+                return constructorDeclaration;
+
+                IEnumerable<LinkerInsertedStatement> Order( IEnumerable<LinkerInsertedStatement> statements )
+                {
+                    // TODO: This sort is intended only for beginning statements.
+                    var memberStatements = new Dictionary<IMember, List<LinkerInsertedStatement>>( this._compilation.InvariantComparer );
+                    var typeStatements = new List<LinkerInsertedStatement>();
+
+                    foreach ( var mark in statements )
+                    {
+                        switch ( mark.ContextDeclaration )
+                        {
+                            case INamedType:
+                                typeStatements.Add( mark );
+
+                                break;
+
+                            case IMember member:
+                                if ( !memberStatements.TryGetValue( member, out var list ) )
+                                {
+                                    memberStatements[member] = list = new List<LinkerInsertedStatement>();
+                                }
+
+                                list.Add( mark );
+
+                                break;
+
+                            default:
+                                throw new AssertionFailedException();
+                        }
+                    }
+
+                    // TODO: This sorting is suboptimal, but needed for stable order since we are using a dictionary.
+                    foreach ( var pair in memberStatements.OrderBy( p => p.Key.ToDisplayString() ) )
+                    {
+                        foreach ( var mark in pair.Value )
+                        {
+                            yield return mark;
+                        }
+                    }
+
+                    foreach ( var mark in typeStatements )
+                    {
+                        yield return mark;
                     }
                 }
             }
@@ -262,6 +367,16 @@ namespace Metalama.Framework.Engine.Linking
                 }
 
                 return node.WithDeclaration( rewrittenDeclaration );
+            }
+
+            public override SyntaxNode? VisitConstructorDeclaration( ConstructorDeclarationSyntax node )
+            {
+                if ( this._symbolInsertedStatements.TryGetValue( node, out var insertedStatements ) )
+                {
+                    node = this.WithInsertedStatements( node, insertedStatements );
+                }
+
+                return base.VisitConstructorDeclaration( node );
             }
 
             public override SyntaxNode? VisitEventFieldDeclaration( EventFieldDeclarationSyntax node )

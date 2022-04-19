@@ -22,7 +22,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Properties.Advise
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advices.OverrideFieldOrProperty(
+            builder.Advices.Override(
                 builder.Target.Properties.OfName( nameof(TestIntroductionAttribute.Property) ).Single(),
                 nameof(PropertyTemplate) );
         }

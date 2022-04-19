@@ -20,9 +20,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         IMember IRef<IMember>.GetTarget( ICompilation compilation ) => throw new NotImplementedException();
 
-        ISymbol ISdkRef<IMember>.GetSymbol( Compilation compilation ) => throw new NotImplementedException();
+        ISymbol? ISdkRef<IMember>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => throw new NotImplementedException();
 
         public bool IsExplicitInterfaceImplementation => this.MemberBuilder.IsExplicitInterfaceImplementation;
+
+        public bool IsImplicit => false;
 
         public new INamedType DeclaringType => base.DeclaringType.AssertNotNull();
 

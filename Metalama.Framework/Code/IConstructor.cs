@@ -11,6 +11,11 @@ namespace Metalama.Framework.Code
     public interface IConstructor : IMethodBase
     {
         /// <summary>
+        /// Gets a <see cref="ConstructorInitializerKind" /> that specifies the initializer semantics of the constructor.
+        /// </summary>
+        public ConstructorInitializerKind InitializerKind { get; }
+
+        /// <summary>
         /// Gets a <see cref="ConstructorInfo"/> that represents the current constructor at run time.
         /// </summary>
         /// <returns>A <see cref="ConstructorInfo"/> that can be used only in run-time code.</returns>

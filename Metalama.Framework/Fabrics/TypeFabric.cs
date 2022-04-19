@@ -13,6 +13,6 @@ namespace Metalama.Framework.Fabrics
         /// <summary>
         /// The user can implement this method to analyze types in the declaring type, add aspects, and report or suppress diagnostics.
         /// </summary>
-        public abstract void AmendType( ITypeAmender amender );
+        public virtual void AmendType( ITypeAmender amender ) { }
     }
 }

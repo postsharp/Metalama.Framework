@@ -56,7 +56,8 @@ namespace Metalama.Framework.Engine.Transformations
                     this.Advice.AspectLayerId,
                     context.SyntaxGenerationContext,
                     this.Advice.Aspect,
-                    context.ServiceProvider ) );
+                    context.ServiceProvider,
+                    MetaApiStaticity.Default ) );
 
             var expansionContext = new TemplateExpansionContext(
                 this.Advice.TemplateInstance.Instance,

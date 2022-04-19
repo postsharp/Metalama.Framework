@@ -6,8 +6,14 @@ using Metalama.Framework.Engine.CodeModel.References;
 
 namespace Metalama.Framework.Engine.Transformations
 {
+    /// <summary>
+    /// Represents a transformation that optionally replaces a member by itself.
+    /// </summary>
     internal interface IReplaceMember : IObservableTransformation
     {
-        MemberRef<IMemberOrNamedType> ReplacedMember { get; }
+        /// <summary>
+        /// Gets a member that is replaced by this transformation or <c>null</c> if the transformation does not replace any member.
+        /// </summary>
+        MemberRef<IMemberOrNamedType>? ReplacedMember { get; }
     }
 }

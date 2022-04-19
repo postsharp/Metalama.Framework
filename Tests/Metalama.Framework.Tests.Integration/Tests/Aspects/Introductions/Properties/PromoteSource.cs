@@ -12,7 +12,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.P
     {
         public override void BuildAspect(IAspectBuilder<IFieldOrProperty> builder)
         {
-            builder.Advices.OverrideFieldOrProperty(builder.Target, nameof(Template));
+            builder.Advices.Override(builder.Target, nameof(Template));
         }
 
         [Template]

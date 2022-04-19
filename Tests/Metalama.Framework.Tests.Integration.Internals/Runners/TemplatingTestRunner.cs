@@ -308,7 +308,8 @@ namespace Metalama.Framework.Tests.Integration.Runners
                     default,
                     syntaxGenerationContext,
                     null!,
-                    augmentedServiceProvider ) );
+                    augmentedServiceProvider,
+                    MetaApiStaticity.Default ) );
 
             return (new TemplateExpansionContext(
                         templateInstance,

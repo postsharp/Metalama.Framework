@@ -46,11 +46,7 @@ namespace Metalama.Framework.Engine.Aspects
 
             // Introductions must have a deterministic order because of testing.
             this._declarativeAdviceAttributes = aspectClass
-                .TemplateClasses.SelectMany( c => c.Members )
-                .Where( m => m.Value.TemplateInfo.AttributeType == TemplateAttributeType.Introduction )
-                .Select( m => m.Value )
-                .OrderBy( m => m.Symbol.GetPrimarySyntaxReference()?.SyntaxTree.FilePath )
-                .ThenBy( m => m.Symbol.GetPrimarySyntaxReference()?.Span.Start )
+                .TemplateClasses.SelectMany( c => c.GetDeclarativeAdvices() )
                 .ToImmutableArray();
 
             // If we have any declarative introduction, the aspect cannot be added to an interface.
@@ -148,6 +144,15 @@ namespace Metalama.Framework.Engine.Aspects
 
             var diagnosticSink = new UserDiagnosticSink( this._aspectClass.Project, pipelineConfiguration.CodeFixFilter );
 
+            // Create the AdviceFactory.
+            var adviceFactory = new AdviceFactory(
+                compilationModelRevision,
+                diagnosticSink,
+                aspectInstance,
+                aspectInstance.TemplateInstances.Count == 1 ? aspectInstance.TemplateInstances.Values.Single() : null,
+                this._serviceProvider );
+
+            // Add declarative advices to the factory.
             var declarativeAdvices =
                 this._declarativeAdviceAttributes
                     .Select(
@@ -158,21 +163,14 @@ namespace Metalama.Framework.Engine.Aspects
                             targetDeclaration,
                             x.TemplateInfo,
                             x.Symbol ) )
-                    .WhereNotNull()
-                    .ToImmutableArray();
+                    .WhereNotNull();
 
-            var adviceFactory = new AdviceFactory(
-                compilationModelRevision,
-                diagnosticSink,
-                declarativeAdvices,
-                aspectInstance,
-                aspectInstance.TemplateInstances.Count == 1 ? aspectInstance.TemplateInstances.Values.Single() : null,
-                this._serviceProvider );
+            adviceFactory.Advices.AddRange( declarativeAdvices );
 
+            // Create the AspectBuilder.
             var aspectBuilder = new AspectBuilder<T>(
                 targetDeclaration,
                 diagnosticSink,
-                declarativeAdvices,
                 adviceFactory,
                 pipelineConfiguration,
                 aspectInstance,
@@ -201,7 +199,7 @@ namespace Metalama.Framework.Engine.Aspects
                             ImmutableArray<IAspectSource>.Empty,
                             ImmutableArray<IValidatorSource>.Empty );
                 }
-                
+
                 var aspectResult = aspectBuilder.ToResult();
 
                 if ( !aspectResult.Success )

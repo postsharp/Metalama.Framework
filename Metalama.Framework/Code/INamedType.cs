@@ -68,6 +68,11 @@ namespace Metalama.Framework.Code
         IPropertyList Properties { get; }
 
         /// <summary>
+        /// Gets the list of indexers defined in the current type.
+        /// </summary>
+        IIndexerList Indexers { get; }
+
+        /// <summary>
         /// Gets the list of fields defined by the current type, but not those inherited from the base  type.
         /// Note that fields can be promoted to properties by aspects, so a source code field can be 
         /// represented in the <see cref="Properties" /> collection instead of the <see cref="Fields"/>
@@ -100,7 +105,7 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets the static constructor.
         /// </summary>
-        IConstructor? StaticConstructor { get; }
+        IConstructor StaticConstructor { get; }
 
         /// <summary>
         /// Gets a value indicating whether the type is <c>readonly</c>.
@@ -117,9 +122,6 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Finds the the implementation of the given interface member that is valid for this type.
         /// </summary>
-        /// <param name="interfaceMember"></param>
-        /// <param name="implementationMember"></param>
-        /// <returns></returns>
         bool TryFindImplementationForInterfaceMember( IMember interfaceMember, [NotNullWhen( true )] out IMember? implementationMember );
     }
 }

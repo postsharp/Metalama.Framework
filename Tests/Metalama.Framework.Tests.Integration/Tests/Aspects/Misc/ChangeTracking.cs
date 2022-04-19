@@ -15,7 +15,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.ChangeTracking
                 isSpecifiedProperty.Name = $"_is{property.Name}Specified";
                 isSpecifiedProperty.Type = isSpecifiedProperty.Compilation.TypeFactory.GetTypeByReflectionType( typeof(bool) );
 
-                builder.Advices.OverrideFieldOrProperty(
+                builder.Advices.Override(
                     property,
                     nameof(OverrideProperty),
                     tags: new TagDictionary { ["isSpecifiedProperty"] = isSpecifiedProperty } );

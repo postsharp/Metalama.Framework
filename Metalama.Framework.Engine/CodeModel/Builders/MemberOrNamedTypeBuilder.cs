@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public Accessibility Accessibility { get; set; }
 
-        public string Name { get; set; }
+        public abstract string Name { get; set; }
 
         public bool IsAbstract { get; set; }
 
@@ -36,10 +36,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public abstract bool IsDesignTime { get; }
 
-        public MemberOrNamedTypeBuilder( Advice parentAdvice, INamedType declaringType, string name ) : base( parentAdvice )
+        public MemberOrNamedTypeBuilder( Advice parentAdvice, INamedType declaringType ) : base( parentAdvice )
         {
             this.DeclaringType = declaringType;
-            this.Name = name;
         }
 
         public abstract IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context );

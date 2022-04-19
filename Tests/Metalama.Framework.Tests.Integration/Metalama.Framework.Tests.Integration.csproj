@@ -31,17 +31,7 @@
         <Compile Remove="Tests\**\__*.cs" />
     </ItemGroup>
 
-    <ItemGroup>
-        <Compile Remove="Tests\Aspects\Overrides\EventFields\PartialType_Declarations.t.cs" />
-        <Compile Remove="Tests\Aspects\Overrides\EventFields\PartialType_SyntaxTrees.t.cs" />
-        <Compile Remove="Tests\Aspects\Overrides\Events\PartialType_Declarations.t.cs" />
-        <Compile Remove="Tests\Aspects\Overrides\Events\PartialType_SyntaxTrees.t.cs" />
-        <Compile Remove="Tests\Aspects\Overrides\Fields\PartialType_Declarations.t.cs" />
-        <Compile Remove="Tests\Aspects\Overrides\Fields\PartialType_SyntaxTrees.t.cs" />
-        <Compile Remove="Tests\Aspects\Overrides\Methods\Advice - Copy.t.cs" />
-        <Compile Remove="Tests\Aspects\Overrides\Properties\PartialType_Declarations.t.cs" />
-        <Compile Remove="Tests\Aspects\Overrides\Properties\PartialType_SyntaxTrees.t.cs" />
-    </ItemGroup>
+
 
     <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
@@ -54,58 +44,10 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Folder Include="Tests\Aspects\Initializers" />
-    </ItemGroup>
 
-    <ItemGroup>
-        <None Include="Tests\Aspects\Inheritance\CrossAssemblyChildAspect.t.cs" />
-        <None Include="Tests\Aspects\Overrides\EventFields\PartialType_Declarations.t.cs">
-            <SubType>Code</SubType>
-            <DependentUpon>PartialType_Declarations.cs</DependentUpon>
-        </None>
-        <None Include="Tests\Aspects\Overrides\EventFields\PartialType_SyntaxTrees.t.cs">
-            <SubType>Code</SubType>
-            <DependentUpon>PartialType_SyntaxTrees.cs</DependentUpon>
-        </None>
-        <None Include="Tests\Aspects\Overrides\Events\PartialType_Declarations.t.cs">
-            <SubType>Code</SubType>
-            <DependentUpon>PartialType_Declarations.cs</DependentUpon>
-        </None>
-        <None Include="Tests\Aspects\Overrides\Events\PartialType_SyntaxTrees.t.cs">
-            <SubType>Code</SubType>
-            <DependentUpon>PartialType_SyntaxTrees.cs</DependentUpon>
-        </None>
-        <None Include="Tests\Aspects\Overrides\Fields\PartialType_Declarations.t.cs">
-            <SubType>Code</SubType>
-            <DependentUpon>PartialType_Declarations.cs</DependentUpon>
-        </None>
-        <None Include="Tests\Aspects\Overrides\Fields\PartialType_SyntaxTrees.t.cs">
-            <SubType>Code</SubType>
-            <DependentUpon>PartialType_SyntaxTrees.cs</DependentUpon>
-        </None>
-        <None Include="Tests\Aspects\Overrides\Methods\PartialType_SyntaxTrees.t.cs">
-            <SubType>Code</SubType>
-            <DependentUpon>PartialType_SyntaxTrees.cs</DependentUpon>
-        </None>
-        <None Include="Tests\Aspects\Overrides\Properties\PartialType_Declarations.t.cs">
-            <SubType>Code</SubType>
-            <DependentUpon>PartialType_Declarations.cs</DependentUpon>
-        </None>
-        <None Include="Tests\Aspects\Overrides\Properties\PartialType_SyntaxTrees.t.cs">
-            <SubType>Code</SubType>
-            <DependentUpon>PartialType_SyntaxTrees.cs</DependentUpon>
-        </None>
-        <None Include="Tests\Validation\Aspect_BeforeAnyAspect.t.cs" />
-        <None Include="Tests\Validation\Aspect_CurrentRevision.t.cs" />
-        <None Include="Tests\Validation\Fabric_ReportDiagnostic.t.cs" />
+
     </ItemGroup>
 
     <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets" />
-
-    <ItemGroup>
-        <None Update="C:\Dev\Metalama\Tests\Metalama.Framework.Tests.Integration\Tests\Aspects\Overrides\Methods\PartialType_Declarations.t.cs">
-            <DependentUpon>PartialType_Declarations.cs</DependentUpon>
-        </None>
-    </ItemGroup>
 
 </Project>

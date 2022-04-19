@@ -5,7 +5,7 @@ namespace Metalama.Framework.Code.DeclarationBuilders
 {
     /// <summary>
     /// Allows to complete the construction of a parameter that has been created using e.g.
-    /// <see cref="IMethodBuilder.AddParameter(string,Metalama.Framework.Code.IType,Metalama.Framework.Code.RefKind,Metalama.Framework.Code.TypedConstant)"/>.
+    /// <see cref="IMethodBaseBuilder.AddParameter(string,Metalama.Framework.Code.IType,Metalama.Framework.Code.RefKind,Metalama.Framework.Code.TypedConstant)"/>.
     /// </summary>
     public interface IParameterBuilder : IParameter, IDeclarationBuilder
     {

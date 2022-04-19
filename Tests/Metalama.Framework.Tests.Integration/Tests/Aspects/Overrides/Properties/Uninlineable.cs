@@ -12,7 +12,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
     {
         public override void BuildAspect( IAspectBuilder<IProperty> builder )
         {
-            builder.Advices.OverrideFieldOrPropertyAccessors( builder.Target, nameof(GetTemplate), nameof(SetTemplate) );
+            builder.Advices.OverrideAccessors( builder.Target, nameof(GetTemplate), nameof(SetTemplate) );
         }
 
         [Template]
@@ -38,7 +38,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
     {
         public override void BuildAspect( IAspectBuilder<IProperty> builder )
         {
-            builder.Advices.OverrideFieldOrPropertyAccessors( builder.Target, nameof(GetTemplate), nameof(SetTemplate) );
+            builder.Advices.OverrideAccessors( builder.Target, nameof(GetTemplate), nameof(SetTemplate) );
         }
 
         [Template]

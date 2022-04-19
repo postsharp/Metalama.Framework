@@ -31,7 +31,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.NamespaceFabri
     
     namespace Sub
     {
-        class AnotherClass
+        internal class AnotherClass
         {
             private int Method1( int a ) => a;
             private string Method2( string s ) {     global::System.Console.WriteLine("overridden");

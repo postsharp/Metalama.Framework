@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace Metalama.Framework.Aspects
 {
     /// <summary>
-    /// Specifies the templates that must be used by the <see cref="IAdviceFactory.OverrideMethod"/> advice.
+    /// Specifies the templates that must be used by the <c>IAdviceFactory.Override(IMethod)</c> advice.
     /// </summary>
     public readonly struct MethodTemplateSelector
     {

@@ -125,6 +125,11 @@ namespace Metalama.Framework.Engine.CodeModel
                 propertySymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
                 ms => new Property( (IPropertySymbol) ms.GetSymbol( this.Compilation ), this._compilationModel ) );
 
+        public IIndexer GetIndexer( IPropertySymbol propertySymbol )
+            => (IIndexer) this._cache.GetOrAdd(
+                propertySymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
+                ms => new Indexer( (IPropertySymbol) ms.GetSymbol( this.Compilation ), this._compilationModel ) );
+
         public IField GetField( IFieldSymbol fieldSymbol )
             => (IField) this._cache.GetOrAdd(
                 fieldSymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
@@ -197,7 +202,9 @@ namespace Metalama.Framework.Engine.CodeModel
                     }
 
                 case SymbolKind.Property:
-                    return this.GetProperty( (IPropertySymbol) symbol );
+                    var property = (IPropertySymbol) symbol;
+
+                    return property.IsIndexer ? this.GetIndexer( property ) : this.GetProperty( property );
 
                 case SymbolKind.Field:
                     return this.GetField( (IFieldSymbol) symbol );

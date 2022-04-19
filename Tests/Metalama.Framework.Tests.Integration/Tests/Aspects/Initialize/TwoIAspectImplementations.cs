@@ -9,12 +9,12 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Initialize.TwoIAspectImpl
     {
         public void BuildAspect( IAspectBuilder<IMethod> builder )
         {
-            builder.Advices.OverrideMethod( builder.Target, nameof(OverrideMethod) );
+            builder.Advices.Override( builder.Target, nameof(OverrideMethod) );
         }
 
         public void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
         {
-            builder.Advices.OverrideFieldOrProperty( builder.Target, nameof(OverrideProperty) );
+            builder.Advices.Override( builder.Target, nameof(OverrideProperty) );
         }
 
         [Template]

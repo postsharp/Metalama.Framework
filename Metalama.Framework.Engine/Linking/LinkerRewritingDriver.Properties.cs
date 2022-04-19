@@ -154,7 +154,7 @@ namespace Metalama.Framework.Engine.Linking
                                     Token( accessorListLeadingTrivia, SyntaxKind.OpenBraceToken, accessorStartingTrivia ),
                                     List( transformedAccessors ),
                                     Token( accessorEndingTrivia, SyntaxKind.CloseBraceToken, accessorListTrailingTrivia ) )
-                                .AddGeneratedCodeAnnotation() )
+                                .WithGeneratedCodeAnnotation() )
                         .WithExpressionBody( null )
                         .WithInitializer( null )
                         .WithSemicolonToken( default );
@@ -197,7 +197,7 @@ namespace Metalama.Framework.Engine.Linking
                             .WithOpenBraceToken( Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ) )
                             .WithCloseBraceToken( Token( closeBraceLeadingTrivia, SyntaxKind.CloseBraceToken, closeBraceTrailingTrivia ) )
                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
-                            .AddGeneratedCodeAnnotation() )
+                            .WithGeneratedCodeAnnotation() )
                     .WithSemicolonToken( default );
             }
         }
@@ -218,7 +218,7 @@ namespace Metalama.Framework.Engine.Linking
                 .NormalizeWhitespace()
                 .WithLeadingTrivia( LineFeed, LineFeed )
                 .WithTrailingTrivia( LineFeed )
-                .AddGeneratedCodeAnnotation();
+                .WithGeneratedCodeAnnotation();
 
         private static BlockSyntax GetImplicitGetterBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
             => Block(
@@ -231,7 +231,7 @@ namespace Metalama.Framework.Engine.Linking
                                 : ThisExpression(),
                             IdentifierName( GetBackingFieldName( (IPropertySymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
                         Token( SyntaxKind.SemicolonToken ) ) )
-                .AddGeneratedCodeAnnotation();
+                .WithGeneratedCodeAnnotation();
 
         private static BlockSyntax GetImplicitSetterBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
             => Block(
@@ -245,7 +245,7 @@ namespace Metalama.Framework.Engine.Linking
                                     : ThisExpression(),
                                 IdentifierName( GetBackingFieldName( (IPropertySymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
                             IdentifierName( "value" ) ) ) )
-                .AddGeneratedCodeAnnotation();
+                .WithGeneratedCodeAnnotation();
 
         private static MemberDeclarationSyntax GetOriginalImplProperty(
             PropertyDeclarationSyntax property,
@@ -289,11 +289,11 @@ namespace Metalama.Framework.Engine.Linking
                                         : null
                                 }.Where( a => a != null )
                                 .AssertNoneNull() ) )
-                    : property.AccessorList.AssertNotNull().AddSourceCodeAnnotation();
+                    : property.AccessorList.AssertNotNull().WithSourceCodeAnnotation();
 
             var initializer = property.Initializer;
 
-            return GetSpecialImplProperty( property.Type, accessorList, initializer.AddSourceCodeAnnotation(), symbol, GetOriginalImplMemberName( symbol ) );
+            return GetSpecialImplProperty( property.Type, accessorList, initializer.WithSourceCodeAnnotation(), symbol, GetOriginalImplMemberName( symbol ) );
         }
 
         private static MemberDeclarationSyntax GetEmptyImplProperty( PropertyDeclarationSyntax property, IPropertySymbol symbol )
@@ -344,10 +344,10 @@ namespace Metalama.Framework.Engine.Linking
                         null )
                     .WithAccessorList( accessorList )
                     .NormalizeWhitespace()
-                    .WithInitializer( initializer.AddSourceCodeAnnotation() )
+                    .WithInitializer( initializer.WithSourceCodeAnnotation() )
                     .WithLeadingTrivia( ElasticLineFeed )
                     .WithTrailingTrivia( ElasticLineFeed )
-                    .AddGeneratedCodeAnnotation();
+                    .WithGeneratedCodeAnnotation();
         }
     }
 }

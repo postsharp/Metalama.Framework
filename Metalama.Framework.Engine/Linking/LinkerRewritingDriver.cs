@@ -94,7 +94,7 @@ namespace Metalama.Framework.Engine.Linking
             // Add the SourceCode annotation, if it is source code.
             if ( !(symbol.GetPrimarySyntaxReference() is { } primarySyntax && primarySyntax.GetSyntax().HasAnnotation( FormattingAnnotations.GeneratedCode )) )
             {
-                rewrittenBody = rewrittenBody.AddSourceCodeAnnotation();
+                rewrittenBody = rewrittenBody.WithSourceCodeAnnotation();
             }
 
             if ( triviaSource == null )
@@ -263,7 +263,7 @@ namespace Metalama.Framework.Engine.Linking
                                 Token( TriviaList( ElasticSpace ), SyntaxKind.EqualsToken, TriviaList( ElasticSpace ) ),
                                 expression ),
                             Token( SyntaxKind.SemicolonToken ).WithTrailingTrivia( ElasticLineFeed ) )
-                        .AddGeneratedCodeAnnotation();
+                        .WithGeneratedCodeAnnotation();
             }
 
             GotoStatementSyntax CreateGotoStatement()
@@ -275,7 +275,7 @@ namespace Metalama.Framework.Engine.Linking
                             default,
                             IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ),
                             Token( SyntaxKind.SemicolonToken ).WithTrailingTrivia( ElasticLineFeed ) )
-                        .AddGeneratedCodeAnnotation();
+                        .WithGeneratedCodeAnnotation();
             }
         }
 
@@ -468,7 +468,8 @@ namespace Metalama.Framework.Engine.Linking
         /// <returns></returns>
         public bool IsRewriteTarget( ISymbol symbol )
         {
-            if ( this._introductionRegistry.IsOverride( symbol ) || this._introductionRegistry.IsOverrideTarget( symbol ) )
+            if ( this._introductionRegistry.IsOverride( symbol )
+                 || this._introductionRegistry.IsOverrideTarget( symbol ) )
             {
                 return true;
             }

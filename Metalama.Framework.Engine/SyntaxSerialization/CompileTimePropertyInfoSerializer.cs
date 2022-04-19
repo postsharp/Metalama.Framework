@@ -24,11 +24,11 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
             return this.SerializeProperty( property, serializationContext );
         }
 
-        public ExpressionSyntax SerializeProperty( IProperty property, SyntaxSerializationContext serializationContext )
+        public ExpressionSyntax SerializeProperty( IPropertyOrIndexer propertyOrIndexer, SyntaxSerializationContext serializationContext )
         {
-            var typeCreation = this.Service.Serialize( CompileTimeType.Create( property.DeclaringType ), serializationContext );
+            var typeCreation = this.Service.Serialize( CompileTimeType.Create( propertyOrIndexer.DeclaringType ), serializationContext );
 
-            if ( property.Parameters.Count == 0 )
+            if ( propertyOrIndexer is IProperty )
             {
                 return SyntaxFactory.InvocationExpression(
                         SyntaxFactory.MemberAccessExpression(
@@ -39,20 +39,20 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                         SyntaxFactory.Argument(
                             SyntaxFactory.LiteralExpression(
                                 SyntaxKind.StringLiteralExpression,
-                                SyntaxFactory.Literal( property.Name ) ) ),
+                                SyntaxFactory.Literal( propertyOrIndexer.Name ) ) ),
                         SyntaxFactory.Argument( SyntaxUtility.CreateBindingFlags( serializationContext ) ) );
             }
-            else
+            else if ( propertyOrIndexer is IIndexer indexer )
             {
-                var returnTypeCreation = this.Service.Serialize( CompileTimeType.Create( property.Type ), serializationContext );
+                var returnTypeCreation = this.Service.Serialize( CompileTimeType.Create( propertyOrIndexer.Type ), serializationContext );
                 var parameterTypes = new List<ExpressionSyntax>();
 
-                foreach ( var parameter in property.Parameters )
+                foreach ( var parameter in indexer.Parameters )
                 {
                     parameterTypes.Add( this.Service.Serialize( CompileTimeType.Create( parameter.Type ), serializationContext ) );
                 }
 
-                var propertyName = property.GetSymbol().AssertNotNull().MetadataName;
+                var propertyName = propertyOrIndexer.GetSymbol().AssertNotNull().MetadataName;
 
                 return SyntaxFactory.InvocationExpression(
                             SyntaxFactory.MemberAccessExpression(
@@ -78,6 +78,10 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                                             SyntaxKind.ArrayInitializerExpression,
                                             SyntaxFactory.SeparatedList( parameterTypes ) ) ) ) )
                     ;
+            }
+            else
+            {
+                throw new AssertionFailedException();
             }
         }
 

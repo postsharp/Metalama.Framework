@@ -49,7 +49,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         IField IRef<IField>.GetTarget( ICompilation compilation ) => (IField) this.GetForCompilation( compilation );
 
-        ISymbol ISdkRef<IField>.GetSymbol( Compilation compilation ) => throw new NotSupportedException();
+        ISymbol? ISdkRef<IField>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => throw new NotSupportedException();
 
         public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 

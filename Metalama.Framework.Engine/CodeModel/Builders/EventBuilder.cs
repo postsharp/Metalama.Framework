@@ -19,7 +19,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
+    internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
     {
         private readonly bool _isEventField;
 
@@ -28,11 +28,14 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             INamedType targetType,
             string name,
             bool isEventField )
-            : base( parentAdvice, targetType, name )
+            : base( parentAdvice, targetType )
         {
+            this.Name = name;
             this._isEventField = isEventField;
             this.Type = (INamedType) targetType.Compilation.TypeFactory.GetTypeByReflectionType( typeof(EventHandler) );
         }
+
+        public override string Name { get; set; }
 
         public INamedType Type { get; set; }
 

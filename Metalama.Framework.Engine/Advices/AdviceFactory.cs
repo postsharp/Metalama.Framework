@@ -28,17 +28,14 @@ namespace Metalama.Framework.Engine.Advices
         private readonly TemplateClassInstance? _templateInstance;
         private readonly IServiceProvider _serviceProvider;
         private readonly IDiagnosticAdder _diagnosticAdder;
-        private readonly ImmutableArray<Advice> _declarativeAdvices;
-        private readonly List<Advice> _advices;
 
         private readonly Dictionary<INamedType, ImplementInterfaceAdvice> _implementInterfaceAdvices;
 
-        internal IReadOnlyList<Advice> Advices => this._advices;
+        internal List<Advice> Advices { get; }
 
         public AdviceFactory(
             CompilationModel compilation,
             IDiagnosticAdder diagnosticAdder,
-            ImmutableArray<Advice> declarativeAdvices,
             IAspectInstanceInternal aspect,
             TemplateClassInstance? templateInstance, // null if the aspect has several template classes.
             IServiceProvider serviceProvider )
@@ -48,9 +45,8 @@ namespace Metalama.Framework.Engine.Advices
             this._serviceProvider = serviceProvider;
             this._compilation = compilation;
             this._diagnosticAdder = diagnosticAdder;
-            this._declarativeAdvices = declarativeAdvices;
             this._implementInterfaceAdvices = new Dictionary<INamedType, ImplementInterfaceAdvice>( compilation.InvariantComparer );
-            this._advices = new List<Advice>();
+            this.Advices = new List<Advice>();
         }
 
         /// <summary>
@@ -66,9 +62,8 @@ namespace Metalama.Framework.Engine.Advices
             this._serviceProvider = parent._serviceProvider;
             this._compilation = parent._compilation;
             this._diagnosticAdder = parent._diagnosticAdder;
-            this._declarativeAdvices = parent._declarativeAdvices;
             this._implementInterfaceAdvices = parent._implementInterfaceAdvices;
-            this._advices = parent._advices;
+            this.Advices = parent.Advices;
         }
 
         public AdviceFactory WithTemplateClassInstance( TemplateClassInstance templateClassInstance ) => new( this, templateClassInstance );
@@ -246,7 +241,7 @@ namespace Metalama.Framework.Engine.Advices
             return selectedTemplate.InterpretedAs( interpretedKind );
         }
 
-        private TemplateMemberRef SelectTemplate( IFieldOrProperty targetFieldOrProperty, in GetterTemplateSelector templateSelector, bool required )
+        private TemplateMemberRef SelectTemplate( IFieldOrPropertyOrIndexer targetFieldOrProperty, in GetterTemplateSelector templateSelector, bool required )
         {
             var getter = targetFieldOrProperty.GetMethod;
 
@@ -279,7 +274,7 @@ namespace Metalama.Framework.Engine.Advices
             return selectedTemplate;
         }
 
-        public void OverrideMethod( IMethod targetMethod, in MethodTemplateSelector templateSelector, TagDictionary? tags = null )
+        public void Override( IMethod targetMethod, in MethodTemplateSelector templateSelector, TagDictionary? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -301,7 +296,7 @@ namespace Metalama.Framework.Engine.Advices
             var advice = new OverrideMethodAdvice( this._aspect, this._templateInstance, targetMethod, template, _layerName, tags );
             advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
-            this._advices.Add( advice );
+            this.Advices.Add( advice );
 
             this._diagnosticAdder.Report( diagnosticList );
         }
@@ -341,15 +336,15 @@ namespace Metalama.Framework.Engine.Advices
 
             advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
-            this._advices.Add( advice );
+            this.Advices.Add( advice );
 
             this._diagnosticAdder.Report( diagnosticList );
 
             return advice.Builder;
         }
 
-        public void OverrideFieldOrProperty(
-            IFieldOrProperty targetDeclaration,
+        public void Override(
+            IFieldOrPropertyOrIndexer targetDeclaration,
             string defaultTemplate,
             TagDictionary? tags = null )
         {
@@ -386,15 +381,15 @@ namespace Metalama.Framework.Engine.Advices
 
             advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
-            this._advices.Add( advice );
+            this.Advices.Add( advice );
 
             this._diagnosticAdder.Report( diagnosticList );
         }
 
-        public void OverrideFieldOrPropertyAccessors(
-            IFieldOrProperty targetDeclaration,
+        public void OverrideAccessors(
+            IFieldOrPropertyOrIndexer targetDeclaration,
             in GetterTemplateSelector getTemplateSelector,
-            string? setTemplate,
+            string? setTemplate = null,
             TagDictionary? tags = null )
         {
             if ( this._templateInstance == null )
@@ -438,7 +433,7 @@ namespace Metalama.Framework.Engine.Advices
 
             advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
-            this._advices.Add( advice );
+            this.Advices.Add( advice );
 
             this._diagnosticAdder.Report( diagnosticList );
         }
@@ -468,7 +463,7 @@ namespace Metalama.Framework.Engine.Advices
 
             advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
-            this._advices.Add( advice );
+            this.Advices.Add( advice );
 
             this._diagnosticAdder.Report( diagnosticList );
 
@@ -515,7 +510,7 @@ namespace Metalama.Framework.Engine.Advices
 
             advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
-            this._advices.Add( advice );
+            this.Advices.Add( advice );
 
             this._diagnosticAdder.Report( diagnosticList );
 
@@ -565,14 +560,14 @@ namespace Metalama.Framework.Engine.Advices
 
             advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
-            this._advices.Add( advice );
+            this.Advices.Add( advice );
 
             this._diagnosticAdder.Report( diagnosticList );
 
             return advice.Builder;
         }
 
-        public void OverrideEventAccessors(
+        public void OverrideAccessors(
             IEvent targetDeclaration,
             string? addTemplate,
             string? removeTemplate,
@@ -620,7 +615,7 @@ namespace Metalama.Framework.Engine.Advices
 
             advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
-            this._advices.Add( advice );
+            this.Advices.Add( advice );
 
             this._diagnosticAdder.Report( diagnosticList );
         }
@@ -663,7 +658,7 @@ namespace Metalama.Framework.Engine.Advices
 
             advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
-            this._advices.Add( advice );
+            this.Advices.Add( advice );
 
             this._diagnosticAdder.Report( diagnosticList );
 
@@ -714,7 +709,7 @@ namespace Metalama.Framework.Engine.Advices
 
             advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
-            this._advices.Add( advice );
+            this.Advices.Add( advice );
 
             this._diagnosticAdder.Report( diagnosticList );
 
@@ -740,7 +735,7 @@ namespace Metalama.Framework.Engine.Advices
                     advice = new ImplementInterfaceAdvice( this._aspect, this._templateInstance, targetType, _layerName );
 
                 advice.Initialize( diagnosticList );
-                this._advices.Add( advice );
+                this.Advices.Add( advice );
             }
 
             advice.AddInterfaceImplementation( interfaceType, whenExists, null, diagnosticList, tags );
@@ -782,7 +777,7 @@ namespace Metalama.Framework.Engine.Advices
                     advice = new ImplementInterfaceAdvice( this._aspect, this._templateInstance, targetType, _layerName );
 
                 advice.Initialize( diagnosticList );
-                this._advices.Add( advice );
+                this.Advices.Add( advice );
             }
 
             advice.AddInterfaceImplementation( interfaceType, whenExists, null, diagnosticList, tags );
@@ -804,6 +799,77 @@ namespace Metalama.Framework.Engine.Advices
                 interfaceMemberSpecifications,
                 whenExists,
                 tags );
+        }
+
+        public void AddInitializerBeforeTypeConstructor( IMemberOrNamedType targetType, string template, TagDictionary? tags = null )
+        {
+            if ( this._templateInstance == null )
+            {
+                throw new InvalidOperationException();
+            }
+
+            var diagnosticList = new DiagnosticList();
+
+            var templateRef = this.ValidateTemplateName( template, TemplateKind.Default, true )
+                .GetTemplateMember<IMethod>( this._compilation, this._serviceProvider );
+
+            var advice = new InitializeAdvice(
+                this._aspect,
+                this._templateInstance,
+                targetType,
+                templateRef,
+                InitializerKind.BeforeTypeConstructor,
+                _layerName,
+                tags );
+
+            advice.Initialize( diagnosticList );
+            ThrowOnErrors( diagnosticList );
+            this.Advices.Add( advice );
+
+            this._diagnosticAdder.Report( diagnosticList );
+        }
+
+        public void AddInitializerBeforeInstanceConstructor( IMemberOrNamedType targetType, string template, TagDictionary? tags = null )
+        {
+            if ( this._templateInstance == null )
+            {
+                throw new InvalidOperationException();
+            }
+
+            var diagnosticList = new DiagnosticList();
+
+            var templateRef = this.ValidateTemplateName( template, TemplateKind.Default, true )
+                .GetTemplateMember<IMethod>( this._compilation, this._serviceProvider );
+
+            var advice = new InitializeAdvice(
+                this._aspect,
+                this._templateInstance,
+                targetType,
+                templateRef,
+                InitializerKind.BeforeInstanceConstructor,
+                _layerName,
+                tags );
+
+            advice.Initialize( diagnosticList );
+            ThrowOnErrors( diagnosticList );
+            this.Advices.Add( advice );
+
+            this._diagnosticAdder.Report( diagnosticList );
+        }
+
+        public void Override( IConstructor targetConstructor, string template, TagDictionary? tags = null )
+        {
+            throw new NotImplementedException();
+        }
+
+        public void IntroduceConstructor(
+            INamedType targetType,
+            string template,
+            IntroductionScope scope = IntroductionScope.Default,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            TagDictionary? tags = null )
+        {
+            throw new NotImplementedException();
         }
 
         private static void ThrowOnErrors( DiagnosticList diagnosticList )

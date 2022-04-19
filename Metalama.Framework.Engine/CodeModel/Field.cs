@@ -50,6 +50,8 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => Writeability.All
             };
 
+        public override bool IsImplicit => throw new NotImplementedException();
+
         public bool IsAutoPropertyOrField => true;
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => CompileTimeFieldOrPropertyInfo.Create( this );

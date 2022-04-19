@@ -8,11 +8,10 @@ using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Testing;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.TestFramework;
-using Metalama.TestFramework.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -22,6 +21,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
+using StringExtensions = Metalama.TestFramework.Utilities.StringExtensions;
 
 #pragma warning disable CA1307 // Specify StringComparison for clarity
 
@@ -43,7 +43,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
         {
             CSharpCompilation CreateEmptyCompilation()
             {
-                return CSharpCompilation.Create( assemblyName ?? "test_" + Guid.NewGuid() )
+                return CSharpCompilation.Create( assemblyName ?? "test_" + RandomIdGenerator.GenerateId() )
                     .WithOptions(
                         new CSharpCompilationOptions(
                             OutputKind.DynamicallyLinkedLibrary,
@@ -84,25 +84,26 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
             stringBuilder.AppendLine( syntaxTreeResult.SyntaxTree.FilePath + ":" );
 
             // Diagnostics
-            stringBuilder.AppendLineInvariant( $"{syntaxTreeResult.Diagnostics.Length} diagnostic(s):" );
+            StringExtensions.AppendLineInvariant( stringBuilder, $"{syntaxTreeResult.Diagnostics.Length} diagnostic(s):" );
 
             foreach ( var diagnostic in syntaxTreeResult.Diagnostics )
             {
-                stringBuilder.AppendLineInvariant(
+                StringExtensions.AppendLineInvariant(
+                    stringBuilder,
                     $"   {diagnostic.Severity} {diagnostic.Id} on `{GetTextUnderDiagnostic( diagnostic )}`: `{diagnostic.GetMessage()}`" );
             }
 
             // Suppressions
-            stringBuilder.AppendLineInvariant( $"{syntaxTreeResult.Suppressions.Length} suppression(s):" );
+            StringExtensions.AppendLineInvariant( stringBuilder, $"{syntaxTreeResult.Suppressions.Length} suppression(s):" );
 
             foreach ( var suppression in syntaxTreeResult.Suppressions )
             {
-                stringBuilder.AppendLineInvariant( $"   {suppression.Definition.SuppressedDiagnosticId} on {suppression.SymbolId}" );
+                StringExtensions.AppendLineInvariant( stringBuilder, $"   {suppression.Definition.SuppressedDiagnosticId} on {suppression.SymbolId}" );
             }
 
             // Introductions
 
-            stringBuilder.AppendLineInvariant( $"{syntaxTreeResult.Introductions.Length} introductions(s):" );
+            StringExtensions.AppendLineInvariant( stringBuilder, $"{syntaxTreeResult.Introductions.Length} introductions(s):" );
 
             foreach ( var introduction in syntaxTreeResult.Introductions )
             {
@@ -165,7 +166,7 @@ F1.cs:
         [Fact]
         public async Task ChangeInAspectCodeAsync()
         {
-            var assemblyName = "test_" + Guid.NewGuid();
+            var assemblyName = "test_" + RandomIdGenerator.GenerateId();
 
             var aspectCode = @"
 using Metalama.Framework.Aspects;
@@ -341,7 +342,7 @@ Target.cs:
         [Fact]
         public void ChangeInTargetCode()
         {
-            var assemblyName = "test_" + Guid.NewGuid();
+            var assemblyName = "test_" + RandomIdGenerator.GenerateId();
 
             var aspectCode = @"
 using Metalama.Framework.Aspects;
