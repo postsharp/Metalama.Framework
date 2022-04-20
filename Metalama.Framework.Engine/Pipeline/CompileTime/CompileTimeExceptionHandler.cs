@@ -12,18 +12,11 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
 {
     internal class CompileTimeExceptionHandler : ICompileTimeExceptionHandler
     {
-        private readonly IExceptionReporter _exceptionReporter;
+        private readonly IExceptionReporter? _exceptionReporter;
 
         public CompileTimeExceptionHandler( IServiceProvider serviceProvider )
         {
-            var exceptionReporter = (IExceptionReporter?) serviceProvider.GetService( typeof(IExceptionReporter) );
-
-            if ( exceptionReporter == null )
-            {
-                throw new InvalidOperationException( "Cannot get the exception reporter." );
-            }
-
-            this._exceptionReporter = exceptionReporter;
+            this._exceptionReporter = (IExceptionReporter?) serviceProvider.GetService( typeof(IExceptionReporter) );
         }
 
         public void ReportException( Exception exception, Action<Diagnostic> reportDiagnostic, out bool mustRethrow )
@@ -37,7 +30,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
 
             reportDiagnostic( GeneralDiagnosticDescriptors.UnhandledException.CreateRoslynDiagnostic( null, (exception.Message, reportFile ?? "(none)") ) );
 
-            this._exceptionReporter.ReportException( exception );
+            this._exceptionReporter?.ReportException( exception );
             
             mustRethrow = false;
         }
