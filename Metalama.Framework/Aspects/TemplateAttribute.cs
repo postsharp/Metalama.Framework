@@ -10,7 +10,7 @@ namespace Metalama.Framework.Aspects
     /// The base class for all custom attributes that mark a declaration as a template.
     /// </summary>
     [AttributeUsage( AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Event )]
-    public class TemplateAttribute : CompileTimeAttribute
+    public class TemplateAttribute : Attribute
     {
         private Accessibility? _accessibility;
         private bool? _isVirtual;

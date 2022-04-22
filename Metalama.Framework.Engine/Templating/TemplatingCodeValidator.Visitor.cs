@@ -302,7 +302,7 @@ namespace Metalama.Framework.Engine.Templating
                     this._currentScope = scope;
 
                     this._currentDeclarationIsTemplate = this._currentDeclarationIsTemplate.GetValueOrDefault()
-                                                         || (scope.MustExecuteAtCompileTime() && !this._classifier.GetTemplateInfo( declaredSymbol ).IsNone);
+                                                         || !this._classifier.GetTemplateInfo( declaredSymbol ).IsNone;
 
                     this._currentDeclaration = declaredSymbol;
 

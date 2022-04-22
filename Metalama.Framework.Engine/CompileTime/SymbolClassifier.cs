@@ -52,8 +52,6 @@ namespace Metalama.Framework.Engine.CompileTime
             }.ToImmutableDictionary( t => t.Namespace, t => (t.Scope, t.IncludeDescendants), StringComparer.Ordinal );
 
         private readonly Compilation? _compilation;
-        private readonly INamedTypeSymbol? _compileTimeAttribute;
-        private readonly INamedTypeSymbol? _compileTimeOnlyAttribute;
         private readonly INamedTypeSymbol? _templateAttribute;
         private readonly INamedTypeSymbol? _ignoreUnlessOverriddenAttribute;
         private readonly ConcurrentDictionary<ISymbol, TemplatingScope?> _cacheScopeFromAttributes = new( SymbolEqualityComparer.Default );
@@ -74,8 +72,6 @@ namespace Metalama.Framework.Engine.CompileTime
             if ( compilation != null )
             {
                 this._compilation = compilation;
-                this._compileTimeAttribute = this._compilation.GetTypeByMetadataName( typeof(RunTimeOrCompileTimeAttribute).FullName ).AssertNotNull();
-                this._compileTimeOnlyAttribute = this._compilation.GetTypeByMetadataName( typeof(CompileTimeAttribute).FullName ).AssertNotNull();
                 this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof(TemplateAttribute).FullName ).AssertNotNull();
                 this._ignoreUnlessOverriddenAttribute = this._compilation.GetTypeByMetadataName( typeof(AbstractAttribute).FullName ).AssertNotNull();
             }
@@ -156,22 +152,21 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private TemplatingScope? GetTemplatingScope( AttributeData attribute )
         {
-            if ( this._compilation == null )
+            switch ( attribute.AttributeClass?.Name )
             {
-                return null;
-            }
+                default:
+                    return null;
 
-            if ( this._compilation.HasImplicitConversion( attribute.AttributeClass, this._compileTimeOnlyAttribute ) )
-            {
-                return TemplatingScope.CompileTimeOnly;
-            }
-            else if ( this._compilation.HasImplicitConversion( attribute.AttributeClass, this._compileTimeAttribute ) )
-            {
-                return TemplatingScope.RunTimeOrCompileTime;
-            }
-            else
-            {
-                return null;
+                case nameof(CompileTimeAttribute):
+                case nameof(TemplateAttribute):
+                    return TemplatingScope.CompileTimeOnly;
+
+                case nameof(RunTimeOrCompileTimeAttribute):
+                    return TemplatingScope.RunTimeOrCompileTime;
+
+                case nameof(IntroduceAttribute):
+                case nameof(InterfaceMemberAttribute):
+                    return TemplatingScope.RunTimeOnly;
             }
         }
 
@@ -197,6 +192,11 @@ namespace Metalama.Framework.Engine.CompileTime
 
         public TemplatingScope GetTemplatingScope( ISymbol symbol )
         {
+            if ( symbol.Kind == SymbolKind.Namespace )
+            {
+                return TemplatingScope.RunTimeOrCompileTime;
+            }
+
             if ( !this._cacheResultingScope.TryGetValue( symbol, out var scope ) )
             {
                 scope = this.GetTemplatingScopeCore( symbol );
