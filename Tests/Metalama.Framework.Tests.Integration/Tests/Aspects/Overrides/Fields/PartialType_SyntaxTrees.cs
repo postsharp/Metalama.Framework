@@ -1,5 +1,4 @@
-﻿// @Skipped(#30159)
-// @OutputAllSyntaxTrees
+﻿// @OutputAllSyntaxTrees
 
 using System;
 using System.Linq;

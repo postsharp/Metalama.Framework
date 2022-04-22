@@ -184,13 +184,13 @@ namespace Metalama.Framework.Engine.Templating
 
         // This method is called when the expression of 'return' is a non-dynamic expression.
         public static StatementSyntax ReturnStatement( ExpressionSyntax? returnExpression )
-            => TemplateExpansionContext.Current.CreateReturnStatement( returnExpression );
+            => TemplateExpansionContext.Current.CreateReturnStatement( returnExpression, false );
 
         // This overload is called when the expression of 'return' is a compile-time expression returning a dynamic value.
-        public static StatementSyntax DynamicReturnStatement( IUserExpression returnExpression )
-            => TemplateExpansionContext.Current.CreateReturnStatement( returnExpression );
+        public static StatementSyntax DynamicReturnStatement( IUserExpression returnExpression, bool awaitResult )
+            => TemplateExpansionContext.Current.CreateReturnStatement( returnExpression, awaitResult );
 
-        public static StatementSyntax DynamicDiscardAssignment( IUserExpression? expression )
+        public static StatementSyntax DynamicDiscardAssignment( IUserExpression? expression, bool awaitResult )
         {
             if ( expression == null )
             {
@@ -200,13 +200,21 @@ namespace Metalama.Framework.Engine.Templating
             {
                 return SyntaxFactory.ExpressionStatement( expression.ToRunTimeExpression() );
             }
+            else if ( awaitResult && TypeExtensions.Equals( expression.Type.GetAsyncInfo().ResultType, SpecialType.Void ) )
+            {
+                return
+                    SyntaxFactory.ExpressionStatement(
+                        SyntaxFactory.AwaitExpression( expression.ToRunTimeExpression() ) );
+            }
             else
             {
                 return SyntaxFactory.ExpressionStatement(
                     SyntaxFactory.AssignmentExpression(
                         SyntaxKind.SimpleAssignmentExpression,
                         SyntaxFactoryEx.DiscardToken,
-                        expression.ToRunTimeExpression() ) );
+                        awaitResult 
+                        ? SyntaxFactory.AwaitExpression( expression.ToRunTimeExpression() )
+                        : expression.ToRunTimeExpression() ) );
             }
         }
 
@@ -214,7 +222,8 @@ namespace Metalama.Framework.Engine.Templating
         public static StatementSyntax DynamicLocalDeclaration(
             TypeSyntax type,
             SyntaxToken identifier,
-            IUserExpression? value )
+            IUserExpression? value,
+            bool awaitResult )
         {
             if ( value == null )
             {
@@ -224,7 +233,8 @@ namespace Metalama.Framework.Engine.Templating
 
             var runtimeExpression = value.ToRunTimeExpression();
 
-            if ( TypeExtensions.Equals( value.Type, SpecialType.Void ) )
+            if ( TypeExtensions.Equals( value.Type, SpecialType.Void )
+                || (awaitResult && TypeExtensions.Equals( value.Type.GetAsyncInfo().ResultType, SpecialType.Void ) ) )
             {
                 // If the method is void, we invoke the method as a statement (so we don't loose the side effect) and we define a local that
                 // we assign to the default value. The local is necessary because it may be referenced later.
@@ -262,7 +272,13 @@ namespace Metalama.Framework.Engine.Templating
 
                 if ( expressionStatement != null )
                 {
-                    return SyntaxFactory.Block( expressionStatement, localDeclarationStatement )
+                    return SyntaxFactory.Block(
+                        awaitResult
+                        ? SyntaxFactory.ExpressionStatement(
+                            SyntaxFactory.AwaitExpression(
+                                expressionStatement.Expression ))
+                        : expressionStatement, 
+                        localDeclarationStatement )
                         .WithFlattenBlockAnnotation();
                 }
                 else
@@ -279,7 +295,10 @@ namespace Metalama.Framework.Engine.Templating
                             SyntaxFactory.VariableDeclarator(
                                 identifier,
                                 null,
-                                SyntaxFactory.EqualsValueClause( runtimeExpression ) ) ) ) );
+                                SyntaxFactory.EqualsValueClause(
+                                    awaitResult
+                                    ? SyntaxFactory.AwaitExpression( runtimeExpression )
+                                    : runtimeExpression ) ) ) ) );
             }
         }
 

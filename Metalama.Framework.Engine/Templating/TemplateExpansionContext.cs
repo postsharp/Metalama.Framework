@@ -132,7 +132,7 @@ namespace Metalama.Framework.Engine.Templating
                     // not the one as seen from outside.
                     var asyncInfo = method.GetAsyncInfoImpl();
 
-                    if ( asyncInfo.IsAwaitable )
+                    if ( asyncInfo.IsAwaitableOrVoid )
                     {
                         returnType = asyncInfo.ResultType;
                     }
@@ -374,7 +374,7 @@ namespace Metalama.Framework.Engine.Templating
 
         public UserDiagnosticSink DiagnosticSink => this.MetaApi.Diagnostics;
 
-        public StatementSyntax CreateReturnStatement( IUserExpression? returnExpression )
+        public StatementSyntax CreateReturnStatement( IUserExpression? returnExpression, bool awaitResult )
         {
             if ( returnExpression == null )
             {
@@ -387,6 +387,22 @@ namespace Metalama.Framework.Engine.Templating
                     return
                         Block(
                                 ExpressionStatement( returnExpression.ToRunTimeExpression() ),
+                                ReturnStatement().WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation ) )
+                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                }
+                else
+                {
+                    // TODO: Emit error.
+                    throw new AssertionFailedException();
+                }
+            }
+            else if ( awaitResult && TypeExtensions.Equals( returnExpression.Type.GetAsyncInfo().ResultType, SpecialType.Void ) )
+            {
+                if ( TypeExtensions.Equals( this.MetaApi.Method.ReturnType, SpecialType.Void ) )
+                {
+                    return
+                        Block(
+                                ExpressionStatement( AwaitExpression( returnExpression.ToRunTimeExpression() ) ),
                                 ReturnStatement().WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation ) )
                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                 }

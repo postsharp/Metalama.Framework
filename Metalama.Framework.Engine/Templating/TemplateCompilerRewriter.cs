@@ -673,16 +673,32 @@ namespace Metalama.Framework.Engine.Templating
 
         protected override ExpressionSyntax TransformExpressionStatement( ExpressionStatementSyntax node )
         {
-            if ( node.Expression is AssignmentExpressionSyntax { Left: IdentifierNameSyntax { Identifier: { Text: "_" } } } assignment &&
-                 this.IsCompileTimeDynamic( assignment.Right ) )
+            if ( node.Expression is AssignmentExpressionSyntax { Left: IdentifierNameSyntax { Identifier: { Text: "_" } } } assignment )
             {
-                // Process the statement "_ = meta.XXX()", where "meta.XXX()" is a call to a compile-time dynamic method. 
+                if ( this.IsCompileTimeDynamic( assignment.Right ) )
+                {
+                    // Process the statement "_ = meta.XXX()", where "meta.XXX()" is a call to a compile-time dynamic method. 
 
-                var invocationExpression = InvocationExpression(
-                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.DynamicDiscardAssignment) ) )
-                    .AddArgumentListArguments( Argument( this.CastToDynamicExpression( this.TransformCompileTimeCode( assignment.Right ) ) ) );
+                    var invocationExpression = InvocationExpression(
+                            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof( TemplateSyntaxFactory.DynamicDiscardAssignment ) ) )
+                        .AddArgumentListArguments( 
+                            Argument( this.CastToDynamicExpression( this.TransformCompileTimeCode( assignment.Right ) ) ),
+                            Argument( LiteralExpression( SyntaxKind.FalseLiteralExpression ) ) );
 
-                return this.WithCallToAddSimplifierAnnotation( invocationExpression );
+                    return this.WithCallToAddSimplifierAnnotation( invocationExpression );
+                }
+                else if ( assignment.Right is AwaitExpressionSyntax awaitExpression && this.IsCompileTimeDynamic( awaitExpression.Expression ) )
+                {
+                    // Process the statement "_ = await meta.XXX()", where "meta.XXX()" is a call to a compile-time dynamic method. 
+
+                    var invocationExpression = InvocationExpression(
+                            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof( TemplateSyntaxFactory.DynamicDiscardAssignment ) ) )
+                        .AddArgumentListArguments( 
+                            Argument( this.CastToDynamicExpression( this.TransformCompileTimeCode( awaitExpression.Expression ) ) ),
+                            Argument( LiteralExpression( SyntaxKind.TrueLiteralExpression ) ) );
+
+                    return this.WithCallToAddSimplifierAnnotation( invocationExpression );
+                }
             }
 
             var expression = this.Transform( node.Expression );
@@ -1419,12 +1435,11 @@ namespace Metalama.Framework.Engine.Templating
             {
                 // We have a dynamic parameter. We need to call the second overload of ReturnStatement, the one that accepts the IDynamicExpression
                 // itself and not the syntax.
-
-                var expression = (ExpressionSyntax) this.Visit( node.Expression )!;
-
-                invocationExpression = InvocationExpression(
-                        this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.DynamicReturnStatement) ) )
-                    .AddArgumentListArguments( Argument( this.CastToDynamicExpression( expression ) ) );
+                invocationExpression = CreateInvocationExpression( node.Expression.AssertNotNull(), false );
+            }
+            else if ( node.Expression is AwaitExpressionSyntax awaitExpression && this.IsCompileTimeDynamic( awaitExpression.Expression ) )
+            {
+                invocationExpression = CreateInvocationExpression( awaitExpression.Expression, true );
             }
             else
             {
@@ -1433,6 +1448,15 @@ namespace Metalama.Framework.Engine.Templating
                 invocationExpression = InvocationExpression(
                         this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.ReturnStatement) ) )
                     .AddArgumentListArguments( Argument( expression ) );
+            }
+
+            InvocationExpressionSyntax CreateInvocationExpression( ExpressionSyntax expression, bool awaitResult )
+            {
+                return 
+                    InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof( TemplateSyntaxFactory.DynamicReturnStatement ) ) )
+                    .AddArgumentListArguments(
+                        Argument( this.CastToDynamicExpression( (ExpressionSyntax) this.Visit( expression ).AssertNotNull() ) ),
+                        Argument( LiteralExpression( awaitResult ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression ) ) );
             }
 
             return this.WithCallToAddSimplifierAnnotation( invocationExpression );
@@ -1455,14 +1479,26 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     if ( this.IsCompileTimeDynamic( declarator.Initializer.Value ) )
                     {
-                        var invocationExpression = InvocationExpression(
-                                this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.DynamicLocalDeclaration) ) )
+                        // Assigning dynamic to a variable.
+                        return this.WithCallToAddSimplifierAnnotation( 
+                            CreateInvocationExpression( declaration, declarator, declarator.Initializer.Value, false ) );
+                    }
+
+                    if ( declarator.Initializer is { Value: AwaitExpressionSyntax awaitExpression } && this.IsCompileTimeDynamic( awaitExpression.Expression ) )
+                    {
+                        // Assigning awaited dynamic to a variable.
+                        return this.WithCallToAddSimplifierAnnotation(
+                            CreateInvocationExpression( declaration, declarator, awaitExpression.Expression, true ) );
+                    }
+
+                    InvocationExpressionSyntax CreateInvocationExpression( VariableDeclarationSyntax declaration, VariableDeclaratorSyntax declarator, ExpressionSyntax expression, bool awaitResult )
+                    {
+                        return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof( TemplateSyntaxFactory.DynamicLocalDeclaration ) ) )
                             .AddArgumentListArguments(
                                 Argument( (ExpressionSyntax) this.Visit( declaration.Type )! ),
                                 Argument( this.Transform( declarator.Identifier ) ),
-                                Argument( this.CastToDynamicExpression( (ExpressionSyntax) this.Visit( declarator.Initializer.Value )! ) ) );
-
-                        return this.WithCallToAddSimplifierAnnotation( invocationExpression );
+                                Argument( this.CastToDynamicExpression( (ExpressionSyntax) this.Visit( expression ).AssertNotNull() ) ),
+                                Argument( LiteralExpression( awaitResult ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression ) ) );
                     }
                 }
             }

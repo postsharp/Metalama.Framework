@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
     {
         private readonly IField _field;
 
-        public MemberRef<IMemberOrNamedType>? ReplacedMember => this._field.ToMemberRef<IMemberOrNamedType>();
+        public MemberRef<IMember>? ReplacedMember => this._field.ToMemberRef<IMember>();
 
         public PromotedField( Advice advice, IField field ) : base(
             advice,

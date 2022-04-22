@@ -47,6 +47,9 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             switch ( declaration )
             {
+                case IReplaceMember replaceMember:
+                    return replaceMember.ReplacedMember.AssertNotNull().GetTarget(declaration.Compilation).ToInsertPosition();
+
                 case BuiltDeclaration:
                 case IDeclarationBuilder:
                     return new InsertPosition(
@@ -55,9 +58,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
                 default:
                     var symbol = declaration.GetSymbol().AssertNotNull();
-
                     var memberDeclaration = symbol.GetPrimaryDeclaration().FindMemberDeclaration();
-
                     return new InsertPosition( InsertPositionRelation.After, memberDeclaration );
             }
         }

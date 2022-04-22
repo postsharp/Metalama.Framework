@@ -6,11 +6,11 @@ using System.Collections.Generic;
 using Metalama.Framework;
 using Metalama.TestFramework;
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Tests.Integration.Templating.Aspects.Async.TwoNormalTemplatesOnVoidAsyncMethod;
+using Metalama.Framework.Tests.Integration.Templating.Aspects.Async.NormalTemplate.VoidAsyncMethodComposition;
 
 [assembly: AspectOrder( typeof(Aspect1), typeof(Aspect2) ) ]
 
-namespace Metalama.Framework.Tests.Integration.Templating.Aspects.Async.TwoNormalTemplatesOnVoidAsyncMethod
+namespace Metalama.Framework.Tests.Integration.Templating.Aspects.Async.NormalTemplate.VoidAsyncMethodComposition
 {
     class Aspect1 : OverrideMethodAspect
     {

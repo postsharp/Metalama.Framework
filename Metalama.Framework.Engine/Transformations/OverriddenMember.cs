@@ -44,12 +44,23 @@ namespace Metalama.Framework.Engine.Transformations
         {
             ExpressionSyntax expression;
 
-            SimpleNameSyntax memberName = IdentifierName( this.OverriddenDeclaration.Name );
+            var memberNameString =
+                this.OverriddenDeclaration switch
+                {
+                    { IsExplicitInterfaceImplementation: true } => this.OverriddenDeclaration.Name.Split( '.' ).Last(),
+                    _ => this.OverriddenDeclaration.Name,
+                };
+
+            SimpleNameSyntax memberName;                
 
             if ( this.OverriddenDeclaration is IGeneric generic && generic.TypeParameters.Count > 0 )
             {
-                memberName = GenericName( this.OverriddenDeclaration.Name )
+                memberName = GenericName( memberNameString )
                     .WithTypeArgumentList( TypeArgumentList( SeparatedList( generic.TypeParameters.Select( p => (TypeSyntax) IdentifierName( p.Name ) ) ) ) );
+            }
+            else
+            {
+                memberName = IdentifierName( memberNameString );
             }
 
             if ( !this.OverriddenDeclaration.IsStatic )
@@ -93,6 +104,6 @@ namespace Metalama.Framework.Engine.Transformations
 
         public InsertPosition InsertPosition => this.OverriddenDeclaration.ToInsertPosition();
 
-        public override string ToString() => $"Override {this.OverriddenDeclaration}";
+        public override string ToString() => $"Override {this.OverriddenDeclaration} by {this.Advice.AspectLayerId}";
     }
 }

@@ -5,7 +5,7 @@ using Metalama.Framework;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.Simple
+namespace Metalama.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.AsyncMethod
 {
     class Aspect : OverrideMethodAspect
     {
@@ -38,6 +38,12 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.Simpl
         {
             await Task.Yield();
             return a;
+        }
+
+        [Aspect]
+        async Task AsyncVoidMethod()
+        {
+            await Task.Yield();
         }
     }
 }
