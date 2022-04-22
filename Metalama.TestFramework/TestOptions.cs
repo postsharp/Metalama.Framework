@@ -57,7 +57,7 @@ namespace Metalama.TestFramework
 
         /// <summary>
         /// Gets the list of assembly names that should be included in the compilation.
-        /// You can only define this option in the <c>metalamaTests.json</c> file of a directory.
+        /// To add a named assembly reference, add this comment to your test file: <c>// @AssemblyReference(assemblyName)</c>.
         /// </summary>
         public List<TestAssemblyReference> References { get; } = new();
 
@@ -361,6 +361,11 @@ namespace Metalama.TestFramework
 
                     case "OutputAllSyntaxTrees":
                         this.OutputAllSyntaxTrees = true;
+
+                        break;
+
+                    case "AssemblyReference":
+                        this.References.Add( new TestAssemblyReference { Name = optionArg } );
 
                         break;
 

@@ -62,6 +62,13 @@ namespace Metalama.Framework.Engine.Templating
 
             public override void Visit( SyntaxNode? node )
             {
+                bool IsTypeOfOrNameOf()
+                {
+                    return node
+                        .AncestorsAndSelf()
+                        .Any( n => n is TypeOfExpressionSyntax || (n is InvocationExpressionSyntax invocation && invocation.IsNameOf()) );
+                }
+
                 bool AvoidDuplicates( ISymbol symbol )
                 {
                     return this._alreadyReportedDiagnostics.Add( symbol ) &&
@@ -114,9 +121,7 @@ namespace Metalama.Framework.Engine.Templating
                                         this._currentDeclaration! ) );
                             }
                         }
-                        else if ( !(this._currentScope.Value.ExecutesAtCompileTimeOnly() || this._currentDeclarationIsTemplate!.Value) && !node
-                                     .AncestorsAndSelf()
-                                     .Any( n => n is TypeOfExpressionSyntax || (n is InvocationExpressionSyntax invocation && invocation.IsNameOf()) ) )
+                        else if ( !(this._currentScope.Value.ExecutesAtCompileTimeOnly() || this._currentDeclarationIsTemplate!.Value) && !IsTypeOfOrNameOf() )
                         {
                             // We cannot reference a compile-time-only declaration, except in a typeof() or nameof() expression
                             // because these are transformed by the CompileTimeCompilationBuilder.
@@ -130,10 +135,28 @@ namespace Metalama.Framework.Engine.Templating
                             }
                         }
                     }
+                    else if ( referencedScope == TemplatingScope.RunTimeOnly )
+                    {
+                        if ( this._currentScope.Value == TemplatingScope.CompileTimeOnly && !IsTypeOfOrNameOf() )
+                        {
+                            if ( AvoidDuplicates( referencedSymbol ) )
+                            {
+                                this.Report(
+                                    TemplatingDiagnosticDescriptors.CannotReferenceRunTimeOnly.CreateRoslynDiagnostic(
+                                        node.GetLocation(),
+                                        (this._currentDeclaration!, referencedSymbol) ) );
+                            }
+                        }
+                    }
                 }
             }
 
             public override void VisitAttribute( AttributeSyntax node )
+            {
+                // Do not validate custom attributes.
+            }
+
+            public override void VisitAttributeList( AttributeListSyntax node )
             {
                 // Do not validate custom attributes.
             }
@@ -159,7 +182,13 @@ namespace Metalama.Framework.Engine.Templating
                 base.VisitClassDeclaration( node );
             }
 
-            public override void VisitMethodDeclaration( MethodDeclarationSyntax node )
+            public override void VisitMethodDeclaration( MethodDeclarationSyntax node ) => this.VisitPotentialTemplate( node, base.VisitMethodDeclaration );
+
+            public override void VisitAccessorDeclaration( AccessorDeclarationSyntax node )
+                => this.VisitPotentialTemplate( node, base.VisitAccessorDeclaration );
+
+            private void VisitPotentialTemplate<T>( T node, Action<T> visitBase )
+                where T : SyntaxNode
             {
                 var methodSymbol = this._semanticModel.GetDeclaredSymbol( node );
 
@@ -179,7 +208,7 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     using ( this.WithScope( node ) )
                     {
-                        base.VisitMethodDeclaration( node );
+                        visitBase( node );
                     }
                 }
             }

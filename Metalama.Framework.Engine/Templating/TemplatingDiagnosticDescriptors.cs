@@ -283,5 +283,14 @@ namespace Metalama.Framework.Engine.Templating
                 "The definition of the type or member '{0}' is invalid. Metalama could report irrelevant errors in the current template.",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition<(ISymbol DeclaringSymbol, ISymbol ReferencedSymbol)>
+            CannotReferenceRunTimeOnly
+                = new(
+                    "LAMA0236",
+                    "Cannot reference a run-time-only declaration in a compile-time-only declaration.",
+                    "Cannot reference '{1}' in '{0}' because '{1}' is run-time-only but '{0}' is compile-time-only.",
+                    _category,
+                    Error );
     }
 }
