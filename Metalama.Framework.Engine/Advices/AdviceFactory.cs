@@ -738,7 +738,7 @@ namespace Metalama.Framework.Engine.Advices
                 this.Advices.Add( advice );
             }
 
-            advice.AddInterfaceImplementation( interfaceType, whenExists, null, diagnosticList, tags );
+            advice.AddInterfaceImplementation( interfaceType, whenExists, null, diagnosticList );
             ThrowOnErrors( diagnosticList );
 
             this._diagnosticAdder.Report( diagnosticList );
@@ -780,7 +780,7 @@ namespace Metalama.Framework.Engine.Advices
                 this.Advices.Add( advice );
             }
 
-            advice.AddInterfaceImplementation( interfaceType, whenExists, null, diagnosticList, tags );
+            advice.AddInterfaceImplementation( interfaceType, whenExists, null, diagnosticList );
             ThrowOnErrors( diagnosticList );
 
             this._diagnosticAdder.Report( diagnosticList );

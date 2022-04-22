@@ -45,7 +45,7 @@ namespace Metalama.Framework.Engine.Advices
 
             this.MemberBuilder = new PropertyBuilder(
                 this,
-                this.TargetDeclaration,
+                targetDeclaration,
                 name,
                 hasGet,
                 hasSet,
@@ -73,7 +73,9 @@ namespace Metalama.Framework.Engine.Advices
         public override AdviceResult ToResult( ICompilation compilation, IReadOnlyList<IObservableTransformation> observableTransformations )
         {
             // Determine whether we need introduction transformation (something may exist in the original code or could have been introduced by previous steps).
-            var existingDeclaration = this.TargetDeclaration.FindClosestVisibleProperty(
+            var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
+
+            var existingDeclaration = targetDeclaration.FindClosestVisibleProperty(
                 this.MemberBuilder,
                 observableTransformations.OfType<IProperty>().ToList() );
 
@@ -97,8 +99,9 @@ namespace Metalama.Framework.Engine.Advices
                     return
                         AdviceResult.Create(
                             AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentStaticity.CreateRoslynDiagnostic(
-                                this.TargetDeclaration.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, this.MemberBuilder, this.TargetDeclaration, existingDeclaration.DeclaringType) ) );
+                                targetDeclaration.GetDiagnosticLocation(),
+                                (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
+                                 existingDeclaration.DeclaringType) ) );
                 }
 
                 switch ( this.OverrideStrategy )
@@ -108,8 +111,9 @@ namespace Metalama.Framework.Engine.Advices
                         return
                             AdviceResult.Create(
                                 AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateRoslynDiagnostic(
-                                    this.TargetDeclaration.GetDiagnosticLocation(),
-                                    (this.Aspect.AspectClass.ShortName, this.MemberBuilder, this.TargetDeclaration, existingDeclaration.DeclaringType) ) );
+                                    targetDeclaration.GetDiagnosticLocation(),
+                                    (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
+                                     existingDeclaration.DeclaringType) ) );
 
                     case OverrideStrategy.Ignore:
                         // Do nothing.
@@ -117,7 +121,7 @@ namespace Metalama.Framework.Engine.Advices
 
                     case OverrideStrategy.New:
                         // If the existing declaration is in the current type, we fail, otherwise, declare a new method and override.
-                        if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( this.TargetDeclaration, existingDeclaration.DeclaringType ) )
+                        if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( targetDeclaration, existingDeclaration.DeclaringType ) )
                         {
                             var overriddenProperty = new OverriddenProperty(
                                 this,
@@ -143,7 +147,7 @@ namespace Metalama.Framework.Engine.Advices
                         }
 
                     case OverrideStrategy.Override:
-                        if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( this.TargetDeclaration, existingDeclaration.DeclaringType ) )
+                        if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( targetDeclaration, existingDeclaration.DeclaringType ) )
                         {
                             var overriddenMethod = new OverriddenProperty(
                                 this,
@@ -159,8 +163,8 @@ namespace Metalama.Framework.Engine.Advices
                             return
                                 AdviceResult.Create(
                                     AdviceDiagnosticDescriptors.CannotIntroduceOverrideOfSealed.CreateRoslynDiagnostic(
-                                        this.TargetDeclaration.GetDiagnosticLocation(),
-                                        (this.Aspect.AspectClass.ShortName, this.MemberBuilder, this.TargetDeclaration,
+                                        targetDeclaration.GetDiagnosticLocation(),
+                                        (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
                                          existingDeclaration.DeclaringType) ) );
                         }
                         else if ( !compilation.InvariantComparer.Equals( this.Builder.Type, existingDeclaration.Type ) )
@@ -168,8 +172,8 @@ namespace Metalama.Framework.Engine.Advices
                             return
                                 AdviceResult.Create(
                                     AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateRoslynDiagnostic(
-                                        this.TargetDeclaration.GetDiagnosticLocation(),
-                                        (this.Aspect.AspectClass.ShortName, this.MemberBuilder, this.TargetDeclaration,
+                                        targetDeclaration.GetDiagnosticLocation(),
+                                        (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
                                          existingDeclaration.DeclaringType, existingDeclaration.Type) ) );
                         }
                         else

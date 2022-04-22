@@ -1,6 +1,25 @@
 <Project>
 
-    
+    <UsingTask
+            TaskName="CopyWithoutFrameworkDirectory"
+            TaskFactory="RoslynCodeTaskFactory"
+            AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+        <ParameterGroup>
+            <SourceFiles ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true"/>
+            <DestinationDirectory ParameterType="System.String" Required="true"/>
+        </ParameterGroup>
+        <Task>
+            <Using Namespace="System"/>
+            <Using Namespace="System.IO"/>
+            <Code Type="Fragment" Language="cs">
+                foreach ( var item in this.SourceFiles )
+                {
+
+                }
+            </Code>
+        </Task>
+    </UsingTask>
+
     <ItemGroup>
 
         <!-- Exclude *.t.cs from the main compilation, display them as text files instead, and fix file nesting -->
@@ -9,9 +28,9 @@
             <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.t','')).cs</DependentUpon>
             <SubType>Code</SubType>
         </None>
-        
+
         <None Remove="$(MSBuildProjectDirectory)\obj\**\*.t.cs"/>
-        
+
         <!-- Fix file nesting for *.Aspect.cs -->
         <Compile Update="$(MSBuildProjectDirectory)\**\*.Aspect.cs">
             <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.Aspect','')).cs</DependentUpon>
@@ -19,10 +38,10 @@
         </Compile>
 
         <!-- Fix file nesting for *.t.txt -->
-        <None Include="$(MSBuildProjectDirectory)\**\*.t.txt" Exclude="$(MSBuildProjectDirectory)\obj\**\*.t.txt" >
+        <None Include="$(MSBuildProjectDirectory)\**\*.t.txt" Exclude="$(MSBuildProjectDirectory)\obj\**\*.t.txt">
             <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.t','')).cs</DependentUpon>
         </None>
-        
+
     </ItemGroup>
 
     <ItemGroup>
@@ -99,36 +118,36 @@ namespace $(RootNamespace)
         <RemoveDir Directories="obj\html"/>
         <Delete Files="@(_CleanTestOutput)"/>
     </Target>
-    
+
     <Target Name="_AcceptTestOutput">
         <ItemGroup>
             <_AcceptTestOutput Include="obj\transformed\$(TargetFramework)\**\*.cs"/>
             <_AcceptTestOutput Include="obj\transformed\$(TargetFramework)\**\*.txt"/>
         </ItemGroup>
-        <Message Text="Accepting @(_AcceptTestOutput)" Importance="high"/>
-        <Copy
-                SourceFiles="@(_AcceptTestOutput)"
-                DestinationFiles="@(_AcceptTestOutput->'%(RecursiveDir)%(Filename)%(Extension)')"/>
-    </Target>
-
-    <Target Name="AcceptTestOutput">
-        <CallTarget Targets="_AcceptTestOutput" Condition="'$(TargetFramework)'!=''" />
-        <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="_AcceptTestOutput" Properties="TargetFramework=%(TargetFrameworks.Identity)" Condition="'$(TargetFramework)'==''"/> 
+        <Message Text="$(MSBuildProjectFile)($(TargetFramework)): Accepting @(_AcceptTestOutput)" Importance="high" Condition="'@(_AcceptTestOutput)'!=''"/>
+        <Copy SourceFiles="@(_AcceptTestOutput)"
+              DestinationFiles="@(_AcceptTestOutput->'%(RecursiveDir)%(Filename)%(Extension)')"/>
     </Target>
 
     <Target Name="_AcceptTestHtml">
         <ItemGroup>
             <_AcceptTestOutput Include="obj\html\$(TargetFramework)\**\*.cs.html"/>
         </ItemGroup>
-        <Message Text="Accepting @(_AcceptTestOutput)" Importance="high"/>
+        <Message Text="$(MSBuildProjectFile)($(TargetFramework)): Accepting @(_AcceptTestOutput)" Importance="high" Condition="'@(_AcceptTestOutput)'!=''"/>
         <Copy
                 SourceFiles="@(_AcceptTestOutput)"
                 DestinationFiles="@(_AcceptTestOutput->'%(RecursiveDir)%(Filename)%(Extension)')"/>
     </Target>
 
-    <Target Name="AcceptTestHtml">
-        <CallTarget Targets="_AcceptTestHtml" Condition="'$(TargetFramework)'!=''" />
-        <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="_AcceptTestHtml" Properties="TargetFramework=%(TargetFrameworks.Identity)" Condition="'$(TargetFramework)'==''"/>
+
+    <!-- The following tasks rely on _ComputeTargetFrameworkItems to multicast to all target frameworks.
+        The _ComputeTargetFrameworkItems target is defined in Microsoft.Common.CrossTargeting.targets and results in @(_InnerBuildProjects) -->
+    <Target Name="AcceptTestOutput" DependsOnTargets="_ComputeTargetFrameworkItems">
+        <MSBuild Projects="@(_InnerBuildProjects)" Targets="_AcceptTestOutput"/>
+    </Target>
+
+    <Target Name="AcceptTestHtml" DependsOnTargets="_ComputeTargetFrameworkItems">
+        <MSBuild Projects="@(_InnerBuildProjects)" Targets="_AcceptTestHtml"/>
     </Target>
 
 

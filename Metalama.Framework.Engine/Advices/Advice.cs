@@ -3,6 +3,8 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
 using System.Collections.Generic;
@@ -16,7 +18,7 @@ namespace Metalama.Framework.Engine.Advices
 
         public TemplateClassInstance TemplateInstance { get; }
 
-        public IDeclaration TargetDeclaration { get; }
+        public Ref<IDeclaration> TargetDeclaration { get; }
 
         public AspectLayerId AspectLayerId { get; }
 
@@ -25,6 +27,11 @@ namespace Metalama.Framework.Engine.Advices
         public ImmutableDictionary<string, object?> ReadOnlyTags => this.Tags?.ToImmutableDictionary() ?? ImmutableDictionary<string, object?>.Empty;
 
         public int Order { get; set; }
+
+        /// <summary>
+        /// Gets the compilation from which the advice was instantiated.
+        /// </summary>
+        public ICompilation SourceCompilation { get; }
 
         protected Advice(
             IAspectInstanceInternal aspect,
@@ -36,7 +43,8 @@ namespace Metalama.Framework.Engine.Advices
             this.Tags = tags;
             this.Aspect = aspect;
             this.TemplateInstance = template;
-            this.TargetDeclaration = targetDeclaration.AssertNotNull();
+            this.TargetDeclaration = targetDeclaration.AssertNotNull().ToTypedRef();
+            this.SourceCompilation = targetDeclaration.Compilation;
             this.AspectLayerId = new AspectLayerId( this.Aspect.AspectClass, layerName );
         }
 

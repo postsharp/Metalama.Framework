@@ -1,3 +1,5 @@
+// Final Compilation.Emit failed. 
+// Error CS8830 on `Clone`: `'Targets.Derived.Clone()': Target runtime doesn't support covariant return types in overrides. Return type must be 'Targets.AutomaticallyCloneable' to match overridden member 'Targets.AutomaticallyCloneable.Clone()'`
 internal class Targets
     {
         [DeepClone]

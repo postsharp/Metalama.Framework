@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.Advices
         public override AdviceResult ToResult( ICompilation compilation, IReadOnlyList<IObservableTransformation> observableTransformations )
         {
             // TODO: order should be self if the target is introduced on the same layer.
-            return AdviceResult.Create( new OverriddenMethod( this, this.TargetDeclaration, this.Template ) );
+            return AdviceResult.Create( new OverriddenMethod( this, this.TargetDeclaration.GetTarget( compilation ), this.Template ) );
         }
     }
 }

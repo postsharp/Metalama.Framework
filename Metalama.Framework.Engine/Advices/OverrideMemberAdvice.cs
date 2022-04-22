@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using System.Collections.Generic;
 
@@ -11,7 +12,7 @@ namespace Metalama.Framework.Engine.Advices
     internal abstract class OverrideMemberAdvice<TMember> : Advice
         where TMember : class, IMember
     {
-        public new TMember TargetDeclaration => (TMember) base.TargetDeclaration;
+        public new Ref<TMember> TargetDeclaration => base.TargetDeclaration.As<TMember>();
 
         public OverrideMemberAdvice(
             IAspectInstanceInternal aspect,

@@ -6,6 +6,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
 using System.Collections.Generic;
@@ -19,7 +20,7 @@ namespace Metalama.Framework.Engine.Advices
     {
         public IFieldBuilder Builder => this.MemberBuilder;
 
-        public new INamedType TargetDeclaration => base.TargetDeclaration;
+        public new Ref<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
 
         public IntroduceFieldAdvice(
             IAspectInstanceInternal aspect,
@@ -32,7 +33,7 @@ namespace Metalama.Framework.Engine.Advices
             string? layerName )
             : base( aspect, templateInstance, targetDeclaration, fieldTemplate, scope, overrideStrategy, layerName, null )
         {
-            this.MemberBuilder = new FieldBuilder( this, this.TargetDeclaration, (explicitName ?? fieldTemplate.Declaration?.Name).AssertNotNull() );
+            this.MemberBuilder = new FieldBuilder( this, targetDeclaration, (explicitName ?? fieldTemplate.Declaration?.Name).AssertNotNull() );
             this.MemberBuilder.InitializerTemplate = fieldTemplate.GetInitializerTemplate();
         }
 
@@ -48,7 +49,7 @@ namespace Metalama.Framework.Engine.Advices
             }
             else
             {
-                this.MemberBuilder.Type = this.TargetDeclaration.Compilation.TypeFactory.GetSpecialType( SpecialType.Object );
+                this.MemberBuilder.Type = this.SourceCompilation.TypeFactory.GetSpecialType( SpecialType.Object );
                 this.MemberBuilder.Accessibility = Accessibility.Private;
                 this.MemberBuilder.IsStatic = false;
             }

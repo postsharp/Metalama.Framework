@@ -45,7 +45,7 @@ namespace Metalama.Framework.Engine.Advices
             return AdviceResult.Create(
                 new OverriddenEvent(
                     this,
-                    this.TargetDeclaration,
+                    this.TargetDeclaration.GetTarget( compilation ),
                     this.EventTemplate,
                     this.AddTemplate,
                     this.RemoveTemplate ) );

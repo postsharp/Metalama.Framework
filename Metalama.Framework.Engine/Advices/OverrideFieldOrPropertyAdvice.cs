@@ -40,7 +40,9 @@ namespace Metalama.Framework.Engine.Advices
         {
             // TODO: Translate templates to this compilation.
             // TODO: order should be self if the target is introduced on the same layer.
-            if ( this.TargetDeclaration is IField field )
+            var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
+
+            if ( targetDeclaration is IField field )
             {
                 var promotedField = new PromotedField( this, field );
 
@@ -48,7 +50,7 @@ namespace Metalama.Framework.Engine.Advices
                     promotedField,
                     new OverriddenProperty( this, promotedField, this.PropertyTemplate, this.GetTemplate, this.SetTemplate ) );
             }
-            else if ( this.TargetDeclaration is IProperty property )
+            else if ( targetDeclaration is IProperty property )
             {
                 return AdviceResult.Create( new OverriddenProperty( this, property, this.PropertyTemplate, this.GetTemplate, this.SetTemplate ) );
             }

@@ -1,8 +1,3 @@
-// @Skipped(#30151)
-// @RequiredConstant(NET5_0_OR_GREATER)
-// In .NET Framework we get: Target runtime doesn't support covariant return types in overrides. Return type must be 'Targets.AutomaticallyCloneable'
-// to match overridden member 'Targets.AutomaticallyCloneable.Clone()'`
-
 using System;
 using System.Linq;
 using Metalama.Framework.Aspects;

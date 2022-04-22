@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
@@ -214,7 +215,7 @@ namespace Metalama.Framework.Engine.Pipeline
             return true;
         }
 
-        public bool AddAdvices( IEnumerable<Advice> advices )
+        public bool AddAdvices( IEnumerable<Advice> advices, ICompilation compilation )
         {
             Invariant.Assert( this._currentStep != null );
 
@@ -222,7 +223,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
             foreach ( var advice in advices )
             {
-                var depth = this.LastCompilation.GetDepth( advice.TargetDeclaration );
+                var depth = this.LastCompilation.GetDepth( advice.TargetDeclaration.GetTarget( compilation ) );
 
                 if ( !this.TryGetOrAddStep( advice.AspectLayerId, PipelineStepPhase.Transform, depth, true, out var step ) )
                 {
