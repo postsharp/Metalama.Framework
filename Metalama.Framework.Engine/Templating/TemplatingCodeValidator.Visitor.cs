@@ -121,7 +121,7 @@ namespace Metalama.Framework.Engine.Templating
                                         this._currentDeclaration! ) );
                             }
                         }
-                        else if ( !(this._currentScope.Value.ExecutesAtCompileTimeOnly() || this._currentDeclarationIsTemplate!.Value) && !IsTypeOfOrNameOf() )
+                        else if ( !(this._currentScope.Value.MustExecuteAtCompileTime() || this._currentDeclarationIsTemplate!.Value) && !IsTypeOfOrNameOf() )
                         {
                             // We cannot reference a compile-time-only declaration, except in a typeof() or nameof() expression
                             // because these are transformed by the CompileTimeCompilationBuilder.
@@ -137,7 +137,7 @@ namespace Metalama.Framework.Engine.Templating
                     }
                     else if ( referencedScope == TemplatingScope.RunTimeOnly )
                     {
-                        if ( this._currentScope.Value == TemplatingScope.CompileTimeOnly && !IsTypeOfOrNameOf() )
+                        if ( this._currentScope.Value == TemplatingScope.CompileTimeOnly && !this._currentDeclarationIsTemplate!.Value && !IsTypeOfOrNameOf() )
                         {
                             if ( AvoidDuplicates( referencedSymbol ) )
                             {
@@ -170,8 +170,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 using var scope = this.WithScope( node );
 
-                if ( (scope.Scope == TemplatingScope.RunTimeOrCompileTime || scope.Scope == TemplatingScope.RunTimeOrCompileTime) &&
-                     this._reportCompileTimeTreeOutdatedError )
+                if ( scope.Scope == TemplatingScope.RunTimeOrCompileTime && this._reportCompileTimeTreeOutdatedError )
                 {
                     this.Report(
                         TemplatingDiagnosticDescriptors.CompileTimeTypeNeedsRebuild.CreateRoslynDiagnostic(
@@ -182,31 +181,29 @@ namespace Metalama.Framework.Engine.Templating
                 base.VisitClassDeclaration( node );
             }
 
-            public override void VisitMethodDeclaration( MethodDeclarationSyntax node ) => this.VisitPotentialTemplate( node, base.VisitMethodDeclaration );
+            public override void VisitMethodDeclaration( MethodDeclarationSyntax node ) => this.VisitBaseMethodOrAccessor( node, base.VisitMethodDeclaration );
 
             public override void VisitAccessorDeclaration( AccessorDeclarationSyntax node )
-                => this.VisitPotentialTemplate( node, base.VisitAccessorDeclaration );
+                => this.VisitBaseMethodOrAccessor( node, base.VisitAccessorDeclaration );
 
-            private void VisitPotentialTemplate<T>( T node, Action<T> visitBase )
+            private void VisitBaseMethodOrAccessor<T>( T node, Action<T> visitBase )
                 where T : SyntaxNode
             {
-                var methodSymbol = this._semanticModel.GetDeclaredSymbol( node );
-
-                if ( methodSymbol != null && !this._classifier.GetTemplateInfo( methodSymbol ).IsNone )
+                using ( this.WithScope( node ) )
                 {
-                    if ( this._isDesignTime )
+                    if ( this._currentDeclarationIsTemplate!.Value )
                     {
-                        this._templateCompiler ??= new TemplateCompiler( this._serviceProvider, this._semanticModel.Compilation );
-                        _ = this._templateCompiler.TryAnnotate( node, this._semanticModel, this, this._cancellationToken, out _, out _ );
+                        if ( this._isDesignTime )
+                        {
+                            this._templateCompiler ??= new TemplateCompiler( this._serviceProvider, this._semanticModel.Compilation );
+                            _ = this._templateCompiler.TryAnnotate( node, this._semanticModel, this, this._cancellationToken, out _, out _ );
+                        }
+                        else
+                        {
+                            // The template compiler will be called by the main pipeline.
+                        }
                     }
                     else
-                    {
-                        // The template compiler will be called by the main pipeline.
-                    }
-                }
-                else
-                {
-                    using ( this.WithScope( node ) )
                     {
                         visitBase( node );
                     }
@@ -303,7 +300,10 @@ namespace Metalama.Framework.Engine.Templating
 
                     var context = new ScopeCookie( this, scope, declaredSymbol );
                     this._currentScope = scope;
-                    this._currentDeclarationIsTemplate = scope.ExecutesAtCompileTimeOnly() && !this._classifier.GetTemplateInfo( declaredSymbol ).IsNone;
+
+                    this._currentDeclarationIsTemplate = this._currentDeclarationIsTemplate.GetValueOrDefault()
+                                                         || (scope.MustExecuteAtCompileTime() && !this._classifier.GetTemplateInfo( declaredSymbol ).IsNone);
+
                     this._currentDeclaration = declaredSymbol;
 
                     return context;

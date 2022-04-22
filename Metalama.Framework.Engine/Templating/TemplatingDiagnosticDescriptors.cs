@@ -292,5 +292,14 @@ namespace Metalama.Framework.Engine.Templating
                     "Cannot reference '{1}' in '{0}' because '{1}' is run-time-only but '{0}' is compile-time-only.",
                     _category,
                     Error );
+
+        internal static readonly DiagnosticDefinition<ISymbol>
+            AbstractTemplateCannotHaveRunTimeSignature
+                = new(
+                    "LAMA0237",
+                    "Abstract templates cannot include a run-time-only type in their signature.",
+                    "The template '{0}' cannot be abstract because it has a run-time-ony signature.",
+                    _category,
+                    Error );
     }
 }

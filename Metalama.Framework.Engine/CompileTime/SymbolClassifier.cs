@@ -241,12 +241,6 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private TemplatingScope GetTemplatingScopeCore( ISymbol symbol, int recursion )
         {
-            if ( symbol is ITypeParameterSymbol )
-            {
-                // All generic parameters are now run-time only.
-                return TemplatingScope.RunTimeOnly;
-            }
-
             if ( recursion > 32 )
             {
                 throw new AssertionFailedException();
@@ -257,8 +251,8 @@ namespace Metalama.Framework.Engine.CompileTime
                 case IDynamicTypeSymbol:
                     return TemplatingScope.Dynamic;
 
-                case ITypeParameterSymbol:
-                    throw new AssertionFailedException( "Generic templates or aspects are not supported." );
+                case ITypeParameterSymbol typeParameterSymbol:
+                    return this.GetTemplatingScopeCore( typeParameterSymbol.ContainingSymbol, recursion + 1 );
 
                 case IErrorTypeSymbol:
                     // We treat all error symbols as run-time only, by convention.
