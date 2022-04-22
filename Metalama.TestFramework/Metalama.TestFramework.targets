@@ -1,25 +1,4 @@
 <Project>
-
-    <UsingTask
-            TaskName="CopyWithoutFrameworkDirectory"
-            TaskFactory="RoslynCodeTaskFactory"
-            AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
-        <ParameterGroup>
-            <SourceFiles ParameterType="Microsoft.Build.Framework.ITaskItem[]" Required="true"/>
-            <DestinationDirectory ParameterType="System.String" Required="true"/>
-        </ParameterGroup>
-        <Task>
-            <Using Namespace="System"/>
-            <Using Namespace="System.IO"/>
-            <Code Type="Fragment" Language="cs">
-                foreach ( var item in this.SourceFiles )
-                {
-
-                }
-            </Code>
-        </Task>
-    </UsingTask>
-
     <ItemGroup>
 
         <!-- Exclude *.t.cs from the main compilation, display them as text files instead, and fix file nesting -->
