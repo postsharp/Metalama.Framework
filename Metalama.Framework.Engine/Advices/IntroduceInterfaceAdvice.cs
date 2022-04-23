@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.Advices
             IAspectInstanceInternal aspect,
             TemplateClassInstance template,
             INamedType targetType,
-            string? layerName ) : base( aspect, template, targetType, layerName, null )
+            string? layerName ) : base( aspect, template, targetType, layerName, TagReader.Empty )
         {
             this._introducedInterfaceTypes = new List<IntroducedInterfaceSpecification>();
         }
@@ -95,7 +95,8 @@ namespace Metalama.Framework.Engine.Advices
             INamedType interfaceType,
             OverrideStrategy overrideStrategy,
             IReadOnlyList<InterfaceMemberSpecification>? explicitMemberSpecification,
-            IDiagnosticAdder diagnosticAdder )
+            IDiagnosticAdder diagnosticAdder,
+            ITagReader tags )
         {
             // Adding interfaces may run into three problems:
             //      1) Target type already implements the interface.
@@ -163,7 +164,7 @@ namespace Metalama.Framework.Engine.Advices
                     else
                     {
                         memberSpecifications.Add(
-                            new MemberSpecification( interfaceMethod, null, matchingAspectMethod.Method, matchingAspectMethod.TemplateInfo ) );
+                            new MemberSpecification( interfaceMethod, null, matchingAspectMethod.Method, matchingAspectMethod.TemplateInfo, tags ) );
                     }
                 }
 
@@ -197,7 +198,8 @@ namespace Metalama.Framework.Engine.Advices
                                 interfaceProperty,
                                 null,
                                 matchingAspectProperty.Property,
-                                matchingAspectProperty.TemplateInfo ) );
+                                matchingAspectProperty.TemplateInfo,
+                                tags ) );
                     }
                 }
 
@@ -223,7 +225,7 @@ namespace Metalama.Framework.Engine.Advices
                     else
                     {
                         memberSpecifications.Add(
-                            new MemberSpecification( interfaceEvent, null, matchingAspectEvent.Event, matchingAspectEvent.TemplateInfo ) );
+                            new MemberSpecification( interfaceEvent, null, matchingAspectEvent.Event, matchingAspectEvent.TemplateInfo, tags ) );
                     }
                 }
 
@@ -272,7 +274,7 @@ namespace Metalama.Framework.Engine.Advices
                     switch ( memberSpec.InterfaceMember )
                     {
                         case IMethod interfaceMethod:
-                            memberBuilder = this.GetImplMethodBuilder( targetDeclaration, interfaceMethod, memberSpec.IsExplicit );
+                            memberBuilder = this.GetImplMethodBuilder( targetDeclaration, interfaceMethod, memberSpec.IsExplicit, memberSpec.Tags );
                             interfaceMemberMap.Add( interfaceMethod, memberBuilder );
 
                             var implementationMethod = (IMethod) memberSpec.AspectInterfaceMember!;
@@ -282,11 +284,13 @@ namespace Metalama.Framework.Engine.Advices
                                     ? new OverriddenMethod(
                                         this,
                                         (IMethod) memberBuilder,
-                                        TemplateMember.Create( implementationMethod, memberSpec.TemplateInfo, TemplateKind.Introduction ) )
+                                        TemplateMember.Create( implementationMethod, memberSpec.TemplateInfo, TemplateKind.Introduction ),
+                                        memberSpec.Tags )
                                     : new RedirectedMethod(
                                         this,
                                         (IMethod) memberBuilder,
-                                        (IMethod) memberSpec.TargetMember.AssertNotNull() ) );
+                                        (IMethod) memberSpec.TargetMember.AssertNotNull(),
+                                        memberSpec.Tags ) );
 
                             break;
 
@@ -299,7 +303,8 @@ namespace Metalama.Framework.Engine.Advices
                                 interfaceProperty,
                                 (IProperty?) memberSpec.TargetMember ?? (IProperty) memberSpec.AspectInterfaceMember.AssertNotNull(),
                                 buildAutoProperty,
-                                memberSpec.IsExplicit );
+                                memberSpec.IsExplicit,
+                                memberSpec.Tags );
 
                             interfaceMemberMap.Add( interfaceProperty, memberBuilder );
 
@@ -315,11 +320,13 @@ namespace Metalama.Framework.Engine.Advices
                                             (IProperty) memberBuilder,
                                             propertyTemplate,
                                             accessorTemplates.Get,
-                                            accessorTemplates.Set )
+                                            accessorTemplates.Set,
+                                            memberSpec.Tags )
                                         : new RedirectedProperty(
                                             this,
                                             (IProperty) memberBuilder,
-                                            (IProperty) memberSpec.TargetMember.AssertNotNull() ) );
+                                            (IProperty) memberSpec.TargetMember.AssertNotNull(),
+                                            memberSpec.Tags ) );
                             }
 
                             break;
@@ -343,11 +350,13 @@ namespace Metalama.Framework.Engine.Advices
                                                 memberSpec.TemplateInfo,
                                                 TemplateKind.Introduction ),
                                             default,
-                                            default )
+                                            default,
+                                            memberSpec.Tags )
                                         : new RedirectedEvent(
                                             this,
                                             (IEvent) memberBuilder,
-                                            (IEvent) memberSpec.TargetMember.AssertNotNull() ) );
+                                            (IEvent) memberSpec.TargetMember.AssertNotNull(),
+                                            memberSpec.Tags ) );
                             }
 
                             break;
@@ -365,9 +374,13 @@ namespace Metalama.Framework.Engine.Advices
             return AdviceResult.Create( transformations );
         }
 
-        private MemberBuilder GetImplMethodBuilder( INamedType declaringType, IMethod interfaceMethod, bool isExplicit )
+        private MemberBuilder GetImplMethodBuilder(
+            INamedType declaringType,
+            IMethod interfaceMethod,
+            bool isExplicit,
+            ITagReader tags )
         {
-            var methodBuilder = new MethodBuilder( this, declaringType, interfaceMethod.Name )
+            var methodBuilder = new MethodBuilder( this, declaringType, interfaceMethod.Name, tags )
             {
                 ReturnParameter = { Type = interfaceMethod.ReturnParameter.Type, RefKind = interfaceMethod.ReturnParameter.RefKind }
             };
@@ -412,7 +425,8 @@ namespace Metalama.Framework.Engine.Advices
             IProperty interfaceProperty,
             IProperty targetProperty,
             bool isAutoProperty,
-            bool isExplicit )
+            bool isExplicit,
+            ITagReader tags )
         {
             var propertyBuilder = new PropertyBuilder(
                 this,
@@ -421,7 +435,8 @@ namespace Metalama.Framework.Engine.Advices
                 interfaceProperty.GetMethod != null || (!isExplicit && targetProperty.GetMethod != null),
                 interfaceProperty.SetMethod != null || (!isExplicit && targetProperty.SetMethod != null),
                 isAutoProperty,
-                interfaceProperty.Writeability == Writeability.InitOnly );
+                interfaceProperty.Writeability == Writeability.InitOnly,
+                tags );
 
             propertyBuilder.Type = interfaceProperty.Type;
 
@@ -467,7 +482,8 @@ namespace Metalama.Framework.Engine.Advices
                 this,
                 declaringType,
                 interfaceEvent.Name,
-                isEventField ) { Type = interfaceEvent.Type };
+                isEventField,
+                this.Tags ) { Type = interfaceEvent.Type };
 
             if ( isExplicit )
             {

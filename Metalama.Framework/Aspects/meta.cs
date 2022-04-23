@@ -192,7 +192,7 @@ namespace Metalama.Framework.Aspects
         /// Gets the dictionary of tags that were passed to the <see cref="IAdviceFactory"/> method by the <see cref="IAspect{T}.BuildAspect"/> method.
         /// </summary>
         /// <seealso href="sharing-state-with-advices"/>
-        public static IReadOnlyDictionary<string, object?> Tags => CurrentContext.Tags;
+        public static ITagReader Tags => CurrentContext.Tags;
 
         /// <summary>
         /// Gets the current <see cref="IAspectInstance"/>, which gives access to the <see cref="IAspectInstance.Predecessors"/>

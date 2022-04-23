@@ -274,7 +274,7 @@ namespace Metalama.Framework.Engine.Advices
             return selectedTemplate;
         }
 
-        public void Override( IMethod targetMethod, in MethodTemplateSelector templateSelector, TagDictionary? tags = null )
+        public void Override( IMethod targetMethod, in MethodTemplateSelector templateSelector, object? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -293,7 +293,14 @@ namespace Metalama.Framework.Engine.Advices
                 .GetTemplateMember<IMethod>( this._compilation, this._serviceProvider )
                 .ValidateTarget( targetMethod );
 
-            var advice = new OverrideMethodAdvice( this._aspect, this._templateInstance, targetMethod, template, _layerName, tags );
+            var advice = new OverrideMethodAdvice(
+                this._aspect,
+                this._templateInstance,
+                targetMethod,
+                template,
+                _layerName,
+                TagReader.GetReader( tags ) );
+
             advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
             this.Advices.Add( advice );
@@ -306,7 +313,7 @@ namespace Metalama.Framework.Engine.Advices
             string defaultTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            TagDictionary? tags = null )
+            object? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -332,7 +339,7 @@ namespace Metalama.Framework.Engine.Advices
                 scope,
                 whenExists,
                 _layerName,
-                tags );
+                TagReader.GetReader( tags ) );
 
             advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
@@ -346,7 +353,7 @@ namespace Metalama.Framework.Engine.Advices
         public void Override(
             IFieldOrPropertyOrIndexer targetDeclaration,
             string defaultTemplate,
-            TagDictionary? tags = null )
+            object? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -377,7 +384,7 @@ namespace Metalama.Framework.Engine.Advices
                 accessorTemplates.Get,
                 accessorTemplates.Set,
                 _layerName,
-                tags );
+                TagReader.GetReader( tags ) );
 
             advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
@@ -390,7 +397,7 @@ namespace Metalama.Framework.Engine.Advices
             IFieldOrPropertyOrIndexer targetDeclaration,
             in GetterTemplateSelector getTemplateSelector,
             string? setTemplate = null,
-            TagDictionary? tags = null )
+            object? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -429,7 +436,7 @@ namespace Metalama.Framework.Engine.Advices
                 getTemplateRef,
                 setTemplateRef,
                 _layerName,
-                tags );
+                TagReader.GetReader( tags ) );
 
             advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
@@ -442,7 +449,8 @@ namespace Metalama.Framework.Engine.Advices
             INamedType targetType,
             string name,
             IntroductionScope scope = IntroductionScope.Default,
-            OverrideStrategy whenExists = OverrideStrategy.Default )
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            object? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -459,7 +467,8 @@ namespace Metalama.Framework.Engine.Advices
                 default,
                 scope,
                 whenExists,
-                _layerName );
+                _layerName,
+                TagReader.GetReader( tags ) );
 
             advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
@@ -475,7 +484,7 @@ namespace Metalama.Framework.Engine.Advices
             string defaultTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            TagDictionary? tags = null )
+            object? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -506,7 +515,7 @@ namespace Metalama.Framework.Engine.Advices
                 scope,
                 whenExists,
                 _layerName,
-                tags );
+                TagReader.GetReader( tags ) );
 
             advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
@@ -524,7 +533,7 @@ namespace Metalama.Framework.Engine.Advices
             string? setTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            TagDictionary? tags = null )
+            object? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -556,7 +565,7 @@ namespace Metalama.Framework.Engine.Advices
                 scope,
                 whenExists,
                 _layerName,
-                tags );
+                TagReader.GetReader( tags ) );
 
             advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
@@ -572,7 +581,7 @@ namespace Metalama.Framework.Engine.Advices
             string? addTemplate,
             string? removeTemplate,
             string? invokeTemplate,
-            TagDictionary? tags = null )
+            object? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -611,7 +620,7 @@ namespace Metalama.Framework.Engine.Advices
                 addTemplateRef,
                 removeTemplateRef,
                 _layerName,
-                tags );
+                TagReader.GetReader( tags ) );
 
             advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
@@ -625,7 +634,7 @@ namespace Metalama.Framework.Engine.Advices
             string eventTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            TagDictionary? tags = null )
+            object? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -654,7 +663,7 @@ namespace Metalama.Framework.Engine.Advices
                 scope,
                 whenExists,
                 _layerName,
-                tags );
+                TagReader.GetReader( tags ) );
 
             advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
@@ -673,7 +682,7 @@ namespace Metalama.Framework.Engine.Advices
             string? invokeTemplate = null,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            TagDictionary? tags = null )
+            object? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -705,7 +714,7 @@ namespace Metalama.Framework.Engine.Advices
                 scope,
                 whenExists,
                 _layerName,
-                tags );
+                TagReader.GetReader( tags ) );
 
             advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
@@ -720,7 +729,7 @@ namespace Metalama.Framework.Engine.Advices
             INamedType targetType,
             INamedType interfaceType,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            TagDictionary? tags = null )
+            object? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -738,7 +747,7 @@ namespace Metalama.Framework.Engine.Advices
                 this.Advices.Add( advice );
             }
 
-            advice.AddInterfaceImplementation( interfaceType, whenExists, null, diagnosticList );
+            advice.AddInterfaceImplementation( interfaceType, whenExists, null, diagnosticList, TagReader.GetReader( tags ) );
             ThrowOnErrors( diagnosticList );
 
             this._diagnosticAdder.Report( diagnosticList );
@@ -748,7 +757,7 @@ namespace Metalama.Framework.Engine.Advices
             INamedType targetType,
             Type interfaceType,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            TagDictionary? tags = null )
+            object? tags = null )
         {
             this.ImplementInterface(
                 targetType,
@@ -762,7 +771,7 @@ namespace Metalama.Framework.Engine.Advices
             INamedType interfaceType,
             IReadOnlyList<InterfaceMemberSpecification> interfaceMemberSpecifications,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            TagDictionary? tags = null )
+            object? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -780,7 +789,7 @@ namespace Metalama.Framework.Engine.Advices
                 this.Advices.Add( advice );
             }
 
-            advice.AddInterfaceImplementation( interfaceType, whenExists, null, diagnosticList );
+            advice.AddInterfaceImplementation( interfaceType, whenExists, null, diagnosticList, TagReader.GetReader( tags ) );
             ThrowOnErrors( diagnosticList );
 
             this._diagnosticAdder.Report( diagnosticList );
@@ -791,7 +800,7 @@ namespace Metalama.Framework.Engine.Advices
             Type interfaceType,
             IReadOnlyList<InterfaceMemberSpecification> interfaceMemberSpecifications,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            TagDictionary? tags = null )
+            object? tags = null )
         {
             this.ImplementInterface(
                 targetType,
@@ -801,7 +810,7 @@ namespace Metalama.Framework.Engine.Advices
                 tags );
         }
 
-        public void AddInitializerBeforeTypeConstructor( IMemberOrNamedType targetType, string template, TagDictionary? tags = null )
+        public void AddInitializerBeforeTypeConstructor( IMemberOrNamedType targetType, string template, object? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -820,7 +829,7 @@ namespace Metalama.Framework.Engine.Advices
                 templateRef,
                 InitializerKind.BeforeTypeConstructor,
                 _layerName,
-                tags );
+                TagReader.GetReader( tags ) );
 
             advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
@@ -829,7 +838,7 @@ namespace Metalama.Framework.Engine.Advices
             this._diagnosticAdder.Report( diagnosticList );
         }
 
-        public void AddInitializerBeforeInstanceConstructor( IMemberOrNamedType targetType, string template, TagDictionary? tags = null )
+        public void AddInitializerBeforeInstanceConstructor( IMemberOrNamedType targetType, string template, object? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -848,7 +857,7 @@ namespace Metalama.Framework.Engine.Advices
                 templateRef,
                 InitializerKind.BeforeInstanceConstructor,
                 _layerName,
-                tags );
+                TagReader.GetReader( tags ) );
 
             advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
@@ -857,7 +866,7 @@ namespace Metalama.Framework.Engine.Advices
             this._diagnosticAdder.Report( diagnosticList );
         }
 
-        public void Override( IConstructor targetConstructor, string template, TagDictionary? tags = null )
+        public void Override( IConstructor targetConstructor, string template, object? tags = null )
         {
             throw new NotImplementedException();
         }
@@ -867,7 +876,7 @@ namespace Metalama.Framework.Engine.Advices
             string template,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            TagDictionary? tags = null )
+            object? tags = null )
         {
             throw new NotImplementedException();
         }

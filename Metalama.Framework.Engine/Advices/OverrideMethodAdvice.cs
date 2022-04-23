@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Diagnostics;
@@ -19,7 +20,7 @@ namespace Metalama.Framework.Engine.Advices
             IMethod targetDeclaration,
             TemplateMember<IMethod> template,
             string? layerName,
-            Dictionary<string, object?>? tags ) : base( aspect, templateInstance, targetDeclaration, layerName, tags )
+            ITagReader tags ) : base( aspect, templateInstance, targetDeclaration, layerName, tags )
         {
             this.Template = template;
         }
@@ -29,7 +30,7 @@ namespace Metalama.Framework.Engine.Advices
         public override AdviceResult ToResult( ICompilation compilation, IReadOnlyList<IObservableTransformation> observableTransformations )
         {
             // TODO: order should be self if the target is introduced on the same layer.
-            return AdviceResult.Create( new OverriddenMethod( this, this.TargetDeclaration.GetTarget( compilation ), this.Template ) );
+            return AdviceResult.Create( new OverriddenMethod( this, this.TargetDeclaration.GetTarget( compilation ), this.Template, this.Tags ) );
         }
     }
 }

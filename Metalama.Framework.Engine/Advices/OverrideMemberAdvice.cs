@@ -1,11 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
-using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Advices
 {
@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.Advices
             TemplateClassInstance templateInstance,
             TMember targetDeclaration,
             string? layerName,
-            Dictionary<string, object?>? tags ) : base( aspect, templateInstance, targetDeclaration, layerName, tags ) { }
+            ITagReader tags ) : base( aspect, templateInstance, targetDeclaration, layerName, tags ) { }
 
         public override void Initialize( IDiagnosticAdder diagnosticAdder )
         {

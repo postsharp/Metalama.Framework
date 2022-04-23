@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.Advices
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             string? layerName,
-            Dictionary<string, object?>? tags )
+            ITagReader tags )
             : base( aspect, templateInstance, targetDeclaration, eventTemplate, scope, overrideStrategy, layerName, tags )
         {
             this._addTemplate = addTemplate;
@@ -45,7 +45,8 @@ namespace Metalama.Framework.Engine.Advices
                 this,
                 targetDeclaration,
                 eventTemplate.Declaration?.Name ?? explicitName.AssertNotNull(),
-                eventTemplate.Declaration != null && eventTemplate.Declaration.IsEventField() );
+                eventTemplate.Declaration != null && eventTemplate.Declaration.IsEventField(),
+                tags );
 
             this.MemberBuilder.InitializerTemplate = eventTemplate.GetInitializerTemplate();
         }
@@ -63,7 +64,7 @@ namespace Metalama.Framework.Engine.Advices
 
         public override AdviceResult ToResult( ICompilation compilation, IReadOnlyList<IObservableTransformation> observableTransformations )
         {
-            // TODO: Override transformations.
+            // this.Tags: Override transformations.
             var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
 
             var existingDeclaration = targetDeclaration.FindClosestVisibleEvent( this.MemberBuilder, observableTransformations.OfType<IEvent>().ToList() );
@@ -85,7 +86,8 @@ namespace Metalama.Framework.Engine.Advices
                             this.MemberBuilder,
                             this.Template,
                             this._addTemplate,
-                            this._removeTemplate ) );
+                            this._removeTemplate,
+                            this.Tags ) );
                 }
             }
             else
@@ -130,7 +132,8 @@ namespace Metalama.Framework.Engine.Advices
                                     existingDeclaration,
                                     this.Template,
                                     this._addTemplate,
-                                    this._removeTemplate );
+                                    this._removeTemplate,
+                                    this.Tags );
 
                                 return AdviceResult.Create( overriddenMethod );
                             }
@@ -150,7 +153,8 @@ namespace Metalama.Framework.Engine.Advices
                                     this.MemberBuilder,
                                     this.Template,
                                     this._addTemplate,
-                                    this._removeTemplate );
+                                    this._removeTemplate,
+                                    this.Tags );
 
                                 return AdviceResult.Create( this.MemberBuilder, overriddenMethod );
                             }
@@ -170,7 +174,8 @@ namespace Metalama.Framework.Engine.Advices
                                     existingDeclaration,
                                     this.Template,
                                     this._addTemplate,
-                                    this._removeTemplate );
+                                    this._removeTemplate,
+                                    this.Tags );
 
                                 return AdviceResult.Create( overriddenMethod );
                             }
@@ -209,7 +214,8 @@ namespace Metalama.Framework.Engine.Advices
                                     this.MemberBuilder,
                                     this.Template,
                                     this._addTemplate,
-                                    this._removeTemplate );
+                                    this._removeTemplate,
+                                    this.Tags );
 
                                 return AdviceResult.Create( this.MemberBuilder, overriddenEvent );
                             }

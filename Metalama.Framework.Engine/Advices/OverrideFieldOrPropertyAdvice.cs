@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Builders;
@@ -26,7 +27,7 @@ namespace Metalama.Framework.Engine.Advices
             TemplateMember<IMethod> getTemplate,
             TemplateMember<IMethod> setTemplate,
             string? layerName,
-            Dictionary<string, object?>? tags )
+            ITagReader tags )
             : base( aspect, templateInstance, targetDeclaration, layerName, tags )
         {
             this.PropertyTemplate = propertyTemplate;
@@ -44,15 +45,15 @@ namespace Metalama.Framework.Engine.Advices
 
             if ( targetDeclaration is IField field )
             {
-                var promotedField = new PromotedField( this, field );
+                var promotedField = new PromotedField( this, field, this.Tags );
 
                 return AdviceResult.Create(
                     promotedField,
-                    new OverriddenProperty( this, promotedField, this.PropertyTemplate, this.GetTemplate, this.SetTemplate ) );
+                    new OverriddenProperty( this, promotedField, this.PropertyTemplate, this.GetTemplate, this.SetTemplate, this.Tags ) );
             }
             else if ( targetDeclaration is IProperty property )
             {
-                return AdviceResult.Create( new OverriddenProperty( this, property, this.PropertyTemplate, this.GetTemplate, this.SetTemplate ) );
+                return AdviceResult.Create( new OverriddenProperty( this, property, this.PropertyTemplate, this.GetTemplate, this.SetTemplate, this.Tags ) );
             }
             else
             {

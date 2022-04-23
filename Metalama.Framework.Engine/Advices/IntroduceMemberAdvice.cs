@@ -9,7 +9,6 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
-using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Advices
 {
@@ -37,7 +36,7 @@ namespace Metalama.Framework.Engine.Advices
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             string? layerName,
-            Dictionary<string, object?>? tags ) : base( aspect, templateInstance, targetDeclaration, layerName, tags )
+            ITagReader tags ) : base( aspect, templateInstance, targetDeclaration, layerName, tags )
         {
             this.Template = template;
             this.Scope = scope;

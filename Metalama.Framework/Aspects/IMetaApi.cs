@@ -3,7 +3,6 @@
 
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Validation;
-using System.Collections.Generic;
 
 namespace Metalama.Framework.Aspects
 {
@@ -39,7 +38,7 @@ namespace Metalama.Framework.Aspects
 
         object BaseStatic { get; }
 
-        IReadOnlyDictionary<string, object?> Tags { get; }
+        ITagReader Tags { get; }
 
         IDiagnosticSink Diagnostics { get; }
 

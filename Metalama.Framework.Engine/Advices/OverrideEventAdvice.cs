@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Diagnostics;
@@ -25,7 +26,7 @@ namespace Metalama.Framework.Engine.Advices
             TemplateMember<IMethod> addTemplate,
             TemplateMember<IMethod> removeTemplate,
             string? layerName,
-            Dictionary<string, object?>? tags )
+            ITagReader tags )
             : base( aspect, templateInstance, targetDeclaration, layerName, tags )
         {
             // We need either property template or both accessor templates, but never both.
@@ -48,7 +49,8 @@ namespace Metalama.Framework.Engine.Advices
                     this.TargetDeclaration.GetTarget( compilation ),
                     this.EventTemplate,
                     this.AddTemplate,
-                    this.RemoveTemplate ) );
+                    this.RemoveTemplate,
+                    this.Tags ) );
         }
     }
 }

@@ -30,10 +30,11 @@ namespace Metalama.Framework.Engine.Advices
             TemplateMember<IField> fieldTemplate,
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
-            string? layerName )
-            : base( aspect, templateInstance, targetDeclaration, fieldTemplate, scope, overrideStrategy, layerName, null )
+            string? layerName,
+            ITagReader tags )
+            : base( aspect, templateInstance, targetDeclaration, fieldTemplate, scope, overrideStrategy, layerName, tags )
         {
-            this.MemberBuilder = new FieldBuilder( this, targetDeclaration, (explicitName ?? fieldTemplate.Declaration?.Name).AssertNotNull() );
+            this.MemberBuilder = new FieldBuilder( this, targetDeclaration, (explicitName ?? fieldTemplate.Declaration?.Name).AssertNotNull(), tags );
             this.MemberBuilder.InitializerTemplate = fieldTemplate.GetInitializerTemplate();
         }
 

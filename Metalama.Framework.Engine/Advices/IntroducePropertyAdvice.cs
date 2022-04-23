@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Advices
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             string? layerName,
-            Dictionary<string, object?>? tags )
+            ITagReader tags )
             : base( aspect, templateInstance, targetDeclaration, propertyTemplate, scope, overrideStrategy, layerName, tags )
         {
             this._getTemplate = getTemplate;
@@ -50,7 +50,8 @@ namespace Metalama.Framework.Engine.Advices
                 hasGet,
                 hasSet,
                 this.Template.Declaration is { IsAutoPropertyOrField: true },
-                this.Template.Declaration is { Writeability: Writeability.InitOnly } );
+                this.Template.Declaration is { Writeability: Writeability.InitOnly },
+                this.Tags );
 
             if ( propertyTemplate.IsNotNull )
             {
@@ -88,7 +89,8 @@ namespace Metalama.Framework.Engine.Advices
                     this.MemberBuilder,
                     this.Template,
                     this._getTemplate,
-                    this._setTemplate );
+                    this._setTemplate,
+                    this.Tags );
 
                 return AdviceResult.Create( this.MemberBuilder, overriddenMethod );
             }
@@ -128,7 +130,8 @@ namespace Metalama.Framework.Engine.Advices
                                 existingDeclaration,
                                 this.Template,
                                 this._getTemplate,
-                                this._setTemplate );
+                                this._setTemplate,
+                                this.Tags );
 
                             return AdviceResult.Create( overriddenProperty );
                         }
@@ -141,7 +144,8 @@ namespace Metalama.Framework.Engine.Advices
                                 this.MemberBuilder,
                                 this.Template,
                                 this._getTemplate,
-                                this._setTemplate );
+                                this._setTemplate,
+                                this.Tags );
 
                             return AdviceResult.Create( this.MemberBuilder, overriddenProperty );
                         }
@@ -154,7 +158,8 @@ namespace Metalama.Framework.Engine.Advices
                                 existingDeclaration,
                                 this.Template,
                                 this._getTemplate,
-                                this._setTemplate );
+                                this._setTemplate,
+                                this.Tags );
 
                             return AdviceResult.Create( overriddenMethod );
                         }
@@ -186,7 +191,8 @@ namespace Metalama.Framework.Engine.Advices
                                 this.MemberBuilder,
                                 this.Template,
                                 this._getTemplate,
-                                this._setTemplate );
+                                this._setTemplate,
+                                this.Tags );
 
                             return AdviceResult.Create( this.MemberBuilder, overriddenProperty );
                         }

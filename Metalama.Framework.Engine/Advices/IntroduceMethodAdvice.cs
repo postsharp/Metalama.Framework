@@ -29,12 +29,12 @@ namespace Metalama.Framework.Engine.Advices
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             string? layerName,
-            Dictionary<string, object?>? tags )
+            ITagReader tags )
             : base( aspect, templateInstance, targetDeclaration, templateMethod, scope, overrideStrategy, layerName, tags )
         {
             Invariant.Assert( templateMethod.IsNotNull );
 
-            this.MemberBuilder = new MethodBuilder( this, targetDeclaration, templateMethod.Declaration.AssertNotNull().Name );
+            this.MemberBuilder = new MethodBuilder( this, targetDeclaration, templateMethod.Declaration.AssertNotNull().Name, tags );
             this.MemberBuilder.ApplyTemplateAttribute( templateMethod.TemplateInfo.Attribute );
         }
 
@@ -98,7 +98,7 @@ namespace Metalama.Framework.Engine.Advices
             if ( existingDeclaration == null )
             {
                 // There is no existing declaration, we will introduce and override the introduced.
-                var overriddenMethod = new OverriddenMethod( this, this.MemberBuilder, this.Template );
+                var overriddenMethod = new OverriddenMethod( this, this.MemberBuilder, this.Template, this.Tags );
                 this.MemberBuilder.IsOverride = false;
                 this.MemberBuilder.IsNew = false;
 
@@ -135,7 +135,7 @@ namespace Metalama.Framework.Engine.Advices
                         // If the existing declaration is in the current type, override it, otherwise, declare a new method and override.
                         if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( targetDeclaration, existingDeclaration.DeclaringType ) )
                         {
-                            var overriddenMethod = new OverriddenMethod( this, existingDeclaration, this.Template );
+                            var overriddenMethod = new OverriddenMethod( this, existingDeclaration, this.Template, this.Tags );
 
                             return AdviceResult.Create( overriddenMethod );
                         }
@@ -144,7 +144,7 @@ namespace Metalama.Framework.Engine.Advices
                             this.MemberBuilder.IsNew = true;
                             this.MemberBuilder.IsOverride = false;
 
-                            var overriddenMethod = new OverriddenMethod( this, this.MemberBuilder, this.Template );
+                            var overriddenMethod = new OverriddenMethod( this, this.MemberBuilder, this.Template, this.Tags );
 
                             return AdviceResult.Create( this.MemberBuilder, overriddenMethod );
                         }
@@ -152,7 +152,7 @@ namespace Metalama.Framework.Engine.Advices
                     case OverrideStrategy.Override:
                         if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( targetDeclaration, existingDeclaration.DeclaringType ) )
                         {
-                            var overriddenMethod = new OverriddenMethod( this, existingDeclaration, this.Template );
+                            var overriddenMethod = new OverriddenMethod( this, existingDeclaration, this.Template, this.Tags );
 
                             return AdviceResult.Create( overriddenMethod );
                         }
@@ -182,7 +182,7 @@ namespace Metalama.Framework.Engine.Advices
                             this.MemberBuilder.IsOverride = true;
                             this.MemberBuilder.IsNew = false;
                             this.MemberBuilder.OverriddenMethod = existingDeclaration;
-                            var overriddenMethod = new OverriddenMethod( this, this.MemberBuilder, this.Template );
+                            var overriddenMethod = new OverriddenMethod( this, this.MemberBuilder, this.Template, this.Tags );
 
                             return AdviceResult.Create( this.MemberBuilder, overriddenMethod );
                         }
