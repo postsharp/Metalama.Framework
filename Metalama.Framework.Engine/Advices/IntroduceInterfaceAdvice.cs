@@ -243,7 +243,8 @@ namespace Metalama.Framework.Engine.Advices
             {
                 // Validate that the interface must be introduced to the specific target.
 
-                if ( targetDeclaration.AllImplementedInterfaces.Any( t => t.Equals( interfaceSpec.InterfaceType ) ) )
+                if ( targetDeclaration.AllImplementedInterfaces.Any(
+                        t => compilation.GetCompilationModel().InvariantComparer.Equals( t, interfaceSpec.InterfaceType ) ) )
                 {
                     // Conflict on the introduced interface itself.
                     switch ( interfaceSpec.OverrideStrategy )

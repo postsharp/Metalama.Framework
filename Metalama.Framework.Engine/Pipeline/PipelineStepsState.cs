@@ -151,7 +151,10 @@ namespace Metalama.Framework.Engine.Pipeline
                     }
                     else
                     {
-                        if ( !this.TryGetOrAddStep( aspectLayerId, PipelineStepPhase.Initialize, -1, false, out var step ) )
+                        // There is a unique depth and TargetKind for the AspectSource step step.
+                        var stepId = new PipelineStepId( aspectLayerId, -1, -1, PipelineStepPhase.Initialize, -1 );
+
+                        if ( !this.TryGetOrAddStep( stepId, false, out var step ) )
                         {
                             this._diagnostics.Report(
                                 GeneralDiagnosticDescriptors.CannotAddChildAspectToPreviousPipelineStep.CreateRoslynDiagnostic(
@@ -173,22 +176,18 @@ namespace Metalama.Framework.Engine.Pipeline
         }
 
         private bool TryGetOrAddStep(
-            AspectLayerId aspectLayerId,
-            PipelineStepPhase phase,
-            int depth,
+            in PipelineStepId stepId,
             bool allowAddToCurrentLayer,
             [NotNullWhen( true )] out PipelineStep? step )
         {
-            var stepId = new PipelineStepId( aspectLayerId, phase, depth );
-
-            var aspectLayer = this._comparer.GetOrderedAspectLayer( aspectLayerId );
+            var aspectLayer = this._comparer.GetOrderedAspectLayer( stepId.AspectLayerId );
 
             if ( this._currentStep != null )
             {
                 var currentLayerOrder = this._currentStep.AspectLayer.Order;
 
                 if ( aspectLayer.Order < currentLayerOrder ||
-                     (aspectLayerId == this._currentStep.AspectLayer.AspectLayerId
+                     (stepId.AspectLayerId == this._currentStep.AspectLayer.AspectLayerId
                       && (!allowAddToCurrentLayer || this._comparer.Compare( stepId, this._currentStep.Id ) < 0)) )
                 {
                     // Cannot add a step before the current one.
@@ -223,9 +222,18 @@ namespace Metalama.Framework.Engine.Pipeline
 
             foreach ( var advice in advices )
             {
-                var depth = this.LastCompilation.GetDepth( advice.TargetDeclaration.GetTarget( compilation ) );
+                var adviceTargetDeclaration = advice.TargetDeclaration.GetTarget( compilation );
+                var aspectTargetDeclaration = advice.Aspect.TargetDeclaration.GetTarget( compilation );
+                var aspectTargetTypeDeclaration = aspectTargetDeclaration.GetDeclaringType() ?? aspectTargetDeclaration;
 
-                if ( !this.TryGetOrAddStep( advice.AspectLayerId, PipelineStepPhase.Transform, depth, true, out var step ) )
+                var stepId = new PipelineStepId(
+                    advice.AspectLayerId,
+                    this.LastCompilation.GetDepth( aspectTargetTypeDeclaration ),
+                    this.LastCompilation.GetDepth( aspectTargetDeclaration ),
+                    PipelineStepPhase.Transform,
+                    this.LastCompilation.GetDepth( adviceTargetDeclaration ) );
+
+                if ( !this.TryGetOrAddStep( stepId, true, out var step ) )
                 {
                     this._diagnostics.Report(
                         GeneralDiagnosticDescriptors.CannotAddAdviceToPreviousPipelineStep.CreateRoslynDiagnostic(
@@ -247,12 +255,18 @@ namespace Metalama.Framework.Engine.Pipeline
         {
             foreach ( var aspectInstance in aspectInstances )
             {
-                var depth = this.LastCompilation.GetDepth( aspectInstance.TargetDeclaration );
+                var aspectTargetDeclaration = (IDeclaration) aspectInstance.TargetDeclaration;
+                var aspectTargetTypeDeclaration = aspectTargetDeclaration.GetDeclaringType() ?? aspectTargetDeclaration;
+
+                var stepId = new PipelineStepId(
+                    new AspectLayerId( aspectInstance.AspectInstance.AspectClass ),
+                    this.LastCompilation.GetDepth( aspectTargetTypeDeclaration ),
+                    this.LastCompilation.GetDepth( aspectTargetDeclaration ),
+                    PipelineStepPhase.Initialize,
+                    -1 );
 
                 if ( !this.TryGetOrAddStep(
-                        new AspectLayerId( aspectInstance.AspectInstance.AspectClass ),
-                        PipelineStepPhase.Initialize,
-                        depth,
+                        stepId,
                         true,
                         out var step ) )
                 {
