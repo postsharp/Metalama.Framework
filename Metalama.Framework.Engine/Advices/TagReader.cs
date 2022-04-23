@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.Advices
 
         private readonly TypeAdapter _typeAdapter;
 
-        internal TagReader( object instance )
+        private TagReader( object instance )
         {
             this._typeAdapter = _types.GetOrAdd( instance.GetType(), t => new TypeAdapter( t ) );
             this.Source = instance;
