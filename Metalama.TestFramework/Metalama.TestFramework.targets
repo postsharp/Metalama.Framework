@@ -121,13 +121,28 @@ namespace $(RootNamespace)
 
     <!-- The following tasks rely on _ComputeTargetFrameworkItems to multicast to all target frameworks.
         The _ComputeTargetFrameworkItems target is defined in Microsoft.Common.CrossTargeting.targets and results in @(_InnerBuildProjects) -->
-    <Target Name="AcceptTestOutput" DependsOnTargets="_ComputeTargetFrameworkItems">
+    <Target Name="_AcceptTestOutputCrossTargeting" DependsOnTargets="_ComputeTargetFrameworkItems">
         <MSBuild Projects="@(_InnerBuildProjects)" Targets="_AcceptTestOutput"/>
     </Target>
 
-    <Target Name="AcceptTestHtml" DependsOnTargets="_ComputeTargetFrameworkItems">
+    <Target Name="_AcceptTestHtmlCrossTargeting" DependsOnTargets="_ComputeTargetFrameworkItems">
         <MSBuild Projects="@(_InnerBuildProjects)" Targets="_AcceptTestHtml"/>
     </Target>
+    
+    <Target Name="AcceptTestOutput">
+        <!-- Cross-targeting -->
+        <CallTarget Targets="_AcceptTestOutputCrossTargeting"  Condition="'$(TargetFrameworks)' != ''"/>
+        <!-- Single target -->
+        <CallTarget Targets="_AcceptTestOutput"  Condition="'$(TargetFrameworks)' == ''"/>
+    </Target>
+
+    <Target Name="AcceptTestHtml">
+        <!-- Cross-targeting -->
+        <CallTarget Targets="_AcceptTestHtmlCrossTargeting"  Condition="'$(TargetFrameworks)' != ''"/>
+        <!-- Single target -->
+        <CallTarget Targets="_AcceptTestHtml"  Condition="'$(TargetFrameworks)' == ''"/>
+    </Target>
+
 
 
     <Target Name="_ResolveCopyLocalNuGetPkgXmls" AfterTargets="ResolveReferences">
