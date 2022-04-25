@@ -10,7 +10,6 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Project;
 using System;
-using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Templating.MetaModel
 {
@@ -23,7 +22,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public TemplateMember<IMemberOrNamedType> Template { get; }
 
-        public IReadOnlyDictionary<string, object?> Tags { get; }
+        public ITagReader Tags { get; }
 
         public AspectLayerId AspectLayerId { get; }
 
@@ -35,14 +34,17 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public AspectPipelineDescription PipelineDescription => this.ServiceProvider.GetRequiredService<AspectPipelineDescription>();
 
+        public MetaApiStaticity Staticity { get; }
+
         public MetaApiProperties(
             UserDiagnosticSink diagnostics,
             TemplateMember<IMemberOrNamedType> template,
-            IReadOnlyDictionary<string, object?> tags,
+            ITagReader tags,
             AspectLayerId aspectLayerId,
             SyntaxGenerationContext syntaxGenerationContext,
             IAspectInstance aspectInstance,
-            IServiceProvider serviceProvider )
+            IServiceProvider serviceProvider,
+            MetaApiStaticity staticity )
         {
             serviceProvider.GetRequiredService<ServiceProviderMark>().RequireProjectWide();
 
@@ -53,6 +55,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             this.SyntaxGenerationContext = syntaxGenerationContext;
             this.AspectInstance = aspectInstance;
             this.ServiceProvider = serviceProvider;
+            this.Staticity = staticity;
         }
     }
 }

@@ -24,7 +24,7 @@ internal class EvaluateAspectSourcesPipelineStep : PipelineStep
 
     public EvaluateAspectSourcesPipelineStep( PipelineStepsState parent, OrderedAspectLayer aspectLayer ) : base(
         parent,
-        new PipelineStepId( aspectLayer.AspectLayerId, PipelineStepPhase.Initialize, -1 ),
+        new PipelineStepId( parent,  aspectLayer.AspectLayerId, -1, -1, PipelineStepPhase.Initialize, -1 ),
         aspectLayer ) { }
 
     public override CompilationModel Execute(

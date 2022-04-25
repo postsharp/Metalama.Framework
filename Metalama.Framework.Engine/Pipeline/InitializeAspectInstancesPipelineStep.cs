@@ -55,7 +55,7 @@ internal class InitializeAspectInstancesPipelineStep : AdvicePipelineStep
 
         this.Parent.AddDiagnostics( reportedDiagnostics, diagnosticSuppressions, codeFixes );
         success &= this.Parent.AddAspectSources( addedAspectSources );
-        success &= this.Parent.AddAdvices( addedAdvices );
+        success &= this.Parent.AddAdvices( addedAdvices, compilation );
         success &= this.Parent.AddValidatorSources( addedValidatorSources );
 
         // It's not clear if we should continue at that time. An error here may result in more errors later.

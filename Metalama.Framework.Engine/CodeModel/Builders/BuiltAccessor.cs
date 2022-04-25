@@ -37,6 +37,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public string Name => this.AccessorBuilder.Name;
 
+        public bool IsImplicit => false;
+
         public bool IsAbstract => this.AccessorBuilder.IsAbstract;
 
         public bool IsStatic => this.AccessorBuilder.IsStatic;
@@ -96,7 +98,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         IMethod IRef<IMethod>.GetTarget( ICompilation compilation ) => (IMethod) this.GetForCompilation( compilation );
 
-        ISymbol? ISdkRef<IMethod>.GetSymbol( Compilation compilation ) => this.GetSymbol();
+        ISymbol? ISdkRef<IMethod>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => this.GetSymbol();
 
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => this.AccessorBuilder.ExplicitInterfaceImplementations;
 

@@ -21,7 +21,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Samples.Notify
             foreach (var property in builder.Target.Properties
                 .Where( p => p.Accessibility == Accessibility.Public && p.Writeability == Writeability.All ))
             {
-                builder.Advices.OverrideFieldOrPropertyAccessors( property, null, nameof(SetPropertyTemplate) );
+                builder.Advices.OverrideAccessors( property, null, nameof(SetPropertyTemplate) );
             }
         }
 

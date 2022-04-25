@@ -59,6 +59,7 @@ namespace Metalama.Framework.Engine.Linking
                     var symbols =
                         member switch
                         {
+                            ConstructorDeclarationSyntax ctorDecl => new ISymbol?[] { semanticModel.GetDeclaredSymbol( ctorDecl ) },
                             MethodDeclarationSyntax methodDecl => new ISymbol?[] { semanticModel.GetDeclaredSymbol( methodDecl ) },
                             BasePropertyDeclarationSyntax basePropertyDecl => new[] { semanticModel.GetDeclaredSymbol( basePropertyDecl ) },
                             FieldDeclarationSyntax fieldDecl =>

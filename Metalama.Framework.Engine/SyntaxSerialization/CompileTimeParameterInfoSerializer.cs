@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization
 {
@@ -23,9 +24,9 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
 
             if ( method == null )
             {
-                if ( declaringMember is IProperty property )
+                if ( declaringMember is IMemberWithAccessors property )
                 {
-                    method = (property.GetMethod ?? property.SetMethod)!;
+                    method = (property.GetAccessor( MethodKind.PropertyGet ) ?? property.GetAccessor( MethodKind.PropertySet ))!;
                 }
                 else
                 {

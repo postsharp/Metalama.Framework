@@ -9,7 +9,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Even
     {
         public override void BuildAspect( IAspectBuilder<IEvent> builder )
         {
-            builder.Advices.OverrideEventAccessors( builder.Target, nameof(AccessorTemplate), nameof(AccessorTemplate), null );
+            builder.Advices.OverrideAccessors( builder.Target, nameof(AccessorTemplate), nameof(AccessorTemplate), null );
         }
 
         [Template]

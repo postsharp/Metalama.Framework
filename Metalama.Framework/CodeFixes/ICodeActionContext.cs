@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Validation;
 using System;
 using System.Threading;
@@ -12,6 +13,7 @@ namespace Metalama.Framework.CodeFixes;
 /// If you implement your own code action using the Metalama SDK, you should cast this interface to <c>ISdkCodeActionContext</c>.
 /// </summary>
 [InternalImplement]
+[CompileTime]
 public interface ICodeActionContext
 {
     /// <summary>

@@ -64,10 +64,10 @@ namespace Metalama.Framework.Engine.Options
         public string? ProjectPath => this.GetStringOption( "MSBuildProjectFullPath" );
 
         [Memo]
-        public string? TargetFramework => this.GetStringOption( "Configuration" );
+        public string? TargetFramework => this.GetStringOption( "TargetFramework" );
 
         [Memo]
-        public string? Configuration => this.GetStringOption( "TargetFramework" );
+        public string? Configuration => this.GetStringOption( "Configuration" );
 
         [Memo]
         public bool IsDesignTimeEnabled => this.GetBooleanOption( "MetalamaDesignTimeEnabled", true );

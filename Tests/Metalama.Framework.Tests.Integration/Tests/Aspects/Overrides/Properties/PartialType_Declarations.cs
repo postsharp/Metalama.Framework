@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -11,9 +10,9 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Properties.Parti
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            foreach( var property in builder.Target.Properties )
+            foreach (var property in builder.Target.Properties)
             {
-                builder.Advices.OverrideFieldOrPropertyAccessors(property, nameof(Template), nameof(Template), tags: new TagDictionary() { ["name"] = property.Name });
+                builder.Advices.OverrideAccessors( property, nameof(Template), nameof(Template), tags: new { name = property.Name } );
             }
         }
 
@@ -34,11 +33,12 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Properties.Parti
         {
             get
             {
-                Console.WriteLine("This is TargetProperty1.");
+                Console.WriteLine( "This is TargetProperty1." );
+
                 return 42;
             }
-            
-            set => Console.WriteLine("This is TargetProperty1.");
+
+            set => Console.WriteLine( "This is TargetProperty1." );
         }
     }
 
@@ -49,11 +49,12 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Properties.Parti
         {
             get
             {
-                Console.WriteLine("This is TargetProperty2.");
+                Console.WriteLine( "This is TargetProperty2." );
+
                 return 42;
             }
 
-            set => Console.WriteLine("This is TargetProperty2.");
+            set => Console.WriteLine( "This is TargetProperty2." );
         }
     }
 
@@ -64,11 +65,12 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Properties.Parti
         {
             get
             {
-                Console.WriteLine("This is TargetProperty3.");
+                Console.WriteLine( "This is TargetProperty3." );
+
                 return 42;
             }
 
-            set => Console.WriteLine("This is TargetProperty3.");
+            set => Console.WriteLine( "This is TargetProperty3." );
         }
     }
 }

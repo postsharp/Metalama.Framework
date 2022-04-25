@@ -53,7 +53,7 @@ namespace Metalama.Framework.Engine.Templating
                 block = block.NormalizeWhitespace();
 
                 // We add generated-code annotations to the statements and not to the block itself so that the brackets don't get colored.
-                block = block.AddGeneratedCodeAnnotation();
+                block = block.WithGeneratedCodeAnnotation();
 
                 return errorCountAfter == errorCountBefore;
             }

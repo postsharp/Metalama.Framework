@@ -820,6 +820,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 A.CallTo( () => fakeAspectSymbol.DeclaringSyntaxReferences ).Returns( ImmutableArray<SyntaxReference>.Empty );
                 A.CallTo( () => fakeAspectSymbol.GetAttributes() ).Returns( ImmutableArray<AttributeData>.Empty );
                 A.CallTo( () => fakeGlobalNamespaceSymbol.IsGlobalNamespace ).Returns( true );
+                A.CallTo( () => fakeGlobalNamespaceSymbol.Kind ).Returns( SymbolKind.Namespace );
 
                 var aspectClass =
                     new AspectClass(
@@ -839,7 +840,11 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     i => i.WithArgumentsForConstructor(
                         new object?[]
                         {
-                            fakeAspectInstance, fakeAspectInstance.TemplateInstances.Values.Single(), A.Fake<IDeclaration>(), aspectLayer.LayerName, null
+                            fakeAspectInstance,
+                            fakeAspectInstance.TemplateInstances.Values.Single(),
+                            A.Fake<IDeclarationImpl>(),
+                            aspectLayer.LayerName,
+                            null
                         } ) );
             }
         }

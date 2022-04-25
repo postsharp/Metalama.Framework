@@ -41,7 +41,7 @@ namespace Metalama.Framework.Aspects
                 this.UseEnumerableTemplateForAnyEnumerable );
 #endif
 
-            builder.Advices.OverrideMethod( builder.Target, templates );
+            builder.Advices.Override( builder.Target, templates );
         }
 
 #pragma warning disable SA1623

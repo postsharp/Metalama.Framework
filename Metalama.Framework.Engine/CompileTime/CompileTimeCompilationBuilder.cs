@@ -27,6 +27,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Versioning;
 using System.Text;
 using System.Threading;
 
@@ -71,11 +72,31 @@ namespace Metalama.Framework.Engine.CompileTime
             this._logger = serviceProvider.GetLoggerFactory().CompileTime();
         }
 
-        private static ulong ComputeSourceHash( IReadOnlyList<SyntaxTree> compileTimeTrees, StringBuilder? log = null )
+        private static ulong ComputeSourceHash( FrameworkName? targetFramework, IReadOnlyList<SyntaxTree> compileTimeTrees, StringBuilder? log = null )
         {
+            if ( compileTimeTrees.Count == 0 )
+            {
+                return 0;
+            }
+
             log?.AppendLine( nameof(ComputeSourceHash) );
             XXH64 h = new();
 
+            // Hash the target framework.
+            if ( targetFramework != null )
+            {
+                h.Update( targetFramework.FullName );
+            }
+
+            // Hash compilation symbols.
+            var preprocessorSymbols = compileTimeTrees.Select( x => x.Options ).SelectMany( x => x.PreprocessorSymbolNames ).Distinct().OrderBy( x => x );
+
+            foreach ( var symbol in preprocessorSymbols )
+            {
+                h.Update( symbol );
+            }
+
+            // Hash
             foreach ( var syntaxTree in compileTimeTrees.OrderBy( t => t.FilePath ) )
             {
                 // SourceText.Checksum does not seem to return the same thing at compile time than at run time, so we take use our own algorithm.
@@ -287,13 +308,12 @@ namespace Metalama.Framework.Engine.CompileTime
         }
 
         private bool TryEmit(
+            OutputPaths outputPaths,
             Compilation compileTimeCompilation,
             IDiagnosticAdder diagnosticSink,
             TextMapDirectory? textMapDirectory,
             CancellationToken cancellationToken )
         {
-            var outputInfo = this.GetOutputPaths( compileTimeCompilation.AssemblyName! );
-
             this._logger.Trace?.Log( $"TryEmit( '{compileTimeCompilation.AssemblyName}' )" );
 
             try
@@ -301,10 +321,10 @@ namespace Metalama.Framework.Engine.CompileTime
                 var emitOptions = new EmitOptions( debugInformationFormat: DebugInformationFormat.PortablePdb );
 
                 // Write the generated files to disk if we should.
-                if ( !Directory.Exists( outputInfo.Directory ) )
+                if ( !Directory.Exists( outputPaths.Directory ) )
                 {
-                    this._logger.Trace?.Log( $"Creating directory '{outputInfo.Directory}'." );
-                    Directory.CreateDirectory( outputInfo.Directory );
+                    this._logger.Trace?.Log( $"Creating directory '{outputPaths.Directory}'." );
+                    Directory.CreateDirectory( outputPaths.Directory );
                 }
 
                 compileTimeCompilation =
@@ -312,9 +332,9 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 foreach ( var compileTimeSyntaxTree in compileTimeCompilation.SyntaxTrees )
                 {
-                    var transformedFileName = Path.Combine( outputInfo.Directory, compileTimeSyntaxTree.FilePath );
+                    var transformedFileName = Path.Combine( outputPaths.Directory, compileTimeSyntaxTree.FilePath );
 
-                    var path = Path.Combine( outputInfo.Directory, transformedFileName );
+                    var path = Path.Combine( outputPaths.Directory, transformedFileName );
                     var text = compileTimeSyntaxTree.GetText();
 
                     // Write the file in a retry loop to handle locks. It seems there are still file lock issues
@@ -352,16 +372,16 @@ namespace Metalama.Framework.Engine.CompileTime
                     {
                         memoryStream.Seek( 0, SeekOrigin.Begin );
 
-                        using ( var peStream = File.Create( outputInfo.Pe ) )
+                        using ( var peStream = File.Create( outputPaths.Pe ) )
                         {
-                            this._rewriter.Rewrite( memoryStream, peStream, outputInfo.Pe );
+                            this._rewriter.Rewrite( memoryStream, peStream, outputPaths.Pe );
                         }
                     }
                 }
                 else
                 {
-                    using ( var peStream = File.Create( outputInfo.Pe ) )
-                    using ( var pdbStream = File.Create( outputInfo.Pdb ) )
+                    using ( var peStream = File.Create( outputPaths.Pe ) )
+                    using ( var pdbStream = File.Create( outputPaths.Pdb ) )
                     {
                         emitResult = compileTimeCompilation.Emit( peStream, pdbStream, options: emitOptions, cancellationToken: cancellationToken );
                     }
@@ -374,7 +394,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     foreach ( var diagnostic in diagnostics )
                     {
-                        textMapDirectory ??= TextMapDirectory.Load( outputInfo.Directory );
+                        textMapDirectory ??= TextMapDirectory.Load( outputPaths.Directory );
 
                         var transformedPath = diagnostic.Location.SourceTree?.FilePath;
 
@@ -480,9 +500,9 @@ namespace Metalama.Framework.Engine.CompileTime
                 RetryHelper.Retry(
                     () =>
                     {
-                        if ( File.Exists( outputInfo.Pe ) )
+                        if ( File.Exists( outputPaths.Pe ) )
                         {
-                            File.Delete( outputInfo.Pe );
+                            File.Delete( outputPaths.Pe );
                         }
                     },
                     logger: this._logger );
@@ -490,9 +510,9 @@ namespace Metalama.Framework.Engine.CompileTime
                 RetryHelper.Retry(
                     () =>
                     {
-                        if ( File.Exists( outputInfo.Pdb ) )
+                        if ( File.Exists( outputPaths.Pdb ) )
                         {
-                            File.Delete( outputInfo.Pdb );
+                            File.Delete( outputPaths.Pdb );
                         }
                     },
                     logger: this._logger );
@@ -731,7 +751,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     {
                         var textMapDirectory = TextMapDirectory.Create( compileTimeCompilation, locationAnnotationMap! );
 
-                        if ( !this.TryEmit( compileTimeCompilation, diagnosticSink, textMapDirectory, cancellationToken ) )
+                        if ( !this.TryEmit( outputPaths, compileTimeCompilation, diagnosticSink, textMapDirectory, cancellationToken ) )
                         {
                             project = null;
 
@@ -773,6 +793,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         var manifest = new CompileTimeProjectManifest(
                             runTimeCompilation.Assembly.Identity.ToString(),
                             compileTimeCompilation.AssemblyName!,
+                            runTimeCompilation.GetTargetFramework()?.ToString() ?? "",
                             aspectTypes,
                             compilerPlugInTypes,
                             fabricTypes,
@@ -811,21 +832,28 @@ namespace Metalama.Framework.Engine.CompileTime
             IReadOnlyList<CompileTimeProject> referencedProjects,
             StringBuilder? log = null )
         {
-            var sourceHash = ComputeSourceHash( sourceTreesWithCompileTimeCode, log );
+            var targetFramework = runTimeCompilation.GetTargetFramework();
+
+            var sourceHash = ComputeSourceHash( targetFramework, sourceTreesWithCompileTimeCode, log );
             var projectHash = ComputeProjectHash( referencedProjects, sourceHash, log );
 
             var compileTimeAssemblyName = GetCompileTimeAssemblyName( runTimeCompilation.AssemblyName!, projectHash );
-            var outputPaths = this.GetOutputPaths( compileTimeAssemblyName );
+            var outputPaths = this.GetOutputPaths( runTimeCompilation.AssemblyName!, targetFramework, compileTimeAssemblyName );
 
             return (sourceHash, projectHash, compileTimeAssemblyName, outputPaths);
         }
 
         private record OutputPaths( string? Directory, string Pe, string Pdb, string Manifest );
 
-        private OutputPaths GetOutputPaths( string compileTimeAssemblyName )
+        private OutputPaths GetOutputPaths( string runTimeAssemblyName, FrameworkName? targetFramework, string compileTimeAssemblyName )
         {
             // We cannot include the full assembly name in the path because we're hitting the max path length.
-            var directory = Path.Combine( this._pathOptions.CompileTimeProjectCacheDirectory, HashUtilities.HashString( compileTimeAssemblyName ) );
+            var directory = Path.Combine(
+                this._pathOptions.CompileTimeProjectCacheDirectory,
+                runTimeAssemblyName,
+                targetFramework?.FullName ?? "unspecified",
+                HashUtilities.HashString( compileTimeAssemblyName ) );
+
             var pe = Path.Combine( directory, compileTimeAssemblyName + ".dll" );
             var pdb = Path.ChangeExtension( pe, ".pdb" );
             var manifest = Path.ChangeExtension( pe, ".manifest" );
@@ -838,6 +866,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// </summary>
         public bool TryCompileDeserializedProject(
             string runTimeAssemblyName,
+            FrameworkName? targetFramework,
             IReadOnlyList<SyntaxTree> syntaxTrees,
             ulong syntaxTreeHash,
             IReadOnlyList<CompileTimeProject> referencedProjects,
@@ -849,28 +878,28 @@ namespace Metalama.Framework.Engine.CompileTime
             this._logger.Trace?.Log( $"TryCompileDeserializedProject( '{runTimeAssemblyName}' )" );
             var compileTimeAssemblyName = GetCompileTimeAssemblyName( runTimeAssemblyName, referencedProjects, syntaxTreeHash );
 
-            var outputInfo = this.GetOutputPaths( compileTimeAssemblyName );
+            var outputPaths = this.GetOutputPaths( runTimeAssemblyName, targetFramework, compileTimeAssemblyName );
 
             var compilation = this.CreateEmptyCompileTimeCompilation( compileTimeAssemblyName, referencedProjects )
                 .AddSyntaxTrees( syntaxTrees );
 
-            assemblyPath = outputInfo.Pe;
-            sourceDirectory = outputInfo.Directory;
+            assemblyPath = outputPaths.Pe;
+            sourceDirectory = outputPaths.Directory;
 
             using ( this.WithLock( compileTimeAssemblyName ) )
             {
-                if ( File.Exists( outputInfo.Pe ) )
+                if ( File.Exists( outputPaths.Pe ) )
                 {
                     // If the file already exists, given that it has a strong hash, it means that the assembly has already been 
                     // emitted and it does not need to be done a second time.
 
-                    this._logger.Trace?.Log( $"TryCompileDeserializedProject( '{runTimeAssemblyName}' ): '{outputInfo.Pe}' already exists." );
+                    this._logger.Trace?.Log( $"TryCompileDeserializedProject( '{runTimeAssemblyName}' ): '{outputPaths.Pe}' already exists." );
 
                     return true;
                 }
                 else
                 {
-                    return this.TryEmit( compilation, diagnosticAdder, null, cancellationToken );
+                    return this.TryEmit( outputPaths, compilation, diagnosticAdder, null, cancellationToken );
                 }
             }
         }

@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Versioning;
 using RoslynSpecialType = Microsoft.CodeAnalysis.SpecialType;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 
@@ -172,16 +173,32 @@ namespace Metalama.Framework.Engine.Utilities
 
         // TODO: Partial methods etc.
 
-        public static SyntaxReference? GetPrimarySyntaxReference( this ISymbol symbol )
+        public static SyntaxReference? GetPrimarySyntaxReference( this ISymbol? symbol )
         {
+            if ( symbol == null )
+            {
+                return null;
+            }
+
+            static SyntaxReference? GetReferenceOfShortestPath( ISymbol s )
+            {
+                if ( s.DeclaringSyntaxReferences.IsDefaultOrEmpty )
+                {
+                    return null;
+                }
+                else
+                {
+                    return s.DeclaringSyntaxReferences.OrderBy( x => x.SyntaxTree.FilePath.Length ).First();
+                }
+            }
+
             switch ( symbol )
             {
                 case IMethodSymbol { AssociatedSymbol: not null } methodSymbol:
-                    return symbol.DeclaringSyntaxReferences.OrderBy( x => x.SyntaxTree.FilePath.Length ).FirstOrDefault()
-                           ?? methodSymbol.AssociatedSymbol!.DeclaringSyntaxReferences.OrderBy( x => x.SyntaxTree.FilePath.Length ).FirstOrDefault();
+                    return GetReferenceOfShortestPath( symbol ) ?? GetReferenceOfShortestPath( methodSymbol.AssociatedSymbol );
 
                 default:
-                    return symbol.DeclaringSyntaxReferences.OrderBy( x => x.SyntaxTree.FilePath.Length ).FirstOrDefault();
+                    return GetReferenceOfShortestPath( symbol );
             }
         }
 
@@ -241,6 +258,25 @@ namespace Metalama.Framework.Engine.Utilities
                     INamedTypeSymbol type => type,
                     _ => otherSymbol.ContainingType
                 } );
+        }
+
+        public static FrameworkName? GetTargetFramework( this Compilation compilation )
+        {
+            var attribute = compilation.Assembly.GetAttributes().FirstOrDefault( a => a.AttributeClass?.Name == nameof(TargetFrameworkAttribute) );
+
+            if ( attribute == null )
+            {
+                return null;
+            }
+
+            var frameworkNameString = (string?) attribute.ConstructorArguments[0].Value;
+
+            if ( frameworkNameString == null )
+            {
+                return null;
+            }
+
+            return new FrameworkName( frameworkNameString );
         }
     }
 }

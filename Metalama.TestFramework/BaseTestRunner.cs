@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Testing;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Metalama.TestFramework.Utilities;
 using Microsoft.CodeAnalysis;
@@ -255,7 +256,7 @@ namespace Metalama.TestFramework
         private async Task<MetadataReference?> CompileDependencyAsync( string code, Project emptyProject, TestResult testResult )
         {
             // The assembly name must match the file name otherwise it wont be found bu AssemblyLocator.
-            var name = "dependency_" + Guid.NewGuid().ToString();
+            var name = "dependency_" + RandomIdGenerator.GenerateId();
             var project = emptyProject.AddDocument( "dependency.cs", code ).Project;
 
             using var domain = new UnloadableCompileTimeDomain();
@@ -365,8 +366,8 @@ namespace Metalama.TestFramework
                 Path.GetDirectoryName( sourceAbsolutePath )!,
                 Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + FileExtensions.TransformedCode );
 
-            var consolidatedTestOutput = testResult.GetConsolidatedTestOutput();
-            var actualTransformedNonNormalizedText = JoinSyntaxTrees( consolidatedTestOutput );
+            var testOutputs = testResult.GetTestOutputsWithDiagnostics();
+            var actualTransformedNonNormalizedText = JoinSyntaxTrees( testOutputs );
             var actualTransformedNormalizedSourceText = NormalizeTestOutput( actualTransformedNonNormalizedText, formatCode );
 
             // If the expectation file does not exist, create it with some placeholder content.
@@ -432,22 +433,20 @@ namespace Metalama.TestFramework
             state["expectedTransformedSourceText"] = expectedTransformedSourceText;
             state["actualTransformedNormalizedSourceText"] = actualTransformedNormalizedSourceText;
 
-            static string JoinSyntaxTrees( IEnumerable<SyntaxTree> compilationUnits )
+            static string JoinSyntaxTrees( IReadOnlyList<SyntaxTree> compilationUnits )
             {
-                var arr = compilationUnits.ToArray();
-
-                switch ( arr.Length )
+                switch ( compilationUnits.Count )
                 {
                     case 0:
                         return "// --- No output compilation units ---";
 
                     case 1:
-                        return arr[0].GetRoot().ToFullString();
+                        return compilationUnits[0].GetRoot().ToFullString();
 
                     default:
                         var sb = new StringBuilder();
 
-                        foreach ( var syntaxTree in arr )
+                        foreach ( var syntaxTree in compilationUnits )
                         {
                             sb.AppendLine();
                             sb.AppendLineInvariant( $"// --- {syntaxTree.FilePath} ---" );
@@ -528,7 +527,7 @@ namespace Metalama.TestFramework
             if ( testInput.Options.WriteOutputHtml.GetValueOrDefault() )
             {
                 // Multi file tests are not supported for html output.
-                var output = testResult.GetConsolidatedTestOutput().Single().GetRoot();
+                var output = testResult.GetTestOutputsWithDiagnostics().Single().GetRoot();
                 var outputDocument = testResult.InputProject!.AddDocument( "Consolidated.cs", output );
 
                 var formattedOutput = await OutputCodeFormatter.FormatToSyntaxAsync( outputDocument );
@@ -599,7 +598,7 @@ namespace Metalama.TestFramework
                         Directory.CreateDirectory( directory );
                     }
 
-                    var diagnosticFile = Path.Combine( directory, Guid.NewGuid().ToString() + ".dll" );
+                    var diagnosticFile = Path.Combine( directory, RandomIdGenerator.GenerateId() + ".dll" );
 
                     using ( var diagnosticStream = File.Create( diagnosticFile ) )
                     {

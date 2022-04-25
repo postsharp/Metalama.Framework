@@ -96,7 +96,7 @@ namespace Metalama.Framework.Engine.Fabrics
             Execute( transitiveFabricTypes );
             project.Freeze();
             Execute( fabrics.OfType<NamespaceFabricDriver>() );
-            
+
             return new FabricsConfiguration( aspectSources.ToImmutable(), validatorSources.ToImmutable() );
         }
 

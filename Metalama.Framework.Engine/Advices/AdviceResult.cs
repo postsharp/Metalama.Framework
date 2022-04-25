@@ -37,6 +37,11 @@ namespace Metalama.Framework.Engine.Advices
 
         public static AdviceResult Create( params ITransformation[] transformations )
         {
+            return Create( (IEnumerable<ITransformation>) transformations );
+        }
+
+        public static AdviceResult Create( IEnumerable<ITransformation> transformations )
+        {
             ImmutableArray<IObservableTransformation>.Builder? observableTransformations = null;
             ImmutableArray<INonObservableTransformation>.Builder? nonObservableTransformations = null;
 

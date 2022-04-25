@@ -80,7 +80,7 @@ namespace Metalama.Framework.Engine.CodeModel
             switch ( type )
             {
                 case CompileTimeType compileTimeType:
-                    return (ITypeSymbol) compileTimeType.Target.GetSymbol( this._compilation )
+                    return (ITypeSymbol) compileTimeType.Target.GetSymbol( this._compilation, true )
                         .AssertNotNull( Justifications.SerializersNotImplementedForIntroductions );
 
                 default:
@@ -97,7 +97,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             if ( type is CompileTimeType compileTimeType )
             {
-                return (ITypeSymbol) compileTimeType.Target.GetSymbol( this._compilation ).AssertNotNull( Justifications.TypesAlwaysHaveSymbol );
+                return (ITypeSymbol) compileTimeType.Target.GetSymbol( this._compilation, true ).AssertNotNull( Justifications.TypesAlwaysHaveSymbol );
             }
 
             if ( type.IsByRef )

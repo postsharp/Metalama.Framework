@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -47,6 +48,16 @@ namespace Metalama.Framework.Engine.Utilities
             }
 
             return declaration.ContainingDeclaration != null && declaration.ContainingDeclaration.IsContainedIn( containingDeclaration );
+        }
+
+        public static bool IsImplicitStaticConstructor( this IConstructor ctor )
+        {
+            return ctor.IsStatic && ctor.GetSymbol() == null && ctor is not IConstructorBuilder;
+        }
+
+        public static bool IsImplicitInstanceConstructor( this IConstructor ctor )
+        {
+            return !ctor.IsStatic && ctor.GetSymbol() != null && ctor.GetSymbol()!.GetPrimaryDeclaration() == null;
         }
     }
 }

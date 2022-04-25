@@ -20,7 +20,12 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder, IMemberImpl
     {
-        protected MemberBuilder( Advice parentAdvice, INamedType declaringType, string name ) : base( parentAdvice, declaringType, name ) { }
+        protected MemberBuilder( Advice parentAdvice, INamedType declaringType, ITagReader tags ) : base( parentAdvice, declaringType )
+        {
+            this.Tags = tags;
+        }
+
+        public bool IsImplicit => false;
 
         public new INamedType DeclaringType => base.DeclaringType.AssertNotNull();
 
@@ -38,6 +43,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.DeclaringType.ToDisplayString( format, context ) + "." + this.Name;
+
+        protected ITagReader Tags { get; }
 
         public void ApplyTemplateAttribute( TemplateAttribute templateAttribute )
         {
@@ -176,14 +183,15 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 new MetaApiProperties(
                     context.DiagnosticSink,
                     initializerTemplate.Cast(),
-                    this.ParentAdvice.Tags,
+                    this.Tags,
                     this.ParentAdvice.AspectLayerId,
                     context.SyntaxGenerationContext,
                     this.ParentAdvice.Aspect,
-                    context.ServiceProvider ) );
+                    context.ServiceProvider,
+                    MetaApiStaticity.Default ) );
 
             var expansionContext = new TemplateExpansionContext(
-                this.ParentAdvice.Aspect.Aspect,
+                this.ParentAdvice.TemplateInstance.Instance,
                 metaApi,
                 this.Compilation,
                 context.LexicalScopeProvider.GetLexicalScope( this ),

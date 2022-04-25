@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.Aspects;
@@ -34,8 +35,9 @@ namespace Metalama.Framework.Engine.Transformations
             IEvent overriddenDeclaration,
             TemplateMember<IEvent> eventTemplate,
             TemplateMember<IMethod> addTemplate,
-            TemplateMember<IMethod> removeTemplate )
-            : base( advice, overriddenDeclaration )
+            TemplateMember<IMethod> removeTemplate,
+            ITagReader tags )
+            : base( advice, overriddenDeclaration, tags )
         {
             // We need event template xor both accessor templates.
             Invariant.Assert( eventTemplate.IsNotNull || (addTemplate.IsNotNull && removeTemplate.IsNotNull) );
@@ -165,11 +167,12 @@ namespace Metalama.Framework.Engine.Transformations
                 new MetaApiProperties(
                     context.DiagnosticSink,
                     accessorTemplate.Cast(),
-                    this.Advice.Tags,
+                    this.Tags,
                     this.Advice.AspectLayerId,
                     context.SyntaxGenerationContext,
                     this.Advice.Aspect,
-                    context.ServiceProvider ) );
+                    context.ServiceProvider,
+                    MetaApiStaticity.Default ) );
 
             var expansionContext = new TemplateExpansionContext(
                 this.Advice.Aspect.Aspect,

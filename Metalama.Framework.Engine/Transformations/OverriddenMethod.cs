@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.Aspects;
@@ -30,8 +31,8 @@ namespace Metalama.Framework.Engine.Transformations
 
         public TemplateMember<IMethod> Template { get; }
 
-        public OverriddenMethod( Advice advice, IMethod overriddenDeclaration, TemplateMember<IMethod> template )
-            : base( advice, overriddenDeclaration )
+        public OverriddenMethod( Advice advice, IMethod overriddenDeclaration, TemplateMember<IMethod> template, ITagReader tags )
+            : base( advice, overriddenDeclaration, tags )
         {
             Invariant.Assert( template.IsNotNull );
 
@@ -52,11 +53,12 @@ namespace Metalama.Framework.Engine.Transformations
                 new MetaApiProperties(
                     context.DiagnosticSink,
                     this.Template.Cast(),
-                    this.Advice.Tags,
+                    this.Tags,
                     this.Advice.AspectLayerId,
                     context.SyntaxGenerationContext,
                     this.Advice.Aspect,
-                    context.ServiceProvider ) );
+                    context.ServiceProvider,
+                    MetaApiStaticity.Default ) );
 
             var expansionContext = new TemplateExpansionContext(
                 this.Advice.TemplateInstance.Instance,

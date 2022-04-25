@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             public override RefKind RefKind { get; set; }
 
-            public override bool IsParams => ((PropertyBuilder) this.Accessor.ContainingMember).Parameters[this.Index].IsParams;
+            public override bool IsParams => false;
 
             public override string Name { get; set; }
 

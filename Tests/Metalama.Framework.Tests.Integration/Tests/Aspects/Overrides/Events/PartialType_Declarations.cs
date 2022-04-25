@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -11,9 +10,9 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Events.PartialTy
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            foreach( var @event in builder.Target.Events )
+            foreach (var @event in builder.Target.Events)
             {
-                builder.Advices.OverrideEventAccessors(@event, nameof(Template), nameof(Template), null, tags: new TagDictionary() { ["name"] = @event.Name });
+                builder.Advices.OverrideAccessors( @event, nameof(Template), nameof(Template), null, tags: new { name = @event.Name } );
             }
         }
 
@@ -32,8 +31,8 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Events.PartialTy
     {
         public event EventHandler TargetEvent1
         {
-            add => Console.WriteLine("This is TargetEvent1.");            
-            remove => Console.WriteLine("This is TargetEvent1.");
+            add => Console.WriteLine( "This is TargetEvent1." );
+            remove => Console.WriteLine( "This is TargetEvent1." );
         }
     }
 
@@ -42,8 +41,8 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Events.PartialTy
     {
         public event EventHandler TargetEvent2
         {
-            add => Console.WriteLine("This is TargetEvent2.");
-            remove => Console.WriteLine("This is TargetEvent2.");
+            add => Console.WriteLine( "This is TargetEvent2." );
+            remove => Console.WriteLine( "This is TargetEvent2." );
         }
     }
 
@@ -52,8 +51,8 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Events.PartialTy
     {
         public event EventHandler TargetEvent3
         {
-            add => Console.WriteLine("This is TargetEvent3.");
-            remove => Console.WriteLine("This is TargetEvent3.");
+            add => Console.WriteLine( "This is TargetEvent3." );
+            remove => Console.WriteLine( "This is TargetEvent3." );
         }
     }
 }

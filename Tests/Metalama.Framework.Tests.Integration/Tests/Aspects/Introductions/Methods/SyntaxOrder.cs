@@ -24,7 +24,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Synt
     {
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            builder.Advices.OverrideMethod(builder.Target.Methods.OfName("Foo").Single(), nameof(Template));
+            builder.Advices.Override(builder.Target.Methods.OfName("Foo").Single(), nameof(Template));
         }
 
         [Template]
@@ -51,7 +51,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Synt
     {
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            builder.Advices.OverrideMethod(builder.Target.Methods.OfName("Foo").Single(), nameof(Template));
+            builder.Advices.Override(builder.Target.Methods.OfName("Foo").Single(), nameof(Template));
         }
 
         [Template]
@@ -67,7 +67,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Synt
     {
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            builder.Advices.OverrideMethod(builder.Target.Methods.OfName("Bar").Single(), nameof(Template));
+            builder.Advices.Override(builder.Target.Methods.OfName("Bar").Single(), nameof(Template));
         }
 
         [Template]
@@ -83,7 +83,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Synt
     {
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            builder.Advices.OverrideMethod(builder.Target.Methods.OfName("Foo").Single(), nameof(Template));
+            builder.Advices.Override(builder.Target.Methods.OfName("Foo").Single(), nameof(Template));
         }
 
         [Template]

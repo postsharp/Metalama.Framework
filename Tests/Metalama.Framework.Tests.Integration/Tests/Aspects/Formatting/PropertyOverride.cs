@@ -17,7 +17,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.Property
     {
         public override void BuildAspect(IAspectBuilder<IProperty> builder)
         {
-            builder.Advices.OverrideFieldOrProperty(builder.Target, nameof(Override));
+            builder.Advices.Override(builder.Target, nameof(Override));
         }
 
         [Template]
@@ -47,7 +47,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.Property
     {
         public override void BuildAspect(IAspectBuilder<IProperty> builder)
         {
-            builder.Advices.OverrideFieldOrProperty(builder.Target, nameof(Override));
+            builder.Advices.Override(builder.Target, nameof(Override));
         }
 
         [Template]

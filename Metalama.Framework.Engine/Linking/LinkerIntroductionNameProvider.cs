@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
@@ -13,11 +14,11 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal class LinkerIntroductionNameProvider : IntroductionNameProvider
     {
-        private readonly Dictionary<INamedType, HashSet<string>> _overrideNames;
+        private readonly Dictionary<INamedType, HashSet<string>> _introducedMemberNames;
 
         public LinkerIntroductionNameProvider()
         {
-            this._overrideNames = new Dictionary<INamedType, HashSet<string>>();
+            this._introducedMemberNames = new Dictionary<INamedType, HashSet<string>>();
         }
 
         internal override string GetOverrideName( INamedType targetType, AspectLayerId aspectLayer, IMember overriddenMember )
@@ -52,7 +53,44 @@ namespace Metalama.Framework.Engine.Linking
 
         internal override string GetInitializerName( INamedType targetType, AspectLayerId aspectLayer, IMember initializedMember )
         {
-            var nameHint = $"Initialize_{initializedMember.Name}";
+            var shortAspectName = aspectLayer.AspectShortName;
+            var shortLayerName = aspectLayer.LayerName;
+
+            var nameHint =
+                shortLayerName != null
+                    ? $"Initialize_{shortAspectName}_{shortLayerName}_{initializedMember.Name}"
+                    : $"Initialize_{shortAspectName}_{initializedMember.Name}";
+
+            return this.FindUniqueName( targetType, nameHint );
+        }
+
+        internal override string GetInitializationName(
+            INamedType targetType,
+            AspectLayerId aspectLayer,
+            IDeclaration targetDeclaration,
+            InitializerKind reason )
+        {
+            var shortAspectName = aspectLayer.AspectShortName;
+            var shortLayerName = aspectLayer.LayerName;
+
+            var targetName = targetDeclaration switch
+            {
+                INamedType => null,
+                IMember member => member.Name,
+                _ => throw new AssertionFailedException()
+            };
+
+            // TODO: Not optimal.
+            var reasonName = reason.ToString().Replace( ", ", "_" );
+
+            var nameHint =
+                shortLayerName != null
+                    ? targetName != null
+                        ? $"{reasonName}_{shortAspectName}_{shortLayerName}_{targetName}"
+                        : $"{reasonName}_{shortAspectName}_{shortLayerName}"
+                    : targetName != null
+                        ? $"{reasonName}_{shortAspectName}_{targetName}"
+                        : $"{reasonName}_{shortAspectName}";
 
             return this.FindUniqueName( targetType, nameHint );
         }
@@ -82,9 +120,9 @@ namespace Metalama.Framework.Engine.Linking
 
             void AddName( string name )
             {
-                if ( !this._overrideNames.TryGetValue( containingType, out var names ) )
+                if ( !this._introducedMemberNames.TryGetValue( containingType, out var names ) )
                 {
-                    this._overrideNames[containingType] = names = new HashSet<string>();
+                    this._introducedMemberNames[containingType] = names = new HashSet<string>();
                 }
 
                 if ( !names.Add( name ) )
@@ -115,7 +153,7 @@ namespace Metalama.Framework.Engine.Linking
                     return false;
                 }
 
-                if ( this._overrideNames.TryGetValue( containingType, out var names )
+                if ( this._introducedMemberNames.TryGetValue( containingType, out var names )
                      && names.Where( x => StringComparer.Ordinal.Equals( x, name ) ).Any() )
                 {
                     return false;

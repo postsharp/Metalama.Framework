@@ -16,7 +16,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.SourceMe
         {
             foreach (var method in builder.Target.Methods)
             {
-                builder.Advices.OverrideMethod(method, nameof(this.OverrideMethod));
+                builder.Advices.Override(method, nameof(this.OverrideMethod));
             }
         }
 

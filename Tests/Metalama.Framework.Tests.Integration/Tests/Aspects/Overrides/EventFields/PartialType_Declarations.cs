@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -13,9 +12,9 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.EventFields.Part
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            foreach( var @event in builder.Target.Events )
+            foreach (var @event in builder.Target.Events)
             {
-                builder.Advices.OverrideEventAccessors(@event, nameof(Template), nameof(Template), null, tags: new TagDictionary() { ["name"] = @event.Name });
+                builder.Advices.OverrideAccessors( @event, nameof(Template), nameof(Template), null, tags: new { name = @event.Name } );
             }
         }
 

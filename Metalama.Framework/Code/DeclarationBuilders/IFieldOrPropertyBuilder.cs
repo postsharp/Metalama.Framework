@@ -4,7 +4,7 @@
 namespace Metalama.Framework.Code.DeclarationBuilders
 {
     /// <summary>
-    /// Allows to complete the construction of a field or property that has been created by an advice.
+    /// Base interface for <see cref="IFieldBuilder"/> and <see cref="IPropertyBuilder"/>.
     /// </summary>
     public interface IFieldOrPropertyBuilder : IFieldOrProperty, IMemberBuilder
     {

@@ -2,10 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
-using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
@@ -13,7 +10,6 @@ using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 using RefKind = Metalama.Framework.Code.RefKind;
@@ -33,12 +29,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.PropertyBuilder;
 
-        [Memo]
-        public IParameterList Parameters
-            => new ParameterList(
-                this,
-                this.PropertyBuilder.Parameters.AsBuilderList.Select( Ref.FromBuilder<IParameter, IParameterBuilder> ) );
-
         public RefKind RefKind => this.PropertyBuilder.RefKind;
 
         public Writeability Writeability => this.PropertyBuilder.Writeability;
@@ -55,11 +45,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IMethod? SetMethod
             => this.PropertyBuilder.SetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this.PropertyBuilder.SetMethod ) : null;
 
-        IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => this.Invokers;
-
         [Memo]
-        public IInvokerFactory<IPropertyInvoker> Invokers
-            => new InvokerFactory<IPropertyInvoker>( ( order, invokerOperator ) => new PropertyInvoker( this, order, invokerOperator ), false );
+        public IInvokerFactory<IFieldOrPropertyInvoker> Invokers
+            => new InvokerFactory<IFieldOrPropertyInvoker>( ( order, invokerOperator ) => new FieldOrPropertyInvoker( this, order, invokerOperator ), false );
 
         public IProperty? OverriddenProperty => this.PropertyBuilder.OverriddenProperty;
 
@@ -74,7 +62,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         IProperty IRef<IProperty>.GetTarget( ICompilation compilation ) => (IProperty) this.GetForCompilation( compilation );
 
-        ISymbol ISdkRef<IProperty>.GetSymbol( Compilation compilation ) => throw new NotSupportedException();
+        ISymbol? ISdkRef<IProperty>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => throw new NotSupportedException();
 
         public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 

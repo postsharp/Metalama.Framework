@@ -92,6 +92,7 @@ namespace Metalama.Framework.Engine.Formatting
 
             private bool IsInSourceCode()
             {
+                // This assumes that every generated compilation unit has generated code annotation on itself.
                 return this._nodeAnnotationStack.Count == 0 || this._nodeAnnotationStack.Peek() == NodeKind.SourceCode;
             }
 

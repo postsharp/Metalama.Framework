@@ -21,7 +21,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Emit;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -304,11 +303,12 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 new MetaApiProperties(
                     diagnostics,
                     template.Cast(),
-                    ImmutableDictionary.Create<string, object?>().Add( "TestKey", "TestValue" ),
+                    TagReader.GetReader( new { TestKey = "TestValue" } ),
                     default,
                     syntaxGenerationContext,
                     null!,
-                    augmentedServiceProvider ) );
+                    augmentedServiceProvider,
+                    MetaApiStaticity.Default ) );
 
             return (new TemplateExpansionContext(
                         templateInstance,

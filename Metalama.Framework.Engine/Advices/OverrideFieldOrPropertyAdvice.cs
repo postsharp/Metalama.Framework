@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Builders;
@@ -10,7 +11,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Advices
 {
-    internal class OverrideFieldOrPropertyAdvice : OverrideMemberAdvice<IFieldOrProperty>
+    internal class OverrideFieldOrPropertyAdvice : OverrideMemberAdvice<IFieldOrPropertyOrIndexer>
     {
         public TemplateMember<IProperty> PropertyTemplate { get; }
 
@@ -21,12 +22,12 @@ namespace Metalama.Framework.Engine.Advices
         public OverrideFieldOrPropertyAdvice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
-            IFieldOrProperty targetDeclaration,
+            IFieldOrPropertyOrIndexer targetDeclaration,
             TemplateMember<IProperty> propertyTemplate,
             TemplateMember<IMethod> getTemplate,
             TemplateMember<IMethod> setTemplate,
             string? layerName,
-            Dictionary<string, object?>? tags )
+            ITagReader tags )
             : base( aspect, templateInstance, targetDeclaration, layerName, tags )
         {
             this.PropertyTemplate = propertyTemplate;
@@ -40,17 +41,19 @@ namespace Metalama.Framework.Engine.Advices
         {
             // TODO: Translate templates to this compilation.
             // TODO: order should be self if the target is introduced on the same layer.
-            if ( this.TargetDeclaration is IField field )
+            var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
+
+            if ( targetDeclaration is IField field )
             {
-                var promotedField = new PromotedField( this, field );
+                var promotedField = new PromotedField( this, field, this.Tags );
 
                 return AdviceResult.Create(
                     promotedField,
-                    new OverriddenProperty( this, promotedField, this.PropertyTemplate, this.GetTemplate, this.SetTemplate ) );
+                    new OverriddenProperty( this, promotedField, this.PropertyTemplate, this.GetTemplate, this.SetTemplate, this.Tags ) );
             }
-            else if ( this.TargetDeclaration is IProperty property )
+            else if ( targetDeclaration is IProperty property )
             {
-                return AdviceResult.Create( new OverriddenProperty( this, property, this.PropertyTemplate, this.GetTemplate, this.SetTemplate ) );
+                return AdviceResult.Create( new OverriddenProperty( this, property, this.PropertyTemplate, this.GetTemplate, this.SetTemplate, this.Tags ) );
             }
             else
             {

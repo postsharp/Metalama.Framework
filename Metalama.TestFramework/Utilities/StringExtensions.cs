@@ -41,7 +41,7 @@ namespace Metalama.TestFramework.Utilities
 #endif
 
         public static string NotNull( this string? s ) => s!;
-        
+
         public static void AppendLineInvariant( this StringBuilder stringBuilder, FormattableString s )
             => stringBuilder.AppendLine( FormattableString.Invariant( s ) );
     }

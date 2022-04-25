@@ -156,7 +156,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 throw new InvalidOperationException( "This reference cannot be serialized because it has no compilation." );
             }
 
-            var symbol = this.GetSymbol( this._compilation );
+            var symbol = this.GetSymbol( this._compilation, true );
 
             return DocumentationCommentId.CreateDeclarationId( symbol );
         }
@@ -187,16 +187,17 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 }
             }
 
-            var symbol = this.GetSymbol( compilation );
+            var symbol = this.GetSymbol( compilation, true );
 
             return (symbol.GetAttributes(), symbol);
         }
 
         public bool IsDefault => this.Target == null && this.TargetKind == DeclarationRefTargetKind.Default;
 
-        public ISymbol GetSymbol( Compilation compilation ) => this.GetSymbolWithKind( this.GetSymbolIgnoringKind( compilation ) );
+        public ISymbol GetSymbol( Compilation compilation, bool ignoreAssemblyKey = false )
+            => this.GetSymbolWithKind( this.GetSymbolIgnoringKind( compilation, ignoreAssemblyKey ) );
 
-        private ISymbol GetSymbolIgnoringKind( Compilation compilation )
+        private ISymbol GetSymbolIgnoringKind( Compilation compilation, bool ignoreAssemblyKey = false )
         {
             switch ( this.Target )
             {
@@ -228,12 +229,12 @@ namespace Metalama.Framework.Engine.CodeModel.References
                         {
                             var symbolKey = new SymbolId( id );
 
-                            symbol = symbolKey.Resolve( compilation );
+                            symbol = symbolKey.Resolve( compilation, ignoreAssemblyKey );
                         }
 
                         if ( symbol == null )
                         {
-                            throw new AssertionFailedException( $"Cannot resolve {id} into a symbol." );
+                            throw new SymbolNotFoundException( id, compilation );
                         }
 
                         return symbol;
@@ -336,7 +337,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
                         if ( symbol == null )
                         {
-                            throw new AssertionFailedException( $"Cannot resolve '{id}' into a symbol." );
+                            throw new SymbolNotFoundException( id, compilation.RoslynCompilation );
                         }
 
                         return (T) compilation.Factory.GetCompilationElement( symbol ).AssertNotNull();

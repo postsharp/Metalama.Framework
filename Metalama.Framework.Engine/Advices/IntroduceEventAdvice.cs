@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.Advices
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             string? layerName,
-            Dictionary<string, object?>? tags )
+            ITagReader tags )
             : base( aspect, templateInstance, targetDeclaration, eventTemplate, scope, overrideStrategy, layerName, tags )
         {
             this._addTemplate = addTemplate;
@@ -43,9 +43,10 @@ namespace Metalama.Framework.Engine.Advices
 
             this.MemberBuilder = new EventBuilder(
                 this,
-                this.TargetDeclaration,
+                targetDeclaration,
                 eventTemplate.Declaration?.Name ?? explicitName.AssertNotNull(),
-                eventTemplate.Declaration != null && eventTemplate.Declaration.IsEventField() );
+                eventTemplate.Declaration != null && eventTemplate.Declaration.IsEventField(),
+                tags );
 
             this.MemberBuilder.InitializerTemplate = eventTemplate.GetInitializerTemplate();
         }
@@ -63,8 +64,10 @@ namespace Metalama.Framework.Engine.Advices
 
         public override AdviceResult ToResult( ICompilation compilation, IReadOnlyList<IObservableTransformation> observableTransformations )
         {
-            // TODO: Override transformations.
-            var existingDeclaration = this.TargetDeclaration.FindClosestVisibleEvent( this.MemberBuilder, observableTransformations.OfType<IEvent>().ToList() );
+            // this.Tags: Override transformations.
+            var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
+
+            var existingDeclaration = targetDeclaration.FindClosestVisibleEvent( this.MemberBuilder, observableTransformations.OfType<IEvent>().ToList() );
             var hasNoOverrideSemantics = this.Template.Declaration != null && this.Template.Declaration.IsEventField();
 
             if ( existingDeclaration == null )
@@ -83,7 +86,8 @@ namespace Metalama.Framework.Engine.Advices
                             this.MemberBuilder,
                             this.Template,
                             this._addTemplate,
-                            this._removeTemplate ) );
+                            this._removeTemplate,
+                            this.Tags ) );
                 }
             }
             else
@@ -93,8 +97,9 @@ namespace Metalama.Framework.Engine.Advices
                     return
                         AdviceResult.Create(
                             AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentStaticity.CreateRoslynDiagnostic(
-                                this.TargetDeclaration.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, this.MemberBuilder, this.TargetDeclaration, existingDeclaration.DeclaringType) ) );
+                                targetDeclaration.GetDiagnosticLocation(),
+                                (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
+                                 existingDeclaration.DeclaringType) ) );
                 }
 
                 switch ( this.OverrideStrategy )
@@ -104,8 +109,9 @@ namespace Metalama.Framework.Engine.Advices
                         return
                             AdviceResult.Create(
                                 AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateRoslynDiagnostic(
-                                    this.TargetDeclaration.GetDiagnosticLocation(),
-                                    (this.Aspect.AspectClass.ShortName, this.MemberBuilder, this.TargetDeclaration, existingDeclaration.DeclaringType) ) );
+                                    targetDeclaration.GetDiagnosticLocation(),
+                                    (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
+                                     existingDeclaration.DeclaringType) ) );
 
                     case OverrideStrategy.Ignore:
                         // Do nothing.
@@ -113,7 +119,7 @@ namespace Metalama.Framework.Engine.Advices
 
                     case OverrideStrategy.New:
                         // If the existing declaration is in the current type, we fail, otherwise, declare a new method and override.
-                        if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( this.TargetDeclaration, existingDeclaration.DeclaringType ) )
+                        if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( targetDeclaration, existingDeclaration.DeclaringType ) )
                         {
                             if ( hasNoOverrideSemantics )
                             {
@@ -126,7 +132,8 @@ namespace Metalama.Framework.Engine.Advices
                                     existingDeclaration,
                                     this.Template,
                                     this._addTemplate,
-                                    this._removeTemplate );
+                                    this._removeTemplate,
+                                    this.Tags );
 
                                 return AdviceResult.Create( overriddenMethod );
                             }
@@ -146,14 +153,15 @@ namespace Metalama.Framework.Engine.Advices
                                     this.MemberBuilder,
                                     this.Template,
                                     this._addTemplate,
-                                    this._removeTemplate );
+                                    this._removeTemplate,
+                                    this.Tags );
 
                                 return AdviceResult.Create( this.MemberBuilder, overriddenMethod );
                             }
                         }
 
                     case OverrideStrategy.Override:
-                        if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( this.TargetDeclaration, existingDeclaration.DeclaringType ) )
+                        if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( targetDeclaration, existingDeclaration.DeclaringType ) )
                         {
                             if ( hasNoOverrideSemantics )
                             {
@@ -166,7 +174,8 @@ namespace Metalama.Framework.Engine.Advices
                                     existingDeclaration,
                                     this.Template,
                                     this._addTemplate,
-                                    this._removeTemplate );
+                                    this._removeTemplate,
+                                    this.Tags );
 
                                 return AdviceResult.Create( overriddenMethod );
                             }
@@ -176,8 +185,8 @@ namespace Metalama.Framework.Engine.Advices
                             return
                                 AdviceResult.Create(
                                     AdviceDiagnosticDescriptors.CannotIntroduceOverrideOfSealed.CreateRoslynDiagnostic(
-                                        this.TargetDeclaration.GetDiagnosticLocation(),
-                                        (this.Aspect.AspectClass.ShortName, this.MemberBuilder, this.TargetDeclaration,
+                                        targetDeclaration.GetDiagnosticLocation(),
+                                        (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
                                          existingDeclaration.DeclaringType) ) );
                         }
                         else if ( !compilation.InvariantComparer.Equals( this.Builder.Type, existingDeclaration.Type ) )
@@ -185,8 +194,8 @@ namespace Metalama.Framework.Engine.Advices
                             return
                                 AdviceResult.Create(
                                     AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateRoslynDiagnostic(
-                                        this.TargetDeclaration.GetDiagnosticLocation(),
-                                        (this.Aspect.AspectClass.ShortName, this.MemberBuilder, this.TargetDeclaration,
+                                        targetDeclaration.GetDiagnosticLocation(),
+                                        (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
                                          existingDeclaration.DeclaringType, existingDeclaration.Type) ) );
                         }
                         else
@@ -205,7 +214,8 @@ namespace Metalama.Framework.Engine.Advices
                                     this.MemberBuilder,
                                     this.Template,
                                     this._addTemplate,
-                                    this._removeTemplate );
+                                    this._removeTemplate,
+                                    this.Tags );
 
                                 return AdviceResult.Create( this.MemberBuilder, overriddenEvent );
                             }

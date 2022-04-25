@@ -74,6 +74,7 @@ namespace Metalama.Framework.Engine.Pipeline
                     if ( transformation is IMemberIntroduction memberIntroduction )
                     {
                         // TODO: Provide other implementations or allow nulls (because this pipeline should not execute anything).
+                        // TODO: Implement support for initializable transformations.
                         var introductionContext = new MemberIntroductionContext(
                             diagnostics,
                             introductionNameProvider,

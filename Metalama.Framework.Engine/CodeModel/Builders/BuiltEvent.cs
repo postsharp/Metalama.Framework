@@ -55,7 +55,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         IEvent IRef<IEvent>.GetTarget( ICompilation compilation ) => (IEvent) this.GetForCompilation( compilation );
 
-        ISymbol ISdkRef<IEvent>.GetSymbol( Compilation compilation ) => throw new NotSupportedException();
+        ISymbol? ISdkRef<IEvent>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => throw new NotSupportedException();
 
         public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 

@@ -4,6 +4,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.ReflectionMocks;
+using Microsoft.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using Xunit;
@@ -90,7 +91,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeIndexerWithTarget( code );
 
             this.AssertEqual(
-                @"new global::Metalama.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target).GetProperty(""Item"", typeof(global::System.String), new global::System.Type[]{typeof(global::System.Int32)}))",
+                @"typeof(global::Target).GetProperty(""Item"", typeof(global::System.String), new global::System.Type[]{typeof(global::System.Int32)})",
                 serialized );
 
             TestExpression<PropertyInfo>(
@@ -115,12 +116,12 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
 
             var compilation = testContext.Compilation;
             var stringType = (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(string) );
-            var properties = stringType.Properties;
-            var property = properties.Single( p => p.Name == "this[]" );
-            var serialized = testContext.Serialize( CompileTimeFieldOrPropertyInfo.Create( (Property) property ) ).ToString();
+            var properties = stringType.Indexers;
+            var property = properties.Single();
+            var serialized = testContext.Serialize( CompileTimePropertyInfo.Create( (Indexer) property ) ).NormalizeWhitespace().ToString();
 
             this.AssertEqual(
-                @"new global::Metalama.Framework.RunTime.FieldOrPropertyInfo(typeof(global::System.String).GetProperty(""Chars"", typeof(global::System.Char), new global::System.Type[]{typeof(global::System.Int32)}))",
+                @"typeof(global::System.String).GetProperty(""Chars"", typeof(global::System.Char), new global::System.Type[]{typeof(global::System.Int32)})",
                 serialized );
 
             TestExpression<PropertyInfo>(
@@ -141,9 +142,9 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             using var testContext = this.CreateSerializationTestContext( code );
 
             var compilation = testContext.Compilation;
-            var single = compilation.Types.Single( t => t.Name == "Target" ).Properties.Single( p => p.Parameters.Any( pp => pp.Name == "target" ) );
-            var property = (Property) single;
-            var actual = testContext.Serialize( CompileTimeFieldOrPropertyInfo.Create( property ) ).ToString();
+            var single = compilation.Types.Single( t => t.Name == "Target" ).Indexers.Single( p => p.Parameters.Any( pp => pp.Name == "target" ) );
+            var property = (Indexer) single;
+            var actual = testContext.Serialize( CompileTimePropertyInfo.Create( property ) ).NormalizeWhitespace().ToString();
 
             return actual;
         }

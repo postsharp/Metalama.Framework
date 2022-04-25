@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Diagnostics;
 
 namespace Metalama.Framework.Code;
@@ -8,6 +9,7 @@ namespace Metalama.Framework.Code;
 /// <summary>
 /// Represents a syntax node or a syntax token. 
 /// </summary>
+[CompileTime]
 public readonly struct SyntaxReference
 {
     private readonly ISyntaxReferenceImpl _syntaxReferenceImpl;
