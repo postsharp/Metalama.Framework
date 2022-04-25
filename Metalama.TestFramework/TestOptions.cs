@@ -180,6 +180,7 @@ namespace Metalama.TestFramework
         /// <summary>
         /// Gets or sets a value indicating whether all input syntax trees should be used as a part of test output. 
         /// If <c>false</c> only the primary syntax tree is processed and used as test output. If <c>true</c>, all syntax trees are processed and used as test output.
+        /// To set this option in a test, add this comment to your test file: <c>// @OutputAllSyntaxTrees</c>.
         /// </summary>
         public bool? OutputAllSyntaxTrees { get; set; }
 

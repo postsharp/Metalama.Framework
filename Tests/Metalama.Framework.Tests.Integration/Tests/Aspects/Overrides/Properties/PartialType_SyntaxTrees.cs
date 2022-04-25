@@ -1,7 +1,6 @@
 ﻿// @OutputAllSyntaxTrees
 
 using System;
-using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -9,18 +8,18 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Properties.Parti
 {
     public class OverrideAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             foreach (var property in builder.Target.Properties)
             {
-                builder.Advices.OverrideAccessors(property, nameof(Template), nameof(Template), tags: new TagDictionary() { ["name"] = property.Name });
+                builder.Advices.OverrideAccessors( property, nameof(Template), nameof(Template), tags: new { name = property.Name } );
             }
         }
 
         [Template]
         public dynamic? Template()
         {
-            Console.WriteLine($"This is the override of {meta.Tags["name"]}.");
+            Console.WriteLine( $"This is the override of {meta.Tags["name"]}." );
 
             return meta.Proceed();
         }
@@ -34,11 +33,12 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Properties.Parti
         {
             get
             {
-                Console.WriteLine("This is TargetProperty1.");
+                Console.WriteLine( "This is TargetProperty1." );
+
                 return 42;
             }
 
-            set => Console.WriteLine("This is TargetProperty1.");
+            set => Console.WriteLine( "This is TargetProperty1." );
         }
     }
 }

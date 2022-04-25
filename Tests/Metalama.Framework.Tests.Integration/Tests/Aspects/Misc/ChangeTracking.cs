@@ -18,7 +18,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.ChangeTracking
                 builder.Advices.Override(
                     property,
                     nameof(OverrideProperty),
-                    tags: new TagDictionary { ["isSpecifiedProperty"] = isSpecifiedProperty } );
+                    tags: new { isSpecifiedProperty = isSpecifiedProperty } );
             }
         }
 
