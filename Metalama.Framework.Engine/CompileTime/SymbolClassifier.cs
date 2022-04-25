@@ -374,45 +374,45 @@ namespace Metalama.Framework.Engine.CompileTime
             return this.GetScopeFromSignature( symbol, recursion + 1 );
         }
 
+        private void CombineScope( ITypeSymbol type, int recursion, ref TemplatingScope combinedScope )
+        {
+            var typeScope = this.GetTemplatingScopeCore( type, recursion + 1 );
+
+            if ( typeScope != TemplatingScope.RunTimeOrCompileTime )
+            {
+                if ( combinedScope == TemplatingScope.RunTimeOrCompileTime )
+                {
+                    combinedScope = typeScope;
+                }
+                else
+                {
+                    combinedScope = TemplatingScope.Conflict;
+                }
+            }
+        }
+
         private TemplatingScope GetScopeFromSignature( ISymbol symbol, int recursion )
         {
             var signatureScope = TemplatingScope.RunTimeOrCompileTime;
 
-            void CombineScope( ITypeSymbol type )
-            {
-                var typeScope = this.GetTemplatingScopeCore( type, recursion + 1 );
-
-                if ( typeScope != TemplatingScope.RunTimeOrCompileTime )
-                {
-                    if ( signatureScope == TemplatingScope.RunTimeOrCompileTime )
-                    {
-                        signatureScope = typeScope;
-                    }
-                    else
-                    {
-                        signatureScope = TemplatingScope.Conflict;
-                    }
-                }
-            }
-
             switch ( symbol )
             {
                 case IMethodSymbol method:
-                    CombineScope( method.ReturnType );
+                    this.CombineScope( method.ReturnType, recursion, ref signatureScope );
 
                     foreach ( var parameter in method.Parameters )
                     {
-                        CombineScope( parameter.Type );
+                        this.CombineScope( parameter.Type, recursion, ref signatureScope );
                     }
 
                     return signatureScope;
 
                 case IPropertySymbol property:
-                    CombineScope( property.Type );
+                    this.CombineScope( property.Type, recursion, ref signatureScope );
 
                     foreach ( var parameter in property.Parameters )
                     {
-                        CombineScope( parameter.Type );
+                        this.CombineScope( parameter.Type, recursion, ref signatureScope );
                     }
 
                     return signatureScope;
@@ -481,44 +481,54 @@ namespace Metalama.Framework.Engine.CompileTime
 
             switch ( symbol )
             {
-                case ITypeSymbol type:
+                case INamedTypeSymbol { IsAnonymousType: true } anonymousType:
+                    var combinedScope = TemplatingScope.RunTimeOrCompileTime;
+
+                    foreach ( var member in anonymousType.GetMembers() )
                     {
-                        if ( symbol is INamedTypeSymbol namedType )
+                        if ( member is IPropertySymbol property )
                         {
-                            // Note: Type with [CompileTime] on a base type or an interface should be considered compile-time,
-                            // even if it has a generic argument from an external assembly (which makes it run-time). So generic arguments should come last.
+                            this.CombineScope( property.Type, 0, ref combinedScope );
+                        }
+                    }
 
-                            // From base type.
-                            if ( type.BaseType != null )
+                    return AddToCache( combinedScope );
+
+                case INamedTypeSymbol namedType:
+                    {
+                        // Note: Type with [CompileTime] on a base type or an interface should be considered compile-time,
+                        // even if it has a generic argument from an external assembly (which makes it run-time). So generic arguments should come last.
+
+                        // From base type.
+                        if ( namedType.BaseType != null )
+                        {
+                            var scopeFromBaseType = this.GetScopeFromAttributes( namedType.BaseType );
+
+                            if ( scopeFromBaseType != null )
                             {
-                                var scopeFromBaseType = this.GetScopeFromAttributes( type.BaseType );
-
-                                if ( scopeFromBaseType != null )
-                                {
-                                    return AddToCache( scopeFromBaseType );
-                                }
+                                return AddToCache( scopeFromBaseType );
                             }
+                        }
 
-                            // From interfaces.
-                            foreach ( var @interface in type.AllInterfaces )
+                        // From interfaces.
+                        foreach ( var @interface in namedType.AllInterfaces )
+                        {
+                            var scopeFromInterface = this.GetScopeFromAttributes( @interface );
+
+                            if ( scopeFromInterface != null )
                             {
-                                var scopeFromInterface = this.GetScopeFromAttributes( @interface );
-
-                                if ( scopeFromInterface != null )
-                                {
-                                    return AddToCache( scopeFromInterface );
-                                }
+                                return AddToCache( scopeFromInterface );
                             }
+                        }
 
-                            // From generic arguments.
-                            foreach ( var genericArgument in namedType.TypeArguments )
+                        // From generic arguments.
+                        foreach ( var genericArgument in namedType.TypeArguments )
+                        {
+                            var scopeFromGenericArgument = this.GetScopeFromAttributes( genericArgument );
+
+                            if ( scopeFromGenericArgument != null )
                             {
-                                var scopeFromGenericArgument = this.GetScopeFromAttributes( genericArgument );
-
-                                if ( scopeFromGenericArgument != null )
-                                {
-                                    return AddToCache( scopeFromGenericArgument );
-                                }
+                                return AddToCache( scopeFromGenericArgument );
                             }
                         }
 
