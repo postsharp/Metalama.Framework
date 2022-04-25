@@ -41,10 +41,6 @@
             <_Parameter1>MetalamaDebugTestFramework</_Parameter1>
             <_Parameter2>$(MetalamaDebugTestFramework)</_Parameter2>
         </AssemblyAttribute>
-        <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
-            <_Parameter1>ImplicitUsings</_Parameter1>
-            <_Parameter2>@(Using)</_Parameter2>
-        </AssemblyAttribute>
         <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute" Condition="'$(GeneratedGlobalUsingsFile)'!=''">
             <_Parameter1>GlobalUsingsFile</_Parameter1>
             <_Parameter2>$(GeneratedGlobalUsingsFile)</_Parameter2>
