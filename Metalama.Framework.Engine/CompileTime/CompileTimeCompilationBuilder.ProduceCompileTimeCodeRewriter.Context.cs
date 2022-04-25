@@ -4,6 +4,8 @@
 using Microsoft.CodeAnalysis;
 using System;
 
+#pragma warning disable CA1001 // IDisposable is not owned.
+
 namespace Metalama.Framework.Engine.CompileTime;
 
 internal partial class CompileTimeCompilationBuilder
@@ -13,10 +15,7 @@ internal partial class CompileTimeCompilationBuilder
         private class Context : IDisposable
         {
             private readonly ProduceCompileTimeCodeRewriter _parent;
-            
-#pragma warning disable CA1001 // IDisposable is not owned.
             private readonly Context _oldContext;
-#pragma warning restore CA1001
 
             public Context(
                 TemplatingScope scope,
