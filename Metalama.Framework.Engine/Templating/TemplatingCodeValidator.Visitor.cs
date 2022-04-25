@@ -62,6 +62,13 @@ namespace Metalama.Framework.Engine.Templating
 
             public override void Visit( SyntaxNode? node )
             {
+                bool IsTypeOfOrNameOf()
+                {
+                    return node
+                        .AncestorsAndSelf()
+                        .Any( n => n is TypeOfExpressionSyntax || (n is InvocationExpressionSyntax invocation && invocation.IsNameOf()) );
+                }
+
                 bool AvoidDuplicates( ISymbol symbol )
                 {
                     return this._alreadyReportedDiagnostics.Add( symbol ) &&
@@ -114,9 +121,7 @@ namespace Metalama.Framework.Engine.Templating
                                         this._currentDeclaration! ) );
                             }
                         }
-                        else if ( !(this._currentScope.Value.ExecutesAtCompileTimeOnly() || this._currentDeclarationIsTemplate!.Value) && !node
-                                     .AncestorsAndSelf()
-                                     .Any( n => n is TypeOfExpressionSyntax || (n is InvocationExpressionSyntax invocation && invocation.IsNameOf()) ) )
+                        else if ( !(this._currentScope.Value.MustExecuteAtCompileTime() || this._currentDeclarationIsTemplate!.Value) && !IsTypeOfOrNameOf() )
                         {
                             // We cannot reference a compile-time-only declaration, except in a typeof() or nameof() expression
                             // because these are transformed by the CompileTimeCompilationBuilder.
@@ -130,10 +135,28 @@ namespace Metalama.Framework.Engine.Templating
                             }
                         }
                     }
+                    else if ( referencedScope == TemplatingScope.RunTimeOnly )
+                    {
+                        if ( this._currentScope.Value == TemplatingScope.CompileTimeOnly && !this._currentDeclarationIsTemplate!.Value && !IsTypeOfOrNameOf() )
+                        {
+                            if ( AvoidDuplicates( referencedSymbol ) )
+                            {
+                                this.Report(
+                                    TemplatingDiagnosticDescriptors.CannotReferenceRunTimeOnly.CreateRoslynDiagnostic(
+                                        node.GetLocation(),
+                                        (this._currentDeclaration!, referencedSymbol) ) );
+                            }
+                        }
+                    }
                 }
             }
 
             public override void VisitAttribute( AttributeSyntax node )
+            {
+                // Do not validate custom attributes.
+            }
+
+            public override void VisitAttributeList( AttributeListSyntax node )
             {
                 // Do not validate custom attributes.
             }
@@ -147,8 +170,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 using var scope = this.WithScope( node );
 
-                if ( (scope.Scope == TemplatingScope.RunTimeOrCompileTime || scope.Scope == TemplatingScope.RunTimeOrCompileTime) &&
-                     this._reportCompileTimeTreeOutdatedError )
+                if ( scope.Scope == TemplatingScope.RunTimeOrCompileTime && this._reportCompileTimeTreeOutdatedError )
                 {
                     this.Report(
                         TemplatingDiagnosticDescriptors.CompileTimeTypeNeedsRebuild.CreateRoslynDiagnostic(
@@ -159,27 +181,31 @@ namespace Metalama.Framework.Engine.Templating
                 base.VisitClassDeclaration( node );
             }
 
-            public override void VisitMethodDeclaration( MethodDeclarationSyntax node )
-            {
-                var methodSymbol = this._semanticModel.GetDeclaredSymbol( node );
+            public override void VisitMethodDeclaration( MethodDeclarationSyntax node ) => this.VisitBaseMethodOrAccessor( node, base.VisitMethodDeclaration );
 
-                if ( methodSymbol != null && !this._classifier.GetTemplateInfo( methodSymbol ).IsNone )
+            public override void VisitAccessorDeclaration( AccessorDeclarationSyntax node )
+                => this.VisitBaseMethodOrAccessor( node, base.VisitAccessorDeclaration );
+
+            private void VisitBaseMethodOrAccessor<T>( T node, Action<T> visitBase )
+                where T : SyntaxNode
+            {
+                using ( this.WithScope( node ) )
                 {
-                    if ( this._isDesignTime )
+                    if ( this._currentDeclarationIsTemplate!.Value )
                     {
-                        this._templateCompiler ??= new TemplateCompiler( this._serviceProvider, this._semanticModel.Compilation );
-                        _ = this._templateCompiler.TryAnnotate( node, this._semanticModel, this, this._cancellationToken, out _, out _ );
+                        if ( this._isDesignTime )
+                        {
+                            this._templateCompiler ??= new TemplateCompiler( this._serviceProvider, this._semanticModel.Compilation );
+                            _ = this._templateCompiler.TryAnnotate( node, this._semanticModel, this, this._cancellationToken, out _, out _ );
+                        }
+                        else
+                        {
+                            // The template compiler will be called by the main pipeline.
+                        }
                     }
                     else
                     {
-                        // The template compiler will be called by the main pipeline.
-                    }
-                }
-                else
-                {
-                    using ( this.WithScope( node ) )
-                    {
-                        base.VisitMethodDeclaration( node );
+                        visitBase( node );
                     }
                 }
             }
@@ -274,7 +300,10 @@ namespace Metalama.Framework.Engine.Templating
 
                     var context = new ScopeCookie( this, scope, declaredSymbol );
                     this._currentScope = scope;
-                    this._currentDeclarationIsTemplate = scope.ExecutesAtCompileTimeOnly() && !this._classifier.GetTemplateInfo( declaredSymbol ).IsNone;
+
+                    this._currentDeclarationIsTemplate = this._currentDeclarationIsTemplate.GetValueOrDefault()
+                                                         || !this._classifier.GetTemplateInfo( declaredSymbol ).IsNone;
+
                     this._currentDeclaration = declaredSymbol;
 
                     return context;

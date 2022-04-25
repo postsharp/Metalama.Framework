@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.props"/>
-    <Import Project="..\..\eng\Coverage.props"/>
+    <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.props" />
+    <Import Project="..\..\eng\Coverage.props" />
 
     <PropertyGroup>
         <TargetFrameworks>net6.0;netframework4.8</TargetFrameworks>
@@ -17,31 +17,34 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)"/>
-        <PackageReference Include="xunit" Version="$(xUnitVersion)"/>
-        <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitVersion)"/>
-        <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)"/>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
+        <PackageReference Include="xunit" Version="$(xUnitVersion)" />
+        <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitVersion)" />
+        <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" />
 
-        <!-- This is used for a test -->
-        <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0"/>
+        <!-- These packages ared used in tests -->
+        <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
+        <PackageReference Include="System.Text.Json" Version="6.0.3" />
+
     </ItemGroup>
 
     <ItemGroup>
         <!-- Exclude files that intentionally do not compile -->
-        <Compile Remove="Tests\**\__*.cs"/>
+        <Compile Remove="Tests\**\__*.cs" />
     </ItemGroup>
+
 
 
     <ItemGroup>
-        <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj"/>
-        <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj"/>
-        <ProjectReference Include="..\..\Metalama.TestFramework\Metalama.TestFramework.csproj"/>
+        <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
+        <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
+        <ProjectReference Include="..\..\Metalama.TestFramework\Metalama.TestFramework.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-        <InternalsVisibleTo Include="Metalama.AspectWorkbench"/>
+        <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
     </ItemGroup>
 
-    <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets"/>
+    <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets" />
 
 </Project>

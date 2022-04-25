@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
@@ -19,7 +20,10 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
 
         public SerializableTypes( IEnumerable<ITypeSymbol> serializableTypes )
         {
-            this._serializableTypes = serializableTypes.Select( t => t.GetDocumentationCommentId().AssertNotNull() ).ToImmutableHashSet();
+            this._serializableTypes = serializableTypes
+                .SelectRecursive( t => t.BaseType )
+                .Select( t => t.GetDocumentationCommentId().AssertNotNull() )
+                .ToImmutableHashSet();
         }
 
         private static bool IsSerializableIntrinsic( ITypeSymbol type )

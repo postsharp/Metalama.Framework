@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// Rewrites a run-time syntax tree into a compile-time syntax tree. Calls <see cref="TemplateCompiler"/> on templates,
         /// and removes run-time-only sub trees.
         /// </summary>
-        private sealed class ProduceCompileTimeCodeRewriter : CompileTimeBaseRewriter
+        private sealed partial class ProduceCompileTimeCodeRewriter : CompileTimeBaseRewriter
         {
             private static readonly SyntaxAnnotation _hasCompileTimeCodeAnnotation = new( "Metalama_HasCompileTimeCode" );
             private readonly Compilation _compileTimeCompilation;
@@ -737,9 +737,16 @@ namespace Metalama.Framework.Engine.CompileTime
                     }
                     else if ( propertySymbol.IsOverride && propertySymbol.OverriddenProperty!.IsAbstract )
                     {
-                        // If the property implements an abstract property, it cannot be removed.
-
                         yield return this.WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
+                    }
+                    else if ( propertySymbol.IsAbstract && (!this.SymbolClassifier.GetTemplatingScope( propertySymbol.Type ).CanExecuteAtCompileTime()
+                                                            || propertySymbol.Parameters.Any(
+                                                                p => !this.SymbolClassifier.GetTemplatingScope( p.Type ).CanExecuteAtCompileTime() )) )
+                    {
+                        this._diagnosticAdder.Report(
+                            TemplatingDiagnosticDescriptors.AbstractTemplateCannotHaveRunTimeSignature.CreateRoslynDiagnostic(
+                                propertySymbol.GetDiagnosticLocation(),
+                                propertySymbol ) );
                     }
                     else
                     {
@@ -764,119 +771,57 @@ namespace Metalama.Framework.Engine.CompileTime
 
             private new IEnumerable<MemberDeclarationSyntax> VisitFieldDeclaration( FieldDeclarationSyntax node )
             {
-                var hasTemplateVariables = false;
-                var unchangedReadabilityVariables = new List<VariableDeclaratorSyntax>();
-                var nonReadOnlyVariables = new List<VariableDeclaratorSyntax>();
-
                 foreach ( var declarator in node.Declaration.Variables )
                 {
                     var fieldSymbol = (IFieldSymbol) this.RunTimeCompilation.GetSemanticModel( declarator.SyntaxTree )
                         .GetDeclaredSymbol( declarator )
                         .AssertNotNull();
 
-                    if ( this._serializableFieldsAndProperties.TryGetValue( fieldSymbol, out var serializableType )
-                         && this._serializerGenerator.ShouldSuppressReadOnly( serializableType, fieldSymbol ) )
+                    var removeReadOnly = this._serializableFieldsAndProperties.TryGetValue( fieldSymbol, out var serializableType )
+                                         && this._serializerGenerator.ShouldSuppressReadOnly( serializableType, fieldSymbol );
+
+                    // This field needs to have their readonly modifier removed, so add it to the list.
+                    foreach ( var result in this.VisitFieldOrEventVariable(
+                                 TemplateCompilerSemantics.Initializer,
+                                 declarator,
+                                 v =>
+                                 {
+                                     var member = node.WithDeclaration( node.Declaration.WithVariables( SingletonSeparatedList( v ) ).WithType( (TypeSyntax) this.Visit( node.Declaration.Type )! ) );
+
+                                     if ( removeReadOnly )
+                                     {
+                                         member = member.WithModifiers( TokenList( node.Modifiers.Where( m => !m.IsKind( SyntaxKind.ReadOnlyKeyword ) ) ) );
+                                     }
+
+                                     return member;
+                                 } ) )
                     {
-                        // This field needs to have it's readonly modifier removed, so add it to the list.
-                        nonReadOnlyVariables.Add(
-                            this.TransformVariable( TemplateCompilerSemantics.Initializer, declarator, out var compiledInitializerTemplate ) );
-
-                        // If the field had an initializer template, yield return the compiled member.
-                        if ( compiledInitializerTemplate != null )
-                        {
-                            hasTemplateVariables = true;
-
-                            yield return compiledInitializerTemplate;
-                        }
-                    }
-                    else
-                    {
-                        // This field is unchanged, so add add it to the list.
-                        unchangedReadabilityVariables.Add(
-                            this.TransformVariable( TemplateCompilerSemantics.Initializer, declarator, out var compiledInitializerTemplate ) );
-
-                        // If the field had an initializer template, yield return the compiled member.
-                        if ( compiledInitializerTemplate != null )
-                        {
-                            hasTemplateVariables = true;
-
-                            yield return compiledInitializerTemplate;
-                        }
-                    }
-                }
-
-                if ( nonReadOnlyVariables.Count > 0 )
-                {
-                    // There are some variables that need to have the readonly modifier removed.
-                    if ( unchangedReadabilityVariables.Count > 0 )
-                    {
-                        // There are some remaining variables that remain readonly.
-                        yield return
-                            node.WithDeclaration( node.Declaration.WithVariables( SeparatedList( unchangedReadabilityVariables ) ) );
-                    }
-
-                    yield return
-                        node.WithDeclaration( node.Declaration.WithVariables( SeparatedList( nonReadOnlyVariables ) ) )
-                            .WithModifiers( TokenList( node.Modifiers.Where( t => !t.IsKind( SyntaxKind.ReadOnlyKeyword ) ) ) );
-                }
-                else if ( hasTemplateVariables )
-                {
-                    // There were some variables with initializer templates, which means their initializers got transformed.
-                    yield return
-                        node.WithDeclaration( node.Declaration.WithVariables( SeparatedList( unchangedReadabilityVariables ) ) );
-                }
-                else
-                {
-                    // Nothing was changed.
-                    var visitedNode = this.Visit( node );
-
-                    if ( visitedNode != null )
-                    {
-                        yield return (MemberDeclarationSyntax) visitedNode;
+                        yield return result;
                     }
                 }
             }
 
             private new IEnumerable<MemberDeclarationSyntax> VisitEventFieldDeclaration( EventFieldDeclarationSyntax node )
             {
-                var hasTemplateVariables = false;
-                var variables = new List<VariableDeclaratorSyntax>();
-
                 foreach ( var declarator in node.Declaration.Variables )
                 {
-                    variables.Add( this.TransformVariable( TemplateCompilerSemantics.Initializer, declarator, out var compiledInitializerTemplate ) );
-
-                    if ( compiledInitializerTemplate != null )
+                    foreach ( var result in this.VisitFieldOrEventVariable(
+                                 TemplateCompilerSemantics.Initializer,
+                                 declarator,
+                                 v => node.WithDeclaration( node.Declaration.WithVariables( SingletonSeparatedList( v ) ).WithType( (TypeSyntax) this.Visit( node.Declaration.Type )! ) ) ) )
                     {
-                        hasTemplateVariables = true;
-
-                        yield return compiledInitializerTemplate;
-                    }
-                }
-
-                if ( hasTemplateVariables )
-                {
-                    // Having template variables means that we've changed nodes even though we did not change readability.
-                    yield return
-                        node.WithDeclaration( node.Declaration.WithVariables( SeparatedList( variables ) ) );
-                }
-                else
-                {
-                    var visitedNode = this.Visit( node );
-
-                    if ( visitedNode != null )
-                    {
-                        yield return (MemberDeclarationSyntax) visitedNode;
+                        yield return result;
                     }
                 }
             }
 
-            private VariableDeclaratorSyntax TransformVariable(
+            private IEnumerable<MemberDeclarationSyntax> VisitFieldOrEventVariable(
                 TemplateCompilerSemantics templateSyntaxKind,
                 VariableDeclaratorSyntax variable,
-                out MethodDeclarationSyntax? compiledInitializerTemplate )
+                Func<VariableDeclaratorSyntax, MemberDeclarationSyntax> createMember )
             {
                 var symbol = this.RunTimeCompilation.GetSemanticModel( variable.SyntaxTree ).GetDeclaredSymbol( variable ).AssertNotNull();
+
                 var isTemplate = !this.SymbolClassifier.GetTemplateInfo( symbol ).IsNone;
 
                 if ( isTemplate && variable.Initializer != null )
@@ -895,24 +840,26 @@ namespace Metalama.Framework.Engine.CompileTime
                             out _,
                             out var transformedFieldDeclaration ) )
                     {
-                        compiledInitializerTemplate = (MethodDeclarationSyntax) transformedFieldDeclaration;
-
-                        return ((VariableDeclaratorSyntax) this.Visit( variable ).AssertNotNull())
-                            .WithInitializer( null );
+                        yield return (MethodDeclarationSyntax) transformedFieldDeclaration;
                     }
                     else
                     {
                         this.Success = false;
-                        compiledInitializerTemplate = null;
-
-                        return (VariableDeclaratorSyntax) this.Visit( variable ).AssertNotNull();
                     }
                 }
                 else
                 {
-                    compiledInitializerTemplate = null;
+                    var variableType = symbol switch
+                    {
+                        IEventSymbol @eventSymbol => @eventSymbol.Type,
+                        IFieldSymbol fieldSymbol => fieldSymbol.Type,
+                        _ => throw new AssertionFailedException()
+                    };
 
-                    return (VariableDeclaratorSyntax) this.Visit( variable ).AssertNotNull();
+                    if ( this.SymbolClassifier.GetTemplatingScope( variableType ).CanExecuteAtCompileTime() )
+                    {
+                        yield return createMember( (VariableDeclaratorSyntax) this.Visit( variable ).AssertNotNull() );
+                    }
                 }
             }
 
@@ -974,7 +921,17 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 if ( success )
                 {
-                    yield return this.WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
+                    if ( eventSymbol.IsOverride && eventSymbol.OverriddenEvent!.IsAbstract )
+                    {
+                        yield return this.WithThrowNotSupportedExceptionBody( node, "Template code cannot be directly executed." );
+                    }
+                    else if ( eventSymbol.IsAbstract && !this.SymbolClassifier.GetTemplatingScope( eventSymbol.Type ).CanExecuteAtCompileTime() )
+                    {
+                        this._diagnosticAdder.Report(
+                            TemplatingDiagnosticDescriptors.AbstractTemplateCannotHaveRunTimeSignature.CreateRoslynDiagnostic(
+                                eventSymbol.GetDiagnosticLocation(),
+                                eventSymbol ) );
+                    }
 
                     if ( transformedAddDeclaration != null )
                     {
@@ -1250,41 +1207,6 @@ namespace Metalama.Framework.Engine.CompileTime
                 this._currentContext = new Context( this._currentContext.Scope, unnestedType, newName, nestingLevel, this );
 
                 return this._currentContext;
-            }
-
-            // TODO: top-level statements?
-
-            private class Context : IDisposable
-            {
-                private readonly ProduceCompileTimeCodeRewriter _parent;
-                private readonly Context _oldContext;
-
-                public Context(
-                    TemplatingScope scope,
-                    INamedTypeSymbol? nestedType,
-                    string? nestedTypeNewName,
-                    int nestingLevel,
-                    ProduceCompileTimeCodeRewriter parent )
-                {
-                    this.Scope = scope;
-                    this.NestedTypeNewName = nestedTypeNewName;
-                    this.NestingLevel = nestingLevel;
-                    this.NestedType = nestedType;
-                    this._parent = parent;
-
-                    // This will be null for the root context.
-                    this._oldContext = parent._currentContext;
-                }
-
-                public TemplatingScope Scope { get; }
-
-                public string? NestedTypeNewName { get; }
-
-                public int NestingLevel { get; }
-
-                public INamedTypeSymbol? NestedType { get; }
-
-                public void Dispose() => this._parent._currentContext = this._oldContext;
             }
         }
     }
