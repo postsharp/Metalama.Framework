@@ -38,7 +38,7 @@ namespace Metalama.Framework.Engine.Advices
             string? layerName,
             ITagReader tags )
         {
-            this.Tags = tags?.ToImmutableDictionary() ?? ImmutableDictionary<string, object?>.Empty;
+            this.Tags = tags;
             this.Aspect = aspect;
             this.TemplateInstance = template;
             this.TargetDeclaration = targetDeclaration.AssertNotNull().ToTypedRef();

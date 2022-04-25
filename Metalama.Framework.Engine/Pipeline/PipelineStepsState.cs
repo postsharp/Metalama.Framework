@@ -38,8 +38,9 @@ namespace Metalama.Framework.Engine.Pipeline
         private readonly List<AspectInstanceResult> _aspectInstanceResults = new();
         private readonly List<IValidatorSource> _validatorSources = new();
         private readonly OverflowAspectSource _overflowAspectSource = new();
+        private readonly IntrospectionPipelineListener? _introspectionPipelineListener;
+
         private PipelineStep? _currentStep;
-        private IntrospectionPipelineListener? _introspectionPipelineListener;
 
         public CompilationModel LastCompilation { get; private set; }
 

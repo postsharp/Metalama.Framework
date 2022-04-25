@@ -7,17 +7,6 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Introspection;
 
-public interface IIntrospectionAdvice
-{
-    IDeclaration TargetDeclaration { get; }
-
-    string AspectLayerId { get; }
-
-    ImmutableDictionary<string, object?> Tags { get; }
-
-    ImmutableArray<object> Transformations { get; }
-}
-
 /// <summary>
 ///  Represents an instance of an aspect, as well as the results of the aspect instance.
 /// </summary>
