@@ -68,7 +68,7 @@ namespace Metalama.Framework.Engine.Advices
                                     template.Attribute.Scope,
                                     template.Attribute.WhenExists,
                                     layerName,
-                                    null );
+                                    TagReader.Empty );
 
                                 advice = introduceMethodAdvice;
                                 builder = introduceMethodAdvice.Builder;
@@ -90,7 +90,7 @@ namespace Metalama.Framework.Engine.Advices
                                     template.Attribute.Scope,
                                     template.Attribute.WhenExists,
                                     layerName,
-                                    null );
+                                    TagReader.Empty );
 
                                 advice = introducePropertyAdvice;
                                 builder = introducePropertyAdvice.Builder;
@@ -109,7 +109,7 @@ namespace Metalama.Framework.Engine.Advices
                                     template.Attribute.Scope,
                                     template.Attribute.WhenExists,
                                     layerName,
-                                    null );
+                                    TagReader.Empty );
 
                                 advice = introduceEventAdvice;
                                 builder = introduceEventAdvice.Builder;
@@ -127,7 +127,8 @@ namespace Metalama.Framework.Engine.Advices
                                     fieldTemplate,
                                     template.Attribute.Scope,
                                     template.Attribute.WhenExists,
-                                    layerName );
+                                    layerName,
+                                    TagReader.Empty );
 
                                 advice = introduceFieldAdvice;
                                 builder = introduceFieldAdvice.Builder;

@@ -1,4 +1,3 @@
-using System;
 using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -45,7 +44,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues
                 builder.Advices.Override(
                     property,
                     nameof(OverridePropertyTemplate),
-                    tags: new TagDictionary { ["optionalProperty"] = propertyBuilder } );
+                    tags: new { optionalProperty = propertyBuilder } );
             }
         }
 
@@ -82,13 +81,12 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues
         public bool IsSpecified { get; private set; }
 
         public T Value { get; }
-        
+
         public OptionalValue( T value )
         {
-            this.Value = value;
-            this.IsSpecified = true;
+            Value = value;
+            IsSpecified = true;
         }
-
     }
 
     // <target>

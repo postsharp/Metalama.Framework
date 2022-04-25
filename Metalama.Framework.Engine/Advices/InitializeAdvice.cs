@@ -6,6 +6,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
@@ -21,7 +22,7 @@ namespace Metalama.Framework.Engine.Advices
 
         public InitializerKind Kind { get; }
 
-        public new IMemberOrNamedType TargetDeclaration => (IMemberOrNamedType) base.TargetDeclaration;
+        public new Ref<IMemberOrNamedType> TargetDeclaration => base.TargetDeclaration.As<IMemberOrNamedType>();
 
         public InitializeAdvice(
             IAspectInstanceInternal aspect,
@@ -30,7 +31,7 @@ namespace Metalama.Framework.Engine.Advices
             TemplateMember<IMethod> template,
             InitializerKind kind,
             string? layerName,
-            Dictionary<string, object?>? tags ) : base( aspect, templateInstance, targetDeclaration, layerName, tags )
+            ITagReader tags ) : base( aspect, templateInstance, targetDeclaration, layerName, tags )
         {
             this.Template = template;
             this.Kind = kind;
@@ -40,8 +41,10 @@ namespace Metalama.Framework.Engine.Advices
 
         public override AdviceResult ToResult( ICompilation compilation, IReadOnlyList<IObservableTransformation> observableTransformations )
         {
+            var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
+
             var containingType =
-                this.TargetDeclaration switch
+                targetDeclaration switch
                 {
                     INamedType t => t,
                     IMember m => m.DeclaringType,
@@ -85,14 +88,14 @@ namespace Metalama.Framework.Engine.Advices
                 if ( ctor.IsImplicitStaticConstructor() )
                 {
                     // Missing static ctor.
-                    var builder = new ConstructorBuilder( this, ctor.DeclaringType ) { IsStatic = true };
+                    var builder = new ConstructorBuilder( this, ctor.DeclaringType, this.Tags ) { IsStatic = true };
                     transformations.Add( builder );
                     targetCtor = builder;
                 }
                 else if ( ctor.IsImplicitInstanceConstructor() )
                 {
                     // Missing implicit ctor.
-                    var builder = new ConstructorBuilder( this, ctor.DeclaringType );
+                    var builder = new ConstructorBuilder( this, ctor.DeclaringType, this.Tags );
                     transformations.Add( builder );
                     targetCtor = builder;
                 }
@@ -103,9 +106,10 @@ namespace Metalama.Framework.Engine.Advices
 
                 var initialization = new InitializationTransformation(
                     this,
-                    this.TargetDeclaration,
+                    targetDeclaration,
                     targetCtor,
-                    this.Template );
+                    this.Template,
+                    this.Tags );
 
                 transformations.Add( initialization );
             }

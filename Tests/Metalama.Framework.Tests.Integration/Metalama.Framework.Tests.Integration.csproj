@@ -34,6 +34,7 @@
     </ItemGroup>
 
 
+
     <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
@@ -42,10 +43,6 @@
 
     <ItemGroup>
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Include="Tests\Aspects\Introductions\Fields\RunTimeOnlyType.t.cs" />
     </ItemGroup>
 
     <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets" />

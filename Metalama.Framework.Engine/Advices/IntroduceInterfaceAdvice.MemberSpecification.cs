@@ -21,12 +21,20 @@ namespace Metalama.Framework.Engine.Advices
 
             public TemplateInfo TemplateInfo { get; }
 
-            public MemberSpecification( IMember interfaceMember, IMember? targetMember, IMember? aspectInterfaceMember, TemplateInfo templateInfo )
+            public ITagReader Tags { get; }
+
+            public MemberSpecification(
+                IMember interfaceMember,
+                IMember? targetMember,
+                IMember? aspectInterfaceMember,
+                TemplateInfo templateInfo,
+                ITagReader tags )
             {
                 this.InterfaceMember = interfaceMember;
                 this.TargetMember = targetMember;
                 this.AspectInterfaceMember = aspectInterfaceMember;
                 this.TemplateInfo = templateInfo;
+                this.Tags = tags;
             }
         }
     }

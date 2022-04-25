@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.CodeModel;
@@ -33,11 +34,13 @@ namespace Metalama.Framework.Engine.Transformations
             Advice advice,
             IMemberOrNamedType initializedDeclaration,
             IConstructor targetConstructor,
-            TemplateMember<IMethod> template )
+            TemplateMember<IMethod> template,
+            ITagReader tags )
         {
             this.ContextDeclaration = initializedDeclaration;
             this._targetConstructor = targetConstructor;
             this._template = template;
+            this.Tags = tags;
             this.Advice = advice;
         }
 
@@ -48,7 +51,7 @@ namespace Metalama.Framework.Engine.Transformations
                 new MetaApiProperties(
                     context.DiagnosticSink,
                     this._template.Cast(),
-                    this.Advice.ReadOnlyTags,
+                    this.Tags,
                     this.Advice.AspectLayerId,
                     context.SyntaxGenerationContext,
                     this.Advice.Aspect,
@@ -80,5 +83,7 @@ namespace Metalama.Framework.Engine.Transformations
                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
                 this.ContextDeclaration );
         }
+
+        public ITagReader Tags { get; }
     }
 }

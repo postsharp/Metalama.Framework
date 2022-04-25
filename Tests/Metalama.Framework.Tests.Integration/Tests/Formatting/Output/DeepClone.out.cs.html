@@ -44,8 +44,7 @@
             }
         </style>
     </head>
-    <body><pre><code class="nohighlight">// Warning CS0114 on `Clone`: `'Targets.Derived.Clone()' hides inherited member 'Targets.AutomaticallyCloneable.Clone()'. To make the current member override that implementation, add the override keyword. Otherwise add the new keyword.`
-<span class="cs-keyword">internal</span> <span class="cs-keyword">class</span> <span class="cs-class-name">Targets</span>
+    <body><pre><code class="nohighlight"><span class="cs-keyword">internal</span> <span class="cs-keyword">class</span> <span class="cs-class-name">Targets</span>
 <span class="cs-punctuation">{</span>
     <span class="cs-punctuation">[</span><span class="cs-identifier">DeepClone</span><span class="cs-punctuation">]</span>
     <span class="cs-keyword">private</span> <span class="cs-keyword">class</span> <span class="cs-class-name">AutomaticallyCloneable</span> <span class="cr-GeneratedCode cs-punctuation">:</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-identifier">ICloneable</span>
@@ -64,6 +63,11 @@
             <span class="cr-GeneratedCode cs-keyword cs-control">return</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-local-name">clone</span><span class="cr-GeneratedCode cs-punctuation">;</span>
         <span class="cr-GeneratedCode cs-punctuation">}</span>
 
+        <span class="cr-GeneratedCode cs-keyword">private</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-class-name">AutomaticallyCloneable</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-method-name">Clone_Source</span><span class="cr-GeneratedCode cs-punctuation">()</span>
+        <span class="cr-GeneratedCode cs-punctuation">{</span>
+            <span class="cr-SourceCode cs-keyword cs-control">return</span><span class="cr-SourceCode"> </span><span class="cr-SourceCode cs-keyword">default</span><span class="cr-SourceCode cs-punctuation">(</span><span class="cr-SourceCode cs-class-name">AutomaticallyCloneable</span><span class="cr-SourceCode cs-punctuation">);</span>
+        <span class="cr-GeneratedCode cs-punctuation">}</span>
+
         <span class="cr-GeneratedCode cs-keyword">object</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-identifier">ICloneable</span><span class="cr-GeneratedCode cs-operator">.</span><span class="cr-GeneratedCode cs-method-name">Clone</span><span class="cr-GeneratedCode cs-punctuation">()</span>
         <span class="cr-GeneratedCode cs-punctuation">{</span>
             <span class="cr-GeneratedCode cs-keyword cs-control">return</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-method-name">Clone</span><span class="cr-GeneratedCode cs-punctuation">();</span>
@@ -71,20 +75,15 @@
     <span class="cs-punctuation">}</span>
 
     <span class="cs-punctuation">[</span><span class="cs-identifier">DeepClone</span><span class="cs-punctuation">]</span>
-    <span class="cs-keyword">private</span> <span class="cs-keyword">class</span> <span class="cs-class-name">Derived</span> <span class="cs-punctuation">:</span> <span class="cs-class-name">AutomaticallyCloneable</span><span class="cs-punctuation">,</span> <span class="cr-GeneratedCode cs-identifier">ICloneable</span>
+    <span class="cs-keyword">private</span> <span class="cs-keyword">class</span> <span class="cs-class-name">Derived</span> <span class="cs-punctuation">:</span> <span class="cs-class-name">AutomaticallyCloneable</span>
     <span class="cs-punctuation">{</span>
         <span class="cs-keyword">private</span> <span class="cs-keyword">string</span> <span class="cs-field-name">d</span><span class="cs-punctuation">;</span>
 
-        <span class="cr-GeneratedCode cs-keyword">public</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-keyword">virtual</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-class-name">Derived</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-method-name">Clone</span><span class="cr-GeneratedCode cs-punctuation">()</span>
+        <span class="cr-GeneratedCode cs-keyword">public</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-keyword">override</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-class-name">Derived</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-method-name">Clone</span><span class="cr-GeneratedCode cs-punctuation">()</span>
         <span class="cr-GeneratedCode cs-punctuation">{</span>
-            <span class="cr-GeneratedCode cs-keyword">var</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-local-name">clone</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-operator">=</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-punctuation">(</span><span class="cr-GeneratedCode cs-class-name">Derived</span><span class="cr-GeneratedCode cs-punctuation">)</span><span class="cr-GeneratedCode cs-method-name">MemberwiseClone</span><span class="cr-GeneratedCode cs-punctuation">();</span>
+            <span class="cr-GeneratedCode cs-keyword">var</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-local-name">clone</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-operator">=</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-punctuation">(</span><span class="cr-GeneratedCode cs-class-name">Derived</span><span class="cr-GeneratedCode cs-punctuation">)</span><span class="cr-GeneratedCode cs-keyword">base</span><span class="cr-GeneratedCode cs-operator">.</span><span class="cr-GeneratedCode cs-method-name">Clone</span><span class="cr-GeneratedCode cs-punctuation">();</span>
             <span class="cr-GeneratedCode cs-local-name">clone</span><span class="cr-GeneratedCode cs-operator">.</span><span class="cr-GeneratedCode cs-field-name">d</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-operator">=</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-punctuation">(</span><span class="cr-GeneratedCode cs-keyword">string</span><span class="cr-GeneratedCode cs-punctuation">)((</span><span class="cr-GeneratedCode cs-identifier">ICloneable</span><span class="cr-GeneratedCode cs-punctuation">)</span><span class="cr-GeneratedCode cs-keyword">this</span><span class="cr-GeneratedCode cs-operator">.</span><span class="cr-GeneratedCode cs-field-name">d</span><span class="cr-GeneratedCode cs-punctuation">)</span><span class="cr-GeneratedCode cs-operator">.</span><span class="cr-GeneratedCode cs-identifier">Clone</span><span class="cr-GeneratedCode cs-punctuation">();</span>
             <span class="cr-GeneratedCode cs-keyword cs-control">return</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-local-name">clone</span><span class="cr-GeneratedCode cs-punctuation">;</span>
-        <span class="cr-GeneratedCode cs-punctuation">}</span>
-
-        <span class="cr-GeneratedCode cs-keyword">object</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-identifier">ICloneable</span><span class="cr-GeneratedCode cs-operator">.</span><span class="cr-GeneratedCode cs-method-name">Clone</span><span class="cr-GeneratedCode cs-punctuation">()</span>
-        <span class="cr-GeneratedCode cs-punctuation">{</span>
-            <span class="cr-GeneratedCode cs-keyword cs-control">return</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-method-name">Clone</span><span class="cr-GeneratedCode cs-punctuation">();</span>
         <span class="cr-GeneratedCode cs-punctuation">}</span>
     <span class="cs-punctuation">}</span>
 <span class="cs-punctuation">}</span></code></pre>

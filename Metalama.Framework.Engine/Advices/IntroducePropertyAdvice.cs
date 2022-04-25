@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Advices
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             string? layerName,
-            Dictionary<string, object?>? tags )
+            ITagReader tags )
             : base( aspect, templateInstance, targetDeclaration, propertyTemplate, scope, overrideStrategy, layerName, tags )
         {
             this._getTemplate = getTemplate;
@@ -45,12 +45,13 @@ namespace Metalama.Framework.Engine.Advices
 
             this.MemberBuilder = new PropertyBuilder(
                 this,
-                this.TargetDeclaration,
+                targetDeclaration,
                 name,
                 hasGet,
                 hasSet,
                 this.Template.Declaration is { IsAutoPropertyOrField: true },
-                this.Template.Declaration is { Writeability: Writeability.InitOnly } );
+                this.Template.Declaration is { Writeability: Writeability.InitOnly },
+                this.Tags );
 
             if ( propertyTemplate.IsNotNull )
             {
@@ -73,7 +74,9 @@ namespace Metalama.Framework.Engine.Advices
         public override AdviceResult ToResult( ICompilation compilation, IReadOnlyList<IObservableTransformation> observableTransformations )
         {
             // Determine whether we need introduction transformation (something may exist in the original code or could have been introduced by previous steps).
-            var existingDeclaration = this.TargetDeclaration.FindClosestVisibleProperty(
+            var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
+
+            var existingDeclaration = targetDeclaration.FindClosestVisibleProperty(
                 this.MemberBuilder,
                 observableTransformations.OfType<IProperty>().ToList() );
 
@@ -86,7 +89,8 @@ namespace Metalama.Framework.Engine.Advices
                     this.MemberBuilder,
                     this.Template,
                     this._getTemplate,
-                    this._setTemplate );
+                    this._setTemplate,
+                    this.Tags );
 
                 return AdviceResult.Create( this.MemberBuilder, overriddenMethod );
             }
@@ -97,8 +101,9 @@ namespace Metalama.Framework.Engine.Advices
                     return
                         AdviceResult.Create(
                             AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentStaticity.CreateRoslynDiagnostic(
-                                this.TargetDeclaration.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, this.MemberBuilder, this.TargetDeclaration, existingDeclaration.DeclaringType) ) );
+                                targetDeclaration.GetDiagnosticLocation(),
+                                (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
+                                 existingDeclaration.DeclaringType) ) );
                 }
 
                 switch ( this.OverrideStrategy )
@@ -108,8 +113,9 @@ namespace Metalama.Framework.Engine.Advices
                         return
                             AdviceResult.Create(
                                 AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateRoslynDiagnostic(
-                                    this.TargetDeclaration.GetDiagnosticLocation(),
-                                    (this.Aspect.AspectClass.ShortName, this.MemberBuilder, this.TargetDeclaration, existingDeclaration.DeclaringType) ) );
+                                    targetDeclaration.GetDiagnosticLocation(),
+                                    (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
+                                     existingDeclaration.DeclaringType) ) );
 
                     case OverrideStrategy.Ignore:
                         // Do nothing.
@@ -117,14 +123,15 @@ namespace Metalama.Framework.Engine.Advices
 
                     case OverrideStrategy.New:
                         // If the existing declaration is in the current type, we fail, otherwise, declare a new method and override.
-                        if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( this.TargetDeclaration, existingDeclaration.DeclaringType ) )
+                        if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( targetDeclaration, existingDeclaration.DeclaringType ) )
                         {
                             var overriddenProperty = new OverriddenProperty(
                                 this,
                                 existingDeclaration,
                                 this.Template,
                                 this._getTemplate,
-                                this._setTemplate );
+                                this._setTemplate,
+                                this.Tags );
 
                             return AdviceResult.Create( overriddenProperty );
                         }
@@ -137,20 +144,22 @@ namespace Metalama.Framework.Engine.Advices
                                 this.MemberBuilder,
                                 this.Template,
                                 this._getTemplate,
-                                this._setTemplate );
+                                this._setTemplate,
+                                this.Tags );
 
                             return AdviceResult.Create( this.MemberBuilder, overriddenProperty );
                         }
 
                     case OverrideStrategy.Override:
-                        if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( this.TargetDeclaration, existingDeclaration.DeclaringType ) )
+                        if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( targetDeclaration, existingDeclaration.DeclaringType ) )
                         {
                             var overriddenMethod = new OverriddenProperty(
                                 this,
                                 existingDeclaration,
                                 this.Template,
                                 this._getTemplate,
-                                this._setTemplate );
+                                this._setTemplate,
+                                this.Tags );
 
                             return AdviceResult.Create( overriddenMethod );
                         }
@@ -159,8 +168,8 @@ namespace Metalama.Framework.Engine.Advices
                             return
                                 AdviceResult.Create(
                                     AdviceDiagnosticDescriptors.CannotIntroduceOverrideOfSealed.CreateRoslynDiagnostic(
-                                        this.TargetDeclaration.GetDiagnosticLocation(),
-                                        (this.Aspect.AspectClass.ShortName, this.MemberBuilder, this.TargetDeclaration,
+                                        targetDeclaration.GetDiagnosticLocation(),
+                                        (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
                                          existingDeclaration.DeclaringType) ) );
                         }
                         else if ( !compilation.InvariantComparer.Equals( this.Builder.Type, existingDeclaration.Type ) )
@@ -168,8 +177,8 @@ namespace Metalama.Framework.Engine.Advices
                             return
                                 AdviceResult.Create(
                                     AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateRoslynDiagnostic(
-                                        this.TargetDeclaration.GetDiagnosticLocation(),
-                                        (this.Aspect.AspectClass.ShortName, this.MemberBuilder, this.TargetDeclaration,
+                                        targetDeclaration.GetDiagnosticLocation(),
+                                        (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
                                          existingDeclaration.DeclaringType, existingDeclaration.Type) ) );
                         }
                         else
@@ -182,7 +191,8 @@ namespace Metalama.Framework.Engine.Advices
                                 this.MemberBuilder,
                                 this.Template,
                                 this._getTemplate,
-                                this._setTemplate );
+                                this._setTemplate,
+                                this.Tags );
 
                             return AdviceResult.Create( this.MemberBuilder, overriddenProperty );
                         }

@@ -33,5 +33,7 @@ namespace Metalama.Framework.Engine.Pipeline
             CompilationModel compilation,
             PipelineStepsState pipelineStepsState,
             CancellationToken cancellationToken );
+
+        public override string ToString() => this.Id.ToString();
     }
 }
