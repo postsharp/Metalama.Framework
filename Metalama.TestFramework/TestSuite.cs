@@ -84,8 +84,8 @@ namespace Metalama.TestFramework
             var projectRelativePath = PathUtil.GetRelativePath( assemblyAssets.ProjectProperties.ProjectDirectory, fullPath );
 
             var testInput = TestInput.FromFile( assemblyAssets.ProjectProperties, assemblyAssets.OptionsReader, projectRelativePath );
-            testInput.Options.References.AddRange( TestAssemblyReferenceReader.GetAssemblyReferences( new ReflectionAssemblyInfo( this.GetType().Assembly ) ) );
-            var testRunner = TestRunnerFactory.CreateTestRunner( testInput, serviceProvider, this.Logger );
+            var assemblyMetadata = TestAssemblyMetadataReader.GetMetadata( new ReflectionAssemblyInfo( this.GetType().Assembly ) );
+            var testRunner = TestRunnerFactory.CreateTestRunner( testInput, serviceProvider, assemblyMetadata.ToProjectReferences(), this.Logger );
             await testRunner.RunAndAssertAsync( testInput );
         }
     }
