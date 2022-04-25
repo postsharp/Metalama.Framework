@@ -52,8 +52,6 @@ namespace Metalama.Framework.Engine.CompileTime
             }.ToImmutableDictionary( t => t.Namespace, t => (t.Scope, t.IncludeDescendants), StringComparer.Ordinal );
 
         private readonly Compilation? _compilation;
-        private readonly INamedTypeSymbol? _compileTimeAttribute;
-        private readonly INamedTypeSymbol? _compileTimeOnlyAttribute;
         private readonly INamedTypeSymbol? _templateAttribute;
         private readonly INamedTypeSymbol? _ignoreUnlessOverriddenAttribute;
         private readonly ConcurrentDictionary<ISymbol, TemplatingScope?> _cacheScopeFromAttributes = new( SymbolEqualityComparer.Default );
@@ -74,8 +72,6 @@ namespace Metalama.Framework.Engine.CompileTime
             if ( compilation != null )
             {
                 this._compilation = compilation;
-                this._compileTimeAttribute = this._compilation.GetTypeByMetadataName( typeof(RunTimeOrCompileTimeAttribute).FullName ).AssertNotNull();
-                this._compileTimeOnlyAttribute = this._compilation.GetTypeByMetadataName( typeof(CompileTimeAttribute).FullName ).AssertNotNull();
                 this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof(TemplateAttribute).FullName ).AssertNotNull();
                 this._ignoreUnlessOverriddenAttribute = this._compilation.GetTypeByMetadataName( typeof(AbstractAttribute).FullName ).AssertNotNull();
             }
@@ -156,22 +152,21 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private TemplatingScope? GetTemplatingScope( AttributeData attribute )
         {
-            if ( this._compilation == null )
+            switch ( attribute.AttributeClass?.Name )
             {
-                return null;
-            }
+                default:
+                    return null;
 
-            if ( this._compilation.HasImplicitConversion( attribute.AttributeClass, this._compileTimeOnlyAttribute ) )
-            {
-                return TemplatingScope.CompileTimeOnly;
-            }
-            else if ( this._compilation.HasImplicitConversion( attribute.AttributeClass, this._compileTimeAttribute ) )
-            {
-                return TemplatingScope.RunTimeOrCompileTime;
-            }
-            else
-            {
-                return null;
+                case nameof(CompileTimeAttribute):
+                case nameof(TemplateAttribute):
+                    return TemplatingScope.CompileTimeOnly;
+
+                case nameof(RunTimeOrCompileTimeAttribute):
+                    return TemplatingScope.RunTimeOrCompileTime;
+
+                case nameof(IntroduceAttribute):
+                case nameof(InterfaceMemberAttribute):
+                    return TemplatingScope.RunTimeOnly;
             }
         }
 
@@ -197,6 +192,11 @@ namespace Metalama.Framework.Engine.CompileTime
 
         public TemplatingScope GetTemplatingScope( ISymbol symbol )
         {
+            if ( symbol.Kind == SymbolKind.Namespace )
+            {
+                return TemplatingScope.RunTimeOrCompileTime;
+            }
+
             if ( !this._cacheResultingScope.TryGetValue( symbol, out var scope ) )
             {
                 scope = this.GetTemplatingScopeCore( symbol );
@@ -241,12 +241,6 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private TemplatingScope GetTemplatingScopeCore( ISymbol symbol, int recursion )
         {
-            if ( symbol is ITypeParameterSymbol )
-            {
-                // All generic parameters are now run-time only.
-                return TemplatingScope.RunTimeOnly;
-            }
-
             if ( recursion > 32 )
             {
                 throw new AssertionFailedException();
@@ -257,8 +251,8 @@ namespace Metalama.Framework.Engine.CompileTime
                 case IDynamicTypeSymbol:
                     return TemplatingScope.Dynamic;
 
-                case ITypeParameterSymbol:
-                    throw new AssertionFailedException( "Generic templates or aspects are not supported." );
+                case ITypeParameterSymbol typeParameterSymbol:
+                    return this.GetTemplatingScopeCore( typeParameterSymbol.ContainingSymbol, recursion + 1 );
 
                 case IErrorTypeSymbol:
                     // We treat all error symbols as run-time only, by convention.
@@ -380,45 +374,45 @@ namespace Metalama.Framework.Engine.CompileTime
             return this.GetScopeFromSignature( symbol, recursion + 1 );
         }
 
+        private void CombineScope( ITypeSymbol type, int recursion, ref TemplatingScope combinedScope )
+        {
+            var typeScope = this.GetTemplatingScopeCore( type, recursion + 1 );
+
+            if ( typeScope != TemplatingScope.RunTimeOrCompileTime )
+            {
+                if ( combinedScope == TemplatingScope.RunTimeOrCompileTime )
+                {
+                    combinedScope = typeScope;
+                }
+                else
+                {
+                    combinedScope = TemplatingScope.Conflict;
+                }
+            }
+        }
+
         private TemplatingScope GetScopeFromSignature( ISymbol symbol, int recursion )
         {
             var signatureScope = TemplatingScope.RunTimeOrCompileTime;
 
-            void CombineScope( ITypeSymbol type )
-            {
-                var typeScope = this.GetTemplatingScopeCore( type, recursion + 1 );
-
-                if ( typeScope != TemplatingScope.RunTimeOrCompileTime )
-                {
-                    if ( signatureScope == TemplatingScope.RunTimeOrCompileTime )
-                    {
-                        signatureScope = typeScope;
-                    }
-                    else
-                    {
-                        signatureScope = TemplatingScope.Conflict;
-                    }
-                }
-            }
-
             switch ( symbol )
             {
                 case IMethodSymbol method:
-                    CombineScope( method.ReturnType );
+                    this.CombineScope( method.ReturnType, recursion, ref signatureScope );
 
                     foreach ( var parameter in method.Parameters )
                     {
-                        CombineScope( parameter.Type );
+                        this.CombineScope( parameter.Type, recursion, ref signatureScope );
                     }
 
                     return signatureScope;
 
                 case IPropertySymbol property:
-                    CombineScope( property.Type );
+                    this.CombineScope( property.Type, recursion, ref signatureScope );
 
                     foreach ( var parameter in property.Parameters )
                     {
-                        CombineScope( parameter.Type );
+                        this.CombineScope( parameter.Type, recursion, ref signatureScope );
                     }
 
                     return signatureScope;
@@ -487,44 +481,54 @@ namespace Metalama.Framework.Engine.CompileTime
 
             switch ( symbol )
             {
-                case ITypeSymbol type:
+                case INamedTypeSymbol { IsAnonymousType: true } anonymousType:
+                    var combinedScope = TemplatingScope.RunTimeOrCompileTime;
+
+                    foreach ( var member in anonymousType.GetMembers() )
                     {
-                        if ( symbol is INamedTypeSymbol namedType )
+                        if ( member is IPropertySymbol property )
                         {
-                            // Note: Type with [CompileTime] on a base type or an interface should be considered compile-time,
-                            // even if it has a generic argument from an external assembly (which makes it run-time). So generic arguments should come last.
+                            this.CombineScope( property.Type, 0, ref combinedScope );
+                        }
+                    }
 
-                            // From base type.
-                            if ( type.BaseType != null )
+                    return AddToCache( combinedScope );
+
+                case INamedTypeSymbol namedType:
+                    {
+                        // Note: Type with [CompileTime] on a base type or an interface should be considered compile-time,
+                        // even if it has a generic argument from an external assembly (which makes it run-time). So generic arguments should come last.
+
+                        // From base type.
+                        if ( namedType.BaseType != null )
+                        {
+                            var scopeFromBaseType = this.GetScopeFromAttributes( namedType.BaseType );
+
+                            if ( scopeFromBaseType != null )
                             {
-                                var scopeFromBaseType = this.GetScopeFromAttributes( type.BaseType );
-
-                                if ( scopeFromBaseType != null )
-                                {
-                                    return AddToCache( scopeFromBaseType );
-                                }
+                                return AddToCache( scopeFromBaseType );
                             }
+                        }
 
-                            // From interfaces.
-                            foreach ( var @interface in type.AllInterfaces )
+                        // From interfaces.
+                        foreach ( var @interface in namedType.AllInterfaces )
+                        {
+                            var scopeFromInterface = this.GetScopeFromAttributes( @interface );
+
+                            if ( scopeFromInterface != null )
                             {
-                                var scopeFromInterface = this.GetScopeFromAttributes( @interface );
-
-                                if ( scopeFromInterface != null )
-                                {
-                                    return AddToCache( scopeFromInterface );
-                                }
+                                return AddToCache( scopeFromInterface );
                             }
+                        }
 
-                            // From generic arguments.
-                            foreach ( var genericArgument in namedType.TypeArguments )
+                        // From generic arguments.
+                        foreach ( var genericArgument in namedType.TypeArguments )
+                        {
+                            var scopeFromGenericArgument = this.GetScopeFromAttributes( genericArgument );
+
+                            if ( scopeFromGenericArgument != null )
                             {
-                                var scopeFromGenericArgument = this.GetScopeFromAttributes( genericArgument );
-
-                                if ( scopeFromGenericArgument != null )
-                                {
-                                    return AddToCache( scopeFromGenericArgument );
-                                }
+                                return AddToCache( scopeFromGenericArgument );
                             }
                         }
 
