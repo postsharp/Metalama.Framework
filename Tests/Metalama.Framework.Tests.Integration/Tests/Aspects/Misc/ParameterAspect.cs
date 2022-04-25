@@ -7,20 +7,17 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.ParameterAspec
 
 public class RequiredAttribute : Attribute, IAspect<IParameter>
 {
-    public void BuildEligibility( IEligibilityBuilder<IParameter> builder )
-    {
-        
-    }
+    public void BuildEligibility( IEligibilityBuilder<IParameter> builder ) { }
 
     public void BuildAspect( IAspectBuilder<IParameter> builder )
     {
-        builder.Advices.Override( (IMethod) builder.Target.DeclaringMember, nameof(this.Template), tags: new { ParameterName = builder.Target.Name  } );
+        builder.Advices.Override( (IMethod)builder.Target.DeclaringMember, nameof(Template), tags: new { ParameterName = builder.Target.Name } );
     }
 
     [Template]
     private dynamic? Template()
     {
-        var parameterName = (string) meta.Tags["ParameterName"]!;
+        var parameterName = (string)meta.Tags["ParameterName"]!;
         var parameter = meta.ParseExpression( parameterName );
 
         if (parameter.Value == null)
@@ -33,10 +30,7 @@ public class RequiredAttribute : Attribute, IAspect<IParameter>
 }
 
 // <target>
-class Class
+internal class Class
 {
-    private void M( [Required] object? a, [Required]  object? b )
-    {
-        
-    }
+    private void M( [Required] object? a, [Required] object? b ) { }
 }

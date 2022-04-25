@@ -1,4 +1,4 @@
-class Class
+internal class Class
 {
     private void M( [Required] object? a, [Required]  object? b )
     {

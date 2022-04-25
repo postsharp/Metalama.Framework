@@ -38,17 +38,15 @@ namespace Metalama.Framework.Aspects
 
         /// <summary>
         /// Requires an instance of a specified aspect type to be present on a specified declaration. If the aspect
-        /// is not present, this method adds a new instance of the aspect (if any) by using the default aspect constructor.
+        /// is not present, this method adds a new instance of the aspect by using the default aspect constructor.
         /// </summary>
         /// <remarks>
         /// <para>Calling this method causes the current aspect to be present in the <see cref="IAspectInstance.Predecessors"/> list
         /// even if the required aspect was already present on the target declaration.</para>
         /// </remarks>
-        /// <param name="target">The target declaration. It must be contained in the current type.</param>
         /// <typeparam name="TTarget">Type of the target declaration.</typeparam>
         /// <typeparam name="TAspect">Type of the aspect. The type must be ordered after the aspect type calling this method.</typeparam>
-        [Obsolete( "Not implemented." )]
-        void RequireAspect<TTarget, TAspect>( TTarget target )
+        void RequireAspect<TTarget, TAspect>()
             where TTarget : class, IDeclaration
             where TAspect : IAspect<TTarget>, new();
 
