@@ -1,4 +1,6 @@
-﻿// @Skipped(#29134 - Invokers.Base is null for an override aspect applied to a field)
+﻿#if TEST_OPTIONS
+// @Skipped(#29134 - Invokers.Base is null for an override aspect applied to a field)
+#endif
 
 using System;
 using System.Linq;

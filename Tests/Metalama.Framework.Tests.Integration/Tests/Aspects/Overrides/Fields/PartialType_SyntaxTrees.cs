@@ -1,5 +1,7 @@
-﻿// @Skipped(#30159)
+﻿#if TEST_OPTIONS
+// @Skipped(#30159)
 // @OutputAllSyntaxTrees
+#endif
 
 using System;
 using Metalama.Framework.Aspects;

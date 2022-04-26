@@ -1,10 +1,10 @@
+#if TEST_OPTIONS
 // @RequiredConstant(NET5_0_OR_GREATER) - Slight differences in .NET Framework due to nullability annotations 
+#endif
 
 using System.Linq;
 using System.Reflection;
 using Metalama.Framework.Aspects;
-using Metalama.TestFramework;
-
 
 namespace Metalama.Framework.IntegrationTests.Aspects.CodeModel.SyntaxSerializer
 {
@@ -27,7 +27,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.CodeModel.SyntaxSerializer
             var constructor = meta.RunTime( meta.Target.Method.DeclaringType.Constructors.Single().ToConstructorInfo() );
             var constructorParameter = meta.RunTime( meta.Target.Method.DeclaringType.Constructors.Single().Parameters.Single().ToParameterInfo() );
             var array = meta.RunTime( new MemberInfo[] { meta.Target.Method.ToMethodInfo(), meta.Target.Type.ToType() } );
-            
+
             return default;
         }
     }
@@ -38,17 +38,15 @@ namespace Metalama.Framework.IntegrationTests.Aspects.CodeModel.SyntaxSerializer
         public TargetClass( int x ) { }
 
         public int Field;
-        public int Property { get; set; }
-        
-        [Override]
-        public void TargetMethod_Void(int x)
-        {
-           
-        }
 
-        public int TargetMethod_Int(int x)
+        public int Property { get; set; }
+
+        [Override]
+        public void TargetMethod_Void( int x ) { }
+
+        public int TargetMethod_Int( int x )
         {
-           return 0;
+            return 0;
         }
     }
 }

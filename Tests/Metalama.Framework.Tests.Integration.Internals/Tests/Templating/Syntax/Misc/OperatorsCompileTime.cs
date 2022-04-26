@@ -1,4 +1,6 @@
+#if TEST_OPTIONS
 // @RequiredConstant(NET5_0_OR_GREATER) - Array slices are not supported in .NET Framework
+#endif
 
 #if NET5_0_OR_GREATER
 #pragma warning disable CS8600, CS8603

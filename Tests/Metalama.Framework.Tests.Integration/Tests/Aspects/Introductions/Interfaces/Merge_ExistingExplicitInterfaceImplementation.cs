@@ -1,4 +1,6 @@
-﻿// @Skipped(Case for interface merge conflict resolution, not implemented.)
+﻿#if TEST_OPTIONS
+// @Skipped(Case for interface merge conflict resolution, not implemented.)
+#endif
 
 using System;
 using Metalama.Framework.Aspects;

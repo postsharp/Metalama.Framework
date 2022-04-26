@@ -1,4 +1,7 @@
+#if TEST_OPTIONS
 // @RequiredConstant(NETFRAMEWORK)
+#endif
+
 // In .NET Framework, INotifyPropertyChanged.PropertyChanged is not marked as nullable, so the output is slightly different.
 
 using System;

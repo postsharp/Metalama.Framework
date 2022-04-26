@@ -1,4 +1,6 @@
-﻿// @Skipped(#28907 Linker: conditional access expression)
+﻿#if TEST_OPTIONS
+// @Skipped(#28907 Linker: conditional access expression)
+#endif
 
 using System;
 using Metalama.Framework.Aspects;
