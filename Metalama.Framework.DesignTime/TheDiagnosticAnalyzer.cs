@@ -35,6 +35,11 @@ namespace Metalama.Framework.DesignTime
         private readonly ILogger _logger;
         private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
 
+        static TheDiagnosticAnalyzer()
+        {
+            MetalamaDiagnosticsService.Initialize( nameof( TheDiagnosticAnalyzer ) );
+        }
+
         public TheDiagnosticAnalyzer() : this( DesignTimeServiceProviderFactory.GetServiceProvider() ) { }
 
         public TheDiagnosticAnalyzer( IServiceProvider serviceProvider )

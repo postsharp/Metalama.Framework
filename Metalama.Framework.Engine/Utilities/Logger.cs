@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.Utilities
         /// </remarks>
         internal static void Initialize()
         {
-            var loggerFactory = Support.GetRequiredService<ILoggerFactory>();
+            var loggerFactory = DiagnosticsService.GetRequiredService<ILoggerFactory>();
             var processInfo = loggerFactory.GetLogger( "ProcessInfo" );
 
             processInfo.Info?.Log( $"Command line: {Environment.CommandLine}" );

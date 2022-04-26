@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Utilities;
@@ -61,10 +62,10 @@ namespace Metalama.Framework.Engine.Pipeline
             // If support services are not initialized at this point, do it.
             // When transformer execution starts, these services are replaced
             // by project-scoped ones coming from the TransformerContext.
-            Support.Initialize( nameof( ServiceProviderFactory ) );
+            MetalamaDiagnosticsService.Initialize( nameof( ServiceProviderFactory ) );
 
             var serviceProvider = ServiceProvider.Empty
-                .WithNextProvider( Support.Services )
+                .WithNextProvider( DiagnosticsService.ServiceProvider )
                 .WithServices(
                     pathOptions,
                     new DefaultCompileTimeDomainFactory() )
