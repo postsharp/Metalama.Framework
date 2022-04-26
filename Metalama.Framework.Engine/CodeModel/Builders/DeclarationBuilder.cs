@@ -17,7 +17,7 @@ using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     /// <summary>
-    /// Base class implementing <see cref="IDeclarationBuilder"/>. These classes are returned by introduction advices so the user can continue
+    /// Base class implementing <see cref="IDeclarationBuilder"/>. These classes are returned by introduction advice methods so the user can continue
     /// specifying the introduced declaration. They are bound to the <see cref="CompilationModel"/> that created them, but implement
     /// <see cref="ISdkRef{T}"/> so they can resolve, using <see cref="DeclarationFactory"/>, to the consuming <see cref="CompilationModel"/>.
     /// 
