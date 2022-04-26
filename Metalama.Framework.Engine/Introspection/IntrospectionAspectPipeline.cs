@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.Introspection;
 internal class IntrospectionAspectPipeline : AspectPipeline
 {
     public IntrospectionAspectPipeline( ServiceProvider serviceProvider, CompileTimeDomain domain, bool isTest ) :
-        base( serviceProvider, ExecutionScenario.Introspection, isTest, domain ) { }
+        base( serviceProvider.WithService( new IntrospectionPipelineListener() ), ExecutionScenario.Introspection, isTest, domain ) { }
 
     private protected override HighLevelPipelineStage CreateHighLevelStage( PipelineStageConfiguration configuration, CompileTimeProject compileTimeProject )
         => new CompileTimePipelineStage( compileTimeProject, configuration.AspectLayers, this.ServiceProvider );
@@ -34,7 +34,7 @@ internal class IntrospectionAspectPipeline : AspectPipeline
 
         if ( !this.TryInitialize( diagnostics, compilation.PartialCompilation, null, cancellationToken, out var configuration ) )
         {
-            return new IntrospectionCompilationResultModel( false, compilation, MapDiagnostics() );
+            return new IntrospectionCompilationResultModel( this.ServiceProvider, false, compilation, MapDiagnostics() );
         }
 
         var success = this.TryExecute( compilation, diagnostics, configuration, cancellationToken, out var pipelineResult );
@@ -52,6 +52,6 @@ internal class IntrospectionAspectPipeline : AspectPipeline
             outputCompilationModel = compilation;
         }
 
-        return new IntrospectionCompilationResultModel( success, outputCompilationModel, MapDiagnostics(), pipelineResult );
+        return new IntrospectionCompilationResultModel( this.ServiceProvider, success, outputCompilationModel, MapDiagnostics(), pipelineResult );
     }
 }

@@ -22,18 +22,18 @@ internal class EvaluateAspectSourcesPipelineStep : PipelineStep
 {
     private readonly List<IAspectSource> _aspectSources = new();
 
-    public EvaluateAspectSourcesPipelineStep( OrderedAspectLayer aspectLayer ) : base(
+    public EvaluateAspectSourcesPipelineStep( PipelineStepsState parent, OrderedAspectLayer aspectLayer ) : base(
+        parent,
         new PipelineStepId( aspectLayer.AspectLayerId, -1, -1, PipelineStepPhase.Initialize, -1 ),
         aspectLayer ) { }
 
     public override CompilationModel Execute(
         CompilationModel compilation,
-        PipelineStepsState pipelineStepsState,
         CancellationToken cancellationToken )
     {
         var aspectClass = this.AspectLayer.AspectClass;
 
-        var aspectSourceResults = this._aspectSources.Select( s => s.GetAspectInstances( compilation, aspectClass, pipelineStepsState, cancellationToken ) )
+        var aspectSourceResults = this._aspectSources.Select( s => s.GetAspectInstances( compilation, aspectClass, this.Parent, cancellationToken ) )
             .ToList();
 
         HashSet<IDeclaration>? exclusions = null;
@@ -137,9 +137,9 @@ internal class EvaluateAspectSourcesPipelineStep : PipelineStep
             .ToList();
 
         // Index these aspects. 
-        pipelineStepsState.AddAspectInstances( concreteAspectInstances );
-        pipelineStepsState.AddAspectInstances( inheritedAspectInstancesInProject );
-        pipelineStepsState.AddInheritableAspectInstances( inheritableAspectInstances.Select( x => x.AspectInstance ).ToList() );
+        this.Parent.AddAspectInstances( concreteAspectInstances );
+        this.Parent.AddAspectInstances( inheritedAspectInstancesInProject );
+        this.Parent.AddInheritableAspectInstances( inheritableAspectInstances.Select( x => x.AspectInstance ).ToList() );
 
         return compilation.WithAspectInstances( concreteAspectInstances.Select( x => x.AspectInstance ).ToImmutableArray() );
     }

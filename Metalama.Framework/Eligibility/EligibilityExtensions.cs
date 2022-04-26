@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility.Implementation;
 using Metalama.Framework.Project;
@@ -13,6 +14,7 @@ namespace Metalama.Framework.Eligibility
     /// Extension methods for <see cref="IEligibilityBuilder"/>.
     /// </summary>
     /// <seealso href="@eligibility"/>
+    [CompileTime]
     public static class EligibilityExtensions
     {
         /// <summary>
