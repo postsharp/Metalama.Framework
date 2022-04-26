@@ -35,4 +35,14 @@ public interface IValidatorReceiver<out TDeclaration>
     void SuppressDiagnostic( Func<TDeclaration, SuppressionDefinition> suppression );
 
     void SuggestCodeFix( Func<TDeclaration, CodeFix> codeFix );
+
+    /// <summary>
+    /// Gets an interface that allows to validate the final compilation, after all aspects have been applied.
+    /// </summary>
+    IValidatorReceiver<IDeclaration> AfterAllAspects();
+
+    /// <summary>
+    /// Gets an interface that allows to validate the initial compilation, after before any aspect has been applied.
+    /// </summary>
+    IValidatorReceiver<IDeclaration> BeforeAnyAspect();
 }

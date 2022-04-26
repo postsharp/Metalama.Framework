@@ -1,4 +1,4 @@
-    [NotifyPropertyChanged]
+[NotifyPropertyChanged]
     internal class Car:global::System.ComponentModel.INotifyPropertyChanged    {
         public string? Make 
 { get

@@ -10,7 +10,7 @@ using System.Collections.Generic;
 namespace Metalama.Framework.Aspects
 {
     /// <summary>
-    /// Exposes all factory methods to create advices. Exposed on the <see cref="IAspectLayerBuilder.Advices"/> property
+    /// Exposes all factory methods to create advice. Exposed on the <see cref="IAspectLayerBuilder.Advice"/> property
     /// of <see cref="IAspectBuilder{TAspectTarget}"/> or <see cref="IAspectLayerBuilder"/>.
     /// </summary>
     /// <seealso href="@advising-code"/>
@@ -28,7 +28,7 @@ namespace Metalama.Framework.Aspects
         /// template for all methods, pass a string.</param>
         /// <param name="tags">An optional opaque object of anonymous type  passed to the template method and exposed under the <see cref="meta.Tags"/> property
         ///     of the <see cref="meta"/> API.</param>
-        /// <remarks>When an aspect overrides the same declaration in same aspect part multiple, the order of advices is equal to the inverse of order of calls of this method.</remarks>
+        /// <remarks>When an aspect overrides the same declaration in same aspect part multiple, the order of distinct pieces of advice is equal to the inverse of order of calls of this method.</remarks>
         /// <seealso href="@overriding-members"/>
         void Override( IMethod targetMethod, in MethodTemplateSelector templateSelector, object? tags = null );
 
@@ -64,7 +64,7 @@ namespace Metalama.Framework.Aspects
         ///     This property must be annotated with <see cref="TemplateAttribute"/>.</param>
         /// <param name="tags">An optional opaque object of anonymous type  passed to the template property and exposed under the <see cref="meta.Tags"/> property of the
         ///     <see cref="meta"/> API.</param>
-        /// <remarks>When an aspect overrides the same declaration in same aspect part multiple, the order of advices is equal to the inverse of order of calls of this method.</remarks>
+        /// <remarks>When an aspect overrides the same declaration in same aspect part multiple, the order of distinct pieces of advice is equal to the inverse of order of calls of this method.</remarks>
         /// <seealso href="@overriding-members"/>
         void Override(
             IFieldOrPropertyOrIndexer targetDeclaration,
@@ -86,7 +86,7 @@ namespace Metalama.Framework.Aspects
         ///     be <c>void Set(T value</c>  where <c>T</c> is either <c>dynamic</c> or a type compatible with the type of the field or property.</param>
         /// <param name="tags">An optional opaque object of anonymous type  passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
         ///     <see cref="meta"/> API.</param>
-        /// <remarks>When an aspect overrides the same declaration in same aspect part multiple, the order of advices is equal to the inverse of order of calls of this method.</remarks>
+        /// <remarks>When an aspect overrides the same declaration in same aspect part multiple, the order of distinct pieces of advice is equal to the inverse of order of calls of this method.</remarks>
         /// <seealso href="@overriding-members"/>
         void OverrideAccessors(
             IFieldOrPropertyOrIndexer targetDeclaration,
@@ -180,7 +180,7 @@ namespace Metalama.Framework.Aspects
         /// <param name="raiseTemplate">Not yet implemented.</param>
         /// <param name="tags">An optional opaque object of anonymous type  passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
         /// <see cref="meta"/> API.</param>
-        /// <remarks>When an aspect overrides the same declaration in same aspect part multiple, the order of advices is equal to the inverse of order of calls of this method.</remarks>
+        /// <remarks>When an aspect overrides the same declaration in same aspect part multiple, the order of distinct pieces of advice is equal to the inverse of order of calls of this method.</remarks>
         /// <seealso href="@overriding-members"/>
         void OverrideAccessors(
             IEvent targetEvent,

@@ -38,9 +38,9 @@ namespace Metalama.TestFramework
         public AspectTestRunner(
             ServiceProvider serviceProvider,
             string? projectDirectory,
-            IEnumerable<MetadataReference> metadataReferences,
+            TestProjectReferences references,
             ITestOutputHelper? logger )
-            : base( serviceProvider, projectDirectory, metadataReferences, logger ) { }
+            : base( serviceProvider, projectDirectory, references, logger ) { }
 
         // We don't want the base class to report errors in the input compilation because the pipeline does.
 

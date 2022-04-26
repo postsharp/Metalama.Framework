@@ -1,134 +1,167 @@
+#if TEST_OPTIONS
 // @IgnoredDiagnostic(CS1998)
+#endif
 
 using System;
-using System.Threading.Tasks;
 using System.Collections;
 using System.Collections.Generic;
-using Metalama.Framework;
-using Metalama.TestFramework;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Aspects.Iterators.IteratorTemplateGetter
 {
-    class Aspect : OverrideFieldOrPropertyAspect
+    internal class Aspect : OverrideFieldOrPropertyAspect
     {
-
-        public override dynamic? OverrideProperty 
-        { 
-        get => throw new NotImplementedException(); 
-        set => throw new NotImplementedException(); 
-        }
-
-        public override IEnumerable<dynamic?> OverrideEnumerableProperty  
+        public override dynamic? OverrideProperty
         {
-        get {
-         Console.WriteLine($"Starting {meta.Target.Method.Name}");
-            foreach ( var item in meta.ProceedEnumerable() )
-            {
-                Console.WriteLine($" Intercepting {item}");
-                yield return item;
-            }
-            Console.WriteLine($"Ending {meta.Target.Method.Name}");
+            get => throw new NotImplementedException();
+            set => throw new NotImplementedException();
         }
-        }
-        
-        
-        public override IEnumerator<dynamic?> OverrideEnumeratorProperty 
+
+        public override IEnumerable<dynamic?> OverrideEnumerableProperty
         {
-        get {
-        Console.WriteLine($"Starting {meta.Target.Method.Name}");
-            var enumerator = meta.ProceedEnumerator();
-            
-            while ( enumerator.MoveNext() )
+            get
             {
-                Console.WriteLine($" Intercepting {enumerator.Current}");
-                yield return enumerator.Current;
+                Console.WriteLine( $"Starting {meta.Target.Method.Name}" );
+
+                foreach (var item in meta.ProceedEnumerable())
+                {
+                    Console.WriteLine( $" Intercepting {item}" );
+
+                    yield return item;
+                }
+
+                Console.WriteLine( $"Ending {meta.Target.Method.Name}" );
             }
-            Console.WriteLine($"Ending {meta.Target.Method.Name}");
-        }
         }
 
+        public override IEnumerator<dynamic?> OverrideEnumeratorProperty
+        {
+            get
+            {
+                Console.WriteLine( $"Starting {meta.Target.Method.Name}" );
+                var enumerator = meta.ProceedEnumerator();
 
+                while (enumerator.MoveNext())
+                {
+                    Console.WriteLine( $" Intercepting {enumerator.Current}" );
 
+                    yield return enumerator.Current;
+                }
+
+                Console.WriteLine( $"Ending {meta.Target.Method.Name}" );
+            }
+        }
     }
-    
-    class Program
+
+    internal class Program
     {
-        static void Main()
+        private static void Main()
         {
             TargetCode targetCode = new();
-            
-            foreach ( var a in targetCode.Enumerable )
+
+            foreach (var a in targetCode.Enumerable)
             {
-                Console.WriteLine($" Received {a}");
+                Console.WriteLine( $" Received {a}" );
             }
-            
-            foreach ( var a in targetCode.OldEnumerable )
+
+            foreach (var a in targetCode.OldEnumerable)
             {
-                Console.WriteLine($" Received {a}");
+                Console.WriteLine( $" Received {a}" );
             }
-            
+
             var enumerator1 = targetCode.Enumerator;
-            while ( enumerator1.MoveNext() )
+
+            while (enumerator1.MoveNext())
             {
-                Console.WriteLine($" Received {enumerator1.Current}");
+                Console.WriteLine( $" Received {enumerator1.Current}" );
             }
-            
+
             var enumerator2 = targetCode.OldEnumerator;
-            while ( enumerator2.MoveNext() )
+
+            while (enumerator2.MoveNext())
             {
-                Console.WriteLine($" Received {enumerator2.Current}");
+                Console.WriteLine( $" Received {enumerator2.Current}" );
             }
-            
         }
     }
 
     // <target>
-    class TargetCode
+    internal class TargetCode
     {
         [Aspect]
-        public IEnumerable<int> Enumerable { get 
+        public IEnumerable<int> Enumerable
         {
-            Console.WriteLine("Yield 1");
-            yield return 1;
-            Console.WriteLine("Yield 2");
-            yield return 2;
-            Console.WriteLine("Yield 3");
-            yield return 3;
-        } }
-        
+            get
+            {
+                Console.WriteLine( "Yield 1" );
+
+                yield return 1;
+
+                Console.WriteLine( "Yield 2" );
+
+                yield return 2;
+
+                Console.WriteLine( "Yield 3" );
+
+                yield return 3;
+            }
+        }
+
         [Aspect]
-        public IEnumerator<int> Enumerator  { get 
+        public IEnumerator<int> Enumerator
         {
-            Console.WriteLine("Yield 1");
-            yield return 1;
-            Console.WriteLine("Yield 2");
-            yield return 2;
-            Console.WriteLine("Yield 3");
-            yield return 3;
-        } }
-        
+            get
+            {
+                Console.WriteLine( "Yield 1" );
+
+                yield return 1;
+
+                Console.WriteLine( "Yield 2" );
+
+                yield return 2;
+
+                Console.WriteLine( "Yield 3" );
+
+                yield return 3;
+            }
+        }
+
         [Aspect]
-        public IEnumerable OldEnumerable  { get 
+        public IEnumerable OldEnumerable
         {
-            Console.WriteLine("Yield 1");
-            yield return 1;
-            Console.WriteLine("Yield 2");
-            yield return 2;
-            Console.WriteLine("Yield 3");
-            yield return 3;
-        } }
-        
-          [Aspect]
-        public IEnumerator OldEnumerator  { get 
+            get
+            {
+                Console.WriteLine( "Yield 1" );
+
+                yield return 1;
+
+                Console.WriteLine( "Yield 2" );
+
+                yield return 2;
+
+                Console.WriteLine( "Yield 3" );
+
+                yield return 3;
+            }
+        }
+
+        [Aspect]
+        public IEnumerator OldEnumerator
         {
-            Console.WriteLine("Yield 1");
-            yield return 1;
-            Console.WriteLine("Yield 2");
-            yield return 2;
-            Console.WriteLine("Yield 3");
-            yield return 3;
-        } }
-      
+            get
+            {
+                Console.WriteLine( "Yield 1" );
+
+                yield return 1;
+
+                Console.WriteLine( "Yield 2" );
+
+                yield return 2;
+
+                Console.WriteLine( "Yield 3" );
+
+                yield return 3;
+            }
+        }
     }
 }

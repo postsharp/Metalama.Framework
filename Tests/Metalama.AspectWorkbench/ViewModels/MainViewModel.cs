@@ -19,6 +19,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
+using TestProjectOptions = Metalama.Framework.Engine.Testing.TestProjectOptions;
 
 #pragma warning restore IDE0005
 
@@ -106,7 +107,11 @@ namespace Metalama.AspectWorkbench.ViewModels
 
             var syntaxColorizer = new SyntaxColorizer( serviceProvider );
 
-            var testRunner = TestRunnerFactory.CreateTestRunner( testInput, serviceProvider, null );
+            var testRunner = TestRunnerFactory.CreateTestRunner(
+                testInput,
+                serviceProvider,
+                new TestProjectReferences( ImmutableArray<MetadataReference>.Empty, null ),
+                null );
 
             var compilationStopwatch = Stopwatch.StartNew();
             using var testResult = new TestResult();

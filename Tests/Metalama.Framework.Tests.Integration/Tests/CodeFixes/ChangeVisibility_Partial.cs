@@ -1,5 +1,6 @@
-// Do not remove!
+#if TEST_OPTIONS
 // @ApplyCodeFix
+#endif
 
 using System;
 using Metalama.Framework.Aspects;

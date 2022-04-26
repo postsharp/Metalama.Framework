@@ -18,7 +18,7 @@ public interface IIntrospectionAspectInstance : IAspectInstance
     ImmutableArray<IIntrospectionDiagnostic> Diagnostics { get; }
 
     /// <summary>
-    /// Gets the advices added by the aspect.
+    /// Gets the advice added by the aspect.
     /// </summary>
     ImmutableArray<IIntrospectionAdvice> Advices { get; }
 

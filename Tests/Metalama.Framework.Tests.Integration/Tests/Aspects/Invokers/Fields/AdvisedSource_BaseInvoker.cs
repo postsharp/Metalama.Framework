@@ -1,16 +1,15 @@
-﻿// @Skipped(#28879 - Invokers.Base is null for an override aspect applied to a field)
+﻿#if TEST_OPTIONS
+// @Skipped(#28879 - Invokers.Base is null for an override aspect applied to a field)
+#endif
 
-using System;
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
-using Metalama.TestFramework;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Fields.AdvisedSource_BaseInvoker
 {
     public class TestAttribute : OverrideFieldOrPropertyAspect
     {
-        public override dynamic? OverrideProperty 
-        { 
+        public override dynamic? OverrideProperty
+        {
             get
             {
                 return meta.Target.FieldOrProperty.Invokers.Base!.GetValue( meta.This );

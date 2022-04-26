@@ -1,4 +1,6 @@
+#if TEST_OPTIONS
 // @AllowCompileTimeDynamicCode
+#endif
 
 using Metalama.Framework.Aspects;
 using Metalama.TestFramework;
@@ -8,10 +10,10 @@ using Metalama.TestFramework;
 namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.DynamicCallAsStatement
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
             // Expression statement
             meta.Target.Method.Invoke( 1 + 1 ).Foo();
@@ -22,23 +24,23 @@ namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.DynamicCallAsS
             // Discard assignment
             _ = meta.Target.Method.Invoke( 1 + 1 ).Foo();
             _ = meta.Target.Method.Invoke( meta.Target.Parameters[0].Value ).Foo();
-            _ = meta.Target.Method.Invoke( 1 + 1  );
+            _ = meta.Target.Method.Invoke( 1 + 1 );
             _ = meta.Target.Method.Invoke( meta.Target.Parameters[0].Value );
 
             // Local variable assignment
-            var x = meta.Target.Method.Invoke( 1 + 1  ).Foo();
+            var x = meta.Target.Method.Invoke( 1 + 1 ).Foo();
             var y = meta.Target.Method.Invoke( meta.Target.Parameters[0].Value ).Foo();
-            var a = meta.Target.Method.Invoke( 1 + 1  );
+            var a = meta.Target.Method.Invoke( 1 + 1 );
             var b = meta.Target.Method.Invoke( meta.Target.Parameters[0].Value );
-            
+
             return default;
         }
     }
 
     // <target>
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

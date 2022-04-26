@@ -1,4 +1,6 @@
+#if TEST_OPTIONS
 // @AcceptInvalidInput
+#endif
 
 using System;
 using System.Text;

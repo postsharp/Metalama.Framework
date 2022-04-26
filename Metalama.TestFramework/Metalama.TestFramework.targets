@@ -25,6 +25,27 @@
 
     <ItemGroup>
         <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+            <_Parameter1>ProjectDirectory</_Parameter1>
+            <_Parameter2>$(MSBuildProjectDirectory)</_Parameter2>
+        </AssemblyAttribute>
+        <AssemblyAttribute Include="Xunit.TestFrameworkAttribute"
+                           Condition="'$(MetalamaTestReplaceFramework)'!='False'">
+            <_Parameter1>Metalama.TestFramework.AspectTestFramework</_Parameter1>
+            <_Parameter2>Metalama.TestFramework</_Parameter2>
+        </AssemblyAttribute>
+        <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+            <_Parameter1>ReferenceAssemblyList</_Parameter1>
+            <_Parameter2>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)assemblies.txt</_Parameter2>
+        </AssemblyAttribute>
+        <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+            <_Parameter1>MetalamaDebugTestFramework</_Parameter1>
+            <_Parameter2>$(MetalamaDebugTestFramework)</_Parameter2>
+        </AssemblyAttribute>
+        <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute" Condition="'$(GeneratedGlobalUsingsFile)'!=''">
+            <_Parameter1>GlobalUsingsFile</_Parameter1>
+            <_Parameter2>$(GeneratedGlobalUsingsFile)</_Parameter2>
+        </AssemblyAttribute>
+        <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
             <_Parameter1>TargetFramework</_Parameter1>
             <_Parameter2>$(TargetFramework)</_Parameter2>
         </AssemblyAttribute>
@@ -121,12 +142,26 @@ namespace $(RootNamespace)
 
     <!-- The following tasks rely on _ComputeTargetFrameworkItems to multicast to all target frameworks.
         The _ComputeTargetFrameworkItems target is defined in Microsoft.Common.CrossTargeting.targets and results in @(_InnerBuildProjects) -->
-    <Target Name="AcceptTestOutput" DependsOnTargets="_ComputeTargetFrameworkItems">
+    <Target Name="_AcceptTestOutputCrossTargeting" DependsOnTargets="_ComputeTargetFrameworkItems">
         <MSBuild Projects="@(_InnerBuildProjects)" Targets="_AcceptTestOutput"/>
     </Target>
 
-    <Target Name="AcceptTestHtml" DependsOnTargets="_ComputeTargetFrameworkItems">
+    <Target Name="_AcceptTestHtmlCrossTargeting" DependsOnTargets="_ComputeTargetFrameworkItems">
         <MSBuild Projects="@(_InnerBuildProjects)" Targets="_AcceptTestHtml"/>
+    </Target>
+
+    <Target Name="AcceptTestOutput">
+        <!-- Cross-targeting -->
+        <CallTarget Targets="_AcceptTestOutputCrossTargeting" Condition="'$(TargetFrameworks)' != ''"/>
+        <!-- Single target -->
+        <CallTarget Targets="_AcceptTestOutput" Condition="'$(TargetFrameworks)' == ''"/>
+    </Target>
+
+    <Target Name="AcceptTestHtml">
+        <!-- Cross-targeting -->
+        <CallTarget Targets="_AcceptTestHtmlCrossTargeting" Condition="'$(TargetFrameworks)' != ''"/>
+        <!-- Single target -->
+        <CallTarget Targets="_AcceptTestHtml" Condition="'$(TargetFrameworks)' == ''"/>
     </Target>
 
 

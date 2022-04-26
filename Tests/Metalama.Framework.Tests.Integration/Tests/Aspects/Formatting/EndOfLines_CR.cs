@@ -1,17 +1,12 @@
-﻿// @ExpectedEndOfLine(CR)
+﻿#if TEST_OPTIONS
+// @ExpectedEndOfLine(CR)
+#endif
 
-using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
-using Metalama.Framework.Code.SyntaxBuilders;
-using Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.EndOfLines_CR;
 using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.EndOfLines_CR;
 
-[assembly: AspectOrder(typeof(TestAspect1), typeof(TestAspect2))]
+[assembly: AspectOrder( typeof(TestAspect1), typeof(TestAspect2) )]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.EndOfLines_CR
 {
@@ -19,7 +14,8 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.EndOfLin
     {
         public override dynamic? OverrideMethod()
         {
-            meta.InsertStatement("Console.WriteLine(\"Hello!\");\n");
+            meta.InsertStatement( "Console.WriteLine(\"Hello!\");\n" );
+
             return meta.Proceed();
         }
     }
@@ -28,7 +24,8 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.EndOfLin
     {
         public override dynamic? OverrideMethod()
         {
-            meta.InsertStatement("Console.WriteLine(\"Hello!\");\r\n");
+            meta.InsertStatement( "Console.WriteLine(\"Hello!\");\r\n" );
+
             return meta.Proceed();
         }
     }
@@ -43,9 +40,10 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.EndOfLin
     {
         [TestAspect1]
         [TestAspect2]
-        private static int Add(int a, int b)
+        private static int Add( int a, int b )
         {
-            Console.WriteLine("Thinking...");
+            Console.WriteLine( "Thinking..." );
+
             return a + b;
         }
     }

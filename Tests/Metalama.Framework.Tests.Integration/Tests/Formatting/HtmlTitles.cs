@@ -1,7 +1,8 @@
-﻿// @AddHtmlTitles
+﻿#if TEST_OPTIONS
+// @AddHtmlTitles
+#endif
 
 using System;
-using Metalama.TestFramework;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;

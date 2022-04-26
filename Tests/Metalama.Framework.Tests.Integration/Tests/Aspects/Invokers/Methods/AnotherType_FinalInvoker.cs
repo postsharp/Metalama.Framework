@@ -12,7 +12,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AnotherTyp
     {
         public override void BuildAspect( IAspectBuilder<IMethod> aspectBuilder )
         {
-            aspectBuilder.Advices.Override( aspectBuilder.Target, nameof(OverrideMethod) );
+            aspectBuilder.Advice.Override( aspectBuilder.Target, nameof(OverrideMethod) );
         }
 
         [Template]

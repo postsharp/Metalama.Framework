@@ -1,4 +1,6 @@
+#if TEST_OPTIONS
 // @DesignTime
+#endif
 
 using System;
 using Metalama.Framework.Aspects;

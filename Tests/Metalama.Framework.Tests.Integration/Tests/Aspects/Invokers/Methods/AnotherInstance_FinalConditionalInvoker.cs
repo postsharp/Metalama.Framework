@@ -1,4 +1,6 @@
-﻿// @Skipped(#28907 Linker: conditional access expression)
+﻿#if TEST_OPTIONS
+// @Skipped(#28907 Linker: conditional access expression)
+#endif
 
 using System;
 using Metalama.Framework.Aspects;
@@ -13,7 +15,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AnotherIns
     {
         public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            var overrideBuilder = aspectBuilder.Advices.IntroduceMethod(
+            var overrideBuilder = aspectBuilder.Advice.IntroduceMethod(
                 aspectBuilder.Target,
                 nameof(OverrideMethod),
                 whenExists: OverrideStrategy.Override );

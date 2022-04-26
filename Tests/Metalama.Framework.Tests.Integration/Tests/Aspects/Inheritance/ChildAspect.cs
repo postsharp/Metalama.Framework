@@ -13,7 +13,7 @@ public class ParentAspect : TypeAspect
     {
         base.BuildAspect( builder );
 
-        builder.WithTargetMembers( t => t.Methods ).AddAspect( _ => new ChildAspect() );
+        builder.With( t => t.Methods ).AddAspect( _ => new ChildAspect() );
     }
 }
 
