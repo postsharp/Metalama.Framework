@@ -1,4 +1,6 @@
-﻿// @OutputAllSyntaxTrees
+﻿#if TEST_OPTIONS
+// @OutputAllSyntaxTrees
+#endif
 
 using System;
 using Metalama.Framework.Aspects;
@@ -12,7 +14,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Properties.Parti
         {
             foreach (var property in builder.Target.Properties)
             {
-                builder.Advices.OverrideAccessors( property, nameof(Template), nameof(Template), tags: new { name = property.Name } );
+                builder.Advice.OverrideAccessors( property, nameof(Template), nameof(Template), tags: new { name = property.Name } );
             }
         }
 

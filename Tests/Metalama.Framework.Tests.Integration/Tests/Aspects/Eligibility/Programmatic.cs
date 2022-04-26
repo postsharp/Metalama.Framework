@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using Metalama.Framework;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
@@ -10,26 +8,24 @@ using Metalama.Framework.Tests.PublicPipeline.Aspects.Eligibility.Programmatic;
 
 namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Eligibility.Programmatic
 {
-    class Aspect1 : TypeAspect
+    internal class Aspect1 : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            base.BuildAspect(builder);
-            
-            builder.WithTargetMembers( t => t.Methods ).AddAspect( x => new Aspect2() );
-            
+            base.BuildAspect( builder );
+
+            builder.With( t => t.Methods ).AddAspect( x => new Aspect2() );
         }
     }
 
-    class Aspect2 : OverrideMethodAspect
+    internal class Aspect2 : OverrideMethodAspect
     {
-
-        public override void BuildEligibility(IEligibilityBuilder<IMethod> builder)
+        public override void BuildEligibility( IEligibilityBuilder<IMethod> builder )
         {
-            base.BuildEligibility(builder);
+            base.BuildEligibility( builder );
             builder.MustNotHaveRefOrOutParameter();
         }
- 
+
         public override dynamic? OverrideMethod()
         {
             throw new NotImplementedException();
@@ -37,12 +33,12 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Eligibility.Programmat
     }
 
     [Aspect1]
-    class TargetCode
+    internal class TargetCode
     {
-       
-        int Method(out int a)
+        private int Method( out int a )
         {
-            a= 0;
+            a = 0;
+
             return a;
         }
     }

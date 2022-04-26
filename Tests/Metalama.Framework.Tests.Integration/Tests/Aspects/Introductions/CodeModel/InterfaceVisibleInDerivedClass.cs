@@ -1,6 +1,5 @@
 ﻿using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using System;
 
 #pragma warning disable CS0067
 
@@ -16,9 +15,9 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     {
         public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            if (!aspectBuilder.Target.AllImplementedInterfaces.Contains(typeof(IInterface)))
+            if (!aspectBuilder.Target.AllImplementedInterfaces.Contains( typeof(IInterface) ))
             {
-                aspectBuilder.Advices.ImplementInterface(aspectBuilder.Target, typeof(IInterface));
+                aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface) );
             }
         }
     }

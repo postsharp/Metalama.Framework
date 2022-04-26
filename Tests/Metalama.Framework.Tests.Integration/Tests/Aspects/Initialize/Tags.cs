@@ -8,7 +8,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Initialize.Tags
     {
         public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
-            builder.Advices.Override( builder.Target, nameof(OverrideMethod), new { Friend = "Bernard" } );
+            builder.Advice.Override( builder.Target, nameof(OverrideMethod), new { Friend = "Bernard" } );
         }
 
         [Template]

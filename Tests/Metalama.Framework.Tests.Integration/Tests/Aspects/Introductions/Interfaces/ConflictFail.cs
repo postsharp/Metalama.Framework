@@ -17,7 +17,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     {
         public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advices.ImplementInterface(
+            aspectBuilder.Advice.ImplementInterface(
                 aspectBuilder.Target,
                 typeof(IInterface),
                 whenExists: OverrideStrategy.Fail );

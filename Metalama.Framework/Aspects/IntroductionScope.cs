@@ -4,7 +4,7 @@
 namespace Metalama.Framework.Aspects
 {
     /// <summary>
-    /// Scope of introduction advices.
+    /// Scope of introduction advice.
     /// </summary>
     [CompileTime]
     public enum IntroductionScope

@@ -1,7 +1,7 @@
-    class TargetCode
+internal class TargetCode
     {
         [Aspect]
-        async Task<int> MethodReturningTaskOfInt(int a)
+        private async Task<int> MethodReturningTaskOfInt( int a )
         {
     global::System.Console.WriteLine("Before");
     var result = (await this.MethodReturningTaskOfInt_Source(a));
@@ -12,11 +12,12 @@
 private async Task<int> MethodReturningTaskOfInt_Source(int a)
         {
             await Task.Yield();
+
             return a;
         }
-        
+
         [Aspect]
-        async Task MethodReturningTaskd(int a)
+        private async Task MethodReturningTaskd( int a )
         {
     global::System.Console.WriteLine("Before");
     await this.MethodReturningTaskd_Source(a);
@@ -28,11 +29,11 @@ private async Task<int> MethodReturningTaskOfInt_Source(int a)
 private async Task MethodReturningTaskd_Source(int a)
         {
             await Task.Yield();
-            Console.WriteLine("Oops");
+            Console.WriteLine( "Oops" );
         }
-        
+
         [Aspect]
-        async ValueTask<int> MethodReturningValueTaskOfInt(int a)
+        private async ValueTask<int> MethodReturningValueTaskOfInt( int a )
         {
     global::System.Console.WriteLine("Before");
     var result = (await this.MethodReturningValueTaskOfInt_Source(a));
@@ -43,6 +44,7 @@ private async Task MethodReturningTaskd_Source(int a)
 private async ValueTask<int> MethodReturningValueTaskOfInt_Source(int a)
         {
             await Task.Yield();
+
             return a;
         }
     }

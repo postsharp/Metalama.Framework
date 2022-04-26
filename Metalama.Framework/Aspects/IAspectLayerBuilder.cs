@@ -10,7 +10,7 @@ using System.Threading;
 namespace Metalama.Framework.Aspects
 {
     /// <summary>
-    /// An object used by the delegated passed to <see cref="IAspectBuilder{TAspectTarget}.SetAspectLayerBuildAction"/> method of the aspect to provide advices, child
+    /// An object used by the delegated passed to <see cref="IAspectBuilder{TAspectTarget}.SetAspectLayerBuildAction"/> method of the aspect to provide advice, child
     /// aspects and validators, or report diagnostics. This is a weakly-typed variant of the <see cref="IAspectLayerBuilder{T}"/> interface.
     /// </summary>
     [InternalImplement]
@@ -39,9 +39,9 @@ namespace Metalama.Framework.Aspects
         IDeclaration Target { get; }
 
         /// <summary>
-        /// Gets an object that allows to create advices, e.g. overriding members, introducing members, or implementing new interfaces.
+        /// Gets an object that allows to create an advice, e.g. overriding members, introducing members, or implementing new interfaces.
         /// </summary>
-        IAdviceFactory Advices { get; }
+        IAdviceFactory Advice { get; }
 
         /// <summary>
         /// Gets the cancellation token for the current operation.
@@ -50,7 +50,7 @@ namespace Metalama.Framework.Aspects
     }
 
     /// <summary>
-    /// An object used by the delegated passed to <see cref="IAspectBuilder{TAspectTarget}.SetAspectLayerBuildAction"/> method of the aspect to provide advices, child
+    /// An object used by the delegated passed to <see cref="IAspectBuilder{TAspectTarget}.SetAspectLayerBuildAction"/> method of the aspect to provide advice, child
     /// aspects and validators, or report diagnostics. This is the strongly-typed variant of the <see cref="IAspectLayerBuilder"/> interface.
     /// </summary>
     public interface IAspectLayerBuilder<out TAspectTarget> : IAspectLayerBuilder, IAspectReceiverSelector<TAspectTarget>

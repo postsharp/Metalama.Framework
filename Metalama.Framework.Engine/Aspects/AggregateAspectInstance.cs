@@ -58,7 +58,7 @@ internal sealed class AggregateAspectInstance : IAspectInstanceInternal
 
     public ImmutableArray<IAspectInstance> SecondaryInstances => this._otherInstances.Cast<IAspectInstance>().ToImmutableArray();
 
-    public ImmutableArray<AspectPredecessor> Predecessors => ImmutableArray.Create( this._primaryInstance.Predecessor );
+    public ImmutableArray<AspectPredecessor> Predecessors => this._primaryInstance.Predecessors;
 
     public IAspectState? State => this._primaryInstance.State;
 

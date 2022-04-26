@@ -1,51 +1,51 @@
-﻿using Metalama.Framework.Aspects;
+﻿using System;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.MethodOverride;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 #pragma warning disable CS0162
 
-[assembly:AspectOrder(typeof(Aspect1), typeof(Aspect2))]
+[assembly: AspectOrder( typeof(Aspect1), typeof(Aspect2) )]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.MethodOverride
 {
     public class Aspect1 : MethodAspect
     {
-        public override void BuildAspect(IAspectBuilder<IMethod> builder)
+        public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
-            builder.Advices.Override(builder.Target, nameof(Override));
+            builder.Advice.Override( builder.Target, nameof(Override) );
         }
 
         [Template]
         public dynamic? Override()
         {
-            meta.InsertComment("Comment before Aspect1.");
-            Console.WriteLine(nameof(Aspect1));
-            meta.InsertComment("Comment mid Aspect1.");
+            meta.InsertComment( "Comment before Aspect1." );
+            Console.WriteLine( nameof(Aspect1) );
+            meta.InsertComment( "Comment mid Aspect1." );
+
             return meta.Proceed();
-            meta.InsertComment("Comment after Aspect1.");
+
+            meta.InsertComment( "Comment after Aspect1." );
         }
     }
 
     public class Aspect2 : MethodAspect
     {
-        public override void BuildAspect(IAspectBuilder<IMethod> builder)
+        public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
-            builder.Advices.Override(builder.Target, nameof(Override));
+            builder.Advice.Override( builder.Target, nameof(Override) );
         }
 
         [Template]
         public dynamic? Override()
         {
-            meta.InsertComment("Comment before Aspect2.");
-            Console.WriteLine(nameof(Aspect2));
-            meta.InsertComment("Comment mid Aspect2.");
+            meta.InsertComment( "Comment before Aspect2." );
+            Console.WriteLine( nameof(Aspect2) );
+            meta.InsertComment( "Comment mid Aspect2." );
+
             return meta.Proceed();
-            meta.InsertComment("Comment after Aspect2.");
+
+            meta.InsertComment( "Comment after Aspect2." );
         }
     }
 
@@ -56,7 +56,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.MethodOv
         [Aspect1]
         [Aspect2]
         public void Foo()
-        // Comment before Foo opening brace.
+            // Comment before Foo opening brace.
         { // Comment after Foo opening brace.
             // Comment inside Foo 1.
             Console.WriteLine("Foo"); // Comment inside Foo 2.
@@ -68,7 +68,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.MethodOv
         [Aspect1]
         [Aspect2]
         public int Bar()
-        // Comment before Bar opening brace.
+            // Comment before Bar opening brace.
         { // Comment after Bar opening brace.
             // Comment inside Bar 1.
             Console.WriteLine("Bar"); // Comment inside Bar 2.
