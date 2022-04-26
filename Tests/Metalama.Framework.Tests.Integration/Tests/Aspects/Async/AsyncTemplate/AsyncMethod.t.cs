@@ -7,31 +7,31 @@ class TargetCode
     }
 
     [Aspect]
-    async Task<int> AsyncMethod(int a)
+    async Task<int> AsyncTaskResultMethod(int a)
     {
         await global::System.Threading.Tasks.Task.Yield();
-        var result = await this.AsyncMethod_Source(a);
+        var result = await this.AsyncTaskResultMethod_Source(a);
         global::System.Console.WriteLine($"result={result}");
         return (global::System.Int32)result;
     }
 
-    private async Task<int> AsyncMethod_Source(int a)
+    private async Task<int> AsyncTaskResultMethod_Source(int a)
     {
         await Task.Yield();
         return a;
     }
 
     [Aspect]
-    async Task AsyncVoidMethod()
+    async Task AsyncTaskMethod()
     {
         await global::System.Threading.Tasks.Task.Yield();
-        await this.AsyncVoidMethod_Source();
+        await this.AsyncTaskMethod_Source();
         object result = null;
         global::System.Console.WriteLine($"result={result}");
         return;
     }
 
-    private async Task AsyncVoidMethod_Source()
+    private async Task AsyncTaskMethod_Source()
     {
         await Task.Yield();
     }

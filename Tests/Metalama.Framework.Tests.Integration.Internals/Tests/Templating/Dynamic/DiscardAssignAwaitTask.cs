@@ -5,7 +5,7 @@ using Metalama.Framework;
 using Metalama.Framework.Aspects;
 using Metalama.TestFramework;
 
-namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.DiscardAssignAwaitVoid
+namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.DiscardAssignAwaitTask
 {
     class Aspect
     {

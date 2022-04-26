@@ -34,14 +34,14 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.Async
         }
         
         [Aspect]
-        async Task<int> AsyncMethod(int a)
+        async Task<int> AsyncTaskResultMethod(int a)
         {
             await Task.Yield();
             return a;
         }
 
         [Aspect]
-        async Task AsyncVoidMethod()
+        async Task AsyncTaskMethod()
         {
             await Task.Yield();
         }
