@@ -5,8 +5,8 @@
         <MetalamaTestReplaceFramework Condition="'$(Obfuscate)'=='True'">False</MetalamaTestReplaceFramework>
     </PropertyGroup>
 
-    <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.props" />
-    <Import Project="..\..\eng\Coverage.props" />
+    <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.props"/>
+    <Import Project="..\..\eng\Coverage.props"/>
 
     <PropertyGroup>
         <TargetFrameworks>net6.0;netframework4.8</TargetFrameworks>
@@ -21,23 +21,23 @@
     <ItemGroup>
 
         <!-- Exclude files that intentionally do not compile -->
-        <Compile Remove="Tests\**\__*.cs" />
+        <Compile Remove="Tests\**\__*.cs"/>
 
-        <PackageReference Include="FakeItEasy" Version="6.2.1" />
-        <PackageReference Include="FakeItEasy.Analyzer.CSharp" Version="6.0.0" />
-        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)" />
-        <PackageReference Include="xunit" Version="$(xUnitVersion)" />
-        <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitVersion)" />
-        <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" />
+        <PackageReference Include="FakeItEasy" Version="6.2.1"/>
+        <PackageReference Include="FakeItEasy.Analyzer.CSharp" Version="6.0.0"/>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkVersion)"/>
+        <PackageReference Include="xunit" Version="$(xUnitVersion)"/>
+        <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitVersion)"/>
+        <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)"/>
 
         <!-- This is used for a test -->
-        <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
+        <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0"/>
     </ItemGroup>
 
     <!-- Enable dynamic file nesting. See https://github.com/dotnet/project-system/issues/3242#issuecomment-453995460 -->
     <ItemGroup>
-        <ProjectCapability Include="DynamicDependentFile" />
-        <ProjectCapability Include="DynamicFileNesting" />
+        <ProjectCapability Include="DynamicDependentFile"/>
+        <ProjectCapability Include="DynamicFileNesting"/>
 
         <!-- In Visual Studio, you should define a nesting profile with the following content:
         
@@ -61,21 +61,21 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
-        <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
-        <ProjectReference Include="..\..\Metalama.TestFramework\Metalama.TestFramework.csproj" />
+        <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj"/>
+        <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj"/>
+        <ProjectReference Include="..\..\Metalama.TestFramework\Metalama.TestFramework.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
-        <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
-        <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />
+        <InternalsVisibleTo Include="Metalama.AspectWorkbench"/>
+        <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false"/>
     </ItemGroup>
 
-    <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets" />
+    <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets"/>
 
     <!-- Ignore project if the build is obfuscated because this project relies on obfuscated internals -->
     <ItemGroup Condition="'$(Obfuscate)'=='True'">
-        <Compile Remove="**\*" />
+        <Compile Remove="**\*"/>
     </ItemGroup>
 
 </Project>
