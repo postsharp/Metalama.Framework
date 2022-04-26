@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.ComponentModel;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -16,7 +15,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
             builder.Advices.IntroduceMethod(
                 builder.Target,
                 nameof(OnPropertyChanged),
-                tags: new TagDictionary { { "event", eventBuilder } } );
+                tags: new { @event = eventBuilder } );
         }
 
         [Template]

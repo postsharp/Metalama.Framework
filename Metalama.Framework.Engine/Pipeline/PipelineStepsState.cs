@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
@@ -9,8 +10,10 @@ using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Introspection;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Validation;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -35,6 +38,8 @@ namespace Metalama.Framework.Engine.Pipeline
         private readonly List<AspectInstanceResult> _aspectInstanceResults = new();
         private readonly List<IValidatorSource> _validatorSources = new();
         private readonly OverflowAspectSource _overflowAspectSource = new();
+        private readonly IntrospectionPipelineListener? _introspectionPipelineListener;
+
         private PipelineStep? _currentStep;
 
         public CompilationModel LastCompilation { get; private set; }
@@ -62,6 +67,8 @@ namespace Metalama.Framework.Engine.Pipeline
             ImmutableArray<IValidatorSource> inputValidatorSources,
             AspectPipelineConfiguration pipelineConfiguration )
         {
+            this._introspectionPipelineListener = pipelineConfiguration.ServiceProvider.GetService<IntrospectionPipelineListener>();
+
             this._diagnostics = new UserDiagnosticSink( pipelineConfiguration.CompileTimeProject, pipelineConfiguration.CodeFixFilter );
             this.LastCompilation = inputLastCompilation;
             this.PipelineConfiguration = pipelineConfiguration;
@@ -76,7 +83,7 @@ namespace Metalama.Framework.Engine.Pipeline
             {
                 if ( aspectLayer.AspectLayerId.IsDefault )
                 {
-                    var step = new EvaluateAspectSourcesPipelineStep( aspectLayer );
+                    var step = new EvaluateAspectSourcesPipelineStep( this, aspectLayer );
 
                     _ = this._steps.Add( step.Id, step );
                 }
@@ -103,7 +110,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
                 var compilation = this.LastCompilation.GetCompilationModel();
 
-                this.LastCompilation = this._currentStep!.Execute( compilation, this, cancellationToken );
+                this.LastCompilation = this._currentStep!.Execute( compilation, cancellationToken );
 
                 if ( compilation != this.LastCompilation )
                 {
@@ -150,7 +157,10 @@ namespace Metalama.Framework.Engine.Pipeline
                     }
                     else
                     {
-                        if ( !this.TryGetOrAddStep( aspectLayerId, PipelineStepPhase.Initialize, -1, false, out var step ) )
+                        // There is a unique depth and TargetKind for the AspectSource step step.
+                        var stepId = new PipelineStepId( aspectLayerId, -1, -1, PipelineStepPhase.Initialize, -1 );
+
+                        if ( !this.TryGetOrAddStep( stepId, false, out var step ) )
                         {
                             this._diagnostics.Report(
                                 GeneralDiagnosticDescriptors.CannotAddChildAspectToPreviousPipelineStep.CreateRoslynDiagnostic(
@@ -172,22 +182,18 @@ namespace Metalama.Framework.Engine.Pipeline
         }
 
         private bool TryGetOrAddStep(
-            AspectLayerId aspectLayerId,
-            PipelineStepPhase phase,
-            int depth,
+            in PipelineStepId stepId,
             bool allowAddToCurrentLayer,
             [NotNullWhen( true )] out PipelineStep? step )
         {
-            var stepId = new PipelineStepId( aspectLayerId, phase, depth );
-
-            var aspectLayer = this._comparer.GetOrderedAspectLayer( aspectLayerId );
+            var aspectLayer = this._comparer.GetOrderedAspectLayer( stepId.AspectLayerId );
 
             if ( this._currentStep != null )
             {
                 var currentLayerOrder = this._currentStep.AspectLayer.Order;
 
                 if ( aspectLayer.Order < currentLayerOrder ||
-                     (aspectLayerId == this._currentStep.AspectLayer.AspectLayerId
+                     (stepId.AspectLayerId == this._currentStep.AspectLayer.AspectLayerId
                       && (!allowAddToCurrentLayer || this._comparer.Compare( stepId, this._currentStep.Id ) < 0)) )
                 {
                     // Cannot add a step before the current one.
@@ -201,11 +207,11 @@ namespace Metalama.Framework.Engine.Pipeline
             {
                 if ( aspectLayer.IsDefault )
                 {
-                    step = new InitializeAspectInstancesPipelineStep( stepId, aspectLayer );
+                    step = new InitializeAspectInstancesPipelineStep( this, stepId, aspectLayer );
                 }
                 else
                 {
-                    step = new AdvicePipelineStep( stepId, aspectLayer );
+                    step = new AdvicePipelineStep( this, stepId, aspectLayer );
                 }
 
                 _ = this._steps.Add( stepId, step );
@@ -214,7 +220,7 @@ namespace Metalama.Framework.Engine.Pipeline
             return true;
         }
 
-        public bool AddAdvices( IEnumerable<Advice> advices )
+        public bool AddAdvices( IEnumerable<Advice> advices, ICompilation compilation )
         {
             Invariant.Assert( this._currentStep != null );
 
@@ -222,9 +228,18 @@ namespace Metalama.Framework.Engine.Pipeline
 
             foreach ( var advice in advices )
             {
-                var depth = this.LastCompilation.GetDepth( advice.TargetDeclaration );
+                var adviceTargetDeclaration = advice.TargetDeclaration.GetTarget( compilation );
+                var aspectTargetDeclaration = advice.Aspect.TargetDeclaration.GetTarget( compilation );
+                var aspectTargetTypeDeclaration = aspectTargetDeclaration.GetDeclaringType() ?? aspectTargetDeclaration;
 
-                if ( !this.TryGetOrAddStep( advice.AspectLayerId, PipelineStepPhase.Transform, depth, true, out var step ) )
+                var stepId = new PipelineStepId(
+                    advice.AspectLayerId,
+                    this.LastCompilation.GetDepth( aspectTargetTypeDeclaration ),
+                    this.LastCompilation.GetDepth( aspectTargetDeclaration ),
+                    PipelineStepPhase.Transform,
+                    this.LastCompilation.GetDepth( adviceTargetDeclaration ) );
+
+                if ( !this.TryGetOrAddStep( stepId, true, out var step ) )
                 {
                     this._diagnostics.Report(
                         GeneralDiagnosticDescriptors.CannotAddAdviceToPreviousPipelineStep.CreateRoslynDiagnostic(
@@ -246,12 +261,18 @@ namespace Metalama.Framework.Engine.Pipeline
         {
             foreach ( var aspectInstance in aspectInstances )
             {
-                var depth = this.LastCompilation.GetDepth( aspectInstance.TargetDeclaration );
+                var aspectTargetDeclaration = (IDeclaration) aspectInstance.TargetDeclaration;
+                var aspectTargetTypeDeclaration = aspectTargetDeclaration.GetDeclaringType() ?? aspectTargetDeclaration;
+
+                var stepId = new PipelineStepId(
+                    new AspectLayerId( aspectInstance.AspectInstance.AspectClass ),
+                    this.LastCompilation.GetDepth( aspectTargetTypeDeclaration ),
+                    this.LastCompilation.GetDepth( aspectTargetDeclaration ),
+                    PipelineStepPhase.Initialize,
+                    -1 );
 
                 if ( !this.TryGetOrAddStep(
-                        new AspectLayerId( aspectInstance.AspectInstance.AspectClass ),
-                        PipelineStepPhase.Initialize,
-                        depth,
+                        stepId,
                         true,
                         out var step ) )
                 {
@@ -294,5 +315,7 @@ namespace Metalama.Framework.Engine.Pipeline
         {
             this._aspectInstanceResults.AddRange( aspectInstanceResults );
         }
+
+        public void AddAdviceResult( Advice advice, AdviceResult result ) => this._introspectionPipelineListener?.AddAdviceResult( advice, result );
     }
 }

@@ -57,7 +57,7 @@ namespace Metalama.TestFramework
 
         /// <summary>
         /// Gets the list of assembly names that should be included in the compilation.
-        /// You can only define this option in the <c>metalamaTests.json</c> file of a directory.
+        /// To add a named assembly reference, add this comment to your test file: <c>// @AssemblyReference(assemblyName)</c>.
         /// </summary>
         public List<TestAssemblyReference> References { get; } = new();
 
@@ -180,6 +180,7 @@ namespace Metalama.TestFramework
         /// <summary>
         /// Gets or sets a value indicating whether all input syntax trees should be used as a part of test output. 
         /// If <c>false</c> only the primary syntax tree is processed and used as test output. If <c>true</c>, all syntax trees are processed and used as test output.
+        /// To set this option in a test, add this comment to your test file: <c>// @OutputAllSyntaxTrees</c>.
         /// </summary>
         public bool? OutputAllSyntaxTrees { get; set; }
 
@@ -361,6 +362,11 @@ namespace Metalama.TestFramework
 
                     case "OutputAllSyntaxTrees":
                         this.OutputAllSyntaxTrees = true;
+
+                        break;
+
+                    case "AssemblyReference":
+                        this.References.Add( new TestAssemblyReference { Name = optionArg } );
 
                         break;
 

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.Aspects;
@@ -22,8 +23,8 @@ namespace Metalama.Framework.Engine.Transformations
 
         public IProperty TargetProperty { get; }
 
-        public RedirectedProperty( Advice advice, IProperty overriddenDeclaration, IProperty targetProperty )
-            : base( advice, overriddenDeclaration )
+        public RedirectedProperty( Advice advice, IProperty overriddenDeclaration, IProperty targetProperty, ITagReader tags )
+            : base( advice, overriddenDeclaration, tags )
         {
             Invariant.Assert( targetProperty != null );
 

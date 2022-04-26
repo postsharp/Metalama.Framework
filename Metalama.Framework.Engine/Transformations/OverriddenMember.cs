@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.Aspects;
@@ -16,6 +17,8 @@ namespace Metalama.Framework.Engine.Transformations
 {
     internal abstract class OverriddenMember : INonObservableTransformation, IMemberIntroduction, IOverriddenDeclaration
     {
+        protected ITagReader Tags { get; }
+
         public Advice Advice { get; }
 
         public IMember OverriddenDeclaration { get; }
@@ -29,13 +32,14 @@ namespace Metalama.Framework.Engine.Transformations
                 _ => throw new AssertionFailedException()
             };
 
-        protected OverriddenMember( Advice advice, IMember overriddenDeclaration )
+        protected OverriddenMember( Advice advice, IMember overriddenDeclaration, ITagReader tags )
         {
             Invariant.Assert( advice != null! );
             Invariant.Assert( overriddenDeclaration != null! );
 
             this.Advice = advice;
             this.OverriddenDeclaration = overriddenDeclaration;
+            this.Tags = tags;
         }
 
         public abstract IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context );

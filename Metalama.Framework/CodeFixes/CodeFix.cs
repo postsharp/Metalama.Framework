@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Aspects;
 using System;
 using System.Threading.Tasks;
 
@@ -10,6 +11,7 @@ namespace Metalama.Framework.CodeFixes
     /// Represents a modification of the current solution, including the <see cref="Title"/> of transformation.
     /// To instantiate a single-step code fix, use <see cref="CodeFixFactory"/>. To instantiate a more complex code fix, use the constructor.
     /// </summary>
+    [CompileTime]
     public sealed class CodeFix
     {
         /// <summary>
