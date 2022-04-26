@@ -1,51 +1,51 @@
-﻿using Metalama.Framework.Aspects;
+﻿using System;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.PropertyAccessorOverride;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 #pragma warning disable CS0162
 
-[assembly:AspectOrder(typeof(Aspect1), typeof(Aspect2))]
+[assembly: AspectOrder( typeof(Aspect1), typeof(Aspect2) )]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.PropertyAccessorOverride
 {
     public class Aspect1 : PropertyAspect
     {
-        public override void BuildAspect(IAspectBuilder<IProperty> builder)
+        public override void BuildAspect( IAspectBuilder<IProperty> builder )
         {
-            builder.Advices.OverrideAccessors(builder.Target, nameof(Override), nameof(Override));
+            builder.Advice.OverrideAccessors( builder.Target, nameof(Override), nameof(Override) );
         }
 
         [Template]
         public dynamic? Override()
         {
-            meta.InsertComment("Comment before Aspect1.");
-            Console.WriteLine(nameof(Aspect1));
-            meta.InsertComment("Comment mid Aspect1.");
+            meta.InsertComment( "Comment before Aspect1." );
+            Console.WriteLine( nameof(Aspect1) );
+            meta.InsertComment( "Comment mid Aspect1." );
+
             return meta.Proceed();
-            meta.InsertComment("Comment after Aspect1.");
+
+            meta.InsertComment( "Comment after Aspect1." );
         }
     }
 
     public class Aspect2 : PropertyAspect
     {
-        public override void BuildAspect(IAspectBuilder<IProperty> builder)
+        public override void BuildAspect( IAspectBuilder<IProperty> builder )
         {
-            builder.Advices.OverrideAccessors(builder.Target, nameof(Override), nameof(Override));
+            builder.Advice.OverrideAccessors( builder.Target, nameof(Override), nameof(Override) );
         }
 
         [Template]
         public dynamic? Override()
         {
-            meta.InsertComment("Comment before Aspect2.");
-            Console.WriteLine(nameof(Aspect2));
-            meta.InsertComment("Comment mid Aspect2.");
+            meta.InsertComment( "Comment before Aspect2." );
+            Console.WriteLine( nameof(Aspect2) );
+            meta.InsertComment( "Comment mid Aspect2." );
+
             return meta.Proceed();
-            meta.InsertComment("Comment after Aspect2.");
+
+            meta.InsertComment( "Comment after Aspect2." );
         }
     }
 
@@ -81,12 +81,12 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.Property
         { // After Bar opening brace.
             // Before Bar.get.
             get // After Bar.get keyword.
-                // Before Bar.get semicolon
-                ; // After Bar.get semicolon.
+            // Before Bar.get semicolon
+            ; // After Bar.get semicolon.
             // After Bar.get and before Bar.set.
             set // After Bar.set keyword.
-                // Before Bar.set semicolon
-                ; // After Bar.set semicolon.
+            // Before Bar.set semicolon
+            ; // After Bar.set semicolon.
             // Before Bar closing brace.
         }// After Bar closing brace.
         // After Bar/before Baz.
@@ -96,20 +96,20 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.Property
         { // After Baz opening brace.
             // Before Baz.get.
             get // After Baz.get keyword.
-                // Before Baz.get arrow.
+            // Before Baz.get arrow.
                 => // After Baz.get arrow.
-                // Before Baz.get expression.
-                42 // After Baz.get expression.
-                // Before Baz.get semicolon.
-                ; // After Baz.get semicolon.
+                    // Before Baz.get expression.
+                    42 // After Baz.get expression.
+            // Before Baz.get semicolon.
+            ; // After Baz.get semicolon.
             // Before Baz.set.
             set // After Baz.set keyword.
-                // Before Baz.set arrow.
+            // Before Baz.set arrow.
                 => // After Baz.set arrow.
-                // Before Baz.set expression.
+                    // Before Baz.set expression.
                 Console.WriteLine("Foo.set") // After Baz.set expression.
-                // Before Baz.set semicolon.
-                ; // After Baz.set semicolon.
+            // Before Baz.set semicolon.
+            ; // After Baz.set semicolon.
             // Before Baz closing brace.
         }// After Baz closing brace.
         // After Baz/before Qux.
@@ -118,10 +118,10 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.Property
         public int Qux // After Qux name
             // Before Qux.get arrow.
             => // After Qux.get arrow.
-            // Before Qux.get expression.
-            42 // After Qux.get expression.
-            // Before Qux.get semicolon.
-            ; // After Qux.get semicolon.
+                // Before Qux.get expression.
+                42 // After Qux.get expression.
+        // Before Qux.get semicolon.
+        ; // After Qux.get semicolon.
         // After Qux.
     }
 }

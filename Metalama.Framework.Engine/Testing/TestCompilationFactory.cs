@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -23,19 +24,31 @@ namespace Metalama.Framework.Engine.Testing
             string? name,
             IEnumerable<Assembly> additionalAssemblies,
             bool addMetalamaReferences = true,
-            OutputKind outputKind = OutputKind.DynamicallyLinkedLibrary )
-            => CreateEmptyCSharpCompilation( name, GetMetadataReferences( additionalAssemblies, addMetalamaReferences ), outputKind );
+            OutputKind outputKind = OutputKind.DynamicallyLinkedLibrary,
+            ImmutableArray<string> implicitUsings = default,
+            NullableContextOptions nullableContextOptions = NullableContextOptions.Enable )
+            => CreateEmptyCSharpCompilation(
+                name,
+                GetMetadataReferences( additionalAssemblies, addMetalamaReferences ),
+                outputKind,
+                implicitUsings,
+                nullableContextOptions );
 
         public static CSharpCompilation CreateEmptyCSharpCompilation(
             string? name,
             IEnumerable<MetadataReference> metadataReferences,
-            OutputKind outputKind = OutputKind.DynamicallyLinkedLibrary )
+            OutputKind outputKind = OutputKind.DynamicallyLinkedLibrary,
+            ImmutableArray<string> implicitUsings = default,
+            NullableContextOptions nullableContextOptions = NullableContextOptions.Enable )
             => CSharpCompilation.Create( name ?? "test_" + RandomIdGenerator.GenerateId() )
                 .WithOptions(
                     new CSharpCompilationOptions(
                         outputKind,
                         allowUnsafe: true,
-                        nullableContextOptions: NullableContextOptions.Enable ) )
+                        nullableContextOptions: nullableContextOptions,
+                        usings: implicitUsings.IsDefault
+                            ? ImmutableArray<string>.Empty
+                            : implicitUsings ) )
                 .AddReferences( metadataReferences );
 
         public static IEnumerable<PortableExecutableReference> GetMetadataReferences(

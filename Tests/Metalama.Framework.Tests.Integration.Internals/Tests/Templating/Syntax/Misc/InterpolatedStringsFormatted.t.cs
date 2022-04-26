@@ -1,6 +1,6 @@
 using System;
 
-int Method(int a)
+private int Method(int a)
 {
     var neutral = $"Zero={0,-5:x}";
     var ct = $"ParameterCount=1    ";

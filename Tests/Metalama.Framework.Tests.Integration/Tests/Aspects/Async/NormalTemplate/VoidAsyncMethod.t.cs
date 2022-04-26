@@ -1,4 +1,4 @@
-class TargetCode
+internal class TargetCode
 {
     [Aspect]
     async void MethodReturningVoid(int a)

@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Threading;
 
 namespace Metalama.Framework.Engine.Fabrics;
@@ -21,15 +22,20 @@ internal class ProgrammaticAspectSource<TAspect, TDeclaration> : IAspectSource
     where TAspect : IAspect<TDeclaration>
 {
     private readonly Func<CompilationModel, IDiagnosticAdder, IEnumerable<AspectInstance>> _getInstances;
+    private readonly Func<CompilationModel, IDiagnosticAdder, IEnumerable<AspectRequirement>> _getRequirements;
 
-    public ProgrammaticAspectSource( IAspectClass aspectClass, Func<CompilationModel, IDiagnosticAdder, IEnumerable<AspectInstance>> getInstances )
+    public ProgrammaticAspectSource(
+        IAspectClass aspectClass,
+        Func<CompilationModel, IDiagnosticAdder, IEnumerable<AspectInstance>>? getInstances = null,
+        Func<CompilationModel, IDiagnosticAdder, IEnumerable<AspectRequirement>>? getRequirements = null )
     {
         if ( aspectClass.FullName != typeof(TAspect).FullName )
         {
             throw new ArgumentOutOfRangeException( nameof(aspectClass) );
         }
 
-        this._getInstances = getInstances;
+        this._getInstances = getInstances ?? (( _, _ ) => Enumerable.Empty<AspectInstance>());
+        this._getRequirements = getRequirements ?? (( _, _ ) => Enumerable.Empty<AspectRequirement>());
         this.AspectClasses = ImmutableArray.Create( aspectClass );
     }
 
@@ -40,5 +46,7 @@ internal class ProgrammaticAspectSource<TAspect, TDeclaration> : IAspectSource
         IAspectClass aspectClass,
         IDiagnosticAdder diagnosticAdder,
         CancellationToken cancellationToken )
-        => new( this._getInstances( compilation, diagnosticAdder ) );
+        => new(
+            this._getInstances( compilation, diagnosticAdder ),
+            requirements: this._getRequirements( compilation, diagnosticAdder ) );
 }

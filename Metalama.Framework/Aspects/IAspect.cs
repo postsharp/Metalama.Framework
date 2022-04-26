@@ -23,10 +23,10 @@ namespace Metalama.Framework.Aspects
         where T : class, IDeclaration
     {
         /// <summary>
-        /// Initializes the aspect. The implementation must add advices, child aspects and validators
+        /// Initializes the aspect. The implementation must add advice, child aspects and validators
         /// using the <paramref name="builder"/> parameter.
         /// </summary>
-        /// <param name="builder">An object that allows the aspect to add advices, child aspects and validators.</param>
+        /// <param name="builder">An object that allows the aspect to add advice, child aspects and validators.</param>
         void BuildAspect( IAspectBuilder<T> builder )
 #if NET5_0_OR_GREATER
         { }

@@ -9,22 +9,7 @@
         <Deterministic>False</Deterministic>
 
     </PropertyGroup>
-    <ItemGroup>
-        <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
-            <_Parameter1>ProjectDirectory</_Parameter1>
-            <_Parameter2>$(MSBuildProjectDirectory)</_Parameter2>
-        </AssemblyAttribute>
-        <AssemblyAttribute Include="Xunit.TestFrameworkAttribute"
-                           Condition="'$(MetalamaTestReplaceFramework)'!='False'">
-            <_Parameter1>Metalama.TestFramework.AspectTestFramework</_Parameter1>
-            <_Parameter2>Metalama.TestFramework</_Parameter2>
-        </AssemblyAttribute>
-        <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
-            <_Parameter1>ReferenceAssemblyList</_Parameter1>
-            <_Parameter2>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)assemblies.txt</_Parameter2>
-        </AssemblyAttribute>
-    </ItemGroup>
-    
+
     <!-- Enable dynamic file nesting in Visual Studio -->
     <ItemGroup>
         <ProjectCapability Include="ConfigurableFileNesting"/>

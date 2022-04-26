@@ -11,7 +11,7 @@ internal class Fabric : NamespaceFabric
     public override void AmendNamespace( INamespaceAmender amender )
     {
         amender
-            .WithTargetMembers(
+            .With(
                 c => c.AllTypes
                     .SelectMany( t => t.Methods )
                     .Where( m => m.ReturnType.Is( typeof(string) ) ) )

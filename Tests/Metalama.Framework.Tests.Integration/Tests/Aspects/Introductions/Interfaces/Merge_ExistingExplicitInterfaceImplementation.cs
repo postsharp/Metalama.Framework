@@ -1,4 +1,6 @@
-﻿// @Skipped(Case for interface merge conflict resolution, not implemented.)
+﻿#if TEST_OPTIONS
+// @Skipped(Case for interface merge conflict resolution, not implemented.)
+#endif
 
 using System;
 using Metalama.Framework.Aspects;
@@ -24,7 +26,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     {
         public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advices.ImplementInterface(
+            aspectBuilder.Advice.ImplementInterface(
                 aspectBuilder.Target,
                 (INamedType)aspectBuilder.Target.Compilation.TypeFactory.GetTypeByReflectionType( typeof(ISuperInterface) ) );
         }

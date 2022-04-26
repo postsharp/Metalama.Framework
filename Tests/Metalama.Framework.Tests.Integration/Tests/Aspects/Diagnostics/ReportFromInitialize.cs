@@ -1,4 +1,6 @@
-﻿// @IncludeAllSeverities
+﻿#if TEST_OPTIONS
+// @IncludeAllSeverities
+#endif
 
 using System;
 using Metalama.Framework.Aspects;

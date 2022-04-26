@@ -20,7 +20,7 @@ namespace Metalama.Framework.TestApp
         {
             foreach ( var methodName in this._methodNames )
             {
-                var method = aspectBuilder.Advices.IntroduceMethod( aspectBuilder.Target, nameof( SomeIntroducedMethod ) );
+                var method = aspectBuilder.Advice.IntroduceMethod( aspectBuilder.Target, nameof( SomeIntroducedMethod ) );
                 method.Name = methodName;
             }
         }
