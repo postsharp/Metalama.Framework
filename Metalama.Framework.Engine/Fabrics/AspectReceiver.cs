@@ -27,20 +27,20 @@ namespace Metalama.Framework.Engine.Fabrics
     /// An implementation of <see cref="IAspectReceiver{TDeclaration}"/>, which offers a fluent
     /// API to programmatically add children aspects.
     /// </summary>
-    /// <typeparam name="TDeclaration"></typeparam>
-    internal class AspectReceiver<TDeclaration> : IAspectReceiver<TDeclaration>
-        where TDeclaration : class, IDeclaration
+    /// <typeparam name="T"></typeparam>
+    internal class AspectReceiver<T> : IAspectReceiver<T>
+        where T : class, IDeclaration
     {
         private readonly ISdkRef<IDeclaration> _containingDeclaration;
         private readonly IAspectReceiverParent _parent;
         private readonly CompilationModelVersion _compilationModelVersion;
-        private readonly Func<CompilationModel, IDiagnosticAdder, IEnumerable<TDeclaration>> _selector;
+        private readonly Func<CompilationModel, IDiagnosticAdder, IEnumerable<T>> _selector;
 
         public AspectReceiver(
             ISdkRef<IDeclaration> containingDeclaration,
             IAspectReceiverParent parent,
             CompilationModelVersion compilationModelVersion,
-            Func<CompilationModel, IDiagnosticAdder, IEnumerable<TDeclaration>> selectTargets )
+            Func<CompilationModel, IDiagnosticAdder, IEnumerable<T>> selectTargets )
         {
             this._containingDeclaration = containingDeclaration;
             this._parent = parent;
@@ -118,17 +118,17 @@ namespace Metalama.Framework.Engine.Fabrics
                             ValidatorImplementation.Create( source.Predecessor.Instance ) ) ) ) );
         }
 
-        public void ReportDiagnostic( Func<TDeclaration, IDiagnostic> diagnostic )
+        public void ReportDiagnostic( Func<T, IDiagnostic> diagnostic )
         {
             this.Validate( new FinalValidatorHelper<IDiagnostic>( diagnostic ).ReportDiagnostic );
         }
 
-        public void SuppressDiagnostic( Func<TDeclaration, SuppressionDefinition> suppression )
+        public void SuppressDiagnostic( Func<T, SuppressionDefinition> suppression )
         {
             this.Validate( new FinalValidatorHelper<SuppressionDefinition>( suppression ).SuppressDiagnostic );
         }
 
-        public void SuggestCodeFix( Func<TDeclaration, CodeFix> codeFix )
+        public void SuggestCodeFix( Func<T, CodeFix> codeFix )
         {
             this.Validate( new FinalValidatorHelper<CodeFix>( codeFix ).SuggestCodeFix );
         }
@@ -141,38 +141,38 @@ namespace Metalama.Framework.Engine.Fabrics
 
         private class FinalValidatorHelper<TOutput>
         {
-            private readonly Func<TDeclaration, TOutput> _func;
+            private readonly Func<T, TOutput> _func;
 
-            public FinalValidatorHelper( Func<TDeclaration, TOutput> func )
+            public FinalValidatorHelper( Func<T, TOutput> func )
             {
                 this._func = func;
             }
 
             public void ReportDiagnostic( in DeclarationValidationContext context )
             {
-                context.Diagnostics.Report( (IDiagnostic) this._func( (TDeclaration) context.Declaration )! );
+                context.Diagnostics.Report( (IDiagnostic) this._func( (T) context.Declaration )! );
             }
 
             public void SuppressDiagnostic( in DeclarationValidationContext context )
             {
-                context.Diagnostics.Suppress( (SuppressionDefinition) (object) this._func( (TDeclaration) context.Declaration )! );
+                context.Diagnostics.Suppress( (SuppressionDefinition) (object) this._func( (T) context.Declaration )! );
             }
 
             public void SuggestCodeFix( in DeclarationValidationContext context )
             {
-                context.Diagnostics.Suggest( (CodeFix) (object) this._func( (TDeclaration) context.Declaration )! );
+                context.Diagnostics.Suggest( (CodeFix) (object) this._func( (T) context.Declaration )! );
             }
         }
 
-        public void AddAspect<TAspect>( Func<TDeclaration, Expression<Func<TAspect>>> createAspect )
-            where TAspect : Attribute, IAspect<TDeclaration>
+        public void AddAspect<TAspect>( Func<T, Expression<Func<TAspect>>> createAspect )
+            where TAspect : Attribute, IAspect<T>
         {
             var aspectClass = this.GetAspectClass<TAspect>();
             var userCodeInvoker = this._parent.ServiceProvider.GetRequiredService<UserCodeInvoker>();
             var executionContext = UserCodeExecutionContext.Current;
 
             this.RegisterAspectSource(
-                new ProgrammaticAspectSource<TAspect, TDeclaration>(
+                new ProgrammaticAspectSource<TAspect, T>(
                     aspectClass,
                     ( compilation, diagnostics ) => this.SelectAndValidateAspectTargets(
                         compilation,
@@ -208,15 +208,15 @@ namespace Metalama.Framework.Engine.Fabrics
                         } ) ) );
         }
 
-        public void AddAspect<TAspect>( Func<TDeclaration, TAspect> createAspect )
-            where TAspect : Attribute, IAspect<TDeclaration>
+        public void AddAspect<TAspect>( Func<T, TAspect> createAspect )
+            where TAspect : Attribute, IAspect<T>
         {
             var aspectClass = this.GetAspectClass<TAspect>();
             var userCodeInvoker = this._parent.ServiceProvider.GetRequiredService<UserCodeInvoker>();
             var executionContext = UserCodeExecutionContext.Current;
 
             this.RegisterAspectSource(
-                new ProgrammaticAspectSource<TAspect, TDeclaration>(
+                new ProgrammaticAspectSource<TAspect, T>(
                     aspectClass,
                     ( compilation, diagnosticAdder ) => this.SelectAndValidateAspectTargets(
                         compilation,
@@ -241,7 +241,7 @@ namespace Metalama.Framework.Engine.Fabrics
         }
 
         public void AddAspect<TAspect>()
-            where TAspect : Attribute, IAspect<TDeclaration>, new()
+            where TAspect : Attribute, IAspect<T>, new()
         {
             var aspectClass = this.GetAspectClass<TAspect>();
 
@@ -249,7 +249,7 @@ namespace Metalama.Framework.Engine.Fabrics
             var executionContext = UserCodeExecutionContext.Current;
 
             this.RegisterAspectSource(
-                new ProgrammaticAspectSource<TAspect, TDeclaration>(
+                new ProgrammaticAspectSource<TAspect, T>(
                     aspectClass,
                     ( compilation, diagnosticAdder ) => this.SelectAndValidateAspectTargets(
                         compilation,
@@ -277,7 +277,7 @@ namespace Metalama.Framework.Engine.Fabrics
             CompilationModel compilation,
             IDiagnosticAdder diagnosticAdder,
             AspectClass aspectClass,
-            Func<TDeclaration, TResult?> createResult )
+            Func<T, TResult?> createResult )
         {
             foreach ( var targetDeclaration in this._selector( compilation, diagnosticAdder ) )
             {
@@ -327,7 +327,7 @@ namespace Metalama.Framework.Engine.Fabrics
         private IEnumerable<ValidatorInstance> SelectAndValidateValidatorTargets(
             CompilationModel compilation,
             IDiagnosticSink diagnosticSink,
-            Func<TDeclaration, ValidatorInstance?> createResult )
+            Func<T, ValidatorInstance?> createResult )
         {
             var diagnosticAdder = (IDiagnosticAdder) diagnosticSink;
 
@@ -357,12 +357,12 @@ namespace Metalama.Framework.Engine.Fabrics
         }
 
         public void RequireAspect<TAspect>()
-            where TAspect : IAspect<TDeclaration>, new()
+            where TAspect : IAspect<T>, new()
         {
             var aspectClass = this.GetAspectClass<TAspect>();
 
             this.RegisterAspectSource(
-                new ProgrammaticAspectSource<TAspect, TDeclaration>(
+                new ProgrammaticAspectSource<TAspect, T>(
                     aspectClass,
                     getRequirements: ( compilation, diagnosticAdder ) => this.SelectAndValidateAspectTargets(
                         compilation,
@@ -374,9 +374,9 @@ namespace Metalama.Framework.Engine.Fabrics
         }
 
         [Obsolete( "Not implemented." )]
-        public void AddAnnotation<TAspect, TAnnotation>( Func<TDeclaration, TAnnotation> getAnnotation )
+        public void AddAnnotation<TAspect, TAnnotation>( Func<T, TAnnotation> getAnnotation )
             where TAspect : IAspect
-            where TAnnotation : IAnnotation<TDeclaration, TAspect>, IEligible<TDeclaration>
+            where TAnnotation : IAnnotation<T, TAspect>, IEligible<T>
             => throw new NotImplementedException();
     }
 }
