@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Backstage.Telemetry;
 using Metalama.Framework.Engine.Utilities;
 
 namespace Metalama.Framework.DesignTime
@@ -22,6 +23,8 @@ namespace Metalama.Framework.DesignTime
             if ( MustHandle( e ) )
             {
                 Logger.DesignTime.Error?.Log( e.ToString() );
+
+                Support.GetOptionalService<IExceptionReporter>()?.ReportException( e );
             }
             else
             {

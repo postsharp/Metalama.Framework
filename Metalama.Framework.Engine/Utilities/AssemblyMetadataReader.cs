@@ -37,6 +37,15 @@ namespace Metalama.Framework.Engine.Utilities
         public static AssemblyMetadataReader GetInstance( Assembly assembly ) => _instances.GetValue( assembly, a => new AssemblyMetadataReader( a ) );
 
         /// <summary>
+        /// Gets the version of the package containing the current assembly.
+        /// </summary>
+        public string GetPackageVersion()
+            => this._metadata.TryGetValue( "PackageVersion", out var version )
+                ? version
+                : throw new AssertionFailedException(
+                    $"The AssemblyMetadataAttribute with key 'PackageVersion' is not defined in assembly '{this._assembly.GetName()}'." );
+
+        /// <summary>
         /// Gets the package version with which the current assembly was built.
         /// </summary>
         public string GetPackageVersion( string packageName )
@@ -44,6 +53,15 @@ namespace Metalama.Framework.Engine.Utilities
                 ? version
                 : throw new AssertionFailedException(
                     $"The AssemblyMetadataAttribute for package '{packageName}' is not defined in assembly '{this._assembly.GetName()}'." );
+
+        /// <summary>
+        /// Gets the build date of the package containing the current assembly.
+        /// </summary>
+        public DateTime GetBuildDate()
+            => this._metadata.TryGetValue( "PackageBuildDate", out var buildDateString )
+            ? DateTime.Parse( buildDateString, CultureInfo.InvariantCulture )
+            : throw new AssertionFailedException(
+                    $"The AssemblyMetadataAttribute with key 'MetalamaBuildDate' is not defined in assembly '{this._assembly.GetName()}'." );
 
         /// <summary>
         /// Gets the unique BuildId for this assembly.

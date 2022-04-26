@@ -46,11 +46,6 @@ namespace Metalama.Framework.DesignTime
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics
             => this._designTimeDiagnosticDefinitions.SupportedDiagnosticDescriptors.Values.ToImmutableArray();
 
-        static TheDiagnosticAnalyzer()
-        {
-            Logger.Initialize();
-        }
-
         public override void Initialize( AnalysisContext context )
         {
             if ( MetalamaCompilerInfo.IsActive )
@@ -70,15 +65,15 @@ namespace Metalama.Framework.DesignTime
 
         private void AnalyzeSemanticModel( SemanticModelAnalysisContext context )
         {
-            var compilation = context.SemanticModel.Compilation;
-
-            var syntaxTreeFilePath = context.SemanticModel.SyntaxTree.FilePath;
-
-            this._logger.Trace?.Log(
-                $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}) started." );
-
             try
             {
+                var compilation = context.SemanticModel.Compilation;
+
+                var syntaxTreeFilePath = context.SemanticModel.SyntaxTree.FilePath;
+
+                this._logger.Trace?.Log(
+                    $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}) started." );
+
                 var projectOptions = new ProjectOptions( context.Options.AnalyzerConfigOptionsProvider );
 
                 if ( !projectOptions.IsDesignTimeEnabled )

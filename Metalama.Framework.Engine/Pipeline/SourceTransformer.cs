@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Backstage.Diagnostics;
 using Metalama.Compiler;
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.Diagnostics;
@@ -26,9 +27,13 @@ namespace Metalama.Framework.Engine.Pipeline
     {
         public void Execute( TransformerContext context )
         {
-            var serviceProvider = ServiceProviderFactory.GetServiceProvider( nextServiceProvider: context.Services );
+            var serviceProvider = ServiceProviderFactory.GetServiceProvider();
 
-            // Try has its own handler. Having the default ICompileTimeExceptionHandler added earlier
+            // The global basckstage service provider, that has been added in ServiceProvider.CreateBaseServiceProvider,
+            // gets replaced here by a project-scoped one.
+            serviceProvider = serviceProvider.WithNextProvider( context.Services );
+
+            // Try.Metalama ships its own handler. Having the default ICompileTimeExceptionHandler added earlier
             // is not possible, because it needs access to IExceptionReporter service, which comes from the TransformerContext.
             if ( serviceProvider.GetService<ICompileTimeExceptionHandler>() == null )
             {
