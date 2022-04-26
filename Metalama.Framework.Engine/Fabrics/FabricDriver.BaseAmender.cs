@@ -41,7 +41,7 @@ internal abstract partial class FabricDriver
         }
 
         private AspectReceiverSelector<T> GetAspectTargetSelector()
-            => this._declarationSelector ??= new AspectReceiverSelector<T>( this._targetDeclaration, this );
+            => this._declarationSelector ??= new AspectReceiverSelector<T>( this._targetDeclaration, this, CompilationModelVersion.Initial );
 
         public IProject Project { get; }
 

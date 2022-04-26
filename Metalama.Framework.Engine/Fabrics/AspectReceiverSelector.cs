@@ -18,11 +18,13 @@ internal class AspectReceiverSelector<T> : IAspectReceiverSelector<T>
 {
     private readonly Ref<T> _targetDeclaration;
     private readonly IAspectReceiverParent _parent;
+    private readonly CompilationModelVersion _version;
 
-    internal AspectReceiverSelector( Ref<T> targetDeclaration, IAspectReceiverParent parent )
+    internal AspectReceiverSelector( Ref<T> targetDeclaration, IAspectReceiverParent parent, CompilationModelVersion version )
     {
         this._targetDeclaration = targetDeclaration;
         this._parent = parent;
+        this._version = version;
     }
 
     public IAspectReceiver<TMember> With<TMember>( Func<T, IEnumerable<TMember>> selector )
@@ -33,7 +35,7 @@ internal class AspectReceiverSelector<T> : IAspectReceiverSelector<T>
         return new AspectReceiver<TMember>(
             this._targetDeclaration,
             this._parent,
-            CompilationModelVersion.Current,
+            this._version,
             ( compilation, diagnostics ) =>
             {
                 var targetDeclaration = this._targetDeclaration.GetTarget( compilation ).AssertNotNull();
@@ -57,7 +59,7 @@ internal class AspectReceiverSelector<T> : IAspectReceiverSelector<T>
         => new AspectReceiver<TMember>(
             this._targetDeclaration,
             this._parent,
-            CompilationModelVersion.Current,
+            this._version,
             ( compilation, _ ) => new[] { selector( this._targetDeclaration.GetTarget( compilation ) ) } );
 
     IValidatorReceiver<TMember> IValidatorReceiverSelector<T>.With<TMember>( Func<T, TMember> selector ) => this.With( selector );
