@@ -1425,7 +1425,12 @@ namespace Metalama.Framework.Engine.Templating
             => expression != null
                && expression.GetScopeFromAnnotation() == TemplatingScope.CompileTimeOnlyReturningRuntimeOnly
                && this.GetTransformationKind( expression ) != TransformationKind.Transform
-               && this._syntaxTreeAnnotationMap.GetExpressionType( expression ) is IDynamicTypeSymbol;
+               && (
+                    this._syntaxTreeAnnotationMap.GetExpressionType( expression ) is IDynamicTypeSymbol
+                    || (
+                        this._syntaxTreeAnnotationMap.GetExpressionType( expression ) is INamedTypeSymbol 
+                            { Name: "Task" or "IEnumerable" or "IAsyncEnumerator", TypeArguments: { Length: 1 } } namedType
+                        && namedType.TypeArguments[0] is  IDynamicTypeSymbol));
 
         public override SyntaxNode VisitReturnStatement( ReturnStatementSyntax node )
         {

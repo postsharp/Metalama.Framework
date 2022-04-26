@@ -1,4 +1,4 @@
-void Method(int a)
+async Task Method(int a)
 {
     await this.Method(a);
     return;

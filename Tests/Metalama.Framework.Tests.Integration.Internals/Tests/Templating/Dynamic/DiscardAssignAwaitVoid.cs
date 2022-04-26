@@ -12,7 +12,7 @@ namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.DiscardAssignA
         [TestTemplate]
         async Task<dynamic?> Template()
         {
-            _ = await meta.Proceed();
+            _ = await meta.ProceedAsync();
             
             return default;
         }

@@ -22,11 +22,6 @@
 
         <!-- Exclude files that intentionally do not compile -->
         <Compile Remove="Tests\**\__*.cs" />
-        <Compile Remove="Tests\Templating\Dynamic\DiscardAssign - Copy.t.cs" />
-        <Compile Remove="Tests\Templating\Dynamic\DiscardAssignVoid - Copy.t.cs" />
-        <Compile Remove="Tests\Templating\Return\ReturnDefault - Copy.t.cs" />
-        <Compile Remove="Tests\Templating\Return\ReturnVoidProceedAndDefault - Copy.t.cs" />
-        <Compile Remove="Tests\Templating\Return\ReturnVoidResultAndNull - Copy.t.cs" />
 
         <PackageReference Include="FakeItEasy" Version="6.2.1" />
         <PackageReference Include="FakeItEasy.Analyzer.CSharp" Version="6.0.0" />
@@ -81,28 +76,6 @@
     <!-- Ignore project if the build is obfuscated because this project relies on obfuscated internals -->
     <ItemGroup Condition="'$(Obfuscate)'=='True'">
         <Compile Remove="**\*" />
-    </ItemGroup>
-    <ItemGroup>
-      <None Include="Tests\Templating\Dynamic\DiscardAssignAwait.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>DiscardAssignAwait.cs</DependentUpon>
-      </None>
-      <None Include="Tests\Templating\Dynamic\DiscardAssignAwaitVoid.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>DiscardAssignAwaitVoid.cs</DependentUpon>
-      </None>
-      <None Include="Tests\Templating\Return\ReturnDefaultAwait.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>ReturnDefaultAwait.cs</DependentUpon>
-      </None>
-      <None Include="Tests\Templating\Return\ReturnVoidProceedAndDefaultAwait.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>ReturnVoidProceedAndDefaultAwait.cs</DependentUpon>
-      </None>
-      <None Include="Tests\Templating\Return\ReturnVoidResultAndNullAwait.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>ReturnVoidResultAndNullAwait.cs</DependentUpon>
-      </None>
     </ItemGroup>
 
 </Project>

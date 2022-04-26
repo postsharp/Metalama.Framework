@@ -3,7 +3,7 @@ using Metalama.TestFramework;
 using Metalama.Framework.Aspects;
 using System.Threading.Tasks;
 
-namespace Metalama.Framework.Tests.Integration.Templating.ReturnStatements.ReturnVoidResultAndNullAwait
+namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.VariableAssignAsyncAwaitTask
 {
     [CompileTime]
     class Aspect
@@ -11,15 +11,8 @@ namespace Metalama.Framework.Tests.Integration.Templating.ReturnStatements.Retur
         [TestTemplate]
         async Task<dynamic?> Template()
         {
-            try
-            {
-                dynamic result = await meta.Proceed();
-                return result;
-            }
-            catch
-            {
-                return null;
-            }
+            var result = await meta.ProceedAsync();
+            return result;
         }
     }
 

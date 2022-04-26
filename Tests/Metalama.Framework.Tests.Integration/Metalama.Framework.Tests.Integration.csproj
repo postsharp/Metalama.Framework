@@ -32,15 +32,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Remove="Tests\Aspects\Async\AsyncTemplate\Simple - Copy.t.cs" />
-      <Compile Remove="Tests\Aspects\Introductions\Interfaces\ConflictIgnore - Copy.t.cs" />
-      <Compile Remove="Tests\Aspects\Introductions\Interfaces\ImplicitMembers - Copy.t.cs" />
-      <Compile Remove="Tests\Aspects\Overrides\Methods\ExpressionTemplate - Copy.t.cs" />
-    </ItemGroup>
-
-
-
-    <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
         <ProjectReference Include="..\..\Metalama.TestFramework\Metalama.TestFramework.csproj" />
@@ -51,11 +42,5 @@
     </ItemGroup>
 
     <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets" />
-
-    <ItemGroup>
-      <None Update="C:\Dev\Metalama\Tests\Metalama.Framework.Tests.Integration\Tests\Aspects\Async\AsyncTemplate\AsyncMethod.t.cs">
-        <DependentUpon>AsyncMethod.cs</DependentUpon>
-      </None>
-    </ItemGroup>
 
 </Project>
