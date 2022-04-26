@@ -1,26 +1,28 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Metalama.Framework;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.Simple
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Async.AsyncTemplate.VoidAsyncMethod
 {
     class Aspect : OverrideMethodAspect
     {
         public override dynamic? OverrideMethod()
         {
-            return meta.Proceed();
+            var result = meta.Proceed();
+            Console.WriteLine($"result={result}");
+            return result;
         }
-        
+
         public override async System.Threading.Tasks.Task<dynamic?> OverrideAsyncMethod()
         {
             await Task.Yield();
             var result = await meta.Proceed();
             Console.WriteLine($"result={result}");
             return result;
-            
+
         }
     }
 
@@ -28,16 +30,14 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.Simpl
     class TargetCode
     {
         [Aspect]
-        int NormalMethod(int a)
+        void NonAsyncMethod()
         {
-            return a;
         }
-        
+
         [Aspect]
-        async Task<int> AsyncMethod(int a)
+        async void AsyncMethod()
         {
             await Task.Yield();
-            return a;
         }
     }
 }

@@ -190,7 +190,7 @@ namespace Metalama.Framework.Engine.Templating
                 = new(
                     "LAMA0223",
                     "Cannot use a specific Proceed variant in the current context.",
-                    "Cannot use the {0} method in '{1}' because the return type of the method is compatible with the {0} method.",
+                    "Cannot use the {0} method in '{1}' because the return type of the method is not compatible with the {0} method.",
                     _category,
                     Error );
 

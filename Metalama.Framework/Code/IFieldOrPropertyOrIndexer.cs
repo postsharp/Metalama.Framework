@@ -12,7 +12,7 @@ public interface IFieldOrPropertyOrIndexer : IMemberWithAccessors
     /// Gets writeability of the field, property or indexer, i.e. the situations in which it can be written.
     /// </summary>
     Writeability Writeability { get; }
-    
+
     /// <summary>
     /// Gets the property getter, or <c>null</c> if the property is write-only. In case of automatic properties, this property returns
     /// an object that does not map to source code but allows to add aspects and advice as with a normal method. In case of fields,

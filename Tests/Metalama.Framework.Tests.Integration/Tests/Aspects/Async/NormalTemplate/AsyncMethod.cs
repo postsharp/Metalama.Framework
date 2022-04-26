@@ -6,7 +6,7 @@ using System;
 using System.Threading.Tasks;
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Framework.Tests.Integration.Templating.Aspects.Async.NormalTemplateOnAsyncMethod
+namespace Metalama.Framework.Tests.Integration.Templating.Aspects.Async.NormalTemplate.AsyncMethod
 {
     internal class Aspect : OverrideMethodAspect
     {
@@ -32,7 +32,7 @@ namespace Metalama.Framework.Tests.Integration.Templating.Aspects.Async.NormalTe
         }
 
         [Aspect]
-        private async Task MethodReturningTaskd( int a )
+        async Task MethodReturningTask( int a )
         {
             await Task.Yield();
             Console.WriteLine( "Oops" );
@@ -44,6 +44,13 @@ namespace Metalama.Framework.Tests.Integration.Templating.Aspects.Async.NormalTe
             await Task.Yield();
 
             return a;
+        }
+
+        [Aspect]
+        async ValueTask MethodReturningValueTask( int a )
+        {
+            await Task.Yield();
+            Console.WriteLine("Oops");
         }
     }
 }

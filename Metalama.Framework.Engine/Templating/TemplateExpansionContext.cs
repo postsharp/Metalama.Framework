@@ -99,27 +99,35 @@ namespace Metalama.Framework.Engine.Templating
 
         public OurSyntaxGenerator SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;
 
-        public StatementSyntax CreateReturnStatement( ExpressionSyntax? returnExpression )
+        public StatementSyntax CreateReturnStatement( ExpressionSyntax? returnExpression, bool awaitResult )
         {
             if ( returnExpression == null )
             {
+                Invariant.Assert( !awaitResult );
+
                 return ReturnStatement();
             }
 
             if ( this.MetaApi.Declaration is IField field )
             {
                 // This is field initializer template expansion.
-                return this.CreateReturnStatementDefault( returnExpression, field.Type );
+                Invariant.Assert( !awaitResult );
+
+                return this.CreateReturnStatementDefault( returnExpression, field.Type, false );
             }
             else if ( this.MetaApi.Declaration is IProperty property )
             {
                 // This is property initializer template expansion.
-                return this.CreateReturnStatementDefault( returnExpression, property.Type );
+                Invariant.Assert( !awaitResult );
+
+                return this.CreateReturnStatementDefault( returnExpression, property.Type, false );
             }
             else if ( this.MetaApi.Declaration is IEvent @event )
             {
-                // This is property initializer template expansion.
-                return this.CreateReturnStatementDefault( returnExpression, @event.Type );
+                // This is event initializer template expansion.
+                Invariant.Assert( !awaitResult );
+
+                return this.CreateReturnStatementDefault( returnExpression, @event.Type, false );
             }
             else
             {
@@ -132,7 +140,7 @@ namespace Metalama.Framework.Engine.Templating
                     // not the one as seen from outside.
                     var asyncInfo = method.GetAsyncInfoImpl();
 
-                    if ( asyncInfo.IsAwaitable )
+                    if ( asyncInfo.IsAwaitableOrVoid )
                     {
                         returnType = asyncInfo.ResultType;
                     }
@@ -160,16 +168,18 @@ namespace Metalama.Framework.Engine.Templating
                 }
                 else
                 {
-                    return this.CreateReturnStatementDefault( returnExpression, returnType );
+                    return this.CreateReturnStatementDefault( returnExpression, returnType, awaitResult );
                 }
             }
         }
 
-        private StatementSyntax CreateReturnStatementDefault( ExpressionSyntax returnExpression, IType returnType )
+        private StatementSyntax CreateReturnStatementDefault( ExpressionSyntax returnExpression, IType returnType, bool awaitResult )
         {
             if ( returnExpression.Kind() is SyntaxKind.DefaultLiteralExpression or SyntaxKind.NullLiteralExpression )
             {
                 // If we need to return null or default, there is no need to emit a cast.
+                Invariant.Assert( !awaitResult );
+
                 return
                     ReturnStatement(
                         Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
@@ -187,7 +197,9 @@ namespace Metalama.Framework.Engine.Templating
                     return
                         ReturnStatement(
                             Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
-                            returnExpression,
+                            awaitResult
+                                ? AwaitExpression( Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( ElasticSpace ), returnExpression )
+                                : returnExpression,
                             Token( SyntaxKind.SemicolonToken ) );
                 }
                 else
@@ -195,7 +207,11 @@ namespace Metalama.Framework.Engine.Templating
                     return
                         ReturnStatement(
                             Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
-                            this.SyntaxGenerator.CastExpression( returnType.GetSymbol(), returnExpression )
+                            this.SyntaxGenerator.CastExpression(
+                                    returnType.GetSymbol(),
+                                    awaitResult
+                                        ? AwaitExpression( Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( ElasticSpace ), returnExpression )
+                                        : returnExpression )
                                 .WithAdditionalAnnotations( Simplifier.Annotation ),
                             Token( SyntaxKind.SemicolonToken ) );
                 }
@@ -374,7 +390,7 @@ namespace Metalama.Framework.Engine.Templating
 
         public UserDiagnosticSink DiagnosticSink => this.MetaApi.Diagnostics;
 
-        public StatementSyntax CreateReturnStatement( IUserExpression? returnExpression )
+        public StatementSyntax CreateReturnStatement( IUserExpression? returnExpression, bool awaitResult )
         {
             if ( returnExpression == null )
             {
@@ -396,9 +412,28 @@ namespace Metalama.Framework.Engine.Templating
                     throw new AssertionFailedException();
                 }
             }
+            else if ( awaitResult && TypeExtensions.Equals( returnExpression.Type.GetAsyncInfo().ResultType, SpecialType.Void ) )
+            {
+                Invariant.Assert( this._templateMethod.MustInterpretAsAsyncTemplate() );
+
+                if ( TypeExtensions.Equals( this.MetaApi.Method.ReturnType, SpecialType.Void )
+                     || TypeExtensions.Equals( this.MetaApi.Method.ReturnType.GetAsyncInfo().ResultType, SpecialType.Void ) )
+                {
+                    return
+                        Block(
+                                ExpressionStatement( AwaitExpression( returnExpression.ToRunTimeExpression() ) ),
+                                ReturnStatement().WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation ) )
+                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                }
+                else
+                {
+                    // TODO: Emit error.
+                    throw new AssertionFailedException();
+                }
+            }
             else
             {
-                return this.CreateReturnStatement( returnExpression.ToRunTimeExpression() );
+                return this.CreateReturnStatement( returnExpression.ToRunTimeExpression(), awaitResult );
             }
         }
 
