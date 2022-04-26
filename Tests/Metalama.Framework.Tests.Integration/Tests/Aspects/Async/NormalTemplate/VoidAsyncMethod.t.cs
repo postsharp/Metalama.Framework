@@ -1,7 +1,7 @@
-    class TargetCode
+internal class TargetCode
     {
-       [Aspect]
-        async void MethodReturningValueTaskOfInt(int a)
+        [Aspect]
+        private async void MethodReturningValueTaskOfInt( int a )
         {
     global::System.Console.WriteLine("Before");
     await this.MethodReturningValueTaskOfInt_Source(a);

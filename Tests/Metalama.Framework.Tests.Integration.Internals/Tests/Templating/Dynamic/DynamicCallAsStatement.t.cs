@@ -1,4 +1,4 @@
-int Method(int a)
+private int Method( int a )
 {
     this.Method(2).Foo();
     this.Method(a).Foo();

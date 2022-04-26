@@ -1,7 +1,10 @@
-class TargetCode
+internal class TargetCode
     {
         [Aspect]
-        public IEnumerable<int> Enumerable {get    {
+        public IEnumerable<int> Enumerable
+        {
+            get
+            {
         global::System.Console.WriteLine($"Starting get_Enumerable");
         foreach (var item in this.Enumerable_Source)
         {
@@ -10,22 +13,27 @@ class TargetCode
         }
 
         global::System.Console.WriteLine($"Ending get_Enumerable");
+            }
+        }
+
+private IEnumerable<int> Enumerable_Source
+{
+    get
+    {
+        Console.WriteLine("Yield 1");
+        yield return 1;
+        Console.WriteLine("Yield 2");
+        yield return 2;
+        Console.WriteLine("Yield 3");
+        yield return 3;
     }
 }
 
-private IEnumerable<int> Enumerable_Source
-{ get 
-        {
-            Console.WriteLine("Yield 1");
-            yield return 1;
-            Console.WriteLine("Yield 2");
-            yield return 2;
-            Console.WriteLine("Yield 3");
-            yield return 3;
-        } }
-        
         [Aspect]
-        public IEnumerator<int> Enumerator  {get    {
+        public IEnumerator<int> Enumerator
+        {
+            get
+            {
         global::System.Console.WriteLine($"Starting get_Enumerator");
         var enumerator = this.Enumerator_Source;
         while (enumerator.MoveNext())
@@ -35,22 +43,27 @@ private IEnumerable<int> Enumerable_Source
         }
 
         global::System.Console.WriteLine($"Ending get_Enumerator");
+            }
+        }
+
+private IEnumerator<int> Enumerator_Source
+{
+    get
+    {
+        Console.WriteLine("Yield 1");
+        yield return 1;
+        Console.WriteLine("Yield 2");
+        yield return 2;
+        Console.WriteLine("Yield 3");
+        yield return 3;
     }
 }
 
-private IEnumerator<int> Enumerator_Source
-{ get 
-        {
-            Console.WriteLine("Yield 1");
-            yield return 1;
-            Console.WriteLine("Yield 2");
-            yield return 2;
-            Console.WriteLine("Yield 3");
-            yield return 3;
-        } }
-        
         [Aspect]
-        public IEnumerable OldEnumerable  {get    {
+        public IEnumerable OldEnumerable
+        {
+            get
+            {
         global::System.Console.WriteLine($"Starting get_OldEnumerable");
         foreach (var item in this.OldEnumerable_Source)
         {
@@ -59,22 +72,27 @@ private IEnumerator<int> Enumerator_Source
         }
 
         global::System.Console.WriteLine($"Ending get_OldEnumerable");
+            }
+        }
+
+private IEnumerable OldEnumerable_Source
+{
+    get
+    {
+        Console.WriteLine("Yield 1");
+        yield return 1;
+        Console.WriteLine("Yield 2");
+        yield return 2;
+        Console.WriteLine("Yield 3");
+        yield return 3;
     }
 }
 
-private IEnumerable OldEnumerable_Source
-{ get 
+        [Aspect]
+        public IEnumerator OldEnumerator
         {
-            Console.WriteLine("Yield 1");
-            yield return 1;
-            Console.WriteLine("Yield 2");
-            yield return 2;
-            Console.WriteLine("Yield 3");
-            yield return 3;
-        } }
-        
-          [Aspect]
-        public IEnumerator OldEnumerator  {get    {
+            get
+            {
         global::System.Console.WriteLine($"Starting get_OldEnumerator");
         var enumerator = this.OldEnumerator_Source;
         while (enumerator.MoveNext())
@@ -84,18 +102,19 @@ private IEnumerable OldEnumerable_Source
         }
 
         global::System.Console.WriteLine($"Ending get_OldEnumerator");
-    }
-}
+            }
+        }
 
 private IEnumerator OldEnumerator_Source
-{ get 
-        {
-            Console.WriteLine("Yield 1");
-            yield return 1;
-            Console.WriteLine("Yield 2");
-            yield return 2;
-            Console.WriteLine("Yield 3");
-            yield return 3;
-        } }
-      
+{
+    get
+    {
+        Console.WriteLine("Yield 1");
+        yield return 1;
+        Console.WriteLine("Yield 2");
+        yield return 2;
+        Console.WriteLine("Yield 3");
+        yield return 3;
+    }
+}
     }
