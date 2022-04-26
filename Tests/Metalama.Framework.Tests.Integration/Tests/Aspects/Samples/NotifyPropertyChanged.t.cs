@@ -1,4 +1,4 @@
-    [NotifyPropertyChanged]
+[NotifyPropertyChanged]
     internal class Car:global::System.ComponentModel.INotifyPropertyChanged    {
         public string? Make 
 { get
@@ -50,4 +50,4 @@ protected void OnPropertyChanged(global::System.String name)
     this.PropertyChanged?.Invoke(this, new global::System.ComponentModel.PropertyChangedEventArgs(name));
 }
 
-public event global::System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;    }
+public event global::System.ComponentModel.PropertyChangedEventHandler PropertyChanged;    }

@@ -56,13 +56,10 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.MethodOv
         [Aspect1]
         [Aspect2]
         public void Foo()
-
             // Comment before Foo opening brace.
-        {
-            // Comment after Foo opening brace.
+        { // Comment after Foo opening brace.
             // Comment inside Foo 1.
-            Console.WriteLine( "Foo" ); // Comment inside Foo 2.
-
+            Console.WriteLine("Foo"); // Comment inside Foo 2.
             // Comment before Foo closing brace.
         } // Comment after Foo closing brace.
         // Comment after Foo.
@@ -71,16 +68,12 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.MethodOv
         [Aspect1]
         [Aspect2]
         public int Bar()
-
             // Comment before Bar opening brace.
-        {
-            // Comment after Bar opening brace.
+        { // Comment after Bar opening brace.
             // Comment inside Bar 1.
-            Console.WriteLine( "Bar" ); // Comment inside Bar 2.
-
+            Console.WriteLine("Bar"); // Comment inside Bar 2.
             // Comment inside Bar 3.
             return 42; // Comment inside Bar 4.
-
             // Comment before Bar closing brace.
         } // Comment after Bar closing brace.
         // Comment after Bar.

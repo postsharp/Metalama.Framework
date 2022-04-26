@@ -56,37 +56,29 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.Property
         [Aspect1]
         [Aspect2]
         public int Foo // After Foo name.
-        {
-            // After Foo opening brace.
+        { // After Foo opening brace.
             // Before Foo.get.
             get // After Foo.get keyword.
             // Before Foo.get opening brace.
-            {
-                // After Foo.get opening brace.
-                Console.WriteLine( "Foo.get" );
-
+            { // After Foo.get opening brace.
+                Console.WriteLine("Foo.get");
                 return 42;
-
                 // Before Foo.get closing brace.
             } // After Foo.get closing brace.
             // After Foo.get and before Foo.set.
             set // After Foo.set keyword.
             // Before Foo.set opening brace.
-            {
-                // After Foo.set opening brace.
-                Console.WriteLine( "Foo.set" );
-
+            { // After Foo.set opening brace.
+                Console.WriteLine("Foo.set");
                 // Before Foo.set closing brace.
             } // After Foo.set closing brace.
             // Before Foo closing brace.
         } // After Foo closing brace.
-
         // After Foo/before Bar.
         [Aspect1]
         [Aspect2]
         public int Bar // After Bar name.
-        {
-            // After Bar opening brace.
+        { // After Bar opening brace.
             // Before Bar.get.
             get // After Bar.get keyword.
             // Before Bar.get semicolon
@@ -96,14 +88,12 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.Property
             // Before Bar.set semicolon
             ; // After Bar.set semicolon.
             // Before Bar closing brace.
-        } // After Bar closing brace.
-
+        }// After Bar closing brace.
         // After Bar/before Baz.
         [Aspect1]
         [Aspect2]
         public int Baz // After Baz name.
-        {
-            // After Baz opening brace.
+        { // After Baz opening brace.
             // Before Baz.get.
             get // After Baz.get keyword.
             // Before Baz.get arrow.
@@ -117,12 +107,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.Property
             // Before Baz.set arrow.
                 => // After Baz.set arrow.
                     // Before Baz.set expression.
-                    Console.WriteLine( "Foo.set" ) // After Baz.set expression.
+                Console.WriteLine("Foo.set") // After Baz.set expression.
             // Before Baz.set semicolon.
             ; // After Baz.set semicolon.
             // Before Baz closing brace.
-        } // After Baz closing brace.
-
+        }// After Baz closing brace.
         // After Baz/before Qux.
         [Aspect1]
         [Aspect2]
@@ -133,7 +122,6 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.Property
                 42 // After Qux.get expression.
         // Before Qux.get semicolon.
         ; // After Qux.get semicolon.
-
         // After Qux.
     }
 }
