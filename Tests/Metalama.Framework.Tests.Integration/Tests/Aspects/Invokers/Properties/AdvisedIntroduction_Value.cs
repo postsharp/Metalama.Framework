@@ -1,6 +1,4 @@
-﻿// @Skipped(#29134 - Invokers.Base is null for an override aspect applied to a field)
-
-using System;
+﻿using System;
 using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -22,7 +20,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Properties.Advise
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advices.Override(
+            builder.Advice.Override(
                 builder.Target.Properties.OfName( nameof(TestIntroductionAttribute.Property) ).Single(),
                 nameof(PropertyTemplate) );
         }

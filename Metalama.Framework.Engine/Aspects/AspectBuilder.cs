@@ -28,6 +28,8 @@ namespace Metalama.Framework.Engine.Aspects
         private readonly AspectPipelineConfiguration _configuration;
         private bool _skipped;
         private AspectReceiverSelector<T>? _declarationSelector;
+        private ImmutableArray<IAspectSource> _aspectSources = ImmutableArray<IAspectSource>.Empty;
+        private ImmutableArray<IValidatorSource> _validatorSources = ImmutableArray<IValidatorSource>.Empty;
 
         public AspectBuilder(
             T target,
@@ -50,18 +52,14 @@ namespace Metalama.Framework.Engine.Aspects
 
         public IAspectInstance AspectInstance { get; }
 
-        public ImmutableArray<IAspectSource> AspectSources { get; private set; } = ImmutableArray<IAspectSource>.Empty;
-
-        public ImmutableArray<IValidatorSource> ValidatorSources { get; private set; } = ImmutableArray<IValidatorSource>.Empty;
-
         void IAspectOrValidatorSourceCollector.AddAspectSource( IAspectSource aspectSource )
         {
-            this.AspectSources = this.AspectSources.Add( aspectSource );
+            this._aspectSources = this._aspectSources.Add( aspectSource );
         }
 
         void IAspectOrValidatorSourceCollector.AddValidatorSource( IValidatorSource validatorSource )
         {
-            this.ValidatorSources = this.ValidatorSources.Add( validatorSource );
+            this._validatorSources = this._validatorSources.Add( validatorSource );
         }
 
         public AdviceFactory AdviceFactory { get; }
@@ -80,27 +78,23 @@ namespace Metalama.Framework.Engine.Aspects
 
         public T Target { get; }
 
-        private AspectReceiverSelector<T> GetValidatorReceiverSelector()
+        private AspectReceiverSelector<T> GetAspectReceiverSelector()
             => this._declarationSelector ??= new AspectReceiverSelector<T>( this.Target.ToTypedRef(), this );
 
-        public IAspectReceiver<TMember> WithTargetMembers<TMember>( Func<T, IEnumerable<TMember>> selector )
+        public IAspectReceiver<TMember> With<TMember>( Func<T, IEnumerable<TMember>> selector )
             where TMember : class, IDeclaration
-            => this.GetValidatorReceiverSelector().WithTargetMembers( selector );
+            => this.GetAspectReceiverSelector().With( selector );
 
-        IValidatorReceiver<T> IValidatorReceiverSelector<T>.WithTarget() => this.WithTarget();
+        IAspectReceiver<TMember> IAspectReceiverSelector<T>.With<TMember>( Func<T, TMember> selector ) => this.GetAspectReceiverSelector().With( selector );
 
-        IValidatorReceiver<TMember> IValidatorReceiverSelector<T>.WithTargetMembers<TMember>( Func<T, IEnumerable<TMember>> selector )
-            => this.WithTargetMembers( selector );
+        IValidatorReceiver<TMember> IValidatorReceiverSelector<T>.With<TMember>( Func<T, TMember> selector )
+            => this.GetAspectReceiverSelector().With( selector );
 
-        public IAspectReceiver<T> WithTarget() => this.GetValidatorReceiverSelector().WithTarget();
-
-        public IValidatorReceiverSelector<T> AfterAllAspects() => this.GetValidatorReceiverSelector().AfterAllAspects();
-
-        public IValidatorReceiverSelector<T> BeforeAnyAspect() => this.GetValidatorReceiverSelector().BeforeAnyAspect();
+        IValidatorReceiver<TMember> IValidatorReceiverSelector<T>.With<TMember>( Func<T, IEnumerable<TMember>> selector ) => this.With( selector );
 
         IDeclaration IAspectLayerBuilder.Target => this.Target;
 
-        public IAdviceFactory Advices => this.AdviceFactory;
+        public IAdviceFactory Advice => this.AdviceFactory;
 
         public void SkipAspect() => this._skipped = true;
 
@@ -122,8 +116,8 @@ namespace Metalama.Framework.Engine.Aspects
                     success,
                     this._diagnosticSink.ToImmutable(),
                     this.AdviceFactory.Advices.ToImmutableArray(),
-                    this.AspectSources,
-                    this.ValidatorSources )
+                    this._aspectSources,
+                    this._validatorSources )
                 : new AspectInstanceResult(
                     this.AspectInstance,
                     success,

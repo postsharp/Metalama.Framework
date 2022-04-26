@@ -1,18 +1,17 @@
 ﻿using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.TestFramework;
 
 #pragma warning disable CS0169
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.PromoteSource
 {
-    [AttributeUsage(AttributeTargets.Field)]
+    [AttributeUsage( AttributeTargets.Field )]
     public class PromoteAttribute : FieldOrPropertyAspect
     {
-        public override void BuildAspect(IAspectBuilder<IFieldOrProperty> builder)
+        public override void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
         {
-            builder.Advices.Override(builder.Target, nameof(Template));
+            builder.Advice.Override( builder.Target, nameof(Template) );
         }
 
         [Template]
@@ -38,7 +37,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.P
 
         public void Foo()
         {
-            Console.WriteLine("Original code.");
+            Console.WriteLine( "Original code." );
         }
     }
 }

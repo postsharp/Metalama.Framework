@@ -24,7 +24,7 @@ namespace Metalama.Framework.Aspects
         ChildAspect,
 
         /// <summary>
-        /// The aspect has been required by another aspect using <see cref="IAspectReceiver{TDeclaration}.RequireAspect{TTarget,TAspect}"/>.
+        /// The aspect has been required by another aspect using <see cref="IAspectReceiver{TDeclaration}.RequireAspect{TAspect}"/>.
         /// </summary>
         RequiredAspect,
 

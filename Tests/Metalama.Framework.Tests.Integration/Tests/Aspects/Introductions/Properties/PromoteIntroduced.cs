@@ -3,18 +3,17 @@ using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.PromoteIntroduced;
-using Metalama.TestFramework;
 
-[assembly: AspectOrder(typeof(PromoteAttribute), typeof(IntroductionAttribute))]
+[assembly: AspectOrder( typeof(PromoteAttribute), typeof(IntroductionAttribute) )]
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.PromoteIntroduced
 {
-    [AttributeUsage(AttributeTargets.Class)]
+    [AttributeUsage( AttributeTargets.Class )]
     public class PromoteAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advices.Override(builder.Target.Fields.Single(), nameof(Template));
+            builder.Advice.Override( builder.Target.Fields.Single(), nameof(Template) );
         }
 
         [Template]
@@ -32,7 +31,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.P
         }
     }
 
-    [AttributeUsage(AttributeTargets.Class)]
+    [AttributeUsage( AttributeTargets.Class )]
     public class IntroductionAttribute : TypeAspect
     {
         [Introduce]
@@ -46,7 +45,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.P
     {
         public void Foo()
         {
-            Console.WriteLine("Original code.");
+            Console.WriteLine( "Original code." );
         }
     }
 }

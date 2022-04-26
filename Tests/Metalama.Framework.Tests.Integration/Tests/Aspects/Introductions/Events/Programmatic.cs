@@ -9,17 +9,17 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.Progr
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             {
-                var propertyBuilder = builder.Advices.IntroduceEvent( builder.Target, nameof(EventField) );
+                var propertyBuilder = builder.Advice.IntroduceEvent( builder.Target, nameof(EventField) );
                 propertyBuilder.Accessibility = Accessibility.Public;
             }
 
             {
-                var propertyBuilder = builder.Advices.IntroduceEvent( builder.Target, nameof(Event) );
+                var propertyBuilder = builder.Advice.IntroduceEvent( builder.Target, nameof(Event) );
                 propertyBuilder.Accessibility = Accessibility.Public;
             }
 
             {
-                var propertyBuilder = builder.Advices.IntroduceEvent(
+                var propertyBuilder = builder.Advice.IntroduceEvent(
                     builder.Target,
                     "EventFromAccessors",
                     nameof(AddEventTemplate),

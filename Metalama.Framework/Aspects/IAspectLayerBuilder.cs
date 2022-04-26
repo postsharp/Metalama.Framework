@@ -39,9 +39,9 @@ namespace Metalama.Framework.Aspects
         IDeclaration Target { get; }
 
         /// <summary>
-        /// Gets an object that allows to create advices, e.g. overriding members, introducing members, or implementing new interfaces.
+        /// Gets an object that allows to create advice, e.g. overriding members, introducing members, or implementing new interfaces.
         /// </summary>
-        IAdviceFactory Advices { get; }
+        IAdviceFactory Advice { get; }
 
         /// <summary>
         /// Gets the cancellation token for the current operation.

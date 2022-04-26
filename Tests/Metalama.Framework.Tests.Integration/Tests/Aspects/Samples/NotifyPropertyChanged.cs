@@ -1,6 +1,3 @@
-// @RequiredConstant(NET5_0_OR_GREATER)
-// In .NET Framework, INotifyPropertyChanged.PropertyChanged is not marked as nullable, so the output is slightly different.
-
 using System;
 using System.ComponentModel;
 using System.Linq;
@@ -16,12 +13,12 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Samples.Notify
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advices.ImplementInterface( builder.Target, typeof(INotifyPropertyChanged) );
+            builder.Advice.ImplementInterface( builder.Target, typeof(INotifyPropertyChanged) );
 
             foreach (var property in builder.Target.Properties
-                .Where( p => p.Accessibility == Accessibility.Public && p.Writeability == Writeability.All ))
+                         .Where( p => p.Accessibility == Accessibility.Public && p.Writeability == Writeability.All ))
             {
-                builder.Advices.OverrideAccessors( property, null, nameof(SetPropertyTemplate) );
+                builder.Advice.OverrideAccessors( property, null, nameof(SetPropertyTemplate) );
             }
         }
 

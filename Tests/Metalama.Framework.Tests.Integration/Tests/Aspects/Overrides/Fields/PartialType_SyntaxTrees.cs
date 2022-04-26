@@ -1,7 +1,4 @@
-﻿// @Skipped(#30159)
-// @OutputAllSyntaxTrees
-
-using System;
+﻿using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -13,7 +10,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.PartialTy
         {
             foreach (var field in builder.Target.Fields)
             {
-                builder.Advices.OverrideAccessors( field, nameof(Template), nameof(Template), tags: new { name = field.Name } );
+                builder.Advice.OverrideAccessors( field, nameof(Template), nameof(Template), tags: new { name = field.Name } );
             }
         }
 

@@ -49,20 +49,15 @@ internal abstract partial class FabricDriver
 
         public abstract void AddValidatorSource( IValidatorSource validatorSource );
 
-        public IAspectReceiver<TChild> WithTargetMembers<TChild>( Func<T, IEnumerable<TChild>> selector )
+        public IAspectReceiver<TChild> With<TChild>( Func<T, IEnumerable<TChild>> selector )
             where TChild : class, IDeclaration
-            => this.GetAspectTargetSelector().WithTargetMembers( selector );
+            => this.GetAspectTargetSelector().With( selector );
 
-        IValidatorReceiver<T> IValidatorReceiverSelector<T>.WithTarget() => this.WithTarget();
+        IAspectReceiver<TMember> IAspectReceiverSelector<T>.With<TMember>( Func<T, TMember> selector ) => this.GetAspectTargetSelector().With( selector );
 
-        IValidatorReceiver<TMember> IValidatorReceiverSelector<T>.WithTargetMembers<TMember>( Func<T, IEnumerable<TMember>> selector )
-            => this.WithTargetMembers( selector );
+        IValidatorReceiver<TMember> IValidatorReceiverSelector<T>.With<TMember>( Func<T, TMember> selector ) => this.GetAspectTargetSelector().With( selector );
 
-        public IAspectReceiver<T> WithTarget() => this.GetAspectTargetSelector().WithTarget();
-
-        IValidatorReceiverSelector<T> IAspectReceiverSelector<T>.AfterAllAspects() => this.GetAspectTargetSelector().AfterAllAspects();
-
-        IValidatorReceiverSelector<T> IAspectReceiverSelector<T>.BeforeAnyAspect() => this.GetAspectTargetSelector().BeforeAnyAspect();
+        IValidatorReceiver<TMember> IValidatorReceiverSelector<T>.With<TMember>( Func<T, IEnumerable<TMember>> selector ) => this.With( selector );
 
         IServiceProvider IAspectReceiverParent.ServiceProvider => this._fabricManager.ServiceProvider;
 

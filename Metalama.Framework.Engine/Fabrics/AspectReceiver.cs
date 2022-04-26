@@ -133,6 +133,12 @@ namespace Metalama.Framework.Engine.Fabrics
             this.Validate( new FinalValidatorHelper<CodeFix>( codeFix ).SuggestCodeFix );
         }
 
+        public IValidatorReceiver<IDeclaration> AfterAllAspects()
+            => new AspectReceiver<IDeclaration>( this._containingDeclaration, this._parent, CompilationModelVersion.Final, this._selector );
+
+        public IValidatorReceiver<IDeclaration> BeforeAnyAspect()
+            => new AspectReceiver<IDeclaration>( this._containingDeclaration, this._parent, CompilationModelVersion.Initial, this._selector );
+
         private class FinalValidatorHelper<TOutput>
         {
             private readonly Func<TDeclaration, TOutput> _func;
@@ -279,7 +285,10 @@ namespace Metalama.Framework.Engine.Fabrics
 
                 var containingDeclaration = this._containingDeclaration.GetTarget( compilation ).AssertNotNull();
 
-                if ( !targetDeclaration.IsContainedIn( containingDeclaration ) || targetDeclaration.DeclaringAssembly.IsExternal )
+                if ( !(targetDeclaration.IsContainedIn( containingDeclaration )
+                       || (containingDeclaration is IParameter p && p.DeclaringMember.Equals( targetDeclaration ))
+                       || (containingDeclaration is IMember m && m.DeclaringType.Equals( targetDeclaration )))
+                     || targetDeclaration.DeclaringAssembly.IsExternal )
                 {
                     diagnosticAdder.Report(
                         GeneralDiagnosticDescriptors.CanAddChildAspectOnlyUnderParent.CreateRoslynDiagnostic(
@@ -347,14 +356,13 @@ namespace Metalama.Framework.Engine.Fabrics
             }
         }
 
-        public void RequireAspect<TTarget, TAspect>()
-            where TTarget : class, IDeclaration
-            where TAspect : IAspect<TTarget>, new()
+        public void RequireAspect<TAspect>()
+            where TAspect : IAspect<TDeclaration>, new()
         {
             var aspectClass = this.GetAspectClass<TAspect>();
 
             this.RegisterAspectSource(
-                new ProgrammaticAspectSource<TAspect, TTarget>(
+                new ProgrammaticAspectSource<TAspect, TDeclaration>(
                     aspectClass,
                     getRequirements: ( compilation, diagnosticAdder ) => this.SelectAndValidateAspectTargets(
                         compilation,
