@@ -11,7 +11,6 @@ namespace Metalama.Framework.CodeFixes;
 /// <summary>
 /// Creates instances of the <see cref="CodeFix"/> class.
 /// </summary>
-[CompileTime]
 public static class CodeFixFactory
 {
     /// <summary>

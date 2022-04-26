@@ -1,6 +1,4 @@
-﻿//@Skipped(30225)
-
-using System;
+﻿using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -34,8 +32,8 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     {
         public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advices.ImplementInterface( aspectBuilder.Target, typeof(IInterface1), tags: new TagDictionary() { ["TestTag"] = "TestValue_For_Interface1" } );
-            aspectBuilder.Advices.ImplementInterface(aspectBuilder.Target, typeof(IInterface2), tags: new TagDictionary() { ["TestTag"] = "TestValue_For_Interface2" });
+            aspectBuilder.Advices.ImplementInterface( aspectBuilder.Target, typeof(IInterface1), tags: new { TestTag = "TestValue_For_Interface1" } );
+            aspectBuilder.Advices.ImplementInterface(aspectBuilder.Target, typeof(IInterface2), tags: new { TestTag = "TestValue_For_Interface2" });
         }
 
         [InterfaceMember]

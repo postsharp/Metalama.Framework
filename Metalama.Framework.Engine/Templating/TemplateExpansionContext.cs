@@ -198,8 +198,8 @@ namespace Metalama.Framework.Engine.Templating
                         ReturnStatement(
                             Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
                             awaitResult
-                            ? AwaitExpression( Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( ElasticSpace ), returnExpression )
-                            : returnExpression,
+                                ? AwaitExpression( Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( ElasticSpace ), returnExpression )
+                                : returnExpression,
                             Token( SyntaxKind.SemicolonToken ) );
                 }
                 else
@@ -207,11 +207,11 @@ namespace Metalama.Framework.Engine.Templating
                     return
                         ReturnStatement(
                             Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
-                            this.SyntaxGenerator.CastExpression( 
-                                returnType.GetSymbol(),
-                                awaitResult
-                                ? AwaitExpression( Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( ElasticSpace ), returnExpression )
-                                : returnExpression )
+                            this.SyntaxGenerator.CastExpression(
+                                    returnType.GetSymbol(),
+                                    awaitResult
+                                        ? AwaitExpression( Token( SyntaxKind.AwaitKeyword ).WithTrailingTrivia( ElasticSpace ), returnExpression )
+                                        : returnExpression )
                                 .WithAdditionalAnnotations( Simplifier.Annotation ),
                             Token( SyntaxKind.SemicolonToken ) );
                 }
@@ -419,12 +419,11 @@ namespace Metalama.Framework.Engine.Templating
                 if ( TypeExtensions.Equals( this.MetaApi.Method.ReturnType, SpecialType.Void )
                      || TypeExtensions.Equals( this.MetaApi.Method.ReturnType.GetAsyncInfo().ResultType, SpecialType.Void ) )
                 {
-
                     return
-                    Block(
-                            ExpressionStatement( AwaitExpression( returnExpression.ToRunTimeExpression() ) ),
-                            ReturnStatement().WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation ) )
-                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                        Block(
+                                ExpressionStatement( AwaitExpression( returnExpression.ToRunTimeExpression() ) ),
+                                ReturnStatement().WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation ) )
+                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                 }
                 else
                 {

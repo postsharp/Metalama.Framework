@@ -52,10 +52,10 @@ namespace Metalama.Framework.Engine.Transformations
                 this.OverriddenDeclaration switch
                 {
                     { IsExplicitInterfaceImplementation: true } => this.OverriddenDeclaration.Name.Split( '.' ).Last(),
-                    _ => this.OverriddenDeclaration.Name,
+                    _ => this.OverriddenDeclaration.Name
                 };
 
-            SimpleNameSyntax memberName;                
+            SimpleNameSyntax memberName;
 
             if ( this.OverriddenDeclaration is IGeneric generic && generic.TypeParameters.Count > 0 )
             {

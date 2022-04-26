@@ -203,8 +203,7 @@ namespace Metalama.Framework.Engine.Templating
             else if ( awaitResult && TypeExtensions.Equals( expression.Type.GetAsyncInfo().ResultType, SpecialType.Void ) )
             {
                 return
-                    SyntaxFactory.ExpressionStatement(
-                        SyntaxFactory.AwaitExpression( expression.ToRunTimeExpression() ) );
+                    SyntaxFactory.ExpressionStatement( SyntaxFactory.AwaitExpression( expression.ToRunTimeExpression() ) );
             }
             else
             {
@@ -212,9 +211,9 @@ namespace Metalama.Framework.Engine.Templating
                     SyntaxFactory.AssignmentExpression(
                         SyntaxKind.SimpleAssignmentExpression,
                         SyntaxFactoryEx.DiscardToken,
-                        awaitResult 
-                        ? SyntaxFactory.AwaitExpression( expression.ToRunTimeExpression() )
-                        : expression.ToRunTimeExpression() ) );
+                        awaitResult
+                            ? SyntaxFactory.AwaitExpression( expression.ToRunTimeExpression() )
+                            : expression.ToRunTimeExpression() ) );
             }
         }
 
@@ -234,7 +233,7 @@ namespace Metalama.Framework.Engine.Templating
             var runtimeExpression = value.ToRunTimeExpression();
 
             if ( TypeExtensions.Equals( value.Type, SpecialType.Void )
-                || (awaitResult && TypeExtensions.Equals( value.Type.GetAsyncInfo().ResultType, SpecialType.Void ) ) )
+                 || (awaitResult && TypeExtensions.Equals( value.Type.GetAsyncInfo().ResultType, SpecialType.Void )) )
             {
                 // If the method is void, we invoke the method as a statement (so we don't loose the side effect) and we define a local that
                 // we assign to the default value. The local is necessary because it may be referenced later.
@@ -273,12 +272,10 @@ namespace Metalama.Framework.Engine.Templating
                 if ( expressionStatement != null )
                 {
                     return SyntaxFactory.Block(
-                        awaitResult
-                        ? SyntaxFactory.ExpressionStatement(
-                            SyntaxFactory.AwaitExpression(
-                                expressionStatement.Expression ))
-                        : expressionStatement, 
-                        localDeclarationStatement )
+                            awaitResult
+                                ? SyntaxFactory.ExpressionStatement( SyntaxFactory.AwaitExpression( expressionStatement.Expression ) )
+                                : expressionStatement,
+                            localDeclarationStatement )
                         .WithFlattenBlockAnnotation();
                 }
                 else
@@ -297,8 +294,8 @@ namespace Metalama.Framework.Engine.Templating
                                 null,
                                 SyntaxFactory.EqualsValueClause(
                                     awaitResult
-                                    ? SyntaxFactory.AwaitExpression( runtimeExpression )
-                                    : runtimeExpression ) ) ) ) );
+                                        ? SyntaxFactory.AwaitExpression( runtimeExpression )
+                                        : runtimeExpression ) ) ) ) );
             }
         }
 

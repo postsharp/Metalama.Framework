@@ -680,8 +680,8 @@ namespace Metalama.Framework.Engine.Templating
                     // Process the statement "_ = meta.XXX()", where "meta.XXX()" is a call to a compile-time dynamic method. 
 
                     var invocationExpression = InvocationExpression(
-                            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof( TemplateSyntaxFactory.DynamicDiscardAssignment ) ) )
-                        .AddArgumentListArguments( 
+                            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.DynamicDiscardAssignment) ) )
+                        .AddArgumentListArguments(
                             Argument( this.CastToDynamicExpression( this.TransformCompileTimeCode( assignment.Right ) ) ),
                             Argument( LiteralExpression( SyntaxKind.FalseLiteralExpression ) ) );
 
@@ -692,8 +692,8 @@ namespace Metalama.Framework.Engine.Templating
                     // Process the statement "_ = await meta.XXX()", where "meta.XXX()" is a call to a compile-time dynamic method. 
 
                     var invocationExpression = InvocationExpression(
-                            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof( TemplateSyntaxFactory.DynamicDiscardAssignment ) ) )
-                        .AddArgumentListArguments( 
+                            this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.DynamicDiscardAssignment) ) )
+                        .AddArgumentListArguments(
                             Argument( this.CastToDynamicExpression( this.TransformCompileTimeCode( awaitExpression.Expression ) ) ),
                             Argument( LiteralExpression( SyntaxKind.TrueLiteralExpression ) ) );
 
@@ -1426,11 +1426,11 @@ namespace Metalama.Framework.Engine.Templating
                && expression.GetScopeFromAnnotation() == TemplatingScope.CompileTimeOnlyReturningRuntimeOnly
                && this.GetTransformationKind( expression ) != TransformationKind.Transform
                && (
-                    this._syntaxTreeAnnotationMap.GetExpressionType( expression ) is IDynamicTypeSymbol
-                    || (
-                        this._syntaxTreeAnnotationMap.GetExpressionType( expression ) is INamedTypeSymbol 
-                            { Name: "Task" or "IEnumerable" or "IAsyncEnumerator", TypeArguments: { Length: 1 } } namedType
-                        && namedType.TypeArguments[0] is  IDynamicTypeSymbol));
+                   this._syntaxTreeAnnotationMap.GetExpressionType( expression ) is IDynamicTypeSymbol
+                   || (
+                       this._syntaxTreeAnnotationMap.GetExpressionType( expression ) is INamedTypeSymbol
+                           { Name: "Task" or "IEnumerable" or "IAsyncEnumerator", TypeArguments: { Length: 1 } } namedType
+                       && namedType.TypeArguments[0] is IDynamicTypeSymbol));
 
         public override SyntaxNode VisitReturnStatement( ReturnStatementSyntax node )
         {
@@ -1457,11 +1457,11 @@ namespace Metalama.Framework.Engine.Templating
 
             InvocationExpressionSyntax CreateInvocationExpression( ExpressionSyntax expression, bool awaitResult )
             {
-                return 
-                    InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof( TemplateSyntaxFactory.DynamicReturnStatement ) ) )
-                    .AddArgumentListArguments(
-                        Argument( this.CastToDynamicExpression( (ExpressionSyntax) this.Visit( expression ).AssertNotNull() ) ),
-                        Argument( LiteralExpression( awaitResult ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression ) ) );
+                return
+                    InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.DynamicReturnStatement) ) )
+                        .AddArgumentListArguments(
+                            Argument( this.CastToDynamicExpression( (ExpressionSyntax) this.Visit( expression ).AssertNotNull() ) ),
+                            Argument( LiteralExpression( awaitResult ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression ) ) );
             }
 
             return this.WithCallToAddSimplifierAnnotation( invocationExpression );
@@ -1485,7 +1485,7 @@ namespace Metalama.Framework.Engine.Templating
                     if ( this.IsCompileTimeDynamic( declarator.Initializer.Value ) )
                     {
                         // Assigning dynamic to a variable.
-                        return this.WithCallToAddSimplifierAnnotation( 
+                        return this.WithCallToAddSimplifierAnnotation(
                             CreateInvocationExpression( declaration, declarator, declarator.Initializer.Value, false ) );
                     }
 
@@ -1496,9 +1496,14 @@ namespace Metalama.Framework.Engine.Templating
                             CreateInvocationExpression( declaration, declarator, awaitExpression.Expression, true ) );
                     }
 
-                    InvocationExpressionSyntax CreateInvocationExpression( VariableDeclarationSyntax declaration, VariableDeclaratorSyntax declarator, ExpressionSyntax expression, bool awaitResult )
+                    InvocationExpressionSyntax CreateInvocationExpression(
+                        VariableDeclarationSyntax declaration,
+                        VariableDeclaratorSyntax declarator,
+                        ExpressionSyntax expression,
+                        bool awaitResult )
                     {
-                        return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof( TemplateSyntaxFactory.DynamicLocalDeclaration ) ) )
+                        return InvocationExpression(
+                                this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.DynamicLocalDeclaration) ) )
                             .AddArgumentListArguments(
                                 Argument( (ExpressionSyntax) this.Visit( declaration.Type )! ),
                                 Argument( this.Transform( declarator.Identifier ) ),
