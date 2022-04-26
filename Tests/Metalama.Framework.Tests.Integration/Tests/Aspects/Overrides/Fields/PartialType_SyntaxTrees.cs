@@ -1,4 +1,7 @@
-﻿using System;
+﻿// @Skipped(#30159)
+// @OutputAllSyntaxTrees
+
+using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 

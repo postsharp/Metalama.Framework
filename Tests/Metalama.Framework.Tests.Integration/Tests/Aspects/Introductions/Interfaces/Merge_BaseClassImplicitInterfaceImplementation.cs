@@ -1,4 +1,6 @@
-﻿using System;
+﻿// @Skipped(Case for interface merge conflict resolution, not implemented.)
+
+using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 

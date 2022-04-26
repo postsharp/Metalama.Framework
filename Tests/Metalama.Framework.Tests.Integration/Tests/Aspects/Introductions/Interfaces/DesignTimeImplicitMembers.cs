@@ -1,3 +1,5 @@
+// @DesignTime
+
 using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;

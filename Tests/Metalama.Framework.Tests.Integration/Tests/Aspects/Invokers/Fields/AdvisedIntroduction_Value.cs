@@ -1,4 +1,6 @@
-﻿using System;
+﻿// @Skipped(#29134 - Invokers.Base is null for an override aspect applied to a field)
+
+using System;
 using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
