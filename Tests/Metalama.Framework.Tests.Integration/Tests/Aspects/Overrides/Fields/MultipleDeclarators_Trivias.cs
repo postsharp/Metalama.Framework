@@ -13,10 +13,10 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.Issue3018
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advices.Override(builder.Target.Fields.OfName("E").Single(), nameof(PropertyTemplate));
-            builder.Advices.Override(builder.Target.Fields.OfName("G").Single(), nameof(PropertyTemplate));
-            builder.Advices.Override(builder.Target.Fields.OfName("H").Single(), nameof(PropertyTemplate));
-            builder.Advices.Override(builder.Target.Fields.OfName("I").Single(), nameof(PropertyTemplate));
+            builder.Advice.Override(builder.Target.Fields.OfName("E").Single(), nameof(PropertyTemplate));
+            builder.Advice.Override(builder.Target.Fields.OfName("G").Single(), nameof(PropertyTemplate));
+            builder.Advice.Override(builder.Target.Fields.OfName("H").Single(), nameof(PropertyTemplate));
+            builder.Advice.Override(builder.Target.Fields.OfName("I").Single(), nameof(PropertyTemplate));
         }
 
         [Template]
