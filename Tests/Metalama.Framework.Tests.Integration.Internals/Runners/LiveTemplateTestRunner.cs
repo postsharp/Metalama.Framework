@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.LiveTemplates;
 using Metalama.Framework.Engine.Templating;
 using Metalama.TestFramework;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,9 +22,9 @@ namespace Metalama.Framework.Tests.Integration.Runners
         public LiveTemplateTestRunner(
             ServiceProvider serviceProvider,
             string? projectDirectory,
-            MetadataReference[] metadataReferences,
+            TestProjectReferences references,
             ITestOutputHelper? logger )
-            : base( serviceProvider, projectDirectory, metadataReferences, logger ) { }
+            : base( serviceProvider, projectDirectory, references, logger ) { }
 
         protected override async Task RunAsync(
             TestInput testInput,
