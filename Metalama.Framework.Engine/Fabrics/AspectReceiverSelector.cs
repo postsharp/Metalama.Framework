@@ -16,18 +16,11 @@ namespace Metalama.Framework.Engine.Fabrics;
 internal class AspectReceiverSelector<T> : IAspectReceiverSelector<T>
     where T : class, IDeclaration
 {
-    private readonly CompilationModelVersion _version;
     private readonly Ref<T> _targetDeclaration;
     private readonly IAspectReceiverParent _parent;
 
-    public AspectReceiverSelector( Ref<T> targetDeclaration, IAspectReceiverParent parent ) : this(
-        CompilationModelVersion.Current,
-        targetDeclaration,
-        parent ) { }
-
-    internal AspectReceiverSelector( CompilationModelVersion version, Ref<T> targetDeclaration, IAspectReceiverParent parent )
+    internal AspectReceiverSelector( Ref<T> targetDeclaration, IAspectReceiverParent parent )
     {
-        this._version = version;
         this._targetDeclaration = targetDeclaration;
         this._parent = parent;
     }
@@ -40,7 +33,7 @@ internal class AspectReceiverSelector<T> : IAspectReceiverSelector<T>
         return new AspectReceiver<TMember>(
             this._targetDeclaration,
             this._parent,
-            this._version,
+            CompilationModelVersion.Current,
             ( compilation, diagnostics ) =>
             {
                 var targetDeclaration = this._targetDeclaration.GetTarget( compilation ).AssertNotNull();
@@ -64,7 +57,7 @@ internal class AspectReceiverSelector<T> : IAspectReceiverSelector<T>
         => new AspectReceiver<TMember>(
             this._targetDeclaration,
             this._parent,
-            this._version,
+            CompilationModelVersion.Current,
             ( compilation, _ ) => new[] { selector( this._targetDeclaration.GetTarget( compilation ) ) } );
 
     IValidatorReceiver<TMember> IValidatorReceiverSelector<T>.With<TMember>( Func<T, TMember> selector ) => this.With( selector );
