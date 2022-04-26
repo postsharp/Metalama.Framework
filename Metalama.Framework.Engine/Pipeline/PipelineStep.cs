@@ -16,22 +16,23 @@ namespace Metalama.Framework.Engine.Pipeline
 
         public OrderedAspectLayer AspectLayer { get; }
 
-        public PipelineStep( PipelineStepId id, OrderedAspectLayer aspectLayer )
+        protected PipelineStepsState Parent { get; }
+
+        public PipelineStep( PipelineStepsState parent, PipelineStepId id, OrderedAspectLayer aspectLayer )
         {
             this.Id = id;
             this.AspectLayer = aspectLayer;
+            this.Parent = parent;
         }
 
         /// <summary>
         /// Executes the step.
         /// </summary>
         /// <param name="compilation"></param>
-        /// <param name="pipelineStepsState"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
         public abstract CompilationModel Execute(
             CompilationModel compilation,
-            PipelineStepsState pipelineStepsState,
             CancellationToken cancellationToken );
 
         public override string ToString() => this.Id.ToString();
