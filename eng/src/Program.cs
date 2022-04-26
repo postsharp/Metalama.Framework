@@ -10,7 +10,7 @@ using PostSharp.Engineering.BuildTools.Utilities;
 using Spectre.Console.Cli;
 using System.IO;
 
-var product = new Product
+var product = new Product( Dependencies.Metalama )
 {
     ProductName = "Metalama",
     Solutions = new Solution[]
