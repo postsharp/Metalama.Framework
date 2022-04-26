@@ -1,3 +1,6 @@
+// @RequiredConstant(NETFRAMEWORK)
+// In .NET Framework, INotifyPropertyChanged.PropertyChanged is not marked as nullable, so the output is slightly different.
+
 using System;
 using System.ComponentModel;
 using System.Linq;
