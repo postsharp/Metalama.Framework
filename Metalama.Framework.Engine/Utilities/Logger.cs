@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.Utilities
         /// Retrieved all loggers from the support services.
         /// </summary>
         /// <remarks>
-        /// This method should only be called from the Support.Initialize method.
+        /// This method should only be called from the MetalamaDiagnosticsService.Initialize method.
         /// </remarks>
         internal static void Initialize()
         {
