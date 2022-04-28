@@ -50,6 +50,13 @@ namespace Metalama.Framework.Engine.Pipeline
             return new ServiceProvider( builder.ToImmutable(), this._nextProvider );
         }
 
+        public ServiceProvider WithUntypedService( Type interfaceType, object implementation )
+        {
+            var serviceNode = new ServiceNode( provider => implementation, interfaceType );
+
+            return new ServiceProvider( this._services.Add( interfaceType, serviceNode ), this._nextProvider );
+        }
+
         private static void AddService( ServiceNode service, ImmutableDictionary<Type, ServiceNode>.Builder builder )
         {
             var interfaces = service.ServiceType.GetInterfaces();

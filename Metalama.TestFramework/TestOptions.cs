@@ -183,12 +183,13 @@ namespace Metalama.TestFramework
         /// To set this option in a test, add this comment to your test file: <c>// @OutputAllSyntaxTrees</c>.
         /// </summary>
         public bool? OutputAllSyntaxTrees { get; set; }
-        
+
         /// <summary>
-        /// Gets or sets the license key with which the test should be run. If no license key is specified, licensing is not included in the text.
-        /// To set this option in a test, add this comment to your test file: <c>// @LicenseKey(key)</c>. 
+        /// Gets or sets the name of a file in the project directory that contains the license key with which the test should be run.
+        /// If no license is specified, the licensing service is not included in the text.
+        /// To set this option in a test, add this comment to your test file: <c>// @LicenseFile(path)</c>. 
         /// </summary>
-        public string? LicenseKey { get; set; }
+        public string? LicenseFile { get; set; }
 
         /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
@@ -375,10 +376,10 @@ namespace Metalama.TestFramework
                         this.References.Add( new TestAssemblyReference { Name = optionArg } );
 
                         break;
-                    
-                    case "LicenseKey":
-                        this.LicenseKey = optionArg;
-                        
+
+                    case "LicenseFile":
+                        this.LicenseFile = optionArg;
+
                         break;
 
                     default:

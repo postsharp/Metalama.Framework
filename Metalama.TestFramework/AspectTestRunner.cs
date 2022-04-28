@@ -77,9 +77,12 @@ namespace Metalama.TestFramework
 
             var serviceProviderForThisTest = testResult.ProjectScopedServiceProvider.WithServices( new Observer( testResult ) );
 
-            if ( testInput.Options.LicenseKey != null )
+            if ( testInput.Options.LicenseFile != null )
             {
-                serviceProviderForThisTest = LicenseVerifierFactory.AddTestLicenseVerifier( serviceProviderForThisTest, testInput.Options.LicenseKey );
+                // TODO: read the license file.
+                var licenseKey = "TODO";
+
+                serviceProviderForThisTest = LicenseVerifierFactory.AddTestLicenseVerifier( serviceProviderForThisTest, licenseKey );
             }
 
             using var domain = new UnloadableCompileTimeDomain();

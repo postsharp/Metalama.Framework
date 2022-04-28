@@ -1,4 +1,8 @@
-﻿using Metalama.Framework.Engine.Pipeline;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using Metalama.Backstage.Extensibility;
+using Metalama.Framework.Engine.Pipeline;
 
 namespace Metalama.Framework.Engine.Licensing;
 
@@ -9,7 +13,12 @@ public static class LicenseVerifierFactory
     /// </summary>
     public static ServiceProvider AddTestLicenseVerifier( ServiceProvider serviceProvider, string licenseKey )
     {
-        // TODO: add the license consumer.
-        return serviceProvider.WithService( new LicenseVerifier(serviceProvider) );
+        var serviceProviderBuilder = new ServiceProviderBuilder(
+            ( type, impl ) => { serviceProvider = serviceProvider.WithUntypedService( type, impl ); },
+            () => serviceProvider );
+
+        serviceProviderBuilder.AddLicensing( additionalLicenses: new[] { licenseKey }, ignoreUserProfileLicenses: true );
+
+        return serviceProvider.WithService( new LicenseVerifier( serviceProvider ) );
     }
 }
