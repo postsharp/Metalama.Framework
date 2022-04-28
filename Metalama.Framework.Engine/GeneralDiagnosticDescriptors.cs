@@ -275,9 +275,18 @@ namespace Metalama.Framework.Engine
                     + "reference aspect-generated artefacts from source code.",
                     _category,
                     Warning );
+        
+        internal static readonly DiagnosticDefinition<(string Message, string File)> IgnorableUnhandledException =
+            new(
+                "LAMA00049",
+                _category,
+                "Unexpected exception occurred in Metalama: {0} Exception details are in '{1}'. " +
+                " Please report this issue at https://www.postsharp.net/support and attach this file to the ticket.",
+                Warning,
+                "Unexpected exception in Metalama." );
 
         // TODO: Use formattable string (C# does not seem to find extension methods).
-        internal static readonly DiagnosticDefinition<string>
+        public static readonly DiagnosticDefinition<string>
             UnsupportedFeature = new(
                 "LAMA0099",
                 "Feature is not yet supported.",

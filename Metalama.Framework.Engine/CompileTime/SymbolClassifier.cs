@@ -378,16 +378,18 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             var typeScope = this.GetTemplatingScopeCore( type, recursion + 1 );
 
-            if ( typeScope != TemplatingScope.RunTimeOrCompileTime )
+            if ( typeScope != combinedScope )
             {
-                if ( combinedScope == TemplatingScope.RunTimeOrCompileTime )
+                combinedScope = (typeScope, combinedScope) switch
                 {
-                    combinedScope = typeScope;
-                }
-                else
-                {
-                    combinedScope = TemplatingScope.Conflict;
-                }
+                    (TemplatingScope.Conflict, _) => TemplatingScope.Conflict,
+                    (TemplatingScope.Invalid, _) => TemplatingScope.Invalid,
+                    (_, TemplatingScope.RunTimeOrCompileTime) => typeScope,
+                    (TemplatingScope.RunTimeOrCompileTime, _) => combinedScope,
+                    (TemplatingScope.RunTimeOnly, TemplatingScope.CompileTimeOnly) => TemplatingScope.Conflict,
+                    (TemplatingScope.CompileTimeOnly, TemplatingScope.RunTimeOnly) => TemplatingScope.Conflict,
+                    _ => throw new AssertionFailedException( $"Invalid combination: ({typeScope}, {combinedScope})" )
+                };
             }
         }
 
