@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 }
                 catch ( Exception ) { }
 
-                File.WriteAllText( reportFile, exception.ToString() );
+                File.WriteAllText( reportFile, exceptionText.ToString() );
             }
 
             var diagnosticDefinition = canIgnoreException ? GeneralDiagnosticDescriptors.IgnorableUnhandledException : GeneralDiagnosticDescriptors.UnhandledException;
