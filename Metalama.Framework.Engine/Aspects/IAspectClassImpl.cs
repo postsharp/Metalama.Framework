@@ -17,5 +17,10 @@ namespace Metalama.Framework.Engine.Aspects
         CompileTimeProject? Project { get; }
 
         ImmutableArray<TemplateClass> TemplateClasses { get; }
+        
+        /// <summary>
+        /// Gets a value indicating whether the aspect class is annotated with the <see cref="FreemiumAttribute"/> custom attribute.
+        /// </summary>
+        bool IsFreemium { get; }
     }
 }

@@ -13,6 +13,7 @@ using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Fabrics;
+using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Validation;
@@ -374,6 +375,7 @@ namespace Metalama.Framework.Engine.Pipeline
             var aspectSources = this.CreateAspectSources( pipelineConfiguration, compilation.Compilation, cancellationToken );
             var additionalCompilationOutputFiles = GetAdditionalCompilationOutputFiles( pipelineConfiguration.ServiceProvider );
 
+            // Execute the pipeline stages.
             pipelineStageResult = new AspectPipelineResult(
                 compilation,
                 pipelineConfiguration.ProjectModel,
@@ -404,7 +406,18 @@ namespace Metalama.Framework.Engine.Pipeline
                     pipelineStageResult = newStageResult;
                 }
             }
+            
+            // Enforce licensing.
+            var licenseController = pipelineConfiguration.ServiceProvider.GetService<LicenseVerifier>();
 
+            if ( licenseController != null )
+            {
+                var licensingDiagnostics = new UserDiagnosticSink();
+                licenseController.VerifyCompilationResult( pipelineStageResult.AspectInstanceResults, licensingDiagnostics );
+                pipelineStageResult = pipelineStageResult.WithAdditionalDiagnostics( licensingDiagnostics.ToImmutable() );
+            }
+
+            // Report diagnostics
             var hasError = pipelineStageResult.Diagnostics.ReportedDiagnostics.Any( d => d.Severity >= DiagnosticSeverity.Error );
 
             foreach ( var diagnostic in pipelineStageResult.Diagnostics.ReportedDiagnostics )

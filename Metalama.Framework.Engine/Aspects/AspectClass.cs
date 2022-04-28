@@ -11,6 +11,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
@@ -84,6 +85,8 @@ namespace Metalama.Framework.Engine.Aspects
 
         Type IAspectClass.Type => this.AspectType;
 
+        public bool IsFreemium { get; }
+
         public bool IsLiveTemplate { get; }
 
         public bool HasError { get; }
@@ -137,6 +140,11 @@ namespace Metalama.Framework.Engine.Aspects
                         this.IsInherited = true;
 
                         break;
+                    
+                    case nameof(FreemiumAttribute):
+                        this.IsFreemium = true;
+                        
+                        break;
 
                     case nameof(LiveTemplateAttribute):
                         if ( !aspectTypeSymbol.HasDefaultConstructor() )
@@ -176,6 +184,9 @@ namespace Metalama.Framework.Engine.Aspects
 
             // This must be called after Members is built and assigned.
             this._aspectDriver = aspectDriverFactory.GetAspectDriver( this, aspectTypeSymbol );
+            
+            this.ServiceProvider.GetService<LicenseVerifier>()?.VerifyCanBeInherited( this, prototype, diagnosticAdder );
+
         }
 
         private bool TryInitialize( IDiagnosticAdder diagnosticAdder )
