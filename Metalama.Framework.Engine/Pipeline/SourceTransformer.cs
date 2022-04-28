@@ -63,15 +63,8 @@ namespace Metalama.Framework.Engine.Pipeline
             }
             catch ( Exception e )
             {
-                var mustRethrow = true;
-
                 ServiceProviderFactory.AsyncLocalProvider.GetService<ICompileTimeExceptionHandler>()
                     ?.ReportException( e, context.ReportDiagnostic );
-
-                if ( mustRethrow )
-                {
-                    throw;
-                }
             }
         }
 
