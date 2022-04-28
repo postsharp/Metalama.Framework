@@ -1,10 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Backstage.Licensing;
+using Metalama.Backstage.Licensing.Consumption;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Fabrics;
+using Metalama.Framework.Project;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
@@ -17,10 +20,24 @@ namespace Metalama.Framework.Engine.Licensing;
 /// <summary>
 /// Controls that the project respects the license and reports diagnostics if not.
 /// </summary>
-internal class LicenseVerifier
+internal class LicenseVerifier : IService
 {
     private const int _maxFreemiumAspects = 1;
-    private bool _isLimitedLicense;
+    private readonly bool _isLimitedLicense;
+
+    public LicenseVerifier( IServiceProvider serviceProvider )
+    {
+        var licenseConsumptionManager = (ILicenseConsumptionManager?) serviceProvider.GetService( typeof(ILicenseConsumptionManager));
+
+        if ( licenseConsumptionManager != null )
+        {
+            this._isLimitedLicense = !licenseConsumptionManager.CanConsumeFeatures( LicensedFeatures.Metalama );
+        }
+        else
+        {
+            this._isLimitedLicense = false;
+        }
+    }
 
     public void VerifyCanAddChildAspect( AspectPredecessor predecessor )
     {
@@ -48,7 +65,7 @@ internal class LicenseVerifier
 
     private static bool HasRedistributionLicense( Assembly assembly )
     {
-        // TODO: determine if the project has a redistribution license (and cache).
+        // TODO #30275: Licensing: redistribution license
         return false;
     }
 

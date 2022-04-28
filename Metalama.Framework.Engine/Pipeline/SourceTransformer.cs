@@ -4,6 +4,7 @@
 using Metalama.Compiler;
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Project;
@@ -27,6 +28,9 @@ namespace Metalama.Framework.Engine.Pipeline
         public void Execute( TransformerContext context )
         {
             var serviceProvider = ServiceProviderFactory.GetServiceProvider( nextServiceProvider: context.Services );
+            
+            // Add the license verifier.
+            serviceProvider = serviceProvider.WithService( new LicenseVerifier( serviceProvider ) );
 
             // Try.Metalama ships its own project options using the async-local service provider.
             var projectOptions = serviceProvider.GetService<IProjectOptions>();
