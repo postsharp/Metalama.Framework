@@ -406,7 +406,7 @@ namespace Metalama.Framework.Engine.Pipeline
                     pipelineStageResult = newStageResult;
                 }
             }
-            
+
             // Enforce licensing.
             var licenseController = pipelineConfiguration.ServiceProvider.GetService<LicenseVerifier>();
 

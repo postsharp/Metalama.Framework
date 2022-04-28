@@ -140,10 +140,10 @@ namespace Metalama.Framework.Engine.Aspects
                         this.IsInherited = true;
 
                         break;
-                    
+
                     case nameof(FreemiumAttribute):
                         this.IsFreemium = true;
-                        
+
                         break;
 
                     case nameof(LiveTemplateAttribute):
@@ -184,9 +184,8 @@ namespace Metalama.Framework.Engine.Aspects
 
             // This must be called after Members is built and assigned.
             this._aspectDriver = aspectDriverFactory.GetAspectDriver( this, aspectTypeSymbol );
-            
-            this.ServiceProvider.GetService<LicenseVerifier>()?.VerifyCanBeInherited( this, prototype, diagnosticAdder );
 
+            this.ServiceProvider.GetService<LicenseVerifier>()?.VerifyCanBeInherited( this, prototype, diagnosticAdder );
         }
 
         private bool TryInitialize( IDiagnosticAdder diagnosticAdder )

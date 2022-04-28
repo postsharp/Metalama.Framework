@@ -42,6 +42,8 @@ namespace Metalama.Framework.Engine.Fabrics
 
         public ImmutableArray<TemplateClass> TemplateClasses { get; }
 
+        public bool IsFreemium => false;
+
         public EligibleScenarios GetEligibility( IDeclaration obj ) => EligibleScenarios.Aspect;
 
         public FormattableString? GetIneligibilityJustification( EligibleScenarios requestedEligibility, IDescribedObject<IDeclaration> describedObject )

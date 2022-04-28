@@ -17,7 +17,6 @@ using Metalama.Framework.Project;
 using Metalama.Framework.Validation;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -66,14 +65,14 @@ namespace Metalama.Framework.Engine.Fabrics
         private void RegisterAspectSource( IAspectSource aspectSource )
         {
             this._parent.ServiceProvider.GetService<LicenseVerifier>()?.VerifyCanAddChildAspect( this._parent.AspectPredecessor );
-            
+
             this._parent.AddAspectSource( aspectSource );
         }
 
         private void RegisterValidatorSource( ProgrammaticValidatorSource validatorSource )
         {
             this._parent.ServiceProvider.GetService<LicenseVerifier>()?.VerifyCanValidator( this._parent.AspectPredecessor );
-            
+
             this._parent.AddValidatorSource( validatorSource );
         }
 
@@ -176,12 +175,9 @@ namespace Metalama.Framework.Engine.Fabrics
             }
         }
 
-
         public void AddAspect<TAspect>( Func<T, Expression<Func<TAspect>>> createAspect )
             where TAspect : Attribute, IAspect<T>
         {
-            this.VerifyCanAddAspect();
-            
             var aspectClass = this.GetAspectClass<TAspect>();
             var userCodeInvoker = this._parent.ServiceProvider.GetRequiredService<UserCodeInvoker>();
             var executionContext = UserCodeExecutionContext.Current;
@@ -374,8 +370,6 @@ namespace Metalama.Framework.Engine.Fabrics
         public void RequireAspect<TAspect>()
             where TAspect : IAspect<T>, new()
         {
-            this.VerifyCanAddAspect();
-            
             var aspectClass = this.GetAspectClass<TAspect>();
 
             this.RegisterAspectSource(

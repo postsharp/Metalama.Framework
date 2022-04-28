@@ -3,7 +3,6 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Fabrics;
 using System;
@@ -12,7 +11,6 @@ using System.Linq;
 using System.Reflection;
 
 namespace Metalama.Framework.Engine.Licensing;
-
 
 #pragma warning disable SA1118
 
@@ -33,12 +31,12 @@ internal class LicenseVerifier
                 case IAspectInstance aspectInstance:
                     var aspectClass = (IAspectClassImpl) aspectInstance.AspectClass;
 
-                    if ( !aspectClass.IsFreemium && !this.HasRedistributionLicense( aspectInstance.Aspect.GetType().Assembly ) )
+                    if ( !aspectClass.IsFreemium && !HasRedistributionLicense( aspectInstance.Aspect.GetType().Assembly ) )
                     {
                         throw new InvalidOperationException(
                             $"The '{aspectInstance.AspectClass.ShortName}' aspect cannot add a child aspect because you are using the Metalama Essentials license and the aspect is not marked as [Freemium]." );
                     }
-                    
+
                     break;
 
                 case IFabricInstance fabricInstance:
@@ -67,7 +65,6 @@ internal class LicenseVerifier
         }
     }
 
-    
     public void VerifyCompilationResult( ImmutableArray<AspectInstanceResult> aspectInstanceResults, UserDiagnosticSink diagnostics )
     {
         var freemiumAspects = aspectInstanceResults.Select( a => a.AspectInstance.AspectClass ).Where( c => ((IAspectClassImpl) c).IsFreemium ).ToList();
@@ -76,7 +73,11 @@ internal class LicenseVerifier
         if ( freemiumAspectsCount > _maxFreemiumAspects )
         {
             var freemiumAspectNames = string.Join( ",", freemiumAspects.Select( x => "'" + x.ShortName + "'" ) );
-            diagnostics.Report( LicensingDiagnosticDescriptors.TooManyFreemiumAspects.CreateRoslynDiagnostic( null, (freemiumAspectsCount, _maxFreemiumAspects,freemiumAspectNames  ) ) );
+
+            diagnostics.Report(
+                LicensingDiagnosticDescriptors.TooManyFreemiumAspects.CreateRoslynDiagnostic(
+                    null,
+                    (freemiumAspectsCount, _maxFreemiumAspects, freemiumAspectNames) ) );
         }
     }
 
@@ -87,11 +88,10 @@ internal class LicenseVerifier
             // This happens only with abstract classes.
             return;
         }
-        
+
         if ( this._isLimitedLicense )
         {
-
-            if ( aspectClass.IsInherited && !aspectClass.IsFreemium && !this.HasRedistributionLicense( prototype.GetType().Assembly ) )
+            if ( aspectClass.IsInherited && !aspectClass.IsFreemium && !HasRedistributionLicense( prototype.GetType().Assembly ) )
             {
                 // TODO: report an error.
             }
