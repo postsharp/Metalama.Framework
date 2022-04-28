@@ -1,15 +1,12 @@
 using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Eligibility;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.ParameterAspect;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.ParameterAspect_;
 
-public class RequiredAttribute : Attribute, IAspect<IParameter>
+public class RequiredAttribute : ParameterAspect
 {
-    public void BuildEligibility( IEligibilityBuilder<IParameter> builder ) { }
-
-    public void BuildAspect( IAspectBuilder<IParameter> builder )
+    public override void BuildAspect( IAspectBuilder<IParameter> builder )
     {
         builder.Advice.Override( (IMethod)builder.Target.DeclaringMember, nameof(Template), tags: new { ParameterName = builder.Target.Name } );
     }
