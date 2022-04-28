@@ -84,7 +84,7 @@ internal class LicenseVerifier : IService
 
     public void VerifyCompilationResult( ImmutableArray<AspectInstanceResult> aspectInstanceResults, UserDiagnosticSink diagnostics )
     {
-        var freemiumAspects = aspectInstanceResults.Select( a => a.AspectInstance.AspectClass ).Where( c => ((IAspectClassImpl) c).IsFreemium ).ToList();
+        var freemiumAspects = aspectInstanceResults.Select( a => a.AspectInstance.AspectClass ).Where( c => ((IAspectClassImpl) c).IsFreemium ).Distinct().ToList();
         var freemiumAspectsCount = freemiumAspects.Count;
 
         if ( freemiumAspectsCount > _maxFreemiumAspects )
