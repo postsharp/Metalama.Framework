@@ -9,6 +9,6 @@ namespace Metalama.Framework.Engine.Pipeline
 {
     public interface ICompileTimeExceptionHandler : IService
     {
-        void ReportException( Exception exception, Action<Diagnostic> reportDiagnostic, bool canIgnoreException = false );
+        void ReportException( Exception exception, Action<Diagnostic> reportDiagnostic, bool canIgnoreException, out bool isHandled );
     }
 }

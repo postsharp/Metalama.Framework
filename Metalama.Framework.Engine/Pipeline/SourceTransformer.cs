@@ -63,8 +63,15 @@ namespace Metalama.Framework.Engine.Pipeline
             }
             catch ( Exception e )
             {
+                var isHandled = false;
+
                 ServiceProviderFactory.AsyncLocalProvider.GetService<ICompileTimeExceptionHandler>()
-                    ?.ReportException( e, context.ReportDiagnostic );
+                    ?.ReportException( e, context.ReportDiagnostic, false, out isHandled );
+
+                if ( !isHandled )
+                {
+                    throw;
+                }
             }
         }
 

@@ -62,7 +62,7 @@ namespace Metalama.Framework.Engine.Templating
                     // It is important to swallow the exception here because this validator is executed on the whole code, even without
                     // aspect, so an exception in this code would have a large impact without any workaround. However, this code has no
                     // other use than reporting diagnostics, so skipping it is safer than failing the compilation. 
-                    handler.ReportException( e, reportDiagnostic );
+                    handler.ReportException( e, reportDiagnostic, true, out _ );
 
                     // We return successfully because we want the compilation to continue regardless.
                     return true;

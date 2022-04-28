@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
 {
     internal class CompileTimeExceptionHandler : ICompileTimeExceptionHandler
     {
-        public void ReportException( Exception exception, Action<Diagnostic> reportDiagnostic, bool canIgnoreException = false )
+        public void ReportException( Exception exception, Action<Diagnostic> reportDiagnostic, bool canIgnoreException, out bool isHandled )
         {
             var reportFile = DefaultPathOptions.Instance.GetNewCrashReportPath();
 
@@ -44,6 +44,8 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
 
             var diagnosticDefinition = canIgnoreException ? GeneralDiagnosticDescriptors.IgnorableUnhandledException : GeneralDiagnosticDescriptors.UnhandledException;
             reportDiagnostic( diagnosticDefinition.CreateRoslynDiagnostic( null, (exception.Message, reportFile ?? "(none)") ) );
+
+            isHandled = true;
         }
     }
 }
