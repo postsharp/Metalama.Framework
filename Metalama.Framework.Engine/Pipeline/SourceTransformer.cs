@@ -66,7 +66,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 var mustRethrow = true;
 
                 ServiceProviderFactory.AsyncLocalProvider.GetService<ICompileTimeExceptionHandler>()
-                    ?.ReportException( e, context.ReportDiagnostic, out mustRethrow );
+                    ?.ReportException( e, context.ReportDiagnostic );
 
                 if ( mustRethrow )
                 {
