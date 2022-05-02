@@ -21,10 +21,11 @@ namespace Metalama.Framework.Code
                 Accessibility.Private => AccessibilityFlags.SameType,
                 Accessibility.Internal => AccessibilityFlags.SameType | AccessibilityFlags.DerivedTypeOfFriendAssembly
                                                                       | AccessibilityFlags.AnyTypeOfFriendAssembly,
-                Accessibility.Protected => AccessibilityFlags.SameType | AccessibilityFlags.DerivedTypeOfAnyAssembly
+                Accessibility.Protected => AccessibilityFlags.SameType | AccessibilityFlags.DerivedTypeOfFriendAssembly
                                                                        | AccessibilityFlags.DerivedTypeOfAnyAssembly,
                 Accessibility.PrivateProtected => AccessibilityFlags.SameType | AccessibilityFlags.DerivedTypeOfFriendAssembly,
                 Accessibility.ProtectedInternal => AccessibilityFlags.SameType | AccessibilityFlags.AnyTypeOfFriendAssembly
+                                                                               | AccessibilityFlags.DerivedTypeOfFriendAssembly
                                                                                | AccessibilityFlags.DerivedTypeOfAnyAssembly,
                 Accessibility.Public => AccessibilityFlags.Public,
                 _ => throw new ArgumentOutOfRangeException( nameof(accessibility) )
