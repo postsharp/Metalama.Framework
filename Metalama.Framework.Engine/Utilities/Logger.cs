@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.Utilities
     public static class Logger
     {
         /// <summary>
-        /// Retrieved all loggers from the support services.
+        /// Initializes all loggers from the support services.
         /// </summary>
         /// <remarks>
         /// This method should only be called from the MetalamaDiagnosticsService.Initialize method.
