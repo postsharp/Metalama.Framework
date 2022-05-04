@@ -32,6 +32,7 @@ internal class LicenseVerifier : IService
 
         if ( licenseConsumptionManager != null )
         {
+            // TODO: if the _current_ project has a redistribution license, it has no limitation.
             this._isLimitedLicense = !licenseConsumptionManager.CanConsumeFeatures( LicensedFeatures.Metalama );
         }
         else
