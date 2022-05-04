@@ -34,6 +34,12 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Compile Remove="Tests\Aspects\Introductions\Properties\AccessorVisibility - Copy.t.cs" />
+      <Compile Remove="Tests\Aspects\Introductions\Properties\Declarative - Copy.t.cs" />
+      <Compile Remove="Tests\Aspects\Samples\CompileTimeIf - Copy.t.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
         <ProjectReference Include="..\..\Metalama.TestFramework\Metalama.TestFramework.csproj" />
@@ -41,6 +47,17 @@
 
     <ItemGroup>
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="Tests\Aspects\Introductions\Properties\AccessorVisibility_Declarative.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>AccessorVisibility_Declarative.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Aspects\Introductions\Properties\AccessorVisibility.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>AccessorVisibility.cs</DependentUpon>
+      </None>
     </ItemGroup>
 
     <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets" />
