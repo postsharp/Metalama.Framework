@@ -27,8 +27,10 @@ namespace Metalama.Framework.Engine.CompileTime
             IReadOnlyList<string> fabricTypes,
             IReadOnlyList<string> transitiveFabricTypes,
             IReadOnlyList<string>? references,
-            ulong sourceHash,
-            IReadOnlyList<CompileTimeFile> files )
+            IReadOnlyList<string>? redistributionLicenseKeys,
+
+        ulong sourceHash,
+              IReadOnlyList<CompileTimeFile> files )
         {
             this.RunTimeAssemblyIdentity = runTimeAssemblyIdentity;
             this.CompileTimeAssemblyName = compileTimeAssemblyName;
@@ -38,6 +40,7 @@ namespace Metalama.Framework.Engine.CompileTime
             this.FabricTypes = fabricTypes;
             this.TransitiveFabricTypes = transitiveFabricTypes;
             this.References = references;
+            this.RedistributionLicenseKeys = redistributionLicenseKeys;
             this.SourceHash = sourceHash;
             this.Files = files;
 
@@ -81,6 +84,8 @@ namespace Metalama.Framework.Engine.CompileTime
         /// Gets the name of all project references (a fully-qualified assembly identity) of the compile-time project.
         /// </summary>
         public IReadOnlyList<string>? References { get; }
+        
+        public IReadOnlyList<string>? RedistributionLicenseKeys { get; }
 
         /// <summary>
         /// Gets a unique hash of the source code and its dependencies.

@@ -80,7 +80,8 @@ namespace Metalama.TestFramework
             if ( testInput.Options.LicenseFile != null )
             {
                 // TODO: read the license file.
-                var licenseKey = "TODO";
+                var licenseKey = File.ReadAllText( Path.Combine( testInput.ProjectDirectory, testInput.Options.LicenseFile ) );
+                
 
                 serviceProviderForThisTest = LicenseVerifierFactory.AddTestLicenseVerifier( serviceProviderForThisTest, licenseKey );
             }

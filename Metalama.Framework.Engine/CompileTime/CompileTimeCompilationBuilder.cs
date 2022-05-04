@@ -33,6 +33,11 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
+    public record RedistributionLicenseInfo( ImmutableArray<string> LicenseKeys )
+    {
+        public static RedistributionLicenseInfo Empty { get; } = new RedistributionLicenseInfo( ImmutableArray<string>.Empty );
+    }
+        
     /// <summary>
     /// This class is responsible for building a compile-time <see cref="Compilation"/> based on a run-time one.
     /// </summary>
@@ -596,6 +601,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// </summary>
         internal bool TryGetCompileTimeProject(
             Compilation runTimeCompilation,
+            RedistributionLicenseInfo? redistributionLicenseInfo,
             IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
             IReadOnlyList<CompileTimeProject> referencedProjects,
             IDiagnosticAdder diagnosticSink,
@@ -607,6 +613,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             return this.TryGetCompileTimeProjectImpl(
                 runTimeCompilation,
+                redistributionLicenseInfo,
                 compileTimeArtifacts.SyntaxTrees,
                 referencedProjects,
                 compileTimeArtifacts.GlobalUsings,
@@ -667,6 +674,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private bool TryGetCompileTimeProjectImpl(
             Compilation runTimeCompilation,
+            RedistributionLicenseInfo redistributionLicenseInfo,
             IReadOnlyList<SyntaxTree> sourceTreesWithCompileTimeCode,
             IReadOnlyList<CompileTimeProject> referencedProjects,
             ImmutableArray<UsingDirectiveSyntax> globalUsings,
@@ -790,6 +798,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             .Select( t => t.GetReflectionName().AssertNotNull() )
                             .ToList();
 
+                        
                         var manifest = new CompileTimeProjectManifest(
                             runTimeCompilation.Assembly.Identity.ToString(),
                             compileTimeCompilation.AssemblyName!,
@@ -799,6 +808,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             fabricTypes,
                             transitiveFabricTypes,
                             referencedProjects.Select( r => r.RunTimeIdentity.GetDisplayName() ).ToList(),
+                            redistributionLicenseInfo.LicenseKeys,
                             sourceHash,
                             textMapDirectory.FilesByTargetPath.Values.Select( f => new CompileTimeFile( f ) ).ToImmutableList() );
 

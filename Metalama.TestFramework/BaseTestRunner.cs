@@ -268,10 +268,14 @@ namespace Metalama.TestFramework
             var project = emptyProject.AddDocument( "dependency.cs", code ).Project;
 
             using var domain = new UnloadableCompileTimeDomain();
+            
+            // TODO: to test the redistribution license, add the fake licensing service here. (?)
+            var serviceProvider = this.BaseServiceProvider.WithProjectScopedServices( this.References.MetadataReferences );
 
             // Transform with Metalama.
+            
             var pipeline = new CompileTimeAspectPipeline(
-                this.BaseServiceProvider.WithProjectScopedServices( this.References.MetadataReferences ),
+                serviceProvider,
                 true,
                 domain );
 

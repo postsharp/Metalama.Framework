@@ -5,6 +5,7 @@ using Metalama.Backstage.Licensing;
 using Metalama.Backstage.Licensing.Consumption;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
@@ -48,7 +49,7 @@ internal class LicenseVerifier : IService
                 case IAspectInstance aspectInstance:
                     var aspectClass = (IAspectClassImpl) aspectInstance.AspectClass;
 
-                    if ( !aspectClass.IsFreemium && !HasRedistributionLicense( aspectInstance.Aspect.GetType().Assembly ) )
+                    if ( !aspectClass.IsFreemium && !HasRedistributionLicense( ((IAspectClassImpl) aspectInstance.AspectClass).Project ) )
                     {
                         throw new InvalidOperationException(
                             $"The '{aspectInstance.AspectClass.ShortName}' aspect cannot add a child aspect because you are using the Metalama Essentials license and the aspect is not marked as [Freemium]." );
@@ -63,9 +64,13 @@ internal class LicenseVerifier : IService
         }
     }
 
-    private static bool HasRedistributionLicense( Assembly assembly )
+    private static bool HasRedistributionLicense( CompileTimeProject? project )
     {
-        // TODO #30275: Licensing: redistribution license
+        if ( project == null )
+            return false;
+        
+        // TODO: project.LicenseKeys
+
         return false;
     }
 
@@ -108,7 +113,7 @@ internal class LicenseVerifier : IService
 
         if ( this._isLimitedLicense )
         {
-            if ( aspectClass.IsInherited && !aspectClass.IsFreemium && !HasRedistributionLicense( prototype.GetType().Assembly ) )
+            if ( aspectClass.IsInherited && !aspectClass.IsFreemium && !HasRedistributionLicense( ((IAspectClassImpl)aspectClass).Project ) )
             {
                 // TODO: report an error.
             }

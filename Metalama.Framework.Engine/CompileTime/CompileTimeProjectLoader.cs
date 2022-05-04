@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Compiler;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating.Mapping;
 using Metalama.Framework.Engine.Utilities;
@@ -10,6 +11,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Compression;
@@ -159,6 +161,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// </summary>
         public bool TryGetCompileTimeProjectFromCompilation(
             Compilation runTimeCompilation,
+            RedistributionLicenseInfo? redistributionLicenseInfo,
             IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
             IDiagnosticAdder diagnosticSink,
             bool cacheOnly,
@@ -195,6 +198,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             if ( !this._builder.TryGetCompileTimeProject(
                     runTimeCompilation,
+                    redistributionLicenseInfo,
                     compileTimeTreesHint,
                     referencedProjects,
                     diagnosticSink,
@@ -227,8 +231,12 @@ namespace Metalama.Framework.Engine.CompileTime
                     return this.TryGetCompileTimeProjectFromPath( filePath, diagnosticSink, cancellationToken, out referencedProject );
 
                 case CompilationReference compilationReference:
+                    // We can pass an empty set of managed resources because this path is used at design time only, and we do not want
+                    // to validate licensing in the design-time pipeline,
+
                     return this.TryGetCompileTimeProjectFromCompilation(
                         compilationReference.Compilation,
+                        RedistributionLicenseInfo.Empty,  
                         null,
                         diagnosticSink,
                         cacheOnly,

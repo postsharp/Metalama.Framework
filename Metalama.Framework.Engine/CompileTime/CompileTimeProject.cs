@@ -42,6 +42,7 @@ namespace Metalama.Framework.Engine.CompileTime
             ImmutableArray<string>.Empty,
             ImmutableArray<string>.Empty,
             ImmutableArray<string>.Empty,
+            ImmutableArray<string>.Empty, 
             0,
             ImmutableArray<CompileTimeFile>.Empty );
 
@@ -131,6 +132,8 @@ namespace Metalama.Framework.Engine.CompileTime
         /// </summary>
         /// <returns></returns>
         public MetadataReference ToMetadataReference() => MetadataReferenceCache.GetFromFile( this.AssertNotEmpty()._compiledAssemblyPath! );
+
+        public IReadOnlyList<string> RedistributionLicenseKeys => this._manifest?.RedistributionLicenseKeys ?? ImmutableArray<string>.Empty;
 
         /// <summary>
         /// Gets the unique hash of the project, computed from the source code.

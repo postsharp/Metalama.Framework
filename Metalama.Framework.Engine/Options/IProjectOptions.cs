@@ -60,6 +60,7 @@ namespace Metalama.Framework.Engine.Options
         /// </summary>
         IProjectOptions Apply( IProjectOptions options );
 
+        // Only for user properties.
         bool TryGetProperty( string name, [NotNullWhen( true )] out string? value );
 
         /// <summary>

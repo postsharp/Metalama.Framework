@@ -309,6 +309,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     if ( !state._pipeline.TryInitialize(
                             diagnosticAdder,
                             compilation,
+                            null,
                             compileTimeTrees,
                             cancellationToken,
                             out configuration ) )

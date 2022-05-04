@@ -82,6 +82,7 @@ namespace Metalama.Framework.Engine.Pipeline
         protected bool TryInitialize(
             IDiagnosticAdder diagnosticAdder,
             PartialCompilation compilation,
+            RedistributionLicenseInfo? redistributionLicenseInfo,
             IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out AspectPipelineConfiguration? configuration )
@@ -96,6 +97,7 @@ namespace Metalama.Framework.Engine.Pipeline
             // Prepare the compile-time assembly.
             if ( !loader.TryGetCompileTimeProjectFromCompilation(
                     roslynCompilation,
+                    redistributionLicenseInfo,
                     compileTimeTreesHint,
                     diagnosticAdder,
                     false,
@@ -348,7 +350,7 @@ namespace Metalama.Framework.Engine.Pipeline
         {
             if ( pipelineConfiguration == null )
             {
-                if ( !this.TryInitialize( diagnosticAdder, compilation, null, cancellationToken, out pipelineConfiguration ) )
+                if ( !this.TryInitialize( diagnosticAdder, compilation, null, null, cancellationToken, out pipelineConfiguration ) )
                 {
                     pipelineStageResult = null;
 

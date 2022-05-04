@@ -60,7 +60,7 @@ namespace Metalama.Framework.Engine.CodeFixes
         {
             if ( configuration == null )
             {
-                if ( !this.TryInitialize( NullDiagnosticAdder.Instance, partialCompilation, null, cancellationToken, out configuration ) )
+                if ( !this.TryInitialize( NullDiagnosticAdder.Instance, partialCompilation, null, null, cancellationToken, out configuration ) )
                 {
                     compilationModel = null;
 

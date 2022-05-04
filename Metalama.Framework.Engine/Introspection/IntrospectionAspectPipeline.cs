@@ -32,7 +32,7 @@ internal class IntrospectionAspectPipeline : AspectPipeline
                 .ToImmutableArray<IIntrospectionDiagnostic>();
         }
 
-        if ( !this.TryInitialize( diagnostics, compilation.PartialCompilation, null, cancellationToken, out var configuration ) )
+        if ( !this.TryInitialize( diagnostics, compilation.PartialCompilation, null, null, cancellationToken, out var configuration ) )
         {
             return new IntrospectionCompilationResultModel( this.ServiceProvider, false, compilation, MapDiagnostics() );
         }

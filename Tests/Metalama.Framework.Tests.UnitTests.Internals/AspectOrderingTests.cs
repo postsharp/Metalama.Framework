@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Compiler;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
@@ -31,6 +32,7 @@ namespace Metalama.Framework.Tests.UnitTests
             Assert.True(
                 loader.TryGetCompileTimeProjectFromCompilation(
                     compilation.RoslynCompilation,
+                    RedistributionLicenseInfo.Empty, 
                     null,
                     new DiagnosticList(),
                     false,

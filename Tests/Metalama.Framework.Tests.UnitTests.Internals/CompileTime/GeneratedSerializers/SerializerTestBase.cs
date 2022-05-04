@@ -1,12 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Compiler;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Serialization;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
@@ -28,6 +30,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
             Assert.True(
                 compileTimeCompilationBuilder.TryGetCompileTimeProject(
                     runtimeCompilation,
+                    RedistributionLicenseInfo.Empty, 
                     null,
                     Array.Empty<CompileTimeProject>(),
                     diagnosticList,
