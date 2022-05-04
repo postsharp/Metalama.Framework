@@ -28,7 +28,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues
             // Introduce a property in the main type to store the Optional object.
             var optionalValuesProperty = builder.Advice.IntroduceProperty( builder.Target, nameof(OptionalValues) );
             optionalValuesProperty.Type = nestedType;
-            optionalValuesProperty.InitializerExpression = meta.ParseExpression( $"new {nestedType.Name}()" );
+            optionalValuesProperty.InitializerExpression = ExpressionFactory.Parse( $"new {nestedType.Name}()" );
 
             var optionalValueType = (INamedType)builder.Target.Compilation.TypeFactory.GetTypeByReflectionType( typeof(OptionalValue<>) );
 

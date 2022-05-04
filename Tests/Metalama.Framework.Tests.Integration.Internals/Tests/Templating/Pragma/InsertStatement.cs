@@ -1,29 +1,31 @@
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.TestFramework;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Pragma.InsertStatement
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
             // Passing a string.
-            meta.InsertStatement("for (;;) {}");
-            
+            meta.InsertStatement( "for (;;) {}" );
+
             // Passing an IStatement.
-            var statement = meta.ParseStatement("return 5;");
+            var statement = StatementFactory.Parse( "return 5;" );
             meta.InsertStatement( statement );
-            
+
             // Padding an IExpression.
-            meta.InsertStatement( meta.ParseExpression( "a.ToString()" ) );
+            meta.InsertStatement( ExpressionFactory.Parse( "a.ToString()" ) );
+
             return default;
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

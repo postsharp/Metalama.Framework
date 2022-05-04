@@ -23,10 +23,10 @@ namespace Metalama.Framework.Engine.Templating
                 SyntaxKind.DefaultLiteralExpression,
                 SyntaxFactory.Token( SyntaxKind.DefaultKeyword ) );
 
-        public static ExpressionSyntax LiteralExpression( object? obj )
-            => LiteralExpressionOrNull( obj ) ?? throw new ArgumentOutOfRangeException( nameof(obj) );
+        public static ExpressionSyntax LiteralExpression( object? obj, bool addSuffix = false )
+            => LiteralExpressionOrNull( obj, addSuffix ) ?? throw new ArgumentOutOfRangeException( nameof(obj) );
 
-        public static ExpressionSyntax? LiteralExpressionOrNull( object? obj )
+        public static ExpressionSyntax? LiteralExpressionOrNull( object? obj, bool suffix = false )
             => obj switch
             {
                 string s => LiteralExpression( s ),

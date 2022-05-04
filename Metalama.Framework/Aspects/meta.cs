@@ -246,32 +246,14 @@ namespace Metalama.Framework.Aspects
         [TemplateKeyword]
         public static void InsertStatement( string statement ) => throw CreateException();
 
-        /// <summary>
-        /// Creates a compile-time object that represents a run-time <i>expression</i>, i.e. the syntax or code, and not the result
-        /// itself. The returned <see cref="IExpression"/> can then be used in run-time C# code thanks to the <see cref="IExpression.Value"/> property.
-        /// This mechanism allows to generate expressions that depend on a compile-time control flow.
-        /// </summary>
-        /// <param name="expression">A run-time expression, possibly containing compile-time sub-expressions.</param>
-        /// <param name="definedException">A compile-time object representing <paramref name="expression"/>. Note that may have to specify the
-        /// type of the <c>out</c> variable explicitly, as <c>out var</c> does not work when another argument is dynamic.</param>
-        /// <seealso href="@templates"/>
-        [TemplateKeyword]
+        [Obsolete( "Use ExpressionFactory.Capture" )]
         public static void DefineExpression( dynamic? expression, out IExpression definedException )
             => definedException = SyntaxBuilder.CurrentImplementation.Expression( expression );
 
-        /// <summary>
-        /// Parses a string containing a C# expression and returns an <see cref="IExpression"/>. The <see cref="IExpression.Value"/> property
-        /// allows to use this expression in a template.
-        /// </summary>
-        /// <seealso href="@templates"/>
+        [Obsolete( "Use ExpressionFactory.Parse" )]
         public static IExpression ParseExpression( string code ) => SyntaxBuilder.CurrentImplementation.ParseExpression( code );
 
-        /// <summary>
-        /// Parses a string containing a C# statement and returns an <see cref="IStatement"/>, which can be inserted into the run-time code
-        /// using <see cref="InsertStatement(Metalama.Framework.Code.SyntaxBuilders.IStatement)"/>. The string must contain a single statement,
-        /// and must be finished by a semicolon or a closing bracket.
-        /// </summary>
-        /// <seealso href="@templates"/>
+        [Obsolete( "Use StatementFactory.Parse" )]
         public static IStatement ParseStatement( string code ) => SyntaxBuilder.CurrentImplementation.ParseStatement( code );
 
         internal static ImplementationCookie WithImplementation( IMetaApi current )
