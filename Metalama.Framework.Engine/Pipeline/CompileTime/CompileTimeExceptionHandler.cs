@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             {
                 var exceptionText = new StringBuilder();
 
-                exceptionText.AppendLine( $"Metalama Version: {AssemblyMetadataReader.MainInstance.Version}" );
+                exceptionText.AppendLine( $"Metalama Version: {EngineAssemblyMetadataReader.Instance.PackageVersion}" );
                 exceptionText.AppendLine( $"Runtime: {RuntimeInformation.FrameworkDescription}" );
                 exceptionText.AppendLine( $"Processor Architecture: {RuntimeInformation.ProcessArchitecture}" );
                 exceptionText.AppendLine( $"OS Description: {RuntimeInformation.OSDescription}" );
