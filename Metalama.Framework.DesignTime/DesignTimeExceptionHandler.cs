@@ -25,7 +25,7 @@ namespace Metalama.Framework.DesignTime
             {
                 Logger.DesignTime.Error?.Log( e.ToString() );
 
-                DiagnosticsService.GetOptionalService<IExceptionReporter>()?.ReportException( e );
+                DiagnosticServiceFactory.GetOptionalService<IExceptionReporter>()?.ReportException( e );
             }
             else
             {

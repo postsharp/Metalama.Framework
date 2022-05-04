@@ -17,12 +17,12 @@ namespace Metalama.Framework.Engine.Utilities
         /// </remarks>
         internal static void Initialize()
         {
-            var loggerFactory = DiagnosticsService.GetRequiredService<ILoggerFactory>();
+            var loggerFactory = DiagnosticServiceFactory.GetRequiredService<ILoggerFactory>();
             var processInfo = loggerFactory.GetLogger( "ProcessInfo" );
 
             processInfo.Info?.Log( $"Command line: {Environment.CommandLine}" );
             processInfo.Info?.Log( $"Process kind: {ProcessUtilities.ProcessKind}" );
-            processInfo.Info?.Log( $"Version: {AssemblyMetadataReader.BuildId}" );
+            processInfo.Info?.Log( $"Version: {AssemblyMetadataReader.GetInstance( typeof( Logger ).Assembly ).BuildId}" );
 
             DesignTime = loggerFactory.DesignTime();
             Remoting = loggerFactory.Remoting();

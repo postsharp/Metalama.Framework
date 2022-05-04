@@ -74,21 +74,6 @@ namespace Metalama.Framework.Workspaces
 
         public string? AdditionalCompilationOutputDirectory => null;
 
-        public string? DotNetSdkDirectory
-        {
-            get
-            {
-                if ( this._properties.TryGetValue( "NETCoreSdkBundledVersionsProps", out var propsFilePath ) && !string.IsNullOrEmpty( propsFilePath ) )
-                {
-                    return Path.GetFullPath( Path.GetDirectoryName( propsFilePath )! );
-                }
-                else
-                {
-                    return null;
-                }
-            }
-        }
-
         public static string? GetTargetFrameworkFromRoslynProject( Microsoft.CodeAnalysis.Project roslynProject )
         {
             if ( roslynProject.Name.EndsWith( ')' ) )

@@ -28,10 +28,10 @@ public static class DesignTimeServiceProviderFactory
             {
                 if ( _serviceProvider == null )
                 {
-                    MetalamaDiagnosticsService.Initialize( nameof( DesignTimeServiceProviderFactory ) );
+                    MetalamaDiagnosticsServiceFactory.Initialize( nameof( DesignTimeServiceProviderFactory ) );
 
                     _serviceProvider = ServiceProviderFactory.GetServiceProvider()
-                        .WithNextProvider( DiagnosticsService.ServiceProvider );
+                        .WithNextProvider( DiagnosticServiceFactory.ServiceProvider );
 
                     _serviceProvider = _serviceProvider
                         .WithService( new DesignTimeAspectPipelineFactory( _serviceProvider, new CompileTimeDomain() ) );
