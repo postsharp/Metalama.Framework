@@ -30,7 +30,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     {
         public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advices.ImplementInterface( aspectBuilder.Target, typeof(IInterface) );
+            aspectBuilder.Advice.ImplementInterface( aspectBuilder.Target, typeof(IInterface) );
         }
 
         [InterfaceMember( IsExplicit = true )]
@@ -89,7 +89,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             {
                 if (method.IsExplicitInterfaceImplementation)
                 {
-                    aspectBuilder.Advices.Override( method, nameof(Template) );
+                    aspectBuilder.Advice.Override( method, nameof(Template) );
                 }
             }
 
@@ -97,7 +97,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             {
                 if (property.IsExplicitInterfaceImplementation)
                 {
-                    aspectBuilder.Advices.OverrideAccessors( property, nameof(Template), nameof(Template) );
+                    aspectBuilder.Advice.OverrideAccessors( property, nameof(Template), nameof(Template) );
                 }
             }
 
@@ -105,7 +105,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             {
                 if (method.IsExplicitInterfaceImplementation)
                 {
-                    aspectBuilder.Advices.OverrideAccessors( method, nameof(Template), nameof(Template), null );
+                    aspectBuilder.Advice.OverrideAccessors( method, nameof(Template), nameof(Template), null );
                 }
             }
         }

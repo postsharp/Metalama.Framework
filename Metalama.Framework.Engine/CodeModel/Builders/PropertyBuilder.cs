@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
@@ -88,8 +89,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             bool hasGetter,
             bool hasSetter,
             bool isAutoProperty,
-            bool hasInitOnlySetter )
-            : base( parentAdvice, targetType )
+            bool hasInitOnlySetter,
+            ITagReader tags )
+            : base( parentAdvice, targetType, tags )
         {
             // TODO: Sanity checks.
 

@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
@@ -106,8 +107,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations { get; private set; } = Array.Empty<IMethod>();
 
-        public MethodBuilder( Advice parentAdvice, INamedType targetType, string name )
-            : base( parentAdvice, targetType )
+        public MethodBuilder( Advice parentAdvice, INamedType targetType, string name, ITagReader tags )
+            : base( parentAdvice, targetType, tags )
         {
             this.Name = name;
 

@@ -19,15 +19,15 @@ internal class InitializeAspectInstancesPipelineStep : AdvicePipelineStep
 {
     private readonly List<AspectInstance> _aspectInstances = new();
 
-    public InitializeAspectInstancesPipelineStep( PipelineStepId stepId, OrderedAspectLayer aspectLayer ) : base( stepId, aspectLayer ) { }
-
-    public void ClearAspectInstances() => this._aspectInstances.Clear();
+    public InitializeAspectInstancesPipelineStep( PipelineStepsState parent, PipelineStepId stepId, OrderedAspectLayer aspectLayer ) : base(
+        parent,
+        stepId,
+        aspectLayer ) { }
 
     public void AddAspectInstance( in ResolvedAspectInstance aspectInstance ) => this._aspectInstances.Add( aspectInstance.AspectInstance );
 
     public override CompilationModel Execute(
         CompilationModel compilation,
-        PipelineStepsState pipelineStepsState,
         CancellationToken cancellationToken )
     {
         var aspectDriver = (AspectDriver) this.AspectLayer.AspectClass.AspectDriver;
@@ -40,10 +40,10 @@ internal class InitializeAspectInstancesPipelineStep : AdvicePipelineStep
             .ToImmutableArray();
 
         var aspectInstanceResults = aggregateInstances
-            .Select( ai => aspectDriver.ExecuteAspect( ai, compilation, pipelineStepsState.PipelineConfiguration, cancellationToken ) )
+            .Select( ai => aspectDriver.ExecuteAspect( ai, compilation, this.Parent.PipelineConfiguration, cancellationToken ) )
             .ToImmutableArray();
 
-        pipelineStepsState.AddAspectInstanceResults( aspectInstanceResults );
+        this.Parent.AddAspectInstanceResults( aspectInstanceResults );
 
         var success = aspectInstanceResults.All( ar => ar.Success );
         var reportedDiagnostics = aspectInstanceResults.SelectMany( air => air.Diagnostics.ReportedDiagnostics );
@@ -53,14 +53,14 @@ internal class InitializeAspectInstancesPipelineStep : AdvicePipelineStep
         var addedValidatorSources = aspectInstanceResults.SelectMany( air => air.ValidatorSources );
         var addedAdvices = aspectInstanceResults.SelectMany( air => air.Advices );
 
-        pipelineStepsState.AddDiagnostics( reportedDiagnostics, diagnosticSuppressions, codeFixes );
-        success &= pipelineStepsState.AddAspectSources( addedAspectSources );
-        success &= pipelineStepsState.AddAdvices( addedAdvices );
-        success &= pipelineStepsState.AddValidatorSources( addedValidatorSources );
+        this.Parent.AddDiagnostics( reportedDiagnostics, diagnosticSuppressions, codeFixes );
+        success &= this.Parent.AddAspectSources( addedAspectSources );
+        success &= this.Parent.AddAdvices( addedAdvices, compilation );
+        success &= this.Parent.AddValidatorSources( addedValidatorSources );
 
         // It's not clear if we should continue at that time. An error here may result in more errors later.
         _ = success;
 
-        return base.Execute( compilation, pipelineStepsState, cancellationToken );
+        return base.Execute( compilation, cancellationToken );
     }
 }

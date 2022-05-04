@@ -8,7 +8,7 @@ using System;
 namespace Metalama.Framework.Aspects
 {
     /// <summary>
-    /// An object used by the <see cref="IAspect{T}.BuildAspect"/> method of the aspect to provide advices, child
+    /// An object used by the <see cref="IAspect{T}.BuildAspect"/> method of the aspect to provide advice, child
     /// aspects and validators, or report diagnostics. This is the strongly-typed variant of the <see cref="IAspectBuilder"/> interface.
     /// </summary>
     public interface IAspectBuilder : IAspectLayerBuilder
@@ -33,7 +33,7 @@ namespace Metalama.Framework.Aspects
     }
 
     /// <summary>
-    /// An object used by the <see cref="IAspect{T}.BuildAspect"/> method of the aspect to provide advices, child
+    /// An object used by the <see cref="IAspect{T}.BuildAspect"/> method of the aspect to provide advice, child
     /// aspects and validators, or report diagnostics. This is a weakly-typed variant of the <see cref="IAspectBuilder{T}"/> interface.
     /// </summary>
     public interface IAspectBuilder<out TAspectTarget> : IAspectLayerBuilder<TAspectTarget>, IAspectBuilder

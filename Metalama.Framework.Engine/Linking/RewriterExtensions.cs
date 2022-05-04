@@ -10,12 +10,7 @@ namespace Metalama.Framework.Engine.Linking
     {
         public static SyntaxTriviaList VisitTriviaList( this CSharpSyntaxRewriter rewriter, SyntaxTriviaList triviaList )
         {
-            if ( triviaList.Count > 0 )
-            {
-                throw new AssertionFailedException( Justifications.CoverageMissing );
-            }
-
-            /*
+            /* This is intended for processing trivia lists, but it is currently unused.
             var dirty = false;
 
 #pragma warning disable IDE0059

@@ -4,7 +4,6 @@
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.TestFramework;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -71,9 +70,9 @@ namespace Metalama.Framework.Tests.Integration.Runners
         public HighlightingTestRunner(
             ServiceProvider serviceProvider,
             string? projectDirectory,
-            IEnumerable<MetadataReference> metadataReferences,
+            TestProjectReferences references,
             ITestOutputHelper? logger )
-            : base( serviceProvider, projectDirectory, metadataReferences, logger )
+            : base( serviceProvider, projectDirectory, references, logger )
         {
             StringBuilder epilogueBuilder = new();
 

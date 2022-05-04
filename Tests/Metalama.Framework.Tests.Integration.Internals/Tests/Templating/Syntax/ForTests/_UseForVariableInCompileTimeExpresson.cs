@@ -1,4 +1,6 @@
+#if TEST_OPTIONS
 // @Skipped
+#endif
 
 using System;
 using Metalama.Framework.Aspects;
@@ -7,24 +9,25 @@ using Metalama.TestFramework;
 namespace Metalama.Framework.Tests.Integration.Templating.Syntax.ForTests.UseForVariableInCompileTimeExpresson
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
-            for (int i = 0; i < meta.Target.Parameters.Count; i++)
+            for (var i = 0; i < meta.Target.Parameters.Count; i++)
             {
-                Console.WriteLine(meta.Target.Parameters[i].Name);
+                Console.WriteLine( meta.Target.Parameters[i].Name );
             }
 
-            dynamic? result = meta.Proceed();
+            var result = meta.Proceed();
+
             return result;
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a, int b)
+        private int Method( int a, int b )
         {
             return a + b;
         }

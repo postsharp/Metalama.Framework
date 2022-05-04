@@ -5,7 +5,6 @@ using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Project;
-using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
@@ -27,9 +26,9 @@ namespace Metalama.TestFramework
         public BaseTestRunner CreateTestRunner(
             ServiceProvider serviceProvider,
             string? projectDirectory,
-            MetadataReference[] metadataReferences,
+            TestProjectReferences references,
             ITestOutputHelper? logger )
-            => new OutputFormatterAspectTestRunner( serviceProvider, projectDirectory, metadataReferences, logger );
+            => new OutputFormatterAspectTestRunner( serviceProvider, projectDirectory, references, logger );
     }
 
     internal class OutputFormatterAspectTestRunner : AspectTestRunner
@@ -37,12 +36,12 @@ namespace Metalama.TestFramework
         public OutputFormatterAspectTestRunner(
             ServiceProvider serviceProvider,
             string? projectDirectory,
-            IEnumerable<MetadataReference> metadataReferences,
+            TestProjectReferences references,
             ITestOutputHelper? logger )
             : base(
                 serviceProvider.WithService( new OptionsWrapper( serviceProvider.GetRequiredService<IProjectOptions>() ) ),
                 projectDirectory,
-                metadataReferences,
+                references,
                 logger ) { }
 
         protected override Task RunAsync( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )

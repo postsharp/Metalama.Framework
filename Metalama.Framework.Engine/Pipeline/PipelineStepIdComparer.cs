@@ -34,14 +34,11 @@ namespace Metalama.Framework.Engine.Pipeline
                 var yOrderedPart = this._orderedAspectLayers[y.AspectLayerId];
 
                 // First order by topological distance.
-                if ( xOrderedPart.Order < yOrderedPart.Order )
-                {
-                    return -1;
-                }
+                var compareAspectLayerOrder = xOrderedPart.Order.CompareTo( yOrderedPart.Order );
 
-                if ( xOrderedPart.Order > yOrderedPart.Order )
+                if ( compareAspectLayerOrder != 0 )
                 {
-                    return 1;
+                    return compareAspectLayerOrder;
                 }
 
                 // If topological distance is identical, order by name.
@@ -53,24 +50,51 @@ namespace Metalama.Framework.Engine.Pipeline
                 }
             }
 
-            // Compare the phase.
-            if ( x.Phase < y.Phase )
+            /*
+             * Within the same aspect layer and the same depth of the declaring type, aspects must be executed in the following order:
+             * 1. Discovering advices on the type itself.
+             * 2. Executing advices discovered at type level, by depth.
+             * 3. Discovering advices on the members (can add advices to the declaring type).
+             * 4. Executing advices discovered at member level, by depth.
+             * 5. Discovering advices on the parameters (can add advices to the declaring member but not to the declaring type).
+             * 6. Executing advices discovered at parameter level, by depth.
+             *
+             *  which means that the order criteria are the following:
+             *
+             *  1. Aspect layer
+             *  2. Depth of the aspect target down to the type level, i.e. type, namespace or compilation (but not member or parameter).
+             *  3. Depth of the aspect target with respect to the declaring type, i.e. 0 (type), 1 (member), 2 (parameter) -- which is
+             *     equivalent to the depth of the aspect target itself.
+             *  4. Phase: discover or transform
+             *  5. Depth of the advice target
+            */
+
+            var compareAspectTypeDepth = x.AspectTargetTypeDepth.CompareTo( y.AspectTargetTypeDepth );
+
+            if ( compareAspectTypeDepth != 0 )
             {
-                return -1;
-            }
-            else if ( x.Phase > y.Phase )
-            {
-                return 1;
+                return compareAspectTypeDepth;
             }
 
-            // Finally, order by depth in the code mode.
-            if ( x.Depth < y.Depth )
+            var compareAspectDepth = x.AspectTargetDepth.CompareTo( y.AspectTargetDepth );
+
+            if ( compareAspectDepth != 0 )
             {
-                return -1;
+                return compareAspectDepth;
             }
-            else if ( x.Depth > y.Depth )
+
+            var comparePhase = x.Phase.CompareTo( y.Phase );
+
+            if ( comparePhase != 0 )
             {
-                return 1;
+                return comparePhase;
+            }
+
+            var compareAdviceTargetDepth = x.AdviceTargetDepth.CompareTo( y.AdviceTargetDepth );
+
+            if ( compareAdviceTargetDepth != 0 )
+            {
+                return compareAdviceTargetDepth;
             }
 
             if ( !x.Equals( y ) )

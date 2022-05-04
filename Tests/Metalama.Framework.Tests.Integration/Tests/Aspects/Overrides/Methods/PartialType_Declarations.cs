@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -11,9 +10,9 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.PartialT
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            foreach( var method in builder.Target.Methods )
+            foreach (var method in builder.Target.Methods)
             {
-                builder.Advices.Override( method, nameof(Template), tags: new TagDictionary() { ["name"] = method.Name });
+                builder.Advice.Override( method, nameof(Template), tags: new { name = method.Name } );
             }
         }
 
@@ -32,7 +31,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.PartialT
     {
         public void TargetMethod1()
         {
-            Console.WriteLine("This is TargetMethod1.");
+            Console.WriteLine( "This is TargetMethod1." );
         }
     }
 
@@ -41,7 +40,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.PartialT
     {
         public void TargetMethod2()
         {
-            Console.WriteLine("This is TargetMethod2.");
+            Console.WriteLine( "This is TargetMethod2." );
         }
     }
 
@@ -50,7 +49,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.PartialT
     {
         public void TargetMethod3()
         {
-            Console.WriteLine("This is TargetMethod3.");
+            Console.WriteLine( "This is TargetMethod3." );
         }
     }
 }

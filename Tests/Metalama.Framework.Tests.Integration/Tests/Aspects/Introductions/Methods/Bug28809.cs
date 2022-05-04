@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using System.ComponentModel;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -9,14 +8,14 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var eventBuilder = builder.Advices.IntroduceEvent(
+            var eventBuilder = builder.Advice.IntroduceEvent(
                 builder.Target,
                 nameof(PropertyChanged) );
 
-            builder.Advices.IntroduceMethod(
+            builder.Advice.IntroduceMethod(
                 builder.Target,
                 nameof(OnPropertyChanged),
-                tags: new TagDictionary { { "event", eventBuilder } } );
+                tags: new { @event = eventBuilder } );
         }
 
         [Template]

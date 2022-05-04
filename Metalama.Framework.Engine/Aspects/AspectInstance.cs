@@ -44,20 +44,26 @@ namespace Metalama.Framework.Engine.Aspects
 
         public ImmutableDictionary<TemplateClass, TemplateClassInstance> TemplateInstances { get; }
 
-        public AspectPredecessor Predecessor { get; }
+        public ImmutableArray<AspectPredecessor> Predecessors { get; }
 
-        ImmutableArray<AspectPredecessor> IAspectInstance.Predecessors => ImmutableArray.Create( this.Predecessor );
+        private AspectPredecessor FirstPredecessor => this.Predecessors[0];
 
         public IAspectState? State { get; set; }
 
         void IAspectInstanceInternal.SetState( IAspectState? value ) => this.State = value;
 
-        internal AspectInstance( IAspect aspect, in Ref<IDeclaration> declaration, AspectClass aspectClass, in AspectPredecessor predecessor )
+        internal AspectInstance( IAspect aspect, in Ref<IDeclaration> declaration, AspectClass aspectClass, in AspectPredecessor predecessor ) : this(
+            aspect,
+            declaration,
+            aspectClass,
+            ImmutableArray.Create( predecessor ) ) { }
+
+        internal AspectInstance( IAspect aspect, in Ref<IDeclaration> declaration, AspectClass aspectClass, ImmutableArray<AspectPredecessor> predecessors )
         {
             this.Aspect = aspect;
             this.TargetDeclaration = declaration;
             this.AspectClass = aspectClass;
-            this.Predecessor = predecessor;
+            this.Predecessors = predecessors;
 
             this.TemplateInstances = ImmutableDictionary.Create<TemplateClass, TemplateClassInstance>()
                 .Add( aspectClass, new TemplateClassInstance( aspect, aspectClass ) );
@@ -68,12 +74,12 @@ namespace Metalama.Framework.Engine.Aspects
             in Ref<IDeclaration> declaration,
             IAspectClassImpl aspectClass,
             IEnumerable<TemplateClassInstance> templateInstances,
-            in AspectPredecessor predecessor )
+            ImmutableArray<AspectPredecessor> predecessors )
         {
             this.Aspect = aspect;
             this.TargetDeclaration = declaration;
             this.AspectClass = aspectClass;
-            this.Predecessor = predecessor;
+            this.Predecessors = predecessors;
 
             this.TemplateInstances = templateInstances.ToImmutableDictionary( t => t.TemplateClass, t => t );
         }
@@ -131,7 +137,7 @@ namespace Metalama.Framework.Engine.Aspects
                 return 1;
             }
 
-            var predecessorKindComparison = this.Predecessor.Kind.CompareTo( other.AssertNotNull().Predecessor.Kind );
+            var predecessorKindComparison = this.FirstPredecessor.Kind.CompareTo( other.AssertNotNull().FirstPredecessor.Kind );
 
             if ( predecessorKindComparison != 0 )
             {

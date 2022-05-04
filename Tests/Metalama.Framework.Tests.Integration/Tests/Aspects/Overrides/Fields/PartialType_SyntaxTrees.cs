@@ -1,8 +1,9 @@
-﻿// @Skipped(#30159)
+﻿#if TEST_OPTIONS
+// @Skipped(#30159)
 // @OutputAllSyntaxTrees
+#endif
 
 using System;
-using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -10,18 +11,18 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.PartialTy
 {
     public class OverrideAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             foreach (var field in builder.Target.Fields)
             {
-                builder.Advices.OverrideAccessors(field, nameof(Template), nameof(Template), tags: new TagDictionary() { ["name"] = field.Name });
+                builder.Advice.OverrideAccessors( field, nameof(Template), nameof(Template), tags: new { name = field.Name } );
             }
         }
 
         [Template]
         public dynamic? Template()
         {
-            Console.WriteLine($"This is the override of {meta.Tags["name"]}.");
+            Console.WriteLine( $"This is the override of {meta.Tags["name"]}." );
 
             return meta.Proceed();
         }

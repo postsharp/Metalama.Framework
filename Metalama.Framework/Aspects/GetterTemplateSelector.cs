@@ -9,6 +9,7 @@ namespace Metalama.Framework.Aspects
     /// <summary>
     /// Specifies the templates that must be used for the <c>get</c> accessor by the <c>IAdviceFactory.OverrideAccessors</c> advice.
     /// </summary>
+    [CompileTime]
     public readonly struct GetterTemplateSelector
     {
         /// <summary>

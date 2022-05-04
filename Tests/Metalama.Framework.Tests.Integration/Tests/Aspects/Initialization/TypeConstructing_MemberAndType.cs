@@ -13,31 +13,31 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.TypeConstr
         [Template]
         public void Template()
         {
-            var targetConstructorString = meta.Target.Constructor.ToDisplayString(CodeDisplayFormat.MinimallyQualified);
-            var targetDeclarationString = ((IDeclaration)meta.Tags["target"]!).ToDisplayString(CodeDisplayFormat.MinimallyQualified);
-            Console.WriteLine($"{targetConstructorString}, {targetDeclarationString}: {meta.AspectInstance.AspectClass.ShortName}");
+            var targetConstructorString = meta.Target.Constructor.ToDisplayString( CodeDisplayFormat.MinimallyQualified );
+            var targetDeclarationString = ( (IDeclaration)meta.Tags["target"]! ).ToDisplayString( CodeDisplayFormat.MinimallyQualified );
+            Console.WriteLine( $"{targetConstructorString}, {targetDeclarationString}: {meta.AspectInstance.AspectClass.ShortName}" );
         }
     }
 
     public class Aspect1 : AspectBase
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advices.AddInitializerBeforeTypeConstructor(
+            builder.Advice.AddInitializerBeforeTypeConstructor(
                 builder.Target,
                 nameof(Template),
-                tags: new TagDictionary() { ["target"] = builder.Target });
+                tags: new { target = builder.Target } );
         }
     }
 
     public class Aspect2 : AspectBase
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advices.AddInitializerBeforeTypeConstructor(
+            builder.Advice.AddInitializerBeforeTypeConstructor(
                 builder.Target.Properties.First(),
                 nameof(Template),
-                tags: new TagDictionary() { ["target"] = builder.Target.Properties.First() });
+                tags: new { target = builder.Target.Properties.First() } );
         }
     }
 
@@ -46,9 +46,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.TypeConstr
     [Aspect2]
     public class TargetCode
     {
-        static TargetCode()
-        {
-        }
+        static TargetCode() { }
 
         public static int Foo { get; }
     }

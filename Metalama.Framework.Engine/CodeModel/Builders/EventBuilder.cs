@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
@@ -27,8 +28,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             Advice parentAdvice,
             INamedType targetType,
             string name,
-            bool isEventField )
-            : base( parentAdvice, targetType )
+            bool isEventField,
+            ITagReader tags )
+            : base( parentAdvice, targetType, tags )
         {
             this.Name = name;
             this._isEventField = isEventField;

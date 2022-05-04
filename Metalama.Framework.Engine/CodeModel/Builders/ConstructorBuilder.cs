@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
@@ -49,15 +50,15 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Constructor;
 
-        public MemberRef<IMemberOrNamedType>? ReplacedMember { get; }
+        public MemberRef<IMember>? ReplacedMember { get; }
 
-        public ConstructorBuilder( Advice parentAdvice, INamedType targetType )
-            : base( parentAdvice, targetType )
+        public ConstructorBuilder( Advice parentAdvice, INamedType targetType, ITagReader tags )
+            : base( parentAdvice, targetType, tags )
         {
             if ( targetType.Constructors.Any( c => c.GetSymbol().AssertNotNull().GetPrimarySyntaxReference() == null ) )
             {
                 Invariant.Assert( targetType.Constructors.Count == 1 );
-                this.ReplacedMember = targetType.Constructors.Single().ToMemberRef<IMemberOrNamedType>();
+                this.ReplacedMember = targetType.Constructors.Single().ToMemberRef<IMember>();
             }
         }
 

@@ -4,7 +4,7 @@
 namespace Metalama.Framework.Aspects
 {
     /// <summary>
-    /// Conflict behavior of introduction advices.
+    /// Conflict behavior of introduction advice.
     /// </summary>
     [CompileTime]
     public enum OverrideStrategy
@@ -38,7 +38,7 @@ namespace Metalama.Framework.Aspects
         // TODO: What happens if the there is a conflict while merging members?
 
         /// <summary>
-        /// If the member already exists, the advice attempts to merge the introduced type with the target type. For non-type advices the behavior is the same as <see cref="Ignore"/>.
+        /// If the member already exists, the advice attempts to merge the introduced type with the target type. For non-type introductions the behavior is the same as <see cref="Ignore"/>.
         /// Merging is done by introducing individual member of the template into the target type.
         /// </summary>
         Merge = 4

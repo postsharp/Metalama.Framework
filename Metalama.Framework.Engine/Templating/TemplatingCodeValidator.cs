@@ -2,6 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Threading;
@@ -40,10 +42,32 @@ namespace Metalama.Framework.Engine.Templating
             bool isDesignTime,
             CancellationToken cancellationToken )
         {
-            Visitor visitor = new( semanticModel, reportDiagnostic, serviceProvider, reportCompileTimeTreeOutdatedError, isDesignTime, cancellationToken );
-            visitor.Visit( semanticModel.SyntaxTree.GetRoot() );
+            try
+            {
+                Visitor visitor = new( semanticModel, reportDiagnostic, serviceProvider, reportCompileTimeTreeOutdatedError, isDesignTime, cancellationToken );
+                visitor.Visit( semanticModel.SyntaxTree.GetRoot() );
 
-            return !visitor.HasError;
+                return !visitor.HasError;
+            }
+            catch ( Exception e )
+            {
+                var handler = serviceProvider.GetService<ICompileTimeExceptionHandler>();
+
+                if ( handler == null )
+                {
+                    throw;
+                }
+                else
+                {
+                    // It is important to swallow the exception here because this validator is executed on the whole code, even without
+                    // aspect, so an exception in this code would have a large impact without any workaround. However, this code has no
+                    // other use than reporting diagnostics, so skipping it is safer than failing the compilation. 
+                    handler.ReportException( e, reportDiagnostic, true, out _ );
+
+                    // We return successfully because we want the compilation to continue regardless.
+                    return true;
+                }
+            }
         }
     }
 }

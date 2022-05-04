@@ -22,29 +22,32 @@ internal class EvaluateAspectSourcesPipelineStep : PipelineStep
 {
     private readonly List<IAspectSource> _aspectSources = new();
 
-    public EvaluateAspectSourcesPipelineStep( OrderedAspectLayer aspectLayer ) : base(
-        new PipelineStepId( aspectLayer.AspectLayerId, PipelineStepPhase.Initialize, -1 ),
+    public EvaluateAspectSourcesPipelineStep( PipelineStepsState parent, OrderedAspectLayer aspectLayer ) : base(
+        parent,
+        new PipelineStepId( aspectLayer.AspectLayerId, -1, -1, PipelineStepPhase.Initialize, -1 ),
         aspectLayer ) { }
 
     public override CompilationModel Execute(
         CompilationModel compilation,
-        PipelineStepsState pipelineStepsState,
         CancellationToken cancellationToken )
     {
-        var aspectSourceResults = this._aspectSources.Select(
-                s => s.GetAspectInstances( compilation, this.AspectLayer.AspectClass, pipelineStepsState, cancellationToken ) )
+        var aspectClass = this.AspectLayer.AspectClass;
+
+        var aspectSourceResults = this._aspectSources.Select( s => s.GetAspectInstances( compilation, aspectClass, this.Parent, cancellationToken ) )
             .ToList();
 
-        var exclusions = new HashSet<IDeclaration>();
+        HashSet<IDeclaration>? exclusions = null;
 
         foreach ( var exclusion in aspectSourceResults.SelectMany( x => x.Exclusions ) )
         {
+            exclusions ??= new HashSet<IDeclaration>();
+
             exclusions.Add( exclusion.GetTarget( compilation ) );
         }
 
         bool IsExcluded( IDeclaration declaration )
         {
-            if ( exclusions.Count == 0 )
+            if ( exclusions == null || exclusions.Count == 0 )
             {
                 return false;
             }
@@ -69,7 +72,7 @@ internal class EvaluateAspectSourcesPipelineStep : PipelineStep
                 {
                     var target = (IDeclarationImpl) x.TargetDeclaration.GetTarget( compilation );
 
-                    if ( x.Predecessor.Kind != AspectPredecessorKind.Attribute && IsExcluded( target ) )
+                    if ( !x.Predecessors.IsDefaultOrEmpty && x.Predecessors[0].Kind != AspectPredecessorKind.Attribute && IsExcluded( target ) )
                     {
                         return default;
                     }
@@ -78,6 +81,35 @@ internal class EvaluateAspectSourcesPipelineStep : PipelineStep
                 } )
             .Where( x => x.TargetDeclaration != null! )
             .ToList();
+
+        // Process aspect requirements.
+        // We always add an aspect instance if there is a requirement, even if there is already an instance, because this has the side effect of exposing
+        // the predecessors to the IAspectInstance in the last instance of the aggregated aspect.
+        var requirements = aspectSourceResults.SelectMany( x => x.Requirements )
+            .Select( x => (TargetDeclaration: x.TargetDeclaration.GetTarget( compilation ), x.Predecessor) )
+            .GroupBy( x => x.TargetDeclaration );
+
+        foreach ( var requirement in requirements )
+        {
+            var requirementTarget = requirement.Key;
+            var predecessors = requirement.Select( x => new AspectPredecessor( AspectPredecessorKind.RequiredAspect, x.Predecessor ) );
+
+            var stronglyTypedAspectClass = (AspectClass) aspectClass;
+            var aspect = stronglyTypedAspectClass.CreateDefaultInstance();
+
+            var aspectInstance = new AspectInstance( aspect, requirementTarget.ToTypedRef(), stronglyTypedAspectClass, predecessors.ToImmutableArray() );
+            var eligibility = aspectInstance.ComputeEligibility( requirementTarget );
+
+            if ( (eligibility & (EligibleScenarios.Aspect | EligibleScenarios.Inheritance)) != 0 )
+            {
+                aspectInstances.Add( new ResolvedAspectInstance( aspectInstance, (IDeclarationImpl) requirementTarget, eligibility ) );
+            }
+            else
+            {
+                // The situation should have been detected before.
+                throw new AssertionFailedException( $"Cannot add the aspect '{aspectClass.ShortName}' to '{requirementTarget}' because of eligibility. " );
+            }
+        }
 
         // We assume that all aspect instances are eligible, but some are eligible only for inheritance.
 
@@ -105,9 +137,9 @@ internal class EvaluateAspectSourcesPipelineStep : PipelineStep
             .ToList();
 
         // Index these aspects. 
-        pipelineStepsState.AddAspectInstances( concreteAspectInstances );
-        pipelineStepsState.AddAspectInstances( inheritedAspectInstancesInProject );
-        pipelineStepsState.AddInheritableAspectInstances( inheritableAspectInstances.Select( x => x.AspectInstance ).ToList() );
+        this.Parent.AddAspectInstances( concreteAspectInstances );
+        this.Parent.AddAspectInstances( inheritedAspectInstancesInProject );
+        this.Parent.AddInheritableAspectInstances( inheritableAspectInstances.Select( x => x.AspectInstance ).ToList() );
 
         return compilation.WithAspectInstances( concreteAspectInstances.Select( x => x.AspectInstance ).ToImmutableArray() );
     }

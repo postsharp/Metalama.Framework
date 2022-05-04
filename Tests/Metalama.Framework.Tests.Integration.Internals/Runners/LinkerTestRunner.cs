@@ -25,12 +25,12 @@ namespace Metalama.Framework.Tests.Integration.Runners
         public LinkerTestRunner(
             ServiceProvider serviceProvider,
             string? projectDirectory,
-            IEnumerable<MetadataReference> metadataReferences,
+            TestProjectReferences references,
             ITestOutputHelper? logger )
             : base(
                 serviceProvider,
                 projectDirectory,
-                metadataReferences,
+                references,
                 logger ) { }
 
         /// <summary>

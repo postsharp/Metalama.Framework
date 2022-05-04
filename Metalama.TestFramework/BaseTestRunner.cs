@@ -14,7 +14,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection.Metadata;
@@ -40,17 +39,15 @@ namespace Metalama.TestFramework
 
         public ServiceProvider BaseServiceProvider { get; }
 
-        public ImmutableArray<MetadataReference> MetadataReferences { get; }
+        public TestProjectReferences References { get; }
 
         protected BaseTestRunner(
             ServiceProvider serviceProvider,
             string? projectDirectory,
-            IEnumerable<MetadataReference> metadataReferences,
+            TestProjectReferences references,
             ITestOutputHelper? logger )
         {
-            this.MetadataReferences = metadataReferences
-                .Append( MetadataReference.CreateFromFile( typeof(BaseTestRunner).Assembly.Location ) )
-                .ToImmutableArray();
+            this.References = references;
 
             this.BaseServiceProvider = serviceProvider.WithMark( ServiceProviderMark.Test );
             this.ProjectDirectory = projectDirectory;
@@ -137,22 +134,17 @@ namespace Metalama.TestFramework
 
                 var parseOptions = CSharpParseOptions.Default.WithPreprocessorSymbols( preprocessorSymbols );
 
-                var compilationOptions = new CSharpCompilationOptions(
-                    OutputKind.DynamicallyLinkedLibrary,
-                    allowUnsafe: true,
-                    nullableContextOptions: NullableContextOptions.Enable );
-
-                var emptyProject = this.CreateProject( testInput.Options ).WithParseOptions( parseOptions ).WithCompilationOptions( compilationOptions );
+                var emptyProject = this.CreateProject( testInput.Options ).WithParseOptions( parseOptions );
                 var project = emptyProject;
 
-                async Task<Document?> AddDocumentAsync( string fileName, string sourceCode )
+                async Task<Document?> AddDocumentAsync( string fileName, string sourceCode, bool acceptFileWithoutMember = false )
                 {
                     // Note that we don't pass the full path to the Document because it causes call stacks of exceptions to have full paths,
                     // which is more difficult to test.
                     var parsedSyntaxTree = CSharpSyntaxTree.ParseText( sourceCode, parseOptions, fileName, Encoding.UTF8 );
                     var prunedSyntaxRoot = new InactiveCodeRemover().Visit( await parsedSyntaxTree.GetRootAsync() );
 
-                    if ( prunedSyntaxRoot is CompilationUnitSyntax { Members: { Count: 0 } } )
+                    if ( !acceptFileWithoutMember && prunedSyntaxRoot is CompilationUnitSyntax { Members: { Count: 0 } } )
                     {
                         return null;
                     }
@@ -164,6 +156,7 @@ namespace Metalama.TestFramework
                     return document;
                 }
 
+                // Add the main document.
                 var sourceFileName = testInput.TestName + ".cs";
                 var mainDocument = await AddDocumentAsync( sourceFileName, testInput.SourceCode );
 
@@ -183,14 +176,7 @@ namespace Metalama.TestFramework
                     project.MetadataReferences,
                     (CSharpCompilationOptions?) project.CompilationOptions );
 
-#if NETFRAMEWORK
-                var platformDocument = await AddDocumentAsync(
-                    "Platform.cs",
-                    "namespace System.Runtime.CompilerServices { internal static class IsExternalInit {}}" );
-
-                initialCompilation = initialCompilation.AddSyntaxTrees( (await platformDocument!.GetSyntaxTreeAsync())! );
-#endif
-
+                // Add additional test documents.
                 foreach ( var includedFile in testInput.Options.IncludedFiles )
                 {
                     var includedFullPath = Path.GetFullPath( Path.Combine( Path.GetDirectoryName( testInput.FullPath )!, includedFile ) );
@@ -223,6 +209,28 @@ namespace Metalama.TestFramework
                         }
 
                         initialCompilation = initialCompilation.AddReferences( dependency );
+                    }
+                }
+
+                // Add system documents.
+#if NETFRAMEWORK
+                var platformDocument = await AddDocumentAsync(
+                    "___Platform.cs",
+                    "namespace System.Runtime.CompilerServices { internal static class IsExternalInit {}}" );
+
+                initialCompilation = initialCompilation.AddSyntaxTrees( (await platformDocument!.GetSyntaxTreeAsync())! );
+#endif
+
+                if ( this.References.GlobalUsingsFile != null )
+                {
+                    var path = Path.Combine( this.ProjectDirectory, this.References.GlobalUsingsFile );
+
+                    if ( File.Exists( path ) )
+                    {
+                        var code = File.ReadAllText( path );
+                        var globalUsingsDocument = await AddDocumentAsync( "___GlobalUsings.cs", code, true );
+
+                        initialCompilation = initialCompilation.AddSyntaxTrees( (await globalUsingsDocument!.GetSyntaxTreeAsync())! );
                     }
                 }
 
@@ -262,7 +270,10 @@ namespace Metalama.TestFramework
             using var domain = new UnloadableCompileTimeDomain();
 
             // Transform with Metalama.
-            var pipeline = new CompileTimeAspectPipeline( this.BaseServiceProvider.WithProjectScopedServices( this.MetadataReferences ), true, domain );
+            var pipeline = new CompileTimeAspectPipeline(
+                this.BaseServiceProvider.WithProjectScopedServices( this.References.MetadataReferences ),
+                true,
+                domain );
 
             var compilation = (await project.GetCompilationAsync())!.WithAssemblyName( name );
 
@@ -366,8 +377,8 @@ namespace Metalama.TestFramework
                 Path.GetDirectoryName( sourceAbsolutePath )!,
                 Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + FileExtensions.TransformedCode );
 
-            var consolidatedTestOutput = testResult.GetConsolidatedTestOutput();
-            var actualTransformedNonNormalizedText = JoinSyntaxTrees( consolidatedTestOutput );
+            var testOutputs = testResult.GetTestOutputsWithDiagnostics();
+            var actualTransformedNonNormalizedText = JoinSyntaxTrees( testOutputs );
             var actualTransformedNormalizedSourceText = NormalizeTestOutput( actualTransformedNonNormalizedText, formatCode );
 
             // If the expectation file does not exist, create it with some placeholder content.
@@ -433,22 +444,20 @@ namespace Metalama.TestFramework
             state["expectedTransformedSourceText"] = expectedTransformedSourceText;
             state["actualTransformedNormalizedSourceText"] = actualTransformedNormalizedSourceText;
 
-            static string JoinSyntaxTrees( IEnumerable<SyntaxTree> compilationUnits )
+            static string JoinSyntaxTrees( IReadOnlyList<SyntaxTree> compilationUnits )
             {
-                var arr = compilationUnits.ToArray();
-
-                switch ( arr.Length )
+                switch ( compilationUnits.Count )
                 {
                     case 0:
                         return "// --- No output compilation units ---";
 
                     case 1:
-                        return arr[0].GetRoot().ToFullString();
+                        return compilationUnits[0].GetRoot().ToFullString();
 
                     default:
                         var sb = new StringBuilder();
 
-                        foreach ( var syntaxTree in arr )
+                        foreach ( var syntaxTree in compilationUnits )
                         {
                             sb.AppendLine();
                             sb.AppendLineInvariant( $"// --- {syntaxTree.FilePath} ---" );
@@ -482,17 +491,18 @@ namespace Metalama.TestFramework
         /// <returns>A new project instance.</returns>
         internal Project CreateProject( TestOptions options )
         {
-            var compilation = TestCompilationFactory.CreateEmptyCSharpCompilation( null, this.MetadataReferences );
+            var compilation = TestCompilationFactory.CreateEmptyCSharpCompilation(
+                null,
+                this.References.MetadataReferences,
+                OutputKind.DynamicallyLinkedLibrary,
+                nullableContextOptions: options.NullabilityDisabled == true ? NullableContextOptions.Disable : NullableContextOptions.Enable );
 
             var projectName = "test";
             var workspace1 = new AdhocWorkspace();
             var solution = workspace1.CurrentSolution;
 
             var project = solution.AddProject( projectName, projectName, LanguageNames.CSharp )
-                .WithCompilationOptions(
-                    new CSharpCompilationOptions(
-                        OutputKind.DynamicallyLinkedLibrary,
-                        nullableContextOptions: options.NullabilityDisabled == true ? NullableContextOptions.Disable : NullableContextOptions.Enable ) )
+                .WithCompilationOptions( compilation.Options )
                 .AddMetadataReferences( compilation.References );
 
             // Don't add the assembly containing the code to test because it would result in duplicate symbols.
@@ -529,7 +539,7 @@ namespace Metalama.TestFramework
             if ( testInput.Options.WriteOutputHtml.GetValueOrDefault() )
             {
                 // Multi file tests are not supported for html output.
-                var output = testResult.GetConsolidatedTestOutput().Single().GetRoot();
+                var output = testResult.GetTestOutputsWithDiagnostics().Single().GetRoot();
                 var outputDocument = testResult.InputProject!.AddDocument( "Consolidated.cs", output );
 
                 var formattedOutput = await OutputCodeFormatter.FormatToSyntaxAsync( outputDocument );

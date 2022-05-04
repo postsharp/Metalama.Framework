@@ -1,27 +1,21 @@
-﻿using Metalama.Framework.Aspects;
+﻿using System.Linq;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.SyntaxBuilders;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.SourceProperty
 {
     public class TestAspect : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            foreach (var property in builder.Target.Properties.Where(p => !p.IsAbstract && p.Writeability == Writeability.All))
+            foreach (var property in builder.Target.Properties.Where( p => !p.IsAbstract && p.Writeability == Writeability.All ))
             {
-                builder.Advices.OverrideAccessors(property, null, nameof(this.OverridePropertySetter));
+                builder.Advice.OverrideAccessors( property, null, nameof(OverridePropertySetter) );
             }
         }
 
         [Template]
-        private dynamic OverridePropertySetter(dynamic value)
+        private dynamic OverridePropertySetter( dynamic value )
         {
             if (value != meta.Target.Property.Value)
             {
@@ -39,7 +33,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Formatting.SourcePr
         public int _field;
 
         public int GetAutoProperty { get; }
-        
+
         public int InitAutoProperty { get; init; }
 
         public int AutoProperty { get; set; }

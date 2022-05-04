@@ -45,14 +45,22 @@ namespace Metalama.TestFramework.XunitFramework
             IMessageSink executionMessageSink,
             ITestFrameworkExecutionOptions executionOptions )
         {
+            var hasLaunchedDebugger = false;
             var directoryOptionsReader = new TestDirectoryOptionsReader( this._factory.ProjectProperties.ProjectDirectory );
 
             var collections = testCases.GroupBy( t => t.TestMethod.TestClass.TestCollection );
 
             foreach ( var collection in collections )
             {
+                var projectMetadata = TestAssemblyMetadataReader.GetMetadata( collection.Key.TestAssembly.Assembly );
+
+                if ( projectMetadata.MustLaunchDebugger && !hasLaunchedDebugger )
+                {
+                    hasLaunchedDebugger = true;
+                    Debugger.Launch();
+                }
+
                 // Creates the set of references. Include all project references plus the project itself.
-                var references = TestAssemblyReferenceReader.GetAssemblyReferences( collection.Key.TestAssembly.Assembly ).ToList();
 
                 executionMessageSink.OnMessage( new TestCollectionStarting( collection, collection.Key ) );
 
@@ -98,7 +106,6 @@ namespace Metalama.TestFramework.XunitFramework
                                     var serviceProvider = ServiceProviderFactory.GetServiceProvider( testOptions );
 
                                     var testInput = TestInput.FromFile( this._factory.ProjectProperties, directoryOptionsReader, testCase.UniqueID );
-                                    testInput.Options.References.AddRange( references );
 
                                     if ( testInput.IsSkipped )
                                     {
@@ -110,7 +117,12 @@ namespace Metalama.TestFramework.XunitFramework
                                     }
                                     else
                                     {
-                                        var testRunner = TestRunnerFactory.CreateTestRunner( testInput, serviceProvider, logger );
+                                        var testRunner = TestRunnerFactory.CreateTestRunner(
+                                            testInput,
+                                            serviceProvider,
+                                            projectMetadata.ToProjectReferences(),
+                                            logger );
+
                                         Task.Run( () => testRunner.RunAndAssertAsync( testInput ) ).Wait();
 
                                         executionMessageSink.OnMessage( new TestPassed( test, testStopwatch.GetSeconds(), logger.ToString() ) );

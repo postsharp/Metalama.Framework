@@ -4,7 +4,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize
 {
     internal class IgnoreValuesAttribute : OverrideFieldOrPropertyAspect
     {
-        private readonly dynamic[] _ignoredValues;
+        private readonly object[] _ignoredValues;
 
         public IgnoreValuesAttribute( params object[] values )
         {

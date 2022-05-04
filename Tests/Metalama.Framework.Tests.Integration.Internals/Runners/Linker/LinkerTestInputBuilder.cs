@@ -264,7 +264,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                         {
                             // This is replaced source element.
                             A.CallTo( () => replaceMember.ReplacedMember )
-                                .Returns( new MemberRef<IMemberOrNamedType>( replacedMemberSymbol, inputCompilation ) );
+                                .Returns( new MemberRef<IMember>( replacedMemberSymbol, inputCompilation ) );
                         }
                         else
                         {
@@ -286,7 +286,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                             A.CallTo( () => ((IDeclarationImpl) replacedTransformation).Compilation ).Returns( initialCompilationModel );
 
                             A.CallTo( () => replaceMember.ReplacedMember )
-                                .Returns( new MemberRef<IMemberOrNamedType>( (IMemberOrNamedTypeBuilder) replacedTransformation ) );
+                                .Returns( new MemberRef<IMember>( (IMemberOrNamedTypeBuilder) replacedTransformation ) );
                         }
                     }
 

@@ -12,7 +12,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Initialize.AddChildAspect
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.WithTargetMembers( t => t.Methods ).AddAspect( _ => new Aspect2( "Hello, world." ) );
+            builder.With( t => t.Methods ).AddAspect( _ => new Aspect2( "Hello, world." ) );
         }
     }
 

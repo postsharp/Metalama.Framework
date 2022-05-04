@@ -1,11 +1,9 @@
-﻿// @Skipped #29730
+﻿#if TEST_OPTIONS
+// @Skipped #29730
+#endif
 
-using Metalama.Framework.Aspects;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Methods.CallAnotherTemplate
 {
@@ -14,7 +12,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
         [Introduce]
         public void IntroducedMethod()
         {
-            Console.WriteLine("This is introduced method.");
+            Console.WriteLine( "This is introduced method." );
             AnotherMethod();
             meta.Proceed();
         }
@@ -22,7 +20,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
         [Introduce]
         public static void IntroducedMethod_Static()
         {
-            Console.WriteLine("This is introduced method.");
+            Console.WriteLine( "This is introduced method." );
             AnotherMethod_Static();
             meta.Proceed();
         }
@@ -30,14 +28,14 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
         [Introduce]
         public void AnotherMethod()
         {
-            Console.WriteLine("This is another method.");
+            Console.WriteLine( "This is another method." );
             meta.Proceed();
         }
 
         [Introduce]
         public static void AnotherMethod_Static()
         {
-            Console.WriteLine("This is another method.");
+            Console.WriteLine( "This is another method." );
             meta.Proceed();
         }
     }
