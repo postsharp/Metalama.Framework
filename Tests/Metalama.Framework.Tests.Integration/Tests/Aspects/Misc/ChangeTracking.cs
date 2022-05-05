@@ -13,7 +13,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.ChangeTracking
             {
                 var isSpecifiedProperty = builder.Advice.IntroduceProperty( builder.Target, nameof(IsSpecifiedTemplate) );
                 isSpecifiedProperty.Name = $"_is{property.Name}Specified";
-                isSpecifiedProperty.Type = isSpecifiedProperty.Compilation.TypeFactory.GetTypeByReflectionType( typeof(bool) );
+                isSpecifiedProperty.Type = TypeFactory.GetType( typeof(bool) );
 
                 builder.Advice.Override(
                     property,
