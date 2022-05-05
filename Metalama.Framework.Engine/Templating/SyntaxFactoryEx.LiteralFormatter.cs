@@ -14,8 +14,10 @@ namespace Metalama.Framework.Engine.Templating;
 
 internal static partial class SyntaxFactoryEx
 {
-    private static readonly  Dictionary<Type, MethodInfo> _syntaxFactoryMethods = typeof(SyntaxFactory).GetMethods(BindingFlags.Static | BindingFlags.Public ).Where( m => m.Name == "Literal" && m.GetParameters().Length == 4 ).ToDictionary( x => x.GetParameters()[2].ParameterType, x=>x );
-    
+    private static readonly Dictionary<Type, MethodInfo> _syntaxFactoryMethods = typeof(SyntaxFactory).GetMethods( BindingFlags.Static | BindingFlags.Public )
+        .Where( m => m.Name == "Literal" && m.GetParameters().Length == 4 )
+        .ToDictionary( x => x.GetParameters()[2].ParameterType, x => x );
+
     private class LiteralFormatter<T>
     {
         public static readonly LiteralFormatter<T> Instance = new();
@@ -29,9 +31,8 @@ internal static partial class SyntaxFactoryEx
             var objectDisplayTypeMethods = objectDisplayType.GetMethods( BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic );
             var formatPrimitiveMethod = objectDisplayTypeMethods.Single( m => m.Name == "FormatLiteral" && m.GetParameters()[0].ParameterType == typeof(T) );
 
-
             var literalMethod = _syntaxFactoryMethods[typeof(T)];
-                
+
             var valueParameter = Expression.Parameter( typeof(T) );
             var optionsParameter = Expression.Parameter( typeof(int) );
             var callFormatPrimitiveArguments = new List<Expression>( 3 ) { valueParameter, Expression.Convert( optionsParameter, objectDisplayOptionsType ) };

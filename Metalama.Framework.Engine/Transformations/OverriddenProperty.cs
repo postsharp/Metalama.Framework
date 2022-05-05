@@ -168,7 +168,7 @@ namespace Metalama.Framework.Engine.Transformations
                         this.OverriddenDeclaration.GetMethod.AssertNotNull() ),
                     MethodKind.PropertySet => new UserExpression(
                         this.CreateProceedSetExpression( context.SyntaxGenerationContext ),
-                        this.OverriddenDeclaration.Compilation.TypeFactory.GetSpecialType( SpecialType.Void ),
+                        this.OverriddenDeclaration.Compilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.Void ),
                         context.SyntaxGenerationContext ),
                     _ => throw new AssertionFailedException()
                 };

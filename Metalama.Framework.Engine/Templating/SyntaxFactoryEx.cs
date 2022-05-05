@@ -33,17 +33,17 @@ namespace Metalama.Framework.Engine.Templating
             {
                 byte b => LiteralExpression( (int) b, options ),
                 sbyte b => LiteralExpression( (int) b, options ),
-                string s => LiteralExpression( s , options ),
-                char s => LiteralExpression( s, options  ),
-                int s => LiteralExpression( s , options ),
-                uint s => LiteralExpression( s, options  ),
-                long s => LiteralExpression( s, options  ),
-                ulong s => LiteralExpression( s , options ),
-                short s => LiteralExpression( (int)s , options ),
-                ushort s => LiteralExpression( (int)s, options  ),
-                double s => LiteralExpression( s, options  ),
-                float s => LiteralExpression( s, options  ),
-                decimal s => LiteralExpression( s, options  ),
+                string s => LiteralExpression( s, options ),
+                char s => LiteralExpression( s, options ),
+                int s => LiteralExpression( s, options ),
+                uint s => LiteralExpression( s, options ),
+                long s => LiteralExpression( s, options ),
+                ulong s => LiteralExpression( s, options ),
+                short s => LiteralExpression( (int) s, options ),
+                ushort s => LiteralExpression( (int) s, options ),
+                double s => LiteralExpression( s, options ),
+                float s => LiteralExpression( s, options ),
+                decimal s => LiteralExpression( s, options ),
                 _ => null
             };
 
@@ -66,7 +66,7 @@ namespace Metalama.Framework.Engine.Templating
                 _ => default
             };
 
-        public static ExpressionSyntax LiteralExpression( string? s , ObjectDisplayOptions options = ObjectDisplayOptions.None)
+        public static ExpressionSyntax LiteralExpression( string? s, ObjectDisplayOptions options = ObjectDisplayOptions.None )
             => s == null
                 ? SyntaxFactory.ParenthesizedExpression(
                         SyntaxFactory.CastExpression(

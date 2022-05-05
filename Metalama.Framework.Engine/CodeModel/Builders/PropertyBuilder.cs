@@ -98,7 +98,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             Invariant.Assert( hasGetter || hasSetter );
 
             this.Name = name;
-            this.Type = targetType.Compilation.TypeFactory.GetTypeByReflectionType( typeof(object) );
+            this.Type = targetType.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(object) );
 
             if ( hasGetter )
             {

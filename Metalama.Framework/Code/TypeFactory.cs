@@ -1,0 +1,64 @@
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code.SyntaxBuilders;
+using Metalama.Framework.Code.Types;
+using System;
+
+namespace Metalama.Framework.Code;
+
+/// <summary>
+/// Exposes methods that return instances of the <see cref="IType"/> interface.
+/// </summary>
+[CompileTime]
+public static class TypeFactory
+{
+    internal static ITypeFactory Implementation => ((ICompilationInternal) SyntaxBuilder.CurrentImplementation.Compilation).TypeFactory;
+
+    /// <summary>
+    /// Gets an <see cref="IType"/> given a reflection <see cref="Type"/>.
+    /// </summary>
+    public static IType GetType( Type type ) => Implementation.GetTypeByReflectionType( type );
+
+    /// <summary>
+    /// Get type based on its full name, as used in reflection.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// For nested types, this means using <c>+</c>, e.g. to get <see cref="System.Environment.SpecialFolder"/>, use <c>System.Environment+SpecialFolder</c>.
+    /// </para>
+    /// <para>
+    /// For generic type definitions, this requires using <c>`</c>, e.g. to get <c>List&lt;T&gt;</c>, use <c>System.Collections.Generic.List`1</c>.
+    /// </para>
+    /// <para>
+    /// Constructed generic types (e.g. <c>List&lt;int&gt;</c>) are not supported, for those, use <see cref="GenericExtensions.ConstructGenericInstance(Metalama.Framework.Code.INamedType,Metalama.Framework.Code.IType[])"/>.
+    /// </para>
+    /// </remarks>
+    public static INamedType GetType( string typeName ) => Implementation.GetTypeByReflectionName( typeName );
+
+    /// <summary>
+    /// Gets a <see cref="INamedType"/> representing a given <see cref="SpecialType"/>.
+    /// </summary>
+    public static INamedType GetType( SpecialType type ) => Implementation.GetSpecialType( type );
+
+    /// <summary>
+    /// Creates an array type from the current type.
+    /// </summary>
+    /// <param name="elementType">Type of array elements.</param>
+    /// <param name="rank">Rank of the array/.</param>
+    /// <returns>An array type <c>T[]</c> where <c>T</c> is the current type.</returns>
+    public static IArrayType ConstructArrayType( this IType elementType, int rank = 1 )
+        => ((ICompilationInternal) elementType.Compilation).TypeFactory.ConstructArrayType( elementType, rank );
+
+    /// <summary>
+    /// Creates an array type from the current type.
+    /// </summary>
+    /// <returns>An unsafe pointer type <c>*T</c> where <c>T</c> is the current type.</returns>
+    public static IPointerType ConstructPointerType( this IType pointedType )
+        => ((ICompilationInternal) pointedType.Compilation).TypeFactory.ConstructPointerType( pointedType );
+
+    public static T ConstructNullable<T>( this T type )
+        where T : IType
+        => ((ICompilationInternal) type.Compilation).TypeFactory.ConstructNullable( type );
+}

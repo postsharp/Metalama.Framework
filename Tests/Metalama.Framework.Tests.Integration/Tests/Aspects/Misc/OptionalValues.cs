@@ -30,7 +30,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues
             optionalValuesProperty.Type = nestedType;
             optionalValuesProperty.InitializerExpression = ExpressionFactory.Parse( $"new {nestedType.Name}()" );
 
-            var optionalValueType = (INamedType)builder.Target.Compilation.TypeFactory.GetTypeByReflectionType( typeof(OptionalValue<>) );
+            var optionalValueType = (INamedType)TypeFactory.GetType( typeof(OptionalValue<>) );
 
             // For all automatic properties of the target type.
             foreach (var property in builder.Target.Properties.Where( p => p.IsAutoPropertyOrField ))
