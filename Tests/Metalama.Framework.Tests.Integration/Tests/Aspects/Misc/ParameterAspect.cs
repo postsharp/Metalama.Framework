@@ -1,6 +1,7 @@
 using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.SyntaxBuilders;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.ParameterAspect_;
 
@@ -15,7 +16,7 @@ public class RequiredAttribute : ParameterAspect
     private dynamic? Template()
     {
         var parameterName = (string)meta.Tags["ParameterName"]!;
-        var parameter = meta.ParseExpression( parameterName );
+        var parameter = ExpressionFactory.Parse( parameterName );
 
         if (parameter.Value == null)
         {

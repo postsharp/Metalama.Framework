@@ -27,7 +27,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 
             static (IType? Type, RefKind? RefKind) GetParameter( (IReadOnlyList<Type?>? ArgumentTypes, ICompilation Compilation) context, int index )
                 => context.ArgumentTypes != null && context.ArgumentTypes[index] != null
-                    ? (context.Compilation.TypeFactory.GetTypeByReflectionType( context.ArgumentTypes[index].AssertNotNull() ), null)
+                    ? (context.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( context.ArgumentTypes[index].AssertNotNull() ), null)
                     : (null, null);
         }
 

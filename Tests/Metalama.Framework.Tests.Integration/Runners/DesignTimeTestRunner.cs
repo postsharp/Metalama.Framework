@@ -4,7 +4,6 @@
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
-using Metalama.Framework.Engine.Templating;
 using Metalama.TestFramework;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
@@ -45,7 +44,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 var introducedSyntaxTree = pipelineResult.AdditionalSyntaxTrees.SingleOrDefault();
 
                 var introducedSyntaxRoot = introducedSyntaxTree == null
-                    ? SyntaxFactory.GlobalStatement( SyntaxFactoryEx.EmptyStatement )
+                    ? SyntaxFactory.CompilationUnit()
                     : await introducedSyntaxTree.GeneratedSyntaxTree.GetRootAsync();
 
                 await testResult.SyntaxTrees.Single().SetRunTimeCodeAsync( introducedSyntaxRoot );

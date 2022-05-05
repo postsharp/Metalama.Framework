@@ -28,7 +28,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         {
             aspectBuilder.Advice.ImplementInterface(
                 aspectBuilder.Target,
-                (INamedType)aspectBuilder.Target.Compilation.TypeFactory.GetTypeByReflectionType( typeof(ISuperInterface) ) );
+                (INamedType)TypeFactory.GetType( typeof(ISuperInterface) ) );
         }
 
         [Introduce]

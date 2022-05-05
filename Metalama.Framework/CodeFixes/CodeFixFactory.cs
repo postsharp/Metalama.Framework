@@ -23,7 +23,7 @@ public static class CodeFixFactory
     /// <param name="title">An optional title of the <see cref="CodeFix"/>, displayed to the user in the light bulb or refactoring menu. When
     /// not specified, the title is generated from the other parameters.</param>
     public static CodeFix AddAttribute( IDeclaration targetDeclaration, Type attributeType, string? title = null )
-        => AddAttribute( targetDeclaration, (INamedType) targetDeclaration.Compilation.TypeFactory.GetTypeByReflectionType( attributeType ), title );
+        => AddAttribute( targetDeclaration, (INamedType) TypeFactory.GetType( attributeType ), title );
 
     /// <summary>
     /// Creates a <see cref="CodeFix"/> that adds a custom attribute to a declaration, without constructor or named arguments, by specifying the <see cref="INamedType"/>
@@ -58,7 +58,7 @@ public static class CodeFixFactory
     /// <param name="title">An optional title of the <see cref="CodeFix"/>, displayed to the user in the light bulb or refactoring menu. When
     /// not specified, the title is generated from the other parameters.</param>
     public static CodeFix RemoveAttributes( IDeclaration targetDeclaration, Type attributeType, string? title = null )
-        => RemoveAttributes( targetDeclaration, (INamedType) targetDeclaration.Compilation.TypeFactory.GetTypeByReflectionType( attributeType ), title );
+        => RemoveAttributes( targetDeclaration, (INamedType) TypeFactory.GetType( attributeType ), title );
 
     /// <summary>
     /// Creates a <see cref="CodeFix"/> that removes all custom attributes of a given type from a declaration and all container declarations,

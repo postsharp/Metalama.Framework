@@ -14,15 +14,26 @@ namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.DynamicExpress
         {
             var expressionBuilder = new ExpressionBuilder();
             expressionBuilder.AppendVerbatim("Test( ");
-            expressionBuilder.AppendLiteral(1);
-            expressionBuilder.AppendVerbatim(", ");
-            expressionBuilder.AppendLiteral(1D);
+            expressionBuilder.AppendLiteral(1, true);
             expressionBuilder.AppendVerbatim(", ");
             expressionBuilder.AppendLiteral(1D, true);
             expressionBuilder.AppendVerbatim(", ");
-            expressionBuilder.AppendLiteral(1F);
+            expressionBuilder.AppendLiteral(1F, true);
             expressionBuilder.AppendVerbatim(", ");
             expressionBuilder.AppendLiteral("s\"\n");
+            expressionBuilder.AppendLiteral(1M, true);
+            expressionBuilder.AppendVerbatim(", ");
+            expressionBuilder.AppendLiteral(1L, true);
+            expressionBuilder.AppendVerbatim(", ");
+            expressionBuilder.AppendLiteral(1UL, true);
+            expressionBuilder.AppendVerbatim(", ");
+            expressionBuilder.AppendLiteral( (byte) 1, true);
+            expressionBuilder.AppendVerbatim(", ");
+            expressionBuilder.AppendLiteral( (sbyte) 1, true);
+            expressionBuilder.AppendVerbatim(", ");
+            expressionBuilder.AppendLiteral( (short) 1, true);
+            expressionBuilder.AppendVerbatim(", ");
+            expressionBuilder.AppendLiteral( (ushort) 1, true);
             expressionBuilder.AppendVerbatim(", ");
 
             var arrayBuilder = new ArrayBuilder();
