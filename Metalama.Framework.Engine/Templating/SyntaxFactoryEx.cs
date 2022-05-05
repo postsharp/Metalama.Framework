@@ -6,7 +6,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Simplification;
 using System;
-using System.Linq;
 using RefKind = Metalama.Framework.Code.RefKind;
 
 namespace Metalama.Framework.Engine.Templating
@@ -14,7 +13,7 @@ namespace Metalama.Framework.Engine.Templating
     /// <summary>
     /// Helper methods that would ideally be in the <see cref="SyntaxFactory"/> class.
     /// </summary>
-    public static class SyntaxFactoryEx
+    internal static partial class SyntaxFactoryEx
     {
         public static LiteralExpressionSyntax Null => SyntaxFactory.LiteralExpression( SyntaxKind.NullLiteralExpression );
 
@@ -23,84 +22,91 @@ namespace Metalama.Framework.Engine.Templating
                 SyntaxKind.DefaultLiteralExpression,
                 SyntaxFactory.Token( SyntaxKind.DefaultKeyword ) );
 
-        public static ExpressionSyntax LiteralExpression( object? obj, bool addSuffix = false )
-            => LiteralExpressionOrNull( obj, addSuffix ) ?? throw new ArgumentOutOfRangeException( nameof(obj) );
+        public static SyntaxToken LiteralImpl<T>( T value, ObjectDisplayOptions options = ObjectDisplayOptions.None )
+            => LiteralFormatter<T>.Instance.Format( value, options );
 
-        public static ExpressionSyntax? LiteralExpressionOrNull( object? obj, bool suffix = false )
+        public static ExpressionSyntax LiteralExpression( object? obj, ObjectDisplayOptions options = ObjectDisplayOptions.None )
+            => LiteralExpressionOrNull( obj, options ) ?? throw new ArgumentOutOfRangeException( nameof(obj) );
+
+        public static ExpressionSyntax? LiteralExpressionOrNull( object? obj, ObjectDisplayOptions options = ObjectDisplayOptions.None )
             => obj switch
             {
-                string s => LiteralExpression( s ),
-                char s => LiteralExpression( s ),
-                int s => LiteralExpression( s ),
-                uint s => LiteralExpression( s ),
-                long s => LiteralExpression( s ),
-                ulong s => LiteralExpression( s ),
-                short s => LiteralExpression( s ),
-                ushort s => LiteralExpression( s ),
-                double s => LiteralExpression( s ),
-                float s => LiteralExpression( s ),
-                decimal s => LiteralExpression( s ),
+                byte b => LiteralExpression( (int) b, options ),
+                sbyte b => LiteralExpression( (int) b, options ),
+                string s => LiteralExpression( s , options ),
+                char s => LiteralExpression( s, options  ),
+                int s => LiteralExpression( s , options ),
+                uint s => LiteralExpression( s, options  ),
+                long s => LiteralExpression( s, options  ),
+                ulong s => LiteralExpression( s , options ),
+                short s => LiteralExpression( (int)s , options ),
+                ushort s => LiteralExpression( (int)s, options  ),
+                double s => LiteralExpression( s, options  ),
+                float s => LiteralExpression( s, options  ),
+                decimal s => LiteralExpression( s, options  ),
                 _ => null
             };
 
-        public static SyntaxToken LiteralTokenOrDefault( object obj )
+        public static SyntaxToken LiteralTokenOrDefault( object obj, ObjectDisplayOptions options = ObjectDisplayOptions.None )
             => obj switch
             {
-                string s => SyntaxFactory.Literal( s ),
-                char s => SyntaxFactory.Literal( s ),
-                int s => SyntaxFactory.Literal( s ),
-                uint s => SyntaxFactory.Literal( s ),
-                long s => SyntaxFactory.Literal( s ),
-                ulong s => SyntaxFactory.Literal( s ),
-                short s => SyntaxFactory.Literal( s ),
-                ushort s => SyntaxFactory.Literal( s ),
-                double s => SyntaxFactory.Literal( s ),
-                float s => SyntaxFactory.Literal( s ),
-                decimal s => SyntaxFactory.Literal( s ),
+                byte b => LiteralImpl( (int) b, options ),
+                sbyte b => LiteralImpl( (int) b, options ),
+                string s => LiteralImpl( s, options ),
+                char s => LiteralImpl( s, options ),
+                int s => LiteralImpl( s, options ),
+                uint s => LiteralImpl( s, options ),
+                long s => LiteralImpl( s, options ),
+                ulong s => LiteralImpl( s, options ),
+                short s => LiteralImpl( (int) s, options ),
+                ushort s => LiteralImpl( (int) s, options ),
+                double s => LiteralImpl( s, options ),
+                float s => LiteralImpl( s, options ),
+                decimal s => LiteralImpl( s, options ),
                 _ => default
             };
 
-        public static ExpressionSyntax LiteralExpression( string? s )
+        public static ExpressionSyntax LiteralExpression( string? s , ObjectDisplayOptions options = ObjectDisplayOptions.None)
             => s == null
                 ? SyntaxFactory.ParenthesizedExpression(
                         SyntaxFactory.CastExpression(
                             SyntaxFactory.NullableType( SyntaxFactory.PredefinedType( SyntaxFactory.Token( SyntaxKind.StringKeyword ) ) ),
                             SyntaxFactory.LiteralExpression( SyntaxKind.NullLiteralExpression ) ) )
                     .WithAdditionalAnnotations( Simplifier.Annotation )
-                : LiteralNonNullExpression( s );
+                : LiteralNonNullExpression( s, options );
 
-        public static LiteralExpressionSyntax LiteralNonNullExpression( string s )
+        public static LiteralExpressionSyntax LiteralNonNullExpression( string s, ObjectDisplayOptions options = ObjectDisplayOptions.None )
             => SyntaxFactory.LiteralExpression( SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal( s ) );
 
-        public static LiteralExpressionSyntax LiteralExpression( int i )
-            => SyntaxFactory.LiteralExpression( SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal( i ) );
+        public static LiteralExpressionSyntax LiteralExpression( int i, ObjectDisplayOptions options = ObjectDisplayOptions.None )
+            => SyntaxFactory.LiteralExpression( SyntaxKind.NumericLiteralExpression, LiteralImpl( i, options ) );
 
-        public static LiteralExpressionSyntax LiteralExpression( uint i )
-            => SyntaxFactory.LiteralExpression( SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal( i ) );
+        public static LiteralExpressionSyntax LiteralExpression( uint i, ObjectDisplayOptions options = ObjectDisplayOptions.None )
+            => SyntaxFactory.LiteralExpression( SyntaxKind.NumericLiteralExpression, LiteralImpl( i, options ) );
 
-        public static LiteralExpressionSyntax LiteralExpression( short i )
-            => SyntaxFactory.LiteralExpression( SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal( i ) );
+        public static LiteralExpressionSyntax LiteralExpression( short i, ObjectDisplayOptions options = ObjectDisplayOptions.None )
+            => SyntaxFactory.LiteralExpression( SyntaxKind.NumericLiteralExpression, LiteralImpl( (int) i, options ) );
 
-        public static LiteralExpressionSyntax LiteralExpression( ushort i )
-            => SyntaxFactory.LiteralExpression( SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal( i ) );
+        public static LiteralExpressionSyntax LiteralExpression( ushort i, ObjectDisplayOptions options = ObjectDisplayOptions.None )
+            => SyntaxFactory.LiteralExpression( SyntaxKind.NumericLiteralExpression, LiteralImpl( (uint) i, options ) );
 
-        public static LiteralExpressionSyntax LiteralExpression( long i )
-            => SyntaxFactory.LiteralExpression( SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal( i ) );
+        public static LiteralExpressionSyntax LiteralExpression( long i, ObjectDisplayOptions options = ObjectDisplayOptions.None )
+            => SyntaxFactory.LiteralExpression( SyntaxKind.NumericLiteralExpression, LiteralImpl( i, options ) );
 
-        public static LiteralExpressionSyntax LiteralExpression( ulong i )
-            => SyntaxFactory.LiteralExpression( SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal( i ) );
+        public static LiteralExpressionSyntax LiteralExpression( ulong i, ObjectDisplayOptions options = ObjectDisplayOptions.None )
+            => SyntaxFactory.LiteralExpression( SyntaxKind.NumericLiteralExpression, LiteralImpl( i, options ) );
 
-        public static LiteralExpressionSyntax LiteralExpression( float i )
-            => SyntaxFactory.LiteralExpression( SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal( i ) );
+        public static LiteralExpressionSyntax LiteralExpression( float i, ObjectDisplayOptions options = ObjectDisplayOptions.None )
+            => SyntaxFactory.LiteralExpression( SyntaxKind.NumericLiteralExpression, LiteralImpl( i, options ) );
 
-        public static LiteralExpressionSyntax LiteralExpression( double i )
-            => SyntaxFactory.LiteralExpression( SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal( i ) );
+        public static LiteralExpressionSyntax LiteralExpression( double i, ObjectDisplayOptions options = ObjectDisplayOptions.None )
+            => SyntaxFactory.LiteralExpression( SyntaxKind.NumericLiteralExpression, LiteralImpl( i, options ) );
 
-        public static LiteralExpressionSyntax LiteralExpression( decimal i )
-            => SyntaxFactory.LiteralExpression( SyntaxKind.NumericLiteralExpression, SyntaxFactory.Literal( i ) );
+        public static LiteralExpressionSyntax LiteralExpression( decimal i, ObjectDisplayOptions options = ObjectDisplayOptions.None )
+            => SyntaxFactory.LiteralExpression( SyntaxKind.NumericLiteralExpression, LiteralImpl( i, options ) );
 
-        public static LiteralExpressionSyntax LiteralExpression( char c )
-            => SyntaxFactory.LiteralExpression( SyntaxKind.CharacterLiteralExpression, SyntaxFactory.Literal( c ) );
+        public static LiteralExpressionSyntax LiteralExpression( char c, ObjectDisplayOptions options = ObjectDisplayOptions.None )
+            => SyntaxFactory.LiteralExpression( SyntaxKind.CharacterLiteralExpression, LiteralImpl( c, options ) );
 
         private static ExpressionSyntax EmptyExpression => SyntaxFactory.IdentifierName( SyntaxFactory.MissingToken( SyntaxKind.IdentifierToken ) );
 
@@ -125,81 +131,5 @@ namespace Metalama.Framework.Engine.Templating
                 RefKind.Ref => SyntaxFactory.Token( SyntaxKind.RefKeyword ),
                 _ => default
             };
-
-        /// <summary>
-        /// Generates a string that contains C# code that instantiates the given node
-        /// using SyntaxFactory. Used for debugging.
-        /// </summary>
-        public static string ToSyntaxFactoryDebug( this SyntaxNode node, Compilation compilation, IServiceProvider serviceProvider )
-        {
-            MetaSyntaxRewriter rewriter = new( serviceProvider, compilation, RoslynApiVersion.Current );
-            var normalized = NormalizeRewriter.Instance.Visit( node );
-            var transformedNode = rewriter.Visit( normalized );
-
-            return transformedNode.ToFullString();
-        }
-
-        private class NormalizeRewriter : CSharpSyntaxRewriter
-        {
-            public static readonly NormalizeRewriter Instance = new();
-
-            private NormalizeRewriter() : base( true ) { }
-
-            public override SyntaxNode? VisitQualifiedName( QualifiedNameSyntax node )
-            {
-                if ( node.Parent == null )
-                {
-                    throw new AssertionFailedException();
-                }
-
-                // The following list of exceptions is incomplete. If you get into an InvalidCastException in the rewriter, you have to extend it.
-                if ( !node.AncestorsAndSelf()
-                        .Any(
-                            a =>
-                                a is GenericNameSyntax or UsingDirectiveSyntax ||
-                                (a.Parent is NamespaceDeclarationSyntax namespaceDeclaration && namespaceDeclaration.Name == a) ||
-                                (a.Parent is FileScopedNamespaceDeclarationSyntax fileScopeNamespaceDeclaration && fileScopeNamespaceDeclaration.Name == a) ||
-                                (a.Parent is MethodDeclarationSyntax methodDeclaration && methodDeclaration.ReturnType == a) ||
-                                (a.Parent is VariableDeclarationSyntax variable && variable.Type == a) ||
-                                (a.Parent is TypeConstraintSyntax typeConstraint && typeConstraint.Type == a) ||
-                                (a.Parent is ArrayTypeSyntax arrayType && arrayType.ElementType == a) ||
-                                (a.Parent is ObjectCreationExpressionSyntax objectCreation && objectCreation.Type == a) ||
-                                (a.Parent is DefaultExpressionSyntax defaultExpression && defaultExpression.Type == a) ||
-                                (a.Parent is CastExpressionSyntax castExpression && castExpression.Type == a) ||
-                                (a.Parent is ExplicitInterfaceSpecifierSyntax explicitInterfaceSpecifier && explicitInterfaceSpecifier.Name == a) ||
-                                (a.Parent is ParameterSyntax parameter && parameter.Type == a) ||
-                                a.Parent is SimpleBaseTypeSyntax ) )
-                {
-                    return SyntaxFactory.MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        (ExpressionSyntax) this.Visit( node.Left ),
-                        node.DotToken,
-                        node.Right );
-                }
-                else
-                {
-                    return base.VisitQualifiedName( node );
-                }
-            }
-
-            public override SyntaxNode? VisitXmlComment( XmlCommentSyntax node ) => null;
-
-            public override SyntaxNode? VisitDocumentationCommentTrivia( DocumentationCommentTriviaSyntax node ) => null;
-
-            public override SyntaxTrivia VisitTrivia( SyntaxTrivia trivia )
-            {
-                switch ( trivia.Kind() )
-                {
-                    case SyntaxKind.SingleLineCommentTrivia:
-                    case SyntaxKind.MultiLineCommentTrivia:
-                        return default;
-
-                    default:
-                        return trivia;
-                }
-            }
-
-            public override SyntaxNode? VisitPragmaWarningDirectiveTrivia( PragmaWarningDirectiveTriviaSyntax node ) => null;
-        }
     }
 }

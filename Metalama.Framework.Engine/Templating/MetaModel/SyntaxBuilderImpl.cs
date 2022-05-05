@@ -70,47 +70,27 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
     private static ExpressionSyntax GetLiteralImpl( object value, SpecialType specialType, bool stronglyTyped )
     {
-        var literal = (LiteralExpressionSyntax) SyntaxFactoryEx.LiteralExpression( value );
+        var options = stronglyTyped ? ObjectDisplayOptions.IncludeTypeSuffix : ObjectDisplayOptions.None;
+        var expression = (LiteralExpressionSyntax) SyntaxFactoryEx.LiteralExpression( value, options );
 
         if ( stronglyTyped && specialType != SpecialType.String )
         {
-            var hasSuffix = !char.IsDigit( literal.Token.Text[literal.Token.Text.Length - 1] );
-
-            if ( !hasSuffix && specialType != SpecialType.Int32 )
+            var cast = specialType switch
             {
-                var suffix = specialType switch
-                {
-                    SpecialType.UInt32 => "u",
-                    SpecialType.Int64 => "l",
-                    SpecialType.UInt64 => "ul",
-                    SpecialType.Single => "f",
-                    SpecialType.Double => "d",
-                    SpecialType.Decimal => "m",
-                    _ => null
-                };
+                SpecialType.Byte => SyntaxKind.ByteKeyword,
+                SpecialType.SByte => SyntaxKind.SByteKeyword,
+                SpecialType.Int16 => SyntaxKind.ShortKeyword,
+                SpecialType.UInt16 => SyntaxKind.UShortKeyword,
+                _ => SyntaxKind.None
+            };
 
-                if ( suffix != null )
-                {
-                    return literal.WithToken( SyntaxFactory.Literal( default, literal.Token.Text + suffix,  ) )
-                }
-                
-                var cast = specialType switch
-                {
-                    SpecialType.Byte => SyntaxKind.ByteKeyword,
-                    SpecialType.SByte => SyntaxKind.SByteKeyword,
-                    SpecialType.Int16 => SyntaxKind.ShortKeyword,
-                    SpecialType.UInt16 => SyntaxKind.UShortKeyword,
-                    _ => SyntaxKind.None
-                };
-
-                if ( cast != SyntaxKind.None )
-                {
-                    return SyntaxFactory.CastExpression( SyntaxFactory.PredefinedType( SyntaxFactory.Token( cast ) ), literal );
-                }
+            if ( cast != SyntaxKind.None )
+            {
+                return SyntaxFactory.CastExpression( SyntaxFactory.PredefinedType( SyntaxFactory.Token( cast ) ), expression );
             }
         }
 
-        return literal;
+        return expression;
     }
 
     public IExpression Literal( object? value, SpecialType specialType, bool stronglyTyped )
@@ -120,13 +100,14 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
         if ( value == null )
         {
             expression = stronglyTyped
-                ? SyntaxFactory.DefaultExpression( SyntaxFactory.PredefinedType( SyntaxFactory.Token( SyntaxKind.StringKeyword ) ) ) : SyntaxFactoryEx.Null;
+                ? SyntaxFactory.DefaultExpression( SyntaxFactory.PredefinedType( SyntaxFactory.Token( SyntaxKind.StringKeyword ) ) )
+                : SyntaxFactoryEx.Null;
         }
         else
         {
             expression = GetLiteralImpl( value, specialType, stronglyTyped );
         }
-        
+
         return new RuntimeExpression( expression, this.Compilation, this.Project.ServiceProvider ).ToUserExpression( this.Compilation );
     }
 
