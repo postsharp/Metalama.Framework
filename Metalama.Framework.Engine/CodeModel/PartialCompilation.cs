@@ -246,7 +246,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 
                 var semanticModel = compilation.GetSemanticModel( syntaxTree );
 
-                // Add all syntax trees in
+                // Add all types in this syntax tree, as well as all base types.
                 foreach ( var typeNode in syntaxTree.FindDeclaredTypes() )
                 {
                     var type = (INamedTypeSymbol?) semanticModel.GetDeclaredSymbol( typeNode );
