@@ -8,11 +8,7 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Metrics;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Generic;
 using System.Linq;
-using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
@@ -39,62 +35,6 @@ namespace Metalama.Framework.Engine.CodeModel
         public override IAssembly DeclaringAssembly => this.Compilation.Factory.GetAssembly( this.Symbol.ContainingAssembly );
 
         internal override Ref<IDeclaration> ToRef() => Ref.FromSymbol( this.Symbol, this.Compilation.RoslynCompilation );
-
-        public IReadOnlyList<ISymbol> LookupSymbols()
-        {
-            var syntaxReference = this.Symbol.GetPrimarySyntaxReference();
-
-            // Event fields have accessors without declaring syntax references.
-            if ( syntaxReference == null )
-            {
-                switch ( this.Symbol )
-                {
-                    case IMethodSymbol { MethodKind: RoslynMethodKind.EventAdd or RoslynMethodKind.EventRemove } eventAccessorSymbol:
-                        syntaxReference = eventAccessorSymbol.AssociatedSymbol.AssertNotNull().GetPrimarySyntaxReference();
-
-                        if ( syntaxReference == null )
-                        {
-                            throw new AssertionFailedException();
-                        }
-
-                        break;
-
-                    default:
-                        throw new AssertionFailedException();
-                }
-            }
-
-            var semanticModel = this.Compilation.RoslynCompilation.GetSemanticModel( syntaxReference.SyntaxTree );
-
-            var bodyNode =
-                syntaxReference.GetSyntax() switch
-                {
-                    MethodDeclarationSyntax methodDeclaration => (SyntaxNode?) methodDeclaration.Body ?? methodDeclaration.ExpressionBody,
-                    AccessorDeclarationSyntax accessorDeclaration => (SyntaxNode?) accessorDeclaration.Body ?? accessorDeclaration.ExpressionBody,
-                    ArrowExpressionClauseSyntax _ => null,
-                    PropertyDeclarationSyntax _ => null,
-                    EventDeclarationSyntax _ => null,
-                    VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax } } => null,
-                    BaseTypeDeclarationSyntax _ => null,
-                    LocalFunctionStatementSyntax localFunction => (SyntaxNode?) localFunction.Body ?? localFunction.ExpressionBody,
-                    _ => throw new AssertionFailedException( $"Don't know how to get the body of a {syntaxReference.GetSyntax().Kind()}" )
-                };
-
-            // Accessors have implicit "value" parameter.
-            var implicitSymbols =
-                bodyNode != null
-                    ? Enumerable.Empty<ISymbol>()
-                    : this.Symbol switch
-                    {
-                        IMethodSymbol { MethodKind: RoslynMethodKind.PropertySet or RoslynMethodKind.EventAdd or RoslynMethodKind.EventRemove } methodSymbol =>
-                            methodSymbol.Parameters,
-                        _ => Enumerable.Empty<ISymbol>()
-                    };
-
-            var lookupPosition = bodyNode != null ? bodyNode.Span.Start : syntaxReference.Span.Start;
-
-            return semanticModel.LookupSymbols( lookupPosition ).AddRange( implicitSymbols );
-        }
 
         [Memo]
         public override IDeclaration OriginalDefinition => this.Compilation.Factory.GetDeclaration( this.Symbol.OriginalDefinition );

@@ -337,6 +337,8 @@ namespace Metalama.Framework.Engine.CompileTime
                     var path = Path.Combine( outputPaths.Directory, transformedFileName );
                     var text = compileTimeSyntaxTree.GetText();
 
+                    this._logger.Trace?.Log( $"Writing '{path}'." );
+
                     // Write the file in a retry loop to handle locks. It seems there are still file lock issues
                     // despite the Mutex. 
                     RetryHelper.Retry(
@@ -358,6 +360,8 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     compileTimeCompilation = compileTimeCompilation.ReplaceSyntaxTree( compileTimeSyntaxTree, newTree );
                 }
+
+                this._logger.Trace?.Log( $"Writing '{outputPaths.Pe}'." );
 
                 EmitResult emitResult;
 
@@ -500,19 +504,9 @@ namespace Metalama.Framework.Engine.CompileTime
                 RetryHelper.Retry(
                     () =>
                     {
-                        if ( File.Exists( outputPaths.Pe ) )
+                        if ( Directory.Exists( outputPaths.Directory ) )
                         {
-                            File.Delete( outputPaths.Pe );
-                        }
-                    },
-                    logger: this._logger );
-
-                RetryHelper.Retry(
-                    () =>
-                    {
-                        if ( File.Exists( outputPaths.Pdb ) )
-                        {
-                            File.Delete( outputPaths.Pdb );
+                            Directory.Delete( outputPaths.Directory, true );
                         }
                     },
                     logger: this._logger );
