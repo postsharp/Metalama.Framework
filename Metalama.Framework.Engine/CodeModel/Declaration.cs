@@ -9,7 +9,6 @@ using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Metrics;
 using Microsoft.CodeAnalysis;
 using System.Linq;
-using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
