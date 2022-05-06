@@ -267,31 +267,7 @@ namespace Metalama.Framework.Engine.Templating
                     }
                 }
             }
-/*
-            public override void VisitVariableDeclarator( VariableDeclaratorSyntax node )
-            {
-                if ( this._currentScope != TemplatingScope.RunTimeOnly && this._currentDeclarationTemplateType != TemplateAttributeType.Template )
-                {
-                    // Cannot have dynamic member.
-                    var variableType = this._currentDeclaration switch
-                    {
-                        ILocalSymbol local => local.Type,
-                        IEventSymbol @event => @event.Type,
-                        _ => throw new AssertionFailedException()
-                    };
-
-                    var variableScope = this._classifier.GetTemplatingScope( variableType );
-
-                    if ( variableScope == TemplatingScope.Dynamic )
-                    {
-                        throw new AssertionFailedException();
-                    }
-
-                }
-                base.VisitVariableDeclarator( node );
-            }
-            */
-
+            
             public override void VisitIncompleteMember( IncompleteMemberSyntax node )
             {
                 // Skip
