@@ -241,8 +241,12 @@ namespace Metalama.Framework.Engine.CodeModel
 
             foreach ( var syntaxTree in syntaxTrees )
             {
+                // We need to add the SyntaxTree even if it does not contain any type.
+                trees.Add( syntaxTree );
+                
                 var semanticModel = compilation.GetSemanticModel( syntaxTree );
 
+                // Add all syntax trees in
                 foreach ( var typeNode in syntaxTree.FindDeclaredTypes() )
                 {
                     var type = (INamedTypeSymbol?) semanticModel.GetDeclaredSymbol( typeNode );
