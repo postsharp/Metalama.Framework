@@ -1,36 +1,39 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Microsoft.CodeAnalysis;
-using System.Collections.Generic;
-using System.Linq;
+using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Templating
 {
     internal class TemplateLexicalScope
     {
-        private readonly HashSet<string> _symbols;
+        private ImmutableHashSet<string> _symbols;
 
-        public TemplateLexicalScope( IEnumerable<ISymbol> symbols )
+        public TemplateLexicalScope( ImmutableHashSet<string> symbols )
         {
-            this._symbols = new HashSet<string>( symbols.Select( x => x.Name ) );
+            this._symbols = symbols;
         }
 
         public string GetUniqueIdentifier( string hint )
         {
-            if ( this._symbols.Add( hint ) )
+            if ( !this._symbols.Contains( hint ) )
             {
+                this._symbols = this._symbols.Add( hint );
+
                 return hint;
             }
 
-            string name;
-
-            for ( var i = 1; !this._symbols.Add( name = hint + "_" + i ); i++ )
+            for ( var i = 1;; i++ )
             {
-                // Intentionally empty.
-            }
+                var name = hint + "_" + i;
 
-            return name;
+                if ( !this._symbols.Contains( name ) )
+                {
+                    this._symbols = this._symbols.Add( name );
+
+                    return name;
+                }
+            }
         }
     }
 }
