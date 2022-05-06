@@ -76,10 +76,7 @@ namespace Metalama.Framework.Engine.Linking
             var semanticModel = declaration.GetCompilationModel().RoslynCompilation.GetSemanticModel( syntaxReference.SyntaxTree );
 
             // Accessors have implicit "value" parameter.
-            if ( symbol is IMethodSymbol
-                {
-                    MethodKind: RoslynMethodKind.PropertySet or RoslynMethodKind.EventAdd or RoslynMethodKind.EventRemove
-                } methodSymbol )
+            if ( symbol is IMethodSymbol { MethodKind: RoslynMethodKind.PropertySet or RoslynMethodKind.EventAdd or RoslynMethodKind.EventRemove } )
             {
                 builder.Add( "value" );
             }
