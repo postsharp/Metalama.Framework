@@ -36,7 +36,8 @@ namespace Metalama.Framework.Engine.Transformations
             TemplateMember<IEvent> eventTemplate,
             TemplateMember<IMethod> addTemplate,
             TemplateMember<IMethod> removeTemplate,
-            ITagReader tags )
+            IObjectReader tags,
+            IObjectReader? parameters )
             : base( advice, overriddenDeclaration, tags )
         {
             // We need event template xor both accessor templates.
@@ -47,8 +48,8 @@ namespace Metalama.Framework.Engine.Transformations
             this.AddTemplate = addTemplate;
             this.RemoveTemplate = removeTemplate;
 
-            this.AddTemplate.ValidateTarget( overriddenDeclaration.AddMethod );
-            this.RemoveTemplate.ValidateTarget( overriddenDeclaration.RemoveMethod );
+            this.AddTemplate.ForOverride( overriddenDeclaration.AddMethod, parameters );
+            this.RemoveTemplate.ForOverride( overriddenDeclaration.RemoveMethod, parameters );
         }
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )

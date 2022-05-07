@@ -232,7 +232,11 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
                 var template = TemplateMember.Create( compilationModel.Factory.GetMethod( templateMethod ), TemplateInfo.None );
 
-                var (expansionContext, targetMethod) = CreateTemplateExpansionContext( serviceProvider, assembly, compilationModel, template );
+                var (expansionContext, targetMethod) = CreateTemplateExpansionContext(
+                    serviceProvider,
+                    assembly,
+                    compilationModel,
+                    template.ForIntroduction() );
 
                 var expandSuccessful = driver.TryExpandDeclaration( expansionContext, testResult.PipelineDiagnostics, out var output );
 
@@ -263,7 +267,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             ServiceProvider serviceProvider,
             Assembly assembly,
             CompilationModel compilation,
-            TemplateMember<IMethod> template )
+            BoundTemplateMethod template )
         {
             var roslynCompilation = compilation.RoslynCompilation;
 
@@ -308,8 +312,8 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 targetMethod,
                 new MetaApiProperties(
                     diagnostics,
-                    template.Cast(),
-                    TagReader.GetReader( new { TestKey = "TestValue" } ),
+                    template.Template.Cast(),
+                    ObjectReader.GetReader( new { TestKey = "TestValue" } ),
                     default,
                     syntaxGenerationContext,
                     null!,

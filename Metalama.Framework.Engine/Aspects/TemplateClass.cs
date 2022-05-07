@@ -119,8 +119,9 @@ namespace Metalama.Framework.Engine.Aspects
                     memberName,
                     this,
                     templateInfo,
-                    memberSymbol is IMethodSymbol { IsAsync: true },
-                    memberSymbol );
+                    memberSymbol,
+                    ImmutableArray<TemplateClassMemberParameter>.Empty, 
+                    ImmutableArray<TemplateClassMemberParameter>.Empty );
 
                 if ( !templateInfo.IsNone )
                 {

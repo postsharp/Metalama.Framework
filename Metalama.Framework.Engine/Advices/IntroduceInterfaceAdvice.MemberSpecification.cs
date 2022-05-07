@@ -21,14 +21,14 @@ namespace Metalama.Framework.Engine.Advices
 
             public TemplateInfo TemplateInfo { get; }
 
-            public ITagReader Tags { get; }
+            public IObjectReader Tags { get; }
 
             public MemberSpecification(
                 IMember interfaceMember,
                 IMember? targetMember,
                 IMember? aspectInterfaceMember,
                 TemplateInfo templateInfo,
-                ITagReader tags )
+                IObjectReader tags )
             {
                 this.InterfaceMember = interfaceMember;
                 this.TargetMember = targetMember;

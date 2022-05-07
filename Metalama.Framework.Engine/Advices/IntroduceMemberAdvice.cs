@@ -36,7 +36,7 @@ namespace Metalama.Framework.Engine.Advices
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             string? layerName,
-            ITagReader tags ) : base( aspect, templateInstance, targetDeclaration, layerName, tags )
+            IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, layerName, tags )
         {
             this.Template = template;
             this.Scope = scope;

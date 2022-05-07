@@ -29,15 +29,14 @@ namespace Metalama.Framework.Engine.Transformations
     {
         public new IMethod OverriddenDeclaration => (IMethod) base.OverriddenDeclaration;
 
-        public TemplateMember<IMethod> Template { get; }
+        public BoundTemplateMethod BoundTemplate { get; }
 
-        public OverriddenMethod( Advice advice, IMethod overriddenDeclaration, TemplateMember<IMethod> template, ITagReader tags )
-            : base( advice, overriddenDeclaration, tags )
+        public OverriddenMethod( Advice advice, IMethod targetMethod, BoundTemplateMethod boundTemplate, IObjectReader tags )
+            : base( advice, targetMethod, tags )
         {
-            Invariant.Assert( template.IsNotNull );
+            Invariant.Assert( !boundTemplate.IsNull );
 
-            this.Template = template;
-            this.Template.ValidateTarget( overriddenDeclaration );
+            this.BoundTemplate = boundTemplate;
         }
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
@@ -45,14 +44,14 @@ namespace Metalama.Framework.Engine.Transformations
             var proceedExpression = ProceedHelper.CreateProceedDynamicExpression(
                 context.SyntaxGenerationContext,
                 this.CreateInvocationExpression( context.SyntaxGenerationContext ),
-                this.Template,
+                this.BoundTemplate,
                 this.OverriddenDeclaration );
 
             var metaApi = MetaApi.ForMethod(
                 this.OverriddenDeclaration,
                 new MetaApiProperties(
                     context.DiagnosticSink,
-                    this.Template.Cast(),
+                    this.BoundTemplate.Template.Cast(),
                     this.Tags,
                     this.Advice.AspectLayerId,
                     context.SyntaxGenerationContext,
@@ -67,11 +66,11 @@ namespace Metalama.Framework.Engine.Transformations
                 context.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ),
                 context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
                 context.SyntaxGenerationContext,
-                this.Template,
+                this.BoundTemplate,
                 proceedExpression,
                 this.Advice.AspectLayerId );
 
-            var templateDriver = this.Advice.TemplateInstance.TemplateClass.GetTemplateDriver( this.Template.Declaration! );
+            var templateDriver = this.Advice.TemplateInstance.TemplateClass.GetTemplateDriver( this.BoundTemplate.Template.Declaration! );
 
             if ( !templateDriver.TryExpandDeclaration( expansionContext, context.DiagnosticSink, out var newMethodBody ) )
             {
@@ -85,7 +84,7 @@ namespace Metalama.Framework.Engine.Transformations
 
             if ( !this.OverriddenDeclaration.IsAsync )
             {
-                if ( this.Template.MustInterpretAsAsyncTemplate() )
+                if ( this.BoundTemplate.Template.MustInterpretAsAsyncTemplate() )
                 {
                     // If the template is async but the overridden declaration is not, we have to add an async modifier.
                     modifiers = modifiers.Add( Token( SyntaxKind.AsyncKeyword ) );
@@ -93,7 +92,7 @@ namespace Metalama.Framework.Engine.Transformations
             }
             else
             {
-                if ( !this.Template.MustInterpretAsAsyncTemplate() )
+                if ( !this.BoundTemplate.Template.MustInterpretAsAsyncTemplate() )
                 {
                     // If the template is not async but the overridden declaration is, we have to remove the async modifier.
                     modifiers = TokenList( modifiers.Where( m => !m.IsKind( SyntaxKind.AsyncKeyword ) ) );

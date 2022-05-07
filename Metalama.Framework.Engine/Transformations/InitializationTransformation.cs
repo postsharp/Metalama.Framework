@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Transformations
     internal class InitializationTransformation : IInsertStatementTransformation
     {
         private readonly IConstructor _targetConstructor;
-        private readonly TemplateMember<IMethod> _template;
+        private readonly BoundTemplateMethod _boundTemplate;
 
         public Advice Advice { get; }
 
@@ -34,12 +34,12 @@ namespace Metalama.Framework.Engine.Transformations
             Advice advice,
             IMemberOrNamedType initializedDeclaration,
             IConstructor targetConstructor,
-            TemplateMember<IMethod> template,
-            ITagReader tags )
+            BoundTemplateMethod boundTemplate,
+            IObjectReader tags )
         {
             this.ContextDeclaration = initializedDeclaration;
             this._targetConstructor = targetConstructor;
-            this._template = template;
+            this._boundTemplate = boundTemplate;
             this.Tags = tags;
             this.Advice = advice;
         }
@@ -50,7 +50,7 @@ namespace Metalama.Framework.Engine.Transformations
                 this._targetConstructor,
                 new MetaApiProperties(
                     context.DiagnosticSink,
-                    this._template.Cast(),
+                    this._boundTemplate.Template.Cast(),
                     this.Tags,
                     this.Advice.AspectLayerId,
                     context.SyntaxGenerationContext,
@@ -65,11 +65,11 @@ namespace Metalama.Framework.Engine.Transformations
                 context.LexicalScopeProvider.GetLexicalScope( this.ContextDeclaration ),
                 context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
                 context.SyntaxGenerationContext,
-                this._template,
+                this._boundTemplate,
                 null,
                 this.Advice.AspectLayerId );
 
-            var templateDriver = this.Advice.TemplateInstance.TemplateClass.GetTemplateDriver( this._template.Declaration! );
+            var templateDriver = this.Advice.TemplateInstance.TemplateClass.GetTemplateDriver( this._boundTemplate.Template.Declaration! );
 
             if ( !templateDriver.TryExpandDeclaration( expansionContext, context.DiagnosticSink, out var expandedBody ) )
             {
@@ -84,6 +84,6 @@ namespace Metalama.Framework.Engine.Transformations
                 this.ContextDeclaration );
         }
 
-        public ITagReader Tags { get; }
+        public IObjectReader Tags { get; }
     }
 }

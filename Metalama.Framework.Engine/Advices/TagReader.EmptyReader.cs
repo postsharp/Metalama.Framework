@@ -8,9 +8,9 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Advices;
 
-internal partial class TagReader
+internal partial class ObjectReader
 {
-    private class EmptyReader : ITagReader
+    private class EmptyReader : IObjectReader
     {
         public IEnumerator<KeyValuePair<string, object?>> GetEnumerator() => Enumerable.Empty<KeyValuePair<string, object?>>().GetEnumerator();
 

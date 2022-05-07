@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.Advices
             IAspectInstanceInternal aspect,
             TemplateClassInstance template,
             INamedType targetType,
-            string? layerName ) : base( aspect, template, targetType, layerName, TagReader.Empty )
+            string? layerName ) : base( aspect, template, targetType, layerName, ObjectReader.Empty )
         {
             this._introducedInterfaceTypes = new List<IntroducedInterfaceSpecification>();
         }
@@ -96,7 +96,7 @@ namespace Metalama.Framework.Engine.Advices
             OverrideStrategy overrideStrategy,
             IReadOnlyList<InterfaceMemberSpecification>? explicitMemberSpecification,
             IDiagnosticAdder diagnosticAdder,
-            ITagReader tags )
+            IObjectReader tags )
         {
             // Adding interfaces may run into three problems:
             //      1) Target type already implements the interface.
@@ -285,7 +285,7 @@ namespace Metalama.Framework.Engine.Advices
                                     ? new OverriddenMethod(
                                         this,
                                         (IMethod) memberBuilder,
-                                        TemplateMember.Create( implementationMethod, memberSpec.TemplateInfo, TemplateKind.Introduction ),
+                                        TemplateMember.Create( implementationMethod, memberSpec.TemplateInfo, TemplateKind.Introduction ).ForIntroduction(),
                                         memberSpec.Tags )
                                     : new RedirectedMethod(
                                         this,
@@ -299,13 +299,15 @@ namespace Metalama.Framework.Engine.Advices
                             var aspectProperty = (IProperty?) memberSpec.AspectInterfaceMember;
                             var buildAutoProperty = aspectProperty?.IsAutoPropertyOrField == true;
 
-                            memberBuilder = this.GetImplPropertyBuilder(
+                            var propertyBuilder = this.GetImplPropertyBuilder(
                                 targetDeclaration,
                                 interfaceProperty,
                                 (IProperty?) memberSpec.TargetMember ?? (IProperty) memberSpec.AspectInterfaceMember.AssertNotNull(),
                                 buildAutoProperty,
                                 memberSpec.IsExplicit,
                                 memberSpec.Tags );
+
+                            memberBuilder = propertyBuilder;
 
                             interfaceMemberMap.Add( interfaceProperty, memberBuilder );
 
@@ -320,8 +322,8 @@ namespace Metalama.Framework.Engine.Advices
                                             this,
                                             (IProperty) memberBuilder,
                                             propertyTemplate,
-                                            accessorTemplates.Get,
-                                            accessorTemplates.Set,
+                                            accessorTemplates.Get.ForOverride( propertyBuilder.GetMethod ),
+                                            accessorTemplates.Set.ForOverride( propertyBuilder.SetMethod ),
                                             memberSpec.Tags )
                                         : new RedirectedProperty(
                                             this,
@@ -352,7 +354,8 @@ namespace Metalama.Framework.Engine.Advices
                                                 TemplateKind.Introduction ),
                                             default,
                                             default,
-                                            memberSpec.Tags )
+                                            memberSpec.Tags,
+                                            null )
                                         : new RedirectedEvent(
                                             this,
                                             (IEvent) memberBuilder,
@@ -379,7 +382,7 @@ namespace Metalama.Framework.Engine.Advices
             INamedType declaringType,
             IMethod interfaceMethod,
             bool isExplicit,
-            ITagReader tags )
+            IObjectReader tags )
         {
             var methodBuilder = new MethodBuilder( this, declaringType, interfaceMethod.Name, tags )
             {
@@ -421,13 +424,13 @@ namespace Metalama.Framework.Engine.Advices
             return methodBuilder;
         }
 
-        private MemberBuilder GetImplPropertyBuilder(
+        private PropertyBuilder GetImplPropertyBuilder(
             INamedType declaringType,
             IProperty interfaceProperty,
             IProperty targetProperty,
             bool isAutoProperty,
             bool isExplicit,
-            ITagReader tags )
+            IObjectReader tags )
         {
             var propertyBuilder = new PropertyBuilder(
                 this,

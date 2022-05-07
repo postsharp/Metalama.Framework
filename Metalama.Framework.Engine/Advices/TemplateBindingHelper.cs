@@ -13,14 +13,19 @@ using System.Reflection;
 namespace Metalama.Framework.Engine.Advices
 {
     [Obfuscation( Exclude = true )] // Not obfuscated to have a decent call stack in case of user exception.
-    internal static class TemplateValidationHelper
+    internal static class TemplateBindingHelper
     {
-        public static TemplateMember<IMethod> ValidateTarget( this in TemplateMember<IMethod> template, IMethod? targetMethod )
+        public static BoundTemplateMethod ForIntroduction( this in TemplateMember<IMethod> template, IObjectReader? parameters = null )
+            => new( template, null, parameters ?? ObjectReader.Empty );
+
+        public static BoundTemplateMethod ForOverride( this in TemplateMember<IMethod> template, IMethod? targetMethod, IObjectReader? parameters = null )
         {
             if ( targetMethod == null || template.IsNull )
             {
-                return template;
+                return default;
             }
+
+            parameters ??= ObjectReader.Empty;
 
             if ( !VerifyTemplateType( template.Declaration!.ReturnType, targetMethod.ReturnType ) )
             {
@@ -71,7 +76,7 @@ namespace Metalama.Framework.Engine.Advices
                 }
             }
 
-            return template;
+            return new BoundTemplateMethod( template, targetMethod, parameters );
         }
 
         private static bool VerifyTemplateType( IReadOnlyList<IType> fromTypes, IReadOnlyList<IType> toTypes )

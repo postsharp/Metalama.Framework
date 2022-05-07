@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.Templating
 {
     internal partial class TemplateExpansionContext : UserCodeExecutionContext
     {
-        private readonly TemplateMember<IMethod> _templateMethod;
+        private readonly BoundTemplateMethod _boundTemplate;
         private readonly IUserExpression? _proceedExpression;
         private static readonly AsyncLocal<SyntaxGenerationContext?> _currentSyntaxGenerationContext = new();
 
@@ -69,17 +69,17 @@ namespace Metalama.Framework.Engine.Templating
             TemplateLexicalScope lexicalScope,
             SyntaxSerializationService syntaxSerializationService,
             SyntaxGenerationContext syntaxGenerationContext,
-            TemplateMember<IMethod> templateMethod,
+            BoundTemplateMethod boundTemplate,
             IUserExpression? proceedExpression,
             AspectLayerId aspectLayerId ) : base(
             syntaxGenerationContext.ServiceProvider,
             metaApi.Diagnostics,
-            UserCodeMemberInfo.FromSymbol( templateMethod.Declaration?.GetSymbol() ),
+            UserCodeMemberInfo.FromSymbol( boundTemplate.Template.Declaration?.GetSymbol() ),
             aspectLayerId,
             compilation,
             metaApi.Target.Declaration )
         {
-            this._templateMethod = templateMethod;
+            this._boundTemplate = boundTemplate;
             this.TemplateInstance = templateInstance;
             this.MetaApi = metaApi;
             this.SyntaxSerializationService = syntaxSerializationService;
@@ -134,7 +134,7 @@ namespace Metalama.Framework.Engine.Templating
                 var method = this.MetaApi.Method;
                 var returnType = method.ReturnType;
 
-                if ( this._templateMethod.MustInterpretAsAsyncTemplate() )
+                if ( this._boundTemplate.Template.MustInterpretAsAsyncTemplate() )
                 {
                     // If we are in an awaitable async method, the consider the return type as seen by the method body,
                     // not the one as seen from outside.
@@ -151,7 +151,7 @@ namespace Metalama.Framework.Engine.Templating
                     return CreateReturnStatementVoid( returnExpression );
                 }
                 else if ( method.GetIteratorInfoImpl() is { EnumerableKind: EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator } iteratorInfo &&
-                          this._templateMethod.MustInterpretAsAsyncIteratorTemplate() )
+                          this._boundTemplate.Template.MustInterpretAsAsyncIteratorTemplate() )
                 {
                     switch ( iteratorInfo.EnumerableKind )
                     {
@@ -414,7 +414,7 @@ namespace Metalama.Framework.Engine.Templating
             }
             else if ( awaitResult && TypeExtensions.Equals( returnExpression.Type.GetAsyncInfo().ResultType, SpecialType.Void ) )
             {
-                Invariant.Assert( this._templateMethod.MustInterpretAsAsyncTemplate() );
+                Invariant.Assert( this._boundTemplate.Template.MustInterpretAsAsyncTemplate() );
 
                 if ( TypeExtensions.Equals( this.MetaApi.Method.ReturnType, SpecialType.Void )
                      || TypeExtensions.Equals( this.MetaApi.Method.ReturnType.GetAsyncInfo().ResultType, SpecialType.Void ) )

@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public TemplateMember<IMemberOrNamedType> Template { get; }
 
-        public ITagReader Tags { get; }
+        public IObjectReader Tags { get; }
 
         public AspectLayerId AspectLayerId { get; }
 
@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         public MetaApiProperties(
             UserDiagnosticSink diagnostics,
             TemplateMember<IMemberOrNamedType> template,
-            ITagReader tags,
+            IObjectReader tags,
             AspectLayerId aspectLayerId,
             SyntaxGenerationContext syntaxGenerationContext,
             IAspectInstance aspectInstance,

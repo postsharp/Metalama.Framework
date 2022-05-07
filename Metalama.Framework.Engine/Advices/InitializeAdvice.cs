@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Advices
 {
     internal class InitializeAdvice : Advice
     {
-        public TemplateMember<IMethod> Template { get; }
+        public BoundTemplateMethod BoundTemplate { get; }
 
         public InitializerKind Kind { get; }
 
@@ -28,12 +28,12 @@ namespace Metalama.Framework.Engine.Advices
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             IMemberOrNamedType targetDeclaration,
-            TemplateMember<IMethod> template,
+            BoundTemplateMethod boundTemplate,
             InitializerKind kind,
             string? layerName,
-            ITagReader tags ) : base( aspect, templateInstance, targetDeclaration, layerName, tags )
+            IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, layerName, tags )
         {
-            this.Template = template;
+            this.BoundTemplate = boundTemplate;
             this.Kind = kind;
         }
 
@@ -108,7 +108,7 @@ namespace Metalama.Framework.Engine.Advices
                     this,
                     targetDeclaration,
                     targetCtor,
-                    this.Template,
+                    this.BoundTemplate,
                     this.Tags );
 
                 transformations.Add( initialization );

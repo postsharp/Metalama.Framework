@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.Transformations
 
         public IEvent TargetEvent { get; }
 
-        public RedirectedEvent( Advice advice, IEvent overriddenDeclaration, IEvent targetEvent, ITagReader tags )
+        public RedirectedEvent( Advice advice, IEvent overriddenDeclaration, IEvent targetEvent, IObjectReader tags )
             : base( advice, overriddenDeclaration, tags )
         {
             this.TargetEvent = targetEvent;

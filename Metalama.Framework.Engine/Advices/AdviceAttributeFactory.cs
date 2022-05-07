@@ -64,11 +64,12 @@ namespace Metalama.Framework.Engine.Advices
                                     aspect,
                                     templateInstance,
                                     targetType,
-                                    TemplateMember.Create( templateMethod, template, TemplateKind.Introduction ),
+                                    TemplateMember.Create( templateMethod, template, TemplateKind.Introduction ).ForIntroduction( null ),
                                     template.Attribute.Scope,
                                     template.Attribute.WhenExists,
                                     layerName,
-                                    TagReader.Empty );
+                                    ObjectReader.Empty,
+                                    ObjectReader.Empty );
 
                                 advice = introduceMethodAdvice;
                                 builder = introduceMethodAdvice.Builder;
@@ -85,12 +86,12 @@ namespace Metalama.Framework.Engine.Advices
                                     targetType,
                                     null,
                                     propertyTemplate,
-                                    accessorTemplates.Get,
-                                    accessorTemplates.Set,
+                                    accessorTemplates.Get.ForIntroduction(),
+                                    accessorTemplates.Set.ForIntroduction(),
                                     template.Attribute.Scope,
                                     template.Attribute.WhenExists,
                                     layerName,
-                                    TagReader.Empty );
+                                    ObjectReader.Empty );
 
                                 advice = introducePropertyAdvice;
                                 builder = introducePropertyAdvice.Builder;
@@ -109,7 +110,8 @@ namespace Metalama.Framework.Engine.Advices
                                     template.Attribute.Scope,
                                     template.Attribute.WhenExists,
                                     layerName,
-                                    TagReader.Empty );
+                                    ObjectReader.Empty,
+                                    ObjectReader.Empty );
 
                                 advice = introduceEventAdvice;
                                 builder = introduceEventAdvice.Builder;
@@ -128,7 +130,7 @@ namespace Metalama.Framework.Engine.Advices
                                     template.Attribute.Scope,
                                     template.Attribute.WhenExists,
                                     layerName,
-                                    TagReader.Empty );
+                                    ObjectReader.Empty );
 
                                 advice = introduceFieldAdvice;
                                 builder = introduceFieldAdvice.Builder;

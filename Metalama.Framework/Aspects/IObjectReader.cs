@@ -9,7 +9,7 @@ namespace Metalama.Framework.Aspects
     /// Exposes as a dictionary the tags passed to an advise.
     /// </summary>
     [CompileTime]
-    public interface ITagReader : IReadOnlyDictionary<string, object?>
+    public interface IObjectReader : IReadOnlyDictionary<string, object?>
     {
         /// <summary>
         /// Gets the source object (typically an object of an anonymous type).
