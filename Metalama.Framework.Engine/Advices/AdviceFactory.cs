@@ -810,7 +810,7 @@ namespace Metalama.Framework.Engine.Advices
                 tags );
         }
 
-        public void AddInitializerBeforeTypeConstructor( IMemberOrNamedType targetType, string template, object? tags = null )
+        public void AddInitializer( IMemberOrNamedType targetType, string template, InitializerKind kind, object? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -827,35 +827,7 @@ namespace Metalama.Framework.Engine.Advices
                 this._templateInstance,
                 targetType,
                 templateRef,
-                InitializerKind.BeforeTypeConstructor,
-                _layerName,
-                TagReader.GetReader( tags ) );
-
-            advice.Initialize( diagnosticList );
-            ThrowOnErrors( diagnosticList );
-            this.Advices.Add( advice );
-
-            this._diagnosticAdder.Report( diagnosticList );
-        }
-
-        public void AddInitializerBeforeInstanceConstructor( IMemberOrNamedType targetType, string template, object? tags = null )
-        {
-            if ( this._templateInstance == null )
-            {
-                throw new InvalidOperationException();
-            }
-
-            var diagnosticList = new DiagnosticList();
-
-            var templateRef = this.ValidateTemplateName( template, TemplateKind.Default, true )
-                .GetTemplateMember<IMethod>( this._compilation, this._serviceProvider );
-
-            var advice = new InitializeAdvice(
-                this._aspect,
-                this._templateInstance,
-                targetType,
-                templateRef,
-                InitializerKind.BeforeInstanceConstructor,
+                kind,
                 _layerName,
                 TagReader.GetReader( tags ) );
 

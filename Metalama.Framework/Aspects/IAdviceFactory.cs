@@ -278,31 +278,20 @@ namespace Metalama.Framework.Aspects
             object? tags = null );
 
         /// <summary>
-        /// Adds initialization logic before the user type constructor (aka static constructor). If there is no type constructor, this advice adds one.
+        /// Adds a type or instance initializer. 
         /// </summary>
         /// <param name="targetType">The type into which the initializer should be added.</param>
         /// <param name="template">The name of the template. This method must have no parameter, be of <c>void</c> return type, and be annotated with the <see cref="TemplateAttribute"/> custom attribute.</param>
+        /// <param name="kind">The type of initializer to add.</param>
         /// <param name="tags">An optional opaque object of anonymous type  passed to templates and exposed under the <see cref="meta.Tags"/> property of the
         /// <see cref="meta"/> API.</param>
-        void AddInitializerBeforeTypeConstructor(
+        void AddInitializer(
             IMemberOrNamedType targetType,
             string template,
+            InitializerKind kind,
             object? tags = null );
 
-        /// <summary>
-        /// Adds initialization logic before any user code in all instance constructors except those that are chained to a constructor of the current class (using the <c>this</c> chaining keyword). The initialization logic executes
-        /// after the call to the base constructor. 
-        /// </summary>
-        /// <param name="targetType">The type into which the initializer should be added.</param>
-        /// <param name="template">The name of the template. This method must have no parameter, be of <c>void</c> return type, and be annotated with the <see cref="TemplateAttribute"/> custom attribute.</param>
-        /// <param name="tags">An optional opaque object of anonymous type  passed to templates and exposed under the <see cref="meta.Tags"/> property of the
-        /// <see cref="meta"/> API.</param>
-        void AddInitializerBeforeInstanceConstructor(
-            IMemberOrNamedType targetType,
-            string template,
-            object? tags = null );
-
-        [Obsolete( "Not implemented." )]
+        [Obsolete( "Not implemented.", true )]
         void ImplementInterface(
             INamedType targetType,
             INamedType interfaceType,
@@ -310,7 +299,7 @@ namespace Metalama.Framework.Aspects
             OverrideStrategy whenExists = OverrideStrategy.Default,
             object? tags = null );
 
-        [Obsolete( "Not implemented." )]
+        [Obsolete( "Not implemented.", true )]
         void ImplementInterface(
             INamedType targetType,
             Type interfaceType,
@@ -318,13 +307,13 @@ namespace Metalama.Framework.Aspects
             OverrideStrategy whenExists = OverrideStrategy.Default,
             object? tags = null );
 
-        [Obsolete( "Not implemented." )]
+        [Obsolete( "Not implemented.", true )]
         void Override(
             IConstructor targetConstructor,
             string template,
             object? tags = null );
 
-        [Obsolete( "Not implemented." )]
+        [Obsolete( "Not implemented.", true )]
         void IntroduceConstructor(
             INamedType targetType,
             string template,
