@@ -252,7 +252,18 @@ namespace Metalama.Framework.Engine.CompileTime
                     return TemplatingScope.Dynamic;
 
                 case ITypeParameterSymbol typeParameterSymbol:
-                    return this.GetTemplatingScopeCore( typeParameterSymbol.ContainingSymbol, recursion + 1 );
+                    var declaringScope = this.GetTemplatingScopeCore( typeParameterSymbol.ContainingSymbol, recursion + 1 );
+
+                    if ( typeParameterSymbol.ContainingSymbol.Kind == SymbolKind.Method
+                         && !this.GetTemplateInfo( typeParameterSymbol.ContainingSymbol ).IsNone )
+                    {
+                        // Currently all generic parameters of templates are run-time only.
+                        return TemplatingScope.RunTimeOnly;
+                    }
+                    else
+                    {
+                        return declaringScope;
+                    }
 
                 case IErrorTypeSymbol:
                     // We treat all error symbols as run-time only, by convention.

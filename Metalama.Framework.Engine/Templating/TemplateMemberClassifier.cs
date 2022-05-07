@@ -49,6 +49,12 @@ namespace Metalama.Framework.Engine.Templating
                 _ => false
             };
 
+        public bool IsCompileTimeParameter( IParameterSymbol parameter )
+            => this._symbolClassifier.GetTemplatingScope( parameter ) == TemplatingScope.CompileTimeOnly;
+
+        public bool IsCompileTimeParameter( ITypeParameterSymbol parameter )
+            => this._symbolClassifier.GetTemplatingScope( parameter ) == TemplatingScope.CompileTimeOnly;
+
         public bool IsRunTimeMethod( IMethodSymbol symbol )
             => symbol.Name == nameof(meta.RunTime) &&
                symbol.ContainingType.GetDocumentationCommentId() == this._metaType.GetDocumentationCommentId();

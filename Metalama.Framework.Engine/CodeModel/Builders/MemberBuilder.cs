@@ -203,7 +203,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( initializerTemplate.Declaration! );
 
-            return templateDriver.TryExpandDeclaration( expansionContext, context.DiagnosticSink, out expression );
+            return templateDriver.TryExpandDeclaration( expansionContext, Array.Empty<object>(), out expression );
         }
     }
 }

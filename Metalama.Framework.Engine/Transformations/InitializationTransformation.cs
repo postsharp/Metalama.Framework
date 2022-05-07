@@ -71,7 +71,7 @@ namespace Metalama.Framework.Engine.Transformations
 
             var templateDriver = this.Advice.TemplateInstance.TemplateClass.GetTemplateDriver( this._boundTemplate.Template.Declaration! );
 
-            if ( !templateDriver.TryExpandDeclaration( expansionContext, context.DiagnosticSink, out var expandedBody ) )
+            if ( !templateDriver.TryExpandDeclaration( expansionContext, this._boundTemplate.TemplateParameters, out var expandedBody ) )
             {
                 // Template expansion error.
                 return default;

@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
@@ -29,7 +28,7 @@ namespace Metalama.Framework.Engine.Templating
 
         public bool TryExpandDeclaration(
             TemplateExpansionContext templateExpansionContext,
-            IDiagnosticAdder diagnosticAdder,
+            object?[] templateParameters,
             [NotNullWhen( true )] out BlockSyntax? block )
         {
             var errorCountBefore = templateExpansionContext.DiagnosticSink.ErrorCount;
@@ -37,7 +36,7 @@ namespace Metalama.Framework.Engine.Templating
             using ( meta.WithImplementation( templateExpansionContext.MetaApi ) )
             {
                 if ( !this._userCodeInvoker.TryInvoke(
-                        () => (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, Array.Empty<object>() ),
+                        () => (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, templateParameters ),
                         templateExpansionContext,
                         out var output ) )
                 {

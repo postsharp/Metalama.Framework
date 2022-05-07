@@ -6,9 +6,15 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
+using SpecialType = Metalama.Framework.Code.SpecialType;
+using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.Advices
 {
@@ -16,7 +22,7 @@ namespace Metalama.Framework.Engine.Advices
     internal static class TemplateBindingHelper
     {
         public static BoundTemplateMethod ForIntroduction( this in TemplateMember<IMethod> template, IObjectReader? parameters = null )
-            => new( template, null, parameters ?? ObjectReader.Empty );
+            => new( template, null, GetTemplateArguments( template, parameters, ImmutableDictionary<string, string>.Empty ) );
 
         public static BoundTemplateMethod ForOverride( this in TemplateMember<IMethod> template, IMethod? targetMethod, IObjectReader? parameters = null )
         {
@@ -76,7 +82,7 @@ namespace Metalama.Framework.Engine.Advices
                 }
             }
 
-            return new BoundTemplateMethod( template, targetMethod, parameters );
+            return new BoundTemplateMethod( template, targetMethod, GetTemplateArguments( template, parameters, ImmutableDictionary<string, string>.Empty ) );
         }
 
         private static bool VerifyTemplateType( IReadOnlyList<IType> fromTypes, IReadOnlyList<IType> toTypes )
@@ -140,6 +146,96 @@ namespace Metalama.Framework.Engine.Advices
             }
 
             return false;
+        }
+
+        private static object?[] GetTemplateArguments(
+            in TemplateMember<IMethod> template,
+            IObjectReader? compileTimeParameters,
+            ImmutableDictionary<string, string> mapping )
+        {
+            if ( template.IsNull )
+            {
+                return Array.Empty<object?>();
+            }
+
+            compileTimeParameters ??= ObjectReader.Empty;
+
+            var templateParameters = new List<object?>();
+
+            // Add parameters.
+            foreach ( var parameter in template.TemplateClassMember.Parameters )
+            {
+                if ( parameter.IsCompileTime )
+                {
+                    if ( !compileTimeParameters.TryGetValue( parameter.Name, out var parameterValue ) )
+                    {
+                        throw new InvalidAdviceParametersException(
+                            UserMessageFormatter.Format(
+                                $"No value has been provided for the parameter '{parameter.Name}' of template '{template.Declaration}'." ) );
+                    }
+
+                    templateParameters.Add( parameterValue );
+                }
+                else
+                {
+                    var name = mapping.TryGetValue( parameter.Name, out var mapped ) ? mapped : parameter.Name;
+                    templateParameters.Add( SyntaxFactory.IdentifierName( name ) );
+                }
+            }
+
+            // Add type parameters.
+            foreach ( var parameter in template.TemplateClassMember.TypeParameters )
+            {
+                if ( parameter.IsCompileTime )
+                {
+                    if ( !compileTimeParameters.TryGetValue( parameter.Name, out var parameterValue ) )
+                    {
+                        throw new InvalidAdviceParametersException(
+                            UserMessageFormatter.Format(
+                                $"No value has been provided for the type parameter '{parameter.Name}' of template '{template.Declaration}'." ) );
+                    }
+
+                    ITypeSymbol typeSymbol;
+
+                    switch ( parameterValue )
+                    {
+                        case IType type:
+                            typeSymbol = type.GetSymbol().AssertNotNull();
+
+                            break;
+
+                        case Type type:
+                            typeSymbol = TypeFactory.Implementation.GetTypeByReflectionType( type ).GetSymbol().AssertNotNull();
+
+                            break;
+
+                        default:
+                            throw new InvalidAdviceParametersException(
+                                UserMessageFormatter.Format(
+                                    $"The value of parameter '{parameter.Name}' for template '{template.Declaration}' must be of type IType or Type." ) );
+                    }
+
+                    templateParameters.Add( OurSyntaxGenerator.CompileTime.Type( typeSymbol ) );
+                }
+            }
+
+            // Check that all provided properties map to a compile-time parameter.
+            foreach ( var name in compileTimeParameters.Keys )
+            {
+                if ( !template.TemplateClassMember.IndexedParameters.TryGetValue( name, out var parameter ) )
+                {
+                    throw new InvalidAdviceTargetException(
+                        UserMessageFormatter.Format( $"There is no parameter '{name}' in template '{template.Declaration}'." ) );
+                }
+
+                if ( !parameter.IsCompileTime )
+                {
+                    throw new InvalidAdviceTargetException(
+                        UserMessageFormatter.Format( $"The parameter '{name}' of template '{template.Declaration}' is not compile-time." ) );
+                }
+            }
+
+            return templateParameters.ToArray();
         }
     }
 }

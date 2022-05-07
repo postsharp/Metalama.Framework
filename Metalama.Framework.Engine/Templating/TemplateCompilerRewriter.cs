@@ -40,7 +40,6 @@ namespace Metalama.Framework.Engine.Templating
         private readonly TemplateMemberClassifier _templateMemberClassifier;
         private readonly CompileTimeOnlyRewriter _compileTimeOnlyRewriter;
         private readonly TypeOfRewriter _typeOfRewriter;
-
         private MetaContext? _currentMetaContext;
         private int _nextStatementListId;
         private ISymbol? _rootTemplateSymbol;
@@ -879,8 +878,7 @@ namespace Metalama.Framework.Engine.Templating
 
             this.Indent( 3 );
 
-            // TODO: templates may support build-time parameters, which must to the compiled template method.
-
+            // Build the template body.
             BlockSyntax body;
 
             if ( node.Body != null )
@@ -897,7 +895,38 @@ namespace Metalama.Framework.Engine.Templating
                     isVoid );
             }
 
-            var result = this.CreateTemplateMethod( node, body );
+            // Build the template parameter list.
+            var templateParameters = new List<ParameterSyntax>( node.ParameterList.Parameters.Count + (node.TypeParameterList?.Parameters.Count ?? 0) );
+
+            foreach ( var parameter in node.ParameterList.Parameters )
+            {
+                var templateParameter = parameter;
+                var parameterSymbol = (IParameterSymbol) this._syntaxTreeAnnotationMap.GetDeclaredSymbol( parameter ).AssertNotNull();
+                var isCompileTime = this._templateMemberClassifier.IsCompileTimeParameter( parameterSymbol );
+
+                if ( !isCompileTime )
+                {
+                    templateParameter = templateParameter.WithType( SyntaxFactoryEx.ExpressionSyntaxType );
+                }
+
+                templateParameters.Add( templateParameter );
+            }
+
+            if ( node.TypeParameterList != null )
+            {
+                foreach ( var parameter in node.TypeParameterList.Parameters )
+                {
+                    var parameterSymbol = (ITypeParameterSymbol) this._syntaxTreeAnnotationMap.GetDeclaredSymbol( parameter ).AssertNotNull();
+                    var isCompileTime = this._templateMemberClassifier.IsCompileTimeParameter( parameterSymbol );
+
+                    if ( isCompileTime )
+                    {
+                        templateParameters.Add( Parameter( default, default, SyntaxFactoryEx.TypeSyntaxType, parameter.Identifier, null ) );
+                    }
+                }
+            }
+
+            var result = this.CreateTemplateMethod( node, body, ParameterList( SeparatedList( templateParameters ) ) );
 
             this.Unindent( 3 );
 
@@ -914,8 +943,7 @@ namespace Metalama.Framework.Engine.Templating
 
             this.Indent( 3 );
 
-            // TODO: templates may support build-time parameters, which must to the compiled template method.
-
+            // Create the body.
             BlockSyntax body;
 
             if ( node.Body != null )
@@ -932,7 +960,14 @@ namespace Metalama.Framework.Engine.Templating
                     isVoid );
             }
 
-            var result = this.CreateTemplateMethod( node, body );
+            // Create the parameter list.
+            var parameters = node.Keyword.IsKind( SyntaxKind.GetKeyword )
+                ? ParameterList()
+                : ParameterList(
+                    SingletonSeparatedList( Parameter( default, default, SyntaxFactoryEx.ExpressionSyntaxType, Identifier( "value" ), default, null ) ) );
+
+            // Create the method.
+            var result = this.CreateTemplateMethod( node, body, parameters );
 
             this.Unindent( 3 );
 
@@ -992,15 +1027,18 @@ namespace Metalama.Framework.Engine.Templating
             }
         }
 
-        private MethodDeclarationSyntax CreateTemplateMethod( SyntaxNode node, BlockSyntax body )
-            => MethodDeclaration(
+        private MethodDeclarationSyntax CreateTemplateMethod( SyntaxNode node, BlockSyntax body, ParameterListSyntax? parameters = null )
+        {
+            return MethodDeclaration(
                     this.MetaSyntaxFactory.Type( typeof(SyntaxNode) ),
                     Identifier( this._templateName ) )
+                .WithParameterList( parameters ?? ParameterList() )
                 .WithModifiers( TokenList( Token( SyntaxKind.PublicKeyword ) ) )
                 .NormalizeWhitespace()
                 .WithBody( body )
                 .WithLeadingTrivia( node.GetLeadingTrivia() )
                 .WithTrailingTrivia( LineFeed, LineFeed );
+        }
 
         public override SyntaxNode VisitBlock( BlockSyntax node )
         {

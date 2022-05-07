@@ -40,8 +40,8 @@ namespace Metalama.Framework.Engine.Advices
 
             var templatePropertyDeclaration = propertyTemplate.Declaration;
             var name = templatePropertyDeclaration?.Name ?? explicitName ?? throw new AssertionFailedException();
-            var hasGet = templatePropertyDeclaration != null ? templatePropertyDeclaration.GetMethod != null : getTemplate.Template.IsNotNull;
-            var hasSet = templatePropertyDeclaration != null ? templatePropertyDeclaration.SetMethod != null : setTemplate.Template.IsNotNull;
+            var hasGet = templatePropertyDeclaration != null ? templatePropertyDeclaration.GetMethod != null : getTemplate.IsNotNull;
+            var hasSet = templatePropertyDeclaration != null ? templatePropertyDeclaration.SetMethod != null : setTemplate.IsNotNull;
 
             this.MemberBuilder = new PropertyBuilder(
                 this,

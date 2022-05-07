@@ -22,6 +22,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Emit;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -29,6 +30,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
+using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using RefKind = Metalama.Framework.Code.RefKind;
 #if NET5_0_OR_GREATER
 using System.Runtime.Loader;
@@ -230,7 +232,16 @@ namespace Metalama.Framework.Tests.Integration.Runners
                     new NullProject( serviceProvider ),
                     (CSharpCompilation) testResult.InputCompilation );
 
-                var template = TemplateMember.Create( compilationModel.Factory.GetMethod( templateMethod ), TemplateInfo.None );
+                var fakeTemplateClassMember = new TemplateClassMember(
+                    "Template",
+                    null!,
+                    TemplateInfo.None,
+                    null!,
+                    ImmutableArray<TemplateClassMemberParameter>.Empty,
+                    ImmutableArray<TemplateClassMemberParameter>.Empty,
+                    ImmutableDictionary<MethodKind, TemplateClassMember>.Empty );
+
+                var template = TemplateMember.Create( compilationModel.Factory.GetMethod( templateMethod ), fakeTemplateClassMember );
 
                 var (expansionContext, targetMethod) = CreateTemplateExpansionContext(
                     serviceProvider,
@@ -238,7 +249,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                     compilationModel,
                     template.ForIntroduction() );
 
-                var expandSuccessful = driver.TryExpandDeclaration( expansionContext, testResult.PipelineDiagnostics, out var output );
+                var expandSuccessful = driver.TryExpandDeclaration( expansionContext, Array.Empty<object>(), out var output );
 
                 testResult.PipelineDiagnostics.Report( expansionContext.DiagnosticSink.ToImmutable().ReportedDiagnostics );
 
