@@ -1429,7 +1429,11 @@ namespace Metalama.Framework.Engine.Templating
                    this._syntaxTreeAnnotationMap.GetExpressionType( expression ) is IDynamicTypeSymbol
                    || (
                        this._syntaxTreeAnnotationMap.GetExpressionType( expression ) is INamedTypeSymbol
-                           { Name: "Task" or "IEnumerable" or "IAsyncEnumerator", TypeArguments: { Length: 1 } } namedType
+                       {
+                           Name: "Task" or "IEnumerable" or "IAsyncEnumerator", TypeArguments: { Length: 1 }
+#pragma warning disable SA1513 // Formatting issue
+                       } namedType
+#pragma warning restore SA1513
                        && namedType.TypeArguments[0] is IDynamicTypeSymbol));
 
         public override SyntaxNode VisitReturnStatement( ReturnStatementSyntax node )
@@ -1485,20 +1489,16 @@ namespace Metalama.Framework.Engine.Templating
                     if ( this.IsCompileTimeDynamic( declarator.Initializer.Value ) )
                     {
                         // Assigning dynamic to a variable.
-                        return this.WithCallToAddSimplifierAnnotation(
-                            CreateInvocationExpression( declaration, declarator, declarator.Initializer.Value, false ) );
+                        return this.WithCallToAddSimplifierAnnotation( CreateInvocationExpression( declarator.Initializer.Value, false ) );
                     }
 
                     if ( declarator.Initializer is { Value: AwaitExpressionSyntax awaitExpression } && this.IsCompileTimeDynamic( awaitExpression.Expression ) )
                     {
                         // Assigning awaited dynamic to a variable.
-                        return this.WithCallToAddSimplifierAnnotation(
-                            CreateInvocationExpression( declaration, declarator, awaitExpression.Expression, true ) );
+                        return this.WithCallToAddSimplifierAnnotation( CreateInvocationExpression( awaitExpression.Expression, true ) );
                     }
 
                     InvocationExpressionSyntax CreateInvocationExpression(
-                        VariableDeclarationSyntax declaration,
-                        VariableDeclaratorSyntax declarator,
                         ExpressionSyntax expression,
                         bool awaitResult )
                     {

@@ -64,11 +64,10 @@ namespace Metalama.Framework.Engine.Advices
                                     aspect,
                                     templateInstance,
                                     targetType,
-                                    TemplateMember.Create( templateMethod, template, TemplateKind.Introduction ).ForIntroduction( null ),
+                                    TemplateMember.Create( templateMethod, template, TemplateKind.Introduction ).ForIntroduction(),
                                     template.Attribute.Scope,
                                     template.Attribute.WhenExists,
                                     layerName,
-                                    ObjectReader.Empty,
                                     ObjectReader.Empty );
 
                                 advice = introduceMethodAdvice;

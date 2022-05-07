@@ -340,8 +340,7 @@ namespace Metalama.Framework.Engine.Advices
                 scope,
                 whenExists,
                 _layerName,
-                ObjectReader.GetReader( tags ),
-                ObjectReader.GetReader( parameters ) );
+                ObjectReader.GetReader( tags ) );
 
             advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
@@ -375,8 +374,8 @@ namespace Metalama.Framework.Engine.Advices
                 .GetTemplateMember<IProperty>( this._compilation, this._serviceProvider );
 
             var accessorTemplates = propertyTemplate.GetAccessorTemplates();
-            var getTemplate = accessorTemplates.Get.ForOverride( targetDeclaration.GetMethod, null );
-            var setTemplate = accessorTemplates.Set.ForOverride( targetDeclaration.SetMethod, null );
+            var getTemplate = accessorTemplates.Get.ForOverride( targetDeclaration.GetMethod );
+            var setTemplate = accessorTemplates.Set.ForOverride( targetDeclaration.SetMethod );
 
             var advice = new OverrideFieldOrPropertyAdvice(
                 this._aspect,
@@ -672,7 +671,7 @@ namespace Metalama.Framework.Engine.Advices
                 whenExists,
                 _layerName,
                 ObjectReader.GetReader( tags ),
-                null );
+                ObjectReader.Empty );
 
             advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );

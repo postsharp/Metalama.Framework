@@ -17,8 +17,6 @@ namespace Metalama.Framework.Engine.Advices
 {
     internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, MethodBuilder>
     {
-        private readonly IObjectReader _parameters;
-
         public BoundTemplateMethod BoundTemplate { get; }
 
         public new Ref<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
@@ -33,11 +31,9 @@ namespace Metalama.Framework.Engine.Advices
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             string? layerName,
-            IObjectReader tags,
-            IObjectReader parameters )
+            IObjectReader tags )
             : base( aspect, templateInstance, targetDeclaration, boundTemplate.Template, scope, overrideStrategy, layerName, tags )
         {
-            this._parameters = parameters;
             this.BoundTemplate = boundTemplate;
             Invariant.Assert( !boundTemplate.IsNull );
 
