@@ -37,7 +37,8 @@ namespace Metalama.Framework.Engine.Templating
 
             private ISymbol? _currentDeclaration;
             private TemplatingScope? _currentScope;
-            private bool? _currentDeclarationIsTemplate;
+            private TemplatingScope? _currentTypeScope;
+            private TemplateAttributeType? _currentDeclarationTemplateType;
 
             public bool HasError { get; private set; }
 
@@ -59,6 +60,9 @@ namespace Metalama.Framework.Engine.Templating
                 this._cancellationToken = cancellationToken;
                 this._hasCompileTimeCodeFast = CompileTimeCodeDetector.HasCompileTimeCode( semanticModel.SyntaxTree.GetRoot() );
             }
+
+            private bool IsInTemplate
+                => this._currentDeclarationTemplateType.HasValue && this._currentDeclarationTemplateType.Value != TemplateAttributeType.None;
 
             public override void Visit( SyntaxNode? node )
             {
@@ -110,7 +114,7 @@ namespace Metalama.Framework.Engine.Templating
                             Name: nameof(meta.Proceed) or nameof(meta.ProceedAsync) or nameof(meta.ProceedEnumerable) or nameof(meta.ProceedEnumerator)
                         };
 
-                        if ( isProceed && !this._currentDeclarationIsTemplate!.Value )
+                        if ( isProceed && !this.IsInTemplate )
                         {
                             // Cannot reference 'meta.Proceed' out of a template.
                             if ( AvoidDuplicates( referencedSymbol ) )
@@ -121,7 +125,7 @@ namespace Metalama.Framework.Engine.Templating
                                         this._currentDeclaration! ) );
                             }
                         }
-                        else if ( !(this._currentScope.Value.MustExecuteAtCompileTime() || this._currentDeclarationIsTemplate!.Value) && !IsTypeOfOrNameOf() )
+                        else if ( !(this._currentScope.Value.MustExecuteAtCompileTime() || this.IsInTemplate) && !IsTypeOfOrNameOf() )
                         {
                             // We cannot reference a compile-time-only declaration, except in a typeof() or nameof() expression
                             // because these are transformed by the CompileTimeCompilationBuilder.
@@ -137,7 +141,7 @@ namespace Metalama.Framework.Engine.Templating
                     }
                     else if ( referencedScope == TemplatingScope.RunTimeOnly )
                     {
-                        if ( this._currentScope.Value == TemplatingScope.CompileTimeOnly && !this._currentDeclarationIsTemplate!.Value && !IsTypeOfOrNameOf() )
+                        if ( this._currentScope.Value == TemplatingScope.CompileTimeOnly && !this.IsInTemplate && !IsTypeOfOrNameOf() )
                         {
                             if ( AvoidDuplicates( referencedSymbol ) )
                             {
@@ -170,12 +174,12 @@ namespace Metalama.Framework.Engine.Templating
             {
                 using var scope = this.WithScope( node );
 
-                if ( scope.Scope == TemplatingScope.RunTimeOrCompileTime && this._reportCompileTimeTreeOutdatedError )
+                if ( scope.PreviousScope == TemplatingScope.RunTimeOrCompileTime && this._reportCompileTimeTreeOutdatedError )
                 {
                     this.Report(
                         TemplatingDiagnosticDescriptors.CompileTimeTypeNeedsRebuild.CreateRoslynDiagnostic(
                             node.Identifier.GetLocation(),
-                            scope.Symbol! ) );
+                            scope.PreviousDeclaration! ) );
                 }
 
                 base.VisitClassDeclaration( node );
@@ -191,7 +195,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 using ( this.WithScope( node ) )
                 {
-                    if ( this._currentDeclarationIsTemplate!.Value )
+                    if ( this.IsInTemplate )
                     {
                         if ( this._isDesignTime )
                         {
@@ -263,7 +267,7 @@ namespace Metalama.Framework.Engine.Templating
                     }
                 }
             }
-
+            
             public override void VisitIncompleteMember( IncompleteMemberSyntax node )
             {
                 // Skip
@@ -290,19 +294,60 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     var scope = this._classifier.GetTemplatingScope( declaredSymbol );
 
-                    if ( scope != TemplatingScope.RunTimeOnly && !this._hasCompileTimeCodeFast )
+                    switch ( scope )
                     {
-                        this.Report(
-                            TemplatingDiagnosticDescriptors.CompileTimeCodeNeedsNamespaceImport.CreateRoslynDiagnostic(
-                                declaredSymbol.GetDiagnosticLocation(),
-                                (declaredSymbol, CompileTimeCodeDetector.Namespace) ) );
+                        case TemplatingScope.Invalid:
+                            this.Report(
+                                TemplatingDiagnosticDescriptors.InvalidScope.CreateRoslynDiagnostic(
+                                    declaredSymbol.GetDiagnosticLocation(),
+                                    declaredSymbol ) );
+
+                            break;
+
+                        case TemplatingScope.Conflict:
+                            this.Report(
+                                TemplatingDiagnosticDescriptors.ScopeConflictInSignature.CreateRoslynDiagnostic(
+                                    declaredSymbol.GetDiagnosticLocation(),
+                                    declaredSymbol ) );
+
+                            break;
+
+                        default:
+                            {
+                                if ( scope != TemplatingScope.RunTimeOnly && !this._hasCompileTimeCodeFast )
+                                {
+                                    this.Report(
+                                        TemplatingDiagnosticDescriptors.CompileTimeCodeNeedsNamespaceImport.CreateRoslynDiagnostic(
+                                            declaredSymbol.GetDiagnosticLocation(),
+                                            (declaredSymbol, CompileTimeCodeDetector.Namespace) ) );
+                                }
+
+                                break;
+                            }
                     }
 
-                    var context = new ScopeCookie( this, scope, declaredSymbol );
+                    var typeScope = this._currentTypeScope;
+
+                    if ( !typeScope.HasValue && declaredSymbol is ITypeSymbol )
+                    {
+                        typeScope = scope;
+                    }
+
+                    var context = new ScopeCookie( this, scope, typeScope, declaredSymbol );
                     this._currentScope = scope;
 
-                    this._currentDeclarationIsTemplate = this._currentDeclarationIsTemplate.GetValueOrDefault()
-                                                         || !this._classifier.GetTemplateInfo( declaredSymbol ).IsNone;
+                    if ( !this.IsInTemplate )
+                    {
+                        this._currentDeclarationTemplateType = this._classifier.GetTemplateInfo( declaredSymbol ).AttributeType;
+                    }
+
+                    if ( scope == TemplatingScope.Dynamic && this._currentDeclarationTemplateType.GetValueOrDefault() != TemplateAttributeType.Template )
+                    {
+                        this.Report(
+                            TemplatingDiagnosticDescriptors.OnlyNamedTemplatesCanHaveDynamicSignature.CreateRoslynDiagnostic(
+                                declaredSymbol.GetDiagnosticLocation(),
+                                declaredSymbol ) );
+                    }
 
                     this._currentDeclaration = declaredSymbol;
 
@@ -315,31 +360,34 @@ namespace Metalama.Framework.Engine.Templating
             private readonly struct ScopeCookie : IDisposable
             {
                 private readonly Visitor? _parent;
+                private readonly TemplatingScope? _previousTypeScope;
                 private readonly TemplatingScope? _previousScope;
-                private readonly bool? _previousDeclarationIsTemplate;
+                private readonly TemplateAttributeType? _previousDeclarationTemplateType;
                 private readonly ISymbol? _previousDeclaration;
 
-                public ScopeCookie( Visitor parent, TemplatingScope scope, ISymbol? symbol )
+                public ScopeCookie( Visitor parent, TemplatingScope previousScope, TemplatingScope? previousTypeScope, ISymbol? previousDeclaration )
                 {
                     this._parent = parent;
+                    this._previousTypeScope = previousTypeScope;
                     this._previousScope = parent._currentScope;
-                    this._previousDeclarationIsTemplate = parent._currentDeclarationIsTemplate;
+                    this._previousDeclarationTemplateType = parent._currentDeclarationTemplateType;
                     this._previousDeclaration = parent._currentDeclaration;
-                    this.Scope = scope;
-                    this.Symbol = symbol;
+                    this.PreviousScope = previousScope;
+                    this.PreviousDeclaration = previousDeclaration;
                 }
 
-                public TemplatingScope Scope { get; }
+                public TemplatingScope PreviousScope { get; }
 
-                public ISymbol? Symbol { get; }
+                public ISymbol? PreviousDeclaration { get; }
 
                 public void Dispose()
                 {
                     if ( this._parent != null )
                     {
                         this._parent._currentScope = this._previousScope;
-                        this._parent._currentDeclarationIsTemplate = this._previousDeclarationIsTemplate;
+                        this._parent._currentDeclarationTemplateType = this._previousDeclarationTemplateType;
                         this._parent._currentDeclaration = this._previousDeclaration;
+                        this._parent._currentTypeScope = this._previousTypeScope;
                     }
                 }
             }
