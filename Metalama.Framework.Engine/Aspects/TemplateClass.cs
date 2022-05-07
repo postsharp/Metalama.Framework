@@ -115,13 +115,46 @@ namespace Metalama.Framework.Engine.Aspects
                         break;
                 }
 
+                var templateParameters = ImmutableArray<TemplateClassMemberParameter>.Empty;
+                var templateTypeParameters = ImmutableArray<TemplateClassMemberParameter>.Empty;
+
+                if ( memberSymbol is IMethodSymbol method )
+                {
+                    var parameterBuilder = ImmutableArray.CreateBuilder<TemplateClassMemberParameter>( method.Parameters.Length );
+
+                    foreach ( var parameter in method.Parameters )
+                    {
+                        var parameterScope = symbolClassifier.GetTemplatingScope( parameter );
+
+                        parameterBuilder.Add(
+                            new TemplateClassMemberParameter( parameter.Ordinal, parameter.Name, parameterScope == TemplatingScope.CompileTimeOnly ) );
+                    }
+
+                    templateParameters = parameterBuilder.MoveToImmutable();
+
+                    var typeParameterBuilder = ImmutableArray.CreateBuilder<TemplateClassMemberParameter>( method.TypeParameters.Length );
+
+                    foreach ( var typeParameter in method.TypeParameters )
+                    {
+                        var typeParameterScope = symbolClassifier.GetTemplatingScope( typeParameter );
+
+                        typeParameterBuilder.Add(
+                            new TemplateClassMemberParameter(
+                                typeParameter.Ordinal,
+                                typeParameter.Name,
+                                typeParameterScope == TemplatingScope.CompileTimeOnly ) );
+                    }
+
+                    templateTypeParameters = typeParameterBuilder.MoveToImmutable();
+                }
+
                 var aspectClassMember = new TemplateClassMember(
                     memberName,
                     this,
                     templateInfo,
                     memberSymbol,
-                    ImmutableArray<TemplateClassMemberParameter>.Empty, 
-                    ImmutableArray<TemplateClassMemberParameter>.Empty );
+                    templateParameters,
+                    templateTypeParameters );
 
                 if ( !templateInfo.IsNone )
                 {
