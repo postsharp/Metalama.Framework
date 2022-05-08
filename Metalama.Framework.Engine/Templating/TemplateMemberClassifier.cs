@@ -49,6 +49,24 @@ namespace Metalama.Framework.Engine.Templating
                 _ => false
             };
 
+        public bool IsTemplateParameter( IParameterSymbol parameter )
+            => parameter.ContainingSymbol is IMethodSymbol { MethodKind: not MethodKind.LambdaMethod and not MethodKind.AnonymousFunction } or IPropertySymbol
+                or IEventSymbol;
+
+        public bool IsTemplateParameter( ExpressionSyntax expression )
+        {
+            var symbol = this._syntaxTreeAnnotationMap.GetSymbol( expression );
+
+            if ( symbol is IParameterSymbol parameter )
+            {
+                return this.IsTemplateParameter( parameter );
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         public bool IsCompileTimeParameter( IParameterSymbol parameter )
             => this._symbolClassifier.GetTemplatingScope( parameter ) == TemplatingScope.CompileTimeOnly;
 

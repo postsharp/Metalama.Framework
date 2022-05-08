@@ -7,12 +7,13 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
@@ -22,7 +23,7 @@ namespace Metalama.Framework.Engine.Advices
     internal static class TemplateBindingHelper
     {
         public static BoundTemplateMethod ForIntroduction( this in TemplateMember<IMethod> template, IObjectReader? parameters = null )
-            => new( template, null, GetTemplateArguments( template, parameters, ImmutableDictionary<string, string>.Empty ) );
+            => new( template, null, GetTemplateArguments( template, parameters ) );
 
         public static BoundTemplateMethod ForOverride( this in TemplateMember<IMethod> template, IMethod? targetMethod, IObjectReader? parameters = null )
         {
@@ -82,7 +83,7 @@ namespace Metalama.Framework.Engine.Advices
                 }
             }
 
-            return new BoundTemplateMethod( template, targetMethod, GetTemplateArguments( template, parameters, ImmutableDictionary<string, string>.Empty ) );
+            return new BoundTemplateMethod( template, targetMethod, GetTemplateArguments( template, parameters ) );
         }
 
         private static bool VerifyTemplateType( IReadOnlyList<IType> fromTypes, IReadOnlyList<IType> toTypes )
@@ -151,7 +152,7 @@ namespace Metalama.Framework.Engine.Advices
         private static object?[] GetTemplateArguments(
             in TemplateMember<IMethod> template,
             IObjectReader? compileTimeParameters,
-            ImmutableDictionary<string, string> mapping )
+            ImmutableDictionary<string, ExpressionSyntax>? runTimeParameterMapping = null )
         {
             if ( template.IsNull )
             {
@@ -178,8 +179,11 @@ namespace Metalama.Framework.Engine.Advices
                 }
                 else
                 {
-                    var name = mapping.TryGetValue( parameter.Name, out var mapped ) ? mapped : parameter.Name;
-                    templateParameters.Add( SyntaxFactory.IdentifierName( name ) );
+                    var expression = runTimeParameterMapping != null && runTimeParameterMapping.TryGetValue( parameter.Name, out var mapped )
+                        ? mapped
+                        : IdentifierName( parameter.Name );
+
+                    templateParameters.Add( expression );
                 }
             }
 

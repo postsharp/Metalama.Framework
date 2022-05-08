@@ -136,14 +136,14 @@ namespace Metalama.Framework.Engine.Templating
                 case { ContainingType: { IsAnonymousType: true } containingType }:
                     return GetMoreSpecificScope( this.GetSymbolScope( containingType ) );
 
-                case IParameterSymbol parameter when this._currentTemplateMember != null &&
-                                                     (SymbolEqualityComparer.Default.Equals( parameter.ContainingSymbol, this._currentTemplateMember ) ||
-                                                      (parameter.ContainingSymbol is IMethodSymbol { AssociatedSymbol: { } associatedSymbol }
-                                                       && SymbolEqualityComparer.Default.Equals( this._currentTemplateMember, associatedSymbol ))):
-                    // In the future, we may have parameters on the template parameters changing their meaning. However, now, all template
-                    // parameters map to run-time parameters of the same name.
+                // Process template parameters. Note that not all parameters are template parameters, because there are also
+                // lambda parameters.
+                case IParameterSymbol parameter when this._templateMemberClassifier.IsTemplateParameter( parameter ):
+                    var parameterScope = this._symbolScopeClassifier.GetTemplatingScope( parameter );
 
-                    return TemplatingScope.RunTimeOnly;
+                    return parameterScope == TemplatingScope.CompileTimeOnly
+                        ? TemplatingScope.CompileTimeOnly
+                        : TemplatingScope.CompileTimeOnlyReturningRuntimeOnly;
 
                 case IMethodSymbol method when this._templateMemberClassifier.IsRunTimeMethod( method ):
                     // The TemplateContext.runTime method must be processed separately. It is a compile-time-only method whose

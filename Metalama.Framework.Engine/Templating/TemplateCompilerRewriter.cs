@@ -516,7 +516,15 @@ namespace Metalama.Framework.Engine.Templating
                     return expression;
             }
 
-            var type = this._syntaxTreeAnnotationMap.GetExpressionType( expression )!;
+            var symbol = this._syntaxTreeAnnotationMap.GetSymbol( expression );
+
+            var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( expression )!;
+
+            if ( symbol is IParameterSymbol parameter && this._templateMemberClassifier.IsTemplateParameter( parameter ) )
+            {
+                // Run-time template parameters are always bound to a run-time meta-expression.
+                return expression;
+            }
 
             // A local function that wraps the input `expression` into a LiteralExpression.
             ExpressionSyntax CreateRunTimeExpressionForLiteralCreateExpressionFactory( SyntaxKind syntaxKind )
@@ -539,24 +547,27 @@ namespace Metalama.Framework.Engine.Templating
                 return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.RuntimeExpression) ) )
                     .AddArgumentListArguments(
                         Argument( literalExpression ),
-                        Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( DocumentationCommentId.CreateDeclarationId( type ) ) ) ) );
+                        Argument(
+                            LiteralExpression(
+                                SyntaxKind.StringLiteralExpression,
+                                Literal( DocumentationCommentId.CreateDeclarationId( expressionType ) ) ) ) );
             }
 
-            if ( type is IErrorTypeSymbol )
+            if ( expressionType is IErrorTypeSymbol )
             {
                 // There is a compile-time error. Return default.
                 return LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) );
             }
 
             // ReSharper disable once ConstantConditionalAccessQualifier
-            switch ( type?.Name )
+            switch ( expressionType?.Name )
             {
                 case "dynamic":
-                case "Task" when type is INamedTypeSymbol { IsGenericType: true } namedType && namedType.TypeArguments[0] is IDynamicTypeSymbol &&
-                                 type.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks":
+                case "Task" when expressionType is INamedTypeSymbol { IsGenericType: true } namedType && namedType.TypeArguments[0] is IDynamicTypeSymbol &&
+                                 expressionType.ContainingNamespace.ToDisplayString() == "System.Threading.Tasks":
                 case "IEnumerable" or "IEnumerator" or "IAsyncEnumerable" or "IAsyncEnumerator"
-                    when type is INamedTypeSymbol { IsGenericType: true } namedType2 && namedType2.TypeArguments[0] is IDynamicTypeSymbol &&
-                         type.ContainingNamespace.ToDisplayString() == "System.Collections.Generic":
+                    when expressionType is INamedTypeSymbol { IsGenericType: true } namedType2 && namedType2.TypeArguments[0] is IDynamicTypeSymbol &&
+                         expressionType.ContainingNamespace.ToDisplayString() == "System.Collections.Generic":
 
                     return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.GetDynamicSyntax) ) )
                         .AddArgumentListArguments(
@@ -598,12 +609,12 @@ namespace Metalama.Framework.Engine.Templating
 
                 default:
                     // Try to find a serializer for this type.
-                    if ( this._serializableTypes.IsSerializable( type, this._syntaxTreeAnnotationMap.GetLocation( expression ), this ) )
+                    if ( this._serializableTypes.IsSerializable( expressionType, this._syntaxTreeAnnotationMap.GetLocation( expression ), this ) )
                     {
                         return InvocationExpression(
                             this._templateMetaSyntaxFactory.GenericTemplateSyntaxFactoryMember(
                                 nameof(TemplateSyntaxFactory.Serialize),
-                                this.MetaSyntaxFactory.Type( type ) ),
+                                this.MetaSyntaxFactory.Type( expressionType ) ),
                             ArgumentList( SingletonSeparatedList( Argument( expression ) ) ) );
                     }
                     else
@@ -1462,6 +1473,7 @@ namespace Metalama.Framework.Engine.Templating
         private bool IsCompileTimeDynamic( ExpressionSyntax? expression )
             => expression != null
                && expression.GetScopeFromAnnotation() == TemplatingScope.CompileTimeOnlyReturningRuntimeOnly
+               && !this._templateMemberClassifier.IsTemplateParameter( expression )
                && this.GetTransformationKind( expression ) != TransformationKind.Transform
                && (
                    this._syntaxTreeAnnotationMap.GetExpressionType( expression ) is IDynamicTypeSymbol

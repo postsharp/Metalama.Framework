@@ -456,5 +456,10 @@ namespace Metalama.Framework.Engine.Templating
 
             return TemplateExpansionContext.Current.SyntaxGenerationContext.SyntaxGenerator.TypeOfExpression( type );
         }
+
+        internal static object? IdentifierName( string name )
+        {
+            throw new NotImplementedException();
+        }
     }
 }
