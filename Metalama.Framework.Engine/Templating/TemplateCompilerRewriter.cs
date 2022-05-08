@@ -281,7 +281,7 @@ namespace Metalama.Framework.Engine.Templating
 
                 var identifierSymbol = this._syntaxTreeAnnotationMap.GetDeclaredSymbol( token.Parent! );
 
-                if ( this.IsDeclaredWithinTemplate( identifierSymbol! ) )
+                if ( this.IsLocalSymbol( identifierSymbol! ) )
                 {
                     if ( !this._currentMetaContext!.TryGetRunTimeSymbolLocal( identifierSymbol!, out _ ) )
                     {
@@ -345,20 +345,16 @@ namespace Metalama.Framework.Engine.Templating
             }
         }
 
-        private bool IsDeclaredWithinTemplate( ISymbol? symbol )
-        {
-            if ( symbol == null )
+        /// <summary>
+        /// Determines is a symbol is local to the current template.
+        /// </summary>
+        private bool IsLocalSymbol( ISymbol? symbol )
+            => symbol switch
             {
-                return false;
-            }
-            else
-            {
-                // Symbol is Declared in Template if ContainsSymbol is Template method or if ContainsSymbol
-                // is child level of Template method f.e. local function etc.
-                return SymbolEqualityComparer.Default.Equals( symbol.ContainingSymbol, this._rootTemplateSymbol )
-                       || this.IsDeclaredWithinTemplate( symbol.ContainingSymbol );
-            }
-        }
+                IMethodSymbol { MethodKind: MethodKind.LocalFunction or MethodKind.AnonymousFunction or MethodKind.LambdaMethod } or ILocalSymbol => true,
+                IParameterSymbol or ITypeParameterSymbol => this.IsLocalSymbol( symbol.ContainingSymbol ),
+                _ => false
+            };
 
         protected override ExpressionSyntax TransformNullableType( NullableTypeSyntax node )
         {
@@ -387,7 +383,7 @@ namespace Metalama.Framework.Engine.Templating
             // For identifiers declared outside of the template we just call the regular Roslyn SyntaxFactory.IdentifierName().
             var identifierSymbol = this._syntaxTreeAnnotationMap.GetSymbol( node );
 
-            if ( this.IsDeclaredWithinTemplate( identifierSymbol! ) )
+            if ( this.IsLocalSymbol( identifierSymbol! ) )
             {
                 if ( this._currentMetaContext!.TryGetRunTimeSymbolLocal( identifierSymbol!, out var declaredSymbolNameLocal ) )
                 {
@@ -470,7 +466,8 @@ namespace Metalama.Framework.Engine.Templating
                     return InvocationExpression(
                             this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.RuntimeExpression) ) )
                         .AddArgumentListArguments(
-                            Argument( this.MetaSyntaxFactory.DefaultExpression( this.Transform( ((DefaultExpressionSyntax) expression).Type ) ) ) );
+                            Argument(
+                                this.MetaSyntaxFactory.DefaultExpression( (ExpressionSyntax) this.Visit( ((DefaultExpressionSyntax) expression).Type ) ) ) );
 
                 case SyntaxKind.IdentifierName:
                     {
@@ -520,7 +517,7 @@ namespace Metalama.Framework.Engine.Templating
 
             var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( expression )!;
 
-            if ( symbol is IParameterSymbol parameter && this._templateMemberClassifier.IsTemplateParameter( parameter ) )
+            if ( (symbol is IParameterSymbol parameter && this._templateMemberClassifier.IsRunTimeTemplateParameter( parameter )) )
             {
                 // Run-time template parameters are always bound to a run-time meta-expression.
                 return expression;

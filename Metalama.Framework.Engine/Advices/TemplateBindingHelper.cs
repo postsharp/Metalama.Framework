@@ -25,25 +25,34 @@ namespace Metalama.Framework.Engine.Advices
         public static BoundTemplateMethod ForIntroduction( this in TemplateMember<IMethod> template, IObjectReader? parameters = null )
             => new( template, null, GetTemplateArguments( template, parameters ) );
 
-        public static BoundTemplateMethod ForOverride( this in TemplateMember<IMethod> template, IMethod? targetMethod, IObjectReader? parameters = null )
+        public static BoundTemplateMethod ForOverride( this in TemplateMember<IMethod> template, IMethod? targetMethod, IObjectReader? arguments = null )
         {
             if ( targetMethod == null || template.IsNull )
             {
                 return default;
             }
 
-            parameters ??= ObjectReader.Empty;
+            arguments ??= ObjectReader.Empty;
 
-            if ( !VerifyTemplateType( template.Declaration!.ReturnType, targetMethod.ReturnType ) )
+            // We first check template arguments because it verifies them and we need them in VerifyTemplateType.
+            var templateArguments = GetTemplateArguments( template, arguments );
+
+            // Verity that the template return type matches the target.
+            if ( !VerifyTemplateType( template.Declaration!.ReturnType, targetMethod.ReturnType, template, arguments ) )
             {
                 throw new InvalidAdviceTargetException(
                     UserMessageFormatter.Format(
                         $"Cannot use the template '{template.Declaration}' on method '{targetMethod}': the template return type '{template.Declaration.ReturnType}' is not compatible with the type of the target method '{targetMethod.ReturnType}'." ) );
             }
 
-            // Check that template parameters match the target.
+            // Check that template run-time parameters match the target.
             foreach ( var templateParameter in template.Declaration.Parameters )
             {
+                if ( template.TemplateClassMember.Parameters[templateParameter.Index].IsCompileTime )
+                {
+                    continue;
+                }
+
                 var methodParameter = targetMethod.Parameters.OfName( templateParameter.Name );
 
                 if ( methodParameter == null )
@@ -55,7 +64,7 @@ namespace Metalama.Framework.Engine.Advices
                             $"Cannot use the template '{template.Declaration}' on method '{targetMethod}': the target method does not contain a parameter '{templateParameter.Name}'. Available parameters are: {parameterNames}." ) );
                 }
 
-                if ( !VerifyTemplateType( templateParameter.Type, methodParameter.Type ) )
+                if ( !VerifyTemplateType( templateParameter.Type, methodParameter.Type, template, arguments ) )
                 {
                     throw new InvalidAdviceTargetException(
                         UserMessageFormatter.Format(
@@ -66,6 +75,11 @@ namespace Metalama.Framework.Engine.Advices
             // Check that template generic parameters match the target.
             foreach ( var templateParameter in template.Declaration.TypeParameters )
             {
+                if ( template.TemplateClassMember.TypeParameters[templateParameter.Index].IsCompileTime )
+                {
+                    continue;
+                }
+
                 var methodParameter = targetMethod.TypeParameters.SingleOrDefault( p => p.Name == templateParameter.Name );
 
                 if ( methodParameter == null )
@@ -83,10 +97,14 @@ namespace Metalama.Framework.Engine.Advices
                 }
             }
 
-            return new BoundTemplateMethod( template, targetMethod, GetTemplateArguments( template, parameters ) );
+            return new BoundTemplateMethod( template, targetMethod, templateArguments );
         }
 
-        private static bool VerifyTemplateType( IReadOnlyList<IType> fromTypes, IReadOnlyList<IType> toTypes )
+        private static bool VerifyTemplateType(
+            IReadOnlyList<IType> fromTypes,
+            IReadOnlyList<IType> toTypes,
+            TemplateMember<IMethod> template,
+            IObjectReader arguments )
         {
             if ( fromTypes.Count != toTypes.Count )
             {
@@ -96,7 +114,7 @@ namespace Metalama.Framework.Engine.Advices
             {
                 for ( var i = 0; i < fromTypes.Count; i++ )
                 {
-                    if ( !VerifyTemplateType( fromTypes[i], toTypes[i] ) )
+                    if ( !VerifyTemplateType( fromTypes[i], toTypes[i], template, arguments ) )
                     {
                         return false;
                     }
@@ -106,8 +124,19 @@ namespace Metalama.Framework.Engine.Advices
             return true;
         }
 
-        private static bool VerifyTemplateType( IType fromType, IType toType )
+        private static bool VerifyTemplateType( IType fromType, IType toType, TemplateMember<IMethod> template, IObjectReader arguments )
         {
+            // Replace type parameters by arguments.
+            if ( fromType is ITypeParameter genericParameter && template.TemplateClassMember.TypeParameters[genericParameter.Index].IsCompileTime )
+            {
+                fromType = arguments[genericParameter.Name] switch
+                {
+                    IType typeArg => typeArg,
+                    Type type => TypeFactory.GetType( type ),
+                    _ => throw new AssertionFailedException()
+                };
+            }
+
             if ( fromType is ITypeParameter fromGenericParameter && toType is ITypeParameter toGenericParameter
                                                                  && fromGenericParameter.Name == toGenericParameter.Name )
             {
@@ -140,7 +169,7 @@ namespace Metalama.Framework.Engine.Advices
                     }
                 }
                 else if ( fromOriginalDefinition.Equals( toNamedType.GetOriginalDefinition() ) &&
-                          VerifyTemplateType( fromNamedType.TypeArguments, toNamedType.TypeArguments ) )
+                          VerifyTemplateType( fromNamedType.TypeArguments, toNamedType.TypeArguments, template, arguments ) )
                 {
                     return true;
                 }

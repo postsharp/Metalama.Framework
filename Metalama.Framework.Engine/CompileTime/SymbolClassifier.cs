@@ -257,8 +257,8 @@ namespace Metalama.Framework.Engine.CompileTime
                     if ( typeParameterSymbol.ContainingSymbol.Kind == SymbolKind.Method
                          && !this.GetTemplateInfo( typeParameterSymbol.ContainingSymbol ).IsNone )
                     {
-                        // Currently all generic parameters of templates are run-time only.
-                        return TemplatingScope.RunTimeOnly;
+                        // We currently ignore any generic parameter constraint.
+                        return this.GetScopeFromAttributes( typeParameterSymbol ).GetValueOrDefault( TemplatingScope.RunTimeOnly );
                     }
                     else
                     {
@@ -435,6 +435,9 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 case IEventSymbol @event:
                     return this.GetTemplatingScopeCore( @event.Type, recursion + 1 );
+
+                case IParameterSymbol parameter:
+                    return this.GetTemplatingScopeCore( parameter.Type, recursion + 1 );
 
                 default:
                     return TemplatingScope.RunTimeOrCompileTime;

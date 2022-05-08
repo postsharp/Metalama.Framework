@@ -274,7 +274,7 @@ namespace Metalama.Framework.Engine.Advices
             return selectedTemplate;
         }
 
-        public void Override( IMethod targetMethod, in MethodTemplateSelector templateSelector, object? tags = null, object? parameters = null )
+        public void Override( IMethod targetMethod, in MethodTemplateSelector templateSelector, object? args = null, object? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -291,7 +291,7 @@ namespace Metalama.Framework.Engine.Advices
 
             var template = this.SelectTemplate( targetMethod, templateSelector )
                 .GetTemplateMember<IMethod>( this._compilation, this._serviceProvider )
-                .ForOverride( targetMethod, ObjectReader.GetReader( parameters ) );
+                .ForOverride( targetMethod, ObjectReader.GetReader( args ) );
 
             var advice = new OverrideMethodAdvice(
                 this._aspect,
@@ -313,8 +313,8 @@ namespace Metalama.Framework.Engine.Advices
             string defaultTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            object? tags = null,
-            object? parameters = null )
+            object? args = null,
+            object? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -336,7 +336,7 @@ namespace Metalama.Framework.Engine.Advices
                 this._aspect,
                 this._templateInstance,
                 targetType,
-                template.ForIntroduction( ObjectReader.GetReader( parameters ) ),
+                template.ForIntroduction( ObjectReader.GetReader( args ) ),
                 scope,
                 whenExists,
                 _layerName,
@@ -398,8 +398,8 @@ namespace Metalama.Framework.Engine.Advices
             IFieldOrPropertyOrIndexer targetDeclaration,
             in GetterTemplateSelector getTemplateSelector,
             string? setTemplate = null,
-            object? tags = null,
-            object? parameters = null )
+            object? args = null,
+            object? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -418,11 +418,11 @@ namespace Metalama.Framework.Engine.Advices
 
             var getTemplateRef = this.SelectTemplate( targetDeclaration, getTemplateSelector, setTemplate == null )
                 .GetTemplateMember<IMethod>( this._compilation, this._serviceProvider )
-                .ForOverride( targetDeclaration.GetMethod, ObjectReader.GetReader( parameters ) );
+                .ForOverride( targetDeclaration.GetMethod, ObjectReader.GetReader( args ) );
 
             var setTemplateRef = this.ValidateTemplateName( setTemplate, TemplateKind.Default, getTemplateSelector.IsNull )
                 .GetTemplateMember<IMethod>( this._compilation, this._serviceProvider )
-                .ForOverride( targetDeclaration.SetMethod, ObjectReader.GetReader( parameters ) );
+                .ForOverride( targetDeclaration.SetMethod, ObjectReader.GetReader( args ) );
 
             if ( getTemplateRef.IsNull && setTemplateRef.IsNull )
             {
@@ -535,8 +535,8 @@ namespace Metalama.Framework.Engine.Advices
             string? setTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            object? tags = null,
-            object? parameters = null )
+            object? args = null,
+            object? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -557,7 +557,7 @@ namespace Metalama.Framework.Engine.Advices
             var setTemplateRef = this.ValidateTemplateName( setTemplate, TemplateKind.Default, true )
                 .GetTemplateMember<IMethod>( this._compilation, this._serviceProvider );
 
-            var parameterReaders = ObjectReader.GetReader( parameters );
+            var parameterReaders = ObjectReader.GetReader( args );
 
             var advice = new IntroducePropertyAdvice(
                 this._aspect,
@@ -586,8 +586,8 @@ namespace Metalama.Framework.Engine.Advices
             string? addTemplate,
             string? removeTemplate,
             string? invokeTemplate,
-            object? tags = null,
-            object? parameters = null )
+            object? args = null,
+            object? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -627,7 +627,7 @@ namespace Metalama.Framework.Engine.Advices
                 removeTemplateRef,
                 _layerName,
                 ObjectReader.GetReader( tags ),
-                ObjectReader.GetReader( parameters ) );
+                ObjectReader.GetReader( args ) );
 
             advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
@@ -690,8 +690,8 @@ namespace Metalama.Framework.Engine.Advices
             string? invokeTemplate = null,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            object? tags = null,
-            object? parameters = null )
+            object? args = null,
+            object? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -724,7 +724,7 @@ namespace Metalama.Framework.Engine.Advices
                 whenExists,
                 _layerName,
                 ObjectReader.GetReader( tags ),
-                ObjectReader.GetReader( parameters ) );
+                ObjectReader.GetReader( args ) );
 
             advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
@@ -820,7 +820,7 @@ namespace Metalama.Framework.Engine.Advices
                 tags );
         }
 
-        public void AddInitializer( IMemberOrNamedType targetType, string template, InitializerKind kind, object? tags = null, object? parameters = null )
+        public void AddInitializer( IMemberOrNamedType targetType, string template, InitializerKind kind, object? tags = null, object? args = null )
         {
             if ( this._templateInstance == null )
             {
@@ -836,7 +836,7 @@ namespace Metalama.Framework.Engine.Advices
                 this._aspect,
                 this._templateInstance,
                 targetType,
-                templateRef.ForIntroduction( ObjectReader.GetReader( parameters ) ),
+                templateRef.ForIntroduction( ObjectReader.GetReader( args ) ),
                 kind,
                 _layerName,
                 ObjectReader.GetReader( tags ) );
@@ -848,7 +848,7 @@ namespace Metalama.Framework.Engine.Advices
             this._diagnosticAdder.Report( diagnosticList );
         }
 
-        public void Override( IConstructor targetConstructor, string template, object? tags = null, object? parameters = null )
+        public void Override( IConstructor targetConstructor, string template, object? args = null, object? tags = null )
         {
             throw new NotImplementedException();
         }
@@ -858,8 +858,8 @@ namespace Metalama.Framework.Engine.Advices
             string template,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            object? tags = null,
-            object? parameters = null )
+            object? args = null,
+            object? tags = null )
         {
             throw new NotImplementedException();
         }

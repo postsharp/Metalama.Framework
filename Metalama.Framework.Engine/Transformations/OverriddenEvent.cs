@@ -209,7 +209,7 @@ namespace Metalama.Framework.Engine.Transformations
 
             var templateDriver = this.Advice.TemplateInstance.TemplateClass.GetTemplateDriver( accessorTemplate.Template.Declaration! );
 
-            return templateDriver.TryExpandDeclaration( expansionContext, accessorTemplate.TemplateParameters, out body );
+            return templateDriver.TryExpandDeclaration( expansionContext, accessorTemplate.TemplateArguments, out body );
         }
 
         /// <summary>

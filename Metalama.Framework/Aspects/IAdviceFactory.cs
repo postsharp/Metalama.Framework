@@ -26,12 +26,12 @@ namespace Metalama.Framework.Aspects
         ///     This property must be annotated with <see cref="TemplateAttribute"/>. To select a different templates according to the kind of target method
         ///     (such as async or iterator methods), use the constructor of the <see cref="MethodTemplateSelector"/> type. To specify a single
         ///     template for all methods, pass a string.</param>
+        /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template method.</param>
         /// <param name="tags">An optional opaque object of anonymous type  passed to the template method and exposed under the <see cref="meta.Tags"/> property
         ///     of the <see cref="meta"/> API.</param>
-        /// <param name="parameters">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template method.</param>
         /// <remarks>When an aspect overrides the same declaration in same aspect part multiple, the order of distinct pieces of advice is equal to the inverse of order of calls of this method.</remarks>
         /// <seealso href="@overriding-members"/>
-        void Override( IMethod targetMethod, in MethodTemplateSelector templateSelector, object? tags = null, object? parameters = null );
+        void Override( IMethod targetMethod, in MethodTemplateSelector templateSelector, object? args = null, object? tags = null );
 
         /// <summary>
         /// Introduces a new method or overrides the implementation of the existing one.
@@ -46,9 +46,9 @@ namespace Metalama.Framework.Aspects
         ///     copies of the scope of the target declaration of the aspect.</param>
         /// <param name="whenExists">Determines the implementation strategy when a method of the same name and signature is already declared in the target type.
         ///     The default strategy is to fail with a compile-time error.</param>
+        /// <param name="args"></param>
         /// <param name="tags">An optional opaque object of anonymous type  passed to the template method and exposed under the <see cref="meta.Tags"/> property
         ///     of the <see cref="meta"/> API.</param>
-        /// <param name="parameters">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template method.</param>
         /// <returns>An <see cref="IMethodBuilder"/> that allows to modify the name or signature, or to add custom attributes.</returns>
         /// <seealso href="@introducing-members"/>
         IMethodBuilder IntroduceMethod(
@@ -56,8 +56,8 @@ namespace Metalama.Framework.Aspects
             string template,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            object? tags = null,
-            object? parameters = null );
+            object? args = null,
+            object? tags = null );
 
         /// <summary>
         /// Overrides a field or property by specifying a property template.
@@ -87,17 +87,17 @@ namespace Metalama.Framework.Aspects
         /// <param name="setTemplate">The name of the method of the aspect class whose implementation will be used as a template for the getter, or <c>null</c>
         ///     if the getter should not be overridden. This method must be annotated with <see cref="TemplateAttribute"/>. The signature of this method must
         ///     be <c>void Set(T value</c>  where <c>T</c> is either <c>dynamic</c> or a type compatible with the type of the field or property.</param>
+        /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template methods.</param>
         /// <param name="tags">An optional opaque object of anonymous type  passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
         ///     <see cref="meta"/> API.</param>
-        /// <param name="parameters">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template methods.</param>
         /// <remarks>When an aspect overrides the same declaration in same aspect part multiple, the order of distinct pieces of advice is equal to the inverse of order of calls of this method.</remarks>
         /// <seealso href="@overriding-members"/>
         void OverrideAccessors(
             IFieldOrPropertyOrIndexer targetDeclaration,
             in GetterTemplateSelector getTemplateSelector = default,
             string? setTemplate = null,
-            object? tags = null,
-            object? parameters = null );
+            object? args = null,
+            object? tags = null );
 
         /// <summary>
         /// Introduces a field to the target type.
@@ -159,9 +159,9 @@ namespace Metalama.Framework.Aspects
         ///     template accessors are non-static, then the introduced property copies of the scope of the target declaration of the aspect.</param>
         /// <param name="whenExists">Determines the implementation strategy when a property of the same name is already declared in the target type.
         ///     The default strategy is to fail with a compile-time error.</param>
+        /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template methods.</param>
         /// <param name="tags">An optional opaque object of anonymous type  passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
         ///     <see cref="meta"/> API.</param>
-        /// <param name="parameters">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template methods.</param>
         /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
         /// <seealso href="@introducing-members"/>
         IPropertyBuilder IntroduceProperty(
@@ -171,8 +171,8 @@ namespace Metalama.Framework.Aspects
             string? setTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            object? tags = null,
-            object? parameters = null );
+            object? args = null,
+            object? tags = null );
 
         /// <summary>
         /// Overrides an event by specifying a template for the adder, the remover, and/or the raiser.
@@ -185,9 +185,9 @@ namespace Metalama.Framework.Aspects
         ///     the adder should not be overridden. This method must be annotated with <see cref="TemplateAttribute"/>. The signature of this method must
         ///     be <c>void Remove(T value)</c> where <c>T</c> is either <c>dynamic</c> or a type compatible with the type of the event.</param>
         /// <param name="raiseTemplate">Not yet implemented.</param>
+        /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template methods.</param>
         /// <param name="tags">An optional opaque object of anonymous type  passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
         ///     <see cref="meta"/> API.</param>
-        /// <param name="parameters">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template methods.</param>
         /// <remarks>When an aspect overrides the same declaration in same aspect part multiple, the order of distinct pieces of advice is equal to the inverse of order of calls of this method.</remarks>
         /// <seealso href="@overriding-members"/>
         void OverrideAccessors(
@@ -195,8 +195,8 @@ namespace Metalama.Framework.Aspects
             string? addTemplate,
             string? removeTemplate,
             string? raiseTemplate,
-            object? tags = null,
-            object? parameters = null );
+            object? args = null,
+            object? tags = null );
 
         /// <summary>
         /// Introduces a new event to the target type, or overrides the implementation of an existing one, by specifying an event template.
@@ -240,9 +240,9 @@ namespace Metalama.Framework.Aspects
         ///     template event is non-static, then the introduced event copies of the scope of the target declaration of the aspect.</param>
         /// <param name="whenExists">Determines the implementation strategy when an event of the same name is already declared in the target type.
         ///     The default strategy is to fail with a compile-time error.</param>
+        /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template methods.</param>
         /// <param name="tags">An optional opaque object of anonymous type  passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
         ///     <see cref="meta"/> API.</param>
-        /// <param name="parameters">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template methods.</param>
         /// <returns>An <see cref="IEventBuilder"/> that allows to change the name and the type of the event.</returns>
         /// <seealso href="@introducing-members"/>
         IEventBuilder IntroduceEvent(
@@ -253,8 +253,8 @@ namespace Metalama.Framework.Aspects
             string? raiseTemplate = null,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            object? tags = null,
-            object? parameters = null );
+            object? args = null,
+            object? tags = null );
 
         /// <summary>
         /// Makes a type implement a new interface specified as an <see cref="INamedType"/>.
@@ -296,13 +296,13 @@ namespace Metalama.Framework.Aspects
         /// <param name="kind">The type of initializer to add.</param>
         /// <param name="tags">An optional opaque object of anonymous type  passed to templates and exposed under the <see cref="meta.Tags"/> property of the
         ///     <see cref="meta"/> API.</param>
-        /// <param name="parameters">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template.</param>
+        /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template.</param>
         void AddInitializer(
             IMemberOrNamedType targetType,
             string template,
             InitializerKind kind,
             object? tags = null,
-            object? parameters = null );
+            object? args = null );
 
         [Obsolete( "Not implemented.", true )]
         void ImplementInterface(
@@ -324,8 +324,8 @@ namespace Metalama.Framework.Aspects
         void Override(
             IConstructor targetConstructor,
             string template,
-            object? tags = null,
-            object? parameters = null );
+            object? args = null,
+            object? tags = null );
 
         [Obsolete( "Not implemented.", true )]
         void IntroduceConstructor(
@@ -333,7 +333,7 @@ namespace Metalama.Framework.Aspects
             string template,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            object? tags = null,
-            object? parameters = null );
+            object? args = null,
+            object? tags = null );
     }
 }

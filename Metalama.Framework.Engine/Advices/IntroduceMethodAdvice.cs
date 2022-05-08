@@ -63,6 +63,11 @@ namespace Metalama.Framework.Engine.Advices
 
             foreach ( var templateParameter in this.Template.Declaration.Parameters )
             {
+                if ( this.Template.TemplateClassMember.Parameters[templateParameter.Index].IsCompileTime )
+                {
+                    continue;
+                }
+
                 var parameterBuilder = this.MemberBuilder.AddParameter(
                     templateParameter.Name,
                     templateParameter.Type,
@@ -74,6 +79,11 @@ namespace Metalama.Framework.Engine.Advices
 
             foreach ( var templateGenericParameter in this.Template.Declaration.TypeParameters )
             {
+                if ( this.Template.TemplateClassMember.TypeParameters[templateGenericParameter.Index].IsCompileTime )
+                {
+                    continue;
+                }
+
                 var genericParameterBuilder = this.MemberBuilder.AddTypeParameter( templateGenericParameter.Name );
                 genericParameterBuilder.Variance = templateGenericParameter.Variance;
                 genericParameterBuilder.HasDefaultConstructorConstraint = templateGenericParameter.HasDefaultConstructorConstraint;

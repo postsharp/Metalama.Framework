@@ -136,14 +136,22 @@ namespace Metalama.Framework.Engine.Templating
                 case { ContainingType: { IsAnonymousType: true } containingType }:
                     return GetMoreSpecificScope( this.GetSymbolScope( containingType ) );
 
-                // Process template parameters. Note that not all parameters are template parameters, because there are also
-                // lambda parameters.
-                case IParameterSymbol parameter when this._templateMemberClassifier.IsTemplateParameter( parameter ):
+                // Template parameters are always evaluated at compile-time, but run-time template parameters return a run-time value.
+                case IParameterSymbol parameter when TemplateMemberClassifier.IsTemplateParameter( parameter ):
                     var parameterScope = this._symbolScopeClassifier.GetTemplatingScope( parameter );
 
                     return parameterScope == TemplatingScope.CompileTimeOnly
                         ? TemplatingScope.CompileTimeOnly
                         : TemplatingScope.CompileTimeOnlyReturningRuntimeOnly;
+
+                // Template type parameters can be run-time or compile-time, but compile-time ones are evaluated as returning a run-time value
+                // because they are substituted with a run-time value.
+                case ITypeParameterSymbol typeParameter when TemplateMemberClassifier.IsTemplateTypeParameter( typeParameter ):
+                    var typeParameterScope = this._symbolScopeClassifier.GetTemplatingScope( typeParameter );
+
+                    return typeParameterScope == TemplatingScope.CompileTimeOnly
+                        ? TemplatingScope.CompileTimeOnlyReturningRuntimeOnly
+                        : TemplatingScope.RunTimeOnly;
 
                 case IMethodSymbol method when this._templateMemberClassifier.IsRunTimeMethod( method ):
                     // The TemplateContext.runTime method must be processed separately. It is a compile-time-only method whose

@@ -125,7 +125,7 @@ namespace Metalama.Framework.Engine.Aspects
                     if ( accessor != null )
                     {
                         var accessorParameters =
-                            accessor.Parameters.Select( p => new TemplateClassMemberParameter( p.Ordinal, p.Name, false ) ).ToImmutableArray();
+                            accessor.Parameters.Select( p => new TemplateClassMemberParameter( p.Ordinal, p.Name, false, null ) ).ToImmutableArray();
 
                         accessors = accessors!.Add(
                             accessor.MethodKind,
@@ -145,13 +145,20 @@ namespace Metalama.Framework.Engine.Aspects
                     case IMethodSymbol method:
                         {
                             var parameterBuilder = ImmutableArray.CreateBuilder<TemplateClassMemberParameter>( method.Parameters.Length );
+                            var allTemplateParametersCount = 0;
 
                             foreach ( var parameter in method.Parameters )
                             {
                                 var parameterScope = symbolClassifier.GetTemplatingScope( parameter );
 
                                 parameterBuilder.Add(
-                                    new TemplateClassMemberParameter( parameter.Ordinal, parameter.Name, parameterScope == TemplatingScope.CompileTimeOnly ) );
+                                    new TemplateClassMemberParameter(
+                                        parameter.Ordinal,
+                                        parameter.Name,
+                                        parameterScope == TemplatingScope.CompileTimeOnly,
+                                        allTemplateParametersCount ) );
+
+                                allTemplateParametersCount++;
                             }
 
                             templateParameters = parameterBuilder.MoveToImmutable();
@@ -166,7 +173,10 @@ namespace Metalama.Framework.Engine.Aspects
                                     new TemplateClassMemberParameter(
                                         typeParameter.Ordinal,
                                         typeParameter.Name,
-                                        typeParameterScope == TemplatingScope.CompileTimeOnly ) );
+                                        typeParameterScope == TemplatingScope.CompileTimeOnly,
+                                        allTemplateParametersCount ) );
+
+                                allTemplateParametersCount++;
                             }
 
                             templateTypeParameters = typeParameterBuilder.MoveToImmutable();

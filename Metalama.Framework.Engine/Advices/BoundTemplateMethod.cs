@@ -14,14 +14,14 @@ internal readonly struct BoundTemplateMethod
 
     public TemplateMember<IMethod> Template { get; }
 
-    public BoundTemplateMethod( TemplateMember<IMethod> template, IMethod? overriddenMethod, object?[] templateParameters )
+    public BoundTemplateMethod( TemplateMember<IMethod> template, IMethod? overriddenMethod, object?[] templateArguments )
     {
         this.OverriddenMethod = overriddenMethod;
         this.Template = template;
-        this.TemplateParameters = templateParameters;
+        this.TemplateArguments = templateArguments;
 
 #if DEBUG
-        if ( template.Declaration?.MethodKind is MethodKind.PropertySet or MethodKind.EventAdd or MethodKind.EventRemove && templateParameters.Length != 1 )
+        if ( template.Declaration?.MethodKind is MethodKind.PropertySet or MethodKind.EventAdd or MethodKind.EventRemove && templateArguments.Length != 1 )
         {
             throw new AssertionFailedException();
         }
@@ -32,5 +32,5 @@ internal readonly struct BoundTemplateMethod
 
     public bool IsNotNull => this.Template.IsNotNull;
 
-    public object?[] TemplateParameters { get; }
+    public object?[] TemplateArguments { get; }
 }

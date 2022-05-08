@@ -72,7 +72,7 @@ namespace Metalama.Framework.Engine.Transformations
 
             var templateDriver = this.Advice.TemplateInstance.TemplateClass.GetTemplateDriver( this.BoundTemplate.Template.Declaration! );
 
-            if ( !templateDriver.TryExpandDeclaration( expansionContext, this.BoundTemplate.TemplateParameters, out var newMethodBody ) )
+            if ( !templateDriver.TryExpandDeclaration( expansionContext, this.BoundTemplate.TemplateArguments, out var newMethodBody ) )
             {
                 // Template expansion error.
                 return Enumerable.Empty<IntroducedMember>();
