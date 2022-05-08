@@ -517,7 +517,8 @@ namespace Metalama.Framework.Engine.Templating
 
             var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( expression )!;
 
-            if ( (symbol is IParameterSymbol parameter && this._templateMemberClassifier.IsRunTimeTemplateParameter( parameter )) )
+            if ( (symbol is IParameterSymbol parameter && this._templateMemberClassifier.IsRunTimeTemplateParameter( parameter )) ||
+                 (symbol is ITypeParameterSymbol typeParameter && this._templateMemberClassifier.IsCompileTemplateTypeParameter( typeParameter )) )
             {
                 // Run-time template parameters are always bound to a run-time meta-expression.
                 return expression;
