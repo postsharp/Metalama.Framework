@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
@@ -292,7 +293,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             }
 
             // ReSharper disable once SuspiciousTypeConversion.Global
-            var lexicalScope = new TemplateLexicalScope( ((Declaration) targetMethod).LookupSymbols() );
+            var lexicalScope = LexicalScopeFactory.GetSourceLexicalScope( targetMethod );
             var syntaxGenerationContext = SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation );
 
             var proceedExpression =

@@ -1,26 +1,26 @@
-using System.Collections.Generic;
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
+using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.TestFramework;
 
 namespace Metalama.Framework.Tests.Integration.Templating.Dynamic.Parse
 {
     [CompileTime]
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
-            var exp = meta.ParseExpression("1 + 1 / System.Math.Pi ");
+            var exp = ExpressionFactory.Parse( "1 + 1 / System.Math.Pi " );
             var x = exp.Value;
+
             return default;
         }
     }
 
     // <target>
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code.SyntaxBuilders;
 using System;
 using System.Threading.Tasks;
 using Xunit;
@@ -28,8 +29,8 @@ namespace Metalama.Framework.Tests.UnitTests.Templating
             Assert.Throws<InvalidOperationException>( () => meta.RunTime( 0 ) );
             Assert.Throws<InvalidOperationException>( meta.DebugBreak );
             Assert.Throws<InvalidOperationException>( () => meta.InsertComment( "" ) );
-            Assert.Throws<InvalidOperationException>( () => meta.DefineExpression( "", out _ ) );
-            Assert.Throws<InvalidOperationException>( () => meta.ParseExpression( "" ) );
+            Assert.Throws<InvalidOperationException>( () => ExpressionFactory.Capture( "", out _ ) );
+            Assert.Throws<InvalidOperationException>( () => ExpressionFactory.Parse( "" ) );
 
 #if NET5_0_OR_GREATER
             Assert.Throws<InvalidOperationException>( meta.ProceedAsyncEnumerable );

@@ -761,7 +761,7 @@ namespace Metalama.Framework.Engine.Advices
         {
             this.ImplementInterface(
                 targetType,
-                (INamedType) targetType.Compilation.TypeFactory.GetTypeByReflectionType( interfaceType ),
+                (INamedType) targetType.GetCompilationModel().Factory.GetTypeByReflectionType( interfaceType ),
                 whenExists,
                 tags );
         }
@@ -804,7 +804,7 @@ namespace Metalama.Framework.Engine.Advices
         {
             this.ImplementInterface(
                 targetType,
-                (INamedType) targetType.Compilation.TypeFactory.GetTypeByReflectionType( interfaceType ),
+                (INamedType) targetType.GetCompilationModel().Factory.GetTypeByReflectionType( interfaceType ),
                 interfaceMemberSpecifications,
                 whenExists,
                 tags );

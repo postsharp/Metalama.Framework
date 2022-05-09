@@ -21,7 +21,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AnotherIns
                 whenExists: OverrideStrategy.Override );
 
             overrideBuilder.Name = "Foo";
-            overrideBuilder.ReturnType = aspectBuilder.Target.Compilation.TypeFactory.GetSpecialType( SpecialType.Void );
+            overrideBuilder.ReturnType = TypeFactory.GetType( SpecialType.Void );
         }
 
         [Template]

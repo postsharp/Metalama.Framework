@@ -423,7 +423,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         /// determine whether an error must displayed in the editor.  
         /// </summary>
         public bool IsCompileTimeSyntaxTreeOutdated( string name )
-            => this._currentState.CompileTimeSyntaxTrees.AssertNotNull().TryGetValue( name, out var syntaxTree ) && syntaxTree == null;
+            => this._currentState.CompileTimeSyntaxTrees is { } compileTimeSyntaxTrees && compileTimeSyntaxTrees.TryGetValue( name, out var syntaxTree ) && syntaxTree == null;
 
         internal IEnumerable<AspectClass> GetEligibleAspects( Compilation compilation, ISymbol symbol, CancellationToken cancellationToken )
         {

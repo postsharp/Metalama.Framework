@@ -140,8 +140,7 @@ namespace Metalama.Framework.Code
             => ((IGenericInternal) declaration).ConstructGenericInstance( typeArguments );
 
         private static IGeneric ConstructGenericInstanceImpl( this IGeneric declaration, params Type[] typeArguments )
-            => ((IGenericInternal) declaration).ConstructGenericInstance(
-                typeArguments.Select( t => declaration.Compilation.TypeFactory.GetTypeByReflectionType( t ) ).ToArray() );
+            => ((IGenericInternal) declaration).ConstructGenericInstance( typeArguments.Select( TypeFactory.GetType ).ToArray() );
 
         private static IMemberOrNamedType ForTypeInstanceImpl( this IMemberOrNamedType declaration, INamedType typeInstance )
         {

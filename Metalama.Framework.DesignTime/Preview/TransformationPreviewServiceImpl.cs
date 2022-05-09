@@ -27,21 +27,21 @@ public class TransformationPreviewServiceImpl : ITransformationPreviewServiceImp
     public async Task<PreviewTransformationResult> PreviewTransformationAsync( string projectId, string syntaxTreeName, CancellationToken cancellationToken )
     {
         // Get the pipeline for the compilation.
-        if ( !this._designTimeAspectPipelineFactory.TryGetPipeline( projectId, out var pipeline ) || pipeline.LastCompilation == null )
+        if ( !this._designTimeAspectPipelineFactory.TryGetPipeline( projectId, out var pipeline ) 
+             || pipeline.LastCompilation == null )
         {
             // We cannot create the pipeline because we don't have all options.
             // If this is a problem, we will need to pass all options as AssemblyMetadataAttribute.
 
             return PreviewTransformationResult.Failure( "The project has not been fully loaded yet. Open a file of this project in the editor." );
         }
-
+        
         // Find the syntax tree of the given name.
-        var syntaxTree = pipeline.LastCompilation.SyntaxTrees.SingleOrDefault( t => t.FilePath == syntaxTreeName );
+        var syntaxTree = pipeline.LastCompilation.SyntaxTrees.FirstOrDefault( t => t.FilePath == syntaxTreeName );
 
         if ( syntaxTree == null )
         {
-            // We cannot create the pipeline because we don't have all options.
-            // If this is a problem, we will need to pass all options as AssemblyMetadataAttribute.
+            // This could happen during initialization if the pipeline did not receive the whole compilation yet.
 
             return PreviewTransformationResult.Failure( "Cannot find the syntax tree in the compilation." );
         }

@@ -356,7 +356,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         switch ( member )
                         {
                             case MethodDeclarationSyntax method:
-                                members.AddRange( this.VisitMethodDeclaration( method ).AssertNoneNull() );
+                                members.AddRange( this.TransformMethodDeclaration( method ).AssertNoneNull() );
 
                                 break;
 
@@ -371,17 +371,17 @@ namespace Metalama.Framework.Engine.CompileTime
                                 break;
 
                             case EventDeclarationSyntax @event:
-                                members.AddRange( this.VisitEventDeclaration( @event ).AssertNoneNull() );
+                                members.AddRange( this.TransformEventDeclaration( @event ).AssertNoneNull() );
 
                                 break;
 
                             case FieldDeclarationSyntax field:
-                                members.AddRange( this.VisitFieldDeclaration( field ).AssertNoneNull() );
+                                members.AddRange( this.TransformFieldDeclaration( field ).AssertNoneNull() );
 
                                 break;
 
                             case EventFieldDeclarationSyntax eventField:
-                                members.AddRange( this.VisitEventFieldDeclaration( eventField ).AssertNoneNull() );
+                                members.AddRange( this.TransformEventFieldDeclaration( eventField ).AssertNoneNull() );
 
                                 break;
 
@@ -533,18 +533,21 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
             }
 
-            private new IEnumerable<MethodDeclarationSyntax> VisitMethodDeclaration( MethodDeclarationSyntax node )
+            private IEnumerable<MethodDeclarationSyntax> TransformMethodDeclaration( MethodDeclarationSyntax node )
             {
                 var methodSymbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node );
 
-                if ( methodSymbol == null || this.SymbolClassifier.GetTemplateInfo( methodSymbol ).IsNone )
+                TemplateInfo templateInfo;
+
+                if ( methodSymbol == null || (templateInfo = this.SymbolClassifier.GetTemplateInfo( methodSymbol )).IsNone )
                 {
-                    yield return (MethodDeclarationSyntax) base.VisitMethodDeclaration( node ).AssertNotNull();
+                    yield return (MethodDeclarationSyntax) this.VisitMethodDeclaration( node ).AssertNotNull();
 
                     yield break;
                 }
 
-                if ( !this.CheckTemplateName( methodSymbol ) )
+                // Templates of [Template] kind must be unique by name.
+                if ( templateInfo.AttributeType == TemplateAttributeType.Template && !this.CheckTemplateName( methodSymbol ) )
                 {
                     yield break;
                 }
@@ -654,7 +657,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             success =
                                 success &&
                                 this._templateCompiler.TryCompile(
-                                    TemplateNameHelper.GetCompiledTemplateName( propertySymbol.Name ),
+                                    TemplateNameHelper.GetCompiledTemplateName( propertySymbol ),
                                     this._compileTimeCompilation,
                                     node,
                                     TemplateCompilerSemantics.Initializer,
@@ -769,7 +772,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
             }
 
-            private new IEnumerable<MemberDeclarationSyntax> VisitFieldDeclaration( FieldDeclarationSyntax node )
+            private IEnumerable<MemberDeclarationSyntax> TransformFieldDeclaration( FieldDeclarationSyntax node )
             {
                 foreach ( var declarator in node.Declaration.Variables )
                 {
@@ -803,7 +806,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
             }
 
-            private new IEnumerable<MemberDeclarationSyntax> VisitEventFieldDeclaration( EventFieldDeclarationSyntax node )
+            private IEnumerable<MemberDeclarationSyntax> TransformEventFieldDeclaration( EventFieldDeclarationSyntax node )
             {
                 foreach ( var declarator in node.Declaration.Variables )
                 {
@@ -830,7 +833,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 if ( isTemplate && variable.Initializer != null )
                 {
-                    var templateName = TemplateNameHelper.GetCompiledTemplateName( symbol.Name );
+                    var templateName = TemplateNameHelper.GetCompiledTemplateName( symbol );
 
                     // This is field template with initializer.
                     if ( this._templateCompiler.TryCompile(
@@ -867,7 +870,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
             }
 
-            private new IEnumerable<MemberDeclarationSyntax> VisitEventDeclaration( EventDeclarationSyntax node )
+            private IEnumerable<MemberDeclarationSyntax> TransformEventDeclaration( EventDeclarationSyntax node )
             {
                 var eventSymbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
 

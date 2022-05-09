@@ -30,12 +30,12 @@ namespace Metalama.Framework.Code.SyntaxBuilders
         /// <summary>
         /// Initializes a new instance of the <see cref="ArrayBuilder"/> class where the item type is a given <see cref="Type"/>.
         /// </summary>
-        public ArrayBuilder( Type itemType ) : this( meta.Target.Compilation.TypeFactory.GetTypeByReflectionType( itemType ) ) { }
+        public ArrayBuilder( Type itemType ) : this( TypeFactory.GetType( itemType ) ) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ArrayBuilder"/> class where the item type is a <see cref="object"/>.
         /// </summary>
-        public ArrayBuilder() : this( meta.Target.Compilation.TypeFactory.GetSpecialType( SpecialType.Object ) ) { }
+        public ArrayBuilder() : this( TypeFactory.GetType( SpecialType.Object ) ) { }
 
         private ArrayBuilder( ArrayBuilder prototype )
         {

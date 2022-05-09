@@ -121,7 +121,10 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
                     if ( expression != null )
                     {
-                        return new RuntimeExpression( expression, compilation.TypeFactory.GetTypeByReflectionType( value.GetType() ), generationContext );
+                        return new RuntimeExpression(
+                            expression,
+                            compilation.GetCompilationModel().Factory.GetTypeByReflectionType( value.GetType() ),
+                            generationContext );
                     }
                     else
                     {

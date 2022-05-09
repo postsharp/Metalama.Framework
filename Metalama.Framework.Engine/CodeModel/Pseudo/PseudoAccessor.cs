@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public IType ReturnType
             => this.MethodKind != MethodKind.PropertyGet
-                ? this.DeclaringMember.Compilation.TypeFactory.GetSpecialType( SpecialType.Void )
+                ? this.DeclaringMember.Compilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.Void )
                 : ((IFieldOrProperty) this.DeclaringMember).Type;
 
         [Memo]

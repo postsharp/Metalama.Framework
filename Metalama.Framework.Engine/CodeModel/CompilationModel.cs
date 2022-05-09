@@ -192,7 +192,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public Compilation RoslynCompilation => this.PartialCompilation.Compilation;
 
-        ITypeFactory ICompilation.TypeFactory => this.Factory;
+        ITypeFactory ICompilationInternal.TypeFactory => this.Factory;
 
         public IReadOnlyList<IManagedResource> ManagedResources => throw new NotImplementedException();
 
@@ -235,6 +235,8 @@ namespace Metalama.Framework.Engine.CodeModel
             => this.GetDerivedTypes( (INamedType) this.Factory.GetTypeByReflectionType( baseType ), deep );
 
         public int Revision { get; }
+
+        IDeclaration? ICompilation.GetDeclarationFromId( string declarationId ) => this.Factory.GetDeclarationFromId( declarationId );
 
         // TODO: throw an exception when the caller tries to get aspects that have not been initialized yet.
 

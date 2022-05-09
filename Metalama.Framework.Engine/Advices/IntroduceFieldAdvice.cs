@@ -5,6 +5,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
@@ -50,7 +51,7 @@ namespace Metalama.Framework.Engine.Advices
             }
             else
             {
-                this.MemberBuilder.Type = this.SourceCompilation.TypeFactory.GetSpecialType( SpecialType.Object );
+                this.MemberBuilder.Type = this.SourceCompilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.Object );
                 this.MemberBuilder.Accessibility = Accessibility.Private;
                 this.MemberBuilder.IsStatic = false;
             }
