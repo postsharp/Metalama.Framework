@@ -15,28 +15,33 @@ namespace Metalama.Framework.Engine.Templating
             {
                 IMethodSymbol { MethodKind: MethodKind.PropertyGet } method => GetCompiledTemplateName(
                     $"Get{method.AssociatedSymbol!.Name}",
+                    method,
                     method.Parameters ),
                 IMethodSymbol { MethodKind: MethodKind.PropertySet } method => GetCompiledTemplateName(
                     $"Set{method.AssociatedSymbol!.Name}",
+                    method,
                     method.Parameters,
                     true ),
                 IMethodSymbol { MethodKind: MethodKind.EventAdd } method => GetCompiledTemplateName(
                     $"Add{method.AssociatedSymbol!.Name}",
+                    method,
                     method.Parameters,
                     true ),
                 IMethodSymbol { MethodKind: MethodKind.EventRemove } method => GetCompiledTemplateName(
                     $"Remove{method.AssociatedSymbol!.Name}",
+                    method,
                     method.Parameters,
                     true ),
-                IMethodSymbol method => GetCompiledTemplateName( method.Name, method.Parameters ),
-                IFieldSymbol field => GetCompiledTemplateName( field.Name ),
-                IPropertySymbol property => GetCompiledTemplateName( property.Name, property.Parameters ),
-                IEventSymbol @event => GetCompiledTemplateName( @event.Name ),
+                IMethodSymbol method => GetCompiledTemplateName( method.Name, method, method.Parameters ),
+                IFieldSymbol field => GetCompiledTemplateName( field.Name, field ),
+                IPropertySymbol property => GetCompiledTemplateName( property.Name, property, property.Parameters ),
+                IEventSymbol @event => GetCompiledTemplateName( @event.Name, @event ),
                 _ => throw new AssertionFailedException()
             };
 
         private static string GetCompiledTemplateName(
             string templateMemberName,
+            ISymbol symbol,
             ImmutableArray<IParameterSymbol> parameters = default,
             bool ignoredLastParameter = false )
         {
@@ -47,28 +52,11 @@ namespace Metalama.Framework.Engine.Templating
                 return principal;
             }
 
+            // If we have parameters, we need to add a unique hash of the symbol to differentiate symbols
+            // of the same name. It is essential that this hash is consistent across runtimes and versions of Roslyn and Metalama.
             var hashCode = new XXH64();
-            var parameterCount = parameters.Length;
-
-            if ( ignoredLastParameter )
-            {
-                parameterCount--;
-            }
-
-            for ( var i = 0; i < parameterCount; i++ )
-            {
-                var parameterType = parameters[i].Type.GetDocumentationCommentId();
-                if ( parameterType != null )
-                {
-                    hashCode.Update( parameterType );
-                }
-                else
-                {
-                    // This happens for dynamics.
-                    hashCode.Update( parameters[i].Type.ToString() );
-                }
-            }
-
+            hashCode.Update( symbol.GetDocumentationCommentId().AssertNotNull() );
+            
             return $"{principal}_{hashCode.Digest():x}";
         }
     }
