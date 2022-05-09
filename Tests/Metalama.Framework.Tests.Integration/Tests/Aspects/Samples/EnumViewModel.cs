@@ -27,10 +27,10 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.EnumViewModel
 
             foreach (var member in enumType.Fields)
             {
-                var propertyBuilder = builder.Advices.IntroduceProperty(
+                var propertyBuilder = builder.Advice.IntroduceProperty(
                     builder.Target,
                     nameof(IsMemberTemplate),
-                    tags: new TagDictionary { ["member"] = member } );
+                    tags: new { member = member } );
 
                 propertyBuilder.Name = "Is" + member.Name;
             }

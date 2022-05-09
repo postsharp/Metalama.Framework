@@ -7,8 +7,8 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
-using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Advices
 {
@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.Advices
 
         public OverrideStrategy OverrideStrategy { get; }
 
-        public new INamedType TargetDeclaration => (INamedType) base.TargetDeclaration;
+        public new Ref<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
 
         protected TBuilder MemberBuilder { get; init; }
 
@@ -36,7 +36,7 @@ namespace Metalama.Framework.Engine.Advices
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             string? layerName,
-            Dictionary<string, object?>? tags ) : base( aspect, templateInstance, targetDeclaration, layerName, tags )
+            ITagReader tags ) : base( aspect, templateInstance, targetDeclaration, layerName, tags )
         {
             this.Template = template;
             this.Scope = scope;
@@ -52,10 +52,12 @@ namespace Metalama.Framework.Engine.Advices
             this.MemberBuilder.Accessibility = this.Template.Declaration?.Accessibility ?? Accessibility.Private;
 
             // Handle the introduction scope.
+            var targetDeclaration = this.TargetDeclaration.GetTarget( this.SourceCompilation );
+
             switch ( this.Scope )
             {
                 case IntroductionScope.Default:
-                    if ( this.Template.Declaration is { IsStatic: true } || this.TargetDeclaration.IsStatic )
+                    if ( this.Template.Declaration is { IsStatic: true } || targetDeclaration.IsStatic )
                     {
                         this.MemberBuilder.IsStatic = true;
                     }
@@ -67,13 +69,13 @@ namespace Metalama.Framework.Engine.Advices
                     break;
 
                 case IntroductionScope.Instance:
-                    if ( this.TargetDeclaration.IsStatic )
+                    if ( targetDeclaration.IsStatic )
                     {
                         // Diagnostics are reported to a sink when the advice is declarative, but as an exception when it is programmatic. 
                         diagnosticAdder.Report(
                             AdviceDiagnosticDescriptors.CannotIntroduceInstanceMemberIntoStaticType.CreateRoslynDiagnostic(
-                                this.TargetDeclaration.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, this.MemberBuilder, this.TargetDeclaration) ) );
+                                targetDeclaration.GetDiagnosticLocation(),
+                                (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration) ) );
                     }
 
                     this.MemberBuilder.IsStatic = false;
@@ -86,7 +88,7 @@ namespace Metalama.Framework.Engine.Advices
                     break;
 
                 case IntroductionScope.Target:
-                    this.MemberBuilder.IsStatic = this.TargetDeclaration.IsStatic;
+                    this.MemberBuilder.IsStatic = targetDeclaration.IsStatic;
 
                     break;
 

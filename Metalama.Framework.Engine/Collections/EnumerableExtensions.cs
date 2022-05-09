@@ -19,6 +19,18 @@ namespace Metalama.Framework.Engine.Collections
         /// </summary>
         public static IReadOnlyList<T> ToReadOnlyList<T>( this IEnumerable<T> collection ) => collection is IReadOnlyList<T> list ? list : collection.ToList();
 
+        public static HashSet<T> ToHashSet<T>( this IEnumerable<T> collection, IEqualityComparer<T>? comparer = null )
+        {
+            var hashSet = new HashSet<T>( comparer );
+
+            foreach ( var item in collection )
+            {
+                hashSet.Add( item );
+            }
+
+            return hashSet;
+        }
+
         /// <summary>
         /// Converts an <see cref="IEnumerable"/> to an <see cref="IReadOnlyList{T}"/>, but calls <see cref="Enumerable.ToList{TSource}"/>
         /// only if needed.

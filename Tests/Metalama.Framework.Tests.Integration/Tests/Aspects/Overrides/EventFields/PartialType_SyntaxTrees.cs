@@ -1,7 +1,8 @@
-﻿// @OutputAllSyntaxTrees
+﻿#if TEST_OPTIONS
+// @OutputAllSyntaxTrees
+#endif
 
 using System;
-using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -11,18 +12,18 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.EventFields.Part
 {
     public class OverrideAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             foreach (var @event in builder.Target.Events)
             {
-                builder.Advices.OverrideAccessors(@event, nameof(Template), nameof(Template), null, tags: new TagDictionary() { ["name"] = @event.Name });
+                builder.Advice.OverrideAccessors( @event, nameof(Template), nameof(Template), null, tags: new { name = @event.Name } );
             }
         }
 
         [Template]
         public dynamic? Template()
         {
-            Console.WriteLine($"This is the override of {meta.Tags["name"]}.");
+            Console.WriteLine( $"This is the override of {meta.Tags["name"]}." );
 
             return meta.Proceed();
         }

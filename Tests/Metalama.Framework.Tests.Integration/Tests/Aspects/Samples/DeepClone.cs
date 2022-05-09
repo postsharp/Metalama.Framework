@@ -1,5 +1,7 @@
-// @Skipped(#30151)
+#if TEST_OPTIONS
 // @RequiredConstant(NET5_0_OR_GREATER)
+#endif
+
 // In .NET Framework we get: Target runtime doesn't support covariant return types in overrides. Return type must be 'Targets.AutomaticallyCloneable'
 // to match overridden member 'Targets.AutomaticallyCloneable.Clone()'`
 
@@ -17,7 +19,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var typedMethod = builder.Advices.IntroduceMethod(
+            var typedMethod = builder.Advice.IntroduceMethod(
                 builder.Target,
                 nameof(CloneImpl),
                 whenExists: OverrideStrategy.Override );
@@ -25,7 +27,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
             typedMethod.Name = "Clone";
             typedMethod.ReturnType = builder.Target;
 
-            builder.Advices.ImplementInterface(
+            builder.Advice.ImplementInterface(
                 builder.Target,
                 typeof(ICloneable),
                 whenExists: OverrideStrategy.Ignore );

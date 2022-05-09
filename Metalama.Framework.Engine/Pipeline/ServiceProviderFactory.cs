@@ -4,10 +4,8 @@
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Options;
-using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
-using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
@@ -61,15 +59,16 @@ namespace Metalama.Framework.Engine.Pipeline
 
         private static ServiceProvider CreateBaseServiceProvider( IPathOptions pathOptions )
         {
-            // If DiagnosticsService is not initialized at this point, do it.
-            Logger.Initialize();
+            // If support services are not initialized at this point, do it.
+            // When transformer execution starts, these services are replaced
+            // by project-scoped ones coming from the TransformerContext.
+            MetalamaDiagnosticsServiceFactory.Initialize( nameof( ServiceProviderFactory ) );
 
-            var serviceProvider = ServiceProvider.Empty.WithServices(
+            var serviceProvider = ServiceProvider.Empty
+                .WithNextProvider( DiagnosticServiceFactory.ServiceProvider )
+                .WithServices(
                     pathOptions,
                     new DefaultCompileTimeDomainFactory() )
-                .WithExternalService<ILoggerFactory>( DiagnosticsService.Instance );
-
-            serviceProvider = serviceProvider
                 .WithSharedLazyInitializedService( sp => new ReferenceAssemblyLocator( sp ) )
                 .WithSharedLazyInitializedService( sp => new SymbolClassificationService( sp ) );
 
@@ -92,7 +91,7 @@ namespace Metalama.Framework.Engine.Pipeline
         /// <see cref="AddAsyncLocalService"/> are ignored). This scenario is used in tests. Otherwise, a shallow clone of the async-local or the global
         /// provider is provided.
         /// </summary>
-        public static ServiceProvider GetServiceProvider( IPathOptions? pathOptions = null, IServiceProvider? nextServiceProvider = null )
+        public static ServiceProvider GetServiceProvider( IPathOptions? pathOptions = null )
         {
             ServiceProvider serviceProvider;
 
@@ -105,11 +104,6 @@ namespace Metalama.Framework.Engine.Pipeline
             else
             {
                 serviceProvider = CreateBaseServiceProvider( pathOptions );
-            }
-
-            if ( nextServiceProvider != null )
-            {
-                serviceProvider = serviceProvider.WithNextProvider( nextServiceProvider );
             }
 
             return serviceProvider;

@@ -1,6 +1,4 @@
 <Project>
-
-    
     <ItemGroup>
 
         <!-- Exclude *.t.cs from the main compilation, display them as text files instead, and fix file nesting -->
@@ -9,9 +7,9 @@
             <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.t','')).cs</DependentUpon>
             <SubType>Code</SubType>
         </None>
-        
+
         <None Remove="$(MSBuildProjectDirectory)\obj\**\*.t.cs"/>
-        
+
         <!-- Fix file nesting for *.Aspect.cs -->
         <Compile Update="$(MSBuildProjectDirectory)\**\*.Aspect.cs">
             <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.Aspect','')).cs</DependentUpon>
@@ -19,13 +17,34 @@
         </Compile>
 
         <!-- Fix file nesting for *.t.txt -->
-        <None Include="$(MSBuildProjectDirectory)\**\*.t.txt" Exclude="$(MSBuildProjectDirectory)\obj\**\*.t.txt" >
+        <None Include="$(MSBuildProjectDirectory)\**\*.t.txt" Exclude="$(MSBuildProjectDirectory)\obj\**\*.t.txt">
             <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.t','')).cs</DependentUpon>
         </None>
-        
+
     </ItemGroup>
 
     <ItemGroup>
+        <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+            <_Parameter1>ProjectDirectory</_Parameter1>
+            <_Parameter2>$(MSBuildProjectDirectory)</_Parameter2>
+        </AssemblyAttribute>
+        <AssemblyAttribute Include="Xunit.TestFrameworkAttribute"
+                           Condition="'$(MetalamaTestReplaceFramework)'!='False'">
+            <_Parameter1>Metalama.TestFramework.AspectTestFramework</_Parameter1>
+            <_Parameter2>Metalama.TestFramework</_Parameter2>
+        </AssemblyAttribute>
+        <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+            <_Parameter1>ReferenceAssemblyList</_Parameter1>
+            <_Parameter2>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)assemblies.txt</_Parameter2>
+        </AssemblyAttribute>
+        <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+            <_Parameter1>MetalamaDebugTestFramework</_Parameter1>
+            <_Parameter2>$(MetalamaDebugTestFramework)</_Parameter2>
+        </AssemblyAttribute>
+        <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute" Condition="'$(GeneratedGlobalUsingsFile)'!=''">
+            <_Parameter1>GlobalUsingsFile</_Parameter1>
+            <_Parameter2>$(GeneratedGlobalUsingsFile)</_Parameter2>
+        </AssemblyAttribute>
         <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
             <_Parameter1>TargetFramework</_Parameter1>
             <_Parameter2>$(TargetFramework)</_Parameter2>
@@ -99,36 +118,50 @@ namespace $(RootNamespace)
         <RemoveDir Directories="obj\html"/>
         <Delete Files="@(_CleanTestOutput)"/>
     </Target>
-    
+
     <Target Name="_AcceptTestOutput">
         <ItemGroup>
             <_AcceptTestOutput Include="obj\transformed\$(TargetFramework)\**\*.cs"/>
             <_AcceptTestOutput Include="obj\transformed\$(TargetFramework)\**\*.txt"/>
         </ItemGroup>
-        <Message Text="Accepting @(_AcceptTestOutput)" Importance="high"/>
-        <Copy
-                SourceFiles="@(_AcceptTestOutput)"
-                DestinationFiles="@(_AcceptTestOutput->'%(RecursiveDir)%(Filename)%(Extension)')"/>
-    </Target>
-
-    <Target Name="AcceptTestOutput">
-        <CallTarget Targets="_AcceptTestOutput" Condition="'$(TargetFramework)'!=''" />
-        <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="_AcceptTestOutput" Properties="TargetFramework=%(TargetFrameworks.Identity)" Condition="'$(TargetFramework)'==''"/> 
+        <Message Text="$(MSBuildProjectFile)($(TargetFramework)): Accepting @(_AcceptTestOutput)" Importance="high" Condition="'@(_AcceptTestOutput)'!=''"/>
+        <Copy SourceFiles="@(_AcceptTestOutput)"
+              DestinationFiles="@(_AcceptTestOutput->'%(RecursiveDir)%(Filename)%(Extension)')"/>
     </Target>
 
     <Target Name="_AcceptTestHtml">
         <ItemGroup>
             <_AcceptTestOutput Include="obj\html\$(TargetFramework)\**\*.cs.html"/>
         </ItemGroup>
-        <Message Text="Accepting @(_AcceptTestOutput)" Importance="high"/>
+        <Message Text="$(MSBuildProjectFile)($(TargetFramework)): Accepting @(_AcceptTestOutput)" Importance="high" Condition="'@(_AcceptTestOutput)'!=''"/>
         <Copy
                 SourceFiles="@(_AcceptTestOutput)"
                 DestinationFiles="@(_AcceptTestOutput->'%(RecursiveDir)%(Filename)%(Extension)')"/>
     </Target>
 
+
+    <!-- The following tasks rely on _ComputeTargetFrameworkItems to multicast to all target frameworks.
+        The _ComputeTargetFrameworkItems target is defined in Microsoft.Common.CrossTargeting.targets and results in @(_InnerBuildProjects) -->
+    <Target Name="_AcceptTestOutputCrossTargeting" DependsOnTargets="_ComputeTargetFrameworkItems">
+        <MSBuild Projects="@(_InnerBuildProjects)" Targets="_AcceptTestOutput"/>
+    </Target>
+
+    <Target Name="_AcceptTestHtmlCrossTargeting" DependsOnTargets="_ComputeTargetFrameworkItems">
+        <MSBuild Projects="@(_InnerBuildProjects)" Targets="_AcceptTestHtml"/>
+    </Target>
+
+    <Target Name="AcceptTestOutput">
+        <!-- Cross-targeting -->
+        <CallTarget Targets="_AcceptTestOutputCrossTargeting" Condition="'$(TargetFrameworks)' != ''"/>
+        <!-- Single target -->
+        <CallTarget Targets="_AcceptTestOutput" Condition="'$(TargetFrameworks)' == ''"/>
+    </Target>
+
     <Target Name="AcceptTestHtml">
-        <CallTarget Targets="_AcceptTestHtml" Condition="'$(TargetFramework)'!=''" />
-        <MSBuild Projects="$(MSBuildProjectFullPath)" Targets="_AcceptTestHtml" Properties="TargetFramework=%(TargetFrameworks.Identity)" Condition="'$(TargetFramework)'==''"/>
+        <!-- Cross-targeting -->
+        <CallTarget Targets="_AcceptTestHtmlCrossTargeting" Condition="'$(TargetFrameworks)' != ''"/>
+        <!-- Single target -->
+        <CallTarget Targets="_AcceptTestHtml" Condition="'$(TargetFrameworks)' == ''"/>
     </Target>
 
 

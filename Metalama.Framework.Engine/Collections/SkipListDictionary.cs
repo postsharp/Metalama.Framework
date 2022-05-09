@@ -63,7 +63,16 @@ namespace Metalama.Framework.Engine.Collections
 
         bool ICollection<KeyValuePair<TKey, TValue>>.Contains( KeyValuePair<TKey, TValue> item ) => throw new NotImplementedException();
 
-        void ICollection<KeyValuePair<TKey, TValue>>.CopyTo( KeyValuePair<TKey, TValue>[] array, int arrayIndex ) => throw new NotImplementedException();
+        void ICollection<KeyValuePair<TKey, TValue>>.CopyTo( KeyValuePair<TKey, TValue>[] array, int arrayIndex )
+        {
+            var i = 0;
+
+            foreach ( var item in this )
+            {
+                array[i] = item;
+                i++;
+            }
+        }
 
         bool ICollection<KeyValuePair<TKey, TValue>>.Remove( KeyValuePair<TKey, TValue> item ) => this.Remove( item.Key );
 

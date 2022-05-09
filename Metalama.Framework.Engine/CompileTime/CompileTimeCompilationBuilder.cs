@@ -3,6 +3,7 @@
 
 using K4os.Hash.xxHash;
 using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Utilities;
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CodeModel;

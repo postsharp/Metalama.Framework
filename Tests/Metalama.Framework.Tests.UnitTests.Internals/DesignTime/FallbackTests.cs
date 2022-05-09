@@ -76,7 +76,7 @@ public class IntroductionAspectAttribute : TypeAspect
 {
     public override void BuildAspect(IAspectBuilder<INamedType> builder)
     {
-        builder.Advices.IntroduceMethod(builder.Target, nameof(Foo));
+        builder.Advice.IntroduceMethod(builder.Target, nameof(Foo));
     }
 
     [Template]
@@ -221,8 +221,6 @@ public class TargetClass
             public bool IsDesignTimeEnabled => false;
 
             public string? AdditionalCompilationOutputDirectory => null;
-
-            public string? DotNetSdkDirectory => null;
 
             public DesignTimeFallbackProjectOptions( IProjectOptions underlying )
             {

@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Pipeline
     {
         private readonly List<Advice> _advices = new();
 
-        public AdvicePipelineStep( PipelineStepId id, OrderedAspectLayer aspectLayer ) : base( id, aspectLayer ) { }
+        public AdvicePipelineStep( PipelineStepsState parent, PipelineStepId id, OrderedAspectLayer aspectLayer ) : base( parent, id, aspectLayer ) { }
 
         public void AddAdvice( Advice advice )
         {
@@ -31,7 +31,6 @@ namespace Metalama.Framework.Engine.Pipeline
 
         public override CompilationModel Execute(
             CompilationModel compilation,
-            PipelineStepsState pipelineStepsState,
             CancellationToken cancellationToken )
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -62,10 +61,13 @@ namespace Metalama.Framework.Engine.Pipeline
                 }
 
                 diagnostics.AddRange( result.Diagnostics );
+
+                // Add the result for introspection.
+                this.Parent.AddAdviceResult( advice, result );
             }
 
-            pipelineStepsState.AddNonObservableTransformations( nonObservableTransformations );
-            pipelineStepsState.AddDiagnostics( diagnostics, Enumerable.Empty<ScopedSuppression>(), Enumerable.Empty<CodeFixInstance>() );
+            this.Parent.AddNonObservableTransformations( nonObservableTransformations );
+            this.Parent.AddDiagnostics( diagnostics, Enumerable.Empty<ScopedSuppression>(), Enumerable.Empty<CodeFixInstance>() );
 
             return compilation.WithTransformations( observableTransformations );
         }

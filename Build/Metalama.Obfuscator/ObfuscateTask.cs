@@ -66,6 +66,15 @@ namespace Metalama.Obfuscator
             // Obfuscate source documents in the PDB.
             this.ObfuscatePdb();
 
+            // Invalidate the serialization of custom attributes because they may contain type references.
+            // This also needs to be done before we change anything in the assembly.
+            var attributeEnumerator = this.Project.Module.GetDeclarationEnumerator( TokenType.CustomAttribute );
+
+            while ( attributeEnumerator.MoveNext() )
+            {
+                ((CustomAttributeDeclaration) attributeEnumerator.Current).InvalidateSerialization();
+            }
+
             // Obfuscate types and their members.
             var typeEnumerator = this.Project.Module.GetDeclarationEnumerator( TokenType.TypeDef );
 

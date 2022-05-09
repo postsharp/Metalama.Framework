@@ -21,18 +21,18 @@ namespace Metalama.Framework.Code
 
         /// <summary>
         /// Gets the method implementing the <c>add</c> semantic. In case of field-like events, this property returns
-        /// an object that does not map to source code but allows to add aspects and advices as with a normal method.
+        /// an object that does not map to source code but allows to add aspects and advice as with a normal method.
         /// </summary>
         IMethod AddMethod { get; }
 
         /// <summary>
         /// Gets the method implementing the <c>remove</c> semantic. In case of field-like events, this property returns
-        /// an object that does not map to source code but allows to add aspects and advices as with a normal method.
+        /// an object that does not map to source code but allows to add aspects and advice as with a normal method.
         /// </summary>
         IMethod RemoveMethod { get; }
 
         /// <summary>
-        /// Gets an object that represents the <c>raise</c> semantic and allows to add aspects and advices
+        /// Gets an object that represents the <c>raise</c> semantic and allows to add aspects and advice
         /// as with a normal method.
         /// </summary>
         IMethod? RaiseMethod { get; }

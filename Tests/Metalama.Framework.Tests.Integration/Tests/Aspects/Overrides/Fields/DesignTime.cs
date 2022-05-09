@@ -1,4 +1,6 @@
+#if TEST_OPTIONS
 // @DesignTime
+#endif
 
 #pragma warning disable CS0169
 

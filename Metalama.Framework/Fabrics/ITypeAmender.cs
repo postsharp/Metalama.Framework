@@ -17,7 +17,7 @@ namespace Metalama.Framework.Fabrics
         INamedType Type { get; }
 
         /// <summary>
-        /// Gets an object that allows creating advices, e.g. overriding members, introducing members, or implementing new interfaces.
+        /// Gets an object that allows creating advice, e.g. overriding members, introducing members, or implementing new interfaces.
         /// </summary>
         IAdviceFactory Advices { get; }
     }

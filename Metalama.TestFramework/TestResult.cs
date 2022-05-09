@@ -93,7 +93,7 @@ namespace Metalama.TestFramework
 
         /// <summary>
         /// Gets or sets a value indicating whether the output run-time code should be included in the result of
-        ///  <see cref="GetConsolidatedTestOutput"/>.
+        ///  <see cref="GetTestOutputsWithDiagnostics"/>.
         /// </summary>
         public bool HasOutputCode { get; set; }
 
@@ -241,12 +241,14 @@ namespace Metalama.TestFramework
         /// Gets the content of the <c>.t.cs</c> file, i.e. the output transformed code with comments
         /// for diagnostics.
         /// </summary>
-        public IEnumerable<SyntaxTree> GetConsolidatedTestOutput()
+        public IReadOnlyList<SyntaxTree> GetTestOutputsWithDiagnostics()
         {
             if ( this.TestInput == null )
             {
                 throw new InvalidOperationException();
             }
+
+            List<SyntaxTree> result = new();
 
             // Adding the syntax of the transformed run-time code, but only if the pipeline was successful.
             var outputSyntaxTrees =
@@ -351,12 +353,15 @@ namespace Metalama.TestFramework
 
                 // Individual trees should be formatted, so we don't need to format again.
 
-                yield return CSharpSyntaxTree.Create(
-                    consolidatedCompilationUnit,
-                    path: Path.GetFileName(
-                        outputSyntaxTree.InputPath
-                        ?? throw new InvalidOperationException( "Output syntax tree has no path" ) ) );
+                result.Add(
+                    CSharpSyntaxTree.Create(
+                        consolidatedCompilationUnit,
+                        path: Path.GetFileName(
+                            outputSyntaxTree.InputPath
+                            ?? throw new InvalidOperationException( "Output syntax tree has no path" ) ) ) );
             }
+
+            return result;
         }
 
         private IEnumerable<string> GetDiagnosticComments( Diagnostic d )

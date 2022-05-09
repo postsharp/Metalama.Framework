@@ -1,5 +1,7 @@
+#if TEST_OPTIONS
 // @IgnoredDiagnostic(CS1998)
 // @RequiredConstant(NET5_0)
+#endif
 
 #if NET5_0
 using System;

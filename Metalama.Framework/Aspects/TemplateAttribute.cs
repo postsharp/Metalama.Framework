@@ -10,7 +10,7 @@ namespace Metalama.Framework.Aspects
     /// The base class for all custom attributes that mark a declaration as a template.
     /// </summary>
     [AttributeUsage( AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Event )]
-    public class TemplateAttribute : CompileTimeAttribute
+    public class TemplateAttribute : Attribute
     {
         private Accessibility? _accessibility;
         private bool? _isVirtual;
@@ -23,7 +23,7 @@ namespace Metalama.Framework.Aspects
             get
                 => this._accessibility
                    ?? throw new InvalidOperationException(
-                       $"{nameof(this.Accessibility)} was not set, use {nameof(this.GetAccessibility)} to get nullable value." );
+                       $"The '{nameof(this.Accessibility)}' was not set, use {nameof(this.GetAccessibility)} to get nullable value." );
             set => this._accessibility = value;
         }
 
@@ -47,13 +47,17 @@ namespace Metalama.Framework.Aspects
 
         public bool IsVirtual
         {
-            get => this._isVirtual ?? throw new InvalidOperationException( $"Visibility was not set, use {nameof(this.GetIsVirtual)} to get nullable value." );
+            get
+                => this._isVirtual
+                   ?? throw new InvalidOperationException( $"The 'Virtual' property was not set, use {nameof(this.GetIsVirtual)} to get nullable value." );
             set => this._isVirtual = value;
         }
 
         public bool IsSealed
         {
-            get => this._isSealed ?? throw new InvalidOperationException( $"Visibility was not set, use {nameof(this.GetIsSealed)} to get nullable value." );
+            get
+                => this._isSealed
+                   ?? throw new InvalidOperationException( $"The 'IsSealed' property was not set, use {nameof(this.GetIsSealed)} to get nullable value." );
             set => this._isSealed = value;
         }
 

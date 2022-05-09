@@ -120,41 +120,47 @@ namespace Metalama.Framework.Engine.Fabrics
 
         public void ReportDiagnostic( Func<T, IDiagnostic> diagnostic )
         {
-            this.Validate( new FinalValidatorHelper<T, IDiagnostic>( diagnostic ).ReportDiagnostic );
+            this.Validate( new FinalValidatorHelper<IDiagnostic>( diagnostic ).ReportDiagnostic );
         }
 
         public void SuppressDiagnostic( Func<T, SuppressionDefinition> suppression )
         {
-            this.Validate( new FinalValidatorHelper<T, SuppressionDefinition>( suppression ).SuppressDiagnostic );
+            this.Validate( new FinalValidatorHelper<SuppressionDefinition>( suppression ).SuppressDiagnostic );
         }
 
         public void SuggestCodeFix( Func<T, CodeFix> codeFix )
         {
-            this.Validate( new FinalValidatorHelper<T, CodeFix>( codeFix ).SuggestCodeFix );
+            this.Validate( new FinalValidatorHelper<CodeFix>( codeFix ).SuggestCodeFix );
         }
 
-        private class FinalValidatorHelper<TDeclaration, TOutput>
-        {
-            private readonly Func<TDeclaration, TOutput> _func;
+        public IValidatorReceiver<IDeclaration> AfterAllAspects()
+            => new AspectReceiver<IDeclaration>( this._containingDeclaration, this._parent, CompilationModelVersion.Final, this._selector );
 
-            public FinalValidatorHelper( Func<TDeclaration, TOutput> func )
+        public IValidatorReceiver<IDeclaration> BeforeAnyAspect()
+            => new AspectReceiver<IDeclaration>( this._containingDeclaration, this._parent, CompilationModelVersion.Initial, this._selector );
+
+        private class FinalValidatorHelper<TOutput>
+        {
+            private readonly Func<T, TOutput> _func;
+
+            public FinalValidatorHelper( Func<T, TOutput> func )
             {
                 this._func = func;
             }
 
             public void ReportDiagnostic( in DeclarationValidationContext context )
             {
-                context.Diagnostics.Report( (IDiagnostic) this._func( (TDeclaration) context.Declaration )! );
+                context.Diagnostics.Report( (IDiagnostic) this._func( (T) context.Declaration )! );
             }
 
             public void SuppressDiagnostic( in DeclarationValidationContext context )
             {
-                context.Diagnostics.Suppress( (SuppressionDefinition) (object) this._func( (TDeclaration) context.Declaration )! );
+                context.Diagnostics.Suppress( (SuppressionDefinition) (object) this._func( (T) context.Declaration )! );
             }
 
             public void SuggestCodeFix( in DeclarationValidationContext context )
             {
-                context.Diagnostics.Suggest( (CodeFix) (object) this._func( (TDeclaration) context.Declaration )! );
+                context.Diagnostics.Suggest( (CodeFix) (object) this._func( (T) context.Declaration )! );
             }
         }
 
@@ -267,11 +273,11 @@ namespace Metalama.Framework.Engine.Fabrics
                         } ) ) );
         }
 
-        private IEnumerable<AspectInstance> SelectAndValidateAspectTargets(
+        private IEnumerable<TResult> SelectAndValidateAspectTargets<TResult>(
             CompilationModel compilation,
             IDiagnosticAdder diagnosticAdder,
             AspectClass aspectClass,
-            Func<T, AspectInstance?> createResult )
+            Func<T, TResult?> createResult )
         {
             foreach ( var targetDeclaration in this._selector( compilation, diagnosticAdder ) )
             {
@@ -279,7 +285,10 @@ namespace Metalama.Framework.Engine.Fabrics
 
                 var containingDeclaration = this._containingDeclaration.GetTarget( compilation ).AssertNotNull();
 
-                if ( !targetDeclaration.IsContainedIn( containingDeclaration ) || targetDeclaration.DeclaringAssembly.IsExternal )
+                if ( !(targetDeclaration.IsContainedIn( containingDeclaration )
+                       || (containingDeclaration is IParameter p && p.DeclaringMember.Equals( targetDeclaration ))
+                       || (containingDeclaration is IMember m && m.DeclaringType.Equals( targetDeclaration )))
+                     || targetDeclaration.DeclaringAssembly.IsExternal )
                 {
                     diagnosticAdder.Report(
                         GeneralDiagnosticDescriptors.CanAddChildAspectOnlyUnderParent.CreateRoslynDiagnostic(
@@ -307,6 +316,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
                 var aspectInstance = createResult( targetDeclaration );
 
+                // ReSharper disable once CompareNonConstrainedGenericWithNull
                 if ( aspectInstance != null )
                 {
                     yield return aspectInstance;
@@ -346,11 +356,22 @@ namespace Metalama.Framework.Engine.Fabrics
             }
         }
 
-        [Obsolete( "Not implemented." )]
-        public void RequireAspect<TTarget, TAspect>( TTarget target )
-            where TTarget : class, IDeclaration
-            where TAspect : IAspect<TTarget>, new()
-            => throw new NotImplementedException();
+        public void RequireAspect<TAspect>()
+            where TAspect : IAspect<T>, new()
+        {
+            var aspectClass = this.GetAspectClass<TAspect>();
+
+            this.RegisterAspectSource(
+                new ProgrammaticAspectSource<TAspect, T>(
+                    aspectClass,
+                    getRequirements: ( compilation, diagnosticAdder ) => this.SelectAndValidateAspectTargets(
+                        compilation,
+                        diagnosticAdder,
+                        aspectClass,
+                        t => new AspectRequirement(
+                            t.ToTypedRef<IDeclaration>(),
+                            this._parent.AspectPredecessor.Instance ) ) ) );
+        }
 
         [Obsolete( "Not implemented." )]
         public void AddAnnotation<TAspect, TAnnotation>( Func<T, TAnnotation> getAnnotation )

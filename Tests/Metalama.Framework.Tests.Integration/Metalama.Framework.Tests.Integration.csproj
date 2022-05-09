@@ -22,16 +22,16 @@
         <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitVersion)" />
         <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" />
 
-        <!-- This is used for a test -->
+        <!-- These packages ared used in tests -->
         <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
+        <PackageReference Include="System.Text.Json" Version="6.0.3" />
+
     </ItemGroup>
 
     <ItemGroup>
         <!-- Exclude files that intentionally do not compile -->
         <Compile Remove="Tests\**\__*.cs" />
     </ItemGroup>
-
-
 
     <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
@@ -41,11 +41,6 @@
 
     <ItemGroup>
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
-    </ItemGroup>
-
-    <ItemGroup>
-
-
     </ItemGroup>
 
     <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets" />

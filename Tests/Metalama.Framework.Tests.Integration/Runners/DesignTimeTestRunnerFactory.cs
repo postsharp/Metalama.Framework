@@ -3,7 +3,6 @@
 
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.TestFramework;
-using Microsoft.CodeAnalysis;
 using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.Integration.Runners
@@ -14,8 +13,8 @@ namespace Metalama.Framework.Tests.Integration.Runners
         public BaseTestRunner CreateTestRunner(
             ServiceProvider serviceProvider,
             string? projectDirectory,
-            MetadataReference[] metadataReferences,
+            TestProjectReferences references,
             ITestOutputHelper? logger )
-            => new DesignTimeTestRunner( serviceProvider, projectDirectory, metadataReferences, logger );
+            => new DesignTimeTestRunner( serviceProvider, projectDirectory, references, logger );
     }
 }

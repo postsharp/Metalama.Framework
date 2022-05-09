@@ -9,7 +9,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Async.AsyncTemplate.NonAs
     {
         public override void BuildAspect( IAspectBuilder<IMethod> builder )
         {
-            builder.Advices.Override(
+            builder.Advice.Override(
                 builder.Target,
                 new MethodTemplateSelector(
                     nameof(OverrideMethod),

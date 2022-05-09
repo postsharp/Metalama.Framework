@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -14,16 +15,17 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
     {
         private readonly IField _field;
 
-        public MemberRef<IMemberOrNamedType>? ReplacedMember => this._field.ToMemberRef<IMemberOrNamedType>();
+        public MemberRef<IMember>? ReplacedMember => this._field.ToMemberRef<IMember>();
 
-        public PromotedField( Advice advice, IField field ) : base(
+        public PromotedField( Advice advice, IField field, ITagReader tags ) : base(
             advice,
             field.DeclaringType,
             field.Name,
             true,
             field.Writeability == Writeability.All,
             true,
-            false )
+            false,
+            tags )
         {
             this._field = field;
             this.Type = field.Type;

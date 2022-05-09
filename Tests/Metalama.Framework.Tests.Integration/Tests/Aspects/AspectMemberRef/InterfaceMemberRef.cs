@@ -10,7 +10,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.AspectMemberRef.InterfaceM
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advices.ImplementInterface( builder.Target, typeof(IInterface) );
+            builder.Advice.ImplementInterface( builder.Target, typeof(IInterface) );
         }
 
         [Framework.Aspects.Introduce]

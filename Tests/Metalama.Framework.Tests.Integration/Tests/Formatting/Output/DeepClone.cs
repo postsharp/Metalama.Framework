@@ -1,4 +1,6 @@
+#if TEST_OPTIONS
 // @RequiredConstant(NET5_0_OR_GREATER) - Return type covariance not supported in .NET Framework
+#endif
 
 using System;
 using System.Linq;
@@ -13,7 +15,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Formatting.Output
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var typedMethod = builder.Advices.IntroduceMethod(
+            var typedMethod = builder.Advice.IntroduceMethod(
                 builder.Target,
                 nameof(CloneImpl),
                 whenExists: OverrideStrategy.Override );
@@ -21,7 +23,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Formatting.Output
             typedMethod.Name = "Clone";
             typedMethod.ReturnType = builder.Target;
 
-            builder.Advices.ImplementInterface(
+            builder.Advice.ImplementInterface(
                 builder.Target,
                 typeof(ICloneable),
                 whenExists: OverrideStrategy.Ignore );

@@ -10,7 +10,6 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Project;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
@@ -94,7 +93,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         public object BaseStatic
             => new ThisTypeUserReceiver( this.Type, new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Base ) );
 
-        public IReadOnlyDictionary<string, object?> Tags => this._common.Tags;
+        public ITagReader Tags => this._common.Tags;
 
         IDiagnosticSink IMetaApi.Diagnostics => this._common.Diagnostics;
 

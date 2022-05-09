@@ -14,10 +14,16 @@ internal readonly struct AspectSourceResult
 
     public IEnumerable<Ref<IDeclaration>> Exclusions { get; }
 
+    public IEnumerable<AspectRequirement> Requirements { get; }
+
     public static AspectSourceResult Empty => new( null );
 
-    public AspectSourceResult( IEnumerable<AspectInstance>? aspectInstances, IEnumerable<Ref<IDeclaration>>? exclusions = null )
+    public AspectSourceResult(
+        IEnumerable<AspectInstance>? aspectInstances,
+        IEnumerable<Ref<IDeclaration>>? exclusions = null,
+        IEnumerable<AspectRequirement>? requirements = null )
     {
+        this.Requirements = requirements ?? Enumerable.Empty<AspectRequirement>();
         this.AspectInstances = aspectInstances ?? Enumerable.Empty<AspectInstance>();
         this.Exclusions = exclusions ?? Enumerable.Empty<Ref<IDeclaration>>();
     }

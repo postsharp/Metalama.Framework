@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Utilities;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.Collections;
@@ -68,16 +69,16 @@ namespace Metalama.Framework.Engine.CompileTime
             this._cacheDirectory = serviceProvider.GetRequiredService<IPathOptions>().AssemblyLocatorCacheDirectory;
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( nameof(ReferenceAssemblyLocator) );
 
-            var projectOptions = serviceProvider.GetService<IProjectOptions>();
+            var platformInfo = (IPlatformInfo?) serviceProvider.GetService( typeof( IPlatformInfo ) );
 
-            if ( projectOptions != null )
+            if ( platformInfo != null )
             {
-                this._dotNetSdkDirectory = projectOptions.DotNetSdkDirectory;
-                this._logger.Trace?.Log( $"Project options available. DotNetSdkDirectory = '{this._dotNetSdkDirectory}'." );
+                this._dotNetSdkDirectory = platformInfo.DotNetSdkDirectory;
+                this._logger.Trace?.Log( $"Platform information available. DotNetSdkDirectory = '{this._dotNetSdkDirectory}'." );
             }
             else
             {
-                this._logger.Trace?.Log( $"No project options available." );
+                this._logger.Trace?.Log( $"Platform information not available." );
             }
 
             // Get Metalama implementation assemblies (but not the public API, for which we need a special compile-time build).

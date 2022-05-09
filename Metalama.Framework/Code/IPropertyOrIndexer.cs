@@ -11,7 +11,7 @@ public interface IPropertyOrIndexer : IFieldOrPropertyOrIndexer
     /// Gets a value indicating whether the property is <c>ref</c> or <c>ref in</c>.
     /// </summary>
     RefKind RefKind { get; }
-    
+
     /// <summary>
     /// Gets a <see cref="PropertyInfo"/> that represents the current property at run time.
     /// </summary>

@@ -3,7 +3,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Tests.Integration.Validation.Aspect_CurrentRevision;
 using Metalama.Framework.Validation;
-using System.Diagnostics;
 
 #pragma warning disable CS0168, CS8618, CS0169
 
@@ -18,12 +17,11 @@ namespace Metalama.Framework.Tests.Integration.Validation.Aspect_CurrentRevision
 
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.WithTargetMembers( t => t.Methods ).Validate( Validate );
+            builder.With( t => t.Methods ).Validate( Validate );
         }
 
         private static void Validate( in DeclarationValidationContext context )
         {
-            Debugger.Break();
             context.Diagnostics.Report( _warning.WithArguments( context.Declaration ) );
         }
     }

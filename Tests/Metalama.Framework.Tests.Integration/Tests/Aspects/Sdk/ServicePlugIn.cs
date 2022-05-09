@@ -1,4 +1,6 @@
+#if TEST_OPTIONS
 // @Skipped(These tests need MetalamaPlugInAttribute, but for some reason the assembly is not accessible (TODO).)
+#endif
 
 using System;
 using Metalama.Compiler;

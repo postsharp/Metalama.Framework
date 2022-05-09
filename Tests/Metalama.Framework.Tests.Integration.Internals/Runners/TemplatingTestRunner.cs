@@ -21,7 +21,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Emit;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -49,28 +48,33 @@ namespace Metalama.Framework.Tests.Integration.Runners
         public TemplatingTestRunner(
             ServiceProvider serviceProvider,
             string? projectDirectory,
-            IEnumerable<MetadataReference> metadataReferences,
+            TestProjectReferences references,
             ITestOutputHelper? logger ) : this(
             serviceProvider,
             projectDirectory,
-            metadataReferences,
+            references,
             Array.Empty<CSharpSyntaxVisitor>(),
             logger ) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TemplatingTestRunner"/> class.
         /// </summary>
+        /// <param name="serviceProvider"></param>
+        /// <param name="projectDirectory"></param>
+        /// <param name="metadataReferences"></param>
+        /// <param name="implicitUsings"></param>
         /// <param name="testAnalyzers">A list of analyzers to invoke on the test source.</param>
+        /// <param name="logger"></param>
         public TemplatingTestRunner(
             ServiceProvider serviceProvider,
             string? projectDirectory,
-            IEnumerable<MetadataReference> metadataReferences,
+            TestProjectReferences references,
             IEnumerable<CSharpSyntaxVisitor> testAnalyzers,
             ITestOutputHelper? logger )
             : base(
                 serviceProvider,
                 projectDirectory,
-                metadataReferences,
+                references,
                 logger )
         {
             this._testAnalyzers = testAnalyzers;
@@ -304,7 +308,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 new MetaApiProperties(
                     diagnostics,
                     template.Cast(),
-                    ImmutableDictionary.Create<string, object?>().Add( "TestKey", "TestValue" ),
+                    TagReader.GetReader( new { TestKey = "TestValue" } ),
                     default,
                     syntaxGenerationContext,
                     null!,

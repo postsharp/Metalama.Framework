@@ -11,14 +11,14 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.ChangeTracking
 
             foreach (var property in builder.Target.Properties)
             {
-                var isSpecifiedProperty = builder.Advices.IntroduceProperty( builder.Target, nameof(IsSpecifiedTemplate) );
+                var isSpecifiedProperty = builder.Advice.IntroduceProperty( builder.Target, nameof(IsSpecifiedTemplate) );
                 isSpecifiedProperty.Name = $"_is{property.Name}Specified";
                 isSpecifiedProperty.Type = isSpecifiedProperty.Compilation.TypeFactory.GetTypeByReflectionType( typeof(bool) );
 
-                builder.Advices.Override(
+                builder.Advice.Override(
                     property,
                     nameof(OverrideProperty),
-                    tags: new TagDictionary { ["isSpecifiedProperty"] = isSpecifiedProperty } );
+                    tags: new { isSpecifiedProperty = isSpecifiedProperty } );
             }
         }
 

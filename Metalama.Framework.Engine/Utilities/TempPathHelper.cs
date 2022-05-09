@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.Utilities
         static TempPathHelper()
         {
             _tempPath = Path.GetTempPath();
-            _version = AssemblyMetadataReader.BuildId;
+            _version = EngineAssemblyMetadataReader.Instance.BuildId;
         }
 
         public static string GetTempPath( string purpose, Guid? guid = null )
