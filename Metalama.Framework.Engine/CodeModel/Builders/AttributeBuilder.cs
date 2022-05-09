@@ -7,6 +7,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -56,5 +57,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public override SyntaxTree? PrimarySyntaxTree => ((IDeclarationImpl) this.ContainingDeclaration).PrimarySyntaxTree;
 
         public FormattableString FormatPredecessor() => $"attribute of type '{this.Type}' on '{this.ContainingDeclaration}'";
+
+        public AttributeSyntax GetSyntax( SyntaxGenerationContext generationContext)
+        {
+            return generationContext.SyntaxGenerator.Attribute( this._attributeConstruction, generationContext.ReflectionMapper );
+        }
     }
 }

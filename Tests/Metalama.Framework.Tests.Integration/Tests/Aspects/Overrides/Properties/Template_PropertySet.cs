@@ -1,0 +1,64 @@
+﻿using System;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Template_PropertySet
+{
+    /*
+     * Tests set-only property template.
+     */
+
+    [AttributeUsage( AttributeTargets.Property )]
+    public class TestAttribute : FieldOrPropertyAspect
+    {
+        public override void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
+        {
+            builder.Advice.Override( builder.Target, nameof(OverrideProperty) );
+        }
+
+        [Template]
+        public dynamic? OverrideProperty
+        {
+            set
+            {
+                Console.WriteLine( $"This is the overridden setter." );
+                meta.Proceed();
+            }
+        }
+    }
+
+    // <target>
+    internal class TargetClass
+    {
+        [Test]
+        public int BlockBodiedAccessors
+        {
+            get
+            {
+                Console.WriteLine("Original");
+                return 42;
+            }
+            set
+            {
+                Console.WriteLine("Original");
+            }
+        }
+
+        [Test]
+        public int ExpressionBodiedAccessors
+        {
+            get => 42;
+            set => Console.WriteLine("Original");
+        }
+
+        [Test]
+        public int ExpressionBodiedProperty => 42;
+
+
+        [Test]
+        public int AutoProperty { get; set; }
+
+        [Test]
+        public int AutoGetOnlyProperty { get; }
+    }
+}

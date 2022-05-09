@@ -42,6 +42,7 @@ namespace Metalama.Framework.Engine.Transformations
             // We need event template xor both accessor templates.
             Invariant.Assert( eventTemplate.IsNotNull || (addTemplate.IsNotNull && removeTemplate.IsNotNull) );
             Invariant.Assert( !(eventTemplate.IsNotNull && (addTemplate.IsNotNull || removeTemplate.IsNotNull)) );
+            Invariant.Assert( !(eventTemplate.IsNotNull && eventTemplate.Declaration.IsEventField()) );
 
             this.EventTemplate = eventTemplate;
             this.AddTemplate = addTemplate;

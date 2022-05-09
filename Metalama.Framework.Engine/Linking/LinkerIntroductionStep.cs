@@ -148,35 +148,67 @@ namespace Metalama.Framework.Engine.Linking
                     _ => replacedMember
                 };
 
-                switch ( canonicalReplacedMember )
+                ProcessReplacedMember( syntaxTransformationCollection, canonicalReplacedMember, replacedTransformations );
+
+                static void ProcessReplacedMember( 
+                    SyntaxTransformationCollection syntaxTransformationCollection, 
+                    IDeclaration replacedMember, 
+                    HashSet<ISyntaxTreeTransformation> replacedTransformations )
                 {
-                    case Field replacedField:
-                        var syntaxReference = replacedField.Symbol.GetPrimarySyntaxReference();
+                    switch ( replacedMember )
+                    {
+                        case IReplaceMember { ReplacedMember: { } } recursiveReplaceMember:
+                            // If the replaced member is IReplaceMember itself, we will just move recursively to it's ReplacedMember.
+                            // This is currently used only for read-only fields that are first promoted and then have their members added.
 
-                        if ( syntaxReference == null )
-                        {
+                            ProcessReplacedMember(
+                                syntaxTransformationCollection,
+                                recursiveReplaceMember.ReplacedMember.Value.GetTarget( ((IDeclarationInternal)recursiveReplaceMember).Compilation),
+                                replacedTransformations );
+
+                            break;
+
+                        case Field replacedField:
+                            var fieldSyntaxReference = replacedField.Symbol.GetPrimarySyntaxReference();
+
+                            if ( fieldSyntaxReference == null )
+                            {
+                                throw new AssertionFailedException();
+                            }
+
+                            var removedFieldSyntax = fieldSyntaxReference.GetSyntax();
+                            syntaxTransformationCollection.AddRemovedSyntax( removedFieldSyntax );
+
+                            break;
+
+                        case Property replacedProperty:
+                            var propertySyntaxReference = replacedProperty.Symbol.GetPrimarySyntaxReference();
+
+                            if ( propertySyntaxReference == null )
+                            {
+                                throw new AssertionFailedException();
+                            }
+
+                            var removedPropertySyntax = propertySyntaxReference.GetSyntax();
+                            syntaxTransformationCollection.AddRemovedSyntax( removedPropertySyntax );
+
+                            break;
+
+                        case Constructor replacedConstructor:
+                            Invariant.Assert( replacedConstructor.Symbol.GetPrimarySyntaxReference() == null );
+
+                            break;
+
+                        case ISyntaxTreeTransformation replacedTransformation:
+                            replacedTransformations.Add( replacedTransformation );
+
+                            break;
+
+                        default:
                             throw new AssertionFailedException();
-                        }
-
-                        var removedSyntax = syntaxReference.GetSyntax();
-
-                        syntaxTransformationCollection.AddRemovedSyntax( removedSyntax );
-
-                        break;
-
-                    case Constructor replacedConstructor:
-                        Invariant.Assert( replacedConstructor.Symbol.GetPrimarySyntaxReference() == null );
-
-                        break;
-
-                    case ISyntaxTreeTransformation replacedTransformation:
-                        replacedTransformations.Add( replacedTransformation );
-
-                        break;
-
-                    default:
-                        throw new AssertionFailedException();
+                    }
                 }
+
             }
         }
 

@@ -1,9 +1,8 @@
 #if TEST_OPTIONS
 // @IgnoredDiagnostic(CS1998)
-// @RequiredConstant(NET5_0)
 #endif
 
-#if NET5_0
+#if NET5_0_OR_GREATER
 using System;
 using System.Threading.Tasks;
 using System.Collections;

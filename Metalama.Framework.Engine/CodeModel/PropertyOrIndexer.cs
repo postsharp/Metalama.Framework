@@ -51,6 +51,7 @@ internal abstract class PropertyOrIndexer : Member, IPropertyOrIndexer
     public Writeability Writeability
         => this.PropertySymbol switch
         {
+            { IsReadOnly: true } when this.PropertySymbol.IsAutoProperty() => Writeability.ConstructorOnly,
             { IsReadOnly: true } => Writeability.None,
             { SetMethod: { IsInitOnly: true } _ } => Writeability.InitOnly,
             _ => Writeability.All

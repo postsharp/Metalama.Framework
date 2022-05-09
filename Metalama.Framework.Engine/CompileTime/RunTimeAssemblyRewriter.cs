@@ -103,7 +103,7 @@ namespace Metalama.Compiler
                             .WithErrorCodes( errorCodes )
                             .NormalizeWhitespace() ) );
 
-                trailingTrivia = trailingTrivia.Add(
+                trailingTrivia = trailingTrivia.Add( ElasticLineFeed ).Add(
                     Trivia(
                         PragmaWarningDirectiveTrivia(
                                 Token( SyntaxKind.RestoreKeyword ),

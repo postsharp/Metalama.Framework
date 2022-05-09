@@ -384,6 +384,11 @@ namespace Metalama.Framework.Engine.CodeModel
                 return SyntaxFactoryEx.Null;
             }
 
+            if ( value is Code.TypedConstant typedConstant)
+            {
+                return this.AttributeValueExpression( typedConstant.Value, reflectionMapper );
+            }
+
             var literalExpression = SyntaxFactoryEx.LiteralExpressionOrNull( value );
 
             if ( literalExpression != null )

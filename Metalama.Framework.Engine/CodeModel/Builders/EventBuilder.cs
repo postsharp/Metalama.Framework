@@ -100,7 +100,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             MemberDeclarationSyntax @event =
                 this._isEventField && this.ExplicitInterfaceImplementations.Count == 0
                     ? EventFieldDeclaration(
-                        List<AttributeListSyntax>(), // TODO: Attributes.
+                        this.GetAttributeLists( context.SyntaxGenerationContext ),
                         this.GetSyntaxModifierList(),
                         VariableDeclaration(
                             syntaxGenerator.Type( this.Type.GetSymbol() ),
@@ -115,7 +115,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                                             : null ) // TODO: Initializer.
                                 } ) ) )
                     : EventDeclaration(
-                        List<AttributeListSyntax>(), // TODO: Attributes.
+                        this.GetAttributeLists( context.SyntaxGenerationContext ),
                         this.GetSyntaxModifierList(),
                         syntaxGenerator.Type( this.Type.GetSymbol() ),
                         this.ExplicitInterfaceImplementations.Count > 0

@@ -10,10 +10,13 @@ using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Project;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
@@ -204,6 +207,24 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( initializerTemplate.Declaration! );
 
             return templateDriver.TryExpandDeclaration( expansionContext, context.DiagnosticSink, out expression );
+        }
+
+        protected virtual SyntaxList<AttributeListSyntax> GetAttributeLists( in SyntaxGenerationContext syntaxGenerationContext )
+        {
+            var attributeLists = new List<AttributeListSyntax>();
+
+            foreach ( var attributeBuilder in this.Attributes )
+            {
+                if (attributeBuilder.Constructor.DeclaringType.Is(this.Compilation.Factory.GetTypeByReflectionType(typeof(TemplateAttribute))))
+                {
+                    // TODO: This is temporary logic - aspect-related attributes should be marked as compile time and all compile time attributes should be skipped.
+                    continue;
+                }
+
+                attributeLists.Add( AttributeList( SingletonSeparatedList( attributeBuilder.GetSyntax( syntaxGenerationContext ) ) ) );
+            }
+
+            return List( attributeLists );
         }
     }
 }

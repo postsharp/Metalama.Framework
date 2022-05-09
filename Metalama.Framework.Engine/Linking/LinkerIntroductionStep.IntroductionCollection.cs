@@ -26,6 +26,7 @@ namespace Metalama.Framework.Engine.Linking
             private readonly Dictionary<InsertPosition, List<LinkerIntroducedMember>> _introducedMembersByInsertPosition;
             private readonly Dictionary<BaseTypeDeclarationSyntax, List<BaseTypeSyntax>> _introducedInterfacesByTargetTypeDecl;
             private readonly HashSet<VariableDeclaratorSyntax> _removedVariableDeclaratorSyntax;
+            private readonly HashSet<PropertyDeclarationSyntax> _removedPropertyDeclarationSyntax;
 
             private int _nextId;
 
@@ -37,6 +38,7 @@ namespace Metalama.Framework.Engine.Linking
                 this._introducedMembersByInsertPosition = new Dictionary<InsertPosition, List<LinkerIntroducedMember>>();
                 this._introducedInterfacesByTargetTypeDecl = new Dictionary<BaseTypeDeclarationSyntax, List<BaseTypeSyntax>>();
                 this._removedVariableDeclaratorSyntax = new HashSet<VariableDeclaratorSyntax>();
+                this._removedPropertyDeclarationSyntax = new HashSet<PropertyDeclarationSyntax>();
             }
 
             public void Add( IMemberIntroduction memberIntroduction, IEnumerable<IntroducedMember> introducedMembers )
@@ -87,14 +89,24 @@ namespace Metalama.Framework.Engine.Linking
 
                         break;
 
+                    case PropertyDeclarationSyntax propertyDeclaration:
+                        this._removedPropertyDeclarationSyntax.Add( propertyDeclaration );
+
+                        break;
+
                     default:
                         throw new AssertionFailedException();
                 }
             }
 
-            public bool IsRemovedSyntax( VariableDeclaratorSyntax memberDeclaration )
+            public bool IsRemovedSyntax( VariableDeclaratorSyntax variableDeclarator )
             {
-                return this._removedVariableDeclaratorSyntax.Contains( memberDeclaration );
+                return this._removedVariableDeclaratorSyntax.Contains( variableDeclarator );
+            }
+
+            public bool IsRemovedSyntax( PropertyDeclarationSyntax propertyDeclaration )
+            {
+                return this._removedPropertyDeclarationSyntax.Contains( propertyDeclaration );
             }
 
             public IEnumerable<LinkerIntroducedMember> GetIntroducedMembersOnPosition( InsertPosition position )

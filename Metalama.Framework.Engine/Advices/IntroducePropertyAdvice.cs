@@ -96,19 +96,30 @@ namespace Metalama.Framework.Engine.Advices
                 this.MemberBuilder,
                 observableTransformations.OfType<IProperty>().ToList() );
 
+            var hasNoOverrideSemantics = this.Template.Declaration != null && this.Template.Declaration.IsAutoPropertyOrField;
+
             // TODO: Introduce attributes that are added not present on the existing member?
             if ( existingDeclaration == null )
             {
-                // There is no existing declaration, we will introduce and override the introduced.
-                var overriddenMethod = new OverriddenProperty(
-                    this,
-                    this.MemberBuilder,
-                    this.Template,
-                    this._getTemplate,
-                    this._setTemplate,
-                    this.Tags );
+                // There is no existing declaration.
+                if ( hasNoOverrideSemantics )
+                {
+                    // Introduced auto property.
+                    return AdviceResult.Create( this.MemberBuilder );
+                }
+                else
+                {
+                    // Introduce and override using the template.
+                    var overriddenProperty = new OverriddenProperty(
+                        this,
+                        this.MemberBuilder,
+                        this.Template,
+                        this._getTemplate,
+                        this._setTemplate,
+                        this.Tags );
 
-                return AdviceResult.Create( this.MemberBuilder, overriddenMethod );
+                    return AdviceResult.Create( this.MemberBuilder, overriddenProperty );
+                }
             }
             else
             {

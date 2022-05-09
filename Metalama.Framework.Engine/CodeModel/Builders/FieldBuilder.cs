@@ -75,7 +75,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             var field =
                 FieldDeclaration(
-                    List<AttributeListSyntax>(), // TODO: Attributes.
+                    this.GetAttributeLists( context.SyntaxGenerationContext ),
                     this.GetSyntaxModifierList(),
                     VariableDeclaration(
                         syntaxGenerator.Type( this.Type.GetSymbol() ),

@@ -47,13 +47,35 @@ namespace Metalama.Framework.Engine.Advices
             {
                 var promotedField = new PromotedField( this, field, this.Tags );
 
-                return AdviceResult.Create(
-                    promotedField,
-                    new OverriddenProperty( this, promotedField, this.PropertyTemplate, this.GetTemplate, this.SetTemplate, this.Tags ) );
+                if (field.Writeability == Writeability.ConstructorOnly)
+                {
+                    var writeableProperty = new PrivatelyWriteableProperty( this, promotedField, this.Tags );
+
+                    return AdviceResult.Create(
+                        writeableProperty,
+                        new OverriddenProperty( this, writeableProperty, this.PropertyTemplate, this.GetTemplate, this.SetTemplate, this.Tags ) );
+                }
+                else
+                {
+                    return AdviceResult.Create(
+                        promotedField,
+                        new OverriddenProperty( this, promotedField, this.PropertyTemplate, this.GetTemplate, this.SetTemplate, this.Tags ) );
+                }
             }
             else if ( targetDeclaration is IProperty property )
             {
-                return AdviceResult.Create( new OverriddenProperty( this, property, this.PropertyTemplate, this.GetTemplate, this.SetTemplate, this.Tags ) );
+                if ( property.Writeability == Writeability.ConstructorOnly )
+                {
+                    var writeableProperty = new PrivatelyWriteableProperty( this, property, this.Tags );
+
+                    return AdviceResult.Create(
+                        writeableProperty,
+                        new OverriddenProperty( this, writeableProperty, this.PropertyTemplate, this.GetTemplate, this.SetTemplate, this.Tags ) );
+                }
+                else
+                {
+                    return AdviceResult.Create( new OverriddenProperty( this, property, this.PropertyTemplate, this.GetTemplate, this.SetTemplate, this.Tags ) );
+                }
             }
             else
             {

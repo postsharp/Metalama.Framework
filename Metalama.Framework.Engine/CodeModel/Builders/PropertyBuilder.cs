@@ -15,6 +15,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using MethodKind = Metalama.Framework.Code.MethodKind;
@@ -140,7 +141,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             // TODO: Indexers.
             var property =
                 PropertyDeclaration(
-                    List<AttributeListSyntax>(), // TODO: Attributes.
+                    this.GetAttributeLists( context.SyntaxGenerationContext ),
                     this.GetSyntaxModifierList(),
                     syntaxGenerator.Type( this.Type.GetSymbol() ),
                     this.ExplicitInterfaceImplementations.Count > 0

@@ -41,6 +41,7 @@ namespace Metalama.Framework.Engine.Transformations
         {
             // We need the getTemplate and setTemplate to be set by the caller even if propertyTemplate is set.
             // The caller is responsible for verifying the compatibility of the template with the target.
+            Invariant.Assert( !(propertyTemplate.Declaration != null && propertyTemplate.Declaration.IsAutoPropertyOrField) );
 
             this.PropertyTemplate = propertyTemplate;
             this.GetTemplate = getTemplate;
