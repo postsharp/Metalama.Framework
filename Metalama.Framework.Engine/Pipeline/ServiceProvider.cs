@@ -50,6 +50,12 @@ namespace Metalama.Framework.Engine.Pipeline
             return new ServiceProvider( builder.ToImmutable(), this._nextProvider );
         }
 
+        public ServiceProvider WithUntypedService( Type interfaceType, object implementation )
+        {
+            var serviceNode = new ServiceNode( provider => implementation, interfaceType );
+            return new ServiceProvider( this._services.Add( interfaceType, serviceNode ), this._nextProvider );
+        }
+
         private static void AddService( ServiceNode service, ImmutableDictionary<Type, ServiceNode>.Builder builder )
         {
             var interfaces = service.ServiceType.GetInterfaces();
@@ -147,13 +153,14 @@ namespace Metalama.Framework.Engine.Pipeline
         }
 
         /// <summary>
-        /// Adds the next service provider in a chain.
+        /// Sets or replaces the next service provider in a chain.
         /// </summary>
         /// <param name="nextProvider"></param>
         /// <remarks>
         /// When the current service provider fails to find a service, it will try to find it using the next provider in the chain.
+        /// When the next service provider has been set before, it gets replaced.
         /// </remarks>
-        internal ServiceProvider WithNextProvider( IServiceProvider nextProvider ) => new( this._services, nextProvider );
+        public ServiceProvider WithNextProvider( IServiceProvider nextProvider ) => new( this._services, nextProvider );
 
         public override string ToString()
         {

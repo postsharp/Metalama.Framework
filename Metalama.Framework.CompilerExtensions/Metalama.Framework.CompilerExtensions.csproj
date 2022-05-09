@@ -13,7 +13,7 @@
 
     <ItemGroup>
         <Compile Include="..\Metalama.Framework.Engine\AssertionFailedException.cs" Link="Utilities\AssertionFailedException.cs"/>
-        <Compile Include="..\Metalama.Framework.Engine\Utilities\AssemblyMetadataReader.cs" Link="Utilities\AssemblyMetadataReader.cs"/>
+        <Compile Include="..\Metalama.Framework.Engine\Utilities\EngineAssemblyMetadataReader.cs" Link="Utilities\EngineAssemblyMetadataReader.cs"/>
         <Compile Include="..\Metalama.Framework.Engine\Utilities\TempPathHelper.cs" Link="Utilities\TempPathHelper.cs"/>
     </ItemGroup>
 

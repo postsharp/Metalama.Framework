@@ -28,9 +28,10 @@ public static class DesignTimeServiceProviderFactory
             {
                 if ( _serviceProvider == null )
                 {
-                    Logger.Initialize();
+                    MetalamaDiagnosticsServiceFactory.Initialize( nameof( DesignTimeServiceProviderFactory ) );
 
-                    _serviceProvider = ServiceProviderFactory.GetServiceProvider( nextServiceProvider: new LoggingServiceProvider() );
+                    _serviceProvider = ServiceProviderFactory.GetServiceProvider()
+                        .WithNextProvider( DiagnosticServiceFactory.ServiceProvider );
 
                     _serviceProvider = _serviceProvider
                         .WithService( new DesignTimeAspectPipelineFactory( _serviceProvider, new CompileTimeDomain() ) );
@@ -50,10 +51,5 @@ public static class DesignTimeServiceProviderFactory
         }
 
         return _serviceProvider;
-    }
-
-    private class LoggingServiceProvider : IServiceProvider
-    {
-        public object? GetService( Type serviceType ) => serviceType == typeof(ILoggerFactory) ? DiagnosticsService.Instance : null;
     }
 }

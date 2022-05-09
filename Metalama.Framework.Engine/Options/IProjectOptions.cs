@@ -71,7 +71,5 @@ namespace Metalama.Framework.Engine.Options
         /// Gets a path to a directory that stores additional compilation output files.
         /// </summary>
         string? AdditionalCompilationOutputDirectory { get; }
-
-        string? DotNetSdkDirectory { get; }
     }
 }

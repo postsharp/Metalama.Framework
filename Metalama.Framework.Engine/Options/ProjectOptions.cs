@@ -6,7 +6,6 @@ using Microsoft.CodeAnalysis.Diagnostics;
 using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.IO;
 
 namespace Metalama.Framework.Engine.Options
 {
@@ -74,21 +73,6 @@ namespace Metalama.Framework.Engine.Options
 
         [Memo]
         public string? AdditionalCompilationOutputDirectory => this.GetStringOption( "MetalamaAdditionalCompilationOutputDirectory" );
-
-        public string? DotNetSdkDirectory
-        {
-            get
-            {
-                var propsFilePath = this.GetStringOption( "NETCoreSdkBundledVersionsProps" );
-
-                if ( propsFilePath == null )
-                {
-                    return null;
-                }
-
-                return Path.GetFullPath( Path.GetDirectoryName( propsFilePath ) );
-            }
-        }
 
         public bool TryGetProperty( string name, [NotNullWhen( true )] out string? value )
         {

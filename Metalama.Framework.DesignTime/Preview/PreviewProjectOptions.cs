@@ -47,7 +47,5 @@ namespace Metalama.Framework.DesignTime.Preview
         bool IProjectOptions.IsDesignTimeEnabled => true;
 
         string? IProjectOptions.AdditionalCompilationOutputDirectory => null;
-
-        public string? DotNetSdkDirectory => this._underlying.DotNetSdkDirectory;
     }
 }
