@@ -1,9 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using K4os.Hash.xxHash;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Templating
@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.Templating
                 return principal;
             }
 
-            var hashCode = default(HashCode);
+            var hashCode = new XXH64();
             var parameterCount = parameters.Length;
 
             if ( ignoredLastParameter )
@@ -57,10 +57,19 @@ namespace Metalama.Framework.Engine.Templating
 
             for ( var i = 0; i < parameterCount; i++ )
             {
-                hashCode.Add( parameters[i].Type, StructuralSymbolComparer.Signature );
+                var parameterType = parameters[i].Type.GetDocumentationCommentId();
+                if ( parameterType != null )
+                {
+                    hashCode.Update( parameterType );
+                }
+                else
+                {
+                    // This happens for dynamics.
+                    hashCode.Update( parameters[i].Type.ToString() );
+                }
             }
 
-            return $"{principal}_{hashCode.ToHashCode():x}";
+            return $"{principal}_{hashCode.Digest():x}";
         }
     }
 }

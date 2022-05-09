@@ -973,7 +973,7 @@ namespace Metalama.Framework.Engine.Templating
             var parameters = node.Keyword.IsKind( SyntaxKind.GetKeyword )
                 ? ParameterList()
                 : ParameterList(
-                    SingletonSeparatedList( Parameter( default, default, SyntaxFactoryEx.ExpressionSyntaxType, Identifier( "value" ), default, null ) ) );
+                    SingletonSeparatedList( Parameter( default, default, SyntaxFactoryEx.ExpressionSyntaxType, Identifier( "value" ), null ) ) );
 
             // Create the method.
             var result = this.CreateTemplateMethod( node, body, parameters );
