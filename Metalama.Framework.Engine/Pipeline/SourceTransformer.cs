@@ -1,11 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Backstage.Extensibility;
+using Metalama.Backstage.Telemetry;
 using Metalama.Compiler;
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
@@ -26,7 +29,39 @@ namespace Metalama.Framework.Engine.Pipeline
     {
         public void Execute( TransformerContext context )
         {
-            var serviceProvider = ServiceProviderFactory.GetServiceProvider( nextServiceProvider: context.Services );
+            var serviceProvider = ServiceProviderFactory.GetServiceProvider();
+
+            // The global basckstage service provider, that has been added in ServiceProvider.CreateBaseServiceProvider,
+            // gets replaced here by a project-scoped one.
+            serviceProvider = serviceProvider.WithNextProvider( context.Services );
+
+            var applicationInfoProvider = (IApplicationInfoProvider?) context.Services.GetService( typeof( IApplicationInfoProvider ) );
+
+            if ( applicationInfoProvider == null )
+            {
+                throw new InvalidOperationException( $"{nameof( IApplicationInfoProvider )} service not found." );
+            }
+
+            applicationInfoProvider.CurrentApplication = new MetalamaApplicationInfo();
+
+            IUsageSample? usageSample = null;
+            var compilerUsageSample = (IUsageSample?) context.Services.GetService( typeof( IUsageSample ) );
+            var usageReporter = (IUsageReporter) context.Services.GetService( typeof( IUsageReporter ) );
+
+            // We look for the compiler usage sample instead of calling usageReporter.ShouldReportSession,
+            // because the compiler has already decided.
+            if ( usageReporter != null && compilerUsageSample != null )
+            {
+                usageSample = usageReporter.CreateSample( "CompilerUsage" );
+                serviceProvider = serviceProvider.WithUntypedService( typeof( IUsageSample ), usageSample );
+            }
+
+            // Try.Metalama ships its own handler. Having the default ICompileTimeExceptionHandler added earlier
+            // is not possible, because it needs access to IExceptionReporter service, which comes from the TransformerContext.
+            if ( serviceProvider.GetService<ICompileTimeExceptionHandler>() == null )
+            {
+                serviceProvider = serviceProvider.WithService( new CompileTimeExceptionHandler( serviceProvider ) );
+            }
 
             // Try.Metalama ships its own project options using the async-local service provider.
             var projectOptions = serviceProvider.GetService<IProjectOptions>();
@@ -65,12 +100,24 @@ namespace Metalama.Framework.Engine.Pipeline
             {
                 var isHandled = false;
 
-                ServiceProviderFactory.AsyncLocalProvider.GetService<ICompileTimeExceptionHandler>()
+                serviceProvider
+                    .GetService<ICompileTimeExceptionHandler>()
                     ?.ReportException( e, context.ReportDiagnostic, false, out isHandled );
 
                 if ( !isHandled )
                 {
                     throw;
+                }
+            }
+            finally
+            {
+                try
+                {
+                    usageSample?.Flush();
+                }
+                catch
+                {
+                    // We don't want telemetry to affect user experience.
                 }
             }
         }

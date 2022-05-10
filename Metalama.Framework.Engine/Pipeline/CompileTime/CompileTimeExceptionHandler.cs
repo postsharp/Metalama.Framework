@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Backstage.Telemetry;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Utilities;
@@ -14,6 +15,13 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
 {
     internal class CompileTimeExceptionHandler : ICompileTimeExceptionHandler
     {
+        private readonly IExceptionReporter? _exceptionReporter;
+
+        public CompileTimeExceptionHandler( IServiceProvider serviceProvider )
+        {
+            this._exceptionReporter = (IExceptionReporter?) serviceProvider.GetService( typeof(IExceptionReporter) );
+        }
+
         public void ReportException( Exception exception, Action<Diagnostic> reportDiagnostic, bool canIgnoreException, out bool isHandled )
         {
             var reportFile = DefaultPathOptions.Instance.GetNewCrashReportPath();
@@ -22,7 +30,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             {
                 var exceptionText = new StringBuilder();
 
-                exceptionText.AppendLine( $"Metalama Version: {AssemblyMetadataReader.MainInstance.Version}" );
+                exceptionText.AppendLine( $"Metalama Version: {EngineAssemblyMetadataReader.Instance.PackageVersion}" );
                 exceptionText.AppendLine( $"Runtime: {RuntimeInformation.FrameworkDescription}" );
                 exceptionText.AppendLine( $"Processor Architecture: {RuntimeInformation.ProcessArchitecture}" );
                 exceptionText.AppendLine( $"OS Description: {RuntimeInformation.OSDescription}" );
@@ -46,6 +54,8 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 canIgnoreException ? GeneralDiagnosticDescriptors.IgnorableUnhandledException : GeneralDiagnosticDescriptors.UnhandledException;
 
             reportDiagnostic( diagnosticDefinition.CreateRoslynDiagnostic( null, (exception.Message, reportFile ?? "(none)") ) );
+
+            this._exceptionReporter?.ReportException( exception );
 
             isHandled = true;
         }

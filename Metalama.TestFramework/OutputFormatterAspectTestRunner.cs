@@ -187,8 +187,6 @@ namespace Metalama.TestFramework
 
             public string? AdditionalCompilationOutputDirectory => this._underlying.AdditionalCompilationOutputDirectory;
 
-            public string? DotNetSdkDirectory => null;
-
             public IProjectOptions Apply( IProjectOptions options )
             {
                 return new OptionsWrapper( options );
