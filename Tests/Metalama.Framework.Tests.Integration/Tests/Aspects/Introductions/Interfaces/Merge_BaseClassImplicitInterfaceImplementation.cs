@@ -23,7 +23,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         {
             aspectBuilder.Advice.ImplementInterface(
                 aspectBuilder.Target,
-                (INamedType)aspectBuilder.Target.Compilation.TypeFactory.GetTypeByReflectionType( typeof(IInterface) ) );
+                (INamedType)TypeFactory.GetType( typeof(IInterface) ) );
         }
 
         [Introduce]

@@ -1,15 +1,13 @@
 using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Eligibility;
+using Metalama.Framework.Code.SyntaxBuilders;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.ParameterAspect;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.ParameterAspect_;
 
-public class RequiredAttribute : Attribute, IAspect<IParameter>
+public class RequiredAttribute : ParameterAspect
 {
-    public void BuildEligibility( IEligibilityBuilder<IParameter> builder ) { }
-
-    public void BuildAspect( IAspectBuilder<IParameter> builder )
+    public override void BuildAspect( IAspectBuilder<IParameter> builder )
     {
         builder.Advice.Override( (IMethod)builder.Target.DeclaringMember, nameof(Template), tags: new { ParameterName = builder.Target.Name } );
     }
@@ -18,7 +16,7 @@ public class RequiredAttribute : Attribute, IAspect<IParameter>
     private dynamic? Template()
     {
         var parameterName = (string)meta.Tags["ParameterName"]!;
-        var parameter = meta.ParseExpression( parameterName );
+        var parameter = ExpressionFactory.Parse( parameterName );
 
         if (parameter.Value == null)
         {

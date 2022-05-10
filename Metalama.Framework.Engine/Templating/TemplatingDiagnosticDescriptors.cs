@@ -301,5 +301,31 @@ namespace Metalama.Framework.Engine.Templating
                     "The template '{0}' cannot be abstract because it has a run-time-ony signature.",
                     _category,
                     Error );
+
+        internal static readonly DiagnosticDefinition<ISymbol>
+            OnlyNamedTemplatesCanHaveDynamicSignature
+                = new(
+                    "LAMA0238",
+                    "Only templates of [Template] kind can have a dynamic type or signature.",
+                    "{0}' cannot have 'dynamic' in its type or signature because it is in an aspect and does not have the [Template] attribute.",
+                    _category,
+                    Error );
+
+        internal static readonly DiagnosticDefinition<ISymbol>
+            InvalidScope
+                = new(
+                    "LAMA0239",
+                    "Arrays or generic types of 'dynamic' are forbidden.",
+                    "The type or signature of '{0}' is invalid: arrays or generic types of 'dynamic' are forbidden.",
+                    _category,
+                    Error );
+
+        internal static readonly DiagnosticDefinition<ISymbol> ScopeConflictInSignature
+            = new(
+                "LAMA0240",
+                "The type or signature combines run-time-only and compile-time-only types.",
+                "The type or signature of '{0}' combines run-time-only and compile-time-only types.",
+                _category,
+                Error );
     }
 }

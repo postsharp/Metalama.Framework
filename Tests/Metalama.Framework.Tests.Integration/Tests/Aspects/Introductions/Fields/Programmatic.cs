@@ -9,12 +9,12 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Field.Progra
         {
             {
                 var introduced = builder.Advice.IntroduceField( builder.Target, "IntroducedField" );
-                introduced.Type = introduced.Compilation.TypeFactory.GetTypeByReflectionType( typeof(int) );
+                introduced.Type = TypeFactory.GetType( typeof(int) );
             }
 
             {
                 var introduced = builder.Advice.IntroduceField( builder.Target, "IntroducedField_Static" );
-                introduced.Type = introduced.Compilation.TypeFactory.GetTypeByReflectionType( typeof(int) );
+                introduced.Type = TypeFactory.GetType( typeof(int) );
                 introduced.IsStatic = true;
             }
 

@@ -18,7 +18,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Prog
             {
                 var introduced = builder.Advice.IntroduceMethod( builder.Target, nameof(Template) );
                 introduced.Name = "IntroducedMethod_ReturnType";
-                introduced.ReturnType = introduced.Compilation.TypeFactory.GetTypeByReflectionType( typeof(int) );
+                introduced.ReturnType = TypeFactory.GetType( typeof(int) );
             }
 
             {

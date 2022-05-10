@@ -44,7 +44,7 @@ namespace Metalama.Framework.Engine.Advices
         {
             var aspectTypeName = this.Aspect.AspectClass.FullName.AssertNotNull();
             var compilation = this.SourceCompilation;
-            var aspectType = compilation.TypeFactory.GetTypeByReflectionName( aspectTypeName );
+            var aspectType = compilation.GetCompilationModel().Factory.GetTypeByReflectionName( aspectTypeName );
 
             foreach ( var aspectMethod in aspectType.Methods )
             {

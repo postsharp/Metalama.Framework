@@ -87,8 +87,6 @@ namespace Metalama.Framework.Engine.Testing
 
         public string? AdditionalCompilationOutputDirectory => null;
 
-        public string? DotNetSdkDirectory => null;
-
         public bool TryGetProperty( string name, [NotNullWhen( true )] out string? value ) => this._properties.TryGetValue( name, out value );
 
         public void Dispose()
