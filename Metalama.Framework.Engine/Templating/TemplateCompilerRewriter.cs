@@ -40,6 +40,7 @@ namespace Metalama.Framework.Engine.Templating
         private readonly TemplateMemberClassifier _templateMemberClassifier;
         private readonly CompileTimeOnlyRewriter _compileTimeOnlyRewriter;
         private readonly TypeOfRewriter _typeOfRewriter;
+        private readonly HashSet<string> _templateCompileTimeTypeParameterNames = new();
         private MetaContext? _currentMetaContext;
         private int _nextStatementListId;
         private ISymbol? _rootTemplateSymbol;
@@ -488,7 +489,9 @@ namespace Metalama.Framework.Engine.Templating
                         if ( typeOfAnnotation != null )
                         {
                             return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.TypeOf) ) )
-                                .AddArgumentListArguments( Argument( SyntaxFactoryEx.LiteralExpression( typeOfAnnotation.Data! ) ) );
+                                .AddArgumentListArguments( 
+                                Argument( SyntaxFactoryEx.LiteralExpression( typeOfAnnotation.Data! ) ),
+                                Argument( CreateTypeParameterSubstitutionDictionary() ) );
                         }
 
                         break;
@@ -511,6 +514,19 @@ namespace Metalama.Framework.Engine.Templating
                         TemplatingDiagnosticDescriptors.CannotUseThisInRunTimeContext.CreateRoslynDiagnostic( location, parentExpression.ToString() ) );
 
                     return expression;
+
+                case SyntaxKind.TypeOfExpression:
+                    {
+                        var type = this._syntaxTreeAnnotationMap.GetSymbol( ((TypeOfExpressionSyntax) expression).Type );
+                        var typeId = type.GetSymbolId().Id;
+
+                        return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof( TemplateSyntaxFactory.TypeOf ) ) )
+                                                       .AddArgumentListArguments(
+                                                       Argument( SyntaxFactoryEx.LiteralExpression( typeId ) ),
+                                                       Argument( CreateTypeParameterSubstitutionDictionary() ));
+                    }
+
+
             }
 
             var symbol = this._syntaxTreeAnnotationMap.GetSymbol( expression );
@@ -620,6 +636,36 @@ namespace Metalama.Framework.Engine.Templating
                         // We don't have a valid tree, but let the compilation continue. The call to IsSerializable wrote a diagnostic.
                         return LiteralExpression( SyntaxKind.DefaultLiteralExpression, Token( SyntaxKind.DefaultKeyword ) );
                     }
+            }
+        }
+
+
+        private ExpressionSyntax CreateTypeParameterSubstitutionDictionary()
+        {
+            if ( this._templateCompileTimeTypeParameterNames.Count == 0 )
+            {
+                return SyntaxFactoryEx.Null;
+            }
+            else
+            {
+                return ImplicitObjectCreationExpression()
+                .WithInitializer(
+                    InitializerExpression(
+                        SyntaxKind.ObjectInitializerExpression,
+                        SeparatedList<ExpressionSyntax>(
+                            this._templateCompileTimeTypeParameterNames.Select( name =>
+                            AssignmentExpression(
+                                SyntaxKind.SimpleAssignmentExpression,
+                                ImplicitElementAccess()
+                                .WithArgumentList(
+                                    BracketedArgumentList(
+                                        SingletonSeparatedList<ArgumentSyntax>(
+                                            Argument(
+                                                LiteralExpression(
+                                                    SyntaxKind.StringLiteralExpression,
+                                                    Literal( name ) ) ) ) ) ),
+                                IdentifierName( name ) ) ) ) ) )
+                .NormalizeWhitespace();
             }
         }
 
@@ -876,7 +922,7 @@ namespace Metalama.Framework.Engine.Templating
 
             return base.VisitInvocationExpression( node );
         }
-        HashSet<string> _templateCompileTimeTypeParameterNames = new();
+        
 
         public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
         {
@@ -1754,14 +1800,16 @@ namespace Metalama.Framework.Engine.Templating
             {
                 return this.TransformTypeOfExpression( node );
             }
-            else             if ( this._syntaxTreeAnnotationMap.GetSymbol( node.Type ) is ITypeSymbol typeSymbol )
+            else if ( this._syntaxTreeAnnotationMap.GetSymbol( node.Type ) is ITypeSymbol typeSymbol )
             {
                 var typeId = SymbolId.Create( typeSymbol ).Id;
 
                 return this._typeOfRewriter.RewriteTypeOf( typeSymbol ).WithAdditionalAnnotations( new SyntaxAnnotation( _rewrittenTypeOfAnnotation, typeId ) );
             }
 
+
             return base.VisitTypeOfExpression( node );
         }
+        
     }
 }

@@ -76,7 +76,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
 
         private static ExpressionSyntax CreateTypeHandleExpression( ITypeSymbol type, SyntaxSerializationContext serializationContext )
         {
-            var typeExpression = TypeSerializer.SerializeTypeSymbolRecursive( type, serializationContext );
+            var typeExpression = TypeSerializationHelper.SerializeTypeSymbolRecursive( type, serializationContext );
 
             ExpressionSyntax typeHandle = SyntaxFactory.MemberAccessExpression(
                 SyntaxKind.SimpleMemberAccessExpression,

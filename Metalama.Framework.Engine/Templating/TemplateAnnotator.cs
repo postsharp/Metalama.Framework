@@ -2185,18 +2185,21 @@ namespace Metalama.Framework.Engine.Templating
 
         public override SyntaxNode? VisitTypeOfExpression( TypeOfExpressionSyntax node )
         {
-            // typeof(T) is always compile-time unless T is a run-time generic parameter.
+            // The processing of typeof(.) is very specific. It is always represented as a compile-time expression even if the type itself is run-time only.
+            // There is then compile-time-to-run-time conversion logic in the rewriter.
+            // The value of typeof is scope-neutral except if the type is run-time only.
+            TypeSyntax annotatedType;
 
-            var type = (ITypeSymbol?) this._syntaxTreeAnnotationMap.GetSymbol( node.Type );
+            using ( this.WithScopeContext( ScopeContext.CreateRunTimeOrCompileTimeScope( this._currentScopeContext, "typeof" ) ) )
+            {
+                annotatedType = this.Visit( node.Type );
+            }
 
-            if ( type is ITypeParameterSymbol && this._symbolScopeClassifier.GetTemplatingScope( type ) == TemplatingScope.RunTimeOnly )
-            {
-                return node.AddScopeAnnotation( TemplatingScope.RunTimeOnly );
-            }
-            else
-            {
-                return node.AddScopeAnnotation( TemplatingScope.CompileTimeOnly );
-            }
+            var typeScope = this.GetNodeScope( annotatedType );
+            var typeOfScope = typeScope.GetExpressionValueScope() == TemplatingScope.CompileTimeOnly ? TemplatingScope.CompileTimeOnly : TemplatingScope.CompileTimeOnlyReturningBoth;
+
+
+            return node.WithType( annotatedType).AddScopeAnnotation( typeOfScope );
         }
 
         public override SyntaxNode? VisitArrayRankSpecifier( ArrayRankSpecifierSyntax node )

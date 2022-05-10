@@ -444,7 +444,7 @@ namespace Metalama.Framework.Engine.Templating
             => TemplateExpansionContext.Current.SyntaxGenerationContext.ServiceProvider.GetRequiredService<CompileTimeTypeFactory>()
                 .Get( new SymbolId( id ), name );
 
-        public static TypeOfExpressionSyntax TypeOf( string typeId )
+        public static TypeOfExpressionSyntax TypeOf( string typeId, Dictionary<string,TypeSyntax> substitutions )
         {
             var compilation = TemplateExpansionContext.Current.SyntaxGenerationContext.Compilation;
             var type = (ITypeSymbol?) new SymbolId( typeId ).Resolve( compilation );
@@ -454,7 +454,7 @@ namespace Metalama.Framework.Engine.Templating
                 throw new InvalidOperationException( $"Cannot find the type {typeId} in compilation '{compilation.AssemblyName}'." );
             }
 
-            return TemplateExpansionContext.Current.SyntaxGenerationContext.SyntaxGenerator.TypeOfExpression( type );
+            return TemplateExpansionContext.Current.SyntaxGenerationContext.SyntaxGenerator.TypeOfExpression( type, substitutions );
         }
 
         internal static object? IdentifierName( string name )
