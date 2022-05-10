@@ -99,7 +99,6 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 var substitutionRewriter = new SubstitutionRewriter( substitutions );
                 rewrittenTypeSyntax = substitutionRewriter.Visit( rewrittenTypeSyntax );
-
             }
 
             return (TypeOfExpressionSyntax) this._syntaxGenerator.TypeOfExpression( rewrittenTypeSyntax );
@@ -428,9 +427,9 @@ namespace Metalama.Framework.Engine.CodeModel
             throw new ArgumentOutOfRangeException( nameof(value), $"The value '{value}' cannot be converted to a custom attribute argument value." );
         }
 
-        class SubstitutionRewriter : CSharpSyntaxRewriter
+        private class SubstitutionRewriter : CSharpSyntaxRewriter
         {
-            private IReadOnlyDictionary<string, TypeSyntax> _substitutions;
+            private readonly IReadOnlyDictionary<string, TypeSyntax> _substitutions;
 
             public SubstitutionRewriter( IReadOnlyDictionary<string, TypeSyntax> substitutions )
             {

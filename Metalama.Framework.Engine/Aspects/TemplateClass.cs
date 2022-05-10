@@ -167,7 +167,7 @@ namespace Metalama.Framework.Engine.Aspects
 
                             foreach ( var typeParameter in method.TypeParameters )
                             {
-                                var isCompileTime = 
+                                var isCompileTime =
                                     symbolClassifier.GetTemplatingScope( typeParameter ).GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly;
 
                                 typeParameterBuilder.Add(

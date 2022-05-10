@@ -148,7 +148,9 @@ namespace Metalama.Framework.Engine.Templating
                 case ITypeParameterSymbol typeParameter when TemplateMemberClassifier.IsTemplateTypeParameter( typeParameter ):
                     var typeParameterScope = this._symbolScopeClassifier.GetTemplatingScope( typeParameter );
 
-                    return typeParameterScope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly ? typeParameterScope : TemplatingScope.RunTimeOnly;
+                    return typeParameterScope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly
+                        ? typeParameterScope
+                        : TemplatingScope.RunTimeOnly;
 
                 case IMethodSymbol method when this._templateMemberClassifier.IsRunTimeMethod( method ):
                     // The TemplateContext.runTime method must be processed separately. It is a compile-time-only method whose
@@ -2060,7 +2062,6 @@ namespace Metalama.Framework.Engine.Templating
             }
 
             return transformedNode;
-            
         }
 
         public override SyntaxNode? VisitObjectCreationExpression( ObjectCreationExpressionSyntax node )
@@ -2196,10 +2197,12 @@ namespace Metalama.Framework.Engine.Templating
             }
 
             var typeScope = this.GetNodeScope( annotatedType );
-            var typeOfScope = typeScope.GetExpressionValueScope() == TemplatingScope.CompileTimeOnly ? TemplatingScope.CompileTimeOnly : TemplatingScope.CompileTimeOnlyReturningBoth;
 
+            var typeOfScope = typeScope.GetExpressionValueScope() == TemplatingScope.CompileTimeOnly
+                ? TemplatingScope.CompileTimeOnly
+                : TemplatingScope.CompileTimeOnlyReturningBoth;
 
-            return node.WithType( annotatedType).AddScopeAnnotation( typeOfScope );
+            return node.WithType( annotatedType ).AddScopeAnnotation( typeOfScope );
         }
 
         public override SyntaxNode? VisitArrayRankSpecifier( ArrayRankSpecifierSyntax node )

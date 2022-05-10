@@ -3,12 +3,10 @@
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization
 {
-
     internal class TypeSerializationHelper
     {
         public static ExpressionSyntax SerializeTypeSymbolRecursive( ITypeSymbol symbol, SyntaxSerializationContext serializationContext )

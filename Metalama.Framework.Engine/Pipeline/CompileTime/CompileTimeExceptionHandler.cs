@@ -42,7 +42,9 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 File.WriteAllText( reportFile, exceptionText.ToString() );
             }
 
-            var diagnosticDefinition = canIgnoreException ? GeneralDiagnosticDescriptors.IgnorableUnhandledException : GeneralDiagnosticDescriptors.UnhandledException;
+            var diagnosticDefinition =
+                canIgnoreException ? GeneralDiagnosticDescriptors.IgnorableUnhandledException : GeneralDiagnosticDescriptors.UnhandledException;
+
             reportDiagnostic( diagnosticDefinition.CreateRoslynDiagnostic( null, (exception.Message, reportFile ?? "(none)") ) );
 
             isHandled = true;

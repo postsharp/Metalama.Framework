@@ -444,7 +444,7 @@ namespace Metalama.Framework.Engine.Templating
             => TemplateExpansionContext.Current.SyntaxGenerationContext.ServiceProvider.GetRequiredService<CompileTimeTypeFactory>()
                 .Get( new SymbolId( id ), name );
 
-        public static TypeOfExpressionSyntax TypeOf( string typeId, Dictionary<string,TypeSyntax> substitutions )
+        public static TypeOfExpressionSyntax TypeOf( string typeId, Dictionary<string, TypeSyntax> substitutions )
         {
             var compilation = TemplateExpansionContext.Current.SyntaxGenerationContext.Compilation;
             var type = (ITypeSymbol?) new SymbolId( typeId ).Resolve( compilation );

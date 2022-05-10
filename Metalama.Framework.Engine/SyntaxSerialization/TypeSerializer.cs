@@ -10,7 +10,6 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
     {
         public override ExpressionSyntax Serialize( Type obj, SyntaxSerializationContext serializationContext )
             => TypeSerializationHelper.SerializeTypeSymbolRecursive( serializationContext.GetTypeSymbol( obj ), serializationContext );
-      
 
         public TypeSerializer( SyntaxSerializationService service ) : base( service ) { }
     }

@@ -5,7 +5,6 @@ using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
-using Xunit;
 
 namespace Metalama.TestFramework
 {

@@ -267,7 +267,7 @@ namespace Metalama.Framework.Engine.Templating
                     }
                 }
             }
-            
+
             public override void VisitIncompleteMember( IncompleteMemberSyntax node )
             {
                 // Skip

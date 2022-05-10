@@ -15,6 +15,7 @@ public static partial class SyntaxFactoryDebugHelper
     public static string ToSyntaxFactoryDebug( this SyntaxNode node, Compilation compilation, IServiceProvider serviceProvider )
     {
         MetaSyntaxRewriter rewriter = new( serviceProvider, compilation, RoslynApiVersion.Current );
+
         try
         {
             var normalized = NormalizeRewriter.Instance.Visit( node );

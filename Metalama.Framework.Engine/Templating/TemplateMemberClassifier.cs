@@ -75,7 +75,8 @@ namespace Metalama.Framework.Engine.Templating
                 or IEventSymbol;
 
         public bool IsCompileTemplateTypeParameter( ITypeParameterSymbol typeParameter )
-            => IsTemplateTypeParameter( typeParameter ) && this._symbolClassifier.GetTemplatingScope( typeParameter ).GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly;
+            => IsTemplateTypeParameter( typeParameter ) && this._symbolClassifier.GetTemplatingScope( typeParameter ).GetExpressionExecutionScope()
+                == TemplatingScope.CompileTimeOnly;
 
         public bool IsCompileTimeParameter( IParameterSymbol parameter )
             => this._symbolClassifier.GetTemplatingScope( parameter ).GetExpressionValueScope() == TemplatingScope.CompileTimeOnly;
@@ -182,6 +183,5 @@ namespace Metalama.Framework.Engine.Templating
                 return MetaMemberKind.None;
             }
         }
-
     }
 }

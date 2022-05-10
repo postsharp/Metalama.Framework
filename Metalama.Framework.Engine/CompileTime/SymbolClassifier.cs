@@ -160,7 +160,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 case nameof(CompileTimeAttribute) when compileTimeReturnsRunTimeOnly:
                     return TemplatingScope.CompileTimeOnlyReturningRuntimeOnly;
 
-                case nameof( CompileTimeAttribute ) when !compileTimeReturnsRunTimeOnly:
+                case nameof(CompileTimeAttribute) when !compileTimeReturnsRunTimeOnly:
                 case nameof(TemplateAttribute):
                     return TemplatingScope.CompileTimeOnly;
 
@@ -182,7 +182,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             var scopeFromAttributes = assembly.GetAttributes()
                 .Concat( assembly.Modules.First().GetAttributes() )
-                .Select( x => this.GetTemplatingScope(x) )
+                .Select( x => this.GetTemplatingScope( x ) )
                 .FirstOrDefault( s => s != null );
 
             if ( scopeFromAttributes != null )
@@ -256,12 +256,13 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 case ITypeParameterSymbol typeParameterSymbol:
                     var scopeFromAttribute = this.GetScopeFromAttributes( typeParameterSymbol );
+
                     if ( scopeFromAttribute != null )
                     {
                         return scopeFromAttribute.Value;
                     }
                     else if ( typeParameterSymbol.ContainingSymbol.Kind == SymbolKind.Method
-                         && !this.GetTemplateInfo( typeParameterSymbol.ContainingSymbol ).IsNone )
+                              && !this.GetTemplateInfo( typeParameterSymbol.ContainingSymbol ).IsNone )
                     {
                         // Template parameters are run-time by default.
                         return TemplatingScope.RunTimeOnly;
@@ -409,8 +410,8 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     (TemplatingScope.Conflict, _) => TemplatingScope.Conflict,
                     (TemplatingScope.Invalid, _) => TemplatingScope.Invalid,
-                    (TemplatingScope.CompileTimeOnlyReturningRuntimeOnly, TemplatingScope.RunTimeOnly ) => TemplatingScope.RunTimeOnly,
-                    (TemplatingScope.CompileTimeOnlyReturningRuntimeOnly, TemplatingScope.RunTimeOrCompileTime ) => TemplatingScope.RunTimeOnly,
+                    (TemplatingScope.CompileTimeOnlyReturningRuntimeOnly, TemplatingScope.RunTimeOnly) => TemplatingScope.RunTimeOnly,
+                    (TemplatingScope.CompileTimeOnlyReturningRuntimeOnly, TemplatingScope.RunTimeOrCompileTime) => TemplatingScope.RunTimeOnly,
                     (_, TemplatingScope.RunTimeOrCompileTime) => typeScope,
                     (TemplatingScope.RunTimeOrCompileTime, _) => combinedScope,
                     (TemplatingScope.RunTimeOnly, TemplatingScope.CompileTimeOnly) => TemplatingScope.Conflict,
@@ -481,9 +482,10 @@ namespace Metalama.Framework.Engine.CompileTime
 
             // From attributes.
             var compileTimeReturnsRunTimeOnly = symbol is ITypeParameterSymbol;
+
             var scopeFromAttributes = symbol
                 .GetAttributes()
-                .Select( a => this.GetTemplatingScope( a, compileTimeReturnsRunTimeOnly  ) )
+                .Select( a => this.GetTemplatingScope( a, compileTimeReturnsRunTimeOnly ) )
                 .FirstOrDefault( s => s != null );
 
             if ( scopeFromAttributes != null )
@@ -505,7 +507,7 @@ namespace Metalama.Framework.Engine.CompileTime
             // From declaring type.
             if ( symbol.ContainingType != null )
             {
-                var scopeFromContainingType = this.GetScopeFromAttributes( symbol.ContainingType);
+                var scopeFromContainingType = this.GetScopeFromAttributes( symbol.ContainingType );
 
                 if ( scopeFromContainingType != null )
                 {
@@ -638,7 +640,7 @@ namespace Metalama.Framework.Engine.CompileTime
         }
 
         [Flags]
-        enum GetTemplatingScopeOptions
+        private enum GetTemplatingScopeOptions
         {
             Default = 0,
             TypeParametersAreNeutral = 1

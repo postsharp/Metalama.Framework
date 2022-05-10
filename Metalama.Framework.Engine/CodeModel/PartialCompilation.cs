@@ -243,7 +243,7 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 // We need to add the SyntaxTree even if it does not contain any type.
                 trees.Add( syntaxTree );
-                
+
                 var semanticModel = compilation.GetSemanticModel( syntaxTree );
 
                 // Add all types in this syntax tree, as well as all base types.

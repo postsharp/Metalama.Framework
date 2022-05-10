@@ -191,8 +191,8 @@ internal class C : TypeAspect
 
             var compilation = testContext.CreateCompilationModel( code );
             var m1 = compilation.Types.OfName( "C" ).Single().Methods.OfName( "M1" ).Single();
-            this.AssertScope( m1, TemplatingScope.RunTimeOrCompileTime);
-            this.AssertScope(m1.ReturnType, TemplatingScope.RunTimeOrCompileTime );
+            this.AssertScope( m1, TemplatingScope.RunTimeOrCompileTime );
+            this.AssertScope( m1.ReturnType, TemplatingScope.RunTimeOrCompileTime );
 
             var m2 = compilation.Types.OfName( "C" ).Single().Methods.OfName( "M2" ).Single();
             this.AssertScope( m2, TemplatingScope.RunTimeOrCompileTime );
@@ -200,8 +200,7 @@ internal class C : TypeAspect
 
             var m3 = compilation.Types.OfName( "C" ).Single().Methods.OfName( "M3" ).Single();
             this.AssertScope( m3, TemplatingScope.RunTimeOrCompileTime );
-            this.AssertScope( m3.ReturnType, TemplatingScope.RunTimeOrCompileTime);
-
+            this.AssertScope( m3.ReturnType, TemplatingScope.RunTimeOrCompileTime );
         }
 
         [Fact]
@@ -237,7 +236,6 @@ internal class C : TypeAspect
             this.AssertScope( m3.Parameters[0].Type, TemplatingScope.RunTimeOnly );
             this.AssertScope( m3.Parameters[1].Type, TemplatingScope.RunTimeOnly );
             this.AssertScope( m3.Parameters[2].Type, TemplatingScope.RunTimeOnly );
-
         }
     }
 }
