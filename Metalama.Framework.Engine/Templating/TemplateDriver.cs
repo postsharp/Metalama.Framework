@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
@@ -28,15 +29,27 @@ namespace Metalama.Framework.Engine.Templating
 
         public bool TryExpandDeclaration(
             TemplateExpansionContext templateExpansionContext,
-            object?[] templateParameters,
+            object?[] templateArguments,
             [NotNullWhen( true )] out BlockSyntax? block )
         {
             var errorCountBefore = templateExpansionContext.DiagnosticSink.ErrorCount;
 
+            // The callers send TemplateTypeArgument in arguments, but we need to send the syntax to the template.
+            var fixedArguments =new object?[templateArguments.Length];
+            for ( var i = 0; i < templateArguments.Length; i++ )
+            {
+                var value = templateArguments[i];
+                fixedArguments[i] = value switch
+                {
+                    TemplateTypeArgument a => a.Syntax,
+                    _ => value
+                };
+            }
+
             using ( meta.WithImplementation( templateExpansionContext.MetaApi ) )
             {
                 if ( !this._userCodeInvoker.TryInvoke(
-                        () => (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, templateParameters ),
+                        () => (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, fixedArguments ),
                         templateExpansionContext,
                         out var output ) )
                 {

@@ -15,6 +15,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Advices
 {
+
     internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, MethodBuilder>
     {
         public BoundTemplateMethod BoundTemplate { get; }
@@ -46,6 +47,7 @@ namespace Metalama.Framework.Engine.Advices
             base.Initialize( diagnosticAdder );
 
             this.MemberBuilder.IsAsync = this.Template.Declaration!.IsAsync;
+            var typeRewriter = TemplateTypeRewriter.Get( this.BoundTemplate );
 
             // Handle return type.
             if ( this.Template.Declaration.ReturnParameter.Type.TypeKind == TypeKind.Dynamic )
@@ -55,7 +57,7 @@ namespace Metalama.Framework.Engine.Advices
             }
             else
             {
-                this.MemberBuilder.ReturnParameter.Type = this.Template.Declaration.ReturnParameter.Type;
+                this.MemberBuilder.ReturnParameter.Type = typeRewriter.Visit( this.Template.Declaration.ReturnParameter.Type );
                 this.MemberBuilder.ReturnParameter.RefKind = this.Template.Declaration.ReturnParameter.RefKind;
             }
 
@@ -70,7 +72,7 @@ namespace Metalama.Framework.Engine.Advices
 
                 var parameterBuilder = this.MemberBuilder.AddParameter(
                     templateParameter.Name,
-                    templateParameter.Type,
+                    typeRewriter.Visit( templateParameter.Type ),
                     templateParameter.RefKind,
                     templateParameter.DefaultValue );
 
@@ -91,7 +93,7 @@ namespace Metalama.Framework.Engine.Advices
 
                 foreach ( var templateGenericParameterConstraint in templateGenericParameter.TypeConstraints )
                 {
-                    genericParameterBuilder.AddTypeConstraint( templateGenericParameterConstraint );
+                    genericParameterBuilder.AddTypeConstraint(typeRewriter.Visit( templateGenericParameterConstraint ) );
                 }
 
                 CopyAttributes( templateGenericParameter.AssertNotNull(), genericParameterBuilder );

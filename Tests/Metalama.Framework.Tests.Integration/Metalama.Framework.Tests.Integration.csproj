@@ -55,6 +55,10 @@
           <SubType>Code</SubType>
           <DependentUpon>OverridePropertyAccessors.cs</DependentUpon>
         </None>
+        <None Include="Tests\Aspects\TemplateTypeParameter\IntroduceMethod.t.cs">
+          <SubType>Code</SubType>
+          <DependentUpon>IntroduceMethod.cs</DependentUpon>
+        </None>
         <None Include="Tests\Aspects\TemplateTypeParameter\TypeOf.t.cs">
           <SubType>Code</SubType>
           <DependentUpon>TypeOf.cs</DependentUpon>

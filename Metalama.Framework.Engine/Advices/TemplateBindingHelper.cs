@@ -19,6 +19,18 @@ using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.Advices
 {
+    internal class TemplateTypeArgument
+    {
+        public ExpressionSyntax Syntax { get; }
+        public IType Type { get; }
+
+        public TemplateTypeArgument( ExpressionSyntax syntax, IType type )
+        {
+            this.Syntax = syntax;
+            this.Type = type;
+        }
+    }
+
     [Obfuscation( Exclude = true )] // Not obfuscated to have a decent call stack in case of user exception.
     internal static class TemplateBindingHelper
     {
@@ -228,18 +240,17 @@ namespace Metalama.Framework.Engine.Advices
                                 $"No value has been provided for the type parameter '{parameter.Name}' of template '{template.Declaration}'." ) );
                     }
 
-                    ITypeSymbol typeSymbol;
+                    IType typeModel;
 
                     switch ( parameterValue )
                     {
                         case IType type:
-                            typeSymbol = type.GetSymbol().AssertNotNull();
+                            typeModel = type;
 
                             break;
 
                         case Type type:
-                            typeSymbol = TypeFactory.Implementation.GetTypeByReflectionType( type ).GetSymbol().AssertNotNull();
-
+                            typeModel = TypeFactory.Implementation.GetTypeByReflectionType( type );
                             break;
 
                         default:
@@ -248,7 +259,10 @@ namespace Metalama.Framework.Engine.Advices
                                     $"The value of parameter '{parameter.Name}' for template '{template.Declaration}' must be of type IType or Type." ) );
                     }
 
-                    templateParameters.Add( OurSyntaxGenerator.CompileTime.Type( typeSymbol ) );
+                    var syntax = OurSyntaxGenerator.CompileTime.Type( typeModel.GetSymbol() ).AssertNotNull();
+
+
+                    templateParameters.Add( new TemplateTypeArgument( syntax, typeModel ) );
                 }
             }
 

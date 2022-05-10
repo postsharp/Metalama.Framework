@@ -2,6 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
@@ -25,7 +27,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this._typeSymbol = typeSymbol;
         }
 
-        public TypeKind TypeKind => TypeKind.GenericParameter;
+        public TypeKind TypeKind => TypeKind.TypeParameter;
 
         public SpecialType SpecialType => SpecialType.None;
 
@@ -108,5 +110,8 @@ namespace Metalama.Framework.Engine.CodeModel
         public bool Equals( IType other ) => SymbolEqualityComparer.Default.Equals( this._typeSymbol, ((ITypeInternal) other).TypeSymbol );
 
         public override string ToString() => this.ContainingDeclaration + "/" + this.Name;
+
+        public ITypeInternal Accept( TypeRewriter  visitor ) => visitor.Visit( this );
+
     }
 }

@@ -36,7 +36,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public void AddTypeConstraint( Type type ) => this._typeConstraints.Add( this.Compilation.Factory.GetTypeByReflectionType( type ) );
 
-        TypeKind IType.TypeKind => TypeKind.GenericParameter;
+        TypeKind IType.TypeKind => TypeKind.TypeParameter;
 
         public SpecialType SpecialType => SpecialType.None;
 
