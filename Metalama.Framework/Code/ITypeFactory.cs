@@ -11,7 +11,7 @@ namespace Metalama.Framework.Code
     /// Allows to get instances of the <see cref="IType"/> interface or to test for type equality or inheritance.
     /// </summary>
     [CompileTime]
-    public interface ITypeFactory
+    internal interface ITypeFactory
     {
         /// <summary>
         /// Get type based on its full name, as used in reflection.
@@ -32,8 +32,6 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets an <see cref="IType"/> given a reflection <see cref="Type"/>.
         /// </summary>
-        /// <param name="type"></param>
-        /// <returns></returns>
         IType GetTypeByReflectionType( Type type );
 
         /// <summary>

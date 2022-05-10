@@ -83,8 +83,10 @@ namespace Metalama.Framework.Tests.Integration.Runners
             {
                 if ( this._parent.IsTemplate( node ) )
                 {
+                    var symbol = this._parent._semanticModel.GetDeclaredSymbol( node ).AssertNotNull();
+
                     if ( !this._parent._templateCompiler.TryCompile(
-                            TemplateNameHelper.GetCompiledTemplateName( node.Identifier.ValueText ),
+                            TemplateNameHelper.GetCompiledTemplateName( symbol ),
                             this._compileTimeCompilation,
                             node,
                             TemplateCompilerSemantics.Default,

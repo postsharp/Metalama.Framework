@@ -21,7 +21,7 @@ namespace Metalama.Framework.Code.SyntaxBuilders
         /// <summary>
         /// Creates a compile-time <see cref="IExpression"/> from the current <see cref="ExpressionBuilder"/>.
         /// </summary>
-        public IExpression ToExpression() => meta.ParseExpression( this.StringBuilder.ToString() );
+        public IExpression ToExpression() => ExpressionFactory.Parse( this.StringBuilder.ToString() );
 
         /// <summary>
         /// Returns a clone of the current <see cref="ExpressionBuilder"/>.

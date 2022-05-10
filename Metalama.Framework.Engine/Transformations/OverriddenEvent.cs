@@ -159,7 +159,7 @@ namespace Metalama.Framework.Engine.Transformations
                     MethodKind.EventRemove => this.CreateRemoveExpression( generationContext ),
                     _ => throw new AssertionFailedException()
                 },
-                this.OverriddenDeclaration.Compilation.TypeFactory.GetSpecialType( SpecialType.Void ),
+                this.OverriddenDeclaration.Compilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.Void ),
                 context.SyntaxGenerationContext );
 
             var metaApi = MetaApi.ForEvent(

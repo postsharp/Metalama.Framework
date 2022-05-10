@@ -129,7 +129,7 @@ namespace Metalama.Framework.CompilerExtensions
 
                 using var log = File.CreateText( Path.Combine( _snapshotDirectory, $"extract-{Guid.NewGuid()}.log" ) );
 
-                var mutexName = "Global\\Metalama_Extract_" + AssemblyMetadataReader.BuildId;
+                var mutexName = "Global\\Metalama_Extract_" + EngineAssemblyMetadataReader.Instance.BuildId;
 
                 log.WriteLine( $"Extracting resources..." );
 

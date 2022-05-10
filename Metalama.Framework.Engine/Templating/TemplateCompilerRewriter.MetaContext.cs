@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
-using System.Linq;
+using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Templating
 {
@@ -58,7 +58,7 @@ namespace Metalama.Framework.Engine.Templating
                 var templateCodeSymbolNameLocals =
                     parentContext?._templateCodeSymbolNameLocals ?? new Dictionary<ISymbol, SyntaxToken>( SymbolEqualityComparer.Default );
 
-                var templateLexicalScope = parentContext?._templateUniqueNames ?? new TemplateLexicalScope( Enumerable.Empty<ISymbol>() );
+                var templateLexicalScope = parentContext?._templateUniqueNames ?? new TemplateLexicalScope( ImmutableHashSet<string>.Empty );
 
                 return new MetaContext( statementListVariableName, generatedCodeSymbolNameLocals, templateCodeSymbolNameLocals, templateLexicalScope );
             }

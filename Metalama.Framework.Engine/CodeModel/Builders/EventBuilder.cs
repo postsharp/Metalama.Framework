@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         {
             this.Name = name;
             this._isEventField = isEventField;
-            this.Type = (INamedType) targetType.Compilation.TypeFactory.GetTypeByReflectionType( typeof(EventHandler) );
+            this.Type = (INamedType) targetType.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(EventHandler) );
         }
 
         public override string Name { get; set; }

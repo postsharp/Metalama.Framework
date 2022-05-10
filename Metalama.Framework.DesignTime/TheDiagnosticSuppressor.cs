@@ -38,8 +38,17 @@ namespace Metalama.Framework.DesignTime
 
         public TheDiagnosticSuppressor( IServiceProvider serviceProvider )
         {
-            this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
-            this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
+            try
+            {
+                this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
+                this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
+            }
+            catch ( Exception e ) when ( DesignTimeExceptionHandler.MustHandle( e ) )
+            {
+                DesignTimeExceptionHandler.ReportException( e );
+
+                throw;
+            }
         }
 
         public override void ReportSuppressions( SuppressionAnalysisContext context )

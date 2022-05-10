@@ -36,7 +36,7 @@ namespace Metalama.Framework.Code
                 }
                 else
                 {
-                    return this._method.Compilation.TypeFactory.GetSpecialType( SpecialType.Object );
+                    return TypeFactory.GetType( SpecialType.Object );
                 }
             }
         }

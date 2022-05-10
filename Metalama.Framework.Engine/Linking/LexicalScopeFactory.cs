@@ -3,14 +3,19 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.Linking
 {
-    internal sealed class LexicalScopeFactory : ITemplateLexicalScopeProvider
+    internal sealed partial class LexicalScopeFactory : ITemplateLexicalScopeProvider
     {
         private readonly Dictionary<IDeclaration, TemplateLexicalScope> _scopes;
 
@@ -19,75 +24,90 @@ namespace Metalama.Framework.Engine.Linking
             this._scopes = new Dictionary<IDeclaration, TemplateLexicalScope>( compilation.InvariantComparer );
         }
 
+        /// <summary>
+        /// Gets a shared lexical code where consumers can add their own symbols.
+        /// </summary>
         public TemplateLexicalScope GetLexicalScope( IDeclaration declaration )
         {
             if ( !this._scopes.TryGetValue( declaration, out var lexicalScope ) )
             {
-                switch ( declaration )
+                this._scopes[declaration] = lexicalScope = GetSourceLexicalScope( declaration );
+            }
+
+            return lexicalScope;
+        }
+
+        /// <summary>
+        /// Gets the lexical scope from source code.
+        /// </summary>
+        internal static TemplateLexicalScope GetSourceLexicalScope( IDeclaration declaration )
+        {
+            var symbol = declaration.GetSymbol();
+
+            if ( symbol == null )
+            {
+                return new TemplateLexicalScope( ImmutableHashSet<string>.Empty );
+            }
+
+            var builder = ImmutableHashSet.CreateBuilder<string>();
+
+            var syntaxReference = symbol.GetPrimarySyntaxReference();
+
+            // Event fields have accessors without declaring syntax references.
+            if ( syntaxReference == null )
+            {
+                switch ( symbol )
                 {
-                    case Method { ContainingDeclaration: Event } sourceAccessor:
-                        this._scopes[declaration] = lexicalScope = new TemplateLexicalScope( sourceAccessor.LookupSymbols() );
+                    case IMethodSymbol { MethodKind: RoslynMethodKind.EventAdd or RoslynMethodKind.EventRemove } eventAccessorSymbol:
+                        syntaxReference = eventAccessorSymbol.AssociatedSymbol.AssertNotNull().GetPrimarySyntaxReference();
 
-                        break;
-
-                    case Method { ContainingDeclaration: Property } sourceAccessor:
-                        this._scopes[declaration] = lexicalScope = new TemplateLexicalScope( sourceAccessor.LookupSymbols() );
-
-                        break;
-
-                    case Method sourceMethod:
-                        this._scopes[declaration] = lexicalScope = new TemplateLexicalScope( sourceMethod.LookupSymbols() );
-
-                        break;
-
-                    case Property sourceProperty:
-                        this._scopes[declaration] = lexicalScope = new TemplateLexicalScope( sourceProperty.LookupSymbols() );
-
-                        break;
-
-                    case Event sourceEvent:
-                        this._scopes[declaration] = lexicalScope = new TemplateLexicalScope( sourceEvent.LookupSymbols() );
-
-                        break;
-
-                    case MethodBuilder { DeclaringType: NamedType containingType }:
-                        this._scopes[declaration] = lexicalScope = new TemplateLexicalScope( containingType.LookupSymbols() );
-
-                        break;
-
-                    case IMethod { ContainingDeclaration: MemberBuilder { DeclaringType: NamedType containingType } _ }:
-                        this._scopes[declaration] = lexicalScope = new TemplateLexicalScope( containingType.LookupSymbols() );
-
-                        break;
-
-                    case FieldBuilder { DeclaringType: NamedType containingType }:
-                        this._scopes[declaration] = lexicalScope = new TemplateLexicalScope( containingType.LookupSymbols() );
-
-                        break;
-
-                    case EventBuilder { DeclaringType: NamedType containingType }:
-                        this._scopes[declaration] = lexicalScope = new TemplateLexicalScope( containingType.LookupSymbols() );
-
-                        break;
-
-                    case PropertyBuilder { DeclaringType: NamedType containingType }:
-                        this._scopes[declaration] = lexicalScope = new TemplateLexicalScope( containingType.LookupSymbols() );
-
-                        break;
-
-                    case NamedType namedType:
-                        this._scopes[declaration] = lexicalScope = new TemplateLexicalScope( namedType.LookupSymbols() );
+                        if ( syntaxReference == null )
+                        {
+                            throw new AssertionFailedException();
+                        }
 
                         break;
 
                     default:
-                        // GetLexicalScope must be called first with the ICodeElementBuilder. In this flow,
-                        // we don't have the target SyntaxTree, so we cannot compute the lexical scope.
                         throw new AssertionFailedException();
                 }
             }
 
-            return lexicalScope;
+            var semanticModel = declaration.GetCompilationModel().RoslynCompilation.GetSemanticModel( syntaxReference.SyntaxTree );
+
+            // Accessors have implicit "value" parameter.
+            if ( symbol is IMethodSymbol { MethodKind: RoslynMethodKind.PropertySet or RoslynMethodKind.EventAdd or RoslynMethodKind.EventRemove } )
+            {
+                builder.Add( "value" );
+            }
+
+            // Get the symbols defined outside of the declaration.
+            var bodyNode =
+                syntaxReference.GetSyntax() switch
+                {
+                    MethodDeclarationSyntax methodDeclaration => (SyntaxNode?) methodDeclaration.Body ?? methodDeclaration.ExpressionBody,
+                    AccessorDeclarationSyntax accessorDeclaration => (SyntaxNode?) accessorDeclaration.Body ?? accessorDeclaration.ExpressionBody,
+                    ArrowExpressionClauseSyntax _ => null,
+                    PropertyDeclarationSyntax _ => null,
+                    EventDeclarationSyntax _ => null,
+                    VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax } } => null,
+                    BaseTypeDeclarationSyntax _ => null,
+                    LocalFunctionStatementSyntax localFunction => (SyntaxNode?) localFunction.Body ?? localFunction.ExpressionBody,
+                    _ => throw new AssertionFailedException( $"Don't know how to get the body of a {syntaxReference.GetSyntax().Kind()}" )
+                };
+
+            var lookupPosition = bodyNode != null ? bodyNode.Span.Start : syntaxReference.Span.Start;
+
+            foreach ( var definedSymbol in semanticModel.LookupSymbols( lookupPosition ) )
+            {
+                builder.Add( definedSymbol.Name );
+            }
+
+            // Get the symbols defined in the declaration.
+            var visitor = new Visitor( builder );
+            visitor.Visit( syntaxReference.GetSyntax() );
+
+            return new TemplateLexicalScope( builder.ToImmutable() );
         }
     }
 }

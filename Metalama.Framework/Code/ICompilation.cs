@@ -32,11 +32,6 @@ namespace Metalama.Framework.Code
         INamedTypeList Types { get; }
 
         /// <summary>
-        /// Gets a service that allows to create type instances and compare them.
-        /// </summary>
-        ITypeFactory TypeFactory { get; }
-
-        /// <summary>
         /// Gets the list of managed resources in the current compilation.
         /// </summary>
         [Obsolete( "Not implemented." )]
@@ -87,5 +82,7 @@ namespace Metalama.Framework.Code
         /// Gets the version of the current compilation in the Metalama pipeline. This number is only informational.
         /// </summary>
         int Revision { get; }
+
+        IDeclaration? GetDeclarationFromId( string declarationId );
     }
 }
