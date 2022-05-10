@@ -55,7 +55,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal class TypeParameterRewriter : TypeRewriter
         {
-            private IReadOnlyDictionary<string, IType> _substitutions;
+            private readonly IReadOnlyDictionary<string, IType> _substitutions;
 
             public TypeParameterRewriter( IReadOnlyDictionary<string, IType> substitutions )
             {

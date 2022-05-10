@@ -9,6 +9,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
+#pragma warning disable CS8618, CS0649
+
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParameter.InjectionSample
 {
 
