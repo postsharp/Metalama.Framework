@@ -22,7 +22,7 @@ internal class TypeOfRewriter
             syntaxGenerationContext.SyntaxGenerator.Type( syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(CompileTimeType) ) );
     }
 
-    public ExpressionSyntax RewriteTypeOf( ITypeSymbol typeSymbol )
+    public ExpressionSyntax RewriteTypeOf( ITypeSymbol typeSymbol, ExpressionSyntax? substitutions = null )
     {
         if ( typeSymbol is INamedTypeSymbol { IsUnboundGenericType: true } namedType
              && namedType.TypeArguments[0].Kind == SymbolKind.ErrorType )
@@ -36,7 +36,7 @@ internal class TypeOfRewriter
             MemberAccessExpression(
                 SyntaxKind.SimpleMemberAccessExpression,
                 this._compileTimeTypeName,
-                IdentifierName( nameof(CompileTimeType.GetCompileTimeType) ) );
+                IdentifierName( nameof(CompileTimeType.GetWithSubstitutions) ) );
 
         var invocation = InvocationExpression(
             memberAccess,
@@ -45,7 +45,7 @@ internal class TypeOfRewriter
                     new[]
                     {
                         Argument( SyntaxFactoryEx.LiteralExpression( typeSymbol.GetSymbolId().ToString() ) ),
-                        Argument( SyntaxFactoryEx.LiteralExpression( typeSymbol.GetReflectionName() ) )
+                        Argument( substitutions ?? SyntaxFactoryEx.Null )
                     } ) ) );
 
         return invocation;

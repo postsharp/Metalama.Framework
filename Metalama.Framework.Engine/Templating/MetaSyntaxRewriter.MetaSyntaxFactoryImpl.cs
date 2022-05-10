@@ -24,6 +24,8 @@ namespace Metalama.Framework.Engine.Templating
                 this._reflectionMapper = serviceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( compileTimeCompilation );
             }
 
+            public ReflectionMapper ReflectionMapper => this._reflectionMapper;
+
             public ExpressionSyntax Null => this.LiteralExpression( this.Kind( SyntaxKind.NullLiteralExpression ) );
 
             public ExpressionSyntax Default

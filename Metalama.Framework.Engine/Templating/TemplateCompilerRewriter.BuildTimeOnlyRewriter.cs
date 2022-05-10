@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     var typeId = SymbolId.Create( typeSymbol ).Id;
 
-                    return this._parent._typeOfRewriter.RewriteTypeOf( typeSymbol )
+                    return this._parent._typeOfRewriter.RewriteTypeOf( typeSymbol, this._parent.CreateTypeParameterSubstitutionDictionary( nameof( TemplateTypeArgument.Syntax ) ) )
                         .WithAdditionalAnnotations( new SyntaxAnnotation( _rewrittenTypeOfAnnotation, typeId ) );
                 }
                 else

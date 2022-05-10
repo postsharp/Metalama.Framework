@@ -40,6 +40,7 @@ namespace Metalama.Framework.Engine.Templating
         private readonly TemplateMemberClassifier _templateMemberClassifier;
         private readonly CompileTimeOnlyRewriter _compileTimeOnlyRewriter;
         private readonly TypeOfRewriter _typeOfRewriter;
+        private readonly TypeSyntax _templateTypeArgumentType;
         private readonly HashSet<string> _templateCompileTimeTypeParameterNames = new();
         private MetaContext? _currentMetaContext;
         private int _nextStatementListId;
@@ -66,7 +67,12 @@ namespace Metalama.Framework.Engine.Templating
             this._templateMetaSyntaxFactory = new TemplateMetaSyntaxFactoryImpl( this.MetaSyntaxFactory );
             this._templateMemberClassifier = new TemplateMemberClassifier( runTimeCompilation, syntaxTreeAnnotationMap, serviceProvider );
             this._compileTimeOnlyRewriter = new CompileTimeOnlyRewriter( this );
-            this._typeOfRewriter = new TypeOfRewriter( SyntaxGenerationContext.CreateDefault( serviceProvider, compileTimeCompilation ) );
+
+            var syntaxGenerationContext = SyntaxGenerationContext.CreateDefault( serviceProvider, compileTimeCompilation );
+            this._typeOfRewriter = new TypeOfRewriter( syntaxGenerationContext );
+
+            this._templateTypeArgumentType =
+            syntaxGenerationContext.SyntaxGenerator.Type( this.MetaSyntaxFactory.ReflectionMapper.GetTypeSymbol( typeof( TemplateTypeArgument ) ) );
         }
 
         public bool Success { get; private set; } = true;
@@ -491,7 +497,7 @@ namespace Metalama.Framework.Engine.Templating
                             return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.TypeOf) ) )
                                 .AddArgumentListArguments(
                                     Argument( SyntaxFactoryEx.LiteralExpression( typeOfAnnotation.Data! ) ),
-                                    Argument( this.CreateTypeParameterSubstitutionDictionary() ) );
+                                    Argument( this.CreateTypeParameterSubstitutionDictionary( nameof( TemplateTypeArgument.Syntax ) ) ) );
                         }
 
                         break;
@@ -523,7 +529,7 @@ namespace Metalama.Framework.Engine.Templating
                         return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.TypeOf) ) )
                             .AddArgumentListArguments(
                                 Argument( SyntaxFactoryEx.LiteralExpression( typeId ) ),
-                                Argument( this.CreateTypeParameterSubstitutionDictionary() ) );
+                                Argument( this.CreateTypeParameterSubstitutionDictionary( nameof( TemplateTypeArgument.Syntax ) ) ) );
                     }
             }
 
@@ -531,15 +537,18 @@ namespace Metalama.Framework.Engine.Templating
 
             var expressionType = this._syntaxTreeAnnotationMap.GetExpressionType( expression )!;
 
-            if ( (symbol is IParameterSymbol parameter && this._templateMemberClassifier.IsRunTimeTemplateParameter( parameter )) ||
-                 (symbol is ITypeParameterSymbol typeParameter && this._templateMemberClassifier.IsCompileTemplateTypeParameter( typeParameter )) )
+            if ( symbol is IParameterSymbol parameter && this._templateMemberClassifier.IsRunTimeTemplateParameter( parameter ))                  
             {
                 // Run-time template parameters are always bound to a run-time meta-expression.
                 return expression;
             }
+            else if ( symbol is ITypeParameterSymbol typeParameter && this._templateMemberClassifier.IsCompileTemplateTypeParameter( typeParameter ) )
+            {
+                return SyntaxFactory.MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, expression, SyntaxFactory.IdentifierName( nameof(TemplateTypeArgument.Syntax ) ) );
+            }
 
-            // A local function that wraps the input `expression` into a LiteralExpression.
-            ExpressionSyntax CreateRunTimeExpressionForLiteralCreateExpressionFactory( SyntaxKind syntaxKind )
+                // A local function that wraps the input `expression` into a LiteralExpression.
+                ExpressionSyntax CreateRunTimeExpressionForLiteralCreateExpressionFactory( SyntaxKind syntaxKind )
             {
                 InvocationExpressionSyntax literalExpression;
 
@@ -637,7 +646,7 @@ namespace Metalama.Framework.Engine.Templating
             }
         }
 
-        private ExpressionSyntax CreateTypeParameterSubstitutionDictionary()
+        private ExpressionSyntax CreateTypeParameterSubstitutionDictionary(string propertyName)
         {
             if ( this._templateCompileTimeTypeParameterNames.Count == 0 )
             {
@@ -662,7 +671,7 @@ namespace Metalama.Framework.Engine.Templating
                                                                 LiteralExpression(
                                                                     SyntaxKind.StringLiteralExpression,
                                                                     Literal( name ) ) ) ) ) ),
-                                            IdentifierName( name ) ) ) ) ) )
+                                            MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, IdentifierName( name ), IdentifierName( propertyName ) ) ) ) ) ) )
                     .NormalizeWhitespace();
             }
         }
@@ -958,7 +967,8 @@ namespace Metalama.Framework.Engine.Templating
                     if ( isCompileTime )
                     {
                         this._templateCompileTimeTypeParameterNames.Add( parameter.Identifier.Text );
-                        templateParameters.Add( Parameter( default, default, SyntaxFactoryEx.TypeSyntaxType, parameter.Identifier, null ) );
+                        
+                        templateParameters.Add( Parameter( default, default, this._templateTypeArgumentType, parameter.Identifier, null ) );
                     }
                 }
             }
@@ -1358,10 +1368,13 @@ namespace Metalama.Framework.Engine.Templating
                         break;
 
                     case InterpolationSyntax interpolation:
-                        if ( this.GetTransformationKind( interpolation ) == TransformationKind.None )
+                        if ( this.GetTransformationKind( interpolation ) == TransformationKind.None &&
+                            !interpolation.Expression.IsKind( SyntaxKind.TypeOfExpression ) )
                         {
                             // We have a compile-time interpolation (e.g. formatting string argument).
                             // We can evaluate it at compile time and add it as a text content.
+
+                            // typeof was skipped because it is always annotated as compile time but actually always transformed.
 
                             var compileTimeInterpolatedString =
                                 InterpolatedStringExpression(
@@ -1645,7 +1658,10 @@ namespace Metalama.Framework.Engine.Templating
                     // parameter.
                     else if ( this._templateCompileTimeTypeParameterNames.Contains( node.Identifier.Text ) )
                     {
-                        return IdentifierName( node.Identifier );
+                        return MemberAccessExpression( 
+                            SyntaxKind.SimpleMemberAccessExpression, 
+                            IdentifierName( node.Identifier ), 
+                            IdentifierName(nameof(TemplateTypeArgument.Syntax)));
                     }
                 }
             }
@@ -1794,7 +1810,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 var typeId = SymbolId.Create( typeSymbol ).Id;
 
-                return this._typeOfRewriter.RewriteTypeOf( typeSymbol ).WithAdditionalAnnotations( new SyntaxAnnotation( _rewrittenTypeOfAnnotation, typeId ) );
+                return this._typeOfRewriter.RewriteTypeOf( typeSymbol, this.CreateTypeParameterSubstitutionDictionary( nameof( TemplateTypeArgument.Type ) ) ).WithAdditionalAnnotations( new SyntaxAnnotation( _rewrittenTypeOfAnnotation, typeId ) );
             }
 
             return base.VisitTypeOfExpression( node );

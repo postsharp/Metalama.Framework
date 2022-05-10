@@ -4,18 +4,18 @@
 using Metalama.Framework.Code;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Metalama.Framework.Engine.Advices
+namespace Metalama.Framework.Engine.Templating
 {
     /// <summary>
     /// Value of a template type argument. 
     /// </summary>
-    internal class TemplateTypeArgument
+    public class TemplateTypeArgument
     {
-        public ExpressionSyntax Syntax { get; }
+        public TypeSyntax Syntax { get; }
 
         public IType Type { get; }
 
-        public TemplateTypeArgument( ExpressionSyntax syntax, IType type )
+        internal TemplateTypeArgument( TypeSyntax syntax, IType type )
         {
             this.Syntax = syntax;
             this.Type = type;
