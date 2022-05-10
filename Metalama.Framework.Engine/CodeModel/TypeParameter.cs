@@ -2,8 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
@@ -111,7 +109,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override string ToString() => this.ContainingDeclaration + "/" + this.Name;
 
-        public ITypeInternal Accept( TypeRewriter  visitor ) => visitor.Visit( this );
-
+        public ITypeInternal Accept( TypeRewriter visitor ) => visitor.Visit( this );
     }
 }

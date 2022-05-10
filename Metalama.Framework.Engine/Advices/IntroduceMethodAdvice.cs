@@ -15,7 +15,6 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Advices
 {
-
     internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, MethodBuilder>
     {
         public BoundTemplateMethod BoundTemplate { get; }
@@ -93,7 +92,7 @@ namespace Metalama.Framework.Engine.Advices
 
                 foreach ( var templateGenericParameterConstraint in templateGenericParameter.TypeConstraints )
                 {
-                    genericParameterBuilder.AddTypeConstraint(typeRewriter.Visit( templateGenericParameterConstraint ) );
+                    genericParameterBuilder.AddTypeConstraint( typeRewriter.Visit( templateGenericParameterConstraint ) );
                 }
 
                 CopyAttributes( templateGenericParameter.AssertNotNull(), genericParameterBuilder );

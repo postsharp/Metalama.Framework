@@ -17,9 +17,10 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public virtual ITypeInternal Visit( IType elementType ) => ((ITypeInternal) elementType).Accept( this );
 
-
         internal virtual ITypeInternal Visit( DynamicType dynamicType ) => dynamicType;
+
         internal virtual ITypeInternal Visit( PointerType pointerType ) => pointerType.WithPointedAtType( this.Visit( pointerType.PointedAtType ) );
+
         internal virtual ITypeInternal Visit( NamedType namedType )
         {
             if ( namedType.TypeArguments.Count == 0 )
@@ -28,22 +29,22 @@ namespace Metalama.Framework.Engine.CodeModel
             }
             else
             {
-                var typeArguments = ImmutableArray.CreateBuilder<IType>(namedType.TypeArguments.Count);
+                var typeArguments = ImmutableArray.CreateBuilder<IType>( namedType.TypeArguments.Count );
+
                 for ( var i = 0; i < namedType.TypeArguments.Count; i++ )
                 {
                     typeArguments.Add( this.Visit( namedType.TypeArguments[i] ) );
                 }
+
                 return namedType.WithTypeArguments( typeArguments.MoveToImmutable() );
             }
         }
 
         internal virtual ITypeInternal Visit( TypeParameter typeParameter ) => typeParameter;
 
-
-        class NullRewriter : TypeRewriter
+        private class NullRewriter : TypeRewriter
         {
             public override ITypeInternal Visit( IType elementType ) => (ITypeInternal) elementType;
-
 
             internal override ITypeInternal Visit( ArrayType arrayType ) => arrayType;
 
@@ -55,9 +56,5 @@ namespace Metalama.Framework.Engine.CodeModel
 
             internal override ITypeInternal Visit( TypeParameter typeParameter ) => typeParameter;
         }
-
     }
-
-    
-
 }

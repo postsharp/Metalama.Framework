@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.CodeModel
             throw new NotImplementedException();
         }
 
-        public override ITypeInternal Accept( TypeRewriter  visitor ) => visitor.Visit( this );
+        public override ITypeInternal Accept( TypeRewriter visitor ) => visitor.Visit( this );
 
         internal ITypeInternal WithPointedAt( ITypeInternal pointedAtType )
         {
@@ -35,6 +35,7 @@ namespace Metalama.Framework.Engine.CodeModel
             else
             {
                 var symbol = this.GetCompilationModel().RoslynCompilation.CreatePointerTypeSymbol( pointedAtType.GetSymbol() );
+
                 return (ITypeInternal) this.GetCompilationModel().Factory.GetIType( symbol );
             }
         }

@@ -6,10 +6,9 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal interface ITypeInternal : ISdkType 
+    internal interface ITypeInternal : ISdkType
     {
-        ITypeInternal Accept( TypeRewriter  visitor );
-   
+        ITypeInternal Accept( TypeRewriter visitor );
     }
 
     internal interface INamedTypeInternal : INamedType, ITypeInternal, IGenericInternal

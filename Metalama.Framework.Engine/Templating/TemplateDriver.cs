@@ -35,10 +35,12 @@ namespace Metalama.Framework.Engine.Templating
             var errorCountBefore = templateExpansionContext.DiagnosticSink.ErrorCount;
 
             // The callers send TemplateTypeArgument in arguments, but we need to send the syntax to the template.
-            var fixedArguments =new object?[templateArguments.Length];
+            var fixedArguments = new object?[templateArguments.Length];
+
             for ( var i = 0; i < templateArguments.Length; i++ )
             {
                 var value = templateArguments[i];
+
                 fixedArguments[i] = value switch
                 {
                     TemplateTypeArgument a => a.Syntax,

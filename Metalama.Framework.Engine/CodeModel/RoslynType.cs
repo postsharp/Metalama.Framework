@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
-using System.Collections.Generic;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
@@ -51,6 +50,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public bool Equals( IType other ) => this.Symbol.Equals( ((ITypeInternal) other).TypeSymbol );
 
         public override string ToString() => this.Symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat );
-        public abstract ITypeInternal Accept( TypeRewriter  visitor );
+
+        public abstract ITypeInternal Accept( TypeRewriter visitor );
     }
 }

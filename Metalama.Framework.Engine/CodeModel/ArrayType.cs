@@ -5,7 +5,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
-using System;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel
@@ -23,6 +22,7 @@ namespace Metalama.Framework.Engine.CodeModel
             else
             {
                 var symbol = this.GetCompilationModel().RoslynCompilation.CreateArrayTypeSymbol( elementType.GetSymbol(), this.Rank );
+
                 return (ITypeInternal) this.GetCompilationModel().Factory.GetIType( symbol );
             }
         }
@@ -34,7 +34,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public int Rank => this.Symbol.Rank;
 
-        public override ITypeInternal Accept( TypeRewriter  visitor ) => visitor.Visit( this );
-        
+        public override ITypeInternal Accept( TypeRewriter visitor ) => visitor.Visit( this );
     }
 }

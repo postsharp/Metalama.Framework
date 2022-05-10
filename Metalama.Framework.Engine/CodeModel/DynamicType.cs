@@ -13,7 +13,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override TypeKind TypeKind => TypeKind.Dynamic;
 
-        public override ITypeInternal Accept( TypeRewriter  visitor ) => visitor.Visit( this );
-       
+        public override ITypeInternal Accept( TypeRewriter visitor ) => visitor.Visit( this );
     }
 }

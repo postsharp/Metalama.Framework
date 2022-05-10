@@ -6,27 +6,27 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Advices
 {
-
     internal class TemplateTypeRewriter : TypeRewriter
     {
         private readonly BoundTemplateMethod _template;
 
-        public TemplateTypeRewriter( BoundTemplateMethod template  )
+        public TemplateTypeRewriter( BoundTemplateMethod template )
         {
             this._template = template;
         }
 
-
-        public static TypeRewriter Get( BoundTemplateMethod template ) => template.Template.TemplateClassMember.TypeParameters.All( x => !x.IsCompileTime) 
-            ? TypeRewriter.Null 
-            : new TemplateTypeRewriter( template );
+        public static TypeRewriter Get( BoundTemplateMethod template )
+            => template.Template.TemplateClassMember.TypeParameters.All( x => !x.IsCompileTime )
+                ? Null
+                : new TemplateTypeRewriter( template );
 
         internal override ITypeInternal Visit( TypeParameter typeParameter )
         {
-            if ( this._template.Template.TemplateClassMember.IndexedParameters.TryGetValue( typeParameter.Name, out var templateParameter ) 
-                && templateParameter.IsCompileTime )
+            if ( this._template.Template.TemplateClassMember.IndexedParameters.TryGetValue( typeParameter.Name, out var templateParameter )
+                 && templateParameter.IsCompileTime )
             {
                 var value = (TemplateTypeArgument) this._template.TemplateArguments[templateParameter.TemplateIndex!.Value]!;
+
                 return (ITypeInternal) value.Type;
             }
             else

@@ -6,7 +6,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -14,14 +13,13 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using SpecialType = Metalama.Framework.Code.SpecialType;
-using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.Advices
 {
     internal class TemplateTypeArgument
     {
         public ExpressionSyntax Syntax { get; }
+
         public IType Type { get; }
 
         public TemplateTypeArgument( ExpressionSyntax syntax, IType type )
@@ -251,6 +249,7 @@ namespace Metalama.Framework.Engine.Advices
 
                         case Type type:
                             typeModel = TypeFactory.Implementation.GetTypeByReflectionType( type );
+
                             break;
 
                         default:
@@ -260,7 +259,6 @@ namespace Metalama.Framework.Engine.Advices
                     }
 
                     var syntax = OurSyntaxGenerator.CompileTime.Type( typeModel.GetSymbol() ).AssertNotNull();
-
 
                     templateParameters.Add( new TemplateTypeArgument( syntax, typeModel ) );
                 }
