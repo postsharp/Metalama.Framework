@@ -67,7 +67,34 @@ namespace Metalama.Framework.Engine.Utilities
             };
 
         public static bool IsGenericTypeDefinition( this INamedTypeSymbol namedType )
-            => namedType.IsUnboundGenericType || namedType.TypeArguments.Any( a => a is ITypeParameterSymbol );
+        {
+            if ( namedType.IsUnboundGenericType )
+            {
+                return true;
+            }
+
+            if ( namedType.TypeArguments.Length != namedType.TypeParameters.Length )
+            {
+                return false;
+            }
+
+            for ( var i = 0; i < namedType.TypeArguments.Length; i++ )
+            {
+                if ( namedType.TypeArguments[i] is ITypeParameterSymbol p  )
+                {
+                    if ( !p.ContainingSymbol.Equals( namedType ) )
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
 
         public static bool AnyBaseType( this INamedTypeSymbol type, Predicate<INamedTypeSymbol> predicate )
         {

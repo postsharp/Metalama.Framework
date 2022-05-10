@@ -141,7 +141,7 @@ namespace Metalama.Framework.Engine.CodeModel
             return SyntaxFactory.CastExpression( this.Type( targetTypeSymbol ), expression ).WithAdditionalAnnotations( Simplifier.Annotation );
         }
 
-        public ExpressionSyntax NameExpression( INamespaceOrTypeSymbol symbol )
+        public ExpressionSyntax TypeOrNamespace( INamespaceOrTypeSymbol symbol )
         {
             ExpressionSyntax expression;
 

@@ -75,13 +75,13 @@ namespace Metalama.Framework.Engine.Templating
                 or IEventSymbol;
 
         public bool IsCompileTemplateTypeParameter( ITypeParameterSymbol typeParameter )
-            => IsTemplateTypeParameter( typeParameter ) && this._symbolClassifier.GetTemplatingScope( typeParameter ) == TemplatingScope.CompileTimeOnly;
+            => IsTemplateTypeParameter( typeParameter ) && this._symbolClassifier.GetTemplatingScope( typeParameter ).GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly;
 
         public bool IsCompileTimeParameter( IParameterSymbol parameter )
-            => this._symbolClassifier.GetTemplatingScope( parameter ) == TemplatingScope.CompileTimeOnly;
+            => this._symbolClassifier.GetTemplatingScope( parameter ).GetExpressionValueScope() == TemplatingScope.CompileTimeOnly;
 
         public bool IsCompileTimeParameter( ITypeParameterSymbol parameter )
-            => this._symbolClassifier.GetTemplatingScope( parameter ) == TemplatingScope.CompileTimeOnly;
+            => this._symbolClassifier.GetTemplatingScope( parameter ).GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly;
 
         public bool IsRunTimeMethod( IMethodSymbol symbol )
             => symbol.Name == nameof(meta.RunTime) &&
@@ -182,5 +182,6 @@ namespace Metalama.Framework.Engine.Templating
                 return MetaMemberKind.None;
             }
         }
+
     }
 }

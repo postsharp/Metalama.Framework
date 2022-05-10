@@ -74,7 +74,7 @@ class User {
                     Assert.Equal( "T3", m.ReturnType.Name );
                     Assert.Equal( "String", m.GetParameters()[0].ParameterType.Name );
                 },
-                @"((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Origin`1.NestedInOrigin`1.Method21(`0)~`1""), typeof(global::Origin<>.NestedInOrigin<>).TypeHandle))" );
+                @"((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Origin`1.NestedInOrigin`1.Method21(`0)~`1""), typeof(global::Origin<global::System.String>.NestedInOrigin<T3>).TypeHandle))" );
         }
 
         [Fact]

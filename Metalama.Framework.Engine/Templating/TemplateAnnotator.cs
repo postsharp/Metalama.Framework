@@ -144,14 +144,11 @@ namespace Metalama.Framework.Engine.Templating
                         ? TemplatingScope.CompileTimeOnly
                         : TemplatingScope.CompileTimeOnlyReturningRuntimeOnly;
 
-                // Template type parameters can be run-time or compile-time, but compile-time ones are evaluated as returning a run-time value
-                // because they are substituted with a run-time value.
+                // Template type parameters can be run-time or compile-time. If a template type parameter is not marked as compile-time, it is run-time (there is no scope-neutral).
                 case ITypeParameterSymbol typeParameter when TemplateMemberClassifier.IsTemplateTypeParameter( typeParameter ):
                     var typeParameterScope = this._symbolScopeClassifier.GetTemplatingScope( typeParameter );
 
-                    return typeParameterScope == TemplatingScope.CompileTimeOnly
-                        ? TemplatingScope.CompileTimeOnlyReturningRuntimeOnly
-                        : TemplatingScope.RunTimeOnly;
+                    return typeParameterScope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly ? typeParameterScope : TemplatingScope.RunTimeOnly;
 
                 case IMethodSymbol method when this._templateMemberClassifier.IsRunTimeMethod( method ):
                     // The TemplateContext.runTime method must be processed separately. It is a compile-time-only method whose
@@ -2052,9 +2049,18 @@ namespace Metalama.Framework.Engine.Templating
 
         public override SyntaxNode? VisitNullableType( NullableTypeSyntax node )
         {
-            var transformedNode = (NullableTypeSyntax) base.VisitNullableType( node )!;
+            var transformedElementType = this.Visit( node.ElementType )!;
+            var transformedNode = node.WithElementType( transformedElementType );
 
-            return transformedNode.WithScopeAnnotationFrom( transformedNode.ElementType );
+            var elementScope = transformedElementType.GetScopeFromAnnotation();
+
+            if ( elementScope != null )
+            {
+                transformedNode = transformedNode.AddScopeAnnotation( elementScope.Value.GetExpressionValueScope() );
+            }
+
+            return transformedNode;
+            
         }
 
         public override SyntaxNode? VisitObjectCreationExpression( ObjectCreationExpressionSyntax node )

@@ -1,8 +1,11 @@
 using System;
+using System.Collections.Generic;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParameters.OverrideMethod;
+
+#pragma warning disable CS0219
 
 public class Aspect : MethodAspect
 {
@@ -14,13 +17,18 @@ public class Aspect : MethodAspect
     }
 
     [Template]
-    private T Method<[CompileTime] T>() where T : IConvertible
+    private T Method<[CompileTime] T>() where T : class 
     {
+        // Try all possible type constructs.
         var x = default(T);
-        var t = (T)meta.Proceed();
-        var z = t.ToBoolean( null );
+        var t = (T) null!;
+        var t2 = (T?) null;
+        var t3 = (List<T>) null!;
+        var t4 = (T[]) null!;
+        var t5 = (List<T[]>) null!;
+        var t6 = (List<T>[]) null!;
 
-        return t;
+        return Target.GenericMethod<T>( (T) meta.Proceed()! );
     }
 }
 
@@ -28,5 +36,7 @@ public class Aspect : MethodAspect
 public class Target
 {
     [Aspect]
-    public int M() => 5;
+    public string M() => "";
+
+    public static T GenericMethod<T>(T x) => x;
 }

@@ -876,6 +876,7 @@ namespace Metalama.Framework.Engine.Templating
 
             return base.VisitInvocationExpression( node );
         }
+        HashSet<string> _templateCompileTimeTypeParameterNames = new();
 
         public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
         {
@@ -887,22 +888,7 @@ namespace Metalama.Framework.Engine.Templating
 
             this.Indent( 3 );
 
-            // Build the template body.
-            BlockSyntax body;
-
-            if ( node.Body != null )
-            {
-                body = (BlockSyntax) this.BuildRunTimeBlock( node.Body, false );
-            }
-            else
-            {
-                var isVoid = node.ReturnType is PredefinedTypeSyntax predefinedType && predefinedType.Keyword.IsKind( SyntaxKind.VoidKeyword );
-
-                body = (BlockSyntax) this.BuildRunTimeBlock(
-                    node.ExpressionBody.AssertNotNull().Expression,
-                    false,
-                    isVoid );
-            }
+         
 
             // Build the template parameter list.
             var templateParameters = new List<ParameterSyntax>( node.ParameterList.Parameters.Count + (node.TypeParameterList?.Parameters.Count ?? 0) );
@@ -921,6 +907,7 @@ namespace Metalama.Framework.Engine.Templating
                 templateParameters.Add( templateParameter );
             }
 
+            
             if ( node.TypeParameterList != null )
             {
                 foreach ( var parameter in node.TypeParameterList.Parameters )
@@ -930,14 +917,34 @@ namespace Metalama.Framework.Engine.Templating
 
                     if ( isCompileTime )
                     {
+                        _templateCompileTimeTypeParameterNames.Add( parameter.Identifier.Text );
                         templateParameters.Add( Parameter( default, default, SyntaxFactoryEx.TypeSyntaxType, parameter.Identifier, null ) );
                     }
                 }
             }
 
+            // Build the template body.
+            BlockSyntax body;
+
+            if ( node.Body != null )
+            {
+                body = (BlockSyntax) this.BuildRunTimeBlock( node.Body, false );
+            }
+            else
+            {
+                var isVoid = node.ReturnType is PredefinedTypeSyntax predefinedType && predefinedType.Keyword.IsKind( SyntaxKind.VoidKeyword );
+
+                body = (BlockSyntax) this.BuildRunTimeBlock(
+                    node.ExpressionBody.AssertNotNull().Expression,
+                    false,
+                    isVoid );
+            }
+
             var result = this.CreateTemplateMethod( node, body, ParameterList( SeparatedList( templateParameters ) ) );
 
             this.Unindent( 3 );
+
+            _templateCompileTimeTypeParameterNames.Clear();
 
             return result;
         }
@@ -1576,7 +1583,7 @@ namespace Metalama.Framework.Engine.Templating
 
                     if ( symbol is INamespaceOrTypeSymbol namespaceOrType )
                     {
-                        return this.Transform( OurSyntaxGenerator.CompileTime.NameExpression( namespaceOrType ) );
+                        return this.Transform( OurSyntaxGenerator.CompileTime.TypeOrNamespace( namespaceOrType ) );
                     }
                     else if ( symbol is { IsStatic: true } && node.Parent is not MemberAccessExpressionSyntax && node.Parent is not AliasQualifiedNameSyntax )
                     {
@@ -1589,15 +1596,25 @@ namespace Metalama.Framework.Engine.Templating
                                 // We have an access to a field or method with a "using static", or a non-qualified static member access.
                                 return this.MetaSyntaxFactory.MemberAccessExpression(
                                     this.MetaSyntaxFactory.Kind( SyntaxKind.SimpleMemberAccessExpression ),
-                                    this.Transform( OurSyntaxGenerator.CompileTime.NameExpression( symbol.ContainingType ) ),
+                                    this.Transform( OurSyntaxGenerator.CompileTime.TypeOrNamespace( symbol.ContainingType ) ),
                                     this.MetaSyntaxFactory.IdentifierName( SyntaxFactoryEx.LiteralExpression( node.Identifier.Text ) ) );
                         }
+                    }
+
+                    // When TryVisitNamespaceOrTypeName calls Transform with the result ot the syntax generator, Transform eventually
+                    // calls the current method for each compile-time parameter. We need to change it to the value of the template
+                    // parameter.
+                    else if ( this._templateCompileTimeTypeParameterNames.Contains( node.Identifier.Text ))
+                    {
+                        return IdentifierName( node.Identifier );
                     }
                 }
             }
 
             return base.VisitIdentifierName( node );
         }
+
+        
 
         private ExpressionSyntax WithCallToAddSimplifierAnnotation( ExpressionSyntax expression )
             => InvocationExpression(
@@ -1618,7 +1635,8 @@ namespace Metalama.Framework.Engine.Templating
             switch ( symbol )
             {
                 case INamespaceOrTypeSymbol namespaceOrType:
-                    var nameExpression = OurSyntaxGenerator.CompileTime.NameExpression( namespaceOrType );
+                    // If we have a generic type, we do not write the generic arguments.
+                    var nameExpression = OurSyntaxGenerator.CompileTime.TypeOrNamespace( namespaceOrType );
 
                     transformedNode = this.GetTransformationKind( node ) == TransformationKind.Transform
                         ? this.WithCallToAddSimplifierAnnotation( this.Transform( nameExpression ) )
@@ -1671,9 +1689,10 @@ namespace Metalama.Framework.Engine.Templating
 
         public override SyntaxNode VisitGenericName( GenericNameSyntax node )
         {
-            if ( this.TryVisitNamespaceOrTypeName( node, out var transformedNode ) )
+           
+            if ( this.TryVisitNamespaceOrTypeName( node, out var transformedTypeName ) )
             {
-                return transformedNode;
+                return transformedTypeName;
             }
             else
             {
@@ -1735,8 +1754,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 return this.TransformTypeOfExpression( node );
             }
-
-            if ( this._syntaxTreeAnnotationMap.GetSymbol( node.Type ) is ITypeSymbol typeSymbol )
+            else             if ( this._syntaxTreeAnnotationMap.GetSymbol( node.Type ) is ITypeSymbol typeSymbol )
             {
                 var typeId = SymbolId.Create( typeSymbol ).Id;
 
