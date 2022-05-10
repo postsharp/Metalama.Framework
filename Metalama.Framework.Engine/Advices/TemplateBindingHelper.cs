@@ -16,19 +16,6 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Advices
 {
-    internal class TemplateTypeArgument
-    {
-        public ExpressionSyntax Syntax { get; }
-
-        public IType Type { get; }
-
-        public TemplateTypeArgument( ExpressionSyntax syntax, IType type )
-        {
-            this.Syntax = syntax;
-            this.Type = type;
-        }
-    }
-
     [Obfuscation( Exclude = true )] // Not obfuscated to have a decent call stack in case of user exception.
     internal static class TemplateBindingHelper
     {
