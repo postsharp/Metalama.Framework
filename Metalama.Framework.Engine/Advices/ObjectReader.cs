@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Advices
                 null => Empty,
                 IObjectReader objectReader => objectReader,
                 IReadOnlyDictionary<string, object?> dictionary => new DictionaryWrapper( dictionary ),
-               _ => new ObjectReader( instance )
+                _ => new ObjectReader( instance )
             };
 
         private readonly TypeAdapter _typeAdapter;

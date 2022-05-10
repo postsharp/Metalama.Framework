@@ -34,13 +34,12 @@ namespace Metalama.Framework.Engine.ReflectionMocks
             this.FullName = fullName;
             this.Target = typeSymbol;
         }
-        
+
         public static Type Get( string id, string fullMetadataName )
             => UserCodeExecutionContext.Current.ServiceProvider.GetRequiredService<CompileTimeTypeFactory>().Get( new SymbolId( id ), fullMetadataName );
 
         public static Type GetWithSubstitutions( string id, Dictionary<string, IType>? substitutions = null )
             => UserCodeExecutionContext.Current.ServiceProvider.GetRequiredService<CompileTimeTypeFactory>().Get( new SymbolId( id ), substitutions );
-
 
         internal static Type CreateFromSymbolId( SymbolId symbolId, string fullMetadataName )
             => new CompileTimeType( Ref.FromSymbolId<IType>( symbolId ), fullMetadataName );

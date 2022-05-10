@@ -69,7 +69,7 @@ namespace Metalama.Framework.Engine.CompileTime
             this._cacheDirectory = serviceProvider.GetRequiredService<IPathOptions>().AssemblyLocatorCacheDirectory;
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( nameof(ReferenceAssemblyLocator) );
 
-            var platformInfo = (IPlatformInfo?) serviceProvider.GetService( typeof( IPlatformInfo ) );
+            var platformInfo = (IPlatformInfo?) serviceProvider.GetService( typeof(IPlatformInfo) );
 
             if ( platformInfo != null )
             {

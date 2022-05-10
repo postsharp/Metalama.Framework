@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Engine.Advices;
@@ -42,12 +41,11 @@ namespace Metalama.Framework.Engine.CodeModel
 
             if ( substitutions != null && substitutions.Count > 0 )
             {
-                
                 var originalType = compilation.Factory.GetIType( originalSymbol );
                 var rewriter = new TypeParameterRewriter( substitutions );
                 var rewrittenTypeSymbol = rewriter.Visit( originalType ).GetSymbol();
 
-                return this.Get( SymbolId.Create( rewrittenTypeSymbol), rewrittenTypeSymbol.GetReflectionName()! );
+                return this.Get( SymbolId.Create( rewrittenTypeSymbol ), rewrittenTypeSymbol.GetReflectionName()! );
             }
             else
             {
@@ -57,7 +55,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal class TypeParameterRewriter : TypeRewriter
         {
-            IReadOnlyDictionary<string, IType> _substitutions;
+            private IReadOnlyDictionary<string, IType> _substitutions;
 
             public TypeParameterRewriter( IReadOnlyDictionary<string, IType> substitutions )
             {

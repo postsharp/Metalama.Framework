@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
@@ -34,7 +33,6 @@ namespace Metalama.Framework.Engine.Templating
         {
             var errorCountBefore = templateExpansionContext.DiagnosticSink.ErrorCount;
 
- 
             using ( meta.WithImplementation( templateExpansionContext.MetaApi ) )
             {
                 if ( !this._userCodeInvoker.TryInvoke(

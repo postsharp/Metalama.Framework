@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Advices
                 this._inner = inner;
             }
 
-            public object? this[string key] => this._inner[key];
+            public object? this[ string key ] => this._inner[key];
 
             public object? Source => this._inner;
 
