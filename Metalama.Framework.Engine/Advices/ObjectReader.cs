@@ -6,6 +6,7 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.Advices
@@ -17,13 +18,15 @@ namespace Metalama.Framework.Engine.Advices
     {
         private static readonly ConcurrentDictionary<Type, TypeAdapter> _types = new();
 
-        public static readonly IObjectReader Empty = new EmptyReader();
+        public static readonly IObjectReader Empty = new DictionaryWrapper( ImmutableDictionary<string, object?>.Empty );
 
         public static IObjectReader GetReader( object? instance )
             => instance switch
             {
                 null => Empty,
-                _ => new ObjectReader( instance )
+                IObjectReader objectReader => objectReader,
+                IReadOnlyDictionary<string, object?> dictionary => new DictionaryWrapper( dictionary ),
+               _ => new ObjectReader( instance )
             };
 
         private readonly TypeAdapter _typeAdapter;

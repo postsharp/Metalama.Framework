@@ -34,12 +34,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Remove="Tests\Aspects\TemplateParameters\OverrideMethod - Copy.t.cs" />
-      <Compile Remove="Tests\Aspects\TemplateTypeParameter\OverrideMethod - Copy.t.cs" />
-      <Compile Remove="Tests\Aspects\TemplateTypeParameter\OverridePropertyAccessors.t.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
         <ProjectReference Include="..\..\Metalama.TestFramework\Metalama.TestFramework.csproj" />
@@ -47,26 +41,6 @@
 
     <ItemGroup>
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
-    </ItemGroup>
-
-    <ItemGroup>
-        <None Include="Tests\Aspects\Introductions\Interfaces\SameMethodName.t.cs" />
-        <None Include="Tests\Aspects\TemplateParameters\OverridePropertyAccessors.t.cs">
-          <SubType>Code</SubType>
-          <DependentUpon>OverridePropertyAccessors.cs</DependentUpon>
-        </None>
-        <None Include="Tests\Aspects\TemplateTypeParameter\IntroduceMethod.t.cs">
-          <SubType>Code</SubType>
-          <DependentUpon>IntroduceMethod.cs</DependentUpon>
-        </None>
-        <None Include="Tests\Aspects\TemplateTypeParameter\TypeOf.t.cs">
-          <SubType>Code</SubType>
-          <DependentUpon>TypeOf.cs</DependentUpon>
-        </None>
-        <None Include="Tests\Aspects\TemplateTypeParameter\OverridePropertyAccessors.t.cs">
-          <SubType>Code</SubType>
-          <DependentUpon>OverridePropertyAccessors.cs</DependentUpon>
-        </None>
     </ItemGroup>
 
     <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets" />
