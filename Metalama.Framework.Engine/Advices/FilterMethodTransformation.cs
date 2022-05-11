@@ -4,34 +4,27 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Advices
 {
-
-
     internal class FilterMethodTransformation : OverriddenMethodBase
     {
-        public FilterMethodTransformation( Advice advice, IMethod overriddenDeclaration ) : base( advice, overriddenDeclaration, ObjectReader.Empty )
-        {
-        }
-
-
+        public FilterMethodTransformation( Advice advice, IMethod overriddenDeclaration ) : base( advice, overriddenDeclaration, ObjectReader.Empty ) { }
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
             var advice = (FilterAdvice) this.Advice;
 
-            var returnValueName = this.OverriddenDeclaration.ReturnType.Is( Code.SpecialType.Void )
-            ? null
+            var returnValueName = this.OverriddenDeclaration.ReturnType.Is( SpecialType.Void )
+                ? null
                 : context.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ).GetUniqueIdentifier( "returnValue" );
-
 
             // Execute the templates.
             var success = true;
@@ -52,27 +45,22 @@ namespace Metalama.Framework.Engine.Advices
 
             if ( outputFilterBodies!.Count > 0 )
             {
-
                 if ( returnValueName != null )
                 {
                     statements.Add(
-                    LocalDeclarationStatement(
-        VariableDeclaration(
-            IdentifierName(
-                Identifier(
-                    TriviaList(),
-                    SyntaxKind.VarKeyword,
-                    "var",
-                    "var",
-                    TriviaList( ElasticSpace ) ) ) )
-        .WithVariables(
-            SingletonSeparatedList(
-                VariableDeclarator(
-                    Identifier( returnValueName ).WithTrailingTrivia( ElasticSpace ) )
-                .WithInitializer(
-                    EqualsValueClause(
-                        proceedExpression ) ) ) ) ) );
-
+                        LocalDeclarationStatement(
+                            VariableDeclaration(
+                                    IdentifierName(
+                                        Identifier(
+                                            TriviaList(),
+                                            SyntaxKind.VarKeyword,
+                                            "var",
+                                            "var",
+                                            TriviaList( ElasticSpace ) ) ) )
+                                .WithVariables(
+                                    SingletonSeparatedList(
+                                        VariableDeclarator( Identifier( returnValueName ).WithTrailingTrivia( ElasticSpace ) )
+                                            .WithInitializer( EqualsValueClause( proceedExpression ) ) ) ) ) );
                 }
                 else
                 {
@@ -99,8 +87,6 @@ namespace Metalama.Framework.Engine.Advices
             }
 
             return this.GetIntroducedMembersImpl( context, Block( List( statements ) ), false );
-
-
         }
     }
 }

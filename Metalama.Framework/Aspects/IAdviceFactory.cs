@@ -31,8 +31,7 @@ namespace Metalama.Framework.Aspects
         /// <summary>
         /// Both <see cref="Input"/> and <see cref="Output"/> if this is possible.
         /// </summary>
-        Both,
-
+        Both
     }
 
     /// <summary>
@@ -329,7 +328,6 @@ namespace Metalama.Framework.Aspects
             InitializerKind kind,
             object? tags = null,
             object? args = null );
-
 
         void AddFilter(
             IParameter targetParameter,

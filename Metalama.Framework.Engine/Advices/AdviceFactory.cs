@@ -72,7 +72,7 @@ namespace Metalama.Framework.Engine.Advices
 
         public AdviceFactory WithTemplateClassInstance( TemplateClassInstance templateClassInstance )
         {
-            return new( this, templateClassInstance );
+            return new AdviceFactory( this, templateClassInstance );
         }
 
         private TemplateMemberRef ValidateTemplateName( string? templateName, TemplateKind templateKind, bool required = false )
@@ -87,7 +87,7 @@ namespace Metalama.Framework.Engine.Advices
                 if ( required )
                 {
                     throw new ArgumentOutOfRangeException(
-                        nameof( templateName ),
+                        nameof(templateName),
                         $"A required template name was not provided for the template kind {templateKind}." );
                 }
                 else
@@ -104,7 +104,7 @@ namespace Metalama.Framework.Engine.Advices
 
                     throw GeneralDiagnosticDescriptors.MemberDoesNotHaveTemplateAttribute.CreateException(
                         (template.TemplateClass.FullName, templateName,
-                         templateKind == TemplateKind.Introduction ? nameof( IntroduceAttribute ) : nameof( TemplateAttribute )) );
+                         templateKind == TemplateKind.Introduction ? nameof(IntroduceAttribute) : nameof(TemplateAttribute)) );
                 }
 
                 if ( template.TemplateInfo.IsAbstract )
@@ -126,12 +126,12 @@ namespace Metalama.Framework.Engine.Advices
                 if ( expectedTemplateType != template.TemplateInfo.AttributeType )
                 {
                     var expectedAttribute = templateKind == TemplateKind.Introduction
-                        ? nameof( IntroduceAttribute )
-                        : nameof( TemplateAttribute );
+                        ? nameof(IntroduceAttribute)
+                        : nameof(TemplateAttribute);
 
                     var actualAttribute = template.TemplateInfo.AttributeType == TemplateAttributeType.Introduction
-                        ? nameof( IntroduceAttribute )
-                        : nameof( TemplateAttribute );
+                        ? nameof(IntroduceAttribute)
+                        : nameof(TemplateAttribute);
 
                     throw GeneralDiagnosticDescriptors.TemplateIsOfTheWrongType.CreateException(
                         (template.TemplateClass.FullName, templateName, expectedAttribute, actualAttribute) );
@@ -881,30 +881,36 @@ namespace Metalama.Framework.Engine.Advices
             }
         }
 
-        public void AddFilter( IParameter targetParameter, string template, FilterDirection kind = FilterDirection.Input, object? tags = null, object? args = null )
+        public void AddFilter(
+            IParameter targetParameter,
+            string template,
+            FilterDirection kind = FilterDirection.Input,
+            object? tags = null,
+            object? args = null )
         {
             if ( kind == FilterDirection.Output && targetParameter.RefKind is not RefKind.Ref or RefKind.Out )
             {
                 throw new ArgumentOutOfRangeException(
-                    nameof( kind ),
-                    UserMessageFormatter.Format(
-                    $"Cannot add an output filter to the parameter '{targetParameter}' because it is neither 'ref' nor 'out'." ) );
-
+                    nameof(kind),
+                    UserMessageFormatter.Format( $"Cannot add an output filter to the parameter '{targetParameter}' because it is neither 'ref' nor 'out'." ) );
             }
 
             if ( kind == FilterDirection.Input && targetParameter.RefKind is not RefKind.None or RefKind.Ref or RefKind.In )
             {
                 throw new ArgumentOutOfRangeException(
-                      nameof( kind ),
-                      UserMessageFormatter.Format(
-                      $"Cannot add an input filter to the out parameter '{targetParameter}' " ) );
+                    nameof(kind),
+                    UserMessageFormatter.Format( $"Cannot add an input filter to the out parameter '{targetParameter}' " ) );
             }
-
 
             this.AddFilterImpl( targetParameter, targetParameter.DeclaringMember, template, kind, tags, args );
         }
 
-        public void AddFilter( IFieldOrPropertyOrIndexer targetMember, string template, FilterDirection kind = FilterDirection.Input, object? tags = null, object? args = null )
+        public void AddFilter(
+            IFieldOrPropertyOrIndexer targetMember,
+            string template,
+            FilterDirection kind = FilterDirection.Input,
+            object? tags = null,
+            object? args = null )
         {
             this.AddFilterImpl( targetMember, targetMember, template, kind, tags, args );
         }
@@ -924,25 +930,20 @@ namespace Metalama.Framework.Engine.Advices
             if ( !this._filterAdvices.TryGetValue( targetMember, out var advice ) )
             {
                 advice = new FilterAdvice(
-               this._aspect,
-               this._templateInstance,
-               targetMember,
-               _layerName );
+                    this._aspect,
+                    this._templateInstance,
+                    targetMember,
+                    _layerName );
 
                 advice.Initialize( diagnosticList );
                 ThrowOnErrors( diagnosticList );
                 this.Advices.Add( advice );
 
                 this._diagnosticAdder.Report( diagnosticList );
-
             }
 
-
-            advice.Filters.Add( new Filter( targetDeclaration.ToTypedRef(), templateRef, kind, ObjectReader.GetReader( tags ), ObjectReader.GetReader( args ) ) );
-
+            advice.Filters.Add(
+                new Filter( targetDeclaration.ToTypedRef(), templateRef, kind, ObjectReader.GetReader( tags ), ObjectReader.GetReader( args ) ) );
         }
-
-
-
     }
 }

@@ -24,20 +24,20 @@ namespace Metalama.Framework.Eligibility
             where T : IMember
         {
             return new ChildEligibilityBuilder<T, INamedType>(
-                           eligibilityBuilder,
-                           declaration => declaration.DeclaringType,
-                           declarationDescription => $"the declaring type '{declarationDescription.Object.DeclaringType}'" );
+                eligibilityBuilder,
+                declaration => declaration.DeclaringType,
+                declarationDescription => $"the declaring type '{declarationDescription.Object.DeclaringType}'" );
         }
 
         public static IEligibilityBuilder<TOutput> As<TInput, TOutput>( this IEligibilityBuilder<TInput> eligibilityBuilder )
             where TOutput : TInput
         {
             return new ChildEligibilityBuilder<TInput, TOutput>(
-                        eligibilityBuilder,
-                        d => (TOutput) d,
-                        d => d.Description,
-                        d => d is TOutput,
-                        d => $"{d} is not  {typeof( TOutput ).Name}" );
+                eligibilityBuilder,
+                d => (TOutput) d,
+                d => d.Description,
+                d => d is TOutput,
+                d => $"{d} is not  {typeof(TOutput).Name}" );
         }
 
         /// <summary>
@@ -46,9 +46,9 @@ namespace Metalama.Framework.Eligibility
         public static IEligibilityBuilder<IType> ReturnType( this IEligibilityBuilder<IMethod> eligibilityBuilder )
         {
             return new ChildEligibilityBuilder<IMethod, IType>(
-                           eligibilityBuilder,
-                           declaration => declaration.ReturnType,
-                           declarationDescription => $"the return type of {declarationDescription}" );
+                eligibilityBuilder,
+                declaration => declaration.ReturnType,
+                declarationDescription => $"the return type of {declarationDescription}" );
         }
 
         /// <summary>
@@ -58,11 +58,11 @@ namespace Metalama.Framework.Eligibility
         public static IEligibilityBuilder<IParameter> Parameter( this IEligibilityBuilder<IHasParameters> eligibilityBuilder, int index )
         {
             return new ChildEligibilityBuilder<IHasParameters, IParameter>(
-                           eligibilityBuilder,
-                           declaration => declaration.Parameters[index],
-                           method => $"the {index + 1}-th parameter of {method}",
-                           method => index < method.Parameters.Count,
-                           method => $"{method} has fewer than {index + 1} parameter(s)" );
+                eligibilityBuilder,
+                declaration => declaration.Parameters[index],
+                method => $"the {index + 1}-th parameter of {method}",
+                method => index < method.Parameters.Count,
+                method => $"{method} has fewer than {index + 1} parameter(s)" );
         }
 
         /// <summary>
@@ -72,11 +72,11 @@ namespace Metalama.Framework.Eligibility
         public static IEligibilityBuilder<IParameter> Parameter( this IEligibilityBuilder<IHasParameters> eligibilityBuilder, string name )
         {
             return new ChildEligibilityBuilder<IHasParameters, IParameter>(
-                           eligibilityBuilder,
-                           declaration => declaration.Parameters[name],
-                           method => $"parameter '{name}' of {method}",
-                           method => method.Parameters.All( p => p.Name != name ),
-                           method => $"{method} has no parameter named '{name}'" );
+                eligibilityBuilder,
+                declaration => declaration.Parameters[name],
+                method => $"parameter '{name}' of {method}",
+                method => method.Parameters.All( p => p.Name != name ),
+                method => $"{method} has no parameter named '{name}'" );
         }
 
         /// <summary>
@@ -85,11 +85,11 @@ namespace Metalama.Framework.Eligibility
         public static IEligibilityBuilder<IType> Type( this IEligibilityBuilder<IHasType> eligibilityBuilder )
         {
             return new ChildEligibilityBuilder<IHasType, IType>(
-                           eligibilityBuilder,
-                           declaration => declaration.Type,
-                           declaration => $"the type of {declaration}",
-                           _ => true,
-                           _ => $"" );
+                eligibilityBuilder,
+                declaration => declaration.Type,
+                declaration => $"the type of {declaration}",
+                _ => true,
+                _ => $"" );
         }
 
         /// <summary>
@@ -162,10 +162,10 @@ namespace Metalama.Framework.Eligibility
         public static void MustNotHaveRefOrOutParameter( this IEligibilityBuilder<IMethod> eligibilityBuilder )
         {
             eligibilityBuilder.AddRule(
-                           new EligibilityRule<IMethod>(
-                               eligibilityBuilder.IneligibleScenarios,
-                               m => !m.Parameters.Any( p => p.RefKind is RefKind.Out or RefKind.Ref ),
-                               d => $"{d} cannot have any ref or out parameter" ) );
+                new EligibilityRule<IMethod>(
+                    eligibilityBuilder.IneligibleScenarios,
+                    m => !m.Parameters.Any( p => p.RefKind is RefKind.Out or RefKind.Ref ),
+                    d => $"{d} cannot have any ref or out parameter" ) );
         }
 
         /// <summary>
@@ -177,62 +177,57 @@ namespace Metalama.Framework.Eligibility
             params Accessibility[] otherAccessibilities )
         {
             eligibilityBuilder.MustSatisfy(
-                           member => member.Accessibility == accessibility || otherAccessibilities.Contains( member.Accessibility ),
-                           member =>
-                           {
-                               var accessibilities = new[] { accessibility }.Concat( otherAccessibilities ).ToArray();
+                member => member.Accessibility == accessibility || otherAccessibilities.Contains( member.Accessibility ),
+                member =>
+                {
+                    var accessibilities = new[] { accessibility }.Concat( otherAccessibilities ).ToArray();
 
-                               var formattedAccessibilities = string.Join(
-                                   " or ",
-                                   accessibilities.Select( a => string.Format( MetalamaExecutionContext.Current.FormatProvider, "{0}", a ) ) );
+                    var formattedAccessibilities = string.Join(
+                        " or ",
+                        accessibilities.Select( a => string.Format( MetalamaExecutionContext.Current.FormatProvider, "{0}", a ) ) );
 
-                               return $"{member} must be {formattedAccessibilities}";
-                           } );
+                    return $"{member} must be {formattedAccessibilities}";
+                } );
         }
 
         /// <summary>
         /// Requires the target field, property or indexer to be writable.
         /// </summary>
-        public static void MustBeWritable(
-            this IEligibilityBuilder<IFieldOrPropertyOrIndexer> eligibilityBuilder )
+        public static void MustBeWritable( this IEligibilityBuilder<IFieldOrPropertyOrIndexer> eligibilityBuilder )
         {
             eligibilityBuilder.MustSatisfy(
-                           member => member.Writeability != Writeability.None,
-                           member => $"{member} must be writable" );
+                member => member.Writeability != Writeability.None,
+                member => $"{member} must be writable" );
         }
 
         /// <summary>
         /// Requires the target field, property or indexer to be writable.
         /// </summary>
-        public static void MustBeReadable(
-            this IEligibilityBuilder<IFieldOrPropertyOrIndexer> eligibilityBuilder )
+        public static void MustBeReadable( this IEligibilityBuilder<IFieldOrPropertyOrIndexer> eligibilityBuilder )
         {
             eligibilityBuilder.MustSatisfyAny(
-                     b => b.MustBe<IField>(),
-                     b => b.As<IFieldOrPropertyOrIndexer, IFieldOrProperty>().MustSatisfy( d => d.GetMethod != null, d => $"{d} must have a getter" )
-                     );
+                b => b.MustBe<IField>(),
+                b => b.As<IFieldOrPropertyOrIndexer, IFieldOrProperty>().MustSatisfy( d => d.GetMethod != null, d => $"{d} must have a getter" ) );
         }
 
         /// <summary>
         /// Requires the target parameter to be writeble, i.e. <c>ref</c> or <c>out</c>.
         /// </summary>
-        public static void MustBeWritable(
-            this IEligibilityBuilder<IParameter> eligibilityBuilder )
+        public static void MustBeWritable( this IEligibilityBuilder<IParameter> eligibilityBuilder )
         {
             eligibilityBuilder.MustSatisfy(
-                           p => p.RefKind is RefKind.Ref or RefKind.Out,
-                           member => $"{member} must be 'out' or 'ref'" );
+                p => p.RefKind is RefKind.Ref or RefKind.Out,
+                member => $"{member} must be 'out' or 'ref'" );
         }
 
         /// <summary>
         /// Requires the parameter to be readable, i.e. not <c>out</c>.
         /// </summary>
-        public static void MustBeReadable(
-            this IEligibilityBuilder<IParameter> eligibilityBuilder )
+        public static void MustBeReadable( this IEligibilityBuilder<IParameter> eligibilityBuilder )
         {
             eligibilityBuilder.MustSatisfy(
-                           p => p.RefKind != RefKind.Out,
-                           member => $"{member} must not be 'out'" );
+                p => p.RefKind != RefKind.Out,
+                member => $"{member} must not be 'out'" );
         }
 
         /// <summary>
@@ -242,8 +237,8 @@ namespace Metalama.Framework.Eligibility
             where T : IDeclaration
         {
             eligibilityBuilder.MustSatisfy(
-                           member => member is T,
-                           member => $"{member} must be of type {typeof( T ).Name}" );
+                member => member is T,
+                member => $"{member} must be of type {typeof(T).Name}" );
         }
 
         /// <summary>
@@ -252,8 +247,8 @@ namespace Metalama.Framework.Eligibility
         public static void MustBeStatic( this IEligibilityBuilder<IMemberOrNamedType> eligibilityBuilder )
         {
             eligibilityBuilder.MustSatisfy(
-                           member => member.IsStatic,
-                           member => $"{member} must be static" );
+                member => member.IsStatic,
+                member => $"{member} must be static" );
         }
 
         /// <summary>
@@ -262,8 +257,8 @@ namespace Metalama.Framework.Eligibility
         public static void MustBeNonStatic( this IEligibilityBuilder<IMemberOrNamedType> eligibilityBuilder )
         {
             eligibilityBuilder.MustSatisfy(
-                           member => !member.IsStatic,
-                           member => $"{member} must be non-static" );
+                member => !member.IsStatic,
+                member => $"{member} must be non-static" );
         }
 
         /// <summary>
@@ -272,8 +267,8 @@ namespace Metalama.Framework.Eligibility
         public static void MustBeNonAbstract( this IEligibilityBuilder<IMemberOrNamedType> eligibilityBuilder )
         {
             eligibilityBuilder.MustSatisfy(
-                           member => !member.IsAbstract,
-                           member => $"{member} must be non-abstract" );
+                member => !member.IsAbstract,
+                member => $"{member} must be non-abstract" );
         }
 
         /// <summary>
@@ -282,8 +277,8 @@ namespace Metalama.Framework.Eligibility
         public static void MustBe( this IEligibilityBuilder<IType> eligibilityBuilder, Type type, ConversionKind conversionKind = ConversionKind.Default )
         {
             eligibilityBuilder.MustSatisfy(
-                           t => t.Is( type, conversionKind ),
-                           member => $"{member} must be of type '{type}'" );
+                t => t.Is( type, conversionKind ),
+                member => $"{member} must be of type '{type}'" );
         }
 
         /// <summary>
@@ -292,8 +287,8 @@ namespace Metalama.Framework.Eligibility
         public static void MustBe( this IEligibilityBuilder<IType> eligibilityBuilder, IType type, ConversionKind conversionKind = ConversionKind.Default )
         {
             eligibilityBuilder.MustSatisfy(
-                           t => t.Is( type, conversionKind ),
-                           member => $"{member} must be of type '{type}'" );
+                t => t.Is( type, conversionKind ),
+                member => $"{member} must be of type '{type}'" );
         }
 
         /// <summary>
@@ -301,7 +296,7 @@ namespace Metalama.Framework.Eligibility
         /// </summary>
         public static void MustBe<T>( this IEligibilityBuilder<IType> eligibilityBuilder, ConversionKind conversionKind = ConversionKind.Default )
         {
-            eligibilityBuilder.MustBe( typeof( T ), conversionKind );
+            eligibilityBuilder.MustBe( typeof(T), conversionKind );
         }
 
         private static void Aggregate<T>(

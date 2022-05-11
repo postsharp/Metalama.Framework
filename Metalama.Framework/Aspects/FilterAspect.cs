@@ -3,27 +3,23 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
+using System;
 
 namespace Metalama.Framework.Aspects
 {
+    [AttributeUsage( AttributeTargets.ReturnValue | AttributeTargets.Parameter | AttributeTargets.Field | AttributeTargets.Property )]
     public abstract class FilterAspect : Aspect, IAspect<IParameter>, IAspect<IFieldOrPropertyOrIndexer>
     {
         public FilterDirection Direction { get; set; } = FilterDirection.Input;
 
         public virtual void BuildAspect( IAspectBuilder<IFieldOrPropertyOrIndexer> builder )
         {
-            if ( this.Direction != FilterDirection.None )
-            {
-                builder.Advice.AddFilter( builder.Target, nameof( this.Filter ), this.Direction );
-            }
+            builder.Advice.AddFilter( builder.Target, nameof(this.Filter), this.Direction );
         }
 
         public virtual void BuildAspect( IAspectBuilder<IParameter> builder )
         {
-            if ( this.Direction != FilterDirection.None )
-            {
-                builder.Advice.AddFilter( builder.Target, nameof( this.Filter ), this.Direction );
-            }
+            builder.Advice.AddFilter( builder.Target, nameof(this.Filter), this.Direction );
         }
 
         public virtual void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
@@ -32,16 +28,19 @@ namespace Metalama.Framework.Aspects
             {
                 case FilterDirection.Input:
                     builder.MustBeReadable();
+
                     break;
 
                 case FilterDirection.Output:
                     builder.MustBeWritable();
+
                     break;
 
                 case FilterDirection.Both:
                     builder.MustSatisfyAll(
                         b => b.MustBeReadable(),
                         b => b.MustBeWritable() );
+
                     break;
             }
         }
@@ -52,21 +51,24 @@ namespace Metalama.Framework.Aspects
             {
                 case FilterDirection.Input:
                     builder.MustBeReadable();
+
                     break;
 
                 case FilterDirection.Output:
                     builder.MustBeWritable();
+
                     break;
 
                 case FilterDirection.Both:
                     builder.MustSatisfyAll(
                         b => b.MustBeReadable(),
                         b => b.MustBeWritable() );
+
                     break;
             }
         }
 
+        [Template]
         public abstract void Filter( dynamic? value );
-
     }
 }

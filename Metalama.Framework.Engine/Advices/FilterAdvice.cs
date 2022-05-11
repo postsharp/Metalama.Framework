@@ -18,19 +18,12 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Advices
 {
-
     internal class FilterAdvice : Advice
     {
         public FilterAdvice( IAspectInstanceInternal aspect, TemplateClassInstance templateInstance, IDeclaration targetDeclaration, string? layerName )
-            : base( aspect, templateInstance, targetDeclaration, layerName, ObjectReader.Empty )
-        {
-        }
+            : base( aspect, templateInstance, targetDeclaration, layerName, ObjectReader.Empty ) { }
 
-
-        public override void Initialize( IDiagnosticAdder diagnosticAdder )
-        {
-
-        }
+        public override void Initialize( IDiagnosticAdder diagnosticAdder ) { }
 
         public override AdviceResult ToResult( ICompilation compilation, IReadOnlyList<IObservableTransformation> observableTransformations )
         {
@@ -38,20 +31,21 @@ namespace Metalama.Framework.Engine.Advices
 
             switch ( targetDeclaration )
             {
-
                 case IMethod method:
                     return AdviceResult.Create( new FilterMethodTransformation( this, method ) );
 
                 default:
                     throw new NotImplementedException();
             }
-
         }
 
         public List<Filter> Filters { get; } = new();
 
-
-        public bool TryExecuteTemplates( IDeclaration targetDeclaration, in MemberIntroductionContext context, FilterDirection kind, [NotNullWhen( true )] out IReadOnlyList<BlockSyntax>? filterBodies )
+        public bool TryExecuteTemplates(
+            IDeclaration targetDeclaration,
+            in MemberIntroductionContext context,
+            FilterDirection kind,
+            [NotNullWhen( true )] out IReadOnlyList<BlockSyntax>? filterBodies )
         {
             var success = true;
 
@@ -68,19 +62,18 @@ namespace Metalama.Framework.Engine.Advices
                 list ??= new List<BlockSyntax>( this.Filters.Count );
 
                 var metaApiProperties = new MetaApiProperties(
-                                        context.DiagnosticSink,
-                                        filter.Template.Cast(),
-                                        filter.Tags,
-                                        this.AspectLayerId,
-                                        context.SyntaxGenerationContext,
-                                        this.Aspect,
-                                        context.ServiceProvider,
-                                        MetaApiStaticity.Default );
+                    context.DiagnosticSink,
+                    filter.Template.Cast(),
+                    filter.Tags,
+                    this.AspectLayerId,
+                    context.SyntaxGenerationContext,
+                    this.Aspect,
+                    context.ServiceProvider,
+                    MetaApiStaticity.Default );
 
                 var metaApi = MetaApi.ForDeclaration(
                     targetDeclaration,
                     metaApiProperties );
-
 
                 var boundTemplate = filter.Template.ForFilter();
 
@@ -108,9 +101,8 @@ namespace Metalama.Framework.Engine.Advices
             }
 
             filterBodies = list ?? (IReadOnlyList<BlockSyntax>) Array.Empty<BlockSyntax>();
+
             return success;
         }
-
-
     }
 }

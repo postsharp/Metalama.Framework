@@ -34,12 +34,11 @@ namespace Metalama.Framework.Engine.Advices
             if ( template.TemplateClassMember.Parameters.Any( p => !p.IsCompileTime ) )
             {
                 throw new InvalidTemplateSignatureException(
-                  UserMessageFormatter.Format(
-                      $"Cannot use the method '{template.Declaration}' as an initializer template: the method cannot have run-time parameters." ) );
+                    UserMessageFormatter.Format(
+                        $"Cannot use the method '{template.Declaration}' as an initializer template: the method cannot have run-time parameters." ) );
             }
 
-
-            return new( template, null, GetTemplateArguments( template, arguments ) );
+            return new BoundTemplateMethod( template, null, GetTemplateArguments( template, arguments ) );
         }
 
         public static BoundTemplateMethod ForFilter( this in TemplateMember<IMethod> template, IObjectReader? arguments = null )
@@ -56,18 +55,19 @@ namespace Metalama.Framework.Engine.Advices
             if ( template.TemplateClassMember.Parameters.Any( p => !p.IsCompileTime && p.Name != "value" ) )
             {
                 throw new InvalidTemplateSignatureException(
-                  UserMessageFormatter.Format(
-                      $"Cannot use the method '{template.Declaration}' as a filter template: the method cannot have run-time parameters except 'value'." ) );
+                    UserMessageFormatter.Format(
+                        $"Cannot use the method '{template.Declaration}' as a filter template: the method cannot have run-time parameters except 'value'." ) );
             }
 
-            if ( !template.TemplateClassMember.IndexedParameters.TryGetValue( "value", out var valueTemplateParameter ) || valueTemplateParameter.IsCompileTime )
+            if ( !template.TemplateClassMember.IndexedParameters.TryGetValue( "value", out var valueTemplateParameter )
+                 || valueTemplateParameter.IsCompileTime )
             {
                 throw new InvalidTemplateSignatureException(
-                 UserMessageFormatter.Format(
-                     $"Cannot use the method '{template.Declaration}' as a filter template: the method must have a run-time parameter named 'value'." ) );
+                    UserMessageFormatter.Format(
+                        $"Cannot use the method '{template.Declaration}' as a filter template: the method must have a run-time parameter named 'value'." ) );
             }
 
-            return new( template, null, GetTemplateArguments( template, arguments ) );
+            return new BoundTemplateMethod( template, null, GetTemplateArguments( template, arguments ) );
         }
 
         public static BoundTemplateMethod ForOverride( this in TemplateMember<IMethod> template, IMethod? targetMethod, IObjectReader? arguments = null )
