@@ -67,9 +67,9 @@ namespace Metalama.Framework.Engine.Advices
 
             // TODO: Indexers.
 
-            this.MemberBuilder.Type = (this.Template.Declaration?.Type ?? this._getTemplate.Declaration?.ReturnType).AssertNotNull();
-            this.MemberBuilder.Accessibility = 
-                (this.Template.Declaration?.Accessibility ?? this._getTemplate.Declaration?.Accessibility ?? this._setTemplate.Declaration?.Accessibility).AssertNotNull();
+            this.MemberBuilder.Type = (this.Template.Declaration?.Type ?? this._getTemplate.Template.Declaration?.ReturnType).AssertNotNull();
+            this.MemberBuilder.Accessibility =
+                (this.Template.Declaration?.Accessibility ?? this._getTemplate.Template.Declaration?.Accessibility ?? this._setTemplate.Template.Declaration?.Accessibility).AssertNotNull();
 
             if ( this.Template.IsNotNull )
             {
