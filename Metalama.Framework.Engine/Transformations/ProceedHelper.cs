@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.Transformations
             ExpressionSyntax invocationExpression,
             BoundTemplateMethod template,
             IMethod overriddenMethod )
-            => CreateProceedDynamicExpression( generationContext, invocationExpression, template.Template.SelectedKind, overriddenMethod);
+            => CreateProceedDynamicExpression( generationContext, invocationExpression, template.Template.SelectedKind, overriddenMethod );
 
         public static UserExpression CreateProceedDynamicExpression(
             SyntaxGenerationContext generationContext,

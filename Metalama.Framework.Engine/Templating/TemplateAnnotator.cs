@@ -2051,7 +2051,7 @@ namespace Metalama.Framework.Engine.Templating
 
         public override SyntaxNode? VisitNullableType( NullableTypeSyntax node )
         {
-            var transformedElementType = this.Visit( node.ElementType )!;
+            var transformedElementType = this.Visit( node.ElementType );
             var transformedNode = node.WithElementType( transformedElementType );
 
             var elementScope = transformedElementType.GetScopeFromAnnotation();

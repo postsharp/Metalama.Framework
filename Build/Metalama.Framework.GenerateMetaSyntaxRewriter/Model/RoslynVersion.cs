@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Metalama.Framework.GenerateMetaSyntaxRewriter;
+namespace Metalama.Framework.GenerateMetaSyntaxRewriter.Model;
 
 public record RoslynVersion( string Name, int Index ) : IComparable<RoslynVersion>
 {

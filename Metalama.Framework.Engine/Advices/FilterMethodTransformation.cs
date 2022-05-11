@@ -41,7 +41,7 @@ namespace Metalama.Framework.Engine.Advices
             var proceedExpression = this.CreateProceedExpression( context, TemplateKind.Default ).ToRunTimeExpression().Syntax;
 
             var statements = new List<StatementSyntax>();
-            statements.AddRange( inputFilterBodies );
+            statements.AddRange( inputFilterBodies! );
 
             if ( outputFilterBodies!.Count > 0 )
             {

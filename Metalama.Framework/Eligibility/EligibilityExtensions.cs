@@ -34,8 +34,8 @@ namespace Metalama.Framework.Eligibility
         {
             return new ChildEligibilityBuilder<TInput, TOutput>(
                 eligibilityBuilder,
-                d => (TOutput) d,
-                d => d.Description,
+                d => (TOutput) d!,
+                d => d.Description!,
                 d => d is TOutput,
                 d => $"{d} is not  {typeof(TOutput).Name}" );
         }
@@ -211,7 +211,7 @@ namespace Metalama.Framework.Eligibility
         }
 
         /// <summary>
-        /// Requires the target parameter to be writeble, i.e. <c>ref</c> or <c>out</c>.
+        /// Requires the target parameter to be writable, i.e. <c>ref</c> or <c>out</c>.
         /// </summary>
         public static void MustBeWritable( this IEligibilityBuilder<IParameter> eligibilityBuilder )
         {

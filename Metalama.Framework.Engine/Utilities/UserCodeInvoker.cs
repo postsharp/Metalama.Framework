@@ -255,11 +255,12 @@ namespace Metalama.Framework.Engine.Utilities
             // to perform the mapping here.
 
             // Get the syntax tree where the exception happened.
+            var stackFrames = stackTrace.GetFrames() ?? Array.Empty<StackFrame>();
+
             var frame =
-                stackTrace
-                    .GetFrames()
+                stackFrames
                     .Where( f => f.GetFileName() != null )
-                    .Select( f => (Frame: f, File: compileTimeProject.FindCodeFileFromTransformedPath( f.GetFileName() )) )
+                    .Select( f => (Frame: f, File: compileTimeProject.FindCodeFileFromTransformedPath( f.GetFileName()! )) )
                     .FirstOrDefault( i => i.File != null );
 
             if ( frame.File == null )
@@ -268,14 +269,14 @@ namespace Metalama.Framework.Engine.Utilities
             }
 
             // Check if we have a location map for this file anyway.
-            var textMap = compileTimeProject.GetTextMap( frame.Frame.GetFileName() );
+            var textMap = compileTimeProject.GetTextMap( frame.Frame.GetFileName()! );
 
             if ( textMap == null )
             {
                 return null;
             }
 
-            var transformedFileFullPath = Path.Combine( compileTimeProject.Directory, frame.File.TransformedPath );
+            var transformedFileFullPath = Path.Combine( compileTimeProject.Directory!, frame.File.TransformedPath );
 
             var transformedText = SourceText.From( File.ReadAllText( transformedFileFullPath ) );
 

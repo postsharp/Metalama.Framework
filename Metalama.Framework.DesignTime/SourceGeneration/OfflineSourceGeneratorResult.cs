@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.DesignTime;
+namespace Metalama.Framework.DesignTime.SourceGeneration;
 
 /// <summary>
 /// An implementation of <see cref="SourceGeneratorResult"/> that is backed by a set of

@@ -666,7 +666,7 @@ namespace Metalama.Framework.Engine.Templating
                                             ImplicitElementAccess()
                                                 .WithArgumentList(
                                                     BracketedArgumentList(
-                                                        SingletonSeparatedList<ArgumentSyntax>(
+                                                        SingletonSeparatedList(
                                                             Argument(
                                                                 LiteralExpression(
                                                                     SyntaxKind.StringLiteralExpression,

@@ -100,15 +100,15 @@ namespace Metalama.Framework.RunTime
         /// <param name="enumerator">An enumerator.</param>
         /// <returns>An enumerator on a <c>List&lt;object&gt;</c> made from the items of <paramref name="enumerator"/>, or the <paramref name="enumerator"/> object itself
         /// it is already a <c>List&lt;object&gt;</c> enumerator.</returns>
-        public static List<object>.Enumerator Buffer( this IEnumerator enumerator )
+        public static List<object?>.Enumerator Buffer( this IEnumerator enumerator )
         {
-            if ( enumerator is List<object>.Enumerator listEnumerator )
+            if ( enumerator is List<object?>.Enumerator listEnumerator )
             {
                 return listEnumerator;
             }
             else
             {
-                List<object> list = new();
+                List<object?> list = new();
 
                 try
                 {

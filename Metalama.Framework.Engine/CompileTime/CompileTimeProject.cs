@@ -196,7 +196,7 @@ namespace Metalama.Framework.Engine.CompileTime
             this.ClosureDiagnosticManifest = new DiagnosticManifest( this.ClosureProjects.Select( p => p.DiagnosticManifest ).ToList() );
 
 #if DEBUG
-            if ( manifest != null )
+            if ( manifest != null && directory != null )
             {
                 foreach ( var file in manifest.Files )
                 {
@@ -259,7 +259,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 foreach ( var sourceFile in this.CodeFiles )
                 {
-                    var sourceText = File.ReadAllText( Path.Combine( this.Directory, sourceFile.TransformedPath ) );
+                    var sourceText = File.ReadAllText( Path.Combine( this.Directory!, sourceFile.TransformedPath ) );
 
                     var entry = archive.CreateEntry( sourceFile.TransformedPath, CompressionLevel.Optimal );
                     using var entryWriter = new StreamWriter( entry.Open() );
@@ -325,7 +325,7 @@ namespace Metalama.Framework.Engine.CompileTime
             }
         }
 
-        public Type GetType( Type reflectionType ) => this.GetType( reflectionType.FullName );
+        public Type GetType( Type reflectionType ) => this.GetType( reflectionType.FullName! );
 
         public Type GetType( string reflectionName, string runTimeAssemblyName )
         {

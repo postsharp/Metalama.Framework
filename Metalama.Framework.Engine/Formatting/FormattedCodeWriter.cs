@@ -150,7 +150,7 @@ namespace Metalama.Framework.Engine.Formatting
             {
                 var position = diagnostic.Location.GetLineSpan();
 
-                if ( !position.IsValid || !position.Path.EndsWith( document.FilePath, StringComparison.OrdinalIgnoreCase ) )
+                if ( !position.IsValid || !position.Path.EndsWith( document.FilePath!, StringComparison.OrdinalIgnoreCase ) )
                 {
                     // The diagnostic is not in the current document.
                     continue;

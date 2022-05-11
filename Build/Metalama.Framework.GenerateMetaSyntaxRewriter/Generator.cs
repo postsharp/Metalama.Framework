@@ -25,7 +25,7 @@ internal class Generator
 
     private static void CreateDirectoryForFile( string path )
     {
-        var directory = Path.GetDirectoryName( path );
+        var directory = Path.GetDirectoryName( path )!;
 
         if ( !Directory.Exists( directory ) )
         {

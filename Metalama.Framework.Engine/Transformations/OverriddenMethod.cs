@@ -14,13 +14,11 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Transformations
 {
-
     /// <summary>
     /// Method override, which expands a template.
     /// </summary>
     internal sealed class OverriddenMethod : OverriddenMethodBase
     {
-        
         public BoundTemplateMethod BoundTemplate { get; }
 
         public OverriddenMethod( Advice advice, IMethod targetMethod, BoundTemplateMethod boundTemplate, IObjectReader tags )
@@ -67,9 +65,6 @@ namespace Metalama.Framework.Engine.Transformations
             }
 
             return this.GetIntroducedMembersImpl( context, newMethodBody, this.BoundTemplate.Template.MustInterpretAsAsyncTemplate() );
-            
         }
-
-     
     }
 }

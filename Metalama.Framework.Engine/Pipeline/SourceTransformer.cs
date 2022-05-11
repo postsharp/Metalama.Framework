@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.Pipeline
         {
             var serviceProvider = ServiceProviderFactory.GetServiceProvider();
 
-            // The global basckstage service provider, that has been added in ServiceProvider.CreateBaseServiceProvider,
+            // The global backstage service provider, that has been added in ServiceProvider.CreateBaseServiceProvider,
             // gets replaced here by a project-scoped one.
             serviceProvider = serviceProvider.WithNextProvider( context.Services );
 
@@ -160,7 +160,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 foreach ( var file in pipelineResult.AdditionalCompilationOutputFiles )
                 {
                     var fullPath = GetFileFullPath( file );
-                    Directory.CreateDirectory( Path.GetDirectoryName( fullPath ) );
+                    Directory.CreateDirectory( Path.GetDirectoryName( fullPath )! );
                     using var stream = File.OpenWrite( fullPath );
                     file.WriteToStream( stream );
                 }

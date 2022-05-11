@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.LamaSerialization.Serializers
 #endif
 
             // This is returned if we're running .NETStandard1.3 or useUserOverride was not set.
-            return new CultureInfo( constructorArguments.GetValue<string>( "identifier" ) );
+            return new CultureInfo( constructorArguments.GetValue<string>( "identifier" )! );
         }
 
         /// <exclude/>

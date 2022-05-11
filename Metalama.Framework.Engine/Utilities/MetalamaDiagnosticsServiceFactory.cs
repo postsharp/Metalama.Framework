@@ -7,7 +7,7 @@ namespace Metalama.Framework.Engine.Utilities
 {
     public static class MetalamaDiagnosticsServiceFactory
     {
-        public static void Initialize(string caller, string? projectName = null)
+        public static void Initialize( string caller, string? projectName = null )
         {
             if ( DiagnosticServiceFactory.Initialize( () => new MetalamaApplicationInfo(), caller, projectName ) )
             {

@@ -6,15 +6,11 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.SyntaxSerialization;
-using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using RefKind = Metalama.Framework.Code.RefKind;
@@ -26,26 +22,20 @@ namespace Metalama.Framework.Engine.Transformations
     {
         public new IMethod OverriddenDeclaration => (IMethod) base.OverriddenDeclaration;
 
-        
         public OverriddenMethodBase( Advice advice, IMethod targetMethod, IObjectReader tags )
-            : base( advice, targetMethod, tags )
-        {
-        }
+            : base( advice, targetMethod, tags ) { }
 
-        protected UserExpression CreateProceedExpression( in MemberIntroductionContext context, TemplateKind templateKind)
+        protected UserExpression CreateProceedExpression( in MemberIntroductionContext context, TemplateKind templateKind )
         {
             return ProceedHelper.CreateProceedDynamicExpression(
-             context.SyntaxGenerationContext,
-             this.CreateInvocationExpression( context.SyntaxGenerationContext ),
-             templateKind,
-             this.OverriddenDeclaration );
+                context.SyntaxGenerationContext,
+                this.CreateInvocationExpression( context.SyntaxGenerationContext ),
+                templateKind,
+                this.OverriddenDeclaration );
         }
 
-        protected IntroducedMember[] GetIntroducedMembersImpl( in MemberIntroductionContext context, BlockSyntax newMethodBody, bool isAsyncTemplate)
+        protected IntroducedMember[] GetIntroducedMembersImpl( in MemberIntroductionContext context, BlockSyntax newMethodBody, bool isAsyncTemplate )
         {
-         
-
-
             TypeSyntax? returnType = null;
 
             var modifiers = this.OverriddenDeclaration.GetSyntaxModifierList();
@@ -94,13 +84,15 @@ namespace Metalama.Framework.Engine.Transformations
                 newMethodBody,
                 null );
 
-            return new[] { new IntroducedMember(
+            return new[]
+            {
+                new IntroducedMember(
                     this,
                     introducedMethod,
                     this.Advice.AspectLayerId,
                     IntroducedMemberSemantic.Override,
-                    this.OverriddenDeclaration ) };
-          
+                    this.OverriddenDeclaration )
+            };
         }
 
         private ExpressionSyntax CreateInvocationExpression( SyntaxGenerationContext generationContext )
