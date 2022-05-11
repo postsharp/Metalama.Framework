@@ -67,10 +67,24 @@ namespace Metalama.Framework.Engine.Advices
 
             // TODO: Indexers.
 
-            this.MemberBuilder.Type = (this.Template.Declaration?.Type ?? this._getTemplate.Template.Declaration?.ReturnType).AssertNotNull();
+            this.MemberBuilder.Type = (this.Template.Declaration?.Type ?? this._getTemplate.Declaration?.ReturnType).AssertNotNull();
+            this.MemberBuilder.Accessibility = 
+                (this.Template.Declaration?.Accessibility ?? this._getTemplate.Declaration?.Accessibility ?? this._setTemplate.Declaration?.Accessibility).AssertNotNull();
 
-            this.MemberBuilder.Accessibility =
-                (this.Template.Declaration?.Accessibility ?? this._getTemplate.Template.Declaration?.Accessibility).AssertNotNull();
+            if ( this.Template.IsNotNull )
+            {
+                if ( this.Template.Declaration.AssertNotNull().GetMethod != null )
+                {
+                    this.MemberBuilder.GetMethod.AssertNotNull().Accessibility = this.Template.Declaration!.GetMethod!.Accessibility;
+                }
+
+                if ( this.Template.Declaration.AssertNotNull().SetMethod != null )
+                {
+                    this.MemberBuilder.SetMethod.AssertNotNull().Accessibility = this.Template.Declaration!.SetMethod!.Accessibility;
+                }
+            }
+
+            // TODO: For get accessor template, we are ignoring accessibility of set accessor template because it can be easily incompatible.
         }
 
         public override AdviceResult ToResult( ICompilation compilation, IReadOnlyList<IObservableTransformation> observableTransformations )

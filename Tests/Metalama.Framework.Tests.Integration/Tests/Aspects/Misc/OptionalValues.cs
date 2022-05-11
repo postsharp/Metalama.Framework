@@ -52,7 +52,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues
         public dynamic? OptionalValues { get; private set; }
 
         [Template]
-        public dynamic? OptionalPropertyTemplate { get; private set; }
+        public dynamic? OptionalPropertyTemplate { get; set; }
 
         [Template]
         public dynamic? OverridePropertyTemplate
