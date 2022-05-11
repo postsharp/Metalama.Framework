@@ -37,12 +37,11 @@ namespace Metalama.Framework.Engine.Pipeline
 
             var applicationInfoProvider = (IApplicationInfoProvider?) context.Services.GetService( typeof( IApplicationInfoProvider ) );
 
-            if ( applicationInfoProvider == null )
+            // Try.Metalama doesn't provide any backstage services.
+            if ( applicationInfoProvider != null )
             {
-                throw new InvalidOperationException( $"{nameof( IApplicationInfoProvider )} service not found." );
+                applicationInfoProvider.CurrentApplication = new MetalamaApplicationInfo();
             }
-
-            applicationInfoProvider.CurrentApplication = new MetalamaApplicationInfo();
 
             IUsageSample? usageSample = null;
             var compilerUsageSample = (IUsageSample?) context.Services.GetService( typeof( IUsageSample ) );
