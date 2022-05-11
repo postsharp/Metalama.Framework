@@ -20,8 +20,55 @@ namespace Metalama.Framework.Engine.Advices
     [Obfuscation( Exclude = true )] // Not obfuscated to have a decent call stack in case of user exception.
     internal static class TemplateBindingHelper
     {
-        public static BoundTemplateMethod ForIntroduction( this in TemplateMember<IMethod> template, IObjectReader? parameters = null )
-            => new( template, null, GetTemplateArguments( template, parameters ) );
+        public static BoundTemplateMethod ForIntroduction( this in TemplateMember<IMethod> template, IObjectReader? arguments = null )
+        {
+            // The template must be void.
+            if ( !template.Declaration!.ReturnType.Is( SpecialType.Void ) )
+            {
+                throw new InvalidTemplateSignatureException(
+                    UserMessageFormatter.Format(
+                        $"Cannot use the method '{template.Declaration}' as an initializer template: the method return type must be a void." ) );
+            }
+
+            // The template must not have run-time parameters.
+            if ( template.TemplateClassMember.Parameters.Any( p => !p.IsCompileTime ) )
+            {
+                throw new InvalidTemplateSignatureException(
+                  UserMessageFormatter.Format(
+                      $"Cannot use the method '{template.Declaration}' as an initializer template: the method cannot have run-time parameters." ) );
+            }
+
+
+            return new( template, null, GetTemplateArguments( template, arguments ) );
+        }
+
+        public static BoundTemplateMethod ForFilter( this in TemplateMember<IMethod> template, IObjectReader? arguments = null )
+        {
+            // The template must be void.
+            if ( !template.Declaration!.ReturnType.Is( SpecialType.Void ) )
+            {
+                throw new InvalidTemplateSignatureException(
+                    UserMessageFormatter.Format(
+                        $"Cannot use the method '{template.Declaration}' as a filter template: the method return type must be a void." ) );
+            }
+
+            // The template must not have run-time parameters.
+            if ( template.TemplateClassMember.Parameters.Any( p => !p.IsCompileTime && p.Name != "value" ) )
+            {
+                throw new InvalidTemplateSignatureException(
+                  UserMessageFormatter.Format(
+                      $"Cannot use the method '{template.Declaration}' as a filter template: the method cannot have run-time parameters except 'value'." ) );
+            }
+
+            if ( !template.TemplateClassMember.IndexedParameters.TryGetValue( "value", out var valueTemplateParameter ) || valueTemplateParameter.IsCompileTime )
+            {
+                throw new InvalidTemplateSignatureException(
+                 UserMessageFormatter.Format(
+                     $"Cannot use the method '{template.Declaration}' as a filter template: the method must have a run-time parameter named 'value'." ) );
+            }
+
+            return new( template, null, GetTemplateArguments( template, arguments ) );
+        }
 
         public static BoundTemplateMethod ForOverride( this in TemplateMember<IMethod> template, IMethod? targetMethod, IObjectReader? arguments = null )
         {
@@ -38,9 +85,9 @@ namespace Metalama.Framework.Engine.Advices
             // Verity that the template return type matches the target.
             if ( !VerifyTemplateType( template.Declaration!.ReturnType, targetMethod.ReturnType, template, arguments ) )
             {
-                throw new InvalidAdviceTargetException(
+                throw new InvalidTemplateSignatureException(
                     UserMessageFormatter.Format(
-                        $"Cannot use the template '{template.Declaration}' on method '{targetMethod}': the template return type '{template.Declaration.ReturnType}' is not compatible with the type of the target method '{targetMethod.ReturnType}'." ) );
+                        $"Cannot use the template '{template.Declaration}' to override the method '{targetMethod}': the template return type '{template.Declaration.ReturnType}' is not compatible with the type of the target method '{targetMethod.ReturnType}'." ) );
             }
 
             // Check that template run-time parameters match the target.
@@ -57,16 +104,16 @@ namespace Metalama.Framework.Engine.Advices
                 {
                     var parameterNames = string.Join( ", ", targetMethod.Parameters.Select( p => "'" + p.Name + "'" ) );
 
-                    throw new InvalidAdviceTargetException(
+                    throw new InvalidTemplateSignatureException(
                         UserMessageFormatter.Format(
-                            $"Cannot use the template '{template.Declaration}' on method '{targetMethod}': the target method does not contain a parameter '{templateParameter.Name}'. Available parameters are: {parameterNames}." ) );
+                            $"Cannot use the template '{template.Declaration}' to override the method '{targetMethod}': the target method does not contain a parameter '{templateParameter.Name}'. Available parameters are: {parameterNames}." ) );
                 }
 
                 if ( !VerifyTemplateType( templateParameter.Type, methodParameter.Type, template, arguments ) )
                 {
-                    throw new InvalidAdviceTargetException(
+                    throw new InvalidTemplateSignatureException(
                         UserMessageFormatter.Format(
-                            $"Cannot use the template '{template.Declaration}' on method '{targetMethod}': the type of the template parameter '{templateParameter.Name}' is not compatible with the type of the target method parameter '{methodParameter.Name}'." ) );
+                            $"Cannot use the template '{template.Declaration}' to override the method '{targetMethod}': the type of the template parameter '{templateParameter.Name}' is not compatible with the type of the target method parameter '{methodParameter.Name}'." ) );
                 }
             }
 
@@ -82,16 +129,16 @@ namespace Metalama.Framework.Engine.Advices
 
                 if ( methodParameter == null )
                 {
-                    throw new InvalidAdviceTargetException(
+                    throw new InvalidTemplateSignatureException(
                         UserMessageFormatter.Format(
-                            $"Cannot use the template '{template.Declaration}' on method '{targetMethod}': the target method does not contain a generic parameter '{templateParameter.Name}'." ) );
+                            $"Cannot use the template '{template.Declaration}' to override the method '{targetMethod}': the target method does not contain a generic parameter '{templateParameter.Name}'." ) );
                 }
 
                 if ( !templateParameter.IsCompatibleWith( methodParameter ) )
                 {
-                    throw new InvalidAdviceTargetException(
+                    throw new InvalidTemplateSignatureException(
                         UserMessageFormatter.Format(
-                            $"Cannot use the template '{template.Declaration}' on method '{targetMethod}': the constraints on the template parameter '{templateParameter.Name}' are not compatible with the constraints on the target method parameter '{methodParameter.Name}'." ) );
+                            $"Cannot use the template '{template.Declaration}' to override the method '{targetMethod}': the constraints on the template parameter '{templateParameter.Name}' are not compatible with the constraints on the target method parameter '{methodParameter.Name}'." ) );
                 }
             }
 
@@ -257,13 +304,13 @@ namespace Metalama.Framework.Engine.Advices
             {
                 if ( !template.TemplateClassMember.IndexedParameters.TryGetValue( name, out var parameter ) )
                 {
-                    throw new InvalidAdviceTargetException(
+                    throw new InvalidTemplateSignatureException(
                         UserMessageFormatter.Format( $"There is no parameter '{name}' in template '{template.Declaration}'." ) );
                 }
 
                 if ( !parameter.IsCompileTime )
                 {
-                    throw new InvalidAdviceTargetException(
+                    throw new InvalidTemplateSignatureException(
                         UserMessageFormatter.Format( $"The parameter '{name}' of template '{template.Declaration}' is not compile-time." ) );
                 }
             }

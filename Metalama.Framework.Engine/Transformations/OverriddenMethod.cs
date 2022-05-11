@@ -4,31 +4,23 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advices;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.MetaModel;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using System.Linq;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
-using RefKind = Metalama.Framework.Code.RefKind;
-using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Transformations
 {
+
     /// <summary>
     /// Method override, which expands a template.
     /// </summary>
-    internal sealed class OverriddenMethod : OverriddenMember
+    internal sealed class OverriddenMethod : OverriddenMethodBase
     {
-        public new IMethod OverriddenDeclaration => (IMethod) base.OverriddenDeclaration;
-
+        
         public BoundTemplateMethod BoundTemplate { get; }
 
         public OverriddenMethod( Advice advice, IMethod targetMethod, BoundTemplateMethod boundTemplate, IObjectReader tags )
@@ -41,11 +33,7 @@ namespace Metalama.Framework.Engine.Transformations
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
-            var proceedExpression = ProceedHelper.CreateProceedDynamicExpression(
-                context.SyntaxGenerationContext,
-                this.CreateInvocationExpression( context.SyntaxGenerationContext ),
-                this.BoundTemplate,
-                this.OverriddenDeclaration );
+            var proceedExpression = this.CreateProceedExpression( context, this.BoundTemplate.Template.SelectedKind );
 
             var metaApi = MetaApi.ForMethod(
                 this.OverriddenDeclaration,
@@ -78,85 +66,10 @@ namespace Metalama.Framework.Engine.Transformations
                 return Enumerable.Empty<IntroducedMember>();
             }
 
-            TypeSyntax? returnType = null;
-
-            var modifiers = this.OverriddenDeclaration.GetSyntaxModifierList();
-
-            if ( !this.OverriddenDeclaration.IsAsync )
-            {
-                if ( this.BoundTemplate.Template.MustInterpretAsAsyncTemplate() )
-                {
-                    // If the template is async but the overridden declaration is not, we have to add an async modifier.
-                    modifiers = modifiers.Add( Token( SyntaxKind.AsyncKeyword ) );
-                }
-            }
-            else
-            {
-                if ( !this.BoundTemplate.Template.MustInterpretAsAsyncTemplate() )
-                {
-                    // If the template is not async but the overridden declaration is, we have to remove the async modifier.
-                    modifiers = TokenList( modifiers.Where( m => !m.IsKind( SyntaxKind.AsyncKeyword ) ) );
-                }
-
-                // If the template is async and the target declaration is `async void`, and regardless of the async flag the template, we have to change the type to ValueTask, otherwise
-                // it is not awaitable
-
-                if ( TypeExtensions.Equals( this.OverriddenDeclaration.ReturnType, SpecialType.Void ) )
-                {
-                    returnType = context.SyntaxGenerator.Type(
-                        this.OverriddenDeclaration.GetCompilationModel().Factory.GetSpecialType( SpecialType.ValueTask ).GetSymbol() );
-                }
-            }
-
-            returnType ??= context.SyntaxGenerator.Type( this.OverriddenDeclaration.ReturnType.GetSymbol() );
-
-            var introducedMethod = MethodDeclaration(
-                List<AttributeListSyntax>(),
-                modifiers,
-                returnType,
-                null,
-                Identifier(
-                    context.IntroductionNameProvider.GetOverrideName(
-                        this.OverriddenDeclaration.DeclaringType,
-                        this.Advice.AspectLayerId,
-                        this.OverriddenDeclaration ) ),
-                context.SyntaxGenerator.TypeParameterList( this.OverriddenDeclaration ),
-                context.SyntaxGenerator.ParameterList( this.OverriddenDeclaration ),
-                context.SyntaxGenerator.ConstraintClauses( this.OverriddenDeclaration ),
-                newMethodBody,
-                null );
-
-            var overrides = new[]
-            {
-                new IntroducedMember(
-                    this,
-                    introducedMethod,
-                    this.Advice.AspectLayerId,
-                    IntroducedMemberSemantic.Override,
-                    this.OverriddenDeclaration )
-            };
-
-            return overrides;
+            return this.GetIntroducedMembersImpl( context, newMethodBody, this.BoundTemplate.Template.MustInterpretAsAsyncTemplate() );
+            
         }
 
-        private ExpressionSyntax CreateInvocationExpression( SyntaxGenerationContext generationContext )
-            => InvocationExpression(
-                this.CreateMemberAccessExpression( AspectReferenceTargetKind.Self, generationContext ),
-                ArgumentList(
-                    SeparatedList(
-                        this.OverriddenDeclaration.Parameters.Select(
-                            p =>
-                            {
-                                var refKind = p.RefKind switch
-                                {
-                                    RefKind.None => default,
-                                    RefKind.In => default,
-                                    RefKind.Out => Token( SyntaxKind.OutKeyword ),
-                                    RefKind.Ref => Token( SyntaxKind.RefKeyword ),
-                                    _ => throw new AssertionFailedException()
-                                };
-
-                                return Argument( null, refKind, IdentifierName( p.Name ) );
-                            } ) ) ) );
+     
     }
 }
