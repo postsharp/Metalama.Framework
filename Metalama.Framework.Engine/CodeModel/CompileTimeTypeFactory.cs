@@ -22,22 +22,24 @@ namespace Metalama.Framework.Engine.CodeModel
         private readonly ConcurrentDictionary<string, Type> _instances = new( StringComparer.Ordinal );
 
         public Type Get( ITypeSymbol symbol )
-            => symbol switch
+        {
+            return symbol switch
             {
                 IDynamicTypeSymbol => throw new AssertionFailedException(),
                 IArrayTypeSymbol { ElementType: IDynamicTypeSymbol } => throw new AssertionFailedException(),
                 _ => this.Get( symbol.GetSymbolId(), symbol.GetReflectionName().AssertNotNull() )
             };
+        }
 
         public Type Get( SymbolId symbolKey, string fullMetadataName )
         {
             return this._instances.GetOrAdd( symbolKey.ToString(), id => CompileTimeType.CreateFromSymbolId( new SymbolId( id ), fullMetadataName ) );
         }
 
-        public Type Get( SymbolId symbolKey, IReadOnlyDictionary<string, IType>? substitutions )
+        public Type Get( SymbolId symbolKey, IReadOnlyDictionary<string, IType>? substitutions, bool ignoreAssemblyKey )
         {
             var compilation = SyntaxBuilder.CurrentImplementation.Compilation.GetCompilationModel();
-            var originalSymbol = (ITypeSymbol) symbolKey.Resolve( compilation.RoslynCompilation ).AssertNotNull();
+            var originalSymbol = (ITypeSymbol) symbolKey.Resolve( compilation.RoslynCompilation, ignoreAssemblyKey ).AssertNotNull();
 
             if ( substitutions != null && substitutions.Count > 0 )
             {
@@ -63,9 +65,11 @@ namespace Metalama.Framework.Engine.CodeModel
             }
 
             public static TypeRewriter Get( BoundTemplateMethod template )
-                => template.Template.TemplateClassMember.TypeParameters.All( x => !x.IsCompileTime )
-                    ? Null
-                    : new TemplateTypeRewriter( template );
+            {
+                return template.Template.TemplateClassMember.TypeParameters.All( x => !x.IsCompileTime )
+                                   ? Null
+                                   : new TemplateTypeRewriter( template );
+            }
 
             internal override ITypeInternal Visit( TypeParameter typeParameter )
             {
