@@ -64,9 +64,11 @@ namespace Metalama.Framework.Aspects
         IAdvisedEvent Event { get; }
 
         /// <summary>
-        /// Gets the list of parameters of <see cref="Method"/>.
+        /// Gets the list of parameters of the current <see cref="Method"/> or <see cref="Property"/>.
         /// </summary>
         IAdvisedParameterList Parameters { get; }
+
+        IAdvisedParameter Parameter { get; }
 
         IIndexer Indexer { get; }
 

@@ -42,24 +42,68 @@ namespace Metalama.Framework.Engine.Advices
         public List<Filter> Filters { get; } = new();
 
         public bool TryExecuteTemplates(
-            IDeclaration targetDeclaration,
+            IDeclaration targetMember,
             in MemberIntroductionContext context,
-            FilterDirection kind,
-            [NotNullWhen( true )] out IReadOnlyList<BlockSyntax>? filterBodies )
+            FilterDirection direction,
+            string? returnValueLocalName,
+            [NotNullWhen( true )] out IReadOnlyList<StatementSyntax>? statements )
         {
             var success = true;
 
-            List<BlockSyntax>? list = null;
+            List<StatementSyntax>? list = null;
 
             foreach ( var filter in this.Filters )
             {
-                if ( (kind == FilterDirection.Input && filter.Kind == FilterDirection.Output) ||
-                     (kind == FilterDirection.Output && filter.Kind == FilterDirection.Input) )
+                if ( (direction == FilterDirection.Input && filter.Direction == FilterDirection.Output) ||
+                     (direction == FilterDirection.Output && filter.Direction == FilterDirection.Input) )
                 {
                     continue;
                 }
 
-                list ??= new List<BlockSyntax>( this.Filters.Count );
+                var filterTarget = filter.TargetDeclaration.GetTarget( targetMember.Compilation );
+
+                string? parameterName;
+                bool skip;
+
+                switch ( filterTarget )
+                {
+                    case IParameter { IsReturnParameter: true }:
+                        if ( returnValueLocalName != null )
+                        {
+                            parameterName = returnValueLocalName;
+                            skip = direction == FilterDirection.Input;
+                        }
+                        else
+                        {
+                            skip = true;
+                            parameterName = null!;
+                        }
+
+                        break;
+
+                    case IParameter parameter:
+                        parameterName = parameter.Name;
+
+                        skip = filter.Direction == FilterDirection.Default && ((direction == FilterDirection.Input && parameter.RefKind == RefKind.Out)
+                                                                               || (direction == FilterDirection.Output && parameter.RefKind != RefKind.Out));
+
+                        break;
+
+                    default:
+                        parameterName = "value";
+                        skip = filter.Direction == FilterDirection.Default && direction == FilterDirection.Output;
+
+                        break;
+                }
+
+                if ( skip )
+                {
+                    statements = Array.Empty<BlockSyntax>();
+
+                    return true;
+                }
+
+                list ??= new List<StatementSyntax>();
 
                 var metaApiProperties = new MetaApiProperties(
                     context.DiagnosticSink,
@@ -72,16 +116,16 @@ namespace Metalama.Framework.Engine.Advices
                     MetaApiStaticity.Default );
 
                 var metaApi = MetaApi.ForDeclaration(
-                    targetDeclaration,
+                    filterTarget,
                     metaApiProperties );
 
-                var boundTemplate = filter.Template.ForFilter();
+                var boundTemplate = filter.Template.ForFilter( parameterName );
 
                 var expansionContext = new TemplateExpansionContext(
                     this.TemplateInstance.Instance,
                     metaApi,
-                    (CompilationModel) targetDeclaration.Compilation,
-                    context.LexicalScopeProvider.GetLexicalScope( targetDeclaration ),
+                    (CompilationModel) targetMember.Compilation,
+                    context.LexicalScopeProvider.GetLexicalScope( targetMember ),
                     context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
                     context.SyntaxGenerationContext,
                     boundTemplate,
@@ -96,11 +140,11 @@ namespace Metalama.Framework.Engine.Advices
                 }
                 else
                 {
-                    list.Add( filterBody );
+                    list.AddRange( filterBody.Statements );
                 }
             }
 
-            filterBodies = list ?? (IReadOnlyList<BlockSyntax>) Array.Empty<BlockSyntax>();
+            statements = list ?? (IReadOnlyList<StatementSyntax>) Array.Empty<StatementSyntax>();
 
             return success;
         }

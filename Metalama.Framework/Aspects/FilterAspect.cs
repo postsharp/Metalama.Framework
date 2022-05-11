@@ -10,7 +10,7 @@ namespace Metalama.Framework.Aspects
     [AttributeUsage( AttributeTargets.ReturnValue | AttributeTargets.Parameter | AttributeTargets.Field | AttributeTargets.Property )]
     public abstract class FilterAspect : Aspect, IAspect<IParameter>, IAspect<IFieldOrPropertyOrIndexer>
     {
-        public FilterDirection Direction { get; set; } = FilterDirection.Input;
+        public FilterDirection Direction { get; set; } = FilterDirection.Default;
 
         public virtual void BuildAspect( IAspectBuilder<IFieldOrPropertyOrIndexer> builder )
         {

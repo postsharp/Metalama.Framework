@@ -26,6 +26,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         private readonly IAdvisedEvent? _event;
         private readonly INamedType? _type;
         private readonly MetaApiProperties _common;
+        private readonly IAdvisedParameter? _parameter;
 
         private Exception CreateInvalidOperationException( string memberName, string? description = null )
             => TemplatingDiagnosticDescriptors.MemberMemberNotAvailable.CreateException(
@@ -51,6 +52,8 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         public IAdvisedEvent Event => this._event ?? throw this.CreateInvalidOperationException( nameof(this.Event) );
 
         public IAdvisedParameterList Parameters => this._method?.Parameters ?? throw this.CreateInvalidOperationException( nameof(this.Parameters) );
+
+        public IAdvisedParameter Parameter => this._parameter ?? throw this.CreateInvalidOperationException( nameof(this.Parameter) );
 
         public IIndexer Indexer => this.Member as IIndexer ?? throw this.CreateInvalidOperationException( nameof(this.Indexer) );
 
@@ -137,6 +140,35 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             this._type = constructor.DeclaringType;
         }
 
+        private MetaApi( IParameter parameter, MetaApiProperties common ) : this( (IDeclaration) parameter, common )
+        {
+            switch ( parameter.DeclaringMember )
+            {
+                case IConstructor constructor:
+                    this._constructor = new AdvisedConstructor( constructor );
+
+                    break;
+
+                case IMethod method:
+                    this._method = new AdvisedMethod( method );
+
+                    break;
+
+                case IField field:
+                    this._fieldOrProperty = new AdvisedField( field );
+
+                    break;
+
+                case IProperty property:
+                    this._fieldOrProperty = new AdvisedProperty( property );
+
+                    break;
+            }
+
+            this._type = parameter.DeclaringMember.DeclaringType;
+            this._parameter = new AdvisedParameter( parameter );
+        }
+
         private MetaApi( IFieldOrProperty fieldOrProperty, IMethod accessor, MetaApiProperties common ) : this( accessor, common )
         {
             this._method = new AdvisedMethod( accessor );
@@ -189,6 +221,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
                 IFieldOrProperty fieldOrProperty => new MetaApi( fieldOrProperty, common ),
                 IEvent @event => new MetaApi( @event, common ),
                 IConstructor constructor => new MetaApi( constructor, common ),
+                IParameter parameter => new MetaApi( parameter, common ),
                 _ => throw new AssertionFailedException()
             };
 

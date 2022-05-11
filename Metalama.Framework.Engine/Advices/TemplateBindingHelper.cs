@@ -22,6 +22,11 @@ namespace Metalama.Framework.Engine.Advices
     {
         public static BoundTemplateMethod ForIntroduction( this in TemplateMember<IMethod> template, IObjectReader? arguments = null )
         {
+            return new BoundTemplateMethod( template, null, GetTemplateArguments( template, arguments ) );
+        }
+        
+        public static BoundTemplateMethod ForInitializer( this in TemplateMember<IMethod> template, IObjectReader? arguments = null )
+        {
             // The template must be void.
             if ( !template.Declaration!.ReturnType.Is( SpecialType.Void ) )
             {
@@ -41,7 +46,9 @@ namespace Metalama.Framework.Engine.Advices
             return new BoundTemplateMethod( template, null, GetTemplateArguments( template, arguments ) );
         }
 
-        public static BoundTemplateMethod ForFilter( this in TemplateMember<IMethod> template, IObjectReader? arguments = null )
+
+
+        public static BoundTemplateMethod ForFilter( this in TemplateMember<IMethod> template, string parameterName, IObjectReader? arguments = null )
         {
             // The template must be void.
             if ( !template.Declaration!.ReturnType.Is( SpecialType.Void ) )
@@ -67,7 +74,14 @@ namespace Metalama.Framework.Engine.Advices
                         $"Cannot use the method '{template.Declaration}' as a filter template: the method must have a run-time parameter named 'value'." ) );
             }
 
-            return new BoundTemplateMethod( template, null, GetTemplateArguments( template, arguments ) );
+            var parameterMapping = ImmutableDictionary<string, ExpressionSyntax>.Empty;
+
+            if ( parameterName != "value" )
+            {
+                parameterMapping = parameterMapping.Add( "value", IdentifierName( parameterName ) );
+            }
+
+            return new BoundTemplateMethod( template, null, GetTemplateArguments( template, arguments, parameterMapping ) );
         }
 
         public static BoundTemplateMethod ForOverride( this in TemplateMember<IMethod> template, IMethod? targetMethod, IObjectReader? arguments = null )

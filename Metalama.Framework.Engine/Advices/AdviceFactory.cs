@@ -843,7 +843,7 @@ namespace Metalama.Framework.Engine.Advices
                 this._aspect,
                 this._templateInstance,
                 targetType,
-                templateRef.ForIntroduction( ObjectReader.GetReader( args ) ),
+                templateRef.ForInitializer( ObjectReader.GetReader( args ) ),
                 kind,
                 _layerName,
                 ObjectReader.GetReader( tags ) );

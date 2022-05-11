@@ -29,8 +29,8 @@ namespace Metalama.Framework.Engine.Advices
             // Execute the templates.
             var success = true;
 
-            success &= advice.TryExecuteTemplates( this.OverriddenDeclaration, context, FilterDirection.Input, out var inputFilterBodies );
-            success &= advice.TryExecuteTemplates( this.OverriddenDeclaration, context, FilterDirection.Output, out var outputFilterBodies );
+            success &= advice.TryExecuteTemplates( this.OverriddenDeclaration, context, FilterDirection.Input, null, out var inputFilterBodies );
+            success &= advice.TryExecuteTemplates( this.OverriddenDeclaration, context, FilterDirection.Output, returnValueName, out var outputFilterBodies );
 
             if ( !success )
             {

@@ -7,5 +7,10 @@ using Metalama.Framework.Engine.CodeModel.References;
 
 namespace Metalama.Framework.Engine.Advices
 {
-    internal record Filter( Ref<IDeclaration> TargetDeclaration, TemplateMember<IMethod> Template, FilterDirection Kind, IObjectReader Tags, IObjectReader Args );
+    internal record Filter(
+        Ref<IDeclaration> TargetDeclaration,
+        TemplateMember<IMethod> Template,
+        FilterDirection Direction,
+        IObjectReader Tags,
+        IObjectReader Args );
 }
