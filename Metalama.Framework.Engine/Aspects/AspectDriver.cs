@@ -161,7 +161,7 @@ namespace Metalama.Framework.Engine.Aspects
                             aspectInstance.TemplateInstances[x.TemplateClass],
                             diagnosticSink,
                             targetDeclaration,
-                            x.TemplateInfo,
+                            x,
                             x.Symbol ) )
                     .WhereNotNull();
 
@@ -233,7 +233,7 @@ namespace Metalama.Framework.Engine.Aspects
             TemplateClassInstance templateInstance,
             IDiagnosticAdder diagnosticAdder,
             T aspectTarget,
-            TemplateInfo template,
+            TemplateClassMember template,
             ISymbol templateDeclaration )
             where T : IDeclaration
         {

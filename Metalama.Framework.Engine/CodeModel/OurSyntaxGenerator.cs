@@ -67,7 +67,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this.IsNullAware = nullAware;
         }
 
-        public TypeOfExpressionSyntax TypeOfExpression( ITypeSymbol type )
+        public TypeOfExpressionSyntax TypeOfExpression( ITypeSymbol type, IReadOnlyDictionary<string, TypeSyntax>? substitutions = null )
         {
             var typeSyntax = this.Type( type.WithNullableAnnotation( NullableAnnotation.NotAnnotated ) );
 
@@ -94,6 +94,12 @@ namespace Metalama.Framework.Engine.CodeModel
             };
 
             var rewrittenTypeSyntax = rewriter.Visit( typeSyntax );
+
+            if ( substitutions != null && substitutions.Count > 0 )
+            {
+                var substitutionRewriter = new SubstitutionRewriter( substitutions );
+                rewrittenTypeSyntax = substitutionRewriter.Visit( rewrittenTypeSyntax );
+            }
 
             return (TypeOfExpressionSyntax) this._syntaxGenerator.TypeOfExpression( rewrittenTypeSyntax );
         }
@@ -141,7 +147,7 @@ namespace Metalama.Framework.Engine.CodeModel
             return SyntaxFactory.CastExpression( this.Type( targetTypeSymbol ), expression ).WithAdditionalAnnotations( Simplifier.Annotation );
         }
 
-        public ExpressionSyntax NameExpression( INamespaceOrTypeSymbol symbol )
+        public ExpressionSyntax TypeOrNamespace( INamespaceOrTypeSymbol symbol )
         {
             ExpressionSyntax expression;
 
@@ -419,6 +425,28 @@ namespace Metalama.Framework.Engine.CodeModel
             }
 
             throw new ArgumentOutOfRangeException( nameof(value), $"The value '{value}' cannot be converted to a custom attribute argument value." );
+        }
+
+        private class SubstitutionRewriter : CSharpSyntaxRewriter
+        {
+            private readonly IReadOnlyDictionary<string, TypeSyntax> _substitutions;
+
+            public SubstitutionRewriter( IReadOnlyDictionary<string, TypeSyntax> substitutions )
+            {
+                this._substitutions = substitutions;
+            }
+
+            public override SyntaxNode? VisitIdentifierName( IdentifierNameSyntax node )
+            {
+                if ( this._substitutions.TryGetValue( node.Identifier.Text, out var substitution ) )
+                {
+                    return substitution;
+                }
+                else
+                {
+                    return base.VisitIdentifierName( node );
+                }
+            }
         }
     }
 }

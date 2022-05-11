@@ -27,7 +27,7 @@ public class TransformationPreviewServiceImpl : ITransformationPreviewServiceImp
     public async Task<PreviewTransformationResult> PreviewTransformationAsync( string projectId, string syntaxTreeName, CancellationToken cancellationToken )
     {
         // Get the pipeline for the compilation.
-        if ( !this._designTimeAspectPipelineFactory.TryGetPipeline( projectId, out var pipeline ) 
+        if ( !this._designTimeAspectPipelineFactory.TryGetPipeline( projectId, out var pipeline )
              || pipeline.LastCompilation == null )
         {
             // We cannot create the pipeline because we don't have all options.
@@ -35,7 +35,7 @@ public class TransformationPreviewServiceImpl : ITransformationPreviewServiceImp
 
             return PreviewTransformationResult.Failure( "The project has not been fully loaded yet. Open a file of this project in the editor." );
         }
-        
+
         // Find the syntax tree of the given name.
         var syntaxTree = pipeline.LastCompilation.SyntaxTrees.FirstOrDefault( t => t.FilePath == syntaxTreeName );
 

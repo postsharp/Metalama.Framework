@@ -39,7 +39,7 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Generic parameter.
         /// </summary>
-        GenericParameter,
+        TypeParameter,
 
         /// <summary>
         /// Interface.

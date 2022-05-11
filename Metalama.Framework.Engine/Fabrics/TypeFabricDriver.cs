@@ -46,7 +46,7 @@ namespace Metalama.Framework.Engine.Fabrics
                             aspectInstance.TemplateInstances[x.TemplateClass],
                             aspectBuilder.DiagnosticAdder,
                             targetType,
-                            x.TemplateInfo,
+                            x,
                             x.Symbol ) )
                     .WhereNotNull();
 
@@ -68,7 +68,7 @@ namespace Metalama.Framework.Engine.Fabrics
             TemplateClassInstance templateInstance,
             IDiagnosticAdder diagnosticAdder,
             INamedType aspectTarget,
-            TemplateInfo template,
+            TemplateClassMember template,
             ISymbol templateDeclaration )
         {
             template.TryCreateAdvice(

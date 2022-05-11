@@ -12,17 +12,17 @@ namespace Metalama.Framework.Engine.Advices
 {
     internal class OverrideMethodAdvice : OverrideMemberAdvice<IMethod>
     {
-        public TemplateMember<IMethod> Template { get; }
+        public BoundTemplateMethod BoundTemplate { get; }
 
         public OverrideMethodAdvice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             IMethod targetDeclaration,
-            TemplateMember<IMethod> template,
+            BoundTemplateMethod boundTemplate,
             string? layerName,
-            ITagReader tags ) : base( aspect, templateInstance, targetDeclaration, layerName, tags )
+            IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, layerName, tags )
         {
-            this.Template = template;
+            this.BoundTemplate = boundTemplate;
         }
 
         public override void Initialize( IDiagnosticAdder diagnosticAdder ) { }
@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.Advices
         public override AdviceResult ToResult( ICompilation compilation, IReadOnlyList<IObservableTransformation> observableTransformations )
         {
             // TODO: order should be self if the target is introduced on the same layer.
-            return AdviceResult.Create( new OverriddenMethod( this, this.TargetDeclaration.GetTarget( compilation ), this.Template, this.Tags ) );
+            return AdviceResult.Create( new OverriddenMethod( this, this.TargetDeclaration.GetTarget( compilation ), this.BoundTemplate, this.Tags ) );
         }
     }
 }

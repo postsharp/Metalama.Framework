@@ -50,5 +50,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public bool Equals( IType other ) => this.Symbol.Equals( ((ITypeInternal) other).TypeSymbol );
 
         public override string ToString() => this.Symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat );
+
+        public abstract ITypeInternal Accept( TypeRewriter visitor );
     }
 }

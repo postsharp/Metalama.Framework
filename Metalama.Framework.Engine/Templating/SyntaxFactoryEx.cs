@@ -28,6 +28,30 @@ namespace Metalama.Framework.Engine.Templating
         public static ExpressionSyntax LiteralExpression( object? obj, ObjectDisplayOptions options = ObjectDisplayOptions.None )
             => LiteralExpressionOrNull( obj, options ) ?? throw new ArgumentOutOfRangeException( nameof(obj) );
 
+        public static TypeSyntax ExpressionSyntaxType { get; } = SyntaxFactory.QualifiedName(
+            SyntaxFactory.QualifiedName(
+                SyntaxFactory.QualifiedName(
+                    SyntaxFactory.QualifiedName(
+                        SyntaxFactory.AliasQualifiedName(
+                            SyntaxFactory.IdentifierName( SyntaxFactory.Token( SyntaxKind.GlobalKeyword ) ),
+                            SyntaxFactory.IdentifierName( "Microsoft" ) ),
+                        SyntaxFactory.IdentifierName( "CodeAnalysis" ) ),
+                    SyntaxFactory.IdentifierName( "CSharp" ) ),
+                SyntaxFactory.IdentifierName( "Syntax" ) ),
+            SyntaxFactory.IdentifierName( "ExpressionSyntax" ) );
+
+        public static TypeSyntax TypeSyntaxType { get; } = SyntaxFactory.QualifiedName(
+            SyntaxFactory.QualifiedName(
+                SyntaxFactory.QualifiedName(
+                    SyntaxFactory.QualifiedName(
+                        SyntaxFactory.AliasQualifiedName(
+                            SyntaxFactory.IdentifierName( SyntaxFactory.Token( SyntaxKind.GlobalKeyword ) ),
+                            SyntaxFactory.IdentifierName( "Microsoft" ) ),
+                        SyntaxFactory.IdentifierName( "CodeAnalysis" ) ),
+                    SyntaxFactory.IdentifierName( "CSharp" ) ),
+                SyntaxFactory.IdentifierName( "Syntax" ) ),
+            SyntaxFactory.IdentifierName( "TypeSyntax" ) );
+
         public static ExpressionSyntax? LiteralExpressionOrNull( object? obj, ObjectDisplayOptions options = ObjectDisplayOptions.None )
             => obj switch
             {

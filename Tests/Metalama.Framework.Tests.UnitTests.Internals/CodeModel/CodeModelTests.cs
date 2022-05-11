@@ -478,7 +478,7 @@ class C<T>
 
             var type = Assert.Single( compilation.Types )!;
 
-            var typeKinds = new[] { TypeKind.Array, Class, TypeKind.Delegate, Dynamic, TypeKind.Enum, GenericParameter, Interface, Pointer, Struct };
+            var typeKinds = new[] { TypeKind.Array, Class, TypeKind.Delegate, Dynamic, TypeKind.Enum, TypeKind.TypeParameter, Interface, Pointer, Struct };
 
             Assert.Equal( typeKinds, type.Fields.Select( p => p.Type.TypeKind ).ToArray() );
         }

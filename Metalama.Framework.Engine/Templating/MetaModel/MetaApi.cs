@@ -93,7 +93,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         public object BaseStatic
             => new ThisTypeUserReceiver( this.Type, new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Base ) );
 
-        public ITagReader Tags => this._common.Tags;
+        public IObjectReader Tags => this._common.Tags;
 
         IDiagnosticSink IMetaApi.Diagnostics => this._common.Diagnostics;
 

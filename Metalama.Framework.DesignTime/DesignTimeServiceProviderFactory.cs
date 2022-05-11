@@ -28,7 +28,7 @@ public static class DesignTimeServiceProviderFactory
             {
                 if ( _serviceProvider == null )
                 {
-                    MetalamaDiagnosticsServiceFactory.Initialize( nameof( DesignTimeServiceProviderFactory ) );
+                    MetalamaDiagnosticsServiceFactory.Initialize( nameof(DesignTimeServiceProviderFactory) );
 
                     _serviceProvider = ServiceProviderFactory.GetServiceProvider()
                         .WithNextProvider( DiagnosticServiceFactory.ServiceProvider );

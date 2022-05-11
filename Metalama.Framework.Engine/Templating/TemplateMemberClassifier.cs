@@ -49,6 +49,41 @@ namespace Metalama.Framework.Engine.Templating
                 _ => false
             };
 
+        public static bool IsTemplateParameter( IParameterSymbol parameter )
+            => parameter.ContainingSymbol is IMethodSymbol { MethodKind: not MethodKind.LambdaMethod and not MethodKind.AnonymousFunction } or IPropertySymbol
+                or IEventSymbol;
+
+        public bool IsRunTimeTemplateParameter( IParameterSymbol parameter )
+            => IsTemplateParameter( parameter ) && this._symbolClassifier.GetTemplatingScope( parameter ) != TemplatingScope.CompileTimeOnly;
+
+        public bool IsTemplateParameter( ExpressionSyntax expression )
+        {
+            var symbol = this._syntaxTreeAnnotationMap.GetSymbol( expression );
+
+            if ( symbol is IParameterSymbol parameter )
+            {
+                return IsTemplateParameter( parameter );
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public static bool IsTemplateTypeParameter( ITypeParameterSymbol parameter )
+            => parameter.ContainingSymbol is IMethodSymbol { MethodKind: not MethodKind.LambdaMethod and not MethodKind.AnonymousFunction } or IPropertySymbol
+                or IEventSymbol;
+
+        public bool IsCompileTemplateTypeParameter( ITypeParameterSymbol typeParameter )
+            => IsTemplateTypeParameter( typeParameter ) && this._symbolClassifier.GetTemplatingScope( typeParameter ).GetExpressionExecutionScope()
+                == TemplatingScope.CompileTimeOnly;
+
+        public bool IsCompileTimeParameter( IParameterSymbol parameter )
+            => this._symbolClassifier.GetTemplatingScope( parameter ).GetExpressionValueScope() == TemplatingScope.CompileTimeOnly;
+
+        public bool IsCompileTimeParameter( ITypeParameterSymbol parameter )
+            => this._symbolClassifier.GetTemplatingScope( parameter ).GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly;
+
         public bool IsRunTimeMethod( IMethodSymbol symbol )
             => symbol.Name == nameof(meta.RunTime) &&
                symbol.ContainingType.GetDocumentationCommentId() == this._metaType.GetDocumentationCommentId();

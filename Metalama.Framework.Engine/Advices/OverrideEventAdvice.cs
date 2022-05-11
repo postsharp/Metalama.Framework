@@ -12,6 +12,8 @@ namespace Metalama.Framework.Engine.Advices
 {
     internal class OverrideEventAdvice : OverrideMemberAdvice<IEvent>
     {
+        private readonly IObjectReader _parameters;
+
         public TemplateMember<IEvent> EventTemplate { get; }
 
         public TemplateMember<IMethod> AddTemplate { get; }
@@ -26,9 +28,12 @@ namespace Metalama.Framework.Engine.Advices
             TemplateMember<IMethod> addTemplate,
             TemplateMember<IMethod> removeTemplate,
             string? layerName,
-            ITagReader tags )
+            IObjectReader tags,
+            IObjectReader parameters )
             : base( aspect, templateInstance, targetDeclaration, layerName, tags )
         {
+            this._parameters = parameters;
+
             // We need either property template or both accessor templates, but never both.
             Invariant.Assert( eventTemplate.IsNotNull || (addTemplate.IsNotNull && removeTemplate.IsNotNull) );
             Invariant.Assert( !(eventTemplate.IsNotNull && (addTemplate.IsNotNull || removeTemplate.IsNotNull)) );
@@ -50,7 +55,8 @@ namespace Metalama.Framework.Engine.Advices
                     this.EventTemplate,
                     this.AddTemplate,
                     this.RemoveTemplate,
-                    this.Tags ) );
+                    this.Tags,
+                    this._parameters ) );
         }
     }
 }
