@@ -1,12 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -24,9 +24,26 @@ namespace Metalama.Framework.CompilerExtensions
 
         private static readonly ConcurrentDictionary<string, Assembly?> _assemblyCache = new( StringComparer.OrdinalIgnoreCase );
 
-        private static string? _snapshotDirectory;
+        private static readonly string _snapshotDirectory;
+        private static readonly string _buildId;
+
         private static volatile bool _initialized;
         private static string? _versionNumber;
+
+        static ResourceExtractor()
+        {
+            // This mimics the logic implemented by TempPathHelper and backed by Metalama.Backstage, however without having a reference to Metalama.Backstage.
+            var assembly = typeof(ResourceExtractor).Assembly;
+            var moduleId = assembly.ManifestModule.ModuleVersionId;
+            var assemblyVersion = assembly.GetName().Version;
+
+            _buildId = assemblyVersion.ToString( 4 ) + "-" +
+                       string.Join( "", moduleId.ToByteArray().Take( 4 ).Select( i => i.ToString( "x2", CultureInfo.InvariantCulture ) ) );
+
+            _snapshotDirectory = GetTempDirectory( "Extract" );
+        }
+
+        private static string GetTempDirectory( string purpose ) => Path.Combine( Path.GetTempPath(), "Metalama", purpose, _buildId );
 
         private static void Initialize()
         {
@@ -44,7 +61,6 @@ namespace Metalama.Framework.CompilerExtensions
                         AppDomain.CurrentDomain.AssemblyResolve += OnAssemblyResolve;
 
                         // Get a temp directory. AssemblyName.GetAssemblyName does not support long paths.
-                        _snapshotDirectory = TempPathHelper.GetTempPath( "Extract" );
 
                         // Extract embedded assemblies to a temp directory.
                         ExtractEmbeddedAssemblies( currentAssembly );
@@ -100,7 +116,7 @@ namespace Metalama.Framework.CompilerExtensions
             }
             catch ( Exception e )
             {
-                var directory = TempPathHelper.GetTempPath( "ExtractExceptions" );
+                var directory = GetTempDirectory( "ExtractExceptions" );
 
                 if ( !Directory.Exists( directory ) )
                 {
@@ -129,7 +145,7 @@ namespace Metalama.Framework.CompilerExtensions
 
                 using var log = File.CreateText( Path.Combine( _snapshotDirectory, $"extract-{Guid.NewGuid()}.log" ) );
 
-                var mutexName = "Global\\Metalama_Extract_" + EngineAssemblyMetadataReader.Instance.BuildId;
+                var mutexName = "Global\\Metalama_Extract_" + _buildId;
 
                 log.WriteLine( $"Extracting resources..." );
 
