@@ -16,6 +16,11 @@
 
         <!-- Design time fallback dependency that forces rerun of analyzers/source generators when changed. -->
         <MetalamaDesignTimeFallbackTouchFile Condition="'$(MetalamaDesignTimeEnabled)'=='False'">$(MetalamaAdditionalCompilationOutputDirectory)MetalamaDesignTimeTouch.touch</MetalamaDesignTimeFallbackTouchFile>
+
+        <!-- Define a new build configuration named LamaDebug (configured below).
+             This needs to be done in the targets file, and not in the props file, because Microsoft.NET.Sdk.props will not define it if we define it first in our own props file. -->
+        <Configurations>$(Configurations);LamaDebug</Configurations>
+
     </PropertyGroup>
 
 
