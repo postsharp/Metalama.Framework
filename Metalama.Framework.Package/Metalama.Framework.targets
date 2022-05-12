@@ -11,9 +11,6 @@
         <!-- This constant is used to identify the pipeline when we have only a compilation but no analyzer options -->
         <DefineConstants>$(DefinedConstants);MetalamaProjectId_$(MetalamaProjectId)</DefineConstants>
 
-        <!-- Define a new build configuration named LamaDebug (configured below). -->
-        <Configurations>$(Configurations);LamaDebug</Configurations>
-
         <!-- Auxiliary files used at design time. -->
         <MetalamaAdditionalCompilationOutputDirectory Condition="'$(MetalamaDesignTimeEnabled)'=='False'">$(MSBuildProjectDirectory)\$(IntermediateOutputPath)\metalama-aux\</MetalamaAdditionalCompilationOutputDirectory>
 
@@ -21,13 +18,6 @@
         <MetalamaDesignTimeFallbackTouchFile Condition="'$(MetalamaDesignTimeEnabled)'=='False'">$(MetalamaAdditionalCompilationOutputDirectory)MetalamaDesignTimeTouch.touch</MetalamaDesignTimeFallbackTouchFile>
     </PropertyGroup>
 
-
-    <!-- Implementation of the 'LamaDebug' build configuration -->
-    <PropertyGroup Condition="'$(Configuration)'=='LamaDebug'">
-        <MetalamaFormatOutput Condition="'$(MetalamaFormatOutput)'==''">True</MetalamaFormatOutput>
-        <MetalamaDebugTransformedCode>True</MetalamaDebugTransformedCode>
-        <MetalamaEmitCompilerTransformedFiles Condition="'$(MetalamaEmitCompilerTransformedFiles)'==''">True</MetalamaEmitCompilerTransformedFiles>
-    </PropertyGroup>
 
     <ItemGroup Condition="'$(MetalamaCompileTimeProject)'=='True'">
         <AssemblyAttribute Include="Metalama.Framework.Aspects.CompileTimeAttribute"/>
