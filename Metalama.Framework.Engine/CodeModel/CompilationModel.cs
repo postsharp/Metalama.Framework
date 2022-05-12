@@ -117,7 +117,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     .Concat( observableTransformations.OfType<AttributeBuilder>() )
                     .Select( a => new AttributeRef( a ) );
 
-            this._derivedTypes = prototype._derivedTypes.WithIntroducedInterfaces( observableTransformations.OfType<IIntroducedInterface>() );
+            this._derivedTypes = prototype._derivedTypes.WithIntroducedInterfaces( observableTransformations.OfType<IIntroduceInterfaceTransformation>() );
 
             // TODO: Process IRemoveMember.
 

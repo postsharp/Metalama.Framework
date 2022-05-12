@@ -13,7 +13,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Transformations
 {
-    internal class IntroducedInterface : IIntroducedInterface
+    internal class IntroduceInterfaceTransformation : IIntroduceInterfaceTransformation
     {
         public IDeclaration ContainingDeclaration => this.TargetType;
 
@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.Transformations
 
         public IReadOnlyDictionary<IMember, IMember> MemberMap { get; }
 
-        public IntroducedInterface(
+        public IntroduceInterfaceTransformation(
             ImplementInterfaceAdvice implementInterfaceAdvice,
             INamedType targetType,
             INamedType interfaceType,

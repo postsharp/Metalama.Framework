@@ -3,7 +3,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Advices;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -12,38 +12,53 @@ using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 
-namespace Metalama.Framework.Engine.Advices
+namespace Metalama.Framework.Engine.Transformations
 {
-    internal class FilterMethodTransformation : OverriddenMethodBase
+    internal class FilterMethodTransformation : OverrideMethodBaseTransformation
     {
-        public FilterMethodTransformation( Advice advice, IMethod overriddenDeclaration ) : base( advice, overriddenDeclaration, ObjectReader.Empty ) { }
+        public FilterMethodTransformation( FilterAdvice advice, IMethod overriddenDeclaration ) : base( advice, overriddenDeclaration, ObjectReader.Empty ) { }
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
             var advice = (FilterAdvice) this.Advice;
 
-            var returnValueName = this.OverriddenDeclaration.ReturnType.Is( SpecialType.Void )
-                ? null
-                : context.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ).GetUniqueIdentifier( "returnValue" );
-
             // Execute the templates.
-            var success = true;
 
-            success &= advice.TryExecuteTemplates( this.OverriddenDeclaration, context, FilterDirection.Input, null, out var inputFilterBodies );
-            success &= advice.TryExecuteTemplates( this.OverriddenDeclaration, context, FilterDirection.Output, returnValueName, out var outputFilterBodies );
+            _ = advice.TryExecuteTemplates( this.OverriddenDeclaration, context, FilterDirection.Input, null, out var inputFilterBodies );
 
-            if ( !success )
+            List<StatementSyntax>? outputFilterBodies;
+            string? returnValueName;
+
+            if ( advice.Filters.Any( f => f.AppliesTo( FilterDirection.Output ) ) )
             {
-                return Enumerable.Empty<IntroducedMember>();
+                returnValueName = this.OverriddenDeclaration.ReturnType.Is( SpecialType.Void )
+                    ? null
+                    : context.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ).GetUniqueIdentifier( "returnValue" );
+
+                _ = !advice.TryExecuteTemplates(
+                    this.OverriddenDeclaration,
+                    context,
+                    FilterDirection.Output,
+                    returnValueName,
+                    out outputFilterBodies );
+            }
+            else
+            {
+                outputFilterBodies = null;
+                returnValueName = null;
             }
 
             // Rewrite the method body.
             var proceedExpression = this.CreateProceedExpression( context, TemplateKind.Default ).ToRunTimeExpression().Syntax;
 
             var statements = new List<StatementSyntax>();
-            statements.AddRange( inputFilterBodies! );
 
-            if ( outputFilterBodies!.Count > 0 )
+            if ( inputFilterBodies != null )
+            {
+                statements.AddRange( inputFilterBodies );
+            }
+
+            if ( outputFilterBodies is { Count: > 0 } )
             {
                 if ( returnValueName != null )
                 {

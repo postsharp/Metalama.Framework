@@ -86,10 +86,9 @@ namespace Metalama.Framework.Engine.Advices
             if ( existingDeclaration == null )
             {
                 // There is no existing declaration, we will introduce and override the introduced.
-                var overriddenMethod = new OverriddenProperty(
+                var overriddenMethod = new OverridePropertyTransformation(
                     this,
                     this.MemberBuilder,
-                    this.Template,
                     this._getTemplate,
                     this._setTemplate,
                     this.Tags );
@@ -127,10 +126,9 @@ namespace Metalama.Framework.Engine.Advices
                         // If the existing declaration is in the current type, we fail, otherwise, declare a new method and override.
                         if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( targetDeclaration, existingDeclaration.DeclaringType ) )
                         {
-                            var overriddenProperty = new OverriddenProperty(
+                            var overriddenProperty = new OverridePropertyTransformation(
                                 this,
                                 existingDeclaration,
-                                this.Template,
                                 this._getTemplate,
                                 this._setTemplate,
                                 this.Tags );
@@ -141,10 +139,9 @@ namespace Metalama.Framework.Engine.Advices
                         {
                             this.MemberBuilder.IsNew = true;
 
-                            var overriddenProperty = new OverriddenProperty(
+                            var overriddenProperty = new OverridePropertyTransformation(
                                 this,
                                 this.MemberBuilder,
-                                this.Template,
                                 this._getTemplate,
                                 this._setTemplate,
                                 this.Tags );
@@ -155,10 +152,9 @@ namespace Metalama.Framework.Engine.Advices
                     case OverrideStrategy.Override:
                         if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( targetDeclaration, existingDeclaration.DeclaringType ) )
                         {
-                            var overriddenMethod = new OverriddenProperty(
+                            var overriddenMethod = new OverridePropertyTransformation(
                                 this,
                                 existingDeclaration,
-                                this.Template,
                                 this._getTemplate,
                                 this._setTemplate,
                                 this.Tags );
@@ -188,10 +184,9 @@ namespace Metalama.Framework.Engine.Advices
                             this.MemberBuilder.IsOverride = true;
                             this.MemberBuilder.OverriddenProperty = existingDeclaration;
 
-                            var overriddenProperty = new OverriddenProperty(
+                            var overriddenProperty = new OverridePropertyTransformation(
                                 this,
                                 this.MemberBuilder,
-                                this.Template,
                                 this._getTemplate,
                                 this._setTemplate,
                                 this.Tags );

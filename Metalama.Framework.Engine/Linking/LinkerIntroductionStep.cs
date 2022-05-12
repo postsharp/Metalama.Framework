@@ -133,7 +133,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             replacedTransformations = new HashSet<ISyntaxTreeTransformation>();
 
-            foreach ( var transformation in allTransformations.OfType<IReplaceMember>() )
+            foreach ( var transformation in allTransformations.OfType<IReplaceMemberTransformation>() )
             {
                 if ( transformation.ReplacedMember == null )
                 {
@@ -199,7 +199,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 switch ( transformation )
                 {
-                    case IMemberIntroduction memberIntroduction:
+                    case IIntroduceMemberTransformation memberIntroduction:
                         // Create the SyntaxGenerationContext for the insertion point.
                         var positionInSyntaxTree = GetSyntaxTreePosition( memberIntroduction.InsertPosition );
 
@@ -223,7 +223,7 @@ namespace Metalama.Framework.Engine.Linking
 
                         break;
 
-                    case IIntroducedInterface interfaceIntroduction:
+                    case IIntroduceInterfaceTransformation interfaceIntroduction:
                         var introducedInterface = interfaceIntroduction.GetSyntax();
                         syntaxTransformationCollection.Add( interfaceIntroduction, introducedInterface );
 
@@ -267,10 +267,10 @@ namespace Metalama.Framework.Engine.Linking
             LexicalScopeFactory lexicalScopeFactory,
             List<ITransformation> allTransformations,
             out Dictionary<SyntaxNode, IReadOnlyList<LinkerInsertedStatement>> symbolInsertedStatements,
-            out Dictionary<IMemberIntroduction, IReadOnlyList<LinkerInsertedStatement>> introductionInsertedStatements )
+            out Dictionary<IIntroduceMemberTransformation, IReadOnlyList<LinkerInsertedStatement>> introductionInsertedStatements )
         {
             symbolInsertedStatements = new Dictionary<SyntaxNode, IReadOnlyList<LinkerInsertedStatement>>();
-            introductionInsertedStatements = new Dictionary<IMemberIntroduction, IReadOnlyList<LinkerInsertedStatement>>();
+            introductionInsertedStatements = new Dictionary<IIntroduceMemberTransformation, IReadOnlyList<LinkerInsertedStatement>>();
 
             foreach ( var insertStatementTransformation in allTransformations.OfType<IInsertStatementTransformation>() )
             {

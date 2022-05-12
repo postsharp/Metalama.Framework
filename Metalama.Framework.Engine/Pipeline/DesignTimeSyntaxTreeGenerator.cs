@@ -71,7 +71,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
                 foreach ( var transformation in transformationGroup.Transformations )
                 {
-                    if ( transformation is IMemberIntroduction memberIntroduction )
+                    if ( transformation is IIntroduceMemberTransformation memberIntroduction )
                     {
                         // TODO: Provide other implementations or allow nulls (because this pipeline should not execute anything).
                         // TODO: Implement support for initializable transformations.
@@ -89,7 +89,7 @@ namespace Metalama.Framework.Engine.Pipeline
                         classDeclaration = classDeclaration.AddMembers( introducedMembers );
                     }
 
-                    if ( transformation is IIntroducedInterface interfaceImplementation )
+                    if ( transformation is IIntroduceInterfaceTransformation interfaceImplementation )
                     {
                         classDeclaration = classDeclaration.AddBaseListTypes( interfaceImplementation.GetSyntax() );
                     }

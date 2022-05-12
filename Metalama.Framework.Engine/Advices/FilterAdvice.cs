@@ -34,6 +34,9 @@ namespace Metalama.Framework.Engine.Advices
                 case IMethod method:
                     return AdviceResult.Create( new FilterMethodTransformation( this, method ) );
 
+                case IProperty property:
+                    return AdviceResult.Create( new FilterPropertyTransformation( this, property ) );
+
                 default:
                     throw new NotImplementedException();
             }
@@ -46,64 +49,29 @@ namespace Metalama.Framework.Engine.Advices
             in MemberIntroductionContext context,
             FilterDirection direction,
             string? returnValueLocalName,
-            [NotNullWhen( true )] out IReadOnlyList<StatementSyntax>? statements )
+            [NotNullWhen( true )] out List<StatementSyntax>? statements )
         {
-            var success = true;
-
-            List<StatementSyntax>? list = null;
+            statements = null;
 
             foreach ( var filter in this.Filters )
             {
-                if ( (direction == FilterDirection.Input && filter.Direction == FilterDirection.Output) ||
-                     (direction == FilterDirection.Output && filter.Direction == FilterDirection.Input) )
+                if ( !filter.AppliesTo( direction ) )
                 {
                     continue;
                 }
 
                 var filterTarget = filter.TargetDeclaration.GetTarget( targetMember.Compilation );
 
-                string? parameterName;
-                bool skip;
-
-                switch ( filterTarget )
+                var parameterName = filterTarget switch
                 {
-                    case IParameter { IsReturnParameter: true }:
-                        if ( returnValueLocalName != null )
-                        {
-                            parameterName = returnValueLocalName;
-                            skip = direction == FilterDirection.Input;
-                        }
-                        else
-                        {
-                            skip = true;
-                            parameterName = null!;
-                        }
+                    IParameter { IsReturnParameter: true } => returnValueLocalName ?? null!,
+                    IParameter parameter => parameter.Name,
+                    IProperty when direction == FilterDirection.Input => "value",
+                    IProperty when direction == FilterDirection.Output => returnValueLocalName,
+                    _ => throw new AssertionFailedException()
+                };
 
-                        break;
-
-                    case IParameter parameter:
-                        parameterName = parameter.Name;
-
-                        skip = filter.Direction == FilterDirection.Default && ((direction == FilterDirection.Input && parameter.RefKind == RefKind.Out)
-                                                                               || (direction == FilterDirection.Output && parameter.RefKind != RefKind.Out));
-
-                        break;
-
-                    default:
-                        parameterName = "value";
-                        skip = filter.Direction == FilterDirection.Default && direction == FilterDirection.Output;
-
-                        break;
-                }
-
-                if ( skip )
-                {
-                    statements = Array.Empty<BlockSyntax>();
-
-                    return true;
-                }
-
-                list ??= new List<StatementSyntax>();
+                statements ??= new List<StatementSyntax>();
 
                 var metaApiProperties = new MetaApiProperties(
                     context.DiagnosticSink,
@@ -136,17 +104,17 @@ namespace Metalama.Framework.Engine.Advices
 
                 if ( !templateDriver.TryExpandDeclaration( expansionContext, boundTemplate.TemplateArguments, out var filterBody ) )
                 {
-                    success = false;
+                    statements = null;
+
+                    return false;
                 }
                 else
                 {
-                    list.AddRange( filterBody.Statements );
+                    statements.AddRange( filterBody.Statements );
                 }
             }
 
-            statements = list ?? (IReadOnlyList<StatementSyntax>) Array.Empty<StatementSyntax>();
-
-            return success;
+            return statements is { Count: > 0 };
         }
     }
 }

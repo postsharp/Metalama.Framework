@@ -17,11 +17,11 @@ namespace Metalama.Framework.Engine.Transformations
     /// <summary>
     /// Method override, which expands a template.
     /// </summary>
-    internal sealed class OverriddenMethod : OverriddenMethodBase
+    internal sealed class OverrideMethodTransformation : OverrideMethodBaseTransformation
     {
         public BoundTemplateMethod BoundTemplate { get; }
 
-        public OverriddenMethod( Advice advice, IMethod targetMethod, BoundTemplateMethod boundTemplate, IObjectReader tags )
+        public OverrideMethodTransformation( Advice advice, IMethod targetMethod, BoundTemplateMethod boundTemplate, IObjectReader tags )
             : base( advice, targetMethod, tags )
         {
             Invariant.Assert( !boundTemplate.IsNull );

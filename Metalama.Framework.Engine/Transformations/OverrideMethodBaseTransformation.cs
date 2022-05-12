@@ -18,11 +18,11 @@ using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Transformations
 {
-    internal abstract class OverriddenMethodBase : OverriddenMember
+    internal abstract class OverrideMethodBaseTransformation : OverrideMemberTransformation
     {
-        public new IMethod OverriddenDeclaration => (IMethod) base.OverriddenDeclaration;
+        protected new IMethod OverriddenDeclaration => (IMethod) base.OverriddenDeclaration;
 
-        public OverriddenMethodBase( Advice advice, IMethod targetMethod, IObjectReader tags )
+        protected OverrideMethodBaseTransformation( Advice advice, IMethod targetMethod, IObjectReader tags )
             : base( advice, targetMethod, tags ) { }
 
         protected UserExpression CreateProceedExpression( in MemberIntroductionContext context, TemplateKind templateKind )

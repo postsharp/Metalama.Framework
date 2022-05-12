@@ -915,7 +915,13 @@ namespace Metalama.Framework.Engine.Advices
             this.AddFilterImpl( targetMember, targetMember, template, kind, tags, args );
         }
 
-        private void AddFilterImpl( IDeclaration targetDeclaration, IMember targetMember, string template, FilterDirection kind, object? tags, object? args )
+        private void AddFilterImpl(
+            IDeclaration targetDeclaration,
+            IMember targetMember,
+            string template,
+            FilterDirection direction,
+            object? tags,
+            object? args )
         {
             if ( this._templateInstance == null )
             {
@@ -942,8 +948,7 @@ namespace Metalama.Framework.Engine.Advices
                 this._diagnosticAdder.Report( diagnosticList );
             }
 
-            advice.Filters.Add(
-                new Filter( targetDeclaration.ToTypedRef(), templateRef, kind, ObjectReader.GetReader( tags ), ObjectReader.GetReader( args ) ) );
+            advice.Filters.Add( new Filter( targetDeclaration, templateRef, direction, ObjectReader.GetReader( tags ), ObjectReader.GetReader( args ) ) );
         }
     }
 }
