@@ -34,7 +34,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Remove="Tests\Aspects\Overrides\Fields\Multiple - Copy.t.cs" />
+        <ProjectReference Include="..\..\Metalama.TestFramework\Metalama.TestFramework.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
@@ -47,13 +47,7 @@
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
     </ItemGroup>
 
-    <ItemGroup>
-        <None Include="Tests\Aspects\Introductions\Interfaces\SameMethodName.t.cs" />
-        <None Include="Tests\Aspects\Overrides\Fields\Multiple - Copy.t.cs">
-          <SubType>Code</SubType>
-          <DependentUpon>Multiple.t.cs</DependentUpon>
-        </None>
-    </ItemGroup>
+
 
     <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets" />
 

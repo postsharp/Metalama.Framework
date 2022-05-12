@@ -51,7 +51,7 @@ namespace Metalama.Framework.Engine.Advices
                     $"The template '{symbol}' is a {declaration.DeclarationKind} but it was expected to be an {typeof(T).Name}" );
             }
 
-            return Advices.TemplateMember.Create( typedSymbol, this.TemplateMember.TemplateInfo, this.SelectedKind, this.InterpretedKind );
+            return Advices.TemplateMember.Create( typedSymbol, this.TemplateMember, this.SelectedKind, this.InterpretedKind );
         }
 
         public TemplateMemberRef InterpretedAs( TemplateKind interpretedKind ) => new( this.TemplateMember, this.SelectedKind, interpretedKind );

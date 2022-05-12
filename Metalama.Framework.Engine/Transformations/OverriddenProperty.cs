@@ -26,17 +26,17 @@ namespace Metalama.Framework.Engine.Transformations
 
         public TemplateMember<IProperty> PropertyTemplate { get; }
 
-        public TemplateMember<IMethod> GetTemplate { get; }
+        public BoundTemplateMethod GetTemplate { get; }
 
-        public TemplateMember<IMethod> SetTemplate { get; }
+        public BoundTemplateMethod SetTemplate { get; }
 
         public OverriddenProperty(
             Advice advice,
             IProperty overriddenDeclaration,
             TemplateMember<IProperty> propertyTemplate,
-            TemplateMember<IMethod> getTemplate,
-            TemplateMember<IMethod> setTemplate,
-            ITagReader tags )
+            BoundTemplateMethod getTemplate,
+            BoundTemplateMethod setTemplate,
+            IObjectReader tags )
             : base( advice, overriddenDeclaration, tags )
         {
             // We need the getTemplate and setTemplate to be set by the caller even if propertyTemplate is set.
@@ -155,7 +155,7 @@ namespace Metalama.Framework.Engine.Transformations
 
         private bool TryExpandAccessorTemplate(
             in MemberIntroductionContext context,
-            TemplateMember<IMethod> accessorTemplate,
+            BoundTemplateMethod accessorTemplate,
             IMethod accessor,
             [NotNullWhen( true )] out BlockSyntax? body )
         {
@@ -179,7 +179,7 @@ namespace Metalama.Framework.Engine.Transformations
                 accessor,
                 new MetaApiProperties(
                     context.DiagnosticSink,
-                    accessorTemplate.Cast(),
+                    accessorTemplate.Template.Cast(),
                     this.Tags,
                     this.Advice.AspectLayerId,
                     context.SyntaxGenerationContext,
@@ -198,9 +198,9 @@ namespace Metalama.Framework.Engine.Transformations
                 proceedExpression,
                 this.Advice.AspectLayerId );
 
-            var templateDriver = this.Advice.TemplateInstance.TemplateClass.GetTemplateDriver( accessorTemplate.Declaration! );
+            var templateDriver = this.Advice.TemplateInstance.TemplateClass.GetTemplateDriver( accessorTemplate.Template.Declaration! );
 
-            return templateDriver.TryExpandDeclaration( expansionContext, context.DiagnosticSink, out body );
+            return templateDriver.TryExpandDeclaration( expansionContext, accessorTemplate.TemplateArguments, out body );
         }
 
         /// <summary>

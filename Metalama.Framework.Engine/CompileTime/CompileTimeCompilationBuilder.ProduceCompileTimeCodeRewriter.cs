@@ -1106,7 +1106,7 @@ namespace Metalama.Framework.Engine.CompileTime
             private QualifiedTypeNameInfo CreateNameExpression( INamespaceOrTypeSymbol symbol )
             {
                 var unnestedType = this._currentContext.NestedType;
-                var fullyQualifiedName = (NameSyntax) OurSyntaxGenerator.CompileTime.NameExpression( symbol );
+                var fullyQualifiedName = (NameSyntax) OurSyntaxGenerator.CompileTime.TypeOrNamespace( symbol );
 
                 static NameSyntax RenameType( NameSyntax syntax, string newIdentifier, int nestingLevel )
                     => syntax switch

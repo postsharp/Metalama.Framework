@@ -53,7 +53,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public TemplateMember<IField> InitializerTemplate { get; set; }
 
-        public FieldBuilder( Advice parentAdvice, INamedType targetType, string name, ITagReader tags )
+        public FieldBuilder( Advice parentAdvice, INamedType targetType, string name, IObjectReader tags )
             : base( parentAdvice, targetType, tags )
         {
             this.Name = name;

@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             INamedType targetType,
             string name,
             bool isEventField,
-            ITagReader tags )
+            IObjectReader tags )
             : base( parentAdvice, targetType, tags )
         {
             this.Name = name;

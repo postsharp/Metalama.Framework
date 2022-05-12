@@ -275,7 +275,7 @@ namespace Metalama.Framework.Engine
                     + "reference aspect-generated artefacts from source code.",
                     _category,
                     Warning );
-        
+
         internal static readonly DiagnosticDefinition<(string Message, string File)> IgnorableUnhandledException =
             new(
                 "LAMA00049",

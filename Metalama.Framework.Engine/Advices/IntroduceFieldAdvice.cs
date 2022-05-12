@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Advices
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             string? layerName,
-            ITagReader tags )
+            IObjectReader tags )
             : base( aspect, templateInstance, targetDeclaration, fieldTemplate, scope, overrideStrategy, layerName, tags )
         {
             this.MemberBuilder = new FieldBuilder( this, targetDeclaration, (explicitName ?? fieldTemplate.Declaration?.Name).AssertNotNull(), tags );

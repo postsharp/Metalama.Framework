@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.Advices
 
         public AspectLayerId AspectLayerId { get; }
 
-        protected ITagReader Tags { get; }
+        protected IObjectReader Tags { get; }
 
         public int Order { get; set; }
 
@@ -36,7 +36,7 @@ namespace Metalama.Framework.Engine.Advices
             TemplateClassInstance template,
             IDeclaration targetDeclaration,
             string? layerName,
-            ITagReader tags )
+            IObjectReader tags )
         {
             this.Tags = tags;
             this.Aspect = aspect;

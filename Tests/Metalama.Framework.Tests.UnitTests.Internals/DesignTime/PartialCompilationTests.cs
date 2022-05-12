@@ -98,10 +98,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
         {
             using var testContext = this.CreateTestContext();
 
-            var code = new Dictionary<string, string>
-            {
-                ["Class1.cs"] = "/* Intentionally empty */",
-            };
+            var code = new Dictionary<string, string> { ["Class1.cs"] = "/* Intentionally empty */" };
 
             var compilation = CreateCSharpCompilation( code );
             var partialCompilation = PartialCompilation.CreatePartial( compilation, compilation.SyntaxTrees[0] );

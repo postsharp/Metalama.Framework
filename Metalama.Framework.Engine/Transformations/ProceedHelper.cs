@@ -22,13 +22,13 @@ namespace Metalama.Framework.Engine.Transformations
         public static UserExpression CreateProceedDynamicExpression(
             SyntaxGenerationContext generationContext,
             ExpressionSyntax invocationExpression,
-            TemplateMember<IMethod> template,
+            BoundTemplateMethod template,
             IMethod overriddenMethod )
         {
             var runtimeAspectHelperType =
                 generationContext.SyntaxGenerator.Type( generationContext.ReflectionMapper.GetTypeSymbol( typeof(RunTimeAspectHelper) ) );
 
-            switch ( template.SelectedKind )
+            switch ( template.Template.SelectedKind )
             {
                 case TemplateKind.Default when overriddenMethod.GetIteratorInfoImpl() is { IsIterator: true } iteratorInfo:
                     {

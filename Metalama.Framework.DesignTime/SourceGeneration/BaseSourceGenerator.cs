@@ -135,8 +135,7 @@ namespace Metalama.Framework.DesignTime
                 (Compilation Compilation, (string TouchId, AnalyzerConfigOptionsProvider Options)) y )
                 => x.Item2.TouchId == y.Item2.TouchId;
 
-            public int GetHashCode( (Compilation Compilation, (string TouchId, AnalyzerConfigOptionsProvider Options)) obj )
-                => obj.Item2.TouchId.GetHashCode();
+            public int GetHashCode( (Compilation Compilation, (string TouchId, AnalyzerConfigOptionsProvider Options)) obj ) => obj.Item2.TouchId.GetHashCode();
         }
 
         private static string GetTouchId(

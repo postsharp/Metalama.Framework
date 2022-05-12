@@ -16,7 +16,17 @@ namespace Metalama.Framework.Tests.UnitTests.Templating
     {
         private void AssertScope( IDeclaration declaration, TemplatingScope expectedScope )
         {
-            this.AssertScope( ((Declaration) declaration).Compilation.RoslynCompilation, declaration.GetSymbol()!, expectedScope );
+            this.AssertScope( declaration.GetCompilationModel().RoslynCompilation, declaration.GetSymbol()!, expectedScope );
+        }
+
+        private void AssertScope( INamedType declaration, TemplatingScope expectedScope )
+        {
+            this.AssertScope( declaration.GetCompilationModel().RoslynCompilation, declaration.GetSymbol()!, expectedScope );
+        }
+
+        private void AssertScope( IType type, TemplatingScope expectedScope )
+        {
+            this.AssertScope( type.GetCompilationModel().RoslynCompilation, type.GetSymbol()!, expectedScope );
         }
 
         private void AssertScope( Compilation compilation, ISymbol symbol, TemplatingScope expectedScope )
@@ -49,7 +59,7 @@ class C : TypeAspect
 
             var compilation = testContext.CreateCompilationModel( code );
             var type = compilation.Types.OfName( "C" ).Single();
-            this.AssertScope( type, TemplatingScope.RunTimeOrCompileTime );
+            this.AssertScope( (IDeclaration) type, TemplatingScope.RunTimeOrCompileTime );
             this.AssertScope( type.Fields.OfName( "F" ).Single(), TemplatingScope.RunTimeOrCompileTime );
             this.AssertScope( type.Methods.OfName( "M" ).Single(), TemplatingScope.RunTimeOrCompileTime );
             this.AssertScope( type.Methods.OfName( "Template" ).Single(), TemplatingScope.CompileTimeOnly );
@@ -158,6 +168,74 @@ class C
             this.AssertScope( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(int) ), TemplatingScope.RunTimeOrCompileTime );
             this.AssertScope( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(Console) ), TemplatingScope.RunTimeOnly );
             this.AssertScope( compilation.Types.Single(), TemplatingScope.RunTimeOnly );
+        }
+
+        [Fact]
+        public void UnmarkedGenericMethod()
+        {
+            using var testContext = this.CreateTestContext();
+
+            // The main purpose of these tests is to check that there is no infinite recursion.
+
+            var code = @"
+using Metalama.Framework.Aspects;
+using System.Collections.Generic;
+
+internal class C : TypeAspect
+{
+    public T M1<T>() => default!;
+    public T[] M2<T>() => default!;
+    public T M3<T>(List<T> l) => default!;
+}
+";
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var m1 = compilation.Types.OfName( "C" ).Single().Methods.OfName( "M1" ).Single();
+            this.AssertScope( m1, TemplatingScope.RunTimeOrCompileTime );
+            this.AssertScope( m1.ReturnType, TemplatingScope.RunTimeOrCompileTime );
+
+            var m2 = compilation.Types.OfName( "C" ).Single().Methods.OfName( "M2" ).Single();
+            this.AssertScope( m2, TemplatingScope.RunTimeOrCompileTime );
+            this.AssertScope( m2.ReturnType, TemplatingScope.RunTimeOrCompileTime );
+
+            var m3 = compilation.Types.OfName( "C" ).Single().Methods.OfName( "M3" ).Single();
+            this.AssertScope( m3, TemplatingScope.RunTimeOrCompileTime );
+            this.AssertScope( m3.ReturnType, TemplatingScope.RunTimeOrCompileTime );
+        }
+
+        [Fact]
+        public void GenericTemplate()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = @"
+using Metalama.Framework.Aspects;
+using System.Collections.Generic;
+
+internal class C : TypeAspect
+{
+    [Template]
+    public T M1<[CompileTime] T>() => default!;
+
+    [Template]
+    public T[] M2<[CompileTime] T>() => default!;
+
+    [Template]
+    public T M3<[CompileTime] T>(List<T> p1, T[] p2, List<T[]> p3) => default!;
+}
+";
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var m1 = compilation.Types.OfName( "C" ).Single().Methods.OfName( "M1" ).Single();
+            this.AssertScope( m1.ReturnType, TemplatingScope.CompileTimeOnlyReturningRuntimeOnly );
+
+            var m2 = compilation.Types.OfName( "C" ).Single().Methods.OfName( "M2" ).Single();
+            this.AssertScope( m2.ReturnType, TemplatingScope.RunTimeOnly );
+
+            var m3 = compilation.Types.OfName( "C" ).Single().Methods.OfName( "M3" ).Single();
+            this.AssertScope( m3.Parameters[0].Type, TemplatingScope.RunTimeOnly );
+            this.AssertScope( m3.Parameters[1].Type, TemplatingScope.RunTimeOnly );
+            this.AssertScope( m3.Parameters[2].Type, TemplatingScope.RunTimeOnly );
         }
     }
 }

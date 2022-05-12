@@ -23,9 +23,10 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.InstanceCo
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.AddInitializerBeforeInstanceConstructor(
+            builder.Advice.AddInitializer(
                 builder.Target,
                 nameof(Template),
+                InitializerKind.BeforeInstanceConstructor,
                 tags: new { target = builder.Target } );
         }
     }
@@ -34,9 +35,10 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.InstanceCo
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.AddInitializerBeforeInstanceConstructor(
+            builder.Advice.AddInitializer(
                 builder.Target.Properties.First(),
                 nameof(Template),
+                InitializerKind.BeforeInstanceConstructor,
                 tags: new { target = builder.Target.Properties.First() } );
         }
     }

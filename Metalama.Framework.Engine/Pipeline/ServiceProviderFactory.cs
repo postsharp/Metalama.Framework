@@ -62,7 +62,7 @@ namespace Metalama.Framework.Engine.Pipeline
             // If support services are not initialized at this point, do it.
             // When transformer execution starts, these services are replaced
             // by project-scoped ones coming from the TransformerContext.
-            MetalamaDiagnosticsServiceFactory.Initialize( nameof( ServiceProviderFactory ) );
+            MetalamaDiagnosticsServiceFactory.Initialize( nameof(ServiceProviderFactory) );
 
             var serviceProvider = ServiceProvider.Empty
                 .WithNextProvider( DiagnosticServiceFactory.ServiceProvider )

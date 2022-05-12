@@ -91,7 +91,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             bool hasSetter,
             bool isAutoProperty,
             bool hasInitOnlySetter,
-            ITagReader tags )
+            IObjectReader tags )
             : base( parentAdvice, targetType, tags )
         {
             // TODO: Sanity checks.

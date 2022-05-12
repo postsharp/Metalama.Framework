@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.Advices
     internal static class AdviceAttributeFactory
     {
         public static bool TryCreateAdvice<T>(
-            this TemplateInfo template,
+            this TemplateClassMember template,
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             IDiagnosticAdder diagnosticAdder,
@@ -27,7 +27,7 @@ namespace Metalama.Framework.Engine.Advices
             [NotNullWhen( true )] out Advice? advice )
             where T : IDeclaration
         {
-            switch ( template.AttributeType )
+            switch ( template.TemplateInfo.AttributeType )
             {
                 case TemplateAttributeType.Introduction:
                     {
@@ -64,11 +64,11 @@ namespace Metalama.Framework.Engine.Advices
                                     aspect,
                                     templateInstance,
                                     targetType,
-                                    TemplateMember.Create( templateMethod, template, TemplateKind.Introduction ),
-                                    template.Attribute.Scope,
-                                    template.Attribute.WhenExists,
+                                    TemplateMember.Create( templateMethod, template, TemplateKind.Introduction ).ForIntroduction(),
+                                    template.TemplateInfo.Attribute.Scope,
+                                    template.TemplateInfo.Attribute.WhenExists,
                                     layerName,
-                                    TagReader.Empty );
+                                    ObjectReader.Empty );
 
                                 advice = introduceMethodAdvice;
                                 builder = introduceMethodAdvice.Builder;
@@ -85,12 +85,12 @@ namespace Metalama.Framework.Engine.Advices
                                     targetType,
                                     null,
                                     propertyTemplate,
-                                    accessorTemplates.Get,
-                                    accessorTemplates.Set,
-                                    template.Attribute.Scope,
-                                    template.Attribute.WhenExists,
+                                    accessorTemplates.Get.ForIntroduction(),
+                                    accessorTemplates.Set.ForIntroduction(),
+                                    template.TemplateInfo.Attribute.Scope,
+                                    template.TemplateInfo.Attribute.WhenExists,
                                     layerName,
-                                    TagReader.Empty );
+                                    ObjectReader.Empty );
 
                                 advice = introducePropertyAdvice;
                                 builder = introducePropertyAdvice.Builder;
@@ -106,10 +106,11 @@ namespace Metalama.Framework.Engine.Advices
                                     TemplateMember.Create( templateEvent, template, TemplateKind.Introduction ),
                                     default,
                                     default,
-                                    template.Attribute.Scope,
-                                    template.Attribute.WhenExists,
+                                    template.TemplateInfo.Attribute.Scope,
+                                    template.TemplateInfo.Attribute.WhenExists,
                                     layerName,
-                                    TagReader.Empty );
+                                    ObjectReader.Empty,
+                                    ObjectReader.Empty );
 
                                 advice = introduceEventAdvice;
                                 builder = introduceEventAdvice.Builder;
@@ -125,10 +126,10 @@ namespace Metalama.Framework.Engine.Advices
                                     targetType,
                                     null,
                                     fieldTemplate,
-                                    template.Attribute.Scope,
-                                    template.Attribute.WhenExists,
+                                    template.TemplateInfo.Attribute.Scope,
+                                    template.TemplateInfo.Attribute.WhenExists,
                                     layerName,
-                                    TagReader.Empty );
+                                    ObjectReader.Empty );
 
                                 advice = introduceFieldAdvice;
                                 builder = introduceFieldAdvice.Builder;
@@ -141,13 +142,13 @@ namespace Metalama.Framework.Engine.Advices
 
                         advice.Initialize( diagnosticAdder );
 
-                        ((MemberBuilder) builder).ApplyTemplateAttribute( template.Attribute );
+                        ((MemberBuilder) builder).ApplyTemplateAttribute( template.TemplateInfo.Attribute );
 
                         return true;
                     }
             }
 
-            throw new NotImplementedException( $"No implementation for advice attribute {template.AttributeType}." );
+            throw new NotImplementedException( $"No implementation for advice attribute {template.TemplateInfo.AttributeType}." );
         }
     }
 }

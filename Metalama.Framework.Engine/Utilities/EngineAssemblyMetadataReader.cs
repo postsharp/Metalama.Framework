@@ -7,6 +7,6 @@ namespace Metalama.Framework.Engine.Utilities
 {
     public static class EngineAssemblyMetadataReader
     {
-        public static readonly AssemblyMetadataReader Instance = AssemblyMetadataReader.GetInstance( typeof( EngineAssemblyMetadataReader ).Assembly );
+        public static readonly AssemblyMetadataReader Instance = AssemblyMetadataReader.GetInstance( typeof(EngineAssemblyMetadataReader).Assembly );
     }
 }
