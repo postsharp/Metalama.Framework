@@ -37,7 +37,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
     {
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            builder.With(x => x.Properties).AddAspect(x => new OverrideAttribute());
+            builder.With(x => x.Fields).AddAspect(x => new OverrideAttribute());
         }
 
         [Introduce]

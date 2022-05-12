@@ -166,7 +166,19 @@ namespace Metalama.Framework.Engine.CodeModel.References
         public static ISymbol? Deserialize( Compilation compilation, string serializedId )
             => DocumentationCommentId.GetFirstSymbolForDeclarationId( serializedId, compilation );
 
-        public T GetTarget( ICompilation compilation ) => Resolve( this.Target, (CompilationModel) compilation, this.TargetKind );
+        public T GetTarget( ICompilation compilation )
+        {
+            var compilationModel = (CompilationModel) compilation;
+            if ( compilationModel.TryGetRedirectedDeclaration( new Ref<IDeclaration>( this.Target, this._compilation, this.TargetKind ), out var redirected ) )
+            {
+                // Referencing redirected declaration.
+                return Resolve( redirected.Target, compilationModel, this.TargetKind );
+            }
+            else
+            {
+                return Resolve( this.Target, compilationModel, this.TargetKind );
+            }
+        }
 
         public (ImmutableArray<AttributeData> Attributes, ISymbol Symbol) GetAttributeData( Compilation compilation )
         {
@@ -297,9 +309,6 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
             return symbol;
         }
-
-        internal static T Resolve( object? reference, ICompilation compilation, DeclarationRefTargetKind kind = DeclarationRefTargetKind.Default )
-            => Resolve( reference, (CompilationModel) compilation, kind );
 
         private static T Resolve( object? reference, CompilationModel compilation, DeclarationRefTargetKind kind = DeclarationRefTargetKind.Default )
         {

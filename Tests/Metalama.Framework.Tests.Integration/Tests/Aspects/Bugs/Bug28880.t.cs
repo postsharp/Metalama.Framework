@@ -7,7 +7,6 @@ internal class TargetCode
     }
 
 
-    [global::Metalama.Framework.Tests.Integration.Aspects.Bugs.Bug28880.TestPropertyAspect]
     private global::System.Int32 field
     {
         get

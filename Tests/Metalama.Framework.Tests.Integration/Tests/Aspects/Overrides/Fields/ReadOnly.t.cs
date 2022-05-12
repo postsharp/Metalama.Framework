@@ -1,3 +1,4 @@
+[IntroduceAndOverride]
 internal class TargetClass
 {
 
@@ -71,15 +72,38 @@ internal class TargetClass
     }
     static TargetClass()
     {
-        // Field access should be rewritten to the newly generated backing field.
         StaticReadOnlyField = 42;
         StaticInitializerReadOnlyField = 27;
     }
 
     public TargetClass()
     {
-        // Field access should be rewritten to the newly generated backing field.
         this.ReadOnlyField = 42;
         this.InitializerReadOnlyField = 27;
+    }
+
+
+    private global::System.Int32 _introducedField;
+
+
+    public global::System.Int32 IntroducedField
+    {
+        get
+        {
+            global::System.Console.WriteLine("This is the overridden getter.");
+            return this._introducedField;
+        }
+    }
+
+    private global::System.Int32 _introducedStaticField;
+
+
+    public global::System.Int32 IntroducedStaticField
+    {
+        get
+        {
+            global::System.Console.WriteLine("This is the overridden getter.");
+            return this._introducedStaticField;
+        }
     }
 }

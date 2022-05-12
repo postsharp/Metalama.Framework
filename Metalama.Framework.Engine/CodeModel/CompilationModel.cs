@@ -5,6 +5,7 @@ using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.Collections;
@@ -51,6 +52,8 @@ namespace Metalama.Framework.Engine.CodeModel
         private readonly DerivedTypeIndex _derivedTypes;
 
         private ImmutableDictionary<Ref<IDeclaration>, int> _depthsCache = ImmutableDictionary.Create<Ref<IDeclaration>, int>();
+
+        private ImmutableDictionary<Ref<IDeclaration>, Ref<IDeclaration>> _redirectionCache = ImmutableDictionary.Create<Ref<IDeclaration>, Ref<IDeclaration>>();
 
         public DeclarationFactory Factory { get; }
 
@@ -105,12 +108,14 @@ namespace Metalama.Framework.Engine.CodeModel
                 t => t.ContainingDeclaration.ToTypedRef(),
                 t => t );
 
-            // TODO: Performance. The next line essentially instantiates the complete code model. We should look at attributes without doing that. 
+            this._redirectionCache = GetUpdatedRedirectionCache( this._redirectionCache, observableTransformations );
+
             var allNewDeclarations =
                 observableTransformations
                     .OfType<IDeclaration>()
                     .SelectMany( declaration => declaration.GetContainedDeclarations() );
 
+            // TODO: Performance. The next line essentially instantiates the complete code model. We should look at attributes without doing that. 
             var allAttributes =
                 allNewDeclarations.SelectMany( c => c.Attributes )
                     .Cast<AttributeBuilder>()
@@ -119,11 +124,32 @@ namespace Metalama.Framework.Engine.CodeModel
 
             this._derivedTypes = prototype._derivedTypes.WithIntroducedInterfaces( observableTransformations.OfType<IIntroducedInterface>() );
 
-            // TODO: Process IRemoveMember.
-
             // TODO: this cache may need to be smartly invalidated when we have interface introductions.
-
             this._allMemberAttributesByTypeName = prototype._allMemberAttributesByTypeName.AddRange( allAttributes, a => a.AttributeTypeName! );
+        }
+
+        private static ImmutableDictionary<Ref<IDeclaration>, Ref<IDeclaration>> GetUpdatedRedirectionCache(
+            ImmutableDictionary<Ref<IDeclaration>, Ref<IDeclaration>> redirectionCache,
+            IReadOnlyList<IObservableTransformation> observableTransformations )
+        {
+            var cacheBuilder = redirectionCache.ToBuilder();
+
+            foreach ( var transformation in observableTransformations )
+            {
+                if ( transformation is IReplaceMember { ReplacedMember: { } replacedMember } )
+                {
+                    if ( transformation is IDeclarationBuilder builder )
+                    {
+                        cacheBuilder.Add( replacedMember.ToRef(), Ref.FromBuilder( builder ) );
+                    }
+                    else
+                    {
+                        throw new AssertionFailedException();
+                    }
+                }
+            }
+
+            return cacheBuilder.ToImmutable();
         }
 
         private CompilationModel( CompilationModel prototype )
@@ -138,6 +164,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this._transformations = prototype._transformations;
             this.Factory = new DeclarationFactory( this );
             this._depthsCache = prototype._depthsCache;
+            this._redirectionCache = prototype._redirectionCache;
             this._allMemberAttributesByTypeName = prototype._allMemberAttributesByTypeName;
             this._aspects = prototype._aspects;
             this.SymbolClassifier = prototype.SymbolClassifier;
@@ -345,6 +372,24 @@ namespace Metalama.Framework.Engine.CodeModel
             this._depthsCache = this._depthsCache.SetItem( reference, depth );
 
             return depth;
+        }
+
+        internal bool TryGetRedirectedDeclaration( Ref<IDeclaration> reference, out Ref<IDeclaration> redirected )
+        {
+            var result = false;
+            while (true)
+            {
+                if (this._redirectionCache.TryGetValue( reference, out var target ) )
+                {
+                    result = true;
+                    reference = target;
+                }
+                else
+                {
+                    redirected = reference;
+                    return result;
+                }
+            }
         }
 
         internal override Ref<IDeclaration> ToRef() => Ref.Compilation( this.RoslynCompilation ).As<IDeclaration>();

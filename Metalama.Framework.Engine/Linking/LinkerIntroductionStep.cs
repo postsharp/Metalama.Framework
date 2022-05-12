@@ -140,75 +140,56 @@ namespace Metalama.Framework.Engine.Linking
                     continue;
                 }
 
-                var replacedMember = transformation.ReplacedMember.Value.GetTarget( input.CompilationModel );
+                // We want to get the replaced member as it is in the compilation of the transformation, i.e. with applied redirections up to that point.
+                var replacedDeclaration = (IDeclaration)transformation.ReplacedMember.Value.GetTarget( transformation.Advice.SourceCompilation );
 
-                IDeclaration canonicalReplacedMember = replacedMember switch
+                replacedDeclaration = replacedDeclaration switch
                 {
                     BuiltDeclaration declaration => declaration.Builder,
-                    _ => replacedMember
+                    _ => replacedDeclaration
                 };
 
-                ProcessReplacedMember( syntaxTransformationCollection, canonicalReplacedMember, replacedTransformations );
-
-                static void ProcessReplacedMember( 
-                    SyntaxTransformationCollection syntaxTransformationCollection, 
-                    IDeclaration replacedMember, 
-                    HashSet<ISyntaxTreeTransformation> replacedTransformations )
+                switch ( replacedDeclaration )
                 {
-                    switch ( replacedMember )
-                    {
-                        case IReplaceMember { ReplacedMember: { } } recursiveReplaceMember:
-                            // If the replaced member is IReplaceMember itself, we will just move recursively to it's ReplacedMember.
-                            // This is currently used only for read-only fields that are first promoted and then have their members added.
+                    case Field replacedField:
+                        var fieldSyntaxReference = replacedField.Symbol.GetPrimarySyntaxReference();
 
-                            ProcessReplacedMember(
-                                syntaxTransformationCollection,
-                                recursiveReplaceMember.ReplacedMember.Value.GetTarget( ((IDeclarationInternal)recursiveReplaceMember).Compilation),
-                                replacedTransformations );
-
-                            break;
-
-                        case Field replacedField:
-                            var fieldSyntaxReference = replacedField.Symbol.GetPrimarySyntaxReference();
-
-                            if ( fieldSyntaxReference == null )
-                            {
-                                throw new AssertionFailedException();
-                            }
-
-                            var removedFieldSyntax = fieldSyntaxReference.GetSyntax();
-                            syntaxTransformationCollection.AddRemovedSyntax( removedFieldSyntax );
-
-                            break;
-
-                        case Property replacedProperty:
-                            var propertySyntaxReference = replacedProperty.Symbol.GetPrimarySyntaxReference();
-
-                            if ( propertySyntaxReference == null )
-                            {
-                                throw new AssertionFailedException();
-                            }
-
-                            var removedPropertySyntax = propertySyntaxReference.GetSyntax();
-                            syntaxTransformationCollection.AddRemovedSyntax( removedPropertySyntax );
-
-                            break;
-
-                        case Constructor replacedConstructor:
-                            Invariant.Assert( replacedConstructor.Symbol.GetPrimarySyntaxReference() == null );
-
-                            break;
-
-                        case ISyntaxTreeTransformation replacedTransformation:
-                            replacedTransformations.Add( replacedTransformation );
-
-                            break;
-
-                        default:
+                        if ( fieldSyntaxReference == null )
+                        {
                             throw new AssertionFailedException();
-                    }
-                }
+                        }
 
+                        var removedFieldSyntax = fieldSyntaxReference.GetSyntax();
+                        syntaxTransformationCollection.AddRemovedSyntax( removedFieldSyntax );
+
+                        break;
+
+                    case Property replacedProperty:
+                        var propertySyntaxReference = replacedProperty.Symbol.GetPrimarySyntaxReference();
+
+                        if ( propertySyntaxReference == null )
+                        {
+                            throw new AssertionFailedException();
+                        }
+
+                        var removedPropertySyntax = propertySyntaxReference.GetSyntax();
+                        syntaxTransformationCollection.AddRemovedSyntax( removedPropertySyntax );
+
+                        break;
+
+                    case Constructor replacedConstructor:
+                        Invariant.Assert( replacedConstructor.Symbol.GetPrimarySyntaxReference() == null );
+
+                        break;
+
+                    case ISyntaxTreeTransformation replacedTransformation:
+                        replacedTransformations.Add( replacedTransformation );
+
+                        break;
+
+                    default:
+                        throw new AssertionFailedException();
+                }
             }
         }
 

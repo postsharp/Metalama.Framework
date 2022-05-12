@@ -41,6 +41,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public ISymbol? GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => this._underlying.GetSymbol( compilation );
 
+        public Ref<IDeclaration> ToRef() => this._underlying.As<IDeclaration>();
+
         public override string ToString() => this._underlying.ToString();
 
         public string Name

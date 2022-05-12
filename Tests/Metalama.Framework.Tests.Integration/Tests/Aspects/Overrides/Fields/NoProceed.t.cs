@@ -64,7 +64,6 @@ internal class TargetClass
     }
     public TargetClass()
     {
-        // Access should be rewritten to the newly generated backing field, which should be generated even though it is not referenced.
         this.ReadOnlyField = 42;
     }
 }

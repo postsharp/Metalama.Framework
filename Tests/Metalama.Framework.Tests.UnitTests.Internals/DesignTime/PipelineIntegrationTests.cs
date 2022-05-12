@@ -369,6 +369,7 @@ Target.cs:
 1 introductions(s):
 partial class C
 {
+    [global::Metalama.Framework.Aspects.IntroduceAttribute]
     public void NewProperty()
     {
     }
