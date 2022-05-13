@@ -67,8 +67,8 @@ namespace Metalama.Framework.Engine.CodeModel
             public static TypeRewriter Get( BoundTemplateMethod template )
             {
                 return template.Template.TemplateClassMember.TypeParameters.All( x => !x.IsCompileTime )
-                                   ? Null
-                                   : new TemplateTypeRewriter( template );
+                    ? Null
+                    : new TemplateTypeRewriter( template );
             }
 
             internal override ITypeInternal Visit( TypeParameter typeParameter )

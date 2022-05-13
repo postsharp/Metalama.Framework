@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Accessibility = Metalama.Framework.Code.Accessibility;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
@@ -38,7 +39,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             this.Accessibility = originalProperty.Accessibility;
             this.IsStatic = originalProperty.IsStatic;
 
-            this.SetMethod.AssertNotNull().Accessibility = Code.Accessibility.Private;
+            this.SetMethod.AssertNotNull().Accessibility = Accessibility.Private;
 
             foreach ( var attribute in originalProperty.Attributes )
             {

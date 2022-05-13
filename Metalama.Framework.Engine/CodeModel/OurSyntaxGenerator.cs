@@ -16,6 +16,7 @@ using System.Linq;
 using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using SpecialType = Microsoft.CodeAnalysis.SpecialType;
+using TypedConstant = Metalama.Framework.Code.TypedConstant;
 using VarianceKind = Metalama.Framework.Code.VarianceKind;
 
 namespace Metalama.Framework.Engine.CodeModel
@@ -390,7 +391,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 return SyntaxFactoryEx.Null;
             }
 
-            if ( value is Code.TypedConstant typedConstant)
+            if ( value is TypedConstant typedConstant )
             {
                 return this.AttributeValueExpression( typedConstant.Value, reflectionMapper );
             }

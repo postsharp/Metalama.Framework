@@ -16,7 +16,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
@@ -215,7 +214,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             foreach ( var attributeBuilder in this.Attributes )
             {
-                if (attributeBuilder.Constructor.DeclaringType.Is(this.Compilation.Factory.GetTypeByReflectionType(typeof(TemplateAttribute))))
+                if ( attributeBuilder.Constructor.DeclaringType.Is( this.Compilation.Factory.GetTypeByReflectionType( typeof(TemplateAttribute) ) ) )
                 {
                     // TODO: This is temporary logic - aspect-related attributes should be marked as compile time and all compile time attributes should be skipped.
                     continue;

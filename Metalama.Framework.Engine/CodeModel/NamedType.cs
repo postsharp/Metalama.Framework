@@ -552,18 +552,21 @@ namespace Metalama.Framework.Engine.CodeModel
             // Go through transformations, noting replaced symbols and builders.
             foreach ( var builder in transformations )
             {
-                if ( builder is IReplaceMember)
-                {
-                }
+                if ( builder is IReplaceMember ) { }
 
                 if ( builder is TBuilder typedBuilder )
                 {
                     builders.Add( typedBuilder );
-                }       
-                
-                static void ProcessReplaceMember(IReplaceMember replaceMember, CompilationModel compilation, HashSet<TSymbol> allSymbols, HashSet<TSymbol> replacedSymbols, HashSet<TBuilder> replacedBuilders )
+                }
+
+                static void ProcessReplaceMember(
+                    IReplaceMember replaceMember,
+                    CompilationModel compilation,
+                    HashSet<TSymbol> allSymbols,
+                    HashSet<TSymbol> replacedSymbols,
+                    HashSet<TBuilder> replacedBuilders )
                 {
-                    if (replaceMember is not { ReplacedMember: { } replacedMember } )
+                    if ( replaceMember is not { ReplacedMember: { } replacedMember } )
                     {
                         return;
                     }

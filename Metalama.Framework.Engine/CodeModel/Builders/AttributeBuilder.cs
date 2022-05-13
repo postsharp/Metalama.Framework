@@ -58,7 +58,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public FormattableString FormatPredecessor() => $"attribute of type '{this.Type}' on '{this.ContainingDeclaration}'";
 
-        public AttributeSyntax GetSyntax( SyntaxGenerationContext generationContext)
+        public AttributeSyntax GetSyntax( SyntaxGenerationContext generationContext )
         {
             return generationContext.SyntaxGenerator.Attribute( this._attributeConstruction, generationContext.ReflectionMapper );
         }

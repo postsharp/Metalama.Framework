@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.Advices
             {
                 var promotedField = new PromotedField( this, field, this.Tags );
 
-                if (field.Writeability == Writeability.ConstructorOnly)
+                if ( field.Writeability == Writeability.ConstructorOnly )
                 {
                     // Privately writeable property is a transformation that adds a private setter to a get-only property.
                     var writeableProperty = new PrivatelyWriteableProperty( this, promotedField, this.Tags );
@@ -76,7 +76,8 @@ namespace Metalama.Framework.Engine.Advices
                 }
                 else
                 {
-                    return AdviceResult.Create( new OverriddenProperty( this, property, this.PropertyTemplate, this.GetTemplate, this.SetTemplate, this.Tags ) );
+                    return AdviceResult.Create(
+                        new OverriddenProperty( this, property, this.PropertyTemplate, this.GetTemplate, this.SetTemplate, this.Tags ) );
                 }
             }
             else

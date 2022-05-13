@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.ReflectionMocks
         {
             if ( string.IsNullOrEmpty( fullName ) )
             {
-                throw new ArgumentNullException( nameof( fullName ) );
+                throw new ArgumentNullException( nameof(fullName) );
             }
 
             this.FullName = fullName;

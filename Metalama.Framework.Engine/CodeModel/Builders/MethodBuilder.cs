@@ -15,7 +15,6 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Text;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -128,7 +127,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             var method =
                 MethodDeclaration(
-                    this.GetAttributeLists(context.SyntaxGenerationContext),
+                    this.GetAttributeLists( context.SyntaxGenerationContext ),
                     this.GetSyntaxModifierList(),
                     context.SyntaxGenerator.ReturnType( this ),
                     this.ExplicitInterfaceImplementations.Count > 0

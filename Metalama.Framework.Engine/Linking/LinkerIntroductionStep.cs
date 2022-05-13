@@ -150,9 +150,9 @@ namespace Metalama.Framework.Engine.Linking
 
                 ProcessReplacedMember( syntaxTransformationCollection, canonicalReplacedMember, replacedTransformations );
 
-                static void ProcessReplacedMember( 
-                    SyntaxTransformationCollection syntaxTransformationCollection, 
-                    IDeclaration replacedMember, 
+                static void ProcessReplacedMember(
+                    SyntaxTransformationCollection syntaxTransformationCollection,
+                    IDeclaration replacedMember,
                     HashSet<ISyntaxTreeTransformation> replacedTransformations )
                 {
                     switch ( replacedMember )
@@ -163,7 +163,7 @@ namespace Metalama.Framework.Engine.Linking
 
                             ProcessReplacedMember(
                                 syntaxTransformationCollection,
-                                recursiveReplaceMember.ReplacedMember.Value.GetTarget( ((IDeclarationInternal)recursiveReplaceMember).Compilation),
+                                recursiveReplaceMember.ReplacedMember.Value.GetTarget( ((IDeclarationInternal) recursiveReplaceMember).Compilation ),
                                 replacedTransformations );
 
                             break;
@@ -208,7 +208,6 @@ namespace Metalama.Framework.Engine.Linking
                             throw new AssertionFailedException();
                     }
                 }
-
             }
         }
 

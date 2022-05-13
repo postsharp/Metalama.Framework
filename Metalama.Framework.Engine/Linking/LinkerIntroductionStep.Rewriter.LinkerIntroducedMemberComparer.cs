@@ -152,13 +152,13 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         // Order replaced declarations within the same layer.
                         if ( x.Introduction is IReplaceMember { ReplacedMember: { } replacedMemberRefX }
-                            && replacedMemberRefX.Target == y.Introduction )
+                             && replacedMemberRefX.Target == y.Introduction )
                         {
                             return 1;
                         }
 
                         if ( y.Introduction is IReplaceMember { ReplacedMember: { } replacedMemberRefY }
-                            && replacedMemberRefY.Target == x.Introduction )
+                             && replacedMemberRefY.Target == x.Introduction )
                         {
                             return -1;
                         }

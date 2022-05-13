@@ -295,14 +295,20 @@ namespace Metalama.Framework.Engine.Linking
 
             var expressionBody =
                 property.IsAutoPropertyDeclaration()
-                ? null
-                : property.AccessorList != null
                     ? null
-                    : property.ExpressionBody;
+                    : property.AccessorList != null
+                        ? null
+                        : property.ExpressionBody;
 
             var initializer = property.Initializer;
 
-            return GetSpecialImplProperty( property.Type, accessorList, expressionBody, initializer.WithSourceCodeAnnotation(), symbol, GetOriginalImplMemberName( symbol ) );
+            return GetSpecialImplProperty(
+                property.Type,
+                accessorList,
+                expressionBody,
+                initializer.WithSourceCodeAnnotation(),
+                symbol,
+                GetOriginalImplMemberName( symbol ) );
         }
 
         private static MemberDeclarationSyntax GetEmptyImplProperty( PropertyDeclarationSyntax property, IPropertySymbol symbol )

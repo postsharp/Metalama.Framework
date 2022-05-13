@@ -138,7 +138,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     throw new InvalidOperationException( $"Cannot change accessor accessibility, if the property has a single accessor ." );
                 }
 
-                if ( value != propertyBuilder.Accessibility && otherAccessor != null && otherAccessor.Accessibility.IsSubsetOf( propertyBuilder.Accessibility ) )
+                if ( value != propertyBuilder.Accessibility && otherAccessor != null
+                                                            && otherAccessor.Accessibility.IsSubsetOf( propertyBuilder.Accessibility ) )
                 {
                     throw new InvalidOperationException(
                         $"Cannot change accessor accessibility to {value}, because the other accessor is already restricted to {otherAccessor.Accessibility}." );
