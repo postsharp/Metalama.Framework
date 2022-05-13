@@ -36,7 +36,7 @@ internal class TypeOfRewriter
             MemberAccessExpression(
                 SyntaxKind.SimpleMemberAccessExpression,
                 this._compileTimeTypeName,
-                IdentifierName( nameof(CompileTimeType.GetWithSubstitutions) ) );
+                IdentifierName( nameof(CompileTimeType.ResolveCompileTimeTypeOf) ) );
 
         var invocation = InvocationExpression(
             memberAccess,

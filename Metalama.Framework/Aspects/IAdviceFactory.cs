@@ -71,7 +71,7 @@ namespace Metalama.Framework.Aspects
         ///     copies of the scope of the target declaration of the aspect.</param>
         /// <param name="whenExists">Determines the implementation strategy when a method of the same name and signature is already declared in the target type.
         ///     The default strategy is to fail with a compile-time error.</param>
-        /// <param name="args"></param>
+        /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template methods.</param>
         /// <param name="tags">An optional opaque object of anonymous type  passed to the template method and exposed under the <see cref="meta.Tags"/> property
         ///     of the <see cref="meta"/> API.</param>
         /// <returns>An <see cref="IMethodBuilder"/> that allows to modify the name or signature, or to add custom attributes.</returns>

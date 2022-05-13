@@ -694,7 +694,7 @@ namespace Metalama.Framework.Engine.Templating
 
                 if ( scope == TemplatingScope.RunTimeOrCompileTime )
                 {
-                    scope = this.GetNodeScope( transformedLeft );
+                    scope = this.GetNodeScope( transformedLeft ).GetExpressionValueScope( true );
                 }
 
                 // If both sides of the member are template keywords, display the . as a template keyword too.

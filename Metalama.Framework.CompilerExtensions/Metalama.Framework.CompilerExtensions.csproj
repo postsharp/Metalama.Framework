@@ -12,14 +12,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Compile Include="..\Metalama.Framework.Engine\AssertionFailedException.cs" Link="Utilities\AssertionFailedException.cs"/>
-        <Compile Include="..\Metalama.Framework.Engine\Utilities\EngineAssemblyMetadataReader.cs" Link="Utilities\EngineAssemblyMetadataReader.cs"/>
-        <Compile Include="..\Metalama.Framework.Engine\Utilities\TempPathHelper.cs" Link="Utilities\TempPathHelper.cs"/>
-    </ItemGroup>
 
-
-    <ItemGroup>
-
+        <!-- Third-party dependencies -->
         <PackageReference Include="Microsoft.Bcl.HashCode" Version="$(MicrosoftBclHashCodeVersion)" PrivateAssets="all">
             <GeneratePathProperty>true</GeneratePathProperty>
         </PackageReference>
@@ -30,35 +24,35 @@
         </PackageReference>
         <EmbeddedResource Include="$(PkgK4os_Hash_xxHash)\lib\netstandard2.0\K4os.Hash.xxHash.dll" Link="Resources\K4os.Hash.xxHash.dll"/>
 
-
         <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" PrivateAssets="all">
             <GeneratePathProperty>true</GeneratePathProperty>
         </PackageReference>
         <EmbeddedResource Include="$(PkgNewtonsoft_Json)\lib\netstandard2.0\Newtonsoft.Json.dll" Link="Resources\Newtonsoft.Json.dll"/>
 
-        <PackageReference Include="Metalama.RoslynUtilities" Version="$(MetalamaCompilerVersion)" PrivateAssets="all">
-            <GeneratePathProperty>true</GeneratePathProperty>
-        </PackageReference>
-        <EmbeddedResource Include="$(PkgMetalama_RoslynUtilities)\lib\netstandard2.0\Metalama.RoslynUtilities.dll" Link="Resources\Metalama.RoslynUtilities.dll"/>
-
+        <!-- First-party dependencies to external repos -->
         <PackageReference Include="Metalama.Backstage" Version="$(MetalamaBackstageVersion)" PrivateAssets="all">
             <GeneratePathProperty>True</GeneratePathProperty>
         </PackageReference>
         <EmbeddedResource Include="$(PkgMetalama_Backstage)\lib\netstandard2.0\Metalama.Backstage.dll" Link="Resources\Metalama.Backstage.dll"/>
 
-        <!-- Version-neutral assemblies -->
+        <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" PrivateAssets="true">
+            <GeneratePathProperty>True</GeneratePathProperty>
+        </PackageReference>
+        <EmbeddedResource Include="$(PkgMetalama_Compiler_Sdk)\lib\netstandard2.0\Metalama.Compiler.Interface.dll" Link="Resources\Metalama.Compiler.Interface.dll"/>
+
+
+        <!-- Current repo: Version-neutral assemblies -->
         <EmbeddedResource Include="..\Metalama.Framework\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.dll" Link="Resources\Metalama.Framework.dll"/>
         <EmbeddedResource Include="..\Metalama.SystemTypes\bin\$(Configuration)\$(TargetFramework)\Metalama.SystemTypes.dll" Link="Resources\Metalama.SystemTypes.dll"/>
         <EmbeddedResource Include="..\Metalama.Framework.Sdk\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.Sdk.dll" Link="Resources\Metalama.Framework.Sdk.dll"/>
         <EmbeddedResource Include="..\Metalama.Framework.DesignTime.Contracts.1.0\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.Contracts.1.0.dll" Link="Resources\Metalama.Framework.DesignTime.Contracts.1.0.dll"/>
-        <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" PrivateAssets="true"/>
 
-        <!-- 4.1.0 -->
+        <!-- Current repo: 4.1.0 -->
         <EmbeddedResource Include="..\Metalama.Framework.Engine\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.Engine.$(RoslynVersion).dll" Link="Resources\Metalama.Framework.Engine.4.1.0.dll"/>
         <EmbeddedResource Include="..\Metalama.Framework.DesignTime\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.$(RoslynVersion).dll" Link="Resources\Metalama.Framework.DesignTime.4.1.0.dll"/>
         <EmbeddedResource Include="..\Metalama.Framework.DesignTime.VisualStudio\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.VisualStudio.$(RoslynVersion).dll" Link="Resources\Metalama.Framework.DesignTime.VisualStudio.4.1.0.dll"/>
 
-        <!-- 4.0.1 -->
+        <!-- Current repo: 4.0.1 -->
         <EmbeddedResource Include="..\Metalama.Framework.Engine.4.0.1\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.Engine.4.0.1.dll" Link="Resources\Metalama.Framework.Engine.4.0.1.dll"/>
         <EmbeddedResource Include="..\Metalama.Framework.DesignTime.4.0.1\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.4.0.1.dll" Link="Resources\Metalama.Framework.DesignTime.4.0.1.dll"/>
         <EmbeddedResource Include="..\Metalama.Framework.DesignTime.VisualStudio.4.0.1\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.VisualStudio.4.0.1.dll" Link="Resources\Metalama.Framework.DesignTime.VisualStudio.4.0.1.dll"/>
