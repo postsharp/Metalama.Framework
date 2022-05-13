@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Eligibility;
 using Metalama.Framework.Serialization;
 using System;
 
@@ -21,6 +22,8 @@ namespace Metalama.Framework.Aspects
         /// Note that reporting an error automatically causes the aspect to be skipped, but, additionally, provided children aspects are ignored.
         /// </remarks>
         void SkipAspect();
+
+        bool IsAspectSkipped { get; }
 
         /// <summary>
         /// Gets or sets an arbitrary object that is then exposed on the <see cref="IAspectInstance.State"/> property of
@@ -47,5 +50,13 @@ namespace Metalama.Framework.Aspects
         /// <param name="buildAction"></param>
         [Obsolete( "Not implemented." )]
         void SetAspectLayerBuildAction( string layerName, Action<IAspectLayerBuilder<TAspectTarget>> buildAction );
+
+        /// <summary>
+        /// Verifies that the target of the aspect matches an eligibility rule. If not, reports an eligibility error (unless the aspect can be used by inheritance) and skips the aspect.  
+        /// </summary>
+        /// <param name="rule">An eligibility rule created by <see cref="EligibilityRuleFactory"/>. For performance reasons, it is recommended that you store the rule in a static
+        /// field of the aspect.</param>
+        /// <returns><c>true<c/> if the aspect target qualifies for the given rule, otherwise <c>false</c> (in this case, the <see cref="IAspectBuilder.SkipAspect"/> method is automatically called. </returns>
+        bool VerifyEligibility( IEligibilityRule<TAspectTarget> rule );
     }
 }

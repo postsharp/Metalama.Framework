@@ -14,6 +14,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Filters.PropertyOut
         }
     }
 
+    // <target>
     internal class Target
     {
         private string q;

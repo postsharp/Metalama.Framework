@@ -15,7 +15,7 @@ namespace Metalama.Framework.Eligibility
     /// </summary>
     /// <seealso href="@eligibility"/>
     [CompileTime]
-    public static class EligibilityExtensions
+    public static partial class EligibilityExtensions
     {
         /// <summary>
         /// Gets an <see cref="IEligibilityBuilder"/> for the declaring type of the member validated by the current <see cref="IEligibilityBuilder"/>.
@@ -29,16 +29,7 @@ namespace Metalama.Framework.Eligibility
                 declarationDescription => $"the declaring type '{declarationDescription.Object.DeclaringType}'" );
         }
 
-        public static IEligibilityBuilder<TOutput> As<TInput, TOutput>( this IEligibilityBuilder<TInput> eligibilityBuilder )
-            where TOutput : TInput
-        {
-            return new ChildEligibilityBuilder<TInput, TOutput>(
-                eligibilityBuilder,
-                d => (TOutput) d!,
-                d => d.Description!,
-                d => d is TOutput,
-                d => $"{d} is not  {typeof(TOutput).Name}" );
-        }
+        public static Converter<T> Convert<T>( this IEligibilityBuilder<T> eligibilityBuilder ) => new( eligibilityBuilder );
 
         /// <summary>
         /// Gets an <see cref="IEligibilityBuilder"/> for the return type of the method validated by the current <see cref="IEligibilityBuilder"/>.
@@ -207,7 +198,15 @@ namespace Metalama.Framework.Eligibility
         {
             eligibilityBuilder.MustSatisfyAny(
                 b => b.MustBe<IField>(),
-                b => b.As<IFieldOrPropertyOrIndexer, IFieldOrProperty>().MustSatisfy( d => d.GetMethod != null, d => $"{d} must have a getter" ) );
+                b => b.Convert().To<IFieldOrProperty>().MustSatisfy( d => d.GetMethod != null, d => $"{d} must have a getter" ) );
+        }
+
+        /// <summary>
+        /// Requires the target property or indexer to be writable.
+        /// </summary>
+        public static void MustBeReadable( this IEligibilityBuilder<IPropertyOrIndexer> eligibilityBuilder )
+        {
+            eligibilityBuilder.MustSatisfy( d => d.GetMethod != null, d => $"{d} must have a getter" );
         }
 
         /// <summary>
@@ -228,6 +227,16 @@ namespace Metalama.Framework.Eligibility
             eligibilityBuilder.MustSatisfy(
                 p => p.RefKind != RefKind.Out,
                 member => $"{member} must not be 'out'" );
+        }
+
+        /// <summary>
+        /// Requires the parameter to be <c>ref</c>.
+        /// </summary>
+        public static void MustBeRef( this IEligibilityBuilder<IParameter> eligibilityBuilder )
+        {
+            eligibilityBuilder.MustSatisfy(
+                p => p.RefKind == RefKind.Ref,
+                member => $"{member} must be 'ref'" );
         }
 
         /// <summary>

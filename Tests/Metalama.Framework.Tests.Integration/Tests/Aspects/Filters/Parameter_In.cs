@@ -1,7 +1,7 @@
 using System;
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Filters.ReturnParameter
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Filters.InputParameter
 {
     internal class NotNullAttribute : FilterAspect
     {
@@ -14,12 +14,9 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Filters.ReturnParam
         }
     }
 
+    // <target>
     internal class Target
     {
-        [return: NotNull]
-        private string M()
-        {
-            return "";
-        }
+        private void M( [NotNull] string m ) { }
     }
 }

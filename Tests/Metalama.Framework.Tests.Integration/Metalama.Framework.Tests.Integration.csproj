@@ -48,8 +48,11 @@
     </ItemGroup>
 
     <ItemGroup>
+        <None Include="Tests\Aspects\Filters\Parameter_InvalidDirections.t.cs"/>
+        <None Include="Tests\Aspects\Filters\Parameter_Out.t.cs"/>
         <None Include="Tests\Aspects\Filters\PropertyInput.t.cs"/>
         <None Include="Tests\Aspects\Filters\PropertyOutput.t.cs"/>
+        <None Include="Tests\Aspects\Filters\Parameter_Ref.t.cs"/>
         <None Include="Tests\Aspects\TemplateTypeParameter\TypeOfInInterpolatedString.t.cs">
             <SubType>Code</SubType>
             <DependentUpon>TypeOfInInterpolatedString.cs</DependentUpon>

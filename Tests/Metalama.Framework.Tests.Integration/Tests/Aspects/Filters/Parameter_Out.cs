@@ -14,6 +14,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Filters.OutParamete
         }
     }
 
+    // <target>
     internal class Target
     {
         private void M( [NotNull] out string m )

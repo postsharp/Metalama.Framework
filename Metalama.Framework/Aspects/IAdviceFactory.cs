@@ -9,31 +9,6 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Aspects
 {
-    public enum FilterDirection
-    {
-        /// <summary>
-        /// For all parameters except <c>out</c> parameters, filters the input value. For fields, properties and indexers,
-        /// filters the value assigned to them and throws an exception if they are not writable.
-        /// </summary>
-        Default,
-
-        /// <summary>
-        /// Only filters the input value of the parameter or the value assigned to the field, property or indexer.
-        /// </summary>
-        Input,
-
-        /// <summary>
-        /// Only filters the output value of an <c>out</c> or <c>ref</c> parameter or the value, the value returned by the
-        /// property or indexer getter, or the value assigned to the field but filtered when the field is retrieved.
-        /// </summary>
-        Output,
-
-        /// <summary>
-        /// Both <see cref="Input"/> and <see cref="Output"/> if this is possible.
-        /// </summary>
-        Both
-    }
-
     /// <summary>
     /// Exposes all factory methods to create advice. Exposed on the <see cref="IAspectLayerBuilder.Advice"/> property
     /// of <see cref="IAspectBuilder{TAspectTarget}"/> or <see cref="IAspectLayerBuilder"/>.
