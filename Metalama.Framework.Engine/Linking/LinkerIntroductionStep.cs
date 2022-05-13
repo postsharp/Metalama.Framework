@@ -140,12 +140,13 @@ namespace Metalama.Framework.Engine.Linking
                     continue;
                 }
 
-                var replacedMember = transformation.ReplacedMember.Value.GetTarget( ((IDeclarationInternal) transformation).Compilation );
+                // We want to get the replaced member as it is in the compilation of the transformation, i.e. with applied redirections up to that point.
+                var replacedDeclaration = (IDeclaration)transformation.ReplacedMember.Value.GetTarget( input.CompilationModel );
 
-                IDeclaration canonicalReplacedMember = replacedMember switch
+                replacedDeclaration = replacedDeclaration switch
                 {
                     BuiltDeclaration declaration => declaration.Builder,
-                    _ => replacedMember
+                    _ => replacedDeclaration
                 };
 
                 ProcessReplacedMember( syntaxTransformationCollection, canonicalReplacedMember, replacedTransformations );
@@ -209,7 +210,6 @@ namespace Metalama.Framework.Engine.Linking
                     }
                 }
             }
-        }
 
         private void ProcessIntroduceTransformations(
             AspectLinkerInput input,
