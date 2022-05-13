@@ -46,7 +46,7 @@ namespace Metalama.Framework.Engine.Advices
                         new FilterPropertyTransformation( this, promotedField ) );
                 
                 default:
-                    throw new NotImplementedException();
+                    throw new AssertionFailedException();
             }
         }
 
@@ -72,10 +72,10 @@ namespace Metalama.Framework.Engine.Advices
 
                 var parameterName = filterTarget switch
                 {
-                    IParameter { IsReturnParameter: true } => returnValueLocalName ?? null!,
+                    IParameter { IsReturnParameter: true } => returnValueLocalName.AssertNotNull(),
                     IParameter parameter => parameter.Name,
                     IFieldOrPropertyOrIndexer when direction == FilterDirection.Input => "value",
-                    IFieldOrPropertyOrIndexer when direction == FilterDirection.Output => returnValueLocalName,
+                    IFieldOrPropertyOrIndexer when direction == FilterDirection.Output => returnValueLocalName.AssertNotNull(),
                     _ => throw new AssertionFailedException()
                 };
 

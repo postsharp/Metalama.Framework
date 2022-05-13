@@ -3,6 +3,8 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Filters.RefParameter_Both;
 
+#pragma warning disable CS8618
+
 internal class NotNullAttribute : FilterAspect
 {
     public NotNullAttribute() : base( FilterDirection.Both ) { }

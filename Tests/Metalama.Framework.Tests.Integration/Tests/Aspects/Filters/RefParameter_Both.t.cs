@@ -2,6 +2,7 @@ using System;
 using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Filters.RefParameter_Both;
+
 #pragma warning disable CS0067
 
 internal class NotNullAttribute : FilterAspect

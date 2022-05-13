@@ -56,7 +56,7 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         /// <param name="rule">An eligibility rule created by <see cref="EligibilityRuleFactory"/>. For performance reasons, it is recommended that you store the rule in a static
         /// field of the aspect.</param>
-        /// <returns><c>true<c/> if the aspect target qualifies for the given rule, otherwise <c>false</c> (in this case, the <see cref="IAspectBuilder.SkipAspect"/> method is automatically called. </returns>
+        /// <returns><c>true</c> if the aspect target qualifies for the given rule, otherwise <c>false</c> (in this case, the <see cref="IAspectBuilder.SkipAspect"/> method is automatically called. </returns>
         bool VerifyEligibility( IEligibilityRule<TAspectTarget> rule );
     }
 }

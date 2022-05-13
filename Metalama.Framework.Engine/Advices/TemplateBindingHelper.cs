@@ -46,8 +46,6 @@ namespace Metalama.Framework.Engine.Advices
             return new BoundTemplateMethod( template, null, GetTemplateArguments( template, arguments ) );
         }
 
-
-
         public static BoundTemplateMethod ForFilter( this in TemplateMember<IMethod> template, string parameterName, IObjectReader? arguments = null )
         {
             // The template must be void.

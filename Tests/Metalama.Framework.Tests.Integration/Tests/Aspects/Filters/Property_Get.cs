@@ -1,6 +1,8 @@
 using System;
 using Metalama.Framework.Aspects;
 
+#pragma warning disable CS8618, CS0169, CS0649
+
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Filters.PropertyOutput
 {
     internal class NotNullAttribute : FilterAspect
