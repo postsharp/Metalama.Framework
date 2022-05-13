@@ -34,10 +34,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Remove="Tests\Aspects\TemplateTypeParameter\TypeOf - Copy.t.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
         <ProjectReference Include="..\..\Metalama.TestFramework\Metalama.TestFramework.csproj" />
