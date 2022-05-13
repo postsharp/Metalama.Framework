@@ -405,12 +405,12 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 };
 
                 // Create transformation fake.
-                var transformation = (IMemberIntroduction) A.Fake<object>(
+                var transformation = (IIntroduceMemberTransformation) A.Fake<object>(
                     o =>
                     {
                         _ = o
                             .Implements<IObservableTransformation>()
-                            .Implements<IMemberIntroduction>()
+                            .Implements<IIntroduceMemberTransformation>()
                             .Implements<IMemberBuilder>()
                             .Implements<IDeclarationImpl>()
                             .Implements<ITestTransformation>();
@@ -426,7 +426,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                         if ( replacementAttribute != null )
                         {
-                            _ = o.Implements<IReplaceMember>();
+                            _ = o.Implements<IReplaceMemberTransformation>();
                         }
                     } );
 
@@ -563,10 +563,10 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                 var aspectLayer = this._owner.GetOrAddAspectLayer( aspectName.AssertNotNull(), layerName );
 
-                var transformation = (IMemberIntroduction) A.Fake<object>(
+                var transformation = (IIntroduceMemberTransformation) A.Fake<object>(
                     o => o
                         .Implements<INonObservableTransformation>()
-                        .Implements<IMemberIntroduction>()
+                        .Implements<IIntroduceMemberTransformation>()
                         .Implements<IOverriddenDeclaration>()
                         .Implements<ITestTransformation>() );
 

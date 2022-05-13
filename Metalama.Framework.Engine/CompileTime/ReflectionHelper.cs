@@ -229,7 +229,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             if ( type.HasElementType )
             {
-                VisitTypeElements( type.GetElementType(), visitor );
+                VisitTypeElements( type.GetElementType()!, visitor );
             }
             else if ( type.IsGenericType && !type.IsGenericTypeDefinition )
             {
@@ -246,7 +246,7 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             if ( type.HasElementType )
             {
-                return IsExported( type.GetElementType() );
+                return IsExported( type.GetElementType()! );
             }
 
             switch ( type.Attributes & TypeAttributes.VisibilityMask )
@@ -259,7 +259,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     return false;
 
                 case TypeAttributes.NestedPublic:
-                    return IsPublic( type.DeclaringType );
+                    return IsPublic( type.DeclaringType! );
 
                 case TypeAttributes.NotPublic:
                     return false;
@@ -276,7 +276,7 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             if ( type.HasElementType )
             {
-                return IsExported( type.GetElementType() );
+                return IsExported( type.GetElementType()! );
             }
 
             switch ( type.Attributes & TypeAttributes.VisibilityMask )
@@ -289,7 +289,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 case TypeAttributes.NestedFamily:
                 case TypeAttributes.NestedFamORAssem:
                 case TypeAttributes.NestedPublic:
-                    return IsExported( type.DeclaringType );
+                    return IsExported( type.DeclaringType! );
 
                 case TypeAttributes.NotPublic:
                     return false;

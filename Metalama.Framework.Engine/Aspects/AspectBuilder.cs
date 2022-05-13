@@ -4,6 +4,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
@@ -26,7 +27,6 @@ namespace Metalama.Framework.Engine.Aspects
     {
         private readonly UserDiagnosticSink _diagnosticSink;
         private readonly AspectPipelineConfiguration _configuration;
-        private bool _skipped;
         private AspectReceiverSelector<T>? _declarationSelector;
         private ImmutableArray<IAspectSource> _aspectSources = ImmutableArray<IAspectSource>.Empty;
         private ImmutableArray<IValidatorSource> _validatorSources = ImmutableArray<IValidatorSource>.Empty;
@@ -96,7 +96,9 @@ namespace Metalama.Framework.Engine.Aspects
 
         public IAdviceFactory Advice => this.AdviceFactory;
 
-        public void SkipAspect() => this._skipped = true;
+        public void SkipAspect() => this.IsAspectSkipped = true;
+
+        public bool IsAspectSkipped { get; private set; }
 
         public IAspectState? State
         {
@@ -110,7 +112,7 @@ namespace Metalama.Framework.Engine.Aspects
         {
             var success = this._diagnosticSink.ErrorCount == 0;
 
-            return success && !this._skipped
+            return success && !this.IsAspectSkipped
                 ? new AspectInstanceResult(
                     this.AspectInstance,
                     success,
@@ -128,6 +130,37 @@ namespace Metalama.Framework.Engine.Aspects
         }
 
         public void SetAspectLayerBuildAction( string layerName, Action<IAspectLayerBuilder<T>> buildAction ) => throw new NotImplementedException();
+
+        public bool VerifyEligibility( IEligibilityRule<T> rule )
+        {
+            var result = rule.GetEligibility( this.Target );
+
+            if ( result == EligibleScenarios.None )
+            {
+                var justification = rule.GetIneligibilityJustification( EligibleScenarios.Aspect, new DescribedObject<T>( this.Target ) );
+
+                this._diagnosticSink.Report(
+                    GeneralDiagnosticDescriptors.AspectNotEligibleOnTarget.CreateRoslynDiagnostic(
+                        this.Diagnostics.DefaultTargetLocation.GetDiagnosticLocation(),
+                        (this.AspectInstance.AspectClass.ShortName, this.Target, justification!) ) );
+
+                this.SkipAspect();
+
+                return false;
+            }
+            else if ( result == EligibleScenarios.Inheritance )
+            {
+                // If inheritance is allowed, we return false without reporting any error.
+
+                this.SkipAspect();
+
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
 
         public AspectPredecessor AspectPredecessor { get; private set; }
 

@@ -13,7 +13,7 @@ using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal abstract class ReturnParameter : BaseDeclaration, IParameter
+    internal abstract class ReturnParameter : BaseDeclaration, IParameterImpl
     {
         protected abstract RefKind SymbolRefKind { get; }
 
@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public bool IsParams => false;
 
-        public abstract IMemberOrNamedType DeclaringMember { get; }
+        public abstract IMember DeclaringMember { get; }
 
         public ParameterInfo ToParameterInfo() => CompileTimeReturnParameterInfo.Create( this );
 

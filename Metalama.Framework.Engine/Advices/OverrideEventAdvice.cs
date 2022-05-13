@@ -49,7 +49,7 @@ namespace Metalama.Framework.Engine.Advices
         {
             // TODO: order should be self if the target is introduced on the same layer.
             return AdviceResult.Create(
-                new OverriddenEvent(
+                new OverrideEventTransformation(
                     this,
                     this.TargetDeclaration.GetTarget( compilation ),
                     this.EventTemplate,

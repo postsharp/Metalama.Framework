@@ -11,7 +11,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class PromotedField : PropertyBuilder, IReplaceMember
+    internal class PromotedField : PropertyBuilder, IReplaceMemberTransformation
     {
         private readonly IField _field;
 

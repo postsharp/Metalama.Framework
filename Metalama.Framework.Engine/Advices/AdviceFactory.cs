@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
+using RefKind = Metalama.Framework.Code.RefKind;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.Advices
@@ -30,6 +31,7 @@ namespace Metalama.Framework.Engine.Advices
         private readonly IDiagnosticAdder _diagnosticAdder;
 
         private readonly Dictionary<INamedType, ImplementInterfaceAdvice> _implementInterfaceAdvices;
+        private readonly Dictionary<IMember, FilterAdvice> _filterAdvices;
 
         internal List<Advice> Advices { get; }
 
@@ -46,6 +48,7 @@ namespace Metalama.Framework.Engine.Advices
             this._compilation = compilation;
             this._diagnosticAdder = diagnosticAdder;
             this._implementInterfaceAdvices = new Dictionary<INamedType, ImplementInterfaceAdvice>( compilation.InvariantComparer );
+            this._filterAdvices = new Dictionary<IMember, FilterAdvice>( compilation.InvariantComparer );
             this.Advices = new List<Advice>();
         }
 
@@ -63,10 +66,14 @@ namespace Metalama.Framework.Engine.Advices
             this._compilation = parent._compilation;
             this._diagnosticAdder = parent._diagnosticAdder;
             this._implementInterfaceAdvices = parent._implementInterfaceAdvices;
+            this._filterAdvices = parent._filterAdvices;
             this.Advices = parent.Advices;
         }
 
-        public AdviceFactory WithTemplateClassInstance( TemplateClassInstance templateClassInstance ) => new( this, templateClassInstance );
+        public AdviceFactory WithTemplateClassInstance( TemplateClassInstance templateClassInstance )
+        {
+            return new AdviceFactory( this, templateClassInstance );
+        }
 
         private TemplateMemberRef ValidateTemplateName( string? templateName, TemplateKind templateKind, bool required = false )
         {
@@ -836,7 +843,7 @@ namespace Metalama.Framework.Engine.Advices
                 this._aspect,
                 this._templateInstance,
                 targetType,
-                templateRef.ForIntroduction( ObjectReader.GetReader( args ) ),
+                templateRef.ForInitializer( ObjectReader.GetReader( args ) ),
                 kind,
                 _layerName,
                 ObjectReader.GetReader( tags ) );
@@ -872,6 +879,76 @@ namespace Metalama.Framework.Engine.Advices
                     "Errors have occured while creating advice.",
                     diagnosticList.Where( d => d.Severity == DiagnosticSeverity.Error ).ToImmutableArray() );
             }
+        }
+
+        public void AddFilter(
+            IParameter targetParameter,
+            string template,
+            FilterDirection kind = FilterDirection.Input,
+            object? tags = null,
+            object? args = null )
+        {
+            if ( kind == FilterDirection.Output && targetParameter.RefKind is not RefKind.Ref or RefKind.Out )
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(kind),
+                    UserMessageFormatter.Format( $"Cannot add an output filter to the parameter '{targetParameter}' because it is neither 'ref' nor 'out'." ) );
+            }
+
+            if ( kind == FilterDirection.Input && targetParameter.RefKind is not RefKind.None or RefKind.Ref or RefKind.In )
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(kind),
+                    UserMessageFormatter.Format( $"Cannot add an input filter to the out parameter '{targetParameter}' " ) );
+            }
+
+            this.AddFilterImpl( targetParameter, targetParameter.DeclaringMember, template, kind, tags, args );
+        }
+
+        public void AddFilter(
+            IFieldOrPropertyOrIndexer targetMember,
+            string template,
+            FilterDirection kind = FilterDirection.Input,
+            object? tags = null,
+            object? args = null )
+        {
+            this.AddFilterImpl( targetMember, targetMember, template, kind, tags, args );
+        }
+
+        private void AddFilterImpl(
+            IDeclaration targetDeclaration,
+            IMember targetMember,
+            string template,
+            FilterDirection direction,
+            object? tags,
+            object? args )
+        {
+            if ( this._templateInstance == null )
+            {
+                throw new InvalidOperationException();
+            }
+
+            var diagnosticList = new DiagnosticList();
+
+            var templateRef = this.ValidateTemplateName( template, TemplateKind.Default, true )
+                .GetTemplateMember<IMethod>( this._compilation, this._serviceProvider );
+
+            if ( !this._filterAdvices.TryGetValue( targetMember, out var advice ) )
+            {
+                advice = new FilterAdvice(
+                    this._aspect,
+                    this._templateInstance,
+                    targetMember,
+                    _layerName );
+
+                advice.Initialize( diagnosticList );
+                ThrowOnErrors( diagnosticList );
+                this.Advices.Add( advice );
+
+                this._diagnosticAdder.Report( diagnosticList );
+            }
+
+            advice.Filters.Add( new Filter( targetDeclaration, templateRef, direction, ObjectReader.GetReader( tags ), ObjectReader.GetReader( args ) ) );
         }
     }
 }

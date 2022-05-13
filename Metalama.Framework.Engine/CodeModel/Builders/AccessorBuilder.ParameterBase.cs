@@ -42,7 +42,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 
-            public IMemberOrNamedType DeclaringMember => (IMemberOrNamedType) this.Accessor.ContainingDeclaration.AssertNotNull();
+            public IMember DeclaringMember => (IMember) this.Accessor.ContainingDeclaration.AssertNotNull();
 
             TypedConstant IParameter.DefaultValue => this.DefaultValue;
 

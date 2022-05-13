@@ -21,12 +21,12 @@ namespace Metalama.Framework.Tests.UnitTests.Templating
 
         private void AssertScope( INamedType declaration, TemplatingScope expectedScope )
         {
-            this.AssertScope( declaration.GetCompilationModel().RoslynCompilation, declaration.GetSymbol()!, expectedScope );
+            this.AssertScope( declaration.GetCompilationModel().RoslynCompilation, declaration.GetSymbol(), expectedScope );
         }
 
         private void AssertScope( IType type, TemplatingScope expectedScope )
         {
-            this.AssertScope( type.GetCompilationModel().RoslynCompilation, type.GetSymbol()!, expectedScope );
+            this.AssertScope( type.GetCompilationModel().RoslynCompilation, type.GetSymbol(), expectedScope );
         }
 
         private void AssertScope( Compilation compilation, ISymbol symbol, TemplatingScope expectedScope )

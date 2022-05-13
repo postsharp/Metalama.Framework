@@ -127,7 +127,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     paramsParameter = constructorParameters[constructorParameters.Length - 1];
 
                     paramsArgument = Array.CreateInstance(
-                        paramsParameter.ParameterType.GetElementType(),
+                        paramsParameter.ParameterType.GetElementType()!,
                         attribute.ConstructorArguments.Length - constructorParameters.Length + 1 );
                 }
             }

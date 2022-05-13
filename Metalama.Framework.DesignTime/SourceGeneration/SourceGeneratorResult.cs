@@ -5,7 +5,7 @@ using Metalama.Framework.Engine.Pipeline;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.DesignTime;
+namespace Metalama.Framework.DesignTime.SourceGeneration;
 
 /// <summary>
 /// A cacheable (and therefore equatable) result of source generators. Returned by <see cref="ProjectHandler.GenerateSources"/>.

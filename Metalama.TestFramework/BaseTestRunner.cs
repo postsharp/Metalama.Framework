@@ -223,7 +223,7 @@ namespace Metalama.TestFramework
 
                 if ( this.References.GlobalUsingsFile != null )
                 {
-                    var path = Path.Combine( this.ProjectDirectory, this.References.GlobalUsingsFile );
+                    var path = Path.Combine( this.ProjectDirectory!, this.References.GlobalUsingsFile );
 
                     if ( File.Exists( path ) )
                     {

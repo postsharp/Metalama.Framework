@@ -15,7 +15,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Transformations
 {
-    internal abstract class OverriddenMember : INonObservableTransformation, IMemberIntroduction, IOverriddenDeclaration
+    internal abstract class OverrideMemberTransformation : INonObservableTransformation, IIntroduceMemberTransformation, IOverriddenDeclaration
     {
         protected IObjectReader Tags { get; }
 
@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Transformations
                 _ => throw new AssertionFailedException()
             };
 
-        protected OverriddenMember( Advice advice, IMember overriddenDeclaration, IObjectReader tags )
+        protected OverrideMemberTransformation( Advice advice, IMember overriddenDeclaration, IObjectReader tags )
         {
             Invariant.Assert( advice != null! );
             Invariant.Assert( overriddenDeclaration != null! );

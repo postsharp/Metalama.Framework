@@ -317,15 +317,17 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             this._logger.Trace?.Log( $"TryEmit( '{compileTimeCompilation.AssemblyName}' )" );
 
+            var outputDirectory = outputPaths.Directory.AssertNotNull();
+
             try
             {
                 var emitOptions = new EmitOptions( debugInformationFormat: DebugInformationFormat.PortablePdb );
 
                 // Write the generated files to disk if we should.
-                if ( !Directory.Exists( outputPaths.Directory ) )
+                if ( !Directory.Exists( outputDirectory ) )
                 {
-                    this._logger.Trace?.Log( $"Creating directory '{outputPaths.Directory}'." );
-                    Directory.CreateDirectory( outputPaths.Directory );
+                    this._logger.Trace?.Log( $"Creating directory '{outputDirectory}'." );
+                    Directory.CreateDirectory( outputDirectory );
                 }
 
                 compileTimeCompilation =
@@ -333,9 +335,9 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 foreach ( var compileTimeSyntaxTree in compileTimeCompilation.SyntaxTrees )
                 {
-                    var transformedFileName = Path.Combine( outputPaths.Directory, compileTimeSyntaxTree.FilePath );
+                    var transformedFileName = Path.Combine( outputDirectory, compileTimeSyntaxTree.FilePath );
 
-                    var path = Path.Combine( outputPaths.Directory, transformedFileName );
+                    var path = Path.Combine( outputDirectory, transformedFileName );
                     var text = compileTimeSyntaxTree.GetText();
 
                     this._logger.Trace?.Log( $"Writing '{path}'." );
@@ -399,7 +401,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     foreach ( var diagnostic in diagnostics )
                     {
-                        textMapDirectory ??= TextMapDirectory.Load( outputPaths.Directory );
+                        textMapDirectory ??= TextMapDirectory.Load( outputDirectory );
 
                         var transformedPath = diagnostic.Location.SourceTree?.FilePath;
 
@@ -505,9 +507,9 @@ namespace Metalama.Framework.Engine.CompileTime
                 RetryHelper.Retry(
                     () =>
                     {
-                        if ( Directory.Exists( outputPaths.Directory ) )
+                        if ( Directory.Exists( outputDirectory ) )
                         {
-                            Directory.Delete( outputPaths.Directory, true );
+                            Directory.Delete( outputDirectory, true );
                         }
                     },
                     logger: this._logger );
@@ -753,7 +755,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             return false;
                         }
 
-                        textMapDirectory.Write( outputPaths.Directory );
+                        textMapDirectory.Write( outputPaths.Directory! );
 
                         var aspectType = compileTimeCompilation.GetTypeByMetadataName( typeof(IAspect).FullName );
                         var fabricType = compileTimeCompilation.GetTypeByMetadataName( typeof(Fabric).FullName );

@@ -49,11 +49,11 @@ namespace Metalama.Framework.Engine.Advices
 
                 return AdviceResult.Create(
                     promotedField,
-                    new OverriddenProperty( this, promotedField, this.PropertyTemplate, this.GetTemplate, this.SetTemplate, this.Tags ) );
+                    new OverridePropertyTransformation( this, promotedField, this.GetTemplate, this.SetTemplate, this.Tags ) );
             }
             else if ( targetDeclaration is IProperty property )
             {
-                return AdviceResult.Create( new OverriddenProperty( this, property, this.PropertyTemplate, this.GetTemplate, this.SetTemplate, this.Tags ) );
+                return AdviceResult.Create( new OverridePropertyTransformation( this, property, this.GetTemplate, this.SetTemplate, this.Tags ) );
             }
             else
             {

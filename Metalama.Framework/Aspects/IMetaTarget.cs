@@ -14,11 +14,15 @@ namespace Metalama.Framework.Aspects
     public interface IMetaTarget
     {
         /// <summary>
-        /// Gets the method metadata, or the accessor if this is a template for a field, property or event.
+        /// Gets the target method or constructor, or the accessor if this is a template for a field, property or event,
+        /// or throws an exception if the advice does not target a method, constructor or accessor.
         /// </summary>
         /// <seealso href="@templates"/>
         IMethodBase MethodBase { get; }
 
+        /// <summary>
+        /// Gets the target field, or throws an exception if the advice does not target a field.
+        /// </summary>
         IAdvisedField Field { get; }
 
         /// <summary>
@@ -34,13 +38,14 @@ namespace Metalama.Framework.Aspects
 
         /// <summary>
         /// Gets the target member (method, constructor, field, property or event, but not a nested type), or
-        /// throws an exception if the advice does not target member.
+        /// throws an exception if the advice does not target a member.
         /// </summary>
         /// <seealso href="@templates"/>
         IMember Member { get; }
 
         /// <summary>
-        /// Gets the method metadata, or the accessor if this is a template for a field, property or event.
+        /// Gets the target method, or the accessor if this is a template for a field, property or event,
+        /// or throws an exception if the advice does not target a method or accessor.
         /// </summary>
         /// <remarks>
         /// To invoke the method, use <see cref="IMethodInvoker.Invoke"/>,
@@ -49,25 +54,34 @@ namespace Metalama.Framework.Aspects
         IAdvisedMethod Method { get; }
 
         /// <summary>
-        /// Gets the target constructor, or null if the advice does not target a constructor.
+        /// Gets the target constructor, or throws an exception if the advice does not target a constructor.
         /// </summary>
         IConstructor Constructor { get; }
 
         /// <summary>
-        /// Gets the target field or property, or null if the advice does not target a field or a property.
+        /// Gets the target field or property, or throws an exception if the advice does not target a field or a property.
         /// </summary>
         IAdvisedProperty Property { get; }
 
         /// <summary>
-        /// Gets the target event, or null if the advice does not target an event.
+        /// Gets the target event, or throws an exception if the advice does not target an event.
         /// </summary>
         IAdvisedEvent Event { get; }
 
         /// <summary>
-        /// Gets the list of parameters of <see cref="Method"/>.
+        /// Gets the list of parameters of the current <see cref="Method"/>, <see cref="Constructor"/>,  <see cref="Property"/> or <see cref="Indexer"/> or throws
+        /// an exception if the advice does not target a method, constructor, property or indexer.
         /// </summary>
         IAdvisedParameterList Parameters { get; }
 
+        /// <summary>
+        /// Gets the target parameter or throws an exception if the advice does not target a parameter.
+        /// </summary>
+        IAdvisedParameter Parameter { get; }
+
+        /// <summary>
+        /// Gets the target indexer, or throws an exception if the advice does not target an indexer.
+        /// </summary>
         IIndexer Indexer { get; }
 
         /// <summary>
@@ -80,6 +94,9 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         ICompilation Compilation { get; }
 
+        /// <summary>
+        /// Gets the project being compiled.
+        /// </summary>
         IProject Project { get; }
     }
 }

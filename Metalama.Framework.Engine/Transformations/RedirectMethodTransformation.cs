@@ -18,13 +18,13 @@ namespace Metalama.Framework.Engine.Transformations
     /// <summary>
     /// Represents a method override, which redirects to another method without requiring template expansion.
     /// </summary>
-    internal class RedirectedMethod : OverriddenMember
+    internal class RedirectMethodTransformation : OverrideMemberTransformation
     {
         public new IMethod OverriddenDeclaration => (IMethod) base.OverriddenDeclaration;
 
         public IMethod TargetMethod { get; }
 
-        public RedirectedMethod( Advice advice, IMethod overriddenDeclaration, IMethod targetMethod, IObjectReader tags )
+        public RedirectMethodTransformation( Advice advice, IMethod overriddenDeclaration, IMethod targetMethod, IObjectReader tags )
             : base( advice, overriddenDeclaration, tags )
         {
             Invariant.Assert( targetMethod != null );

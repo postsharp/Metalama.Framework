@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.Utilities
         public ProcessKind ProcessKind { get; }
 
         // In compile time, the long running process is identified
-        // by services comming from TransformerContext.
+        // by services comIng from TransformerContext.
         // See the SourceTransformer.Execute method.
         public bool IsLongRunningProcess => !MetalamaCompilerInfo.IsActive;
 

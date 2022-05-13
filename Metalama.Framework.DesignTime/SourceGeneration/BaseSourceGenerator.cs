@@ -14,7 +14,7 @@ using System.Diagnostics.CodeAnalysis;
 
 #pragma warning disable SA1414 // Tuple items must have names.
 
-namespace Metalama.Framework.DesignTime
+namespace Metalama.Framework.DesignTime.SourceGeneration
 {
     /// <summary>
     /// Our base implementation of <see cref="ISourceGenerator"/>, which essentially delegates the work to a <see cref="ProjectHandler"/>.

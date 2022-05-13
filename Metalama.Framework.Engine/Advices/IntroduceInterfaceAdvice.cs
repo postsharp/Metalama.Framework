@@ -271,13 +271,13 @@ namespace Metalama.Framework.Engine.Advices
 
                             transformations.Add(
                                 memberSpec.AspectInterfaceMember != null
-                                    ? new OverriddenMethod(
+                                    ? new OverrideMethodTransformation(
                                         this,
                                         (IMethod) memberBuilder,
                                         TemplateMember.Create( implementationMethod, memberSpec.TemplateClassMember, TemplateKind.Introduction )
                                             .ForIntroduction(),
                                         memberSpec.Tags )
-                                    : new RedirectedMethod(
+                                    : new RedirectMethodTransformation(
                                         this,
                                         (IMethod) memberBuilder,
                                         (IMethod) memberSpec.TargetMember.AssertNotNull(),
@@ -308,14 +308,13 @@ namespace Metalama.Framework.Engine.Advices
 
                                 transformations.Add(
                                     memberSpec.AspectInterfaceMember != null
-                                        ? new OverriddenProperty(
+                                        ? new OverridePropertyTransformation(
                                             this,
                                             (IProperty) memberBuilder,
-                                            propertyTemplate,
                                             accessorTemplates.Get.ForOverride( propertyBuilder.GetMethod ),
                                             accessorTemplates.Set.ForOverride( propertyBuilder.SetMethod ),
                                             memberSpec.Tags )
-                                        : new RedirectedProperty(
+                                        : new RedirectPropertyTransformation(
                                             this,
                                             (IProperty) memberBuilder,
                                             (IProperty) memberSpec.TargetMember.AssertNotNull(),
@@ -335,7 +334,7 @@ namespace Metalama.Framework.Engine.Advices
                             {
                                 transformations.Add(
                                     memberSpec.AspectInterfaceMember != null
-                                        ? new OverriddenEvent(
+                                        ? new OverrideEventTransformation(
                                             this,
                                             (IEvent) memberBuilder,
                                             TemplateMember.Create(
@@ -346,7 +345,7 @@ namespace Metalama.Framework.Engine.Advices
                                             default,
                                             memberSpec.Tags,
                                             null )
-                                        : new RedirectedEvent(
+                                        : new RedirectEventTransformation(
                                             this,
                                             (IEvent) memberBuilder,
                                             (IEvent) memberSpec.TargetMember.AssertNotNull(),
@@ -362,7 +361,7 @@ namespace Metalama.Framework.Engine.Advices
                     transformations.Add( memberBuilder );
                 }
 
-                transformations.Add( new IntroducedInterface( this, targetDeclaration, interfaceSpec.InterfaceType, interfaceMemberMap ) );
+                transformations.Add( new IntroduceInterfaceTransformation( this, targetDeclaration, interfaceSpec.InterfaceType, interfaceMemberMap ) );
             }
 
             return AdviceResult.Create( transformations );

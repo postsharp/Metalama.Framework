@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             switch ( declaration )
             {
-                case IReplaceMember replaceMember:
+                case IReplaceMemberTransformation replaceMember:
                     return replaceMember.ReplacedMember.AssertNotNull().GetTarget( declaration.Compilation ).ToInsertPosition();
 
                 case BuiltDeclaration:

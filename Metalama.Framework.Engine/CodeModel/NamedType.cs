@@ -302,7 +302,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     this.TypeSymbol.Interfaces.Select( this.Compilation.Factory.GetNamedType )
                         .Concat(
                             this.Compilation.GetObservableTransformationsOnElement( this )
-                                .OfType<IntroducedInterface>()
+                                .OfType<IntroduceInterfaceTransformation>()
                                 .Select( i => i.InterfaceType ) ) )
                 .Distinct() // Remove duplicates (re-implementations of earlier interface by aspect).
                 .ToImmutableArray()
@@ -314,7 +314,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 this.TypeSymbol.Interfaces.Select( this.Compilation.Factory.GetNamedType )
                     .Concat(
                         this.Compilation.GetObservableTransformationsOnElement( this )
-                            .OfType<IntroducedInterface>()
+                            .OfType<IntroduceInterfaceTransformation>()
                             .Select( i => i.InterfaceType ) )
                     .Distinct() // Remove duplicates (re-implementations of earlier interface by aspect).
                     .ToImmutableArray()
@@ -478,7 +478,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 var introducedInterface =
                     this.Compilation
                         .GetObservableTransformationsOnElement( currentType )
-                        .OfType<IntroducedInterface>()
+                        .OfType<IntroduceInterfaceTransformation>()
                         .SingleOrDefault( i => this.Compilation.InvariantComparer.Equals( i.InterfaceType, interfaceMember.DeclaringType ) );
 
                 if ( introducedInterface != null )
@@ -534,7 +534,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 return symbolMembers.Select( x => new MemberRef<TMember>( x, this.Compilation.RoslynCompilation ) );
             }
 
-            if ( !transformations.OfType<TBuilder>().Any( t => t is IReplaceMember ) )
+            if ( !transformations.OfType<TBuilder>().Any( t => t is IReplaceMemberTransformation ) )
             {
                 // No replaced members.
                 return
@@ -551,7 +551,7 @@ namespace Metalama.Framework.Engine.CodeModel
             // Go through transformations, noting replaced symbols and builders.
             foreach ( var builder in transformations )
             {
-                if ( builder is IReplaceMember { ReplacedMember: { } replacedMember } )
+                if ( builder is IReplaceMemberTransformation { ReplacedMember: { } replacedMember } )
                 {
                     if ( replacedMember.Target is TSymbol symbol && allSymbols.Contains( replacedMember.Target ) )
                     {

@@ -1,4 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Aspects;
@@ -6,15 +6,11 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.SyntaxSerialization;
-using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using RefKind = Metalama.Framework.Code.RefKind;
@@ -22,69 +18,31 @@ using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Transformations
 {
-    /// <summary>
-    /// Method override, which expands a template.
-    /// </summary>
-    internal sealed class OverriddenMethod : OverriddenMember
+    internal abstract class OverrideMethodBaseTransformation : OverrideMemberTransformation
     {
-        public new IMethod OverriddenDeclaration => (IMethod) base.OverriddenDeclaration;
+        protected new IMethod OverriddenDeclaration => (IMethod) base.OverriddenDeclaration;
 
-        public BoundTemplateMethod BoundTemplate { get; }
+        protected OverrideMethodBaseTransformation( Advice advice, IMethod targetMethod, IObjectReader tags )
+            : base( advice, targetMethod, tags ) { }
 
-        public OverriddenMethod( Advice advice, IMethod targetMethod, BoundTemplateMethod boundTemplate, IObjectReader tags )
-            : base( advice, targetMethod, tags )
+        protected UserExpression CreateProceedExpression( in MemberIntroductionContext context, TemplateKind templateKind )
         {
-            Invariant.Assert( !boundTemplate.IsNull );
-
-            this.BoundTemplate = boundTemplate;
-        }
-
-        public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
-        {
-            var proceedExpression = ProceedHelper.CreateProceedDynamicExpression(
+            return ProceedHelper.CreateProceedDynamicExpression(
                 context.SyntaxGenerationContext,
                 this.CreateInvocationExpression( context.SyntaxGenerationContext ),
-                this.BoundTemplate,
+                templateKind,
                 this.OverriddenDeclaration );
+        }
 
-            var metaApi = MetaApi.ForMethod(
-                this.OverriddenDeclaration,
-                new MetaApiProperties(
-                    context.DiagnosticSink,
-                    this.BoundTemplate.Template.Cast(),
-                    this.Tags,
-                    this.Advice.AspectLayerId,
-                    context.SyntaxGenerationContext,
-                    this.Advice.Aspect,
-                    context.ServiceProvider,
-                    MetaApiStaticity.Default ) );
-
-            var expansionContext = new TemplateExpansionContext(
-                this.Advice.TemplateInstance.Instance,
-                metaApi,
-                (CompilationModel) this.OverriddenDeclaration.Compilation,
-                context.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ),
-                context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
-                context.SyntaxGenerationContext,
-                this.BoundTemplate,
-                proceedExpression,
-                this.Advice.AspectLayerId );
-
-            var templateDriver = this.Advice.TemplateInstance.TemplateClass.GetTemplateDriver( this.BoundTemplate.Template.Declaration! );
-
-            if ( !templateDriver.TryExpandDeclaration( expansionContext, this.BoundTemplate.TemplateArguments, out var newMethodBody ) )
-            {
-                // Template expansion error.
-                return Enumerable.Empty<IntroducedMember>();
-            }
-
+        protected IntroducedMember[] GetIntroducedMembersImpl( in MemberIntroductionContext context, BlockSyntax newMethodBody, bool isAsyncTemplate )
+        {
             TypeSyntax? returnType = null;
 
             var modifiers = this.OverriddenDeclaration.GetSyntaxModifierList();
 
             if ( !this.OverriddenDeclaration.IsAsync )
             {
-                if ( this.BoundTemplate.Template.MustInterpretAsAsyncTemplate() )
+                if ( isAsyncTemplate )
                 {
                     // If the template is async but the overridden declaration is not, we have to add an async modifier.
                     modifiers = modifiers.Add( Token( SyntaxKind.AsyncKeyword ) );
@@ -92,7 +50,7 @@ namespace Metalama.Framework.Engine.Transformations
             }
             else
             {
-                if ( !this.BoundTemplate.Template.MustInterpretAsAsyncTemplate() )
+                if ( !isAsyncTemplate )
                 {
                     // If the template is not async but the overridden declaration is, we have to remove the async modifier.
                     modifiers = TokenList( modifiers.Where( m => !m.IsKind( SyntaxKind.AsyncKeyword ) ) );
@@ -126,7 +84,7 @@ namespace Metalama.Framework.Engine.Transformations
                 newMethodBody,
                 null );
 
-            var overrides = new[]
+            return new[]
             {
                 new IntroducedMember(
                     this,
@@ -135,8 +93,6 @@ namespace Metalama.Framework.Engine.Transformations
                     IntroducedMemberSemantic.Override,
                     this.OverriddenDeclaration )
             };
-
-            return overrides;
         }
 
         private ExpressionSyntax CreateInvocationExpression( SyntaxGenerationContext generationContext )

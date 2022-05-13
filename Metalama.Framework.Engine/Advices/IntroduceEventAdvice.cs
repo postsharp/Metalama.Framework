@@ -84,7 +84,7 @@ namespace Metalama.Framework.Engine.Advices
                 {
                     return AdviceResult.Create(
                         this.MemberBuilder,
-                        new OverriddenEvent(
+                        new OverrideEventTransformation(
                             this,
                             this.MemberBuilder,
                             this.Template,
@@ -131,7 +131,7 @@ namespace Metalama.Framework.Engine.Advices
                             }
                             else
                             {
-                                var overriddenMethod = new OverriddenEvent(
+                                var overriddenMethod = new OverrideEventTransformation(
                                     this,
                                     existingDeclaration,
                                     this.Template,
@@ -153,7 +153,7 @@ namespace Metalama.Framework.Engine.Advices
                             }
                             else
                             {
-                                var overriddenMethod = new OverriddenEvent(
+                                var overriddenMethod = new OverrideEventTransformation(
                                     this,
                                     this.MemberBuilder,
                                     this.Template,
@@ -175,7 +175,7 @@ namespace Metalama.Framework.Engine.Advices
                             }
                             else
                             {
-                                var overriddenMethod = new OverriddenEvent(
+                                var overriddenMethod = new OverrideEventTransformation(
                                     this,
                                     existingDeclaration,
                                     this.Template,
@@ -216,7 +216,7 @@ namespace Metalama.Framework.Engine.Advices
                             }
                             else
                             {
-                                var overriddenEvent = new OverriddenEvent(
+                                var overriddenEvent = new OverrideEventTransformation(
                                     this,
                                     this.MemberBuilder,
                                     this.Template,

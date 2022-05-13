@@ -22,7 +22,7 @@ using ParameterList = Metalama.Framework.Engine.CodeModel.Collections.ParameterL
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class ConstructorBuilder : MemberBuilder, IConstructorBuilder, IConstructorImpl, IReplaceMember
+    internal class ConstructorBuilder : MemberBuilder, IConstructorBuilder, IConstructorImpl, IReplaceMemberTransformation
     {
         public ConstructorInitializerKind InitializerKind => ConstructorInitializerKind.Undetermined;
 

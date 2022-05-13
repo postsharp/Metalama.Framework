@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.Linking
                 this._removedVariableDeclaratorSyntax = new HashSet<VariableDeclaratorSyntax>();
             }
 
-            public void Add( IMemberIntroduction memberIntroduction, IEnumerable<IntroducedMember> introducedMembers )
+            public void Add( IIntroduceMemberTransformation memberIntroduction, IEnumerable<IntroducedMember> introducedMembers )
             {
                 foreach ( var introducedMember in introducedMembers )
                 {
@@ -63,7 +63,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            public void Add( IIntroducedInterface interfaceImplementationIntroduction, BaseTypeSyntax introducedInterface )
+            public void Add( IIntroduceInterfaceTransformation interfaceImplementationIntroduction, BaseTypeSyntax introducedInterface )
             {
                 var targetTypeSymbol = ((INamedType) interfaceImplementationIntroduction.ContainingDeclaration).GetSymbol();
 

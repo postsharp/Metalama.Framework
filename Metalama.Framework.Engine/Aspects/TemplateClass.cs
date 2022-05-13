@@ -127,12 +127,12 @@ namespace Metalama.Framework.Engine.Aspects
                         var accessorParameters =
                             accessor.Parameters.Select( p => new TemplateClassMemberParameter( p.Ordinal, p.Name, false, null ) ).ToImmutableArray();
 
-                        accessors = accessors!.Add(
+                        accessors = accessors.Add(
                             accessor.MethodKind,
                             new TemplateClassMember(
                                 accessor.Name,
                                 this,
-                                templateInfo!,
+                                templateInfo,
                                 accessor,
                                 accessorParameters,
                                 ImmutableArray<TemplateClassMemberParameter>.Empty,

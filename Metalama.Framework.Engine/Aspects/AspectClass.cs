@@ -41,8 +41,9 @@ namespace Metalama.Framework.Engine.Aspects
         private ValidatorDriverFactory? _validatorDriverFactory;
 
         private static readonly MethodInfo _tryInitializeEligibilityMethod = typeof(AspectClass).GetMethod(
-            nameof(TryInitializeEligibility),
-            BindingFlags.Instance | BindingFlags.NonPublic );
+                nameof(TryInitializeEligibility),
+                BindingFlags.Instance | BindingFlags.NonPublic )
+            .AssertNotNull();
 
         private ImmutableArray<KeyValuePair<Type, IEligibilityRule<IDeclaration>>> _eligibilityRules;
 

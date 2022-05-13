@@ -157,7 +157,7 @@ namespace Metalama.Framework.Engine.Linking
                 private static int GetAccessibilityOrder( Accessibility accessibility )
                     => _orderedAccessibilities.TryGetValue( accessibility, out var order ) ? order : 10;
 
-                private static int GetTypeOrder( IMemberIntroduction introduction ) => introduction is IOverriddenDeclaration ? 0 : 1;
+                private static int GetTypeOrder( IIntroduceMemberTransformation introduction ) => introduction is IOverriddenDeclaration ? 0 : 1;
 
                 private static int GetSemanticOrder( IntroducedMemberSemantic semantic ) => semantic != IntroducedMemberSemantic.InitializerMethod ? 0 : 1;
 
