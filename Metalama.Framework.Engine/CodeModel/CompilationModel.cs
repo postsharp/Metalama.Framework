@@ -390,6 +390,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     return result;
                 }
             }
+
         }
 
         internal override Ref<IDeclaration> ToRef() => Ref.Compilation( this.RoslynCompilation ).As<IDeclaration>();
