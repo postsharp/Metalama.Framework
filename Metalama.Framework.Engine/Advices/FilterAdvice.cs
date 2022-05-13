@@ -5,6 +5,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
@@ -36,7 +37,14 @@ namespace Metalama.Framework.Engine.Advices
 
                 case IProperty property:
                     return AdviceResult.Create( new FilterPropertyTransformation( this, property ) );
+                
+                case IField field:
+                    var promotedField = new PromotedField( this, field, this.Tags );
 
+                    return AdviceResult.Create(
+                        promotedField,
+                        new FilterPropertyTransformation( this, promotedField ) );
+                
                 default:
                     throw new NotImplementedException();
             }
@@ -66,8 +74,8 @@ namespace Metalama.Framework.Engine.Advices
                 {
                     IParameter { IsReturnParameter: true } => returnValueLocalName ?? null!,
                     IParameter parameter => parameter.Name,
-                    IProperty when direction == FilterDirection.Input => "value",
-                    IProperty when direction == FilterDirection.Output => returnValueLocalName,
+                    IFieldOrPropertyOrIndexer when direction == FilterDirection.Input => "value",
+                    IFieldOrPropertyOrIndexer when direction == FilterDirection.Output => returnValueLocalName,
                     _ => throw new AssertionFailedException()
                 };
 
