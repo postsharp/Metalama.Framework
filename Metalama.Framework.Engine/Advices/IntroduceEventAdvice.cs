@@ -19,6 +19,7 @@ namespace Metalama.Framework.Engine.Advices
     {
         private readonly TemplateMember<IMethod> _addTemplate;
         private readonly TemplateMember<IMethod> _removeTemplate;
+        private readonly IObjectReader _parameters;
 
         // ReSharper disable once MemberCanBePrivate.Global
 
@@ -35,11 +36,13 @@ namespace Metalama.Framework.Engine.Advices
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             string? layerName,
-            ITagReader tags )
+            IObjectReader tags,
+            IObjectReader parameters )
             : base( aspect, templateInstance, targetDeclaration, eventTemplate, scope, overrideStrategy, layerName, tags )
         {
             this._addTemplate = addTemplate;
             this._removeTemplate = removeTemplate;
+            this._parameters = parameters;
 
             this.MemberBuilder = new EventBuilder(
                 this,
@@ -87,7 +90,8 @@ namespace Metalama.Framework.Engine.Advices
                             this.Template,
                             this._addTemplate,
                             this._removeTemplate,
-                            this.Tags ) );
+                            this.Tags,
+                            this._parameters ) );
                 }
             }
             else
@@ -133,7 +137,8 @@ namespace Metalama.Framework.Engine.Advices
                                     this.Template,
                                     this._addTemplate,
                                     this._removeTemplate,
-                                    this.Tags );
+                                    this.Tags,
+                                    this._parameters );
 
                                 return AdviceResult.Create( overriddenMethod );
                             }
@@ -154,7 +159,8 @@ namespace Metalama.Framework.Engine.Advices
                                     this.Template,
                                     this._addTemplate,
                                     this._removeTemplate,
-                                    this.Tags );
+                                    this.Tags,
+                                    this._parameters );
 
                                 return AdviceResult.Create( this.MemberBuilder, overriddenMethod );
                             }
@@ -175,7 +181,8 @@ namespace Metalama.Framework.Engine.Advices
                                     this.Template,
                                     this._addTemplate,
                                     this._removeTemplate,
-                                    this.Tags );
+                                    this.Tags,
+                                    this._parameters );
 
                                 return AdviceResult.Create( overriddenMethod );
                             }
@@ -215,7 +222,8 @@ namespace Metalama.Framework.Engine.Advices
                                     this.Template,
                                     this._addTemplate,
                                     this._removeTemplate,
-                                    this.Tags );
+                                    this.Tags,
+                                    this._parameters );
 
                                 return AdviceResult.Create( this.MemberBuilder, overriddenEvent );
                             }

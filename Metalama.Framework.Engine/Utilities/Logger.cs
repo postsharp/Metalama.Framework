@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.Utilities
 
             processInfo.Info?.Log( $"Command line: {Environment.CommandLine}" );
             processInfo.Info?.Log( $"Process kind: {ProcessUtilities.ProcessKind}" );
-            processInfo.Info?.Log( $"Version: {AssemblyMetadataReader.GetInstance( typeof( Logger ).Assembly ).BuildId}" );
+            processInfo.Info?.Log( $"Version: {AssemblyMetadataReader.GetInstance( typeof(Logger).Assembly ).BuildId}" );
 
             DesignTime = loggerFactory.DesignTime();
             Remoting = loggerFactory.Remoting();

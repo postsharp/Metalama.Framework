@@ -1,10 +1,11 @@
-    internal class TargetClass
+internal class TargetClass
     {
 
 
 private int _autoProperty;
         [Override]
-        public int AutoProperty { get
+        public int AutoProperty 
+{ get
 { 
         return this._autoProperty;
 }
@@ -19,7 +20,8 @@ set
 private static int _static_AutoProperty;
 
         [Override]
-        public static int Static_AutoProperty { get
+        public static int Static_AutoProperty 
+{ get
 { 
         return global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.MethodSetTemplate.TargetClass._static_AutoProperty;
 }
@@ -34,7 +36,8 @@ set
 private int _autoProperty_Init;
 
         [Override]
-        public int AutoProperty_Init { get
+        public int AutoProperty_Init 
+{ get
 { 
         return this._autoProperty_Init;
 }
@@ -45,15 +48,8 @@ init
 }
 }
 
-
-private int _autoProperty_GetOnly;
-
         [Override]
-        public int AutoProperty_GetOnly { get
-{ 
-        return this._autoProperty_GetOnly;
-}
-}
+        public int AutoProperty_GetOnly { get; }
 
         [Override]
         public int Property
@@ -111,7 +107,7 @@ private int _autoProperty_GetOnly;
         {
             get
             {
-                        Console.WriteLine( "This is the original getter." );
+                Console.WriteLine( "This is the original getter." );
 
                 return 42;
             }

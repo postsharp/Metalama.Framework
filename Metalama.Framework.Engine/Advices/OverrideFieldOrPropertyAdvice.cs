@@ -15,19 +15,19 @@ namespace Metalama.Framework.Engine.Advices
     {
         public TemplateMember<IProperty> PropertyTemplate { get; }
 
-        public TemplateMember<IMethod> GetTemplate { get; }
+        public BoundTemplateMethod GetTemplate { get; }
 
-        public TemplateMember<IMethod> SetTemplate { get; }
+        public BoundTemplateMethod SetTemplate { get; }
 
         public OverrideFieldOrPropertyAdvice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             IFieldOrPropertyOrIndexer targetDeclaration,
             TemplateMember<IProperty> propertyTemplate,
-            TemplateMember<IMethod> getTemplate,
-            TemplateMember<IMethod> setTemplate,
+            BoundTemplateMethod getTemplate,
+            BoundTemplateMethod setTemplate,
             string? layerName,
-            ITagReader tags )
+            IObjectReader tags )
             : base( aspect, templateInstance, targetDeclaration, layerName, tags )
         {
             this.PropertyTemplate = propertyTemplate;

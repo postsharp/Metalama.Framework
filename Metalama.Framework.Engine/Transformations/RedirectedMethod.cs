@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.Transformations
 
         public IMethod TargetMethod { get; }
 
-        public RedirectedMethod( Advice advice, IMethod overriddenDeclaration, IMethod targetMethod, ITagReader tags )
+        public RedirectedMethod( Advice advice, IMethod overriddenDeclaration, IMethod targetMethod, IObjectReader tags )
             : base( advice, overriddenDeclaration, tags )
         {
             Invariant.Assert( targetMethod != null );

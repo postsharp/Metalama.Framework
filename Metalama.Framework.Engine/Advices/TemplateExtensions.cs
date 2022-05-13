@@ -10,14 +10,28 @@ namespace Metalama.Framework.Engine.Advices
 {
     internal static class TemplateExtensions
     {
-        public static (TemplateMember<IMethod> Get, TemplateMember<IMethod> Set) GetAccessorTemplates( this in TemplateMember<IProperty> propertyTemplate )
+        public static (TemplateMember<IMethod> Get, TemplateMember<IMethod> Set) GetAccessorTemplates( this TemplateMember<IProperty> propertyTemplate )
         {
             if ( propertyTemplate.IsNotNull )
             {
                 if ( !propertyTemplate.Declaration!.IsAutoPropertyOrField )
                 {
-                    return (TemplateMember.Create( propertyTemplate.Declaration!.GetMethod, propertyTemplate.TemplateInfo ),
-                            TemplateMember.Create( propertyTemplate.Declaration!.SetMethod, propertyTemplate.TemplateInfo ));
+                    TemplateMember<IMethod> GetAccessorTemplate( IMethod? accessor )
+                    {
+                        if ( accessor != null && propertyTemplate.TemplateClassMember.Accessors.TryGetValue(
+                                accessor.GetSymbol()!.MethodKind,
+                                out var template ) )
+                        {
+                            return TemplateMember.Create( accessor, template );
+                        }
+                        else
+                        {
+                            return default;
+                        }
+                    }
+
+                    return (GetAccessorTemplate( propertyTemplate.Declaration!.GetMethod ),
+                            GetAccessorTemplate( propertyTemplate.Declaration!.SetMethod ));
                 }
             }
 
@@ -56,7 +70,7 @@ namespace Metalama.Framework.Engine.Advices
 
                 if ( fieldSyntax.Initializer != null )
                 {
-                    return TemplateMember.Create( fieldTemplate.Declaration, fieldTemplate.TemplateInfo, TemplateKind.InitializerExpression );
+                    return TemplateMember.Create( fieldTemplate.Declaration, fieldTemplate.TemplateClassMember, TemplateKind.InitializerExpression );
                 }
                 else
                 {
@@ -76,7 +90,7 @@ namespace Metalama.Framework.Engine.Advices
             {
                 if ( eventFieldSyntax.Initializer != null )
                 {
-                    return TemplateMember.Create( eventFieldTemplate.Declaration, eventFieldTemplate.TemplateInfo, TemplateKind.InitializerExpression );
+                    return TemplateMember.Create( eventFieldTemplate.Declaration, eventFieldTemplate.TemplateClassMember, TemplateKind.InitializerExpression );
                 }
                 else
                 {
@@ -97,7 +111,7 @@ namespace Metalama.Framework.Engine.Advices
 
                 if ( propertySyntax.Initializer != null )
                 {
-                    return TemplateMember.Create( propertyTemplate.Declaration, propertyTemplate.TemplateInfo, TemplateKind.InitializerExpression );
+                    return TemplateMember.Create( propertyTemplate.Declaration, propertyTemplate.TemplateClassMember, TemplateKind.InitializerExpression );
                 }
                 else
                 {

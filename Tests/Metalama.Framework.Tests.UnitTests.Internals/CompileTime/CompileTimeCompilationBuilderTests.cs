@@ -673,12 +673,12 @@ using Metalama.Framework.Aspects;
 [CompileTime]
 public class CompileTimeOnlyClass
 {
-   static global::System.Type Type1 = global::Metalama.Framework.Engine.ReflectionMocks.CompileTimeType.GetCompileTimeType(""1 (D \""RunTimeOnlyClass\"" (N \""\"" 0 (U (S \""test\"" 3) 2) 1) 0 0 (% 0) 0)"",""RunTimeOnlyClass"");
+   static global::System.Type Type1 = global::Metalama.Framework.Engine.ReflectionMocks.CompileTimeType.ResolveCompileTimeTypeOf(""1 (D \""RunTimeOnlyClass\"" (N \""\"" 0 (U (S \""test\"" 3) 2) 1) 0 0 (% 0) 0)"",null);
    static global::System.Type Type2 = typeof(global::CompileTimeOnlyClass);
    static string Name1 = ""RunTimeOnlyClass"";
    static string Name2 = ""CompileTimeOnlyClass"";
 
-   void Method() { var t = global::Metalama.Framework.Engine.ReflectionMocks.CompileTimeType.GetCompileTimeType(""1 (D \""RunTimeOnlyClass\"" (N \""\"" 0 (U (S \""test\"" 3) 2) 1) 0 0 (% 0) 0)"",""RunTimeOnlyClass""); }
+   void Method() { var t = global::Metalama.Framework.Engine.ReflectionMocks.CompileTimeType.ResolveCompileTimeTypeOf(""1 (D \""RunTimeOnlyClass\"" (N \""\"" 0 (U (S \""test\"" 3) 2) 1) 0 0 (% 0) 0)"",null); }
    string Property => ""RunTimeOnlyClass"";
 }
 ";
@@ -783,7 +783,9 @@ public class MyAspect : OverrideMethodAspect
         }
 
         private static string GetCompileTimeCode( TestContext testContext, string code, OutputKind outputKind = OutputKind.DynamicallyLinkedLibrary )
-            => GetCompileTimeCode( testContext, new Dictionary<string, string> { { "main.cs", code } }, outputKind ).Values.Single();
+        {
+            return GetCompileTimeCode( testContext, new Dictionary<string, string> { { "main.cs", code } }, outputKind ).Values.Single();
+        }
 
         private static IReadOnlyDictionary<string, string> GetCompileTimeCode(
             TestContext testContext,

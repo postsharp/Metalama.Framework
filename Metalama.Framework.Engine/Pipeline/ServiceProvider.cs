@@ -53,6 +53,7 @@ namespace Metalama.Framework.Engine.Pipeline
         public ServiceProvider WithUntypedService( Type interfaceType, object implementation )
         {
             var serviceNode = new ServiceNode( provider => implementation, interfaceType );
+
             return new ServiceProvider( this._services.Add( interfaceType, serviceNode ), this._nextProvider );
         }
 

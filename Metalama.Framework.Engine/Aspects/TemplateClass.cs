@@ -17,6 +17,7 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
+using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.Aspects
 {
@@ -115,12 +116,101 @@ namespace Metalama.Framework.Engine.Aspects
                         break;
                 }
 
+                var templateParameters = ImmutableArray<TemplateClassMemberParameter>.Empty;
+                var templateTypeParameters = ImmutableArray<TemplateClassMemberParameter>.Empty;
+                var accessors = ImmutableDictionary<MethodKind, TemplateClassMember>.Empty;
+
+                void AddAccessor( IMethodSymbol? accessor )
+                {
+                    if ( accessor != null )
+                    {
+                        var accessorParameters =
+                            accessor.Parameters.Select( p => new TemplateClassMemberParameter( p.Ordinal, p.Name, false, null ) ).ToImmutableArray();
+
+                        accessors = accessors!.Add(
+                            accessor.MethodKind,
+                            new TemplateClassMember(
+                                accessor.Name,
+                                this,
+                                templateInfo!,
+                                accessor,
+                                accessorParameters,
+                                ImmutableArray<TemplateClassMemberParameter>.Empty,
+                                ImmutableDictionary<MethodKind, TemplateClassMember>.Empty ) );
+                    }
+                }
+
+                switch ( memberSymbol )
+                {
+                    case IMethodSymbol method:
+                        {
+                            var parameterBuilder = ImmutableArray.CreateBuilder<TemplateClassMemberParameter>( method.Parameters.Length );
+                            var allTemplateParametersCount = 0;
+
+                            foreach ( var parameter in method.Parameters )
+                            {
+                                var parameterScope = symbolClassifier.GetTemplatingScope( parameter );
+
+                                parameterBuilder.Add(
+                                    new TemplateClassMemberParameter(
+                                        parameter.Ordinal,
+                                        parameter.Name,
+                                        parameterScope == TemplatingScope.CompileTimeOnly,
+                                        allTemplateParametersCount ) );
+
+                                allTemplateParametersCount++;
+                            }
+
+                            templateParameters = parameterBuilder.MoveToImmutable();
+
+                            var typeParameterBuilder = ImmutableArray.CreateBuilder<TemplateClassMemberParameter>( method.TypeParameters.Length );
+
+                            foreach ( var typeParameter in method.TypeParameters )
+                            {
+                                var isCompileTime =
+                                    symbolClassifier.GetTemplatingScope( typeParameter ).GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly;
+
+                                typeParameterBuilder.Add(
+                                    new TemplateClassMemberParameter(
+                                        typeParameter.Ordinal,
+                                        typeParameter.Name,
+                                        isCompileTime,
+                                        allTemplateParametersCount ) );
+
+                                allTemplateParametersCount++;
+                            }
+
+                            templateTypeParameters = typeParameterBuilder.MoveToImmutable();
+
+                            break;
+                        }
+
+                    case IPropertySymbol property:
+                        AddAccessor( property.GetMethod );
+                        AddAccessor( property.SetMethod );
+
+                        break;
+
+                    case IEventSymbol @event:
+                        AddAccessor( @event.AddMethod );
+                        AddAccessor( @event.RemoveMethod );
+
+                        break;
+                }
+
+                if ( memberSymbol is IMethodSymbol { MethodKind: MethodKind.PropertySet } && templateParameters.Length != 1 )
+                {
+                    throw new AssertionFailedException();
+                }
+
                 var aspectClassMember = new TemplateClassMember(
                     memberName,
                     this,
                     templateInfo,
-                    memberSymbol is IMethodSymbol { IsAsync: true },
-                    memberSymbol );
+                    memberSymbol,
+                    templateParameters,
+                    templateTypeParameters,
+                    accessors );
 
                 if ( !templateInfo.IsNone )
                 {

@@ -17,23 +17,23 @@ namespace Metalama.Framework.Engine.Advices
 
             public IMember? AspectInterfaceMember { get; }
 
-            public bool IsExplicit => ((InterfaceMemberAttribute) this.TemplateInfo.Attribute).IsExplicit;
+            public bool IsExplicit => ((InterfaceMemberAttribute) this.TemplateClassMember.TemplateInfo.Attribute).IsExplicit;
 
-            public TemplateInfo TemplateInfo { get; }
+            public TemplateClassMember TemplateClassMember { get; }
 
-            public ITagReader Tags { get; }
+            public IObjectReader Tags { get; }
 
             public MemberSpecification(
                 IMember interfaceMember,
                 IMember? targetMember,
                 IMember? aspectInterfaceMember,
-                TemplateInfo templateInfo,
-                ITagReader tags )
+                TemplateClassMember templateClassMember,
+                IObjectReader tags )
             {
                 this.InterfaceMember = interfaceMember;
                 this.TargetMember = targetMember;
                 this.AspectInterfaceMember = aspectInterfaceMember;
-                this.TemplateInfo = templateInfo;
+                this.TemplateClassMember = templateClassMember;
                 this.Tags = tags;
             }
         }

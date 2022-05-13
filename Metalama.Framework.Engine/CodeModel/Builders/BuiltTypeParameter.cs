@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override DeclarationBuilder Builder => this.TypeParameterBuilder;
 
-        public TypeKind TypeKind => TypeKind.GenericParameter;
+        public TypeKind TypeKind => TypeKind.TypeParameter;
 
         public SpecialType SpecialType => SpecialType.None;
 

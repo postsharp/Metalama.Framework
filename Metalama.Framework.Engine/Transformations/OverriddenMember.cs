@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.Transformations
 {
     internal abstract class OverriddenMember : INonObservableTransformation, IMemberIntroduction, IOverriddenDeclaration
     {
-        protected ITagReader Tags { get; }
+        protected IObjectReader Tags { get; }
 
         public Advice Advice { get; }
 
@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Transformations
                 _ => throw new AssertionFailedException()
             };
 
-        protected OverriddenMember( Advice advice, IMember overriddenDeclaration, ITagReader tags )
+        protected OverriddenMember( Advice advice, IMember overriddenDeclaration, IObjectReader tags )
         {
             Invariant.Assert( advice != null! );
             Invariant.Assert( overriddenDeclaration != null! );

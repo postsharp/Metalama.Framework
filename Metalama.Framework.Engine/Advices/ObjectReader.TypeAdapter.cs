@@ -9,10 +9,10 @@ using System.Reflection;
 
 namespace Metalama.Framework.Engine.Advices
 {
-    internal partial class TagReader
+    internal partial class ObjectReader
     {
         /// <summary>
-        /// Builds and represents the list of properties of a <see cref="TagReader"/>.
+        /// Builds and represents the list of properties of a <see cref="ObjectReader"/>.
         /// </summary>
         internal class TypeAdapter
         {

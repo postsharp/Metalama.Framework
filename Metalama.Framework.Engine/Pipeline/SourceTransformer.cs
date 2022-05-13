@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.Pipeline
             // gets replaced here by a project-scoped one.
             serviceProvider = serviceProvider.WithNextProvider( context.Services );
 
-            var applicationInfoProvider = (IApplicationInfoProvider?) context.Services.GetService( typeof( IApplicationInfoProvider ) );
+            var applicationInfoProvider = (IApplicationInfoProvider?) context.Services.GetService( typeof(IApplicationInfoProvider) );
 
             // Try.Metalama doesn't provide any backstage services.
             if ( applicationInfoProvider != null )
@@ -44,15 +44,15 @@ namespace Metalama.Framework.Engine.Pipeline
             }
 
             IUsageSample? usageSample = null;
-            var compilerUsageSample = (IUsageSample?) context.Services.GetService( typeof( IUsageSample ) );
-            var usageReporter = (IUsageReporter) context.Services.GetService( typeof( IUsageReporter ) );
+            var compilerUsageSample = (IUsageSample?) context.Services.GetService( typeof(IUsageSample) );
+            var usageReporter = (IUsageReporter) context.Services.GetService( typeof(IUsageReporter) );
 
             // We look for the compiler usage sample instead of calling usageReporter.ShouldReportSession,
             // because the compiler has already decided.
             if ( usageReporter != null && compilerUsageSample != null )
             {
                 usageSample = usageReporter.CreateSample( "CompilerUsage" );
-                serviceProvider = serviceProvider.WithUntypedService( typeof( IUsageSample ), usageSample );
+                serviceProvider = serviceProvider.WithUntypedService( typeof(IUsageSample), usageSample );
             }
 
             // Try.Metalama ships its own handler. Having the default ICompileTimeExceptionHandler added earlier

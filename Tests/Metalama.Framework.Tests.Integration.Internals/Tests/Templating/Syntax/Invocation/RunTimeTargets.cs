@@ -1,7 +1,4 @@
 using System;
-using System.Collections.Generic;
-using Metalama.Framework;
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.TestFramework;
 
@@ -9,53 +6,45 @@ using Metalama.TestFramework;
 
 namespace Metalama.Framework.Tests.InternalPipeline.Templating.Syntax.Invocation.RunTimeTargets
 {
-    class Aspect : Attribute
+    internal class Aspect : Attribute
     {
-    
         [TestTemplate]
-        dynamic? Template( Action<int,int> parameter )
+        private dynamic? Template()
         {
             // Method
             TargetCode.Method( 0, 1 );
-        
+
             // Local variable.
-            var local = new Func<int,int>( x => x );
-            _ = local(0);
-            
-            // Parameter
-            parameter( 0, 1 );
-            
+            var local = new Func<int, int>( x => x );
+            _ = local( 0 );
+
             // Field
-            TargetCode.Field(0,1);
-            
+            TargetCode.Field( 0, 1 );
+
             // Property
-            TargetCode.Property(0,1);
-            
+            TargetCode.Property( 0, 1 );
+
             // Expression
-            _ = new Func<int,int>( x => x )(0);
-            
+            _ = new Func<int, int>( x => x )( 0 );
+
             // Run-time dynamic field.
-            TargetCode.DynamicField(0, 1);
-            
-            
-            
+            TargetCode.DynamicField( 0, 1 );
+
             return null;
         }
-        
-        
-        static IExpression? BuildTimeMethod( int x, int y) => null;
+
+        private static IExpression? BuildTimeMethod( int x, int y ) => null;
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        public static dynamic DynamicField {get; }
-    
-        public static Action<int,int> Field;
-        
-        public static Action<int,int> Property { get; }
-        
+        public static dynamic DynamicField { get; }
+
+        public static Action<int, int> Field;
+
+        public static Action<int, int> Property { get; }
+
         [Aspect]
-        public static void Method( int a, int b ) {}
-    
+        public static void Method( int a, int b ) { }
     }
 }

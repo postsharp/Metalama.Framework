@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.Transformations
 
         public IProperty TargetProperty { get; }
 
-        public RedirectedProperty( Advice advice, IProperty overriddenDeclaration, IProperty targetProperty, ITagReader tags )
+        public RedirectedProperty( Advice advice, IProperty overriddenDeclaration, IProperty targetProperty, IObjectReader tags )
             : base( advice, overriddenDeclaration, tags )
         {
             Invariant.Assert( targetProperty != null );

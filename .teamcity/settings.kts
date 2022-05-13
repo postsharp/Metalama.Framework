@@ -188,6 +188,10 @@ object PublicDeployment : BuildType({
 
     dependencies {
 
+        snapshot(AbsoluteId("Metalama_MetalamaCompiler_PublicDeployment")) {
+                     onDependencyFailure = FailureAction.FAIL_TO_START
+                }
+
         dependency(PublicBuild) {
             snapshot {
                 onDependencyFailure = FailureAction.FAIL_TO_START
