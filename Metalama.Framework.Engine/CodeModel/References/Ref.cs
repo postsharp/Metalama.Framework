@@ -95,6 +95,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         internal Ref( ISymbol symbol, Compilation compilation, DeclarationRefTargetKind targetKind = DeclarationRefTargetKind.Default )
         {
+            Invariant.Assert( symbol is IErrorTypeSymbol || SymbolEqualityComparer.Default.Equals( symbol, symbol.GetSymbolId().Resolve( compilation ) ) );
             symbol.AssertValidType<T>();
 
             this.TargetKind = targetKind;

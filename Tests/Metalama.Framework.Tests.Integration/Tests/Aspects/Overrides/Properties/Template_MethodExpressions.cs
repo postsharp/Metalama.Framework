@@ -1,12 +1,15 @@
 ﻿using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.SyntaxBuilders;
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Template_MethodExpressions
 {
     /*
      * Tests expression bodied method templates.
      */
+
+    // TODO: Get-only auto-property does not get override.
 
     [AttributeUsage( AttributeTargets.Property )]
     public class TestAttribute : FieldOrPropertyAspect
@@ -17,7 +20,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         }
 
         [Template]
-        public dynamic? GetProperty() => meta.ParseExpression("default");
+        public dynamic? GetProperty() => ExpressionFactory.Parse("default");
 
         [Template]
         public void SetProperty() => Console.WriteLine("Overridden");

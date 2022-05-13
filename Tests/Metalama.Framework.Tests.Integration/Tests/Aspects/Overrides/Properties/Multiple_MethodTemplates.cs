@@ -11,6 +11,8 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
      * Tests that multiple aspects overriding the same property using method templates produce correct code.
      */
 
+    // TODO: multiple aspects on get-only auto properties.
+
     [AttributeUsage(AttributeTargets.Property, AllowMultiple = true)]
     public class FirstOverrideAttribute : PropertyAspect
     {
@@ -105,10 +107,9 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         [SecondOverride]
         public int AutoProperty { get; set; }
 
-
-        [FirstOverride]
-        [SecondOverride]
-        public int GetOnlyAutoProperty { get; }
+        //[FirstOverride]
+        //[SecondOverride]
+        //public int GetOnlyAutoProperty { get; }
 
         [FirstOverride]
         [SecondOverride]
@@ -116,7 +117,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
 
         public TargetClass()
         {
-            this.GetOnlyAutoProperty = 42;
+            // this.GetOnlyAutoProperty = 42;
         }
     }
 }

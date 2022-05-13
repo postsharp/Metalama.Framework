@@ -140,7 +140,7 @@ namespace Metalama.Framework.Engine.Linking
                     continue;
                 }
 
-                var replacedMember = transformation.ReplacedMember.Value.GetTarget( input.CompilationModel );
+                var replacedMember = transformation.ReplacedMember.Value.GetTarget( ((IDeclarationInternal) transformation).Compilation );
 
                 IDeclaration canonicalReplacedMember = replacedMember switch
                 {

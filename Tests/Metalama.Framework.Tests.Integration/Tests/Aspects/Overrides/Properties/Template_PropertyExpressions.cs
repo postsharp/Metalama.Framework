@@ -1,4 +1,5 @@
 ﻿using Metalama.Framework.Aspects;
+using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.TestFramework;
 using System;
 using System.Collections.Generic;
@@ -10,11 +11,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Propertie
      * Tests that expression bodied template works against all kinds of bodies of the property.
      */
 
+    // TODO: Get-only auto-property does not get override.
+
     internal class TestAttribute : OverrideFieldOrPropertyAspect
     {
         public override dynamic? OverrideProperty
         {
-            get => meta.ParseExpression("default");
+            get => ExpressionFactory.Parse("default");
             set => Console.WriteLine("Overridden");
         }
     }

@@ -49,8 +49,10 @@ namespace Metalama.Framework.Engine.Advices
 
                 if (field.Writeability == Writeability.ConstructorOnly)
                 {
+                    // Privately writeable property is a transformation that adds a private setter to a get-only property.
                     var writeableProperty = new PrivatelyWriteableProperty( this, promotedField, this.Tags );
 
+                    // TODO: The promoted field should be also included and processed as an transformation (currently fails in the linker).
                     return AdviceResult.Create(
                         writeableProperty,
                         new OverriddenProperty( this, writeableProperty, this.PropertyTemplate, this.GetTemplate, this.SetTemplate, this.Tags ) );

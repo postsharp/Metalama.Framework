@@ -9,6 +9,8 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
      * Tests a template without meta.Proceed.
      */
 
+    // TODO: Get-only auto-property does not get override.
+
     public class OverrideAttribute : FieldOrPropertyAspect
     {
         public override void BuildAspect(IAspectBuilder<IFieldOrProperty> builder)

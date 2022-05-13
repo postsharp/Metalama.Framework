@@ -8,6 +8,8 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
      * Tests a method template for set without a template for get.
      */
 
+    // TODO: Get-only auto-property does not get override.
+
     [AttributeUsage( AttributeTargets.Property )]
     public class TestAttribute : FieldOrPropertyAspect
     {

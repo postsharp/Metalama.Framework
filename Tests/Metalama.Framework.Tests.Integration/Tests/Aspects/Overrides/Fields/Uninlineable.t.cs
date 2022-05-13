@@ -1,47 +1,89 @@
 internal class TargetClass
+{
+
+
+    public global::System.Int32 Field
     {
-        private int _field;
+        get
+        {
+            global::System.Console.WriteLine("Override.");
+            _ = this.Field_Source;
+            return this.Field_Source;
 
-        [FirstOverride]
-        [SecondOverride]
-        public int Property
-{get    {
-        global::System.Console.WriteLine("This is the overridden getter.");
-        _ = this.Property_SecondOverride;
-        return this.Property_SecondOverride;
+        }
+        set
+        {
+            global::System.Console.WriteLine("Override.");
+            this.Field_Source = value;
+            this.Field_Source = value;
+
+        }
     }
+    private global::System.Int32 Field_Source { get; set; }
 
-set    {
-        global::System.Console.WriteLine("This is the overridden setter.");
-        this.Property_SecondOverride= value;
-        this.Property_SecondOverride= value;
+
+    public global::System.Int32 StaticField
+    {
+        get
+        {
+            global::System.Console.WriteLine("Override.");
+            _ = this.StaticField_Source;
+            return this.StaticField_Source;
+
+        }
+        set
+        {
+            global::System.Console.WriteLine("Override.");
+            this.StaticField_Source = value;
+            this.StaticField_Source = value;
+
+        }
+    }
+    private global::System.Int32 StaticField_Source { get; set; }
+
+
+    public global::System.Int32 InitializerField
+    {
+        get
+        {
+            global::System.Console.WriteLine("Override.");
+            _ = this.InitializerField_Source;
+            return this.InitializerField_Source;
+
+        }
+        set
+        {
+            global::System.Console.WriteLine("Override.");
+            this.InitializerField_Source = value;
+            this.InitializerField_Source = value;
+
+        }
+    }
+    private global::System.Int32 InitializerField_Source { get; set; } = 42
+
+
+    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Uninlineable.OverrideAttribute]
+public global::System.Int32 ReadOnlyField
+    {
+        get
+        {
+            global::System.Console.WriteLine("Override.");
+            _ = this.ReadOnlyField_Source;
+            return this.ReadOnlyField_Source;
+
+        }
+        private set
+        {
+            global::System.Console.WriteLine("Override.");
+            this.ReadOnlyField_Source = value;
+            this.ReadOnlyField_Source = value;
+
+        }
+    }
+    private global::System.Int32 ReadOnlyField_Source { get; set; }
+
+    public TargetClass()
+    {
+        this.ReadOnlyField = 42;
     }
 }
-
-private int Property_Source
-        {
-            get
-            {
-                return _field;
-            }
-
-            set
-            {
-                _field = value;
-            }
-        }
-
-
-public global::System.Int32 Property_SecondOverride
-{get    {
-        global::System.Console.WriteLine("This is the overridden getter.");
-        _ = this.Property_Source;
-        return this.Property_Source;
-    }
-
-set    {
-        global::System.Console.WriteLine("This is the overridden setter.");
-        this.Property_Source= value;
-        this.Property_Source= value;
-    }
-}    }

@@ -1,4 +1,3 @@
-[IntroduceAndOverride]
 internal class TargetClass
 {
 
@@ -6,6 +5,7 @@ internal class TargetClass
     private global::System.Int32 _property;
 
 
+    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto_GetOnly.OverrideAttribute]
     public global::System.Int32 Property
     {
         get
@@ -15,7 +15,6 @@ internal class TargetClass
         }
         private set
         {
-            global::System.Console.WriteLine($"This is the overridden setter.");
             this._property = value;
         }
     }
@@ -23,6 +22,7 @@ internal class TargetClass
     private static global::System.Int32 _staticProperty;
 
 
+    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto_GetOnly.OverrideAttribute]
     public static global::System.Int32 StaticProperty
     {
         get
@@ -32,7 +32,6 @@ internal class TargetClass
         }
         private set
         {
-            global::System.Console.WriteLine($"This is the overridden setter.");
             global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto_GetOnly.TargetClass._staticProperty = value;
         }
     }
@@ -40,6 +39,7 @@ internal class TargetClass
     private global::System.Int32 _initializerProperty = 42;
 
 
+    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto_GetOnly.OverrideAttribute]
     public global::System.Int32 InitializerProperty
     {
         get
@@ -49,25 +49,24 @@ internal class TargetClass
         }
         private set
         {
-            global::System.Console.WriteLine($"This is the overridden setter.");
             this._initializerProperty = value;
         }
     }
 
-    private static global::System.Int32 _staticInitializeProperty = 42;
+    private static global::System.Int32 _staticInitializerProperty = 42;
 
 
-    public static global::System.Int32 StaticInitializeProperty
+    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto_GetOnly.OverrideAttribute]
+    public static global::System.Int32 StaticInitializerProperty
     {
         get
         {
             global::System.Console.WriteLine("This is the overridden getter.");
-            return global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto_GetOnly.TargetClass._staticInitializeProperty;
+            return global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto_GetOnly.TargetClass._staticInitializerProperty;
         }
         private set
         {
-            global::System.Console.WriteLine($"This is the overridden setter.");
-            global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto_GetOnly.TargetClass._staticInitializeProperty = value;
+            global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto_GetOnly.TargetClass._staticInitializerProperty = value;
         }
     }
     public TargetClass()
@@ -79,41 +78,6 @@ internal class TargetClass
     static TargetClass()
     {
         StaticProperty = 42;
-        StaticInitializeProperty = 27;
-    }
-
-
-    private global::System.Int32 _introducedProperty;
-
-
-    public global::System.Int32 IntroducedProperty
-    {
-        get
-        {
-            global::System.Console.WriteLine("This is the overridden getter.");
-            return this._introducedProperty;
-        }
-        private set
-        {
-            global::System.Console.WriteLine($"This is the overridden setter.");
-            this._introducedProperty = value;
-        }
-    }
-
-    private global::System.Int32 _introducedStaticProperty;
-
-
-    public global::System.Int32 IntroducedStaticProperty
-    {
-        get
-        {
-            global::System.Console.WriteLine("This is the overridden getter.");
-            return this._introducedStaticProperty;
-        }
-        private set
-        {
-            global::System.Console.WriteLine($"This is the overridden setter.");
-            this._introducedStaticProperty = value;
-        }
+        StaticInitializerProperty = 27;
     }
 }

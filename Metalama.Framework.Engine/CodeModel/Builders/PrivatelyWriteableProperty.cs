@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public MemberRef<IMember>? ReplacedMember => this._originalProperty.ToMemberRef<IMember>();
 
-        public PrivatelyWriteableProperty( Advice advice, IProperty originalProperty, ITagReader tags ) : base(
+        public PrivatelyWriteableProperty( Advice advice, IProperty originalProperty, IObjectReader tags ) : base(
             advice,
             originalProperty.DeclaringType,
             originalProperty.Name,

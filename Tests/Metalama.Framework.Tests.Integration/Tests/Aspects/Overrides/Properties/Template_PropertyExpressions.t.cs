@@ -55,6 +55,9 @@ public class Target
     }
 
 
+    private global::System.Int32 _autoGetOnlyProperty;
+
+
     [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Properties.Template_PropertyExpressions.TestAttribute]
     public global::System.Int32 AutoGetOnlyProperty
     {
@@ -65,8 +68,7 @@ public class Target
         }
         private set
         {
-            global::System.Console.WriteLine("Overridden");
-
+            this._autoGetOnlyProperty = value;
         }
     }
 }

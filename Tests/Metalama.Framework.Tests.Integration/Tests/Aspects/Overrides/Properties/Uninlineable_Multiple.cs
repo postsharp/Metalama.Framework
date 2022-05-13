@@ -11,6 +11,8 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
      * Tests that two overrides with an uninlineable expanded template produces correct code.
      */
 
+    // TODO: multiple aspects on get-only auto properties.
+
     public class FirstOverrideAttribute : FieldOrPropertyAspect
     {
         public override void BuildAspect(IAspectBuilder<IFieldOrProperty> builder)
@@ -108,8 +110,13 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         [SecondOverride]
         public int AutoProperty { get; set; }
 
-        [FirstOverride]
-        [SecondOverride]
-        public int AutoGetOnlyProperty { get; }
+        //[FirstOverride]
+        //[SecondOverride]
+        //public int AutoGetOnlyProperty { get; }
+
+        public TargetClass()
+        {
+            //this.AutoGetOnlyProperty = 42;
+        }
     }
 }

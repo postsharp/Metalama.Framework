@@ -5,6 +5,7 @@ internal class TargetClass
     private global::System.Int32 _readOnlyField;
 
 
+    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.ReadOnly.OverrideAttribute]
     public global::System.Int32 ReadOnlyField
     {
         get
@@ -22,6 +23,7 @@ internal class TargetClass
     private static global::System.Int32 _staticReadOnlyField;
 
 
+    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.ReadOnly.OverrideAttribute]
     public static global::System.Int32 StaticReadOnlyField
     {
         get
@@ -39,6 +41,7 @@ internal class TargetClass
     private global::System.Int32 _initializerReadOnlyField;
 
 
+    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.ReadOnly.OverrideAttribute]
     public global::System.Int32 InitializerReadOnlyField
     {
         get
@@ -56,6 +59,7 @@ internal class TargetClass
     private static global::System.Int32 _staticInitializerReadOnlyField;
 
 
+    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.ReadOnly.OverrideAttribute]
     public static global::System.Int32 StaticInitializerReadOnlyField
     {
         get
@@ -71,14 +75,12 @@ internal class TargetClass
     }
     static TargetClass()
     {
-        // Field access should be rewritten to the newly generated backing field.
         StaticReadOnlyField = 42;
         StaticInitializerReadOnlyField = 27;
     }
 
     public TargetClass()
     {
-        // Field access should be rewritten to the newly generated backing field.
         this.ReadOnlyField = 42;
         this.InitializerReadOnlyField = 27;
     }

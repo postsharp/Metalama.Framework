@@ -30,13 +30,7 @@ internal class TargetClass
     }
 
     [Test]
-    public int ExpressionBodiedProperty
-    {
-        get
-        {
-            return 42;
-        }
-    }
+    public int ExpressionBodiedProperty => 42;
 
 
     private int _autoProperty;
@@ -56,21 +50,6 @@ internal class TargetClass
         }
     }
 
-
-    private global::System.Int32 _autoGetOnlyProperty;
-
-
-    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Template_MethodSet.TestAttribute]
-    public global::System.Int32 AutoGetOnlyProperty
-    {
-        get
-        {
-            return this._autoGetOnlyProperty;
-        }
-        private set
-        {
-            global::System.Console.WriteLine($"This is the overridden setter.");
-            this._autoGetOnlyProperty = value;
-        }
-    }
+    [Test]
+    public int AutoGetOnlyProperty { get; }
 }

@@ -289,11 +289,20 @@ namespace Metalama.Framework.Engine.Linking
                                         : null
                                 }.Where( a => a != null )
                                 .AssertNoneNull() ) )
-                    : property.AccessorList.AssertNotNull().WithSourceCodeAnnotation();
+                    : property.AccessorList != null
+                        ? property.AccessorList.WithSourceCodeAnnotation()
+                        : null;
+
+            var expressionBody =
+                property.IsAutoPropertyDeclaration()
+                ? null
+                : property.AccessorList != null
+                    ? null
+                    : property.ExpressionBody;
 
             var initializer = property.Initializer;
 
-            return GetSpecialImplProperty( property.Type, accessorList, initializer.WithSourceCodeAnnotation(), symbol, GetOriginalImplMemberName( symbol ) );
+            return GetSpecialImplProperty( property.Type, accessorList, expressionBody, initializer.WithSourceCodeAnnotation(), symbol, GetOriginalImplMemberName( symbol ) );
         }
 
         private static MemberDeclarationSyntax GetEmptyImplProperty( PropertyDeclarationSyntax property, IPropertySymbol symbol )
@@ -320,12 +329,13 @@ namespace Metalama.Framework.Engine.Linking
                                 .AssertNoneNull() ) )
                     : property.AccessorList.AssertNotNull();
 
-            return GetSpecialImplProperty( property.Type, accessorList, null, symbol, GetEmptyImplMemberName( symbol ) );
+            return GetSpecialImplProperty( property.Type, accessorList, null, null, symbol, GetEmptyImplMemberName( symbol ) );
         }
 
         private static MemberDeclarationSyntax GetSpecialImplProperty(
             TypeSyntax propertyType,
-            AccessorListSyntax accessorList,
+            AccessorListSyntax? accessorList,
+            ArrowExpressionClauseSyntax? expressionBody,
             EqualsValueClauseSyntax? initializer,
             IPropertySymbol symbol,
             string name )
@@ -343,6 +353,7 @@ namespace Metalama.Framework.Engine.Linking
                         null,
                         null )
                     .WithAccessorList( accessorList )
+                    .WithExpressionBody( expressionBody )
                     .NormalizeWhitespace()
                     .WithInitializer( initializer.WithSourceCodeAnnotation() )
                     .WithLeadingTrivia( ElasticLineFeed )

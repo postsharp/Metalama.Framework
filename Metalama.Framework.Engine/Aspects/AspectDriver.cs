@@ -46,7 +46,7 @@ namespace Metalama.Framework.Engine.Aspects
 
             // Introductions must have a deterministic order because of testing.
             this._declarativeAdviceAttributes = aspectClass
-                .TemplateClasses.SelectMany( c => c.GetDeclarativeAdvices() )
+                .TemplateClasses.SelectMany( c => c.GetDeclarativeAdvices( compilation ) )
                 .ToImmutableArray();
 
             // If we have any declarative introduction, the aspect cannot be added to an interface.
@@ -162,7 +162,7 @@ namespace Metalama.Framework.Engine.Aspects
                             diagnosticSink,
                             targetDeclaration,
                             x,
-                            x.Symbol ) )
+                            x.SymbolId.Resolve( compilationModelRevision.RoslynCompilation, cancellationToken: cancellationToken ).AssertNotNull() ) )
                     .WhereNotNull();
 
             adviceFactory.Advices.AddRange( declarativeAdvices );
