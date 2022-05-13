@@ -10,12 +10,26 @@ namespace Metalama.Framework.Aspects
     /// <summary>
     /// A base aspect that can validate or change the value of fields, properties, indexers, and parameters.
     /// </summary>
+    /// <remarks>
+    /// <para>A filter aspect can apply to the input or output data flow, or to both data flows, according to the <see cref="FilterDirection"/> value
+    /// passes to the constructor. Since the current class does not know the value of this parameter before it is instantiated, this class cannot
+    /// set the eligibility conditions using the <see cref="BuildEligibility(Metalama.Framework.Eligibility.IEligibilityBuilder{Metalama.Framework.Code.IFieldOrPropertyOrIndexer})"/> method.
+    /// If a derived class targets a specific <see cref="FilterDirection"/> (i.e. if the choice is not left to the user),
+    /// its implementation of <see cref="BuildEligibility(Metalama.Framework.Eligibility.IEligibilityBuilder{Metalama.Framework.Code.IFieldOrPropertyOrIndexer})"/>
+    /// can call <see cref="BuildEligibilityForDirection(Metalama.Framework.Eligibility.IEligibilityBuilder{Metalama.Framework.Code.IFieldOrPropertyOrIndexer},Metalama.Framework.Aspects.FilterDirection)"/>
+    /// methods. This means that eligibility can be checked upfront by the IDE before suggesting the code actions.
+    /// </para>
+    /// <para>
+    /// In any case, this aspect verifies the eligibility of the target with respect to the specific <see cref="FilterDirection"/> and target declaration. This verification
+    /// cannot be skipped.
+    /// </para>
+    /// </remarks>
     [AttributeUsage( AttributeTargets.ReturnValue | AttributeTargets.Parameter | AttributeTargets.Field | AttributeTargets.Property )]
     public abstract class FilterAspect : Aspect, IAspect<IParameter>, IAspect<IFieldOrPropertyOrIndexer>
     {
         // Eligibility rules for properties.
         private static readonly IEligibilityRule<IFieldOrPropertyOrIndexer> _propertyOrIndexerEligibilityInput =
-            EligibilityRuleFactory.CreateRule<IFieldOrPropertyOrIndexer>( builder => builder.MustBeWritable() );
+            EligibilityRuleFactory.CreateRule<IFieldOrPropertyOrIndexer>( builder => builder.Convert().To<IPropertyOrIndexer>().MustBeWritable() );
 
         private static readonly IEligibilityRule<IFieldOrPropertyOrIndexer> _propertyOrIndexerEligibilityOutput =
             EligibilityRuleFactory.CreateRule<IFieldOrPropertyOrIndexer>( builder => builder.Convert().To<IPropertyOrIndexer>().MustBeReadable() );
@@ -53,23 +67,34 @@ namespace Metalama.Framework.Aspects
         /// </remarks>
         protected FilterDirection Direction { get; }
 
+        private static IEligibilityRule<IParameter>? GetParameterEligibilityRule( FilterDirection direction )
+            => direction switch
+            {
+                FilterDirection.Default => null,
+                FilterDirection.Both => _parameterEligibilityBoth,
+                FilterDirection.Input => _parameterEligibilityInput,
+                FilterDirection.Output => _parameterEligibilityOutput,
+                _ => throw new ArgumentOutOfRangeException( nameof(direction) )
+            };
+
+        private static IEligibilityRule<IFieldOrPropertyOrIndexer>? GetPropertyEligibilityRule( FilterDirection direction )
+            => direction switch
+            {
+                FilterDirection.Default => null,
+                FilterDirection.Both => _propertyOrIndexerEligibilityBoth,
+                FilterDirection.Input => _propertyOrIndexerEligibilityInput,
+                FilterDirection.Output => _propertyOrIndexerEligibilityOutput,
+                _ => throw new ArgumentOutOfRangeException( nameof(direction) )
+            };
+
         public virtual void BuildAspect( IAspectBuilder<IFieldOrPropertyOrIndexer> builder )
         {
             var eligibilityRule = builder.Target.DeclarationKind switch
-                {
-                    DeclarationKind.Property or DeclarationKind.Indexer => this.Direction switch
-                    {
-                        FilterDirection.Default => null,
-                        FilterDirection.Both => _propertyOrIndexerEligibilityBoth,
-                        FilterDirection.Input => _propertyOrIndexerEligibilityInput,
-                        FilterDirection.Output => _propertyOrIndexerEligibilityOutput,
-                        _ => throw new ArgumentOutOfRangeException( nameof(this.Direction) )
-                    },
-
-                    DeclarationKind.Field => null,
-                    _ => throw new InvalidOperationException()
-                }
-                ;
+            {
+                DeclarationKind.Property or DeclarationKind.Indexer => GetPropertyEligibilityRule( this.Direction ),
+                DeclarationKind.Field => null,
+                _ => throw new ArgumentOutOfRangeException()
+            };
 
             if ( eligibilityRule != null && !builder.VerifyEligibility( eligibilityRule ) )
             {
@@ -82,14 +107,7 @@ namespace Metalama.Framework.Aspects
 
         public virtual void BuildAspect( IAspectBuilder<IParameter> builder )
         {
-            var eligibilityRule = this.Direction switch
-            {
-                FilterDirection.Default => null,
-                FilterDirection.Both => _parameterEligibilityBoth,
-                FilterDirection.Input => _parameterEligibilityInput,
-                FilterDirection.Output => _parameterEligibilityOutput,
-                _ => throw new ArgumentOutOfRangeException( nameof(this.Direction) )
-            };
+            var eligibilityRule = GetParameterEligibilityRule( this.Direction );
 
             if ( eligibilityRule != null && !builder.VerifyEligibility( eligibilityRule ) )
             {
@@ -102,6 +120,30 @@ namespace Metalama.Framework.Aspects
         }
 
         public virtual void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder ) { }
+
+        /// <summary>
+        /// Populates the <see cref="IEligibilityBuilder"/> for a field, property or indexer when the <see cref="FilterDirection"/> is known.
+        /// </summary>
+        protected static void BuildEligibilityForDirection( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder, FilterDirection direction )
+        {
+            if ( direction != FilterDirection.Default )
+            {
+                builder.MustSatisfyAny(
+                    b => b.MustBe<IField>(),
+                    b => b.Convert().To<IPropertyOrIndexer>().AddRule( GetPropertyEligibilityRule( direction )! ) );
+            }
+        }
+
+        /// <summary>
+        /// Populates the <see cref="IEligibilityBuilder"/> for a parameter when the <see cref="FilterDirection"/> is known.
+        /// </summary>
+        protected static void BuildEligibilityForDirection( IEligibilityBuilder<IParameter> builder, FilterDirection direction )
+        {
+            if ( direction != FilterDirection.Default )
+            {
+                builder.AddRule( GetParameterEligibilityRule( direction )! );
+            }
+        }
 
         public virtual void BuildEligibility( IEligibilityBuilder<IParameter> builder ) { }
 

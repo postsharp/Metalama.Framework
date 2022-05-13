@@ -20,6 +20,11 @@ __aspect_return_1:        if (returnValue == null)
 }
 set
 { 
+        if (value == null)
+        {
+            throw new global::System.ArgumentNullException();
+        }
+
         this._q1=value;
 }
 }    }

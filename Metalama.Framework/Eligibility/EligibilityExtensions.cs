@@ -182,13 +182,14 @@ namespace Metalama.Framework.Eligibility
         }
 
         /// <summary>
-        /// Requires the target field, property or indexer to be writable.
+        /// Requires the target property or indexer to be writable.
         /// </summary>
-        public static void MustBeWritable( this IEligibilityBuilder<IFieldOrPropertyOrIndexer> eligibilityBuilder )
+        public static void MustBeWritable<T>( this IEligibilityBuilder<T> eligibilityBuilder )
+            where T : IPropertyOrIndexer
         {
             eligibilityBuilder.MustSatisfy(
                 member => member.Writeability != Writeability.None,
-                member => $"{member} must be writable" );
+                member => $"{member} must be a writable {GetInterfaceName<T>()}" );
         }
 
         /// <summary>
@@ -216,7 +217,7 @@ namespace Metalama.Framework.Eligibility
         {
             eligibilityBuilder.MustSatisfy(
                 p => p.RefKind is RefKind.Ref or RefKind.Out,
-                member => $"{member} must be 'out' or 'ref'" );
+                member => $"{member} must be an 'out' or 'ref' parameter" );
         }
 
         /// <summary>
@@ -226,7 +227,7 @@ namespace Metalama.Framework.Eligibility
         {
             eligibilityBuilder.MustSatisfy(
                 p => p.RefKind != RefKind.Out,
-                member => $"{member} must not be 'out'" );
+                member => $"{member} must not be an 'out' parameter" );
         }
 
         /// <summary>
@@ -236,8 +237,29 @@ namespace Metalama.Framework.Eligibility
         {
             eligibilityBuilder.MustSatisfy(
                 p => p.RefKind == RefKind.Ref,
-                member => $"{member} must be 'ref'" );
+                member => $"{member} must be a 'ref' parameter" );
         }
+
+        private static string GetInterfaceName<T>() => GetInterfaceName( typeof(T) );
+
+        private static string GetInterfaceName( Type type )
+            => type.Name switch
+            {
+                nameof(IMethod) => "method",
+                nameof(IField) => "field",
+                nameof(INamedType) => "type",
+                nameof(IProperty) => "property",
+                nameof(IFieldOrProperty) => "field or a property",
+                nameof(IFieldOrPropertyOrIndexer) => "field, property or indexer",
+                nameof(IPropertyOrIndexer) => "property or indexer",
+                nameof(IMember) => "method, constructor, field, property, indexer or event",
+                nameof(IMemberOrNamedType) => "method, constructor, field, property, indexer, event or type",
+                nameof(IEvent) => "event",
+                nameof(IConstructor) => "constructor",
+                nameof(IMethodBase) => "method or constructor",
+                nameof(IParameter) => "parameter",
+                _ => type.Name
+            };
 
         /// <summary>
         /// Requires the target member or type to be of a certain type.
@@ -247,37 +269,40 @@ namespace Metalama.Framework.Eligibility
         {
             eligibilityBuilder.MustSatisfy(
                 member => member is T,
-                member => $"{member} must be of type {typeof(T).Name}" );
+                member => $"must be a {GetInterfaceName<T>()}" );
         }
 
         /// <summary>
         /// Requires the target member or type to be static.
         /// </summary>
-        public static void MustBeStatic( this IEligibilityBuilder<IMemberOrNamedType> eligibilityBuilder )
+        public static void MustBeStatic<T>( this IEligibilityBuilder<T> eligibilityBuilder )
+            where T : IMemberOrNamedType
         {
             eligibilityBuilder.MustSatisfy(
                 member => member.IsStatic,
-                member => $"{member} must be static" );
+                member => $"{member} must be a static {GetInterfaceName<T>()}" );
         }
 
         /// <summary>
         /// Requires the target member or type to be non-static.
         /// </summary>
-        public static void MustBeNonStatic( this IEligibilityBuilder<IMemberOrNamedType> eligibilityBuilder )
+        public static void MustBeNonStatic<T>( this IEligibilityBuilder<T> eligibilityBuilder )
+            where T : IMemberOrNamedType
         {
             eligibilityBuilder.MustSatisfy(
                 member => !member.IsStatic,
-                member => $"{member} must be non-static" );
+                member => $"{member} must be a non-static {GetInterfaceName<T>()}" );
         }
 
         /// <summary>
         /// Requires the target member or type to be non-abstract.
         /// </summary>
-        public static void MustBeNonAbstract( this IEligibilityBuilder<IMemberOrNamedType> eligibilityBuilder )
+        public static void MustBeNonAbstract<T>( this IEligibilityBuilder<T> eligibilityBuilder )
+            where T : IMemberOrNamedType
         {
             eligibilityBuilder.MustSatisfy(
                 member => !member.IsAbstract,
-                member => $"{member} must be non-abstract" );
+                member => $"{member} must be a non-abstract {GetInterfaceName<T>()} " );
         }
 
         /// <summary>

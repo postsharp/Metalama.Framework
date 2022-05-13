@@ -6,6 +6,7 @@ namespace Metalama.Framework.Aspects;
 /// <summary>
 /// Directions of the data flow to which the filter applies.
 /// </summary>
+[RunTimeOrCompileTime]
 public enum FilterDirection
 {
     /// <summary>

@@ -40,7 +40,7 @@ namespace Metalama.Framework.Eligibility
     {
         /// <summary>
         /// Adds a rule to the current builder. For convenience, user code should use extension methods
-        /// from <see cref="EligibilityExtensions"/>.
+        /// from <see cref="EligibilityExtensions"/>. 
         /// </summary>
         void AddRule( IEligibilityRule<T> rule );
     }

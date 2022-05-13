@@ -23,6 +23,9 @@ namespace Metalama.Framework.Aspects
         /// </remarks>
         void SkipAspect();
 
+        /// <summary>
+        /// Gets a value indicating whether the <see cref="SkipAspect"/> method was called.
+        /// </summary>
         bool IsAspectSkipped { get; }
 
         /// <summary>
