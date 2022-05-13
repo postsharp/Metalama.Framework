@@ -124,7 +124,7 @@ namespace $(RootNamespace)
             <_AcceptTestOutput Include="obj\transformed\$(TargetFramework)\**\*.cs"/>
             <_AcceptTestOutput Include="obj\transformed\$(TargetFramework)\**\*.txt"/>
         </ItemGroup>
-        <Message Text="$(MSBuildProjectFile)($(TargetFramework)): Accepting @(_AcceptTestOutput)" Importance="high" Condition="'@(_AcceptTestOutput)'!=''"/>
+        <Message Text="$(MSBuildProjectFile)($(TargetFramework)): Accepting @(_AcceptTestOutput->'%(RecursiveDir)%(Filename)%(Extension)')" Importance="high" Condition="'@(_AcceptTestOutput)'!=''"/>
         <Copy SourceFiles="@(_AcceptTestOutput)"
               DestinationFiles="@(_AcceptTestOutput->'%(RecursiveDir)%(Filename)%(Extension)')"/>
     </Target>
@@ -133,7 +133,7 @@ namespace $(RootNamespace)
         <ItemGroup>
             <_AcceptTestOutput Include="obj\html\$(TargetFramework)\**\*.cs.html"/>
         </ItemGroup>
-        <Message Text="$(MSBuildProjectFile)($(TargetFramework)): Accepting @(_AcceptTestOutput)" Importance="high" Condition="'@(_AcceptTestOutput)'!=''"/>
+        <Message Text="$(MSBuildProjectFile)($(TargetFramework)): Accepting @(_AcceptTestOutput->'%(RecursiveDir)%(Filename)%(Extension)')" Importance="high" Condition="'@(_AcceptTestOutput)'!=''"/>
         <Copy
                 SourceFiles="@(_AcceptTestOutput)"
                 DestinationFiles="@(_AcceptTestOutput->'%(RecursiveDir)%(Filename)%(Extension)')"/>
