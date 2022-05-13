@@ -57,7 +57,7 @@ namespace Metalama.Framework.Workspaces
 
             var compilation = metalamaOutput ? projects[0].MetalamaOutput.Compilation : projects[0].Compilation;
 
-            return compilation.TypeFactory.GetDeclarationFromId( declarationId );
+            return compilation.GetDeclarationFromId( declarationId );
         }
 
         [Memo]

@@ -7,4 +7,16 @@
 
     <Import Project="Metalama.CompilerVisibleProperties.props"
             Condition="'$(MetalamaCompilerVisiblePropertiesProjectImported)'==''"/>
+
+    <!-- Implementation of the 'LamaDebug' build configuration.
+         It is import to define this in the .props file, and not in the .targets file, because it needs to be processed _before_
+         Metalama.Compiler targets file. -->
+    
+    <PropertyGroup Condition="'$(Configuration)'=='LamaDebug'">
+        <MetalamaFormatOutput>True</MetalamaFormatOutput>
+        <MetalamaDebugTransformedCode>True</MetalamaDebugTransformedCode>
+        <MetalamaEmitCompilerTransformedFiles>True</MetalamaEmitCompilerTransformedFiles>
+    </PropertyGroup>
+
+    
 </Project>

@@ -151,11 +151,6 @@ namespace Metalama.AspectWorkbench.ViewModels
 
                 if ( transformedTemplateSyntax != null )
                 {
-                    if ( testResult.CompileTimeCompilation != null )
-                    {
-                        SyntaxTreeStructureVerifier.Verify( testResult.CompileTimeCompilation, serviceProvider );
-                    }
-
                     // Render the transformed tree.
                     var project3 = testRunner.CreateProject( testInput.Options );
 
@@ -167,6 +162,15 @@ namespace Metalama.AspectWorkbench.ViewModels
                     var formattedDocument3 = await OutputCodeFormatter.FormatToDocumentAsync( document3, testResult.CompileTimeCompilationDiagnostics );
 
                     this.CompiledTemplateDocument = await syntaxColorizer.WriteSyntaxColoringAsync( formattedDocument3.Document, true );
+
+                    if ( testResult.CompileTimeCompilation != null )
+                    {
+                        if ( !SyntaxTreeStructureVerifier.Verify( testResult.CompileTimeCompilation, serviceProvider ) )
+                        {
+                            testResult.SetFailed(
+                                "The compiled template syntax tree object model is incorrect: roundloop parsing verification failed. Add a breakpoint in SyntaxTreeStructureVerifier.Verify and diff manually." );
+                        }
+                    }
                 }
             }
 

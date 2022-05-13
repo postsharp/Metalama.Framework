@@ -63,42 +63,52 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
         }
         else
         {
-            var code = ((LiteralExpressionSyntax) SyntaxFactoryEx.LiteralExpression( value )).Token.Text;
-
-            string suffix = "", prefix = "";
-
-            if ( stronglyTyped )
-            {
-                if ( int.TryParse( code, out _ ) && specialType != SpecialType.Int32 )
-                {
-                    // Specify the suffix if there is an ambiguity.
-
-                    suffix = specialType switch
-                    {
-                        SpecialType.UInt32 => "u",
-                        SpecialType.Int64 => "l",
-                        SpecialType.UInt64 => "ul",
-                        SpecialType.Single => "f",
-                        SpecialType.Double => "d",
-                        SpecialType.Decimal => "m",
-                        _ => ""
-                    };
-                }
-
-                prefix = specialType switch
-                {
-                    SpecialType.Byte => "(byte) ",
-                    SpecialType.SByte => "(sbyte) ",
-                    SpecialType.Int16 => "(short) ",
-                    SpecialType.UInt16 => "(ushort) ",
-                    _ => ""
-                };
-            }
-
-            stringBuilder.Append( prefix );
-            stringBuilder.Append( code );
-            stringBuilder.Append( suffix );
+            var expression = GetLiteralImpl( value, specialType, stronglyTyped );
+            stringBuilder.Append( expression.ToFullString() );
         }
+    }
+
+    private static ExpressionSyntax GetLiteralImpl( object value, SpecialType specialType, bool stronglyTyped )
+    {
+        var options = stronglyTyped ? ObjectDisplayOptions.IncludeTypeSuffix : ObjectDisplayOptions.None;
+        var expression = (LiteralExpressionSyntax) SyntaxFactoryEx.LiteralExpression( value, options );
+
+        if ( stronglyTyped && specialType != SpecialType.String )
+        {
+            var cast = specialType switch
+            {
+                SpecialType.Byte => SyntaxKind.ByteKeyword,
+                SpecialType.SByte => SyntaxKind.SByteKeyword,
+                SpecialType.Int16 => SyntaxKind.ShortKeyword,
+                SpecialType.UInt16 => SyntaxKind.UShortKeyword,
+                _ => SyntaxKind.None
+            };
+
+            if ( cast != SyntaxKind.None )
+            {
+                return SyntaxFactory.CastExpression( SyntaxFactory.PredefinedType( SyntaxFactory.Token( cast ) ), expression );
+            }
+        }
+
+        return expression;
+    }
+
+    public IExpression Literal( object? value, SpecialType specialType, bool stronglyTyped )
+    {
+        ExpressionSyntax expression;
+
+        if ( value == null )
+        {
+            expression = stronglyTyped
+                ? SyntaxFactory.DefaultExpression( SyntaxFactory.PredefinedType( SyntaxFactory.Token( SyntaxKind.StringKeyword ) ) )
+                : SyntaxFactoryEx.Null;
+        }
+        else
+        {
+            expression = GetLiteralImpl( value, specialType, stronglyTyped );
+        }
+
+        return new RuntimeExpression( expression, this.Compilation, this.Project.ServiceProvider ).ToUserExpression( this.Compilation );
     }
 
     public void AppendTypeName( IType type, StringBuilder stringBuilder )

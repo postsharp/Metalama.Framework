@@ -16,8 +16,8 @@ namespace Metalama.Framework.Engine.Advices
 {
     internal class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty, PropertyBuilder>
     {
-        private readonly TemplateMember<IMethod> _getTemplate;
-        private readonly TemplateMember<IMethod> _setTemplate;
+        private readonly BoundTemplateMethod _getTemplate;
+        private readonly BoundTemplateMethod _setTemplate;
 
         public IPropertyBuilder Builder => this.MemberBuilder;
 
@@ -27,12 +27,12 @@ namespace Metalama.Framework.Engine.Advices
             INamedType targetDeclaration,
             string? explicitName,
             TemplateMember<IProperty> propertyTemplate,
-            TemplateMember<IMethod> getTemplate,
-            TemplateMember<IMethod> setTemplate,
+            BoundTemplateMethod getTemplate,
+            BoundTemplateMethod setTemplate,
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             string? layerName,
-            ITagReader tags )
+            IObjectReader tags )
             : base( aspect, templateInstance, targetDeclaration, propertyTemplate, scope, overrideStrategy, layerName, tags )
         {
             this._getTemplate = getTemplate;
@@ -67,9 +67,9 @@ namespace Metalama.Framework.Engine.Advices
 
             // TODO: Indexers.
 
-            this.MemberBuilder.Type = (this.Template.Declaration?.Type ?? this._getTemplate.Declaration?.ReturnType).AssertNotNull();
-            this.MemberBuilder.Accessibility = 
-                (this.Template.Declaration?.Accessibility ?? this._getTemplate.Declaration?.Accessibility ?? this._setTemplate.Declaration?.Accessibility).AssertNotNull();
+            this.MemberBuilder.Type = (this.Template.Declaration?.Type ?? this._getTemplate.Template.Declaration?.ReturnType).AssertNotNull();
+            this.MemberBuilder.Accessibility =
+                (this.Template.Declaration?.Accessibility ?? this._getTemplate.Template.Declaration?.Accessibility ?? this._setTemplate.Template.Declaration?.Accessibility).AssertNotNull();
 
             if ( this.Template.IsNotNull )
             {

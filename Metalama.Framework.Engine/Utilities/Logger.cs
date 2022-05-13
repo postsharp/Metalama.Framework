@@ -9,20 +9,24 @@ namespace Metalama.Framework.Engine.Utilities
 {
     public static class Logger
     {
-        public static void Initialize()
+        /// <summary>
+        /// Initializes all loggers from the support services.
+        /// </summary>
+        /// <remarks>
+        /// This method should only be called from the MetalamaDiagnosticsService.Initialize method.
+        /// </remarks>
+        internal static void Initialize()
         {
-            if ( DiagnosticsService.Initialize( ProcessUtilities.ProcessKind ) )
-            {
-                var processInfo = DiagnosticsService.Instance.GetLogger( "ProcessInfo" );
+            var loggerFactory = DiagnosticServiceFactory.ServiceProvider.GetLoggerFactory();
+            var processInfo = loggerFactory.GetLogger( "ProcessInfo" );
 
-                processInfo.Info?.Log( $"Command line: {Environment.CommandLine}" );
-                processInfo.Info?.Log( $"Process kind: {ProcessUtilities.ProcessKind}" );
-                processInfo.Info?.Log( $"Version: {AssemblyMetadataReader.BuildId}" );
-            }
+            processInfo.Info?.Log( $"Command line: {Environment.CommandLine}" );
+            processInfo.Info?.Log( $"Process kind: {ProcessUtilities.ProcessKind}" );
+            processInfo.Info?.Log( $"Version: {AssemblyMetadataReader.GetInstance( typeof(Logger).Assembly ).BuildId}" );
 
-            DesignTime = DiagnosticsService.Instance.DesignTime();
-            Remoting = DiagnosticsService.Instance.Remoting();
-            DesignTimeEntryPointManager = DiagnosticsService.Instance.GetLogger( "DesignTimeEntryPointManager" );
+            DesignTime = loggerFactory.DesignTime();
+            Remoting = loggerFactory.Remoting();
+            DesignTimeEntryPointManager = loggerFactory.GetLogger( "DesignTimeEntryPointManager" );
         }
 
         // The DesignTime logger is used before the service container is initialized, therefore we use the global instance.

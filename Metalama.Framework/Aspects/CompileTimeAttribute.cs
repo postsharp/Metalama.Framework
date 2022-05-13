@@ -13,6 +13,6 @@ namespace Metalama.Framework.Aspects
     [AttributeUsage(
         AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Delegate | AttributeTargets.Interface
         | AttributeTargets.Assembly | AttributeTargets.ReturnValue | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field
-        | AttributeTargets.Constructor | AttributeTargets.Event )]
+        | AttributeTargets.Constructor | AttributeTargets.Event | AttributeTargets.Parameter | AttributeTargets.GenericParameter )]
     public class CompileTimeAttribute : ScopeAttribute { }
 }

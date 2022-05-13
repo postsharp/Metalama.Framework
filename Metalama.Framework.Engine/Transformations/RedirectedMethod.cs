@@ -5,6 +5,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -23,7 +24,7 @@ namespace Metalama.Framework.Engine.Transformations
 
         public IMethod TargetMethod { get; }
 
-        public RedirectedMethod( Advice advice, IMethod overriddenDeclaration, IMethod targetMethod, ITagReader tags )
+        public RedirectedMethod( Advice advice, IMethod overriddenDeclaration, IMethod targetMethod, IObjectReader tags )
             : base( advice, overriddenDeclaration, tags )
         {
             Invariant.Assert( targetMethod != null );
@@ -35,7 +36,8 @@ namespace Metalama.Framework.Engine.Transformations
         {
             var body =
                 Block(
-                    this.OverriddenDeclaration.ReturnType != this.OverriddenDeclaration.Compilation.TypeFactory.GetTypeByReflectionType( typeof(void) )
+                    this.OverriddenDeclaration.ReturnType
+                    != this.OverriddenDeclaration.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(void) )
                         ? ReturnStatement( GetInvocationExpression() )
                         : ExpressionStatement( GetInvocationExpression() ) );
 

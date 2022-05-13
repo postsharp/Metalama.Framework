@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
+using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -20,7 +21,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         public InterpolatedStringUserExpression( InterpolatedStringBuilder builder, ICompilation compilation )
         {
             this._builder = builder;
-            this.Type = compilation.TypeFactory.GetSpecialType( SpecialType.String );
+            this.Type = compilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.String );
         }
 
         public RuntimeExpression ToRunTimeExpression()

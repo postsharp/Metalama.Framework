@@ -17,6 +17,8 @@ namespace Metalama.Framework.Engine.Advices
 {
     internal sealed class IntroduceMethodAdvice : IntroduceMemberAdvice<IMethod, MethodBuilder>
     {
+        public BoundTemplateMethod BoundTemplate { get; }
+
         public new Ref<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
 
         public IMethodBuilder Builder => this.MemberBuilder;
@@ -25,17 +27,18 @@ namespace Metalama.Framework.Engine.Advices
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             INamedType targetDeclaration,
-            TemplateMember<IMethod> templateMethod,
+            BoundTemplateMethod boundTemplate,
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             string? layerName,
-            ITagReader tags )
-            : base( aspect, templateInstance, targetDeclaration, templateMethod, scope, overrideStrategy, layerName, tags )
+            IObjectReader tags )
+            : base( aspect, templateInstance, targetDeclaration, boundTemplate.Template, scope, overrideStrategy, layerName, tags )
         {
-            Invariant.Assert( templateMethod.IsNotNull );
+            this.BoundTemplate = boundTemplate;
+            Invariant.Assert( !boundTemplate.IsNull );
 
-            this.MemberBuilder = new MethodBuilder( this, targetDeclaration, templateMethod.Declaration.AssertNotNull().Name, tags );
-            this.MemberBuilder.ApplyTemplateAttribute( templateMethod.TemplateInfo.Attribute );
+            this.MemberBuilder = new MethodBuilder( this, targetDeclaration, boundTemplate.Template.Declaration.AssertNotNull().Name, tags );
+            this.MemberBuilder.ApplyTemplateAttribute( boundTemplate.Template.TemplateInfo.Attribute );
         }
 
         public override void Initialize( IDiagnosticAdder diagnosticAdder )
@@ -43,6 +46,7 @@ namespace Metalama.Framework.Engine.Advices
             base.Initialize( diagnosticAdder );
 
             this.MemberBuilder.IsAsync = this.Template.Declaration!.IsAsync;
+            var typeRewriter = TemplateTypeRewriter.Get( this.BoundTemplate );
 
             // Handle return type.
             if ( this.Template.Declaration.ReturnParameter.Type.TypeKind == TypeKind.Dynamic )
@@ -52,7 +56,7 @@ namespace Metalama.Framework.Engine.Advices
             }
             else
             {
-                this.MemberBuilder.ReturnParameter.Type = this.Template.Declaration.ReturnParameter.Type;
+                this.MemberBuilder.ReturnParameter.Type = typeRewriter.Visit( this.Template.Declaration.ReturnParameter.Type );
                 this.MemberBuilder.ReturnParameter.RefKind = this.Template.Declaration.ReturnParameter.RefKind;
             }
 
@@ -60,9 +64,14 @@ namespace Metalama.Framework.Engine.Advices
 
             foreach ( var templateParameter in this.Template.Declaration.Parameters )
             {
+                if ( this.Template.TemplateClassMember.Parameters[templateParameter.Index].IsCompileTime )
+                {
+                    continue;
+                }
+
                 var parameterBuilder = this.MemberBuilder.AddParameter(
                     templateParameter.Name,
-                    templateParameter.Type,
+                    typeRewriter.Visit( templateParameter.Type ),
                     templateParameter.RefKind,
                     templateParameter.DefaultValue );
 
@@ -71,6 +80,11 @@ namespace Metalama.Framework.Engine.Advices
 
             foreach ( var templateGenericParameter in this.Template.Declaration.TypeParameters )
             {
+                if ( this.Template.TemplateClassMember.TypeParameters[templateGenericParameter.Index].IsCompileTime )
+                {
+                    continue;
+                }
+
                 var genericParameterBuilder = this.MemberBuilder.AddTypeParameter( templateGenericParameter.Name );
                 genericParameterBuilder.Variance = templateGenericParameter.Variance;
                 genericParameterBuilder.HasDefaultConstructorConstraint = templateGenericParameter.HasDefaultConstructorConstraint;
@@ -78,7 +92,7 @@ namespace Metalama.Framework.Engine.Advices
 
                 foreach ( var templateGenericParameterConstraint in templateGenericParameter.TypeConstraints )
                 {
-                    genericParameterBuilder.AddTypeConstraint( templateGenericParameterConstraint );
+                    genericParameterBuilder.AddTypeConstraint( typeRewriter.Visit( templateGenericParameterConstraint ) );
                 }
 
                 CopyAttributes( templateGenericParameter.AssertNotNull(), genericParameterBuilder );
@@ -98,7 +112,7 @@ namespace Metalama.Framework.Engine.Advices
             if ( existingDeclaration == null )
             {
                 // There is no existing declaration, we will introduce and override the introduced.
-                var overriddenMethod = new OverriddenMethod( this, this.MemberBuilder, this.Template, this.Tags );
+                var overriddenMethod = new OverriddenMethod( this, this.MemberBuilder, this.BoundTemplate, this.Tags );
                 this.MemberBuilder.IsOverride = false;
                 this.MemberBuilder.IsNew = false;
 
@@ -135,7 +149,7 @@ namespace Metalama.Framework.Engine.Advices
                         // If the existing declaration is in the current type, override it, otherwise, declare a new method and override.
                         if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( targetDeclaration, existingDeclaration.DeclaringType ) )
                         {
-                            var overriddenMethod = new OverriddenMethod( this, existingDeclaration, this.Template, this.Tags );
+                            var overriddenMethod = new OverriddenMethod( this, existingDeclaration, this.BoundTemplate, this.Tags );
 
                             return AdviceResult.Create( overriddenMethod );
                         }
@@ -144,7 +158,7 @@ namespace Metalama.Framework.Engine.Advices
                             this.MemberBuilder.IsNew = true;
                             this.MemberBuilder.IsOverride = false;
 
-                            var overriddenMethod = new OverriddenMethod( this, this.MemberBuilder, this.Template, this.Tags );
+                            var overriddenMethod = new OverriddenMethod( this, this.MemberBuilder, this.BoundTemplate, this.Tags );
 
                             return AdviceResult.Create( this.MemberBuilder, overriddenMethod );
                         }
@@ -152,7 +166,7 @@ namespace Metalama.Framework.Engine.Advices
                     case OverrideStrategy.Override:
                         if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( targetDeclaration, existingDeclaration.DeclaringType ) )
                         {
-                            var overriddenMethod = new OverriddenMethod( this, existingDeclaration, this.Template, this.Tags );
+                            var overriddenMethod = new OverriddenMethod( this, existingDeclaration, this.BoundTemplate, this.Tags );
 
                             return AdviceResult.Create( overriddenMethod );
                         }
@@ -182,7 +196,7 @@ namespace Metalama.Framework.Engine.Advices
                             this.MemberBuilder.IsOverride = true;
                             this.MemberBuilder.IsNew = false;
                             this.MemberBuilder.OverriddenMethod = existingDeclaration;
-                            var overriddenMethod = new OverriddenMethod( this, this.MemberBuilder, this.Template, this.Tags );
+                            var overriddenMethod = new OverriddenMethod( this, this.MemberBuilder, this.BoundTemplate, this.Tags );
 
                             return AdviceResult.Create( this.MemberBuilder, overriddenMethod );
                         }

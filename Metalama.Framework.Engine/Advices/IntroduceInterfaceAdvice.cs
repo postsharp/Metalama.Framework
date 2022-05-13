@@ -22,10 +22,10 @@ namespace Metalama.Framework.Engine.Advices
 {
     internal partial class ImplementInterfaceAdvice : Advice
     {
-        private readonly List<(IMethod Method, TemplateInfo TemplateInfo)> _aspectInterfaceMethods = new();
-        private readonly List<(IProperty Property, TemplateInfo TemplateInfo)> _aspectInterfaceProperties = new();
+        private readonly List<(IMethod Method, TemplateClassMember Template)> _aspectInterfaceMethods = new();
+        private readonly List<(IProperty Property, TemplateClassMember Template)> _aspectInterfaceProperties = new();
 
-        private readonly List<(IEvent Event, TemplateInfo TemplateInfo)> _aspectInterfaceEvents = new();
+        private readonly List<(IEvent Event, TemplateClassMember Template)> _aspectInterfaceEvents = new();
 
         private readonly List<IntroducedInterfaceSpecification> _introducedInterfaceTypes;
 
@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.Advices
             IAspectInstanceInternal aspect,
             TemplateClassInstance template,
             INamedType targetType,
-            string? layerName ) : base( aspect, template, targetType, layerName, TagReader.Empty )
+            string? layerName ) : base( aspect, template, targetType, layerName, ObjectReader.Empty )
         {
             this._introducedInterfaceTypes = new List<IntroducedInterfaceSpecification>();
         }
@@ -44,11 +44,11 @@ namespace Metalama.Framework.Engine.Advices
         {
             var aspectTypeName = this.Aspect.AspectClass.FullName.AssertNotNull();
             var compilation = this.SourceCompilation;
-            var aspectType = compilation.TypeFactory.GetTypeByReflectionName( aspectTypeName );
+            var aspectType = compilation.GetCompilationModel().Factory.GetTypeByReflectionName( aspectTypeName );
 
             foreach ( var aspectMethod in aspectType.Methods )
             {
-                if ( TryGetInterfaceMemberTemplateInfo( aspectMethod, out var interfaceMemberAttribute ) )
+                if ( TryGetInterfaceMemberTemplate( aspectMethod, out var interfaceMemberAttribute ) )
                 {
                     this._aspectInterfaceMethods.Add( (aspectMethod, interfaceMemberAttribute) );
                 }
@@ -56,7 +56,7 @@ namespace Metalama.Framework.Engine.Advices
 
             foreach ( var aspectProperty in aspectType.Properties )
             {
-                if ( TryGetInterfaceMemberTemplateInfo( aspectProperty, out var interfaceMemberAttribute ) )
+                if ( TryGetInterfaceMemberTemplate( aspectProperty, out var interfaceMemberAttribute ) )
                 {
                     this._aspectInterfaceProperties.Add( (aspectProperty, interfaceMemberAttribute) );
                 }
@@ -64,30 +64,19 @@ namespace Metalama.Framework.Engine.Advices
 
             foreach ( var aspectEvent in aspectType.Events )
             {
-                if ( TryGetInterfaceMemberTemplateInfo( aspectEvent, out var interfaceMemberAttribute ) )
+                if ( TryGetInterfaceMemberTemplate( aspectEvent, out var interfaceMemberAttribute ) )
                 {
                     this._aspectInterfaceEvents.Add( (aspectEvent, interfaceMemberAttribute) );
                 }
             }
 
-            bool TryGetInterfaceMemberTemplateInfo(
+            bool TryGetInterfaceMemberTemplate(
                 IMember member,
-                [NotNullWhen( true )] out TemplateInfo? templateInfo )
+                [NotNullWhen( true )] out TemplateClassMember? templateClassMember )
             {
-                if ( this.TemplateInstance.TemplateClass.TryGetInterfaceMember(
-                        member.GetSymbol().AssertNotNull( Justifications.ImplementingIntroducedInterfacesNotSupported ),
-                        out var aspectClassMember ) )
-                {
-                    templateInfo = aspectClassMember.TemplateInfo;
-
-                    return true;
-                }
-                else
-                {
-                    templateInfo = null;
-
-                    return false;
-                }
+                return this.TemplateInstance.TemplateClass.TryGetInterfaceMember(
+                    member.GetSymbol().AssertNotNull( Justifications.ImplementingIntroducedInterfacesNotSupported ),
+                    out templateClassMember );
             }
         }
 
@@ -96,7 +85,7 @@ namespace Metalama.Framework.Engine.Advices
             OverrideStrategy overrideStrategy,
             IReadOnlyList<InterfaceMemberSpecification>? explicitMemberSpecification,
             IDiagnosticAdder diagnosticAdder,
-            ITagReader tags )
+            IObjectReader tags )
         {
             // Adding interfaces may run into three problems:
             //      1) Target type already implements the interface.
@@ -164,7 +153,7 @@ namespace Metalama.Framework.Engine.Advices
                     else
                     {
                         memberSpecifications.Add(
-                            new MemberSpecification( interfaceMethod, null, matchingAspectMethod.Method, matchingAspectMethod.TemplateInfo, tags ) );
+                            new MemberSpecification( interfaceMethod, null, matchingAspectMethod.Method, matchingAspectMethod.Template, tags ) );
                     }
                 }
 
@@ -198,7 +187,7 @@ namespace Metalama.Framework.Engine.Advices
                                 interfaceProperty,
                                 null,
                                 matchingAspectProperty.Property,
-                                matchingAspectProperty.TemplateInfo,
+                                matchingAspectProperty.Template,
                                 tags ) );
                     }
                 }
@@ -225,7 +214,7 @@ namespace Metalama.Framework.Engine.Advices
                     else
                     {
                         memberSpecifications.Add(
-                            new MemberSpecification( interfaceEvent, null, matchingAspectEvent.Event, matchingAspectEvent.TemplateInfo, tags ) );
+                            new MemberSpecification( interfaceEvent, null, matchingAspectEvent.Event, matchingAspectEvent.Template, tags ) );
                     }
                 }
 
@@ -285,7 +274,8 @@ namespace Metalama.Framework.Engine.Advices
                                     ? new OverriddenMethod(
                                         this,
                                         (IMethod) memberBuilder,
-                                        TemplateMember.Create( implementationMethod, memberSpec.TemplateInfo, TemplateKind.Introduction ),
+                                        TemplateMember.Create( implementationMethod, memberSpec.TemplateClassMember, TemplateKind.Introduction )
+                                            .ForIntroduction(),
                                         memberSpec.Tags )
                                     : new RedirectedMethod(
                                         this,
@@ -299,7 +289,7 @@ namespace Metalama.Framework.Engine.Advices
                             var aspectProperty = (IProperty?) memberSpec.AspectInterfaceMember;
                             var buildAutoProperty = aspectProperty?.IsAutoPropertyOrField == true;
 
-                            memberBuilder = this.GetImplPropertyBuilder(
+                            var propertyBuilder = this.GetImplPropertyBuilder(
                                 targetDeclaration,
                                 interfaceProperty,
                                 (IProperty?) memberSpec.TargetMember ?? (IProperty) memberSpec.AspectInterfaceMember.AssertNotNull(),
@@ -307,11 +297,13 @@ namespace Metalama.Framework.Engine.Advices
                                 memberSpec.IsExplicit,
                                 memberSpec.Tags );
 
+                            memberBuilder = propertyBuilder;
+
                             interfaceMemberMap.Add( interfaceProperty, memberBuilder );
 
                             if ( aspectProperty?.IsAutoPropertyOrField != true )
                             {
-                                var propertyTemplate = TemplateMember.Create( aspectProperty, memberSpec.TemplateInfo, TemplateKind.Introduction );
+                                var propertyTemplate = TemplateMember.Create( aspectProperty, memberSpec.TemplateClassMember, TemplateKind.Introduction );
                                 var accessorTemplates = propertyTemplate.GetAccessorTemplates();
 
                                 transformations.Add(
@@ -320,8 +312,8 @@ namespace Metalama.Framework.Engine.Advices
                                             this,
                                             (IProperty) memberBuilder,
                                             propertyTemplate,
-                                            accessorTemplates.Get,
-                                            accessorTemplates.Set,
+                                            accessorTemplates.Get.ForOverride( propertyBuilder.GetMethod ),
+                                            accessorTemplates.Set.ForOverride( propertyBuilder.SetMethod ),
                                             memberSpec.Tags )
                                         : new RedirectedProperty(
                                             this,
@@ -348,11 +340,12 @@ namespace Metalama.Framework.Engine.Advices
                                             (IEvent) memberBuilder,
                                             TemplateMember.Create(
                                                 (IEvent) memberSpec.AspectInterfaceMember,
-                                                memberSpec.TemplateInfo,
+                                                memberSpec.TemplateClassMember,
                                                 TemplateKind.Introduction ),
                                             default,
                                             default,
-                                            memberSpec.Tags )
+                                            memberSpec.Tags,
+                                            null )
                                         : new RedirectedEvent(
                                             this,
                                             (IEvent) memberBuilder,
@@ -379,7 +372,7 @@ namespace Metalama.Framework.Engine.Advices
             INamedType declaringType,
             IMethod interfaceMethod,
             bool isExplicit,
-            ITagReader tags )
+            IObjectReader tags )
         {
             var methodBuilder = new MethodBuilder( this, declaringType, interfaceMethod.Name, tags )
             {
@@ -421,13 +414,13 @@ namespace Metalama.Framework.Engine.Advices
             return methodBuilder;
         }
 
-        private MemberBuilder GetImplPropertyBuilder(
+        private PropertyBuilder GetImplPropertyBuilder(
             INamedType declaringType,
             IProperty interfaceProperty,
             IProperty targetProperty,
             bool isAutoProperty,
             bool isExplicit,
-            ITagReader tags )
+            IObjectReader tags )
         {
             var propertyBuilder = new PropertyBuilder(
                 this,

@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder, IMemberImpl
     {
-        protected MemberBuilder( Advice parentAdvice, INamedType declaringType, ITagReader tags ) : base( parentAdvice, declaringType )
+        protected MemberBuilder( Advice parentAdvice, INamedType declaringType, IObjectReader tags ) : base( parentAdvice, declaringType )
         {
             this.Tags = tags;
         }
@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.DeclaringType.ToDisplayString( format, context ) + "." + this.Name;
 
-        protected ITagReader Tags { get; }
+        protected IObjectReader Tags { get; }
 
         public void ApplyTemplateAttribute( TemplateAttribute templateAttribute )
         {
@@ -206,7 +206,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( initializerTemplate.Declaration! );
 
-            return templateDriver.TryExpandDeclaration( expansionContext, context.DiagnosticSink, out expression );
+            return templateDriver.TryExpandDeclaration( expansionContext, Array.Empty<object>(), out expression );
         }
 
         protected virtual SyntaxList<AttributeListSyntax> GetAttributeLists( in SyntaxGenerationContext syntaxGenerationContext )

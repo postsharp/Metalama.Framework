@@ -91,7 +91,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             bool hasSetter,
             bool isAutoProperty,
             bool hasInitOnlySetter,
-            ITagReader tags )
+            IObjectReader tags )
             : base( parentAdvice, targetType, tags )
         {
             // TODO: Sanity checks.
@@ -99,7 +99,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             Invariant.Assert( hasGetter || hasSetter );
 
             this.Name = name;
-            this.Type = targetType.Compilation.TypeFactory.GetTypeByReflectionType( typeof(object) );
+            this.Type = targetType.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(object) );
 
             if ( hasGetter )
             {

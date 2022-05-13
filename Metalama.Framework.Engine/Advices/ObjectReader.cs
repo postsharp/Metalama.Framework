@@ -6,29 +6,32 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.Advices
 {
     /// <summary>
-    /// Wraps an anonymous type into a dictionary-like <see cref="ITagReader"/>.
+    /// Wraps an anonymous type into a dictionary-like <see cref="IObjectReader"/>.
     /// </summary>
-    internal partial class TagReader : ITagReader
+    internal partial class ObjectReader : IObjectReader
     {
         private static readonly ConcurrentDictionary<Type, TypeAdapter> _types = new();
 
-        public static readonly ITagReader Empty = new EmptyReader();
+        public static readonly IObjectReader Empty = new DictionaryWrapper( ImmutableDictionary<string, object?>.Empty );
 
-        public static ITagReader GetReader( object? instance )
+        public static IObjectReader GetReader( object? instance )
             => instance switch
             {
                 null => Empty,
-                _ => new TagReader( instance )
+                IObjectReader objectReader => objectReader,
+                IReadOnlyDictionary<string, object?> dictionary => new DictionaryWrapper( dictionary ),
+                _ => new ObjectReader( instance )
             };
 
         private readonly TypeAdapter _typeAdapter;
 
-        private TagReader( object instance )
+        private ObjectReader( object instance )
         {
             this._typeAdapter = _types.GetOrAdd( instance.GetType(), t => new TypeAdapter( t ) );
             this.Source = instance;

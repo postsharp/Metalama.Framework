@@ -92,5 +92,17 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             Assert.Equal( new[] { "Class1", "Class2" }, ns1.Types.Select( t => t.Name ).OrderBy( t => t ) );
         }
+
+        [Fact]
+        public void SyntaxTreeWithoutType()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = new Dictionary<string, string> { ["Class1.cs"] = "/* Intentionally empty */" };
+
+            var compilation = CreateCSharpCompilation( code );
+            var partialCompilation = PartialCompilation.CreatePartial( compilation, compilation.SyntaxTrees[0] );
+            Assert.Single( partialCompilation.SyntaxTrees );
+        }
     }
 }

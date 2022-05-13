@@ -108,7 +108,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations { get; private set; } = Array.Empty<IMethod>();
 
-        public MethodBuilder( Advice parentAdvice, INamedType targetType, string name, ITagReader tags )
+        public MethodBuilder( Advice parentAdvice, INamedType targetType, string name, IObjectReader tags )
             : base( parentAdvice, targetType, tags )
         {
             this.Name = name;

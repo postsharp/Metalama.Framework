@@ -13,11 +13,27 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         internal ArrayType( IArrayTypeSymbol typeSymbol, CompilationModel compilation ) : base( typeSymbol, compilation ) { }
 
+        internal ITypeInternal WithElementType( ITypeInternal elementType )
+        {
+            if ( elementType == this.ElementType )
+            {
+                return this;
+            }
+            else
+            {
+                var symbol = this.GetCompilationModel().RoslynCompilation.CreateArrayTypeSymbol( elementType.GetSymbol(), this.Rank );
+
+                return (ITypeInternal) this.GetCompilationModel().Factory.GetIType( symbol );
+            }
+        }
+
         public override TypeKind TypeKind => TypeKind.Array;
 
         [Memo]
         public IType ElementType => this.Compilation.Factory.GetIType( this.Symbol.ElementType );
 
         public int Rank => this.Symbol.Rank;
+
+        public override ITypeInternal Accept( TypeRewriter visitor ) => visitor.Visit( this );
     }
 }

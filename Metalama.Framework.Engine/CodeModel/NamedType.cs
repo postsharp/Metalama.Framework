@@ -638,5 +638,38 @@ namespace Metalama.Framework.Engine.CodeModel
 
             return builder.ToImmutable();
         }
+
+        public ITypeInternal Accept( TypeRewriter visitor ) => visitor.Visit( this );
+
+        internal ITypeInternal WithTypeArguments( ImmutableArray<IType> types )
+        {
+            var hasDifference = false;
+
+            for ( var i = 0; i < types.Length; i++ )
+            {
+                if ( types[i] != this.TypeArguments[i] )
+                {
+                    hasDifference = true;
+
+                    break;
+                }
+            }
+
+            if ( !hasDifference )
+            {
+                return this;
+            }
+
+            var typeArgumentSymbols = new ITypeSymbol[types.Length];
+
+            for ( var i = 0; i < types.Length; i++ )
+            {
+                typeArgumentSymbols[i] = types[i].GetSymbol();
+            }
+
+            var symbol = this.TypeSymbol.OriginalDefinition.Construct( typeArgumentSymbols );
+
+            return (ITypeInternal) this.GetCompilationModel().Factory.GetIType( symbol );
+        }
     }
 }

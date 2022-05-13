@@ -38,7 +38,7 @@ namespace Metalama.Framework.Aspects
 
         object BaseStatic { get; }
 
-        ITagReader Tags { get; }
+        IObjectReader Tags { get; }
 
         IDiagnosticSink Diagnostics { get; }
 

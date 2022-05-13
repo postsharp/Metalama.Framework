@@ -12,7 +12,6 @@ using System.IO;
 
 var product = new Product( Dependencies.Metalama )
 {
-    ProductName = "Metalama",
     Solutions = new Solution[]
     {
         new DotNetSolution( "Metalama.sln" )

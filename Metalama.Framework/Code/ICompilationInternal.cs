@@ -6,5 +6,10 @@ namespace Metalama.Framework.Code
     internal interface ICompilationInternal : ICompilation
     {
         ICompilationHelpers Helpers { get; }
+
+        /// <summary>
+        /// Gets a service that allows to create type instances and compare them.
+        /// </summary>
+        ITypeFactory TypeFactory { get; }
     }
 }

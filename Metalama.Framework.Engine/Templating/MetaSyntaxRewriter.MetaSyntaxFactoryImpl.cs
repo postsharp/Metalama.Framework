@@ -17,12 +17,12 @@ namespace Metalama.Framework.Engine.Templating
     {
         protected partial class MetaSyntaxFactoryImpl
         {
-            private readonly ReflectionMapper _reflectionMapper;
-
             public MetaSyntaxFactoryImpl( IServiceProvider serviceProvider, Compilation compileTimeCompilation )
             {
-                this._reflectionMapper = serviceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( compileTimeCompilation );
+                this.ReflectionMapper = serviceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( compileTimeCompilation );
             }
+
+            public ReflectionMapper ReflectionMapper { get; }
 
             public ExpressionSyntax Null => this.LiteralExpression( this.Kind( SyntaxKind.NullLiteralExpression ) );
 
@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.Templating
                     this.Kind( SyntaxKind.DefaultLiteralExpression ),
                     this.Token( this.Kind( SyntaxKind.DefaultKeyword ) ) );
 
-            public TypeSyntax Type( Type type ) => OurSyntaxGenerator.CompileTime.Type( this._reflectionMapper.GetTypeSymbol( type ) );
+            public TypeSyntax Type( Type type ) => OurSyntaxGenerator.CompileTime.Type( this.ReflectionMapper.GetTypeSymbol( type ) );
 
 #pragma warning disable CA1822 // Mark members as static
             public TypeSyntax Type( ITypeSymbol type )
@@ -39,10 +39,10 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     IArrayTypeSymbol arrayType => OurSyntaxGenerator.CompileTime.ArrayTypeExpression(
                         OurSyntaxGenerator.CompileTime.Type( arrayType.ElementType ) ),
-                    _ => (TypeSyntax) OurSyntaxGenerator.CompileTime.NameExpression( type )
+                    _ => (TypeSyntax) OurSyntaxGenerator.CompileTime.TypeOrNamespace( type )
                 };
 
-            public ExpressionSyntax NamespaceOrType( INamespaceOrTypeSymbol type ) => OurSyntaxGenerator.CompileTime.NameExpression( type );
+            public ExpressionSyntax NamespaceOrType( INamespaceOrTypeSymbol type ) => OurSyntaxGenerator.CompileTime.TypeOrNamespace( type );
 #pragma warning restore CA1822 // Mark members as static
 
             public TypeSyntax GenericType( Type type, params TypeSyntax[] genericParameters )

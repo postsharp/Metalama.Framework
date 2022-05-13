@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.Advices
             TemplateClassInstance templateInstance,
             TMember targetDeclaration,
             string? layerName,
-            ITagReader tags ) : base( aspect, templateInstance, targetDeclaration, layerName, tags ) { }
+            IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, layerName, tags ) { }
 
         public override void Initialize( IDiagnosticAdder diagnosticAdder )
         {
