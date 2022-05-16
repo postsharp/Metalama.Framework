@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Formatting
             this._serviceProvider = serviceProvider;
         }
 
-        public static bool ContainsCompileTimeCode( SyntaxNode syntaxRoot ) => CompileTimeCodeDetector.HasCompileTimeCode( syntaxRoot );
+        public static bool ContainsCompileTimeCode( SyntaxNode syntaxRoot ) => CompileTimeCodeFastDetector.HasCompileTimeCode( syntaxRoot );
 
         public ClassifiedTextSpanCollection GetClassifiedTextSpans( SemanticModel model, CancellationToken cancellationToken )
         {

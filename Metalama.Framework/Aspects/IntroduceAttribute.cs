@@ -1,6 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Code;
+using Metalama.Framework.Eligibility;
+using Metalama.Framework.Eligibility.Implementation;
 using System;
 
 namespace Metalama.Framework.Aspects
@@ -11,13 +14,75 @@ namespace Metalama.Framework.Aspects
     /// </summary>
     /// <seealso href="@introducing-members"/>
     [AttributeUsage( AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Method | AttributeTargets.Event )]
-    public class IntroduceAttribute : TemplateAttribute
+    public sealed class IntroduceAttribute : DeclarativeAdviceAttribute
     {
-        /// <summary>
-        /// Gets or sets the name of the aspect layer into which the member will be introduced. The layer must have been defined
-        /// using the <see cref="LayersAttribute"/> custom attribute.
-        /// </summary>
-        [Obsolete( "Not implemented." )]
-        public string? Layer { get; set; }
+        public override bool IsIntroduction => true;
+
+        public override void BuildEligibility( IEligibilityBuilder<IDeclaration> builder )
+        {
+            builder.AddRule(
+                new EligibilityRule<IDeclaration>(
+                    EligibleScenarios.Inheritance,
+                    x =>
+                    {
+                        var t = x.GetDeclaringType();
+
+                        return t != null && t.TypeKind != TypeKind.Interface;
+                    },
+                    _ => $"the aspect cannot be added to an interface because the aspect contains a declarative introduction" ) );
+        }
+
+        public override bool TryBuildAspect( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder )
+        {
+            INamedType targetType;
+
+            switch ( builder.Target )
+            {
+                case IMember member:
+                    targetType = member.DeclaringType;
+
+                    break;
+
+                case INamedType type:
+                    targetType = type;
+
+                    break;
+
+                default:
+                    builder.Diagnostics.Report(
+                        DeclarativeAdviceDiagnosticDescriptors.CannotUseIntroduceWithoutDeclaringType.WithArguments(
+                            (builder.AspectInstance.AspectClass.ShortName, templateMember.DeclarationKind, builder.Target.DeclarationKind) ) );
+
+                    return false;
+            }
+
+            switch ( templateMember.DeclarationKind )
+            {
+                case DeclarationKind.Method:
+                    builder.Advice.IntroduceMethod( targetType, templateMemberId, this.Scope, this.WhenExists );
+
+                    break;
+
+                case DeclarationKind.Property:
+                    builder.Advice.IntroduceProperty( targetType, templateMemberId, this.Scope, this.WhenExists );
+
+                    break;
+
+                case DeclarationKind.Event:
+                    builder.Advice.IntroduceEvent( targetType, templateMemberId, this.Scope, this.WhenExists );
+
+                    break;
+
+                case DeclarationKind.Field:
+                    builder.Advice.IntroduceField( targetType, templateMemberId, this.Scope, this.WhenExists );
+
+                    break;
+
+                default:
+                    throw new InvalidOperationException( $"Don't know how to introduce a {templateMember.DeclarationKind}." );
+            }
+
+            return true;
+        }
     }
 }

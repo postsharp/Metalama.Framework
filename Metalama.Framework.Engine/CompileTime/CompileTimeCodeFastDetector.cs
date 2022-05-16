@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.CompileTime
     /// Implements a fast way to detect whether a syntax tree contains compile-time code, just by looking at namespace imports.
     /// This way is imprecise, but it is enforced by an analyzer <see cref="TemplatingCodeValidator"/>. 
     /// </summary>
-    public static class CompileTimeCodeDetector
+    public static class CompileTimeCodeFastDetector
     {
         public const string Namespace = "Metalama.Framework";
 

@@ -58,7 +58,7 @@ namespace Metalama.Framework.Engine.Templating
                 this._reportCompileTimeTreeOutdatedError = reportCompileTimeTreeOutdatedError;
                 this._isDesignTime = isDesignTime;
                 this._cancellationToken = cancellationToken;
-                this._hasCompileTimeCodeFast = CompileTimeCodeDetector.HasCompileTimeCode( semanticModel.SyntaxTree.GetRoot() );
+                this._hasCompileTimeCodeFast = CompileTimeCodeFastDetector.HasCompileTimeCode( semanticModel.SyntaxTree.GetRoot() );
             }
 
             private bool IsInTemplate
@@ -319,7 +319,7 @@ namespace Metalama.Framework.Engine.Templating
                                     this.Report(
                                         TemplatingDiagnosticDescriptors.CompileTimeCodeNeedsNamespaceImport.CreateRoslynDiagnostic(
                                             declaredSymbol.GetDiagnosticLocation(),
-                                            (declaredSymbol, CompileTimeCodeDetector.Namespace) ) );
+                                            (declaredSymbol, CompileTimeCodeFastDetector.Namespace) ) );
                                 }
 
                                 break;

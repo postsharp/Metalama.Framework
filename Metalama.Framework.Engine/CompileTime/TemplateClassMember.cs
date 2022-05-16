@@ -15,6 +15,7 @@ namespace Metalama.Framework.Engine.CompileTime
         TemplateClass TemplateClass,
         TemplateInfo TemplateInfo,
         ISymbol Symbol,
+        string SymbolDocumentationId,
         ImmutableArray<TemplateClassMemberParameter> Parameters,
         ImmutableArray<TemplateClassMemberParameter> TypeParameters,
         ImmutableDictionary<MethodKind, TemplateClassMember> Accessors )

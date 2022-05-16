@@ -156,11 +156,11 @@ namespace Metalama.Framework.Engine
                 Error,
                 "The class already defines a template of the same name." );
 
-        internal static readonly DiagnosticDefinition<(string ClassName, string MemberName, string AttributeName)>
+        internal static readonly DiagnosticDefinition<(string ClassName, string MemberName)>
             MemberDoesNotHaveTemplateAttribute = new(
                 "LAMA0033",
                 _category,
-                "The class '{0}' defines a member named '{1}', but the member is not annotated with the '{2}' custom attribute.",
+                "The class '{0}' defines a member named '{1}', but the member is not annotated with the [Template] custom attribute.",
                 Error,
                 "The member does not have a template custom attribute." );
 

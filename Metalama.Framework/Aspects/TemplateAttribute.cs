@@ -61,14 +61,10 @@ namespace Metalama.Framework.Aspects
             set => this._isSealed = value;
         }
 
-        public bool? GetIsVirtual()
-        {
-            return this._isVirtual;
-        }
+        public bool? GetIsVirtual() => this._isVirtual;
 
-        public bool? GetIsSealed()
-        {
-            return this._isSealed;
-        }
+        public bool? GetIsSealed() => this._isSealed;
+
+        public virtual bool IsIntroduction => false;
     }
 }

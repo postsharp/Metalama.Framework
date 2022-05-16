@@ -3,7 +3,6 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Eligibility.Implementation;
@@ -22,7 +21,6 @@ using System;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
-using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.Aspects
 {
@@ -50,17 +48,11 @@ namespace Metalama.Framework.Engine.Aspects
                 .ToImmutableArray();
 
             // If we have any declarative introduction, the aspect cannot be added to an interface.
-            if ( this._declarativeAdviceAttributes.Any( a => a.TemplateInfo.AttributeType is TemplateAttributeType.Introduction ) )
+            foreach ( var declarativeAdvice in this._declarativeAdviceAttributes )
             {
-                this.EligibilityRule = new EligibilityRule<IDeclaration>(
-                    EligibleScenarios.Inheritance,
-                    x =>
-                    {
-                        var t = x.GetDeclaringType();
-
-                        return t != null && t.TypeKind != TypeKind.Interface;
-                    },
-                    _ => $"the aspect {this._aspectClass.ShortName} cannot be added to an interface (because the aspect contains a declarative introduction)" );
+                var eligibilityBuilder = new EligibilityBuilder<IDeclaration>();
+                ((DeclarativeAdviceAttribute) declarativeAdvice.TemplateInfo.Attribute).BuildEligibility( eligibilityBuilder );
+                this.EligibilityRule = eligibilityBuilder.Build();
             }
         }
 
@@ -152,20 +144,14 @@ namespace Metalama.Framework.Engine.Aspects
                 aspectInstance.TemplateInstances.Count == 1 ? aspectInstance.TemplateInstances.Values.Single() : null,
                 this._serviceProvider );
 
-            // Add declarative advices to the factory.
-            var declarativeAdvices =
-                this._declarativeAdviceAttributes
-                    .Select(
-                        x => CreateDeclarativeAdvice(
-                            aspectInstance,
-                            aspectInstance.TemplateInstances[x.TemplateClass],
-                            diagnosticSink,
-                            targetDeclaration,
-                            x,
-                            x.Symbol ) )
-                    .WhereNotNull();
-
-            adviceFactory.Advices.AddRange( declarativeAdvices );
+            // Prepare declarative advice.
+            var declarativeAdvice = this._aspectClass.TemplateClasses.SelectMany( c => c.GetDeclarativeAdvices() )
+                .Select(
+                    a =>
+                        (TemplateDeclaration: (IMemberOrNamedType) compilationModelRevision.Factory.GetDeclaration( a.Symbol ),
+                         TemplateId: a.SymbolDocumentationId,
+                         Attribute: (DeclarativeAdviceAttribute) a.TemplateInfo.Attribute) )
+                .ToList();
 
             // Create the AspectBuilder.
             var aspectBuilder = new AspectBuilder<T>(
@@ -186,7 +172,24 @@ namespace Metalama.Framework.Engine.Aspects
                     compilationModelRevision,
                     targetDeclaration );
 
-                if ( !this._serviceProvider.GetRequiredService<UserCodeInvoker>().TryInvoke( () => aspectOfT.BuildAspect( aspectBuilder ), executionContext ) )
+                var success = true;
+
+                if ( !this._serviceProvider.GetRequiredService<UserCodeInvoker>()
+                        .TryInvoke(
+                            () =>
+                            {
+                                // Execute declarative advice.
+                                foreach ( var advice in declarativeAdvice )
+                                {
+                                    success |= advice.Attribute.TryBuildAspect( advice.TemplateDeclaration, advice.TemplateId, aspectBuilder );
+                                }
+
+                                if ( success )
+                                {
+                                    aspectOfT.BuildAspect( aspectBuilder );
+                                }
+                            },
+                            executionContext ) || !success )
                 {
                     aspectInstance.Skip();
 
@@ -226,27 +229,6 @@ namespace Metalama.Framework.Engine.Aspects
 
                 return aspectResult;
             }
-        }
-
-        private static Advice? CreateDeclarativeAdvice<T>(
-            IAspectInstanceInternal aspect,
-            TemplateClassInstance templateInstance,
-            IDiagnosticAdder diagnosticAdder,
-            T aspectTarget,
-            TemplateClassMember template,
-            ISymbol templateDeclaration )
-            where T : IDeclaration
-        {
-            template.TryCreateAdvice(
-                aspect,
-                templateInstance,
-                diagnosticAdder,
-                aspectTarget,
-                ((CompilationModel) aspectTarget.Compilation).Factory.GetDeclaration( templateDeclaration ),
-                null,
-                out var advice );
-
-            return advice;
         }
     }
 }

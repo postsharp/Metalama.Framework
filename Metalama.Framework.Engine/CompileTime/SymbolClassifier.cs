@@ -139,14 +139,14 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             switch ( templateAttribute.AttributeClass?.Name )
             {
-                case nameof(IntroduceAttribute):
-                    return new TemplateInfo( TemplateAttributeType.Introduction, templateAttribute );
+                case nameof(TemplateAttribute):
+                    return new TemplateInfo( TemplateAttributeType.Template, templateAttribute );
 
                 case nameof(InterfaceMemberAttribute):
                     return new TemplateInfo( TemplateAttributeType.InterfaceMember, templateAttribute );
 
                 default:
-                    return new TemplateInfo( TemplateAttributeType.Template, templateAttribute );
+                    return new TemplateInfo( TemplateAttributeType.DeclarativeAdvice, templateAttribute );
             }
         }
 

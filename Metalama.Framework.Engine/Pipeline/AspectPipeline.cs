@@ -90,7 +90,9 @@ namespace Metalama.Framework.Engine.Pipeline
             var roslynCompilation = compilation.Compilation;
 
             // Create dependencies.
-            var loader = CompileTimeProjectLoader.Create( this.Domain, this.ServiceProvider );
+            var projectServiceProvider = this.ServiceProvider.WithService( new SymbolClassificationService( this.ServiceProvider ) );
+
+            var loader = CompileTimeProjectLoader.Create( this.Domain, projectServiceProvider );
 
             // Prepare the compile-time assembly.
             if ( !loader.TryGetCompileTimeProjectFromCompilation(
@@ -107,7 +109,9 @@ namespace Metalama.Framework.Engine.Pipeline
             }
 
             // Create a project-level service provider.
-            var projectServiceProviderWithoutPlugins = this.ServiceProvider.WithService( loader ).WithMark( ServiceProviderMark.Project );
+            var projectServiceProviderWithoutPlugins = projectServiceProvider
+                .WithService( loader )
+                .WithMark( ServiceProviderMark.Project );
             var projectServiceProviderWithProject = projectServiceProviderWithoutPlugins;
 
             // Create compiler plug-ins found in compile-time code.

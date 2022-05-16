@@ -6,7 +6,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System;
@@ -102,9 +101,7 @@ namespace Metalama.Framework.Engine.Advices
                     // It is possible that the aspect has a member of the required name, but the user did not use the custom attribute. In this case,
                     // we want a proper error message.
 
-                    throw GeneralDiagnosticDescriptors.MemberDoesNotHaveTemplateAttribute.CreateException(
-                        (template.TemplateClass.FullName, templateName,
-                         templateKind == TemplateKind.Introduction ? nameof(IntroduceAttribute) : nameof(TemplateAttribute)) );
+                    throw GeneralDiagnosticDescriptors.MemberDoesNotHaveTemplateAttribute.CreateException( (template.TemplateClass.FullName, templateName) );
                 }
 
                 if ( template.TemplateInfo.IsAbstract )
@@ -117,24 +114,6 @@ namespace Metalama.Framework.Engine.Advices
                     {
                         throw new AssertionFailedException( "A non-abstract template was expected." );
                     }
-                }
-
-                var expectedTemplateType = templateKind == TemplateKind.Introduction
-                    ? TemplateAttributeType.Introduction
-                    : TemplateAttributeType.Template;
-
-                if ( expectedTemplateType != template.TemplateInfo.AttributeType )
-                {
-                    var expectedAttribute = templateKind == TemplateKind.Introduction
-                        ? nameof(IntroduceAttribute)
-                        : nameof(TemplateAttribute);
-
-                    var actualAttribute = template.TemplateInfo.AttributeType == TemplateAttributeType.Introduction
-                        ? nameof(IntroduceAttribute)
-                        : nameof(TemplateAttribute);
-
-                    throw GeneralDiagnosticDescriptors.TemplateIsOfTheWrongType.CreateException(
-                        (template.TemplateClass.FullName, templateName, expectedAttribute, actualAttribute) );
                 }
 
                 return new TemplateMemberRef( template, templateKind );

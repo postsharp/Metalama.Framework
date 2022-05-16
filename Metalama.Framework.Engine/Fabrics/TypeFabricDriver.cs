@@ -3,17 +3,14 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Fabrics;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.Fabrics
@@ -34,23 +31,21 @@ namespace Metalama.Framework.Engine.Fabrics
         {
             var templateInstance = new TemplateClassInstance( this.Fabric, templateClass );
             var targetType = (INamedType) aspectBuilder.Target;
+            var compilation = aspectBuilder.Target.GetCompilationModel();
 
             // Add declarative advices.
             var aspectInstance = (IAspectInstanceInternal) aspectBuilder.AspectInstance;
 
-            var declarativeAdvices =
-                templateClass.GetDeclarativeAdvices()
-                    .Select(
-                        x => CreateDeclarativeAdvice(
-                            aspectInstance,
-                            aspectInstance.TemplateInstances[x.TemplateClass],
-                            aspectBuilder.DiagnosticAdder,
-                            targetType,
-                            x,
-                            x.Symbol ) )
-                    .WhereNotNull();
-
-            aspectBuilder.AdviceFactory.Advices.AddRange( declarativeAdvices );
+            // Prepare declarative advice.
+            List<(IMemberOrNamedType TemplateDeclaration, string TemplateMemberId, DeclarativeAdviceAttribute Attribute)> declarativeAdvice = templateClass.GetDeclarativeAdvices()
+                .Select(
+                    a =>
+                    {
+                        return (TemplateDeclaration: (IMemberOrNamedType) compilation.Factory.GetDeclaration( a.Symbol ),
+                                TemplateId: a.SymbolDocumentationId,
+                                Attribute: (DeclarativeAdviceAttribute) a.TemplateInfo.Attribute);
+                    } )
+                .ToList();
 
             // Execute the AmendType.
             var builder = new Amender( targetType, this.FabricManager, aspectBuilder, templateInstance, fabricInstance );
@@ -60,27 +55,23 @@ namespace Metalama.Framework.Engine.Fabrics
                 aspectBuilder.DiagnosticAdder,
                 UserCodeMemberInfo.FromDelegate( new Action<ITypeAmender>( ((TypeFabric) this.Fabric).AmendType ) ) );
 
-            return this.FabricManager.UserCodeInvoker.TryInvoke( () => ((TypeFabric) this.Fabric).AmendType( builder ), executionContext );
-        }
+            var success = true;
 
-        private static Advice? CreateDeclarativeAdvice(
-            IAspectInstanceInternal aspect,
-            TemplateClassInstance templateInstance,
-            IDiagnosticAdder diagnosticAdder,
-            INamedType aspectTarget,
-            TemplateClassMember template,
-            ISymbol templateDeclaration )
-        {
-            template.TryCreateAdvice(
-                aspect,
-                templateInstance,
-                diagnosticAdder,
-                aspectTarget,
-                ((CompilationModel) aspectTarget.Compilation).Factory.GetDeclaration( templateDeclaration ),
-                null,
-                out var advice );
+            return this.FabricManager.UserCodeInvoker.TryInvoke(
+                () =>
+                {
+                    // Execute declarative advice.
+                    foreach ( var advice in declarativeAdvice )
+                    {
+                        success |= advice.Attribute.TryBuildAspect( advice.TemplateDeclaration, advice.TemplateMemberId, (IAspectBuilder<IDeclaration>) aspectBuilder );
+                    }
 
-            return advice;
+                    if ( success )
+                    {
+                        ((TypeFabric) this.Fabric).AmendType( builder );
+                    }
+                },
+                executionContext ) && success;
         }
 
         public override FabricKind Kind => FabricKind.Type;

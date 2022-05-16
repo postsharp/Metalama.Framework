@@ -105,8 +105,8 @@ namespace Metalama.Framework.Engine.Aspects
 
                 switch ( templateInfo.AttributeType )
                 {
-                    case TemplateAttributeType.Introduction when memberSymbol is IMethodSymbol { AssociatedSymbol: not null }:
-                        // This is an accessor of an introduced event or property. We don't index them.
+                    case TemplateAttributeType.DeclarativeAdvice when memberSymbol is IMethodSymbol { AssociatedSymbol: not null }:
+                        // This is an accessor of a template or event declarative advice. We don't index them.
                         continue;
 
                     case TemplateAttributeType.InterfaceMember:
@@ -134,6 +134,7 @@ namespace Metalama.Framework.Engine.Aspects
                                 this,
                                 templateInfo,
                                 accessor,
+                                accessor.GetDocumentationCommentId().AssertNotNull(),
                                 accessorParameters,
                                 ImmutableArray<TemplateClassMemberParameter>.Empty,
                                 ImmutableDictionary<MethodKind, TemplateClassMember>.Empty ) );
@@ -208,6 +209,7 @@ namespace Metalama.Framework.Engine.Aspects
                     this,
                     templateInfo,
                     memberSymbol,
+                    memberSymbol.GetDocumentationCommentId().AssertNotNull(),
                     templateParameters,
                     templateTypeParameters,
                     accessors );
@@ -247,7 +249,7 @@ namespace Metalama.Framework.Engine.Aspects
         internal IEnumerable<TemplateClassMember> GetDeclarativeAdvices()
         {
             return this.Members
-                .Where( m => m.Value.TemplateInfo.AttributeType == TemplateAttributeType.Introduction )
+                .Where( m => m.Value.TemplateInfo.AttributeType == TemplateAttributeType.DeclarativeAdvice )
                 .Select( m => m.Value )
                 .OrderBy( m => m.Symbol.GetPrimarySyntaxReference()?.SyntaxTree.FilePath )
                 .ThenBy( m => m.Symbol.GetPrimarySyntaxReference()?.Span.Start );

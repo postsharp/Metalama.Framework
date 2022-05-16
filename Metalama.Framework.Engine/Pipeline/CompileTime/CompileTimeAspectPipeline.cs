@@ -53,18 +53,19 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                     ImmutableArray<AdditionalCompilationOutputFile>.Empty );
             }
 
-            // Run the code analyzers that normally run at design time.
-            if ( !TemplatingCodeValidator.Validate( compilation, diagnosticAdder, this.ServiceProvider, cancellationToken ) )
-            {
-                return null;
-            }
-
             // Initialize the pipeline and generate the compile-time project.
             if ( !this.TryInitialize( diagnosticAdder, partialCompilation, null, cancellationToken, out var configuration ) )
             {
                 return null;
             }
+            
+            // Run the code analyzers that normally run at design time.
+            if ( !TemplatingCodeValidator.Validate( compilation, diagnosticAdder, configuration.ServiceProvider, cancellationToken ) )
+            {
+                return null;
+            }
 
+            // Run the pipeline.
             return await this.ExecuteCoreAsync(
                 diagnosticAdder,
                 partialCompilation,
