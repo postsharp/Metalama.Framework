@@ -51,11 +51,13 @@ namespace Metalama.Framework.Engine.CodeModel
         TypeKind IType.TypeKind
             => this.TypeSymbol.TypeKind switch
             {
-                RoslynTypeKind.Class => TypeKind.Class,
+                RoslynTypeKind.Class when !this.TypeSymbol.IsRecord => TypeKind.Class,
+                RoslynTypeKind.Class when this.TypeSymbol.IsRecord => TypeKind.RecordClass,
                 RoslynTypeKind.Delegate => TypeKind.Delegate,
                 RoslynTypeKind.Enum => TypeKind.Enum,
                 RoslynTypeKind.Interface => TypeKind.Interface,
-                RoslynTypeKind.Struct => TypeKind.Struct,
+                RoslynTypeKind.Struct when !this.TypeSymbol.IsRecord => TypeKind.Struct,
+                RoslynTypeKind.Struct when this.TypeSymbol.IsRecord => TypeKind.RecordStruct,
                 _ => throw new InvalidOperationException( $"Unexpected type kind {this.TypeSymbol.TypeKind}." )
             };
 
@@ -434,7 +436,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public bool IsSubclassOf( INamedType type )
         {
             // TODO: enum.IsSubclassOf(int) == true etc.
-            if ( type.TypeKind == TypeKind.Class )
+            if ( type.TypeKind is TypeKind.Class or TypeKind.RecordClass )
             {
                 INamedType? currentType = this;
 
