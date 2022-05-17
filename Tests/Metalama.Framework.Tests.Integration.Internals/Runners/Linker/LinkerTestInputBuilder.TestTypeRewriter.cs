@@ -831,8 +831,9 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                         typeof(object),
                         null,
                         fakeDiagnosticAdder,
-                        null!,
-                        new AspectDriverFactory( fakeCompilation, ImmutableArray<object>.Empty, this._owner.ServiceProvider ) );
+                        null! );
+
+                var aspectDriverFactory = new AspectDriverFactory( fakeCompilation, ImmutableArray<object>.Empty, this._owner.ServiceProvider );
 
                 var fakeAspectInstance = new AspectInstance( A.Fake<IAspect>(), default, aspectClass, default );
 

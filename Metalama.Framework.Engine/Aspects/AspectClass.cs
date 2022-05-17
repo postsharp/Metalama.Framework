@@ -36,8 +36,8 @@ namespace Metalama.Framework.Engine.Aspects
     public class AspectClass : TemplateClass, IAspectClassImpl, IBoundAspectClass, IValidatorDriverFactory
     {
         private readonly UserCodeInvoker _userCodeInvoker;
-        private readonly IAspectDriver? _aspectDriver;
         private readonly IAspect? _prototypeAspectInstance; // Null for abstract classes.
+        private IAspectDriver? _aspectDriver;
         private ValidatorDriverFactory? _validatorDriverFactory;
 
         private static readonly MethodInfo _tryInitializeEligibilityMethod = typeof(AspectClass).GetMethod(
@@ -102,8 +102,7 @@ namespace Metalama.Framework.Engine.Aspects
             Type aspectType,
             IAspect? prototype,
             IDiagnosticAdder diagnosticAdder,
-            Compilation compilation,
-            AspectDriverFactory aspectDriverFactory ) : base( serviceProvider, compilation, aspectTypeSymbol, diagnosticAdder, baseClass )
+            Compilation compilation ) : base( serviceProvider, compilation, aspectTypeSymbol, diagnosticAdder, baseClass )
         {
             this.FullName = aspectTypeSymbol.GetReflectionName().AssertNotNull();
             this.DisplayName = this.ShortName = AttributeHelper.GetShortName( aspectTypeSymbol.Name );
@@ -183,18 +182,18 @@ namespace Metalama.Framework.Engine.Aspects
             }
 
             this.Layers = layers.Select( l => new AspectLayer( this, l ) ).ToImmutableArray();
-
-            // This must be called after Members is built and assigned.
-            this._aspectDriver = aspectDriverFactory.GetAspectDriver( this, aspectTypeSymbol );
         }
 
-        private bool TryInitialize( IDiagnosticAdder diagnosticAdder )
+        private bool TryInitialize( IDiagnosticAdder diagnosticAdder, AspectDriverFactory aspectDriverFactory )
         {
             if ( this.HasError )
             {
                 return false;
             }
 
+            // This must be called after Members is built and assigned.
+            this._aspectDriver = aspectDriverFactory.GetAspectDriver( this );
+            
             if ( this._prototypeAspectInstance != null )
             {
                 // Call BuildEligibility for all relevant interface implementations.
@@ -329,10 +328,9 @@ namespace Metalama.Framework.Engine.Aspects
                 aspectReflectionType,
                 prototype,
                 diagnosticAdder,
-                compilation,
-                aspectDriverFactory );
+                compilation );
 
-            if ( !aspectClass.TryInitialize( diagnosticAdder ) )
+            if ( !aspectClass.TryInitialize( diagnosticAdder, aspectDriverFactory ) )
             {
                 aspectClass = null;
 

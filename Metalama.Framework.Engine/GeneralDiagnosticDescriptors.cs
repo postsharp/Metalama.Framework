@@ -282,6 +282,14 @@ namespace Metalama.Framework.Engine
                 Warning,
                 "Unexpected exception in Metalama." );
 
+        internal static readonly DiagnosticDefinition<(string WeaverType, string AspectType)> CannotFindAspectWeaver =
+            new(
+                "LAMA00050",
+                _category,
+                "The weaver type '{0}' required to weave aspect '{1}' is not found in the project. The weaver assembly must be included as an analyzer.",
+                Error,
+                "Cannot find an aspect weaver." );
+
         // TODO: Use formattable string (C# does not seem to find extension methods).
         public static readonly DiagnosticDefinition<string>
             UnsupportedFeature = new(

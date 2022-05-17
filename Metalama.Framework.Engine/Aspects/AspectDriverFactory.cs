@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.AspectWeavers;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Aspects
 {
@@ -15,28 +16,30 @@ namespace Metalama.Framework.Engine.Aspects
     {
         private readonly Compilation _compilation;
         private readonly IServiceProvider _serviceProvider;
-        private readonly ImmutableDictionary<string, IAspectWeaver> _weaverTypes;
+        private readonly ImmutableDictionary<string, IAspectDriver> _weaverTypes;
 
         public AspectDriverFactory( Compilation compilation, ImmutableArray<object> plugins, IServiceProvider serviceProvider )
         {
             this._compilation = compilation;
             this._serviceProvider = serviceProvider;
 
-            this._weaverTypes = plugins.OfType<IAspectWeaver>()
+            this._weaverTypes = plugins.OfType<IAspectDriver>()
                 .ToImmutableDictionary( weaver => weaver.GetType().FullName );
         }
 
-        public IAspectDriver GetAspectDriver( AspectClass aspectClass, INamedTypeSymbol type )
+        public IAspectDriver GetAspectDriver( AspectClass aspectClass )
         {
             if ( aspectClass.WeaverType != null )
             {
-                if ( !this._weaverTypes.TryGetValue( aspectClass.WeaverType, out var weaver ) )
+                if ( !this._weaverTypes.TryGetValue( aspectClass.WeaverType, out var registeredAspectDriver ) )
                 {
-                    throw new InvalidOperationException(
-                        $"The weaver type '{aspectClass.WeaverType}' required to weave aspect '{aspectClass.ShortName}' is not found in the project. The weaver assembly must be included as an analyzer." );
+                    // It's okay to have a missing driver if the aspect is not instantiated.
+                    // This is actually a common situation when building the project defining the aspect class.
+                    // Return an ErrorAspectWeaver that will emit an error when used.
+                    return new ErrorAspectWeaver( aspectClass );
                 }
 
-                return weaver;
+                return registeredAspectDriver;
             }
 
             return new AspectDriver( this._serviceProvider, aspectClass, this._compilation );

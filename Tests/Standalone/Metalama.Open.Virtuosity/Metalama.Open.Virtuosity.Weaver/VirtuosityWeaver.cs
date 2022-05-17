@@ -1,4 +1,7 @@
-﻿using Metalama.Compiler;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using Metalama.Compiler;
 using Metalama.Framework.Engine.AspectWeavers;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -9,42 +12,52 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxKind;
 
 namespace Metalama.Open.Virtuosity
 {
-    [MetalamaPlugIn, AspectWeaver(aspectType: typeof(VirtualizeAttribute))]
+    [MetalamaPlugIn]
     public class VirtuosityWeaver : IAspectWeaver
     {
-        void IAspectWeaver.Transform(AspectWeaverContext context)
+        void IAspectWeaver.Transform( AspectWeaverContext context )
         {
             Debugger.Break();
-            context.RewriteAspectTargets(new Rewriter());
+            context.RewriteAspectTargets( new Rewriter() );
         }
 
         private class Rewriter : CSharpSyntaxRewriter
         {
-            private static readonly SyntaxKind[]? forbiddenModifiers = new[] { StaticKeyword, SealedKeyword, VirtualKeyword, OverrideKeyword };
+            private static readonly SyntaxKind[]? forbiddenModifiers = new[] { StaticKeyword, VirtualKeyword, OverrideKeyword };
             private static readonly SyntaxKind[]? requiredModifiers = new[] { PublicKeyword, ProtectedKeyword, InternalKeyword };
 
-            public override SyntaxNode VisitMethodDeclaration(MethodDeclarationSyntax node)
+            public override SyntaxNode VisitMethodDeclaration( MethodDeclarationSyntax node )
             {
-                if (node.Parent is not ClassDeclarationSyntax classDeclaration)
+                if ( node.Parent is not ClassDeclarationSyntax classDeclaration )
                 {
                     return node;
                 }
 
                 // Note: this won't work if the method is in one part of a partial class and only the other part has the sealed modifier
-                if (classDeclaration.Modifiers.Any(SealedKeyword))
+                if ( classDeclaration.Modifiers.Any( SealedKeyword ) )
                 {
                     return node;
                 }
 
-                SyntaxTokenList modifiers = node.Modifiers;
+                var modifiers = node.Modifiers;
 
-                if (forbiddenModifiers.Any(modifier => node.Modifiers.Any(modifier))
-                    || !requiredModifiers.Any(modifier => node.Modifiers.Any(modifier)))
+                // Remove the sealed modifier.
+                var sealedToken = node.Modifiers.FirstOrDefault( modifier => modifier.IsKind( SyntaxKind.SealedKeyword ) );
+
+                if ( !sealedToken.IsKind( SyntaxKind.None ) )
                 {
-                    return node;
+                    node = node.WithModifiers( node.Modifiers.Remove( sealedToken ) );
                 }
 
-                return node.AddModifiers(SyntaxFactory.Token(VirtualKeyword));
+                // Add the virtual modifier.
+                if ( !forbiddenModifiers.Any( modifier => node.Modifiers.Any( modifier ) )
+                    && requiredModifiers.Any( modifier => node.Modifiers.Any( modifier ) ) )
+                {
+                    node = node.AddModifiers( SyntaxFactory.Token( VirtualKeyword ).WithTrailingTrivia( SyntaxFactory.ElasticSpace ) );
+                }
+
+
+                return node;
             }
         }
     }
