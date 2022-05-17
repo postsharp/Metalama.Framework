@@ -53,7 +53,8 @@ var product = new Product( Dependencies.Metalama )
                 AdditionalArtifactRules = new[]
                 {
                     $@"+:%system.teamcity.build.tempDir%/Metalama/ExtractExceptions/**/*=>logs",
-                    $@"+:%system.teamcity.build.tempDir%/Metalama/Extract/**/.completed=>logs"
+                    $@"+:%system.teamcity.build.tempDir%/Metalama/Extract/**/.completed=>logs",
+                    $@"+:%system.teamcity.build.tempDir%/Metalama/CrashReports/**/*=>logs",
                 }
             } )
 };
