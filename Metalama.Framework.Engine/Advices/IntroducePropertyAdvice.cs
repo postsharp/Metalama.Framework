@@ -116,10 +116,9 @@ namespace Metalama.Framework.Engine.Advices
                 else
                 {
                     // Introduce and override using the template.
-                    var overriddenProperty = new OverriddenProperty(
+                    var overriddenProperty = new OverridePropertyTransformation(
                         this,
                         this.MemberBuilder,
-                        this.Template,
                         this._getTemplate.ForIntroduction(this._args),
                         this._setTemplate.ForIntroduction( this._args ),
                         this.Tags );
@@ -158,10 +157,9 @@ namespace Metalama.Framework.Engine.Advices
                         // If the existing declaration is in the current type, we fail, otherwise, declare a new method and override.
                         if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( targetDeclaration, existingDeclaration.DeclaringType ) )
                         {
-                            var overriddenProperty = new OverriddenProperty(
+                            var overriddenProperty = new OverridePropertyTransformation(
                                 this,
                                 existingDeclaration,
-                                this.Template,
                                 this._getTemplate.ForIntroduction( this._args ),
                                 this._setTemplate.ForIntroduction( this._args ),
                                 this.Tags );
@@ -172,10 +170,9 @@ namespace Metalama.Framework.Engine.Advices
                         {
                             this.MemberBuilder.IsNew = true;
 
-                            var overriddenProperty = new OverriddenProperty(
+                            var overriddenProperty = new OverridePropertyTransformation(
                                 this,
                                 this.MemberBuilder,
-                                this.Template,
                                 this._getTemplate.ForIntroduction( this._args ),
                                 this._setTemplate.ForIntroduction( this._args ),
                                 this.Tags );
@@ -186,10 +183,9 @@ namespace Metalama.Framework.Engine.Advices
                     case OverrideStrategy.Override:
                         if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( targetDeclaration, existingDeclaration.DeclaringType ) )
                         {
-                            var overriddenMethod = new OverriddenProperty(
+                            var overriddenMethod = new OverridePropertyTransformation(
                                 this,
                                 existingDeclaration,
-                                this.Template,
                                 this._getTemplate.ForIntroduction( this._args ),
                                 this._setTemplate.ForIntroduction( this._args ),
                                 this.Tags );
@@ -223,7 +219,6 @@ namespace Metalama.Framework.Engine.Advices
                                 OverrideHelper.OverrideProperty(
                                     this,
                                     this.MemberBuilder,
-                                    this.Template,
                                     this._getTemplate,
                                     this._setTemplate,
                                     ( t, m ) => t.ForIntroduction( this._args ),

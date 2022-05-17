@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.Transformations
     /// <summary>
     /// Represents a transformation that optionally replaces a member by itself.
     /// </summary>
-    internal interface IReplaceMember : IObservableTransformation
+    internal interface IReplaceMemberTransformation : IObservableTransformation
     {
         /// <summary>
         /// Gets a member that is replaced by this transformation or <c>null</c> if the transformation does not replace any member.

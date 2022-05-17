@@ -122,7 +122,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     .Concat( observableTransformations.OfType<AttributeBuilder>() )
                     .Select( a => new AttributeRef( a ) );
 
-            this._derivedTypes = prototype._derivedTypes.WithIntroducedInterfaces( observableTransformations.OfType<IIntroducedInterface>() );
+            this._derivedTypes = prototype._derivedTypes.WithIntroducedInterfaces( observableTransformations.OfType<IIntroduceInterfaceTransformation>() );
 
             // TODO: this cache may need to be smartly invalidated when we have interface introductions.
             this._allMemberAttributesByTypeName = prototype._allMemberAttributesByTypeName.AddRange( allAttributes, a => a.AttributeTypeName! );
@@ -136,7 +136,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             foreach ( var transformation in observableTransformations )
             {
-                if ( transformation is IReplaceMember { ReplacedMember: { } replacedMember } )
+                if ( transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMember } )
                 {
                     if ( transformation is IDeclarationBuilder builder )
                     {

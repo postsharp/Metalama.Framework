@@ -36,15 +36,15 @@ namespace Metalama.Framework.Engine.Utilities
             var symbolKeyExtensionsType = typeof(AdhocWorkspace).Assembly.GetType( "Microsoft.CodeAnalysis.SymbolKeyExtensions" );
 
             // Get SymbolKey(string) constructor.
-            var symbolKeyConstructor = symbolKeyType.GetConstructor( new[] { typeof(string) } );
+            var symbolKeyConstructor = symbolKeyType.GetConstructor( new[] { typeof(string) } ).AssertNotNull();
 
             var idParameter = Expression.Parameter( typeof(string), "id" );
             var newSymbolKey = Expression.ConvertChecked( Expression.New( symbolKeyConstructor, idParameter ), typeof(object) );
             _newSymbolKeyFunc = Expression.Lambda<Func<string, object>>( newSymbolKey, idParameter ).Compile();
 
             // Get SymbolKey.Resolve.
-            var symbolKeyResolve = symbolKeyType.GetMethod( "Resolve" );
-            var symbolKeyResolutionGetSymbol = symbolKeyResolutionType.GetProperty( "Symbol" );
+            var symbolKeyResolve = symbolKeyType.GetMethod( "Resolve" ).AssertNotNull();
+            var symbolKeyResolutionGetSymbol = symbolKeyResolutionType.GetProperty( "Symbol" ).AssertNotNull();
 
             var symbolKeyParameter = Expression.Parameter( typeof(object), "symbolKey" );
             var compilationParameter = Expression.Parameter( typeof(Compilation), "compilation" );
@@ -70,7 +70,7 @@ namespace Metalama.Framework.Engine.Utilities
 
             // Get SymbolKeyExtensions.GetSymbolKey
             var symbolParameter = Expression.Parameter( typeof(ISymbol), "symbol" );
-            var getSymbolKeyMethod = symbolKeyExtensionsType.GetMethod( "GetSymbolKey" );
+            var getSymbolKeyMethod = symbolKeyExtensionsType.GetMethod( "GetSymbolKey" ).AssertNotNull();
 
             var callGetSymbolKey = Expression.Convert(
                 Expression.Call( null, getSymbolKeyMethod, symbolParameter, cancellationTokenParameter ),

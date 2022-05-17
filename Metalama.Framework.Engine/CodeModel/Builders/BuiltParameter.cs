@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public bool IsParams => this.ParameterBuilder.IsParams;
 
         [Memo]
-        public IMemberOrNamedType DeclaringMember => this.Compilation.Factory.GetDeclaration( this.ParameterBuilder.DeclaringMember );
+        public IMember DeclaringMember => this.Compilation.Factory.GetDeclaration( this.ParameterBuilder.DeclaringMember );
 
         public ParameterInfo ToParameterInfo() => this.ParameterBuilder.ToParameterInfo();
 

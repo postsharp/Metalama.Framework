@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.Linking
             private readonly ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> _diagnosticSuppressions;
             private readonly SyntaxTransformationCollection _introducedMemberCollection;
             private readonly IReadOnlyDictionary<SyntaxNode, IReadOnlyList<LinkerInsertedStatement>> _symbolInsertedStatements;
-            private readonly IReadOnlyDictionary<IMemberIntroduction, IReadOnlyList<LinkerInsertedStatement>> _introductionInsertedStatements;
+            private readonly IReadOnlyDictionary<IIntroduceMemberTransformation, IReadOnlyList<LinkerInsertedStatement>> _introductionInsertedStatements;
 
             // Maps a diagnostic id to the number of times it has been suppressed.
             private ImmutableHashSet<string> _activeSuppressions = ImmutableHashSet.Create<string>( StringComparer.OrdinalIgnoreCase );
@@ -40,7 +40,7 @@ namespace Metalama.Framework.Engine.Linking
                 CompilationModel compilation,
                 IReadOnlyList<OrderedAspectLayer> inputOrderedAspectLayers,
                 IReadOnlyDictionary<SyntaxNode, IReadOnlyList<LinkerInsertedStatement>> symbolInsertedStatements,
-                IReadOnlyDictionary<IMemberIntroduction, IReadOnlyList<LinkerInsertedStatement>> introductionInsertedStatements )
+                IReadOnlyDictionary<IIntroduceMemberTransformation, IReadOnlyList<LinkerInsertedStatement>> introductionInsertedStatements )
             {
                 this._diagnosticSuppressions = diagnosticSuppressions;
                 this._compilation = compilation;

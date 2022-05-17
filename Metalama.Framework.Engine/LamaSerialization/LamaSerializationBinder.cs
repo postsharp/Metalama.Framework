@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
         /// <param name="assemblyName">At output, the name of <paramref name="assemblyName"/>.</param>
         public virtual void BindToName( Type type, out string typeName, out string assemblyName )
         {
-            typeName = type.FullName;
+            typeName = type.FullName!;
 
             // TODO: Remove.
             // if ( this.reflectionBindingManagerService != null )

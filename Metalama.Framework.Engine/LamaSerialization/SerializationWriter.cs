@@ -166,7 +166,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
                 case SerializationIntrinsicType.Array:
                     this._binaryWriter.WriteByte( (byte) intrinsicType );
                     this._binaryWriter.WriteCompressedInteger( type.GetArrayRank() );
-                    this.WriteType( type.GetElementType(), cause );
+                    this.WriteType( type.GetElementType()!, cause );
 
                     break;
 
@@ -324,7 +324,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
             if ( type.IsArray )
             {
                 var indices = new int[array!.Rank];
-                this.WriteArrayElements( array, array.GetType().GetElementType(), indices, 0, cause );
+                this.WriteArrayElements( array, array.GetType().GetElementType()!, indices, 0, cause );
             }
             else
             {
@@ -446,7 +446,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
         private void WriteGenericTypeParameter( Type type, SerializationCause? cause )
         {
             this._binaryWriter.WriteByte( (byte) SerializationIntrinsicType.GenericTypeParameter );
-            this.WriteType( type.DeclaringType, cause );
+            this.WriteType( type.DeclaringType!, cause );
             this._binaryWriter.WriteCompressedInteger( type.GenericParameterPosition );
         }
 

@@ -189,7 +189,7 @@ namespace Metalama.Framework.Engine
                 "The class already defines a template of the same name." );
 
         internal static readonly DiagnosticDefinition<(string AspectName, IDeclaration Target, FormattableString Reason)>
-            AspectNotEligibleOnAspect = new(
+            AspectNotEligibleOnTarget = new(
                 "LAMA0037",
                 _category,
                 "The aspect '{0}' cannot be applied to '{1}' because {2}.",

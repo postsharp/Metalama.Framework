@@ -35,10 +35,7 @@ namespace Metalama.Framework.Eligibility.Implementation
 
         public EligibleScenarios IneligibleScenarios => this._parent.IneligibleScenarios;
 
-        public void AddRule( IEligibilityRule<TChild> rule )
-        {
-            this._parent.AddRule( new ChildRule( this, rule ) );
-        }
+        public void AddRule( IEligibilityRule<TChild> rule ) => this._parent.AddRule( new ChildRule( this, rule ) );
 
         // This method is not supported because the predicates are added to the parent. This class is never used alone. 
         IEligibilityRule<IDeclaration> IEligibilityBuilder.Build() => throw new NotSupportedException();

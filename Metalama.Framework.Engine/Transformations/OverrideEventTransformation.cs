@@ -20,7 +20,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Transformations
 {
-    internal class OverriddenEvent : OverriddenMember
+    internal class OverrideEventTransformation : OverrideMemberTransformation
     {
         private readonly IObjectReader? _parameters;
 
@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Transformations
 
         public BoundTemplateMethod RemoveTemplate { get; }
 
-        public OverriddenEvent(
+        public OverrideEventTransformation(
             Advice advice,
             IEvent overriddenDeclaration,
             TemplateMember<IEvent> eventTemplate,
@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.Transformations
             // We need event template xor both accessor templates.
             Invariant.Assert( eventTemplate.IsNotNull || (addTemplate.IsNotNull && removeTemplate.IsNotNull) );
             Invariant.Assert( !(eventTemplate.IsNotNull && (addTemplate.IsNotNull || removeTemplate.IsNotNull)) );
-            Invariant.Assert( !(eventTemplate.IsNotNull && eventTemplate.Declaration.IsEventField()) );
+            Invariant.Assert( !(eventTemplate.IsNotNull && eventTemplate.Declaration!.IsEventField()) );
 
             this.EventTemplate = eventTemplate;
 

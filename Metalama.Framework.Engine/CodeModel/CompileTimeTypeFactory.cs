@@ -73,9 +73,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
             internal override ITypeInternal Visit( TypeParameter typeParameter )
             {
-                if ( this._substitutions.TryGetValue( typeParameter.Name, out var subsitution ) )
+                if ( this._substitutions.TryGetValue( typeParameter.Name, out var substitution ) )
                 {
-                    return (ITypeInternal) subsitution;
+                    return (ITypeInternal) substitution;
                 }
                 else
                 {

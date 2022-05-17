@@ -31,9 +31,9 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 var typeArguments = ImmutableArray.CreateBuilder<IType>( namedType.TypeArguments.Count );
 
-                for ( var i = 0; i < namedType.TypeArguments.Count; i++ )
+                foreach ( var t in namedType.TypeArguments )
                 {
-                    typeArguments.Add( this.Visit( namedType.TypeArguments[i] ) );
+                    typeArguments.Add( this.Visit( t ) );
                 }
 
                 return namedType.WithTypeArguments( typeArguments.MoveToImmutable() );

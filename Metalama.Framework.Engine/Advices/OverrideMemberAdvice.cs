@@ -25,5 +25,7 @@ namespace Metalama.Framework.Engine.Advices
         {
             // TODO: Test that the advice is not applied to declaration in a base class.
         }
+
+        public override string ToString() => $"Override {this.TargetDeclaration}";
     }
 }

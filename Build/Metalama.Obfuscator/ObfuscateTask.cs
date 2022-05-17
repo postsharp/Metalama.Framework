@@ -72,7 +72,7 @@ namespace Metalama.Obfuscator
 
             while ( attributeEnumerator.MoveNext() )
             {
-                ((CustomAttributeDeclaration) attributeEnumerator.Current).InvalidateSerialization();
+                ((CustomAttributeDeclaration) attributeEnumerator.Current!).InvalidateSerialization();
             }
 
             // Obfuscate types and their members.

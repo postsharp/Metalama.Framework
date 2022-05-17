@@ -59,7 +59,7 @@ namespace Metalama.Framework.Engine.Aspects
 
             var frameworkAspectClasses =
                 new[] { typeof(OverrideMethodAspect), typeof(OverrideEventAspect), typeof(OverrideFieldOrPropertyAspect) }
-                    .Select( t => new AspectTypeData( null, t.FullName, frameworkAssembly.GetTypeByMetadataName( t.FullName )!, t ) );
+                    .Select( t => new AspectTypeData( null, t.FullName!, frameworkAssembly.GetTypeByMetadataName( t.FullName! )!, t ) );
 
             // Gets the aspect types in the current compilation, including aspects types in referenced assemblies.
             var aspectTypeDataDictionary =
@@ -146,7 +146,7 @@ namespace Metalama.Framework.Engine.Aspects
 
                     if ( aspectTypeDataDictionary.TryGetValue( aspectTypeSymbol.BaseType.GetReflectionName().AssertNotNull(), out var baseData ) )
                     {
-                        if ( !TryProcessType( aspectTypeSymbol.BaseType, aspectReflectionType.BaseType, baseData.Project, out baseAspectClass ) )
+                        if ( !TryProcessType( aspectTypeSymbol.BaseType, aspectReflectionType.BaseType!, baseData.Project, out baseAspectClass ) )
                         {
                             metadata = null;
 

@@ -52,11 +52,13 @@ namespace Metalama.Framework.Engine.CodeModel
         TypeKind IType.TypeKind
             => this.TypeSymbol.TypeKind switch
             {
-                RoslynTypeKind.Class => TypeKind.Class,
+                RoslynTypeKind.Class when !this.TypeSymbol.IsRecord => TypeKind.Class,
+                RoslynTypeKind.Class when this.TypeSymbol.IsRecord => TypeKind.RecordClass,
                 RoslynTypeKind.Delegate => TypeKind.Delegate,
                 RoslynTypeKind.Enum => TypeKind.Enum,
                 RoslynTypeKind.Interface => TypeKind.Interface,
-                RoslynTypeKind.Struct => TypeKind.Struct,
+                RoslynTypeKind.Struct when !this.TypeSymbol.IsRecord => TypeKind.Struct,
+                RoslynTypeKind.Struct when this.TypeSymbol.IsRecord => TypeKind.RecordStruct,
                 _ => throw new InvalidOperationException( $"Unexpected type kind {this.TypeSymbol.TypeKind}." )
             };
 
@@ -303,7 +305,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     this.TypeSymbol.Interfaces.Select( this.Compilation.Factory.GetNamedType )
                         .Concat(
                             this.Compilation.GetObservableTransformationsOnElement( this )
-                                .OfType<IntroducedInterface>()
+                                .OfType<IntroduceInterfaceTransformation>()
                                 .Select( i => i.InterfaceType ) ) )
                 .Distinct() // Remove duplicates (re-implementations of earlier interface by aspect).
                 .ToImmutableArray()
@@ -315,7 +317,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 this.TypeSymbol.Interfaces.Select( this.Compilation.Factory.GetNamedType )
                     .Concat(
                         this.Compilation.GetObservableTransformationsOnElement( this )
-                            .OfType<IntroducedInterface>()
+                            .OfType<IntroduceInterfaceTransformation>()
                             .Select( i => i.InterfaceType ) )
                     .Distinct() // Remove duplicates (re-implementations of earlier interface by aspect).
                     .ToImmutableArray()
@@ -435,7 +437,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public bool IsSubclassOf( INamedType type )
         {
             // TODO: enum.IsSubclassOf(int) == true etc.
-            if ( type.TypeKind == TypeKind.Class )
+            if ( type.TypeKind is TypeKind.Class or TypeKind.RecordClass )
             {
                 INamedType? currentType = this;
 
@@ -479,7 +481,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 var introducedInterface =
                     this.Compilation
                         .GetObservableTransformationsOnElement( currentType )
-                        .OfType<IntroducedInterface>()
+                        .OfType<IntroduceInterfaceTransformation>()
                         .SingleOrDefault( i => this.Compilation.InvariantComparer.Equals( i.InterfaceType, interfaceMember.DeclaringType ) );
 
                 if ( introducedInterface != null )
@@ -535,7 +537,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 return symbolMembers.Select( x => new MemberRef<TMember>( x, this.Compilation.RoslynCompilation ) );
             }
 
-            if ( !transformations.Any( t => t is IReplaceMember ) )
+            if ( !transformations.Any( t => t is IReplaceMemberTransformation ) )
             {
                 // No replaced members.
                 return
@@ -557,7 +559,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     builders.Add( typedBuilder );
                 }
 
-                if ( builder is IReplaceMember { ReplacedMember: { } replacedMember } )
+                if ( builder is IReplaceMemberTransformation { ReplacedMember: { } replacedMember } )
                 {
                     if ( replacedMember.Target is TSymbol symbol && allSymbols.Contains( replacedMember.Target ) )
                     {

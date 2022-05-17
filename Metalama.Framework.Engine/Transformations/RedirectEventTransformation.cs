@@ -15,20 +15,18 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 namespace Metalama.Framework.Engine.Transformations
 {
     /// <summary>
-    /// Represents a property override, which redirects to accessors of another property without requiring template expansion.
+    /// Represents an event override, which redirects to accessors of another event without requiring template expansion.
     /// </summary>
-    internal class RedirectedProperty : OverriddenMember
+    internal class RedirectEventTransformation : OverrideMemberTransformation
     {
-        public new IProperty OverriddenDeclaration => (IProperty) base.OverriddenDeclaration;
+        public new IEvent OverriddenDeclaration => (IEvent) base.OverriddenDeclaration;
 
-        public IProperty TargetProperty { get; }
+        public IEvent TargetEvent { get; }
 
-        public RedirectedProperty( Advice advice, IProperty overriddenDeclaration, IProperty targetProperty, IObjectReader tags )
+        public RedirectEventTransformation( Advice advice, IEvent overriddenDeclaration, IEvent targetEvent, IObjectReader tags )
             : base( advice, overriddenDeclaration, tags )
         {
-            Invariant.Assert( targetProperty != null );
-
-            this.TargetProperty = targetProperty;
+            this.TargetEvent = targetEvent;
         }
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
@@ -37,19 +35,17 @@ namespace Metalama.Framework.Engine.Transformations
             {
                 new IntroducedMember(
                     this,
-                    PropertyDeclaration(
+                    EventDeclaration(
                         List<AttributeListSyntax>(),
                         this.OverriddenDeclaration.GetSyntaxModifierList(),
-                        context.SyntaxGenerator.PropertyType( this.OverriddenDeclaration ),
+                        context.SyntaxGenerator.EventType( this.OverriddenDeclaration ),
                         null,
                         Identifier(
                             context.IntroductionNameProvider.GetOverrideName(
                                 this.OverriddenDeclaration.DeclaringType,
                                 this.Advice.AspectLayerId,
                                 this.OverriddenDeclaration ) ),
-                        AccessorList( List( GetAccessors() ) ),
-                        null,
-                        null ),
+                        AccessorList( List( GetAccessors() ) ) ),
                     this.Advice.AspectLayerId,
                     IntroducedMemberSemantic.Override,
                     this.OverriddenDeclaration )
@@ -59,42 +55,29 @@ namespace Metalama.Framework.Engine.Transformations
             {
                 return new[]
                     {
-                        this.OverriddenDeclaration.GetMethod != null
-                            ? AccessorDeclaration(
-                                SyntaxKind.GetAccessorDeclaration,
-                                List<AttributeListSyntax>(),
-                                this.OverriddenDeclaration.GetMethod.GetSyntaxModifierList(),
-                                CreateGetterBody(),
-                                null )
-                            : null,
-                        this.OverriddenDeclaration.SetMethod != null
-                            ? AccessorDeclaration(
-                                this.OverriddenDeclaration.Writeability != Writeability.InitOnly
-                                    ? SyntaxKind.SetAccessorDeclaration
-                                    : SyntaxKind.InitAccessorDeclaration,
-                                List<AttributeListSyntax>(),
-                                this.OverriddenDeclaration.SetMethod.GetSyntaxModifierList(),
-                                CreateSetterBody(),
-                                null )
-                            : null
+                        AccessorDeclaration(
+                            SyntaxKind.AddAccessorDeclaration,
+                            List<AttributeListSyntax>(),
+                            this.OverriddenDeclaration.AddMethod.GetSyntaxModifierList(),
+                            CreateAccessorBody( SyntaxKind.AddAssignmentExpression ),
+                            null ),
+                        AccessorDeclaration(
+                            SyntaxKind.RemoveAccessorDeclaration,
+                            List<AttributeListSyntax>(),
+                            this.OverriddenDeclaration.RemoveMethod.GetSyntaxModifierList(),
+                            CreateAccessorBody( SyntaxKind.SubtractAssignmentExpression ),
+                            null )
                     }.Where( a => a != null )
-                    .AssertNoneNull()
                     .ToArray();
             }
 
-            BlockSyntax CreateGetterBody()
-            {
-                return
-                    Block( ReturnStatement( CreateAccessTargetExpression() ) );
-            }
-
-            BlockSyntax CreateSetterBody()
+            BlockSyntax CreateAccessorBody( SyntaxKind assignmentKind )
             {
                 return
                     Block(
                         ExpressionStatement(
                             AssignmentExpression(
-                                SyntaxKind.SimpleAssignmentExpression,
+                                assignmentKind,
                                 CreateAccessTargetExpression(),
                                 IdentifierName( "value" ) ) ) );
             }

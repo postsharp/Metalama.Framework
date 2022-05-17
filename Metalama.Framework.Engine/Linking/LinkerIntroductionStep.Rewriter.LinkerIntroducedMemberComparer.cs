@@ -46,7 +46,7 @@ namespace Metalama.Framework.Engine.Linking
                     this._orderedAspectLayers = orderedAspectLayers;
                 }
 
-                private int GetLayerOrder( LinkerIntroducedMember m ) => this._orderedAspectLayers[m.Introduction.Advice.AspectLayerId].Order;
+                private OrderedAspectLayer GetAspectLayer( LinkerIntroducedMember m ) => this._orderedAspectLayers[m.Introduction.Advice.AspectLayerId];
 
                 public int Compare( LinkerIntroducedMember x, LinkerIntroducedMember y )
                 {
@@ -121,20 +121,36 @@ namespace Metalama.Framework.Engine.Linking
                     }
 
                     // Order by type of introduction.
-                    var typeComparison = GetTypeOrder( x.Introduction ).CompareTo( GetTypeOrder( y.Introduction ) );
+                    var typeComparison = GetTransformationTypeOrder( x.Introduction ).CompareTo( GetTransformationTypeOrder( y.Introduction ) );
 
                     if ( typeComparison != 0 )
                     {
                         return typeComparison;
                     }
 
-                    var aspectLayerComparison = this.GetLayerOrder( x ).CompareTo( this.GetLayerOrder( y ) );
+                    // Order by aspect layer.
+                    var xLayer = this.GetAspectLayer( x );
+                    var yLayer = this.GetAspectLayer( y );
+                    var aspectLayerComparison = xLayer.Order.CompareTo( yLayer.Order );
 
                     if ( aspectLayerComparison != 0 )
                     {
                         return aspectLayerComparison;
                     }
+                    
+                    // At this point, if we have two distinct layers with identical ordering, we need to sort alphabetically otherwise
+                    // we will have an assertion failure. A LAMA0035 warning is emitted if aspects are not strongly ordered.
+                    if ( !xLayer.Equals( yLayer ) )
+                    {
+                        var aspectNameComparison = string.Compare( xLayer.AspectName, yLayer.AspectName, StringComparison.Ordinal );
 
+                        if ( aspectNameComparison != 0 )
+                        {
+                            return aspectLayerComparison;
+                        }
+                    }
+
+                    // Order by advice.
                     var adviceOrderComparison = x.Introduction.Advice.Order.CompareTo( y.Introduction.Advice.Order );
 
                     if ( adviceOrderComparison != 0 )
@@ -142,6 +158,7 @@ namespace Metalama.Framework.Engine.Linking
                         return adviceOrderComparison;
                     }
 
+                    // Order by semantic.
                     var semanticComparison = GetSemanticOrder( x.Semantic ).CompareTo( GetSemanticOrder( y.Semantic ) );
 
                     if ( semanticComparison != 0 )
@@ -151,13 +168,13 @@ namespace Metalama.Framework.Engine.Linking
 
                     {
                         // Order replaced declarations within the same layer.
-                        if ( x.Introduction is IReplaceMember { ReplacedMember: { } replacedMemberRefX }
+                        if ( x.Introduction is IReplaceMemberTransformation { ReplacedMember: { } replacedMemberRefX }
                              && replacedMemberRefX.Target == y.Introduction )
                         {
                             return 1;
                         }
 
-                        if ( y.Introduction is IReplaceMember { ReplacedMember: { } replacedMemberRefY }
+                        if ( y.Introduction is IReplaceMemberTransformation { ReplacedMember: { } replacedMemberRefY }
                              && replacedMemberRefY.Target == x.Introduction )
                         {
                             return -1;
@@ -172,7 +189,7 @@ namespace Metalama.Framework.Engine.Linking
                 private static int GetAccessibilityOrder( Accessibility accessibility )
                     => _orderedAccessibilities.TryGetValue( accessibility, out var order ) ? order : 10;
 
-                private static int GetTypeOrder( IMemberIntroduction introduction ) => introduction is IOverriddenDeclaration ? 0 : 1;
+                private static int GetTransformationTypeOrder( IIntroduceMemberTransformation introduction ) => introduction is IOverriddenDeclaration ? 0 : 1;
 
                 private static int GetSemanticOrder( IntroducedMemberSemantic semantic ) => semantic != IntroducedMemberSemantic.InitializerMethod ? 0 : 1;
 

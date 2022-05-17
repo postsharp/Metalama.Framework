@@ -78,9 +78,9 @@ namespace Metalama.Framework.Engine.Utilities
                 return false;
             }
 
-            for ( var i = 0; i < namedType.TypeArguments.Length; i++ )
+            foreach ( var t in namedType.TypeArguments )
             {
-                if ( namedType.TypeArguments[i] is ITypeParameterSymbol p )
+                if ( t is ITypeParameterSymbol p )
                 {
                     if ( !p.ContainingSymbol.Equals( namedType ) )
                     {

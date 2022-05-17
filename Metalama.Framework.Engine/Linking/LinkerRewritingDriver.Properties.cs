@@ -289,9 +289,7 @@ namespace Metalama.Framework.Engine.Linking
                                         : null
                                 }.Where( a => a != null )
                                 .AssertNoneNull() ) )
-                    : property.AccessorList != null
-                        ? property.AccessorList.WithSourceCodeAnnotation()
-                        : null;
+                    : property.AccessorList?.WithSourceCodeAnnotation();
 
             var expressionBody =
                 property.IsAutoPropertyDeclaration()

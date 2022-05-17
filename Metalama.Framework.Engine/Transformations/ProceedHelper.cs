@@ -24,11 +24,18 @@ namespace Metalama.Framework.Engine.Transformations
             ExpressionSyntax invocationExpression,
             BoundTemplateMethod template,
             IMethod overriddenMethod )
+            => CreateProceedDynamicExpression( generationContext, invocationExpression, template.Template.SelectedKind, overriddenMethod );
+
+        public static UserExpression CreateProceedDynamicExpression(
+            SyntaxGenerationContext generationContext,
+            ExpressionSyntax invocationExpression,
+            TemplateKind selectedTemplateKind,
+            IMethod overriddenMethod )
         {
             var runtimeAspectHelperType =
                 generationContext.SyntaxGenerator.Type( generationContext.ReflectionMapper.GetTypeSymbol( typeof(RunTimeAspectHelper) ) );
 
-            switch ( template.Template.SelectedKind )
+            switch ( selectedTemplateKind )
             {
                 case TemplateKind.Default when overriddenMethod.GetIteratorInfoImpl() is { IsIterator: true } iteratorInfo:
                     {

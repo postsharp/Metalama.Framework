@@ -507,7 +507,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
         {
             var indices = new int[array.Rank];
 
-            this.ReadArrayElements( array, array.GetType().GetElementType(), indices, 0, cause );
+            this.ReadArrayElements( array, array.GetType().GetElementType()!, indices, 0, cause );
         }
 
         private void ReadArrayElements( Array array, Type elementType, int[] indices, int currentDimension, SerializationCause? cause )
@@ -588,7 +588,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
                     lowerBounds[i] = this._binaryReader.ReadCompressedInteger();
                 }
 
-                value = Array.CreateInstance( type.GetElementType(), lengths, lowerBounds );
+                value = Array.CreateInstance( type.GetElementType()!, lengths, lowerBounds );
 
                 serializer = null;
             }
@@ -751,7 +751,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
 #if LEGACY_REFLECTION_API
                         return type.AssemblyQualifiedName + " (" + GetElementType(type).Assembly.Location + ")";
 #else
-                        return type.AssemblyQualifiedName;
+                        return type.AssemblyQualifiedName ?? type.ToString();
 #endif
                     }
 

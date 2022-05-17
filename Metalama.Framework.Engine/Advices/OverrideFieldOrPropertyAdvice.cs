@@ -50,7 +50,6 @@ namespace Metalama.Framework.Engine.Advices
                 OverrideHelper.OverrideProperty(
                     this,
                     targetDeclaration,
-                    this.PropertyTemplate,
                     this.GetTemplate,
                     this.SetTemplate,
                     ForOverride,

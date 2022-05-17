@@ -32,7 +32,7 @@ namespace Metalama.TestFramework
 
                 try
                 {
-                    factoryType = Type.GetType( testInput.Options.TestRunnerFactoryType, true )!;
+                    factoryType = Type.GetType( testInput.Options.TestRunnerFactoryType!, true )!;
                 }
                 catch ( Exception e )
                 {

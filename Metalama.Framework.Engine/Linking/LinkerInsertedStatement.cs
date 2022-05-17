@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.Linking
         /// <summary>
         /// Gets a member introduction into which the new node will be inserted.
         /// </summary>
-        public IMemberIntroduction? TargetIntroduction { get; }
+        public IIntroduceMemberTransformation? TargetIntroduction { get; }
 
         /// <summary>
         /// Gets the inserted statement.
@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.Linking
 
         public LinkerInsertedStatement(
             ITransformation parentTransformation,
-            IMemberIntroduction targetIntroduction,
+            IIntroduceMemberTransformation targetIntroduction,
             StatementSyntax statement,
             IDeclaration contextDeclaration )
         {

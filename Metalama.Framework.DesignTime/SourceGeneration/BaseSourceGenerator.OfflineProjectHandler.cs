@@ -8,7 +8,7 @@ using Metalama.Framework.Engine.Options;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.DesignTime;
+namespace Metalama.Framework.DesignTime.SourceGeneration;
 
 public partial class BaseSourceGenerator
 {

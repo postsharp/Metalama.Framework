@@ -14,7 +14,6 @@ namespace Metalama.Framework.Engine.Advices
         public static ITransformation[] OverrideProperty(
             Advice advice,
             IFieldOrPropertyOrIndexer targetDeclaration, 
-            TemplateMember<IProperty> propertyTemplate,
             TemplateMember<IMethod> getTemplate,
             TemplateMember<IMethod> setTemplate,
             Func<TemplateMember<IMethod>, IMethod?, BoundTemplateMethod> templateBinder,          
@@ -36,7 +35,7 @@ namespace Metalama.Framework.Engine.Advices
                     {
                         promotedField,
                         writeableProperty,
-                        new OverriddenProperty( advice, writeableProperty, propertyTemplate, boundGetTemplate, boundSetTemplate, tags ),
+                        new OverridePropertyTransformation( advice, writeableProperty, boundGetTemplate, boundSetTemplate, tags ),
                     };
                 }
                 else
@@ -47,7 +46,7 @@ namespace Metalama.Framework.Engine.Advices
                     return new ITransformation[]
                     {
                         promotedField,
-                        new OverriddenProperty( advice, promotedField, propertyTemplate, boundGetTemplate, boundSetTemplate, tags ),
+                        new OverridePropertyTransformation( advice, promotedField, boundGetTemplate, boundSetTemplate, tags ),
                     };
                 }
             }
@@ -63,7 +62,7 @@ namespace Metalama.Framework.Engine.Advices
                     return new ITransformation[]
                     {
                         writeableProperty,
-                        new OverriddenProperty( advice, writeableProperty, propertyTemplate, boundGetTemplate, boundSetTemplate, tags ),
+                        new OverridePropertyTransformation( advice, writeableProperty, boundGetTemplate, boundSetTemplate, tags ),
                     };
                 }
                 else
@@ -73,7 +72,7 @@ namespace Metalama.Framework.Engine.Advices
 
                     return new ITransformation[]
                     {
-                        new OverriddenProperty( advice, property, propertyTemplate, boundGetTemplate, boundSetTemplate, tags ),
+                        new OverridePropertyTransformation( advice, property, boundGetTemplate, boundSetTemplate, tags ),
                     };
                 }
             }

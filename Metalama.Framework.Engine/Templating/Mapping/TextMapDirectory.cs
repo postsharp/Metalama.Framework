@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.Templating.Mapping
         {
             var dictionaryBuilder = ImmutableDictionary.CreateBuilder<string, TextMapFile>();
 
-            foreach ( var filePath in Directory.GetFiles( directory, "*.map" ) )
+            foreach ( var filePath in Directory.GetFiles( directory!, "*.map" ) )
             {
                 var file = TextMapFile.Read( filePath );
 
@@ -57,7 +57,7 @@ namespace Metalama.Framework.Engine.Templating.Mapping
         /// <summary>
         /// Writes the content of the current <see cref="TextMapDirectory"/> to the filesystem.
         /// </summary>
-        public void Write( string? outputDirectory )
+        public void Write( string outputDirectory )
         {
             foreach ( var map in this.FilesByTargetPath.Values )
             {

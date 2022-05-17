@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
     /// <summary>
     /// Get-only property that is made writeable for override purposes.
     /// </summary>
-    internal class PrivatelyWriteableProperty : PropertyBuilder, IReplaceMember
+    internal class PrivatelyWriteableProperty : PropertyBuilder, IReplaceMemberTransformation
     {
         private readonly IProperty _originalProperty;
 
