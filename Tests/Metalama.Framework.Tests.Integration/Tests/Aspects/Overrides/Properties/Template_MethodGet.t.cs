@@ -58,20 +58,15 @@ internal class TargetClass
     }
 
 
-    private global::System.Int32 _autoGetOnlyProperty;
+    private int _autoGetOnlyProperty;
 
-
-    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Template_MethodGet.TestAttribute]
-    public global::System.Int32 AutoGetOnlyProperty
+    [Test]
+    public int AutoGetOnlyProperty
     {
         get
         {
             global::System.Console.WriteLine($"This is the overridden getter.");
             return this._autoGetOnlyProperty;
-        }
-        private set
-        {
-            this._autoGetOnlyProperty = value;
         }
     }
 }

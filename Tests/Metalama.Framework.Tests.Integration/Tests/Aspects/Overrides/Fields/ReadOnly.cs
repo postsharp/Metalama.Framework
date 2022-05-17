@@ -2,12 +2,9 @@
 using Metalama.Framework.Code;
 using Metalama.TestFramework;
 using System;
-//using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.ReadOnly;
 
 #pragma warning disable CS0169
 #pragma warning disable CS0414
-
-//[assembly: AspectOrder(typeof(OverrideAttribute), typeof(IntroduceAndOverrideAttribute))]
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.ReadOnly
 {
@@ -17,7 +14,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
 
     public class OverrideAttribute : OverrideFieldOrPropertyAspect
     {
-        public override dynamic? OverrideProperty 
+        public override dynamic? OverrideProperty
         {
             get
             {
@@ -33,28 +30,9 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
         }
     }
 
-    // TODO: Introductions are currently broken.
-
-    //public class IntroduceAndOverrideAttribute : TypeAspect
-    //{
-    //    public override void BuildAspect(IAspectBuilder<INamedType> builder)
-    //    {
-    //        builder.With(x => x.Properties).AddAspect(x => new OverrideAttribute());
-    //    }
-
-    //    [Introduce]
-    //    public readonly int IntroducedField;
-
-    //    [Introduce]
-    //    public readonly int IntroducedStaticField;
-    //}
-
     // <target>
-    //[IntroduceAndOverride]
     internal class TargetClass
     {
-        // TODO: Remove override attribute after the introductions are fixed.
-
         [Override]
         public readonly int ReadOnlyField;
 
@@ -80,3 +58,4 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
         }
     }
 }
+

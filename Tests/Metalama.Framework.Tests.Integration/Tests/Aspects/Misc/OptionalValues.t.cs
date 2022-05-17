@@ -19,7 +19,7 @@ internal class Account
     {
         get
         {
-            return (global::Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues.Account)((global::Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues.Account.Optional)this.OptionalValues).Parent.Value;
+            return (global::Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues.Account?)((global::Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues.Account.Optional)this.OptionalValues).Parent.Value;
 
         }
         set

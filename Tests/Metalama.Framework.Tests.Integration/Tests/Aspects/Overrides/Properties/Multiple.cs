@@ -3,16 +3,13 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Multiple;
 
-[assembly: AspectOrder( typeof(FirstOverrideAttribute), typeof(SecondOverrideAttribute) )]
+[assembly: AspectOrder( typeof(FirstOverrideAttribute), typeof(SecondOverrideAttribute), typeof(IntroduceAndOverrideAttribute) )]
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Multiple
 {
     /*
      * Tests that multiple aspects overriding the same property produce correct code.
      */
-
-    // TODO: Also add introduced properties.
-    // TODO: multiple aspects on get-only auto properties.
 
     public class FirstOverrideAttribute : FieldOrPropertyAspect
     {
@@ -62,13 +59,27 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         }
     }
 
+    public class IntroduceAndOverrideAttribute : TypeAspect
+    {
+        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        {
+            builder.With(x => x.FieldsAndProperties).AddAspect(x => new FirstOverrideAttribute());
+            builder.With(x => x.FieldsAndProperties).AddAspect(x => new SecondOverrideAttribute());
+        }
+
+        [Introduce]
+        public int IntroducedField;
+
+        [Introduce]
+        public readonly int IntroducedReadOnlyField;
+    }
+
     // <target>
+    [IntroduceAndOverride]
     internal class TargetClass
     {
         private int _field;
 
-        [FirstOverride]
-        [SecondOverride]
         public int Property
         {
             get
@@ -84,8 +95,6 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
 
         private static int _staticField;
 
-        [FirstOverride]
-        [SecondOverride]
         public static int StaticProperty
         {
             get
@@ -99,26 +108,17 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
             }
         }
 
-        [FirstOverride]
-        [SecondOverride]
         public int ExpressionBodiedProperty => 42;
 
-
-        [FirstOverride]
-        [SecondOverride]
         public int AutoProperty { get; set; }
 
-        //[FirstOverride]
-        //[SecondOverride]
-        //public int GetOnlyAutoProperty { get; }
+        public int GetOnlyAutoProperty { get; }
 
-        [FirstOverride]
-        [SecondOverride]
         public int InitializerAutoProperty { get; set; } = 42;
 
         public TargetClass()
         {
-            //this.GetOnlyAutoProperty = 42;
+            this.GetOnlyAutoProperty = 42;
         }
     }
 }

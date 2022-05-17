@@ -1,8 +1,4 @@
-﻿#if TEST_OPTIONS
-// @Skipped(#30307)
-#endif
-
-using System;
+﻿using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Multiple;
@@ -27,7 +23,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
         {
             get
             {
-                Console.WriteLine( "First override." );
+                Console.WriteLine("First override.");
                 return meta.Proceed();
             }
 
@@ -41,9 +37,9 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
 
     public class SecondOverrideAttribute : FieldOrPropertyAspect
     {
-        public override void BuildAspect( IAspectBuilder<IFieldOrProperty> builder )
+        public override void BuildAspect(IAspectBuilder<IFieldOrProperty> builder)
         {
-            builder.Advice.Override( builder.Target, nameof(Template) );
+            builder.Advice.Override(builder.Target, nameof(Template));
         }
 
         [Template]
@@ -67,8 +63,8 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
     {
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            builder.With(x => x.Fields).AddAspect(x => new FirstOverrideAttribute());
-            builder.With(x => x.Fields).AddAspect(x => new SecondOverrideAttribute());
+            builder.With( x => x.FieldsAndProperties ).AddAspect(x => new FirstOverrideAttribute());
+            builder.With( x => x.FieldsAndProperties).AddAspect(x => new SecondOverrideAttribute());
         }
 
         [Introduce]
@@ -79,23 +75,15 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
     }
 
     // <target>
-    //[IntroduceAndOverride]
+    [IntroduceAndOverride]
     internal class TargetClass
     {
-        //[FirstOverride]
-        //[SecondOverride]
-        //public int Field;
+        public int Field;
 
-        //[FirstOverride]
-        //[SecondOverride]
-        //public int StaticField;
+        public int StaticField;
 
-        //[FirstOverride]
-        //[SecondOverride]
-        //public int InitializerField = 42;
+        public int InitializerField = 42;
 
-        [FirstOverride]
-        [SecondOverride]
         public readonly int ReadOnlyField;
 
         public TargetClass()

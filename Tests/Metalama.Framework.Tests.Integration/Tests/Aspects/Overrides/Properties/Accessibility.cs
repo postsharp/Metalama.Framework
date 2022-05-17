@@ -42,7 +42,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         private protected int PrivateProtectedProperty { get; set; }
 
         [Override]
-        protected int ProtectedProperty{ get; set; }
+        protected int ProtectedProperty { get; set; }
 
         [Override]
         protected internal int ProtectedInternalProperty { get; set; }

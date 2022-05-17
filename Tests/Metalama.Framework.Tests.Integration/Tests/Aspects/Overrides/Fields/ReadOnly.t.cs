@@ -1,4 +1,3 @@
-[IntroduceAndOverride]
 internal class TargetClass
 {
 
@@ -84,30 +83,5 @@ internal class TargetClass
     {
         this.ReadOnlyField = 42;
         this.InitializerReadOnlyField = 27;
-    }
-
-
-    private global::System.Int32 _introducedField;
-
-
-    public global::System.Int32 IntroducedField
-    {
-        get
-        {
-            global::System.Console.WriteLine("This is the overridden getter.");
-            return this._introducedField;
-        }
-    }
-
-    private global::System.Int32 _introducedStaticField;
-
-
-    public global::System.Int32 IntroducedStaticField
-    {
-        get
-        {
-            global::System.Console.WriteLine("This is the overridden getter.");
-            return this._introducedStaticField;
-        }
     }
 }

@@ -81,7 +81,7 @@ internal class TargetClass
     private int ExpressionBodiedProperty_Source => 42
 
             [Override]
-        public int AutoProperty
+            public int AutoProperty
     {
         get
         {
@@ -114,6 +114,8 @@ internal class TargetClass
         }
         private set
         {
+            global::System.Console.WriteLine("Override.");
+            this.AutoGetOnlyProperty_Source = value;
             this.AutoGetOnlyProperty_Source = value;
 
         }

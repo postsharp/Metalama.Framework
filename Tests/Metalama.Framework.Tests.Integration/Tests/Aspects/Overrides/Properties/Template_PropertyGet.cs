@@ -21,7 +21,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         {
             get
             {
-                Console.WriteLine( $"This is the overridden setter." );
+                Console.WriteLine( $"This is the overridden getter." );
 
                 return meta.Proceed();
             }

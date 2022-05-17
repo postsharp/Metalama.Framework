@@ -5,7 +5,7 @@ internal class TargetClass
     {
         get
         {
-            global::System.Console.WriteLine($"This is the overridden setter.");
+            global::System.Console.WriteLine($"This is the overridden getter.");
             Console.WriteLine("Original");
             return 42;
         }
@@ -20,7 +20,7 @@ internal class TargetClass
     {
         get
         {
-            global::System.Console.WriteLine($"This is the overridden setter.");
+            global::System.Console.WriteLine($"This is the overridden getter.");
             return 42;
         }
         set
@@ -34,7 +34,7 @@ internal class TargetClass
     {
         get
         {
-            global::System.Console.WriteLine($"This is the overridden setter.");
+            global::System.Console.WriteLine($"This is the overridden getter.");
             return 42;
         }
     }
@@ -48,7 +48,7 @@ internal class TargetClass
     {
         get
         {
-            global::System.Console.WriteLine($"This is the overridden setter.");
+            global::System.Console.WriteLine($"This is the overridden getter.");
             return this._autoProperty;
         }
         set
@@ -58,20 +58,15 @@ internal class TargetClass
     }
 
 
-    private global::System.Int32 _autoGetOnlyProperty;
+    private int _autoGetOnlyProperty;
 
-
-    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Template_PropertyGet.TestAttribute]
-    public global::System.Int32 AutoGetOnlyProperty
+    [Test]
+    public int AutoGetOnlyProperty
     {
         get
         {
-            global::System.Console.WriteLine($"This is the overridden setter.");
+            global::System.Console.WriteLine($"This is the overridden getter.");
             return this._autoGetOnlyProperty;
-        }
-        private set
-        {
-            this._autoGetOnlyProperty = value;
         }
     }
 }

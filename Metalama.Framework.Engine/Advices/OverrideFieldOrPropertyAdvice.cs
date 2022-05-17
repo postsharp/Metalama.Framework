@@ -4,7 +4,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
 using System.Collections.Generic;
@@ -13,26 +12,30 @@ namespace Metalama.Framework.Engine.Advices
 {
     internal class OverrideFieldOrPropertyAdvice : OverrideMemberAdvice<IFieldOrPropertyOrIndexer>
     {
+        private readonly IObjectReader? _args;
+
         public TemplateMember<IProperty> PropertyTemplate { get; }
 
-        public BoundTemplateMethod GetTemplate { get; }
+        public TemplateMember<IMethod> GetTemplate { get; }
 
-        public BoundTemplateMethod SetTemplate { get; }
+        public TemplateMember<IMethod> SetTemplate { get; }
 
         public OverrideFieldOrPropertyAdvice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             IFieldOrPropertyOrIndexer targetDeclaration,
             TemplateMember<IProperty> propertyTemplate,
-            BoundTemplateMethod getTemplate,
-            BoundTemplateMethod setTemplate,
+            TemplateMember<IMethod> getTemplate,
+            TemplateMember<IMethod> setTemplate,
             string? layerName,
-            IObjectReader tags )
+            IObjectReader tags,
+            IObjectReader? args )
             : base( aspect, templateInstance, targetDeclaration, layerName, tags )
         {
             this.PropertyTemplate = propertyTemplate;
             this.GetTemplate = getTemplate;
             this.SetTemplate = setTemplate;
+            this._args = args;
         }
 
         public override void Initialize( IDiagnosticAdder diagnosticAdder ) { }
@@ -43,46 +46,19 @@ namespace Metalama.Framework.Engine.Advices
             // TODO: order should be self if the target is introduced on the same layer.
             var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
 
-            if ( targetDeclaration is IField field )
-            {
-                var promotedField = new PromotedField( this, field, this.Tags );
+            return AdviceResult.Create(
+                OverrideHelper.OverrideProperty(
+                    this,
+                    targetDeclaration,
+                    this.PropertyTemplate,
+                    this.GetTemplate,
+                    this.SetTemplate,
+                    ForOverride,
+                    this.Tags ) );
 
-                if ( field.Writeability == Writeability.ConstructorOnly )
-                {
-                    // Privately writeable property is a transformation that adds a private setter to a get-only property.
-                    var writeableProperty = new PrivatelyWriteableProperty( this, promotedField, this.Tags );
-
-                    // TODO: The promoted field should be also included and processed as an transformation (currently fails in the linker).
-                    return AdviceResult.Create(
-                        writeableProperty,
-                        new OverriddenProperty( this, writeableProperty, this.PropertyTemplate, this.GetTemplate, this.SetTemplate, this.Tags ) );
-                }
-                else
-                {
-                    return AdviceResult.Create(
-                        promotedField,
-                        new OverriddenProperty( this, promotedField, this.PropertyTemplate, this.GetTemplate, this.SetTemplate, this.Tags ) );
-                }
-            }
-            else if ( targetDeclaration is IProperty property )
+            BoundTemplateMethod ForOverride(TemplateMember<IMethod> templateMember, IMethod? targetMethod )
             {
-                if ( property.Writeability == Writeability.ConstructorOnly )
-                {
-                    var writeableProperty = new PrivatelyWriteableProperty( this, property, this.Tags );
-
-                    return AdviceResult.Create(
-                        writeableProperty,
-                        new OverriddenProperty( this, writeableProperty, this.PropertyTemplate, this.GetTemplate, this.SetTemplate, this.Tags ) );
-                }
-                else
-                {
-                    return AdviceResult.Create(
-                        new OverriddenProperty( this, property, this.PropertyTemplate, this.GetTemplate, this.SetTemplate, this.Tags ) );
-                }
-            }
-            else
-            {
-                throw new AssertionFailedException();
+                return templateMember.ForOverride( targetMethod, this._args );
             }
         }
     }

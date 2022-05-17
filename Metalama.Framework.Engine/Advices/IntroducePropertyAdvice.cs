@@ -16,8 +16,10 @@ namespace Metalama.Framework.Engine.Advices
 {
     internal class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty, PropertyBuilder>
     {
-        private readonly BoundTemplateMethod _getTemplate;
-        private readonly BoundTemplateMethod _setTemplate;
+        private readonly IObjectReader? _args;
+
+        private readonly TemplateMember<IMethod> _getTemplate;
+        private readonly TemplateMember<IMethod> _setTemplate;
 
         public IPropertyBuilder Builder => this.MemberBuilder;
 
@@ -27,14 +29,16 @@ namespace Metalama.Framework.Engine.Advices
             INamedType targetDeclaration,
             string? explicitName,
             TemplateMember<IProperty> propertyTemplate,
-            BoundTemplateMethod getTemplate,
-            BoundTemplateMethod setTemplate,
+            TemplateMember<IMethod> getTemplate,
+            TemplateMember<IMethod> setTemplate,
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             string? layerName,
-            IObjectReader tags )
+            IObjectReader tags,
+            IObjectReader? args = null )
             : base( aspect, templateInstance, targetDeclaration, propertyTemplate, scope, overrideStrategy, layerName, tags )
         {
+            this._args = args;
             this._getTemplate = getTemplate;
             this._setTemplate = setTemplate;
 
@@ -67,11 +71,11 @@ namespace Metalama.Framework.Engine.Advices
 
             // TODO: Indexers.
 
-            this.MemberBuilder.Type = (this.Template.Declaration?.Type ?? this._getTemplate.Template.Declaration?.ReturnType).AssertNotNull();
+            this.MemberBuilder.Type = (this.Template.Declaration?.Type ?? this._getTemplate.Declaration?.ReturnType).AssertNotNull();
 
             this.MemberBuilder.Accessibility =
                 (this.Template.Declaration?.Accessibility
-                 ?? this._getTemplate.Template.Declaration?.Accessibility ?? this._setTemplate.Template.Declaration?.Accessibility).AssertNotNull();
+                 ?? this._getTemplate.Declaration?.Accessibility ?? this._setTemplate.Declaration?.Accessibility).AssertNotNull();
 
             if ( this.Template.IsNotNull )
             {
@@ -116,8 +120,8 @@ namespace Metalama.Framework.Engine.Advices
                         this,
                         this.MemberBuilder,
                         this.Template,
-                        this._getTemplate,
-                        this._setTemplate,
+                        this._getTemplate.ForIntroduction(this._args),
+                        this._setTemplate.ForIntroduction( this._args ),
                         this.Tags );
 
                     return AdviceResult.Create( this.MemberBuilder, overriddenProperty );
@@ -158,8 +162,8 @@ namespace Metalama.Framework.Engine.Advices
                                 this,
                                 existingDeclaration,
                                 this.Template,
-                                this._getTemplate,
-                                this._setTemplate,
+                                this._getTemplate.ForIntroduction( this._args ),
+                                this._setTemplate.ForIntroduction( this._args ),
                                 this.Tags );
 
                             return AdviceResult.Create( overriddenProperty );
@@ -172,8 +176,8 @@ namespace Metalama.Framework.Engine.Advices
                                 this,
                                 this.MemberBuilder,
                                 this.Template,
-                                this._getTemplate,
-                                this._setTemplate,
+                                this._getTemplate.ForIntroduction( this._args ),
+                                this._setTemplate.ForIntroduction( this._args ),
                                 this.Tags );
 
                             return AdviceResult.Create( this.MemberBuilder, overriddenProperty );
@@ -186,8 +190,8 @@ namespace Metalama.Framework.Engine.Advices
                                 this,
                                 existingDeclaration,
                                 this.Template,
-                                this._getTemplate,
-                                this._setTemplate,
+                                this._getTemplate.ForIntroduction( this._args ),
+                                this._setTemplate.ForIntroduction( this._args ),
                                 this.Tags );
 
                             return AdviceResult.Create( overriddenMethod );
@@ -215,15 +219,17 @@ namespace Metalama.Framework.Engine.Advices
                             this.MemberBuilder.IsOverride = true;
                             this.MemberBuilder.OverriddenProperty = existingDeclaration;
 
-                            var overriddenProperty = new OverriddenProperty(
-                                this,
-                                this.MemberBuilder,
-                                this.Template,
-                                this._getTemplate,
-                                this._setTemplate,
-                                this.Tags );
+                            var overrideTransformations =
+                                OverrideHelper.OverrideProperty(
+                                    this,
+                                    this.MemberBuilder,
+                                    this.Template,
+                                    this._getTemplate,
+                                    this._setTemplate,
+                                    ( t, m ) => t.ForIntroduction( this._args ),
+                                    this.Tags );
 
-                            return AdviceResult.Create( this.MemberBuilder, overriddenProperty );
+                            return AdviceResult.Create( new ITransformation[] { this.MemberBuilder }.Concat( overrideTransformations ) );
                         }
 
                     default:

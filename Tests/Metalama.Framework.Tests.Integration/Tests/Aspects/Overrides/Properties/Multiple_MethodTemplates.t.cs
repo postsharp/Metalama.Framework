@@ -1,9 +1,31 @@
+[IntroduceAndOverride]
 internal class TargetClass
 {
-    private int _field;
 
-    [FirstOverride]
-    [SecondOverride]
+
+    private global::System.Int32 _field
+    {
+        get
+        {
+            global::System.Console.WriteLine("This is the overridden getter.");
+            global::System.Console.WriteLine("This is the overridden getter.");
+            _ = this._field_Source;
+            return this._field_Source;
+
+
+
+        }
+        set
+        {
+            global::System.Console.WriteLine("This is the overridden setter.");
+            global::System.Console.WriteLine("This is the overridden setter.");
+            this._field_Source = value;
+
+
+        }
+    }
+    private global::System.Int32 _field_Source { get; set; }
+
     public int Property
     {
         get
@@ -38,10 +60,30 @@ internal class TargetClass
         }
     }
 
-    private static int _staticField;
 
-    [FirstOverride]
-    [SecondOverride]
+    private static global::System.Int32 _staticField
+    {
+        get
+        {
+            global::System.Console.WriteLine("This is the overridden getter.");
+            global::System.Console.WriteLine("This is the overridden getter.");
+            _ = global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Multiple_MethodTemplates.TargetClass._staticField_Source;
+            return global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Multiple_MethodTemplates.TargetClass._staticField_Source;
+
+
+
+        }
+        set
+        {
+            global::System.Console.WriteLine("This is the overridden setter.");
+            global::System.Console.WriteLine("This is the overridden setter.");
+            global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Multiple_MethodTemplates.TargetClass._staticField_Source = value;
+
+
+        }
+    }
+    private static global::System.Int32 _staticField_Source { get; set; }
+
     public static int StaticProperty
     {
         get
@@ -76,8 +118,6 @@ internal class TargetClass
         }
     }
 
-    [FirstOverride]
-    [SecondOverride]
     public int ExpressionBodiedProperty
     {
         get
@@ -93,9 +133,6 @@ internal class TargetClass
 
     private int ExpressionBodiedProperty_Source => 42
 
-
-            [FirstOverride]
-            [SecondOverride]
         public int AutoProperty
     {
         get
@@ -120,12 +157,30 @@ internal class TargetClass
 
     private int AutoProperty_Source { get; set; }
 
-    //[FirstOverride]
-    //[SecondOverride]
-    //public int GetOnlyAutoProperty { get; }
 
-    [FirstOverride]
-    [SecondOverride]
+    public global::System.Int32 GetOnlyAutoProperty
+    {
+        get
+        {
+            global::System.Console.WriteLine("This is the overridden getter.");
+            global::System.Console.WriteLine("This is the overridden getter.");
+            _ = this.GetOnlyAutoProperty_Source;
+            return this.GetOnlyAutoProperty_Source;
+
+
+
+        }
+        private set
+        {
+            global::System.Console.WriteLine("This is the overridden setter.");
+            global::System.Console.WriteLine("This is the overridden setter.");
+            this.GetOnlyAutoProperty_Source = value;
+
+
+        }
+    }
+    private global::System.Int32 GetOnlyAutoProperty_Source { get; set; }
+
     public int InitializerAutoProperty
     {
         get
@@ -151,6 +206,54 @@ internal class TargetClass
 
         public TargetClass()
     {
-        // this.GetOnlyAutoProperty = 42;
+        this.GetOnlyAutoProperty = 42;
     }
+
+
+    public global::System.Int32 IntroducedField
+    {
+        get
+        {
+            global::System.Console.WriteLine("This is the overridden getter.");
+            global::System.Console.WriteLine("This is the overridden getter.");
+            _ = this.IntroducedField_Source;
+            return this.IntroducedField_Source;
+
+
+
+        }
+        set
+        {
+            global::System.Console.WriteLine("This is the overridden setter.");
+            global::System.Console.WriteLine("This is the overridden setter.");
+            this.IntroducedField_Source = value;
+
+
+        }
+    }
+    private global::System.Int32 IntroducedField_Source { get; set; }
+
+
+    public global::System.Int32 IntroducedReadOnlyField
+    {
+        get
+        {
+            global::System.Console.WriteLine("This is the overridden getter.");
+            global::System.Console.WriteLine("This is the overridden getter.");
+            _ = this.IntroducedReadOnlyField_Source;
+            return this.IntroducedReadOnlyField_Source;
+
+
+
+        }
+        private set
+        {
+            global::System.Console.WriteLine("This is the overridden setter.");
+            global::System.Console.WriteLine("This is the overridden setter.");
+            this.IntroducedReadOnlyField_Source = value;
+
+
+        }
+    }
+    private global::System.Int32 IntroducedReadOnlyField_Source { get; set; }
 }

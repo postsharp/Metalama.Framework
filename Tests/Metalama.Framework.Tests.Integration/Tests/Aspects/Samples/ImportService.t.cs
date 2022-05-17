@@ -3,9 +3,6 @@ class TargetClass
     private readonly IServiceProvider? _serviceProvider;
 
 
-    private global::System.IFormatProvider? _formatProvider;
-
-
     [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.ImportService.ImportServiceAspect]
     private global::System.IFormatProvider? FormatProvider
     {
@@ -16,7 +13,8 @@ class TargetClass
         }
         set
         {
-            this._formatProvider = value;
+            throw new global::System.NotSupportedException();
+
         }
     }
     public string? Format(object? o)

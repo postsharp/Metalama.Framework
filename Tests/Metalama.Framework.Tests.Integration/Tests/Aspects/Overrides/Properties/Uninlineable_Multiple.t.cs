@@ -169,12 +169,48 @@ public global::System.Int32 ExpressionBodiedProperty_SecondOverride
             this.AutoProperty_Source = value;
         }
     }
-    //[FirstOverride]
-    //[SecondOverride]
-    //public int AutoGetOnlyProperty { get; }
+
+    public global::System.Int32 AutoGetOnlyProperty_SecondOverride
+    {
+        get
+        {
+            global::System.Console.WriteLine("Second override.");
+            _ = this.AutoGetOnlyProperty_Source;
+            return this.AutoGetOnlyProperty_Source;
+
+        }
+
+        private set
+        {
+            global::System.Console.WriteLine("Second override.");
+            this.AutoGetOnlyProperty_Source = value;
+            this.AutoGetOnlyProperty_Source = value;
+        }
+    }
+
+    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Uninlineable_Multiple.FirstOverrideAttribute]
+    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Uninlineable_Multiple.SecondOverrideAttribute]
+    public global::System.Int32 AutoGetOnlyProperty
+    {
+        get
+        {
+            global::System.Console.WriteLine("First override.");
+            _ = this.AutoGetOnlyProperty_SecondOverride;
+            return this.AutoGetOnlyProperty_SecondOverride;
+
+        }
+        private set
+        {
+            global::System.Console.WriteLine("First override.");
+            this.AutoGetOnlyProperty_SecondOverride = value;
+            this.AutoGetOnlyProperty_SecondOverride = value;
+
+        }
+    }
+    private global::System.Int32 AutoGetOnlyProperty_Source { get; set; }
 
     public TargetClass()
     {
-        //this.AutoGetOnlyProperty = 42;
+        this.AutoGetOnlyProperty = 42;
     }
 }

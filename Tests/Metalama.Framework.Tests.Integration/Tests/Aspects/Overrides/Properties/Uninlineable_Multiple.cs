@@ -110,13 +110,13 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         [SecondOverride]
         public int AutoProperty { get; set; }
 
-        //[FirstOverride]
-        //[SecondOverride]
-        //public int AutoGetOnlyProperty { get; }
+        [FirstOverride]
+        [SecondOverride]
+        public int AutoGetOnlyProperty { get; }
 
         public TargetClass()
         {
-            //this.AutoGetOnlyProperty = 42;
+            this.AutoGetOnlyProperty = 42;
         }
     }
 }

@@ -535,7 +535,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 return symbolMembers.Select( x => new MemberRef<TMember>( x, this.Compilation.RoslynCompilation ) );
             }
 
-            if ( !transformations.OfType<TBuilder>().Any( t => t is IReplaceMember ) )
+            if ( !transformations.Any( t => t is IReplaceMember ) )
             {
                 // No replaced members.
                 return
@@ -552,25 +552,13 @@ namespace Metalama.Framework.Engine.CodeModel
             // Go through transformations, noting replaced symbols and builders.
             foreach ( var builder in transformations )
             {
-                if ( builder is IReplaceMember ) { }
-
                 if ( builder is TBuilder typedBuilder )
                 {
                     builders.Add( typedBuilder );
                 }
 
-                static void ProcessReplaceMember(
-                    IReplaceMember replaceMember,
-                    CompilationModel compilation,
-                    HashSet<TSymbol> allSymbols,
-                    HashSet<TSymbol> replacedSymbols,
-                    HashSet<TBuilder> replacedBuilders )
+                if ( builder is IReplaceMember { ReplacedMember: { } replacedMember } )
                 {
-                    if ( replaceMember is not { ReplacedMember: { } replacedMember } )
-                    {
-                        return;
-                    }
-
                     if ( replacedMember.Target is TSymbol symbol && allSymbols.Contains( replacedMember.Target ) )
                     {
                         // If the MemberRef points to a symbol just remove from symbol list.
@@ -579,8 +567,8 @@ namespace Metalama.Framework.Engine.CodeModel
                     }
                     else
                     {
-                        // Otherwise resolve the MemberRef.
-                        var resolved = replacedMember.GetTarget( compilation );
+                        // Otherwise resolve the MemberRef (directly, without redirections).
+                        var resolved = replacedMember.GetTarget( this.Compilation, false );
 
                         if ( resolved is TMember )
                         {
@@ -593,20 +581,10 @@ namespace Metalama.Framework.Engine.CodeModel
                             else if ( resolved is TBuilder replacedBuilder )
                             {
                                 replacedBuilders.Add( replacedBuilder );
-
-                                if ( replacedBuilder is IReplaceMember recursiveReplaceMember )
-                                {
-                                    ProcessReplaceMember( recursiveReplaceMember, compilation, allSymbols, replacedSymbols, replacedBuilders );
-                                }
                             }
                             else if ( resolved is BuiltDeclaration { Builder: TBuilder replacedDeclarationBuilder } builtDeclaration )
                             {
                                 replacedBuilders.Add( replacedDeclarationBuilder );
-
-                                if ( replacedDeclarationBuilder is IReplaceMember recursiveReplaceMember )
-                                {
-                                    ProcessReplaceMember( recursiveReplaceMember, compilation, allSymbols, replacedSymbols, replacedBuilders );
-                                }
                             }
                             else
                             {

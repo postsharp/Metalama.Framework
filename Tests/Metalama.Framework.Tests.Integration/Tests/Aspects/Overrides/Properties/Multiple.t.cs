@@ -1,9 +1,29 @@
+[IntroduceAndOverride]
 internal class TargetClass
 {
-    private int _field;
 
-    [FirstOverride]
-    [SecondOverride]
+
+    private global::System.Int32 _field1;
+
+
+    private global::System.Int32 _field
+    {
+        get
+        {
+            global::System.Console.WriteLine("First override.");
+            global::System.Console.WriteLine("Second override.");
+            return this._field1;
+
+
+        }
+        set
+        {
+            global::System.Console.WriteLine("First override.");
+            global::System.Console.WriteLine("Second override.");
+            this._field1 = value;
+
+        }
+    }
     public int Property
     {
         get
@@ -24,10 +44,28 @@ internal class TargetClass
         }
     }
 
-    private static int _staticField;
 
-    [FirstOverride]
-    [SecondOverride]
+    private static global::System.Int32 _staticField1;
+
+
+    private static global::System.Int32 _staticField
+    {
+        get
+        {
+            global::System.Console.WriteLine("First override.");
+            global::System.Console.WriteLine("Second override.");
+            return global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Multiple.TargetClass._staticField1;
+
+
+        }
+        set
+        {
+            global::System.Console.WriteLine("First override.");
+            global::System.Console.WriteLine("Second override.");
+            global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Multiple.TargetClass._staticField1 = value;
+
+        }
+    }
     public static int StaticProperty
     {
         get
@@ -48,8 +86,6 @@ internal class TargetClass
         }
     }
 
-    [FirstOverride]
-    [SecondOverride]
     public int ExpressionBodiedProperty
     {
         get
@@ -64,9 +100,6 @@ internal class TargetClass
 
     private int _autoProperty;
 
-
-    [FirstOverride]
-    [SecondOverride]
     public int AutoProperty
     {
         get
@@ -87,14 +120,30 @@ internal class TargetClass
     }
 
 
+    private global::System.Int32 _getOnlyAutoProperty;
+
+
+    public global::System.Int32 GetOnlyAutoProperty
+    {
+        get
+        {
+            global::System.Console.WriteLine("First override.");
+            global::System.Console.WriteLine("Second override.");
+            return this._getOnlyAutoProperty;
+
+
+        }
+        private set
+        {
+            global::System.Console.WriteLine("First override.");
+            global::System.Console.WriteLine("Second override.");
+            this._getOnlyAutoProperty = value;
+
+        }
+    }
+
     private int _initializerAutoProperty = 42;
 
-    //[FirstOverride]
-    //[SecondOverride]
-    //public int GetOnlyAutoProperty { get; }
-
-    [FirstOverride]
-    [SecondOverride]
     public int InitializerAutoProperty
     {
         get
@@ -115,6 +164,51 @@ internal class TargetClass
     }
     public TargetClass()
     {
-        //this.GetOnlyAutoProperty = 42;
+        this.GetOnlyAutoProperty = 42;
+    }
+
+
+    private global::System.Int32 _introducedField;
+
+
+    public global::System.Int32 IntroducedField
+    {
+        get
+        {
+            global::System.Console.WriteLine("First override.");
+            global::System.Console.WriteLine("Second override.");
+            return this._introducedField;
+
+
+        }
+        set
+        {
+            global::System.Console.WriteLine("First override.");
+            global::System.Console.WriteLine("Second override.");
+            this._introducedField = value;
+
+        }
+    }
+
+    private global::System.Int32 _introducedReadOnlyField;
+
+
+    public global::System.Int32 IntroducedReadOnlyField
+    {
+        get
+        {
+            global::System.Console.WriteLine("First override.");
+            global::System.Console.WriteLine("Second override.");
+            return this._introducedReadOnlyField;
+
+
+        }
+        private set
+        {
+            global::System.Console.WriteLine("First override.");
+            global::System.Console.WriteLine("Second override.");
+            this._introducedReadOnlyField = value;
+
+        }
     }
 }

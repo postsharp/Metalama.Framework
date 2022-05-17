@@ -169,8 +169,13 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public T GetTarget( ICompilation compilation )
         {
+            return this.GetTarget( compilation, true );
+        }
+
+        public T GetTarget( ICompilation compilation, bool applyRedirections )
+        {
             var compilationModel = (CompilationModel) compilation;
-            if ( compilationModel.TryGetRedirectedDeclaration( new Ref<IDeclaration>( this.Target, this._compilation, this.TargetKind ), out var redirected ) )
+            if ( applyRedirections && compilationModel.TryGetRedirectedDeclaration( new Ref<IDeclaration>( this.Target, this._compilation, this.TargetKind ), out var redirected ) )
             {
                 // Referencing redirected declaration.
                 return Resolve( redirected.Target, compilationModel, this.TargetKind );
