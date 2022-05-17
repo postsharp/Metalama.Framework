@@ -21,6 +21,8 @@ namespace Metalama.Framework.Code
         /// </summary>
         Class,
 
+        RecordClass,
+
         /// <summary>
         /// Delegate.
         /// </summary>
@@ -54,7 +56,9 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Struct.
         /// </summary>
-        Struct
+        Struct,
+
+        RecordStruct
 
         // FunctionPointer
     }
