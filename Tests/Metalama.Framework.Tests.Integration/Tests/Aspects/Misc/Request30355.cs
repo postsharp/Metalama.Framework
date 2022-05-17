@@ -1,3 +1,7 @@
+#if TEST_OPTIONS
+// @RequiredConstant(NET5_0_OR_GREATER)
+#endif
+
 #pragma warning disable CS8618
 
 using System.ComponentModel;

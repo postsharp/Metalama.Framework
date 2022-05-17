@@ -20,7 +20,7 @@ set
         if (value != this.FirstName_Source)
         {
             this.FirstName_Source = value;
-            this.OnPropertyChanged("FirstName");
+            OnPropertyChanged("FirstName");
         }
 
         return;
@@ -49,7 +49,7 @@ set
         if (value != this.LastName_Source)
         {
             this.LastName_Source = value;
-            this.OnPropertyChanged("LastName");
+            OnPropertyChanged("LastName");
         }
 
         return;
@@ -62,7 +62,7 @@ private string LastName_Source { get; set; }
 
 protected void OnPropertyChanged(global::System.String name)
 {
-    this.PropertyChanged?.Invoke(this, new global::System.ComponentModel.PropertyChangedEventArgs(name));
+    PropertyChanged?.Invoke(this, new global::System.ComponentModel.PropertyChangedEventArgs(name));
 }
 
 public event global::System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
