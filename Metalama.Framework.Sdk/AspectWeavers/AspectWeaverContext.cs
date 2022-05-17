@@ -17,6 +17,7 @@ namespace Metalama.Framework.Engine.AspectWeavers
     /// <summary>
     /// Context for the <see cref="IAspectWeaver"/>.
     /// </summary>
+    [CompileTime]
     public sealed partial class AspectWeaverContext
     {
         private readonly Action<Diagnostic> _addDiagnostic;

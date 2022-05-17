@@ -24,17 +24,15 @@ namespace Metalama.TestFramework
 
         private static TestAssemblyMetadata GetProjectOptionsCore( IAssemblyInfo assembly )
         {
-            ImmutableArray<TestAssemblyReference> GetAssemblyReferences()
+            ImmutableArray<TestAssemblyReference> GetAssemblyReferences( string propertyName )
             {
                 var referencesAttribute = assembly
                     .GetCustomAttributes( typeof(AssemblyMetadataAttribute) )
-                    .SingleOrDefault(
-                        a => string.Equals( (string) a.GetConstructorArguments().First<object>(), "ReferenceAssemblyList", StringComparison.Ordinal ) );
+                    .SingleOrDefault( a => string.Equals( (string) a.GetConstructorArguments().First<object>(), propertyName, StringComparison.Ordinal ) );
 
                 if ( referencesAttribute == null )
                 {
-                    throw new InvalidOperationException(
-                        "The test assembly must have a single AssemblyMetadataAttribute with Key = \"ReferenceAssemblyList\"." );
+                    throw new InvalidOperationException( $"The test assembly must have a AssemblyMetadataAttribute with Key = \"{propertyName}\"." );
                 }
 
                 TestDiscoverer testDiscoverer = new( assembly );
@@ -81,7 +79,11 @@ namespace Metalama.TestFramework
                 return value;
             }
 
-            return new TestAssemblyMetadata( GetMustLaunchDebugger(), GetAssemblyReferences(), GetGlobalUsingsFile() );
+            return new TestAssemblyMetadata(
+                GetMustLaunchDebugger(),
+                GetAssemblyReferences( "ReferenceAssemblyList" ),
+                GetAssemblyReferences( "AnalyzerAssemblyList" ),
+                GetGlobalUsingsFile() );
         }
 
         private static string FilterReference( string projectDirectory, string path )

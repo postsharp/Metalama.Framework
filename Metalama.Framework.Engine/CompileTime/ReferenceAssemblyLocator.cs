@@ -4,6 +4,7 @@
 using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Utilities;
+using Metalama.Compiler;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Options;
@@ -82,11 +83,10 @@ namespace Metalama.Framework.Engine.CompileTime
             }
 
             // Get Metalama implementation assemblies (but not the public API, for which we need a special compile-time build).
-            var metalamaImplementationAssemblies = new Dictionary<string, string>()
-            {
-                [typeof(AspectWeaverAttribute).Assembly.GetName().Name] = typeof(AspectWeaverAttribute).Assembly.Location,
-                [typeof(TemplateSyntaxFactory).Assembly.GetName().Name] = typeof(TemplateSyntaxFactory).Assembly.Location
-            };
+            var metalamaImplementationAssemblies =
+                new[] { typeof(MetalamaPlugInAttribute), typeof(IAspectWeaver), typeof(TemplateSyntaxFactory) }.ToDictionary(
+                    x => x.Assembly.GetName().Name,
+                    x => x.Assembly.Location );
 
             this.MetalamaImplementationAssemblyNames = metalamaImplementationAssemblies.Keys.ToImmutableArray();
             var metalamaImplementationPaths = metalamaImplementationAssemblies.Values;

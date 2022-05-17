@@ -58,6 +58,8 @@ namespace Metalama.Framework.Engine.Aspects
 
         public string? Description { get; }
 
+        public string? WeaverType { get; }
+
         internal override CompileTimeProject? Project { get; }
 
         CompileTimeProject? IAspectClassImpl.Project => this.Project;
@@ -120,6 +122,8 @@ namespace Metalama.Framework.Engine.Aspects
                 this.Description = baseClass.Description;
                 this.IsInherited = baseClass.IsInherited;
                 this.IsLiveTemplate = baseClass.IsLiveTemplate;
+                this.WeaverType = baseClass.WeaverType;
+
                 layers.AddRange( baseClass.Layers.Select( l => l.LayerName ) );
             }
             else
@@ -168,6 +172,11 @@ namespace Metalama.Framework.Engine.Aspects
 
                     case nameof(DisplayNameAttribute):
                         this.DisplayName = (string?) attribute.ConstructorArguments[0].Value ?? this.ShortName;
+
+                        break;
+
+                    case nameof(RequireAspectWeaverAttribute):
+                        this.WeaverType = (string?) attribute.ConstructorArguments[0].Value ?? this.ShortName;
 
                         break;
                 }

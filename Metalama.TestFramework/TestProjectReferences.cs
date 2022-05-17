@@ -6,4 +6,4 @@ using System.Collections.Immutable;
 
 namespace Metalama.TestFramework;
 
-public record TestProjectReferences( ImmutableArray<MetadataReference> MetadataReferences, string? GlobalUsingsFile );
+public record TestProjectReferences( ImmutableArray<MetadataReference> MetadataReferences, ImmutableArray<object> PlugIns, string? GlobalUsingsFile );

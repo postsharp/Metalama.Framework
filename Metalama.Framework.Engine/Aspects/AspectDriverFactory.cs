@@ -2,13 +2,9 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Engine.AspectWeavers;
-using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Engine.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
-using System.Linq;
-using System.Reflection;
 
 namespace Metalama.Framework.Engine.Aspects
 {
@@ -19,7 +15,7 @@ namespace Metalama.Framework.Engine.Aspects
     {
         private readonly Compilation _compilation;
         private readonly IServiceProvider _serviceProvider;
-        private readonly ILookup<string, IAspectWeaver> _weaverTypes;
+        private readonly ImmutableDictionary<string, IAspectWeaver> _weaverTypes;
 
         public AspectDriverFactory( Compilation compilation, ImmutableArray<object> plugins, IServiceProvider serviceProvider )
         {
@@ -27,21 +23,20 @@ namespace Metalama.Framework.Engine.Aspects
             this._serviceProvider = serviceProvider;
 
             this._weaverTypes = plugins.OfType<IAspectWeaver>()
-                .ToLookup( weaver => weaver.GetType().GetCustomAttribute<AspectWeaverAttribute>().AspectType.FullName );
+                .ToImmutableDictionary( weaver => weaver.GetType().FullName );
         }
 
         public IAspectDriver GetAspectDriver( AspectClass aspectClass, INamedTypeSymbol type )
         {
-            var weavers = this._weaverTypes[type.GetReflectionName().AssertNotNull()].ToList();
-
-            if ( weavers.Count > 1 )
+            if ( aspectClass.WeaverType != null )
             {
-                throw GeneralDiagnosticDescriptors.AspectHasMoreThanOneWeaver.CreateException( (type, string.Join( ", ", weavers )) );
-            }
+                if ( !this._weaverTypes.TryGetValue( aspectClass.WeaverType, out var weaver ) )
+                {
+                    throw new InvalidOperationException(
+                        $"The weaver type '{aspectClass.WeaverType}' required to weave aspect '{aspectClass.ShortName}' is not found in the project. The weaver assembly must be included as an analyzer." );
+                }
 
-            if ( weavers.Count == 1 )
-            {
-                return weavers.Single();
+                return weaver;
             }
 
             return new AspectDriver( this._serviceProvider, aspectClass, this._compilation );

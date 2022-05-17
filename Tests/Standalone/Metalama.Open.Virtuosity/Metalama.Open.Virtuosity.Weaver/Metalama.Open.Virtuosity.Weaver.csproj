@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackageId>Metalama.Open.Virtuosity</PackageId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Metalama.Framework.Sdk" Version="$(MetalamaVersion)" />
+  </ItemGroup>
+
+  <!-- PrivateAssets="all" ensures that the NuGet package for this project does not have a dependency on the other project; Metalama.Framework.Sdk takes care of including it directly in the package -->
+  <ItemGroup>
+    <ProjectReference Include="..\Metalama.Open.Virtuosity\Metalama.Open.Virtuosity.csproj" PrivateAssets="all" />
+  </ItemGroup>
+
+</Project>

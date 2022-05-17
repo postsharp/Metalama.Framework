@@ -60,6 +60,8 @@ namespace Metalama.TestFramework.XunitFramework
                     Debugger.Launch();
                 }
 
+                var projectReferences = projectMetadata.ToProjectReferences();
+
                 // Creates the set of references. Include all project references plus the project itself.
 
                 executionMessageSink.OnMessage( new TestCollectionStarting( collection, collection.Key ) );
@@ -101,7 +103,7 @@ namespace Metalama.TestFramework.XunitFramework
 
                                 try
                                 {
-                                    using var testOptions = new TestProjectOptions();
+                                    using var testOptions = new TestProjectOptions( plugIns: projectReferences.PlugIns );
 
                                     var serviceProvider = ServiceProviderFactory.GetServiceProvider( testOptions );
 
@@ -120,7 +122,7 @@ namespace Metalama.TestFramework.XunitFramework
                                         var testRunner = TestRunnerFactory.CreateTestRunner(
                                             testInput,
                                             serviceProvider,
-                                            projectMetadata.ToProjectReferences(),
+                                            projectReferences,
                                             logger );
 
                                         Task.Run( () => testRunner.RunAndAssertAsync( testInput ) ).Wait();
