@@ -2,7 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.AspectOrdering;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Collections;
@@ -43,13 +43,16 @@ namespace Metalama.Framework.Engine.Linking
             var nameProvider = new LinkerIntroductionNameProvider();
             var syntaxTransformationCollection = new SyntaxTransformationCollection();
 
-            // TODO: Merge observable and non-observable transformations so that the order is preserved.
-            //       Maybe have all transformations already together in the input?
+            var observableTransformations = input.CompilationModel.GetAllObservableTransformations( false )
+                .SelectMany( x => x.Transformations.OfType<ISyntaxTreeTransformation>() );
+
+            var nonObservableTransformations = input.NonObservableTransformations.OfType<ISyntaxTreeTransformation>();
+
+            // TODO: this sorting can be optimized.
             var allTransformations =
-                MergeOrderedTransformations(
-                        input.OrderedAspectLayers,
-                        input.CompilationModel.GetAllObservableTransformations( false ).Select( x => x.Transformations.OfType<ISyntaxTreeTransformation>() ),
-                        input.NonObservableTransformations.OfType<ISyntaxTreeTransformation>() )
+                observableTransformations.Concat( nonObservableTransformations )
+                    .OrderBy( x => x.Advice.AspectLayerId, new AspectLayerIdComparer( input.OrderedAspectLayers ) )
+                    .Cast<ITransformation>()
                     .ToList();
 
             ProcessReplaceTransformations( input, allTransformations, syntaxTransformationCollection, out var replacedTransformations );
@@ -353,76 +356,6 @@ namespace Metalama.Framework.Engine.Linking
 
                     return insertStatementTransformation.GetInsertedStatement( context );
                 }
-            }
-        }
-
-        private static IEnumerable<ITransformation> MergeOrderedTransformations(
-            IReadOnlyList<OrderedAspectLayer> orderedLayers,
-            IEnumerable<IEnumerable<ITransformation>> observableTransformationLists,
-            IEnumerable<ITransformation> nonObservableTransformations )
-        {
-            var enumerators = new LinkedList<IEnumerator<ITransformation>>();
-
-            foreach ( var observableTransformations in observableTransformationLists )
-            {
-                enumerators.AddLast( observableTransformations.GetEnumerator() );
-            }
-
-            enumerators.AddLast( nonObservableTransformations.GetEnumerator() );
-
-            // Initialize enumerators and remove empty ones.
-            var currentEnumerator = enumerators.First;
-
-            while ( currentEnumerator != null )
-            {
-                if ( !currentEnumerator.Value.MoveNext() )
-                {
-                    enumerators.Remove( currentEnumerator );
-                }
-
-                currentEnumerator = currentEnumerator.Next;
-            }
-
-            // Go through ordered layers and yield all transformations for these layers.
-            // Presumes all input enumerable are ordered according to ordered layers.
-            foreach ( var orderedLayer in orderedLayers )
-            {
-                currentEnumerator = enumerators.First;
-
-                if ( currentEnumerator == null )
-                {
-                    break;
-                }
-
-                do
-                {
-                    var current = currentEnumerator.Value.Current.AssertNotNull();
-
-                    while ( current.Advice.AspectLayerId == orderedLayer.AspectLayerId )
-                    {
-                        yield return current;
-
-                        if ( !currentEnumerator.Value.MoveNext() )
-                        {
-                            var toRemove = currentEnumerator;
-                            currentEnumerator = currentEnumerator.Next;
-                            enumerators.Remove( toRemove );
-
-                            goto next;
-                        }
-
-                        current = currentEnumerator.Value.Current;
-                    }
-
-                    currentEnumerator = currentEnumerator.Next;
-
-                next:
-
-                    // Comment to make the formatter happy.
-
-                    ;
-                }
-                while ( currentEnumerator != null );
             }
         }
     }

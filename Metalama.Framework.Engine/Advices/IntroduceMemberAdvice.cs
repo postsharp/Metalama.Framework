@@ -110,5 +110,7 @@ namespace Metalama.Framework.Engine.Advices
                 builder.AddAttribute( codeElementAttribute.ToAttributeConstruction() );
             }
         }
+
+        public override string ToString() => $"Introduce {this.MemberBuilder}";
     }
 }

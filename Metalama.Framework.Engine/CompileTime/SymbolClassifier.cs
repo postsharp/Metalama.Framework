@@ -8,6 +8,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -37,7 +38,8 @@ namespace Metalama.Framework.Engine.CompileTime
                 (typeof(STAThreadAttribute), Scope: TemplatingScope.RunTimeOnly, false),
                 (typeof(AppDomain), Scope: TemplatingScope.RunTimeOnly, false),
                 (typeof(MemberInfo), Scope: TemplatingScope.RunTimeOnly, true),
-                (typeof(ParameterInfo), Scope: TemplatingScope.RunTimeOnly, true)
+                (typeof(ParameterInfo), Scope: TemplatingScope.RunTimeOnly, true),
+                (typeof(Debugger), Scope: TemplatingScope.RunTimeOrCompileTime, false)
             }.ToImmutableDictionary( t => t.ReflectionType.Name, t => (t.ReflectionType.Namespace, t.Scope, t.MembersOnly) );
 
         private static readonly ImmutableDictionary<string, (TemplatingScope Scope, bool IncludeDescendants)> _wellKnownNamespaces =
