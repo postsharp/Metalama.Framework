@@ -17,7 +17,7 @@ namespace Metalama.Open.Virtuosity
     {
         void IAspectWeaver.Transform( AspectWeaverContext context )
         {
-            Debugger.Break();
+            Debugger.Launch();
             context.RewriteAspectTargets( new Rewriter() );
         }
 

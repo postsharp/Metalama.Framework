@@ -4,7 +4,6 @@
 using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Utilities;
-using Metalama.Compiler;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Options;

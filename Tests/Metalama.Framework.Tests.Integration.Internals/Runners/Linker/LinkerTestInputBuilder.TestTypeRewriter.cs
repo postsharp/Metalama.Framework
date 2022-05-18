@@ -813,8 +813,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 var fakeAspectSymbol = A.Fake<INamedTypeSymbol>();
                 var fakeGlobalNamespaceSymbol = A.Fake<INamespaceSymbol>();
                 var fakeDiagnosticAdder = A.Fake<IDiagnosticAdder>();
-                var fakeCompilation = A.Fake<Compilation>();
-
+                
                 A.CallTo( () => fakeAspectSymbol.MetadataName ).Returns( aspectLayer.AspectName.AssertNotNull() );
                 A.CallTo( () => fakeAspectSymbol.ContainingSymbol ).Returns( fakeGlobalNamespaceSymbol );
                 A.CallTo( () => fakeAspectSymbol.DeclaringSyntaxReferences ).Returns( ImmutableArray<SyntaxReference>.Empty );
@@ -832,8 +831,6 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                         null,
                         fakeDiagnosticAdder,
                         null! );
-
-                var aspectDriverFactory = new AspectDriverFactory( fakeCompilation, ImmutableArray<object>.Empty, this._owner.ServiceProvider );
 
                 var fakeAspectInstance = new AspectInstance( A.Fake<IAspect>(), default, aspectClass, default );
 

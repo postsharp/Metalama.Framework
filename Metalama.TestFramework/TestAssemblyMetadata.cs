@@ -45,7 +45,7 @@ internal record TestAssemblyMetadata(
 
             try
             {
-                exportedTypes = assembly.GetExportedTypes().Where( t => t.GetCustomAttribute<MetalamaPlugInAttribute>() != null ).ToList();
+                exportedTypes = assembly.GetTypes().Where( t => t.GetCustomAttribute<MetalamaPlugInAttribute>() != null ).ToList();
             }
             catch
             {

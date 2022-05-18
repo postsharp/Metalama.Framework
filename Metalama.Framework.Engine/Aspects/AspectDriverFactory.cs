@@ -5,7 +5,6 @@ using Metalama.Framework.Engine.AspectWeavers;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Aspects
 {

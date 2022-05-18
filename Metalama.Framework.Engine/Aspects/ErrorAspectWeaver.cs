@@ -1,4 +1,7 @@
-﻿using Metalama.Framework.Engine.AspectWeavers;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.Diagnostics;
 
 namespace Metalama.Framework.Engine.Aspects;
@@ -8,15 +11,16 @@ namespace Metalama.Framework.Engine.Aspects;
 /// </summary>
 internal class ErrorAspectWeaver : IAspectWeaver
 {
-    private AspectClass _aspectClass;
+    private readonly AspectClass _aspectClass;
 
-    public ErrorAspectWeaver( AspectClass aspectClass ) {
+    public ErrorAspectWeaver( AspectClass aspectClass )
+    {
         this._aspectClass = aspectClass;
     }
 
     public void Transform( AspectWeaverContext context )
     {
-        context.ReportDiagnostic( GeneralDiagnosticDescriptors.CannotFindAspectWeaver.CreateRoslynDiagnostic( null, (this._aspectClass.WeaverType, this._aspectClass.ShortName) ) );
-
+        context.ReportDiagnostic(
+            GeneralDiagnosticDescriptors.CannotFindAspectWeaver.CreateRoslynDiagnostic( null, (this._aspectClass.WeaverType!, this._aspectClass.ShortName) ) );
     }
 }
