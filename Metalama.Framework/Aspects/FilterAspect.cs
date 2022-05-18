@@ -12,7 +12,7 @@ namespace Metalama.Framework.Aspects
     /// </summary>
     /// <remarks>
     /// <para>A filter aspect can apply to the input or output data flow, or to both data flows, according to the <see cref="FilterDirection"/> value
-    /// passes to the constructor. Since the current class does not know the value of this parameter before it is instantiated, this class cannot
+    /// passed to the constructor. Since the current class does not know the value of this parameter before it is instantiated, this class cannot
     /// set the eligibility conditions using the <see cref="BuildEligibility(Metalama.Framework.Eligibility.IEligibilityBuilder{Metalama.Framework.Code.IFieldOrPropertyOrIndexer})"/> method.
     /// If a derived class targets a specific <see cref="FilterDirection"/> (i.e. if the choice is not left to the user),
     /// its implementation of <see cref="BuildEligibility(Metalama.Framework.Eligibility.IEligibilityBuilder{Metalama.Framework.Code.IFieldOrPropertyOrIndexer})"/>

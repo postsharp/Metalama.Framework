@@ -61,7 +61,7 @@ namespace Metalama.TestFramework.XunitFramework
                 if ( attributes.Count != 1 )
                 {
                     throw new InvalidOperationException(
-                        $"The assembly '{this._assembly.AssemblyPath}' must have a single AssemblyMetadataAttribute with Key = \"{key}\"." );
+                        $"The assembly '{this._assembly.AssemblyPath}' must have a single AssemblyMetadataAttribute with Key = \"{key}\" but it has {attributes.Count}." );
                 }
 
                 var value = (string?) attributes[0].GetConstructorArguments().ElementAt( 1 );
@@ -71,7 +71,7 @@ namespace Metalama.TestFramework.XunitFramework
                     if ( required )
                     {
                         throw new InvalidOperationException(
-                            $"The assembly '{this._assembly.AssemblyPath}' must have a single AssemblyMetadataAttribute with Key = \"{key}\"." );
+                            $"The assembly '{this._assembly.AssemblyPath}' AssemblyMetadataAttribute with Key = \"{key}\" has a null or empty value." );
                     }
                     else
                     {

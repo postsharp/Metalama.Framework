@@ -2,13 +2,9 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Engine.AspectWeavers;
-using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Engine.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
-using System.Linq;
-using System.Reflection;
 
 namespace Metalama.Framework.Engine.Aspects
 {
@@ -19,29 +15,30 @@ namespace Metalama.Framework.Engine.Aspects
     {
         private readonly Compilation _compilation;
         private readonly IServiceProvider _serviceProvider;
-        private readonly ILookup<string, IAspectWeaver> _weaverTypes;
+        private readonly ImmutableDictionary<string, IAspectDriver> _weaverTypes;
 
         public AspectDriverFactory( Compilation compilation, ImmutableArray<object> plugins, IServiceProvider serviceProvider )
         {
             this._compilation = compilation;
             this._serviceProvider = serviceProvider;
 
-            this._weaverTypes = plugins.OfType<IAspectWeaver>()
-                .ToLookup( weaver => weaver.GetType().GetCustomAttribute<AspectWeaverAttribute>().AspectType.FullName );
+            this._weaverTypes = plugins.OfType<IAspectDriver>()
+                .ToImmutableDictionary( weaver => weaver.GetType().FullName );
         }
 
-        public IAspectDriver GetAspectDriver( AspectClass aspectClass, INamedTypeSymbol type )
+        public IAspectDriver GetAspectDriver( AspectClass aspectClass )
         {
-            var weavers = this._weaverTypes[type.GetReflectionName().AssertNotNull()].ToList();
-
-            if ( weavers.Count > 1 )
+            if ( aspectClass.WeaverType != null )
             {
-                throw GeneralDiagnosticDescriptors.AspectHasMoreThanOneWeaver.CreateException( (type, string.Join( ", ", weavers )) );
-            }
+                if ( !this._weaverTypes.TryGetValue( aspectClass.WeaverType, out var registeredAspectDriver ) )
+                {
+                    // It's okay to have a missing driver if the aspect is not instantiated.
+                    // This is actually a common situation when building the project defining the aspect class.
+                    // Return an ErrorAspectWeaver that will emit an error when used.
+                    return new ErrorAspectWeaver( aspectClass );
+                }
 
-            if ( weavers.Count == 1 )
-            {
-                return weavers.Single();
+                return registeredAspectDriver;
             }
 
             return new AspectDriver( this._serviceProvider, aspectClass, this._compilation );

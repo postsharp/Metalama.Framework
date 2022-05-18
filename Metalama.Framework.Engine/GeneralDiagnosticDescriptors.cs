@@ -39,9 +39,6 @@ namespace Metalama.Framework.Engine
                     Error,
                     "Aspect applied to incorrect kind of declaration." );
 
-        internal static readonly DiagnosticDefinition<(INamedTypeSymbol AspectType, string Weavers)> AspectHasMoreThanOneWeaver =
-            new( "LAMA0004", _category, "Aspect '{0}' can have at most one weaver, but it has the following: {1}.", Error, "Aspect has more than one weaver." );
-
         internal static readonly DiagnosticDefinition<(string AspectType, string Exception)> ExceptionInWeaver =
             new( "LAMA0006", _category, "Exception occurred while executing the weaver of aspect '{0}': {1}", Error, "Exception in aspect weaver." );
 
@@ -284,6 +281,14 @@ namespace Metalama.Framework.Engine
                 " Please report this issue at https://www.postsharp.net/support and attach this file to the ticket.",
                 Warning,
                 "Unexpected exception in Metalama." );
+
+        internal static readonly DiagnosticDefinition<(string WeaverType, string AspectType)> CannotFindAspectWeaver =
+            new(
+                "LAMA00050",
+                _category,
+                "The weaver type '{0}' required to weave aspect '{1}' is not found in the project. The weaver assembly must be included as an analyzer.",
+                Error,
+                "Cannot find an aspect weaver." );
 
         // TODO: Use formattable string (C# does not seem to find extension methods).
         public static readonly DiagnosticDefinition<string>

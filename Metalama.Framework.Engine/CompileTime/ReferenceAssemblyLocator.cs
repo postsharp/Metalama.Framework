@@ -82,11 +82,26 @@ namespace Metalama.Framework.Engine.CompileTime
             }
 
             // Get Metalama implementation assemblies (but not the public API, for which we need a special compile-time build).
-            var metalamaImplementationAssemblies = new Dictionary<string, string>()
+            var metalamaImplementationAssemblies =
+                new[] { typeof(IAspectWeaver), typeof(TemplateSyntaxFactory) }.ToDictionary(
+                    x => x.Assembly.GetName().Name,
+                    x => x.Assembly.Location );
+
+            // Add the Metalama.Compiler.Interface" assembly. We cannot get it through typeof because types are directed to Microsoft.CodeAnalysis at compile time.
+            // Strangely, there can be many instances of this same assembly.
+            var metalamaCompilerInterfaceAssembly = AppDomain.CurrentDomain.GetAssemblies()
+                .Where( a => a.FullName.StartsWith( "Metalama.Compiler.Interface,", StringComparison.Ordinal ) )
+                .OrderByDescending( a => a.GetName().Version )
+                .FirstOrDefault();
+
+            if ( metalamaCompilerInterfaceAssembly == null )
             {
-                [typeof(AspectWeaverAttribute).Assembly.GetName().Name] = typeof(AspectWeaverAttribute).Assembly.Location,
-                [typeof(TemplateSyntaxFactory).Assembly.GetName().Name] = typeof(TemplateSyntaxFactory).Assembly.Location
-            };
+                throw new AssertionFailedException( "Cannot find the Metalama.Compiler.Interface assembly." );
+            }
+
+            metalamaImplementationAssemblies.Add(
+                "Metalama.Compiler.Interface",
+                metalamaCompilerInterfaceAssembly.Location );
 
             this.MetalamaImplementationAssemblyNames = metalamaImplementationAssemblies.Keys.ToImmutableArray();
             var metalamaImplementationPaths = metalamaImplementationAssemblies.Values;

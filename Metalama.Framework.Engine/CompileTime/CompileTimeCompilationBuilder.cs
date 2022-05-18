@@ -467,7 +467,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                         foreach ( var reference in compileTimeCompilation.References )
                         {
-                            errorFile.WriteLine( "  " + reference );
+                            errorFile.WriteLine( "  " + reference.Display );
                         }
                     }
 

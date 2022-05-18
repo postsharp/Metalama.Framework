@@ -42,14 +42,14 @@ internal class FilterPropertyTransformation : OverridePropertyBaseTransformation
                     returnValueLocalName = null;
                 }
 
-                if ( !advice.TryExecuteTemplates( this.OverriddenDeclaration, contextCopy!, direction, returnValueLocalName, out statements ) )
+                if ( !advice.TryExecuteTemplates( this.OverriddenDeclaration, contextCopy, direction, returnValueLocalName, out statements ) )
                 {
                     proceedExpression = null;
 
                     return false;
                 }
 
-                proceedExpression = this.CreateProceedDynamicExpression( contextCopy!, accessor, TemplateKind.Default ).ToRunTimeExpression().Syntax;
+                proceedExpression = this.CreateProceedDynamicExpression( contextCopy, accessor, TemplateKind.Default ).ToRunTimeExpression().Syntax;
 
                 return true;
             }

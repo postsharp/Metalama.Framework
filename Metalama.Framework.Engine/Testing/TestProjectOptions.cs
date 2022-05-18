@@ -21,8 +21,10 @@ namespace Metalama.Framework.Engine.Testing
         private readonly Lazy<string> _projectDirectory;
         private readonly Lazy<string> _compileTimeProjectCacheDirectory;
 
-        public TestProjectOptions( ImmutableDictionary<string, string>? properties = null )
+        public TestProjectOptions( ImmutableDictionary<string, string>? properties = null, ImmutableArray<object> plugIns = default )
         {
+            this.PlugIns = plugIns.IsDefault ? ImmutableArray<object>.Empty : plugIns;
+
             this._properties = properties ?? ImmutableDictionary<string, string>.Empty;
             var baseDirectory = Path.Combine( Path.GetTempPath(), "Metalama", "Tests", RandomIdGenerator.GenerateId() );
             this._baseDirectory = CreateDirectoryLazy( baseDirectory );
@@ -63,7 +65,7 @@ namespace Metalama.Framework.Engine.Testing
 
         public string? AssemblyName => null;
 
-        public ImmutableArray<object> PlugIns => ImmutableArray<object>.Empty;
+        public ImmutableArray<object> PlugIns { get; }
 
         public bool IsFrameworkEnabled => true;
 
