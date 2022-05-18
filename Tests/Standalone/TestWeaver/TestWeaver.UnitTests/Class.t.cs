@@ -1,10 +1,6 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
-
 namespace Metalama.Open.Virtuosity.TestApp
 {
     [Virtualize]
-
     internal class C
     {
         // Not transformed.
@@ -14,19 +10,19 @@ namespace Metalama.Open.Virtuosity.TestApp
         private void ExplicitPrivate() { }
 
         // Transformed.
-        public void Public() { }
+        public virtual void Public() { }
 
         // Not transformed (already virtual).
         public virtual void PublicVirtual() { }
 
         // Transformed.
-        protected async void Protected() { }
+        protected async virtual void Protected() { }
 
         // Transformed.
-        private protected void PrivateProtected() { }
+        private protected virtual void PrivateProtected() { }
 
         // Transformed (should not be sealed).
-        public sealed override string ToString()
+        public override string ToString()
         {
             return null;
         }

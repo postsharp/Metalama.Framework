@@ -1,7 +1,13 @@
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+#pragma warning disable CA1822 // Mark members as static
+#pragma warning disable IDE0051 // Remove unused private members
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
+
 namespace Metalama.Open.Virtuosity.TestApp
 {
     [Virtualize]
-
     internal class C
     {
         // Not transformed.
@@ -11,19 +17,19 @@ namespace Metalama.Open.Virtuosity.TestApp
         private void ExplicitPrivate() { }
 
         // Transformed.
-        public virtual void Public() { }
+        public void Public() { }
 
         // Not transformed (already virtual).
         public virtual void PublicVirtual() { }
 
         // Transformed.
-        protected async virtual void Protected() { }
+        protected async void Protected() { }
 
         // Transformed.
-        private protected virtual void PrivateProtected() { }
+        private protected void PrivateProtected() { }
 
         // Transformed (should not be sealed).
-        public override string ToString()
+        public sealed override string ToString()
         {
             return null;
         }

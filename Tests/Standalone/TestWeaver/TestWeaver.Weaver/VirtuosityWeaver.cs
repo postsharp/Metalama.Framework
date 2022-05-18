@@ -23,8 +23,8 @@ namespace Metalama.Open.Virtuosity
 
         private class Rewriter : CSharpSyntaxRewriter
         {
-            private static readonly SyntaxKind[]? forbiddenModifiers = new[] { StaticKeyword, VirtualKeyword, OverrideKeyword };
-            private static readonly SyntaxKind[]? requiredModifiers = new[] { PublicKeyword, ProtectedKeyword, InternalKeyword };
+            private static readonly SyntaxKind[]? _forbiddenModifiers = new[] { StaticKeyword, VirtualKeyword, OverrideKeyword };
+            private static readonly SyntaxKind[]? _requiredModifiers = new[] { PublicKeyword, ProtectedKeyword, InternalKeyword };
 
             public override SyntaxNode VisitMethodDeclaration( MethodDeclarationSyntax node )
             {
@@ -50,8 +50,8 @@ namespace Metalama.Open.Virtuosity
                 }
 
                 // Add the virtual modifier.
-                if ( !forbiddenModifiers.Any( modifier => node.Modifiers.Any( modifier ) )
-                    && requiredModifiers.Any( modifier => node.Modifiers.Any( modifier ) ) )
+                if ( !_forbiddenModifiers.Any( modifier => node.Modifiers.Any( modifier ) )
+                    && _requiredModifiers.Any( modifier => node.Modifiers.Any( modifier ) ) )
                 {
                     node = node.AddModifiers( SyntaxFactory.Token( VirtualKeyword ).WithTrailingTrivia( SyntaxFactory.ElasticSpace ) );
                 }
