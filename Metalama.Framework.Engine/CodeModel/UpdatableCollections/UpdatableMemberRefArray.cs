@@ -30,7 +30,7 @@ internal class UpdatableMemberRefArray<T>
 
     public void Remove( MemberRef<T> member )
     {
-        var index = this._array.IndexOf( member, DeclarationRefEqualityComparer<MemberRef<T>>.Instance );
+        var index = this._array.IndexOf( member, DeclarationRefEqualityComparer<MemberRef<T>>.Default );
 
         if ( index < 0 )
         {

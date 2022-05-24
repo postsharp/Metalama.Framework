@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.CodeModel
         private readonly ReflectionMapper _reflectionMapper;
 
         private readonly DeclarationRefEqualityComparer<Ref<IDeclaration>> _innerComparer =
-            DeclarationRefEqualityComparer<Ref<IDeclaration>>.Instance;
+            DeclarationRefEqualityComparer<Ref<IDeclaration>>.Default;
 
         public DeclarationEqualityComparer( ReflectionMapper reflectionMapper, Compilation compilation )
         {

@@ -132,7 +132,7 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
                 // The collection has not been populated yet, so do it now, and add the new member.
                 var sourceMembers = this.GetMemberRefs( member.Name );
 
-                var index = sourceMembers.IndexOf( member, DeclarationRefEqualityComparer<MemberRef<T>>.Instance );
+                var index = sourceMembers.IndexOf( member, DeclarationRefEqualityComparer<MemberRef<T>>.Default );
 
                 if ( index < 0 )
                 {
@@ -160,7 +160,7 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
             else
             {
                 // The object was created for another compilation, so we need to create a clone for ourselves.
-                var index = members.Array.IndexOf( member, DeclarationRefEqualityComparer<MemberRef<T>>.Instance );
+                var index = members.Array.IndexOf( member, DeclarationRefEqualityComparer<MemberRef<T>>.Default );
 
                 if ( index < 0 )
                 {

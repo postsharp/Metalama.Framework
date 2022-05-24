@@ -69,7 +69,7 @@ internal abstract class UpdatableDeclarationCollection<T> : ILazy, IReadOnlyList
     {
         this.EnsureComplete();
 
-        return this._allItems!.Any( i => DeclarationRefEqualityComparer<Ref<T>>.Instance.Equals( i, item ) );
+        return this._allItems!.Any( i => DeclarationRefEqualityComparer<Ref<T>>.Default.Equals( i, item ) );
     }
 
     public UpdatableDeclarationCollection<T> Clone( CompilationModel compilation )

@@ -36,7 +36,10 @@ namespace Metalama.Framework.Engine.Pipeline
             LexicalScopeFactory lexicalScopeFactory = new( compilationModel );
             var introductionNameProvider = new LinkerIntroductionNameProvider();
 
-            foreach ( var transformationGroup in transformations.OfType<IObservableTransformation>().GroupBy( t => t.ContainingDeclaration ) )
+            // Get all observable transformations except replacements, because replacements are not visible at design time.
+            var observableTransformations = transformations.OfType<IObservableTransformation>().Where( t => t is not IReplaceMemberTransformation );
+
+            foreach ( var transformationGroup in observableTransformations.GroupBy( t => t.ContainingDeclaration ) )
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
