@@ -23,39 +23,40 @@
 
     </ItemGroup>
 
-    <ItemGroup>
-        <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
-            <_Parameter1>ProjectDirectory</_Parameter1>
-            <_Parameter2>$(MSBuildProjectDirectory)</_Parameter2>
-        </AssemblyAttribute>
-        <AssemblyAttribute Include="Xunit.TestFrameworkAttribute"
-                           Condition="'$(MetalamaTestReplaceFramework)'!='False'">
-            <_Parameter1>Metalama.TestFramework.AspectTestFramework</_Parameter1>
-            <_Parameter2>Metalama.TestFramework</_Parameter2>
-        </AssemblyAttribute>
-        <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
-            <_Parameter1>ReferenceAssemblyList</_Parameter1>
-            <_Parameter2>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)assemblies.txt</_Parameter2>
-        </AssemblyAttribute>
-        <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
-            <_Parameter1>MetalamaDebugTestFramework</_Parameter1>
-            <_Parameter2>$(MetalamaDebugTestFramework)</_Parameter2>
-        </AssemblyAttribute>
-        <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute" Condition="'$(GeneratedGlobalUsingsFile)'!=''">
-            <_Parameter1>GlobalUsingsFile</_Parameter1>
-            <_Parameter2>$(GeneratedGlobalUsingsFile)</_Parameter2>
-        </AssemblyAttribute>
-        <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
-            <_Parameter1>TargetFramework</_Parameter1>
-            <_Parameter2>$(TargetFramework)</_Parameter2>
-        </AssemblyAttribute>
-    </ItemGroup>
-
-    <Target Name="AddAttributeForDefineConstants" DependsOnTargets="AddImplicitDefineConstants" BeforeTargets="CoreGenerateAssemblyInfo">
+    <Target Name="AddMetalamaTestFrameworkAttributes" DependsOnTargets="AddImplicitDefineConstants" BeforeTargets="CoreGenerateAssemblyInfo">
         <ItemGroup>
             <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
                 <_Parameter1>DefineConstants</_Parameter1>
                 <_Parameter2>$(DefineConstants)</_Parameter2>
+            </AssemblyAttribute>
+            <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+                <_Parameter1>ProjectDirectory</_Parameter1>
+                <_Parameter2>$(MSBuildProjectDirectory)</_Parameter2>
+            </AssemblyAttribute>
+            <AssemblyAttribute Include="Xunit.TestFrameworkAttribute"
+                               Condition="'$(MetalamaTestReplaceFramework)'!='False'">
+                <_Parameter1>Metalama.TestFramework.AspectTestFramework</_Parameter1>
+                <_Parameter2>Metalama.TestFramework</_Parameter2>
+            </AssemblyAttribute>
+            <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+                <_Parameter1>ReferenceAssemblyList</_Parameter1>
+                <_Parameter2>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)assemblies.txt</_Parameter2>
+            </AssemblyAttribute>
+            <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+                <_Parameter1>AnalyzerAssemblyList</_Parameter1>
+                <_Parameter2>$(MSBuildProjectDirectory)\$(IntermediateOutputPath)analyzers.txt</_Parameter2>
+            </AssemblyAttribute>
+            <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+                <_Parameter1>MetalamaDebugTestFramework</_Parameter1>
+                <_Parameter2>$(MetalamaDebugTestFramework)</_Parameter2>
+            </AssemblyAttribute>
+            <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute" Condition="'$(GeneratedGlobalUsingsFile)'!=''">
+                <_Parameter1>GlobalUsingsFile</_Parameter1>
+                <_Parameter2>$(GeneratedGlobalUsingsFile)</_Parameter2>
+            </AssemblyAttribute>
+            <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+                <_Parameter1>TargetFramework</_Parameter1>
+                <_Parameter2>$(TargetFramework)</_Parameter2>
             </AssemblyAttribute>
         </ItemGroup>
     </Target>
@@ -63,6 +64,8 @@
     <Target Name='WriteReferenceAssemblies' AfterTargets="Build">
         <WriteLinesToFile File='$(IntermediateOutputPath)assemblies.txt' Overwrite='true'
                           Lines='@(ReferencePathWithRefAssemblies)'/>
+        <WriteLinesToFile File='$(IntermediateOutputPath)analyzers.txt' Overwrite='true'
+                          Lines='@(Analyzer)'/>
     </Target>
 
     <Target Name="GenerateMetalamaTestDefaultRunner" BeforeTargets="CoreCompile"

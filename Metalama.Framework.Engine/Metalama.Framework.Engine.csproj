@@ -74,7 +74,7 @@
     <!-- Obfuscation -->
     <PropertyGroup>
         <PostSharpProperties>
-            ObfuscateMapFile=$(MSBuildThisFileDirectory)\bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).obmap;
+            ObfuscateMapFile=$(PackageOutputPath)\$(AssemblyName).obmap;
             ObfuscateRootPath=$(MSBuildThisFileDirectory)
         </PostSharpProperties>
         <PostSharpSearchPath>$(MSBuildThisFileDirectory)..\Build\Metalama.Obfuscator\bin\$(Configuration)\netstandard2.0</PostSharpSearchPath>

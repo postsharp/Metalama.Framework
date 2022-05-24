@@ -110,7 +110,10 @@ namespace Metalama.AspectWorkbench.ViewModels
             var testRunner = TestRunnerFactory.CreateTestRunner(
                 testInput,
                 serviceProvider,
-                new TestProjectReferences( TestCompilationFactory.GetMetadataReferences().ToImmutableArray<MetadataReference>(), null ),
+                new TestProjectReferences(
+                    TestCompilationFactory.GetMetadataReferences().ToImmutableArray<MetadataReference>(),
+                    ImmutableArray<object>.Empty,
+                    null ),
                 null );
 
             var compilationStopwatch = Stopwatch.StartNew();
