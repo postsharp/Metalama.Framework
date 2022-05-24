@@ -389,11 +389,10 @@ namespace Metalama.Framework.Engine.Advices
                 this._templateInstance,
                 targetDeclaration,
                 propertyTemplate,
-                getTemplate,
-                setTemplate,
+                getTemplate.ForIntroduction(),
+                setTemplate.ForIntroduction(),
                 _layerName,
-                ObjectReader.GetReader( tags ),
-                null );
+                ObjectReader.GetReader( tags ) );
 
             advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
@@ -425,10 +424,12 @@ namespace Metalama.Framework.Engine.Advices
             var diagnosticList = new DiagnosticList();
 
             var getTemplateRef = this.SelectTemplate( targetDeclaration, getTemplateSelector, setTemplate == null )
-                .GetTemplateMember<IMethod>( this._compilation, this._serviceProvider );
+                .GetTemplateMember<IMethod>( this._compilation, this._serviceProvider )
+                .ForOverride( targetDeclaration.GetMethod, ObjectReader.GetReader( args ) );
 
             var setTemplateRef = this.ValidateTemplateName( setTemplate, TemplateKind.Default, getTemplateSelector.IsNull )
-                .GetTemplateMember<IMethod>( this._compilation, this._serviceProvider );
+                .GetTemplateMember<IMethod>( this._compilation, this._serviceProvider )
+                .ForOverride( targetDeclaration.SetMethod, ObjectReader.GetReader( args ) );
 
             if ( getTemplateRef.IsNull && setTemplateRef.IsNull )
             {
@@ -444,8 +445,7 @@ namespace Metalama.Framework.Engine.Advices
                 getTemplateRef,
                 setTemplateRef,
                 _layerName,
-                ObjectReader.GetReader( tags ), 
-                ObjectReader.GetReader( args ) );
+                ObjectReader.GetReader( tags ) );
 
             advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
@@ -519,8 +519,8 @@ namespace Metalama.Framework.Engine.Advices
                 targetType,
                 null,
                 propertyTemplate,
-                accessorTemplates.Get,
-                accessorTemplates.Set,
+                accessorTemplates.Get.ForIntroduction(),
+                accessorTemplates.Set.ForIntroduction(),
                 scope,
                 whenExists,
                 _layerName,
@@ -564,19 +564,20 @@ namespace Metalama.Framework.Engine.Advices
             var setTemplateRef = this.ValidateTemplateName( setTemplate, TemplateKind.Default, true )
                 .GetTemplateMember<IMethod>( this._compilation, this._serviceProvider );
 
+            var parameterReaders = ObjectReader.GetReader( args );
+
             var advice = new IntroducePropertyAdvice(
                 this._aspect,
                 this._templateInstance,
                 targetType,
                 name,
                 default,
-                getTemplateRef,
-                setTemplateRef,
+                getTemplateRef.ForIntroduction( parameterReaders ),
+                setTemplateRef.ForIntroduction( parameterReaders ),
                 scope,
                 whenExists,
                 _layerName,
-                ObjectReader.GetReader( tags ),
-                ObjectReader.GetReader( args ) );
+                ObjectReader.GetReader( tags ) );
 
             advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );

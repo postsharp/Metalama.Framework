@@ -27,7 +27,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             this.Tags = tags;
         }
 
-        public bool IsImplicit => false;
+        public abstract bool IsImplicit { get; }
 
         public new INamedType DeclaringType => base.DeclaringType.AssertNotNull();
 
@@ -210,20 +210,33 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         protected virtual SyntaxList<AttributeListSyntax> GetAttributeLists( in SyntaxGenerationContext syntaxGenerationContext )
         {
-            var attributeLists = new List<AttributeListSyntax>();
+            var attributeLists = default(List<AttributeListSyntax>);
+            var templateAttribute = this.Compilation.Factory.GetTypeByReflectionType( typeof( TemplateAttribute ) );
 
             foreach ( var attributeBuilder in this.Attributes )
             {
-                if ( attributeBuilder.Constructor.DeclaringType.Is( this.Compilation.Factory.GetTypeByReflectionType( typeof(TemplateAttribute) ) ) )
+                if ( attributeBuilder.Constructor.DeclaringType.Is( templateAttribute ) )
                 {
                     // TODO: This is temporary logic - aspect-related attributes should be marked as compile time and all compile time attributes should be skipped.
                     continue;
                 }
 
+                if (attributeLists == null)
+                {
+                    attributeLists = new List<AttributeListSyntax>();
+                }
+
                 attributeLists.Add( AttributeList( SingletonSeparatedList( attributeBuilder.GetSyntax( syntaxGenerationContext ) ) ) );
             }
 
-            return List( attributeLists );
+            if ( attributeLists != null )
+            {
+                return List( attributeLists );
+            }
+            else
+            {
+                return List<AttributeListSyntax>();
+            }
         }
     }
 }

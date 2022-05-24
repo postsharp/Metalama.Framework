@@ -2,9 +2,8 @@ class TargetClass
 {
     private readonly IServiceProvider? _serviceProvider;
 
-
-    [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.ImportService.ImportServiceAspect]
-    private global::System.IFormatProvider? FormatProvider
+    [ImportServiceAspect]
+    private IFormatProvider? FormatProvider
     {
         get
         {
@@ -17,6 +16,7 @@ class TargetClass
 
         }
     }
+
     public string? Format(object? o)
     {
         return ((ICustomFormatter?)this.FormatProvider?.GetFormat(typeof(ICustomFormatter)))?.Format(null, o, this.FormatProvider);

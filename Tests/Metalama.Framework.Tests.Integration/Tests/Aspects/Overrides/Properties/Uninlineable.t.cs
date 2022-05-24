@@ -81,7 +81,7 @@ internal class TargetClass
     private int ExpressionBodiedProperty_Source => 42
 
             [Override]
-            public int AutoProperty
+        public int AutoProperty
     {
         get
         {
@@ -101,9 +101,8 @@ internal class TargetClass
 
     private int AutoProperty_Source { get; set; }
 
-
-    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Uninlineable.OverrideAttribute]
-    public global::System.Int32 AutoGetOnlyProperty
+    [Override]
+    public int AutoGetOnlyProperty
     {
         get
         {
@@ -120,5 +119,6 @@ internal class TargetClass
 
         }
     }
-    private global::System.Int32 AutoGetOnlyProperty_Source { get; set; }
+
+    private int AutoGetOnlyProperty_Source { get; set; }
 }

@@ -157,8 +157,7 @@ internal class TargetClass
 
     private int AutoProperty_Source { get; set; }
 
-
-    public global::System.Int32 GetOnlyAutoProperty
+    public int GetOnlyAutoProperty
     {
         get
         {
@@ -179,7 +178,8 @@ internal class TargetClass
 
         }
     }
-    private global::System.Int32 GetOnlyAutoProperty_Source { get; set; }
+
+    private int GetOnlyAutoProperty_Source { get; set; }
 
     public int InitializerAutoProperty
     {
@@ -210,14 +210,14 @@ internal class TargetClass
     }
 
 
-    public global::System.Int32 IntroducedField
+    public global::System.Int32 IntroducedAutoProperty
     {
         get
         {
             global::System.Console.WriteLine("This is the overridden getter.");
             global::System.Console.WriteLine("This is the overridden getter.");
-            _ = this.IntroducedField_Source;
-            return this.IntroducedField_Source;
+            _ = this.IntroducedAutoProperty_Source;
+            return this.IntroducedAutoProperty_Source;
 
 
 
@@ -226,22 +226,22 @@ internal class TargetClass
         {
             global::System.Console.WriteLine("This is the overridden setter.");
             global::System.Console.WriteLine("This is the overridden setter.");
-            this.IntroducedField_Source = value;
+            this.IntroducedAutoProperty_Source = value;
 
 
         }
     }
-    private global::System.Int32 IntroducedField_Source { get; set; }
+    private global::System.Int32 IntroducedAutoProperty_Source { get; set; }
 
 
-    public global::System.Int32 IntroducedReadOnlyField
+    public global::System.Int32 IntroducedGetOnlyAutoProperty
     {
         get
         {
             global::System.Console.WriteLine("This is the overridden getter.");
             global::System.Console.WriteLine("This is the overridden getter.");
-            _ = this.IntroducedReadOnlyField_Source;
-            return this.IntroducedReadOnlyField_Source;
+            _ = this.IntroducedGetOnlyAutoProperty_Source;
+            return this.IntroducedGetOnlyAutoProperty_Source;
 
 
 
@@ -250,10 +250,45 @@ internal class TargetClass
         {
             global::System.Console.WriteLine("This is the overridden setter.");
             global::System.Console.WriteLine("This is the overridden setter.");
-            this.IntroducedReadOnlyField_Source = value;
+            this.IntroducedGetOnlyAutoProperty_Source = value;
 
 
         }
     }
-    private global::System.Int32 IntroducedReadOnlyField_Source { get; set; }
+    private global::System.Int32 IntroducedGetOnlyAutoProperty_Source { get; set; }
+
+
+    public global::System.Int32 IntroducedProperty_IntroduceAndOverride
+    {
+        get
+        {
+            return (global::System.Int32)42;
+
+        }
+
+        set
+        {
+        }
+    }
+
+    public global::System.Int32 IntroducedProperty
+    {
+        get
+        {
+            global::System.Console.WriteLine("This is the overridden getter.");
+            global::System.Console.WriteLine("This is the overridden getter.");
+            _ = this.IntroducedProperty_IntroduceAndOverride;
+            return this.IntroducedProperty_IntroduceAndOverride;
+
+
+        }
+
+        set
+        {
+            global::System.Console.WriteLine("This is the overridden setter.");
+            global::System.Console.WriteLine("This is the overridden setter.");
+            this.IntroducedProperty_IntroduceAndOverride = value;
+
+        }
+    }
 }

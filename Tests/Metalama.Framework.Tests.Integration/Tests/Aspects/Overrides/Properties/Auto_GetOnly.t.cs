@@ -2,11 +2,9 @@ internal class TargetClass
 {
 
 
-    private global::System.Int32 _property;
-
-
-    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto_GetOnly.OverrideAttribute]
-    public global::System.Int32 Property
+    private int _property;
+    [Override]
+    public int Property
     {
         get
         {
@@ -20,11 +18,11 @@ internal class TargetClass
         }
     }
 
-    private static global::System.Int32 _staticProperty;
 
+    private static int _staticProperty;
 
-    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto_GetOnly.OverrideAttribute]
-    public static global::System.Int32 StaticProperty
+    [Override]
+    public static int StaticProperty
     {
         get
         {
@@ -38,11 +36,11 @@ internal class TargetClass
         }
     }
 
-    private global::System.Int32 _initializerProperty = 42;
 
+    private int _initializerProperty = 42;
 
-    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto_GetOnly.OverrideAttribute]
-    public global::System.Int32 InitializerProperty
+    [Override]
+    public int InitializerProperty
     {
         get
         {
@@ -56,11 +54,10 @@ internal class TargetClass
         }
     }
 
-    private static global::System.Int32 _staticInitializerProperty = 42;
+    private static int _staticInitializerProperty = 42;
 
-
-    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto_GetOnly.OverrideAttribute]
-    public static global::System.Int32 StaticInitializerProperty
+    [Override]
+    public static int StaticInitializerProperty
     {
         get
         {

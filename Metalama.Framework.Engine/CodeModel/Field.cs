@@ -40,7 +40,14 @@ namespace Metalama.Framework.Engine.CodeModel
         public IMethod? GetMethod => new PseudoGetter( this );
 
         [Memo]
-        public IMethod? SetMethod => this.Writeability != Writeability.None ? new PseudoSetter( this ) : null;
+        public IMethod? SetMethod =>
+            this.Writeability switch
+            {
+                Writeability.None => null,
+                Writeability.ConstructorOnly => new PseudoSetter( this, Code.Accessibility.Private ),
+                Writeability.All => new PseudoSetter( this, null ),
+                _ => throw new AssertionFailedException(),
+            };
 
         public Writeability Writeability
             => this._symbol switch
@@ -50,7 +57,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => Writeability.All
             };
 
-        public override bool IsImplicit => throw new NotImplementedException();
+        public override bool IsImplicit => false;
 
         public bool IsAutoPropertyOrField => true;
 

@@ -68,5 +68,9 @@ internal class TargetClass
             global::System.Console.WriteLine($"This is the overridden getter.");
             return this._autoGetOnlyProperty;
         }
+        private set
+        {
+            this._autoGetOnlyProperty = value;
+        }
     }
 }

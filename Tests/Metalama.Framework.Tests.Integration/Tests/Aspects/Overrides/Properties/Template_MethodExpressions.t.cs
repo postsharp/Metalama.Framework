@@ -54,9 +54,8 @@ internal class TargetClass
         }
     }
 
-
-    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Template_MethodExpressions.TestAttribute]
-    public global::System.Int32 AutoGetOnlyProperty
+    [Test]
+    public int AutoGetOnlyProperty
     {
         get
         {

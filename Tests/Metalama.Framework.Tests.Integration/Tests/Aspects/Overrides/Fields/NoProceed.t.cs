@@ -47,7 +47,6 @@ internal class TargetClass
         }
     }
 
-    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.NoProceed.OverrideAttribute]
     public global::System.Int32 ReadOnlyField
     {
         get

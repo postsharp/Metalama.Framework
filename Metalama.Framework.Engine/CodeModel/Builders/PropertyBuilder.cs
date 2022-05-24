@@ -7,6 +7,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.CodeModel.Pseudo;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
@@ -28,16 +29,18 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public RefKind RefKind { get; set; }
 
-        public Writeability Writeability
+        public virtual Writeability Writeability
             => this switch
             {
-                { SetMethod: null, IsAutoPropertyOrField: false } => Writeability.None,
-                { SetMethod: null, IsAutoPropertyOrField: true } => Writeability.ConstructorOnly,
+                { SetMethod: null } => Writeability.None,
+                { SetMethod: { IsImplicit: true }, IsAutoPropertyOrField: true } => Writeability.ConstructorOnly,
                 { _hasInitOnlySetter: true } => Writeability.InitOnly,
                 _ => Writeability.All
             };
 
         public sealed override string Name { get; set; }
+
+        public override bool IsImplicit => false;
 
         public bool IsAutoPropertyOrField { get; }
 
@@ -90,24 +93,29 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             bool hasSetter,
             bool isAutoProperty,
             bool hasInitOnlySetter,
+            bool hasImplicitGetter,
+            bool hasImplicitSetter,
             IObjectReader tags )
             : base( parentAdvice, targetType, tags )
         {
             // TODO: Sanity checks.
 
             Invariant.Assert( hasGetter || hasSetter );
+            Invariant.Assert( !(!hasSetter && hasImplicitSetter) );
+            Invariant.Assert( !(hasInitOnlySetter && hasImplicitSetter) );
+            Invariant.Assert( !(!isAutoProperty && hasImplicitSetter) );
 
             this.Name = name;
             this.Type = targetType.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(object) );
 
             if ( hasGetter )
             {
-                this.GetMethod = new AccessorBuilder( this, MethodKind.PropertyGet );
+                this.GetMethod = new AccessorBuilder( this, MethodKind.PropertyGet, hasImplicitGetter );
             }
 
             if ( hasSetter )
             {
-                this.SetMethod = new AccessorBuilder( this, MethodKind.PropertySet );
+                this.SetMethod = new AccessorBuilder( this, MethodKind.PropertySet, hasImplicitSetter );
             }
 
             this.IsAutoPropertyOrField = isAutoProperty;
@@ -171,15 +179,24 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             AccessorListSyntax GenerateAccessorList()
             {
-                switch (Getter: this.GetMethod, Setter: this.SetMethod)
+                switch (this.IsAutoPropertyOrField, this.Writeability, this.GetMethod, this.SetMethod)
                 {
-                    case (not null, not null):
+                    // Properties with both accessors.
+                    case (false, _, not null, not null ):
+                    // Writeable fields.
+                    case (true, Writeability.All, { IsImplicit: true }, { IsImplicit: true } ):
+                    // Auto-properties with both accessors.
+                    case (true, Writeability.All or Writeability.InitOnly, { IsImplicit: false }, { IsImplicit: false } ):
                         return AccessorList( List( new[] { GenerateGetAccessor(), GenerateSetAccessor() } ) );
 
-                    case (not null, null):
+                    // Properties with only get accessor.
+                    case (false, _, not null, null ):
+                    // Read only fields or get-only auto properties.
+                    case (true, Writeability.ConstructorOnly, { }, { IsImplicit: true } ):
                         return AccessorList( List( new[] { GenerateGetAccessor() } ) );
 
-                    case (null, not null):
+                    // Properties with only set accessor.
+                    case (_, _, null, not null):
                         return AccessorList( List( new[] { GenerateSetAccessor() } ) );
 
                     default:

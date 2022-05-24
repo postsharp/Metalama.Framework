@@ -54,9 +54,8 @@ public class Target
         }
     }
 
-
-    [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Properties.Template_PropertyExpressions.TestAttribute]
-    public global::System.Int32 AutoGetOnlyProperty
+    [Test]
+    public int AutoGetOnlyProperty
     {
         get
         {

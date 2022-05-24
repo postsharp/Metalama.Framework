@@ -2,11 +2,13 @@ class TargetCode
 {
 
 
-    private global::System.IFormatProvider _formatProvider;
+    private
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
 
-
-    [global::Metalama.Framework.Tests.Integration.Aspects.Bugs.Bug28973.ImportAttribute]
-    private global::System.IFormatProvider FormatProvider
+    IFormatProvider _formatProvider;
+    [Import]
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+    IFormatProvider FormatProvider
     {
         get
         {

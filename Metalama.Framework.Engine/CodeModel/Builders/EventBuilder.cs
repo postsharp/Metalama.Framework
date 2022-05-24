@@ -39,15 +39,17 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override string Name { get; set; }
 
+        public override bool IsImplicit => false;
+
         public INamedType Type { get; set; }
 
         public IMethod Signature => this.Type.Methods.OfName( "Invoke" ).Single();
 
         [Memo]
-        public IMethodBuilder AddMethod => new AccessorBuilder( this, MethodKind.EventAdd );
+        public IMethodBuilder AddMethod => new AccessorBuilder( this, MethodKind.EventAdd, this._isEventField );
 
         [Memo]
-        public IMethodBuilder RemoveMethod => new AccessorBuilder( this, MethodKind.EventRemove );
+        public IMethodBuilder RemoveMethod => new AccessorBuilder( this, MethodKind.EventRemove, this._isEventField );
 
         public IMethodBuilder? RaiseMethod => null;
 

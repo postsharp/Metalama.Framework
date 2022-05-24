@@ -4,6 +4,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.Pseudo;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
@@ -60,6 +61,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
         /// Creates a <see cref="Ref{T}"/> from a Roslyn symbol.
         /// </summary>
         public static Ref<IDeclaration> FromSymbol( ISymbol symbol, Compilation compilation ) => new( symbol, compilation );
+
+        public static Ref<IDeclaration> FromImplicitMember( IMember member ) => new( member );
 
         public static Ref<T> FromSymbolId<T>( SymbolId symbolKey )
             where T : class, ICompilationElement
@@ -136,6 +139,13 @@ namespace Metalama.Framework.Engine.CodeModel.References
             this.Target = id;
             this.TargetKind = DeclarationRefTargetKind.Default;
             this._compilation = null;
+        }
+
+        internal Ref(IMember implicitMember)
+        {
+            this.Target = implicitMember;
+            this.TargetKind = DeclarationRefTargetKind.Default;
+            this._compilation = implicitMember.Compilation.GetRoslynCompilation();
         }
 
         // ReSharper disable once UnusedParameter.Local

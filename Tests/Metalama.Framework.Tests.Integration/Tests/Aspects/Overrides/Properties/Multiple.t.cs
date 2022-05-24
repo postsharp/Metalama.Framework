@@ -120,10 +120,9 @@ internal class TargetClass
     }
 
 
-    private global::System.Int32 _getOnlyAutoProperty;
+    private int _getOnlyAutoProperty;
 
-
-    public global::System.Int32 GetOnlyAutoProperty
+    public int GetOnlyAutoProperty
     {
         get
         {
@@ -141,6 +140,7 @@ internal class TargetClass
 
         }
     }
+
 
     private int _initializerAutoProperty = 42;
 
@@ -168,16 +168,16 @@ internal class TargetClass
     }
 
 
-    private global::System.Int32 _introducedField;
+    private global::System.Int32 _introducedAutoProperty;
 
 
-    public global::System.Int32 IntroducedField
+    public global::System.Int32 IntroducedAutoProperty
     {
         get
         {
             global::System.Console.WriteLine("First override.");
             global::System.Console.WriteLine("Second override.");
-            return this._introducedField;
+            return this._introducedAutoProperty;
 
 
         }
@@ -185,21 +185,21 @@ internal class TargetClass
         {
             global::System.Console.WriteLine("First override.");
             global::System.Console.WriteLine("Second override.");
-            this._introducedField = value;
+            this._introducedAutoProperty = value;
 
         }
     }
 
-    private global::System.Int32 _introducedReadOnlyField;
+    private global::System.Int32 _introducedGetOnlyAutoProperty;
 
 
-    public global::System.Int32 IntroducedReadOnlyField
+    public global::System.Int32 IntroducedGetOnlyAutoProperty
     {
         get
         {
             global::System.Console.WriteLine("First override.");
             global::System.Console.WriteLine("Second override.");
-            return this._introducedReadOnlyField;
+            return this._introducedGetOnlyAutoProperty;
 
 
         }
@@ -207,7 +207,28 @@ internal class TargetClass
         {
             global::System.Console.WriteLine("First override.");
             global::System.Console.WriteLine("Second override.");
-            this._introducedReadOnlyField = value;
+            this._introducedGetOnlyAutoProperty = value;
+
+        }
+    }
+
+    public global::System.Int32 IntroducedProperty
+    {
+        get
+        {
+            global::System.Console.WriteLine("First override.");
+            global::System.Console.WriteLine("Second override.");
+            return (global::System.Int32)42;
+
+
+
+
+        }
+
+        set
+        {
+            global::System.Console.WriteLine("First override.");
+            global::System.Console.WriteLine("Second override.");
 
         }
     }

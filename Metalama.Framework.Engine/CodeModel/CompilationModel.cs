@@ -51,9 +51,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private readonly DerivedTypeIndex _derivedTypes;
 
-        private ImmutableDictionary<Ref<IDeclaration>, int> _depthsCache = ImmutableDictionary.Create<Ref<IDeclaration>, int>();
+        private readonly ImmutableDictionary<Ref<IDeclaration>, Ref<IDeclaration>> _redirectionCache = ImmutableDictionary.Create<Ref<IDeclaration>, Ref<IDeclaration>>();
 
-        private ImmutableDictionary<Ref<IDeclaration>, Ref<IDeclaration>> _redirectionCache = ImmutableDictionary.Create<Ref<IDeclaration>, Ref<IDeclaration>>();
+        private ImmutableDictionary<Ref<IDeclaration>, int> _depthsCache = ImmutableDictionary.Create<Ref<IDeclaration>, int>();
 
         public DeclarationFactory Factory { get; }
 
@@ -390,7 +390,6 @@ namespace Metalama.Framework.Engine.CodeModel
                     return result;
                 }
             }
-
         }
 
         internal override Ref<IDeclaration> ToRef() => Ref.Compilation( this.RoslynCompilation ).As<IDeclaration>();

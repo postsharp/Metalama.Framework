@@ -85,12 +85,11 @@ namespace Metalama.Framework.Engine.Advices
                                     targetType,
                                     null,
                                     propertyTemplate,
-                                    accessorTemplates.Get,
-                                    accessorTemplates.Set,
+                                    accessorTemplates.Get.ForIntroduction(),
+                                    accessorTemplates.Set.ForIntroduction(),
                                     template.TemplateInfo.Attribute.Scope,
                                     template.TemplateInfo.Attribute.WhenExists,
                                     layerName,
-                                    ObjectReader.Empty,
                                     ObjectReader.Empty );
 
                                 advice = introducePropertyAdvice;

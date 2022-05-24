@@ -62,7 +62,6 @@ internal class TargetClass
     private global::System.Int32 InitializerField_Source { get; set; } = 42
 
 
-    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Uninlineable.OverrideAttribute]
 public global::System.Int32 ReadOnlyField
     {
         get

@@ -18,20 +18,27 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public MemberRef<IMember>? ReplacedMember => this._field.ToMemberRef<IMember>();
 
+        public override Writeability Writeability => this._field.Writeability;
+
         public PromotedField( Advice advice, IField field, IObjectReader tags ) : base(
             advice,
             field.DeclaringType,
             field.Name,
             true,
-            field.Writeability == Writeability.All,
+            true,
             true,
             false,
+            true,
+            true,
             tags )
         {
             this._field = field;
             this.Type = field.Type;
             this.Accessibility = this._field.Accessibility;
             this.IsStatic = this._field.IsStatic;
+
+            this.GetMethod.AssertNotNull().Accessibility = this._field.Accessibility;
+            this.SetMethod.AssertNotNull().Accessibility = this._field.Accessibility;
 
             foreach ( var attribute in field.Attributes )
             {

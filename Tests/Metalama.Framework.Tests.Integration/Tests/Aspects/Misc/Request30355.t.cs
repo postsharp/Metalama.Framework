@@ -94,7 +94,7 @@ public partial class Account
     {
         get
         {
-            return (global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account?)((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account.Optional)this.OptionalValues).Parent.Value;
+            return (global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account)((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account.Optional)this.OptionalValues).Parent.Value;
 
         }
         set

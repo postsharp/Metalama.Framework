@@ -57,11 +57,10 @@ internal class TargetClass
     }
 
 
-    private global::System.Int32 _autoGetOnlyProperty;
+    private int _autoGetOnlyProperty;
 
-
-    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Template_PropertySet.TestAttribute]
-    public global::System.Int32 AutoGetOnlyProperty
+    [Test]
+    public int AutoGetOnlyProperty
     {
         get
         {

@@ -26,11 +26,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override string Name { get; set; }
 
-        [Memo]
-        public IMethod? GetMethod => new AccessorBuilder( this, MethodKind.PropertyGet );
+        public override bool IsImplicit => false;
 
         [Memo]
-        public IMethod? SetMethod => new AccessorBuilder( this, MethodKind.PropertySet );
+        public IMethod? GetMethod => new AccessorBuilder( this, MethodKind.PropertyGet, true );
+
+        [Memo]
+        public IMethod? SetMethod => new AccessorBuilder( this, MethodKind.PropertySet, true );
 
         public override bool IsExplicitInterfaceImplementation => false;
 

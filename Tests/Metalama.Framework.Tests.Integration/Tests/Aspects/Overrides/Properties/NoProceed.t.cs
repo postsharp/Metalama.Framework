@@ -50,9 +50,8 @@ internal class TargetClass
         }
     }
 
-
-    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.NoProceed.OverrideAttribute]
-    public global::System.Int32 GetAutoProperty
+    [Override]
+    public int GetAutoProperty
     {
         get
         {
@@ -66,6 +65,7 @@ internal class TargetClass
 
         }
     }
+
     [Override]
     public int InitializerAutoProperty
     {

@@ -18,6 +18,6 @@ namespace Metalama.Framework.Code
         Protected = 3,
         Internal = 4,
         ProtectedInternal = 5,
-        Public = 6
+        Public = 6,
     }
 }

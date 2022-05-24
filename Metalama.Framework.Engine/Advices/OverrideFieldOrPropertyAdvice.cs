@@ -12,30 +12,26 @@ namespace Metalama.Framework.Engine.Advices
 {
     internal class OverrideFieldOrPropertyAdvice : OverrideMemberAdvice<IFieldOrPropertyOrIndexer>
     {
-        private readonly IObjectReader? _args;
-
         public TemplateMember<IProperty> PropertyTemplate { get; }
 
-        public TemplateMember<IMethod> GetTemplate { get; }
+        public BoundTemplateMethod GetTemplate { get; }
 
-        public TemplateMember<IMethod> SetTemplate { get; }
+        public BoundTemplateMethod SetTemplate { get; }
 
         public OverrideFieldOrPropertyAdvice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             IFieldOrPropertyOrIndexer targetDeclaration,
             TemplateMember<IProperty> propertyTemplate,
-            TemplateMember<IMethod> getTemplate,
-            TemplateMember<IMethod> setTemplate,
+            BoundTemplateMethod getTemplate,
+            BoundTemplateMethod setTemplate,
             string? layerName,
-            IObjectReader tags,
-            IObjectReader? args )
+            IObjectReader tags )
             : base( aspect, templateInstance, targetDeclaration, layerName, tags )
         {
             this.PropertyTemplate = propertyTemplate;
             this.GetTemplate = getTemplate;
             this.SetTemplate = setTemplate;
-            this._args = args;
         }
 
         public override void Initialize( IDiagnosticAdder diagnosticAdder ) { }
@@ -52,13 +48,7 @@ namespace Metalama.Framework.Engine.Advices
                     targetDeclaration,
                     this.GetTemplate,
                     this.SetTemplate,
-                    ForOverride,
                     this.Tags ) );
-
-            BoundTemplateMethod ForOverride(TemplateMember<IMethod> templateMember, IMethod? targetMethod )
-            {
-                return templateMember.ForOverride( targetMethod, this._args );
-            }
         }
     }
 }

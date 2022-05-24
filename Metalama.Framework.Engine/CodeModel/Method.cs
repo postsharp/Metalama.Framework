@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Method;
 
-        public override bool IsImplicit => throw new NotImplementedException();
+        public override bool IsImplicit => false;
 
         public bool IsOpenGeneric => this.MethodSymbol.TypeArguments.Any( ga => ga is ITypeParameterSymbol ) || this.DeclaringType.IsOpenGeneric;
 

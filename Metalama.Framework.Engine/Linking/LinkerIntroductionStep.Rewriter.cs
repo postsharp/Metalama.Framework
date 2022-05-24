@@ -384,9 +384,9 @@ namespace Metalama.Framework.Engine.Linking
 
             public override SyntaxNode? VisitPropertyDeclaration( PropertyDeclarationSyntax node )
             {
-                if ( this._introducedMemberCollection.IsRemovedSyntax( node ) )
+                if ( this._introducedMemberCollection.IsAutoPropertyWithSynthetizedSetter( node ) )
                 {
-                    return null;
+                    return node.WithSynthesizedSetter();
                 }
 
                 return base.VisitPropertyDeclaration( node );

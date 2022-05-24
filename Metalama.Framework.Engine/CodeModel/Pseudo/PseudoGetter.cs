@@ -9,6 +9,8 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 {
     internal class PseudoGetter : PseudoAccessor<IFieldOrPropertyImpl>
     {
+        public override Accessibility Accessibility => this.DeclaringMember.Accessibility;
+
         public PseudoGetter( IFieldOrPropertyImpl property ) : base( property, MethodKind.PropertyGet ) { }
 
         public override IParameterList Parameters => ParameterList.Empty;

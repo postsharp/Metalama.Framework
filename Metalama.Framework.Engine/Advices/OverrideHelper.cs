@@ -14,67 +14,26 @@ namespace Metalama.Framework.Engine.Advices
         public static ITransformation[] OverrideProperty(
             Advice advice,
             IFieldOrPropertyOrIndexer targetDeclaration, 
-            TemplateMember<IMethod> getTemplate,
-            TemplateMember<IMethod> setTemplate,
-            Func<TemplateMember<IMethod>, IMethod?, BoundTemplateMethod> templateBinder,          
+            BoundTemplateMethod getTemplate,
+            BoundTemplateMethod setTemplate,          
             IObjectReader tags )
         {
             if ( targetDeclaration is IField field )
             {
                 var promotedField = new PromotedField( advice, field, tags );
 
-                if ( field.Writeability == Writeability.ConstructorOnly && setTemplate.IsNotNull )
+                return new ITransformation[]
                 {
-                    // Privately writeable property is a transformation that adds a private setter to a get-only property.
-                    var writeableProperty = new PrivatelyWriteableProperty( advice, promotedField, tags );
-
-                    var boundGetTemplate = templateBinder( getTemplate, writeableProperty.GetMethod );
-                    var boundSetTemplate = templateBinder( setTemplate, writeableProperty.SetMethod );
-
-                    return new ITransformation[] 
-                    {
-                        promotedField,
-                        writeableProperty,
-                        new OverridePropertyTransformation( advice, writeableProperty, boundGetTemplate, boundSetTemplate, tags ),
-                    };
-                }
-                else
-                {
-                    var boundGetTemplate = templateBinder( getTemplate, promotedField.GetMethod );
-                    var boundSetTemplate = templateBinder( setTemplate, promotedField.SetMethod );
-
-                    return new ITransformation[]
-                    {
-                        promotedField,
-                        new OverridePropertyTransformation( advice, promotedField, boundGetTemplate, boundSetTemplate, tags ),
-                    };
-                }
+                    promotedField,
+                    new OverridePropertyTransformation( advice, promotedField, getTemplate, setTemplate, tags ),
+                };
             }
             else if ( targetDeclaration is IProperty property )
             {
-                if ( property.Writeability == Writeability.ConstructorOnly && setTemplate.IsNotNull )
+                return new ITransformation[]
                 {
-                    var writeableProperty = new PrivatelyWriteableProperty( advice, property, tags );
-
-                    var boundGetTemplate = templateBinder( getTemplate, writeableProperty.GetMethod );
-                    var boundSetTemplate = templateBinder( setTemplate, writeableProperty.SetMethod );
-
-                    return new ITransformation[]
-                    {
-                        writeableProperty,
-                        new OverridePropertyTransformation( advice, writeableProperty, boundGetTemplate, boundSetTemplate, tags ),
-                    };
-                }
-                else
-                {
-                    var boundGetTemplate = templateBinder( getTemplate, targetDeclaration.GetMethod );
-                    var boundSetTemplate = templateBinder( setTemplate, targetDeclaration.SetMethod );
-
-                    return new ITransformation[]
-                    {
-                        new OverridePropertyTransformation( advice, property, boundGetTemplate, boundSetTemplate, tags ),
-                    };
-                }
+                    new OverridePropertyTransformation( advice, property, getTemplate, setTemplate, tags ),
+                };
             }
             else
             {

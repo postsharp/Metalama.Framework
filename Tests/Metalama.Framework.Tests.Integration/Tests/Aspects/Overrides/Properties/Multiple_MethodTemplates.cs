@@ -70,10 +70,23 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         }
 
         [Introduce]
-        public int IntroducedField;
+        public int IntroducedProperty
+        {
+            get
+            {
+                return 42;
+            }
+
+            set
+            {
+            }
+        }
 
         [Introduce]
-        public readonly int IntroducedReadOnlyField;
+        public int IntroducedAutoProperty { get; set; }
+
+        [Introduce]
+        public int IntroducedGetOnlyAutoProperty { get; }
     }
 
     // <target>

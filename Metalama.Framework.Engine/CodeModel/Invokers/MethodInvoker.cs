@@ -90,7 +90,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                     Identifier( this._method.Name ),
                     TypeArgumentList(
                         SeparatedList(
-                            this._method.TypeArguments.Select( t => generationContext.SyntaxGenerator.Type( SymbolExtensions.GetSymbol( (IType) t ) ) )
+                            this._method.TypeArguments.Select( t => generationContext.SyntaxGenerator.Type( t.GetSymbol() ) )
                                 .ToArray() ) ) );
             }
             else

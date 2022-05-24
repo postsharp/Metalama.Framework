@@ -9,7 +9,14 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 {
     internal class PseudoSetter : PseudoAccessor<IFieldOrPropertyImpl>
     {
-        public PseudoSetter( IFieldOrPropertyImpl property ) : base( property, MethodKind.PropertySet ) { }
+        private readonly Accessibility? _accessibility;
+
+        public override Accessibility Accessibility => this._accessibility ?? this.DeclaringMember.Accessibility;
+
+        public PseudoSetter( IFieldOrPropertyImpl property, Accessibility? accessibility ) : base( property, MethodKind.PropertySet ) 
+        {
+            this._accessibility = accessibility;
+        }
 
         [Memo]
         public override IParameterList Parameters => new PseudoParameterList( new PseudoParameter( this, 0, this.DeclaringMember.Type, "value" ) );

@@ -36,18 +36,21 @@ internal abstract class PropertyOrIndexer : Member, IPropertyOrIndexer
     public IMethod? GetMethod => this.PropertySymbol.GetMethod == null ? null : this.Compilation.Factory.GetMethod( this.PropertySymbol.GetMethod );
 
     [Memo]
-
-    // TODO: get-only properties
-    public IMethod? SetMethod => this.PropertySymbol.SetMethod == null ? null : this.Compilation.Factory.GetMethod( this.PropertySymbol.SetMethod );
+    public virtual IMethod? SetMethod =>
+        this.PropertySymbol switch
+        {
+            { IsReadOnly: true } when this.PropertySymbol.IsAutoProperty() => new Pseudo.PseudoSetter( (IPropertyImpl) this, Code.Accessibility.Private ),
+            { IsReadOnly: true } => null,
+            _ => this.Compilation.Factory.GetMethod( this.PropertySymbol.SetMethod! ),
+        };
 
     public override MemberInfo ToMemberInfo() => this.ToPropertyInfo();
 
     public PropertyInfo ToPropertyInfo() => CompileTimePropertyInfo.Create( this );
 
     public override string ToString() => this.PropertySymbol.ToString();
-
-    // TODO: Memo does not work here.
-    // [Memo]
+        
+    [Memo]
     public Writeability Writeability
         => this.PropertySymbol switch
         {
