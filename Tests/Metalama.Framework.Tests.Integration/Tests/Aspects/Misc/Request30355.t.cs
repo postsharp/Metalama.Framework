@@ -90,12 +90,12 @@ set
     public Account? Parent 
 { get
 { 
-        return (global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account)((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account.Optional)this.OptionalValues).Parent.Value;
+        return (global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account? )((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account.Optional)this.OptionalValues).Parent.Value;
 
 }
 set
 { 
-        ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account.Optional)this.OptionalValues).Parent = new global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.OptionalValue<global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account>(value);
+        ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account.Optional)this.OptionalValues).Parent = new global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.OptionalValue<global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account?>(value);
 
 }
 }
@@ -118,10 +118,10 @@ set
 }
 }
 
-private global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.OptionalValue<global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account> _parent;
+private global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.OptionalValue<global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account?> _parent;
 
 
-public global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.OptionalValue<global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account> Parent 
+public global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.OptionalValue<global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account?> Parent 
 { get
 { 
         return this._parent;

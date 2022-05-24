@@ -93,9 +93,7 @@ namespace Metalama.Framework.Engine.Advices
             // Determine whether we need introduction transformation (something may exist in the original code or could have been introduced by previous steps).
             var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
 
-            var existingDeclaration = targetDeclaration.FindClosestVisibleProperty( this.MemberBuilder.Name );
-
-            // TODO: verify property type.
+            var existingDeclaration = targetDeclaration.FindClosestUniquelyNamedMember( this.MemberBuilder.Name );
 
             // TODO: Introduce attributes that are added not present on the existing member?
             if ( existingDeclaration == null )
@@ -112,6 +110,15 @@ namespace Metalama.Framework.Engine.Advices
             }
             else
             {
+                if ( existingDeclaration is not IProperty existingProperty )
+                {
+                    return
+                        AdviceResult.Create(
+                            AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentKind.CreateRoslynDiagnostic(
+                                targetDeclaration.GetDiagnosticLocation(),
+                                (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration, existingDeclaration.DeclarationKind) ) );
+                }
+
                 if ( existingDeclaration.IsStatic != this.MemberBuilder.IsStatic )
                 {
                     return
@@ -120,6 +127,15 @@ namespace Metalama.Framework.Engine.Advices
                                 targetDeclaration.GetDiagnosticLocation(),
                                 (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
                                  existingDeclaration.DeclaringType) ) );
+                }
+                else if ( !compilation.InvariantComparer.Equals( this.Builder.Type, existingProperty.Type ) )
+                {
+                    return
+                        AdviceResult.Create(
+                            AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateRoslynDiagnostic(
+                                targetDeclaration.GetDiagnosticLocation(),
+                                (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
+                                 existingDeclaration.DeclaringType, existingProperty.Type) ) );
                 }
 
                 switch ( this.OverrideStrategy )
@@ -143,7 +159,7 @@ namespace Metalama.Framework.Engine.Advices
                         {
                             var overriddenProperty = new OverridePropertyTransformation(
                                 this,
-                                existingDeclaration,
+                                existingProperty,
                                 this._getTemplate,
                                 this._setTemplate,
                                 this.Tags );
@@ -169,7 +185,7 @@ namespace Metalama.Framework.Engine.Advices
                         {
                             var overriddenMethod = new OverridePropertyTransformation(
                                 this,
-                                existingDeclaration,
+                                existingProperty,
                                 this._getTemplate,
                                 this._setTemplate,
                                 this.Tags );
@@ -185,19 +201,10 @@ namespace Metalama.Framework.Engine.Advices
                                         (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
                                          existingDeclaration.DeclaringType) ) );
                         }
-                        else if ( !compilation.InvariantComparer.Equals( this.Builder.Type, existingDeclaration.Type ) )
-                        {
-                            return
-                                AdviceResult.Create(
-                                    AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateRoslynDiagnostic(
-                                        targetDeclaration.GetDiagnosticLocation(),
-                                        (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
-                                         existingDeclaration.DeclaringType, existingDeclaration.Type) ) );
-                        }
                         else
                         {
                             this.MemberBuilder.IsOverride = true;
-                            this.MemberBuilder.OverriddenProperty = existingDeclaration;
+                            this.MemberBuilder.OverriddenProperty = existingProperty;
 
                             var overriddenProperty = new OverridePropertyTransformation(
                                 this,

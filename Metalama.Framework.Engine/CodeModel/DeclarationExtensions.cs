@@ -373,22 +373,16 @@ namespace Metalama.Framework.Engine.CodeModel
             => namedType.AllMethods.OfExactSignature( signatureTemplate, matchIsStatic: false );
 
         /// <summary>
-        /// Finds a property of given signature that is visible in the specified type, taking into account properties being hidden by other properties.
+        /// Finds a parameterless member in the given type and parent type, taking into account member hiding.
         /// </summary>
         /// <param name="namedType">Type.</param>
-        /// <param name="name">Property name.</param>
+        /// <param name="name">Member name.</param>
         /// <returns>A property of the given signature that is visible from the given type or <c>null</c> if no such property exists.</returns>
-        public static IProperty? FindClosestVisibleProperty(
+        public static IMember? FindClosestUniquelyNamedMember(
             this INamedType namedType,
             string name )
-            => namedType.AllProperties.OfName( name ).FirstOrDefault();
-
-        /// <summary>
-        /// Finds an event of given signature that is visible in the specified type, taking into account events being hidden by other events.
-        /// </summary>
-        /// <param name="namedType">Type.</param>
-        /// <param name="name">Event name.</param>
-        /// <returns>An event of the given signature that is visible from the given type or <c>null</c> if no such method exists.</returns>
-        public static IEvent? FindClosestVisibleEvent( this INamedType namedType, string name ) => namedType.AllEvents.OfName( name ).FirstOrDefault();
+            => namedType.AllProperties.OfName( name ).FirstOrDefault() ??
+               (IMember?) namedType.AllFields.OfName( name ).FirstOrDefault() ??
+               namedType.AllEvents.OfName( name ).FirstOrDefault();
     }
 }

@@ -3,15 +3,18 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Metrics;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 using SpecialType = Metalama.Framework.Code.SpecialType;
+using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel;
@@ -33,7 +36,7 @@ internal class NullableNamedType : INamedTypeInternal
 
     ICompilation ICompilationElement.Compilation => ((ICompilationElement) this._underlying).Compilation;
 
-    string IDisplayable.ToDisplayString( CodeDisplayFormat? format, CodeDisplayContext? context ) => this.TypeSymbol.ToDisplayString( format.ToRoslyn() );
+    public string ToDisplayString( CodeDisplayFormat? format= null, CodeDisplayContext? context = null ) => this.TypeSymbol.ToDisplayString( format.ToRoslyn() );
 
     TypeKind IType.TypeKind => ((IType) this._underlying).TypeKind;
 
@@ -46,6 +49,16 @@ internal class NullableNamedType : INamedTypeInternal
     bool? IType.IsNullable => true;
 
     IRef<IDeclaration> IDeclaration.ToRef() => ((IDeclaration) this._underlying).ToRef();
+
+    ImmutableArray<SyntaxReference> IDeclarationImpl.DeclaringSyntaxReferences => this._underlying.DeclaringSyntaxReferences;
+
+    bool IDeclarationImpl.CanBeInherited => this._underlying.CanBeInherited;
+
+    SyntaxTree? IDeclarationImpl.PrimarySyntaxTree => this._underlying.PrimarySyntaxTree;
+
+    IEnumerable<IDeclaration> IDeclarationImpl.GetDerivedDeclarations( bool deep ) => this._underlying.GetDerivedDeclarations( deep );
+
+    Ref<IDeclaration> IDeclarationImpl.ToRef() => new Ref<IDeclaration>(this.TypeSymbol, this.GetCompilationModel().RoslynCompilation);
 
     IAssembly IDeclaration.DeclaringAssembly => this._underlying.DeclaringAssembly;
 
@@ -147,4 +160,10 @@ internal class NullableNamedType : INamedTypeInternal
 
     bool INamedTypeInternal.IsImplementationOfInterfaceMember( IMember typeMember, IMember interfaceMember )
         => this._underlying.IsImplementationOfInterfaceMember( typeMember, interfaceMember );
+
+    ISymbol? ISdkDeclaration.Symbol => this.TypeSymbol;
+
+    Location? IDiagnosticLocationImpl.DiagnosticLocation => this._underlying.DiagnosticLocation;
+
+    public override string ToString() => this.ToDisplayString();
 }

@@ -103,11 +103,23 @@ namespace Metalama.Framework.Engine.Advices
             // Determine whether we need introduction transformation (something may exist in the original code or could have been introduced by previous steps).
             var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
 
-            var existingDeclaration = targetDeclaration.FindClosestVisibleMethod( this.MemberBuilder );
+            var existingMethod = targetDeclaration.FindClosestVisibleMethod( this.MemberBuilder );
 
             // TODO: Introduce attributes that are added not present on the existing member?
-            if ( existingDeclaration == null )
+            if ( existingMethod == null )
             {
+                // Check that there is no other member named the same, otherwise we cannot add a method.
+                var existingOtherMember = targetDeclaration.FindClosestUniquelyNamedMember( this.MemberBuilder.Name );
+
+                if ( existingOtherMember != null )
+                {
+                    return
+                        AdviceResult.Create(
+                            AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentKind.CreateRoslynDiagnostic(
+                                targetDeclaration.GetDiagnosticLocation(),
+                                (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration, existingOtherMember.DeclarationKind) ) );
+                }
+                
                 // There is no existing declaration, we will introduce and override the introduced.
                 var overriddenMethod = new OverrideMethodTransformation( this, this.MemberBuilder, this.BoundTemplate, this.Tags );
                 this.MemberBuilder.IsOverride = false;
@@ -117,14 +129,26 @@ namespace Metalama.Framework.Engine.Advices
             }
             else
             {
-                if ( existingDeclaration.IsStatic != this.MemberBuilder.IsStatic )
+                if ( existingMethod.IsStatic != this.MemberBuilder.IsStatic )
                 {
                     return
                         AdviceResult.Create(
                             AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentStaticity.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
                                 (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
-                                 existingDeclaration.DeclaringType) ) );
+                                 existingMethod.DeclaringType) ) );
+                }
+                else if ( !compilation.InvariantComparer.Is(
+                              this.Builder.ReturnType,
+                              existingMethod.ReturnType,
+                              ConversionKind.ImplicitReference ) )
+                {
+                    return
+                        AdviceResult.Create(
+                            AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateRoslynDiagnostic(
+                                targetDeclaration.GetDiagnosticLocation(),
+                                (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
+                                 existingMethod.DeclaringType, existingMethod.ReturnType) ) );
                 }
 
                 switch ( this.OverrideStrategy )
@@ -136,7 +160,7 @@ namespace Metalama.Framework.Engine.Advices
                                 AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateRoslynDiagnostic(
                                     targetDeclaration.GetDiagnosticLocation(),
                                     (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
-                                     existingDeclaration.DeclaringType) ) );
+                                     existingMethod.DeclaringType) ) );
 
                     case OverrideStrategy.Ignore:
                         // Do nothing.
@@ -144,9 +168,9 @@ namespace Metalama.Framework.Engine.Advices
 
                     case OverrideStrategy.New:
                         // If the existing declaration is in the current type, override it, otherwise, declare a new method and override.
-                        if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( targetDeclaration, existingDeclaration.DeclaringType ) )
+                        if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( targetDeclaration, existingMethod.DeclaringType ) )
                         {
-                            var overriddenMethod = new OverrideMethodTransformation( this, existingDeclaration, this.BoundTemplate, this.Tags );
+                            var overriddenMethod = new OverrideMethodTransformation( this, existingMethod, this.BoundTemplate, this.Tags );
 
                             return AdviceResult.Create( overriddenMethod );
                         }
@@ -161,38 +185,26 @@ namespace Metalama.Framework.Engine.Advices
                         }
 
                     case OverrideStrategy.Override:
-                        if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( targetDeclaration, existingDeclaration.DeclaringType ) )
+                        if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( targetDeclaration, existingMethod.DeclaringType ) )
                         {
-                            var overriddenMethod = new OverrideMethodTransformation( this, existingDeclaration, this.BoundTemplate, this.Tags );
+                            var overriddenMethod = new OverrideMethodTransformation( this, existingMethod, this.BoundTemplate, this.Tags );
 
                             return AdviceResult.Create( overriddenMethod );
                         }
-                        else if ( existingDeclaration.IsSealed || !existingDeclaration.IsVirtual )
+                        else if ( existingMethod.IsSealed || !existingMethod.IsVirtual )
                         {
                             return
                                 AdviceResult.Create(
                                     AdviceDiagnosticDescriptors.CannotIntroduceOverrideOfSealed.CreateRoslynDiagnostic(
                                         targetDeclaration.GetDiagnosticLocation(),
                                         (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
-                                         existingDeclaration.DeclaringType) ) );
-                        }
-                        else if ( !compilation.InvariantComparer.Is(
-                                     this.Builder.ReturnType,
-                                     existingDeclaration.ReturnType,
-                                     ConversionKind.ImplicitReference ) )
-                        {
-                            return
-                                AdviceResult.Create(
-                                    AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateRoslynDiagnostic(
-                                        targetDeclaration.GetDiagnosticLocation(),
-                                        (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
-                                         existingDeclaration.DeclaringType, existingDeclaration.ReturnType) ) );
+                                         existingMethod.DeclaringType) ) );
                         }
                         else
                         {
                             this.MemberBuilder.IsOverride = true;
                             this.MemberBuilder.IsNew = false;
-                            this.MemberBuilder.OverriddenMethod = existingDeclaration;
+                            this.MemberBuilder.OverriddenMethod = existingMethod;
                             var overriddenMethod = new OverrideMethodTransformation( this, this.MemberBuilder, this.BoundTemplate, this.Tags );
 
                             return AdviceResult.Create( this.MemberBuilder, overriddenMethod );

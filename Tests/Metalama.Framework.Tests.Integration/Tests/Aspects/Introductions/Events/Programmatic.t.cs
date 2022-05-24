@@ -1,26 +1,30 @@
 [Introduction]
-    internal class TargetClass
-    {
-
+    internal class TargetClass { 
 
 public event global::System.EventHandler Event
-{add    {
+{
+    add
+    {
         global::System.Console.WriteLine("Get");
-    }
+            }
 
-remove    {
+    remove
+    {
         global::System.Console.WriteLine("Set");
-    }
+            }
 }
 
-public event global::System.EventHandler EventField;
+public event global::System.EventHandler? EventField;
 
 public event global::System.EventHandler EventFromAccessors
-{add    {
+{
+    add
+    {
         global::System.Console.WriteLine("Add");
-    }
+            }
 
-remove    {
+    remove
+    {
         global::System.Console.WriteLine("Remove");
-    }
-}    }
+            }
+}}

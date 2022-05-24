@@ -7,8 +7,8 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
+using System;
 
 namespace Metalama.Framework.Engine.Advices
 {
@@ -18,8 +18,6 @@ namespace Metalama.Framework.Engine.Advices
     internal class IntroduceFieldAdvice : IntroduceMemberAdvice<IField, FieldBuilder>
     {
         public IFieldBuilder Builder => this.MemberBuilder;
-
-        public new Ref<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
 
         public IntroduceFieldAdvice(
             IAspectInstanceInternal aspect,
@@ -57,6 +55,58 @@ namespace Metalama.Framework.Engine.Advices
 
         public override AdviceResult ToResult( ICompilation compilation )
         {
+            var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
+            var existingDeclaration = targetDeclaration.FindClosestUniquelyNamedMember( this.MemberBuilder.Name );
+
+            if ( existingDeclaration != null )
+            {
+                if ( existingDeclaration is not IField )
+                {
+                    return
+                        AdviceResult.Create(
+                            AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentKind.CreateRoslynDiagnostic(
+                                targetDeclaration.GetDiagnosticLocation(),
+                                (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration, existingDeclaration.DeclarationKind) ) );
+                }
+
+                if ( existingDeclaration.IsStatic != this.MemberBuilder.IsStatic )
+                {
+                    return
+                        AdviceResult.Create(
+                            AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentStaticity.CreateRoslynDiagnostic(
+                                targetDeclaration.GetDiagnosticLocation(),
+                                (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
+                                 existingDeclaration.DeclaringType) ) );
+                }
+
+                switch ( this.OverrideStrategy )
+                {
+                    case OverrideStrategy.Fail:
+                        // Produce fail diagnostic.
+                        return
+                            AdviceResult.Create(
+                                AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateRoslynDiagnostic(
+                                    targetDeclaration.GetDiagnosticLocation(),
+                                    (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
+                                     existingDeclaration.DeclaringType) ) );
+
+                    case OverrideStrategy.Ignore:
+                        // Do nothing.
+                        return AdviceResult.Create();
+
+                    case OverrideStrategy.New:
+                        this.MemberBuilder.IsNew = true;
+
+                        break;
+
+                    case OverrideStrategy.Override:
+                        throw new NotSupportedException( "Override is not a supported OverrideStrategy for fields." );
+
+                    default:
+                        throw new AssertionFailedException();
+                }
+            }
+
             return AdviceResult.Create( this.MemberBuilder );
         }
     }

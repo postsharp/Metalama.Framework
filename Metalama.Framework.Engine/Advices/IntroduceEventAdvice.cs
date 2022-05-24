@@ -70,7 +70,7 @@ namespace Metalama.Framework.Engine.Advices
             // this.Tags: Override transformations.
             var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
 
-            var existingDeclaration = targetDeclaration.FindClosestVisibleEvent( this.MemberBuilder.Name );
+            var existingDeclaration = targetDeclaration.FindClosestUniquelyNamedMember( this.MemberBuilder.Name );
             var hasNoOverrideSemantics = this.Template.Declaration != null && this.Template.Declaration.IsEventField();
 
             if ( existingDeclaration == null )
@@ -98,7 +98,15 @@ namespace Metalama.Framework.Engine.Advices
             }
             else
             {
-                if ( existingDeclaration.IsStatic != this.MemberBuilder.IsStatic )
+                if ( existingDeclaration is not IEvent existingEvent )
+                {
+                    return
+                        AdviceResult.Create(
+                            AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentKind.CreateRoslynDiagnostic(
+                                targetDeclaration.GetDiagnosticLocation(),
+                                (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration, existingDeclaration.DeclarationKind) ) );
+                }
+                else if ( existingDeclaration.IsStatic != this.MemberBuilder.IsStatic )
                 {
                     return
                         AdviceResult.Create(
@@ -106,6 +114,15 @@ namespace Metalama.Framework.Engine.Advices
                                 targetDeclaration.GetDiagnosticLocation(),
                                 (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
                                  existingDeclaration.DeclaringType) ) );
+                }
+                else if ( !compilation.InvariantComparer.Equals( this.Builder.Type, existingEvent.Type ) )
+                {
+                    return
+                        AdviceResult.Create(
+                            AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateRoslynDiagnostic(
+                                targetDeclaration.GetDiagnosticLocation(),
+                                (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
+                                 existingDeclaration.DeclaringType, existingEvent.Type) ) );
                 }
 
                 switch ( this.OverrideStrategy )
@@ -135,7 +152,7 @@ namespace Metalama.Framework.Engine.Advices
                             {
                                 var overriddenMethod = new OverrideEventTransformation(
                                     this,
-                                    existingDeclaration,
+                                    existingEvent,
                                     this.Template,
                                     this._addTemplate,
                                     this._removeTemplate,
@@ -179,7 +196,7 @@ namespace Metalama.Framework.Engine.Advices
                             {
                                 var overriddenMethod = new OverrideEventTransformation(
                                     this,
-                                    existingDeclaration,
+                                    existingEvent,
                                     this.Template,
                                     this._addTemplate,
                                     this._removeTemplate,
@@ -198,19 +215,10 @@ namespace Metalama.Framework.Engine.Advices
                                         (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
                                          existingDeclaration.DeclaringType) ) );
                         }
-                        else if ( !compilation.InvariantComparer.Equals( this.Builder.Type, existingDeclaration.Type ) )
-                        {
-                            return
-                                AdviceResult.Create(
-                                    AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateRoslynDiagnostic(
-                                        targetDeclaration.GetDiagnosticLocation(),
-                                        (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
-                                         existingDeclaration.DeclaringType, existingDeclaration.Type) ) );
-                        }
                         else
                         {
                             this.MemberBuilder.IsOverride = true;
-                            this.MemberBuilder.OverriddenEvent = existingDeclaration;
+                            this.MemberBuilder.OverriddenEvent = existingEvent;
 
                             if ( hasNoOverrideSemantics )
                             {
