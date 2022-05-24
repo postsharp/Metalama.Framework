@@ -38,7 +38,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public abstract IDeclaration? ContainingDeclaration { get; }
 
-        public abstract IAttributeList Attributes { get; }
+        public abstract IAttributeCollection Attributes { get; }
 
         public abstract DeclarationKind DeclarationKind { get; }
 

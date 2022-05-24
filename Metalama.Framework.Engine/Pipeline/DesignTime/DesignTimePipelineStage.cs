@@ -55,6 +55,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             DesignTimeSyntaxTreeGenerator.GenerateDesignTimeSyntaxTrees(
                 input.Compilation,
                 pipelineStepsResult.LastCompilation,
+                pipelineStepsResult.Transformations,
                 this.ServiceProvider,
                 diagnosticSink,
                 cancellationToken,

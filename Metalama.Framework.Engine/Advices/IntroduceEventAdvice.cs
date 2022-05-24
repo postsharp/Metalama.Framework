@@ -65,16 +65,18 @@ namespace Metalama.Framework.Engine.Advices
             this.MemberBuilder.Accessibility = (this.Template.Declaration?.Accessibility ?? this._addTemplate.Declaration?.Accessibility).AssertNotNull();
         }
 
-        public override AdviceResult ToResult( ICompilation compilation, IReadOnlyList<IObservableTransformation> observableTransformations )
+        public override AdviceResult ToResult( ICompilation compilation )
         {
             // this.Tags: Override transformations.
             var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
 
-            var existingDeclaration = targetDeclaration.FindClosestVisibleEvent( this.MemberBuilder, observableTransformations.OfType<IEvent>().ToList() );
+            var existingDeclaration = targetDeclaration.FindClosestVisibleEvent( this.MemberBuilder.Name );
             var hasNoOverrideSemantics = this.Template.Declaration != null && this.Template.Declaration.IsEventField();
 
             if ( existingDeclaration == null )
             {
+                // TODO: validate event type.
+
                 // There is no existing declaration, we will introduce and override the introduced.
                 if ( hasNoOverrideSemantics )
                 {

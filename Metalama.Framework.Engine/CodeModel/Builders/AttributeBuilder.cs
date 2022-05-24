@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         IDeclaration? IDeclaration.ContainingDeclaration => this.ContainingDeclaration;
 
-        IAttributeList IDeclaration.Attributes => AttributeList.Empty;
+        IAttributeCollection IDeclaration.Attributes => AttributeCollection.Empty;
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Attribute;
 

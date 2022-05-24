@@ -24,24 +24,23 @@ namespace Metalama.Framework.Engine.Pipeline
         public static void GenerateDesignTimeSyntaxTrees(
             PartialCompilation partialCompilation,
             CompilationModel compilationModel,
+            IEnumerable<ITransformation> transformations,
             IServiceProvider serviceProvider,
             UserDiagnosticSink diagnostics,
             CancellationToken cancellationToken,
             out IReadOnlyList<IntroducedSyntaxTree> additionalSyntaxTrees )
         {
-            var transformations = compilationModel.GetAllObservableTransformations( true );
-
             var additionalSyntaxTreeList = new List<IntroducedSyntaxTree>();
             additionalSyntaxTrees = additionalSyntaxTreeList;
 
             LexicalScopeFactory lexicalScopeFactory = new( compilationModel );
             var introductionNameProvider = new LinkerIntroductionNameProvider();
 
-            foreach ( var transformationGroup in transformations )
+            foreach ( var transformationGroup in transformations.OfType<IObservableTransformation>().GroupBy( t => t.ContainingDeclaration ) )
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                if ( transformationGroup.DeclaringDeclaration is not INamedType declaringType )
+                if ( transformationGroup.Key is not INamedType declaringType )
                 {
                     // We only support introductions to types.
                     continue;
@@ -62,7 +61,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 var members = List<MemberDeclarationSyntax>();
                 var syntaxGenerationContext = SyntaxGenerationContext.CreateDefault( serviceProvider, partialCompilation.Compilation, true );
 
-                foreach ( var transformation in transformationGroup.Transformations )
+                foreach ( var transformation in transformationGroup )
                 {
                     if ( transformation is IIntroduceMemberTransformation memberIntroduction )
                     {

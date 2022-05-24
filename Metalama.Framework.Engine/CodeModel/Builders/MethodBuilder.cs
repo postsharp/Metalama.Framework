@@ -7,7 +7,6 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Advices;
-using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
@@ -83,8 +82,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public ParameterBuilder ReturnParameter { get; }
 
         IParameter IMethod.ReturnParameter => this.ReturnParameter;
-
-        IMethodList IMethodBase.LocalFunctions => MethodList.Empty;
 
         IParameterList IHasParameters.Parameters => this.Parameters;
 

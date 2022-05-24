@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public override IDeclaration? ContainingDeclaration => this.DeclaringAccessor;
 
-        public override IAttributeList Attributes => AttributeList.Empty;
+        public override IAttributeCollection Attributes => AttributeCollection.Empty;
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 

@@ -11,7 +11,6 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.Advices
 {
@@ -99,14 +98,12 @@ namespace Metalama.Framework.Engine.Advices
             }
         }
 
-        public override AdviceResult ToResult( ICompilation compilation, IReadOnlyList<IObservableTransformation> observableTransformations )
+        public override AdviceResult ToResult( ICompilation compilation )
         {
             // Determine whether we need introduction transformation (something may exist in the original code or could have been introduced by previous steps).
             var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
 
-            var existingDeclaration = targetDeclaration.FindClosestVisibleMethod(
-                this.MemberBuilder,
-                observableTransformations.OfType<IMethod>().ToList() );
+            var existingDeclaration = targetDeclaration.FindClosestVisibleMethod( this.MemberBuilder );
 
             // TODO: Introduce attributes that are added not present on the existing member?
             if ( existingDeclaration == null )

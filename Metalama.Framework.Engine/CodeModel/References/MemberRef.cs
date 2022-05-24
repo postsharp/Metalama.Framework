@@ -33,6 +33,11 @@ namespace Metalama.Framework.Engine.CodeModel.References
             this._underlying = declarationRef.As<T>();
         }
 
+        public MemberRef( in Ref<T> declarationRef )
+        {
+            this._underlying = declarationRef;
+        }
+
         public object? Target => this._underlying.Target;
 
         public string? ToSerializableId() => this._underlying.ToSerializableId();
@@ -43,6 +48,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public override string ToString() => this._underlying.ToString();
 
+        public Ref<T> ToRef() => this._underlying;
+
         public string Name
             => this.Target switch
             {
@@ -50,5 +57,11 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 IMemberOrNamedTypeBuilder builder => builder.Name,
                 _ => throw new AssertionFailedException()
             };
+
+        public bool IsDefault => this._underlying.IsDefault;
+
+        public MemberRef<TCast> As<TCast>()
+            where TCast : class, IMemberOrNamedType
+            => new( this._underlying.As<IDeclaration>() );
     }
 }

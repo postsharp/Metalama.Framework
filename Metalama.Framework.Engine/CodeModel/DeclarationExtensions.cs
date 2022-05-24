@@ -3,7 +3,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
@@ -70,11 +69,9 @@ namespace Metalama.Framework.Engine.CodeModel
                         .Concat( namedType.Fields )
                         .Concat( namedType.Properties )
                         .Concat( namedType.Events )
-                        .Concat( namedType.TypeParameters )
-                        .ConcatNotNull( namedType.StaticConstructor ),
-                    IMethod method => method.LocalFunctions
-                        .Concat<IDeclaration>( method.Parameters )
-                        .Concat( method.TypeParameters )
+                        .Concat( namedType.TypeParameters ),
+                    IMethod method => method.Parameters
+                        .Concat<IDeclaration>( method.TypeParameters )
                         .ConcatNotNull( method.ReturnParameter ),
                     IMemberWithAccessors member => member.Accessors,
                     _ => null
@@ -363,157 +360,31 @@ namespace Metalama.Framework.Engine.CodeModel
             => ((IDeclarationImpl) declaration).DeclaringSyntaxReferences;
 
         /// <summary>
-        /// Determine whether a member is visible within the specified type.
-        /// </summary>
-        /// <param name="member">Member that is to be references.</param>
-        /// <param name="within">Type from which the member is to referenced.</param>
-        /// <returns><c>True</c> if the member is visible from the type.</returns>
-        /// <exception cref="NotImplementedException">Not implemented for introduced types.</exception>
-        private static bool IsVisibleWithin( this IMember member, INamedType within )
-        {
-            if ( member.GetSymbol() != null && within.GetSymbol() != null )
-            {
-                // Both are code elements, use Roslyn.
-                return member.GetCompilationModel().RoslynCompilation.IsSymbolAccessibleWithin( member.GetSymbol()!, within.GetSymbol() );
-            }
-            else if ( within.GetSymbol() != null && member.Compilation.InvariantComparer.Equals( member.DeclaringAssembly, within.DeclaringAssembly ) )
-            {
-                // Member is generated and in the same assembly as the other type.
-                var currentType = (INamedType?) within;
-
-                while ( currentType != null && currentType != member.DeclaringType )
-                {
-                    currentType = currentType.BaseType;
-                }
-
-                if ( currentType == null )
-                {
-                    // Other type is not super type of member's declaring type. We do not support this case atm.
-                    throw new NotImplementedException();
-                }
-
-                // Base type member is not accessible within the same assembly only if it private.
-                return member.Accessibility is not Accessibility.Private;
-            }
-            else
-            {
-                // Introduced types are not supported.
-                throw new NotImplementedException();
-            }
-        }
-
-        /// <summary>
         /// Finds a method of given signature that is visible in the specified type, taking into account methods being hidden by other methods.
         /// </summary>
         /// <param name="namedType">Type.</param>
         /// <param name="signatureTemplate">Method that acts as a template for the signature.</param>
-        /// <param name="additionalMethods">A set of additional methods that have been added to <paramref name="namedType"/>.</param>
         /// <returns>A method of the given signature that is visible from the given type or <c>null</c> if no such method exists.</returns>
-        public static IMethod? FindClosestVisibleMethod( this INamedType namedType, IMethod signatureTemplate, IReadOnlyList<IMethod> additionalMethods )
-        {
-            if ( additionalMethods.Count > 0 )
-            {
-                var additionalMethodList = new MethodList( (Declaration) namedType, additionalMethods.Select( x => x.ToMemberRef() ) );
-                var method = additionalMethodList.OfExactSignature( signatureTemplate, matchIsStatic: false, declaredOnly: true );
-
-                if ( method != null )
-                {
-                    return method;
-                }
-            }
-
-            var currentType = (INamedType?) namedType;
-
-            while ( currentType != null )
-            {
-                var method = currentType.Methods.OfExactSignature( signatureTemplate, matchIsStatic: false, declaredOnly: true );
-
-                if ( method != null && method.IsVisibleWithin( namedType ) )
-                {
-                    return method;
-                }
-
-                currentType = currentType.BaseType;
-            }
-
-            return null;
-        }
+        public static IMethod? FindClosestVisibleMethod( this INamedType namedType, IMethod signatureTemplate )
+            => namedType.AllMethods.OfExactSignature( signatureTemplate );
 
         /// <summary>
         /// Finds a property of given signature that is visible in the specified type, taking into account properties being hidden by other properties.
         /// </summary>
         /// <param name="namedType">Type.</param>
-        /// <param name="signatureTemplate">Property that acts as a template for the signature.</param>
-        /// <param name="additionalProperties">A set of additional properties that have been added to <paramref name="namedType"/>.</param> 
+        /// <param name="name">Property name.</param>
         /// <returns>A property of the given signature that is visible from the given type or <c>null</c> if no such property exists.</returns>
         public static IProperty? FindClosestVisibleProperty(
             this INamedType namedType,
-            IProperty signatureTemplate,
-            IReadOnlyList<IProperty> additionalProperties )
-        {
-            if ( additionalProperties.Count > 0 )
-            {
-                var additionalPropertyList = new PropertyList( (NamedType) namedType, additionalProperties.Select( x => x.ToMemberRef() ) );
-                var property = additionalPropertyList.OfExactSignature( signatureTemplate, matchIsStatic: false, declaredOnly: true );
-
-                if ( property != null )
-                {
-                    return property;
-                }
-            }
-
-            var currentType = (INamedType?) namedType;
-
-            while ( currentType != null )
-            {
-                var property = currentType.Properties.OfExactSignature( signatureTemplate, matchIsStatic: false, declaredOnly: true );
-
-                if ( property != null && property.IsVisibleWithin( namedType ) )
-                {
-                    return property;
-                }
-
-                currentType = currentType.BaseType;
-            }
-
-            return null;
-        }
+            string name )
+            => namedType.AllProperties.OfName( name ).FirstOrDefault();
 
         /// <summary>
         /// Finds an event of given signature that is visible in the specified type, taking into account events being hidden by other events.
         /// </summary>
         /// <param name="namedType">Type.</param>
-        /// <param name="signatureTemplate">Event that acts as a template for the signature.</param>
-        /// <param name="additionalEvents">A set of additional events that have been added to <paramref name="namedType"/>.</param>
+        /// <param name="name">Event name.</param>
         /// <returns>An event of the given signature that is visible from the given type or <c>null</c> if no such method exists.</returns>
-        public static IEvent? FindClosestVisibleEvent( this INamedType namedType, IEvent signatureTemplate, IReadOnlyList<IEvent> additionalEvents )
-        {
-            if ( additionalEvents.Count > 0 )
-            {
-                var additionalEventList = new EventList( (NamedType) namedType, additionalEvents.Select( x => x.ToMemberRef() ) );
-                var @event = additionalEventList.OfExactSignature( signatureTemplate, matchIsStatic: false, declaredOnly: true );
-
-                if ( @event != null )
-                {
-                    return @event;
-                }
-            }
-
-            var currentType = (INamedType?) namedType;
-
-            while ( currentType != null )
-            {
-                var @event = currentType.Events.OfExactSignature( signatureTemplate, matchIsStatic: false, declaredOnly: true );
-
-                if ( @event != null && @event.IsVisibleWithin( namedType ) )
-                {
-                    return @event;
-                }
-
-                currentType = currentType.BaseType;
-            }
-
-            return null;
-        }
+        public static IEvent? FindClosestVisibleEvent( this INamedType namedType, string name ) => namedType.AllEvents.OfName( name ).FirstOrDefault();
     }
 }

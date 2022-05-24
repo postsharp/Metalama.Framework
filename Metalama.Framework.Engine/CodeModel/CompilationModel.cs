@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Metrics;
@@ -41,8 +42,6 @@ namespace Metalama.Framework.Engine.CodeModel
             ImmutableArray<ManagedResource> resources = default )
             => new( project, PartialCompilation.CreatePartial( compilation, syntaxTree, resources ) );
 
-        private readonly ImmutableDictionaryOfArray<Ref<IDeclaration>, IObservableTransformation> _transformations;
-
         // This collection index all attributes on types and members, but not attributes on the assembly and the module.
         private readonly ImmutableDictionaryOfArray<string, AttributeRef> _allMemberAttributesByTypeName;
 
@@ -71,13 +70,27 @@ namespace Metalama.Framework.Engine.CodeModel
             this.ReflectionMapper = project.ServiceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( this.RoslynCompilation );
             this.InvariantComparer = new DeclarationEqualityComparer( this.ReflectionMapper, this.RoslynCompilation );
             this._derivedTypes = partialCompilation.DerivedTypes;
+            this._aspects = ImmutableDictionaryOfArray<Ref<IDeclaration>, IAspectInstanceInternal>.Empty;
+            this.SymbolClassifier = project.ServiceProvider.GetRequiredService<SymbolClassificationService>().GetClassifier( this.RoslynCompilation );
+            this.MetricManager = project.ServiceProvider.GetService<MetricManager>() ?? new MetricManager( project.ServiceProvider );
+            this.EmptyGenericMap = new GenericMap( partialCompilation.Compilation );
 
-            this._transformations = ImmutableDictionaryOfArray<Ref<IDeclaration>, IObservableTransformation>
-                .Empty
-                .WithKeyComparer( DeclarationRefEqualityComparer<Ref<IDeclaration>>.Instance );
+            // Initialize dictionaries of modified members.
+            static void InitializeDictionary<T>( out ImmutableDictionary<INamedTypeSymbol, T> dictionary )
+                => dictionary = ImmutableDictionary.Create<INamedTypeSymbol, T>()
+                    .WithComparers( SymbolEqualityComparer.Default );
+
+            InitializeDictionary( out this._fields );
+            InitializeDictionary( out this._methods );
+            InitializeDictionary( out this._constructors );
+            InitializeDictionary( out this._events );
+            InitializeDictionary( out this._properties );
+            InitializeDictionary( out this._indexers );
+            InitializeDictionary( out this._interfaceImplementations );
 
             this.Factory = new DeclarationFactory( this );
 
+            // Discover custom attributes.
             AttributeDiscoveryVisitor attributeDiscoveryVisitor = new( this.RoslynCompilation );
 
             foreach ( var tree in partialCompilation.SyntaxTrees )
@@ -86,24 +99,24 @@ namespace Metalama.Framework.Engine.CodeModel
             }
 
             this._allMemberAttributesByTypeName = attributeDiscoveryVisitor.GetDiscoveredAttributes();
-
-            this._aspects = ImmutableDictionaryOfArray<Ref<IDeclaration>, IAspectInstanceInternal>.Empty;
-            this.SymbolClassifier = project.ServiceProvider.GetRequiredService<SymbolClassificationService>().GetClassifier( this.RoslynCompilation );
-            this.MetricManager = project.ServiceProvider.GetService<MetricManager>() ?? new MetricManager( project.ServiceProvider );
-            this.EmptyGenericMap = new GenericMap( partialCompilation.Compilation );
         }
+
+        // The following dictionaries contain the members of types, if they have been modified. If they have not been modified,
+        // the collection should be created from symbols.
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CompilationModel"/> class that is based on a prototype instance but appends transformations.
         /// </summary>
         /// <param name="prototype"></param>
         /// <param name="observableTransformations"></param>
-        private CompilationModel( CompilationModel prototype, IReadOnlyList<IObservableTransformation> observableTransformations ) : this( prototype )
+        private CompilationModel( CompilationModel prototype, IReadOnlyList<IObservableTransformation> observableTransformations ) : this( prototype, true )
         {
-            this._transformations = prototype._transformations.AddRange(
-                observableTransformations,
-                t => t.ContainingDeclaration.ToTypedRef(),
-                t => t );
+            foreach ( var transformation in observableTransformations )
+            {
+                this.AddTransformation( transformation );
+            }
+
+            this.IsMutable = false;
 
             // TODO: Performance. The next line essentially instantiates the complete code model. We should look at attributes without doing that. 
             var allNewDeclarations =
@@ -126,8 +139,9 @@ namespace Metalama.Framework.Engine.CodeModel
             this._allMemberAttributesByTypeName = prototype._allMemberAttributesByTypeName.AddRange( allAttributes, a => a.AttributeTypeName! );
         }
 
-        private CompilationModel( CompilationModel prototype )
+        private CompilationModel( CompilationModel prototype, bool mutable )
         {
+            this.IsMutable = mutable;
             this.Project = prototype.Project;
             this.Revision = prototype.Revision + 1;
 
@@ -135,7 +149,15 @@ namespace Metalama.Framework.Engine.CodeModel
             this.PartialCompilation = prototype.PartialCompilation;
             this.ReflectionMapper = prototype.ReflectionMapper;
             this.InvariantComparer = prototype.InvariantComparer;
-            this._transformations = prototype._transformations;
+            this._methods = prototype._methods;
+            this._constructors = prototype._constructors;
+            this._fields = prototype._fields;
+            this._properties = prototype._properties;
+            this._indexers = prototype._indexers;
+            this._events = prototype._events;
+            this._interfaceImplementations = prototype._interfaceImplementations;
+            this._staticConstructors = prototype._staticConstructors;
+
             this.Factory = new DeclarationFactory( this );
             this._depthsCache = prototype._depthsCache;
             this._allMemberAttributesByTypeName = prototype._allMemberAttributesByTypeName;
@@ -145,7 +167,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this.EmptyGenericMap = prototype.EmptyGenericMap;
         }
 
-        private CompilationModel( CompilationModel prototype, IReadOnlyList<IAspectInstanceInternal> aspectInstances ) : this( prototype )
+        private CompilationModel( CompilationModel prototype, IReadOnlyList<IAspectInstanceInternal> aspectInstances ) : this( prototype, false )
         {
             this._aspects = this._aspects.AddRange( aspectInstances, a => a.TargetDeclaration );
         }
@@ -166,22 +188,21 @@ namespace Metalama.Framework.Engine.CodeModel
         public string AssemblyName => this.RoslynCompilation.AssemblyName ?? "";
 
         [Memo]
-        public INamedTypeList Types
-            => new NamedTypeList(
+        public INamedTypeCollection Types
+            => new NamedTypeCollection(
                 this,
-                this.PartialCompilation.Types
-                    .Where( t => this.SymbolClassifier.GetTemplatingScope( t ) != TemplatingScope.CompileTimeOnly )
-                    .Select( t => new MemberRef<INamedType>( t, this.RoslynCompilation ) ) );
+                new CompilationTypeUpdatableCollection( this, this.RoslynCompilation.GlobalNamespace ) );
 
         [Memo]
-        public override IAttributeList Attributes
-            => new AttributeList(
+        public override IAttributeCollection Attributes
+            => new AttributeCollection(
                 this,
                 this.RoslynCompilation.Assembly
                     .GetAttributes()
                     .Union( this.RoslynCompilation.SourceModule.GetAttributes() )
                     .Where( a => a.AttributeConstructor != null )
-                    .Select( a => new AttributeRef( a, Ref.FromSymbol( this.RoslynCompilation.Assembly, this.RoslynCompilation ) ) ) );
+                    .Select( a => new AttributeRef( a, Ref.FromSymbol( this.RoslynCompilation.Assembly, this.RoslynCompilation ) ) )
+                    .ToList() );
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Compilation;
 
@@ -261,25 +282,6 @@ namespace Metalama.Framework.Engine.CodeModel
                     } )
                 .WhereNotNull()
                 .Where( a => a.Type.Equals( type ) );
-
-        internal ImmutableArray<IObservableTransformation> GetObservableTransformationsOnElement( IDeclaration declaration )
-            => this._transformations[declaration.ToTypedRef()];
-
-        internal IEnumerable<(IDeclaration DeclaringDeclaration, ImmutableArray<IObservableTransformation> Transformations)> GetAllObservableTransformations(
-            bool designTimeOnly )
-        {
-            foreach ( var group in this._transformations )
-            {
-                var filteredGroup = designTimeOnly
-                    ? group.Where( t => t.IsDesignTime ).ToImmutableArray()
-                    : group.ToImmutableArray();
-
-                if ( !filteredGroup.IsEmpty )
-                {
-                    yield return (group.Key.GetTarget( this ), filteredGroup);
-                }
-            }
-        }
 
         internal int GetDepth( IDeclaration declaration )
         {
@@ -394,5 +396,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public override bool CanBeInherited => false;
 
         public override SyntaxTree? PrimarySyntaxTree => null;
+
+        public CompilationModel ToMutable() => new( this, true );
     }
 }

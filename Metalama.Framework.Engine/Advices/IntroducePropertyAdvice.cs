@@ -10,7 +10,6 @@ using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.Advices
 {
@@ -70,7 +69,8 @@ namespace Metalama.Framework.Engine.Advices
             this.MemberBuilder.Type = (this.Template.Declaration?.Type ?? this._getTemplate.Template.Declaration?.ReturnType).AssertNotNull();
 
             this.MemberBuilder.Accessibility =
-                (this.Template.Declaration?.Accessibility ?? this._getTemplate.Template.Declaration?.Accessibility ?? this._setTemplate.Template.Declaration?.Accessibility).AssertNotNull();
+                (this.Template.Declaration?.Accessibility
+                 ?? this._getTemplate.Template.Declaration?.Accessibility ?? this._setTemplate.Template.Declaration?.Accessibility).AssertNotNull();
 
             if ( this.Template.IsNotNull )
             {
@@ -88,14 +88,14 @@ namespace Metalama.Framework.Engine.Advices
             // TODO: For get accessor template, we are ignoring accessibility of set accessor template because it can be easily incompatible.
         }
 
-        public override AdviceResult ToResult( ICompilation compilation, IReadOnlyList<IObservableTransformation> observableTransformations )
+        public override AdviceResult ToResult( ICompilation compilation )
         {
             // Determine whether we need introduction transformation (something may exist in the original code or could have been introduced by previous steps).
             var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
 
-            var existingDeclaration = targetDeclaration.FindClosestVisibleProperty(
-                this.MemberBuilder,
-                observableTransformations.OfType<IProperty>().ToList() );
+            var existingDeclaration = targetDeclaration.FindClosestVisibleProperty( this.MemberBuilder.Name );
+
+            // TODO: verify property type.
 
             // TODO: Introduce attributes that are added not present on the existing member?
             if ( existingDeclaration == null )

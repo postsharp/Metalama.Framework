@@ -36,12 +36,12 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets the list of all interfaces (recursive) that the current type implements.
         /// </summary>
-        IImplementedInterfaceList AllImplementedInterfaces { get; }
+        IImplementedInterfaceCollection AllImplementedInterfaces { get; }
 
         /// <summary>
         /// Gets the list of interfaces that the current type implements.
         /// </summary>
-        IImplementedInterfaceList ImplementedInterfaces { get; }
+        IImplementedInterfaceCollection ImplementedInterfaces { get; }
 
         /// <summary>
         /// Gets the namespace of the current type. If the <see cref="IsExternal"/> property is <c>true</c>,
@@ -57,7 +57,7 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets the nested types of the current type.
         /// </summary>
-        INamedTypeList NestedTypes { get; }
+        INamedTypeCollection NestedTypes { get; }
 
         /// <summary>
         /// Gets the list of properties defined by the current type, but not those inherited from the base type.
@@ -65,12 +65,16 @@ namespace Metalama.Framework.Code
         /// represented in the <see cref="Properties" /> collection instead of the <see cref="Fields"/>
         /// collection.
         /// </summary>
-        IPropertyList Properties { get; }
+        IPropertyCollection Properties { get; }
+
+        IPropertyCollection AllProperties { get; }
 
         /// <summary>
         /// Gets the list of indexers defined in the current type.
         /// </summary>
-        IIndexerList Indexers { get; }
+        IIndexerCollection Indexers { get; }
+
+        IIndexerCollection AllIndexers { get; }
 
         /// <summary>
         /// Gets the list of fields defined by the current type, but not those inherited from the base  type.
@@ -78,29 +82,37 @@ namespace Metalama.Framework.Code
         /// represented in the <see cref="Properties" /> collection instead of the <see cref="Fields"/>
         /// collection.
         /// </summary>
-        IFieldList Fields { get; }
+        IFieldCollection Fields { get; }
+
+        IFieldCollection AllFields { get; }
 
         /// <summary>
         /// Gets the union of the <see cref="Fields"/> and <see cref="Properties"/> collections.
         /// </summary>
-        IFieldOrPropertyList FieldsAndProperties { get; }
+        IFieldOrPropertyCollection FieldsAndProperties { get; }
+
+        IFieldOrPropertyCollection AllFieldsAndProperties { get; }
 
         /// <summary>
         /// Gets the list of events defined by the current type, but not those inherited from the base
         /// type.
         /// </summary>
-        IEventList Events { get; }
+        IEventCollection Events { get; }
+
+        IEventCollection AllEvents { get; }
 
         /// <summary>
         /// Gets the list of methods defined by the current type, but not those inherited from the base
         /// type, and not constructors.
         /// </summary>
-        IMethodList Methods { get; }
+        IMethodCollection Methods { get; }
+
+        IMethodCollection AllMethods { get; }
 
         /// <summary>
         /// Gets the list of constructors, including the implicit default constructor if any, but not the static constructor. 
         /// </summary>
-        IConstructorList Constructors { get; }
+        IConstructorCollection Constructors { get; }
 
         /// <summary>
         /// Gets the static constructor.

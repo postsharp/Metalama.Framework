@@ -320,6 +320,11 @@ namespace Metalama.Framework.Engine.CodeModel
                     return ((IMemberWithAccessors) this.GetDeclaration( builder.ContainingMember )).GetAccessor( builder.MethodKind )!;
                 } );
 
+        internal IConstructor GetConstructor( ConstructorBuilder methodBuilder )
+            => (IConstructor) this._cache.GetOrAdd(
+                Ref.FromBuilder( methodBuilder ).As<ICompilationElement>(),
+                l => new BuiltConstructor( (ConstructorBuilder) l.Target!, this._compilationModel ) );
+
         internal IField GetField( IFieldBuilder fieldBuilder )
             => (IField) this._cache.GetOrAdd(
                 Ref.FromBuilder( fieldBuilder ).As<ICompilationElement>(),

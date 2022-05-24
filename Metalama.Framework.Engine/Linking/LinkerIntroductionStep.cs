@@ -43,14 +43,9 @@ namespace Metalama.Framework.Engine.Linking
             var nameProvider = new LinkerIntroductionNameProvider();
             var syntaxTransformationCollection = new SyntaxTransformationCollection();
 
-            var observableTransformations = input.CompilationModel.GetAllObservableTransformations( false )
-                .SelectMany( x => x.Transformations.OfType<ISyntaxTreeTransformation>() );
-
-            var nonObservableTransformations = input.NonObservableTransformations.OfType<ISyntaxTreeTransformation>();
-
             // TODO: this sorting can be optimized.
             var allTransformations =
-                observableTransformations.Concat( nonObservableTransformations )
+                input.Transformations.OfType<ISyntaxTreeTransformation>()
                     .OrderBy( x => x.Advice.AspectLayerId, new AspectLayerIdComparer( input.OrderedAspectLayers ) )
                     .Cast<ITransformation>()
                     .ToList();

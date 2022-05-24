@@ -38,7 +38,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public IDeclaration ContainingDeclaration { get; }
 
-        IAttributeList IDeclaration.Attributes => AttributeList.Empty;
+        IAttributeCollection IDeclaration.Attributes => AttributeCollection.Empty;
 
         public DeclarationKind DeclarationKind => DeclarationKind.Attribute;
 

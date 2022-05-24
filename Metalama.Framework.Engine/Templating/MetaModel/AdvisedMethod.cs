@@ -17,8 +17,6 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
     {
         public AdvisedMethod( IMethod underlying ) : base( (IMethodImpl) underlying ) { }
 
-        public IMethodList LocalFunctions => this.Underlying.LocalFunctions;
-
         public object? Invoke( params object?[] args )
         {
             if ( this.Invokers.Base != null )

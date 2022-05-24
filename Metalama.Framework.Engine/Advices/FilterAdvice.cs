@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.Advices
 
         public override void Initialize( IDiagnosticAdder diagnosticAdder ) { }
 
-        public override AdviceResult ToResult( ICompilation compilation, IReadOnlyList<IObservableTransformation> observableTransformations )
+        public override AdviceResult ToResult( ICompilation compilation )
         {
             var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
 
@@ -36,14 +36,14 @@ namespace Metalama.Framework.Engine.Advices
 
                 case IProperty property:
                     return AdviceResult.Create( new FilterPropertyTransformation( this, property ) );
-                
+
                 case IField field:
                     var promotedField = new PromotedField( this, field, this.Tags );
 
                     return AdviceResult.Create(
                         promotedField,
                         new FilterPropertyTransformation( this, promotedField ) );
-                
+
                 default:
                     throw new AssertionFailedException();
             }
