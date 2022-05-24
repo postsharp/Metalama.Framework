@@ -355,23 +355,23 @@ class C : B
             var typeB = types.ElementAt( 1 );
             var typeC = types.ElementAt( 2 );
 
-            var matchedMethods1 = typeC.AllMethods.OfCompatibleSignature( "Foo", Array.Empty<IType>() );
+            var matchedMethods1 = typeC.AllMethods.OfCompatibleSignature( "Foo", Array.Empty<IType>() ).ToArray();
             Assert.Equal( new[] { typeB.Methods.ElementAt( 0 ) }, matchedMethods1 );
-            var matchedMethods2 = typeC.AllMethods.OfCompatibleSignature( "Bar", Array.Empty<IType>() );
+            var matchedMethods2 = typeC.AllMethods.OfCompatibleSignature( "Bar", Array.Empty<IType>() ).ToArray();
             Assert.Equal( new[] { typeA.Methods.ElementAt( 1 ) }, matchedMethods2 );
-            var matchedMethods3 = typeC.AllMethods.OfCompatibleSignature( "Baz", Array.Empty<IType>() );
+            var matchedMethods3 = typeC.AllMethods.OfCompatibleSignature( "Baz", Array.Empty<IType>() ).ToArray();
             Assert.Equal( new[] { typeB.Methods.ElementAt( 1 ) }, matchedMethods3 );
-            var matchedMethods4 = typeC.AllMethods.OfCompatibleSignature( "Qux", Array.Empty<IType>() );
+            var matchedMethods4 = typeC.AllMethods.OfCompatibleSignature( "Qux", Array.Empty<IType>() ).ToArray();
             Assert.Equal( new[] { typeA.Methods.ElementAt( 3 ) }, matchedMethods4 );
-            var matchedMethods5 = typeC.AllMethods.OfCompatibleSignature( "Quz", Array.Empty<IType>() );
+            var matchedMethods5 = typeC.AllMethods.OfCompatibleSignature( "Quz", Array.Empty<IType>() ).ToArray();
             Assert.Equal( new[] { typeB.Methods.ElementAt( 2 ) }, matchedMethods5 );
-            var matchedMethods6 = typeC.AllMethods.OfCompatibleSignature( "Qur", Array.Empty<IType>() );
+            var matchedMethods6 = typeC.AllMethods.OfCompatibleSignature( "Qur", Array.Empty<IType>() ).ToArray();
             Assert.Equal( new[] { typeB.Methods.ElementAt( 3 ) }, matchedMethods6 );
-            var matchedMethods7 = typeC.AllMethods.OfCompatibleSignature( "Trx", Array.Empty<IType>() );
+            var matchedMethods7 = typeC.AllMethods.OfCompatibleSignature( "Trx", Array.Empty<IType>() ).ToArray();
             Assert.Equal( new[] { typeC.Methods.ElementAt( 0 ) }, matchedMethods7 );
-            var matchedMethods8 = typeC.AllMethods.OfCompatibleSignature( "Trw", Array.Empty<IType>() );
+            var matchedMethods8 = typeC.AllMethods.OfCompatibleSignature( "Trw", Array.Empty<IType>() ).ToArray();
             Assert.Equal( new[] { typeC.Methods.ElementAt( 1 ) }, matchedMethods8 );
-            var matchedMethods9 = typeC.AllMethods.OfCompatibleSignature( "Xyzzy", Array.Empty<IType>() );
+            var matchedMethods9 = typeC.AllMethods.OfCompatibleSignature( "Xyzzy", Array.Empty<IType>() ).ToArray();
             Assert.Equal( Array.Empty<IMethod>(), matchedMethods9 );
         }
     }

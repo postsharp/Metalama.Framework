@@ -36,7 +36,7 @@ internal abstract class AllMembersCollection<T> : IMemberCollection<T>
         // We don't assign the field directly so we don't get into concurrent updates of the collection.
         var members = new Dictionary<T, T>( MemberComparer<T>.Instance );
 
-        for ( var t = this.DeclaringType; t != null; t = t.DeclaringType )
+        for ( var t = this.DeclaringType; t != null; t = t.BaseType )
         {
             var includePrivate = t == this.DeclaringType;
             var declaredMembers = name == null ? this.GetMembers( t ) : this.GetMembers( t ).OfName( name );

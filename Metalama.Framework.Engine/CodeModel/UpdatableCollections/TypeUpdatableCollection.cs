@@ -13,11 +13,15 @@ internal class TypeUpdatableCollection : UniquelyNamedUpdatableCollection<INamed
 {
     public TypeUpdatableCollection( CompilationModel compilation, INamespaceOrTypeSymbol declaringType ) : base( compilation, declaringType ) { }
 
+    private bool IsIncluded( INamedTypeSymbol t )
+        => (t.ContainingType != null || this.Compilation.PartialCompilation.Types.Contains( t )) &&
+           this.Compilation.SymbolClassifier.GetTemplatingScope( t ) != TemplatingScope.CompileTimeOnly;
+
     protected override ISymbol? GetMember( string name )
         => this.DeclaringTypeOrNamespace.GetTypeMembers( name )
-            .FirstOrDefault( t => this.Compilation.SymbolClassifier.GetTemplatingScope( t ) != TemplatingScope.CompileTimeOnly );
+            .FirstOrDefault( this.IsIncluded );
 
     protected override IEnumerable<ISymbol> GetMembers()
         => this.DeclaringTypeOrNamespace.GetTypeMembers()
-            .Where( t => this.Compilation.SymbolClassifier.GetTemplatingScope( t ) != TemplatingScope.CompileTimeOnly );
+            .Where( this.IsIncluded );
 }

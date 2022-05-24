@@ -18,6 +18,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 using DeclarationKind = Metalama.Framework.Code.DeclarationKind;
+using EnumerableExtensions = Metalama.Framework.Engine.Collections.EnumerableExtensions;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using RefKind = Metalama.Framework.Code.RefKind;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
@@ -63,13 +64,16 @@ namespace Metalama.Framework.Engine.CodeModel
                 child => child switch
                 {
                     ICompilation compilation => compilation.Types,
-                    INamedType namedType => namedType.NestedTypes
-                        .Concat<IDeclaration>( namedType.Methods )
-                        .Concat( namedType.Constructors )
-                        .Concat( namedType.Fields )
-                        .Concat( namedType.Properties )
-                        .Concat( namedType.Events )
-                        .Concat( namedType.TypeParameters ),
+                    INamedType namedType => EnumerableExtensions.Concat<IDeclaration>(
+                            namedType.NestedTypes,
+                            namedType.Methods,
+                            namedType.Constructors,
+                            namedType.Fields,
+                            namedType.Properties,
+                            namedType.Indexers,
+                            namedType.Events,
+                            namedType.TypeParameters )
+                        .ConcatNotNull( namedType.StaticConstructor ),
                     IMethod method => method.Parameters
                         .Concat<IDeclaration>( method.TypeParameters )
                         .ConcatNotNull( method.ReturnParameter ),

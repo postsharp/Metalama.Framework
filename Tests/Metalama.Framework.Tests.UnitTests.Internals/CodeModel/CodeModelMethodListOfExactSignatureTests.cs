@@ -219,9 +219,9 @@ class C : B
             var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
 
             var matchedMethod1 = typeC.AllMethods.OfExactSignature( "Foo", Array.Empty<IType>() );
-            Assert.Same( typeA.AllMethods.Single(), matchedMethod1 );
+            Assert.Same( typeA.Methods.Single(), matchedMethod1 );
             var matchedMethod2 = typeC.AllMethods.OfExactSignature( "Foo", new[] { intType } );
-            Assert.Same( typeB.AllMethods.Single(), matchedMethod2 );
+            Assert.Same( typeB.Methods.Single(), matchedMethod2 );
             var matchedMethod3 = typeC.AllMethods.OfExactSignature( "Foo", new[] { intType, intType } );
             Assert.Same( typeC.Methods.Single(), matchedMethod3 );
         }

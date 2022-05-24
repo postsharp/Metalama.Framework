@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Collections;
 using System;
 using System.Collections.Generic;
@@ -8,6 +9,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Code;
 
+[CompileTime]
 public static class MethodCollectionExtensions
 {
     /// <summary>
@@ -25,15 +27,15 @@ public static class MethodCollectionExtensions
         bool? isStatic = false )
     {
         return methods.OfCompatibleSignature(
-            (argumentTypes, methods.DeclaringType.Compilation),
+            (argumentTypes, (ICompilationInternal) methods.DeclaringType.Compilation),
             name,
             argumentTypes?.Count,
             GetParameter,
             isStatic );
 
-        static (IType? Type, RefKind? RefKind) GetParameter( (IReadOnlyList<Type?>? ArgumentTypes, ICompilation Compilation) context, int index )
+        static (IType? Type, RefKind? RefKind) GetParameter( (IReadOnlyList<Type?>? ArgumentTypes, ICompilationInternal Compilation) context, int index )
             => context.ArgumentTypes != null && context.ArgumentTypes[index] != null
-                ? (TypeFactory.GetType( context.ArgumentTypes[index]! ), null)
+                ? (context.Compilation.TypeFactory.GetTypeByReflectionType( context.ArgumentTypes[index]! ), null)
                 : (null, null);
     }
 

@@ -14,6 +14,8 @@ namespace Metalama.Framework.Code.Collections
     /// </remarks>
     public interface IImplementedInterfaceCollection : IReadOnlyCollection<INamedType>
     {
+        bool Contains( INamedType namedType );
+
         /// <summary>
         /// Determines whether the current collection contains a given <see cref="Type"/>.
         /// </summary>

@@ -107,15 +107,21 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
         var dictionary = this.GetInitializedDictionary();
         var dictionaryBuilder = dictionary.ToBuilder();
 
+        // Add items that have already been retrieved.
+        foreach ( var item in dictionary )
+        {
+            action( item.Value.ToRef() );
+        }
+
+        // Add items discovered from source code.
         foreach ( var symbol in this.GetMembers() )
         {
             var memberRef = new MemberRef<T>( symbol, this.Compilation.RoslynCompilation );
 
-            action( memberRef.ToRef() );
-
             if ( !dictionary.ContainsKey( memberRef.Name ) )
             {
                 dictionaryBuilder[memberRef.Name] = memberRef;
+                action( memberRef.ToRef() );
             }
             else
             {

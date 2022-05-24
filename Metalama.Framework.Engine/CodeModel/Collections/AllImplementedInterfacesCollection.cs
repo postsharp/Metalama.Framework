@@ -16,7 +16,7 @@ internal class AllImplementedInterfacesCollection : IImplementedInterfaceCollect
     private readonly HashSet<INamedTypeSymbol> _implementedInterfacesSymbols = new( SymbolEqualityComparer.Default );
     private readonly CompilationModel _compilation;
     private List<INamedType>? _implementedInterfaces;
-    
+
     public AllImplementedInterfacesCollection( INamedType type )
     {
         var compilation = this._compilation = type.GetCompilationModel();
@@ -42,6 +42,8 @@ internal class AllImplementedInterfacesCollection : IImplementedInterfaceCollect
             }
         }
     }
+
+    public bool Contains( INamedType namedType ) => this._implementedInterfacesSymbols.Contains( namedType.GetSymbol() );
 
     public bool Contains( Type type ) => this._implementedInterfacesSymbols.Contains( this._compilation.ReflectionMapper.GetTypeSymbol( type ) );
 

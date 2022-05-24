@@ -6,7 +6,6 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 using System;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections
 {
@@ -14,6 +13,18 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
     {
         public ImplementedInterfaceCollection( INamedType declaringType, InterfaceUpdatableCollection source ) : base( declaringType, source ) { }
 
-        public bool Contains( Type type ) => this.Any( i => i.Is( type ) );
+        public bool Contains( INamedType namedType ) => ((InterfaceUpdatableCollection) this.Source).Contains( namedType.ToTypedRef() );
+
+        public bool Contains( Type type )
+        {
+            var itype = ((ICompilationInternal) this.ContainingDeclaration!.Compilation).TypeFactory.GetTypeByReflectionType( type );
+
+            if ( itype is not INamedType namedType )
+            {
+                return false;
+            }
+
+            return this.Contains( namedType );
+        }
     }
 }

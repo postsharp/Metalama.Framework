@@ -47,15 +47,26 @@ internal abstract class NonUniquelyNamedUpdatableCollection<T> : UpdatableMember
         var dictionary = this.GetInitializedDictionary();
         var dictionaryBuilder = dictionary.ToBuilder();
 
+        // Add all items that already been discovered in a name-specific operation.
+        foreach ( var array in dictionary.Values )
+        {
+            foreach ( var item in array.Array )
+            {
+                action( item.ToRef() );
+            }
+        }
+
+        // Discover from source.
         foreach ( var symbol in this.GetMembers() )
         {
-            var memberRef = new MemberRef<T>( symbol, this.Compilation.RoslynCompilation );
-            action( memberRef.ToRef() );
-
             // We intentionally look in the initial dictionary (not the builder). If there is no value for this name, it means
             // that the collection was not built for that name, and we need to create it now.
-            if ( !dictionary.ContainsKey( memberRef.Name ) )
+            if ( !dictionary.ContainsKey( symbol.Name ) )
             {
+                var memberRef = new MemberRef<T>( symbol, this.Compilation.RoslynCompilation );
+
+                action( memberRef.ToRef() );
+
                 if ( !dictionaryBuilder.TryGetValue( memberRef.Name, out var members ) )
                 {
                     // This is the first time this method processes a member of that name.

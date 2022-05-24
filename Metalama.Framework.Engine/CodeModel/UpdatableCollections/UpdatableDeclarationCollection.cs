@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.CodeModel.References;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
@@ -62,6 +63,13 @@ internal abstract class UpdatableDeclarationCollection<T> : ILazy, IReadOnlyList
 
             return this._allItems!.Count;
         }
+    }
+
+    public bool Contains( Ref<T> item )
+    {
+        this.EnsureComplete();
+
+        return this._allItems!.Any( i => DeclarationRefEqualityComparer<Ref<T>>.Instance.Equals( i, item ) );
     }
 
     public UpdatableDeclarationCollection<T> Clone( CompilationModel compilation )

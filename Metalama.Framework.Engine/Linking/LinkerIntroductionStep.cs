@@ -307,8 +307,12 @@ namespace Metalama.Framework.Engine.Linking
                             break;
                         }
 
-                    case ConstructorBuilder constructorBuilder:
+                    case BuiltConstructor:
+                    case ConstructorBuilder:
                         {
+                            var constructorBuilder = insertStatementTransformation.TargetDeclaration as ConstructorBuilder
+                                                     ?? ((BuiltConstructor) insertStatementTransformation.TargetDeclaration).ConstructorBuilder;
+
                             var positionInSyntaxTree = GetSyntaxTreePosition( constructorBuilder.InsertPosition );
 
                             var syntaxGenerationContext = SyntaxGenerationContext.Create(

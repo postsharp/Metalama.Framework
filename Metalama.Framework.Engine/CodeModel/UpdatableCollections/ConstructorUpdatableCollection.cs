@@ -14,7 +14,7 @@ internal sealed class ConstructorUpdatableCollection : UniquelyNamedTypeMemberUp
 
     protected override Func<ISymbol, bool> Predicate
         => m => m.Kind == SymbolKind.Method &&
-                ((IMethodSymbol) m).MethodKind is MethodKind.Constructor or MethodKind.StaticConstructor;
+                ((IMethodSymbol) m).MethodKind is MethodKind.Constructor;
 
     // TODO: define implicit constructor
 }

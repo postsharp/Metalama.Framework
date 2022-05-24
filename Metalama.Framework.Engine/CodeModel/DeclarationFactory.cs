@@ -351,6 +351,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 AttributeBuilder attributeBuilder => this.GetAttribute( attributeBuilder ),
                 TypeParameterBuilder genericParameterBuilder => this.GetGenericParameter( genericParameterBuilder ),
                 AccessorBuilder accessorBuilder => this.GetMethod( accessorBuilder ),
+                ConstructorBuilder constructorBuilder => this.GetConstructor( constructorBuilder ),
 
                 // This is for linker tests (fake builders), which resolve to themselves.
                 // ReSharper disable once SuspiciousTypeConversion.Global

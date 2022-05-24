@@ -136,16 +136,16 @@ public partial class CompilationModel
 
         switch ( transformation )
         {
-            case IMethodBuilder methodBuilder:
-                var methods = this.GetMethodCollection( methodBuilder.DeclaringType.GetSymbol().AssertNotNull(), true );
-                methods.Add( methodBuilder.ToMemberRef<IMethod>() );
+            case IMethod method:
+                var methods = this.GetMethodCollection( method.DeclaringType.GetSymbol().AssertNotNull(), true );
+                methods.Add( method.ToMemberRef() );
                 ApplyRemoval( methods );
 
                 break;
 
-            case IConstructorBuilder { IsStatic: false } constructorBuilder:
-                var constructors = this.GetConstructorCollection( constructorBuilder.DeclaringType.GetSymbol().AssertNotNull(), true );
-                constructors.Add( constructorBuilder.ToMemberRef<IConstructor>() );
+            case IConstructor { IsStatic: false } constructor:
+                var constructors = this.GetConstructorCollection( constructor.DeclaringType.GetSymbol().AssertNotNull(), true );
+                constructors.Add( constructor.ToMemberRef() );
                 ApplyRemoval( constructors );
 
                 break;
@@ -163,17 +163,24 @@ public partial class CompilationModel
 
                 break;
 
-            case IFieldBuilder fieldBuilder:
-                var fields = this.GetFieldCollection( fieldBuilder.DeclaringType.GetSymbol().AssertNotNull(), true );
-                fields.Add( fieldBuilder.ToMemberRef<IField>() );
+            case IField field:
+                var fields = this.GetFieldCollection( field.DeclaringType.GetSymbol().AssertNotNull(), true );
+                fields.Add( field.ToMemberRef() );
                 ApplyRemoval( fields );
 
                 break;
 
-            case IPropertyBuilder propertyBuilder:
-                var properties = this.GetPropertyCollection( propertyBuilder.DeclaringType.GetSymbol().AssertNotNull(), true );
-                properties.Add( propertyBuilder.ToMemberRef<IProperty>() );
+            case IProperty property:
+                var properties = this.GetPropertyCollection( property.DeclaringType.GetSymbol().AssertNotNull(), true );
+                properties.Add( property.ToMemberRef() );
                 ApplyRemoval( properties );
+
+                break;
+
+            case IEvent @event:
+                var events = this.GetEventCollection( @event.DeclaringType.GetSymbol().AssertNotNull(), true );
+                events.Add( @event.ToMemberRef() );
+                ApplyRemoval( events );
 
                 break;
 

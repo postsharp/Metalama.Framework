@@ -56,11 +56,11 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
         {
             if ( this.Source is ILazy { IsComplete: true } )
             {
-                return $"DeclarationList<{typeof(TDeclaration).Name}> Count={this.Count}";
+                return $"{this.GetType().Name} Count={this.Count}";
             }
             else
             {
-                return $"DeclarationList<{typeof(TDeclaration).Name}> (unresolved)";
+                return $"{this.GetType().Name} (unresolved)";
             }
         }
     }

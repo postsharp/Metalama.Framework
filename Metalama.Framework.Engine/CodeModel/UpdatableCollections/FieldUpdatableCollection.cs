@@ -11,5 +11,5 @@ internal class FieldUpdatableCollection : UniquelyNamedTypeMemberUpdatableCollec
 {
     public FieldUpdatableCollection( CompilationModel compilation, INamedTypeSymbol declaringType ) : base( compilation, declaringType ) { }
 
-    protected override Func<ISymbol, bool> Predicate => m => m.Kind == SymbolKind.Field;
+    protected override Func<ISymbol, bool> Predicate => m => m.Kind == SymbolKind.Field && ((IFieldSymbol) m).AssociatedSymbol == null;
 }
