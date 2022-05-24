@@ -43,7 +43,7 @@ namespace Metalama.Framework.Engine.Utilities
                 SyntaxKind.ProtectedKeyword => true,
                 SyntaxKind.InternalKeyword => true,
                 SyntaxKind.PublicKeyword => true,
-                _ => fals
+                _ => false,
             };
     }
 }

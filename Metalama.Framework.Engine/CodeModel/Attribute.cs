@@ -28,8 +28,6 @@ namespace Metalama.Framework.Engine.CodeModel
             this.ContainingDeclaration = containingDeclaration;
         }
 
-        public bool IsImplicit => false;
-
         public AttributeData AttributeData { get; }
 
         IRef<IDeclaration> IDeclaration.ToRef() => new AttributeRef( this.AttributeData, ((IDeclarationImpl) this.ContainingDeclaration).ToRef() );
