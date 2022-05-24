@@ -137,7 +137,7 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         return aspectLayerComparison;
                     }
-                    
+
                     // At this point, if we have two distinct layers with identical ordering, we need to sort alphabetically otherwise
                     // we will have an assertion failure. A LAMA0035 warning is emitted if aspects are not strongly ordered.
                     if ( !xLayer.Equals( yLayer ) )

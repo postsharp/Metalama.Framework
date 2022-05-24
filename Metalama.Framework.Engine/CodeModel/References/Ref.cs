@@ -4,7 +4,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.CodeModel.Pseudo;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
@@ -141,7 +140,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
             this._compilation = null;
         }
 
-        internal Ref(IMember implicitMember)
+        internal Ref( IMember implicitMember )
         {
             this.Target = implicitMember;
             this.TargetKind = DeclarationRefTargetKind.Default;
@@ -185,7 +184,10 @@ namespace Metalama.Framework.Engine.CodeModel.References
         public T GetTarget( ICompilation compilation, bool applyRedirections )
         {
             var compilationModel = (CompilationModel) compilation;
-            if ( applyRedirections && compilationModel.TryGetRedirectedDeclaration( new Ref<IDeclaration>( this.Target, this._compilation, this.TargetKind ), out var redirected ) )
+
+            if ( applyRedirections && compilationModel.TryGetRedirectedDeclaration(
+                    new Ref<IDeclaration>( this.Target, this._compilation, this.TargetKind ),
+                    out var redirected ) )
             {
                 // Referencing redirected declaration.
                 return Resolve( redirected.Target, compilationModel, this.TargetKind );

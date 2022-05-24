@@ -5,7 +5,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Transformations;
-using System;
 
 namespace Metalama.Framework.Engine.Advices
 {
@@ -13,27 +12,20 @@ namespace Metalama.Framework.Engine.Advices
     {
         public static ITransformation[] OverrideProperty(
             Advice advice,
-            IFieldOrPropertyOrIndexer targetDeclaration, 
+            IFieldOrPropertyOrIndexer targetDeclaration,
             BoundTemplateMethod getTemplate,
-            BoundTemplateMethod setTemplate,          
+            BoundTemplateMethod setTemplate,
             IObjectReader tags )
         {
             if ( targetDeclaration is IField field )
             {
                 var promotedField = new PromotedField( advice, field, tags );
 
-                return new ITransformation[]
-                {
-                    promotedField,
-                    new OverridePropertyTransformation( advice, promotedField, getTemplate, setTemplate, tags ),
-                };
+                return new ITransformation[] { promotedField, new OverridePropertyTransformation( advice, promotedField, getTemplate, setTemplate, tags ) };
             }
             else if ( targetDeclaration is IProperty property )
             {
-                return new ITransformation[]
-                {
-                    new OverridePropertyTransformation( advice, property, getTemplate, setTemplate, tags ),
-                };
+                return new ITransformation[] { new OverridePropertyTransformation( advice, property, getTemplate, setTemplate, tags ) };
             }
             else
             {

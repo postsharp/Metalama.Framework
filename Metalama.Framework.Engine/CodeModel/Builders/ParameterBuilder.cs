@@ -52,8 +52,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public bool IsReturnParameter => this.Index < 0;
 
-        public ParameterBuilder( MemberBuilder declaringMember, int index, string? name, IType type, RefKind refKind ) : base(
-            declaringMember.ParentAdvice )
+        public ParameterBuilder( MemberBuilder declaringMember, int index, string? name, IType type, RefKind refKind ) : base( declaringMember.ParentAdvice )
         {
             this.DeclaringMember = declaringMember;
             this.Index = index;

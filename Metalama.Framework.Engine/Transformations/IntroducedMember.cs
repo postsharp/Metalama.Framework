@@ -99,7 +99,7 @@ namespace Metalama.Framework.Engine.Transformations
 
         public override string ToString() => this.Introduction.ToString();
 
-        internal IntroducedMember WithSyntax( MemberDeclarationSyntax newSyntax)
+        internal IntroducedMember WithSyntax( MemberDeclarationSyntax newSyntax )
         {
             return new IntroducedMember( this, newSyntax );
         }

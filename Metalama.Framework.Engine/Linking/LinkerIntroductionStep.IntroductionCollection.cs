@@ -93,6 +93,7 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     case VariableDeclaratorSyntax variableDeclarator:
                         this._removedVariableDeclaratorSyntax.Add( variableDeclarator );
+
                         break;
 
                     default:

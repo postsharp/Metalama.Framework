@@ -7,7 +7,6 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.CodeModel.Invokers;
-using Metalama.Framework.Engine.CodeModel.Pseudo;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
@@ -182,17 +181,17 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 switch (this.IsAutoPropertyOrField, this.Writeability, this.GetMethod, this.SetMethod)
                 {
                     // Properties with both accessors.
-                    case (false, _, not null, not null ):
+                    case (false, _, not null, not null):
                     // Writeable fields.
-                    case (true, Writeability.All, { IsImplicit: true }, { IsImplicit: true } ):
+                    case (true, Writeability.All, { IsImplicit: true }, { IsImplicit: true }):
                     // Auto-properties with both accessors.
-                    case (true, Writeability.All or Writeability.InitOnly, { IsImplicit: false }, { IsImplicit: false } ):
+                    case (true, Writeability.All or Writeability.InitOnly, { IsImplicit: false }, { IsImplicit: false }):
                         return AccessorList( List( new[] { GenerateGetAccessor(), GenerateSetAccessor() } ) );
 
                     // Properties with only get accessor.
-                    case (false, _, not null, null ):
+                    case (false, _, not null, null):
                     // Read only fields or get-only auto properties.
-                    case (true, Writeability.ConstructorOnly, { }, { IsImplicit: true } ):
+                    case (true, Writeability.ConstructorOnly, { }, { IsImplicit: true }):
                         return AccessorList( List( new[] { GenerateGetAccessor() } ) );
 
                     // Properties with only set accessor.

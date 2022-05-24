@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.Utilities
 
         public static bool HasSetterAccessorDeclaration( this PropertyDeclarationSyntax propertyDeclaration )
             => propertyDeclaration.AccessorList != null
-               && propertyDeclaration.AccessorList.Accessors.Any( a => a.IsKind( SyntaxKind.SetAccessorDeclaration ));
+               && propertyDeclaration.AccessorList.Accessors.Any( a => a.IsKind( SyntaxKind.SetAccessorDeclaration ) );
 
         public static bool IsAccessModifierKeyword( this SyntaxToken token )
             => token.Kind() switch
@@ -43,7 +43,7 @@ namespace Metalama.Framework.Engine.Utilities
                 SyntaxKind.ProtectedKeyword => true,
                 SyntaxKind.InternalKeyword => true,
                 SyntaxKind.PublicKeyword => true,
-                _ => false,
+                _ => fals
             };
     }
 }

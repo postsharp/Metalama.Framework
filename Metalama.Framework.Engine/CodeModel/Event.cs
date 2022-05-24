@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.CodeModel.Pseudo;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;

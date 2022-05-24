@@ -162,7 +162,6 @@ internal class TransitiveAspectSource : IAspectSource, IValidatorSource
         }
 
         return ValidatorDriverFactory.GetInstance( type )
-            .GetReferenceValidatorDriver(
-                method );
+            .GetReferenceValidatorDriver( method );
     }
 }

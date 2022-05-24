@@ -9,7 +9,6 @@ using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel

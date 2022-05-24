@@ -211,7 +211,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         protected virtual SyntaxList<AttributeListSyntax> GetAttributeLists( in SyntaxGenerationContext syntaxGenerationContext )
         {
             var attributeLists = default(List<AttributeListSyntax>);
-            var templateAttribute = this.Compilation.Factory.GetTypeByReflectionType( typeof( TemplateAttribute ) );
+            var templateAttribute = this.Compilation.Factory.GetTypeByReflectionType( typeof(TemplateAttribute) );
 
             foreach ( var attributeBuilder in this.Attributes )
             {
@@ -221,7 +221,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     continue;
                 }
 
-                if (attributeLists == null)
+                if ( attributeLists == null )
                 {
                     attributeLists = new List<AttributeListSyntax>();
                 }

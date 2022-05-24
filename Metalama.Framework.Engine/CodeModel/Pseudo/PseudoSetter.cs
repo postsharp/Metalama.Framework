@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public override Accessibility Accessibility => this._accessibility ?? this.DeclaringMember.Accessibility;
 
-        public PseudoSetter( IFieldOrPropertyImpl property, Accessibility? accessibility ) : base( property, MethodKind.PropertySet ) 
+        public PseudoSetter( IFieldOrPropertyImpl property, Accessibility? accessibility ) : base( property, MethodKind.PropertySet )
         {
             this._accessibility = accessibility;
         }

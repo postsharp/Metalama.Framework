@@ -10,7 +10,6 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel;
 

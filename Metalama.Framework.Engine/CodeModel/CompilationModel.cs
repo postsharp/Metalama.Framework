@@ -51,7 +51,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private readonly DerivedTypeIndex _derivedTypes;
 
-        private readonly ImmutableDictionary<Ref<IDeclaration>, Ref<IDeclaration>> _redirectionCache = ImmutableDictionary.Create<Ref<IDeclaration>, Ref<IDeclaration>>();
+        private readonly ImmutableDictionary<Ref<IDeclaration>, Ref<IDeclaration>> _redirectionCache =
+            ImmutableDictionary.Create<Ref<IDeclaration>, Ref<IDeclaration>>();
 
         private ImmutableDictionary<Ref<IDeclaration>, int> _depthsCache = ImmutableDictionary.Create<Ref<IDeclaration>, int>();
 
@@ -377,9 +378,10 @@ namespace Metalama.Framework.Engine.CodeModel
         internal bool TryGetRedirectedDeclaration( Ref<IDeclaration> reference, out Ref<IDeclaration> redirected )
         {
             var result = false;
-            while (true)
+
+            while ( true )
             {
-                if (this._redirectionCache.TryGetValue( reference, out var target ) )
+                if ( this._redirectionCache.TryGetValue( reference, out var target ) )
                 {
                     result = true;
                     reference = target;
@@ -387,6 +389,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 else
                 {
                     redirected = reference;
+
                     return result;
                 }
             }

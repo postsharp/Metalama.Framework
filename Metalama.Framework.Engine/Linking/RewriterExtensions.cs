@@ -51,9 +51,9 @@ namespace Metalama.Framework.Engine.Linking
             return triviaList;
         }
 
-        public static PropertyDeclarationSyntax WithSynthesizedSetter(this PropertyDeclarationSyntax propertyDeclaration)
+        public static PropertyDeclarationSyntax WithSynthesizedSetter( this PropertyDeclarationSyntax propertyDeclaration )
         {
-            Invariant.Assert( 
+            Invariant.Assert(
                 propertyDeclaration
                     .AccessorList.AssertNotNull()
                     .Accessors
@@ -61,16 +61,17 @@ namespace Metalama.Framework.Engine.Linking
 
             return propertyDeclaration
                 .WithAccessorList(
-                    propertyDeclaration.AccessorList.AssertNotNull().AddAccessors(
-                        AccessorDeclaration(
-                            SyntaxKind.SetAccessorDeclaration,
-                            List<AttributeListSyntax>(),
-                            propertyDeclaration.Modifiers.Any( t => t.IsKind( SyntaxKind.PrivateKeyword ) ) 
-                            || propertyDeclaration.Modifiers.All( t => !t.IsAccessModifierKeyword() )
-                            ? TokenList()
-                            : TokenList( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( ElasticSpace ) ),
-                            null,
-                            null ) ) );
+                    propertyDeclaration.AccessorList.AssertNotNull()
+                        .AddAccessors(
+                            AccessorDeclaration(
+                                SyntaxKind.SetAccessorDeclaration,
+                                List<AttributeListSyntax>(),
+                                propertyDeclaration.Modifiers.Any( t => t.IsKind( SyntaxKind.PrivateKeyword ) )
+                                || propertyDeclaration.Modifiers.All( t => !t.IsAccessModifierKeyword() )
+                                    ? TokenList()
+                                    : TokenList( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( ElasticSpace ) ),
+                                null,
+                                null ) ) );
         }
     }
 }

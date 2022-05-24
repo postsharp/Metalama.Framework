@@ -12,6 +12,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Accessibility = Metalama.Framework.Code.Accessibility;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel
@@ -40,13 +41,13 @@ namespace Metalama.Framework.Engine.CodeModel
         public IMethod? GetMethod => new PseudoGetter( this );
 
         [Memo]
-        public IMethod? SetMethod =>
-            this.Writeability switch
+        public IMethod? SetMethod
+            => this.Writeability switch
             {
                 Writeability.None => null,
-                Writeability.ConstructorOnly => new PseudoSetter( this, Code.Accessibility.Private ),
+                Writeability.ConstructorOnly => new PseudoSetter( this, Accessibility.Private ),
                 Writeability.All => new PseudoSetter( this, null ),
-                _ => throw new AssertionFailedException(),
+                _ => throw new AssertionFailedException()
             };
 
         public Writeability Writeability

@@ -13,7 +13,6 @@ using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -244,27 +243,32 @@ namespace Metalama.Framework.Engine.Linking
                         break;
                 }
 
-                IEnumerable<IntroducedMember> PostProcessIntroducedMembers(IEnumerable<IntroducedMember> introducedMembers)
+                IEnumerable<IntroducedMember> PostProcessIntroducedMembers( IEnumerable<IntroducedMember> introducedMembers )
                 {
-                    if (transformation is PropertyBuilder propertyBuilder && buildersWithSyntesizedSetters.Contains(propertyBuilder))
+                    if ( transformation is PropertyBuilder propertyBuilder && buildersWithSyntesizedSetters.Contains( propertyBuilder ) )
                     {
                         // This is a property which should have a synthesized setter added.
                         return
                             introducedMembers
-                            .Select( im =>
-                            {
-                                switch ( im )
-                                {
-                                    case { Semantic: IntroducedMemberSemantic.Introduction, Kind: DeclarationKind.Property, Syntax: PropertyDeclarationSyntax propertyDeclaration }:
-                                        return im.WithSyntax( propertyDeclaration.WithSynthesizedSetter() );
+                                .Select(
+                                    im =>
+                                    {
+                                        switch ( im )
+                                        {
+                                            case
+                                            {
+                                                Semantic: IntroducedMemberSemantic.Introduction, Kind: DeclarationKind.Property,
+                                                Syntax: PropertyDeclarationSyntax propertyDeclaration
+                                            }:
+                                                return im.WithSyntax( propertyDeclaration.WithSynthesizedSetter() );
 
-                                    case { Semantic: IntroducedMemberSemantic.InitializerMethod }:
-                                        return im;
+                                            case { Semantic: IntroducedMemberSemantic.InitializerMethod }:
+                                                return im;
 
-                                    default:
-                                        throw new AssertionFailedException();
-                                }
-                            } );
+                                            default:
+                                                throw new AssertionFailedException();
+                                        }
+                                    } );
                     }
 
                     return introducedMembers;
@@ -310,20 +314,27 @@ namespace Metalama.Framework.Engine.Linking
 
             foreach ( var transformation in allTransformations.OfType<IOverriddenDeclaration>() )
             {
-                if ( transformation.OverriddenDeclaration is IProperty { IsAutoPropertyOrField: true, Writeability: Writeability.ConstructorOnly, SetMethod: { IsImplicit: true } } overriddenAutoProperty )
+                if ( transformation.OverriddenDeclaration is IProperty
+                    {
+                        IsAutoPropertyOrField: true, Writeability: Writeability.ConstructorOnly, SetMethod: { IsImplicit: true }
+                    } overriddenAutoProperty )
                 {
                     switch ( overriddenAutoProperty )
                     {
                         case Property codeProperty:
-                            syntaxTransformationCollection.AddAutoPropertyWithSynthetizedSetter( (PropertyDeclarationSyntax) codeProperty.GetPrimaryDeclaration().AssertNotNull() );
+                            syntaxTransformationCollection.AddAutoPropertyWithSynthetizedSetter(
+                                (PropertyDeclarationSyntax) codeProperty.GetPrimaryDeclaration().AssertNotNull() );
+
                             break;
 
                         case BuiltProperty { PropertyBuilder: var builder }:
                             ((HashSet<PropertyBuilder>) buildersWithSynthesizedSetters).Add( builder.AssertNotNull() );
+
                             break;
 
                         case PropertyBuilder builder:
                             ((HashSet<PropertyBuilder>) buildersWithSynthesizedSetters).Add( builder.AssertNotNull() );
+
                             break;
 
                         default:
