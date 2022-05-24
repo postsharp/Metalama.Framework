@@ -48,7 +48,7 @@ internal class NullableNamedType : INamedTypeInternal
 
     bool? IType.IsNullable => true;
 
-    IRef<IDeclaration> IDeclaration.ToRef() => ((IDeclaration) this._underlying).ToRef();
+    IRef<IDeclaration> IDeclaration.ToRef() => this.ToRef();
 
     ImmutableArray<SyntaxReference> IDeclarationImpl.DeclaringSyntaxReferences => this._underlying.DeclaringSyntaxReferences;
 
@@ -58,7 +58,7 @@ internal class NullableNamedType : INamedTypeInternal
 
     IEnumerable<IDeclaration> IDeclarationImpl.GetDerivedDeclarations( bool deep ) => this._underlying.GetDerivedDeclarations( deep );
 
-    Ref<IDeclaration> IDeclarationImpl.ToRef() => new Ref<IDeclaration>(this.TypeSymbol, this.GetCompilationModel().RoslynCompilation);
+    public Ref<IDeclaration> ToRef() => new Ref<IDeclaration>(this.TypeSymbol, this.GetCompilationModel().RoslynCompilation);
 
     IAssembly IDeclaration.DeclaringAssembly => this._underlying.DeclaringAssembly;
 

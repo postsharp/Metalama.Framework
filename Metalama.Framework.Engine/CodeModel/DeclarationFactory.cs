@@ -110,14 +110,32 @@ namespace Metalama.Framework.Engine.CodeModel
                 s => new PointerType( (IPointerTypeSymbol) s, this._compilationModel ) );
 
         public INamedType GetNamedType( INamedTypeSymbol typeSymbol )
-            => (INamedType) this._typeCache.GetOrAdd(
-                typeSymbol,
-                s =>
-                    s.NullableAnnotation == NullableAnnotation.Annotated
-                        ? new NullableNamedType(
-                            (NamedType) this.GetNamedType( (INamedTypeSymbol) s.WithNullableAnnotation( NullableAnnotation.NotAnnotated ) ),
-                            (INamedTypeSymbol) s )
-                        : new NamedType( (INamedTypeSymbol) s.WithNullableAnnotation( NullableAnnotation.NotAnnotated ), this._compilationModel ) );
+        {
+            if ( typeSymbol.NullableAnnotation == NullableAnnotation.Annotated )
+            {
+                // If we have a nullable named type, we return a nullable wrapper. We want to make sure that there is a single
+                // underlying NamedType.
+                
+                return (INamedType) this._typeCache.GetOrAdd(
+                    typeSymbol,
+                    s =>
+                        new NullableNamedType(
+                                (NamedType) this.GetNamedType( (INamedTypeSymbol) s.WithNullableAnnotation( NullableAnnotation.None ) ),
+                                (INamedTypeSymbol) s ));
+            }
+            else
+            {
+                if ( typeSymbol.NullableAnnotation == NullableAnnotation.NotAnnotated )
+                {
+                    // Normalize to the NullableAnnotation.None.
+                    typeSymbol = (INamedTypeSymbol) typeSymbol.WithNullableAnnotation( NullableAnnotation.None );
+                }
+                
+                return (INamedType) this._typeCache.GetOrAdd(
+                    typeSymbol,
+                    s => new NamedType( (INamedTypeSymbol) s, this._compilationModel ) );
+            }
+        }
 
         public ITypeParameter GetGenericParameter( ITypeParameterSymbol typeParameterSymbol )
             => (TypeParameter) this._defaultCache.GetOrAdd(

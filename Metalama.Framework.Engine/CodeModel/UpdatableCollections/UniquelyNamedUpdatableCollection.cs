@@ -110,7 +110,10 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
         // Add items that have already been retrieved.
         foreach ( var item in dictionary )
         {
-            action( item.Value.ToRef() );
+            if ( !item.Value.IsDefault )
+            {
+                action( item.Value.ToRef() );
+            }
         }
 
         // Add items discovered from source code.

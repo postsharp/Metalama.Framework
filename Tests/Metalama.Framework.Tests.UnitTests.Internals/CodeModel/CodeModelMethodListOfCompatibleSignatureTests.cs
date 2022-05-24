@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Tests.UnitTests.Utilities;
 using System;
 using System.Linq;
@@ -352,21 +353,27 @@ class C : B
             var compilation = testContext.CreateCompilationModel( code );
             var types = compilation.Types.OrderBySource();
             var typeA = types.ElementAt( 0 );
+            var typeAMethods = typeA.Methods.OrderBy( m => m.GetPrimaryDeclaration()!.GetLocation().SourceSpan.Start ).ToList();
+            
             var typeB = types.ElementAt( 1 );
+            var typeBMethods = typeB.Methods.OrderBy( m => m.GetPrimaryDeclaration()!.GetLocation().SourceSpan.Start ).ToList();
+
             var typeC = types.ElementAt( 2 );
 
             var matchedMethods1 = typeC.AllMethods.OfCompatibleSignature( "Foo", Array.Empty<IType>() ).ToArray();
-            Assert.Equal( new[] { typeB.Methods.ElementAt( 0 ) }, matchedMethods1 );
+            
+            Assert.Equal( new[] { typeBMethods.ElementAt( 0 ) }, matchedMethods1 );
             var matchedMethods2 = typeC.AllMethods.OfCompatibleSignature( "Bar", Array.Empty<IType>() ).ToArray();
-            Assert.Equal( new[] { typeA.Methods.ElementAt( 1 ) }, matchedMethods2 );
+            
+            Assert.Equal( new[] { typeAMethods.ElementAt( 1 ) }, matchedMethods2 );
             var matchedMethods3 = typeC.AllMethods.OfCompatibleSignature( "Baz", Array.Empty<IType>() ).ToArray();
-            Assert.Equal( new[] { typeB.Methods.ElementAt( 1 ) }, matchedMethods3 );
+            Assert.Equal( new[] { typeBMethods.ElementAt( 1 ) }, matchedMethods3 );
             var matchedMethods4 = typeC.AllMethods.OfCompatibleSignature( "Qux", Array.Empty<IType>() ).ToArray();
-            Assert.Equal( new[] { typeA.Methods.ElementAt( 3 ) }, matchedMethods4 );
+            Assert.Equal( new[] { typeAMethods.ElementAt( 3 ) }, matchedMethods4 );
             var matchedMethods5 = typeC.AllMethods.OfCompatibleSignature( "Quz", Array.Empty<IType>() ).ToArray();
-            Assert.Equal( new[] { typeB.Methods.ElementAt( 2 ) }, matchedMethods5 );
+            Assert.Equal( new[] { typeBMethods.ElementAt( 2 ) }, matchedMethods5 );
             var matchedMethods6 = typeC.AllMethods.OfCompatibleSignature( "Qur", Array.Empty<IType>() ).ToArray();
-            Assert.Equal( new[] { typeB.Methods.ElementAt( 3 ) }, matchedMethods6 );
+            Assert.Equal( new[] { typeBMethods.ElementAt( 3 ) }, matchedMethods6 );
             var matchedMethods7 = typeC.AllMethods.OfCompatibleSignature( "Trx", Array.Empty<IType>() ).ToArray();
             Assert.Equal( new[] { typeC.Methods.ElementAt( 0 ) }, matchedMethods7 );
             var matchedMethods8 = typeC.AllMethods.OfCompatibleSignature( "Trw", Array.Empty<IType>() ).ToArray();

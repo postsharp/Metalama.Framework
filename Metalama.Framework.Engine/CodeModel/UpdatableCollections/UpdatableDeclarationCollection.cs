@@ -32,7 +32,21 @@ internal abstract class UpdatableDeclarationCollection<T> : ILazy, IReadOnlyList
         if ( !this.IsComplete )
         {
             this._allItems = new List<Ref<T>>();
+
+#if DEBUG
+            this.PopulateAllItems(
+                r =>
+                {
+                    if ( r.IsDefault )
+                    {
+                        throw new AssertionFailedException();
+                    }
+
+                    this._allItems.Add( r );
+                } );
+#else
             this.PopulateAllItems( this._allItems.Add );
+#endif
             this.IsComplete = true;
         }
     }
