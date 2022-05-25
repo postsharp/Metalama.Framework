@@ -9,6 +9,9 @@ using System.Linq;
 
 namespace Metalama.Framework.Code;
 
+/// <summary>
+/// Provides extension methods to the <see cref="IMethodCollection"/> interface.
+/// </summary>
 [CompileTime]
 public static class MethodCollectionExtensions
 {

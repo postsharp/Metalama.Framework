@@ -8,6 +8,9 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Code;
 
+/// <summary>
+/// Provides extension methods to the <see cref="IConstructorCollection"/> interface.
+/// </summary>
 [CompileTime]
 public static class ConstructorCollectionExtensions
 {
