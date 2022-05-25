@@ -2,13 +2,13 @@
     <ItemGroup>
 
         <!-- Exclude *.t.cs from the main compilation, display them as text files instead, and fix file nesting -->
-        <Compile Remove="$(MSBuildProjectDirectory)\**\*.t.cs"/>
+        <Compile Remove="$(MSBuildProjectDirectory)\**\*.t.cs" />
         <None Include="$(MSBuildProjectDirectory)\**\*.t.cs">
             <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.t','')).cs</DependentUpon>
             <SubType>Code</SubType>
         </None>
 
-        <None Remove="$(MSBuildProjectDirectory)\obj\**\*.t.cs"/>
+        <None Remove="$(MSBuildProjectDirectory)\obj\**\*.t.cs" />
 
         <!-- Fix file nesting for *.Aspect.cs -->
         <Compile Update="$(MSBuildProjectDirectory)\**\*.Aspect.cs">
@@ -23,7 +23,8 @@
 
     </ItemGroup>
 
-    <Target Name="AddMetalamaTestFrameworkAttributes" DependsOnTargets="AddImplicitDefineConstants" BeforeTargets="CoreGenerateAssemblyInfo">
+    <Target Name="AddMetalamaTestFrameworkAttributes" DependsOnTargets="AddImplicitDefineConstants"
+            BeforeTargets="CoreGenerateAssemblyInfo">
         <ItemGroup>
             <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
                 <_Parameter1>DefineConstants</_Parameter1>
@@ -50,7 +51,8 @@
                 <_Parameter1>MetalamaDebugTestFramework</_Parameter1>
                 <_Parameter2>$(MetalamaDebugTestFramework)</_Parameter2>
             </AssemblyAttribute>
-            <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute" Condition="'$(GeneratedGlobalUsingsFile)'!=''">
+            <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute"
+                               Condition="'$(GeneratedGlobalUsingsFile)'!=''">
                 <_Parameter1>GlobalUsingsFile</_Parameter1>
                 <_Parameter2>$(GeneratedGlobalUsingsFile)</_Parameter2>
             </AssemblyAttribute>
@@ -63,9 +65,9 @@
 
     <Target Name='WriteReferenceAssemblies' AfterTargets="Build">
         <WriteLinesToFile File='$(IntermediateOutputPath)assemblies.txt' Overwrite='true'
-                          Lines='@(ReferencePathWithRefAssemblies)'/>
+                          Lines='@(ReferencePathWithRefAssemblies)' />
         <WriteLinesToFile File='$(IntermediateOutputPath)analyzers.txt' Overwrite='true'
-                          Lines='@(Analyzer)'/>
+                          Lines='@(Analyzer)' />
     </Target>
 
     <Target Name="GenerateMetalamaTestDefaultRunner" BeforeTargets="CoreCompile"
@@ -101,12 +103,12 @@ namespace $(RootNamespace)
         </PropertyGroup>
 
         <WriteLinesToFile
-                File="$(IntermediateOutputPath)DefaultTestRunner.g.cs"
-                Overwrite="true"
-                Lines="$(_DefaultRunner)"/>
+            File="$(IntermediateOutputPath)DefaultTestRunner.g.cs"
+            Overwrite="true"
+            Lines="$(_DefaultRunner)" />
 
         <ItemGroup>
-            <Compile Include="$(IntermediateOutputPath)DefaultTestRunner.g.cs"/>
+            <Compile Include="$(IntermediateOutputPath)DefaultTestRunner.g.cs" />
         </ItemGroup>
 
     </Target>
@@ -114,57 +116,61 @@ namespace $(RootNamespace)
 
     <Target Name="CleanTestOutput">
         <ItemGroup>
-            <_CleanTestOutput Include="obj\transformed\**\*.*"/>
-            <_CleanTestOutput Include="obj\html\**\*.*"/>
+            <_CleanTestOutput Include="obj\transformed\**\*.*" />
+            <_CleanTestOutput Include="obj\html\**\*.*" />
         </ItemGroup>
-        <RemoveDir Directories="obj\transformed"/>
-        <RemoveDir Directories="obj\html"/>
-        <Delete Files="@(_CleanTestOutput)"/>
+        <RemoveDir Directories="obj\transformed" />
+        <RemoveDir Directories="obj\html" />
+        <Delete Files="@(_CleanTestOutput)" />
     </Target>
 
     <Target Name="_AcceptTestOutput">
         <ItemGroup>
-            <_AcceptTestOutput Include="obj\transformed\$(TargetFramework)\**\*.cs"/>
-            <_AcceptTestOutput Include="obj\transformed\$(TargetFramework)\**\*.txt"/>
+            <_AcceptTestOutput Include="obj\transformed\$(TargetFramework)\**\*.cs" />
+            <_AcceptTestOutput Include="obj\transformed\$(TargetFramework)\**\*.txt" />
         </ItemGroup>
-        <Message Text="$(MSBuildProjectFile)($(TargetFramework)): Accepting @(_AcceptTestOutput->'%(RecursiveDir)%(Filename)%(Extension)')" Importance="high" Condition="'@(_AcceptTestOutput)'!=''"/>
+        <Message
+            Text="$(MSBuildProjectFile)($(TargetFramework)): Accepting @(_AcceptTestOutput->'%(RecursiveDir)%(Filename)%(Extension)')"
+            Importance="high" Condition="'@(_AcceptTestOutput)'!=''" />
         <Copy SourceFiles="@(_AcceptTestOutput)"
-              DestinationFiles="@(_AcceptTestOutput->'%(RecursiveDir)%(Filename)%(Extension)')"/>
+              DestinationFiles="@(_AcceptTestOutput->'%(RecursiveDir)%(Filename)%(Extension)')" />
     </Target>
 
     <Target Name="_AcceptTestHtml">
         <ItemGroup>
-            <_AcceptTestOutput Include="obj\html\$(TargetFramework)\**\*.cs.html"/>
+            <_AcceptTestOutput Include="obj\html\$(TargetFramework)\**\*.cs.html" />
         </ItemGroup>
-        <Message Text="$(MSBuildProjectFile)($(TargetFramework)): Accepting @(_AcceptTestOutput->'%(RecursiveDir)%(Filename)%(Extension)')" Importance="high" Condition="'@(_AcceptTestOutput)'!=''"/>
+        <Message
+            Text="$(MSBuildProjectFile)($(TargetFramework)): Accepting @(_AcceptTestOutput->'%(RecursiveDir)%(Filename)%(Extension)')"
+            Importance="high" Condition="'@(_AcceptTestOutput)'!=''" />
         <Copy
-                SourceFiles="@(_AcceptTestOutput)"
-                DestinationFiles="@(_AcceptTestOutput->'%(RecursiveDir)%(Filename)%(Extension)')"/>
+            SourceFiles="@(_AcceptTestOutput)"
+            DestinationFiles="@(_AcceptTestOutput->'%(RecursiveDir)%(Filename)%(Extension)')" />
     </Target>
 
 
     <!-- The following tasks rely on _ComputeTargetFrameworkItems to multicast to all target frameworks.
         The _ComputeTargetFrameworkItems target is defined in Microsoft.Common.CrossTargeting.targets and results in @(_InnerBuildProjects) -->
     <Target Name="_AcceptTestOutputCrossTargeting" DependsOnTargets="_ComputeTargetFrameworkItems">
-        <MSBuild Projects="@(_InnerBuildProjects)" Targets="_AcceptTestOutput"/>
+        <MSBuild Projects="@(_InnerBuildProjects)" Targets="_AcceptTestOutput" />
     </Target>
 
     <Target Name="_AcceptTestHtmlCrossTargeting" DependsOnTargets="_ComputeTargetFrameworkItems">
-        <MSBuild Projects="@(_InnerBuildProjects)" Targets="_AcceptTestHtml"/>
+        <MSBuild Projects="@(_InnerBuildProjects)" Targets="_AcceptTestHtml" />
     </Target>
 
     <Target Name="AcceptTestOutput">
         <!-- Cross-targeting -->
-        <CallTarget Targets="_AcceptTestOutputCrossTargeting" Condition="'$(TargetFrameworks)' != ''"/>
+        <CallTarget Targets="_AcceptTestOutputCrossTargeting" Condition="'$(TargetFrameworks)' != ''" />
         <!-- Single target -->
-        <CallTarget Targets="_AcceptTestOutput" Condition="'$(TargetFrameworks)' == ''"/>
+        <CallTarget Targets="_AcceptTestOutput" Condition="'$(TargetFrameworks)' == ''" />
     </Target>
 
     <Target Name="AcceptTestHtml">
         <!-- Cross-targeting -->
-        <CallTarget Targets="_AcceptTestHtmlCrossTargeting" Condition="'$(TargetFrameworks)' != ''"/>
+        <CallTarget Targets="_AcceptTestHtmlCrossTargeting" Condition="'$(TargetFrameworks)' != ''" />
         <!-- Single target -->
-        <CallTarget Targets="_AcceptTestHtml" Condition="'$(TargetFrameworks)' == ''"/>
+        <CallTarget Targets="_AcceptTestHtml" Condition="'$(TargetFrameworks)' == ''" />
     </Target>
 
 
@@ -176,7 +182,7 @@ namespace $(RootNamespace)
          We need this to build the HTML titles when the option is enabled.
          -->
             <ReferenceCopyLocalPaths Include="@(ReferenceCopyLocalPaths->'%(RootDir)%(Directory)%(Filename).xml')"
-                                     Condition="'%(ReferenceCopyLocalPaths.NuGetPackageId)'!='' and Exists('%(RootDir)%(Directory)%(Filename).xml')"/>
+                                     Condition="'%(ReferenceCopyLocalPaths.NuGetPackageId)'!='' and Exists('%(RootDir)%(Directory)%(Filename).xml')" />
         </ItemGroup>
     </Target>
 
