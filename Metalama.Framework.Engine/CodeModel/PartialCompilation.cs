@@ -5,6 +5,7 @@ using Metalama.Compiler;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -275,5 +276,13 @@ namespace Metalama.Framework.Engine.CodeModel
         /// method, ignoring any modification done by <see cref="Update"/>.
         /// </summary>
         public Compilation InitialCompilation { get; }
+
+        private static void Validate( IReadOnlyList<SyntaxTree>? addedTrees )
+        {
+            if ( addedTrees != null && addedTrees.Any( t => string.IsNullOrEmpty( t.FilePath ) ) )
+            {
+                throw new ArgumentOutOfRangeException( nameof(addedTrees), "The SyntaxTree.FilePath property must be set to a non-empty value." );
+            }
+        }
     }
 }

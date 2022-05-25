@@ -49,4 +49,6 @@ public abstract class ProjectOptionsWrapper : IProjectOptions
     public virtual IProjectOptions Apply( IProjectOptions options ) => this.Wrapped.Apply( options );
 
     public virtual bool TryGetProperty( string name, out string? value ) => this.Wrapped.TryGetProperty( name, out value );
+
+    public bool RemoveCompileTimeOnlyCode => this.Wrapped.RemoveCompileTimeOnlyCode;
 }

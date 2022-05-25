@@ -69,5 +69,10 @@ namespace Metalama.Framework.Engine.Options
         IProjectOptions Apply( IProjectOptions options );
 
         bool TryGetProperty( string name, out string? value );
+
+        /// <summary>
+        /// Gets a value indicating whether the compile-time-only code should be removed from the main compiled assembly.
+        /// </summary>
+        bool RemoveCompileTimeOnlyCode { get; }
     }
 }
