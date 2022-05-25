@@ -11,4 +11,4 @@ public class Commerce
     private IDisposable _Notifier;
 
 
-private global::System.IServiceProvider _serviceProvider;}
+private readonly global::System.IServiceProvider _serviceProvider;}

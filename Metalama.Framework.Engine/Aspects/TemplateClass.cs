@@ -133,7 +133,7 @@ namespace Metalama.Framework.Engine.Aspects
                                 accessor.Name,
                                 this,
                                 templateInfo,
-                                accessor,
+                                accessor.GetSymbolId(),
                                 accessorParameters,
                                 ImmutableArray<TemplateClassMemberParameter>.Empty,
                                 ImmutableDictionary<MethodKind, TemplateClassMember>.Empty ) );
@@ -207,7 +207,7 @@ namespace Metalama.Framework.Engine.Aspects
                     memberName,
                     this,
                     templateInfo,
-                    memberSymbol,
+                    memberSymbol.GetSymbolId(),
                     templateParameters,
                     templateTypeParameters,
                     accessors );
@@ -244,13 +244,13 @@ namespace Metalama.Framework.Engine.Aspects
             return members.ToImmutable();
         }
 
-        internal IEnumerable<TemplateClassMember> GetDeclarativeAdvices()
+        internal IEnumerable<TemplateClassMember> GetDeclarativeAdvices( Compilation compilation )
         {
             return this.Members
                 .Where( m => m.Value.TemplateInfo.AttributeType == TemplateAttributeType.Introduction )
                 .Select( m => m.Value )
-                .OrderBy( m => m.Symbol.GetPrimarySyntaxReference()?.SyntaxTree.FilePath )
-                .ThenBy( m => m.Symbol.GetPrimarySyntaxReference()?.Span.Start );
+                .OrderBy( m => m.SymbolId.Resolve( compilation ).GetPrimarySyntaxReference()?.SyntaxTree.FilePath )
+                .ThenBy( m => m.SymbolId.Resolve( compilation ).GetPrimarySyntaxReference()?.Span.Start );
         }
     }
 }

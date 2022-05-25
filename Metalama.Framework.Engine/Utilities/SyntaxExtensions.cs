@@ -31,5 +31,19 @@ namespace Metalama.Framework.Engine.Utilities
             => propertyDeclaration.ExpressionBody == null
                && propertyDeclaration.AccessorList?.Accessors.All( x => x.Body == null && x.ExpressionBody == null ) == true
                && propertyDeclaration.Modifiers.All( x => !x.IsKind( SyntaxKind.AbstractKeyword ) );
+
+        public static bool HasSetterAccessorDeclaration( this PropertyDeclarationSyntax propertyDeclaration )
+            => propertyDeclaration.AccessorList != null
+               && propertyDeclaration.AccessorList.Accessors.Any( a => a.IsKind( SyntaxKind.SetAccessorDeclaration ) );
+
+        public static bool IsAccessModifierKeyword( this SyntaxToken token )
+            => token.Kind() switch
+            {
+                SyntaxKind.PrivateKeyword => true,
+                SyntaxKind.ProtectedKeyword => true,
+                SyntaxKind.InternalKeyword => true,
+                SyntaxKind.PublicKeyword => true,
+                _ => false,
+            };
     }
 }

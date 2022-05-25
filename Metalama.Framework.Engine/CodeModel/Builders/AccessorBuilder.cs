@@ -27,12 +27,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         private Accessibility? _accessibility;
 
-        public AccessorBuilder( MemberBuilder containingDeclaration, MethodKind methodKind )
+        public AccessorBuilder( MemberBuilder containingDeclaration, MethodKind methodKind, bool isImplicit )
             : base( containingDeclaration.ParentAdvice )
         {
             this.ContainingMember = containingDeclaration;
             this._accessibility = null;
             this.MethodKind = methodKind;
+            this.IsImplicit = isImplicit;
         }
 
         [Memo]
@@ -58,7 +59,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IReadOnlyList<IType> TypeArguments => ImmutableArray<IType>.Empty;
 
-        public bool IsImplicit => false;
+        public bool IsImplicit { get; }
 
         public bool IsOpenGeneric => false;
 

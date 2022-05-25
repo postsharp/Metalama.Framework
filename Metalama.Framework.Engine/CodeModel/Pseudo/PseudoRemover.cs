@@ -9,6 +9,8 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 {
     internal class PseudoRemover : PseudoAccessor<Event>
     {
+        public override Accessibility Accessibility => this.DeclaringMember.Accessibility;
+
         public PseudoRemover( Event @event ) : base( @event, MethodKind.EventRemove ) { }
 
         [Memo]

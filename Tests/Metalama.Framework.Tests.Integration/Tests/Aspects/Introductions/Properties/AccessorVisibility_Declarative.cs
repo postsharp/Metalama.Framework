@@ -56,10 +56,10 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.A
         public int AutoPropertyWithRestrictedInit { get; private init; }
 
         [Introduce]
-        protected int ProtectedPropertyWithPrivateProtectedSetter { get; private protected set; }
+        protected int ProtectedAutoPropertyWithPrivateProtectedSetter { get; private protected set; }
 
         [Introduce]
-        protected internal int ProtectedInternalPropertyWithProtectedSetter { get; protected set; }
+        protected internal int ProtectedInternalAutoPropertyWithProtectedSetter { get; protected set; }
     }
 
     // <target>

@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.Advices
 {
@@ -50,6 +51,8 @@ namespace Metalama.Framework.Engine.Advices
                 hasSet,
                 this.Template.Declaration is { IsAutoPropertyOrField: true },
                 this.Template.Declaration is { Writeability: Writeability.InitOnly },
+                false,
+                this.Template.Declaration is { Writeability: Writeability.ConstructorOnly } && this.Template.Declaration.IsAutoPropertyOrField,
                 this.Tags );
 
             if ( propertyTemplate.IsNotNull )
@@ -95,18 +98,29 @@ namespace Metalama.Framework.Engine.Advices
 
             var existingDeclaration = targetDeclaration.FindClosestUniquelyNamedMember( this.MemberBuilder.Name );
 
+            var hasNoOverrideSemantics = this.Template.Declaration != null && this.Template.Declaration.IsAutoPropertyOrField;
+
             // TODO: Introduce attributes that are added not present on the existing member?
             if ( existingDeclaration == null )
             {
-                // There is no existing declaration, we will introduce and override the introduced.
-                var overriddenMethod = new OverridePropertyTransformation(
-                    this,
-                    this.MemberBuilder,
-                    this._getTemplate,
-                    this._setTemplate,
-                    this.Tags );
+                // There is no existing declaration.
+                if ( hasNoOverrideSemantics )
+                {
+                    // Introduced auto property.
+                    return AdviceResult.Create( this.MemberBuilder );
+                }
+                else
+                {
+                    // Introduce and override using the template.
+                    var overriddenProperty = new OverridePropertyTransformation(
+                        this,
+                        this.MemberBuilder,
+                        this._getTemplate,
+                        this._setTemplate,
+                        this.Tags );
 
-                return AdviceResult.Create( this.MemberBuilder, overriddenMethod );
+                    return AdviceResult.Create( this.MemberBuilder, overriddenProperty );
+                }
             }
             else
             {
@@ -206,14 +220,15 @@ namespace Metalama.Framework.Engine.Advices
                             this.MemberBuilder.IsOverride = true;
                             this.MemberBuilder.OverriddenProperty = existingProperty;
 
-                            var overriddenProperty = new OverridePropertyTransformation(
-                                this,
-                                this.MemberBuilder,
-                                this._getTemplate,
-                                this._setTemplate,
-                                this.Tags );
+                            var overrideTransformations =
+                                OverrideHelper.OverrideProperty(
+                                    this,
+                                    this.MemberBuilder,
+                                    this._getTemplate,
+                                    this._setTemplate,
+                                    this.Tags );
 
-                            return AdviceResult.Create( this.MemberBuilder, overriddenProperty );
+                            return AdviceResult.Create( new ITransformation[] { this.MemberBuilder }.Concat( overrideTransformations ) );
                         }
 
                     default:

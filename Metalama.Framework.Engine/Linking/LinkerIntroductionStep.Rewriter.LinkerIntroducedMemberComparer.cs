@@ -166,6 +166,21 @@ namespace Metalama.Framework.Engine.Linking
                         return semanticComparison;
                     }
 
+                    {
+                        // Order replaced declarations within the same layer.
+                        if ( x.Introduction is IReplaceMemberTransformation { ReplacedMember: { } replacedMemberRefX }
+                             && replacedMemberRefX.Target == y.Introduction )
+                        {
+                            return 1;
+                        }
+
+                        if ( y.Introduction is IReplaceMemberTransformation { ReplacedMember: { } replacedMemberRefY }
+                             && replacedMemberRefY.Target == x.Introduction )
+                        {
+                            return -1;
+                        }
+                    }
+
                     throw new AssertionFailedException( $"'{x}' and '{y}' are not strongly ordered" );
                 }
 

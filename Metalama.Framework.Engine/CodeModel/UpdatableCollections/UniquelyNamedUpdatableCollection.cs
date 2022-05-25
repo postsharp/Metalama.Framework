@@ -105,7 +105,6 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
     protected override void PopulateAllItems( Action<Ref<T>> action )
     {
         var dictionary = this.GetInitializedDictionary();
-        var dictionaryBuilder = dictionary.ToBuilder();
 
         // Add items that have already been retrieved.
         foreach ( var item in dictionary )
@@ -115,6 +114,8 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
                 action( item.Value.ToRef() );
             }
         }
+
+        var dictionaryBuilder = dictionary.ToBuilder();
 
         // Add items discovered from source code.
         foreach ( var symbol in this.GetMembers() )
@@ -131,6 +132,8 @@ internal abstract class UniquelyNamedUpdatableCollection<T> : UpdatableMemberCol
                 // This member has already been discovered by a previous call of this object.
             }
         }
+
+        this._dictionary = dictionaryBuilder.ToImmutable();
     }
 
     public override ImmutableArray<MemberRef<T>> OfName( string name )

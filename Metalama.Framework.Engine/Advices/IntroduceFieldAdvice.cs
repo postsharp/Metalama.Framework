@@ -44,12 +44,14 @@ namespace Metalama.Framework.Engine.Advices
                 this.MemberBuilder.Type = this.Template.Declaration!.Type;
                 this.MemberBuilder.Accessibility = this.Template.Declaration!.Accessibility;
                 this.MemberBuilder.IsStatic = this.Template.Declaration!.IsStatic;
+                this.MemberBuilder.Writeability = this.Template.Declaration!.Writeability;
             }
             else
             {
                 this.MemberBuilder.Type = this.SourceCompilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.Object );
                 this.MemberBuilder.Accessibility = Accessibility.Private;
                 this.MemberBuilder.IsStatic = false;
+                this.MemberBuilder.Writeability = Writeability.All;
             }
         }
 

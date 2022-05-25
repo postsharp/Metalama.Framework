@@ -381,16 +381,16 @@ namespace Metalama.Framework.Engine.Advices
                 .GetTemplateMember<IProperty>( this._compilation, this._serviceProvider );
 
             var accessorTemplates = propertyTemplate.GetAccessorTemplates();
-            var getTemplate = accessorTemplates.Get.ForOverride( targetDeclaration.GetMethod );
-            var setTemplate = accessorTemplates.Set.ForOverride( targetDeclaration.SetMethod );
+            var getTemplate = accessorTemplates.Get;
+            var setTemplate = accessorTemplates.Set;
 
             var advice = new OverrideFieldOrPropertyAdvice(
                 this._aspect,
                 this._templateInstance,
                 targetDeclaration,
                 propertyTemplate,
-                getTemplate,
-                setTemplate,
+                getTemplate.ForIntroduction(),
+                setTemplate.ForIntroduction(),
                 _layerName,
                 ObjectReader.GetReader( tags ) );
 

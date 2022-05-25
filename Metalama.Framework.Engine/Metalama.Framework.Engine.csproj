@@ -30,7 +30,6 @@
         <Compile Include="..\.generated\$(ThisRoslynVersion)\Metalama.Framework.Engine\*.cs"/>
     </ItemGroup>
 
-
     <ItemGroup>
         <!-- By convention, we use InternalsVisibleTo only for test projects that must have access to internals.. -->
         <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals"/>
@@ -68,7 +67,7 @@
     <!-- Obfuscation -->
     <PropertyGroup>
         <PostSharpProperties>
-            ObfuscateMapFile=$(MSBuildThisFileDirectory)\bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).obmap;
+            ObfuscateMapFile=$(PackageOutputPath)\$(AssemblyName).obmap;
             ObfuscateRootPath=$(MSBuildThisFileDirectory)
         </PostSharpProperties>
         <PostSharpSearchPath>$(MSBuildThisFileDirectory)..\Build\Metalama.Obfuscator\bin\$(Configuration)\netstandard2.0</PostSharpSearchPath>
@@ -82,9 +81,6 @@
     <!-- This is a work-around of PostSharp not preserving the public-signing flag. (#29763) -->
     <ItemGroup>
         <PackageReference Include="FakeSign" Version="0.9.2" PrivateAssets="all" GeneratePathProperty="true"/>
-    </ItemGroup>
-    <ItemGroup>
-        <Folder Include="Advices\Tags"/>
     </ItemGroup>
 
     <PropertyGroup>

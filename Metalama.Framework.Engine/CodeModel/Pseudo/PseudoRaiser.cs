@@ -10,6 +10,8 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 {
     internal class PseudoRaiser : PseudoAccessor<Event>
     {
+        public override Accessibility Accessibility => this.DeclaringMember.Accessibility;
+
         public PseudoRaiser( Event @event ) : base( @event, MethodKind.EventRaise ) { }
 
         [Memo]

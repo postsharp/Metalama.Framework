@@ -206,6 +206,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal ICompilationElement? GetCompilationElement( ISymbol symbol, DeclarationRefTargetKind kind = DeclarationRefTargetKind.Default )
         {
+            Invariant.Assert( SymbolEqualityComparer.Default.Equals( symbol, symbol.GetSymbolId().Resolve( this._compilationModel.RoslynCompilation ) ) );
+
             switch ( symbol.Kind )
             {
                 case SymbolKind.NamedType:

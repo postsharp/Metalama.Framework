@@ -61,6 +61,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
         /// </summary>
         public static Ref<IDeclaration> FromSymbol( ISymbol symbol, Compilation compilation ) => new( symbol, compilation );
 
+        public static Ref<IDeclaration> FromImplicitMember( IMember member ) => new( member );
+
         public static Ref<T> FromSymbolId<T>( SymbolId symbolKey )
             where T : class, ICompilationElement
             => new( symbolKey );
@@ -95,6 +97,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         internal Ref( ISymbol symbol, Compilation compilation, DeclarationRefTargetKind targetKind = DeclarationRefTargetKind.Default )
         {
+            Invariant.Assert( symbol is IErrorTypeSymbol || SymbolEqualityComparer.Default.Equals( symbol, symbol.GetSymbolId().Resolve( compilation ) ) );
             symbol.AssertValidType<T>();
 
             this.TargetKind = targetKind;
@@ -137,6 +140,13 @@ namespace Metalama.Framework.Engine.CodeModel.References
             this._compilation = null;
         }
 
+        internal Ref( IMember implicitMember )
+        {
+            this.Target = implicitMember;
+            this.TargetKind = DeclarationRefTargetKind.Default;
+            this._compilation = implicitMember.Compilation.GetRoslynCompilation();
+        }
+
         // ReSharper disable once UnusedParameter.Local
         public Ref( SyntaxNode? declaration, DeclarationRefTargetKind targetKind, Compilation compilation )
         {
@@ -166,7 +176,27 @@ namespace Metalama.Framework.Engine.CodeModel.References
         public static ISymbol? Deserialize( Compilation compilation, string serializedId )
             => DocumentationCommentId.GetFirstSymbolForDeclarationId( serializedId, compilation );
 
-        public T GetTarget( ICompilation compilation ) => Resolve( this.Target, (CompilationModel) compilation, this.TargetKind );
+        public T GetTarget( ICompilation compilation )
+        {
+            return this.GetTarget( compilation, true );
+        }
+
+        public T GetTarget( ICompilation compilation, bool applyRedirections )
+        {
+            var compilationModel = (CompilationModel) compilation;
+
+            if ( applyRedirections && compilationModel.TryGetRedirectedDeclaration(
+                    new Ref<IDeclaration>( this.Target, this._compilation, this.TargetKind ),
+                    out var redirected ) )
+            {
+                // Referencing redirected declaration.
+                return Resolve( redirected.Target, compilationModel, this.TargetKind );
+            }
+            else
+            {
+                return Resolve( this.Target, compilationModel, this.TargetKind );
+            }
+        }
 
         public (ImmutableArray<AttributeData> Attributes, ISymbol Symbol) GetAttributeData( Compilation compilation )
         {
@@ -297,9 +327,6 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
             return symbol;
         }
-
-        internal static T Resolve( object? reference, ICompilation compilation, DeclarationRefTargetKind kind = DeclarationRefTargetKind.Default )
-            => Resolve( reference, (CompilationModel) compilation, kind );
 
         private static T Resolve( object? reference, CompilationModel compilation, DeclarationRefTargetKind kind = DeclarationRefTargetKind.Default )
         {

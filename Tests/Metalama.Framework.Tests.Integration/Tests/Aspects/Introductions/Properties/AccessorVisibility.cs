@@ -14,8 +14,8 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.A
             builder.Advice.IntroduceProperty(builder.Target, nameof(AutoPropertyWithRestrictedSet));
             builder.Advice.IntroduceProperty(builder.Target, nameof(PropertyWithRestrictedInit));
             builder.Advice.IntroduceProperty(builder.Target, nameof(AutoPropertyWithRestrictedInit));
-            builder.Advice.IntroduceProperty(builder.Target, nameof(ProtectedPropertyWithPrivateProtectedSetter));
-            builder.Advice.IntroduceProperty(builder.Target, nameof(ProtectedInternalPropertyWithProtectedSetter));
+            builder.Advice.IntroduceProperty(builder.Target, nameof(ProtectedAutoPropertyWithPrivateProtectedSetter));
+            builder.Advice.IntroduceProperty(builder.Target, nameof(ProtectedInternalAutoPropertyWithProtectedSetter));
         }
 
         [Template]
@@ -68,10 +68,10 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.A
         public int AutoPropertyWithRestrictedInit { get; private init; }
 
         [Template]
-        protected int ProtectedPropertyWithPrivateProtectedSetter { get; private protected set; }
+        protected int ProtectedAutoPropertyWithPrivateProtectedSetter { get; private protected set; }
 
         [Template]
-        protected internal int ProtectedInternalPropertyWithProtectedSetter { get; protected set; }
+        protected internal int ProtectedInternalAutoPropertyWithProtectedSetter { get; protected set; }
     }
 
     // <target>

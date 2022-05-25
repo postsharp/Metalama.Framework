@@ -26,6 +26,7 @@ namespace Metalama.Framework.Engine.Linking
             private readonly Dictionary<InsertPosition, List<LinkerIntroducedMember>> _introducedMembersByInsertPosition;
             private readonly Dictionary<BaseTypeDeclarationSyntax, List<BaseTypeSyntax>> _introducedInterfacesByTargetTypeDecl;
             private readonly HashSet<VariableDeclaratorSyntax> _removedVariableDeclaratorSyntax;
+            private readonly HashSet<PropertyDeclarationSyntax> _autoPropertyWithSynthetizedSetterSyntax;
 
             private int _nextId;
 
@@ -37,6 +38,7 @@ namespace Metalama.Framework.Engine.Linking
                 this._introducedMembersByInsertPosition = new Dictionary<InsertPosition, List<LinkerIntroducedMember>>();
                 this._introducedInterfacesByTargetTypeDecl = new Dictionary<BaseTypeDeclarationSyntax, List<BaseTypeSyntax>>();
                 this._removedVariableDeclaratorSyntax = new HashSet<VariableDeclaratorSyntax>();
+                this._autoPropertyWithSynthetizedSetterSyntax = new HashSet<PropertyDeclarationSyntax>();
             }
 
             public void Add( IIntroduceMemberTransformation memberIntroduction, IEnumerable<IntroducedMember> introducedMembers )
@@ -78,7 +80,14 @@ namespace Metalama.Framework.Engine.Linking
                 interfaceList.Add( introducedInterface );
             }
 
-            internal void AddRemovedSyntax( SyntaxNode removedSyntax )
+            public void AddAutoPropertyWithSynthetizedSetter( PropertyDeclarationSyntax declaration )
+            {
+                Invariant.Assert( declaration.IsAutoPropertyDeclaration() && !declaration.HasSetterAccessorDeclaration() );
+
+                this._autoPropertyWithSynthetizedSetterSyntax.Add( declaration );
+            }
+
+            public void AddRemovedSyntax( SyntaxNode removedSyntax )
             {
                 switch ( removedSyntax )
                 {
@@ -92,9 +101,14 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            public bool IsRemovedSyntax( VariableDeclaratorSyntax memberDeclaration )
+            public bool IsRemovedSyntax( VariableDeclaratorSyntax variableDeclarator )
             {
-                return this._removedVariableDeclaratorSyntax.Contains( memberDeclaration );
+                return this._removedVariableDeclaratorSyntax.Contains( variableDeclarator );
+            }
+
+            public bool IsAutoPropertyWithSynthetizedSetter( PropertyDeclarationSyntax propertyDeclaration )
+            {
+                return this._autoPropertyWithSynthetizedSetterSyntax.Contains( propertyDeclaration );
             }
 
             public IEnumerable<LinkerIntroducedMember> GetIntroducedMembersOnPosition( InsertPosition position )

@@ -1,16 +1,84 @@
-    internal class TargetClass
-    {
-        private int _field;
+internal class TargetClass
+{
+    private int _field;
 
-        [Override]
-        public int Property
-{get    {
-        global::System.Console.WriteLine("This is the overridden getter.");
-        return default;
+    [Override]
+    public int Property
+    {
+        get
+        {
+            global::System.Console.WriteLine("Override.");
+            return default;
+        }
+
+        set
+        {
+            global::System.Console.WriteLine("Override.");
+        }
     }
 
-set    {
-        global::System.Console.WriteLine("This is the overridden setter.");
+    private static int _staticfield;
+
+    [Override]
+    public static int StaticProperty
+    {
+        get
+        {
+            global::System.Console.WriteLine("Override.");
+            return default;
+        }
+
+        set
+        {
+            global::System.Console.WriteLine("Override.");
+        }
+    }
+
+    [Override]
+    public int AutoProperty
+    {
+        get
+        {
+            global::System.Console.WriteLine("Override.");
+            return default;
+
+        }
+        set
+        {
+            global::System.Console.WriteLine("Override.");
+
+        }
+    }
+
+    [Override]
+    public int GetAutoProperty
+    {
+        get
+        {
+            global::System.Console.WriteLine("Override.");
+            return default;
+
+        }
+        private set
+        {
+            global::System.Console.WriteLine("Override.");
+
+        }
+    }
+
+    [Override]
+    public int InitializerAutoProperty
+    {
+        get
+        {
+            global::System.Console.WriteLine("Override.");
+            return default;
+
+        }
+        set
+        {
+            global::System.Console.WriteLine("Override.");
+
+        }
     }
 }
-    }
