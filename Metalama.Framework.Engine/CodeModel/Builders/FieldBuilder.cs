@@ -46,11 +46,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public bool IsAutoPropertyOrField => true;
 
-        public override InsertPosition InsertPosition
-            => new(
-                InsertPositionRelation.Within,
-                (MemberDeclarationSyntax) ((NamedType) this.DeclaringType).Symbol.GetPrimaryDeclaration().AssertNotNull() );
-
         public IExpression? InitializerExpression { get; set; }
 
         public TemplateMember<IField> InitializerTemplate { get; set; }

@@ -65,11 +65,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IProperty? OverriddenProperty { get; set; }
 
-        public override InsertPosition InsertPosition
-            => new(
-                InsertPositionRelation.Within,
-                (MemberDeclarationSyntax) ((NamedType) this.DeclaringType).Symbol.GetPrimaryDeclaration().AssertNotNull() );
-
         public override DeclarationKind DeclarationKind => DeclarationKind.Property;
 
         public IReadOnlyList<IProperty> ExplicitInterfaceImplementations { get; set; } = Array.Empty<IProperty>();

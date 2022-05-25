@@ -140,13 +140,13 @@ namespace Metalama.Framework.Engine.Linking
 
             foreach ( var transformation in allTransformations.OfType<IReplaceMemberTransformation>() )
             {
-                if ( transformation.ReplacedMember == null )
+                if ( transformation.ReplacedMember.IsDefault )
                 {
                     continue;
                 }
 
                 // We want to get the replaced member as it is in the compilation of the transformation, i.e. with applied redirections up to that point.
-                var replacedDeclaration = (IDeclaration) transformation.ReplacedMember.Value.GetTarget( compilation, false );
+                var replacedDeclaration = (IDeclaration) transformation.ReplacedMember.GetTarget( compilation, false );
 
                 replacedDeclaration = replacedDeclaration switch
                 {

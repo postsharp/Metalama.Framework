@@ -43,24 +43,46 @@ namespace Metalama.Framework.Engine.CodeModel
             return declaration.GetSymbol()?.GetPrimaryDeclaration();
         }
 
-        public static InsertPosition ToInsertPosition( this IMember declaration )
+        public static InsertPosition ToInsertPosition( this IDeclaration declaration )
         {
             switch ( declaration )
             {
-                case IReplaceMemberTransformation replaceMember:
-                    return replaceMember.ReplacedMember.AssertNotNull().GetTarget( declaration.Compilation ).ToInsertPosition();
+                case IReplaceMemberTransformation { ReplacedMember: var replacedMember } when !replacedMember.IsDefault:
+                    return replacedMember.GetTarget( declaration.Compilation, false ).ToInsertPosition();
 
-                case BuiltDeclaration:
-                case IDeclarationBuilder:
+                case BuiltDeclaration builtDeclaration:
+                    return builtDeclaration.Builder.ToInsertPosition();
+
+                case IMemberOrNamedTypeBuilder { DeclaringType: { } declaringType }:
                     return new InsertPosition(
                         InsertPositionRelation.Within,
-                        (MemberDeclarationSyntax) declaration.DeclaringType.GetPrimaryDeclaration().AssertNotNull() );
+                        (MemberDeclarationSyntax) declaringType.GetPrimaryDeclaration().AssertNotNull() );
+
+                case SymbolBasedDeclaration baseDeclaration:
+                    var symbol = baseDeclaration.Symbol;
+                    var primaryDeclaration = symbol.GetPrimaryDeclaration();
+
+                    if ( primaryDeclaration != null )
+                    {
+                        var memberDeclaration = primaryDeclaration.FindMemberDeclaration();
+
+                        if ( memberDeclaration is BaseTypeDeclarationSyntax )
+                        {
+                            return new InsertPosition( InsertPositionRelation.Within, memberDeclaration );
+                        }
+                        else
+                        {
+                            return new InsertPosition( InsertPositionRelation.After, memberDeclaration );
+                        }
+                    }
+                    else
+                    {
+                        var primaryTypeDeclaration = symbol.ContainingType.GetPrimaryDeclaration();
+                        return new InsertPosition( InsertPositionRelation.Within, primaryTypeDeclaration.FindMemberDeclaration() );
+                    }
 
                 default:
-                    var symbol = declaration.GetSymbol().AssertNotNull();
-                    var memberDeclaration = symbol.GetPrimaryDeclaration().FindMemberDeclaration();
-
-                    return new InsertPosition( InsertPositionRelation.After, memberDeclaration );
+                    throw new AssertionFailedException();
             }
         }
     }

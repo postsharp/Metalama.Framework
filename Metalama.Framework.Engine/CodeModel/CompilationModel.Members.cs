@@ -159,12 +159,12 @@ public partial class CompilationModel
 
     private void AddReplaceMemberTransformation( CompilationModel originCompilation, IReplaceMemberTransformation transformation )
     {
-        if ( !transformation.ReplacedMember.HasValue )
+        if ( transformation.ReplacedMember.IsDefault )
         {
             return;
         }
 
-        var replaced = transformation.ReplacedMember.Value;
+        var replaced = transformation.ReplacedMember;
 
         switch ( replaced.GetTarget( originCompilation ) )
         {
