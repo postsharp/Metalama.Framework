@@ -5,29 +5,33 @@ using Metalama.Framework.Eligibility;
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.NoProceed
 {
-    [AttributeUsage( AttributeTargets.Property, AllowMultiple = true )]
-    public class OverrideAttribute : Attribute, IAspect<IProperty>
+    /*
+     * Tests a template without meta.Proceed.
+     */
+
+    // TODO: Get-only auto-property does not get override.
+
+    public class OverrideAttribute : FieldOrPropertyAspect
     {
-        void IAspect<IProperty>.BuildAspect( IAspectBuilder<IProperty> builder )
+        public override void BuildAspect(IAspectBuilder<IFieldOrProperty> builder)
         {
-            builder.Advice.OverrideAccessors( builder.Target, nameof(GetTemplate), nameof(SetTemplate) );
+            builder.Advice.Override(builder.Target, nameof(Template));
         }
 
         [Template]
-        public dynamic? GetTemplate()
+        public dynamic? Template
         {
-            Console.WriteLine( "This is the overridden getter." );
+            get
+            {
+                Console.WriteLine("Override.");
+                return default;
+            }
 
-            return default;
+            set
+            {
+                Console.WriteLine("Override.");
+            }
         }
-
-        [Template]
-        public void SetTemplate()
-        {
-            Console.WriteLine( "This is the overridden setter." );
-        }
-
-        public void BuildEligibility( IEligibilityBuilder<IProperty> builder ) { }
     }
 
     // <target>
@@ -40,13 +44,38 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         {
             get
             {
-                return _field;
+                return this._field;
             }
 
             set
             {
-                _field = value;
+                this._field = value;
             }
         }
+
+        private static int _staticfield;
+
+        [Override]
+        public static int StaticProperty
+        {
+            get
+            {
+                return _staticfield;
+            }
+
+            set
+            {
+                _staticfield = value;
+            }
+        }
+
+        [Override]
+        public int AutoProperty { get; set; }
+
+        [Override]
+        public int GetAutoProperty { get; }
+
+        [Override]
+        public int InitializerAutoProperty { get; set; } = 42;
     }
 }

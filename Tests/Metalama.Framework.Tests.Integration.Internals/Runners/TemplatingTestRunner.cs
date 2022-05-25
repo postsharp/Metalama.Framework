@@ -236,7 +236,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                     "Template",
                     null!,
                     TemplateInfo.None,
-                    null!,
+                    default,
                     ImmutableArray<TemplateClassMemberParameter>.Empty,
                     ImmutableArray<TemplateClassMemberParameter>.Empty,
                     ImmutableDictionary<MethodKind, TemplateClassMember>.Empty );

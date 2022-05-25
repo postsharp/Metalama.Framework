@@ -29,6 +29,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override string Name { get; set; }
 
+        public override bool IsImplicit => false;
+
         // A builder is never accessed directly from user code and never represents a generic type instance,
         // so we don't need an implementation of GenericArguments.
         public IReadOnlyList<IType> TypeArguments => throw new NotSupportedException();
@@ -127,7 +129,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             var method =
                 MethodDeclaration(
-                    List<AttributeListSyntax>(),
+                    this.GetAttributeLists( context.SyntaxGenerationContext ),
                     this.GetSyntaxModifierList(),
                     context.SyntaxGenerator.ReturnType( this ),
                     this.ExplicitInterfaceImplementations.Count > 0

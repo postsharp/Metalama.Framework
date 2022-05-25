@@ -42,6 +42,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             set => throw new NotSupportedException();
         }
 
+        public override bool IsImplicit => false;
+
         // TODO: Temporary.
         public override InsertPosition InsertPosition
             => new(

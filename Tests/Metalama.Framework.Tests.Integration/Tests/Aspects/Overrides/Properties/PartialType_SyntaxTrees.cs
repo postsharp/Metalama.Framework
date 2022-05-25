@@ -8,6 +8,10 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Properties.PartialType_SyntaxTrees
 {
+    /*
+     * Tests that overriding properties of types with multiple partial declarations across multiple syntax trees does work and targets correct methods.
+     */
+
     public class OverrideAttribute : TypeAspect
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )

@@ -59,12 +59,18 @@ namespace Metalama.Framework.Engine.Linking
 
             var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
 
+            ProcessOverrideTransformations(
+                allTransformations,
+                syntaxTransformationCollection,
+                out var buildersWithSynthesizedSetters );
+
             this.ProcessIntroduceTransformations(
                 input,
                 allTransformations,
                 diagnostics,
                 lexicalScopeFactory,
                 nameProvider,
+                buildersWithSynthesizedSetters,
                 syntaxTransformationCollection,
                 replacedTransformations );
 
@@ -134,6 +140,7 @@ namespace Metalama.Framework.Engine.Linking
             SyntaxTransformationCollection syntaxTransformationCollection,
             out HashSet<ISyntaxTreeTransformation> replacedTransformations )
         {
+            var compilation = input.CompilationModel;
             replacedTransformations = new HashSet<ISyntaxTreeTransformation>();
 
             foreach ( var transformation in allTransformations.OfType<IReplaceMemberTransformation>() )
@@ -143,27 +150,27 @@ namespace Metalama.Framework.Engine.Linking
                     continue;
                 }
 
-                var replacedMember = transformation.ReplacedMember.Value.GetTarget( input.CompilationModel );
+                // We want to get the replaced member as it is in the compilation of the transformation, i.e. with applied redirections up to that point.
+                var replacedDeclaration = (IDeclaration) transformation.ReplacedMember.Value.GetTarget( compilation, false );
 
-                IDeclaration canonicalReplacedMember = replacedMember switch
+                replacedDeclaration = replacedDeclaration switch
                 {
                     BuiltDeclaration declaration => declaration.Builder,
-                    _ => replacedMember
+                    _ => replacedDeclaration
                 };
 
-                switch ( canonicalReplacedMember )
+                switch ( replacedDeclaration )
                 {
                     case Field replacedField:
-                        var syntaxReference = replacedField.Symbol.GetPrimarySyntaxReference();
+                        var fieldSyntaxReference = replacedField.Symbol.GetPrimarySyntaxReference();
 
-                        if ( syntaxReference == null )
+                        if ( fieldSyntaxReference == null )
                         {
                             throw new AssertionFailedException();
                         }
 
-                        var removedSyntax = syntaxReference.GetSyntax();
-
-                        syntaxTransformationCollection.AddRemovedSyntax( removedSyntax );
+                        var removedFieldSyntax = fieldSyntaxReference.GetSyntax();
+                        syntaxTransformationCollection.AddRemovedSyntax( removedFieldSyntax );
 
                         break;
 
@@ -189,6 +196,7 @@ namespace Metalama.Framework.Engine.Linking
             UserDiagnosticSink diagnostics,
             LexicalScopeFactory lexicalScopeFactory,
             LinkerIntroductionNameProvider nameProvider,
+            IReadOnlyCollection<PropertyBuilder> buildersWithSyntesizedSetters,
             SyntaxTransformationCollection syntaxTransformationCollection,
             HashSet<ISyntaxTreeTransformation> replacedTransformations )
         {
@@ -222,6 +230,8 @@ namespace Metalama.Framework.Engine.Linking
 
                         var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext );
 
+                        introducedMembers = PostProcessIntroducedMembers( introducedMembers );
+
                         syntaxTransformationCollection.Add( memberIntroduction, introducedMembers );
 
                         break;
@@ -231,6 +241,37 @@ namespace Metalama.Framework.Engine.Linking
                         syntaxTransformationCollection.Add( interfaceIntroduction, introducedInterface );
 
                         break;
+                }
+
+                IEnumerable<IntroducedMember> PostProcessIntroducedMembers( IEnumerable<IntroducedMember> introducedMembers )
+                {
+                    if ( transformation is PropertyBuilder propertyBuilder && buildersWithSyntesizedSetters.Contains( propertyBuilder ) )
+                    {
+                        // This is a property which should have a synthesized setter added.
+                        return
+                            introducedMembers
+                                .Select(
+                                    im =>
+                                    {
+                                        switch ( im )
+                                        {
+                                            case
+                                            {
+                                                Semantic: IntroducedMemberSemantic.Introduction, Kind: DeclarationKind.Property,
+                                                Syntax: PropertyDeclarationSyntax propertyDeclaration
+                                            }:
+                                                return im.WithSyntax( propertyDeclaration.WithSynthesizedSetter() );
+
+                                            case { Semantic: IntroducedMemberSemantic.InitializerMethod }:
+                                                return im;
+
+                                            default:
+                                                throw new AssertionFailedException();
+                                        }
+                                    } );
+                    }
+
+                    return introducedMembers;
                 }
             }
         }
@@ -262,6 +303,43 @@ namespace Metalama.Framework.Engine.Linking
             }
 
             return positionInSyntaxTree;
+        }
+
+        private static void ProcessOverrideTransformations(
+            List<ITransformation> allTransformations,
+            SyntaxTransformationCollection syntaxTransformationCollection,
+            out IReadOnlyCollection<PropertyBuilder> buildersWithSynthesizedSetters )
+        {
+            buildersWithSynthesizedSetters = new HashSet<PropertyBuilder>();
+
+            foreach ( var transformation in allTransformations.OfType<IOverriddenDeclaration>() )
+            {
+                if ( transformation.OverriddenDeclaration is IProperty
+                        { IsAutoPropertyOrField: true, Writeability: Writeability.ConstructorOnly, SetMethod: { IsImplicit: true } } overriddenAutoProperty )
+                {
+                    switch ( overriddenAutoProperty )
+                    {
+                        case Property codeProperty:
+                            syntaxTransformationCollection.AddAutoPropertyWithSynthetizedSetter(
+                                (PropertyDeclarationSyntax) codeProperty.GetPrimaryDeclaration().AssertNotNull() );
+
+                            break;
+
+                        case BuiltProperty { PropertyBuilder: var builder }:
+                            ((HashSet<PropertyBuilder>) buildersWithSynthesizedSetters).Add( builder.AssertNotNull() );
+
+                            break;
+
+                        case PropertyBuilder builder:
+                            ((HashSet<PropertyBuilder>) buildersWithSynthesizedSetters).Add( builder.AssertNotNull() );
+
+                            break;
+
+                        default:
+                            throw new AssertionFailedException();
+                    }
+                }
+            }
         }
 
         private void ProcessInsertStatementTransformations(

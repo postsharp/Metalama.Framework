@@ -27,5 +27,5 @@ internal partial class Greeter
     public void Greet() => this._console.WriteLine("Hello, world.");
 
 
-    private global::System.IServiceProvider _serviceProvider = (global::System.IServiceProvider)global::Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParameter.InjectionSample.ServiceLocator.Current;
+    private readonly global::System.IServiceProvider _serviceProvider = (global::System.IServiceProvider)global::Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParameter.InjectionSample.ServiceLocator.Current;
 }

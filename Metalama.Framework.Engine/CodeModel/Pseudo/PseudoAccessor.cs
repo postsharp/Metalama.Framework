@@ -46,7 +46,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
         [Memo]
         public IReadOnlyList<IType> TypeArguments => ImmutableArray<IType>.Empty;
 
-        public bool IsImplicit => throw new NotImplementedException();
+        public bool IsImplicit => true;
 
         public bool IsOpenGeneric => this.DeclaringMember.DeclaringType.IsOpenGeneric;
 
@@ -64,7 +64,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public MethodKind MethodKind { get; }
 
-        public Accessibility Accessibility => this.DeclaringMember.Accessibility;
+        public abstract Accessibility Accessibility { get; }
 
         public abstract string Name { get; }
 
@@ -116,7 +116,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public ISymbol? Symbol => null;
 
-        public Ref<IDeclaration> ToRef() => throw new NotImplementedException();
+        public Ref<IDeclaration> ToRef() => Ref.FromImplicitMember( this );
 
         public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 

@@ -36,14 +36,14 @@ namespace Metalama.Framework.Engine.Advices
 
                 case IProperty property:
                     return AdviceResult.Create( new FilterPropertyTransformation( this, property ) );
-                
+
                 case IField field:
                     var promotedField = new PromotedField( this, field, this.Tags );
 
                     return AdviceResult.Create(
                         promotedField,
                         new FilterPropertyTransformation( this, promotedField ) );
-                
+
                 default:
                     throw new AssertionFailedException();
             }

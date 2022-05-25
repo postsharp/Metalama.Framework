@@ -4,6 +4,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
@@ -536,7 +537,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 return symbolMembers.Select( x => new MemberRef<TMember>( x, this.Compilation.RoslynCompilation ) );
             }
 
-            if ( !transformations.OfType<TBuilder>().Any( t => t is IReplaceMemberTransformation ) )
+            if ( !transformations.Any( t => t is IReplaceMemberTransformation ) )
             {
                 // No replaced members.
                 return
@@ -553,6 +554,11 @@ namespace Metalama.Framework.Engine.CodeModel
             // Go through transformations, noting replaced symbols and builders.
             foreach ( var builder in transformations )
             {
+                if ( builder is TBuilder typedBuilder )
+                {
+                    builders.Add( typedBuilder );
+                }
+
                 if ( builder is IReplaceMemberTransformation { ReplacedMember: { } replacedMember } )
                 {
                     if ( replacedMember.Target is TSymbol symbol && allSymbols.Contains( replacedMember.Target ) )
@@ -563,8 +569,8 @@ namespace Metalama.Framework.Engine.CodeModel
                     }
                     else
                     {
-                        // Otherwise resolve the MemberRef.
-                        var resolved = replacedMember.GetTarget( this.Compilation );
+                        // Otherwise resolve the MemberRef (directly, without redirections).
+                        var resolved = replacedMember.GetTarget( this.Compilation, false );
 
                         if ( resolved is TMember )
                         {
@@ -578,17 +584,16 @@ namespace Metalama.Framework.Engine.CodeModel
                             {
                                 replacedBuilders.Add( replacedBuilder );
                             }
+                            else if ( resolved is BuiltDeclaration { Builder: TBuilder replacedDeclarationBuilder } builtDeclaration )
+                            {
+                                replacedBuilders.Add( replacedDeclarationBuilder );
+                            }
                             else
                             {
                                 throw new AssertionFailedException();
                             }
                         }
                     }
-                }
-
-                if ( builder is TBuilder typedBuilder )
-                {
-                    builders.Add( typedBuilder );
                 }
             }
 
