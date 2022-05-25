@@ -9,7 +9,7 @@
         <DefineConstants>$(DefineConstants);METALAMA</DefineConstants>
 
         <!-- This constant is used to identify the pipeline when we have only a compilation but no analyzer options -->
-        <DefineConstants>$(DefinedConstants);MetalamaProjectId_$(MetalamaProjectId)</DefineConstants>
+        <DefineConstants>$(DefineConstants);MetalamaProjectId_$(MetalamaProjectId)</DefineConstants>
 
         <!-- Auxiliary files used at design time. -->
         <MetalamaAdditionalCompilationOutputDirectory Condition="'$(MetalamaDesignTimeEnabled)'=='False'">$(MSBuildProjectDirectory)\$(IntermediateOutputPath)\metalama-aux\</MetalamaAdditionalCompilationOutputDirectory>
