@@ -50,7 +50,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private readonly DerivedTypeIndex _derivedTypes;
 
-        private readonly ImmutableDictionary<Ref<IDeclaration>, Ref<IDeclaration>> _redirectionCache =
+        private ImmutableDictionary<Ref<IDeclaration>, Ref<IDeclaration>> _redirectionCache =
             ImmutableDictionary.Create<Ref<IDeclaration>, Ref<IDeclaration>>();
 
         private ImmutableDictionary<Ref<IDeclaration>, int> _depthsCache = ImmutableDictionary.Create<Ref<IDeclaration>, int>();
@@ -117,10 +117,8 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             foreach ( var transformation in observableTransformations )
             {
-                this.AddTransformation( transformation );
+                this.AddTransformation( prototype, transformation );
             }
-
-            this._redirectionCache = GetUpdatedRedirectionCache( this._redirectionCache, observableTransformations );
 
             this.IsMutable = false;
 
@@ -141,30 +139,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
             // TODO: this cache may need to be smartly invalidated when we have interface introductions.
             this._allMemberAttributesByTypeName = prototype._allMemberAttributesByTypeName.AddRange( allAttributes, a => a.AttributeTypeName! );
-        }
-
-        private static ImmutableDictionary<Ref<IDeclaration>, Ref<IDeclaration>> GetUpdatedRedirectionCache(
-            ImmutableDictionary<Ref<IDeclaration>, Ref<IDeclaration>> redirectionCache,
-            IReadOnlyList<IObservableTransformation> observableTransformations )
-        {
-            var cacheBuilder = redirectionCache.ToBuilder();
-
-            foreach ( var transformation in observableTransformations )
-            {
-                if ( transformation is IReplaceMemberTransformation { ReplacedMember: { } replacedMember } )
-                {
-                    if ( transformation is IDeclarationBuilder builder )
-                    {
-                        cacheBuilder.Add( replacedMember.ToRef(), Ref.FromBuilder( builder ) );
-                    }
-                    else
-                    {
-                        throw new AssertionFailedException();
-                    }
-                }
-            }
-
-            return cacheBuilder.ToImmutable();
         }
 
         private CompilationModel( CompilationModel prototype, bool mutable )

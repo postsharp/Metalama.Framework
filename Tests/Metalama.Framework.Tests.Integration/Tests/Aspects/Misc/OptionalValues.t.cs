@@ -33,7 +33,7 @@ set
 
         public global::Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues.OptionalValue<global::System.String?> Name { get; set; }
 
-        public global::Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues.OptionalValue<global::Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues.Account> Parent { get; set; }
+        public global::Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues.OptionalValue<global::Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues.Account?> Parent { get; set; }
     }
 
 

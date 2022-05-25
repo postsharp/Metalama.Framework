@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
@@ -125,28 +126,91 @@ public partial class CompilationModel
 
     internal void AddTransformation( IObservableTransformation transformation )
     {
-        void ApplyRemoval<T>( UpdatableMemberCollection<T> collection )
-            where T : class, IMemberOrNamedType
+        if ( !this.IsMutable )
         {
-            if ( transformation is IReplaceMemberTransformation replaceMemberTransformation )
-            {
-                collection.Remove( replaceMemberTransformation.ReplacedMember!.Value.As<T>() );
-            }
+            throw new InvalidOperationException( "Cannot add transformation to an immutable compilation." );
         }
 
+        this.AddTransformation( this, transformation );
+    }
+
+    private void AddTransformation( CompilationModel originCompilation, IObservableTransformation transformation )
+    {
+        // "originCompilation" is intended for resolving references, i.e. it should be fully initialized.
+        //  * For immutable compilation models, this should be the prototype.
+        //  * For mutable compilation models, this should be the compilation itself.
+
+        // Replaced declaration should be always removed before adding the replacement.
+        if ( transformation is IReplaceMemberTransformation replaceMember )
+        {
+            this.AddReplaceMemberTransformation( originCompilation, replaceMember );
+        }
+
+        if ( transformation is IMemberBuilder builder )
+        {
+            this.AddMemberBuilderTransformation( builder );
+        }
+
+        if (transformation is IIntroduceInterfaceTransformation introduceInterface)
+        {
+            this.AddIntroduceInterfaceTransformation( introduceInterface );
+        }
+    }
+
+    private void AddReplaceMemberTransformation( CompilationModel originCompilation, IReplaceMemberTransformation transformation )
+    {
+        if ( !transformation.ReplacedMember.HasValue )
+        {
+            return;
+        }
+
+        var replaced = transformation.ReplacedMember.Value;
+
+        switch ( replaced.GetTarget( originCompilation ) )
+        {
+            case IConstructor { IsStatic: false } replacedConstructor:
+                var constructors = this.GetConstructorCollection( replacedConstructor.DeclaringType.GetSymbol().AssertNotNull(), true );
+                constructors.Remove( replaced.As<IConstructor>() );
+
+                break;
+
+            case IField replacedField:
+                var fields = this.GetFieldCollection( replacedField.DeclaringType.GetSymbol().AssertNotNull(), true );
+                fields.Remove( replaced.As<IField>() );
+
+                break;
+
+            default:
+                throw new AssertionFailedException();
+        }
+
+        // Update the redirection cache.
+        if ( transformation is { ReplacedMember: { } replacedMember } )
+        {
+            if ( transformation is IDeclarationBuilder builder )
+            {
+                this._redirectionCache = this._redirectionCache.Add( replacedMember.ToRef().As<IDeclaration>(), Ref.FromBuilder( builder ) );
+            }
+            else
+            {
+                throw new AssertionFailedException();
+            }
+        }
+    }
+
+    private void AddMemberBuilderTransformation(IMemberBuilder transformation)
+    {
         switch ( transformation )
         {
             case IMethod method:
                 var methods = this.GetMethodCollection( method.DeclaringType.GetSymbol().AssertNotNull(), true );
                 methods.Add( method.ToMemberRef() );
-                ApplyRemoval( methods );
 
                 break;
 
             case IConstructor { IsStatic: false } constructor:
                 var constructors = this.GetConstructorCollection( constructor.DeclaringType.GetSymbol().AssertNotNull(), true );
                 constructors.Add( constructor.ToMemberRef() );
-                ApplyRemoval( constructors );
 
                 break;
 
@@ -166,35 +230,35 @@ public partial class CompilationModel
             case IField field:
                 var fields = this.GetFieldCollection( field.DeclaringType.GetSymbol().AssertNotNull(), true );
                 fields.Add( field.ToMemberRef() );
-                ApplyRemoval( fields );
 
                 break;
 
             case IProperty property:
                 var properties = this.GetPropertyCollection( property.DeclaringType.GetSymbol().AssertNotNull(), true );
                 properties.Add( property.ToMemberRef() );
-                ApplyRemoval( properties );
 
                 break;
 
             case IEvent @event:
                 var events = this.GetEventCollection( @event.DeclaringType.GetSymbol().AssertNotNull(), true );
                 events.Add( @event.ToMemberRef() );
-                ApplyRemoval( events );
-
-                break;
-
-            case IntroduceInterfaceTransformation introduceInterface:
-                var interfaces = this.GetInterfaceImplementationCollection(
-                    (INamedTypeSymbol) introduceInterface.ContainingDeclaration.GetSymbol().AssertNotNull(),
-                    true );
-
-                interfaces.Add( introduceInterface );
 
                 break;
 
             default:
                 throw new AssertionFailedException();
         }
+    }
+
+    private void AddIntroduceInterfaceTransformation(IIntroduceInterfaceTransformation transformation)
+    {
+        var introduceInterface = (IntroduceInterfaceTransformation) transformation;
+
+        var interfaces =
+            this.GetInterfaceImplementationCollection(
+                (INamedTypeSymbol) introduceInterface.ContainingDeclaration.GetSymbol().AssertNotNull(),
+                true );
+
+        interfaces.Add( introduceInterface );
     }
 }

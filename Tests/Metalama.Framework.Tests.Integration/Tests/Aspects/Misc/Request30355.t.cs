@@ -94,12 +94,12 @@ public partial class Account
     {
         get
         {
-            return (global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account)((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account.Optional)this.OptionalValues).Parent.Value;
+            return (global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account?)((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account.Optional)this.OptionalValues).Parent.Value;
 
         }
         set
         {
-            ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account.Optional)this.OptionalValues).Parent = new global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.OptionalValue<global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account>(value);
+            ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account.Optional)this.OptionalValues).Parent = new global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.OptionalValue<global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account?>(value);
 
         }
     }
@@ -111,7 +111,7 @@ public partial class Account
 
         public global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.OptionalValue<global::System.String?> Name { get; set; }
 
-        public global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.OptionalValue<global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account> Parent { get; set; }
+        public global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.OptionalValue<global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account?> Parent { get; set; }
     }
 
 
