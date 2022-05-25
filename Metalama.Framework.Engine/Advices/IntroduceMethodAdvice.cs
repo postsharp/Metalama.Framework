@@ -119,7 +119,7 @@ namespace Metalama.Framework.Engine.Advices
                                 targetDeclaration.GetDiagnosticLocation(),
                                 (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration, existingOtherMember.DeclarationKind) ) );
                 }
-                
+
                 // There is no existing declaration, we will introduce and override the introduced.
                 var overriddenMethod = new OverrideMethodTransformation( this, this.MemberBuilder, this.BoundTemplate, this.Tags );
                 this.MemberBuilder.IsOverride = false;
@@ -139,9 +139,9 @@ namespace Metalama.Framework.Engine.Advices
                                  existingMethod.DeclaringType) ) );
                 }
                 else if ( !compilation.InvariantComparer.Is(
-                              this.Builder.ReturnType,
-                              existingMethod.ReturnType,
-                              ConversionKind.ImplicitReference ) )
+                             this.Builder.ReturnType,
+                             existingMethod.ReturnType,
+                             ConversionKind.ImplicitReference ) )
                 {
                     return
                         AdviceResult.Create(

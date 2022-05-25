@@ -95,9 +95,10 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 inputCompilation,
                 inputCompilationModel,
                 this._rewriter.ReplacedTransformations.Cast<ITransformation>()
-                    .Concat(this._rewriter.ObservableTransformations)
-                    .Concat(this._rewriter.NonObservableTransformations)
-                    .OrderBy( x => layerOrderLookup[x.Advice.AspectLayerId] ).ToList(),
+                    .Concat( this._rewriter.ObservableTransformations )
+                    .Concat( this._rewriter.NonObservableTransformations )
+                    .OrderBy( x => layerOrderLookup[x.Advice.AspectLayerId] )
+                    .ToList(),
                 orderedLayers,
                 new ArraySegment<ScopedSuppression>( Array.Empty<ScopedSuppression>() ),
                 null! );

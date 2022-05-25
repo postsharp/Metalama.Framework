@@ -36,7 +36,8 @@ internal class NullableNamedType : INamedTypeInternal
 
     ICompilation ICompilationElement.Compilation => ((ICompilationElement) this._underlying).Compilation;
 
-    public string ToDisplayString( CodeDisplayFormat? format= null, CodeDisplayContext? context = null ) => this.TypeSymbol.ToDisplayString( format.ToRoslyn() );
+    public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
+        => this.TypeSymbol.ToDisplayString( format.ToRoslyn() );
 
     TypeKind IType.TypeKind => ((IType) this._underlying).TypeKind;
 
@@ -58,7 +59,7 @@ internal class NullableNamedType : INamedTypeInternal
 
     IEnumerable<IDeclaration> IDeclarationImpl.GetDerivedDeclarations( bool deep ) => this._underlying.GetDerivedDeclarations( deep );
 
-    public Ref<IDeclaration> ToRef() => new Ref<IDeclaration>(this.TypeSymbol, this.GetCompilationModel().RoslynCompilation);
+    public Ref<IDeclaration> ToRef() => new( this.TypeSymbol, this.GetCompilationModel().RoslynCompilation );
 
     IAssembly IDeclaration.DeclaringAssembly => this._underlying.DeclaringAssembly;
 

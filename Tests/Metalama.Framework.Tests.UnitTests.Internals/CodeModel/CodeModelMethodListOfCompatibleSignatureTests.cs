@@ -354,17 +354,17 @@ class C : B
             var types = compilation.Types.OrderBySource();
             var typeA = types.ElementAt( 0 );
             var typeAMethods = typeA.Methods.OrderBy( m => m.GetPrimaryDeclaration()!.GetLocation().SourceSpan.Start ).ToList();
-            
+
             var typeB = types.ElementAt( 1 );
             var typeBMethods = typeB.Methods.OrderBy( m => m.GetPrimaryDeclaration()!.GetLocation().SourceSpan.Start ).ToList();
 
             var typeC = types.ElementAt( 2 );
 
             var matchedMethods1 = typeC.AllMethods.OfCompatibleSignature( "Foo", Array.Empty<IType>() ).ToArray();
-            
+
             Assert.Equal( new[] { typeBMethods.ElementAt( 0 ) }, matchedMethods1 );
             var matchedMethods2 = typeC.AllMethods.OfCompatibleSignature( "Bar", Array.Empty<IType>() ).ToArray();
-            
+
             Assert.Equal( new[] { typeAMethods.ElementAt( 1 ) }, matchedMethods2 );
             var matchedMethods3 = typeC.AllMethods.OfCompatibleSignature( "Baz", Array.Empty<IType>() ).ToArray();
             Assert.Equal( new[] { typeBMethods.ElementAt( 1 ) }, matchedMethods3 );

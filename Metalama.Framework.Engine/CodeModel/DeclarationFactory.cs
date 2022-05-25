@@ -115,13 +115,13 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 // If we have a nullable named type, we return a nullable wrapper. We want to make sure that there is a single
                 // underlying NamedType.
-                
+
                 return (INamedType) this._typeCache.GetOrAdd(
                     typeSymbol,
                     s =>
                         new NullableNamedType(
-                                (NamedType) this.GetNamedType( (INamedTypeSymbol) s.WithNullableAnnotation( NullableAnnotation.None ) ),
-                                (INamedTypeSymbol) s ));
+                            (NamedType) this.GetNamedType( (INamedTypeSymbol) s.WithNullableAnnotation( NullableAnnotation.None ) ),
+                            (INamedTypeSymbol) s ) );
             }
             else
             {
@@ -130,7 +130,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     // Normalize to the NullableAnnotation.None.
                     typeSymbol = (INamedTypeSymbol) typeSymbol.WithNullableAnnotation( NullableAnnotation.None );
                 }
-                
+
                 return (INamedType) this._typeCache.GetOrAdd(
                     typeSymbol,
                     s => new NamedType( (INamedTypeSymbol) s, this._compilationModel ) );
