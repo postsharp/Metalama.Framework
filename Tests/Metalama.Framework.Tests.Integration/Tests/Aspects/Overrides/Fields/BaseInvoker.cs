@@ -21,7 +21,6 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Overrides.Fields.BaseI
     class TargetCode
     {
         [Aspect]
-        int field;
-        
+        int field;        
     }
 }

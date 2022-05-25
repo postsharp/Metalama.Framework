@@ -103,13 +103,14 @@ namespace Metalama.Compiler
                             .WithErrorCodes( errorCodes )
                             .NormalizeWhitespace() ) );
 
-                trailingTrivia = trailingTrivia.Add(
-                    Trivia(
-                        PragmaWarningDirectiveTrivia(
-                                Token( SyntaxKind.RestoreKeyword ),
-                                true )
-                            .WithErrorCodes( errorCodes )
-                            .NormalizeWhitespace() ) );
+                trailingTrivia = trailingTrivia.Add( ElasticLineFeed )
+                    .Add(
+                        Trivia(
+                            PragmaWarningDirectiveTrivia(
+                                    Token( SyntaxKind.RestoreKeyword ),
+                                    true )
+                                .WithErrorCodes( errorCodes )
+                                .NormalizeWhitespace() ) );
             }
 
             return base.VisitClassDeclaration( node )!

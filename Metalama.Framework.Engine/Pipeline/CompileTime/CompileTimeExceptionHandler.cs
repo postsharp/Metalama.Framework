@@ -45,7 +45,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                     exceptionText.AppendLine( "-------" );
                     exceptionText.AppendLine( exceptionToString );
                 }
-                
+
                 // ReSharper disable once EmptyGeneralCatchClause
                 catch { }
 

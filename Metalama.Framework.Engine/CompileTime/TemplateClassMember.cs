@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
@@ -14,7 +15,7 @@ namespace Metalama.Framework.Engine.CompileTime
         string Name,
         TemplateClass TemplateClass,
         TemplateInfo TemplateInfo,
-        ISymbol Symbol,
+        SymbolId SymbolId,
         ImmutableArray<TemplateClassMemberParameter> Parameters,
         ImmutableArray<TemplateClassMemberParameter> TypeParameters,
         ImmutableDictionary<MethodKind, TemplateClassMember> Accessors )

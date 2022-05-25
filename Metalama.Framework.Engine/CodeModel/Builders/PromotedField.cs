@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
@@ -17,14 +18,18 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public MemberRef<IMember>? ReplacedMember => this._field.ToMemberRef<IMember>();
 
+        public override Writeability Writeability => this._field.Writeability;
+
         public PromotedField( Advice advice, IField field, IObjectReader tags ) : base(
             advice,
             field.DeclaringType,
             field.Name,
             true,
-            field.Writeability == Writeability.All,
+            true,
             true,
             false,
+            true,
+            true,
             tags )
         {
             this._field = field;
@@ -32,7 +37,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             this.Accessibility = this._field.Accessibility;
             this.IsStatic = this._field.IsStatic;
 
-            // TODO: Attributes etc.
+            this.GetMethod.AssertNotNull().Accessibility = this._field.Accessibility;
+            this.SetMethod.AssertNotNull().Accessibility = this._field.Accessibility;
+
+            foreach ( var attribute in field.Attributes )
+            {
+                this.AddAttribute( attribute.ToAttributeConstruction() );
+            }
         }
 
         public override InsertPosition InsertPosition => this._field.ToInsertPosition();
@@ -83,6 +94,12 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
                 return true;
             }
+        }
+
+        protected override SyntaxList<AttributeListSyntax> GetAttributeLists( in SyntaxGenerationContext syntaxGenerationContext )
+        {
+            // TODO: 
+            return List<AttributeListSyntax>();
         }
     }
 }

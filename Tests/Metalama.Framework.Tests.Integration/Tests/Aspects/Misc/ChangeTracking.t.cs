@@ -34,33 +34,7 @@ internal class MyClass
     }
 
 
-    private global::System.Boolean _isASpecified1;
+    public global::System.Boolean _isASpecified { get; private set; }
 
-
-    public global::System.Boolean _isASpecified
-    {
-        get
-        {
-            return this._isASpecified1;
-        }
-        private set
-        {
-            this._isASpecified1 = value;
-        }
-    }
-
-    private global::System.Boolean _isBSpecified1;
-
-
-    public global::System.Boolean _isBSpecified
-    {
-        get
-        {
-            return this._isBSpecified1;
-        }
-        private set
-        {
-            this._isBSpecified1 = value;
-        }
-    }
+    public global::System.Boolean _isBSpecified { get; private set; }
 }

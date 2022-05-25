@@ -295,6 +295,7 @@ namespace Metalama.Framework.Engine.Advices
                                 (IProperty?) memberSpec.TargetMember ?? (IProperty) memberSpec.AspectInterfaceMember.AssertNotNull(),
                                 buildAutoProperty,
                                 memberSpec.IsExplicit,
+                                aspectProperty?.SetMethod?.IsImplicit ?? false,
                                 memberSpec.Tags );
 
                             memberBuilder = propertyBuilder;
@@ -419,6 +420,7 @@ namespace Metalama.Framework.Engine.Advices
             IProperty targetProperty,
             bool isAutoProperty,
             bool isExplicit,
+            bool hasImplicitSetter,
             IObjectReader tags )
         {
             var propertyBuilder = new PropertyBuilder(
@@ -429,6 +431,8 @@ namespace Metalama.Framework.Engine.Advices
                 interfaceProperty.SetMethod != null || (!isExplicit && targetProperty.SetMethod != null),
                 isAutoProperty,
                 interfaceProperty.Writeability == Writeability.InitOnly,
+                false,
+                hasImplicitSetter,
                 tags );
 
             propertyBuilder.Type = interfaceProperty.Type;

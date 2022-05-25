@@ -10,6 +10,9 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355;
+
+[assembly: AspectOrder(typeof(OptionalValueTypeAttribute), typeof(NotifyPropertyChangedAttribute))]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355;
 

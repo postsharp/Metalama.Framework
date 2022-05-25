@@ -137,7 +137,7 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         return aspectLayerComparison;
                     }
-                    
+
                     // At this point, if we have two distinct layers with identical ordering, we need to sort alphabetically otherwise
                     // we will have an assertion failure. A LAMA0035 warning is emitted if aspects are not strongly ordered.
                     if ( !xLayer.Equals( yLayer ) )
@@ -164,6 +164,21 @@ namespace Metalama.Framework.Engine.Linking
                     if ( semanticComparison != 0 )
                     {
                         return semanticComparison;
+                    }
+
+                    {
+                        // Order replaced declarations within the same layer.
+                        if ( x.Introduction is IReplaceMemberTransformation { ReplacedMember: { } replacedMemberRefX }
+                             && replacedMemberRefX.Target == y.Introduction )
+                        {
+                            return 1;
+                        }
+
+                        if ( y.Introduction is IReplaceMemberTransformation { ReplacedMember: { } replacedMemberRefY }
+                             && replacedMemberRefY.Target == x.Introduction )
+                        {
+                            return -1;
+                        }
                     }
 
                     throw new AssertionFailedException( $"'{x}' and '{y}' are not strongly ordered" );

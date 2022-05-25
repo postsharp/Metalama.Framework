@@ -29,37 +29,7 @@
         </ItemGroup>
     </Target>
 
-    <UsingTask TaskName="MetalamaSdkRewriteNuspec" TaskFactory="RoslynCodeTaskFactory"
-               AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
-        <ParameterGroup>
-            <NuspecFile/>
-        </ParameterGroup>
-        <Task>
-            <Using Namespace="System.Xml.Linq"/>
-            <Code Type="Fragment" Language="cs">
-                <![CDATA[
-            XNamespace ns = "http://schemas.microsoft.com/packaging/2012/06/nuspec.xsd";
-
-            var doc = XDocument.Load(NuspecFile);
-            var groups = doc.Element(ns + "package").Element(ns + "metadata").Element(ns + "dependencies").Elements(ns + "group");
-
-            foreach (var group in groups)
-            {
-                var metalamaDependency = group.Elements(ns + "dependency").SingleOrDefault(e => e.Attribute("id").Value == "Metalama.Framework.Sdk");
-                
-                if (metalamaDependency != null)
-                {
-                    metalamaDependency.Attribute("id").Value = "Metalama.Framework";
-                    metalamaDependency.Attribute("exclude")?.Remove();
-                }
-            }
-
-            doc.Save(NuspecFile);
-        ]]>
-            </Code>
-        </Task>
-    </UsingTask>
-
+   
     <!-- based on https://github.com/NuGet/NuGet.Client/blob/1f3a4d9/src/NuGet.Core/NuGet.Build.Tasks.Pack/NuGet.Build.Tasks.Pack.targets#L195 -->
     <Target Name="MetalamaSdkGenerateNuspec"
             DependsOnTargets="$(GenerateNuspecDependsOn);_CalculateInputsOutputsForPack;_GetProjectReferenceVersions;_InitializeNuspecRepositoryInformationProperties"
@@ -126,7 +96,7 @@
                   ContinueOnError="true"/>
     </Target>
 
-    <Target Name="MetalamaSdkUpdateNuspec" DependsOnTargets="MetalamaSdkGenerateNuspec">
+    <Target Name="MetalamaSdkUpdateNuspec" DependsOnTargets="MetalamaSdkGenerateNuspec" Condition="'$(IsPackable)'=='True'">
         <ItemGroup>
             <FilteredOutput Include="@(NuGetPackOutput)" Condition="%(Extension) == '.nuspec'"/>
         </ItemGroup>
@@ -135,11 +105,15 @@
             <NuspecFileAbsolutePath>@(FilteredOutput)</NuspecFileAbsolutePath>
         </PropertyGroup>
 
-        <MetalamaSdkRewriteNuspec NuspecFile="$(NuspecFileAbsolutePath)"/>
+        <ItemGroup>
+            <MetalamaSdkPackageReplacement Include="Metalama.Framework.Sdk" ReplacedBy="Metalama.Framework"/>
+        </ItemGroup>
+
+        <RewriteMetalamaSdkNuspec File="$(NuspecFileAbsolutePath)" Replacements="@(MetalamaSdkPackageReplacement)"/>
 
     </Target>
 
-    <PropertyGroup>
+    <PropertyGroup Condition="'$(IsPackable)'=='True'">
         <BeforePack>$(BeforePack); MetalamaSdkSetAnalyzerAssembliesInPackage; MetalamaSdkUpdateNuspec</BeforePack>
     </PropertyGroup>
 

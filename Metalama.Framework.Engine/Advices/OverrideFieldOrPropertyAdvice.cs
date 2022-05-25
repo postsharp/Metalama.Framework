@@ -4,7 +4,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
 
@@ -42,22 +41,13 @@ namespace Metalama.Framework.Engine.Advices
             // TODO: order should be self if the target is introduced on the same layer.
             var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
 
-            if ( targetDeclaration is IField field )
-            {
-                var promotedField = new PromotedField( this, field, this.Tags );
-
-                return AdviceResult.Create(
-                    promotedField,
-                    new OverridePropertyTransformation( this, promotedField, this.GetTemplate, this.SetTemplate, this.Tags ) );
-            }
-            else if ( targetDeclaration is IProperty property )
-            {
-                return AdviceResult.Create( new OverridePropertyTransformation( this, property, this.GetTemplate, this.SetTemplate, this.Tags ) );
-            }
-            else
-            {
-                throw new AssertionFailedException();
-            }
+            return AdviceResult.Create(
+                OverrideHelper.OverrideProperty(
+                    this,
+                    targetDeclaration,
+                    this.GetTemplate,
+                    this.SetTemplate,
+                    this.Tags ) );
         }
     }
 }

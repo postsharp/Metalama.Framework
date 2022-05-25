@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.Advices
         {
             return new BoundTemplateMethod( template, null, GetTemplateArguments( template, arguments ) );
         }
-        
+
         public static BoundTemplateMethod ForInitializer( this in TemplateMember<IMethod> template, IObjectReader? arguments = null )
         {
             // The template must be void.
