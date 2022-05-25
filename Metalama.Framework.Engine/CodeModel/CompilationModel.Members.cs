@@ -151,7 +151,7 @@ public partial class CompilationModel
             this.AddMemberBuilderTransformation( builder );
         }
 
-        if (transformation is IIntroduceInterfaceTransformation introduceInterface)
+        if ( transformation is IIntroduceInterfaceTransformation introduceInterface )
         {
             this.AddIntroduceInterfaceTransformation( introduceInterface );
         }
@@ -198,7 +198,7 @@ public partial class CompilationModel
         }
     }
 
-    private void AddMemberBuilderTransformation(IMemberBuilder transformation)
+    private void AddMemberBuilderTransformation( IMemberBuilder transformation )
     {
         switch ( transformation )
         {
@@ -250,7 +250,7 @@ public partial class CompilationModel
         }
     }
 
-    private void AddIntroduceInterfaceTransformation(IIntroduceInterfaceTransformation transformation)
+    private void AddIntroduceInterfaceTransformation( IIntroduceInterfaceTransformation transformation )
     {
         var introduceInterface = (IntroduceInterfaceTransformation) transformation;
 

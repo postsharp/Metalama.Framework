@@ -5,7 +5,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CompileTime;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 

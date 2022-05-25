@@ -3,7 +3,6 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
@@ -11,7 +10,6 @@ using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using System.Collections.Immutable;
-using System.Linq;
 using System.Threading;
 
 namespace Metalama.Framework.Engine.Aspects;
