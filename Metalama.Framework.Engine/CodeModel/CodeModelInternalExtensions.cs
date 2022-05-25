@@ -78,6 +78,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     else
                     {
                         var primaryTypeDeclaration = symbol.ContainingType.GetPrimaryDeclaration();
+
                         return new InsertPosition( InsertPositionRelation.Within, primaryTypeDeclaration.FindMemberDeclaration() );
                     }
 
