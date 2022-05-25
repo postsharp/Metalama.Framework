@@ -105,7 +105,7 @@ namespace Metalama.TestFramework.XunitFramework
                                 {
                                     using var testOptions = new TestProjectOptions( plugIns: projectReferences.PlugIns );
 
-                                    var serviceProvider = ServiceProviderFactory.GetServiceProvider( testOptions );
+                                    var serviceProvider = ServiceProviderFactory.GetServiceProvider( testOptions.PathOptions );
 
                                     var testInput = TestInput.FromFile( this._factory.ProjectProperties, directoryOptionsReader, testCase.UniqueID );
 

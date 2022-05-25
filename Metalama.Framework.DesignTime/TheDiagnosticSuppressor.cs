@@ -63,7 +63,7 @@ namespace Metalama.Framework.DesignTime
             {
                 this._logger.Trace?.Log( $"DesignTimeDiagnosticSuppressor.ReportSuppressions('{context.Compilation.AssemblyName}')." );
 
-                var buildOptions = new ProjectOptions( context.Options.AnalyzerConfigOptionsProvider );
+                var buildOptions = new MSBuildProjectOptions( context.Options.AnalyzerConfigOptionsProvider );
 
                 if ( !buildOptions.IsDesignTimeEnabled )
                 {
@@ -92,7 +92,7 @@ namespace Metalama.Framework.DesignTime
             Compilation compilation,
             ImmutableArray<Diagnostic> reportedDiagnostics,
             Action<Suppression> reportSuppression,
-            ProjectOptions options,
+            MSBuildProjectOptions options,
             CancellationToken cancellationToken )
         {
             // Execute the pipeline.

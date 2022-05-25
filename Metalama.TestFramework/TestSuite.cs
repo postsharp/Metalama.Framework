@@ -77,7 +77,8 @@ namespace Metalama.TestFramework
             using var testOptions = new TestProjectOptions( plugIns: projectReferences.PlugIns );
 
             var serviceProvider =
-                ServiceProviderFactory.GetServiceProvider( testOptions );
+                ServiceProviderFactory.GetServiceProvider( testOptions.PathOptions )
+                    .WithService( testOptions );
 
             var fullPath = Path.Combine( directory, relativePath );
 

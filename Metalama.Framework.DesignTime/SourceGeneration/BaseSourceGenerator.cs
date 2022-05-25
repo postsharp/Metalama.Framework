@@ -78,7 +78,7 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
             this._logger.Trace?.Log(
                 $"{this.GetType().Name}.GetGeneratedSources('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )})." );
 
-            var projectOptions = new ProjectOptions( options );
+            var projectOptions = new MSBuildProjectOptions( options );
 
             if ( string.IsNullOrEmpty( projectOptions.ProjectId ) )
             {

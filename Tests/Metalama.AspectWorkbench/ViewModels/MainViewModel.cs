@@ -100,9 +100,10 @@ namespace Metalama.AspectWorkbench.ViewModels
                 testInput.Options.TestRunnerFactoryType = typeof(TemplatingTestRunnerFactory).AssemblyQualifiedName;
             }
 
-            using var testProjectOptions = new TestProjectOptions() { FormatCompileTimeCode = true };
+            using var testProjectOptions = new TestProjectOptions( formatCompileTimeCode: true );
 
-            var serviceProvider = ServiceProviderFactory.GetServiceProvider( testProjectOptions )
+            var serviceProvider = ServiceProviderFactory.GetServiceProvider( testProjectOptions.PathOptions )
+                .WithService( testProjectOptions )
                 .WithProjectScopedServices( TestCompilationFactory.GetMetadataReferences() );
 
             var syntaxColorizer = new SyntaxColorizer( serviceProvider );

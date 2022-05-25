@@ -149,7 +149,8 @@ class Expression
             {
                 this.ProjectOptions = projectOptions ?? new TestProjectOptions();
 
-                this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( this.ProjectOptions )
+                this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( this.ProjectOptions.PathOptions )
+                    .WithService( this.ProjectOptions )
                     .WithProjectScopedServices( TestCompilationFactory.GetMetadataReferences() )
                     .WithMark( ServiceProviderMark.Test );
 

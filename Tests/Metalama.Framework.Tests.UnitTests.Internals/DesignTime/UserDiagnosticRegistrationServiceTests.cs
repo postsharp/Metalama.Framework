@@ -132,7 +132,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.TestCode
             using var domain = new UnloadableCompileTimeDomain();
             using DesignTimeAspectPipeline pipeline = new( testContext.ServiceProvider, domain, compilation.References, true );
 
-            var diagnosticsFileName = Path.Combine( testContext.ProjectOptions.SettingsDirectory, "userDiagnostics.json" );
+            var diagnosticsFileName = Path.Combine( testContext.ProjectOptions.PathOptions.SettingsDirectory, "userDiagnostics.json" );
 
             Assert.False( File.Exists( diagnosticsFileName ) );
             Assert.True( pipeline.TryExecute( compilation, CancellationToken.None, out _ ) );

@@ -42,7 +42,7 @@ namespace Metalama.Framework.DesignTime
 
             try
             {
-                var projectOptions = new ProjectOptions( context.Document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider );
+                var projectOptions = new MSBuildProjectOptions( context.Document.Project.AnalyzerOptions.AnalyzerConfigOptionsProvider );
 
                 if ( string.IsNullOrEmpty( projectOptions.ProjectId ) )
                 {
