@@ -274,8 +274,14 @@ namespace Metalama.Framework.Engine.CodeModel
         /// </summary>
         public Compilation InitialCompilation { get; }
 
-        private static void Validate( IReadOnlyList<SyntaxTree>? addedTrees, IReadOnlyList<SyntaxTreeModification>? replacedTrees )
+        private void Validate( IReadOnlyList<SyntaxTree>? addedTrees, IReadOnlyList<SyntaxTreeModification>? replacedTrees )
         {
+            // In production scenario, we need weavers to provide SyntaxTree instances with a valid Encoding value.
+            // However, we don't need that in test scenarios, and tests currently don't set Encoding properly.
+            // The way this test is implemented is to test Encoding in increments only if it is set properly in the initial compilation.
+
+            bool HasInitialCompilationEncoding() => this.InitialCompilation.SyntaxTrees.All( t => t.Encoding != null );
+
             if ( addedTrees != null )
             {
                 if ( addedTrees.Any( t => string.IsNullOrEmpty( t.FilePath ) ) )
@@ -283,7 +289,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     throw new ArgumentOutOfRangeException( nameof(addedTrees), "The SyntaxTree.FilePath property must be set to a non-empty value." );
                 }
 
-                if ( addedTrees.Any( t => t.Encoding == null ) )
+                if ( addedTrees.Any( t => t.Encoding == null ) && HasInitialCompilationEncoding() )
                 {
                     throw new ArgumentOutOfRangeException( nameof(addedTrees), "The SyntaxTree.Encoding property cannot be null." );
                 }
@@ -298,7 +304,7 @@ namespace Metalama.Framework.Engine.CodeModel
                         "The SyntaxTree.FilePath property of the new SyntaxTree must be set to a non-empty value." );
                 }
 
-                if ( replacedTrees.Any( t => t.NewTree.Encoding == null ) )
+                if ( replacedTrees.Any( t => t.NewTree.Encoding == null ) && HasInitialCompilationEncoding() )
                 {
                     throw new ArgumentOutOfRangeException( nameof(addedTrees), "The SyntaxTree.Encoding property of the new SyntaxTree cannot be null." );
                 }
