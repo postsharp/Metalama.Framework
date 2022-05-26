@@ -7,8 +7,6 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Transformations;
-using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Advices
 {
@@ -48,6 +46,6 @@ namespace Metalama.Framework.Engine.Advices
 
         public abstract void Initialize( IDiagnosticAdder diagnosticAdder );
 
-        public abstract AdviceResult ToResult( ICompilation compilation, IReadOnlyList<IObservableTransformation> observableTransformations );
+        public abstract AdviceResult ToResult( ICompilation compilation );
     }
 }

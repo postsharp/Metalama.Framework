@@ -193,7 +193,7 @@ namespace Metalama.Framework.Engine.Aspects
 
             // This must be called after Members is built and assigned.
             this._aspectDriver = aspectDriverFactory.GetAspectDriver( this );
-            
+
             if ( this._prototypeAspectInstance != null )
             {
                 // Call BuildEligibility for all relevant interface implementations.

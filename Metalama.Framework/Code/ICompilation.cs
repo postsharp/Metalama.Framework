@@ -29,7 +29,7 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets the list of types declared in the current compilation, in all namespaces, but not the nested types.
         /// </summary>
-        INamedTypeList Types { get; }
+        INamedTypeCollection Types { get; }
 
         /// <summary>
         /// Gets the list of managed resources in the current compilation.

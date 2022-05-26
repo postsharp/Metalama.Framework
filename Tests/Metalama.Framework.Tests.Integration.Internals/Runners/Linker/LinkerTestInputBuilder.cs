@@ -84,6 +84,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
             var layerOrderLookup = orderedLayers.ToDictionary( x => x.AspectLayerId, x => x.Order );
 
+            // TODO: All transformations should be ordered together, but there are no tests that would require that.
             var replacedCompilationModel = initialCompilationModel.WithTransformations(
                 this._rewriter.ReplacedTransformations.OrderBy( x => layerOrderLookup[x.Advice.AspectLayerId] ).ToList() );
 
@@ -93,7 +94,11 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
             var linkerInput = new AspectLinkerInput(
                 inputCompilation,
                 inputCompilationModel,
-                this._rewriter.NonObservableTransformations.OrderBy( x => layerOrderLookup[x.Advice.AspectLayerId] ).ToList(),
+                this._rewriter.ReplacedTransformations.Cast<ITransformation>()
+                    .Concat( this._rewriter.ObservableTransformations )
+                    .Concat( this._rewriter.NonObservableTransformations )
+                    .OrderBy( x => layerOrderLookup[x.Advice.AspectLayerId] )
+                    .ToList(),
                 orderedLayers,
                 new ArraySegment<ScopedSuppression>( Array.Empty<ScopedSuppression>() ),
                 null! );
@@ -370,7 +375,6 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 insertPositionNode,
                 introducedElementName );
 
-            A.CallTo( () => ((IMethod) observableTransformation).LocalFunctions ).Returns( symbolHelperElement.LocalFunctions );
             A.CallTo( () => ((IMethod) observableTransformation).Parameters ).Returns( symbolHelperElement.Parameters );
             A.CallTo( () => ((IMethod) observableTransformation).TypeParameters ).Returns( symbolHelperElement.TypeParameters );
             A.CallTo( () => ((IMethod) observableTransformation).ReturnParameter ).Returns( symbolHelperElement.ReturnParameter );

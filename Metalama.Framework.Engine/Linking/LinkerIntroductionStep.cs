@@ -43,14 +43,9 @@ namespace Metalama.Framework.Engine.Linking
             var nameProvider = new LinkerIntroductionNameProvider();
             var syntaxTransformationCollection = new SyntaxTransformationCollection();
 
-            var observableTransformations = input.CompilationModel.GetAllObservableTransformations( false )
-                .SelectMany( x => x.Transformations.OfType<ISyntaxTreeTransformation>() );
-
-            var nonObservableTransformations = input.NonObservableTransformations.OfType<ISyntaxTreeTransformation>();
-
             // TODO: this sorting can be optimized.
             var allTransformations =
-                observableTransformations.Concat( nonObservableTransformations )
+                input.Transformations.OfType<ISyntaxTreeTransformation>()
                     .OrderBy( x => x.Advice.AspectLayerId, new AspectLayerIdComparer( input.OrderedAspectLayers ) )
                     .Cast<ITransformation>()
                     .ToList();
@@ -145,13 +140,13 @@ namespace Metalama.Framework.Engine.Linking
 
             foreach ( var transformation in allTransformations.OfType<IReplaceMemberTransformation>() )
             {
-                if ( transformation.ReplacedMember == null )
+                if ( transformation.ReplacedMember.IsDefault )
                 {
                     continue;
                 }
 
                 // We want to get the replaced member as it is in the compilation of the transformation, i.e. with applied redirections up to that point.
-                var replacedDeclaration = (IDeclaration) transformation.ReplacedMember.Value.GetTarget( compilation, false );
+                var replacedDeclaration = (IDeclaration) transformation.ReplacedMember.GetTarget( compilation, false );
 
                 replacedDeclaration = replacedDeclaration switch
                 {
@@ -390,8 +385,12 @@ namespace Metalama.Framework.Engine.Linking
                             break;
                         }
 
-                    case ConstructorBuilder constructorBuilder:
+                    case BuiltConstructor:
+                    case ConstructorBuilder:
                         {
+                            var constructorBuilder = insertStatementTransformation.TargetDeclaration as ConstructorBuilder
+                                                     ?? ((BuiltConstructor) insertStatementTransformation.TargetDeclaration).ConstructorBuilder;
+
                             var positionInSyntaxTree = GetSyntaxTreePosition( constructorBuilder.InsertPosition );
 
                             var syntaxGenerationContext = SyntaxGenerationContext.Create(

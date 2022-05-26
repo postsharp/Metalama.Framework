@@ -15,8 +15,8 @@
 
     <!-- Enable dynamic file nesting in Visual Studio -->
     <ItemGroup>
-        <ProjectCapability Include="ConfigurableFileNesting"/>
-        <ProjectCapability Include="ConfigurableFileNestingFeatureEnabled"/>
+        <ProjectCapability Include="ConfigurableFileNesting" />
+        <ProjectCapability Include="ConfigurableFileNestingFeatureEnabled" />
     </ItemGroup>
 
 </Project>

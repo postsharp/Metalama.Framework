@@ -55,7 +55,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 new AspectLinkerInput(
                     input.Compilation,
                     pipelineStepsResult.LastCompilation,
-                    pipelineStepsResult.NonObservableTransformations,
+                    pipelineStepsResult.Transformations,
                     input.AspectLayers,
                     input.Diagnostics.DiagnosticSuppressions.Concat( pipelineStepsResult.Diagnostics.DiagnosticSuppressions )
                         .Concat( validationResult.Diagnostics.DiagnosticSuppressions ),
@@ -105,6 +105,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             DesignTimeSyntaxTreeGenerator.GenerateDesignTimeSyntaxTrees(
                 input.Compilation,
                 pipelineStepResult.LastCompilation,
+                pipelineStepResult.Transformations,
                 this.ServiceProvider,
                 diagnostics,
                 cancellationToken,

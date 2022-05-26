@@ -14,9 +14,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal class PromotedField : PropertyBuilder, IReplaceMemberTransformation
     {
-        private readonly IField _field;
+        private readonly IFieldImpl _field;
 
-        public MemberRef<IMember>? ReplacedMember => this._field.ToMemberRef<IMember>();
+        public MemberRef<IMember> ReplacedMember => this._field.ToMemberRef<IMember>();
 
         public override Writeability Writeability => this._field.Writeability;
 
@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             true,
             tags )
         {
-            this._field = field;
+            this._field = (IFieldImpl) field;
             this.Type = field.Type;
             this.Accessibility = this._field.Accessibility;
             this.IsStatic = this._field.IsStatic;
@@ -46,14 +46,14 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
         }
 
-        public override InsertPosition InsertPosition => this._field.ToInsertPosition();
-
         public override SyntaxTree TargetSyntaxTree
             => this._field switch
             {
                 IDeclarationImpl declaration => declaration.PrimarySyntaxTree.AssertNotNull(),
                 _ => throw new AssertionFailedException()
             };
+
+        public override SyntaxTree? PrimarySyntaxTree => this._field.PrimarySyntaxTree;
 
         public override bool IsDesignTime => false;
 

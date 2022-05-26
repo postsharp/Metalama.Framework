@@ -1,5 +1,4 @@
 [Introduction]
-internal class TargetClass
-{
-    public event global::System.EventHandler Event;
-}
+    internal class TargetClass { 
+
+public event global::System.EventHandler? Event;}

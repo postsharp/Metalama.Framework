@@ -25,10 +25,11 @@ internal record TestAssemblyMetadata(
         var fileName = Path.GetFileName( x.Path! );
 
         return !fileName.StartsWith( "Microsoft.", StringComparison.Ordinal )
-               && !fileName.StartsWith( "System.", StringComparison.Ordinal ) 
+               && !fileName.StartsWith( "System.", StringComparison.Ordinal )
                && !fileName.StartsWith( "Metalama.Framework.", StringComparison.Ordinal )
-               && !fileName.StartsWith( "xunit.", StringComparison.Ordinal ) 
-               && !fileName.StartsWith( "FakeItEasy.", StringComparison.Ordinal );
+               && !fileName.StartsWith( "xunit.", StringComparison.Ordinal )
+               && !fileName.StartsWith( "FakeItEasy.", StringComparison.Ordinal )
+               && !fileName.StartsWith( "StyleCop.", StringComparison.Ordinal );
     }
 
     public TestProjectReferences ToProjectReferences()

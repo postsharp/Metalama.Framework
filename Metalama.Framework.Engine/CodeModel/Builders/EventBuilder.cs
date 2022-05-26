@@ -61,13 +61,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IEvent? OverriddenEvent { get; set; }
 
-        public override InsertPosition InsertPosition
-            => new(
-                InsertPositionRelation.Within,
-                this.IsEventField()
-                    ? ((MemberDeclarationSyntax?) ((NamedType) this.DeclaringType).Symbol.GetPrimaryDeclaration()?.Parent?.Parent).AssertNotNull()
-                    : ((MemberDeclarationSyntax?) ((NamedType) this.DeclaringType).Symbol.GetPrimaryDeclaration()).AssertNotNull() );
-
         public override DeclarationKind DeclarationKind => DeclarationKind.Event;
 
         INamedType IEvent.Type => this.Type;

@@ -30,6 +30,6 @@ namespace Metalama.Framework.Engine.Transformations
 
         public override int GetHashCode() => HashCode.Combine( this.Relation, this.SyntaxNode );
 
-        public override string ToString() => $"{this.Relation} {this.SyntaxNode.Kind()}";
+        public override string ToString() => $"{this.Relation} {this.SyntaxNode.Kind()} in {this.SyntaxNode.SyntaxTree.FilePath}";
     }
 }

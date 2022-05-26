@@ -57,13 +57,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public bool IsAsync => this.AccessorBuilder.IsAsync;
 
-        public IMethodList LocalFunctions => MethodList.Empty;
-
         [Memo]
         public IParameterList Parameters
             => new ParameterList(
                 this,
-                this.AccessorBuilder.Parameters.AsBuilderList.Select( Ref.FromBuilder<IParameter, IParameterBuilder> ) );
+                this.AccessorBuilder.Parameters.AsBuilderList.Select( Ref.FromBuilder<IParameter, IParameterBuilder> ).ToList() );
 
         public MethodKind MethodKind => this.AccessorBuilder.MethodKind;
 
@@ -74,7 +72,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IType ReturnType => this.Compilation.Factory.GetIType( this.AccessorBuilder.ReturnParameter.Type );
 
         [Memo]
-        public IGenericParameterList TypeParameters => GenericParameterList.Empty;
+        public IGenericParameterList TypeParameters => TypeParameterList.Empty;
 
         public IReadOnlyList<IType> TypeArguments => this.AccessorBuilder.TypeArguments;
 

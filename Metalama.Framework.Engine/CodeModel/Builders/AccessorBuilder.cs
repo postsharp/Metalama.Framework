@@ -55,7 +55,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         }
 
         [Memo]
-        public IGenericParameterList TypeParameters => GenericParameterList.Empty;
+        public IGenericParameterList TypeParameters => TypeParameterList.Empty;
 
         public IReadOnlyList<IType> TypeArguments => ImmutableArray<IType>.Empty;
 
@@ -82,9 +82,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 (EventBuilder eventBuilder, MethodKind.EventRemove) => eventBuilder.OverriddenEvent?.RemoveMethod.AssertNotNull(),
                 _ => throw new AssertionFailedException()
             };
-
-        // TODO: Local functions from templates will never be visible (which is probably only thing possible).
-        public IMethodList LocalFunctions => MethodList.Empty;
 
         IParameterList IHasParameters.Parameters => this.Parameters;
 

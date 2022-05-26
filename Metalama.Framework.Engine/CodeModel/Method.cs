@@ -38,9 +38,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
         [Memo]
         public IGenericParameterList TypeParameters
-            => new GenericParameterList(
+            => new TypeParameterList(
                 this,
-                this.MethodSymbol.TypeParameters.Select( x => Ref.FromSymbol<ITypeParameter>( x, this.Compilation.RoslynCompilation ) ) );
+                this.MethodSymbol.TypeParameters.Select( x => Ref.FromSymbol<ITypeParameter>( x, this.Compilation.RoslynCompilation ) ).ToList() );
 
         [Memo]
         public IReadOnlyList<IType> TypeArguments => this.MethodSymbol.TypeArguments.Select( t => this.Compilation.Factory.GetIType( t ) ).ToImmutableArray();

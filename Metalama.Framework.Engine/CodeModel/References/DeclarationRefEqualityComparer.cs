@@ -15,7 +15,15 @@ namespace Metalama.Framework.Engine.CodeModel.References
     internal class DeclarationRefEqualityComparer<T> : IEqualityComparer<T>
         where T : IRefImpl
     {
-        public static readonly DeclarationRefEqualityComparer<T> Instance = new();
+        public static readonly DeclarationRefEqualityComparer<T> Default = new( SymbolEqualityComparer.Default );
+        public static readonly DeclarationRefEqualityComparer<T> IncludeNullability = new( SymbolEqualityComparer.IncludeNullability );
+
+        private readonly SymbolEqualityComparer _symbolEqualityComparer;
+
+        private DeclarationRefEqualityComparer( SymbolEqualityComparer symbolEqualityComparer )
+        {
+            this._symbolEqualityComparer = symbolEqualityComparer;
+        }
 
         private static ISymbol? GetSymbol( T reference ) => reference.Target as ISymbol;
 
@@ -25,7 +33,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
             if ( xSymbol != null )
             {
-                return SymbolEqualityComparer.Default.Equals( xSymbol, GetSymbol( y ) );
+                return this._symbolEqualityComparer.Equals( xSymbol, GetSymbol( y ) );
             }
             else
             {

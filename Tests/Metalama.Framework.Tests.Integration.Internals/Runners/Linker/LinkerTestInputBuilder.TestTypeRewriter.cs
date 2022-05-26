@@ -813,7 +813,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 var fakeAspectSymbol = A.Fake<INamedTypeSymbol>();
                 var fakeGlobalNamespaceSymbol = A.Fake<INamespaceSymbol>();
                 var fakeDiagnosticAdder = A.Fake<IDiagnosticAdder>();
-                
+
                 A.CallTo( () => fakeAspectSymbol.MetadataName ).Returns( aspectLayer.AspectName.AssertNotNull() );
                 A.CallTo( () => fakeAspectSymbol.ContainingSymbol ).Returns( fakeGlobalNamespaceSymbol );
                 A.CallTo( () => fakeAspectSymbol.DeclaringSyntaxReferences ).Returns( ImmutableArray<SyntaxReference>.Empty );
