@@ -3,6 +3,8 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Methods.Bug30387;
 
+#pragma warning disable CS0169, CS8618
+
 internal class InjectAttribute : FieldOrPropertyAspect
 {
     [Introduce( WhenExists = OverrideStrategy.Ignore )]
