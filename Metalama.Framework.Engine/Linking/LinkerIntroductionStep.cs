@@ -310,9 +310,7 @@ namespace Metalama.Framework.Engine.Linking
             foreach ( var transformation in allTransformations.OfType<IOverriddenDeclaration>() )
             {
                 if ( transformation.OverriddenDeclaration is IProperty
-                    {
-                        IsAutoPropertyOrField: true, Writeability: Writeability.ConstructorOnly, SetMethod: { IsImplicit: true }
-                    } overriddenAutoProperty )
+                        { IsAutoPropertyOrField: true, Writeability: Writeability.ConstructorOnly, SetMethod: { IsImplicit: true } } overriddenAutoProperty )
                 {
                     switch ( overriddenAutoProperty )
                     {
