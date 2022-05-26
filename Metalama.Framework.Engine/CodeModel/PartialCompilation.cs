@@ -37,8 +37,6 @@ namespace Metalama.Framework.Engine.CodeModel
         /// </summary>
         public abstract ImmutableDictionary<string, SyntaxTree> SyntaxTrees { get; }
 
-        public ImmutableHashSet<INamedTypeSymbol> BaseExternalTypes => this.DerivedTypes.ExternalBaseTypes;
-
         /// <summary>
         /// Gets the types declared in the current subset.
         /// </summary>
@@ -66,7 +64,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             this.Compilation = this.InitialCompilation = compilation;
             this.ModifiedSyntaxTrees = ImmutableDictionary<string, SyntaxTreeModification>.Empty;
-            this.Resources = resources;
+            this.Resources = resources.IsDefault ? ImmutableArray<ManagedResource>.Empty : resources;
             this.DerivedTypes = derivedTypeIndex;
         }
 
@@ -75,7 +73,7 @@ namespace Metalama.Framework.Engine.CodeModel
             PartialCompilation baseCompilation,
             IReadOnlyList<SyntaxTreeModification>? modifiedSyntaxTrees,
             IReadOnlyList<SyntaxTree>? addedSyntaxTrees,
-            ImmutableArray<ManagedResource>? newResources )
+            ImmutableArray<ManagedResource> newResources )
         {
             this.InitialCompilation = baseCompilation.InitialCompilation;
             var compilation = baseCompilation.Compilation;
@@ -102,10 +100,9 @@ namespace Metalama.Framework.Engine.CodeModel
                     compilation = compilation.ReplaceSyntaxTree( oldTree, replacement.NewTree );
 
                     // Find the tree in InitialCompilation.
-                    SyntaxTree initialTree;
+                    SyntaxTree? initialTree;
 
-                    if ( baseCompilation.ModifiedSyntaxTrees.TryGetValue( replacement.FilePath, out var initialTreeReplacement )
-                         && initialTreeReplacement.OldTree != null )
+                    if ( baseCompilation.ModifiedSyntaxTrees.TryGetValue( replacement.FilePath, out var initialTreeReplacement ) )
                     {
                         initialTree = initialTreeReplacement.OldTree;
                     }
@@ -120,7 +117,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             this.ModifiedSyntaxTrees = modifiedTreeBuilder.ToImmutable();
             this.Compilation = compilation;
-            this.Resources = newResources ?? baseCompilation.Resources;
+            this.Resources = newResources.IsDefault ? ImmutableArray<ManagedResource>.Empty : newResources;
         }
 
         /// <summary>
@@ -183,7 +180,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public abstract PartialCompilation Update(
             IReadOnlyList<SyntaxTreeModification>? replacedTrees = null,
             IReadOnlyList<SyntaxTree>? addedTrees = null,
-            ImmutableArray<ManagedResource>? resources = null );
+            ImmutableArray<ManagedResource> resources = default );
 
         /// <summary>
         /// Gets a closure of the syntax trees declaring all base types and interfaces of all types declared in input syntax trees.
@@ -277,11 +274,34 @@ namespace Metalama.Framework.Engine.CodeModel
         /// </summary>
         public Compilation InitialCompilation { get; }
 
-        private static void Validate( IReadOnlyList<SyntaxTree>? addedTrees )
+        private static void Validate( IReadOnlyList<SyntaxTree>? addedTrees, IReadOnlyList<SyntaxTreeModification>? replacedTrees )
         {
-            if ( addedTrees != null && addedTrees.Any( t => string.IsNullOrEmpty( t.FilePath ) ) )
+            if ( addedTrees != null )
             {
-                throw new ArgumentOutOfRangeException( nameof(addedTrees), "The SyntaxTree.FilePath property must be set to a non-empty value." );
+                if ( addedTrees.Any( t => string.IsNullOrEmpty( t.FilePath ) ) )
+                {
+                    throw new ArgumentOutOfRangeException( nameof(addedTrees), "The SyntaxTree.FilePath property must be set to a non-empty value." );
+                }
+
+                if ( addedTrees.Any( t => t.Encoding == null ) )
+                {
+                    throw new ArgumentOutOfRangeException( nameof(addedTrees), "The SyntaxTree.Encoding property cannot be null." );
+                }
+            }
+
+            if ( replacedTrees != null )
+            {
+                if ( replacedTrees.Any( t => string.IsNullOrEmpty( t.NewTree.FilePath ) ) )
+                {
+                    throw new ArgumentOutOfRangeException(
+                        nameof(replacedTrees),
+                        "The SyntaxTree.FilePath property of the new SyntaxTree must be set to a non-empty value." );
+                }
+
+                if ( replacedTrees.Any( t => t.NewTree.Encoding == null ) )
+                {
+                    throw new ArgumentOutOfRangeException( nameof(addedTrees), "The SyntaxTree.Encoding property of the new SyntaxTree cannot be null." );
+                }
             }
         }
     }
