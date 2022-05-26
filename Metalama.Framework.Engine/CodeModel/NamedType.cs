@@ -584,7 +584,7 @@ namespace Metalama.Framework.Engine.CodeModel
                             {
                                 replacedBuilders.Add( replacedBuilder );
                             }
-                            else if ( resolved is BuiltDeclaration { Builder: TBuilder replacedDeclarationBuilder } builtDeclaration )
+                            else if ( resolved is BuiltDeclaration { Builder: TBuilder replacedDeclarationBuilder } )
                             {
                                 replacedBuilders.Add( replacedDeclarationBuilder );
                             }

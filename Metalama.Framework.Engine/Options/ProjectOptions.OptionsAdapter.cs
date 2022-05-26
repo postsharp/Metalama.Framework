@@ -6,6 +6,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Options
 {
+    // ReSharper disable once InconsistentNaming
     public partial class MSBuildProjectOptions
     {
         /// <summary>

@@ -196,7 +196,7 @@ namespace Metalama.Framework.Engine.Linking
             UserDiagnosticSink diagnostics,
             LexicalScopeFactory lexicalScopeFactory,
             LinkerIntroductionNameProvider nameProvider,
-            IReadOnlyCollection<PropertyBuilder> buildersWithSyntesizedSetters,
+            IReadOnlyCollection<PropertyBuilder> buildersWithSynthesizedSetters,
             SyntaxTransformationCollection syntaxTransformationCollection,
             HashSet<ISyntaxTreeTransformation> replacedTransformations )
         {
@@ -245,7 +245,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 IEnumerable<IntroducedMember> PostProcessIntroducedMembers( IEnumerable<IntroducedMember> introducedMembers )
                 {
-                    if ( transformation is PropertyBuilder propertyBuilder && buildersWithSyntesizedSetters.Contains( propertyBuilder ) )
+                    if ( transformation is PropertyBuilder propertyBuilder && buildersWithSynthesizedSetters.Contains( propertyBuilder ) )
                     {
                         // This is a property which should have a synthesized setter added.
                         return
@@ -255,6 +255,7 @@ namespace Metalama.Framework.Engine.Linking
                                     {
                                         switch ( im )
                                         {
+                                            // ReSharper disable once MissingIndent
                                             case
                                             {
                                                 Semantic: IntroducedMemberSemantic.Introduction, Kind: DeclarationKind.Property,
@@ -314,13 +315,17 @@ namespace Metalama.Framework.Engine.Linking
 
             foreach ( var transformation in allTransformations.OfType<IOverriddenDeclaration>() )
             {
+#pragma warning disable SA1513
                 if ( transformation.OverriddenDeclaration is IProperty
-                        { IsAutoPropertyOrField: true, Writeability: Writeability.ConstructorOnly, SetMethod: { IsImplicit: true } } overriddenAutoProperty )
+                    {
+                        IsAutoPropertyOrField: true, Writeability: Writeability.ConstructorOnly, SetMethod: { IsImplicit: true }
+                    } overriddenAutoProperty )
+#pragma warning restore SA1513
                 {
                     switch ( overriddenAutoProperty )
                     {
                         case Property codeProperty:
-                            syntaxTransformationCollection.AddAutoPropertyWithSynthetizedSetter(
+                            syntaxTransformationCollection.AddAutoPropertyWithSynthesizedSetter(
                                 (PropertyDeclarationSyntax) codeProperty.GetPrimaryDeclaration().AssertNotNull() );
 
                             break;
