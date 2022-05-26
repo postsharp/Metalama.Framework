@@ -1,4 +1,3 @@
-// Warning CS8618 on `_serviceProvider`: `Non-nullable field '_serviceProvider' must contain a non-null value when exiting constructor. Consider declaring the field as nullable.`
 public class Commerce
 {
     [Inject]
@@ -11,4 +10,5 @@ public class Commerce
     private IDisposable _Notifier;
 
 
-private readonly global::System.IServiceProvider _serviceProvider;}
+    private readonly global::System.IServiceProvider _serviceProvider;
+}
