@@ -57,7 +57,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 IReadOnlyList<SyntaxTree>? addedTrees = null,
                 ImmutableArray<ManagedResource> resources = default )
             {
-                Validate( addedTrees, replacedTrees );
+                this.Validate( addedTrees, replacedTrees );
 
                 return new CompleteImpl( this, replacedTrees, addedTrees, resources );
             }

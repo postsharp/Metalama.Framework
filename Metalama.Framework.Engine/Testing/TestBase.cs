@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Pipeline;
 using Microsoft.CodeAnalysis;
@@ -15,13 +16,6 @@ namespace Metalama.Framework.Engine.Testing
 {
     public class TestBase
     {
-        /// <summary>
-        /// A value indicating whether tests that test the serialization of reflection objects like <see cref="Type"/> should use "dotnet build" to see if the
-        /// resulting syntax tree actually compiles and results in valid IL. This is slow but necessary during development, at least, since an incorrect syntax tree
-        /// can easily be produced.
-        /// </summary>
-        private const bool _doCodeExecutionTests = false;
-
         private readonly Func<ServiceProvider, ServiceProvider> _addServices;
 
         protected TestBase( Func<ServiceProvider, ServiceProvider>? addServices = null )
@@ -29,24 +23,7 @@ namespace Metalama.Framework.Engine.Testing
             this._addServices = addServices ?? new Func<ServiceProvider, ServiceProvider>( p => p );
         }
 
-        protected static CSharpCompilation CreateCSharpCompilation(
-            string code,
-            string? dependentCode = null,
-            bool ignoreErrors = false,
-            IEnumerable<MetadataReference>? additionalReferences = null,
-            string? name = null,
-            bool addMetalamaReferences = true,
-            IEnumerable<string>? preprocessorSymbols = null )
-            => CreateCSharpCompilation(
-                new Dictionary<string, string> { { Guid.NewGuid() + ".cs", code } },
-                dependentCode,
-                ignoreErrors,
-                additionalReferences,
-                name,
-                addMetalamaReferences,
-                preprocessorSymbols );
-
-        protected static CSharpCompilation CreateCSharpCompilation(
+        private static CSharpCompilation CreateCSharpCompilation(
             IReadOnlyDictionary<string, string> code,
             string? dependentCode = null,
             bool ignoreErrors = false,
@@ -96,44 +73,7 @@ namespace Metalama.Framework.Engine.Testing
                 throw new InvalidOperationException( string.Join( Environment.NewLine, lines ) );
             }
         }
-
-        protected static object? ExecuteExpression( string context, string expression )
-        {
-            var expressionContainer = $@"
-class Expression
-{{
-    public static object Execute() => {expression};
-}}";
-
-            var assemblyPath = MetalamaCompilerUtility.CompileAssembly( context, expressionContainer );
-
-            var assembly = Assembly.LoadFile( assemblyPath );
-
-            return assembly.GetType( "Expression" )!.GetMethod( "Execute" )!.Invoke( null, null );
-        }
-
-        /// <summary>
-        /// Executes the C# <paramref name="expression"/> alongside the code <paramref name="context"/> and passes the value of the expression
-        /// as the argument to the callback <paramref name="withResult"/>. Does all of this only conditionally: it does nothing if <see cref="_doCodeExecutionTests"/>
-        /// is false.
-        /// </summary>
-        /// <param name="context">Additional C# code.</param>
-        /// <param name="expression">A C# expression of type <typeparamref name="T"/>.</param>
-        /// <param name="withResult">Code to run on the result of the expression.</param>
-        protected static void TestExpression<T>( string context, string expression, Action<T> withResult )
-        {
-#pragma warning disable CS0162 // Unreachable code detected
-
-            // ReSharper disable HeuristicUnreachableCode
-
-            if ( _doCodeExecutionTests )
-            {
-                var t = (T) ExecuteExpression( context, expression )!;
-                withResult( t );
-            }
-#pragma warning restore CS0162 // Unreachable code detected
-        }
-
+        
         protected TestContext CreateTestContext( TestProjectOptions? projectOptions = null ) => this.CreateTestContext( null, projectOptions );
 
         protected TestContext CreateTestContext( Func<ServiceProvider, ServiceProvider>? addServices, TestProjectOptions? projectOptions = null )
@@ -167,11 +107,10 @@ class Expression
                 string? dependentCode = null,
                 bool ignoreErrors = false,
                 IEnumerable<MetadataReference>? additionalReferences = null,
-                string? name = null,
-                bool addMetalamaReferences = true )
+                string? name = null )
                 => this.CreateCompilationModel( code, dependentCode, ignoreErrors, additionalReferences, name );
-
-            public CompilationModel CreateCompilationModel(
+            
+            private CompilationModel CreateCompilationModel(
                 string code,
                 string? dependentCode = null,
                 bool ignoreErrors = false,
@@ -186,16 +125,7 @@ class Expression
                     name,
                     addMetalamaReferences );
 
-            public ICompilation CreateCompilation(
-                IReadOnlyDictionary<string, string> code,
-                string? dependentCode = null,
-                bool ignoreErrors = false,
-                IEnumerable<MetadataReference>? additionalReferences = null,
-                string? name = null,
-                bool addMetalamaReferences = true )
-                => this.CreateCompilationModel( code, dependentCode, ignoreErrors, additionalReferences, name );
-
-            public CompilationModel CreateCompilationModel(
+            private CompilationModel CreateCompilationModel(
                 IReadOnlyDictionary<string, string> code,
                 string? dependentCode = null,
                 bool ignoreErrors = false,
@@ -209,11 +139,6 @@ class Expression
                     new ProjectModel( roslynCompilation, this.ServiceProvider ),
                     roslynCompilation );
             }
-
-            internal CompilationModel CreateCompilationModel( Compilation compilation )
-                => CompilationModel.CreateInitialInstance(
-                    new ProjectModel( compilation, this.ServiceProvider ),
-                    compilation );
 
             public void Dispose()
             {
