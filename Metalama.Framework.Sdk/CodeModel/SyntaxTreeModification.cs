@@ -28,6 +28,11 @@ namespace Metalama.Framework.Engine.CodeModel
         /// </summary>
         public SyntaxTreeModification( SyntaxTree newTree, SyntaxTree? oldTree = null )
         {
+            if ( string.IsNullOrEmpty( newTree.FilePath ) )
+            {
+                throw new ArgumentOutOfRangeException( nameof(newTree), "The SyntaxTree.FilePath property must be set to a non-empty value." );
+            }
+
             if ( oldTree != null && !string.Equals( oldTree.FilePath, newTree.FilePath, StringComparison.Ordinal ) )
             {
                 throw new ArgumentOutOfRangeException( nameof(newTree), "The FilePath property of both trees must be equal." );

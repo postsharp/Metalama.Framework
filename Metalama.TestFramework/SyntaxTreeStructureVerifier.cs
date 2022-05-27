@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
+using System.Text;
 
 namespace Metalama.TestFramework
 {
@@ -20,7 +21,7 @@ namespace Metalama.TestFramework
             {
                 var actualSyntaxFactory = syntaxTree.GetRoot().ToSyntaxFactoryDebug( compilation, serviceProvider );
 
-                var parsedFromText = CSharpSyntaxTree.ParseText( syntaxTree.GetRoot().ToString() )
+                var parsedFromText = CSharpSyntaxTree.ParseText( syntaxTree.GetRoot().ToString(), encoding: Encoding.UTF8 )
                     .GetRoot()
                     .ToSyntaxFactoryDebug( compilation, serviceProvider );
 

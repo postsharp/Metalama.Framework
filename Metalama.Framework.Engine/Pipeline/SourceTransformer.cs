@@ -67,7 +67,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
             if ( projectOptions == null )
             {
-                projectOptions = new ProjectOptions( context.GlobalOptions, context.Plugins );
+                projectOptions = new MSBuildProjectOptions( context.GlobalOptions, context.Plugins );
                 serviceProvider = serviceProvider.WithService( projectOptions );
             }
 

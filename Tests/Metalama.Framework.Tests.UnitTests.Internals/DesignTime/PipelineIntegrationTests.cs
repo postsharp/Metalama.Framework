@@ -309,7 +309,8 @@ Target.cs:
             // Build the project from the compile-time pipeline.
             using UnloadableCompileTimeDomain domain = new();
 
-            var serviceProvider = ServiceProviderFactory.GetServiceProvider( projectOptions )
+            var serviceProvider = ServiceProviderFactory.GetServiceProvider( projectOptions.PathOptions )
+                .WithService( projectOptions )
                 .WithProjectScopedServices( compilation.References );
 
             var compileTimeAspectPipeline = new CompileTimeAspectPipeline( serviceProvider, true, domain );

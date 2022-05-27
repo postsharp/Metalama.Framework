@@ -54,7 +54,8 @@ namespace Metalama.Framework.Engine.CompileTime
             () =>
                 CSharpSyntaxTree.ParseText(
                     "namespace System.Runtime.CompilerServices { internal static class IsExternalInit {} }",
-                    path: CompileTimeConstants.PredefinedTypesFileName ) );
+                    path: CompileTimeConstants.PredefinedTypesFileName,
+                    encoding: Encoding.UTF8 ) );
 
         private static readonly Guid _buildId = AssemblyMetadataReader.GetInstance( typeof(CompileTimeCompilationBuilder).Assembly ).ModuleId;
         private readonly ReflectionMapperFactory _reflectionMapperFactory;

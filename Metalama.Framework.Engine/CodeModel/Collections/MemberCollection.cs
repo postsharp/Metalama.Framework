@@ -3,12 +3,14 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
+using System.Reflection;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections
 {
     internal abstract class MemberCollection<TMember> : MemberOrNamedTypeCollection<TMember>
         where TMember : class, IMember
     {
+        [Obfuscation( Exclude = true )]
         public INamedType DeclaringType { get; }
 
         protected MemberCollection( INamedType declaringType, UpdatableMemberCollection<TMember> sourceItems ) : base(

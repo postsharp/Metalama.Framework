@@ -3,6 +3,8 @@
 
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -42,11 +44,13 @@ namespace Metalama.Compiler
             new( () => CSharpSyntaxTree.ParseText( _intrinsics, CSharpParseOptions.Default, path: "@@Intrinsics.cs", Encoding.UTF8 ) );
 
         private readonly INamedTypeSymbol? _aspectDriverSymbol;
+        private readonly bool _removeCompileTimeOnlyCode;
 
         private RunTimeAssemblyRewriter( Compilation runTimeCompilation, IServiceProvider serviceProvider )
             : base( runTimeCompilation, serviceProvider )
         {
             this._aspectDriverSymbol = runTimeCompilation.GetTypeByMetadataName( typeof(IAspectDriver).FullName );
+            this._removeCompileTimeOnlyCode = serviceProvider.GetRequiredService<IProjectOptions>().RemoveCompileTimeOnlyCode;
         }
 
         public static IPartialCompilation Rewrite( IPartialCompilation compilation, IServiceProvider serviceProvider )
@@ -173,8 +177,9 @@ namespace Metalama.Compiler
         }
 
         private bool MustReplaceByThrow( ISymbol symbol )
-            => !symbol.IsAbstract && (this.SymbolClassifier.GetTemplatingScope( symbol ) == TemplatingScope.CompileTimeOnly ||
-                                      !this.SymbolClassifier.GetTemplateInfo( symbol ).IsNone);
+            => this._removeCompileTimeOnlyCode && !symbol.IsAbstract
+                                               && (this.SymbolClassifier.GetTemplatingScope( symbol ) == TemplatingScope.CompileTimeOnly ||
+                                                   !this.SymbolClassifier.GetTemplateInfo( symbol ).IsNone);
 
         public override SyntaxNode? VisitPropertyDeclaration( PropertyDeclarationSyntax node )
         {

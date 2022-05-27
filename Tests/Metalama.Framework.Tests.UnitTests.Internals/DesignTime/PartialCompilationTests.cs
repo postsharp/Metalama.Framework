@@ -4,6 +4,8 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Testing;
 using Metalama.TestFramework;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
@@ -103,6 +105,63 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
             var compilation = CreateCSharpCompilation( code );
             var partialCompilation = PartialCompilation.CreatePartial( compilation, compilation.SyntaxTrees[0] );
             Assert.Single( partialCompilation.SyntaxTrees );
+        }
+
+        [Fact]
+        public void SeveralModifications_Partial()
+        {
+            var code = new Dictionary<string, string> { ["Class1.cs"] = "/* Intentionally empty */" };
+
+            var compilation = CreateCSharpCompilation( code );
+
+            ApplySeveralModifications( PartialCompilation.CreatePartial( compilation, compilation.SyntaxTrees[0] ) );
+        }
+
+        private static void ApplySeveralModifications( PartialCompilation partialCompilation1 )
+        {
+            var initialCompilation = partialCompilation1.InitialCompilation;
+
+            // Test the initial compilation.
+            const string path1 = "1.cs";
+            Assert.Single( partialCompilation1.SyntaxTrees );
+            Assert.Empty( partialCompilation1.ModifiedSyntaxTrees );
+
+            // Add a syntax tree.
+            var partialCompilation2 = (PartialCompilation) partialCompilation1.AddSyntaxTrees( CSharpSyntaxTree.ParseText( "", path: path1 ) );
+            Assert.Equal( 2, partialCompilation2.SyntaxTrees.Count );
+            Assert.Single( partialCompilation2.ModifiedSyntaxTrees );
+            Assert.Same( initialCompilation, partialCompilation2.InitialCompilation );
+            Assert.Null( partialCompilation2.ModifiedSyntaxTrees[path1].OldTree );
+
+            // Add a second syntax tree.
+            var partialCompilation3 = (PartialCompilation) partialCompilation2.AddSyntaxTrees( CSharpSyntaxTree.ParseText( "", path: "2.cs" ) );
+            Assert.Equal( 3, partialCompilation3.SyntaxTrees.Count );
+            Assert.Equal( 2, partialCompilation3.ModifiedSyntaxTrees.Count );
+            Assert.Null( partialCompilation3.ModifiedSyntaxTrees[path1].OldTree );
+            Assert.Same( initialCompilation, partialCompilation3.InitialCompilation );
+
+            // Modify syntax trees.
+            var partialCompilation4 = (PartialCompilation) partialCompilation3.RewriteSyntaxTrees( new Rewriter() );
+            Assert.Equal( 3, partialCompilation4.SyntaxTrees.Count );
+            Assert.Equal( 3, partialCompilation4.ModifiedSyntaxTrees.Count );
+            Assert.Null( partialCompilation4.ModifiedSyntaxTrees[path1].OldTree );
+            Assert.Same( initialCompilation, partialCompilation4.InitialCompilation );
+        }
+
+        [Fact]
+        public void SeveralModifications_Complete()
+        {
+            var code = new Dictionary<string, string> { ["Class1.cs"] = "/* Intentionally empty */" };
+
+            var compilation = CreateCSharpCompilation( code );
+
+            ApplySeveralModifications( PartialCompilation.CreateComplete( compilation ) );
+        }
+
+        private class Rewriter : CSharpSyntaxRewriter
+        {
+            // Apply some arbitrary transformation.
+            public override SyntaxNode? Visit( SyntaxNode? node ) => base.Visit( node )!.WithTrailingTrivia( SyntaxFactory.Space );
         }
     }
 }
