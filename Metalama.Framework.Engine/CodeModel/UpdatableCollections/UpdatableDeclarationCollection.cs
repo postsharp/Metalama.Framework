@@ -91,6 +91,12 @@ internal abstract class UpdatableDeclarationCollection<T> : ILazy, IReadOnlyList
         var clone = (UpdatableDeclarationCollection<T>) this.MemberwiseClone();
         clone.Compilation = compilation;
 
+        if ( this._allItems != null )
+        {
+            clone._allItems = new List<Ref<T>>( this._allItems.Count );
+            clone._allItems.AddRange( this._allItems );
+        }
+
         return clone;
     }
 

@@ -20,7 +20,10 @@ class C
 {    
 }";
 
-        var compilation = testContext.CreateCompilationModel( code ).ToMutable();
+        var immutableCompilation = testContext.CreateCompilationModel( code );
+        Assert.Empty( immutableCompilation.Types.Single().Methods );
+        
+        var compilation = immutableCompilation.ToMutable();
 
         var type = Assert.Single( compilation.Types )!;
 
@@ -33,6 +36,9 @@ class C
 
         // Assert that the method has been added.
         Assert.Single( type.Methods );
+        
+        // Assert that there is still no method in original compilation.
+        Assert.Empty( immutableCompilation.Types.Single().Methods );
     }
 
     [Fact]
@@ -45,7 +51,10 @@ class C
 {    
 }";
 
-        var compilation = testContext.CreateCompilationModel( code ).ToMutable();
+        var immutableCompilation = testContext.CreateCompilationModel( code );
+        Assert.Empty( immutableCompilation.Types.Single().Methods.OfName( "M" ) );
+        
+        var compilation = immutableCompilation.ToMutable();
 
         var type = Assert.Single( compilation.Types )!;
 
@@ -58,6 +67,9 @@ class C
 
         // Assert that the method has been added.
         Assert.Single( type.Methods.OfName( "M" ) );
+        
+        // Assert that there is still no method in original compilation.
+        Assert.Empty( immutableCompilation.Types.Single().Methods.OfName( "M" ) );
     }
 
     [Fact]
@@ -70,7 +82,8 @@ class C
 {    
 }";
 
-        var compilation = testContext.CreateCompilationModel( code ).ToMutable();
+        var immutableCompilation = testContext.CreateCompilationModel( code );
+        var compilation = immutableCompilation.ToMutable();
 
         var type = Assert.Single( compilation.Types )!;
 
@@ -80,6 +93,9 @@ class C
 
         // Assert that the method has been added.
         Assert.Single( type.Methods );
+        
+        // Assert that there is still no method in original compilation.
+        Assert.Empty( immutableCompilation.Types.Single().Methods );
     }
 
     [Fact]
@@ -92,7 +108,8 @@ class C
 {    
 }";
 
-        var compilation = testContext.CreateCompilationModel( code ).ToMutable();
+        var immutableCompilation = testContext.CreateCompilationModel( code );
+        var compilation = immutableCompilation.ToMutable();
 
         var type = Assert.Single( compilation.Types )!;
 
@@ -102,6 +119,9 @@ class C
 
         // Assert that the method has been added.
         Assert.Single( type.Methods.OfName( "M" ) );
+        
+        // Assert that there is still no method in original compilation.
+        Assert.Empty( immutableCompilation.Types.Single().Methods.OfName( "M" ) );
     }
 
     [Fact]
@@ -115,7 +135,8 @@ class C
   void M() {}
 }";
 
-        var compilation = testContext.CreateCompilationModel( code ).ToMutable();
+        var immutableCompilation = testContext.CreateCompilationModel( code );
+        var compilation = immutableCompilation.ToMutable();
 
         var type = Assert.Single( compilation.Types )!;
 
@@ -135,7 +156,8 @@ class C
 void M(int p){}
 }";
 
-        var compilation = testContext.CreateCompilationModel( code ).ToMutable();
+        var immutableCompilation = testContext.CreateCompilationModel( code );
+        var compilation = immutableCompilation.ToMutable();
 
         var type = Assert.Single( compilation.Types )!;
 
@@ -158,7 +180,8 @@ class C
 void M(int p){}
 }";
 
-        var compilation = testContext.CreateCompilationModel( code ).ToMutable();
+        var immutableCompilation = testContext.CreateCompilationModel( code );
+        var compilation = immutableCompilation.ToMutable();
 
         var type = Assert.Single( compilation.Types )!;
 
@@ -183,7 +206,8 @@ class C
 {    
 }";
 
-        var compilation = testContext.CreateCompilationModel( code ).ToMutable();
+        var immutableCompilation = testContext.CreateCompilationModel( code );
+        var compilation = immutableCompilation.ToMutable();
 
         var type = Assert.Single( compilation.Types )!;
 
@@ -208,7 +232,8 @@ class C
 {    
 }";
 
-        var compilation = testContext.CreateCompilationModel( code ).ToMutable();
+        var immutableCompilation = testContext.CreateCompilationModel( code );
+        var compilation = immutableCompilation.ToMutable();
 
         var type = Assert.Single( compilation.Types )!;
 
@@ -230,7 +255,8 @@ class C
 {    
 }";
 
-        var compilation = testContext.CreateCompilationModel( code ).ToMutable();
+        var immutableCompilation = testContext.CreateCompilationModel( code );
+        var compilation = immutableCompilation.ToMutable();
 
         var type = Assert.Single( compilation.Types )!;
 
@@ -255,7 +281,8 @@ class C
 {    
 }";
 
-        var compilation = testContext.CreateCompilationModel( code ).ToMutable();
+        var immutableCompilation = testContext.CreateCompilationModel( code );
+        var compilation = immutableCompilation.ToMutable();
 
         var type = Assert.Single( compilation.Types )!;
 
