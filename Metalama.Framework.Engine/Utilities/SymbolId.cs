@@ -3,14 +3,11 @@
 
 // ReSharper disable once RedundantBlankLines
 
-#pragma warning disable SA1516 // Elements should be separated by blank line
 using Microsoft.CodeAnalysis;
 using Newtonsoft.Json;
 using System;
 using System.Linq.Expressions;
 using System.Threading;
-
-#pragma warning restore SA1516 // Elements should be separated by blank line
 
 namespace Metalama.Framework.Engine.Utilities
 {
@@ -31,25 +28,25 @@ namespace Metalama.Framework.Engine.Utilities
 
         static SymbolId()
         {
-            var symbolKeyType = typeof(AdhocWorkspace).Assembly.GetType( "Microsoft.CodeAnalysis.SymbolKey" );
-            var symbolKeyResolutionType = typeof(AdhocWorkspace).Assembly.GetType( "Microsoft.CodeAnalysis.SymbolKeyResolution" );
-            var symbolKeyExtensionsType = typeof(AdhocWorkspace).Assembly.GetType( "Microsoft.CodeAnalysis.SymbolKeyExtensions" );
+            var symbolKeyType = typeof( AdhocWorkspace ).Assembly.GetType( "Microsoft.CodeAnalysis.SymbolKey" );
+            var symbolKeyResolutionType = typeof( AdhocWorkspace ).Assembly.GetType( "Microsoft.CodeAnalysis.SymbolKeyResolution" );
+            var symbolKeyExtensionsType = typeof( AdhocWorkspace ).Assembly.GetType( "Microsoft.CodeAnalysis.SymbolKeyExtensions" );
 
             // Get SymbolKey(string) constructor.
-            var symbolKeyConstructor = symbolKeyType.GetConstructor( new[] { typeof(string) } ).AssertNotNull();
+            var symbolKeyConstructor = symbolKeyType.GetConstructor( new[] { typeof( string ) } ).AssertNotNull();
 
-            var idParameter = Expression.Parameter( typeof(string), "id" );
-            var newSymbolKey = Expression.ConvertChecked( Expression.New( symbolKeyConstructor, idParameter ), typeof(object) );
+            var idParameter = Expression.Parameter( typeof( string ), "id" );
+            var newSymbolKey = Expression.ConvertChecked( Expression.New( symbolKeyConstructor, idParameter ), typeof( object ) );
             _newSymbolKeyFunc = Expression.Lambda<Func<string, object>>( newSymbolKey, idParameter ).Compile();
 
             // Get SymbolKey.Resolve.
             var symbolKeyResolve = symbolKeyType.GetMethod( "Resolve" ).AssertNotNull();
             var symbolKeyResolutionGetSymbol = symbolKeyResolutionType.GetProperty( "Symbol" ).AssertNotNull();
 
-            var symbolKeyParameter = Expression.Parameter( typeof(object), "symbolKey" );
-            var compilationParameter = Expression.Parameter( typeof(Compilation), "compilation" );
-            var ignoreAssemblyKeyParameter = Expression.Parameter( typeof(bool), "ignoreAssemblyKey" );
-            var cancellationTokenParameter = Expression.Parameter( typeof(CancellationToken), "cancellationToken" );
+            var symbolKeyParameter = Expression.Parameter( typeof( object ), "symbolKey" );
+            var compilationParameter = Expression.Parameter( typeof( Compilation ), "compilation" );
+            var ignoreAssemblyKeyParameter = Expression.Parameter( typeof( bool ), "ignoreAssemblyKey" );
+            var cancellationTokenParameter = Expression.Parameter( typeof( CancellationToken ), "cancellationToken" );
 
             var callResolve = Expression.Call(
                 Expression.Convert( symbolKeyParameter, symbolKeyType ),
@@ -69,12 +66,12 @@ namespace Metalama.Framework.Engine.Utilities
                 .Compile();
 
             // Get SymbolKeyExtensions.GetSymbolKey
-            var symbolParameter = Expression.Parameter( typeof(ISymbol), "symbol" );
+            var symbolParameter = Expression.Parameter( typeof( ISymbol ), "symbol" );
             var getSymbolKeyMethod = symbolKeyExtensionsType.GetMethod( "GetSymbolKey" ).AssertNotNull();
 
             var callGetSymbolKey = Expression.Convert(
                 Expression.Call( null, getSymbolKeyMethod, symbolParameter, cancellationTokenParameter ),
-                typeof(object) );
+                typeof( object ) );
 
             _getSymbolKeyFunc = Expression.Lambda<Func<ISymbol, CancellationToken, object>>( callGetSymbolKey, symbolParameter, cancellationTokenParameter )
                 .Compile();
@@ -92,9 +89,14 @@ namespace Metalama.Framework.Engine.Utilities
         }
 
         public ISymbol? Resolve( Compilation compilation, bool ignoreAssemblyKey = false, CancellationToken cancellationToken = default )
-            => _resolveSymbolKeyFunc( this._symbolKey, compilation, ignoreAssemblyKey, cancellationToken );
+        {
+            return _resolveSymbolKeyFunc( this._symbolKey, compilation, ignoreAssemblyKey, cancellationToken );
+        }
 
-        public override string ToString() => this._symbolKey.ToString();
+        public override string ToString()
+        {
+            return this._symbolKey.ToString();
+        }
 
         public static SymbolId Create( ISymbol? symbol, CancellationToken cancellationToken = default )
         {
@@ -111,11 +113,20 @@ namespace Metalama.Framework.Engine.Utilities
             }
         }
 
-        public bool Equals( SymbolId other ) => this._symbolKey.Equals( other._symbolKey );
+        public bool Equals( SymbolId other )
+        {
+            return this._symbolKey.Equals( other._symbolKey );
+        }
 
-        public override bool Equals( object? obj ) => obj is SymbolId other && this.Equals( other );
+        public override bool Equals( object? obj )
+        {
+            return obj is SymbolId other && this.Equals( other );
+        }
 
-        public override int GetHashCode() => this._symbolKey.GetHashCode();
+        public override int GetHashCode()
+        {
+            return this._symbolKey.GetHashCode();
+        }
 
         public static bool operator ==( SymbolId left, SymbolId right ) => left.Equals( right );
 

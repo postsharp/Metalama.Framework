@@ -32,13 +32,18 @@ namespace Metalama.TestFramework.XunitFramework
 
         void IDisposable.Dispose() { }
 
-        ITestCase ITestFrameworkExecutor.Deserialize( string value ) => new TestCase( this._factory, value );
+        ITestCase ITestFrameworkExecutor.Deserialize( string value )
+        {
+            return new TestCase( this._factory, value );
+        }
 
         void ITestFrameworkExecutor.RunAll(
             IMessageSink executionMessageSink,
             ITestFrameworkDiscoveryOptions discoveryOptions,
             ITestFrameworkExecutionOptions executionOptions )
-            => throw new NotImplementedException();
+        {
+            throw new NotImplementedException();
+        }
 
         void ITestFrameworkExecutor.RunTests(
             IEnumerable<ITestCase> testCases,
@@ -105,7 +110,7 @@ namespace Metalama.TestFramework.XunitFramework
                                 {
                                     using var testOptions = new TestProjectOptions( plugIns: projectReferences.PlugIns );
 
-                                    var serviceProvider = ServiceProviderFactory.GetServiceProvider( testOptions.PathOptions );
+                                    var serviceProvider = ServiceProviderFactory.GetServiceProvider( testOptions.PathOptions ).WithService( testOptions );
 
                                     var testInput = TestInput.FromFile( this._factory.ProjectProperties, directoryOptionsReader, testCase.UniqueID );
 
