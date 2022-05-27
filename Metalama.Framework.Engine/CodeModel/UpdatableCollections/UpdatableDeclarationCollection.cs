@@ -7,7 +7,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Transactions;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
