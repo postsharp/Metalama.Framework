@@ -48,7 +48,7 @@ class TargetCode
                        SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ),
                        serviceProvider ) )
             {
-                var type = compilation.Types[0];
+                var type = compilation.Types.Single();
                 var toString = type.Methods.OfName( "ToString" ).Single();
                 var fooMethod = type.Methods.OfName( "Foo" ).Single();
                 var byRefMethod = type.Methods.OfName( "ByRef" ).Single();
@@ -265,39 +265,6 @@ class TargetCode
                 AssertEx.DynamicEquals(
                     instanceEvent.Invokers.Final.Add( instance, null ),
                     "((global::TargetCode.Nested<global::System.String>)abc).InstanceEvent += null" );
-            }
-        }
-
-        [Fact]
-        public void LocalFunctions()
-        {
-            var code = @"
-class TargetCode
-{
-    void Method()
-    {
-        void Local() {}
-    }
-}";
-
-            using var testContext = this.CreateTestContext();
-            var serviceProvider = testContext.ServiceProvider;
-
-            var compilation = testContext.CreateCompilationModel( code );
-
-            using ( TemplateExpansionContext.WithTestingContext(
-                       SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ),
-                       serviceProvider ) )
-            {
-                var localFunction = compilation.Types.OfName( "TargetCode" ).Single().Methods.Single().LocalFunctions.Single();
-
-                AssertEx.DynamicEquals(
-                    localFunction.Invokers.Final.Invoke( null ),
-                    @"Local()" );
-
-                AssertEx.ThrowsWithDiagnostic(
-                    GeneralDiagnosticDescriptors.CannotProvideInstanceForLocalFunction,
-                    () => localFunction.Invokers.Final.Invoke( new RuntimeExpression( SyntaxFactory.ThisExpression(), compilation, serviceProvider ) ) );
             }
         }
 

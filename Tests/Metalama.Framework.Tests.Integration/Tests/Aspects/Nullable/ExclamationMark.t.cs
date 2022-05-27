@@ -1,2 +1,20 @@
-// CompileTimeAspectPipeline.ExecuteAsync failed. 
-// Error LAMA0500 on `NullableTarget`: `The aspect 'Aspect' cannot introduce member 'TargetCode.NullableTarget.Introduced(string?)' into type 'TargetCode.NullableTarget' because it is already defined in type 'TargetCode.NonNullableTarget'.`
+internal class TargetCode
+{
+    [Aspect]
+    private class NullableTarget { 
+
+        private global::System.String? Introduced(global::System.String? a)
+        {
+            return (global::System.String? )a.ToString();
+        }}
+
+#nullable disable
+
+    [Aspect]
+    private class NonNullableTarget { 
+
+        private global::System.String Introduced(global::System.String a)
+        {
+            return (global::System.String)a.ToString();
+        }}
+}

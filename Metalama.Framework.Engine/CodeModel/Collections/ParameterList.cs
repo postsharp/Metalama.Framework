@@ -10,14 +10,14 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections
 {
-    internal class ParameterList : DeclarationList<IParameter, Ref<IParameter>>, IParameterList
+    internal class ParameterList : DeclarationCollection<IParameter, Ref<IParameter>>, IParameterList
     {
-        public ParameterList( IMethodBase containingDeclaration, IEnumerable<Ref<IParameter>> sourceItems ) : base(
-            containingDeclaration,
+        public ParameterList( IMethodBase declaringType, IReadOnlyList<Ref<IParameter>> sourceItems ) : base(
+            declaringType,
             sourceItems ) { }
 
-        public ParameterList( IIndexer containingDeclaration, IEnumerable<Ref<IParameter>> sourceItems ) : base(
-            containingDeclaration,
+        public ParameterList( IIndexer declaringType, IReadOnlyList<Ref<IParameter>> sourceItems ) : base(
+            declaringType,
             sourceItems ) { }
 
         private ParameterList() { }
@@ -40,5 +40,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
                 return parameter;
             }
         }
+
+        public IParameter this[ int index ] => this.GetItem( this.Source[index] );
     }
 }

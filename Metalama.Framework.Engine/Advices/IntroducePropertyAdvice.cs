@@ -91,14 +91,12 @@ namespace Metalama.Framework.Engine.Advices
             // TODO: For get accessor template, we are ignoring accessibility of set accessor template because it can be easily incompatible.
         }
 
-        public override AdviceResult ToResult( ICompilation compilation, IReadOnlyList<IObservableTransformation> observableTransformations )
+        public override AdviceResult ToResult( ICompilation compilation )
         {
             // Determine whether we need introduction transformation (something may exist in the original code or could have been introduced by previous steps).
             var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
 
-            var existingDeclaration = targetDeclaration.FindClosestVisibleProperty(
-                this.MemberBuilder,
-                observableTransformations.OfType<IProperty>().ToList() );
+            var existingDeclaration = targetDeclaration.FindClosestUniquelyNamedMember( this.MemberBuilder.Name );
 
             var hasNoOverrideSemantics = this.Template.Declaration != null && this.Template.Declaration.IsAutoPropertyOrField;
 
@@ -126,6 +124,15 @@ namespace Metalama.Framework.Engine.Advices
             }
             else
             {
+                if ( existingDeclaration is not IProperty existingProperty )
+                {
+                    return
+                        AdviceResult.Create(
+                            AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentKind.CreateRoslynDiagnostic(
+                                targetDeclaration.GetDiagnosticLocation(),
+                                (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration, existingDeclaration.DeclarationKind) ) );
+                }
+
                 if ( existingDeclaration.IsStatic != this.MemberBuilder.IsStatic )
                 {
                     return
@@ -134,6 +141,15 @@ namespace Metalama.Framework.Engine.Advices
                                 targetDeclaration.GetDiagnosticLocation(),
                                 (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
                                  existingDeclaration.DeclaringType) ) );
+                }
+                else if ( !compilation.InvariantComparer.Equals( this.Builder.Type, existingProperty.Type ) )
+                {
+                    return
+                        AdviceResult.Create(
+                            AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateRoslynDiagnostic(
+                                targetDeclaration.GetDiagnosticLocation(),
+                                (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
+                                 existingDeclaration.DeclaringType, existingProperty.Type) ) );
                 }
 
                 switch ( this.OverrideStrategy )
@@ -157,7 +173,7 @@ namespace Metalama.Framework.Engine.Advices
                         {
                             var overriddenProperty = new OverridePropertyTransformation(
                                 this,
-                                existingDeclaration,
+                                existingProperty,
                                 this._getTemplate,
                                 this._setTemplate,
                                 this.Tags );
@@ -183,7 +199,7 @@ namespace Metalama.Framework.Engine.Advices
                         {
                             var overriddenMethod = new OverridePropertyTransformation(
                                 this,
-                                existingDeclaration,
+                                existingProperty,
                                 this._getTemplate,
                                 this._setTemplate,
                                 this.Tags );
@@ -199,19 +215,10 @@ namespace Metalama.Framework.Engine.Advices
                                         (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
                                          existingDeclaration.DeclaringType) ) );
                         }
-                        else if ( !compilation.InvariantComparer.Equals( this.Builder.Type, existingDeclaration.Type ) )
-                        {
-                            return
-                                AdviceResult.Create(
-                                    AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateRoslynDiagnostic(
-                                        targetDeclaration.GetDiagnosticLocation(),
-                                        (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
-                                         existingDeclaration.DeclaringType, existingDeclaration.Type) ) );
-                        }
                         else
                         {
                             this.MemberBuilder.IsOverride = true;
-                            this.MemberBuilder.OverriddenProperty = existingDeclaration;
+                            this.MemberBuilder.OverriddenProperty = existingProperty;
 
                             var overrideTransformations =
                                 OverrideHelper.OverrideProperty(

@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.CodeFixes;
@@ -43,30 +44,48 @@ namespace Metalama.Framework.Engine.Pipeline
             }
 
             var observableTransformations = new List<IObservableTransformation>();
-            var nonObservableTransformations = new List<INonObservableTransformation>();
+            var transformations = new List<ITransformation>();
             var diagnostics = new List<Diagnostic>();
 
-            foreach ( var advice in this._advices )
+            foreach ( var adviceGroup in this._advices.GroupBy( a => a.TargetDeclaration.GetTarget( compilation ).GetDeclaringType() ) )
             {
-                var result = advice.ToResult( compilation, observableTransformations );
+                var compilationForThisType = compilation;
+                var groupCount = adviceGroup.Count();
 
-                foreach ( var transformation in result.ObservableTransformations )
+                foreach ( var advice in adviceGroup.OrderBy( a => a.Order ) )
                 {
-                    observableTransformations.Add( transformation );
+                    var result = advice.ToResult( compilationForThisType );
+
+                    foreach ( var transformation in result.ObservableTransformations )
+                    {
+                        observableTransformations.Add( transformation );
+                        transformations.Add( transformation );
+
+                        // If we have several observable transformations, update the component model within the same type.
+                        if ( groupCount > 1 )
+                        {
+                            if ( !compilationForThisType.IsMutable )
+                            {
+                                compilationForThisType = compilationForThisType.ToMutable();
+                            }
+
+                            compilationForThisType.AddTransformation( transformation );
+                        }
+                    }
+
+                    foreach ( var transformation in result.NonObservableTransformations )
+                    {
+                        transformations.Add( transformation );
+                    }
+
+                    diagnostics.AddRange( result.Diagnostics );
+
+                    // Add the result for introspection.
+                    this.Parent.AddAdviceResult( advice, result );
                 }
-
-                foreach ( var transformation in result.NonObservableTransformations )
-                {
-                    nonObservableTransformations.Add( transformation );
-                }
-
-                diagnostics.AddRange( result.Diagnostics );
-
-                // Add the result for introspection.
-                this.Parent.AddAdviceResult( advice, result );
             }
 
-            this.Parent.AddNonObservableTransformations( nonObservableTransformations );
+            this.Parent.AddTransformations( transformations );
             this.Parent.AddDiagnostics( diagnostics, Enumerable.Empty<ScopedSuppression>(), Enumerable.Empty<CodeFixInstance>() );
 
             return compilation.WithTransformations( observableTransformations );

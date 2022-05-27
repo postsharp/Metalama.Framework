@@ -24,12 +24,13 @@ namespace Metalama.Framework.Engine.CodeModel
         public override DeclarationOrigin Origin => DeclarationOrigin.Source;
 
         [Memo]
-        public override IAttributeList Attributes
-            => new AttributeList(
+        public override IAttributeCollection Attributes
+            => new AttributeCollection(
                 this,
                 this.Symbol.GetAttributes()
                     .Where( a => a.AttributeConstructor != null )
-                    .Select( a => new AttributeRef( a, Ref.FromSymbol<IDeclaration>( this.Symbol, this.Compilation.RoslynCompilation ) ) ) );
+                    .Select( a => new AttributeRef( a, Ref.FromSymbol<IDeclaration>( this.Symbol, this.Compilation.RoslynCompilation ) ) )
+                    .ToList() );
 
         [Memo]
         public override IAssembly DeclaringAssembly => this.Compilation.Factory.GetAssembly( this.Symbol.ContainingAssembly );

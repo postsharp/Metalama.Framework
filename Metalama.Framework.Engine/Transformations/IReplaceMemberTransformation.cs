@@ -14,6 +14,6 @@ namespace Metalama.Framework.Engine.Transformations
         /// <summary>
         /// Gets a member that is replaced by this transformation or <c>null</c> if the transformation does not replace any member.
         /// </summary>
-        MemberRef<IMember>? ReplacedMember { get; }
+        MemberRef<IMember> ReplacedMember { get; }
     }
 }

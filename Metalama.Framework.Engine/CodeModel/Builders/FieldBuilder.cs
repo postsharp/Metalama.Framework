@@ -10,7 +10,6 @@ using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -45,11 +44,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public Writeability Writeability { get; set; }
 
         public bool IsAutoPropertyOrField => true;
-
-        public override InsertPosition InsertPosition
-            => new(
-                InsertPositionRelation.Within,
-                (MemberDeclarationSyntax) ((NamedType) this.DeclaringType).Symbol.GetPrimaryDeclaration().AssertNotNull() );
 
         public IExpression? InitializerExpression { get; set; }
 

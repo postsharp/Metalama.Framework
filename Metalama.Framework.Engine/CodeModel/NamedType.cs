@@ -3,14 +3,10 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Code.DeclarationBuilders;
-using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
-using Metalama.Framework.Engine.Collections;
-using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -23,7 +19,6 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Accessibility = Metalama.Framework.Code.Accessibility;
-using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using RoslynTypeKind = Microsoft.CodeAnalysis.TypeKind;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypeKind = Metalama.Framework.Code.TypeKind;
@@ -147,100 +142,88 @@ namespace Metalama.Framework.Engine.CodeModel
         public bool IsGeneric => this.TypeSymbol.IsGenericType;
 
         [Memo]
-        public INamedTypeList NestedTypes
-            => new NamedTypeList(
+        public INamedTypeCollection NestedTypes
+            => new NamedTypeCollection(
                 this,
-                this.TypeSymbol.GetTypeMembers()
-                    .Where( t => this.Compilation.SymbolClassifier.GetTemplatingScope( t ) != TemplatingScope.CompileTimeOnly )
-                    .Select( t => new MemberRef<INamedType>( t, this.Compilation.RoslynCompilation ) ) );
+                new TypeUpdatableCollection( this.Compilation, this.TypeSymbol ) );
 
         [Memo]
-        public IPropertyList Properties
-            => new PropertyList(
+        public IPropertyCollection Properties
+            => new PropertyCollection(
                 this,
-                this.TransformMembers<IProperty, IPropertyBuilder, IPropertySymbol>(
-                    this.TypeSymbol
-                        .GetMembers()
-                        .OfType<IPropertySymbol>()
-                        .Where( p => !p.IsIndexer )
-                        .ToReadOnlyList() ) );
+                this.Compilation.GetPropertyCollection( this.TypeSymbol, false ) );
 
         [Memo]
-        public IIndexerList Indexers
-            => new IndexerList(
+        public IPropertyCollection AllProperties => new AllPropertiesCollection( this );
+
+        [Memo]
+        public IIndexerCollection Indexers
+            => new IndexerCollection(
                 this,
-                this.TransformMembers<IIndexer, IIndexerBuilder, IPropertySymbol>(
-                    this.TypeSymbol
-                        .GetMembers()
-                        .OfType<IPropertySymbol>()
-                        .Where( p => p.IsIndexer )
-                        .ToReadOnlyList() ) );
+                this.Compilation.GetIndexerCollection( this.TypeSymbol, false ) );
 
         [Memo]
-        public IFieldList Fields
-            => new FieldList(
+        public IIndexerCollection AllIndexers => new AllIndexersCollection( this );
+
+        [Memo]
+        public IFieldCollection Fields
+            => new FieldCollection(
                 this,
-                this.TransformMembers<IField, IFieldBuilder, IFieldSymbol>(
-                    this.TypeSymbol
-                        .GetMembers()
-                        .OfType<IFieldSymbol>()
-                        .Where( s => s is { CanBeReferencedByName: true } )
-                        .ToReadOnlyList() ) );
+                this.Compilation.GetFieldCollection( this.TypeSymbol, false ) );
 
         [Memo]
-        public IFieldOrPropertyList FieldsAndProperties => new FieldAndPropertiesList( this.Fields, this.Properties );
+        public IFieldCollection AllFields => new AllFieldsCollection( this );
 
         [Memo]
-        public IEventList Events
-            => new EventList(
+        public IFieldOrPropertyCollection FieldsAndProperties => new FieldAndPropertiesCollection( this.Fields, this.Properties );
+
+        public IFieldOrPropertyCollection AllFieldsAndProperties => throw new NotImplementedException();
+
+        [Memo]
+        public IEventCollection Events
+            => new EventCollection(
                 this,
-                this.TransformMembers<IEvent, IEventBuilder, IEventSymbol>(
-                    this.TypeSymbol
-                        .GetMembers()
-                        .OfType<IEventSymbol>()
-                        .ToReadOnlyList() ) );
+                this.Compilation.GetEventCollection( this.TypeSymbol, false ) );
 
         [Memo]
-        public IMethodList Methods
-            => new MethodList(
+        public IEventCollection AllEvents => new AllEventsCollection( this );
+
+        [Memo]
+        public IMethodCollection Methods
+            => new MethodCollection(
                 this,
-                this.TransformMembers<IMethod, IMethodBuilder, IMethodSymbol>(
-                    this.TypeSymbol
-                        .GetMembers()
-                        .OfType<IMethodSymbol>()
-                        .Where(
-                            m =>
-                                m.MethodKind != MethodKind.Constructor
-                                && m.MethodKind != MethodKind.StaticConstructor
-                                && m.MethodKind != MethodKind.PropertyGet
-                                && m.MethodKind != MethodKind.PropertySet
-                                && m.MethodKind != MethodKind.EventAdd
-                                && m.MethodKind != MethodKind.EventRemove
-                                && m.MethodKind != MethodKind.EventRaise )
-                        .ToReadOnlyList() ) );
+                this.Compilation.GetMethodCollection( this.TypeSymbol, false ) );
 
         [Memo]
-        public IConstructorList Constructors
-            => new ConstructorList(
+        public IMethodCollection AllMethods => new AllMethodsCollection( this );
+
+        [Memo]
+        public IConstructorCollection Constructors
+            => new ConstructorCollection(
                 this,
-                this.TransformMembers<IConstructor, IConstructorBuilder, IMethodSymbol>(
-                    this.TypeSymbol
-                        .GetMembers()
-                        .OfType<IMethodSymbol>()
-                        .Where( m => m.MethodKind == MethodKind.Constructor )
-                        .ToReadOnlyList() ) );
+                this.Compilation.GetConstructorCollection( this.TypeSymbol, false ) );
 
         [Memo]
-        public IConstructor StaticConstructor // TODO: This is a bit of a hack (VirtualStaticConstructor disappears is ConstructorBuilder is used).
-            => this.TransformMembers<IConstructor, IConstructorBuilder, IMethodSymbol>(
-                       this.TypeSymbol
-                           .GetMembers()
-                           .OfType<IMethodSymbol>()
-                           .Where( m => m.MethodKind == MethodKind.StaticConstructor )
-                           .ToReadOnlyList() )
-                   .Select( c => c.GetTarget( this.Compilation ) )
-                   .SingleOrDefault()
-               ?? new ImplicitStaticConstructor( this );
+        public IConstructor StaticConstructor => this.GetStaticConstructorImpl();
+
+        private IConstructor GetStaticConstructorImpl()
+        {
+            var builder = this.Compilation.GetStaticConstructor( this.TypeSymbol );
+
+            if ( builder != null )
+            {
+                return this.Compilation.Factory.GetConstructor( builder );
+            }
+
+            var symbol = this.TypeSymbol.StaticConstructors.SingleOrDefault();
+
+            if ( symbol != null )
+            {
+                return this.Compilation.Factory.GetConstructor( symbol );
+            }
+
+            return new ImplicitStaticConstructor( this );
+        }
 
         public bool IsPartial
         {
@@ -269,10 +252,11 @@ namespace Metalama.Framework.Engine.CodeModel
 
         [Memo]
         public IGenericParameterList TypeParameters
-            => new GenericParameterList(
+            => new TypeParameterList(
                 this,
                 this.TypeSymbol.TypeParameters
-                    .Select( x => Ref.FromSymbol<ITypeParameter>( x, this.Compilation.RoslynCompilation ) ) );
+                    .Select( x => Ref.FromSymbol<ITypeParameter>( x, this.Compilation.RoslynCompilation ) )
+                    .ToList() );
 
         [Memo]
         public INamespace Namespace => this.Compilation.Factory.GetNamespace( this.TypeSymbol.ContainingNamespace );
@@ -297,31 +281,13 @@ namespace Metalama.Framework.Engine.CodeModel
         [Memo]
         public INamedType? BaseType => this.TypeSymbol.BaseType == null ? null : this.Compilation.Factory.GetNamedType( this.TypeSymbol.BaseType );
 
+        // TODO: the problem of this implementation is that the collection is reconstructed for each compilation version. This could be improved.
         [Memo]
-        public IImplementedInterfaceList AllImplementedInterfaces
-            => // TODO: Correct order after concat and distinct?            
-                (this.BaseType?.AllImplementedInterfaces ?? Enumerable.Empty<INamedType>())
-                .Concat(
-                    this.TypeSymbol.Interfaces.Select( this.Compilation.Factory.GetNamedType )
-                        .Concat(
-                            this.Compilation.GetObservableTransformationsOnElement( this )
-                                .OfType<IntroduceInterfaceTransformation>()
-                                .Select( i => i.InterfaceType ) ) )
-                .Distinct() // Remove duplicates (re-implementations of earlier interface by aspect).
-                .ToImmutableArray()
-                .ToImplementedInterfaceList();
+        public IImplementedInterfaceCollection AllImplementedInterfaces => new AllImplementedInterfacesCollection( this );
 
         [Memo]
-        public IImplementedInterfaceList ImplementedInterfaces
-            => // TODO: Correct order after concat and distinct?            
-                this.TypeSymbol.Interfaces.Select( this.Compilation.Factory.GetNamedType )
-                    .Concat(
-                        this.Compilation.GetObservableTransformationsOnElement( this )
-                            .OfType<IntroduceInterfaceTransformation>()
-                            .Select( i => i.InterfaceType ) )
-                    .Distinct() // Remove duplicates (re-implementations of earlier interface by aspect).
-                    .ToImmutableArray()
-                    .ToImplementedInterfaceList();
+        public IImplementedInterfaceCollection ImplementedInterfaces
+            => new ImplementedInterfaceCollection( this, this.Compilation.GetInterfaceImplementationCollection( this.TypeSymbol, false ) );
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
@@ -351,7 +317,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 return Enumerable.Empty<IMember>();
             }
 
-            IMemberList<IMember> members;
+            IMemberCollection<IMember> members;
 
             switch ( member.DeclarationKind )
             {
@@ -422,7 +388,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 {
                     var candidateMember = (IMember) this.Compilation.Factory.GetDeclaration( candidateSymbol );
 
-                    if ( SignatureComparer.Instance.Equals( candidateMember, typeMember ) )
+                    if ( MemberComparer<IMember>.Instance.Equals( candidateMember, typeMember ) )
                     {
                         return true;
                     }
@@ -480,8 +446,8 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 var introducedInterface =
                     this.Compilation
-                        .GetObservableTransformationsOnElement( currentType )
-                        .OfType<IntroduceInterfaceTransformation>()
+                        .GetInterfaceImplementationCollection( this.TypeSymbol, false )
+                        .Introductions
                         .SingleOrDefault( i => this.Compilation.InvariantComparer.Equals( i.InterfaceType, interfaceMember.DeclaringType ) );
 
                 if ( introducedInterface != null )
@@ -522,100 +488,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
                 return false;
             }
-        }
-
-        private IEnumerable<MemberRef<TMember>> TransformMembers<TMember, TBuilder, TSymbol>( IReadOnlyList<TSymbol> symbolMembers )
-            where TMember : class, IMember
-            where TBuilder : IMemberBuilder, TMember
-            where TSymbol : class, ISymbol
-        {
-            var transformations = this.Compilation.GetObservableTransformationsOnElement( this );
-
-            if ( transformations.Length == 0 )
-            {
-                // No transformations.
-                return symbolMembers.Select( x => new MemberRef<TMember>( x, this.Compilation.RoslynCompilation ) );
-            }
-
-            if ( !transformations.Any( t => t is IReplaceMemberTransformation ) )
-            {
-                // No replaced members.
-                return
-                    symbolMembers
-                        .Select( x => new MemberRef<TMember>( x, this.Compilation.RoslynCompilation ) )
-                        .Concat( transformations.OfType<TBuilder>().Select( x => x.ToMemberRef<TMember>() ) );
-            }
-
-            var allSymbols = new HashSet<TSymbol>( symbolMembers, SymbolEqualityComparer.Default );
-            var replacedSymbols = new HashSet<TSymbol>( SymbolEqualityComparer.Default );
-            var replacedBuilders = new HashSet<TBuilder>();
-            var builders = new List<TBuilder>();
-
-            // Go through transformations, noting replaced symbols and builders.
-            foreach ( var builder in transformations )
-            {
-                if ( builder is TBuilder typedBuilder )
-                {
-                    builders.Add( typedBuilder );
-                }
-
-                if ( builder is IReplaceMemberTransformation { ReplacedMember: { } replacedMember } )
-                {
-                    if ( replacedMember.Target is TSymbol symbol && allSymbols.Contains( replacedMember.Target ) )
-                    {
-                        // If the MemberRef points to a symbol just remove from symbol list.
-                        // This prevents needless allocation.
-                        replacedSymbols.Add( symbol );
-                    }
-                    else
-                    {
-                        // Otherwise resolve the MemberRef (directly, without redirections).
-                        var resolved = replacedMember.GetTarget( this.Compilation, false );
-
-                        if ( resolved is TMember )
-                        {
-                            var resolvedSymbol = (TSymbol?) resolved.GetSymbol();
-
-                            if ( resolvedSymbol != null )
-                            {
-                                replacedSymbols.Add( resolvedSymbol );
-                            }
-                            else if ( resolved is TBuilder replacedBuilder )
-                            {
-                                replacedBuilders.Add( replacedBuilder );
-                            }
-                            else if ( resolved is BuiltDeclaration { Builder: TBuilder replacedDeclarationBuilder } )
-                            {
-                                replacedBuilders.Add( replacedDeclarationBuilder );
-                            }
-                            else
-                            {
-                                throw new AssertionFailedException();
-                            }
-                        }
-                    }
-                }
-            }
-
-            var members = new List<MemberRef<TMember>>();
-
-            foreach ( var symbol in symbolMembers )
-            {
-                if ( !replacedSymbols.Contains( symbol ) )
-                {
-                    members.Add( new MemberRef<TMember>( symbol, this.Compilation.RoslynCompilation ) );
-                }
-            }
-
-            foreach ( var builder in builders )
-            {
-                if ( !replacedBuilders.Contains( builder ) )
-                {
-                    members.Add( builder.ToMemberRef<TMember>() );
-                }
-            }
-
-            return members;
         }
 
         private void PopulateAllInterfaces( ImmutableHashSet<INamedTypeSymbol>.Builder builder, GenericMap genericMap )

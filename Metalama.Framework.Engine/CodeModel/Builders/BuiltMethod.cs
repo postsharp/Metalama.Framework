@@ -31,13 +31,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder => this.MethodBuilder;
 
-        public IMethodList LocalFunctions => MethodList.Empty;
-
         [Memo]
         public IParameterList Parameters
             => new ParameterList(
                 this,
-                this.MethodBuilder.Parameters.AsBuilderList.Select( Ref.FromBuilder<IParameter, IParameterBuilder> ) );
+                this.MethodBuilder.Parameters.AsBuilderList.Select( Ref.FromBuilder<IParameter, IParameterBuilder> ).ToList() );
 
         public MethodKind MethodKind => this.MethodBuilder.MethodKind;
 
@@ -60,9 +58,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         [Memo]
         public IGenericParameterList TypeParameters
-            => new GenericParameterList(
+            => new TypeParameterList(
                 this,
-                this.MethodBuilder.GenericParameters.AsBuilderList.Select( Ref.FromBuilder<ITypeParameter, TypeParameterBuilder> ) );
+                this.MethodBuilder.GenericParameters.AsBuilderList.Select( Ref.FromBuilder<ITypeParameter, TypeParameterBuilder> ).ToList() );
 
         public IReadOnlyList<IType> TypeArguments => throw new NotImplementedException();
 

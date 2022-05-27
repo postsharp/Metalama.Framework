@@ -24,24 +24,26 @@ namespace Metalama.Framework.Engine.Pipeline
         public static void GenerateDesignTimeSyntaxTrees(
             PartialCompilation partialCompilation,
             CompilationModel compilationModel,
+            IEnumerable<ITransformation> transformations,
             IServiceProvider serviceProvider,
             UserDiagnosticSink diagnostics,
             CancellationToken cancellationToken,
             out IReadOnlyList<IntroducedSyntaxTree> additionalSyntaxTrees )
         {
-            var transformations = compilationModel.GetAllObservableTransformations( true );
-
             var additionalSyntaxTreeList = new List<IntroducedSyntaxTree>();
             additionalSyntaxTrees = additionalSyntaxTreeList;
 
             LexicalScopeFactory lexicalScopeFactory = new( compilationModel );
             var introductionNameProvider = new LinkerIntroductionNameProvider();
 
-            foreach ( var transformationGroup in transformations )
+            // Get all observable transformations except replacements, because replacements are not visible at design time.
+            var observableTransformations = transformations.OfType<IObservableTransformation>().Where( t => t is not IReplaceMemberTransformation );
+
+            foreach ( var transformationGroup in observableTransformations.GroupBy( t => t.ContainingDeclaration ) )
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                if ( transformationGroup.DeclaringDeclaration is not INamedType declaringType )
+                if ( transformationGroup.Key is not INamedType declaringType )
                 {
                     // We only support introductions to types.
                     continue;
@@ -62,7 +64,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 var members = List<MemberDeclarationSyntax>();
                 var syntaxGenerationContext = SyntaxGenerationContext.CreateDefault( serviceProvider, partialCompilation.Compilation, true );
 
-                foreach ( var transformation in transformationGroup.Transformations )
+                foreach ( var transformation in transformationGroup )
                 {
                     if ( transformation is IIntroduceMemberTransformation memberIntroduction )
                     {

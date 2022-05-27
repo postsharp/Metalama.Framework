@@ -61,7 +61,7 @@ namespace NS
             var types = compilation.Types.OrderBySource();
             Assert.Equal( 2, types.Length );
 
-            var c1 = types[0];
+            var c1 = types.ElementAt( 0 );
             Assert.Equal( "C", c1.Name );
             Assert.Equal( "C", c1.FullName );
             Assert.IsAssignableFrom<ICompilation>( c1.ContainingDeclaration );
@@ -71,7 +71,7 @@ namespace NS
             Assert.Equal( "C.D", d.FullName );
             Assert.Same( c1, d.ContainingDeclaration );
 
-            var c2 = types[1];
+            var c2 = types.ElementAt( 1 );
             Assert.Equal( "C", c2.Name );
             Assert.Equal( "NS.C", c2.FullName );
             Assert.IsAssignableFrom<ICompilation>( c2.ContainingDeclaration );
@@ -103,18 +103,9 @@ class C
 
             Assert.Single( methods );
 
-            var method = methods[0];
+            var method = methods.ElementAt( 0 );
             Assert.Equal( "M", method.Name );
             Assert.Same( type, method.ContainingDeclaration );
-
-            var outerLocalFunction = method.LocalFunctions.Single();
-            Assert.Equal( "Outer", outerLocalFunction.Name );
-            Assert.Same( method, outerLocalFunction.ContainingDeclaration );
-
-            var innerLocalFunction = outerLocalFunction.LocalFunctions.Single();
-            Assert.Equal( "Inner", innerLocalFunction.Name );
-
-            Assert.Same( outerLocalFunction, innerLocalFunction.ContainingDeclaration );
         }
 
         [Fact]
@@ -149,11 +140,11 @@ class TestAttribute : Attribute
             Assert.Equal( 1, attribute.GetNamedArgumentValue( "E" ) );
             var types = Assert.IsAssignableFrom<IReadOnlyList<TypedConstant>>( attribute.GetNamedArgumentValue( "Types" ) );
             Assert.Equal( 5, types.Count );
-            var type0 = Assert.IsAssignableFrom<INamedType>( types[0].Value );
+            var type0 = Assert.IsAssignableFrom<INamedType>( types.ElementAt( 0 ).Value );
             Assert.Equal( "E", type0.FullName );
-            var type1 = Assert.IsAssignableFrom<INamedType>( types[1].Value );
+            var type1 = Assert.IsAssignableFrom<INamedType>( types.ElementAt( 1 ).Value );
             Assert.Equal( "System.Action<,>", type1.FullName );
-            Assert.Null( types[2].Value );
+            Assert.Null( types.ElementAt( 2 ).Value );
         }
 
         [Fact]
@@ -195,11 +186,11 @@ interface I<T>
             var methods = compilation.Types.Single().Methods.ToList();
             Assert.Equal( 2, methods.Count );
 
-            var m1 = methods[0];
+            var m1 = methods.ElementAt( 0 );
             Assert.Equal( "M1", m1.Name );
 
             Assert.True( m1.ReturnParameter.IsReturnParameter );
-            Assert.False( m1.Parameters[0].IsReturnParameter );
+            Assert.False( m1.Parameters.ElementAt( 0 ).IsReturnParameter );
 
             Assert.Equal( 0, m1.Parameters.OfParameterType( typeof(int) ).First().Index );
             Assert.Equal( 0, m1.Parameters.OfParameterType<int>().First().Index );
@@ -207,13 +198,13 @@ interface I<T>
 
             CheckParameterData( m1.ReturnParameter, m1, "void", "<return>", -1 );
             Assert.Equal( 5, m1.Parameters.Count );
-            CheckParameterData( m1.Parameters[0], m1, "int", "i", 0 );
-            CheckParameterData( m1.Parameters[1], m1, "I<T>/T", "t", 1 );
-            CheckParameterData( m1.Parameters[2], m1, "dynamic", "d", 2 );
-            CheckParameterData( m1.Parameters[3], m1, "object", "o", 3 );
-            CheckParameterData( m1.Parameters[4], m1, "string", "s", 4 );
+            CheckParameterData( m1.Parameters.ElementAt( 0 ), m1, "int", "i", 0 );
+            CheckParameterData( m1.Parameters.ElementAt( 1 ), m1, "I<T>/T", "t", 1 );
+            CheckParameterData( m1.Parameters.ElementAt( 2 ), m1, "dynamic", "d", 2 );
+            CheckParameterData( m1.Parameters.ElementAt( 3 ), m1, "object", "o", 3 );
+            CheckParameterData( m1.Parameters.ElementAt( 4 ), m1, "string", "s", 4 );
 
-            var m2 = methods[1];
+            var m2 = methods.ElementAt( 1 );
             Assert.Equal( "M2", m2.Name );
 
             CheckParameterData( m2.ReturnParameter, m2, "int", "<return>", -1 );
@@ -274,11 +265,11 @@ class MyAttribute : Attribute
 
             Assert.Equal( 2, attributes.Length );
 
-            Assert.Equal( "MyAttribute", attributes[0].Type.FullName );
-            Assert.Equal( "a", Assert.Single( attributes[0].ConstructorArguments.Select( a => a.Value ) ) );
+            Assert.Equal( "MyAttribute", attributes.ElementAt( 0 ).Type.FullName );
+            Assert.Equal( "a", Assert.Single( attributes.ElementAt( 0 ).ConstructorArguments.Select( a => a.Value ) ) );
 
-            Assert.Equal( "MyAttribute", attributes[1].Type.FullName );
-            Assert.Equal( "m", Assert.Single( attributes[1].ConstructorArguments.Select( a => a.Value ) ) );
+            Assert.Equal( "MyAttribute", attributes.ElementAt( 1 ).Type.FullName );
+            Assert.Equal( "m", Assert.Single( attributes.ElementAt( 1 ).ConstructorArguments.Select( a => a.Value ) ) );
         }
 
         [Fact]
@@ -450,8 +441,6 @@ class C : IDisposable
             Assert.Equal( new[] { EventAdd, EventRemove }, type.Events.SelectMany( p => new[] { p.AddMethod.MethodKind, p.RemoveMethod.MethodKind } ) );
             Assert.Single( type.Constructors );
             Assert.NotNull( type.StaticConstructor );
-
-            Assert.Equal( LocalFunction, type.Methods.First().LocalFunctions.Single().MethodKind );
         }
 
         [Fact]
@@ -525,7 +514,7 @@ class C
 
             var method = type.Methods.First();
 
-            var parametersWithoutDefaults = new[] { method.ReturnParameter, method.Parameters[0] };
+            var parametersWithoutDefaults = new[] { method.ReturnParameter, method.Parameters.ElementAt( 0 ) };
 
             foreach ( var parameter in parametersWithoutDefaults )
             {
@@ -681,7 +670,7 @@ class Class<T>
             Assert.Equal( "string", openType.Properties.Single().ForTypeInstance( typeInstance ).Type.ToString() );
             Assert.Equal( "Action<string>", openType.Events.Single().ForTypeInstance( typeInstance ).Type.ToString() );
             Assert.Equal( "string", openType.Methods.Single().ForTypeInstance( typeInstance ).ReturnType.ToString() );
-            Assert.Equal( "string", openType.Constructors.Single().ForTypeInstance( typeInstance ).Parameters[0].Type.ToString() );
+            Assert.Equal( "string", openType.Constructors.Single().ForTypeInstance( typeInstance ).Parameters.ElementAt( 0 ).Type.ToString() );
             Assert.Equal( typeInstance, openType.StaticConstructor.ForTypeInstance( typeInstance ).DeclaringType );
         }
 
@@ -737,7 +726,7 @@ class Parent<TParent>
             // Creating a closed nested type.
             var closedParentType = openParentType.ConstructGenericInstance( typeof(string) );
             var closedGenericNestedType = closedParentType.NestedTypes.OfName( "NestedGeneric" ).Single().ConstructGenericInstance( typeof(int) );
-            Assert.Equal( "int", closedGenericNestedType.TypeArguments[0].ToString() );
+            Assert.Equal( "int", closedGenericNestedType.TypeArguments.ElementAt( 0 ).ToString() );
             Assert.False( closedGenericNestedType.IsOpenGeneric );
 
             // Open method of closed nested type.
@@ -769,8 +758,8 @@ public sealed class C
 
             var compilation = testContext.CreateCompilationModel( code );
             Assert.Single( compilation.Types );
-            Assert.Single( compilation.Types[0].Indexers );
-            Assert.Single( compilation.Types[0].Indexers[0].Parameters );
+            Assert.Single( compilation.Types.ElementAt( 0 ).Indexers );
+            Assert.Single( compilation.Types.ElementAt( 0 ).Indexers.ElementAt( 0 ).Parameters );
         }
 
         [Fact]
@@ -810,7 +799,6 @@ namespace Ns1
 
             Assert.Equal( 3, compilation.GetDepth( type ) );
             Assert.Equal( 4, compilation.GetDepth( type.Methods.OfName( "M" ).Single() ) );
-            Assert.Equal( 5, compilation.GetDepth( type.Methods.OfName( "M" ).Single().LocalFunctions.Single() ) );
             Assert.Equal( 3, compilation.GetDepth( compilation.Types.OfName( "I" ).Single() ) );
             Assert.Equal( 4, compilation.GetDepth( compilation.Types.OfName( "J" ).Single() ) );
             Assert.Equal( 4, compilation.GetDepth( compilation.Types.OfName( "K" ).Single() ) );

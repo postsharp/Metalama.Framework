@@ -41,7 +41,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
                 : ((IFieldOrProperty) this.DeclaringMember).Type;
 
         [Memo]
-        public IGenericParameterList TypeParameters => GenericParameterList.Empty;
+        public IGenericParameterList TypeParameters => TypeParameterList.Empty;
 
         [Memo]
         public IReadOnlyList<IType> TypeArguments => ImmutableArray<IType>.Empty;
@@ -57,8 +57,6 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
             => new InvokerFactory<IMethodInvoker>( ( order, invokerOperator ) => new MethodInvoker( this, order, invokerOperator ) );
 
         public IMethod? OverriddenMethod => null;
-
-        public IMethodList LocalFunctions => MethodList.Empty;
 
         public abstract IParameterList Parameters { get; }
 
@@ -96,7 +94,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public IDeclaration? ContainingDeclaration => this.DeclaringMember;
 
-        public IAttributeList Attributes => AttributeList.Empty;
+        public IAttributeCollection Attributes => AttributeCollection.Empty;
 
         public DeclarationKind DeclarationKind => DeclarationKind.Method;
 

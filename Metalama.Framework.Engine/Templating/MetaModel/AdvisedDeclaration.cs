@@ -38,7 +38,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IDeclaration? ContainingDeclaration => this.Underlying.ContainingDeclaration;
 
-        public IAttributeList Attributes => this.Underlying.Attributes;
+        public IAttributeCollection Attributes => this.Underlying.Attributes;
 
         public DeclarationKind DeclarationKind => this.Underlying.DeclarationKind;
 
