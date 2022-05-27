@@ -87,7 +87,9 @@ public class AnalysisProcessProjectHandler : ProjectHandler
             }
         }
 
+#pragma warning disable CS8603 // Possible null reference return -- analyzer bug
         return this.LastSourceGeneratorResult.AssertNotNull();
+#pragma warning restore CS8603
     }
 
     /// <summary>
@@ -174,10 +176,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
     /// <summary>
     /// When implemented by a derived class, publishes the generated source code to the client.
     /// </summary>
-    protected virtual Task PublishGeneratedSourcesAsync( string projectId, CancellationToken cancellationToken )
-    {
-        return Task.CompletedTask;
-    }
+    protected virtual Task PublishGeneratedSourcesAsync( string projectId, CancellationToken cancellationToken ) => Task.CompletedTask;
 
     protected override void Dispose( bool disposing )
     {

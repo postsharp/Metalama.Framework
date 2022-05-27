@@ -31,7 +31,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
     internal partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
     {
         private readonly ConditionalWeakTable<Compilation, CompilationResult> _compilationResultCache = new();
-        private static readonly string _sourceGeneratorAssemblyName = typeof( DesignTimeAspectPipelineFactory ).Assembly.GetName().Name;
+        private static readonly string _sourceGeneratorAssemblyName = typeof(DesignTimeAspectPipelineFactory).Assembly.GetName().Name;
 
         private readonly IFileSystemWatcher? _fileSystemWatcher;
 
@@ -211,7 +211,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
         {
             this.SetState( this._currentState.InvalidateCacheForNewCompilation( compilation, invalidateCompilationResult, cancellationToken ) );
 
+#pragma warning disable CS8603 // Probably a compiler error. Happens only in the release build.
             return this._currentState.UnprocessedChanges.AssertNotNull();
+#pragma warning restore CS8603
         }
 
         public void InvalidateCache()
@@ -421,10 +423,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
         /// determine whether an error must displayed in the editor.  
         /// </summary>
         public bool IsCompileTimeSyntaxTreeOutdated( string name )
-        {
-            return this._currentState.CompileTimeSyntaxTrees is { } compileTimeSyntaxTrees && compileTimeSyntaxTrees.TryGetValue( name, out var syntaxTree )
-                                                                                                  && syntaxTree == null;
-        }
+            => this._currentState.CompileTimeSyntaxTrees is { } compileTimeSyntaxTrees && compileTimeSyntaxTrees.TryGetValue( name, out var syntaxTree )
+                                                                                       && syntaxTree == null;
 
         internal IEnumerable<AspectClass> GetEligibleAspects( Compilation compilation, ISymbol symbol, CancellationToken cancellationToken )
         {

@@ -29,6 +29,8 @@ namespace Metalama.Framework.Engine.CompileTime
 {
     internal partial class CompileTimeCompilationBuilder
     {
+#pragma warning disable CA1001 // Class must be disposable.
+
         /// <summary>
         /// Rewrites a run-time syntax tree into a compile-time syntax tree. Calls <see cref="TemplateCompiler"/> on templates,
         /// and removes run-time-only sub trees.
@@ -95,43 +97,28 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 this._originalNameTypeSyntax = (NameSyntax)
                     this._syntaxGenerationContext.SyntaxGenerator.Type(
-                        this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof( OriginalIdAttribute ) ) );
+                        this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(OriginalIdAttribute) ) );
 
                 this._originalPathTypeSyntax = (NameSyntax)
                     this._syntaxGenerationContext.SyntaxGenerator.Type(
-                        this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof( OriginalPathAttribute ) ) );
+                        this._syntaxGenerationContext.ReflectionMapper.GetTypeSymbol( typeof(OriginalPathAttribute) ) );
 
                 var reflectionMapper = serviceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( runTimeCompilation );
-                this._fabricType = reflectionMapper.GetTypeSymbol( typeof( Fabric ) );
-                this._typeFabricType = reflectionMapper.GetTypeSymbol( typeof( TypeFabric ) );
+                this._fabricType = reflectionMapper.GetTypeSymbol( typeof(Fabric) );
+                this._typeFabricType = reflectionMapper.GetTypeSymbol( typeof(TypeFabric) );
             }
 
             // TODO: assembly and module-level attributes?
 
-            public override SyntaxNode? VisitAttributeList( AttributeListSyntax node )
-            {
-                return node.Parent is CompilationUnitSyntax ? null : node;
-            }
+            public override SyntaxNode? VisitAttributeList( AttributeListSyntax node ) => node.Parent is CompilationUnitSyntax ? null : node;
 
-            public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
-            {
-                return this.VisitTypeDeclaration( node ).SingleOrDefault();
-            }
+            public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node ).SingleOrDefault();
 
-            public override SyntaxNode? VisitStructDeclaration( StructDeclarationSyntax node )
-            {
-                return this.VisitTypeDeclaration( node ).SingleOrDefault();
-            }
+            public override SyntaxNode? VisitStructDeclaration( StructDeclarationSyntax node ) => this.VisitTypeDeclaration( node ).SingleOrDefault();
 
-            public override SyntaxNode? VisitInterfaceDeclaration( InterfaceDeclarationSyntax node )
-            {
-                return this.VisitTypeDeclaration( node ).SingleOrDefault();
-            }
+            public override SyntaxNode? VisitInterfaceDeclaration( InterfaceDeclarationSyntax node ) => this.VisitTypeDeclaration( node ).SingleOrDefault();
 
-            public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node )
-            {
-                return this.VisitTypeDeclaration( node ).SingleOrDefault();
-            }
+            public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitTypeDeclaration( node ).SingleOrDefault();
 
             public override SyntaxNode? VisitEnumDeclaration( EnumDeclarationSyntax node )
             {
@@ -214,7 +201,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                                 this._diagnosticAdder.Report(
                                                     TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptClasses.CreateRoslynDiagnostic(
                                                         childSymbol.GetDiagnosticLocation(),
-                                                        (childSymbol, typeof( TypeFabric )) ) );
+                                                        (childSymbol, typeof(TypeFabric)) ) );
 
                                                 this.Success = false;
                                             }
@@ -276,7 +263,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                 this._diagnosticAdder.Report(
                                     TemplatingDiagnosticDescriptors.RunTimeTypesCannotHaveCompileTimeTypesExceptClasses.CreateRoslynDiagnostic(
                                         childSymbol.GetDiagnosticLocation(),
-                                        (childSymbol, typeof( TypeFabric )) ) );
+                                        (childSymbol, typeof(TypeFabric)) ) );
 
                                 this.Success = false;
                             }
@@ -412,7 +399,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 foreach ( var implementedInterface in allImplementedInterfaces )
                 {
-                    if ( implementedInterface.Name is nameof( IAspect ) or nameof( IEligible<IDeclaration> ) or nameof( ProjectExtension ) )
+                    if ( implementedInterface.Name is nameof(IAspect) or nameof(IEligible<IDeclaration>) or nameof(ProjectExtension) )
                     {
                         foreach ( var member in implementedInterface.GetMembers() )
                         {
@@ -1106,23 +1093,15 @@ namespace Metalama.Framework.Engine.CompileTime
 
             private T? AddLocationAnnotation<T>( T? originalNode, T? transformedNode )
                 where T : SyntaxNode
-            {
-                return originalNode == null || transformedNode == null
-                                   ? null
-                                   : (T?) this._templateCompiler.LocationAnnotationMap.AddLocationAnnotation( originalNode, transformedNode );
-            }
+                => originalNode == null || transformedNode == null
+                    ? null
+                    : (T?) this._templateCompiler.LocationAnnotationMap.AddLocationAnnotation( originalNode, transformedNode );
 
             // The default implementation of Visit(SyntaxNode) and Visit(SyntaxToken) adds the location annotations.
 
-            public override SyntaxNode? Visit( SyntaxNode? node )
-            {
-                return this.AddLocationAnnotation( node, base.Visit( node ) );
-            }
+            public override SyntaxNode? Visit( SyntaxNode? node ) => this.AddLocationAnnotation( node, base.Visit( node ) );
 
-            public override SyntaxToken VisitToken( SyntaxToken token )
-            {
-                return this._templateCompiler.LocationAnnotationMap.AddLocationAnnotation( token );
-            }
+            public override SyntaxToken VisitToken( SyntaxToken token ) => this._templateCompiler.LocationAnnotationMap.AddLocationAnnotation( token );
 
             private QualifiedTypeNameInfo CreateNameExpression( INamespaceOrTypeSymbol symbol )
             {
@@ -1216,10 +1195,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 return base.VisitIdentifierName( node );
             }
 
-            protected override T RewriteThrowNotSupported<T>( T node )
-            {
-                return ReplaceDynamicToObjectRewriter.Rewrite( node );
-            }
+            protected override T RewriteThrowNotSupported<T>( T node ) => ReplaceDynamicToObjectRewriter.Rewrite( node );
 
             private Context WithScope( TemplatingScope scope )
             {
