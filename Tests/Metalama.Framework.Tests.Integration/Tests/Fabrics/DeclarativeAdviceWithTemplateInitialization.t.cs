@@ -19,8 +19,8 @@ internal class BuildInfo
 #pragma warning restore CS0067
 
 
-    public global::System.String? Configuration { get; } = "Debug"
+    public global::System.String? Configuration { get; } = "Debug";
 
-
-    public global::System.String? TargetFramework { get; } = "net6.0"}
+    public global::System.String? TargetFramework { get; } = "net6.0";
+}
 #pragma warning restore CS0067
