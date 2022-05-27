@@ -115,4 +115,5 @@ public partial class Account
     }
 
 
-    public global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account.Optional OptionalValues { get; set; } = new Optional()}
+    public global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account.Optional OptionalValues { get; set; } = new Optional();
+}

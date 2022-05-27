@@ -153,7 +153,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     null,
                     initializerExpression != null
                         ? EqualsValueClause( initializerExpression )
-                        : null );
+                        : null,
+                    initializerExpression != null
+                        ? Token(SyntaxKind.SemicolonToken)
+                        : default );
 
             var introducedProperty = new IntroducedMember( this, property, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this );
 
