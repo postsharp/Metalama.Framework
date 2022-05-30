@@ -147,7 +147,6 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
     public void AppendExpression( IExpression expression, StringBuilder stringBuilder )
     {
-        // The problem here is that we don't have a SyntaxGenerationContext.
         stringBuilder.Append(
             ((IUserExpression) expression).ToSyntax( this._syntaxGenerationContext )
             .NormalizeWhitespace()
