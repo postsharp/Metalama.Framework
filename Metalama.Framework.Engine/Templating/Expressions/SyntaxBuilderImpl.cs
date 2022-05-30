@@ -15,26 +15,46 @@ using System.Reflection;
 using System.Text;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 
-namespace Metalama.Framework.Engine.Templating.MetaModel;
+namespace Metalama.Framework.Engine.Templating.Expressions;
 
 internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 {
-    public ICompilation Compilation { get; }
+    // Note that the implementation of this class cannot use TemplateExpansionContext because there is no necessarily one active.
+    // For instance, in the BuildAspect method, there is none.
 
-    public OurSyntaxGenerator SyntaxGenerator { get; }
+    private readonly CompilationModel _compilation;
+    private readonly SyntaxGenerationContext _syntaxGenerationContext;
 
-    public SyntaxBuilderImpl( ICompilation compilation, OurSyntaxGenerator syntaxGenerator )
+    public ICompilation Compilation => this._compilation;
+
+    private OurSyntaxGenerator SyntaxGenerator => this._syntaxGenerationContext.SyntaxGenerator;
+
+    public SyntaxBuilderImpl( CompilationModel compilation, SyntaxGenerationContext syntaxGenerationContext )
     {
-        this.Compilation = compilation;
-        this.SyntaxGenerator = syntaxGenerator;
+        this._compilation = compilation;
+        this._syntaxGenerationContext = syntaxGenerationContext;
+    }
+
+    public SyntaxBuilderImpl( CompilationModel compilation, IServiceProvider serviceProvider )
+    {
+        this._compilation = compilation;
+        var syntaxGenerationContextFactory = serviceProvider.GetService<SyntaxGenerationContextFactory>();
+
+        if ( syntaxGenerationContextFactory != null )
+        {
+            this._syntaxGenerationContext = syntaxGenerationContextFactory.Default;
+        }
+        else
+        {
+            // This should happen in tests only.
+            this._syntaxGenerationContext = SyntaxGenerationContext.Create( serviceProvider, compilation.RoslynCompilation );
+        }
     }
 
     [Obfuscation( Exclude = true )]
     public IProject Project => this.Compilation.Project;
 
-    public IExpression Expression( object? expression )
-        => RuntimeExpression.FromValue( expression, this.Compilation, TemplateExpansionContext.CurrentSyntaxGenerationContext )
-            .ToUserExpression( this.Compilation );
+    public IExpression Expression( object? expression ) => new ParsedUserExpression( this.Compilation, expression );
 
     public IExpression BuildArray( ArrayBuilder arrayBuilder ) => new ArrayUserExpression( arrayBuilder );
 
@@ -45,7 +65,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
     {
         var expression = SyntaxFactory.ParseExpression( code ).WithAdditionalAnnotations( Formatter.Annotation );
 
-        return new RuntimeExpression( expression, this.Compilation, this.Project.ServiceProvider ).ToUserExpression( this.Compilation );
+        return new UserExpression( expression, this._compilation.Factory.GetSpecialType( SpecialType.Object ) );
     }
 
     public IStatement ParseStatement( string code )
@@ -96,6 +116,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
     public IExpression Literal( object? value, SpecialType specialType, bool stronglyTyped )
     {
         ExpressionSyntax expression;
+        IType type;
 
         if ( value == null )
         {
@@ -108,7 +129,9 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
             expression = GetLiteralImpl( value, specialType, stronglyTyped );
         }
 
-        return new RuntimeExpression( expression, this.Compilation, this.Project.ServiceProvider ).ToUserExpression( this.Compilation );
+        type = this._compilation.Factory.GetSpecialType( specialType );
+
+        return new UserExpression( expression, type );
     }
 
     public void AppendTypeName( IType type, StringBuilder stringBuilder )
@@ -124,9 +147,10 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
     public void AppendExpression( IExpression expression, StringBuilder stringBuilder )
     {
+        // The problem here is that we don't have a SyntaxGenerationContext.
         stringBuilder.Append(
-            ((IUserExpression) expression.Value!).ToRunTimeExpression()
-            .Syntax.NormalizeWhitespace()
+            ((IUserExpression) expression).ToSyntax( this._syntaxGenerationContext )
+            .NormalizeWhitespace()
             .ToFullString() );
     }
 
@@ -134,5 +158,8 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
         => stringBuilder.Append(
             expression == null
                 ? "null"
-                : ((RuntimeExpression) expression).Syntax.NormalizeWhitespace().ToFullString() );
+                : ((RunTimeTemplateExpression) expression).Syntax.NormalizeWhitespace().ToFullString() );
+
+    public IExpression Cast( IExpression expression, IType targetType )
+        => expression.Type.Is( targetType ) ? expression : new CastUserExpression( targetType, expression );
 }

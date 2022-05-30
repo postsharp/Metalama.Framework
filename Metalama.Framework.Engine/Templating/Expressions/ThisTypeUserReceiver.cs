@@ -5,9 +5,10 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 
-namespace Metalama.Framework.Engine.Templating.MetaModel
+namespace Metalama.Framework.Engine.Templating.Expressions
 {
     /// <summary>
     /// An implementation of <see cref="IUserExpression"/> that represents a <see cref="INamedType"/> and allows to access
@@ -24,21 +25,22 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             this._linkerAnnotation = linkerAnnotation;
         }
 
-        public RuntimeExpression ToRunTimeExpression() => throw new NotSupportedException();
+        public ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext ) => throw new NotSupportedException();
+
+        public RunTimeTemplateExpression ToRunTimeTemplateExpression( SyntaxGenerationContext syntaxGenerationContext ) => throw new NotSupportedException();
 
         public bool IsAssignable => false;
 
         public IType Type => this._type;
 
-        public RuntimeExpression CreateMemberAccessExpression( string member )
+        public RunTimeTemplateExpression CreateMemberAccessExpression( string member )
             => new(
                 SyntaxFactory.MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
                         TemplateExpansionContext.CurrentSyntaxGenerationContext.SyntaxGenerator.Type( this._type.GetSymbol() ),
                         SyntaxFactory.IdentifierName( SyntaxFactory.Identifier( member ) ) )
                     .WithAspectReferenceAnnotation( this._linkerAnnotation ),
-                this._type.Compilation,
-                this._type.GetCompilationModel().Project.ServiceProvider );
+                TemplateExpansionContext.CurrentSyntaxGenerationContext );
 
         object? IExpression.Value { get => this; set => throw new NotSupportedException(); }
     }

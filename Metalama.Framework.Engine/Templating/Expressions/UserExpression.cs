@@ -6,29 +6,32 @@ using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 
-namespace Metalama.Framework.Engine.Templating.MetaModel
+namespace Metalama.Framework.Engine.Templating.Expressions
 {
+    /// <summary>
+    /// An implementation of <see cref="IUserExpression"/> where the syntax is known upfront.
+    /// </summary>
     internal class UserExpression : IUserExpression
     {
         private readonly ExpressionSyntax _expression;
-        private readonly SyntaxGenerationContext _generationContext;
         private readonly bool _isReferenceable;
 
         public UserExpression(
             ExpressionSyntax expression,
             IType type,
-            SyntaxGenerationContext generationContext,
             bool isReferenceable = false,
             bool isAssignable = false )
         {
             this._expression = expression;
-            this._generationContext = generationContext;
             this.Type = type;
             this.IsAssignable = isAssignable;
             this._isReferenceable = isReferenceable;
         }
 
-        public RuntimeExpression ToRunTimeExpression() => new( this._expression, this.Type, this._generationContext, this._isReferenceable );
+        public ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext ) => this._expression;
+
+        public RunTimeTemplateExpression ToRunTimeTemplateExpression( SyntaxGenerationContext syntaxGenerationContext )
+            => new( this._expression, this.Type, syntaxGenerationContext, this._isReferenceable );
 
         public IType Type { get; }
 

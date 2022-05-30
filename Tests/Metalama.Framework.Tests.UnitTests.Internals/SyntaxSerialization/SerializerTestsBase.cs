@@ -24,7 +24,9 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
                 // We need a syntax factory for an arbitrary compilation, but at least with standard references.
                 // Note that we cannot easily get a reference to Metalama.Compiler.Interfaces this way because we have a reference assembly.
 
-                this.SerializationContext = new SyntaxSerializationContext( this.Compilation, OurSyntaxGenerator.Default );
+                this.SerializationContext = new SyntaxSerializationContext(
+                    this.Compilation,
+                    SyntaxGenerationContext.Create( this.ServiceProvider, compilationModel.RoslynCompilation ) );
 
                 this.SerializationService = new SyntaxSerializationService( this.ServiceProvider );
             }
@@ -36,7 +38,9 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
                 // We need a syntax factory for an arbitrary compilation, but at least with standard references.
                 // Note that we cannot easily get a reference to Metalama.Compiler.Interfaces this way because we have a reference assembly.
 
-                this.SerializationContext = new SyntaxSerializationContext( this.Compilation, OurSyntaxGenerator.Default );
+                this.SerializationContext = new SyntaxSerializationContext(
+                    this.Compilation,
+                    SyntaxGenerationContext.Create( this.ServiceProvider, this.Compilation.RoslynCompilation ) );
 
                 this.SerializationService = new SyntaxSerializationService( this.ServiceProvider );
             }

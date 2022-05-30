@@ -4,7 +4,7 @@
 using Metalama.Framework.Aspects;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Metalama.Framework.Engine.Templating.MetaModel
+namespace Metalama.Framework.Engine.Templating.Expressions
 {
     /// <summary>
     /// An <see cref="IUserExpression"/> that can be always be used in a <see cref="MemberAccessExpressionSyntax"/>,
@@ -13,6 +13,6 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
     /// </summary>
     internal interface IUserReceiver : IUserExpression
     {
-        RuntimeExpression CreateMemberAccessExpression( string member );
+        RunTimeTemplateExpression CreateMemberAccessExpression( string member );
     }
 }

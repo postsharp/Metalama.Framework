@@ -3,11 +3,13 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
-namespace Metalama.Framework.Engine.Templating.MetaModel
+namespace Metalama.Framework.Engine.Templating.Expressions
 {
     /// <summary>
     /// An implementation of <see cref="IUserExpression"/> that represents <c>this</c> and allows to access its instance members dynamically.
@@ -23,13 +25,16 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             this._linkerAnnotation = linkerAnnotation;
         }
 
-        public RuntimeExpression ToRunTimeExpression() => new( ThisExpression(), this._type, TemplateExpansionContext.CurrentSyntaxGenerationContext );
+        public ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext ) => ThisExpression();
+
+        public RunTimeTemplateExpression ToRunTimeTemplateExpression( SyntaxGenerationContext syntaxGenerationContext )
+            => new( ThisExpression(), this._type, syntaxGenerationContext );
 
         public bool IsAssignable => this._type.TypeKind == TypeKind.Struct;
 
         public IType Type => this._type;
 
-        RuntimeExpression IUserReceiver.CreateMemberAccessExpression( string member )
+        RunTimeTemplateExpression IUserReceiver.CreateMemberAccessExpression( string member )
             => new(
                 MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( Identifier( member ) ) )
                     .WithAspectReferenceAnnotation( this._linkerAnnotation ),

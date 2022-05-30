@@ -3,8 +3,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Templating.MetaModel;
+using Metalama.Framework.Engine.Templating.Expressions;
 using System.Linq;
 using Xunit;
 
@@ -112,7 +111,7 @@ class C
 ";
 
             var compilation = testContext.CreateCompilationModel( code );
-            using var syntaxBuilder = SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( compilation, OurSyntaxGenerator.Default ) );
+            using var syntaxBuilder = SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( compilation, testContext.ServiceProvider ) );
 
             var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
@@ -135,7 +134,7 @@ class C
 ";
 
             var compilation = testContext.CreateCompilationModel( code );
-            using var syntaxBuilder = SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( compilation, OurSyntaxGenerator.Default ) );
+            using var syntaxBuilder = SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( compilation, testContext.ServiceProvider ) );
 
             var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
@@ -158,7 +157,7 @@ class C
 ";
 
             var compilation = testContext.CreateCompilationModel( code );
-            using var syntaxBuilder = SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( compilation, OurSyntaxGenerator.Default ) );
+            using var syntaxBuilder = SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( compilation, testContext.ServiceProvider ) );
 
             var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
@@ -246,7 +245,7 @@ class C
 ";
 
             var compilation = testContext.CreateCompilationModel( code );
-            using var syntaxBuilder = SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( compilation, OurSyntaxGenerator.Default ) );
+            using var syntaxBuilder = SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( compilation, testContext.ServiceProvider ) );
 
             var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 
@@ -269,7 +268,7 @@ class C
 ";
 
             var compilation = testContext.CreateCompilationModel( code );
-            using var syntaxBuilder = SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( compilation, OurSyntaxGenerator.Default ) );
+            using var syntaxBuilder = SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( compilation, testContext.ServiceProvider ) );
 
             var iteratorInfo = compilation.Types.Single().Methods.Single().GetIteratorInfo();
 

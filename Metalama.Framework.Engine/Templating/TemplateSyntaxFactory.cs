@@ -8,7 +8,7 @@ using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.SyntaxSerialization;
-using Metalama.Framework.Engine.Templating.MetaModel;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -43,7 +43,8 @@ namespace Metalama.Framework.Engine.Templating
         public static void AddStatement( List<StatementOrTrivia> list, IExpression statement )
             => list.Add(
                 new StatementOrTrivia(
-                    SyntaxFactory.ExpressionStatement( ((IUserExpression) statement).ToRunTimeExpression().Syntax ),
+                    SyntaxFactory.ExpressionStatement(
+                        ((IUserExpression) statement).ToRunTimeTemplateExpression( TemplateExpansionContext.CurrentSyntaxGenerationContext ).Syntax ),
                     true ) );
 
         public static void AddStatement( List<StatementOrTrivia> list, string statement )
@@ -198,12 +199,13 @@ namespace Metalama.Framework.Engine.Templating
             }
             else if ( TypeExtensions.Equals( expression.Type, SpecialType.Void ) )
             {
-                return SyntaxFactory.ExpressionStatement( expression.ToRunTimeExpression() );
+                return SyntaxFactory.ExpressionStatement( expression.ToRunTimeTemplateExpression( TemplateExpansionContext.CurrentSyntaxGenerationContext ) );
             }
             else if ( awaitResult && TypeExtensions.Equals( expression.Type.GetAsyncInfo().ResultType, SpecialType.Void ) )
             {
                 return
-                    SyntaxFactory.ExpressionStatement( SyntaxFactory.AwaitExpression( expression.ToRunTimeExpression() ) );
+                    SyntaxFactory.ExpressionStatement(
+                        SyntaxFactory.AwaitExpression( expression.ToRunTimeTemplateExpression( TemplateExpansionContext.CurrentSyntaxGenerationContext ) ) );
             }
             else
             {
@@ -212,8 +214,8 @@ namespace Metalama.Framework.Engine.Templating
                         SyntaxKind.SimpleAssignmentExpression,
                         SyntaxFactoryEx.DiscardToken,
                         awaitResult
-                            ? SyntaxFactory.AwaitExpression( expression.ToRunTimeExpression() )
-                            : expression.ToRunTimeExpression() ) );
+                            ? SyntaxFactory.AwaitExpression( expression.ToRunTimeTemplateExpression( TemplateExpansionContext.CurrentSyntaxGenerationContext ) )
+                            : expression.ToRunTimeTemplateExpression( TemplateExpansionContext.CurrentSyntaxGenerationContext ) ) );
             }
         }
 
@@ -230,7 +232,7 @@ namespace Metalama.Framework.Engine.Templating
                 throw new AssertionFailedException();
             }
 
-            var runtimeExpression = value.ToRunTimeExpression();
+            var runtimeExpression = value.ToRunTimeTemplateExpression( TemplateExpansionContext.CurrentSyntaxGenerationContext );
 
             if ( TypeExtensions.Equals( value.Type, SpecialType.Void )
                  || (awaitResult && TypeExtensions.Equals( value.Type.GetAsyncInfo().ResultType, SpecialType.Void )) )
@@ -299,23 +301,22 @@ namespace Metalama.Framework.Engine.Templating
             }
         }
 
-        public static RuntimeExpression? DynamicMemberAccessExpression( IUserExpression userExpression, string member )
+        public static RunTimeTemplateExpression? DynamicMemberAccessExpression( IUserExpression userExpression, string member )
         {
             if ( userExpression is IUserReceiver dynamicMemberAccess )
             {
                 return dynamicMemberAccess.CreateMemberAccessExpression( member );
             }
 
-            var expression = userExpression.ToRunTimeExpression();
+            var expression = userExpression.ToRunTimeTemplateExpression( TemplateExpansionContext.CurrentSyntaxGenerationContext );
 
-            return new RuntimeExpression(
+            return new RunTimeTemplateExpression(
                 SyntaxFactory.MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
                         expression.Syntax,
                         SyntaxFactory.IdentifierName( member ) )
                     .WithAdditionalAnnotations( Simplifier.Annotation ),
-                TemplateExpansionContext.Current.Compilation.AssertNotNull(),
-                TemplateExpansionContext.Current.SyntaxGenerationContext.ServiceProvider );
+                TemplateExpansionContext.Current.SyntaxGenerationContext );
         }
 
         public static SyntaxToken GetUniqueIdentifier( string hint )
@@ -326,7 +327,7 @@ namespace Metalama.Framework.Engine.Templating
                 o,
                 new SyntaxSerializationContext(
                     TemplateExpansionContext.Current.Compilation.AssertNotNull().GetCompilationModel(),
-                    TemplateExpansionContext.CurrentSyntaxGenerationContext.SyntaxGenerator ) );
+                    TemplateExpansionContext.CurrentSyntaxGenerationContext ) );
 
         public static T AddSimplifierAnnotations<T>( T node )
             where T : SyntaxNode
@@ -400,7 +401,7 @@ namespace Metalama.Framework.Engine.Templating
             switch ( expression )
             {
                 case IUserExpression dynamicExpression:
-                    return dynamicExpression.ToRunTimeExpression();
+                    return dynamicExpression.ToRunTimeTemplateExpression( TemplateExpansionContext.CurrentSyntaxGenerationContext );
 
                 default:
                     if ( TemplateExpansionContext.Current.SyntaxSerializationService.TrySerialize(
@@ -415,7 +416,7 @@ namespace Metalama.Framework.Engine.Templating
             }
         }
 
-        public static RuntimeExpression RuntimeExpression( ExpressionSyntax syntax, string? type = null )
+        public static RunTimeTemplateExpression RuntimeExpression( ExpressionSyntax syntax, string? type = null )
         {
             var syntaxGenerationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
@@ -423,7 +424,7 @@ namespace Metalama.Framework.Engine.Templating
                 ? (ITypeSymbol?) DocumentationCommentId.GetFirstSymbolForDeclarationId( type, syntaxGenerationContext.Compilation )
                 : null;
 
-            return new RuntimeExpression( syntax, expressionType, syntaxGenerationContext, false );
+            return new RunTimeTemplateExpression( syntax, expressionType, syntaxGenerationContext, false );
         }
 
         public static ExpressionSyntax SuppressNullableWarningExpression( ExpressionSyntax operand )

@@ -6,7 +6,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Templating.MetaModel;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -66,7 +66,7 @@ namespace Metalama.Framework.Engine.Transformations
                             expression = GenerateAwaitBufferAsync();
                         }
 
-                        return new UserExpression( expression, overriddenMethod.ReturnType, generationContext );
+                        return new UserExpression( expression, overriddenMethod.ReturnType );
                     }
 
                 case TemplateKind.Default when overriddenMethod.GetAsyncInfoImpl() is { IsAsync: true, IsAwaitableOrVoid: true } asyncInfo:
@@ -79,8 +79,7 @@ namespace Metalama.Framework.Engine.Transformations
                         return new UserExpression(
                             SyntaxFactory.ParenthesizedExpression( SyntaxFactory.AwaitExpression( invocationExpression ) )
                                 .WithAdditionalAnnotations( Simplifier.Annotation ),
-                            taskResultType,
-                            generationContext );
+                            taskResultType );
                     }
 
                 case TemplateKind.Async when overriddenMethod.GetIteratorInfoImpl() is
@@ -88,7 +87,7 @@ namespace Metalama.Framework.Engine.Transformations
                     {
                         var expression = GenerateAwaitBufferAsync();
 
-                        return new UserExpression( expression, overriddenMethod.ReturnType, generationContext );
+                        return new UserExpression( expression, overriddenMethod.ReturnType );
                     }
             }
 
@@ -96,8 +95,7 @@ namespace Metalama.Framework.Engine.Transformations
             // Generate: `BASE(ARGS)`
             return new UserExpression(
                 invocationExpression,
-                overriddenMethod.ReturnType,
-                generationContext );
+                overriddenMethod.ReturnType );
 
             ExpressionSyntax GenerateAwaitBufferAsync()
             {

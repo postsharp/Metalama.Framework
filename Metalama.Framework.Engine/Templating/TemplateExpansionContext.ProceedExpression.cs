@@ -5,7 +5,8 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Templating.MetaModel;
+using Metalama.Framework.Engine.Templating.Expressions;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 
 namespace Metalama.Framework.Engine.Templating
@@ -23,7 +24,21 @@ namespace Metalama.Framework.Engine.Templating
                 this._parent = parent;
             }
 
-            public RuntimeExpression ToRunTimeExpression()
+            public ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
+            {
+                this.Validate();
+
+                return this._parent._proceedExpression!.ToSyntax( syntaxGenerationContext );
+            }
+
+            public RunTimeTemplateExpression ToRunTimeTemplateExpression( SyntaxGenerationContext syntaxGenerationContext )
+            {
+                this.Validate();
+
+                return this._parent._proceedExpression!.ToRunTimeTemplateExpression( syntaxGenerationContext );
+            }
+
+            private void Validate()
             {
                 var targetMethod = this._parent.MetaApi.Target.Method;
 
@@ -44,8 +59,6 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     throw TemplatingDiagnosticDescriptors.CannotUseSpecificProceedInThisContext.CreateException( (this._methodName, targetMethod) );
                 }
-
-                return this._parent._proceedExpression!.ToRunTimeExpression();
             }
 
             public bool IsAssignable => false;

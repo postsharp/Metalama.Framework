@@ -34,4 +34,6 @@ internal interface ISyntaxBuilderImpl
     void AppendExpression( IExpression expression, StringBuilder stringBuilder );
 
     void AppendDynamic( object? expression, StringBuilder stringBuilder );
+
+    IExpression Cast( IExpression expression, IType targetType );
 }

@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Aspects;
+using System;
 using System.Text;
 
 namespace Metalama.Framework.Code.SyntaxBuilders;
@@ -133,4 +134,10 @@ public static class ExpressionFactory
     /// <seealso href="@templates"/>
     public static void Capture( dynamic? expression, out IExpression definedException )
         => definedException = SyntaxBuilder.CurrentImplementation.Expression( expression );
+
+    public static IExpression CastTo( this IExpression expression, IType targetType ) => SyntaxBuilder.CurrentImplementation.Cast( expression, targetType );
+
+    public static IExpression CastTo( this IExpression expression, Type targetType ) => expression.CastTo( TypeFactory.GetType( targetType ) );
+
+    public static IExpression CastTo<T>( this IExpression expression ) => expression.CastTo( TypeFactory.GetType( typeof(T) ) );
 }

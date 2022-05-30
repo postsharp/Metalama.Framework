@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -23,24 +24,24 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
                 this._parent = parent;
             }
 
-            public RuntimeExpression ToRunTimeExpression()
+            public ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
             {
-                var syntaxGenerationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
                 var syntaxGenerator = syntaxGenerationContext.SyntaxGenerator;
 
-                var array = (ExpressionSyntax) syntaxGenerator.ArrayCreationExpression(
+                return syntaxGenerator.ArrayCreationExpression(
                     syntaxGenerator.Type( SpecialType.System_Object ),
                     this._parent._parameters.Select(
                         p =>
                             p.RefKind.IsReadable()
                                 ? SyntaxFactory.IdentifierName( p.Name )
                                 : (SyntaxNode) syntaxGenerator.DefaultExpression( p.ParameterType.GetSymbol() ) ) );
+            }
 
-                return new RuntimeExpression(
-                    array,
+            public RunTimeTemplateExpression ToRunTimeTemplateExpression( SyntaxGenerationContext syntaxGenerationContext )
+                => new(
+                    this.ToSyntax( syntaxGenerationContext ),
                     this._parent.Compilation.Factory.GetTypeByReflectionType( typeof(object[]) ),
                     syntaxGenerationContext );
-            }
 
             public IType Type => this._parent.Compilation.Factory.GetTypeByReflectionType( typeof(object[]) );
 

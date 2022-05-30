@@ -4,10 +4,11 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Engine.CodeModel;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Linq;
 
-namespace Metalama.Framework.Engine.Templating.MetaModel
+namespace Metalama.Framework.Engine.Templating.Expressions
 {
     internal class ArrayUserExpression : IUserExpression
     {
@@ -22,20 +23,24 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             this.Type = this._itemType.ConstructArrayType();
         }
 
-        public RuntimeExpression ToRunTimeExpression()
+        public ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
         {
-            var syntaxGenerationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
-
-            var items = this._arrayBuilder.Items.Select( i => RuntimeExpression.FromValue( i, this.Type.Compilation, syntaxGenerationContext ).Syntax )
+            var items = this._arrayBuilder.Items.Select( i => RunTimeTemplateExpression.FromValue( i, this.Type.Compilation, syntaxGenerationContext ).Syntax )
                 .ToArray();
 
             var generator = syntaxGenerationContext.SyntaxGenerator;
 
-            var syntax = generator.ArrayCreationExpression(
+            return generator.ArrayCreationExpression(
                 generator.Type( this._itemType.GetSymbol() ),
                 items );
+        }
 
-            return new RuntimeExpression( syntax, this.Type, syntaxGenerationContext );
+        public RunTimeTemplateExpression ToRunTimeTemplateExpression( SyntaxGenerationContext syntaxGenerationContext )
+        {
+            return new RunTimeTemplateExpression(
+                this.ToSyntax( TemplateExpansionContext.CurrentSyntaxGenerationContext ),
+                this.Type,
+                TemplateExpansionContext.CurrentSyntaxGenerationContext );
         }
 
         public bool IsAssignable => false;

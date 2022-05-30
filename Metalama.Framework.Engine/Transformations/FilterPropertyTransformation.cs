@@ -24,6 +24,8 @@ internal class FilterPropertyTransformation : OverridePropertyBaseTransformation
         BlockSyntax? getterBody, setterBody;
 
         // Local function that executes the filter for one of the accessors.
+        var syntaxGenerationContext = context.SyntaxGenerationContext;
+
         bool TryExecuteFilters(
             IMethod? accessor,
             FilterDirection direction,
@@ -49,7 +51,7 @@ internal class FilterPropertyTransformation : OverridePropertyBaseTransformation
                     return false;
                 }
 
-                proceedExpression = this.CreateProceedDynamicExpression( contextCopy, accessor, TemplateKind.Default ).ToRunTimeExpression().Syntax;
+                proceedExpression = this.CreateProceedDynamicExpression( contextCopy, accessor, TemplateKind.Default ).ToSyntax( syntaxGenerationContext );
 
                 return true;
             }
@@ -120,12 +122,12 @@ internal class FilterPropertyTransformation : OverridePropertyBaseTransformation
 
         if ( this.OverriddenDeclaration.GetMethod != null && getterBody == null )
         {
-            getterBody = this.CreateIdentityAccessorBody( SyntaxKind.GetAccessorDeclaration, context.SyntaxGenerationContext );
+            getterBody = this.CreateIdentityAccessorBody( SyntaxKind.GetAccessorDeclaration, syntaxGenerationContext );
         }
 
         if ( this.OverriddenDeclaration.SetMethod != null && setterBody == null )
         {
-            setterBody = this.CreateIdentityAccessorBody( SyntaxKind.SetAccessorDeclaration, context.SyntaxGenerationContext );
+            setterBody = this.CreateIdentityAccessorBody( SyntaxKind.SetAccessorDeclaration, syntaxGenerationContext );
         }
 
         return this.GetIntroducedMembersImpl( context, getterBody, setterBody );

@@ -9,18 +9,21 @@ using System;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal sealed class SyntaxGenerationContext
+    public sealed class SyntaxGenerationContext
     {
-        public Compilation Compilation { get; }
+        // This should be used only for tests.
+        public static Compilation EmptyCompilation { get; } = CSharpCompilation.Create( "empty" );
 
-        public OurSyntaxGenerator SyntaxGenerator { get; }
+        internal Compilation Compilation { get; }
 
-        public IServiceProvider ServiceProvider { get; }
+        internal OurSyntaxGenerator SyntaxGenerator { get; }
 
-        public bool IsPartial { get; }
+        internal IServiceProvider ServiceProvider { get; }
+
+        internal bool IsPartial { get; }
 
         [Memo]
-        public ReflectionMapper ReflectionMapper => this.ServiceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( this.Compilation );
+        internal ReflectionMapper ReflectionMapper => this.ServiceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( this.Compilation );
 
         private SyntaxGenerationContext( IServiceProvider serviceProvider, Compilation compilation, OurSyntaxGenerator syntaxGenerator, bool isPartial )
         {
@@ -29,15 +32,6 @@ namespace Metalama.Framework.Engine.CodeModel
             this.SyntaxGenerator = syntaxGenerator;
             this.IsPartial = isPartial;
         }
-
-        public static SyntaxGenerationContext CreateDefault( IServiceProvider serviceProvider, Compilation compilation, bool isPartial = false )
-            => new(
-                serviceProvider,
-                compilation,
-                (compilation.Options.NullableContextOptions & NullableContextOptions.Annotations) != 0
-                    ? OurSyntaxGenerator.Default
-                    : OurSyntaxGenerator.NullOblivious,
-                isPartial );
 
         public static SyntaxGenerationContext Create( IServiceProvider serviceProvider, Compilation compilation, SyntaxNode node, bool isPartial = false )
             => Create( serviceProvider, compilation, node.SyntaxTree, node.SpanStart, isPartial );
@@ -51,16 +45,30 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             var semanticModel = compilation.GetSemanticModel( syntaxTree );
             var nullableContext = semanticModel.GetNullableContext( position );
+            var isNullOblivious = (nullableContext & NullableContext.AnnotationsEnabled) != 0;
+
+            return Create( serviceProvider, compilation, isPartial, isNullOblivious );
+        }
+
+        public static SyntaxGenerationContext Create(
+            IServiceProvider serviceProvider,
+            Compilation compilation,
+            bool isPartial = false,
+            bool? isNullOblivious = null )
+        {
+            if ( isNullOblivious == null )
+            {
+                isNullOblivious = (((CSharpCompilation) compilation).Options.NullableContextOptions & NullableContextOptions.Annotations) != 0;
+            }
 
             return new SyntaxGenerationContext(
                 serviceProvider,
                 compilation,
-                (nullableContext & NullableContext.AnnotationsEnabled) != 0 ? OurSyntaxGenerator.Default : OurSyntaxGenerator.NullOblivious,
+                isNullOblivious.Value ? OurSyntaxGenerator.Default : OurSyntaxGenerator.NullOblivious,
                 isPartial );
         }
 
-        public static SyntaxGenerationContext CreateDefault( IServiceProvider serviceProvider )
-            => CreateDefault( serviceProvider, CSharpCompilation.Create( "empty" ) );
+        public static SyntaxGenerationContext Create( IServiceProvider serviceProvider ) => Create( serviceProvider, EmptyCompilation );
 
         public override string ToString() => $"SyntaxGenerator Compilation={this.Compilation.AssemblyName}, NullAware={this.SyntaxGenerator.IsNullAware}";
     }

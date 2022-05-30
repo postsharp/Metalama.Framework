@@ -4,13 +4,15 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Advised;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Reflection;
 
 namespace Metalama.Framework.Engine.Templating.MetaModel
 {
-    internal class AdvisedParameter : AdvisedDeclaration<IParameterImpl>, IAdvisedParameter
+    internal class AdvisedParameter : AdvisedDeclaration<IParameterImpl>, IAdvisedParameter, IUserExpression
     {
         public AdvisedParameter( IParameter p ) : base( (IParameterImpl) p ) { }
 
@@ -44,12 +46,19 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             set => throw new NotSupportedException();
         }
 
-        private IExpression ToExpression()
-            => new UserExpression(
+        private UserExpression ToExpression()
+            => new(
                 SyntaxFactory.IdentifierName( this.Underlying.Name ),
                 this.Underlying.Type,
-                TemplateExpansionContext.CurrentSyntaxGenerationContext,
                 isReferenceable: true,
                 isAssignable: true );
+
+        public ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext ) => SyntaxFactory.IdentifierName( this.Underlying.Name );
+
+        public RunTimeTemplateExpression ToRunTimeTemplateExpression( SyntaxGenerationContext syntaxGenerationContext )
+            => new(
+                this.ToSyntax( syntaxGenerationContext ),
+                this.Type,
+                syntaxGenerationContext );
     }
 }

@@ -5,7 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Templating;
-using Metalama.Framework.Engine.Templating.MetaModel;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
         protected virtual void AssertNoArgument() { }
 
         private ExpressionSyntax CreatePropertyExpression(
-            RuntimeExpression instance,
+            RunTimeTemplateExpression instance,
             AspectReferenceTargetKind targetKind,
             SyntaxGenerationContext generationContext )
         {
@@ -70,11 +70,10 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
             return new UserExpression(
                 this.CreatePropertyExpression(
-                    RuntimeExpression.FromValue( instance, this.Compilation, generationContext ),
+                    RunTimeTemplateExpression.FromValue( instance, this.Compilation, generationContext ),
                     AspectReferenceTargetKind.PropertyGetAccessor,
                     generationContext ),
                 this._invokerOperator == InvokerOperator.Default ? this.Member.Type : this.Member.Type.ConstructNullable(),
-                generationContext,
                 isReferenceable: this.Member is Field,
                 isAssignable: this.Member.Writeability != Writeability.None );
         }
@@ -89,16 +88,16 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             var generationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
             var propertyAccess = this.CreatePropertyExpression(
-                RuntimeExpression.FromValue( instance, this.Compilation, generationContext ),
+                RunTimeTemplateExpression.FromValue( instance, this.Compilation, generationContext ),
                 AspectReferenceTargetKind.PropertySetAccessor,
                 generationContext );
 
             var expression = AssignmentExpression(
                 SyntaxKind.SimpleAssignmentExpression,
                 propertyAccess,
-                RuntimeExpression.GetSyntaxFromValue( value, this.Compilation, generationContext ) );
+                RunTimeTemplateExpression.GetSyntaxFromValue( value, this.Compilation, generationContext ) );
 
-            return new UserExpression( expression, this.Member.Type, generationContext );
+            return new UserExpression( expression, this.Member.Type );
         }
     }
 }

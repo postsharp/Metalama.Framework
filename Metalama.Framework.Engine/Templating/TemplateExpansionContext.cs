@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.SyntaxSerialization;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
@@ -83,7 +84,7 @@ namespace Metalama.Framework.Engine.Templating
             this.TemplateInstance = templateInstance;
             this.MetaApi = metaApi;
             this.SyntaxSerializationService = syntaxSerializationService;
-            this.SyntaxSerializationContext = new SyntaxSerializationContext( compilation, syntaxGenerationContext.SyntaxGenerator );
+            this.SyntaxSerializationContext = new SyntaxSerializationContext( compilation, syntaxGenerationContext );
             this.SyntaxGenerationContext = syntaxGenerationContext;
             this.LexicalScope = lexicalScope;
             this._proceedExpression = proceedExpression;
@@ -190,7 +191,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 var compilation = returnType.GetCompilationModel().RoslynCompilation;
 
-                if ( RuntimeExpression.TryFindExpressionType( returnExpression, compilation, out var expressionType ) &&
+                if ( RunTimeTemplateExpression.TryFindExpressionType( returnExpression, compilation, out var expressionType ) &&
                      compilation.HasImplicitConversion( expressionType, returnType.GetSymbol() ) )
                 {
                     // No need to emit a cast.
@@ -402,7 +403,7 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     return
                         Block(
-                                ExpressionStatement( returnExpression.ToRunTimeExpression() ),
+                                ExpressionStatement( returnExpression.ToRunTimeTemplateExpression( this.SyntaxGenerationContext ) ),
                                 ReturnStatement().WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation ) )
                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                 }
@@ -421,7 +422,7 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     return
                         Block(
-                                ExpressionStatement( AwaitExpression( returnExpression.ToRunTimeExpression() ) ),
+                                ExpressionStatement( AwaitExpression( returnExpression.ToRunTimeTemplateExpression( this.SyntaxGenerationContext ) ) ),
                                 ReturnStatement().WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation ) )
                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                 }
@@ -433,7 +434,7 @@ namespace Metalama.Framework.Engine.Templating
             }
             else
             {
-                return this.CreateReturnStatement( returnExpression.ToRunTimeExpression(), awaitResult );
+                return this.CreateReturnStatement( returnExpression.ToRunTimeTemplateExpression( this.SyntaxGenerationContext ), awaitResult );
             }
         }
 

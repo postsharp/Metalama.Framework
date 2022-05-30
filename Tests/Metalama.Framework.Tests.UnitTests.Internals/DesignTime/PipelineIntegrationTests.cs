@@ -311,7 +311,7 @@ Target.cs:
 
             var serviceProvider = ServiceProviderFactory.GetServiceProvider( projectOptions.PathOptions )
                 .WithService( projectOptions )
-                .WithProjectScopedServices( compilation.References );
+                .WithProjectScopedServices( compilation );
 
             var compileTimeAspectPipeline = new CompileTimeAspectPipeline( serviceProvider, true, domain );
             DiagnosticList compileDiagnostics = new();

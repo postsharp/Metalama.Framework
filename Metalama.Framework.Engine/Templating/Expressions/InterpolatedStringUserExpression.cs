@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using System.Text;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 
-namespace Metalama.Framework.Engine.Templating.MetaModel
+namespace Metalama.Framework.Engine.Templating.Expressions
 {
     internal class InterpolatedStringUserExpression : IUserExpression
     {
@@ -24,9 +24,8 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             this.Type = compilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.String );
         }
 
-        public RuntimeExpression ToRunTimeExpression()
+        public ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
         {
-            var syntaxGenerationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
             List<InterpolatedStringContentSyntax> contents = new( this._builder.Items.Count );
 
             var textAccumulator = new StringBuilder();
@@ -63,7 +62,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
                         FlushTextToken();
 
-                        var tokenSyntax = RuntimeExpression.FromValue( token.Expression, this.Type.Compilation, syntaxGenerationContext ).Syntax;
+                        var tokenSyntax = RunTimeTemplateExpression.FromValue( token.Expression, this.Type.Compilation, syntaxGenerationContext ).Syntax;
 
                         if ( tokenSyntax is LiteralExpressionSyntax literal && literal.Token.IsKind( SyntaxKind.StringLiteralToken ) )
                         {
@@ -83,13 +82,19 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
             FlushTextToken();
 
-            var syntax = TemplateSyntaxFactory.RenderInterpolatedString(
+            return TemplateSyntaxFactory.RenderInterpolatedString(
                 SyntaxFactory.InterpolatedStringExpression(
                     SyntaxFactory.Token( SyntaxKind.InterpolatedStringStartToken ),
                     SyntaxFactory.List( contents ),
                     SyntaxFactory.Token( SyntaxKind.InterpolatedStringEndToken ) ) );
+        }
 
-            return new RuntimeExpression( syntax, this.Type, syntaxGenerationContext );
+        public RunTimeTemplateExpression ToRunTimeTemplateExpression( SyntaxGenerationContext syntaxGenerationContext )
+        {
+            return new RunTimeTemplateExpression(
+                this.ToSyntax( TemplateExpansionContext.CurrentSyntaxGenerationContext ),
+                this.Type,
+                TemplateExpansionContext.CurrentSyntaxGenerationContext );
         }
 
         public bool IsAssignable => false;
