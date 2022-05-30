@@ -133,7 +133,7 @@ public static class ExpressionFactory
     /// type of the <c>out</c> variable explicitly, as <c>out var</c> does not work when another argument is dynamic.</param>
     /// <seealso href="@templates"/>
     public static void Capture( dynamic? expression, out IExpression definedException )
-        => definedException = SyntaxBuilder.CurrentImplementation.Expression( expression );
+        => definedException = SyntaxBuilder.CurrentImplementation.Capture( expression );
 
     /// <summary>
     /// Returns an expression obtained by casting another expression to a type given as an <see cref="IType"/>.

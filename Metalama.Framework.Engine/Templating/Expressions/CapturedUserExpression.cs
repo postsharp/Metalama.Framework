@@ -8,12 +8,12 @@ using System;
 
 namespace Metalama.Framework.Engine.Templating.Expressions;
 
-internal sealed class ParsedUserExpression : IUserExpression
+internal sealed class CapturedUserExpression : IUserExpression
 {
     private readonly ICompilation _compilation;
     private readonly object? _expression;
 
-    public ParsedUserExpression( ICompilation compilation, object? expression )
+    public CapturedUserExpression( ICompilation compilation, object? expression )
     {
         this._compilation = compilation;
         this._expression = expression;

@@ -13,7 +13,7 @@ internal interface ISyntaxBuilderImpl
 {
     ICompilation Compilation { get; }
 
-    IExpression Expression( object? expression );
+    IExpression Capture( object? expression );
 
     IExpression BuildArray( ArrayBuilder arrayBuilder );
 

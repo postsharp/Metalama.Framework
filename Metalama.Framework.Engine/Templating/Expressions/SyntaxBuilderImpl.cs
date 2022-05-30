@@ -54,7 +54,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
     [Obfuscation( Exclude = true )]
     public IProject Project => this.Compilation.Project;
 
-    public IExpression Expression( object? expression ) => new ParsedUserExpression( this.Compilation, expression );
+    public IExpression Capture( object? expression ) => new CapturedUserExpression( this.Compilation, expression );
 
     public IExpression BuildArray( ArrayBuilder arrayBuilder ) => new ArrayUserExpression( arrayBuilder );
 
