@@ -4,11 +4,10 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 
 namespace Metalama.Framework.Engine.Templating.Expressions;
 
-internal sealed class CapturedUserExpression : IUserExpression
+internal sealed class CapturedUserExpression : UserExpression
 {
     private readonly ICompilation _compilation;
     private readonly object? _expression;
@@ -19,19 +18,8 @@ internal sealed class CapturedUserExpression : IUserExpression
         this._expression = expression;
     }
 
-    public IType Type => ((ICompilationInternal) this._compilation).TypeFactory.GetSpecialType( SpecialType.Object );
+    public override IType Type => ((ICompilationInternal) this._compilation).TypeFactory.GetSpecialType( SpecialType.Object );
 
-    public bool IsAssignable => true;
-
-    public object? Value
-    {
-        get => this;
-        set => throw new NotSupportedException();
-    }
-
-    public ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
+    public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
         => RunTimeTemplateExpression.FromValue( this._expression, this._compilation, syntaxGenerationContext ).Syntax;
-
-    public RunTimeTemplateExpression ToRunTimeTemplateExpression( SyntaxGenerationContext syntaxGenerationContext )
-        => RunTimeTemplateExpression.FromValue( this._expression, this._compilation, syntaxGenerationContext );
 }

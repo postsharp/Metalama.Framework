@@ -7,14 +7,13 @@ using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Collections.Generic;
 using System.Text;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Templating.Expressions
 {
-    internal class InterpolatedStringUserExpression : IUserExpression
+    internal class InterpolatedStringUserExpression : UserExpression
     {
         private readonly InterpolatedStringBuilder _builder;
 
@@ -24,7 +23,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this.Type = compilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.String );
         }
 
-        public ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
+        public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
         {
             List<InterpolatedStringContentSyntax> contents = new( this._builder.Items.Count );
 
@@ -89,18 +88,6 @@ namespace Metalama.Framework.Engine.Templating.Expressions
                     SyntaxFactory.Token( SyntaxKind.InterpolatedStringEndToken ) ) );
         }
 
-        public RunTimeTemplateExpression ToRunTimeTemplateExpression( SyntaxGenerationContext syntaxGenerationContext )
-        {
-            return new RunTimeTemplateExpression(
-                this.ToSyntax( TemplateExpansionContext.CurrentSyntaxGenerationContext ),
-                this.Type,
-                TemplateExpansionContext.CurrentSyntaxGenerationContext );
-        }
-
-        public bool IsAssignable => false;
-
-        public IType Type { get; set; }
-
-        object? IExpression.Value { get => this; set => throw new NotSupportedException(); }
+        public override IType Type { get; }
     }
 }

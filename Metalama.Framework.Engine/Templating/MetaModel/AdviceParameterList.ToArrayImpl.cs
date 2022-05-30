@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Linq;
 using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 
@@ -15,7 +14,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 {
     internal partial class AdvisedParameterList
     {
-        private class ToArrayImpl : IUserExpression
+        private class ToArrayImpl : UserExpression
         {
             private readonly AdvisedParameterList _parent;
 
@@ -24,7 +23,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
                 this._parent = parent;
             }
 
-            public ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
+            public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
             {
                 var syntaxGenerator = syntaxGenerationContext.SyntaxGenerator;
 
@@ -37,17 +36,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
                                 : (SyntaxNode) syntaxGenerator.DefaultExpression( p.ParameterType.GetSymbol() ) ) );
             }
 
-            public RunTimeTemplateExpression ToRunTimeTemplateExpression( SyntaxGenerationContext syntaxGenerationContext )
-                => new(
-                    this.ToSyntax( syntaxGenerationContext ),
-                    this._parent.Compilation.Factory.GetTypeByReflectionType( typeof(object[]) ),
-                    syntaxGenerationContext );
-
-            public IType Type => this._parent.Compilation.Factory.GetTypeByReflectionType( typeof(object[]) );
-
-            bool IExpression.IsAssignable => false;
-
-            object? IExpression.Value { get => this; set => throw new NotSupportedException(); }
+            public override IType Type => this._parent.Compilation.Factory.GetTypeByReflectionType( typeof(object[]) );
         }
     }
 }

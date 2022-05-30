@@ -249,7 +249,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
         {
             var declarationFactory = compilation.GetCompilationModel().Factory;
 
-            return new UserExpression(
+            return new BuiltUserExpression(
                 this.Syntax,
                 this.ExpressionType != null ? declarationFactory.GetIType( this.ExpressionType ) : declarationFactory.GetSpecialType( SpecialType.Object ),
                 isReferenceable: this.IsReferenceable,

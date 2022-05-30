@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             {
                 var generationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
-                return new UserExpression(
+                return new BuiltUserExpression(
                     generationContext.SyntaxGenerator.DefaultExpression( this.ReturnType.GetSymbol() ),
                     this.ReturnType );
             }

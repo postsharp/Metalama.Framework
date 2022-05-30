@@ -41,7 +41,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public MemberInfo ToMemberInfo() => this.Underlying.ToMemberInfo();
 
-        public IUserReceiver This
+        public UserReceiver This
             => new ThisInstanceUserReceiver(
                 this.DeclaringType,
                 new AspectReferenceSpecification( UserCodeExecutionContext.Current.AspectLayerId!.Value, AspectReferenceOrder.Base ) );

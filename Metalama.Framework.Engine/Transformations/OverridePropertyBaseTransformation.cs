@@ -79,7 +79,7 @@ internal abstract class OverridePropertyBaseTransformation : OverrideMemberTrans
         return overrides;
     }
 
-    protected UserExpression CreateProceedDynamicExpression( in MemberIntroductionContext context, IMethod accessor, TemplateKind templateKind )
+    protected BuiltUserExpression CreateProceedDynamicExpression( in MemberIntroductionContext context, IMethod accessor, TemplateKind templateKind )
         => accessor.MethodKind switch
         {
             MethodKind.PropertyGet => ProceedHelper.CreateProceedDynamicExpression(
@@ -87,7 +87,7 @@ internal abstract class OverridePropertyBaseTransformation : OverrideMemberTrans
                 this.CreateProceedGetExpression( context.SyntaxGenerationContext ),
                 templateKind,
                 this.OverriddenDeclaration.GetMethod.AssertNotNull() ),
-            MethodKind.PropertySet => new UserExpression(
+            MethodKind.PropertySet => new BuiltUserExpression(
                 this.CreateProceedSetExpression( context.SyntaxGenerationContext ),
                 this.OverriddenDeclaration.Compilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.Void ) ),
             _ => throw new AssertionFailedException()

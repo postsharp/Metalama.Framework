@@ -11,10 +11,10 @@ using System;
 namespace Metalama.Framework.Engine.Templating.Expressions
 {
     /// <summary>
-    /// An implementation of <see cref="IUserExpression"/> that represents a <see cref="INamedType"/> and allows to access
+    /// An implementation of <see cref="UserExpression"/> that represents a <see cref="INamedType"/> and allows to access
     /// its static members dynamically.
     /// </summary>
-    internal class ThisTypeUserReceiver : IUserReceiver
+    internal class ThisTypeUserReceiver : UserReceiver
     {
         private readonly INamedType _type;
         private readonly AspectReferenceSpecification _linkerAnnotation;
@@ -25,15 +25,14 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this._linkerAnnotation = linkerAnnotation;
         }
 
-        public ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext ) => throw new NotSupportedException();
+        public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext ) => throw new NotSupportedException();
 
-        public RunTimeTemplateExpression ToRunTimeTemplateExpression( SyntaxGenerationContext syntaxGenerationContext ) => throw new NotSupportedException();
+        public override RunTimeTemplateExpression ToRunTimeTemplateExpression( SyntaxGenerationContext syntaxGenerationContext )
+            => throw new NotSupportedException();
 
-        public bool IsAssignable => false;
+        public override IType Type => this._type;
 
-        public IType Type => this._type;
-
-        public RunTimeTemplateExpression CreateMemberAccessExpression( string member )
+        public override RunTimeTemplateExpression CreateMemberAccessExpression( string member )
             => new(
                 SyntaxFactory.MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
@@ -41,7 +40,5 @@ namespace Metalama.Framework.Engine.Templating.Expressions
                         SyntaxFactory.IdentifierName( SyntaxFactory.Identifier( member ) ) )
                     .WithAspectReferenceAnnotation( this._linkerAnnotation ),
                 TemplateExpansionContext.CurrentSyntaxGenerationContext );
-
-        object? IExpression.Value { get => this; set => throw new NotSupportedException(); }
     }
 }

@@ -6,15 +6,14 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Templating.Expressions
 {
     /// <summary>
-    /// An implementation of <see cref="IUserExpression"/> that represents <c>this</c> and allows to access its instance members dynamically.
+    /// An implementation of <see cref="UserExpression"/> that represents <c>this</c> and allows to access its instance members dynamically.
     /// </summary>
-    internal class ThisInstanceUserReceiver : IUserReceiver
+    internal class ThisInstanceUserReceiver : UserReceiver
     {
         private readonly INamedType _type;
         private readonly AspectReferenceSpecification _linkerAnnotation;
@@ -25,23 +24,18 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this._linkerAnnotation = linkerAnnotation;
         }
 
-        public ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext ) => ThisExpression();
+        public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext ) => ThisExpression();
 
-        public RunTimeTemplateExpression ToRunTimeTemplateExpression( SyntaxGenerationContext syntaxGenerationContext )
-            => new( ThisExpression(), this._type, syntaxGenerationContext );
+        public override bool IsAssignable => this._type.TypeKind == TypeKind.Struct;
 
-        public bool IsAssignable => this._type.TypeKind == TypeKind.Struct;
+        public override IType Type => this._type;
 
-        public IType Type => this._type;
-
-        RunTimeTemplateExpression IUserReceiver.CreateMemberAccessExpression( string member )
+        public override RunTimeTemplateExpression CreateMemberAccessExpression( string member )
             => new(
                 MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( Identifier( member ) ) )
                     .WithAspectReferenceAnnotation( this._linkerAnnotation ),
                 this._type,
                 TemplateExpansionContext.CurrentSyntaxGenerationContext );
-
-        object? IExpression.Value { get => this; set => throw new NotSupportedException(); }
 
         // TODO: Add linker annotations.
     }

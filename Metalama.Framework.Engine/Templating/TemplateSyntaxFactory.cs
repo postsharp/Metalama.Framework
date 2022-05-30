@@ -303,7 +303,7 @@ namespace Metalama.Framework.Engine.Templating
 
         public static RunTimeTemplateExpression? DynamicMemberAccessExpression( IUserExpression userExpression, string member )
         {
-            if ( userExpression is IUserReceiver dynamicMemberAccess )
+            if ( userExpression is UserReceiver dynamicMemberAccess )
             {
                 return dynamicMemberAccess.CreateMemberAccessExpression( member );
             }

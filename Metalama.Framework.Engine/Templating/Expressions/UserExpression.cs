@@ -9,34 +9,26 @@ using System;
 namespace Metalama.Framework.Engine.Templating.Expressions
 {
     /// <summary>
-    /// An implementation of <see cref="IUserExpression"/> where the syntax is known upfront.
+    /// Adds implementation methods to the public <see cref="IExpression"/> interface. 
     /// </summary>
-    internal class UserExpression : IUserExpression
+    internal abstract class UserExpression : IUserExpression
     {
-        private readonly ExpressionSyntax _expression;
-        private readonly bool _isReferenceable;
+        public abstract ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext );
 
-        public UserExpression(
-            ExpressionSyntax expression,
-            IType type,
-            bool isReferenceable = false,
-            bool isAssignable = false )
+        /// <summary>
+        /// Creates a <see cref="RunTimeTemplateExpression"/> for the given <see cref="SyntaxGenerationContext"/>.
+        /// </summary>
+        public virtual RunTimeTemplateExpression ToRunTimeTemplateExpression( SyntaxGenerationContext syntaxGenerationContext )
+            => new( this.ToSyntax( syntaxGenerationContext ), this.Type, syntaxGenerationContext );
+
+        public abstract IType Type { get; }
+
+        public virtual bool IsAssignable => false;
+
+        public object? Value
         {
-            this._expression = expression;
-            this.Type = type;
-            this.IsAssignable = isAssignable;
-            this._isReferenceable = isReferenceable;
+            get => this;
+            set => throw new NotSupportedException();
         }
-
-        public ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext ) => this._expression;
-
-        public RunTimeTemplateExpression ToRunTimeTemplateExpression( SyntaxGenerationContext syntaxGenerationContext )
-            => new( this._expression, this.Type, syntaxGenerationContext, this._isReferenceable );
-
-        public IType Type { get; }
-
-        public bool IsAssignable { get; }
-
-        object? IExpression.Value { get => this; set => throw new NotSupportedException(); }
     }
 }

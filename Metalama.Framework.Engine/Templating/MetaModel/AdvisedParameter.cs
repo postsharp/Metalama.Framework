@@ -46,7 +46,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             set => throw new NotSupportedException();
         }
 
-        private UserExpression ToExpression()
+        private BuiltUserExpression ToExpression()
             => new(
                 SyntaxFactory.IdentifierName( this.Underlying.Name ),
                 this.Underlying.Type,

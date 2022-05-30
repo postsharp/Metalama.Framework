@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.Templating
 {
     internal partial class TemplateExpansionContext
     {
-        private class ProceedUserExpression : IUserExpression
+        private class ProceedUserExpression : UserExpression
         {
             private readonly TemplateExpansionContext _parent;
             private readonly string _methodName;
@@ -24,14 +24,14 @@ namespace Metalama.Framework.Engine.Templating
                 this._parent = parent;
             }
 
-            public ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
+            public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
             {
                 this.Validate();
 
                 return this._parent._proceedExpression!.ToSyntax( syntaxGenerationContext );
             }
 
-            public RunTimeTemplateExpression ToRunTimeTemplateExpression( SyntaxGenerationContext syntaxGenerationContext )
+            public override RunTimeTemplateExpression ToRunTimeTemplateExpression( SyntaxGenerationContext syntaxGenerationContext )
             {
                 this.Validate();
 
@@ -61,11 +61,7 @@ namespace Metalama.Framework.Engine.Templating
                 }
             }
 
-            public bool IsAssignable => false;
-
-            public IType Type => this._parent._proceedExpression!.Type;
-
-            object? IExpression.Value { get => this; set => throw new NotSupportedException(); }
+            public override IType Type => this._parent._proceedExpression!.Type;
         }
     }
 }

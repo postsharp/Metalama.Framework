@@ -313,7 +313,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             var syntaxGenerationContext = SyntaxGenerationContext.Create( serviceProvider, compilation.RoslynCompilation );
 
             var proceedExpression =
-                new UserExpression(
+                new BuiltUserExpression(
                     GetProceedInvocation( targetMethod ),
                     targetMethod.ReturnType );
 

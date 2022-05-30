@@ -7,12 +7,12 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace Metalama.Framework.Engine.Templating.Expressions
 {
     /// <summary>
-    /// An <see cref="IUserExpression"/> that can be always be used in a <see cref="MemberAccessExpressionSyntax"/>,
+    /// An <see cref="UserExpression"/> that can be always be used in a <see cref="MemberAccessExpressionSyntax"/>,
     /// but not necessarily as a value itself. This is used to represent <see cref="meta.This"/>. The value represents the current value
     /// or the current type and can be used to allow access to instance or static members.
     /// </summary>
-    internal interface IUserReceiver : IUserExpression
+    internal abstract class UserReceiver : UserExpression
     {
-        RunTimeTemplateExpression CreateMemberAccessExpression( string member );
+        public abstract RunTimeTemplateExpression CreateMemberAccessExpression( string member );
     }
 }

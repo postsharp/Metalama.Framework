@@ -65,7 +65,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
     {
         var expression = SyntaxFactory.ParseExpression( code ).WithAdditionalAnnotations( Formatter.Annotation );
 
-        return new UserExpression( expression, this._compilation.Factory.GetSpecialType( SpecialType.Object ) );
+        return new BuiltUserExpression( expression, this._compilation.Factory.GetSpecialType( SpecialType.Object ) );
     }
 
     public IStatement ParseStatement( string code )
@@ -131,7 +131,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
         type = this._compilation.Factory.GetSpecialType( specialType );
 
-        return new UserExpression( expression, type );
+        return new BuiltUserExpression( expression, type );
     }
 
     public void AppendTypeName( IType type, StringBuilder stringBuilder )

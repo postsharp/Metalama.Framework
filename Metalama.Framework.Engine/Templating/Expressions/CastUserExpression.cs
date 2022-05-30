@@ -7,11 +7,10 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Simplification;
-using System;
 
 namespace Metalama.Framework.Engine.Templating.Expressions
 {
-    internal class CastUserExpression : IUserExpression
+    internal class CastUserExpression : UserExpression
     {
         private readonly object? _value;
 
@@ -21,7 +20,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this._value = value;
         }
 
-        public ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
+        public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
         {
             var valueSyntax = this._value switch
             {
@@ -35,18 +34,6 @@ namespace Metalama.Framework.Engine.Templating.Expressions
                 .WithAdditionalAnnotations( Simplifier.Annotation );
         }
 
-        public RunTimeTemplateExpression ToRunTimeTemplateExpression( SyntaxGenerationContext syntaxGenerationContext )
-        {
-            return new RunTimeTemplateExpression(
-                this.ToSyntax( syntaxGenerationContext ),
-                this.Type,
-                syntaxGenerationContext );
-        }
-
-        public bool IsAssignable => false;
-
-        public IType Type { get; }
-
-        object? IExpression.Value { get => this; set => throw new NotSupportedException(); }
+        public override IType Type { get; }
     }
 }

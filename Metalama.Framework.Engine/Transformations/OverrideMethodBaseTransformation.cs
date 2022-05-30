@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.Transformations
         protected OverrideMethodBaseTransformation( Advice advice, IMethod targetMethod, IObjectReader tags )
             : base( advice, targetMethod, tags ) { }
 
-        protected UserExpression CreateProceedExpression( in MemberIntroductionContext context, TemplateKind templateKind )
+        protected BuiltUserExpression CreateProceedExpression( in MemberIntroductionContext context, TemplateKind templateKind )
         {
             return ProceedHelper.CreateProceedDynamicExpression(
                 context.SyntaxGenerationContext,

@@ -68,7 +68,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
         {
             var generationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
-            return new UserExpression(
+            return new BuiltUserExpression(
                 this.CreatePropertyExpression(
                     RunTimeTemplateExpression.FromValue( instance, this.Compilation, generationContext ),
                     AspectReferenceTargetKind.PropertyGetAccessor,
@@ -97,7 +97,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 propertyAccess,
                 RunTimeTemplateExpression.GetSyntaxFromValue( value, this.Compilation, generationContext ) );
 
-            return new UserExpression( expression, this.Member.Type );
+            return new BuiltUserExpression( expression, this.Member.Type );
         }
     }
 }
