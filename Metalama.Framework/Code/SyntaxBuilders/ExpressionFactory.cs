@@ -135,9 +135,18 @@ public static class ExpressionFactory
     public static void Capture( dynamic? expression, out IExpression definedException )
         => definedException = SyntaxBuilder.CurrentImplementation.Expression( expression );
 
+    /// <summary>
+    /// Returns an expression obtained by casting another expression to a type given as an <see cref="IType"/>.
+    /// </summary>
     public static IExpression CastTo( this IExpression expression, IType targetType ) => SyntaxBuilder.CurrentImplementation.Cast( expression, targetType );
 
+    /// <summary>
+    /// Returns an expression obtained by casting another expression to a type given as a <see cref="Type"/>.
+    /// </summary>
     public static IExpression CastTo( this IExpression expression, Type targetType ) => expression.CastTo( TypeFactory.GetType( targetType ) );
 
+    /// <summary>
+    /// Returns an expression obtained by casting another expression to a type given as a generic parameter.
+    /// </summary>
     public static IExpression CastTo<T>( this IExpression expression ) => expression.CastTo( TypeFactory.GetType( typeof(T) ) );
 }
