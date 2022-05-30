@@ -5,14 +5,14 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Filters.Field_Out
 {
-    internal class NotNullAttribute : FilterAspect
+    internal class NotNullAttribute : ContractAspect
     {
-        public NotNullAttribute() : base( FilterDirection.Output )
+        public NotNullAttribute() : base( ContractDirection.Output )
         {
             
         }
         
-        public override void Filter( dynamic? value )
+        public override void Validate( dynamic? value )
         {
             if (value == null)
             {

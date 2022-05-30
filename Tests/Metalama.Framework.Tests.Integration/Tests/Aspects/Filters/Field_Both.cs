@@ -5,14 +5,14 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Filters.Field_Both
 {
-    internal class NotNullAttribute : FilterAspect
+    internal class NotNullAttribute : ContractAspect
     {
-        public NotNullAttribute() : base( FilterDirection.Both )
+        public NotNullAttribute() : base( ContractDirection.Both )
         {
             
         }
         
-        public override void Filter( dynamic? value )
+        public override void Validate( dynamic? value )
         {
             if (value == null)
             {

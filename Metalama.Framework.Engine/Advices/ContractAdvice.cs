@@ -18,9 +18,9 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Advices
 {
-    internal class FilterAdvice : Advice
+    internal class ContractAdvice : Advice
     {
-        public FilterAdvice( IAspectInstanceInternal aspect, TemplateClassInstance templateInstance, IDeclaration targetDeclaration, string? layerName )
+        public ContractAdvice( IAspectInstanceInternal aspect, TemplateClassInstance templateInstance, IDeclaration targetDeclaration, string? layerName )
             : base( aspect, templateInstance, targetDeclaration, layerName, ObjectReader.Empty ) { }
 
         public override void Initialize( IDiagnosticAdder diagnosticAdder ) { }
@@ -49,18 +49,18 @@ namespace Metalama.Framework.Engine.Advices
             }
         }
 
-        public List<Filter> Filters { get; } = new();
+        public List<Contract> Contracts { get; } = new();
 
         public bool TryExecuteTemplates(
             IDeclaration targetMember,
             in MemberIntroductionContext context,
-            FilterDirection direction,
+            ContractDirection direction,
             string? returnValueLocalName,
             [NotNullWhen( true )] out List<StatementSyntax>? statements )
         {
             statements = null;
 
-            foreach ( var filter in this.Filters )
+            foreach ( var filter in this.Contracts )
             {
                 if ( !filter.AppliesTo( direction ) )
                 {
@@ -73,8 +73,8 @@ namespace Metalama.Framework.Engine.Advices
                 {
                     IParameter { IsReturnParameter: true } => returnValueLocalName.AssertNotNull(),
                     IParameter parameter => parameter.Name,
-                    IFieldOrPropertyOrIndexer when direction == FilterDirection.Input => "value",
-                    IFieldOrPropertyOrIndexer when direction == FilterDirection.Output => returnValueLocalName.AssertNotNull(),
+                    IFieldOrPropertyOrIndexer when direction == ContractDirection.Input => "value",
+                    IFieldOrPropertyOrIndexer when direction == ContractDirection.Output => returnValueLocalName.AssertNotNull(),
                     _ => throw new AssertionFailedException()
                 };
 
@@ -92,9 +92,10 @@ namespace Metalama.Framework.Engine.Advices
 
                 var metaApi = MetaApi.ForDeclaration(
                     filterTarget,
-                    metaApiProperties );
+                    metaApiProperties,
+                    direction );
 
-                var boundTemplate = filter.Template.ForFilter( parameterName, filter.TemplateArguments );
+                var boundTemplate = filter.Template.ForContract( parameterName, filter.TemplateArguments );
 
                 var expansionContext = new TemplateExpansionContext(
                     this.TemplateInstance.Instance,

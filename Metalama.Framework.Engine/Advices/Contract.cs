@@ -8,22 +8,22 @@ using Metalama.Framework.Engine.CodeModel.References;
 
 namespace Metalama.Framework.Engine.Advices
 {
-    internal sealed class Filter
+    internal sealed class Contract
     {
         public Ref<IDeclaration> TargetDeclaration { get; }
 
         public TemplateMember<IMethod> Template { get; }
 
-        public FilterDirection Direction { get; }
+        public ContractDirection Direction { get; }
 
         public IObjectReader Tags { get; }
 
         public IObjectReader TemplateArguments { get; }
 
-        public Filter(
+        public Contract(
             IDeclaration targetDeclaration,
             TemplateMember<IMethod> template,
-            FilterDirection direction,
+            ContractDirection direction,
             IObjectReader tags,
             IObjectReader templateArguments )
         {
@@ -33,15 +33,15 @@ namespace Metalama.Framework.Engine.Advices
             this.TemplateArguments = templateArguments;
 
             // Resolve the default value before storing the direction.
-            if ( direction == FilterDirection.Default )
+            if ( direction == ContractDirection.Default )
             {
                 this.Direction = targetDeclaration switch
                 {
-                    IParameter { IsReturnParameter: true } => FilterDirection.Output,
-                    IParameter { RefKind: RefKind.Out } => FilterDirection.Output,
-                    IParameter => FilterDirection.Input,
-                    IFieldOrProperty { Writeability: Writeability.None } => FilterDirection.Output,
-                    IFieldOrProperty => FilterDirection.Input,
+                    IParameter { IsReturnParameter: true } => ContractDirection.Output,
+                    IParameter { RefKind: RefKind.Out } => ContractDirection.Output,
+                    IParameter => ContractDirection.Input,
+                    IFieldOrProperty { Writeability: Writeability.None } => ContractDirection.Output,
+                    IFieldOrProperty => ContractDirection.Input,
                     _ => throw new AssertionFailedException()
                 };
             }
@@ -51,9 +51,9 @@ namespace Metalama.Framework.Engine.Advices
             }
         }
 
-        public bool AppliesTo( FilterDirection direction )
+        public bool AppliesTo( ContractDirection direction )
         {
-            return this.Direction == direction || this.Direction == FilterDirection.Both;
+            return this.Direction == direction || this.Direction == ContractDirection.Both;
         }
     }
 }

@@ -7,7 +7,7 @@ namespace Metalama.Framework.Aspects;
 /// Directions of the data flow to which the filter applies.
 /// </summary>
 [RunTimeOrCompileTime]
-public enum FilterDirection
+public enum ContractDirection
 {
     /// <summary>
     /// For all parameters except <c>out</c> parameters and read-only properties or indexers, equivalent to <see cref="Input"/>. Otherwise, equivalent to <see cref="Output"/>. 
