@@ -690,7 +690,8 @@ namespace Metalama.Framework.Engine.Templating
 
             // Cast to dynamic expressions.
             if ( transformationKind != TransformationKind.Transform &&
-                 this._syntaxTreeAnnotationMap.GetExpressionType( node.Expression ) is IDynamicTypeSymbol )
+                 this._syntaxTreeAnnotationMap.GetExpressionType( node.Expression ) is IDynamicTypeSymbol &&
+                 !this._templateMemberClassifier.IsTemplateParameter( node.Expression ) )
             {
                 return InvocationExpression(
                     this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.DynamicMemberAccessExpression) ),
