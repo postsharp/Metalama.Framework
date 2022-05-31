@@ -5,6 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -44,8 +45,10 @@ class TargetCode
 
             var compilation = testContext.CreateCompilationModel( code );
 
+            var syntaxGenerationContext = SyntaxGenerationContext.Create( serviceProvider, compilation.RoslynCompilation );
+
             using ( TemplateExpansionContext.WithTestingContext(
-                       SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ),
+                       syntaxGenerationContext,
                        serviceProvider ) )
             {
                 var type = compilation.Types.Single();
@@ -56,20 +59,20 @@ class TargetCode
                 // Test normal case.
                 AssertEx.DynamicEquals(
                     toString.Invokers.Final.Invoke(
-                        new RuntimeExpression( generator.ThisExpression(), compilation, serviceProvider ),
-                        new RuntimeExpression( generator.LiteralExpression( "x" ), compilation, serviceProvider ) ),
+                        new RunTimeTemplateExpression( generator.ThisExpression(), syntaxGenerationContext ),
+                        new RunTimeTemplateExpression( generator.LiteralExpression( "x" ), syntaxGenerationContext ) ),
                     @"((global::TargetCode)this).ToString((global::System.String)""x"")" );
 
                 AssertEx.DynamicEquals(
                     toString.Invokers.ConditionalFinal.Invoke(
-                        new RuntimeExpression( generator.IdentifierName( "a" ), compilation, serviceProvider ),
-                        new RuntimeExpression( generator.LiteralExpression( "x" ), compilation, serviceProvider ) ),
+                        new RunTimeTemplateExpression( generator.IdentifierName( "a" ), syntaxGenerationContext ),
+                        new RunTimeTemplateExpression( generator.LiteralExpression( "x" ), syntaxGenerationContext ) ),
                     @"((global::TargetCode)a)?.ToString((global::System.String)""x"")" );
 
                 AssertEx.DynamicEquals(
                     toString.Invokers.Final.Invoke(
-                        new RuntimeExpression( generator.LiteralExpression( 42 ), compilation, serviceProvider ),
-                        new RuntimeExpression( generator.LiteralExpression( 43 ), compilation, serviceProvider ) ),
+                        new RunTimeTemplateExpression( generator.LiteralExpression( 42 ), syntaxGenerationContext ),
+                        new RunTimeTemplateExpression( generator.LiteralExpression( 43 ), syntaxGenerationContext ) ),
                     @"((global::TargetCode)42).ToString((global::System.String)43)" );
 
                 // Test static call.
@@ -79,14 +82,14 @@ class TargetCode
 
                 // Test exception related to the 'instance' parameter.
                 AssertEx.DynamicEquals(
-                    fooMethod.Invokers.Final.Invoke( new RuntimeExpression( SyntaxFactoryEx.Null, compilation, serviceProvider ) ),
+                    fooMethod.Invokers.Final.Invoke( new RunTimeTemplateExpression( SyntaxFactoryEx.Null, syntaxGenerationContext ) ),
                     @"global::TargetCode.Foo()" );
 
                 AssertEx.ThrowsWithDiagnostic(
                     GeneralDiagnosticDescriptors.MustProvideInstanceForInstanceMember,
                     () => toString.Invokers.Final.Invoke(
                         null,
-                        new RuntimeExpression( generator.LiteralExpression( "x" ), compilation, serviceProvider ) ) );
+                        new RunTimeTemplateExpression( generator.LiteralExpression( "x" ), syntaxGenerationContext ) ) );
 
                 // Test in/out.
                 var intType = compilation.Factory.GetTypeByReflectionType( typeof(int) );
@@ -94,16 +97,16 @@ class TargetCode
                 AssertEx.DynamicEquals(
                     byRefMethod.Invokers.Final.Invoke(
                         null,
-                        new RuntimeExpression( generator.IdentifierName( "x" ), intType, SyntaxGenerationContext.CreateDefault( serviceProvider ), true ),
-                        new RuntimeExpression( generator.IdentifierName( "y" ), intType, SyntaxGenerationContext.CreateDefault( serviceProvider ), true ) ),
+                        new RunTimeTemplateExpression( generator.IdentifierName( "x" ), intType, syntaxGenerationContext, true ),
+                        new RunTimeTemplateExpression( generator.IdentifierName( "y" ), intType, syntaxGenerationContext, true ) ),
                     @"global::TargetCode.ByRef(out x, ref y)" );
 
                 AssertEx.ThrowsWithDiagnostic(
                     GeneralDiagnosticDescriptors.CannotPassExpressionToByRefParameter,
                     () => byRefMethod.Invokers.Final.Invoke(
                         null,
-                        new RuntimeExpression( generator.IdentifierName( "x" ), compilation, serviceProvider ),
-                        new RuntimeExpression( generator.IdentifierName( "y" ), compilation, serviceProvider ) ) );
+                        new RunTimeTemplateExpression( generator.IdentifierName( "x" ), syntaxGenerationContext ),
+                        new RunTimeTemplateExpression( generator.IdentifierName( "y" ), syntaxGenerationContext ) ) );
             }
         }
 
@@ -136,8 +139,10 @@ class TargetCode
 
             var compilation = testContext.CreateCompilationModel( code );
 
+            var syntaxGenerationContext = SyntaxGenerationContext.Create( serviceProvider, compilation.RoslynCompilation );
+
             using ( TemplateExpansionContext.WithTestingContext(
-                       SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ),
+                       syntaxGenerationContext,
                        serviceProvider ) )
             {
                 var type = compilation.Types.OfName( "TargetCode" ).Single();
@@ -159,7 +164,7 @@ class TargetCode
                 AssertEx.DynamicThrows<InvalidOperationException>( () => staticEvent.Invokers.Final.Add( null, null ) );
 
                 // Testing instance members on a generic type.
-                var instance = new RuntimeExpression( SyntaxFactory.ParseExpression( "abc" ), compilation, serviceProvider );
+                var instance = new RunTimeTemplateExpression( SyntaxFactory.ParseExpression( "abc" ), syntaxGenerationContext );
                 var instanceGenericMethod = nestedType.Methods.OfName( "InstanceGenericMethod" ).Single();
                 var instanceNonGenericMethod = nestedType.Methods.OfName( "InstanceNonGenericMethod" ).Single();
                 var instanceField = nestedType.Fields.OfName( "InstanceField" ).Single();
@@ -205,8 +210,10 @@ class TargetCode
 
             var compilation = testContext.CreateCompilationModel( code );
 
+            var syntaxGenerationContext = SyntaxGenerationContext.Create( serviceProvider, compilation.RoslynCompilation );
+
             using ( TemplateExpansionContext.WithTestingContext(
-                       SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ),
+                       syntaxGenerationContext,
                        serviceProvider ) )
             {
                 var type = compilation.Types.OfName( "TargetCode" ).Single();
@@ -235,7 +242,7 @@ class TargetCode
                 AssertEx.DynamicEquals( staticEvent.Invokers.Final.Add( null, null ), "global::TargetCode.Nested<global::System.String>.StaticEvent += null" );
 
                 // Testing instance members on a generic type.
-                var instance = new RuntimeExpression( SyntaxFactory.ParseExpression( "abc" ), compilation, serviceProvider );
+                var instance = new RunTimeTemplateExpression( SyntaxFactory.ParseExpression( "abc" ), syntaxGenerationContext );
 
                 var instanceGenericMethod = nestedType.Methods.OfName( "InstanceGenericMethod" )
                     .Single()
@@ -285,7 +292,7 @@ class TargetCode
             var compilation = testContext.CreateCompilationModel( code );
 
             using ( TemplateExpansionContext.WithTestingContext(
-                       SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ),
+                       SyntaxGenerationContext.Create( serviceProvider, compilation.RoslynCompilation ),
                        serviceProvider ) )
             {
                 var method = compilation.Types.Single().Methods.Single();
@@ -320,13 +327,15 @@ class TargetCode
 
             var compilation = testContext.CreateCompilationModel( code );
 
+            var syntaxGenerationContext = SyntaxGenerationContext.Create( serviceProvider, compilation.RoslynCompilation );
+
             using ( TemplateExpansionContext.WithTestingContext(
-                       SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ),
+                       syntaxGenerationContext,
                        serviceProvider ) )
             {
                 var type = compilation.Types.Single();
                 var property = type.Properties.OfName( "P" ).Single();
-                RuntimeExpression thisExpression = new( SyntaxFactory.ThisExpression(), compilation, serviceProvider );
+                RunTimeTemplateExpression thisExpression = new( SyntaxFactory.ThisExpression(), syntaxGenerationContext );
 
                 AssertEx.DynamicEquals( property.Invokers.Final.GetValue( thisExpression ), @"((global::TargetCode)this).P" );
 
@@ -365,13 +374,15 @@ class TargetCode
 
             var compilation = testContext.CreateCompilationModel( code );
 
+            var syntaxGenerationContext = SyntaxGenerationContext.Create( serviceProvider, compilation.RoslynCompilation );
+
             using ( TemplateExpansionContext.WithTestingContext(
-                       SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ),
+                       syntaxGenerationContext,
                        serviceProvider ) )
             {
                 var type = compilation.Types.Single();
                 var property = type.Properties.OfName( "P" ).Single();
-                RuntimeExpression thisExpression = new( SyntaxFactory.ThisExpression(), compilation, serviceProvider );
+                RunTimeTemplateExpression thisExpression = new( SyntaxFactory.ThisExpression(), syntaxGenerationContext );
 
                 AssertEx.DynamicEquals( property.Invokers.Final.GetValue( thisExpression ), @"((global::TargetCode)this).P" );
 
@@ -399,15 +410,17 @@ class TargetCode
 
             var compilation = testContext.CreateCompilationModel( code );
 
+            var syntaxGenerationContext = SyntaxGenerationContext.Create( serviceProvider, compilation.RoslynCompilation );
+
             using ( TemplateExpansionContext.WithTestingContext(
-                       SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ),
+                       syntaxGenerationContext,
                        serviceProvider ) )
             {
                 var type = compilation.Types.Single();
                 var @event = type.Events.Single();
 
-                RuntimeExpression thisExpression = new( SyntaxFactory.ThisExpression(), compilation, serviceProvider );
-                RuntimeExpression parameterExpression = new( SyntaxFactory.IdentifierName( "value" ), compilation, serviceProvider );
+                RunTimeTemplateExpression thisExpression = new( SyntaxFactory.ThisExpression(), syntaxGenerationContext );
+                RunTimeTemplateExpression parameterExpression = new( SyntaxFactory.IdentifierName( "value" ), syntaxGenerationContext );
 
                 AssertEx.DynamicEquals( @event.Invokers.Final.Add( thisExpression, parameterExpression ), @"((global::TargetCode)this).MyEvent += value" );
                 AssertEx.DynamicEquals( @event.Invokers.Final.Remove( thisExpression, parameterExpression ), @"((global::TargetCode)this).MyEvent -= value" );
@@ -438,15 +451,17 @@ class TargetCode
 
             var compilation = testContext.CreateCompilationModel( code );
 
+            var syntaxGenerationContext = SyntaxGenerationContext.Create( serviceProvider, compilation.RoslynCompilation );
+
             using ( TemplateExpansionContext.WithTestingContext(
-                       SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ),
+                       syntaxGenerationContext,
                        serviceProvider ) )
             {
                 var type = compilation.Types.Single();
                 var @event = type.Events.Single();
 
-                RuntimeExpression thisExpression = new( SyntaxFactory.ThisExpression(), compilation, serviceProvider );
-                RuntimeExpression parameterExpression = new( SyntaxFactory.IdentifierName( "value" ), compilation, serviceProvider );
+                RunTimeTemplateExpression thisExpression = new( SyntaxFactory.ThisExpression(), syntaxGenerationContext );
+                RunTimeTemplateExpression parameterExpression = new( SyntaxFactory.IdentifierName( "value" ), syntaxGenerationContext );
 
                 AssertEx.DynamicEquals(
                     @event.AddMethod.Invokers.Final.Invoke( thisExpression, parameterExpression ),
@@ -494,7 +509,7 @@ class TargetCode
             var compilation = testContext.CreateCompilationModel( code );
 
             using ( TemplateExpansionContext.WithTestingContext(
-                       SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation ),
+                       SyntaxGenerationContext.Create( serviceProvider, compilation.RoslynCompilation ),
                        serviceProvider ) )
             {
                 var type = compilation.Types.Single();

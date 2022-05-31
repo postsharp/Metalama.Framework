@@ -6,6 +6,7 @@ using Metalama.Framework.Code.Advised;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
 using System.Collections.Generic;
 using System.Reflection;
@@ -31,10 +32,9 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             {
                 var generationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
-                return new UserExpression(
+                return new BuiltUserExpression(
                     generationContext.SyntaxGenerator.DefaultExpression( this.ReturnType.GetSymbol() ),
-                    this.ReturnType,
-                    generationContext );
+                    this.ReturnType );
             }
         }
 

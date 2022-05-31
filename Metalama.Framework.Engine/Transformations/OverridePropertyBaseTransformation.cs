@@ -6,7 +6,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Templating.MetaModel;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -79,7 +79,7 @@ internal abstract class OverridePropertyBaseTransformation : OverrideMemberTrans
         return overrides;
     }
 
-    protected UserExpression CreateProceedDynamicExpression( in MemberIntroductionContext context, IMethod accessor, TemplateKind templateKind )
+    protected BuiltUserExpression CreateProceedDynamicExpression( in MemberIntroductionContext context, IMethod accessor, TemplateKind templateKind )
         => accessor.MethodKind switch
         {
             MethodKind.PropertyGet => ProceedHelper.CreateProceedDynamicExpression(
@@ -87,10 +87,9 @@ internal abstract class OverridePropertyBaseTransformation : OverrideMemberTrans
                 this.CreateProceedGetExpression( context.SyntaxGenerationContext ),
                 templateKind,
                 this.OverriddenDeclaration.GetMethod.AssertNotNull() ),
-            MethodKind.PropertySet => new UserExpression(
+            MethodKind.PropertySet => new BuiltUserExpression(
                 this.CreateProceedSetExpression( context.SyntaxGenerationContext ),
-                this.OverriddenDeclaration.Compilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.Void ),
-                context.SyntaxGenerationContext ),
+                this.OverriddenDeclaration.Compilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.Void ) ),
             _ => throw new AssertionFailedException()
         };
 

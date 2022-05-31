@@ -6,8 +6,10 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Advised;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Project;
 using System;
 using System.Diagnostics;
@@ -123,7 +125,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public UserDiagnosticSink Diagnostics => this._common.Diagnostics;
 
-        private MetaApi( IDeclaration declaration, MetaApiProperties common ) : base( declaration.Compilation, common.SyntaxGenerationContext.SyntaxGenerator )
+        private MetaApi( IDeclaration declaration, MetaApiProperties common ) : base( declaration.GetCompilationModel(), common.SyntaxGenerationContext )
         {
             this.Declaration = declaration;
             this._common = common;

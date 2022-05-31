@@ -71,7 +71,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 serviceProvider = serviceProvider.WithService( projectOptions );
             }
 
-            serviceProvider = serviceProvider.WithProjectScopedServices( context.Compilation.References );
+            serviceProvider = serviceProvider.WithProjectScopedServices( context.Compilation );
 
             try
             {

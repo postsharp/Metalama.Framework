@@ -248,7 +248,7 @@ namespace Metalama.Framework.Aspects
 
         [Obsolete( "Use ExpressionFactory.Capture" )]
         public static void DefineExpression( dynamic? expression, out IExpression definedException )
-            => definedException = SyntaxBuilder.CurrentImplementation.Expression( expression );
+            => definedException = SyntaxBuilder.CurrentImplementation.Capture( expression );
 
         [Obsolete( "Use ExpressionFactory.Parse" )]
         public static IExpression ParseExpression( string code ) => SyntaxBuilder.CurrentImplementation.ParseExpression( code );

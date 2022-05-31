@@ -4,7 +4,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Templating;
-using Metalama.Framework.Engine.Templating.MetaModel;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -14,7 +14,10 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 {
     internal class IndexerInvoker : Invoker, IIndexerInvoker
     {
-        private ExpressionSyntax CreateIndexerAccess( RuntimeExpression instance, RuntimeExpression[]? args, SyntaxGenerationContext generationContext )
+        private ExpressionSyntax CreateIndexerAccess(
+            RunTimeTemplateExpression instance,
+            RunTimeTemplateExpression[]? args,
+            SyntaxGenerationContext generationContext )
         {
             if ( this.Indexer.DeclaringType.IsOpenGeneric )
             {
@@ -34,13 +37,12 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
         {
             var syntaxGenerationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
-            return new UserExpression(
+            return new BuiltUserExpression(
                 this.CreateIndexerAccess(
-                    RuntimeExpression.FromValue( instance, this.Compilation, syntaxGenerationContext ),
-                    RuntimeExpression.FromValue( args, this.Compilation, syntaxGenerationContext ),
+                    RunTimeTemplateExpression.FromValue( instance, this.Compilation, syntaxGenerationContext ),
+                    RunTimeTemplateExpression.FromValue( args, this.Compilation, syntaxGenerationContext ),
                     syntaxGenerationContext ),
                 this.Indexer.Type,
-                syntaxGenerationContext,
                 isReferenceable: this.Indexer.Writeability != Writeability.None );
         }
 
@@ -49,16 +51,16 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             var syntaxGenerationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
             var propertyAccess = this.CreateIndexerAccess(
-                RuntimeExpression.FromValue( instance, this.Compilation, syntaxGenerationContext ),
-                RuntimeExpression.FromValue( args, this.Compilation, syntaxGenerationContext ),
+                RunTimeTemplateExpression.FromValue( instance, this.Compilation, syntaxGenerationContext ),
+                RunTimeTemplateExpression.FromValue( args, this.Compilation, syntaxGenerationContext ),
                 syntaxGenerationContext );
 
             var expression = AssignmentExpression(
                 SyntaxKind.SimpleAssignmentExpression,
                 propertyAccess,
-                RuntimeExpression.GetSyntaxFromValue( value, this.Compilation, syntaxGenerationContext ) );
+                RunTimeTemplateExpression.GetSyntaxFromValue( value, this.Compilation, syntaxGenerationContext ) );
 
-            return new UserExpression( expression, this.Indexer.Type, syntaxGenerationContext );
+            return new BuiltUserExpression( expression, this.Indexer.Type );
         }
 
         public IndexerInvoker( IIndexer indexer, InvokerOrder order ) : base( indexer, order )

@@ -89,7 +89,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     serializableTypes.SelectMany( x => x.SerializedMembers.Select( y => (Member: y, Type: x) ) )
                         .ToDictionary( x => x.Member, x => x.Type, SymbolEqualityComparer.Default );
 
-                this._syntaxGenerationContext = SyntaxGenerationContext.CreateDefault( serviceProvider, compileTimeCompilation );
+                this._syntaxGenerationContext = SyntaxGenerationContext.Create( serviceProvider, compileTimeCompilation );
 
                 // TODO: This should be probably injected as a service, but we are creating the generation context here.
                 this._serializerGenerator = new SerializerGenerator( runTimeCompilation, this._syntaxGenerationContext );

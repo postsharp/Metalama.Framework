@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -13,12 +14,16 @@ using System.Globalization;
 using System.Linq;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 
-namespace Metalama.Framework.Engine.Templating.MetaModel
+namespace Metalama.Framework.Engine.Templating.Expressions
 {
     /// <summary>
-    /// Contains information about an expression that is passed to dynamic methods.
+    /// Contains information about an expression that is passed to dynamic methods. The main difference
+    /// between a <see cref="RunTimeTemplateExpression"/> and an <see cref="IUserExpression"/> is that the <see cref="RunTimeTemplateExpression"/>
+    /// is bound to a specific <see cref="SyntaxGenerationContext"/>. Another difference is that this class tries to find the expression type from
+    /// the expression syntax tree thanks to a syntax annotation. This class seems to exist because of the implicit operators from and
+    /// to an <see cref="ExpressionSyntax"/>: the template compiler generates code that relies on these implicit conversions.
     /// </summary>
-    public sealed class RuntimeExpression
+    public sealed class RunTimeTemplateExpression
     {
         private const string _typeIdAnnotationName = "metalama-typeid";
 
@@ -37,15 +42,15 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         public ExpressionSyntax Syntax { get; }
 
         /// <summary>
-        /// Returns the <see cref="ExpressionSyntax"/> encapsulated by the current <see cref="RuntimeExpression"/>. Called from generated
+        /// Returns the <see cref="ExpressionSyntax"/> encapsulated by the current <see cref="RunTimeTemplateExpression"/>. Called from generated
         /// code. Do not remove.
         /// </summary>
         /// <param name="runtimeExpression"></param>
         /// <returns></returns>
         [return: NotNullIfNotNull( "runtimeExpression" )]
-        public static implicit operator ExpressionSyntax?( RuntimeExpression? runtimeExpression ) => runtimeExpression?.Syntax;
+        public static implicit operator ExpressionSyntax?( RunTimeTemplateExpression? runtimeExpression ) => runtimeExpression?.Syntax;
 
-        public static implicit operator ExpressionStatementSyntax?( RuntimeExpression? runtimeExpression )
+        public static implicit operator ExpressionStatementSyntax?( RunTimeTemplateExpression? runtimeExpression )
             => runtimeExpression?.Syntax switch
             {
                 null => null,
@@ -68,8 +73,19 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             }
         }
 
-        internal RuntimeExpression( ExpressionSyntax syntax, ITypeSymbol? expressionType, SyntaxGenerationContext generationContext, bool isReferenceable )
+        internal RunTimeTemplateExpression(
+            ExpressionSyntax syntax,
+            ITypeSymbol? expressionType,
+            SyntaxGenerationContext generationContext,
+            bool isReferenceable )
         {
+#if DEBUG
+            if ( generationContext.Compilation == SyntaxGenerationContext.EmptyCompilation )
+            {
+                throw new AssertionFailedException();
+            }
+#endif
+
             if ( expressionType == null )
             {
                 // This should happen only for null and default expressions.
@@ -86,42 +102,49 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             this.SyntaxGenerationContext = generationContext;
         }
 
-        internal RuntimeExpression( ExpressionSyntax syntax, IType type, SyntaxGenerationContext generationContext, bool isReferenceable = false )
+        internal RunTimeTemplateExpression( ExpressionSyntax syntax, IType type, SyntaxGenerationContext generationContext, bool isReferenceable = false )
             : this( syntax, type.GetSymbol(), generationContext, isReferenceable ) { }
 
         // This overload must be used only in tests or when the expression type is really unknown.
-        internal RuntimeExpression( ExpressionSyntax syntax, ICompilation compilation, IServiceProvider serviceProvider )
+        internal RunTimeTemplateExpression( ExpressionSyntax syntax, IServiceProvider serviceProvider )
             : this(
                 syntax,
                 (ITypeSymbol) null!,
-                SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.GetCompilationModel().RoslynCompilation ),
+                serviceProvider.GetRequiredService<SyntaxGenerationContextFactory>().Default,
+                false ) { }
+
+        internal RunTimeTemplateExpression( ExpressionSyntax syntax, SyntaxGenerationContext syntaxGenerationContext )
+            : this(
+                syntax,
+                (ITypeSymbol) null!,
+                syntaxGenerationContext,
                 false ) { }
 
         internal static ExpressionSyntax GetSyntaxFromValue( object? value, ICompilation compilation, SyntaxGenerationContext generationContext )
             => FromValue( value, compilation, generationContext ).Syntax;
 
-        internal static RuntimeExpression FromValue( object? value, ICompilation compilation, SyntaxGenerationContext generationContext )
+        internal static RunTimeTemplateExpression FromValue( object? value, ICompilation compilation, SyntaxGenerationContext generationContext )
         {
             switch ( value )
             {
                 case null:
-                    return new RuntimeExpression( SyntaxFactoryEx.Null, compilation, generationContext.ServiceProvider );
+                    return new RunTimeTemplateExpression( SyntaxFactoryEx.Null, generationContext );
 
-                case RuntimeExpression runtimeExpression:
+                case RunTimeTemplateExpression runtimeExpression:
                     return runtimeExpression;
 
                 case IUserExpression dynamicMember:
-                    return dynamicMember.ToRunTimeExpression();
+                    return dynamicMember.ToRunTimeTemplateExpression( generationContext );
 
                 case ExpressionSyntax syntax:
-                    return new RuntimeExpression( syntax, compilation, generationContext.ServiceProvider );
+                    return new RunTimeTemplateExpression( syntax, generationContext );
 
                 default:
                     var expression = SyntaxFactoryEx.LiteralExpressionOrNull( value );
 
                     if ( expression != null )
                     {
-                        return new RuntimeExpression(
+                        return new RunTimeTemplateExpression(
                             expression,
                             compilation.GetCompilationModel().Factory.GetTypeByReflectionType( value.GetType() ),
                             generationContext );
@@ -135,23 +158,23 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             }
         }
 
-        internal static RuntimeExpression[]? FromValue( object?[]? array, ICompilation compilation, SyntaxGenerationContext generationContext )
+        internal static RunTimeTemplateExpression[]? FromValue( object?[]? array, ICompilation compilation, SyntaxGenerationContext generationContext )
         {
             switch ( array )
             {
                 case null:
                     return null;
 
-                case RuntimeExpression[] runtimeExpressions:
+                case RunTimeTemplateExpression[] runtimeExpressions:
                     return runtimeExpressions;
 
                 default:
                     if ( array.Length == 0 )
                     {
-                        return Array.Empty<RuntimeExpression>();
+                        return Array.Empty<RunTimeTemplateExpression>();
                     }
 
-                    var newArray = new RuntimeExpression[array.Length];
+                    var newArray = new RunTimeTemplateExpression[array.Length];
 
                     for ( var i = 0; i < newArray.Length; i++ )
                     {
@@ -191,7 +214,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         }
 
         /// <summary>
-        /// Converts the current <see cref="RuntimeExpression"/> into an <see cref="ExpressionSyntax"/> and emits a cast
+        /// Converts the current <see cref="RunTimeTemplateExpression"/> into an <see cref="ExpressionSyntax"/> and emits a cast
         /// if necessary.
         /// </summary>
         /// <param name="targetType">The target type, or <c>null</c> if no cast must be emitted in any case.</param>
@@ -226,10 +249,9 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         {
             var declarationFactory = compilation.GetCompilationModel().Factory;
 
-            return new UserExpression(
+            return new BuiltUserExpression(
                 this.Syntax,
                 this.ExpressionType != null ? declarationFactory.GetIType( this.ExpressionType ) : declarationFactory.GetSpecialType( SpecialType.Object ),
-                this.SyntaxGenerationContext,
                 isReferenceable: this.IsReferenceable,
                 isAssignable: false );
         }

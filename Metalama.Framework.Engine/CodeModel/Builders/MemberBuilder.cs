@@ -7,6 +7,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Project;
@@ -110,7 +111,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             {
                 // TODO: Error about the expression type?
                 initializerMethodSyntax = null;
-                initializerExpressionSyntax = ((IUserExpression) initializerExpression).ToRunTimeExpression().Syntax;
+                initializerExpressionSyntax = ((IUserExpression) initializerExpression).ToSyntax( context.SyntaxGenerationContext );
 
                 return true;
             }
