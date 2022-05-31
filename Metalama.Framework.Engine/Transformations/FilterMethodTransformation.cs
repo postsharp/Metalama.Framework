@@ -49,7 +49,7 @@ namespace Metalama.Framework.Engine.Transformations
             }
 
             // Rewrite the method body.
-            var proceedExpression = this.CreateProceedExpression( context, TemplateKind.Default ).ToRunTimeExpression().Syntax;
+            var proceedExpression = this.CreateProceedExpression( context, TemplateKind.Default ).ToSyntax( context.SyntaxGenerationContext );
 
             var statements = new List<StatementSyntax>();
 

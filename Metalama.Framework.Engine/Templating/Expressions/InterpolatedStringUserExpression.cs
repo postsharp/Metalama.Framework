@@ -7,14 +7,13 @@ using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Collections.Generic;
 using System.Text;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 
-namespace Metalama.Framework.Engine.Templating.MetaModel
+namespace Metalama.Framework.Engine.Templating.Expressions
 {
-    internal class InterpolatedStringUserExpression : IUserExpression
+    internal class InterpolatedStringUserExpression : UserExpression
     {
         private readonly InterpolatedStringBuilder _builder;
 
@@ -24,9 +23,8 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             this.Type = compilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.String );
         }
 
-        public RuntimeExpression ToRunTimeExpression()
+        public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
         {
-            var syntaxGenerationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
             List<InterpolatedStringContentSyntax> contents = new( this._builder.Items.Count );
 
             var textAccumulator = new StringBuilder();
@@ -63,7 +61,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
                         FlushTextToken();
 
-                        var tokenSyntax = RuntimeExpression.FromValue( token.Expression, this.Type.Compilation, syntaxGenerationContext ).Syntax;
+                        var tokenSyntax = RunTimeTemplateExpression.FromValue( token.Expression, this.Type.Compilation, syntaxGenerationContext ).Syntax;
 
                         if ( tokenSyntax is LiteralExpressionSyntax literal && literal.Token.IsKind( SyntaxKind.StringLiteralToken ) )
                         {
@@ -83,19 +81,13 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
             FlushTextToken();
 
-            var syntax = TemplateSyntaxFactory.RenderInterpolatedString(
+            return TemplateSyntaxFactory.RenderInterpolatedString(
                 SyntaxFactory.InterpolatedStringExpression(
                     SyntaxFactory.Token( SyntaxKind.InterpolatedStringStartToken ),
                     SyntaxFactory.List( contents ),
                     SyntaxFactory.Token( SyntaxKind.InterpolatedStringEndToken ) ) );
-
-            return new RuntimeExpression( syntax, this.Type, syntaxGenerationContext );
         }
 
-        public bool IsAssignable => false;
-
-        public IType Type { get; set; }
-
-        object? IExpression.Value { get => this; set => throw new NotSupportedException(); }
+        public override IType Type { get; }
     }
 }

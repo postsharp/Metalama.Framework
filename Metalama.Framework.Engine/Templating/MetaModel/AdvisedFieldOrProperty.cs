@@ -6,13 +6,16 @@ using Metalama.Framework.Code.Advised;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.RunTime;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Templating.MetaModel
 {
-    internal class AdvisedFieldOrProperty<T> : AdvisedMember<T>, IAdvisedFieldOrProperty
+    internal class AdvisedFieldOrProperty<T> : AdvisedMember<T>, IAdvisedFieldOrProperty, IUserExpression
         where T : IFieldOrProperty, IDeclarationImpl
     {
         public AdvisedFieldOrProperty( T underlying ) : base( underlying ) { }
@@ -53,5 +56,13 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         public IMethod? GetAccessor( MethodKind methodKind ) => this.Underlying.GetAccessor( methodKind );
 
         public IEnumerable<IMethod> Accessors => this.Underlying.Accessors;
+
+        public ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext ) => SyntaxFactory.IdentifierName( this.Underlying.Name );
+
+        public RunTimeTemplateExpression ToRunTimeTemplateExpression( SyntaxGenerationContext syntaxGenerationContext )
+            => new(
+                this.ToSyntax( syntaxGenerationContext ),
+                this.Type,
+                syntaxGenerationContext );
     }
 }

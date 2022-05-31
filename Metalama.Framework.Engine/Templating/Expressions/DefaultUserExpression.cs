@@ -5,21 +5,18 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 
-namespace Metalama.Framework.Engine.Templating.MetaModel
+namespace Metalama.Framework.Engine.Templating.Expressions
 {
-    internal class DefaultUserExpression : IUserExpression
+    internal class DefaultUserExpression : UserExpression
     {
         public DefaultUserExpression( IType type )
         {
             this.Type = type;
         }
 
-        public RuntimeExpression ToRunTimeExpression()
+        public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
         {
-            var syntaxGenerationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
-
             var typeSymbol = this.Type.GetSymbol();
             var expression = syntaxGenerationContext.SyntaxGenerator.DefaultExpression( typeSymbol );
 
@@ -31,13 +28,9 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
                     expression );
             }
 
-            return new RuntimeExpression( expression, this.Type, syntaxGenerationContext );
+            return expression;
         }
 
-        public IType Type { get; }
-
-        bool IExpression.IsAssignable => false;
-
-        object? IExpression.Value { get => this; set => throw new NotSupportedException(); }
+        public override IType Type { get; }
     }
 }

@@ -11,6 +11,7 @@ using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
@@ -309,13 +310,12 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
             // ReSharper disable once SuspiciousTypeConversion.Global
             var lexicalScope = LexicalScopeFactory.GetSourceLexicalScope( targetMethod );
-            var syntaxGenerationContext = SyntaxGenerationContext.CreateDefault( serviceProvider, compilation.RoslynCompilation );
+            var syntaxGenerationContext = SyntaxGenerationContext.Create( serviceProvider, compilation.RoslynCompilation );
 
             var proceedExpression =
-                new UserExpression(
+                new BuiltUserExpression(
                     GetProceedInvocation( targetMethod ),
-                    targetMethod.ReturnType,
-                    syntaxGenerationContext );
+                    targetMethod.ReturnType );
 
             var augmentedServiceProvider = serviceProvider.WithService( new AspectPipelineDescription( ExecutionScenario.CompileTime, true ) );
 

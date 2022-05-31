@@ -6,7 +6,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Templating.MetaModel;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -19,14 +19,14 @@ namespace Metalama.Framework.Engine.Transformations
 {
     internal static class ProceedHelper
     {
-        public static UserExpression CreateProceedDynamicExpression(
+        public static BuiltUserExpression CreateProceedDynamicExpression(
             SyntaxGenerationContext generationContext,
             ExpressionSyntax invocationExpression,
             BoundTemplateMethod template,
             IMethod overriddenMethod )
             => CreateProceedDynamicExpression( generationContext, invocationExpression, template.Template.SelectedKind, overriddenMethod );
 
-        public static UserExpression CreateProceedDynamicExpression(
+        public static BuiltUserExpression CreateProceedDynamicExpression(
             SyntaxGenerationContext generationContext,
             ExpressionSyntax invocationExpression,
             TemplateKind selectedTemplateKind,
@@ -66,7 +66,7 @@ namespace Metalama.Framework.Engine.Transformations
                             expression = GenerateAwaitBufferAsync();
                         }
 
-                        return new UserExpression( expression, overriddenMethod.ReturnType, generationContext );
+                        return new BuiltUserExpression( expression, overriddenMethod.ReturnType );
                     }
 
                 case TemplateKind.Default when overriddenMethod.GetAsyncInfoImpl() is { IsAsync: true, IsAwaitableOrVoid: true } asyncInfo:
@@ -76,11 +76,10 @@ namespace Metalama.Framework.Engine.Transformations
 
                         var taskResultType = asyncInfo.ResultType;
 
-                        return new UserExpression(
+                        return new BuiltUserExpression(
                             SyntaxFactory.ParenthesizedExpression( SyntaxFactory.AwaitExpression( invocationExpression ) )
                                 .WithAdditionalAnnotations( Simplifier.Annotation ),
-                            taskResultType,
-                            generationContext );
+                            taskResultType );
                     }
 
                 case TemplateKind.Async when overriddenMethod.GetIteratorInfoImpl() is
@@ -88,16 +87,15 @@ namespace Metalama.Framework.Engine.Transformations
                     {
                         var expression = GenerateAwaitBufferAsync();
 
-                        return new UserExpression( expression, overriddenMethod.ReturnType, generationContext );
+                        return new BuiltUserExpression( expression, overriddenMethod.ReturnType );
                     }
             }
 
             // This is a default method, or a non-default template.
             // Generate: `BASE(ARGS)`
-            return new UserExpression(
+            return new BuiltUserExpression(
                 invocationExpression,
-                overriddenMethod.ReturnType,
-                generationContext );
+                overriddenMethod.ReturnType );
 
             ExpressionSyntax GenerateAwaitBufferAsync()
             {

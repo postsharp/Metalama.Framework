@@ -4,12 +4,12 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Engine.CodeModel;
-using System;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
 
-namespace Metalama.Framework.Engine.Templating.MetaModel
+namespace Metalama.Framework.Engine.Templating.Expressions
 {
-    internal class ArrayUserExpression : IUserExpression
+    internal class ArrayUserExpression : UserExpression
     {
         private readonly ArrayBuilder _arrayBuilder;
         private readonly IType _itemType;
@@ -22,26 +22,18 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             this.Type = this._itemType.ConstructArrayType();
         }
 
-        public RuntimeExpression ToRunTimeExpression()
+        public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
         {
-            var syntaxGenerationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
-
-            var items = this._arrayBuilder.Items.Select( i => RuntimeExpression.FromValue( i, this.Type.Compilation, syntaxGenerationContext ).Syntax )
+            var items = this._arrayBuilder.Items.Select( i => RunTimeTemplateExpression.FromValue( i, this.Type.Compilation, syntaxGenerationContext ).Syntax )
                 .ToArray();
 
             var generator = syntaxGenerationContext.SyntaxGenerator;
 
-            var syntax = generator.ArrayCreationExpression(
+            return generator.ArrayCreationExpression(
                 generator.Type( this._itemType.GetSymbol() ),
                 items );
-
-            return new RuntimeExpression( syntax, this.Type, syntaxGenerationContext );
         }
 
-        public bool IsAssignable => false;
-
-        public IType Type { get; }
-
-        object? IExpression.Value { get => this; set => throw new NotSupportedException(); }
+        public override IType Type { get; }
     }
 }

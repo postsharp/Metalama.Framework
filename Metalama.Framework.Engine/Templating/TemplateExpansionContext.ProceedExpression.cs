@@ -5,14 +5,15 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Templating.MetaModel;
+using Metalama.Framework.Engine.Templating.Expressions;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 
 namespace Metalama.Framework.Engine.Templating
 {
     internal partial class TemplateExpansionContext
     {
-        private class ProceedUserExpression : IUserExpression
+        private class ProceedUserExpression : UserExpression
         {
             private readonly TemplateExpansionContext _parent;
             private readonly string _methodName;
@@ -23,7 +24,21 @@ namespace Metalama.Framework.Engine.Templating
                 this._parent = parent;
             }
 
-            public RuntimeExpression ToRunTimeExpression()
+            public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
+            {
+                this.Validate();
+
+                return this._parent._proceedExpression!.ToSyntax( syntaxGenerationContext );
+            }
+
+            public override RunTimeTemplateExpression ToRunTimeTemplateExpression( SyntaxGenerationContext syntaxGenerationContext )
+            {
+                this.Validate();
+
+                return this._parent._proceedExpression!.ToRunTimeTemplateExpression( syntaxGenerationContext );
+            }
+
+            private void Validate()
             {
                 var targetMethod = this._parent.MetaApi.Target.Method;
 
@@ -44,15 +59,9 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     throw TemplatingDiagnosticDescriptors.CannotUseSpecificProceedInThisContext.CreateException( (this._methodName, targetMethod) );
                 }
-
-                return this._parent._proceedExpression!.ToRunTimeExpression();
             }
 
-            public bool IsAssignable => false;
-
-            public IType Type => this._parent._proceedExpression!.Type;
-
-            object? IExpression.Value { get => this; set => throw new NotSupportedException(); }
+            public override IType Type => this._parent._proceedExpression!.Type;
         }
     }
 }

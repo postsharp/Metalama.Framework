@@ -2,7 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Templating.MetaModel;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 
@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
 
         public override ExpressionSyntax Serialize( IExpression obj, SyntaxSerializationContext serializationContext )
         {
-            return ((IUserExpression) obj.Value!).ToRunTimeExpression();
+            return ((IUserExpression) obj.Value!).ToRunTimeTemplateExpression( serializationContext.SyntaxGenerationContext );
         }
 
         public override Type? OutputType => null;

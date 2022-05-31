@@ -4,7 +4,7 @@
 using Metalama.Framework.Code.SyntaxBuilders;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Metalama.Framework.Engine.Templating.MetaModel
+namespace Metalama.Framework.Engine.Templating.Expressions
 {
     internal class UserStatement : IStatement
     {
