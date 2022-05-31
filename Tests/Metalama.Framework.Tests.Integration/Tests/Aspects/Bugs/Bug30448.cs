@@ -2,6 +2,8 @@ using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
+#pragma warning disable CS8618, CS8602
+
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug30448;
 
 internal class TrimAttribute : ContractAspect
