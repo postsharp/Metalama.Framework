@@ -11,21 +11,21 @@ namespace Metalama.Framework.Aspects
     /// A base aspect that can validate or change the value of fields, properties, indexers, and parameters.
     /// </summary>
     /// <remarks>
-    /// <para>A filter aspect can apply to the input or output data flow, or to both data flows, according to the <see cref="FilterDirection"/> value
+    /// <para>A contract aspect can apply to the input or output data flow, or to both data flows, according to the <see cref="ContractDirection"/> value
     /// passed to the constructor. Since the current class does not know the value of this parameter before it is instantiated, this class cannot
     /// set the eligibility conditions using the <see cref="BuildEligibility(Metalama.Framework.Eligibility.IEligibilityBuilder{Metalama.Framework.Code.IFieldOrPropertyOrIndexer})"/> method.
-    /// If a derived class targets a specific <see cref="FilterDirection"/> (i.e. if the choice is not left to the user),
+    /// If a derived class targets a specific <see cref="ContractDirection"/> (i.e. if the choice is not left to the user),
     /// its implementation of <see cref="BuildEligibility(Metalama.Framework.Eligibility.IEligibilityBuilder{Metalama.Framework.Code.IFieldOrPropertyOrIndexer})"/>
-    /// can call <see cref="BuildEligibilityForDirection(Metalama.Framework.Eligibility.IEligibilityBuilder{Metalama.Framework.Code.IFieldOrPropertyOrIndexer},Metalama.Framework.Aspects.FilterDirection)"/>
+    /// can call <see cref="BuildEligibilityForDirection(Metalama.Framework.Eligibility.IEligibilityBuilder{Metalama.Framework.Code.IFieldOrPropertyOrIndexer},ContractDirection)"/>
     /// methods. This means that eligibility can be checked upfront by the IDE before suggesting the code actions.
     /// </para>
     /// <para>
-    /// In any case, this aspect verifies the eligibility of the target with respect to the specific <see cref="FilterDirection"/> and target declaration. This verification
+    /// In any case, this aspect verifies the eligibility of the target with respect to the specific <see cref="ContractDirection"/> and target declaration. This verification
     /// cannot be skipped.
     /// </para>
     /// </remarks>
     [AttributeUsage( AttributeTargets.ReturnValue | AttributeTargets.Parameter | AttributeTargets.Field | AttributeTargets.Property )]
-    public abstract class FilterAspect : Aspect, IAspect<IParameter>, IAspect<IFieldOrPropertyOrIndexer>
+    public abstract class ContractAspect : Aspect, IAspect<IParameter>, IAspect<IFieldOrPropertyOrIndexer>
     {
         // Eligibility rules for properties.
         private static readonly IEligibilityRule<IFieldOrPropertyOrIndexer> _propertyOrIndexerEligibilityInput =
@@ -49,41 +49,41 @@ namespace Metalama.Framework.Aspects
             EligibilityRuleFactory.CreateRule<IParameter>( builder => builder.MustBeRef() );
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="FilterAspect"/> class.
+        /// Initializes a new instance of the <see cref="ContractAspect"/> class.
         /// </summary>
-        /// <param name="direction">The direction of the data flow (<see cref="FilterDirection.Input"/>,  <see cref="FilterDirection.Output"/> or <see cref="FilterDirection.Both"/>)
-        /// to which this filter applies. See the <see cref="FilterDirection"/> for details.</param>
-        protected FilterAspect( FilterDirection direction = FilterDirection.Default )
+        /// <param name="direction">The direction of the data flow (<see cref="ContractDirection.Input"/>,  <see cref="ContractDirection.Output"/> or <see cref="ContractDirection.Both"/>)
+        /// to which this contract applies. See the <see cref="ContractDirection"/> for details.</param>
+        protected ContractAspect( ContractDirection direction = ContractDirection.Default )
         {
             this.Direction = direction;
         }
 
         /// <summary>
-        /// Gets the direction of the data flow (<see cref="FilterDirection.Input"/>,  <see cref="FilterDirection.Output"/> or <see cref="FilterDirection.Both"/>)
-        /// to which this filter applies.
+        /// Gets the direction of the data flow (<see cref="ContractDirection.Input"/>,  <see cref="ContractDirection.Output"/> or <see cref="ContractDirection.Both"/>)
+        /// to which this contract applies.
         /// </summary>
         /// <remarks>
-        /// It is the responsibility of the <i>author</i> of the aspect, and not of its <i>user</i>, to define the eligible directions of a filter.
+        /// It is the responsibility of the <i>author</i> of the aspect, and not of its <i>user</i>, to define the eligible directions of a contract.
         /// </remarks>
-        protected FilterDirection Direction { get; }
+        protected ContractDirection Direction { get; }
 
-        private static IEligibilityRule<IParameter>? GetParameterEligibilityRule( FilterDirection direction )
+        private static IEligibilityRule<IParameter>? GetParameterEligibilityRule( ContractDirection direction )
             => direction switch
             {
-                FilterDirection.Default => null,
-                FilterDirection.Both => _parameterEligibilityBoth,
-                FilterDirection.Input => _parameterEligibilityInput,
-                FilterDirection.Output => _parameterEligibilityOutput,
+                ContractDirection.Default => null,
+                ContractDirection.Both => _parameterEligibilityBoth,
+                ContractDirection.Input => _parameterEligibilityInput,
+                ContractDirection.Output => _parameterEligibilityOutput,
                 _ => throw new ArgumentOutOfRangeException( nameof(direction) )
             };
 
-        private static IEligibilityRule<IFieldOrPropertyOrIndexer>? GetPropertyEligibilityRule( FilterDirection direction )
+        private static IEligibilityRule<IFieldOrPropertyOrIndexer>? GetPropertyEligibilityRule( ContractDirection direction )
             => direction switch
             {
-                FilterDirection.Default => null,
-                FilterDirection.Both => _propertyOrIndexerEligibilityBoth,
-                FilterDirection.Input => _propertyOrIndexerEligibilityInput,
-                FilterDirection.Output => _propertyOrIndexerEligibilityOutput,
+                ContractDirection.Default => null,
+                ContractDirection.Both => _propertyOrIndexerEligibilityBoth,
+                ContractDirection.Input => _propertyOrIndexerEligibilityInput,
+                ContractDirection.Output => _propertyOrIndexerEligibilityOutput,
                 _ => throw new ArgumentOutOfRangeException( nameof(direction) )
             };
 
@@ -102,7 +102,7 @@ namespace Metalama.Framework.Aspects
                 return;
             }
 
-            builder.Advice.AddFilter( builder.Target, nameof(this.Filter), this.Direction );
+            builder.Advice.AddContract( builder.Target, nameof(this.Validate), this.Direction );
         }
 
         public virtual void BuildAspect( IAspectBuilder<IParameter> builder )
@@ -116,17 +116,17 @@ namespace Metalama.Framework.Aspects
                 return;
             }
 
-            builder.Advice.AddFilter( builder.Target, nameof(this.Filter), this.Direction );
+            builder.Advice.AddContract( builder.Target, nameof(this.Validate), this.Direction );
         }
 
         public virtual void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder ) { }
 
         /// <summary>
-        /// Populates the <see cref="IEligibilityBuilder"/> for a field, property or indexer when the <see cref="FilterDirection"/> is known.
+        /// Populates the <see cref="IEligibilityBuilder"/> for a field, property or indexer when the <see cref="ContractDirection"/> is known.
         /// </summary>
-        protected static void BuildEligibilityForDirection( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder, FilterDirection direction )
+        protected static void BuildEligibilityForDirection( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder, ContractDirection direction )
         {
-            if ( direction != FilterDirection.Default )
+            if ( direction != ContractDirection.Default )
             {
                 builder.MustSatisfyAny(
                     b => b.MustBe<IField>(),
@@ -135,11 +135,11 @@ namespace Metalama.Framework.Aspects
         }
 
         /// <summary>
-        /// Populates the <see cref="IEligibilityBuilder"/> for a parameter when the <see cref="FilterDirection"/> is known.
+        /// Populates the <see cref="IEligibilityBuilder"/> for a parameter when the <see cref="ContractDirection"/> is known.
         /// </summary>
-        protected static void BuildEligibilityForDirection( IEligibilityBuilder<IParameter> builder, FilterDirection direction )
+        protected static void BuildEligibilityForDirection( IEligibilityBuilder<IParameter> builder, ContractDirection direction )
         {
-            if ( direction != FilterDirection.Default )
+            if ( direction != ContractDirection.Default )
             {
                 builder.AddRule( GetParameterEligibilityRule( direction )! );
             }
@@ -148,6 +148,6 @@ namespace Metalama.Framework.Aspects
         public virtual void BuildEligibility( IEligibilityBuilder<IParameter> builder ) { }
 
         [Template]
-        public abstract void Filter( dynamic? value );
+        public abstract void Validate( dynamic? value );
     }
 }

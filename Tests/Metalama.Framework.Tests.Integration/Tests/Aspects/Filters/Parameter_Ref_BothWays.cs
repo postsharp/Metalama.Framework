@@ -5,11 +5,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Filters.RefParamete
 
 #pragma warning disable CS8618
 
-internal class NotNullAttribute : FilterAspect
+internal class NotNullAttribute : ContractAspect
 {
-    public NotNullAttribute() : base( FilterDirection.Both ) { }
+    public NotNullAttribute() : base( ContractDirection.Both ) { }
 
-    public override void Filter( dynamic? value )
+    public override void Validate( dynamic? value )
     {
         if (value == null)
         {

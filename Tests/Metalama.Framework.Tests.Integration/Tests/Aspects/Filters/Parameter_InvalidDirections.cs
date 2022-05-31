@@ -5,11 +5,11 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Filters.InvalidDirections
 {
-    internal class NotNullAttribute : FilterAspect
+    internal class NotNullAttribute : ContractAspect
     {
-        public NotNullAttribute( FilterDirection direction ) : base( direction ) { }
+        public NotNullAttribute( ContractDirection direction ) : base( direction ) { }
 
-        public override void Filter( dynamic? value )
+        public override void Validate( dynamic? value )
         {
             if (value == null)
             {
@@ -22,16 +22,16 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Filters.InvalidDire
     {
         // All these situations are invalid and should result in eligibility errors.
 
-        private void M1( [NotNull( FilterDirection.Output )] string m ) { }
+        private void M1( [NotNull( ContractDirection.Output )] string m ) { }
 
-        private void M2( [NotNull( FilterDirection.Both )] string m ) { }
+        private void M2( [NotNull( ContractDirection.Both )] string m ) { }
 
-        private void M3( [NotNull( FilterDirection.Input )] out string m )
+        private void M3( [NotNull( ContractDirection.Input )] out string m )
         {
             m = "";
         }
 
-        private void M4( [NotNull( FilterDirection.Both )] out string m )
+        private void M4( [NotNull( ContractDirection.Both )] out string m )
         {
             m = "";
         }

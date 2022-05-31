@@ -10,7 +10,7 @@ internal class MyAspect : FieldAspect
 {
     public override void BuildAspect( IAspectBuilder<IField> builder )
     {
-        builder.Advice.AddFilter( builder.Target, nameof(Filter),  args: new { p = "hey"} );
+        builder.Advice.AddContract( builder.Target, nameof(Filter),  args: new { p = "hey"} );
     }
 
     [Template]
