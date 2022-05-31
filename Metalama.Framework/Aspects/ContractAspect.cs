@@ -11,7 +11,7 @@ namespace Metalama.Framework.Aspects
     /// A base aspect that can validate or change the value of fields, properties, indexers, and parameters.
     /// </summary>
     /// <remarks>
-    /// <para>A filter aspect can apply to the input or output data flow, or to both data flows, according to the <see cref="ContractDirection"/> value
+    /// <para>A contract aspect can apply to the input or output data flow, or to both data flows, according to the <see cref="ContractDirection"/> value
     /// passed to the constructor. Since the current class does not know the value of this parameter before it is instantiated, this class cannot
     /// set the eligibility conditions using the <see cref="BuildEligibility(Metalama.Framework.Eligibility.IEligibilityBuilder{Metalama.Framework.Code.IFieldOrPropertyOrIndexer})"/> method.
     /// If a derived class targets a specific <see cref="ContractDirection"/> (i.e. if the choice is not left to the user),
@@ -52,7 +52,7 @@ namespace Metalama.Framework.Aspects
         /// Initializes a new instance of the <see cref="ContractAspect"/> class.
         /// </summary>
         /// <param name="direction">The direction of the data flow (<see cref="ContractDirection.Input"/>,  <see cref="ContractDirection.Output"/> or <see cref="ContractDirection.Both"/>)
-        /// to which this filter applies. See the <see cref="ContractDirection"/> for details.</param>
+        /// to which this contract applies. See the <see cref="ContractDirection"/> for details.</param>
         protected ContractAspect( ContractDirection direction = ContractDirection.Default )
         {
             this.Direction = direction;
@@ -60,10 +60,10 @@ namespace Metalama.Framework.Aspects
 
         /// <summary>
         /// Gets the direction of the data flow (<see cref="ContractDirection.Input"/>,  <see cref="ContractDirection.Output"/> or <see cref="ContractDirection.Both"/>)
-        /// to which this filter applies.
+        /// to which this contract applies.
         /// </summary>
         /// <remarks>
-        /// It is the responsibility of the <i>author</i> of the aspect, and not of its <i>user</i>, to define the eligible directions of a filter.
+        /// It is the responsibility of the <i>author</i> of the aspect, and not of its <i>user</i>, to define the eligible directions of a contract.
         /// </remarks>
         protected ContractDirection Direction { get; }
 

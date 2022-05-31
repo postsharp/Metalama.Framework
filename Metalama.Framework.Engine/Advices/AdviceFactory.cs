@@ -892,14 +892,14 @@ namespace Metalama.Framework.Engine.Advices
             {
                 throw new ArgumentOutOfRangeException(
                     nameof(kind),
-                    UserMessageFormatter.Format( $"Cannot add an output filter to the parameter '{targetParameter}' because it is neither 'ref' nor 'out'." ) );
+                    UserMessageFormatter.Format( $"Cannot add an output contract to the parameter '{targetParameter}' because it is neither 'ref' nor 'out'." ) );
             }
 
             if ( kind == ContractDirection.Input && targetParameter.RefKind is not RefKind.None or RefKind.Ref or RefKind.In )
             {
                 throw new ArgumentOutOfRangeException(
                     nameof(kind),
-                    UserMessageFormatter.Format( $"Cannot add an input filter to the out parameter '{targetParameter}' " ) );
+                    UserMessageFormatter.Format( $"Cannot add an input contract to the out parameter '{targetParameter}' " ) );
             }
 
             this.AddFilterImpl( targetParameter, targetParameter.DeclaringMember, template, kind, tags, args );

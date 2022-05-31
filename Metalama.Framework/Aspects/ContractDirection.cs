@@ -4,7 +4,7 @@
 namespace Metalama.Framework.Aspects;
 
 /// <summary>
-/// Directions of the data flow to which the filter applies.
+/// Directions of the data flow to which the contract applies.
 /// </summary>
 [RunTimeOrCompileTime]
 public enum ContractDirection
@@ -15,12 +15,12 @@ public enum ContractDirection
     Default,
 
     /// <summary>
-    /// Filters the input value of the parameter (before execution of the method) or the value assigned to the field, property or indexer (before the actual assignment).
+    /// Validates the input value of the parameter (before execution of the method) or the value assigned to the field, property or indexer (before the actual assignment).
     /// </summary>
     Input,
 
     /// <summary>
-    /// Filters the output value of an <c>out</c> or <c>ref</c> parameter or the value (after execution of the method), the value returned by the
+    /// Validates the output value of an <c>out</c> or <c>ref</c> parameter or the value (after execution of the method), the value returned by the
     /// property or indexer getter, or the value assigned to the field at the moment when the field is retrieved.
     /// </summary>
     Output,
