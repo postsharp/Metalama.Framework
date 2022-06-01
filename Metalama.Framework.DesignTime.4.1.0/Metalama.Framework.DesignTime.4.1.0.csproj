@@ -10,9 +10,6 @@
 
     <ItemGroup>
         <Compile Include="..\Metalama.Framework.DesignTime\**\*.cs" Exclude="..\Metalama.Framework.DesignTime\obj\**\*.cs"/>
-        <Compile Update="..\Metalama.Framework.DesignTime\SourceGeneratorResult.cs">
-            <Link>Metalama.Framework.DesignTime\SourceGeneratorResult.cs</Link>
-        </Compile>
     </ItemGroup>
 
 </Project>
