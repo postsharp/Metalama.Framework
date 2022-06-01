@@ -15,13 +15,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 		Directory.Build.props = Directory.Build.props
 		Directory.Build.targets = Directory.Build.targets
+		Build\RoslynVersion\Latest.imports = Build\RoslynVersion\Latest.imports
 		LICENSE.md = LICENSE.md
 		nuget.config = nuget.config
-		THIRD-PARTY-NOTICES.TXT = THIRD-PARTY-NOTICES.TXT
-		eng\Versions.props = eng\Versions.props
-		Build\RoslynVersion\Latest.imports = Build\RoslynVersion\Latest.imports
 		Build\RoslynVersion\Roslyn4.0.1.props = Build\RoslynVersion\Roslyn4.0.1.props
 		Build\RoslynVersion\Roslyn4.1.0.props = Build\RoslynVersion\Roslyn4.1.0.props
+		THIRD-PARTY-NOTICES.TXT = THIRD-PARTY-NOTICES.TXT
+		eng\Versions.props = eng\Versions.props
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.SourceTransformer", "Build\Metalama.SourceTransformer\Metalama.SourceTransformer.csproj", "{DB6B2103-3DB0-4C86-BA11-46A2DC5B3E62}"
@@ -93,9 +93,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Framework.Engine.4
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Framework.DesignTime.4.0.1", "Metalama.Framework.DesignTime.4.0.1\Metalama.Framework.DesignTime.4.0.1.csproj", "{6009A304-9ECB-4939-BB11-6380E82DD9FF}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "4.0.1", "4.0.1", "{50C6D1B9-BA74-4B54-BDD9-36762ED7D905}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Other Roslyn Versions", "Other Roslyn Versions", "{50C6D1B9-BA74-4B54-BDD9-36762ED7D905}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Framework.DesignTime.VisualStudio.4.0.1", "Metalama.Framework.DesignTime.VisualStudio.4.0.1\Metalama.Framework.DesignTime.VisualStudio.4.0.1.csproj", "{5317617B-9481-4E51-B159-629057E921A2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Framework.DesignTime.4.1.0", "Metalama.Framework.DesignTime.4.1.0\Metalama.Framework.DesignTime.4.1.0.csproj", "{8A29E296-7DCA-488A-BEB7-F09329A16B07}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Framework.DesignTime.VisualStudio.4.1.0", "Metalama.Framework.DesignTime.VisualStudio.4.1.0\Metalama.Framework.DesignTime.VisualStudio.4.1.0.csproj", "{B2C891FB-61F3-46A4-B172-48B656FA6A34}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Framework.Engine.4.1.0", "Metalama.Framework.Engine.4.1.0\Metalama.Framework.Engine.4.1.0.csproj", "{C94D2048-087E-4767-BAFF-EBC8AB3B7287}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -215,6 +221,18 @@ Global
 		{5317617B-9481-4E51-B159-629057E921A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5317617B-9481-4E51-B159-629057E921A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5317617B-9481-4E51-B159-629057E921A2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A29E296-7DCA-488A-BEB7-F09329A16B07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A29E296-7DCA-488A-BEB7-F09329A16B07}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A29E296-7DCA-488A-BEB7-F09329A16B07}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A29E296-7DCA-488A-BEB7-F09329A16B07}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2C891FB-61F3-46A4-B172-48B656FA6A34}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2C891FB-61F3-46A4-B172-48B656FA6A34}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2C891FB-61F3-46A4-B172-48B656FA6A34}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2C891FB-61F3-46A4-B172-48B656FA6A34}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C94D2048-087E-4767-BAFF-EBC8AB3B7287}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C94D2048-087E-4767-BAFF-EBC8AB3B7287}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C94D2048-087E-4767-BAFF-EBC8AB3B7287}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C94D2048-087E-4767-BAFF-EBC8AB3B7287}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -233,6 +251,9 @@ Global
 		{A68D0C9F-9F32-4309-9725-7936C0C95C2D} = {50C6D1B9-BA74-4B54-BDD9-36762ED7D905}
 		{6009A304-9ECB-4939-BB11-6380E82DD9FF} = {50C6D1B9-BA74-4B54-BDD9-36762ED7D905}
 		{5317617B-9481-4E51-B159-629057E921A2} = {50C6D1B9-BA74-4B54-BDD9-36762ED7D905}
+		{8A29E296-7DCA-488A-BEB7-F09329A16B07} = {50C6D1B9-BA74-4B54-BDD9-36762ED7D905}
+		{B2C891FB-61F3-46A4-B172-48B656FA6A34} = {50C6D1B9-BA74-4B54-BDD9-36762ED7D905}
+		{C94D2048-087E-4767-BAFF-EBC8AB3B7287} = {50C6D1B9-BA74-4B54-BDD9-36762ED7D905}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {59CB4F2D-3547-4DDF-9712-7B3F95C1ED66}

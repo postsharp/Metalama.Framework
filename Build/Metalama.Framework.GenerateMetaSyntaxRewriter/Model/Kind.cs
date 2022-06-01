@@ -18,5 +18,6 @@ namespace Metalama.Framework.GenerateMetaSyntaxRewriter.Model
 
         // ReSharper disable once NonReadonlyMemberInGetHashCode
         public override int GetHashCode() => this.Name.GetHashCode();
+        public override string ToString() => this.Name;
     }
 }
