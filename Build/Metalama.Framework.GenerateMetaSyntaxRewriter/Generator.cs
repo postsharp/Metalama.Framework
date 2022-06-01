@@ -124,12 +124,14 @@ internal class Generator
                 {
                     writer.WriteLine( $"\t\tswitch( node.{field.Name}.Kind() )" );
                     writer.WriteLine( "\t\t{" );
+
                     foreach ( var k in GetVersionSpecificKinds( field ) )
                     {
                         writer.WriteLine( $"\t\t\tcase SyntaxKind.{k.Key.Name}:" );
                         writer.WriteLine( $"\t\t\t\tthis.VisitVersionSpecificFieldKind( node.{field.Name}, {k.Value!.QualifiedEnumValue} ); " );
                         writer.WriteLine( $"\t\t\t\tbreak;" );
                     }
+
                     writer.WriteLine( "\t\t}" );
                 }
             }
@@ -140,9 +142,10 @@ internal class Generator
         writer.WriteLine( "}" );
 
         bool IsVersionSpecificType( Node t ) => t.MinimalRoslynVersion!.Index > 0;
-        bool IsVersionSpecificField( Field f ) => f.MinimalRoslynVersion!.Index > 0;
-        IEnumerable<KeyValuePair<Kind, RoslynVersion>> GetVersionSpecificKinds( Field f ) => f.KindsMinimalRoslynVersions.Where( k => k.Value.Index > 0 );
 
+        bool IsVersionSpecificField( Field f ) => f.MinimalRoslynVersion!.Index > 0;
+
+        IEnumerable<KeyValuePair<Kind, RoslynVersion>> GetVersionSpecificKinds( Field f ) => f.KindsMinimalRoslynVersions.Where( k => k.Value.Index > 0 );
     }
 
     private static void WriteUsings( StreamWriter writer )
@@ -253,14 +256,14 @@ internal class Generator
     private static string Join( string separator, params object[] values )
     {
         return string.Join(
-                separator,
-                values.SelectMany(
-                    v => (v switch
-                    {
-                        string s => new[] { s },
-                        IEnumerable<string> ss => ss,
-                        _ => throw new InvalidOperationException( "Join must be passed strings or collections of strings" )
-                    }).Where( s => s != "" ) ) );
+            separator,
+            values.SelectMany(
+                v => (v switch
+                {
+                    string s => new[] { s },
+                    IEnumerable<string> ss => ss,
+                    _ => throw new InvalidOperationException( "Join must be passed strings or collections of strings" )
+                }).Where( s => s != "" ) ) );
     }
 
     private static string CamelCase( string name )
@@ -425,9 +428,9 @@ internal class Generator
 
                 for ( var i = 0; i < minimalRoslynApiVersions.Count; i++ )
                 {
-
                     var minVersion = minimalRoslynApiVersions[i];
                     var maxVersionIndex = i == minimalRoslynApiVersions.Count - 1 ? syntaxVersions.Length - 1 : minimalRoslynApiVersions[i + 1].Index - 1;
+
                     if ( maxVersionIndex > this._syntax.Version.Index )
                     {
                         maxVersionIndex = this._syntax.Version.Index;
@@ -562,6 +565,13 @@ internal class Generator
                 var factoryWithNoAutoCreatableTokenFields = new HashSet<Field>( DetermineRedFactoryWithNoAutoCreatableTokenFields( node ) );
                 var orderedMinimalFactoryFields = node.Fields.Where( factoryWithNoAutoCreatableTokenFields.Contains ).ToList();
                 WriteMethod( orderedMinimalFactoryFields );
+            }
+            else if ( node.Name == "LiteralExpressionSyntax" )
+            {
+                // This is added for backward compatibility because SyntaxFactory.LiteralExpression(kind) is implemented manually
+                // since Roslyn 4.2.0.
+                
+                WriteMethod( new List<Field>() );
             }
         }
 
