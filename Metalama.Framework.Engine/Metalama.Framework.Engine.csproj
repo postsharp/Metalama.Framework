@@ -8,6 +8,7 @@
         <MetalamaCompilerDisablePackCustomization>True</MetalamaCompilerDisablePackCustomization>
         <UseMetalamaCompiler>Private</UseMetalamaCompiler>
         <AssemblyName>Metalama.Framework.Engine.$(ThisRoslynVersion)</AssemblyName>
+        <PackageId>Metalama.Framework.Engine</PackageId>
     </PropertyGroup>
 
     <ItemGroup>

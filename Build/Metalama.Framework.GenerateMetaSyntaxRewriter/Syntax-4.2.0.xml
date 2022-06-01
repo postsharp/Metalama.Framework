@@ -228,7 +228,7 @@
       <Kind Name="AmpersandToken" />
       <Kind Name="AsteriskToken" />
       <Kind Name="CaretToken" />"
-            </Field>
+      </Field>
     <Field Name="Operand" Type="ExpressionSyntax" />
   </Node>
   <Node Name="AwaitExpressionSyntax" Base="ExpressionSyntax">
@@ -406,6 +406,8 @@
       <Kind Name="ArgListKeyword" />
       <Kind Name="NumericLiteralToken" />
       <Kind Name="StringLiteralToken" />
+      <Kind Name="MultiLineRawStringLiteralToken" />
+      <Kind Name="SingleLineRawStringLiteralToken" />
       <Kind Name="CharacterLiteralToken" />
       <Kind Name="TrueKeyword" />
       <Kind Name="FalseKeyword" />
@@ -890,10 +892,15 @@
     <Field Name="StringStartToken" Type="SyntaxToken">
       <Kind Name="InterpolatedStringStartToken" />
       <Kind Name="InterpolatedVerbatimStringStartToken" />
+      <Kind Name="InterpolatedSingleLineRawStringStartToken" />
+      <Kind Name="InterpolatedMultiLineRawStringStartToken" />
     </Field>
     <Field Name="Contents" Type="SyntaxList&lt;InterpolatedStringContentSyntax&gt;" />
     <Field Name="StringEndToken" Type="SyntaxToken">
       <Kind Name="InterpolatedStringEndToken" />
+      <Kind Name="InterpolatedStringEndToken" />
+      <Kind Name="InterpolatedRawStringEndToken" />
+      <Kind Name="InterpolatedRawStringEndToken" />
     </Field>
   </Node>
   <Node Name="IsPatternExpressionSyntax" Base="ExpressionSyntax">
@@ -1022,6 +1029,27 @@
       <Kind Name="NotKeyword" />
     </Field>
     <Field Name="Pattern" Type="PatternSyntax" />
+  </Node>
+  <Node Name="ListPatternSyntax" Base="PatternSyntax">
+    <Kind Name="ListPattern" />
+    <Field Name="OpenBracketToken" Type="SyntaxToken">
+      <Kind Name="OpenBracketToken" />
+    </Field>
+    <Field Name="Patterns" Type="SeparatedSyntaxList&lt;PatternSyntax&gt;" AllowTrailingSeparator="true" />
+    <Field Name="CloseBracketToken" Type="SyntaxToken">
+      <Kind Name="CloseBracketToken" />
+    </Field>
+    <Field Name="Designation" Type="VariableDesignationSyntax" Optional="true">
+      <Kind Name="SingleVariableDesignation" />
+      <Kind Name="DiscardDesignation" />
+    </Field>
+  </Node>
+  <Node Name="SlicePatternSyntax" Base="PatternSyntax">
+    <Kind Name="SlicePattern" />
+    <Field Name="DotDotToken" Type="SyntaxToken">
+      <Kind Name="DotDotToken" />
+    </Field>
+    <Field Name="Pattern" Type="PatternSyntax" Optional="true" />
   </Node>
   <AbstractNode Name="InterpolatedStringContentSyntax" Base="CSharpSyntaxNode" />
   <Node Name="InterpolatedStringTextSyntax" Base="InterpolatedStringContentSyntax">
@@ -2356,6 +2384,9 @@
       <Kind Name="IdentifierToken" />
       <Kind Name="ArgListKeyword" />
     </Field>
+    <Field Name="ExclamationExclamationToken" Type="SyntaxToken" Optional="true">
+      <Kind Name="ExclamationExclamationToken" />
+    </Field>
     <Field Name="Default" Type="EqualsValueClauseSyntax" Optional="true" />
   </Node>
   <Node Name="FunctionPointerParameterSyntax" Base="BaseParameterSyntax">
@@ -2366,7 +2397,7 @@
   </Node>
   <Node Name="IncompleteMemberSyntax" Base="MemberDeclarationSyntax">
     <Kind Name="IncompleteMember" />n
-        <Field Name="AttributeLists" Type="SyntaxList&lt;AttributeListSyntax&gt;" Override="true" /><Field Name="Modifiers" Type="SyntaxList&lt;SyntaxToken&gt;" Override="true" /><Field Name="Type" Type="TypeSyntax" Optional="true" /></Node>
+    <Field Name="AttributeLists" Type="SyntaxList&lt;AttributeListSyntax&gt;" Override="true" /><Field Name="Modifiers" Type="SyntaxList&lt;SyntaxToken&gt;" Override="true" /><Field Name="Type" Type="TypeSyntax" Optional="true" /></Node>
   <Node Name="SkippedTokensTriviaSyntax" Base="StructuredTriviaSyntax">
     <Kind Name="SkippedTokensTrivia" />
     <Field Name="Tokens" Type="SyntaxList&lt;SyntaxToken&gt;" />

@@ -17,7 +17,7 @@ internal class SyntaxDocument
     public SyntaxDocument( RoslynVersion version )
     {
         this.Version = version;
-        this._tree = TreeReader.ReadTree( $"Syntax-{version.Name}.xml" );
+        this._tree = TreeReader.ReadTree( $"..\\..\\..\\Syntax-{version.Name}.xml" );
         this._nodeMap = this._tree.Types.OfType<Node>().ToDictionary( n => n.Name );
         this._parentMap = this._tree.Types.ToDictionary( n => n.Name, n => n.Base )!;
         this._parentMap.Add( this._tree.Root, null );

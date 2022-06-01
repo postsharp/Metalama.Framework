@@ -1,6 +1,6 @@
 <Project DefaultTargets="Build">
 
-    <Import Project="..\Build\RoslynVersion\Roslyn4.0.1.props"/>
+    <Import Project="..\Build\RoslynVersion\Roslyn4.1.0.props"/>
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>

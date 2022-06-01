@@ -35,10 +35,19 @@ internal static class VersionDetector
                 // Get the minimal version of the syntax defining this field.
                 var fieldMinimalVersion = fields.Min( f => f.Version );
 
+                // Gets the minimal version for each kind of the field.
+                var kindsMinimalVersion = fields.SelectMany( f => f.Field!.Kinds.Select( k => (Kind: k, f.Version) ) )
+                    .GroupBy( k => k.Kind )
+                    .Select( g => (Kind: g.Key, Version: g.Select( i => i.Version ).Min()) )
+                    .ToList();
+
                 // Update the MinimalRoslynVersion property in all syntax documents.
-                foreach ( var anyVersionField in fields.Select( x => x.Field! ) )
+                foreach ( var anyVersionField in fields )
                 {
-                    anyVersionField.MinimalRoslynVersion = fieldMinimalVersion;
+                    anyVersionField.Field!.MinimalRoslynVersion = fieldMinimalVersion;
+                    
+                    anyVersionField.Field.KindsMinimalRoslynVersions = kindsMinimalVersion.Where( k => k.Version.Index <= anyVersionField.Version.Index )
+                        .ToDictionary( i => i.Kind, i => i.Version );
                 }
             }
         }
