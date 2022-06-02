@@ -17,13 +17,18 @@ namespace Metalama.Framework.Engine.Advices
                        .Select( ( p, i ) => (p, i) )
                        .All(
                            amp =>
-                               method.Compilation.InvariantComparer.Equals( amp.p.Type, other.Parameters[amp.i].Type )
+                               method.Compilation.InvariantComparer.ParameterTypeEquals( amp.p.Type, other.Parameters[amp.i].Type )
                                && amp.p.RefKind == other.Parameters[amp.i].RefKind );
         }
 
         public static bool SignatureEquals( this IProperty property, IProperty other )
         {
             return property.Name == other.Name;
+        }
+
+        public static bool SignatureEquals( this IEvent @event, IEvent other )
+        {
+            return @event.Name == other.Name;
         }
 
         public static bool SignatureEquals( this IIndexer property, IIndexer other )
@@ -34,7 +39,7 @@ namespace Metalama.Framework.Engine.Advices
                        .Select( ( p, i ) => (p, i) )
                        .All(
                            app =>
-                               property.Compilation.InvariantComparer.Equals( app.p.Type, other.Parameters[app.i].Type )
+                               property.Compilation.InvariantComparer.ParameterTypeEquals( app.p.Type, other.Parameters[app.i].Type )
                                && app.p.RefKind == other.Parameters[app.i].RefKind );
         }
     }

@@ -91,13 +91,13 @@ namespace Metalama.Framework.Engine.Transformations
             }
             else
             {
-                if ( returnValueName != null )
+                if ( this.OverriddenDeclaration.ReturnType.Is( SpecialType.Void ) )
                 {
-                    statements.Add( ReturnStatement( proceedExpression ) );
+                    statements.Add( ExpressionStatement( proceedExpression ) );
                 }
                 else
                 {
-                    statements.Add( ExpressionStatement( proceedExpression ) );
+                    statements.Add( ReturnStatement( proceedExpression ) );
                 }
             }
 

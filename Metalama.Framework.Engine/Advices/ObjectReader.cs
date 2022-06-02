@@ -37,6 +37,8 @@ namespace Metalama.Framework.Engine.Advices
             this.Source = instance;
         }
 
+        public static IObjectReader Merge( params IObjectReader?[] readers ) => new MergeWrapper( readers );
+
         public object? this[ string key ]
         {
             get

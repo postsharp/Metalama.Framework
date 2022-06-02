@@ -3,7 +3,7 @@ using Metalama.Framework.Aspects;
 
 #pragma warning disable CS8618
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Filters.OutParameter
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Filters.Parameter_Out
 {
     internal class NotNullAttribute : FilterAspect
     {

@@ -30,7 +30,6 @@ namespace Metalama.Framework.Engine.Advices
         private readonly IServiceProvider _serviceProvider;
         private readonly IDiagnosticAdder _diagnosticAdder;
 
-        private readonly Dictionary<INamedType, ImplementInterfaceAdvice> _implementInterfaceAdvices;
         private readonly Dictionary<IMember, FilterAdvice> _filterAdvices;
 
         internal List<Advice> Advices { get; }
@@ -47,7 +46,6 @@ namespace Metalama.Framework.Engine.Advices
             this._serviceProvider = serviceProvider;
             this._compilation = compilation;
             this._diagnosticAdder = diagnosticAdder;
-            this._implementInterfaceAdvices = new Dictionary<INamedType, ImplementInterfaceAdvice>( compilation.InvariantComparer );
             this._filterAdvices = new Dictionary<IMember, FilterAdvice>( compilation.InvariantComparer );
             this.Advices = new List<Advice>();
         }
@@ -65,7 +63,6 @@ namespace Metalama.Framework.Engine.Advices
             this._serviceProvider = parent._serviceProvider;
             this._compilation = parent._compilation;
             this._diagnosticAdder = parent._diagnosticAdder;
-            this._implementInterfaceAdvices = parent._implementInterfaceAdvices;
             this._filterAdvices = parent._filterAdvices;
             this.Advices = parent.Advices;
         }
@@ -755,17 +752,19 @@ namespace Metalama.Framework.Engine.Advices
 
             var diagnosticList = new DiagnosticList();
 
-            if ( !this._implementInterfaceAdvices.TryGetValue( targetType, out var advice ) )
-            {
-                this._implementInterfaceAdvices[targetType] =
-                    advice = new ImplementInterfaceAdvice( this._aspect, this._templateInstance, targetType, _layerName );
+            var advice = new ImplementInterfaceAdvice( 
+                this._aspect, 
+                this._templateInstance, 
+                targetType, 
+                interfaceType, 
+                whenExists, 
+                null, 
+                _layerName, 
+                ObjectReader.GetReader( tags ) );
 
-                advice.Initialize( diagnosticList );
-                this.Advices.Add( advice );
-            }
-
-            advice.AddInterfaceImplementation( interfaceType, whenExists, null, diagnosticList, ObjectReader.GetReader( tags ) );
+            advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
+            this.Advices.Add( advice );
 
             this._diagnosticAdder.Report( diagnosticList );
         }
@@ -797,17 +796,19 @@ namespace Metalama.Framework.Engine.Advices
 
             var diagnosticList = new DiagnosticList();
 
-            if ( !this._implementInterfaceAdvices.TryGetValue( targetType, out var advice ) )
-            {
-                this._implementInterfaceAdvices[targetType] =
-                    advice = new ImplementInterfaceAdvice( this._aspect, this._templateInstance, targetType, _layerName );
+            var advice = new ImplementInterfaceAdvice(
+                this._aspect,
+                this._templateInstance,
+                targetType,
+                interfaceType,
+                whenExists,
+                interfaceMemberSpecifications,
+                _layerName,
+                ObjectReader.GetReader( tags ) );
 
-                advice.Initialize( diagnosticList );
-                this.Advices.Add( advice );
-            }
-
-            advice.AddInterfaceImplementation( interfaceType, whenExists, null, diagnosticList, ObjectReader.GetReader( tags ) );
+            advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
+            this.Advices.Add( advice );
 
             this._diagnosticAdder.Report( diagnosticList );
         }
@@ -902,6 +903,13 @@ namespace Metalama.Framework.Engine.Advices
                     UserMessageFormatter.Format( $"Cannot add an input filter to the out parameter '{targetParameter}' " ) );
             }
 
+            if ( targetParameter.IsReturnParameter && targetParameter.Type.Is( Code.SpecialType.Void ) )
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof( targetParameter ),
+                    UserMessageFormatter.Format( $"Cannot add a filter to the return parameter of a void method." ) );
+            }
+
             this.AddFilterImpl( targetParameter, targetParameter.DeclaringMember, template, kind, tags, args );
         }
 
@@ -935,7 +943,7 @@ namespace Metalama.Framework.Engine.Advices
 
             if ( !this._filterAdvices.TryGetValue( targetMember, out var advice ) )
             {
-                advice = new FilterAdvice(
+                this._filterAdvices[targetMember] = advice = new FilterAdvice(
                     this._aspect,
                     this._templateInstance,
                     targetMember,

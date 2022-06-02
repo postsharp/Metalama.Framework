@@ -18,7 +18,7 @@ namespace Metalama.Framework.Aspects
 
         // ReSharper disable UnusedParameter.Local
 
-        private InterfaceMemberSpecification( IMember interfaceMember, IMember implementationMember )
+        private InterfaceMemberSpecification( IMember interfaceMember, IMember implementationMember, InterfaceMemberOverrideStrategy overrideStrategy, object? tags )
 #pragma warning restore IDE0051 // Remove unused private members
         {
             throw new NotImplementedException();
@@ -40,22 +40,51 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         public IMember ImplementationMember { get; }
 
+        // ReSharper disable once UnassignedGetOnlyAutoProperty
+
+        /// <summary>
+        /// Gets a value indication the override strategy when interface member conflicts with an existing class member.
+        /// </summary>
+        public InterfaceMemberOverrideStrategy OverrideStrategy { get; }
+
+        // ReSharper disable once UnassignedGetOnlyAutoProperty
+
+        /// <summary>
+        /// Gets an optional opaque object of anonymous type passed to the template method and exposed under the <see cref="meta.Tags"/> property
+        /// of the <see cref="meta"/> API. Replaces values provided for the whole advice.
+        /// </summary>
+        public object? Tags { get; }
+
         [Obsolete( "Not implemented." )]
         public static InterfaceMemberSpecification Create<TInterfaceType, TReturnType>(
             Expression<Func<TInterfaceType, TReturnType>> expression,
-            string aspectMemberName )
+            string aspectMemberName, 
+            InterfaceMemberOverrideStrategy overrideStrategy = InterfaceMemberOverrideStrategy.Default,
+            object? tags = null )
             => throw new NotImplementedException();
 
         [Obsolete( "Not implemented." )]
         public static InterfaceMemberSpecification Create<TInterfaceType, TReturnType>(
             Expression<Func<TInterfaceType, TReturnType>> expression,
-            IMember targetTypeMember )
+            IMember targetTypeMember,
+            InterfaceMemberOverrideStrategy overrideStrategy = InterfaceMemberOverrideStrategy.Default,
+            object? tags = null )
             => throw new NotImplementedException();
 
         [Obsolete( "Not implemented." )]
-        public static InterfaceMemberSpecification Create( IMember interfaceMember, string aspectMemberName ) => throw new NotImplementedException();
+        public static InterfaceMemberSpecification Create( 
+            IMember interfaceMember, 
+            string aspectMemberName,
+            InterfaceMemberOverrideStrategy overrideStrategy = InterfaceMemberOverrideStrategy.Default,
+            object? tags = null ) 
+            => throw new NotImplementedException();
 
         [Obsolete( "Not implemented." )]
-        public static InterfaceMemberSpecification Create( IMember interfaceMember, IMember targetTypeMember ) => throw new NotImplementedException();
+        public static InterfaceMemberSpecification Create( 
+            IMember interfaceMember, 
+            IMember targetTypeMember,
+            InterfaceMemberOverrideStrategy overrideStrategy = InterfaceMemberOverrideStrategy.Default,
+            object? tags = null ) 
+            => throw new NotImplementedException();
     }
 }

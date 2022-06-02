@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -53,7 +54,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             }
 
             // Variable and method return type should be equal (i.e. no implicit conversions).
-            if ( !SymbolEqualityComparer.Default.Equals( semanticModel.GetSymbolInfo( variableDeclaration.Type ).Symbol, methodSymbol.ReturnType ) )
+            if ( !SymbolEqualityComparer.Default.ParameterTypeEquals( semanticModel.GetSymbolInfo( variableDeclaration.Type ).Symbol, methodSymbol.ReturnType ) )
             {
                 return false;
             }

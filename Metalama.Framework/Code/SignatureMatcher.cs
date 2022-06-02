@@ -107,6 +107,7 @@ namespace Metalama.Framework.Code
             {
                 var parameterInfo = payload.ParameterGetter( payload.InnerPayload, parameterIndex );
 
+                // TODO: This comparison does not work for generic type parameters.
                 return
                     payload.Compilation.InvariantComparer.Equals( expectedType, parameterInfo.Type )
                     && expectedRefKind == parameterInfo.RefKind;

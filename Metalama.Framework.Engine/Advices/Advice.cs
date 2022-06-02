@@ -44,8 +44,20 @@ namespace Metalama.Framework.Engine.Advices
             this.AspectLayerId = new AspectLayerId( this.Aspect.AspectClass, layerName );
         }
 
+        /// <summary>
+        /// Initializes the advice. Executed before any advices are executed.
+        /// </summary>
+        /// <param name="diagnosticAdder">Diagnostic adder.</param>
+        /// <remarks>
+        /// The advice should only report diagnostics that do not take into account the target declaration(s).
+        /// </remarks>
         public abstract void Initialize( IDiagnosticAdder diagnosticAdder );
 
+        /// <summary>
+        /// Applies the advice on the given compilation.
+        /// </summary>
+        /// <param name="compilation">Input compilation.</param>
+        /// <returns>Advice result containing transformations and diagnostics.</returns>
         public abstract AdviceResult ToResult( ICompilation compilation );
     }
 }
