@@ -47,15 +47,21 @@
         <EmbeddedResource Include="..\Metalama.Framework.Sdk\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.Sdk.dll" Link="Resources\Metalama.Framework.Sdk.dll"/>
         <EmbeddedResource Include="..\Metalama.Framework.DesignTime.Contracts.1.0\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.Contracts.1.0.dll" Link="Resources\Metalama.Framework.DesignTime.Contracts.1.0.dll"/>
 
-        <!-- Current repo: 4.1.0 -->
-        <EmbeddedResource Include="..\Metalama.Framework.Engine\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.Engine.$(RoslynVersion).dll" Link="Resources\Metalama.Framework.Engine.4.1.0.dll"/>
-        <EmbeddedResource Include="..\Metalama.Framework.DesignTime\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.$(RoslynVersion).dll" Link="Resources\Metalama.Framework.DesignTime.4.1.0.dll"/>
-        <EmbeddedResource Include="..\Metalama.Framework.DesignTime.VisualStudio\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.VisualStudio.$(RoslynVersion).dll" Link="Resources\Metalama.Framework.DesignTime.VisualStudio.4.1.0.dll"/>
+        <!-- Current repo: latest API version -->
+        <EmbeddedResource Include="..\Metalama.Framework.Engine\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.Engine.$(RoslynApiMaxVersion).dll" Link="Resources\Metalama.Framework.Engine.$(RoslynApiMaxVersion).dll"/>
+        <EmbeddedResource Include="..\Metalama.Framework.DesignTime\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.$(RoslynApiMaxVersion).dll" Link="Resources\Metalama.Framework.DesignTime..$(RoslynApiMaxVersion).dll"/>
+        <EmbeddedResource Include="..\Metalama.Framework.DesignTime.VisualStudio\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.VisualStudio.$(RoslynApiMaxVersion).dll" Link="Resources\Metalama.Framework.DesignTime.VisualStudio..$(RoslynApiMaxVersion).dll"/>
 
         <!-- Current repo: 4.0.1 -->
         <EmbeddedResource Include="..\Metalama.Framework.Engine.4.0.1\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.Engine.4.0.1.dll" Link="Resources\Metalama.Framework.Engine.4.0.1.dll"/>
         <EmbeddedResource Include="..\Metalama.Framework.DesignTime.4.0.1\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.4.0.1.dll" Link="Resources\Metalama.Framework.DesignTime.4.0.1.dll"/>
         <EmbeddedResource Include="..\Metalama.Framework.DesignTime.VisualStudio.4.0.1\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.VisualStudio.4.0.1.dll" Link="Resources\Metalama.Framework.DesignTime.VisualStudio.4.0.1.dll"/>
+
+        <!-- Current repo: 4.1.0 -->
+        <EmbeddedResource Include="..\Metalama.Framework.Engine.4.1.0\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.Engine.4.1.0.dll" Link="Resources\Metalama.Framework.Engine.4.1.0.dll"/>
+        <EmbeddedResource Include="..\Metalama.Framework.DesignTime.4.1.0\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.4.1.0.dll" Link="Resources\Metalama.Framework.DesignTime.4.1.0.dll"/>
+        <EmbeddedResource Include="..\Metalama.Framework.DesignTime.VisualStudio.4.1.0\bin\$(Configuration)\$(TargetFramework)\Metalama.Framework.DesignTime.VisualStudio.4.1.0.dll" Link="Resources\Metalama.Framework.DesignTime.VisualStudio.4.1.0.dll"/>
+
 
     </ItemGroup>
 

@@ -7,7 +7,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.SyntaxSerialization;
-using Metalama.Framework.Engine.Templating.MetaModel;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -68,7 +68,7 @@ namespace Metalama.Framework.Engine.Templating
             this._templateMemberClassifier = new TemplateMemberClassifier( runTimeCompilation, syntaxTreeAnnotationMap, serviceProvider );
             this._compileTimeOnlyRewriter = new CompileTimeOnlyRewriter( this );
 
-            var syntaxGenerationContext = SyntaxGenerationContext.CreateDefault( serviceProvider, compileTimeCompilation );
+            var syntaxGenerationContext = SyntaxGenerationContext.Create( serviceProvider, compileTimeCompilation );
             this._typeOfRewriter = new TypeOfRewriter( syntaxGenerationContext );
 
             this._templateTypeArgumentType =
@@ -455,7 +455,7 @@ namespace Metalama.Framework.Engine.Templating
             => this.CreateRunTimeExpression( expression );
 
         /// <summary>
-        /// Transforms an <see cref="ExpressionSyntax"/> that instantiates a <see cref="RuntimeExpression"/>
+        /// Transforms an <see cref="ExpressionSyntax"/> that instantiates a <see cref="RunTimeTemplateExpression"/>
         /// that represents the input.
         /// </summary>
         private ExpressionSyntax CreateRunTimeExpression( ExpressionSyntax expression )
@@ -690,7 +690,8 @@ namespace Metalama.Framework.Engine.Templating
 
             // Cast to dynamic expressions.
             if ( transformationKind != TransformationKind.Transform &&
-                 this._syntaxTreeAnnotationMap.GetExpressionType( node.Expression ) is IDynamicTypeSymbol )
+                 this._syntaxTreeAnnotationMap.GetExpressionType( node.Expression ) is IDynamicTypeSymbol &&
+                 !this._templateMemberClassifier.IsTemplateParameter( node.Expression ) )
             {
                 return InvocationExpression(
                     this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.DynamicMemberAccessExpression) ),

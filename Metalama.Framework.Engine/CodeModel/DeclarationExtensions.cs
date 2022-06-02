@@ -6,7 +6,7 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Templating.MetaModel;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -134,7 +134,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => null
             };
 
-        internal static void CheckArguments( this IDeclaration declaration, IReadOnlyList<IParameter> parameters, RuntimeExpression[]? arguments )
+        internal static void CheckArguments( this IDeclaration declaration, IReadOnlyList<IParameter> parameters, RunTimeTemplateExpression[]? arguments )
         {
             // TODO: somehow provide locations for the diagnostics?
             var argumentsLength = arguments?.Length ?? 0;
@@ -161,7 +161,7 @@ namespace Metalama.Framework.Engine.CodeModel
         internal static ArgumentSyntax[] GetArguments(
             this IDeclaration declaration,
             IReadOnlyList<IParameter> parameters,
-            RuntimeExpression[]? args )
+            RunTimeTemplateExpression[]? args )
         {
             CheckArguments( declaration, parameters, args );
 
@@ -217,7 +217,10 @@ namespace Metalama.Framework.Engine.CodeModel
             return arguments.ToArray();
         }
 
-        internal static ExpressionSyntax GetReceiverSyntax<T>( this T declaration, RuntimeExpression instance, SyntaxGenerationContext generationContext )
+        internal static ExpressionSyntax GetReceiverSyntax<T>(
+            this T declaration,
+            RunTimeTemplateExpression instance,
+            SyntaxGenerationContext generationContext )
             where T : IMember
         {
             if ( declaration.IsStatic )

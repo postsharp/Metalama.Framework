@@ -46,14 +46,14 @@ namespace Metalama.Framework.Engine.Advices
             return new BoundTemplateMethod( template, null, GetTemplateArguments( template, arguments ) );
         }
 
-        public static BoundTemplateMethod ForFilter( this in TemplateMember<IMethod> template, string parameterName, IObjectReader? arguments = null )
+        public static BoundTemplateMethod ForContract( this in TemplateMember<IMethod> template, string parameterName, IObjectReader? arguments = null )
         {
             // The template must be void.
             if ( !template.Declaration!.ReturnType.Is( SpecialType.Void ) )
             {
                 throw new InvalidTemplateSignatureException(
                     UserMessageFormatter.Format(
-                        $"Cannot use the method '{template.Declaration}' as a filter template: the method return type must be a void." ) );
+                        $"Cannot use the method '{template.Declaration}' as a contract template: the method return type must be a void." ) );
             }
 
             // The template must not have run-time parameters.
@@ -61,7 +61,7 @@ namespace Metalama.Framework.Engine.Advices
             {
                 throw new InvalidTemplateSignatureException(
                     UserMessageFormatter.Format(
-                        $"Cannot use the method '{template.Declaration}' as a filter template: the method cannot have run-time parameters except 'value'." ) );
+                        $"Cannot use the method '{template.Declaration}' as a contract template: the method cannot have run-time parameters except 'value'." ) );
             }
 
             if ( !template.TemplateClassMember.IndexedParameters.TryGetValue( "value", out var valueTemplateParameter )
@@ -69,7 +69,7 @@ namespace Metalama.Framework.Engine.Advices
             {
                 throw new InvalidTemplateSignatureException(
                     UserMessageFormatter.Format(
-                        $"Cannot use the method '{template.Declaration}' as a filter template: the method must have a run-time parameter named 'value'." ) );
+                        $"Cannot use the method '{template.Declaration}' as a contract template: the method must have a run-time parameter named 'value'." ) );
             }
 
             var parameterMapping = ImmutableDictionary<string, ExpressionSyntax>.Empty;

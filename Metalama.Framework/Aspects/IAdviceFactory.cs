@@ -305,35 +305,35 @@ namespace Metalama.Framework.Aspects
             object? args = null );
 
         /// <summary>
-        /// Adds a filter to a parameter. Filters are usually used to validate parameters (pre- or post-conditions) or to normalize their value (null-to-empty, trimming, normalizing case, ...).
+        /// Adds a contract to a parameter. Contracts are usually used to validate parameters (pre- or post-conditions) or to normalize their value (null-to-empty, trimming, normalizing case, ...).
         /// </summary>
-        /// <param name="targetParameter">The parameter to which the filter should be added.</param>
+        /// <param name="targetParameter">The parameter to which the contract should be added.</param>
         /// <param name="template">The name of the template method. This method must have a single run-time parameter named <c>value</c>, and be annotated with the <see cref="TemplateAttribute"/> custom attribute.</param>
-        /// <param name="direction">Direction of the data flow to which the filter should apply. See <see cref="FilterDirection"/> for details.</param>
+        /// <param name="direction">Direction of the data flow to which the contract should apply. See <see cref="ContractDirection"/> for details.</param>
         /// <param name="tags">An optional opaque object of anonymous type passed to templates and exposed under the <see cref="meta.Tags"/> property of the
         ///     <see cref="meta"/> API.</param>
         /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template.</param>
-        void AddFilter(
+        void AddContract(
             IParameter targetParameter,
             string template,
-            FilterDirection direction = FilterDirection.Default,
+            ContractDirection direction = ContractDirection.Default,
             object? tags = null,
             object? args = null );
 
         /// <summary>
-        /// Adds a filter to a field, property or indexer. Filters are usually used to validate the value assigned to fields properties or indexers or to normalize their value (null-to-empty, trimming, normalizing case, ...)
-        /// before assignment. Alternatively, a filter can be used to validate the value <i>returned</i> by a property or indexer, in which case the <paramref name="direction"/> parameter should be set to <see cref="FilterDirection.Output"/>.
+        /// Adds a contract to a field, property or indexer. Contracts are usually used to validate the value assigned to fields properties or indexers or to normalize their value (null-to-empty, trimming, normalizing case, ...)
+        /// before assignment. Alternatively, a contract can be used to validate the value <i>returned</i> by a property or indexer, in which case the <paramref name="direction"/> parameter should be set to <see cref="ContractDirection.Output"/>.
         /// </summary>
-        /// <param name="targetMember">The field, property or indexer to which the filter should be added.</param>
+        /// <param name="targetMember">The field, property or indexer to which the contract should be added.</param>
         /// <param name="template">The name of the template method. This method must have a single run-time parameter named <c>value</c>, and be annotated with the <see cref="TemplateAttribute"/> custom attribute.</param>
-        /// <param name="direction">Direction of the data flow to which the filter should apply. See <see cref="FilterDirection"/> for details.</param>
+        /// <param name="direction">Direction of the data flow to which the contract should apply. See <see cref="ContractDirection"/> for details.</param>
         /// <param name="tags">An optional opaque object of anonymous type passed to templates and exposed under the <see cref="meta.Tags"/> property of the
         ///     <see cref="meta"/> API.</param>
         /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template.</param>      
-        void AddFilter(
+        void AddContract(
             IFieldOrPropertyOrIndexer targetMember,
             string template,
-            FilterDirection direction = FilterDirection.Default,
+            ContractDirection direction = ContractDirection.Default,
             object? tags = null,
             object? args = null );
 

@@ -62,7 +62,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 BaseListSyntax? baseList = null;
 
                 var members = List<MemberDeclarationSyntax>();
-                var syntaxGenerationContext = SyntaxGenerationContext.CreateDefault( serviceProvider, partialCompilation.Compilation, true );
+                var syntaxGenerationContext = SyntaxGenerationContext.Create( serviceProvider, partialCompilation.Compilation, true );
 
                 foreach ( var transformation in transformationGroup )
                 {

@@ -7,9 +7,9 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(RoslynMinimalVersion)"/>
-        <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="$(RoslynMinimalVersion)"/>
-        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynMinimalVersion)"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="$(RoslynApiMinVersion)"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.Workspaces.Common" Version="$(RoslynApiMinVersion)"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="$(RoslynApiMinVersion)"/>
 
     </ItemGroup>
 
