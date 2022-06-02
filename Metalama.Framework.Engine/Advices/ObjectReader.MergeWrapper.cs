@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.Advices
                         continue;
                     }
 
-                    foreach ( var kvp in readers[i] )
+                    foreach ( var kvp in readers[i]! )
                     {
                         builder[kvp.Key] = kvp.Value;
                     }

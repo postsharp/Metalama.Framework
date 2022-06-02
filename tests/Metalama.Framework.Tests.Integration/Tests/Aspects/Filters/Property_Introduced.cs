@@ -19,12 +19,12 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Filters.Property_In
         {
             foreach (var property in builder.Target.Properties)
             {
-                builder.Advice.AddFilter(property, nameof(Filter), FilterDirection.Both);
+                builder.Advice.AddContract(property, nameof(Filter), ContractDirection.Both);
             }
 
             var introducedField = builder.Advice.IntroduceField(builder.Target, nameof(IntroducedProperty));
 
-            builder.Advice.AddFilter(introducedField, nameof(Filter), FilterDirection.Both);
+            builder.Advice.AddContract(introducedField, nameof(Filter), ContractDirection.Both);
         }
 
         [Template]

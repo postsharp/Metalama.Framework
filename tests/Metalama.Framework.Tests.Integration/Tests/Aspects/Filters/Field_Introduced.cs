@@ -3,7 +3,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Filters.Field_Introduced;
 
-#pragma warning disable CS8618, CS0169
+#pragma warning disable CS8618, CS0169, CS0649
 
 [assembly: AspectOrder(typeof(IntroduceAndFilterAttribute))]
 
@@ -19,12 +19,12 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Filters.Field_Intro
         {
             foreach (var field in builder.Target.Fields)
             {
-                builder.Advice.AddFilter(field, nameof(Filter), FilterDirection.Both);
+                builder.Advice.AddContract(field, nameof(Filter), ContractDirection.Both);
             }
 
             var introducedField = builder.Advice.IntroduceField(builder.Target, nameof(IntroducedField));
 
-            builder.Advice.AddFilter(introducedField, nameof(Filter), FilterDirection.Both);
+            builder.Advice.AddContract(introducedField, nameof(Filter), ContractDirection.Both);
         }
 
         [Template]

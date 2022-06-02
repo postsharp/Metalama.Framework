@@ -943,7 +943,7 @@ namespace Metalama.Framework.Engine.Advices
 
             if ( !this._contractAdvices.TryGetValue( targetMember, out var advice ) )
             {
-                this._filterAdvices[targetMember] = advice = new ContractAdvice(
+                this._contractAdvices[targetMember] = advice = new ContractAdvice(
                     this._aspect,
                     this._templateInstance,
                     targetMember,
