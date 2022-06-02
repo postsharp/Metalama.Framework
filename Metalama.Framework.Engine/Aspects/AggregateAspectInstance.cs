@@ -52,7 +52,9 @@ internal sealed class AggregateAspectInstance : IAspectInstanceInternal
 
     public Ref<IDeclaration> TargetDeclaration => this._primaryInstance.TargetDeclaration;
 
-    public IAspectClass AspectClass => this._primaryInstance.AspectClass;
+    public IAspectClassImpl AspectClass => this._primaryInstance.AspectClass;
+
+    IAspectClass IAspectInstance.AspectClass => this.AspectClass;
 
     public bool IsSkipped => this._primaryInstance.IsSkipped;
 

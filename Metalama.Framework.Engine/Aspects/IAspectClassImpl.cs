@@ -5,6 +5,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.CompileTime;
+using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Aspects
@@ -17,5 +18,7 @@ namespace Metalama.Framework.Engine.Aspects
         CompileTimeProject? Project { get; }
 
         ImmutableArray<TemplateClass> TemplateClasses { get; }
+
+        SyntaxAnnotation GeneratedCodeAnnotation { get; }
     }
 }

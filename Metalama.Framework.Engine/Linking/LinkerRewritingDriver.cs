@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Compiler;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
@@ -92,7 +93,8 @@ namespace Metalama.Framework.Engine.Linking
             }
 
             // Add the SourceCode annotation, if it is source code.
-            if ( !(symbol.GetPrimarySyntaxReference() is { } primarySyntax && primarySyntax.GetSyntax().HasAnnotation( FormattingAnnotations.GeneratedCode )) )
+            if ( !(symbol.GetPrimarySyntaxReference() is { } primarySyntax
+                   && primarySyntax.GetSyntax().HasAnnotations( FormattingAnnotations.GeneratedCodeAnnotationKind )) )
             {
                 rewrittenBody = rewrittenBody.WithSourceCodeAnnotation();
             }
@@ -195,9 +197,11 @@ namespace Metalama.Framework.Engine.Linking
 
                             if ( returnStatement.Expression != null )
                             {
+                                var assignStatement = CreateAssignmentStatement( returnStatement.Expression ).WithOriginalLocationAnnotationFrom( returnStatement );
+
                                 replacements[returnStatement] =
                                     Block(
-                                            CreateAssignmentStatement( returnStatement.Expression ),
+                                            assignStatement,
                                             CreateGotoStatement() )
                                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                             }
@@ -263,7 +267,7 @@ namespace Metalama.Framework.Engine.Linking
                                 Token( TriviaList( ElasticSpace ), SyntaxKind.EqualsToken, TriviaList( ElasticSpace ) ),
                                 expression ),
                             Token( SyntaxKind.SemicolonToken ).WithTrailingTrivia( ElasticLineFeed ) )
-                        .WithGeneratedCodeAnnotation();
+                        .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
             }
 
             GotoStatementSyntax CreateGotoStatement()
@@ -275,7 +279,7 @@ namespace Metalama.Framework.Engine.Linking
                             default,
                             IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ),
                             Token( SyntaxKind.SemicolonToken ).WithTrailingTrivia( ElasticLineFeed ) )
-                        .WithGeneratedCodeAnnotation();
+                        .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
             }
         }
 

@@ -76,7 +76,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                         ((TypeDeclarationSyntax) this.DeclaringType.GetPrimaryDeclaration().AssertNotNull()).Identifier,
                         ParameterList(),
                         null,
-                        Block().WithGeneratedCodeAnnotation(),
+                        Block().WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation ),
                         null );
 
                 return new[] { new IntroducedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
@@ -90,7 +90,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                         ((TypeDeclarationSyntax) this.DeclaringType.GetPrimaryDeclaration().AssertNotNull()).Identifier,
                         ParameterList(),
                         null,
-                        Block().WithGeneratedCodeAnnotation(),
+                        Block().WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation ),
                         null );
 
                 return new[] { new IntroducedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };

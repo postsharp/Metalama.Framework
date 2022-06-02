@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public SyntaxGenerationContext SyntaxGenerationContext { get; }
 
-        public IAspectInstance AspectInstance { get; }
+        public IAspectInstanceInternal? AspectInstance { get; }
 
         public IServiceProvider ServiceProvider { get; }
 
@@ -42,7 +42,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             IObjectReader tags,
             AspectLayerId aspectLayerId,
             SyntaxGenerationContext syntaxGenerationContext,
-            IAspectInstance aspectInstance,
+            IAspectInstanceInternal? aspectInstance, // Can be null in tests.
             IServiceProvider serviceProvider,
             MetaApiStaticity staticity )
         {

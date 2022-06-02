@@ -55,8 +55,8 @@ public class SerializableSyntaxTree
                 {
                     SerializableAnnotationKind.Formatter => Formatter.Annotation,
                     SerializableAnnotationKind.Simplifier => Simplifier.Annotation,
-                    SerializableAnnotationKind.GeneratedCode => FormattingAnnotations.GeneratedCode,
-                    SerializableAnnotationKind.SourceCode => FormattingAnnotations.SourceCode,
+                    SerializableAnnotationKind.GeneratedCode => FormattingAnnotations.SystemGeneratedCodeAnnotation,
+                    SerializableAnnotationKind.SourceCode => FormattingAnnotations.SourceCodeAnnotation,
                     _ => throw new AssertionFailedException()
                 };
 
@@ -83,11 +83,11 @@ public class SerializableSyntaxTree
         {
             if ( node.ContainsAnnotations )
             {
-                if ( node.HasAnnotation( FormattingAnnotations.GeneratedCode ) )
+                if ( node.HasAnnotations( FormattingAnnotations.GeneratedCodeAnnotationKind ) )
                 {
                     this.AddAnnotation( node, SerializableAnnotationKind.GeneratedCode );
                 }
-                else if ( node.HasAnnotation( FormattingAnnotations.SourceCode ) )
+                else if ( node.HasAnnotation( FormattingAnnotations.SourceCodeAnnotation ) )
                 {
                     this.AddAnnotation( node, SerializableAnnotationKind.SourceCode );
                 }
