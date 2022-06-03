@@ -1,3 +1,7 @@
+#if TEST_OPTIONS
+// @Skipped(#30519 - TestFramework: System exceptions render to different diagnostic texts making them untestable)
+#endif
+
 using System;
 using Metalama.Framework.Aspects;
 

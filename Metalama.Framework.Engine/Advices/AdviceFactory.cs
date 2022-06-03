@@ -907,7 +907,7 @@ namespace Metalama.Framework.Engine.Advices
             {
                 throw new ArgumentOutOfRangeException(
                     nameof( targetParameter ),
-                    UserMessageFormatter.Format( $"Cannot add a filter to the return parameter of a void method." ) );
+                    UserMessageFormatter.Format( $"Cannot add a contract to the return parameter of a void method." ) );
             }
 
             this.AddFilterImpl( targetParameter, targetParameter.DeclaringMember, template, kind, tags, args );
