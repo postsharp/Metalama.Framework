@@ -162,10 +162,18 @@ namespace Metalama.Framework.Engine.CompileTime
             }
 
             // Validate the code (some validations are not done by the template compiler).
+            var isTemplatingCodeValidatorSuccessful = true;
             foreach ( var syntaxTree in treesWithCompileTimeCode )
             {
                 var semanticModel = runTimeCompilation.GetSemanticModel( syntaxTree );
-                TemplatingCodeValidator.Validate( this._serviceProvider, semanticModel, diagnosticSink.Report, false, false, cancellationToken );
+                isTemplatingCodeValidatorSuccessful &= TemplatingCodeValidator.Validate( this._serviceProvider, semanticModel, diagnosticSink.Report, false, false, cancellationToken );
+            }
+
+            if ( !isTemplatingCodeValidatorSuccessful )
+            {
+                compileTimeCompilation = null;
+                
+                return false;
             }
 
             var assemblyName = GetCompileTimeAssemblyName( runTimeCompilation.AssemblyName!, hash );

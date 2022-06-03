@@ -45,7 +45,7 @@ set
 private double Power_Source { get; set; }
 
 
-protected void OnPropertyChanged(global::System.String name)
+protected virtual void OnPropertyChanged(global::System.String name)
 {
     this.PropertyChanged?.Invoke(this, new global::System.ComponentModel.PropertyChangedEventArgs(name));
 }
