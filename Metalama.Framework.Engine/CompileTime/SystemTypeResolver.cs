@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.CompileTime
         private readonly Assembly _netStandardAssembly = Assembly.Load( "netstandard, Version=2.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51" );
 
         private readonly ReferenceAssemblyLocator _referenceAssemblyLocator;
-        
+
         public SystemTypeResolver( IServiceProvider serviceProvider ) : base( serviceProvider )
         {
             this._referenceAssemblyLocator = serviceProvider.GetRequiredService<ReferenceAssemblyLocator>();
@@ -25,10 +25,10 @@ namespace Metalama.Framework.Engine.CompileTime
 
         protected override bool CanLoadTypeFromAssembly( AssemblyName assemblyName )
             => AppDomain.CurrentDomain.GetAssemblies().Any( a => AssemblyName.ReferenceMatchesDefinition( assemblyName, a.GetName() ) );
-        
+
         protected override bool IsSupportedAssembly( string assemblyName ) => this._referenceAssemblyLocator.IsStandardAssemblyName( assemblyName );
 
-        protected override Type? GetWellKnownType( string typeName ) 
+        protected override Type? GetWellKnownType( string typeName )
         {
             // Check if this is a system type. If yes, it does not need to be in the same assembly.
             var systemType = this._netStandardAssembly.GetType( typeName, false );

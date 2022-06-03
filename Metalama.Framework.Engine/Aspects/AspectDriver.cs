@@ -9,7 +9,6 @@ using Metalama.Framework.Eligibility.Implementation;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Templating.Expressions;
@@ -30,7 +29,6 @@ namespace Metalama.Framework.Engine.Aspects
     internal class AspectDriver : IAspectDriver
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly ImmutableArray<TemplateClassMember> _declarativeAdviceAttributes;
         private readonly ReflectionMapper _reflectionMapper;
         private readonly IAspectClassImpl _aspectClass;
 
@@ -43,12 +41,12 @@ namespace Metalama.Framework.Engine.Aspects
             this._aspectClass = aspectClass;
 
             // Introductions must have a deterministic order because of testing.
-            this._declarativeAdviceAttributes = aspectClass
+            var declarativeAdviceAttributes = aspectClass
                 .TemplateClasses.SelectMany( c => c.GetDeclarativeAdvices( compilation ) )
                 .ToImmutableArray();
 
             // If we have any declarative introduction, the aspect cannot be added to an interface.
-            foreach ( var declarativeAdvice in this._declarativeAdviceAttributes )
+            foreach ( var declarativeAdvice in declarativeAdviceAttributes )
             {
                 var eligibilityBuilder = new EligibilityBuilder<IDeclaration>();
                 ((DeclarativeAdviceAttribute) declarativeAdvice.TemplateInfo.Attribute).BuildEligibility( eligibilityBuilder );
@@ -145,10 +143,10 @@ namespace Metalama.Framework.Engine.Aspects
                 this._serviceProvider );
 
             // Prepare declarative advice.
-            var declarativeAdvice = this._aspectClass.TemplateClasses.SelectMany( c => c.GetDeclarativeAdvices(compilationModelRevision.RoslynCompilation) )
+            var declarativeAdvice = this._aspectClass.TemplateClasses.SelectMany( c => c.GetDeclarativeAdvices( compilationModelRevision.RoslynCompilation ) )
                 .Select(
                     a =>
-                        (TemplateDeclaration: (IMemberOrNamedType) compilationModelRevision.Factory.GetDeclarationFromSymbolId( a.SymbolId ).AssertNotNull(  ),
+                        (TemplateDeclaration: (IMemberOrNamedType) compilationModelRevision.Factory.GetDeclarationFromSymbolId( a.SymbolId ).AssertNotNull(),
                          TemplateKey: a.Key,
                          Attribute: (DeclarativeAdviceAttribute) a.TemplateInfo.Attribute) )
                 .ToList();

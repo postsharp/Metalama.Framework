@@ -15,7 +15,8 @@ namespace Metalama.Framework.Engine.Transformations;
 
 internal class FilterPropertyTransformation : OverridePropertyBaseTransformation
 {
-    public FilterPropertyTransformation( ContractAdvice advice, IProperty overriddenDeclaration ) : base( advice, overriddenDeclaration, ObjectReader.Empty ) { }
+    public FilterPropertyTransformation( ContractAdvice advice, IProperty overriddenDeclaration ) :
+        base( advice, overriddenDeclaration, ObjectReader.Empty ) { }
 
     public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
     {

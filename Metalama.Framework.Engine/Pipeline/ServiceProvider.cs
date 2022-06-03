@@ -12,7 +12,6 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Reflection;
 
 namespace Metalama.Framework.Engine.Pipeline
 {
@@ -137,12 +136,14 @@ namespace Metalama.Framework.Engine.Pipeline
         /// Adds the services that have the same scope as the project processing itself.
         /// </summary>
         /// <param name="metadataReferences">A list of resolved metadata references for the current project.</param>
-        public ServiceProvider WithProjectScopedServices( IEnumerable<MetadataReference> metadataReferences, IEnumerable<Assembly>? testAssemblies = null)
-            => this.WithProjectScopedServices( metadataReferences, null, testAssemblies );
+        public ServiceProvider WithProjectScopedServices( IEnumerable<MetadataReference> metadataReferences )
+            => this.WithProjectScopedServices( metadataReferences, null );
 
-        public ServiceProvider WithProjectScopedServices( Compilation compilation ) => this.WithProjectScopedServices( compilation.References, null,null );
+        public ServiceProvider WithProjectScopedServices( Compilation compilation ) => this.WithProjectScopedServices( compilation.References, null );
 
-        private ServiceProvider WithProjectScopedServices( IEnumerable<MetadataReference> metadataReferences, Compilation? compilation = null,  IEnumerable<Assembly>? testAssemblies = null )
+        private ServiceProvider WithProjectScopedServices(
+            IEnumerable<MetadataReference> metadataReferences,
+            Compilation? compilation )
         {
             // ReflectionMapperFactory cannot be a global service because it keeps a reference from compilations to types of the
             // user assembly. When we need to unload the user assembly, we first need to unload the ReflectionMapperFactory.

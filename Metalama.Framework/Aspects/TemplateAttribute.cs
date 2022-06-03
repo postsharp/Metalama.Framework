@@ -13,9 +13,9 @@ namespace Metalama.Framework.Aspects
     public class TemplateAttribute : Attribute
     {
         internal static TemplateAttribute Default { get; } = new IntroduceAttribute();
-        
-        public virtual bool IsIntroduction => false;
-        
+
+        internal virtual bool IsIntroduction => false;
+
         private Accessibility? _accessibility;
         private bool? _isVirtual;
         private bool? _isSealed;
@@ -30,8 +30,7 @@ namespace Metalama.Framework.Aspects
                        $"The '{nameof(this.Accessibility)}' was not set, use {nameof(this.GetAccessibility)} to get nullable value." );
             set => this._accessibility = value;
         }
-        
-        
+
         public bool IsVirtual
         {
             get
@@ -48,16 +47,10 @@ namespace Metalama.Framework.Aspects
             set => this._isSealed = value;
         }
 
-        
-        
-
         public bool? GetIsVirtual() => this._isVirtual;
 
         public bool? GetIsSealed() => this._isSealed;
-        
-       
+
         public Accessibility? GetAccessibility() => this._accessibility;
-
-
     }
 }

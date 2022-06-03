@@ -22,7 +22,7 @@ public abstract class DeclarativeAdviceAttribute : TemplateAttribute
     [Obsolete( "Not implemented." )]
     public string? Layer { get; set; }
 
-    public abstract void BuildEligibility( IEligibilityBuilder<IDeclaration> builder );
+    internal abstract void BuildEligibility( IEligibilityBuilder<IDeclaration> builder );
 
-    public abstract bool TryBuildAspect( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder );
+    internal abstract bool TryBuildAspect( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder );
 }

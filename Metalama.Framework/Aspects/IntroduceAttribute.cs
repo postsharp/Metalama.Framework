@@ -16,7 +16,6 @@ namespace Metalama.Framework.Aspects
     [AttributeUsage( AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Method | AttributeTargets.Event )]
     public sealed class IntroduceAttribute : DeclarativeAdviceAttribute
     {
-        
         public IntroductionScope Scope { get; set; }
 
         /// <summary>
@@ -33,10 +32,9 @@ namespace Metalama.Framework.Aspects
         [Obsolete( "Not implemented." )]
         public OverrideStrategy WhenInherited { get; set; }
 
-        
-        public override bool IsIntroduction => true;
+        internal override bool IsIntroduction => true;
 
-        public override void BuildEligibility( IEligibilityBuilder<IDeclaration> builder )
+        internal override void BuildEligibility( IEligibilityBuilder<IDeclaration> builder )
         {
             builder.AddRule(
                 new EligibilityRule<IDeclaration>(
@@ -50,7 +48,7 @@ namespace Metalama.Framework.Aspects
                     _ => $"the aspect contains a declarative introduction and therefore cannot be applied to an interface" ) );
         }
 
-        public override bool TryBuildAspect( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder )
+        internal override bool TryBuildAspect( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder )
         {
             INamedType targetType;
 

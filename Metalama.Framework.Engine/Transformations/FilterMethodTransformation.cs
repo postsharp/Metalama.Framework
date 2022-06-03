@@ -16,7 +16,8 @@ namespace Metalama.Framework.Engine.Transformations
 {
     internal class FilterMethodTransformation : OverrideMethodBaseTransformation
     {
-        public FilterMethodTransformation( ContractAdvice advice, IMethod overriddenDeclaration ) : base( advice, overriddenDeclaration, ObjectReader.Empty ) { }
+        public FilterMethodTransformation( ContractAdvice advice, IMethod overriddenDeclaration ) :
+            base( advice, overriddenDeclaration, ObjectReader.Empty ) { }
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {

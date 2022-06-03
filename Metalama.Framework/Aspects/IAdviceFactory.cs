@@ -100,10 +100,10 @@ namespace Metalama.Framework.Aspects
             object? tags = null );
 
         /// <summary>
-        /// Introduces a field to the target type.
+        /// Introduces a field to the target type by specifying a template.
         /// </summary>
         /// <param name="targetType">The type into which the property must be introduced.</param>
-        /// <param name="fieldName">Name of the introduced field.</param>
+        /// <param name="template">Name of the introduced field.</param>
         /// <param name="scope">Determines the scope (e.g. <see cref="IntroductionScope.Instance"/> or <see cref="IntroductionScope.Static"/>) of the introduced
         ///     field. The default scope is <see cref="IntroductionScope.Instance"/>.</param>
         /// <param name="whenExists">Determines the implementation strategy when a property of the same name is already declared in the target type.
@@ -113,22 +113,48 @@ namespace Metalama.Framework.Aspects
         /// <seealso href="@introducing-members"/>
         IFieldBuilder IntroduceField(
             INamedType targetType,
-            string templateName,
+            string template,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
             object? tags = null );
 
+        /// <summary>
+        /// Introduces a field to the target type by specifying a field name and <see cref="IType"/>.
+        /// </summary>
+        /// <param name="targetType">The type into which the property must be introduced.</param>
+        /// <param name="fieldName">Name of the introduced field.</param>
+        /// <param name="fieldType">Type of the introduced field.</param>
+        /// <param name="scope">Determines the scope (e.g. <see cref="IntroductionScope.Instance"/> or <see cref="IntroductionScope.Static"/>) of the introduced
+        ///     field. The default scope is <see cref="IntroductionScope.Instance"/>.</param>
+        /// <param name="whenExists">Determines the implementation strategy when a property of the same name is already declared in the target type.
+        ///     The default strategy is to fail with a compile-time error.</param>
+        /// <param name="tags"></param>
+        /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
+        /// <seealso href="@introducing-members"/>
         IFieldBuilder IntroduceField(
             INamedType targetType,
-            string templateName,
+            string fieldName,
             IType fieldType,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            object? tags = null ); 
-        
+            object? tags = null );
+
+        /// <summary>
+        /// Introduces a field to the target type by specifying a field name and <see cref="Type"/>.
+        /// </summary>
+        /// <param name="targetType">The type into which the property must be introduced.</param>
+        /// <param name="fieldName">Name of the introduced field.</param>
+        /// <param name="fieldType">Type of the introduced field.</param>
+        /// <param name="scope">Determines the scope (e.g. <see cref="IntroductionScope.Instance"/> or <see cref="IntroductionScope.Static"/>) of the introduced
+        ///     field. The default scope is <see cref="IntroductionScope.Instance"/>.</param>
+        /// <param name="whenExists">Determines the implementation strategy when a property of the same name is already declared in the target type.
+        ///     The default strategy is to fail with a compile-time error.</param>
+        /// <param name="tags"></param>
+        /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
+        /// <seealso href="@introducing-members"/>
         IFieldBuilder IntroduceField(
             INamedType targetType,
-            string templateName,
+            string fieldName,
             Type fieldType,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,

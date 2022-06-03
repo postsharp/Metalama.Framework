@@ -38,7 +38,9 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     var hasMetalamaReference = compilation.GetTypeByMetadataName( typeof(RunTimeOrCompileTimeAttribute).FullName ) != null;
 
-                    return hasMetalamaReference ? new SymbolClassifier( this._serviceProvider, c, this._attributeDeserializer ) : this._noMetalamaReferenceClassifier;
+                    return hasMetalamaReference
+                        ? new SymbolClassifier( this._serviceProvider, c, this._attributeDeserializer )
+                        : this._noMetalamaReferenceClassifier;
                 } );
     }
 }

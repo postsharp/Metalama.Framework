@@ -112,7 +112,7 @@ namespace Metalama.Framework.Engine.Aspects
                     case TemplateAttributeType.DeclarativeAdvice:
                     case TemplateAttributeType.InterfaceMember:
                         // For interface members, we don't require a unique name, so we identify the template by documentation id.
-                        memberKey = memberSymbol.GetDocumentationCommentId();
+                        memberKey = memberSymbol.GetDocumentationCommentId().AssertNotNull();
 
                         break;
                 }
@@ -227,7 +227,7 @@ namespace Metalama.Framework.Engine.Aspects
                         diagnosticAdder.Report(
                             GeneralDiagnosticDescriptors.TemplateWithSameNameAlreadyDefinedInBaseClass.CreateRoslynDiagnostic(
                                 memberSymbol.GetDiagnosticLocation(),
-                                (memberName: memberKey, type.Name, existingMember.TemplateClass.AspectType.Name) ) );
+                                (memberKey, type.Name, existingMember.TemplateClass.AspectType.Name) ) );
 
                         continue;
                     }

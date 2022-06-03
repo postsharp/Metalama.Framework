@@ -59,7 +59,7 @@ namespace Metalama.Framework.Engine.Advices
         public override void Initialize( IDiagnosticAdder diagnosticAdder )
         {
             var templateAttribute = this.Template.IsNotNull ? this.Template.TemplateInfo.Attribute : TemplateAttribute.Default;
-            
+
             this.MemberBuilder.Accessibility = templateAttribute.GetAccessibility() ?? this.Template.Declaration?.Accessibility ?? Accessibility.Private;
             this.MemberBuilder.IsSealed = templateAttribute.GetIsSealed() ?? this.Template.Declaration?.IsSealed ?? false;
             this.MemberBuilder.IsVirtual = templateAttribute.GetIsVirtual() ?? this.Template.Declaration?.IsVirtual ?? false;
@@ -113,9 +113,6 @@ namespace Metalama.Framework.Engine.Advices
             {
                 CopyAttributes( this.Template.Declaration, this.MemberBuilder );
             }
-            
-            
-            
         }
 
         protected static void CopyAttributes( IDeclaration declaration, IDeclarationBuilder builder )
@@ -129,25 +126,25 @@ namespace Metalama.Framework.Engine.Advices
 
         protected void ApplyTemplateAttribute( IntroduceAttribute templateAttribute )
         {
-                if ( templateAttribute.Name != null )
-                {
-                    this.MemberBuilder.Name = templateAttribute.Name;
-                }
+            if ( templateAttribute.Name != null )
+            {
+                this.MemberBuilder.Name = templateAttribute.Name;
+            }
 
-                if ( templateAttribute.GetIsSealed().HasValue )
-                {
-                    this.MemberBuilder.IsSealed = templateAttribute.GetIsSealed()!.Value;
-                }
+            if ( templateAttribute.GetIsSealed().HasValue )
+            {
+                this.MemberBuilder.IsSealed = templateAttribute.GetIsSealed()!.Value;
+            }
 
-                if ( templateAttribute.GetAccessibility().HasValue )
-                {
-                    this.MemberBuilder.Accessibility = templateAttribute.GetAccessibility()!.Value;
-                }
+            if ( templateAttribute.GetAccessibility().HasValue )
+            {
+                this.MemberBuilder.Accessibility = templateAttribute.GetAccessibility()!.Value;
+            }
 
-                if ( templateAttribute.GetIsVirtual().HasValue )
-                {
-                    this.MemberBuilder.IsVirtual = templateAttribute.GetIsVirtual()!.Value;
-                }
+            if ( templateAttribute.GetIsVirtual().HasValue )
+            {
+                this.MemberBuilder.IsVirtual = templateAttribute.GetIsVirtual()!.Value;
+            }
         }
 
         public override string ToString() => $"Introduce {this.MemberBuilder}";

@@ -446,10 +446,9 @@ namespace Metalama.Framework.Engine.Advices
             }
 
             var diagnosticList = new DiagnosticList();
-            
+
             var template = this.ValidateTemplateName( templateName, TemplateKind.Default, true )
                 .GetTemplateMember<IField>( this._compilation, this._serviceProvider );
-
 
             var advice = new IntroduceFieldAdvice(
                 this._aspect,
@@ -483,9 +482,9 @@ namespace Metalama.Framework.Engine.Advices
             {
                 throw new InvalidOperationException();
             }
-            
+
             var diagnosticList = new DiagnosticList();
-            
+
             var advice = new IntroduceFieldAdvice(
                 this._aspect,
                 this._templateInstance,
@@ -502,7 +501,7 @@ namespace Metalama.Framework.Engine.Advices
             this.Advices.Add( advice );
 
             this._diagnosticAdder.Report( diagnosticList );
-            
+
             advice.Builder.Type = fieldType;
 
             return advice.Builder;
@@ -921,7 +920,8 @@ namespace Metalama.Framework.Engine.Advices
             {
                 throw new ArgumentOutOfRangeException(
                     nameof(kind),
-                    UserMessageFormatter.Format( $"Cannot add an output contract to the parameter '{targetParameter}' because it is neither 'ref' nor 'out'." ) );
+                    UserMessageFormatter.Format(
+                        $"Cannot add an output contract to the parameter '{targetParameter}' because it is neither 'ref' nor 'out'." ) );
             }
 
             if ( kind == ContractDirection.Input && targetParameter.RefKind is not RefKind.None or RefKind.Ref or RefKind.In )

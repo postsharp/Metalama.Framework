@@ -1,4 +1,7 @@
-﻿using Microsoft.CodeAnalysis;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using Microsoft.CodeAnalysis;
 using System;
 using System.Reflection;
 using System.Threading;
@@ -11,13 +14,11 @@ namespace Metalama.Framework.Engine.CompileTime;
 /// </summary>
 internal class CurrentAppDomainTypeResolver : CompileTimeTypeResolver
 {
-    public CurrentAppDomainTypeResolver( IServiceProvider serviceProvider ) : base( serviceProvider )
-    {
-    }
+    public CurrentAppDomainTypeResolver( IServiceProvider serviceProvider ) : base( serviceProvider ) { }
 
     protected virtual bool IsSupportedAssembly( string assemblyName ) => true;
 
-    protected virtual Type? GetWellKnownType(string typeName) => null;
+    protected virtual Type? GetWellKnownType( string typeName ) => null;
 
     protected virtual bool CanLoadTypeFromAssembly( AssemblyName assemblyName ) => true;
 

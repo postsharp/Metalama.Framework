@@ -17,6 +17,6 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         public bool IsExplicit { get; set; }
 
-        public override bool IsIntroduction => true;
+        internal override bool IsIntroduction => true;
     }
 }

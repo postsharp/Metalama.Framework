@@ -104,7 +104,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             if ( templateAttribute != null )
             {
-                var templateInfo = GetTemplateInfo( templateAttribute );
+                var templateInfo = this.GetTemplateInfo( templateAttribute );
 
                 if ( !templateInfo.IsNone )
                 {
@@ -141,7 +141,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private bool IsAttributeOfType( AttributeData a, ITypeSymbol type ) => this._compilation!.HasImplicitConversion( a.AttributeClass, type );
 
-        private  TemplateInfo GetTemplateInfo( AttributeData attributeData )
+        private TemplateInfo GetTemplateInfo( AttributeData attributeData )
         {
             if ( !this._attributeDeserializer.TryCreateAttribute( attributeData, NullDiagnosticAdder.Instance, out var attributeInstance ) )
             {
@@ -150,11 +150,11 @@ namespace Metalama.Framework.Engine.CompileTime
             }
 
             var templateAttribute = (TemplateAttribute) attributeInstance;
-                
+
             switch ( attributeData.AttributeClass?.Name )
             {
                 case nameof(TemplateAttribute):
-                case "TestTemplateAttribute": 
+                case "TestTemplateAttribute":
                     return new TemplateInfo( TemplateAttributeType.Template, templateAttribute );
 
                 case nameof(InterfaceMemberAttribute):

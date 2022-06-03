@@ -17,7 +17,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
         {
             public CompilationModel Compilation { get; }
 
-            public SerializerTestContext( TestBase parent, CompilationModel compilationModel ) : base( parent, null, null )
+            public SerializerTestContext( TestBase parent, CompilationModel compilationModel ) : base( parent )
             {
                 this.Compilation = compilationModel;
 
@@ -31,7 +31,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
                 this.SerializationService = new SyntaxSerializationService( this.ServiceProvider );
             }
 
-            public SerializerTestContext( TestBase parent, string code ) : base( parent, null, null )
+            public SerializerTestContext( TestBase parent, string code ) : base( parent )
             {
                 this.Compilation = this.CreateCompilationModel( code );
 

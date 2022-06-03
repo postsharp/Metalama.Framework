@@ -8,9 +8,9 @@ namespace Metalama.Framework.Engine.Utilities;
 
 internal static class ConditionalWeakTableExtensions
 {
-    public static TValue GetOrAdd<TKey, TValue>( this ConditionalWeakTable<TKey, TValue> table, TKey key, Func<TKey, TValue> func ) 
+    public static TValue GetOrAdd<TKey, TValue>( this ConditionalWeakTable<TKey, TValue> table, TKey key, Func<TKey, TValue> func )
         where TKey : class
-        where TValue : class 
+        where TValue : class
     {
         if ( table.TryGetValue( key, out var value ) )
         {
