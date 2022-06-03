@@ -52,6 +52,20 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                     partialCompilation,
                     ImmutableArray<AdditionalCompilationOutputFile>.Empty );
             }
+            
+            
+            // Validate the code (some validations are not done by the template compiler).
+            var isTemplatingCodeValidatorSuccessful = true;
+            foreach ( var syntaxTree in compilation.SyntaxTrees )
+            {
+                var semanticModel = compilation.GetSemanticModel( syntaxTree );
+                isTemplatingCodeValidatorSuccessful &= TemplatingCodeValidator.Validate( this.ServiceProvider, semanticModel, diagnosticAdder.Report, false, false, cancellationToken );
+            }
+
+            if ( !isTemplatingCodeValidatorSuccessful )
+            {
+                return null;
+            }
 
             // Initialize the pipeline and generate the compile-time project.
             if ( !this.TryInitialize( diagnosticAdder, partialCompilation, null, cancellationToken, out var configuration ) )

@@ -44,7 +44,7 @@ namespace Metalama.Framework.Engine.Advices
             {
                 this.Scope = scope;
             }
-            else if ( template.TemplateInfo.Attribute is IntroduceAttribute introduceAttribute )
+            else if ( template.IsNotNull && template.TemplateInfo.Attribute is IntroduceAttribute introduceAttribute )
             {
                 this.Scope = introduceAttribute.Scope;
             }
@@ -58,7 +58,7 @@ namespace Metalama.Framework.Engine.Advices
 
         public override void Initialize( IDiagnosticAdder diagnosticAdder )
         {
-            var templateAttribute = this.Template.TemplateInfo.Attribute;
+            var templateAttribute = this.Template.IsNotNull ? this.Template.TemplateInfo.Attribute : TemplateAttribute.Default;
             
             this.MemberBuilder.Accessibility = templateAttribute.GetAccessibility() ?? this.Template.Declaration?.Accessibility ?? Accessibility.Private;
             this.MemberBuilder.IsSealed = templateAttribute.GetIsSealed() ?? this.Template.Declaration?.IsSealed ?? false;

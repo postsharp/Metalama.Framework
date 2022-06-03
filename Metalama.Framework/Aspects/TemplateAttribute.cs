@@ -12,6 +12,8 @@ namespace Metalama.Framework.Aspects
     [AttributeUsage( AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Event )]
     public class TemplateAttribute : Attribute
     {
+        internal static TemplateAttribute Default { get; } = new IntroduceAttribute();
+        
         public virtual bool IsIntroduction => false;
         
         private Accessibility? _accessibility;
@@ -45,6 +47,9 @@ namespace Metalama.Framework.Aspects
                    ?? throw new InvalidOperationException( $"The 'IsSealed' property was not set, use {nameof(this.GetIsSealed)} to get nullable value." );
             set => this._isSealed = value;
         }
+
+        
+        
 
         public bool? GetIsVirtual() => this._isVirtual;
 

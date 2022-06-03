@@ -271,7 +271,7 @@ namespace Metalama.TestFramework
 
             // Transform with Metalama.
             var pipeline = new CompileTimeAspectPipeline(
-                this.BaseServiceProvider.WithProjectScopedServices( this.References.MetadataReferences ),
+                this.BaseServiceProvider.WithProjectScopedServices( this.References.MetadataReferences),
                 true,
                 domain );
 

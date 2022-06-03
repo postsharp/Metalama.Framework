@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -139,7 +140,9 @@ class Expression
         protected TestContext CreateTestContext( TestProjectOptions? projectOptions = null ) => this.CreateTestContext( null, projectOptions );
 
         protected TestContext CreateTestContext( Func<ServiceProvider, ServiceProvider>? addServices, TestProjectOptions? projectOptions = null )
-            => new( this, projectOptions, addServices );
+            => new( this, projectOptions, addServices, this.GetTestAssemblies() );
+
+        protected virtual IEnumerable<Assembly> GetTestAssemblies() => new[] { this.GetType().Assembly }; 
 
         protected class TestContext : IDisposable
         {
@@ -147,13 +150,13 @@ class Expression
 
             public ServiceProvider ServiceProvider { get; }
 
-            public TestContext( TestBase parent, TestProjectOptions? projectOptions, Func<ServiceProvider, ServiceProvider>? addServices )
+            public TestContext( TestBase parent, TestProjectOptions? projectOptions = null, Func<ServiceProvider, ServiceProvider>? addServices = null, IEnumerable<Assembly>? testAssemblies = null )
             {
                 this.ProjectOptions = projectOptions ?? new TestProjectOptions();
 
                 this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( this.ProjectOptions.PathOptions )
                     .WithService( this.ProjectOptions )
-                    .WithProjectScopedServices( TestCompilationFactory.GetMetadataReferences() )
+                    .WithProjectScopedServices( TestCompilationFactory.GetMetadataReferences(), testAssemblies )
                     .WithMark( ServiceProviderMark.Test );
 
                 this.ServiceProvider = parent._addServices( this.ServiceProvider );
