@@ -5,16 +5,16 @@ using Metalama.Framework.Eligibility;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Filters.Parameter_StaticEligibility;
 
-internal class NotNullAttribute : FilterAspect
+internal class NotNullAttribute : ContractAspect
 {
-    public NotNullAttribute() : base( FilterDirection.Input ) { }
+    public NotNullAttribute() : base( ContractDirection.Input ) { }
 
-    public override void BuildEligibility( IEligibilityBuilder<IParameter> builder ) => BuildEligibilityForDirection( builder, FilterDirection.Input );
+    public override void BuildEligibility( IEligibilityBuilder<IParameter> builder ) => BuildEligibilityForDirection( builder, ContractDirection.Input );
 
     public override void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder )
-        => BuildEligibilityForDirection( builder, FilterDirection.Input );
+        => BuildEligibilityForDirection( builder, ContractDirection.Input );
 
-    public override void Filter( dynamic? value )
+    public override void Validate( dynamic? value )
     {
         if (value == null)
         {

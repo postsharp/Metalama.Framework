@@ -19,12 +19,12 @@ internal class Account
     {
         get
         {
-            return (global::Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues.Account)((global::Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues.Account.Optional)this.OptionalValues).Parent.Value;
+            return (global::Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues.Account?)((global::Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues.Account.Optional)this.OptionalValues).Parent.Value;
 
         }
         set
         {
-            ((global::Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues.Account.Optional)this.OptionalValues).Parent = new global::Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues.OptionalValue<global::Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues.Account>(value);
+            ((global::Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues.Account.Optional)this.OptionalValues).Parent = new global::Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues.OptionalValue<global::Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues.Account?>(value);
 
         }
     }
@@ -34,50 +34,11 @@ internal class Account
     public class Optional
     {
 
-        private global::Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues.OptionalValue<global::System.String?> _name;
+        public global::Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues.OptionalValue<global::System.String?> Name { get; set; }
 
-
-        public global::Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues.OptionalValue<global::System.String?> Name
-        {
-            get
-            {
-                return this._name;
-            }
-            set
-            {
-                this._name = value;
-            }
-        }
-
-        private global::Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues.OptionalValue<global::Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues.Account> _parent;
-
-
-        public global::Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues.OptionalValue<global::Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues.Account> Parent
-        {
-            get
-            {
-                return this._parent;
-            }
-            set
-            {
-                this._parent = value;
-            }
-        }
+        public global::Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues.OptionalValue<global::Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues.Account?> Parent { get; set; }
     }
 
 
-    private global::Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues.Account.Optional _optionalValues = new Optional();
-
-
-    public global::Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues.Account.Optional OptionalValues
-    {
-        get
-        {
-            return this._optionalValues;
-        }
-        private set
-        {
-            this._optionalValues = value;
-        }
-    }
+    public global::Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues.Account.Optional OptionalValues { get; private set; } = new Optional();
 }

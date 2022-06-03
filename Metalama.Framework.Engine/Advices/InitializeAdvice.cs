@@ -3,11 +3,9 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
-using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
@@ -39,7 +37,7 @@ namespace Metalama.Framework.Engine.Advices
 
         public override void Initialize( IDiagnosticAdder diagnosticAdder ) { }
 
-        public override AdviceResult ToResult( ICompilation compilation, IReadOnlyList<IObservableTransformation> observableTransformations )
+        public override AdviceResult ToResult( ICompilation compilation )
         {
             var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
 
@@ -51,31 +49,14 @@ namespace Metalama.Framework.Engine.Advices
                     _ => throw new AssertionFailedException()
                 };
 
-            // TODO: merging localConstructors with constructors from the compilation does not take into account signatures, only implicit instance ctor and missing static ctor.
-            var localConstructors =
-                observableTransformations
-                    .OfType<IConstructorBuilder>()
-                    .Where(
-                        c => this.Kind switch
-                        {
-                            InitializerKind.BeforeTypeConstructor => c.IsStatic,
-                            InitializerKind.BeforeInstanceConstructor => !c.IsStatic,
-                            _ => throw new AssertionFailedException()
-                        } )
-                    .ToReadOnlyList();
-
             var constructors =
                 this.Kind switch
                 {
                     InitializerKind.BeforeTypeConstructor =>
-                        localConstructors.Count == 0
-                            ? new[] { containingType.StaticConstructor }
-                            : localConstructors,
+                        new[] { containingType.StaticConstructor },
                     InitializerKind.BeforeInstanceConstructor =>
                         containingType.Constructors
-                            .Where( c => c.InitializerKind != ConstructorInitializerKind.This )
-                            .Where( c => !(c.Parameters.Count == 0 && localConstructors.Any( cc => cc.Parameters.Count == 0 )) )
-                            .Concat( localConstructors ),
+                            .Where( c => c.InitializerKind != ConstructorInitializerKind.This ),
                     _ => throw new AssertionFailedException()
                 };
 

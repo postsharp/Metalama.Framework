@@ -9,6 +9,8 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 {
     internal class PseudoAdder : PseudoAccessor<Event>
     {
+        public override Accessibility Accessibility => this.DeclaringMember.Accessibility;
+
         public PseudoAdder( Event @event ) : base( @event, MethodKind.EventAdd ) { }
 
         [Memo]

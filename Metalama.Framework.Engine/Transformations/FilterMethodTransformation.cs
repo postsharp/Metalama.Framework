@@ -16,20 +16,20 @@ namespace Metalama.Framework.Engine.Transformations
 {
     internal class FilterMethodTransformation : OverrideMethodBaseTransformation
     {
-        public FilterMethodTransformation( FilterAdvice advice, IMethod overriddenDeclaration ) : base( advice, overriddenDeclaration, ObjectReader.Empty ) { }
+        public FilterMethodTransformation( ContractAdvice advice, IMethod overriddenDeclaration ) : base( advice, overriddenDeclaration, ObjectReader.Empty ) { }
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
-            var advice = (FilterAdvice) this.Advice;
+            var advice = (ContractAdvice) this.Advice;
 
             // Execute the templates.
 
-            _ = advice.TryExecuteTemplates( this.OverriddenDeclaration, context, FilterDirection.Input, null, out var inputFilterBodies );
+            _ = advice.TryExecuteTemplates( this.OverriddenDeclaration, context, ContractDirection.Input, null, out var inputFilterBodies );
 
             List<StatementSyntax>? outputFilterBodies;
             string? returnValueName;
 
-            if ( advice.Filters.Any( f => f.AppliesTo( FilterDirection.Output ) ) )
+            if ( advice.Contracts.Any( f => f.AppliesTo( ContractDirection.Output ) ) )
             {
                 returnValueName = this.OverriddenDeclaration.ReturnType.Is( SpecialType.Void )
                     ? null
@@ -38,7 +38,7 @@ namespace Metalama.Framework.Engine.Transformations
                 _ = !advice.TryExecuteTemplates(
                     this.OverriddenDeclaration,
                     context,
-                    FilterDirection.Output,
+                    ContractDirection.Output,
                     returnValueName,
                     out outputFilterBodies );
             }
@@ -49,7 +49,7 @@ namespace Metalama.Framework.Engine.Transformations
             }
 
             // Rewrite the method body.
-            var proceedExpression = this.CreateProceedExpression( context, TemplateKind.Default ).ToRunTimeExpression().Syntax;
+            var proceedExpression = this.CreateProceedExpression( context, TemplateKind.Default ).ToSyntax( context.SyntaxGenerationContext );
 
             var statements = new List<StatementSyntax>();
 

@@ -1,61 +1,36 @@
 ﻿using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Uninlineable;
-
-[assembly: AspectOrder( typeof(FirstOverrideAttribute), typeof(SecondOverrideAttribute) )]
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Uninlineable
 {
-    [AttributeUsage( AttributeTargets.Property, AllowMultiple = true )]
-    public class FirstOverrideAttribute : PropertyAspect
+    /*
+     * Tests that override with an uninlineable expanded template produces correct code.
+     */
+
+    public class OverrideAttribute : FieldOrPropertyAspect
     {
-        public override void BuildAspect( IAspectBuilder<IProperty> builder )
+        public override void BuildAspect(IAspectBuilder<IFieldOrProperty> builder)
         {
-            builder.Advice.OverrideAccessors( builder.Target, nameof(GetTemplate), nameof(SetTemplate) );
+            builder.Advice.Override(builder.Target, nameof(Template));
         }
 
         [Template]
-        public dynamic? GetTemplate()
+        public dynamic? Template
         {
-            Console.WriteLine( "This is the overridden getter." );
-            _ = meta.Proceed();
+            get
+            {
+                Console.WriteLine("Override.");
+                _ = meta.Proceed();
+                return meta.Proceed();
+            }
 
-            return meta.Proceed();
-        }
-
-        [Template]
-        public void SetTemplate()
-        {
-            Console.WriteLine( "This is the overridden setter." );
-            meta.Proceed();
-            meta.Proceed();
-        }
-    }
-
-    [AttributeUsage( AttributeTargets.Property, AllowMultiple = true )]
-    public class SecondOverrideAttribute : PropertyAspect
-    {
-        public override void BuildAspect( IAspectBuilder<IProperty> builder )
-        {
-            builder.Advice.OverrideAccessors( builder.Target, nameof(GetTemplate), nameof(SetTemplate) );
-        }
-
-        [Template]
-        public dynamic? GetTemplate()
-        {
-            Console.WriteLine( "This is the overridden getter." );
-            _ = meta.Proceed();
-
-            return meta.Proceed();
-        }
-
-        [Template]
-        public void SetTemplate()
-        {
-            Console.WriteLine( "This is the overridden setter." );
-            meta.Proceed();
-            meta.Proceed();
+            set
+            {
+                Console.WriteLine("Override.");
+                meta.Proceed();
+                meta.Proceed();
+            }
         }
     }
 
@@ -64,8 +39,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
     {
         private int _field;
 
-        [FirstOverride]
-        [SecondOverride]
+        [Override]
         public int Property
         {
             get
@@ -78,5 +52,30 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
                 _field = value;
             }
         }
+
+        private static int _staticField;
+
+        [Override]
+        public static int StaticProperty
+        {
+            get
+            {
+                return _staticField;
+            }
+
+            set
+            {
+                _staticField = value;
+            }
+        }
+
+        [Override]
+        public int ExpressionBodiedProperty => 42;
+
+        [Override]
+        public int AutoProperty { get; set; }
+
+        [Override]
+        public int AutoGetOnlyProperty { get; }
     }
 }

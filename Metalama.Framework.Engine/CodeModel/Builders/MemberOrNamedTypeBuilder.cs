@@ -43,7 +43,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public abstract IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context );
 
-        public abstract InsertPosition InsertPosition { get; }
+        public InsertPosition InsertPosition => this.ToInsertPosition();
 
         // TODO: This is temporary.
 

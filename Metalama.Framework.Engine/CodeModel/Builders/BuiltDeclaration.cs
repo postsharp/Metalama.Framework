@@ -40,11 +40,12 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public override IDeclaration? ContainingDeclaration => this.Builder.ContainingDeclaration;
 
         [Memo]
-        public override IAttributeList Attributes
-            => new AttributeList(
+        public override IAttributeCollection Attributes
+            => new AttributeCollection(
                 this,
                 this.Builder.Attributes
-                    .Select<AttributeBuilder, AttributeRef>( a => new AttributeRef( a ) ) );
+                    .Select<AttributeBuilder, AttributeRef>( a => new AttributeRef( a ) )
+                    .ToList() );
 
         public override DeclarationKind DeclarationKind => this.Builder.DeclarationKind;
 

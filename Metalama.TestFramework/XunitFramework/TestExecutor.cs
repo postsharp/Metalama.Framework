@@ -32,13 +32,18 @@ namespace Metalama.TestFramework.XunitFramework
 
         void IDisposable.Dispose() { }
 
-        ITestCase ITestFrameworkExecutor.Deserialize( string value ) => new TestCase( this._factory, value );
+        ITestCase ITestFrameworkExecutor.Deserialize( string value )
+        {
+            return new TestCase( this._factory, value );
+        }
 
         void ITestFrameworkExecutor.RunAll(
             IMessageSink executionMessageSink,
             ITestFrameworkDiscoveryOptions discoveryOptions,
             ITestFrameworkExecutionOptions executionOptions )
-            => throw new NotImplementedException();
+        {
+            throw new NotImplementedException();
+        }
 
         void ITestFrameworkExecutor.RunTests(
             IEnumerable<ITestCase> testCases,
@@ -59,6 +64,8 @@ namespace Metalama.TestFramework.XunitFramework
                     hasLaunchedDebugger = true;
                     Debugger.Launch();
                 }
+
+                var projectReferences = projectMetadata.ToProjectReferences();
 
                 // Creates the set of references. Include all project references plus the project itself.
 
@@ -101,9 +108,9 @@ namespace Metalama.TestFramework.XunitFramework
 
                                 try
                                 {
-                                    using var testOptions = new TestProjectOptions();
+                                    using var testOptions = new TestProjectOptions( plugIns: projectReferences.PlugIns );
 
-                                    var serviceProvider = ServiceProviderFactory.GetServiceProvider( testOptions );
+                                    var serviceProvider = ServiceProviderFactory.GetServiceProvider( testOptions.PathOptions ).WithService( testOptions );
 
                                     var testInput = TestInput.FromFile( this._factory.ProjectProperties, directoryOptionsReader, testCase.UniqueID );
 
@@ -120,7 +127,7 @@ namespace Metalama.TestFramework.XunitFramework
                                         var testRunner = TestRunnerFactory.CreateTestRunner(
                                             testInput,
                                             serviceProvider,
-                                            projectMetadata.ToProjectReferences(),
+                                            projectReferences,
                                             logger );
 
                                         Task.Run( () => testRunner.RunAndAssertAsync( testInput ) ).Wait();

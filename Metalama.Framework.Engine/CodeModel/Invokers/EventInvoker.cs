@@ -5,7 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Templating;
-using Metalama.Framework.Engine.Templating.MetaModel;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
         protected virtual void AssertNoArgument() { }
 
         private ExpressionSyntax CreateEventExpression(
-            RuntimeExpression instance,
+            RunTimeTemplateExpression instance,
             AspectReferenceTargetKind targetKind,
             SyntaxGenerationContext generationContext )
         {
@@ -63,16 +63,16 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             var generationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
             var eventAccess = this.CreateEventExpression(
-                RuntimeExpression.FromValue( instance, this.Compilation, generationContext ),
+                RunTimeTemplateExpression.FromValue( instance, this.Compilation, generationContext ),
                 AspectReferenceTargetKind.EventAddAccessor,
                 generationContext );
 
             var expression = AssignmentExpression(
                 SyntaxKind.AddAssignmentExpression,
                 eventAccess,
-                RuntimeExpression.GetSyntaxFromValue( value, this.Compilation, generationContext ) );
+                RunTimeTemplateExpression.GetSyntaxFromValue( value, this.Compilation, generationContext ) );
 
-            return new UserExpression( expression, this._event.Type, generationContext );
+            return new BuiltUserExpression( expression, this._event.Type );
         }
 
         public object Remove( object? instance, object? value )
@@ -80,16 +80,16 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             var generationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
             var eventAccess = this.CreateEventExpression(
-                RuntimeExpression.FromValue( instance, this.Compilation, generationContext ),
+                RunTimeTemplateExpression.FromValue( instance, this.Compilation, generationContext ),
                 AspectReferenceTargetKind.EventRemoveAccessor,
                 generationContext );
 
             var expression = AssignmentExpression(
                 SyntaxKind.SubtractAssignmentExpression,
                 eventAccess,
-                RuntimeExpression.GetSyntaxFromValue( value, this.Compilation, generationContext ) );
+                RunTimeTemplateExpression.GetSyntaxFromValue( value, this.Compilation, generationContext ) );
 
-            return new UserExpression( expression, this._event.Type, generationContext );
+            return new BuiltUserExpression( expression, this._event.Type );
         }
 
         public object? Raise( object? instance, params object?[] args )
@@ -97,22 +97,21 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             var generationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
 
             var eventAccess = this.CreateEventExpression(
-                RuntimeExpression.FromValue( instance, this.Compilation, generationContext ),
+                RunTimeTemplateExpression.FromValue( instance, this.Compilation, generationContext ),
                 AspectReferenceTargetKind.EventRaiseAccessor,
                 generationContext );
 
             var arguments = this._event.GetArguments(
                 this._event.Signature.Parameters,
-                RuntimeExpression.FromValue( args, this.Compilation, generationContext ) );
+                RunTimeTemplateExpression.FromValue( args, this.Compilation, generationContext ) );
 
             var expression = ConditionalAccessExpression(
                 eventAccess,
                 InvocationExpression( MemberBindingExpression( IdentifierName( "Invoke" ) ) ).AddArgumentListArguments( arguments ) );
 
-            return new UserExpression(
+            return new BuiltUserExpression(
                 expression,
-                this._event.Signature.ReturnType,
-                generationContext );
+                this._event.Signature.ReturnType );
         }
     }
 }

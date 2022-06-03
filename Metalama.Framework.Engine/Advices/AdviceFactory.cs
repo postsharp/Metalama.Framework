@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.Advices
         private readonly IDiagnosticAdder _diagnosticAdder;
 
         private readonly Dictionary<INamedType, ImplementInterfaceAdvice> _implementInterfaceAdvices;
-        private readonly Dictionary<IMember, FilterAdvice> _filterAdvices;
+        private readonly Dictionary<IMember, ContractAdvice> _contractAdvices;
 
         internal List<Advice> Advices { get; }
 
@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.Advices
             this._compilation = compilation;
             this._diagnosticAdder = diagnosticAdder;
             this._implementInterfaceAdvices = new Dictionary<INamedType, ImplementInterfaceAdvice>( compilation.InvariantComparer );
-            this._filterAdvices = new Dictionary<IMember, FilterAdvice>( compilation.InvariantComparer );
+            this._contractAdvices = new Dictionary<IMember, ContractAdvice>( compilation.InvariantComparer );
             this.Advices = new List<Advice>();
         }
 
@@ -65,7 +65,7 @@ namespace Metalama.Framework.Engine.Advices
             this._compilation = parent._compilation;
             this._diagnosticAdder = parent._diagnosticAdder;
             this._implementInterfaceAdvices = parent._implementInterfaceAdvices;
-            this._filterAdvices = parent._filterAdvices;
+            this._contractAdvices = parent._contractAdvices;
             this.Advices = parent.Advices;
         }
 
@@ -360,16 +360,16 @@ namespace Metalama.Framework.Engine.Advices
                 .GetTemplateMember<IProperty>( this._compilation, this._serviceProvider );
 
             var accessorTemplates = propertyTemplate.GetAccessorTemplates();
-            var getTemplate = accessorTemplates.Get.ForOverride( targetDeclaration.GetMethod );
-            var setTemplate = accessorTemplates.Set.ForOverride( targetDeclaration.SetMethod );
+            var getTemplate = accessorTemplates.Get;
+            var setTemplate = accessorTemplates.Set;
 
             var advice = new OverrideFieldOrPropertyAdvice(
                 this._aspect,
                 this._templateInstance,
                 targetDeclaration,
                 propertyTemplate,
-                getTemplate,
-                setTemplate,
+                getTemplate.ForIntroduction(),
+                setTemplate.ForIntroduction(),
                 _layerName,
                 ObjectReader.GetReader( tags ) );
 
@@ -860,34 +860,34 @@ namespace Metalama.Framework.Engine.Advices
             }
         }
 
-        public void AddFilter(
+        public void AddContract(
             IParameter targetParameter,
             string template,
-            FilterDirection kind = FilterDirection.Input,
+            ContractDirection kind = ContractDirection.Input,
             object? tags = null,
             object? args = null )
         {
-            if ( kind == FilterDirection.Output && targetParameter.RefKind is not RefKind.Ref or RefKind.Out )
+            if ( kind == ContractDirection.Output && targetParameter.RefKind is not RefKind.Ref or RefKind.Out )
             {
                 throw new ArgumentOutOfRangeException(
                     nameof(kind),
-                    UserMessageFormatter.Format( $"Cannot add an output filter to the parameter '{targetParameter}' because it is neither 'ref' nor 'out'." ) );
+                    UserMessageFormatter.Format( $"Cannot add an output contract to the parameter '{targetParameter}' because it is neither 'ref' nor 'out'." ) );
             }
 
-            if ( kind == FilterDirection.Input && targetParameter.RefKind is not RefKind.None or RefKind.Ref or RefKind.In )
+            if ( kind == ContractDirection.Input && targetParameter.RefKind is not RefKind.None or RefKind.Ref or RefKind.In )
             {
                 throw new ArgumentOutOfRangeException(
                     nameof(kind),
-                    UserMessageFormatter.Format( $"Cannot add an input filter to the out parameter '{targetParameter}' " ) );
+                    UserMessageFormatter.Format( $"Cannot add an input contract to the out parameter '{targetParameter}' " ) );
             }
 
             this.AddFilterImpl( targetParameter, targetParameter.DeclaringMember, template, kind, tags, args );
         }
 
-        public void AddFilter(
+        public void AddContract(
             IFieldOrPropertyOrIndexer targetMember,
             string template,
-            FilterDirection kind = FilterDirection.Input,
+            ContractDirection kind = ContractDirection.Input,
             object? tags = null,
             object? args = null )
         {
@@ -898,7 +898,7 @@ namespace Metalama.Framework.Engine.Advices
             IDeclaration targetDeclaration,
             IMember targetMember,
             string template,
-            FilterDirection direction,
+            ContractDirection direction,
             object? tags,
             object? args )
         {
@@ -912,9 +912,9 @@ namespace Metalama.Framework.Engine.Advices
             var templateRef = this.ValidateTemplateName( template, TemplateKind.Default, true )
                 .GetTemplateMember<IMethod>( this._compilation, this._serviceProvider );
 
-            if ( !this._filterAdvices.TryGetValue( targetMember, out var advice ) )
+            if ( !this._contractAdvices.TryGetValue( targetMember, out var advice ) )
             {
-                advice = new FilterAdvice(
+                advice = new ContractAdvice(
                     this._aspect,
                     this._templateInstance,
                     targetMember,
@@ -927,7 +927,7 @@ namespace Metalama.Framework.Engine.Advices
                 this._diagnosticAdder.Report( diagnosticList );
             }
 
-            advice.Filters.Add( new Filter( targetDeclaration, templateRef, direction, ObjectReader.GetReader( tags ), ObjectReader.GetReader( args ) ) );
+            advice.Contracts.Add( new Contract( targetDeclaration, templateRef, direction, ObjectReader.GetReader( tags ), ObjectReader.GetReader( args ) ) );
         }
     }
 }

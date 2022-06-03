@@ -1,15 +1,24 @@
 class TargetClass
+{
+    private readonly IServiceProvider? _serviceProvider;
+
+    [ImportServiceAspect]
+    private IFormatProvider? FormatProvider
     {
-        private readonly IServiceProvider? _serviceProvider;
-
-        [ImportServiceAspect]
-        private IFormatProvider? FormatProvider {get    {
-        return (global::System.IFormatProvider? )this._serviceProvider.GetService(typeof(global::System.IFormatProvider));
-    }
-}
-
-        public string? Format(object? o)
+        get
         {
-            return ((ICustomFormatter?)this.FormatProvider?.GetFormat(typeof(ICustomFormatter)))?.Format(null, o, this.FormatProvider);
+            return (global::System.IFormatProvider?)this._serviceProvider.GetService(typeof(global::System.IFormatProvider));
+
+        }
+        set
+        {
+            throw new global::System.NotSupportedException();
+
         }
     }
+
+    public string? Format(object? o)
+    {
+        return ((ICustomFormatter?)this.FormatProvider?.GetFormat(typeof(ICustomFormatter)))?.Format(null, o, this.FormatProvider);
+    }
+}

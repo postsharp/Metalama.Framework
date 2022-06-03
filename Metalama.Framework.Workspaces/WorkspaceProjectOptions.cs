@@ -14,7 +14,7 @@ namespace Metalama.Framework.Workspaces
     /// <summary>
     /// The implement of <see cref="IProjectOptions"/> used by <see cref="Workspace"/>.
     /// </summary>
-    internal class WorkspaceProjectOptions : IProjectOptions
+    internal class WorkspaceProjectOptions : DefaultProjectOptions
     {
         private readonly Microsoft.CodeAnalysis.Project _roslynProject;
         private readonly Compilation _compilation;
@@ -38,40 +38,26 @@ namespace Metalama.Framework.Workspaces
             this.Configuration = msbuildProject.Properties.FirstOrDefault( p => p.Name == "Configuration" )?.EvaluatedValue;
         }
 
-        public string ProjectId { get; } = Guid.NewGuid().ToString();
+        public override string ProjectId { get; } = Guid.NewGuid().ToString();
 
-        public string? BuildTouchFile => null;
+        public override string? AssemblyName => this._compilation.AssemblyName;
 
-        public string? SourceGeneratorTouchFile => null;
+        public override bool FormatOutput => true;
 
-        public string? AssemblyName => this._compilation.AssemblyName;
+        public override bool FormatCompileTimeCode => true;
 
-        public ImmutableArray<object> PlugIns => ImmutableArray<object>.Empty;
+        public override string? ProjectPath => this._roslynProject.FilePath;
 
-        public bool IsFrameworkEnabled => true;
+        public override string? TargetFramework { get; }
 
-        public bool FormatOutput => true;
+        public override string? Configuration { get; }
 
-        public bool FormatCompileTimeCode => true;
-
-        public bool IsUserCodeTrusted => true;
-
-        public string? ProjectPath => this._roslynProject.FilePath;
-
-        public string? TargetFramework { get; }
-
-        public string? Configuration { get; }
-
-        public IProjectOptions Apply( IProjectOptions options ) => throw new NotImplementedException();
-
-        public bool TryGetProperty( string name, [NotNullWhen( true )] out string? value )
+        public override bool TryGetProperty( string name, [NotNullWhen( true )] out string? value )
         {
             return this._properties.TryGetValue( name, out value );
         }
 
-        public bool IsDesignTimeEnabled => false;
-
-        public string? AdditionalCompilationOutputDirectory => null;
+        public override bool IsDesignTimeEnabled => false;
 
         public static string? GetTargetFrameworkFromRoslynProject( Microsoft.CodeAnalysis.Project roslynProject )
         {

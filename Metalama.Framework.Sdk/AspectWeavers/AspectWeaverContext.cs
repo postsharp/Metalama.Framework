@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Project;
@@ -17,10 +16,10 @@ namespace Metalama.Framework.Engine.AspectWeavers
     /// <summary>
     /// Context for the <see cref="IAspectWeaver"/>.
     /// </summary>
+    [CompileTime]
     public sealed partial class AspectWeaverContext
     {
         private readonly Action<Diagnostic> _addDiagnostic;
-        private readonly Action<ManagedResource> _addResource;
         private IPartialCompilation _compilation;
 
         public IServiceProvider ServiceProvider { get; }
@@ -63,12 +62,6 @@ namespace Metalama.Framework.Engine.AspectWeavers
         public IAspectWeaverHelper Helper { get; }
 
         /// <summary>
-        /// Adds a new <see cref="ManagedResource" /> to the compilation.
-        /// </summary>
-        /// <param name="resource"></param>
-        public void AddResource( ManagedResource resource ) => this._addResource( resource );
-
-        /// <summary>
         /// Rewrites the syntax trees affected by aspects.
         /// </summary>
         /// <param name="rewriter">A <see cref="CSharpSyntaxRewriter"/> whose <c>Visit</c> method is invoked for all declarations
@@ -106,7 +99,6 @@ namespace Metalama.Framework.Engine.AspectWeavers
             IReadOnlyDictionary<ISymbol, IAspectInstance> aspectInstances,
             IPartialCompilation compilation,
             Action<Diagnostic> addDiagnostic,
-            Action<ManagedResource> addManifestResource,
             IAspectWeaverHelper helper,
             IServiceProvider serviceProvider,
             IProject project )
@@ -116,7 +108,6 @@ namespace Metalama.Framework.Engine.AspectWeavers
             this._compilation = compilation;
             this._addDiagnostic = addDiagnostic;
             this.Project = project;
-            this._addResource = addManifestResource;
             this.Helper = helper;
             this.ServiceProvider = serviceProvider;
         }

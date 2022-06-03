@@ -36,16 +36,16 @@ namespace Metalama.Framework.Engine.Advices
                 ReturnType)>
             CannotIntroduceDifferentExistingReturnType = new(
                 "LAMA0503",
-                "Cannot introduce member into a type because it has a different return type in the base class.",
+                "Cannot introduce member into a type because it has a different type or return type.",
                 "The aspect '{0}' cannot introduce member '{1}' into type '{2}' because it is already defined in type '{3}' " +
-                "and has return type '{4}'.",
+                "and has a different type or return type '{4}'.",
                 _category,
                 Error );
 
         internal static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType, IDeclaration DeclaringType)>
             CannotIntroduceWithDifferentStaticity = new(
                 "LAMA0504",
-                "Cannot introduce member into a type because it is sealed in a base class.",
+                "Cannot introduce member into a type because the type already contains a member of the same name or signature but with a different staticity.",
                 "The aspect '{0}' cannot introduce member '{1}' into type '{2}' because it is already defined in type '{3}' and " +
                 "its IsStatic flag is opposite of the introduced member.",
                 _category,
@@ -92,6 +92,14 @@ namespace Metalama.Framework.Engine.Advices
                 "Cannot introduce an interface was already introduced by the aspect.",
                 "The aspect '{0}' cannot introduce interface '{1}' into type '{2}' because there is already introduced an implementation of this interface. " +
                 "This happens when you introduce an interface after introducing another interface that extends it.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType, DeclarationKind DeclarationKind)>
+            CannotIntroduceWithDifferentKind = new(
+                "LAMA0514",
+                "Cannot introduce member into a type because another member of a different kind already exists.",
+                "The aspect '{0}' cannot introduce member '{1}' into type '{2}' because there is already a {3} of the same name in the type.",
                 _category,
                 Error );
     }

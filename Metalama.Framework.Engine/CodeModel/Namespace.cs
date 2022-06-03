@@ -5,6 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
@@ -38,29 +39,27 @@ namespace Metalama.Framework.Engine.CodeModel
         [Memo]
         public INamespace? ParentNamespace => this.IsGlobalNamespace ? null : this.Compilation.Factory.GetNamespace( this._symbol.ContainingNamespace );
 
+        // TODO: TypeUpdatableCollection could be cached in the CompilationModel.
         [Memo]
-        public INamedTypeList Types
-            => new NamedTypeList(
+        public INamedTypeCollection Types
+            => new NamedTypeCollection(
                 this,
-                this._symbol.GetTypeMembers()
-                    .Where( t => this.Compilation.ContainsType( t ) )
-                    .Select( n => new MemberRef<INamedType>( n, this.Compilation.RoslynCompilation ) ) );
+                new TypeUpdatableCollection( this.Compilation, this._symbol ) );
 
+        // TODO: AllNamespaceTypesUpdateableCollection could be cached in the CompilationModel.
         [Memo]
-        public INamedTypeList AllTypes
-            => new NamedTypeList(
+        public INamedTypeCollection AllTypes
+            => new NamedTypeCollection(
                 this,
-                this._symbol.SelectManyRecursive( ns => ns.GetNamespaceMembers(), includeThis: true )
-                    .SelectMany( ns => ns.GetTypeMembers() )
-                    .Where( t => this.Compilation.ContainsType( t ) )
-                    .Select( n => new MemberRef<INamedType>( n, this.Compilation.RoslynCompilation ) ) );
+                new AllNamespaceTypesUpdateableCollection( this.Compilation, this._symbol ) );
 
-        public INamespaceList Namespaces
-            => new NamespaceList(
+        public INamespaceCollection Namespaces
+            => new NamespaceCollection(
                 this,
                 this._symbol.GetNamespaceMembers()
                     .Where( n => this.Compilation.PartialCompilation.ParentNamespaces.Contains( n ) )
-                    .Select( n => new Ref<INamespace>( n, this.Compilation.RoslynCompilation ) ) );
+                    .Select( n => new Ref<INamespace>( n, this.Compilation.RoslynCompilation ) )
+                    .ToList() );
 
         public bool IsAncestorOf( INamespace ns )
         {

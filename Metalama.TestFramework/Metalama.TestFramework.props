@@ -8,12 +8,15 @@
              when DeterministicSourcePaths is true -->
         <Deterministic>False</Deterministic>
 
+        <!-- AssemblyInfo attributes are used to pass info from the msbuild project to the test project. -->
+        <GenerateAssemblyInfo>True</GenerateAssemblyInfo>
+
     </PropertyGroup>
 
     <!-- Enable dynamic file nesting in Visual Studio -->
     <ItemGroup>
-        <ProjectCapability Include="ConfigurableFileNesting"/>
-        <ProjectCapability Include="ConfigurableFileNestingFeatureEnabled"/>
+        <ProjectCapability Include="ConfigurableFileNesting" />
+        <ProjectCapability Include="ConfigurableFileNestingFeatureEnabled" />
     </ItemGroup>
 
 </Project>

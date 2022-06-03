@@ -29,17 +29,17 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets the list of types defined in the current namespace inside the current assembly, but not in descendant namespaces.
         /// </summary>
-        INamedTypeList Types { get; }
+        INamedTypeCollection Types { get; }
 
         /// <summary>
         /// Gets the list of types defined in the current namespace and in all descendant namespaces in the current assembly.
         /// </summary>
-        INamedTypeList AllTypes { get; }
+        INamedTypeCollection AllTypes { get; }
 
         /// <summary>
         /// Gets the list of children namespaces of the current namespace in the current assembly.
         /// </summary>
-        INamespaceList Namespaces { get; }
+        INamespaceCollection Namespaces { get; }
 
         /// <summary>
         /// Gets a value indicating whether the current namespace is the ancestor of another given namespace.

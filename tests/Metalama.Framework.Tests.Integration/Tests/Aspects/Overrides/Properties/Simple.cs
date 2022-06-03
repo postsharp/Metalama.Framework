@@ -4,6 +4,10 @@ using System;
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Simple
 {
+    /*
+     * Tests that a basic case of override property with property template works.
+     */
+
     public class OverrideAttribute : OverrideFieldOrPropertyAspect
     {
         public override dynamic? OverrideProperty
@@ -38,6 +42,22 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
             set
             {
                 this._field = value;
+            }
+        }
+
+        private static int _staticField;
+
+        [Override]
+        public static int StaticProperty
+        {
+            get
+            {
+                return _staticField;
+            }
+
+            set
+            {
+                _staticField = value;
             }
         }
     }

@@ -19,15 +19,15 @@ namespace Metalama.Framework.Tests.UnitTests
 
             TestProjectOptions myOptions = new();
 
-            ServiceProviderFactory.InitializeAsyncLocalProvider( myOptions );
+            ServiceProviderFactory.InitializeAsyncLocalProvider( myOptions.PathOptions );
             Assert.True( ServiceProviderFactory.HasAsyncLocalProvider );
 
-            Assert.Same( myOptions, ServiceProviderFactory.GetServiceProvider().GetRequiredService<IPathOptions>() );
+            Assert.Same( myOptions.PathOptions, ServiceProviderFactory.GetServiceProvider().GetRequiredService<IPathOptions>() );
 
             await Task.Yield();
 
             Assert.True( ServiceProviderFactory.HasAsyncLocalProvider );
-            Assert.Same( myOptions, ServiceProviderFactory.GetServiceProvider().GetRequiredService<IPathOptions>() );
+            Assert.Same( myOptions.PathOptions, ServiceProviderFactory.GetServiceProvider().GetRequiredService<IPathOptions>() );
 
             ServiceProviderFactory.AddAsyncLocalService( new TestService() );
 

@@ -27,12 +27,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         private Accessibility? _accessibility;
 
-        public AccessorBuilder( MemberBuilder containingDeclaration, MethodKind methodKind )
+        public AccessorBuilder( MemberBuilder containingDeclaration, MethodKind methodKind, bool isImplicit )
             : base( containingDeclaration.ParentAdvice )
         {
             this.ContainingMember = containingDeclaration;
             this._accessibility = null;
             this.MethodKind = methodKind;
+            this.IsImplicit = isImplicit;
         }
 
         [Memo]
@@ -54,11 +55,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         }
 
         [Memo]
-        public IGenericParameterList TypeParameters => GenericParameterList.Empty;
+        public IGenericParameterList TypeParameters => TypeParameterList.Empty;
 
         public IReadOnlyList<IType> TypeArguments => ImmutableArray<IType>.Empty;
 
-        public bool IsImplicit => false;
+        public bool IsImplicit { get; }
 
         public bool IsOpenGeneric => false;
 
@@ -81,9 +82,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 (EventBuilder eventBuilder, MethodKind.EventRemove) => eventBuilder.OverriddenEvent?.RemoveMethod.AssertNotNull(),
                 _ => throw new AssertionFailedException()
             };
-
-        // TODO: Local functions from templates will never be visible (which is probably only thing possible).
-        public IMethodList LocalFunctions => MethodList.Empty;
 
         IParameterList IHasParameters.Parameters => this.Parameters;
 
@@ -138,7 +136,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     throw new InvalidOperationException( $"Cannot change accessor accessibility, if the property has a single accessor ." );
                 }
 
-                if ( value != propertyBuilder.Accessibility && otherAccessor != null && otherAccessor.Accessibility.IsSubsetOf( propertyBuilder.Accessibility ) )
+                if ( value != propertyBuilder.Accessibility && otherAccessor != null
+                                                            && otherAccessor.Accessibility.IsSubsetOf( propertyBuilder.Accessibility ) )
                 {
                     throw new InvalidOperationException(
                         $"Cannot change accessor accessibility to {value}, because the other accessor is already restricted to {otherAccessor.Accessibility}." );

@@ -19,23 +19,10 @@ namespace Metalama.Framework.Engine.Linking
             return annotationValue != null ? LinkerDeclarationAnnotation.FromString( annotationValue ).Flags : LinkerDeclarationFlags.None;
         }
 
-        public static string? GetLinkerMarkedNodeId( this SyntaxNode node )
-        {
-            var annotationValue = node.GetAnnotations( MarkedNodeIdAnnotationKind ).SingleOrDefault()?.Data;
-
-            return annotationValue != null ? LinkerMarkedNodeIdAnnotation.FromString( annotationValue ).Id : null;
-        }
-
         public static T WithLinkerDeclarationFlags<T>( this T node, in LinkerDeclarationFlags flags )
             where T : MemberDeclarationSyntax
         {
             return node.WithAdditionalAnnotations( new SyntaxAnnotation( DeclarationAnnotationKind, new LinkerDeclarationAnnotation( flags ).ToString() ) );
-        }
-
-        public static T WithLinkerMarkedNodeId<T>( this T node, string id )
-            where T : SyntaxNode
-        {
-            return node.WithAdditionalAnnotations( new SyntaxAnnotation( MarkedNodeIdAnnotationKind, new LinkerMarkedNodeIdAnnotation( id ).ToString() ) );
         }
     }
 }

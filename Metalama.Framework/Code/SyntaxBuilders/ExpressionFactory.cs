@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Aspects;
+using System;
 using System.Text;
 
 namespace Metalama.Framework.Code.SyntaxBuilders;
@@ -132,5 +133,20 @@ public static class ExpressionFactory
     /// type of the <c>out</c> variable explicitly, as <c>out var</c> does not work when another argument is dynamic.</param>
     /// <seealso href="@templates"/>
     public static void Capture( dynamic? expression, out IExpression definedException )
-        => definedException = SyntaxBuilder.CurrentImplementation.Expression( expression );
+        => definedException = SyntaxBuilder.CurrentImplementation.Capture( expression );
+
+    /// <summary>
+    /// Returns an expression obtained by casting another expression to a type given as an <see cref="IType"/>.
+    /// </summary>
+    public static IExpression CastTo( this IExpression expression, IType targetType ) => SyntaxBuilder.CurrentImplementation.Cast( expression, targetType );
+
+    /// <summary>
+    /// Returns an expression obtained by casting another expression to a type given as a <see cref="Type"/>.
+    /// </summary>
+    public static IExpression CastTo( this IExpression expression, Type targetType ) => expression.CastTo( TypeFactory.GetType( targetType ) );
+
+    /// <summary>
+    /// Returns an expression obtained by casting another expression to a type given as a generic parameter.
+    /// </summary>
+    public static IExpression CastTo<T>( this IExpression expression ) => expression.CastTo( TypeFactory.GetType( typeof(T) ) );
 }

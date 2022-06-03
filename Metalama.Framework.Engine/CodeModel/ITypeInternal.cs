@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.CodeModel
         ITypeInternal Accept( TypeRewriter visitor );
     }
 
-    internal interface INamedTypeInternal : INamedType, ITypeInternal, IGenericInternal
+    internal interface INamedTypeInternal : INamedType, ITypeInternal, IGenericInternal, IDeclarationImpl
     {
         /// <summary>
         /// Gets the set of methods that override a given member of a base type or interface. In case of

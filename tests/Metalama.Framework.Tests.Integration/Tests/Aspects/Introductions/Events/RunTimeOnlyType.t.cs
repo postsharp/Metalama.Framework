@@ -1,9 +1,7 @@
 [Aspect]
-internal class RunTimeClass
-{
+internal class RunTimeClass { 
 
-
-internal event global::System.EventHandler<global::Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Events.RunTimeOnlyType.RunTimeClass>? Event
+internal event global::System.EventHandler<global::Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Events.RunTimeOnlyType.RunTimeClass> Event
 {
     add
     {
@@ -14,5 +12,4 @@ internal event global::System.EventHandler<global::Metalama.Framework.Tests.Inte
     }
 }
 
-internal event global::System.EventHandler<global::Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Events.RunTimeOnlyType.RunTimeClass>? FieldLikeEvent;    
-}
+internal event global::System.EventHandler<global::Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Events.RunTimeOnlyType.RunTimeClass>? FieldLikeEvent;}

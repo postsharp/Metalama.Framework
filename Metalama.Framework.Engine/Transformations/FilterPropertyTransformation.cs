@@ -15,25 +15,27 @@ namespace Metalama.Framework.Engine.Transformations;
 
 internal class FilterPropertyTransformation : OverridePropertyBaseTransformation
 {
-    public FilterPropertyTransformation( FilterAdvice advice, IProperty overriddenDeclaration ) : base( advice, overriddenDeclaration, ObjectReader.Empty ) { }
+    public FilterPropertyTransformation( ContractAdvice advice, IProperty overriddenDeclaration ) : base( advice, overriddenDeclaration, ObjectReader.Empty ) { }
 
     public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
     {
-        var advice = (FilterAdvice) this.Advice;
+        var advice = (ContractAdvice) this.Advice;
         var contextCopy = context;
         BlockSyntax? getterBody, setterBody;
 
         // Local function that executes the filter for one of the accessors.
+        var syntaxGenerationContext = context.SyntaxGenerationContext;
+
         bool TryExecuteFilters(
             IMethod? accessor,
-            FilterDirection direction,
+            ContractDirection direction,
             [NotNullWhen( true )] out List<StatementSyntax>? statements,
             [NotNullWhen( true )] out ExpressionSyntax? proceedExpression,
             out string? returnValueLocalName )
         {
-            if ( accessor != null && advice.Filters.Any( f => f.AppliesTo( direction ) ) )
+            if ( accessor != null && advice.Contracts.Any( f => f.AppliesTo( direction ) ) )
             {
-                if ( direction == FilterDirection.Output )
+                if ( direction == ContractDirection.Output )
                 {
                     returnValueLocalName = contextCopy.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ).GetUniqueIdentifier( "returnValue" );
                 }
@@ -42,14 +44,14 @@ internal class FilterPropertyTransformation : OverridePropertyBaseTransformation
                     returnValueLocalName = null;
                 }
 
-                if ( !advice.TryExecuteTemplates( this.OverriddenDeclaration, contextCopy!, direction, returnValueLocalName, out statements ) )
+                if ( !advice.TryExecuteTemplates( this.OverriddenDeclaration, contextCopy, direction, returnValueLocalName, out statements ) )
                 {
                     proceedExpression = null;
 
                     return false;
                 }
 
-                proceedExpression = this.CreateProceedDynamicExpression( contextCopy!, accessor, TemplateKind.Default ).ToRunTimeExpression().Syntax;
+                proceedExpression = this.CreateProceedDynamicExpression( contextCopy, accessor, TemplateKind.Default ).ToSyntax( syntaxGenerationContext );
 
                 return true;
             }
@@ -66,7 +68,7 @@ internal class FilterPropertyTransformation : OverridePropertyBaseTransformation
         // Process the setter (input filters).
         if ( TryExecuteFilters(
                 this.OverriddenDeclaration.SetMethod,
-                FilterDirection.Input,
+                ContractDirection.Input,
                 out var setterStatements,
                 out var setterProceedExpression,
                 out _ ) )
@@ -82,7 +84,7 @@ internal class FilterPropertyTransformation : OverridePropertyBaseTransformation
         // Process the getter (output filters).
         if ( TryExecuteFilters(
                 this.OverriddenDeclaration.GetMethod,
-                FilterDirection.Output,
+                ContractDirection.Output,
                 out var getterStatements,
                 out var getterProceedExpression,
                 out var getterReturnValueLocalName ) )
@@ -120,12 +122,12 @@ internal class FilterPropertyTransformation : OverridePropertyBaseTransformation
 
         if ( this.OverriddenDeclaration.GetMethod != null && getterBody == null )
         {
-            getterBody = this.CreateIdentityAccessorBody( SyntaxKind.GetAccessorDeclaration, context.SyntaxGenerationContext );
+            getterBody = this.CreateIdentityAccessorBody( SyntaxKind.GetAccessorDeclaration, syntaxGenerationContext );
         }
 
         if ( this.OverriddenDeclaration.SetMethod != null && setterBody == null )
         {
-            setterBody = this.CreateIdentityAccessorBody( SyntaxKind.SetAccessorDeclaration, context.SyntaxGenerationContext );
+            setterBody = this.CreateIdentityAccessorBody( SyntaxKind.SetAccessorDeclaration, syntaxGenerationContext );
         }
 
         return this.GetIntroducedMembersImpl( context, getterBody, setterBody );

@@ -13,29 +13,40 @@ namespace Metalama.Framework.Engine.Testing
     /// <summary>
     /// An implementation of <see cref="IProjectOptions"/> and <see cref="IPathOptions"/> that can be used in tests.
     /// </summary>
-    public class TestProjectOptions : DefaultPathOptions, IProjectOptions, IDisposable
+    public class TestProjectOptions : DefaultProjectOptions, IDisposable
     {
         private readonly ImmutableDictionary<string, string> _properties;
         private readonly Lazy<string> _baseDirectory;
-        private readonly Lazy<string> _settingsDirectory;
         private readonly Lazy<string> _projectDirectory;
-        private readonly Lazy<string> _compileTimeProjectCacheDirectory;
 
-        public TestProjectOptions( ImmutableDictionary<string, string>? properties = null )
+        public TestProjectOptions(
+            ImmutableDictionary<string, string>? properties = null,
+            ImmutableArray<object> plugIns = default,
+            bool formatOutput = false,
+            bool formatCompileTimeCode = false )
         {
+            this.PlugIns = plugIns.IsDefault ? ImmutableArray<object>.Empty : plugIns;
+
             this._properties = properties ?? ImmutableDictionary<string, string>.Empty;
             var baseDirectory = Path.Combine( Path.GetTempPath(), "Metalama", "Tests", RandomIdGenerator.GenerateId() );
             this._baseDirectory = CreateDirectoryLazy( baseDirectory );
 
             var compileTimeProjectCacheDirectory = Path.Combine( this.BaseDirectory, "Cache" );
-            this._compileTimeProjectCacheDirectory = CreateDirectoryLazy( compileTimeProjectCacheDirectory );
+            var compileTimeProjectCacheDirectoryLazy = CreateDirectoryLazy( compileTimeProjectCacheDirectory );
 
             var settingsDirectory = Path.Combine( baseDirectory, "Settings" );
-            this._settingsDirectory = CreateDirectoryLazy( settingsDirectory );
+            var settingsDirectoryLazy = CreateDirectoryLazy( settingsDirectory );
+
+            this.PathOptions = new TestPathOptions( settingsDirectoryLazy, compileTimeProjectCacheDirectoryLazy );
 
             var projectDirectory = Path.Combine( baseDirectory, "Project" );
             this._projectDirectory = CreateDirectoryLazy( projectDirectory );
+
+            this.FormatOutput = formatOutput;
+            this.FormatCompileTimeCode = formatCompileTimeCode;
         }
+
+        public TestPathOptions PathOptions { get; }
 
         private static Lazy<string> CreateDirectoryLazy( string path )
             => new(
@@ -46,48 +57,17 @@ namespace Metalama.Framework.Engine.Testing
                     return path;
                 } );
 
-        // Don't create crash reports for user exceptions so we have deterministic error messages.
-        public override string? GetNewCrashReportPath() => null;
+        public override ImmutableArray<object> PlugIns { get; }
 
         public string BaseDirectory => this._baseDirectory.Value;
 
-        public override string CompileTimeProjectCacheDirectory => this._compileTimeProjectCacheDirectory.Value;
+        public override bool FormatOutput { get; }
 
-        public override string SettingsDirectory => this._settingsDirectory.Value;
-
-        public string ProjectId => throw new NotSupportedException();
-
-        public virtual string? BuildTouchFile => null;
-
-        public string? SourceGeneratorTouchFile => null;
-
-        public string? AssemblyName => null;
-
-        public ImmutableArray<object> PlugIns => ImmutableArray<object>.Empty;
-
-        public bool IsFrameworkEnabled => true;
-
-        public bool FormatOutput { get; set; }
-
-        public bool FormatCompileTimeCode { get; set; }
-
-        public bool IsUserCodeTrusted => true;
-
-        public string? ProjectPath => null;
-
-        public string? TargetFramework => "net6.0";
-
-        public string? Configuration => "Debug";
+        public override bool FormatCompileTimeCode { get; }
 
         public string ProjectDirectory => this._projectDirectory.Value;
 
-        public IProjectOptions Apply( IProjectOptions options ) => options;
-
-        public bool IsDesignTimeEnabled => true;
-
-        public string? AdditionalCompilationOutputDirectory => null;
-
-        public bool TryGetProperty( string name, [NotNullWhen( true )] out string? value ) => this._properties.TryGetValue( name, out value );
+        public override bool TryGetProperty( string name, [NotNullWhen( true )] out string? value ) => this._properties.TryGetValue( name, out value );
 
         public void Dispose()
         {

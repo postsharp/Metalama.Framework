@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
@@ -47,6 +48,7 @@ namespace Metalama.Framework.Engine.Transformations
             // We need event template xor both accessor templates.
             Invariant.Assert( eventTemplate.IsNotNull || (addTemplate.IsNotNull && removeTemplate.IsNotNull) );
             Invariant.Assert( !(eventTemplate.IsNotNull && (addTemplate.IsNotNull || removeTemplate.IsNotNull)) );
+            Invariant.Assert( !(eventTemplate.IsNotNull && eventTemplate.Declaration!.IsEventField()) );
 
             this.EventTemplate = eventTemplate;
 
@@ -173,15 +175,14 @@ namespace Metalama.Framework.Engine.Transformations
             SyntaxGenerationContext generationContext,
             [NotNullWhen( true )] out BlockSyntax? body )
         {
-            var proceedExpression = new UserExpression(
+            var proceedExpression = new BuiltUserExpression(
                 accessor.MethodKind switch
                 {
                     MethodKind.EventAdd => this.CreateAddExpression( generationContext ),
                     MethodKind.EventRemove => this.CreateRemoveExpression( generationContext ),
                     _ => throw new AssertionFailedException()
                 },
-                this.OverriddenDeclaration.Compilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.Void ),
-                context.SyntaxGenerationContext );
+                this.OverriddenDeclaration.Compilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.Void ) );
 
             var metaApi = MetaApi.ForEvent(
                 this.OverriddenDeclaration,

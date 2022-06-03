@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
-using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Transformations
@@ -45,24 +44,16 @@ namespace Metalama.Framework.Engine.Transformations
 
         public BaseTypeSyntax GetSyntax()
         {
-            if ( !this.TargetType.ImplementedInterfaces.Contains( this.InterfaceType ) )
-            {
-                var targetSyntax = this.TargetType.GetSymbol().GetPrimarySyntaxReference().AssertNotNull();
+            var targetSyntax = this.TargetType.GetSymbol().GetPrimarySyntaxReference().AssertNotNull();
 
-                var generationContext = SyntaxGenerationContext.Create(
-                    this.TargetType.Compilation.Project.ServiceProvider,
-                    this.TargetType.GetCompilationModel().RoslynCompilation,
-                    targetSyntax.SyntaxTree,
-                    targetSyntax.Span.Start );
+            var generationContext = SyntaxGenerationContext.Create(
+                this.TargetType.Compilation.Project.ServiceProvider,
+                this.TargetType.GetCompilationModel().RoslynCompilation,
+                targetSyntax.SyntaxTree,
+                targetSyntax.Span.Start );
 
-                // The type already implements the interface members itself.
-                return SimpleBaseType( generationContext.SyntaxGenerator.Type( this.InterfaceType.GetSymbol() ) );
-            }
-            else
-            {
-                // Transformation should not be created iff the interface is not present on the target type.
-                throw new AssertionFailedException();
-            }
+            // The type already implements the interface members itself.
+            return SimpleBaseType( generationContext.SyntaxGenerator.Type( this.InterfaceType.GetSymbol() ) );
         }
     }
 }

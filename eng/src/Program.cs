@@ -39,8 +39,7 @@ var product = new Product( Dependencies.Metalama )
         "Metalama.TestFramework.$(PackageVersion).nupkg",
         "Metalama.Framework.Redist.$(PackageVersion).nupkg",
         "Metalama.Framework.Sdk.$(PackageVersion).nupkg",
-        "Metalama.Framework.Engine.4.1.0.$(PackageVersion).nupkg",
-        "Metalama.Framework.Engine.4.0.1.$(PackageVersion).nupkg",
+        "Metalama.Framework.Engine.$(PackageVersion).nupkg",
         "Metalama.Framework.Introspection.$(PackageVersion).nupkg",
         "Metalama.Framework.Workspaces.$(PackageVersion).nupkg",
         "Metalama.LinqPad.$(PackageVersion).nupkg" ),
@@ -53,7 +52,8 @@ var product = new Product( Dependencies.Metalama )
                 AdditionalArtifactRules = new[]
                 {
                     $@"+:%system.teamcity.build.tempDir%/Metalama/ExtractExceptions/**/*=>logs",
-                    $@"+:%system.teamcity.build.tempDir%/Metalama/Extract/**/.completed=>logs"
+                    $@"+:%system.teamcity.build.tempDir%/Metalama/Extract/**/.completed=>logs",
+                    $@"+:%system.teamcity.build.tempDir%/Metalama/CrashReports/**/*=>logs",
                 }
             } )
 };

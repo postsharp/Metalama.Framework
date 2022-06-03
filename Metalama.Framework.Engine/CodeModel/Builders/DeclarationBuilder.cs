@@ -30,9 +30,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public abstract IDeclaration? ContainingDeclaration { get; }
 
-        IAttributeList IDeclaration.Attributes => this.Attributes;
+        IAttributeCollection IDeclaration.Attributes => this.Attributes;
 
-        public AttributeBuilderList Attributes { get; } = new();
+        public AttributeBuilderCollection Attributes { get; } = new();
 
         public abstract DeclarationKind DeclarationKind { get; }
 

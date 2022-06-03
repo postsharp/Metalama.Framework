@@ -130,7 +130,10 @@ namespace Metalama.Framework.Engine.Linking
                                 .WithErrorCodes( errorCodes )
                                 .NormalizeWhitespace() );
 
-                    transformedNode = transformedNode.WithLeadingTrivia( node.GetLeadingTrivia().Insert( 0, disable ) ).WithTrailingTrivia( LineFeed, restore );
+                    transformedNode =
+                        transformedNode
+                            .WithLeadingTrivia( node.GetLeadingTrivia().InsertRange( 0, new[] { ElasticLineFeed, disable, ElasticLineFeed } ) )
+                            .WithTrailingTrivia( transformedNode.GetTrailingTrivia().AddRange( new[] { ElasticLineFeed, restore, ElasticLineFeed } ) );
                 }
 
                 return transformedNode;
@@ -377,6 +380,16 @@ namespace Metalama.Framework.Engine.Linking
                 }
 
                 return base.VisitConstructorDeclaration( node );
+            }
+
+            public override SyntaxNode? VisitPropertyDeclaration( PropertyDeclarationSyntax node )
+            {
+                if ( this._introducedMemberCollection.IsAutoPropertyWithSynthesizedSetter( node ) )
+                {
+                    return node.WithSynthesizedSetter();
+                }
+
+                return base.VisitPropertyDeclaration( node );
             }
 
             public override SyntaxNode? VisitEventFieldDeclaration( EventFieldDeclarationSyntax node )

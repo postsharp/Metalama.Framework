@@ -3,10 +3,10 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Linq;
 using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 
@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 {
     internal partial class AdvisedParameterList
     {
-        private class ToArrayImpl : IUserExpression
+        private class ToArrayImpl : UserExpression
         {
             private readonly AdvisedParameterList _parent;
 
@@ -23,30 +23,20 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
                 this._parent = parent;
             }
 
-            public RuntimeExpression ToRunTimeExpression()
+            public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
             {
-                var syntaxGenerationContext = TemplateExpansionContext.CurrentSyntaxGenerationContext;
                 var syntaxGenerator = syntaxGenerationContext.SyntaxGenerator;
 
-                var array = (ExpressionSyntax) syntaxGenerator.ArrayCreationExpression(
+                return syntaxGenerator.ArrayCreationExpression(
                     syntaxGenerator.Type( SpecialType.System_Object ),
                     this._parent._parameters.Select(
                         p =>
                             p.RefKind.IsReadable()
                                 ? SyntaxFactory.IdentifierName( p.Name )
                                 : (SyntaxNode) syntaxGenerator.DefaultExpression( p.ParameterType.GetSymbol() ) ) );
-
-                return new RuntimeExpression(
-                    array,
-                    this._parent.Compilation.Factory.GetTypeByReflectionType( typeof(object[]) ),
-                    syntaxGenerationContext );
             }
 
-            public IType Type => this._parent.Compilation.Factory.GetTypeByReflectionType( typeof(object[]) );
-
-            bool IExpression.IsAssignable => false;
-
-            object? IExpression.Value { get => this; set => throw new NotSupportedException(); }
+            public override IType Type => this._parent.Compilation.Factory.GetTypeByReflectionType( typeof(object[]) );
         }
     }
 }

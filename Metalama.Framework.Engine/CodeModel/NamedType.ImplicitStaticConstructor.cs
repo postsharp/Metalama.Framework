@@ -22,8 +22,6 @@ namespace Metalama.Framework.Engine.CodeModel
                 this.DeclaringType = declaringType;
             }
 
-            public IMethodList LocalFunctions => MethodList.Empty;
-
             public MethodKind MethodKind => MethodKind.StaticConstructor;
 
             public bool IsVirtual => false;
@@ -54,7 +52,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             public IDeclaration? ContainingDeclaration => this.DeclaringType;
 
-            public IAttributeList Attributes => AttributeList.Empty;
+            public IAttributeCollection Attributes => AttributeCollection.Empty;
 
             public DeclarationKind DeclarationKind => DeclarationKind.Constructor;
 

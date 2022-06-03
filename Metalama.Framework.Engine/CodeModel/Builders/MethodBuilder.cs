@@ -7,7 +7,6 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Advices;
-using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
@@ -28,6 +27,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public GenericParameterBuilderList GenericParameters { get; } = new();
 
         public override string Name { get; set; }
+
+        public override bool IsImplicit => false;
 
         // A builder is never accessed directly from user code and never represents a generic type instance,
         // so we don't need an implementation of GenericArguments.
@@ -84,8 +85,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         IParameter IMethod.ReturnParameter => this.ReturnParameter;
 
-        IMethodList IMethodBase.LocalFunctions => MethodList.Empty;
-
         IParameterList IHasParameters.Parameters => this.Parameters;
 
         IGenericParameterList IGeneric.TypeParameters => this.GenericParameters;
@@ -127,7 +126,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             var method =
                 MethodDeclaration(
-                    List<AttributeListSyntax>(),
+                    this.GetAttributeLists( context.SyntaxGenerationContext ),
                     this.GetSyntaxModifierList(),
                     context.SyntaxGenerator.ReturnType( this ),
                     this.ExplicitInterfaceImplementations.Count > 0
@@ -152,12 +151,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             return new[] { new IntroducedMember( this, method, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
         }
-
-        // TODO: Temporary
-        public override InsertPosition InsertPosition
-            => new(
-                InsertPositionRelation.Within,
-                (MemberDeclarationSyntax) ((NamedType) this.DeclaringType).Symbol.GetPrimaryDeclaration().AssertNotNull() );
 
         public void SetExplicitInterfaceImplementation( IMethod interfaceMethod ) => this.ExplicitInterfaceImplementations = new[] { interfaceMethod };
 

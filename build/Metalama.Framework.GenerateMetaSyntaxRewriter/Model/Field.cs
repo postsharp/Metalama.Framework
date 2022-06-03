@@ -31,7 +31,7 @@ namespace Metalama.Framework.GenerateMetaSyntaxRewriter.Model
         [XmlAttribute]
         public bool AllowTrailingSeparator { get; set; }
 
-        [XmlElement( ElementName = "Kind", Type = typeof(Kind) )]
+        [XmlElement( ElementName = "Kind", Type = typeof( Kind ) )]
         public List<Kind> Kinds { get; set; } = new();
 
         [XmlElement]
@@ -43,5 +43,8 @@ namespace Metalama.Framework.GenerateMetaSyntaxRewriter.Model
 
         [XmlIgnore]
         public RoslynVersion MinimalRoslynVersion { get; set; }
+
+        [XmlIgnore]
+        public Dictionary<Kind, RoslynVersion> KindsMinimalRoslynVersions { get; set; }
     }
 }

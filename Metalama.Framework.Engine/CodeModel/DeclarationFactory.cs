@@ -7,7 +7,7 @@ using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Engine.Templating.MetaModel;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -25,8 +25,12 @@ namespace Metalama.Framework.Engine.CodeModel
     /// </summary>
     public class DeclarationFactory : ITypeFactory
     {
-        private readonly ConcurrentDictionary<Ref<ICompilationElement>, object> _cache =
-            new( DeclarationRefEqualityComparer<Ref<ICompilationElement>>.Instance );
+        private readonly ConcurrentDictionary<Ref<ICompilationElement>, object> _defaultCache =
+            new( DeclarationRefEqualityComparer<Ref<ICompilationElement>>.Default );
+
+        // For types, we have a null-sensitive comparer to that 'object' and 'object?' are cached as two distinct items.
+        private readonly ConcurrentDictionary<ITypeSymbol, object> _typeCache =
+            new( SymbolEqualityComparer.IncludeNullability );
 
         private readonly INamedType?[] _specialTypes = new INamedType?[(int) SpecialType.Count];
 
@@ -73,80 +77,103 @@ namespace Metalama.Framework.Engine.CodeModel
                 throw new InvalidOperationException( "Cannot get the namespace of a type that is not a part of the current compilation." );
             }
 
-            return (INamespace) this._cache.GetOrAdd(
+            return (INamespace) this._defaultCache.GetOrAdd(
                 namespaceSymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
                 l => new Namespace( (INamespaceSymbol) l.GetSymbol( this.Compilation ), this._compilationModel ) );
         }
 
         internal IAssembly GetAssembly( IAssemblySymbol assemblySymbol )
-            => (IAssembly) this._cache.GetOrAdd(
+            => (IAssembly) this._defaultCache.GetOrAdd(
                 assemblySymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
                 l => !SymbolEqualityComparer.Default.Equals( l.GetSymbol( this.Compilation ), this._compilationModel.RoslynCompilation.Assembly )
                     ? new ReferencedAssembly( (IAssemblySymbol) l.GetSymbol( this.Compilation ), this._compilationModel )
                     : this._compilationModel );
 
         public IType GetIType( ITypeSymbol typeSymbol )
-            => (IType) this._cache.GetOrAdd(
-                typeSymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
-                l => CodeModelFactory.CreateIType( (ITypeSymbol) l.GetSymbol( this.Compilation ), this._compilationModel ) );
-
-        public INamedType GetNamedType( INamedTypeSymbol typeSymbol )
-            => (NamedType) this._cache.GetOrAdd(
-                typeSymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
-                s => new NamedType( (INamedTypeSymbol) s.GetSymbol( this.Compilation ), this._compilationModel ) );
+            => (IType) this._typeCache.GetOrAdd(
+                typeSymbol,
+                l => CodeModelFactory.CreateIType( l, this._compilationModel ) );
 
         private IArrayType GetArrayType( IArrayTypeSymbol typeSymbol )
-            => (ArrayType) this._cache.GetOrAdd(
-                typeSymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
-                s => new ArrayType( (IArrayTypeSymbol) s.GetSymbol( this.Compilation ), this._compilationModel ) );
+            => (ArrayType) this._typeCache.GetOrAdd(
+                typeSymbol,
+                s => new ArrayType( (IArrayTypeSymbol) s, this._compilationModel ) );
 
         private IDynamicType GetDynamicType( IDynamicTypeSymbol typeSymbol )
-            => (DynamicType) this._cache.GetOrAdd(
-                typeSymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
-                s => new DynamicType( (IDynamicTypeSymbol) s.GetSymbol( this.Compilation ), this._compilationModel ) );
+            => (DynamicType) this._typeCache.GetOrAdd(
+                typeSymbol,
+                s => new DynamicType( (IDynamicTypeSymbol) s, this._compilationModel ) );
 
         private IPointerType GetPointerType( IPointerTypeSymbol typeSymbol )
-            => (PointerType) this._cache.GetOrAdd(
-                typeSymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
-                s => new PointerType( (IPointerTypeSymbol) s.GetSymbol( this.Compilation ), this._compilationModel ) );
+            => (PointerType) this._typeCache.GetOrAdd(
+                typeSymbol,
+                s => new PointerType( (IPointerTypeSymbol) s, this._compilationModel ) );
+
+        public INamedType GetNamedType( INamedTypeSymbol typeSymbol )
+        {
+            if ( typeSymbol.NullableAnnotation == NullableAnnotation.Annotated )
+            {
+                // If we have a nullable named type, we return a nullable wrapper. We want to make sure that there is a single
+                // underlying NamedType.
+
+                return (INamedType) this._typeCache.GetOrAdd(
+                    typeSymbol,
+                    s =>
+                        new NullableNamedType(
+                            (NamedType) this.GetNamedType( (INamedTypeSymbol) s.WithNullableAnnotation( NullableAnnotation.None ) ),
+                            (INamedTypeSymbol) s ) );
+            }
+            else
+            {
+                if ( typeSymbol.NullableAnnotation == NullableAnnotation.NotAnnotated )
+                {
+                    // Normalize to the NullableAnnotation.None.
+                    typeSymbol = (INamedTypeSymbol) typeSymbol.WithNullableAnnotation( NullableAnnotation.None );
+                }
+
+                return (INamedType) this._typeCache.GetOrAdd(
+                    typeSymbol,
+                    s => new NamedType( (INamedTypeSymbol) s, this._compilationModel ) );
+            }
+        }
 
         public ITypeParameter GetGenericParameter( ITypeParameterSymbol typeParameterSymbol )
-            => (TypeParameter) this._cache.GetOrAdd(
+            => (TypeParameter) this._defaultCache.GetOrAdd(
                 typeParameterSymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
                 tp => new TypeParameter( (ITypeParameterSymbol) tp.GetSymbol( this.Compilation ), this._compilationModel ) );
 
         public IMethod GetMethod( IMethodSymbol methodSymbol )
-            => (IMethod) this._cache.GetOrAdd(
+            => (IMethod) this._defaultCache.GetOrAdd(
                 methodSymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
                 ms => new Method( (IMethodSymbol) ms.GetSymbol( this.Compilation ), this._compilationModel ) );
 
         public IProperty GetProperty( IPropertySymbol propertySymbol )
-            => (IProperty) this._cache.GetOrAdd(
+            => (IProperty) this._defaultCache.GetOrAdd(
                 propertySymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
                 ms => new Property( (IPropertySymbol) ms.GetSymbol( this.Compilation ), this._compilationModel ) );
 
         public IIndexer GetIndexer( IPropertySymbol propertySymbol )
-            => (IIndexer) this._cache.GetOrAdd(
+            => (IIndexer) this._defaultCache.GetOrAdd(
                 propertySymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
                 ms => new Indexer( (IPropertySymbol) ms.GetSymbol( this.Compilation ), this._compilationModel ) );
 
         public IField GetField( IFieldSymbol fieldSymbol )
-            => (IField) this._cache.GetOrAdd(
+            => (IField) this._defaultCache.GetOrAdd(
                 fieldSymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
                 ms => new Field( (IFieldSymbol) ms.GetSymbol( this.Compilation ), this._compilationModel ) );
 
         public IConstructor GetConstructor( IMethodSymbol methodSymbol )
-            => (IConstructor) this._cache.GetOrAdd(
+            => (IConstructor) this._defaultCache.GetOrAdd(
                 methodSymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
                 ms => new Constructor( (IMethodSymbol) ms.GetSymbol( this.Compilation ), this._compilationModel ) );
 
         public IParameter GetParameter( IParameterSymbol parameterSymbol )
-            => (IParameter) this._cache.GetOrAdd(
+            => (IParameter) this._defaultCache.GetOrAdd(
                 parameterSymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
                 ms => new Parameter( (IParameterSymbol) ms.GetSymbol( this.Compilation ), this._compilationModel ) );
 
         public IEvent GetEvent( IEventSymbol @event )
-            => (IEvent) this._cache.GetOrAdd(
+            => (IEvent) this._defaultCache.GetOrAdd(
                 @event.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
                 ms => new Event( (IEventSymbol) ms.GetSymbol( this.Compilation ), this._compilationModel ) );
 
@@ -179,6 +206,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal ICompilationElement? GetCompilationElement( ISymbol symbol, DeclarationRefTargetKind kind = DeclarationRefTargetKind.Default )
         {
+            Invariant.Assert( SymbolEqualityComparer.Default.Equals( symbol, symbol.GetSymbolId().Resolve( this._compilationModel.RoslynCompilation ) ) );
+
             switch ( symbol.Kind )
             {
                 case SymbolKind.NamedType:
@@ -291,27 +320,27 @@ namespace Metalama.Framework.Engine.CodeModel
         }
 
         internal IAttribute GetAttribute( AttributeBuilder attributeBuilder )
-            => (IAttribute) this._cache.GetOrAdd(
+            => (IAttribute) this._defaultCache.GetOrAdd(
                 Ref.FromBuilder( attributeBuilder ).As<ICompilationElement>(),
                 l => new BuiltAttribute( (AttributeBuilder) l.Target!, this._compilationModel ) );
 
         internal IParameter GetParameter( IParameterBuilder parameterBuilder )
-            => (IParameter) this._cache.GetOrAdd(
+            => (IParameter) this._defaultCache.GetOrAdd(
                 Ref.FromBuilder( parameterBuilder ).As<ICompilationElement>(),
                 l => new BuiltParameter( (IParameterBuilder) l.Target!, this._compilationModel ) );
 
         internal ITypeParameter GetGenericParameter( TypeParameterBuilder typeParameterBuilder )
-            => (ITypeParameter) this._cache.GetOrAdd(
+            => (ITypeParameter) this._defaultCache.GetOrAdd(
                 Ref.FromBuilder( typeParameterBuilder ).As<ICompilationElement>(),
                 l => new BuiltTypeParameter( (TypeParameterBuilder) l.Target!, this._compilationModel ) );
 
         internal IMethod GetMethod( MethodBuilder methodBuilder )
-            => (IMethod) this._cache.GetOrAdd(
+            => (IMethod) this._defaultCache.GetOrAdd(
                 Ref.FromBuilder( methodBuilder ).As<ICompilationElement>(),
                 l => new BuiltMethod( (MethodBuilder) l.Target!, this._compilationModel ) );
 
         internal IMethod GetMethod( AccessorBuilder methodBuilder )
-            => (IMethod) this._cache.GetOrAdd(
+            => (IMethod) this._defaultCache.GetOrAdd(
                 Ref.FromBuilder( methodBuilder ).As<ICompilationElement>(),
                 valueFactory: l =>
                 {
@@ -320,18 +349,23 @@ namespace Metalama.Framework.Engine.CodeModel
                     return ((IMemberWithAccessors) this.GetDeclaration( builder.ContainingMember )).GetAccessor( builder.MethodKind )!;
                 } );
 
+        internal IConstructor GetConstructor( ConstructorBuilder methodBuilder )
+            => (IConstructor) this._defaultCache.GetOrAdd(
+                Ref.FromBuilder( methodBuilder ).As<ICompilationElement>(),
+                l => new BuiltConstructor( (ConstructorBuilder) l.Target!, this._compilationModel ) );
+
         internal IField GetField( IFieldBuilder fieldBuilder )
-            => (IField) this._cache.GetOrAdd(
+            => (IField) this._defaultCache.GetOrAdd(
                 Ref.FromBuilder( fieldBuilder ).As<ICompilationElement>(),
                 l => new BuiltField( (FieldBuilder) l.Target!, this._compilationModel ) );
 
         internal IProperty GetProperty( PropertyBuilder propertyBuilder )
-            => (IProperty) this._cache.GetOrAdd(
+            => (IProperty) this._defaultCache.GetOrAdd(
                 Ref.FromBuilder( propertyBuilder ).As<ICompilationElement>(),
                 l => new BuiltProperty( (PropertyBuilder) l.Target!, this._compilationModel ) );
 
         internal IEvent GetEvent( EventBuilder propertyBuilder )
-            => (IEvent) this._cache.GetOrAdd(
+            => (IEvent) this._defaultCache.GetOrAdd(
                 Ref.FromBuilder( propertyBuilder ).As<ICompilationElement>(),
                 l => new BuiltEvent( (EventBuilder) l.Target!, this._compilationModel ) );
 
@@ -346,6 +380,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 AttributeBuilder attributeBuilder => this.GetAttribute( attributeBuilder ),
                 TypeParameterBuilder genericParameterBuilder => this.GetGenericParameter( genericParameterBuilder ),
                 AccessorBuilder accessorBuilder => this.GetMethod( accessorBuilder ),
+                ConstructorBuilder constructorBuilder => this.GetConstructor( constructorBuilder ),
 
                 // This is for linker tests (fake builders), which resolve to themselves.
                 // ReSharper disable once SuspiciousTypeConversion.Global

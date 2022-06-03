@@ -13,9 +13,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using System;
-using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -190,52 +187,11 @@ public class TargetClass
             Assert.Empty( emitResult.Diagnostics );
         }
 
-        private class DesignTimeFallbackProjectOptions : IProjectOptions
+        private class DesignTimeFallbackProjectOptions : ProjectOptionsWrapper
         {
-            private readonly IProjectOptions _underlying;
+            public override bool IsDesignTimeEnabled => false;
 
-            public string ProjectId => this._underlying.ProjectId;
-
-            public string? BuildTouchFile => this._underlying.BuildTouchFile;
-
-            public string? SourceGeneratorTouchFile => this._underlying.SourceGeneratorTouchFile;
-
-            public string? AssemblyName => this._underlying.AssemblyName;
-
-            public ImmutableArray<object> PlugIns => this._underlying.PlugIns;
-
-            public bool IsFrameworkEnabled => this._underlying.IsFrameworkEnabled;
-
-            public bool FormatOutput => this._underlying.FormatOutput;
-
-            public bool FormatCompileTimeCode => this._underlying.FormatCompileTimeCode;
-
-            public bool IsUserCodeTrusted => this._underlying.IsUserCodeTrusted;
-
-            public string? ProjectPath => this._underlying.ProjectPath;
-
-            public string? TargetFramework => this._underlying.TargetFramework;
-
-            public string? Configuration => this._underlying.Configuration;
-
-            public bool IsDesignTimeEnabled => false;
-
-            public string? AdditionalCompilationOutputDirectory => null;
-
-            public DesignTimeFallbackProjectOptions( IProjectOptions underlying )
-            {
-                this._underlying = underlying;
-            }
-
-            public IProjectOptions Apply( IProjectOptions options )
-            {
-                throw new NotSupportedException();
-            }
-
-            public bool TryGetProperty( string name, [NotNullWhen( true )] out string? value )
-            {
-                return this._underlying.TryGetProperty( name, out value );
-            }
+            public DesignTimeFallbackProjectOptions( IProjectOptions underlying ) : base( underlying ) { }
         }
 
         private class RemovingRewriter : CSharpSyntaxRewriter

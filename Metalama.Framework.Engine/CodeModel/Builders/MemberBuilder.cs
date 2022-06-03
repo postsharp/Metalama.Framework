@@ -7,12 +7,15 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Project;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -25,7 +28,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             this.Tags = tags;
         }
 
-        public bool IsImplicit => false;
+        public abstract bool IsImplicit { get; }
 
         public new INamedType DeclaringType => base.DeclaringType.AssertNotNull();
 
@@ -108,7 +111,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             {
                 // TODO: Error about the expression type?
                 initializerMethodSyntax = null;
-                initializerExpressionSyntax = ((IUserExpression) initializerExpression).ToRunTimeExpression().Syntax;
+                initializerExpressionSyntax = ((IUserExpression) initializerExpression).ToSyntax( context.SyntaxGenerationContext );
 
                 return true;
             }
@@ -204,6 +207,37 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( initializerTemplate.Declaration! );
 
             return templateDriver.TryExpandDeclaration( expansionContext, Array.Empty<object>(), out expression );
+        }
+
+        protected virtual SyntaxList<AttributeListSyntax> GetAttributeLists( in SyntaxGenerationContext syntaxGenerationContext )
+        {
+            var attributeLists = default(List<AttributeListSyntax>);
+            var templateAttribute = this.Compilation.Factory.GetTypeByReflectionType( typeof(TemplateAttribute) );
+
+            foreach ( var attributeBuilder in this.Attributes )
+            {
+                if ( attributeBuilder.Constructor.DeclaringType.Is( templateAttribute ) )
+                {
+                    // TODO: This is temporary logic - aspect-related attributes should be marked as compile time and all compile time attributes should be skipped.
+                    continue;
+                }
+
+                if ( attributeLists == null )
+                {
+                    attributeLists = new List<AttributeListSyntax>();
+                }
+
+                attributeLists.Add( AttributeList( SingletonSeparatedList( attributeBuilder.GetSyntax( syntaxGenerationContext ) ) ) );
+            }
+
+            if ( attributeLists != null )
+            {
+                return List( attributeLists );
+            }
+            else
+            {
+                return List<AttributeListSyntax>();
+            }
         }
     }
 }

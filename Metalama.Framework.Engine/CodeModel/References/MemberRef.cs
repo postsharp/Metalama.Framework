@@ -33,13 +33,22 @@ namespace Metalama.Framework.Engine.CodeModel.References
             this._underlying = declarationRef.As<T>();
         }
 
+        public MemberRef( in Ref<T> declarationRef )
+        {
+            this._underlying = declarationRef;
+        }
+
         public object? Target => this._underlying.Target;
 
         public string? ToSerializableId() => this._underlying.ToSerializableId();
 
-        public T GetTarget( ICompilation compilation ) => this._underlying.GetTarget( compilation );
+        public T GetTarget( ICompilation compilation ) => this.GetTarget( compilation, true );
+
+        public T GetTarget( ICompilation compilation, bool applyRedirections ) => this._underlying.GetTarget( compilation, applyRedirections );
 
         public ISymbol? GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => this._underlying.GetSymbol( compilation );
+
+        public Ref<T> ToRef() => this._underlying;
 
         public override string ToString() => this._underlying.ToString();
 
@@ -50,5 +59,11 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 IMemberOrNamedTypeBuilder builder => builder.Name,
                 _ => throw new AssertionFailedException()
             };
+
+        public bool IsDefault => this._underlying.IsDefault;
+
+        public MemberRef<TCast> As<TCast>()
+            where TCast : class, IMemberOrNamedType
+            => new( this._underlying.As<IDeclaration>() );
     }
 }

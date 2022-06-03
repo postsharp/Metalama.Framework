@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Linq;
 using System.Reflection;
@@ -42,22 +41,10 @@ namespace Metalama.Framework.Engine.CodeModel
         }
 
         [Memo]
-        public IMethodList LocalFunctions
-            => new MethodList(
-                this,
-                this.MethodSymbol.DeclaringSyntaxReferences
-                    .Select( r => r.GetSyntax() )
-                    /* don't descend into nested local functions */
-                    .SelectMany( n => n.DescendantNodes( c => c == n || c is not LocalFunctionStatementSyntax ) )
-                    .OfType<LocalFunctionStatementSyntax>()
-                    .Select( f => (IMethodSymbol) this.Compilation.RoslynCompilation.GetSemanticModel( f.SyntaxTree ).GetDeclaredSymbol( f )! )
-                    .Select( s => new MemberRef<IMethod>( s, this.Compilation.RoslynCompilation ) ) );
-
-        [Memo]
         public IParameterList Parameters
             => new ParameterList(
                 this,
-                this.MethodSymbol.Parameters.Select( p => Ref.FromSymbol<IParameter>( p, this.Compilation.RoslynCompilation ) ) );
+                this.MethodSymbol.Parameters.Select( p => Ref.FromSymbol<IParameter>( p, this.Compilation.RoslynCompilation ) ).ToList() );
 
         MethodKind IMethodBase.MethodKind
             => this.MethodSymbol.MethodKind switch

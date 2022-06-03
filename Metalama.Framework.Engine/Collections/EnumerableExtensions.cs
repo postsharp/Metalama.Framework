@@ -73,7 +73,26 @@ namespace Metalama.Framework.Engine.Collections
             where TKey : notnull
             => enumerable.ToMultiValueDictionary( getKey, i => i, keyComparer );
 
-        public static IReadOnlyList<T> ConcatNotNull<T>( this IReadOnlyList<T> a, T? b )
+        public static IReadOnlyCollection<T> Concat<T>( params IReadOnlyCollection<T>[] collections )
+        {
+            var size = 0;
+
+            foreach ( var collection in collections )
+            {
+                size += collection.Count;
+            }
+
+            var list = new List<T>( size );
+
+            foreach ( var collection in collections )
+            {
+                list.AddRange( collection );
+            }
+
+            return list;
+        }
+
+        public static IReadOnlyCollection<T> ConcatNotNull<T>( this IReadOnlyCollection<T> a, T? b )
             where T : class
         {
             if ( b == null )

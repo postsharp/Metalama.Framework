@@ -6,7 +6,8 @@ using System;
 
 namespace Metalama.Framework.Engine.Options
 {
-    public partial class ProjectOptions
+    // ReSharper disable once InconsistentNaming
+    public partial class MSBuildProjectOptions
     {
         /// <summary>
         /// An implementation of <see cref="IProjectOptions"/> that reads the values from <see cref="AnalyzerConfigOptions"/>.
@@ -28,6 +29,6 @@ namespace Metalama.Framework.Engine.Options
             public bool TryGetValue( string name, out string? value ) => this._options.TryGetValue( name, out value );
         }
 
-        public IProjectOptions Apply( IProjectOptions options ) => throw new NotSupportedException();
+        public override IProjectOptions Apply( IProjectOptions options ) => throw new NotSupportedException();
     }
 }

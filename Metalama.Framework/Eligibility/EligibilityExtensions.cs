@@ -269,7 +269,7 @@ namespace Metalama.Framework.Eligibility
         {
             eligibilityBuilder.MustSatisfy(
                 member => member is T,
-                member => $"must be a {GetInterfaceName<T>()}" );
+                _ => $"must be a {GetInterfaceName<T>()}" );
         }
 
         /// <summary>
