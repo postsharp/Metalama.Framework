@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.Advices
             Invariant.Assert( !boundTemplate.IsNull );
 
             this.MemberBuilder = new MethodBuilder( this, targetDeclaration, boundTemplate.Template.Declaration.AssertNotNull().Name, tags );
-            this.MemberBuilder.ApplyTemplateAttribute( boundTemplate.Template.TemplateInfo.Attribute );
+            
         }
 
         public override void Initialize( IDiagnosticAdder diagnosticAdder )

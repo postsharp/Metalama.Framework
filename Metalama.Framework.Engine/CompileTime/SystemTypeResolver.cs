@@ -11,20 +11,20 @@ using System.Threading;
 namespace Metalama.Framework.Engine.CompileTime
 {
     /// <summary>
-    /// An implementation of <see cref="CompileTimeTypeResolver"/> that cannot be used for user-code attributes.
+    /// An implementation of <see cref="CompileTimeTypeResolver"/> that will resolve any type of an assembly that
+    /// is already loaded in the AppDomain.
     /// </summary>
-    internal class SystemTypeResolver : CompileTimeTypeResolver, IService
+    internal class CurrentAppDomainTypeResolver : CompileTimeTypeResolver
     {
-        // Avoid initializing from a static member because it is more difficult to debug.
-        private readonly Assembly _netStandardAssembly = Assembly.Load( "netstandard, Version=2.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51" );
-        private readonly ReferenceAssemblyLocator _referenceAssemblyLocator;
-
-        public SystemTypeResolver( IServiceProvider serviceProvider ) : base( serviceProvider )
+        public CurrentAppDomainTypeResolver( IServiceProvider serviceProvider ) : base( serviceProvider )
         {
-            this._referenceAssemblyLocator = serviceProvider.GetRequiredService<ReferenceAssemblyLocator>();
         }
 
-        protected virtual bool IsStandardAssemblyName( string assemblyName ) => this._referenceAssemblyLocator.IsStandardAssemblyName( assemblyName );
+        protected virtual bool IsAcceptableAssemblyName( string assemblyName ) => true;
+
+        protected virtual Type? GetWellKnownType(string typeName) => null;
+
+        protected virtual bool CanLoadAssembly( AssemblyName assemblyName ) => true;
 
         protected override Type? GetCompileTimeNamedType( INamedTypeSymbol typeSymbol, CancellationToken cancellationToken = default )
         {
@@ -53,24 +53,22 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 var assemblyIdentity = typeSymbol.ContainingAssembly.Identity;
 
-                // We load only system assemblies, not user assemblies loaded in the AppDomain.
-                if ( !this.IsStandardAssemblyName( assemblyIdentity.Name ) )
+                if ( !this.IsAcceptableAssemblyName( assemblyIdentity.Name ) )
                 {
                     return null;
                 }
 
-                // Check if this is a system type. If yes, it does not need to be in the same assembly.
-                var systemType = this._netStandardAssembly.GetType( typeName, false );
+                var wellKnownType = this.GetWellKnownType( typeName );
 
-                if ( systemType != null )
+                if ( wellKnownType != null )
                 {
-                    return systemType;
+                    return wellKnownType;
                 }
 
                 // We don't allow loading new assemblies to the AppDomain.
                 var assemblyName = new AssemblyName( assemblyIdentity.GetDisplayName() );
 
-                if ( AppDomain.CurrentDomain.GetAssemblies().All( a => AssemblyName.ReferenceMatchesDefinition( assemblyName, a.GetName() ) ) )
+                if ( !this.CanLoadAssembly( assemblyName ) )
                 {
                     // Coverage: ignore
                     return null;
@@ -82,6 +80,41 @@ namespace Metalama.Framework.Engine.CompileTime
             var type = Type.GetType( typeName );
 
             return type;
+        }
+    }
+    
+    /// <summary>
+    /// An implementation of <see cref="CompileTimeTypeResolver"/> that cannot be used for user-code attributes.
+    /// </summary>
+    internal class SystemTypeResolver : CurrentAppDomainTypeResolver, IService
+    {
+        // Avoid initializing from a static member because it is more difficult to debug.
+        private readonly Assembly _netStandardAssembly = Assembly.Load( "netstandard, Version=2.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51" );
+
+        private readonly ReferenceAssemblyLocator _referenceAssemblyLocator;
+
+        public SystemTypeResolver( IServiceProvider serviceProvider ) : base( serviceProvider )
+        {
+            this._referenceAssemblyLocator = serviceProvider.GetRequiredService<ReferenceAssemblyLocator>();
+        }
+
+        protected override bool CanLoadAssembly( AssemblyName assemblyName ) => AppDomain.CurrentDomain.GetAssemblies().All( a => AssemblyName.ReferenceMatchesDefinition( assemblyName, a.GetName() ) );
+
+        protected override bool IsAcceptableAssemblyName( string assemblyName ) => this._referenceAssemblyLocator.IsStandardAssemblyName( assemblyName );
+
+        protected override Type? GetWellKnownType( string typeName ) 
+        {
+            // Check if this is a system type. If yes, it does not need to be in the same assembly.
+            var systemType = this._netStandardAssembly.GetType( typeName, false );
+
+            if ( systemType != null )
+            {
+                return systemType;
+            }
+            else
+            {
+                return null;
+            }
         }
     }
 }

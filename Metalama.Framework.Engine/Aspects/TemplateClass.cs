@@ -82,7 +82,7 @@ namespace Metalama.Framework.Engine.Aspects
         public abstract string FullName { get; }
 
         internal bool TryGetInterfaceMember( ISymbol symbol, [NotNullWhen( true )] out TemplateClassMember? member )
-            => this.Members.TryGetValue( DocumentationCommentId.CreateDeclarationId( symbol ), out member )
+            => this.Members.TryGetValue( symbol.GetDocumentationCommentId().AssertNotNull(), out member )
                && member.TemplateInfo.AttributeType == TemplateAttributeType.InterfaceMember;
 
         private ImmutableDictionary<string, TemplateClassMember> GetMembers( Compilation compilation, INamedTypeSymbol type, IDiagnosticAdder diagnosticAdder )
@@ -101,7 +101,7 @@ namespace Metalama.Framework.Engine.Aspects
             foreach ( var memberSymbol in type.GetMembers() )
             {
                 var templateInfo = symbolClassifier.GetTemplateInfo( memberSymbol ).AssertNotNull();
-                var memberName = memberSymbol.Name;
+                var memberKey = memberSymbol.Name;
 
                 switch ( templateInfo.AttributeType )
                 {
@@ -109,9 +109,10 @@ namespace Metalama.Framework.Engine.Aspects
                         // This is an accessor of a template or event declarative advice. We don't index them.
                         continue;
 
+                    case TemplateAttributeType.DeclarativeAdvice:
                     case TemplateAttributeType.InterfaceMember:
-                        // For interface members, we don't require a unique name.
-                        memberName = DocumentationCommentId.CreateDeclarationId( memberSymbol );
+                        // For interface members, we don't require a unique name, so we identify the template by documentation id.
+                        memberKey = memberSymbol.GetDocumentationCommentId();
 
                         break;
                 }
@@ -130,6 +131,7 @@ namespace Metalama.Framework.Engine.Aspects
                         accessors = accessors.Add(
                             accessor.MethodKind,
                             new TemplateClassMember(
+                                accessor.Name,
                                 accessor.Name,
                                 this,
                                 templateInfo,
@@ -204,7 +206,8 @@ namespace Metalama.Framework.Engine.Aspects
                 }
 
                 var aspectClassMember = new TemplateClassMember(
-                    memberName,
+                    memberSymbol.Name,
+                    memberKey,
                     this,
                     templateInfo,
                     memberSymbol.GetSymbolId(),
@@ -214,7 +217,7 @@ namespace Metalama.Framework.Engine.Aspects
 
                 if ( !templateInfo.IsNone )
                 {
-                    if ( members.TryGetValue( memberName, out var existingMember ) && !memberSymbol.IsOverride &&
+                    if ( members.TryGetValue( memberKey, out var existingMember ) && !memberSymbol.IsOverride &&
                          !existingMember.TemplateInfo.IsNone )
                     {
                         // Note we cannot get here when the member is defined in the same type because the compile-time assembly creation
@@ -224,19 +227,19 @@ namespace Metalama.Framework.Engine.Aspects
                         diagnosticAdder.Report(
                             GeneralDiagnosticDescriptors.TemplateWithSameNameAlreadyDefinedInBaseClass.CreateRoslynDiagnostic(
                                 memberSymbol.GetDiagnosticLocation(),
-                                (memberName, type.Name, existingMember.TemplateClass.AspectType.Name) ) );
+                                (memberName: memberKey, type.Name, existingMember.TemplateClass.AspectType.Name) ) );
 
                         continue;
                     }
 
                     // Add or replace the template.
-                    members[memberName] = aspectClassMember;
+                    members[memberKey] = aspectClassMember;
                 }
                 else
                 {
-                    if ( !members.ContainsKey( memberName ) )
+                    if ( !members.ContainsKey( memberKey ) )
                     {
-                        members.Add( memberName, aspectClassMember );
+                        members.Add( memberKey, aspectClassMember );
                     }
                 }
             }

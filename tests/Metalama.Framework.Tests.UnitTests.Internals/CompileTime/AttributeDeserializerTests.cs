@@ -560,8 +560,8 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
         {
             public HackedSystemTypeResolver( IServiceProvider serviceProvider ) : base( serviceProvider ) { }
 
-            protected override bool IsStandardAssemblyName( string assemblyName )
-                => base.IsStandardAssemblyName( assemblyName ) || assemblyName == this.GetType().Assembly.GetName().Name;
+            protected override bool IsAcceptableAssemblyName( string assemblyName )
+                => base.IsAcceptableAssemblyName( assemblyName ) || assemblyName == this.GetType().Assembly.GetName().Name;
         }
     }
 }

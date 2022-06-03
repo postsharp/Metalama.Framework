@@ -145,11 +145,11 @@ namespace Metalama.Framework.Engine.Aspects
                 this._serviceProvider );
 
             // Prepare declarative advice.
-            var declarativeAdvice = this._aspectClass.TemplateClasses.SelectMany( c => c.GetDeclarativeAdvices() )
+            var declarativeAdvice = this._aspectClass.TemplateClasses.SelectMany( c => c.GetDeclarativeAdvices(compilationModelRevision.RoslynCompilation) )
                 .Select(
                     a =>
-                        (TemplateDeclaration: (IMemberOrNamedType) compilationModelRevision.Factory.GetDeclaration( a.Symbol ),
-                         TemplateId: a.SymbolDocumentationId,
+                        (TemplateDeclaration: (IMemberOrNamedType) compilationModelRevision.Factory.GetDeclarationFromSymbolId( a.SymbolId ).AssertNotNull(  ),
+                         TemplateKey: a.Key,
                          Attribute: (DeclarativeAdviceAttribute) a.TemplateInfo.Attribute) )
                 .ToList();
 
@@ -181,7 +181,7 @@ namespace Metalama.Framework.Engine.Aspects
                                 // Execute declarative advice.
                                 foreach ( var advice in declarativeAdvice )
                                 {
-                                    success |= advice.Attribute.TryBuildAspect( advice.TemplateDeclaration, advice.TemplateId, aspectBuilder );
+                                    success |= advice.Attribute.TryBuildAspect( advice.TemplateDeclaration, advice.TemplateKey, aspectBuilder );
                                 }
 
                                 if ( success )

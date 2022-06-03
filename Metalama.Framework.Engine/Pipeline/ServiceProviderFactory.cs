@@ -69,7 +69,8 @@ namespace Metalama.Framework.Engine.Pipeline
                 .WithServices(
                     pathOptions,
                     new DefaultCompileTimeDomainFactory() )
-                .WithSharedLazyInitializedService( sp => new ReferenceAssemblyLocator( sp ) );
+                .WithSharedLazyInitializedService( sp => new ReferenceAssemblyLocator( sp ) )
+                .WithSharedLazyInitializedService( sp => new SymbolClassificationService( sp ) );
 
             return serviceProvider;
         }

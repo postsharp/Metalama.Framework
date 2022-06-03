@@ -307,13 +307,15 @@ namespace Metalama.Framework.Engine.CodeModel
 
         object? ITypeFactory.Cast( IType type, object? value ) => new CastUserExpression( type, value );
 
-        public IDeclaration? GetDeclarationFromId( string declarationId )
+        public IDeclaration GetDeclarationFromSymbolId( SymbolId symbolId ) => this.GetDeclaration( symbolId.Resolve( this.RoslynCompilation ).AssertNotNull(  ) );
+        
+        public IDeclaration GetDeclarationFromDocumentationId( string declarationId )
         {
             var symbol = Ref<IDeclaration>.Deserialize( this.Compilation, declarationId );
 
             if ( symbol == null )
             {
-                return null;
+                 throw new InvalidOperationException($"Cannot find the symbol '{declarationId}' in compilation '{this._compilationModel.RoslynCompilation.Assembly.Name}'.");
             }
 
             return this.GetDeclaration( symbol );

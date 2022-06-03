@@ -103,7 +103,7 @@ namespace Metalama.Framework.Aspects
         /// Introduces a field to the target type.
         /// </summary>
         /// <param name="targetType">The type into which the property must be introduced.</param>
-        /// <param name="name">Name of the introduced field.</param>
+        /// <param name="fieldName">Name of the introduced field.</param>
         /// <param name="scope">Determines the scope (e.g. <see cref="IntroductionScope.Instance"/> or <see cref="IntroductionScope.Static"/>) of the introduced
         ///     field. The default scope is <see cref="IntroductionScope.Instance"/>.</param>
         /// <param name="whenExists">Determines the implementation strategy when a property of the same name is already declared in the target type.
@@ -113,7 +113,23 @@ namespace Metalama.Framework.Aspects
         /// <seealso href="@introducing-members"/>
         IFieldBuilder IntroduceField(
             INamedType targetType,
-            string name,
+            string templateName,
+            IntroductionScope scope = IntroductionScope.Default,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            object? tags = null );
+
+        IFieldBuilder IntroduceField(
+            INamedType targetType,
+            string templateName,
+            IType fieldType,
+            IntroductionScope scope = IntroductionScope.Default,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            object? tags = null ); 
+        
+        IFieldBuilder IntroduceField(
+            INamedType targetType,
+            string templateName,
+            Type fieldType,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
             object? tags = null );

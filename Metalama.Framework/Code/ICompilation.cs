@@ -83,6 +83,6 @@ namespace Metalama.Framework.Code
         /// </summary>
         int Revision { get; }
 
-        IDeclaration? GetDeclarationFromId( string declarationId );
+        IDeclaration GetDeclarationFromId( string declarationId );
     }
 }

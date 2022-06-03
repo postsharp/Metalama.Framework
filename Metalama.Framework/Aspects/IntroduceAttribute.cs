@@ -16,6 +16,24 @@ namespace Metalama.Framework.Aspects
     [AttributeUsage( AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Method | AttributeTargets.Event )]
     public sealed class IntroduceAttribute : DeclarativeAdviceAttribute
     {
+        
+        public IntroductionScope Scope { get; set; }
+
+        /// <summary>
+        /// Gets or sets the implementation strategy (like <see cref="OverrideStrategy.Override"/>, <see cref="OverrideStrategy.Fail"/> or <see cref="OverrideStrategy.Ignore"/>) when the member is already declared in the target type.
+        /// The default value is <see cref="OverrideStrategy.Fail"/>. 
+        /// </summary>
+        public OverrideStrategy WhenExists { get; set; }
+
+        /// <summary>
+        /// Gets or sets the implementation strategy (like <see cref="OverrideStrategy.Override"/>, <see cref="OverrideStrategy.Fail"/> or <see cref="OverrideStrategy.Ignore"/>) when the member is already declared
+        /// in a parent class of the target tye.
+        /// The default value is <see cref="OverrideStrategy.Fail"/>. 
+        /// </summary>
+        [Obsolete( "Not implemented." )]
+        public OverrideStrategy WhenInherited { get; set; }
+
+        
         public override bool IsIntroduction => true;
 
         public override void BuildEligibility( IEligibilityBuilder<IDeclaration> builder )
@@ -29,7 +47,7 @@ namespace Metalama.Framework.Aspects
 
                         return t != null && t.TypeKind != TypeKind.Interface;
                     },
-                    _ => $"the aspect cannot be added to an interface because the aspect contains a declarative introduction" ) );
+                    _ => $"the aspect contains a declarative introduction and therefore cannot be applied to an interface" ) );
         }
 
         public override bool TryBuildAspect( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder )

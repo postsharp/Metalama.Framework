@@ -55,11 +55,6 @@ namespace Metalama.Framework.Engine.Advices
                 this.Template.Declaration is { Writeability: Writeability.ConstructorOnly } && this.Template.Declaration.IsAutoPropertyOrField,
                 this.Tags );
 
-            if ( propertyTemplate.IsNotNull )
-            {
-                this.MemberBuilder.ApplyTemplateAttribute( propertyTemplate.TemplateInfo.Attribute );
-            }
-
             this.MemberBuilder.InitializerTemplate = propertyTemplate.GetInitializerTemplate();
         }
 

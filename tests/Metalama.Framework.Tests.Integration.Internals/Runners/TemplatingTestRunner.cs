@@ -235,6 +235,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
                 var fakeTemplateClassMember = new TemplateClassMember(
                     "Template",
+                    "Template",
                     null!,
                     TemplateInfo.None,
                     default,

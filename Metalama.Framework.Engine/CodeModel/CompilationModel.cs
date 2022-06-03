@@ -259,7 +259,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public int Revision { get; }
 
-        IDeclaration? ICompilation.GetDeclarationFromId( string declarationId ) => this.Factory.GetDeclarationFromId( declarationId );
+        IDeclaration ICompilation.GetDeclarationFromId( string declarationId ) => this.Factory.GetDeclarationFromDocumentationId( declarationId );
 
         // TODO: throw an exception when the caller tries to get aspects that have not been initialized yet.
 

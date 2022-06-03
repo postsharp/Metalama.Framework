@@ -37,5 +37,7 @@ namespace Metalama.Framework.Engine.CompileTime
         }
 
         public TemplateInfo AsAbstract() => new( this, true );
+
+        public override string ToString() => $"Type={this.AttributeType}, Attribute={this.Attribute}";
     }
 }

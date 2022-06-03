@@ -13,8 +13,8 @@ using Metalama.Framework.Engine.Diagnostics;
 namespace Metalama.Framework.Engine.Advices
 {
     internal abstract class IntroduceMemberAdvice<TMember, TBuilder> : Advice, IIntroductionAdvice
-        where TMember : class, IMemberOrNamedType
-        where TBuilder : MemberOrNamedTypeBuilder
+        where TMember : class, IMember
+        where TBuilder : MemberBuilder
     {
         public IntroductionScope Scope { get; }
 
@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.Advices
 
         protected TemplateMember<TMember> Template { get; }
 
-        public IntroduceMemberAdvice(
+        protected IntroduceMemberAdvice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             INamedType targetDeclaration,
@@ -39,7 +39,16 @@ namespace Metalama.Framework.Engine.Advices
             IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, layerName, tags )
         {
             this.Template = template;
-            this.Scope = scope;
+
+            if ( scope != IntroductionScope.Default )
+            {
+                this.Scope = scope;
+            }
+            else if ( template.TemplateInfo.Attribute is IntroduceAttribute introduceAttribute )
+            {
+                this.Scope = introduceAttribute.Scope;
+            }
+
             this.OverrideStrategy = overrideStrategy;
 
             // This is to make the nullability analyzer happy. Derived classes are supposed to set this member in the
@@ -49,7 +58,11 @@ namespace Metalama.Framework.Engine.Advices
 
         public override void Initialize( IDiagnosticAdder diagnosticAdder )
         {
-            this.MemberBuilder.Accessibility = this.Template.Declaration?.Accessibility ?? Accessibility.Private;
+            var templateAttribute = this.Template.TemplateInfo.Attribute;
+            
+            this.MemberBuilder.Accessibility = templateAttribute.GetAccessibility() ?? this.Template.Declaration?.Accessibility ?? Accessibility.Private;
+            this.MemberBuilder.IsSealed = templateAttribute.GetIsSealed() ?? this.Template.Declaration?.IsSealed ?? false;
+            this.MemberBuilder.IsVirtual = templateAttribute.GetIsVirtual() ?? this.Template.Declaration?.IsVirtual ?? false;
 
             // Handle the introduction scope.
             var targetDeclaration = this.TargetDeclaration.GetTarget( this.SourceCompilation );
@@ -100,6 +113,9 @@ namespace Metalama.Framework.Engine.Advices
             {
                 CopyAttributes( this.Template.Declaration, this.MemberBuilder );
             }
+            
+            
+            
         }
 
         protected static void CopyAttributes( IDeclaration declaration, IDeclarationBuilder builder )
@@ -109,6 +125,29 @@ namespace Metalama.Framework.Engine.Advices
             {
                 builder.AddAttribute( codeElementAttribute.ToAttributeConstruction() );
             }
+        }
+
+        protected void ApplyTemplateAttribute( IntroduceAttribute templateAttribute )
+        {
+                if ( templateAttribute.Name != null )
+                {
+                    this.MemberBuilder.Name = templateAttribute.Name;
+                }
+
+                if ( templateAttribute.GetIsSealed().HasValue )
+                {
+                    this.MemberBuilder.IsSealed = templateAttribute.GetIsSealed()!.Value;
+                }
+
+                if ( templateAttribute.GetAccessibility().HasValue )
+                {
+                    this.MemberBuilder.Accessibility = templateAttribute.GetAccessibility()!.Value;
+                }
+
+                if ( templateAttribute.GetIsVirtual().HasValue )
+                {
+                    this.MemberBuilder.IsVirtual = templateAttribute.GetIsVirtual()!.Value;
+                }
         }
 
         public override string ToString() => $"Introduce {this.MemberBuilder}";

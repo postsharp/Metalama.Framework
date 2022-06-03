@@ -435,7 +435,7 @@ namespace Metalama.Framework.Engine.Advices
 
         public IFieldBuilder IntroduceField(
             INamedType targetType,
-            string name,
+            string templateName,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
             object? tags = null )
@@ -446,13 +446,17 @@ namespace Metalama.Framework.Engine.Advices
             }
 
             var diagnosticList = new DiagnosticList();
+            
+            var template = this.ValidateTemplateName( templateName, TemplateKind.Default, true )
+                .GetTemplateMember<IField>( this._compilation, this._serviceProvider );
+
 
             var advice = new IntroduceFieldAdvice(
                 this._aspect,
                 this._templateInstance,
                 targetType,
-                name,
-                default,
+                null,
+                template,
                 scope,
                 whenExists,
                 _layerName,
@@ -466,6 +470,52 @@ namespace Metalama.Framework.Engine.Advices
 
             return advice.Builder;
         }
+
+        public IFieldBuilder IntroduceField(
+            INamedType targetType,
+            string templateName,
+            IType fieldType,
+            IntroductionScope scope = IntroductionScope.Default,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            object? tags = null )
+        {
+            if ( this._templateInstance == null )
+            {
+                throw new InvalidOperationException();
+            }
+            
+            var diagnosticList = new DiagnosticList();
+            
+            var advice = new IntroduceFieldAdvice(
+                this._aspect,
+                this._templateInstance,
+                targetType,
+                templateName,
+                default,
+                scope,
+                whenExists,
+                _layerName,
+                ObjectReader.GetReader( tags ) );
+
+            advice.Initialize( diagnosticList );
+            ThrowOnErrors( diagnosticList );
+            this.Advices.Add( advice );
+
+            this._diagnosticAdder.Report( diagnosticList );
+            
+            advice.Builder.Type = fieldType;
+
+            return advice.Builder;
+        }
+
+        public IFieldBuilder IntroduceField(
+            INamedType targetType,
+            string templateName,
+            Type fieldType,
+            IntroductionScope scope = IntroductionScope.Default,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            object? tags = null )
+            => this.IntroduceField( targetType, templateName, this._compilation.Factory.GetTypeByReflectionType( fieldType ), scope, whenExists, tags );
 
         public IPropertyBuilder IntroduceProperty(
             INamedType targetType,

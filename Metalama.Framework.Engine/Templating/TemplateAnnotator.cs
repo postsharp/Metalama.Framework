@@ -170,7 +170,9 @@ namespace Metalama.Framework.Engine.Templating
             // be called from run-time code.
             if ( this.IsAspectMember( symbol ) )
             {
-                return this._symbolScopeClassifier.GetTemplateInfo( symbol ).Attribute.IsIntroduction
+                var templateInfo = this._symbolScopeClassifier.GetTemplateInfo( symbol );
+
+                return templateInfo.Attribute.IsIntroduction
                     ? TemplatingScope.RunTimeOnly
                     : TemplatingScope.CompileTimeOnly;
             }

@@ -2,7 +2,9 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
@@ -61,15 +63,17 @@ namespace Metalama.Framework.Engine.CompileTime
         private readonly ConcurrentDictionary<ISymbol, TemplateInfo> _cacheInheritedTemplateInfo = new( SymbolEqualityComparer.Default );
         private readonly ConcurrentDictionary<ISymbol, TemplateInfo> _cacheNonInheritedTemplateInfo = new( SymbolEqualityComparer.Default );
         private readonly ReferenceAssemblyLocator _referenceAssemblyLocator;
+        private readonly AttributeDeserializer _attributeDeserializer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SymbolClassifier"/> class.
         /// </summary>
         /// <param name="referenceAssemblyLocator"></param>
         /// <param name="compilation">The compilation, or null if the compilation has no reference to Metalama.</param>
-        public SymbolClassifier( ReferenceAssemblyLocator referenceAssemblyLocator, Compilation? compilation )
+        public SymbolClassifier( IServiceProvider serviceProvider, Compilation? compilation, AttributeDeserializer attributeDeserializer )
         {
-            this._referenceAssemblyLocator = referenceAssemblyLocator;
+            this._referenceAssemblyLocator = serviceProvider.GetRequiredService<ReferenceAssemblyLocator>();
+            this._attributeDeserializer = attributeDeserializer;
 
             if ( compilation != null )
             {
@@ -137,9 +141,17 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private bool IsAttributeOfType( AttributeData a, ITypeSymbol type ) => this._compilation!.HasImplicitConversion( a.AttributeClass, type );
 
-        private static TemplateInfo GetTemplateInfo( AttributeData templateAttribute )
+        private  TemplateInfo GetTemplateInfo( AttributeData attributeData )
         {
-            switch ( templateAttribute.AttributeClass?.Name )
+            if ( !this._attributeDeserializer.TryCreateAttribute( attributeData, NullDiagnosticAdder.Instance, out var attributeInstance ) )
+            {
+                // We are not able to handle exceptions in instantiating an advice attribute at the moment.
+                throw new AssertionFailedException();
+            }
+
+            var templateAttribute = (TemplateAttribute) attributeInstance;
+                
+            switch ( attributeData.AttributeClass?.Name )
             {
                 case nameof(TemplateAttribute):
                     return new TemplateInfo( TemplateAttributeType.Template, templateAttribute );

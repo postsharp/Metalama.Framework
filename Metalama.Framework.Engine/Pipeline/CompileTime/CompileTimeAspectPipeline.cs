@@ -59,12 +59,6 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 return null;
             }
             
-            // Run the code analyzers that normally run at design time.
-            if ( !TemplatingCodeValidator.Validate( compilation, diagnosticAdder, configuration.ServiceProvider, cancellationToken ) )
-            {
-                return null;
-            }
-
             // Run the pipeline.
             return await this.ExecuteCoreAsync(
                 diagnosticAdder,

@@ -12,6 +12,8 @@ namespace Metalama.Framework.Aspects
     [AttributeUsage( AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Event )]
     public class TemplateAttribute : Attribute
     {
+        public virtual bool IsIntroduction => false;
+        
         private Accessibility? _accessibility;
         private bool? _isVirtual;
         private bool? _isSealed;
@@ -26,25 +28,8 @@ namespace Metalama.Framework.Aspects
                        $"The '{nameof(this.Accessibility)}' was not set, use {nameof(this.GetAccessibility)} to get nullable value." );
             set => this._accessibility = value;
         }
-
-        public IntroductionScope Scope { get; set; }
-
-        /// <summary>
-        /// Gets or sets the implementation strategy (like <see cref="OverrideStrategy.Override"/>, <see cref="OverrideStrategy.Fail"/> or <see cref="OverrideStrategy.Ignore"/>) when the member is already declared in the target type.
-        /// The default value is <see cref="OverrideStrategy.Fail"/>. 
-        /// </summary>
-        public OverrideStrategy WhenExists { get; set; }
-
-        /// <summary>
-        /// Gets or sets the implementation strategy (like <see cref="OverrideStrategy.Override"/>, <see cref="OverrideStrategy.Fail"/> or <see cref="OverrideStrategy.Ignore"/>) when the member is already declared
-        /// in a parent class of the target tye.
-        /// The default value is <see cref="OverrideStrategy.Fail"/>. 
-        /// </summary>
-        [Obsolete( "Not implemented." )]
-        public OverrideStrategy WhenInherited { get; set; }
-
-        public Accessibility? GetAccessibility() => this._accessibility;
-
+        
+        
         public bool IsVirtual
         {
             get
@@ -64,7 +49,10 @@ namespace Metalama.Framework.Aspects
         public bool? GetIsVirtual() => this._isVirtual;
 
         public bool? GetIsSealed() => this._isSealed;
+        
+       
+        public Accessibility? GetAccessibility() => this._accessibility;
 
-        public virtual bool IsIntroduction => false;
+
     }
 }
