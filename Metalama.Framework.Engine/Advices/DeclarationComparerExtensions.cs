@@ -9,9 +9,9 @@ namespace Metalama.Framework.Engine.Advices
 {
     internal static class DeclarationComparerExtensions
     {
-        public static bool ParameterTypeEquals( this IDeclarationComparer comparer, IType parameterType, IType otherType)
+        public static bool ParameterTypeEquals( this IDeclarationComparer comparer, IType parameterType, IType otherType )
         {
-            if (parameterType.GetSymbol() is ITypeParameterSymbol typeParam && otherType.GetSymbol() is ITypeParameterSymbol otherTypeParam)
+            if ( parameterType.GetSymbol() is ITypeParameterSymbol typeParam && otherType.GetSymbol() is ITypeParameterSymbol otherTypeParam )
             {
                 return typeParam.Ordinal == otherTypeParam.Ordinal;
             }

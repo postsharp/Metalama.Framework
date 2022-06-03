@@ -17,7 +17,7 @@ namespace Metalama.Framework.Aspects
         /// <summary>
         /// The advice fails with a compilation error if a matching interface member already exists in the target declaration.
         /// </summary>
-        Fail = 0,
+        Fail = 0
 
         // TODO: Implement. Note that C# implements the interface with visible base members when they are equal to interface members:
         //       public interface I { void Foo(); }        

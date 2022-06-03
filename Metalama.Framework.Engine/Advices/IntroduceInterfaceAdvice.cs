@@ -61,8 +61,8 @@ namespace Metalama.Framework.Engine.Advices
             // have precedence.
             var interfacesToIntroduce =
                 new[] { (InterfaceType: this.InterfaceType, IsTopLevel: true) }
-                .Concat( this.InterfaceType.AllImplementedInterfaces.Select( i => (InterfaceType: i, IsTopLevel: false) ) )
-                .ToDictionary( x => x.InterfaceType, x => x.IsTopLevel, this.SourceCompilation.InvariantComparer );
+                    .Concat( this.InterfaceType.AllImplementedInterfaces.Select( i => (InterfaceType: i, IsTopLevel: false) ) )
+                    .ToDictionary( x => x.InterfaceType, x => x.IsTopLevel, this.SourceCompilation.InvariantComparer );
 
             if ( this.ExplicitMemberSpecifications != null )
             {
@@ -80,15 +80,17 @@ namespace Metalama.Framework.Engine.Advices
 
                 foreach ( var interfaceMethod in introducedInterface.Methods )
                 {
-                    if ( !TryGetAspectInterfaceMethod(interfaceMethod, out var matchingMethod, out var matchingTemplate) )
+                    if ( !TryGetAspectInterfaceMethod( interfaceMethod, out var matchingMethod, out var matchingTemplate ) )
                     {
                         diagnosticAdder.Report(
                             AdviceDiagnosticDescriptors.MissingDeclarativeInterfaceMember.CreateRoslynDiagnostic(
                                 this.GetDiagnosticLocation(),
                                 (this.Aspect.AspectClass.ShortName, this.TargetDeclaration, this.InterfaceType, interfaceMethod) ) );
                     }
-                    else if ( 
-                        !this.SourceCompilation.InvariantComparer.ParameterTypeEquals(interfaceMethod.ReturnParameter.Type, matchingMethod.ReturnParameter.Type )
+                    else if (
+                        !this.SourceCompilation.InvariantComparer.ParameterTypeEquals(
+                            interfaceMethod.ReturnParameter.Type,
+                            matchingMethod.ReturnParameter.Type )
                         || interfaceMethod.ReturnParameter.RefKind != matchingMethod.ReturnParameter.RefKind )
                     {
                         diagnosticAdder.Report(
@@ -156,7 +158,7 @@ namespace Metalama.Framework.Engine.Advices
                     }
                 }
 
-                this._interfaceSpecifications.Add( new InterfaceSpecification( introducedInterface, isTopLevel, memberSpecifications ) );                
+                this._interfaceSpecifications.Add( new InterfaceSpecification( introducedInterface, isTopLevel, memberSpecifications ) );
             }
 
             bool TryGetAspectInterfaceMethod(
@@ -170,11 +172,13 @@ namespace Metalama.Framework.Engine.Advices
                 {
                     aspectMethod = method;
                     templateClassMember = classMember;
+
                     return true;
                 }
 
                 aspectMethod = null;
                 templateClassMember = null;
+
                 return false;
             }
 
@@ -189,11 +193,13 @@ namespace Metalama.Framework.Engine.Advices
                 {
                     aspectProperty = property;
                     templateClassMember = classMember;
+
                     return true;
                 }
 
                 aspectProperty = null;
                 templateClassMember = null;
+
                 return false;
             }
 
@@ -208,11 +214,13 @@ namespace Metalama.Framework.Engine.Advices
                 {
                     aspectEvent = @event;
                     templateClassMember = classMember;
+
                     return true;
                 }
 
                 aspectEvent = null;
                 templateClassMember = null;
+
                 return false;
             }
 
@@ -279,7 +287,8 @@ namespace Metalama.Framework.Engine.Advices
                     switch ( memberSpec.InterfaceMember )
                     {
                         case IMethod interfaceMethod:
-                            var existingMethod = targetType.Methods.SingleOrDefault( m => m.SignatureEquals(interfaceMethod) );
+                            var existingMethod = targetType.Methods.SingleOrDefault( m => m.SignatureEquals( interfaceMethod ) );
+
                             if ( existingMethod != null && !memberSpec.IsExplicit )
                             {
                                 // TODO: Handle WhenExists.
@@ -313,6 +322,7 @@ namespace Metalama.Framework.Engine.Advices
 
                         case IProperty interfaceProperty:
                             var existingProperty = targetType.Properties.SingleOrDefault( p => p.SignatureEquals( interfaceProperty ) );
+
                             if ( existingProperty != null && !memberSpec.IsExplicit )
                             {
                                 // TODO: Handle WhenExists.
@@ -366,7 +376,8 @@ namespace Metalama.Framework.Engine.Advices
                             throw new NotImplementedException();
 
                         case IEvent interfaceEvent:
-                            var existingEvent= targetType.Events.SingleOrDefault( p => p.SignatureEquals( interfaceEvent ) );
+                            var existingEvent = targetType.Events.SingleOrDefault( p => p.SignatureEquals( interfaceEvent ) );
+
                             if ( existingEvent != null && !memberSpec.IsExplicit )
                             {
                                 // TODO: Handle WhenExists.

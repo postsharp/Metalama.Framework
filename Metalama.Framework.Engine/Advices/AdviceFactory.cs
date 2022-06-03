@@ -15,6 +15,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using RefKind = Metalama.Framework.Code.RefKind;
+using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.Advices
@@ -752,14 +753,14 @@ namespace Metalama.Framework.Engine.Advices
 
             var diagnosticList = new DiagnosticList();
 
-            var advice = new ImplementInterfaceAdvice( 
-                this._aspect, 
-                this._templateInstance, 
-                targetType, 
-                interfaceType, 
-                whenExists, 
-                null, 
-                _layerName, 
+            var advice = new ImplementInterfaceAdvice(
+                this._aspect,
+                this._templateInstance,
+                targetType,
+                interfaceType,
+                whenExists,
+                null,
+                _layerName,
                 ObjectReader.GetReader( tags ) );
 
             advice.Initialize( diagnosticList );
@@ -893,7 +894,8 @@ namespace Metalama.Framework.Engine.Advices
             {
                 throw new ArgumentOutOfRangeException(
                     nameof(kind),
-                    UserMessageFormatter.Format( $"Cannot add an output contract to the parameter '{targetParameter}' because it is neither 'ref' nor 'out'." ) );
+                    UserMessageFormatter.Format(
+                        $"Cannot add an output contract to the parameter '{targetParameter}' because it is neither 'ref' nor 'out'." ) );
             }
 
             if ( kind == ContractDirection.Input && targetParameter.RefKind is not RefKind.None or RefKind.Ref or RefKind.In )
@@ -903,10 +905,10 @@ namespace Metalama.Framework.Engine.Advices
                     UserMessageFormatter.Format( $"Cannot add an input contract to the out parameter '{targetParameter}' " ) );
             }
 
-            if ( targetParameter.IsReturnParameter && targetParameter.Type.Is( Code.SpecialType.Void ) )
+            if ( targetParameter.IsReturnParameter && targetParameter.Type.Is( SpecialType.Void ) )
             {
                 throw new ArgumentOutOfRangeException(
-                    nameof( targetParameter ),
+                    nameof(targetParameter),
                     UserMessageFormatter.Format( $"Cannot add a contract to the return parameter of a void method." ) );
             }
 

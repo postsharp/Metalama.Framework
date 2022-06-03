@@ -54,7 +54,9 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             }
 
             // Variable and method return type should be equal (i.e. no implicit conversions).
-            if ( !SymbolEqualityComparer.Default.ParameterTypeEquals( semanticModel.GetSymbolInfo( variableDeclaration.Type ).Symbol, methodSymbol.ReturnType ) )
+            if ( !SymbolEqualityComparer.Default.ParameterTypeEquals(
+                    semanticModel.GetSymbolInfo( variableDeclaration.Type ).Symbol,
+                    methodSymbol.ReturnType ) )
             {
                 return false;
             }

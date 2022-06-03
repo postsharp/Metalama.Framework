@@ -957,8 +957,8 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     templateParameter =
                         templateParameter
-                        .WithType( SyntaxFactoryEx.ExpressionSyntaxType )
-                        .WithModifiers( TokenList() );
+                            .WithType( SyntaxFactoryEx.ExpressionSyntaxType )
+                            .WithModifiers( TokenList() );
                 }
 
                 templateParameters.Add( templateParameter );

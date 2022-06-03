@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.Utilities
         /// <summary>
         /// Compares equality of two parameter types, specifically interpreting and comparing ITypeParameterSymbol's ordinals.
         /// </summary>
-        public static bool ParameterTypeEquals(this SymbolEqualityComparer comparer, ISymbol? left, ISymbol? right)
+        public static bool ParameterTypeEquals( this SymbolEqualityComparer comparer, ISymbol? left, ISymbol? right )
         {
             if ( left is ITypeParameterSymbol leftTypeParam && right is ITypeParameterSymbol rightTypeParam )
             {

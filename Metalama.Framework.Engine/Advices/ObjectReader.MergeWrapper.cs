@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.Advices
 
                 for ( var i = 0; i < readers.Length; i++ )
                 {
-                    if (readers[i] == null)
+                    if ( readers[i] == null )
                     {
                         continue;
                     }

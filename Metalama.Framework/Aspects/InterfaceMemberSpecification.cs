@@ -18,7 +18,11 @@ namespace Metalama.Framework.Aspects
 
         // ReSharper disable UnusedParameter.Local
 
-        private InterfaceMemberSpecification( IMember interfaceMember, IMember implementationMember, InterfaceMemberOverrideStrategy overrideStrategy, object? tags )
+        private InterfaceMemberSpecification(
+            IMember interfaceMember,
+            IMember implementationMember,
+            InterfaceMemberOverrideStrategy overrideStrategy,
+            object? tags )
 #pragma warning restore IDE0051 // Remove unused private members
         {
             throw new NotImplementedException();
@@ -58,7 +62,7 @@ namespace Metalama.Framework.Aspects
         [Obsolete( "Not implemented." )]
         public static InterfaceMemberSpecification Create<TInterfaceType, TReturnType>(
             Expression<Func<TInterfaceType, TReturnType>> expression,
-            string aspectMemberName, 
+            string aspectMemberName,
             InterfaceMemberOverrideStrategy overrideStrategy = InterfaceMemberOverrideStrategy.Default,
             object? tags = null )
             => throw new NotImplementedException();
@@ -72,19 +76,19 @@ namespace Metalama.Framework.Aspects
             => throw new NotImplementedException();
 
         [Obsolete( "Not implemented." )]
-        public static InterfaceMemberSpecification Create( 
-            IMember interfaceMember, 
+        public static InterfaceMemberSpecification Create(
+            IMember interfaceMember,
             string aspectMemberName,
             InterfaceMemberOverrideStrategy overrideStrategy = InterfaceMemberOverrideStrategy.Default,
-            object? tags = null ) 
+            object? tags = null )
             => throw new NotImplementedException();
 
         [Obsolete( "Not implemented." )]
-        public static InterfaceMemberSpecification Create( 
-            IMember interfaceMember, 
+        public static InterfaceMemberSpecification Create(
+            IMember interfaceMember,
             IMember targetTypeMember,
             InterfaceMemberOverrideStrategy overrideStrategy = InterfaceMemberOverrideStrategy.Default,
-            object? tags = null ) 
+            object? tags = null )
             => throw new NotImplementedException();
     }
 }
