@@ -59,7 +59,7 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         public object? Tags { get; }
 
-        [Obsolete( "Not implemented." )]
+        [Obsolete( "Not implemented.", true )]
         public static InterfaceMemberSpecification Create<TInterfaceType, TReturnType>(
             Expression<Func<TInterfaceType, TReturnType>> expression,
             string aspectMemberName,
@@ -67,7 +67,7 @@ namespace Metalama.Framework.Aspects
             object? tags = null )
             => throw new NotImplementedException();
 
-        [Obsolete( "Not implemented." )]
+        [Obsolete( "Not implemented.", true )]
         public static InterfaceMemberSpecification Create<TInterfaceType, TReturnType>(
             Expression<Func<TInterfaceType, TReturnType>> expression,
             IMember targetTypeMember,
@@ -75,7 +75,7 @@ namespace Metalama.Framework.Aspects
             object? tags = null )
             => throw new NotImplementedException();
 
-        [Obsolete( "Not implemented." )]
+        [Obsolete( "Not implemented.", true )]
         public static InterfaceMemberSpecification Create(
             IMember interfaceMember,
             string aspectMemberName,
@@ -83,7 +83,7 @@ namespace Metalama.Framework.Aspects
             object? tags = null )
             => throw new NotImplementedException();
 
-        [Obsolete( "Not implemented." )]
+        [Obsolete( "Not implemented.", true )]
         public static InterfaceMemberSpecification Create(
             IMember interfaceMember,
             IMember targetTypeMember,
