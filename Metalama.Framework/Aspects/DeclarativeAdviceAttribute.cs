@@ -7,6 +7,9 @@ using System;
 
 namespace Metalama.Framework.Aspects;
 
+/// <summary>
+/// A base class for attributes that define declarative advice members. 
+/// </summary>
 public abstract class DeclarativeAdviceAttribute : TemplateAttribute
 {
     // We intentionally forbid public implementations because the implementation assembly must be present or at least loadable in the AppDomain,

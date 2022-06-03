@@ -45,7 +45,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public FieldInfo ToFieldInfo() => this.FieldBuilder.ToFieldInfo();
 
-        string? IRef<IField>.ToSerializableId() => null;
+        DeclarationSerializableId IRef<IField>.ToSerializableId() => throw new NotImplementedException();
 
         IField IRef<IField>.GetTarget( ICompilation compilation ) => (IField) this.GetForCompilation( compilation );
 

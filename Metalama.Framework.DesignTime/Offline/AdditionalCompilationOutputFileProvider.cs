@@ -4,6 +4,7 @@
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Project;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Offline

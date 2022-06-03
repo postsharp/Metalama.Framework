@@ -310,9 +310,9 @@ namespace Metalama.Framework.Engine.CodeModel
         public IDeclaration GetDeclarationFromSymbolId( SymbolId symbolId )
             => this.GetDeclaration( symbolId.Resolve( this.RoslynCompilation ).AssertNotNull() );
 
-        public IDeclaration GetDeclarationFromDocumentationId( string declarationId )
+        public IDeclaration GetDeclarationFromSerializableId( DeclarationSerializableId declarationId )
         {
-            var symbol = Ref<IDeclaration>.Deserialize( this.Compilation, declarationId );
+            var symbol = Ref<IDeclaration>.Deserialize( this.Compilation, declarationId.Id );
 
             if ( symbol == null )
             {

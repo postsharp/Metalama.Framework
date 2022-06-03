@@ -92,7 +92,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public object? Target => throw new NotImplementedException();
 
-        public string? ToSerializableId() => throw new NotImplementedException();
+        public DeclarationSerializableId ToSerializableId() => throw new NotImplementedException();
 
         IMethod IRef<IMethod>.GetTarget( ICompilation compilation ) => (IMethod) this.GetForCompilation( compilation );
 
