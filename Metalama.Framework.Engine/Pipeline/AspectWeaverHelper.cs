@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.Pipeline
     {
         static AspectWeaverHelper()
         {
-            FormattingAnnotations.Simplify = Simplifier.Annotation;
+            FormattingAnnotations.SimplifyAnnotation = Simplifier.Annotation;
         }
 
         private readonly ReflectionMapper _reflectionMapper;
