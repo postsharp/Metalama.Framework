@@ -64,6 +64,11 @@ namespace Metalama.Framework.Engine.Advices
             this.MemberBuilder.IsSealed = templateAttribute.GetIsSealed() ?? this.Template.Declaration?.IsSealed ?? false;
             this.MemberBuilder.IsVirtual = templateAttribute.GetIsVirtual() ?? this.Template.Declaration?.IsVirtual ?? false;
 
+            if ( templateAttribute.Name != null )
+            {
+                this.MemberBuilder.Name = templateAttribute.Name;
+            }
+
             // Handle the introduction scope.
             var targetDeclaration = this.TargetDeclaration.GetTarget( this.SourceCompilation );
 
