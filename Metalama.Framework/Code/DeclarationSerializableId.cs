@@ -10,7 +10,7 @@ public readonly struct DeclarationSerializableId : IEquatable<DeclarationSeriali
     internal string Id { get; }
 
     // Intentionally public because this is used in the Workspace project where we need to pass the id as a string.
-    public DeclarationSerializableId( string id ) 
+    public DeclarationSerializableId( string id )
     {
         this.Id = id;
     }
@@ -26,5 +26,4 @@ public readonly struct DeclarationSerializableId : IEquatable<DeclarationSeriali
     public static bool operator !=( DeclarationSerializableId left, DeclarationSerializableId right ) => !left.Equals( right );
 
     public override string ToString() => this.Id;
-    
 }
