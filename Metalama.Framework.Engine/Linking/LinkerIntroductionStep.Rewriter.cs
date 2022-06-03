@@ -173,13 +173,18 @@ namespace Metalama.Framework.Engine.Linking
                         {
                             node = node
                                 .WithIdentifier( node.Identifier.WithTrailingTrivia() )
-                                .WithBaseList( BaseList( SeparatedList( additionalBaseList ) ).WithGeneratedCodeAnnotation() )
+                                .WithBaseList(
+                                    BaseList( SeparatedList( additionalBaseList ) )
+                                        .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) )
                                 .WithTrailingTrivia( node.Identifier.TrailingTrivia );
                         }
                         else
                         {
                             node = node.WithBaseList(
-                                BaseList( node.BaseList.Types.AddRange( additionalBaseList.Select( i => i.WithGeneratedCodeAnnotation() ) ) ) );
+                                BaseList(
+                                    node.BaseList.Types.AddRange(
+                                        additionalBaseList.Select(
+                                            i => i.WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) ) ) ) );
                         }
                     }
 
@@ -204,7 +209,7 @@ namespace Metalama.Framework.Engine.Linking
 
                         introducedNode = introducedNode.NormalizeWhitespace()
                             .WithLeadingTrivia( ElasticLineFeed, ElasticLineFeed )
-                            .WithGeneratedCodeAnnotation();
+                            .WithGeneratedCodeAnnotation( introducedMember.Introduction.Advice.Aspect.AspectClass.GeneratedCodeAnnotation );
 
                         // Insert inserted statements into 
                         switch ( introducedNode )
@@ -255,9 +260,8 @@ namespace Metalama.Framework.Engine.Linking
                                 .WithSemicolonToken( default )
                                 .WithBody(
                                     Block(
-                                            beginningStatements
-                                                .Append( ExpressionStatement( expressionBody.Expression.WithSourceCodeAnnotationIfNotGenerated() ) ) )
-                                        .WithGeneratedCodeAnnotation() );
+                                        beginningStatements
+                                            .Append( ExpressionStatement( expressionBody.Expression.WithSourceCodeAnnotationIfNotGenerated() ) ) ) );
 
                     case { Body: { } body }:
                         return

@@ -154,7 +154,7 @@ namespace Metalama.Framework.Engine.Linking
                                     Token( accessorListLeadingTrivia, SyntaxKind.OpenBraceToken, accessorStartingTrivia ),
                                     List( transformedAccessors ),
                                     Token( accessorEndingTrivia, SyntaxKind.CloseBraceToken, accessorListTrailingTrivia ) )
-                                .WithGeneratedCodeAnnotation() )
+                                .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) )
                         .WithExpressionBody( null )
                         .WithInitializer( null )
                         .WithSemicolonToken( default );
@@ -197,7 +197,7 @@ namespace Metalama.Framework.Engine.Linking
                             .WithOpenBraceToken( Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ) )
                             .WithCloseBraceToken( Token( closeBraceLeadingTrivia, SyntaxKind.CloseBraceToken, closeBraceTrailingTrivia ) )
                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
-                            .WithGeneratedCodeAnnotation() )
+                            .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) )
                     .WithSemicolonToken( default );
             }
         }
@@ -218,7 +218,7 @@ namespace Metalama.Framework.Engine.Linking
                 .NormalizeWhitespace()
                 .WithLeadingTrivia( LineFeed, LineFeed )
                 .WithTrailingTrivia( LineFeed )
-                .WithGeneratedCodeAnnotation();
+                .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
         private static BlockSyntax GetImplicitGetterBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
             => Block(
@@ -231,7 +231,7 @@ namespace Metalama.Framework.Engine.Linking
                                 : ThisExpression(),
                             IdentifierName( GetBackingFieldName( (IPropertySymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
                         Token( SyntaxKind.SemicolonToken ) ) )
-                .WithGeneratedCodeAnnotation();
+                .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
         private static BlockSyntax GetImplicitSetterBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
             => Block(
@@ -245,7 +245,7 @@ namespace Metalama.Framework.Engine.Linking
                                     : ThisExpression(),
                                 IdentifierName( GetBackingFieldName( (IPropertySymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
                             IdentifierName( "value" ) ) ) )
-                .WithGeneratedCodeAnnotation();
+                .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
         private static MemberDeclarationSyntax GetOriginalImplProperty(
             PropertyDeclarationSyntax property,
@@ -362,7 +362,7 @@ namespace Metalama.Framework.Engine.Linking
                     .WithInitializer( initializer.WithSourceCodeAnnotation() )
                     .WithLeadingTrivia( ElasticLineFeed )
                     .WithTrailingTrivia( ElasticLineFeed )
-                    .WithGeneratedCodeAnnotation();
+                    .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
     }
 }

@@ -26,11 +26,11 @@ namespace Metalama.Framework.Engine.Formatting
                     return;
                 }
 
-                if ( node.HasAnnotation( FormattingAnnotations.GeneratedCode ) )
+                if ( node.HasAnnotations( FormattingAnnotations.GeneratedCodeAnnotationKind ) )
                 {
                     this._textSpans.Add( node.Span, TextSpanClassification.GeneratedCode );
                 }
-                else if ( node.HasAnnotation( FormattingAnnotations.SourceCode ) )
+                else if ( node.HasAnnotation( FormattingAnnotations.SourceCodeAnnotation ) )
                 {
                     this._textSpans.Add( node.Span, TextSpanClassification.SourceCode );
                 }

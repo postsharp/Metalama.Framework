@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Formatting
                 else
                 {
                     // Add Source/Generated code annotations on the stack.
-                    if ( node.HasAnnotation( FormattingAnnotations.GeneratedCode ) )
+                    if ( node.HasAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) )
                     {
                         try
                         {
@@ -45,7 +45,7 @@ namespace Metalama.Framework.Engine.Formatting
                             this._nodeAnnotationStack.Pop();
                         }
                     }
-                    else if ( node.HasAnnotation( FormattingAnnotations.SourceCode ) )
+                    else if ( node.HasAnnotation( FormattingAnnotations.SourceCodeAnnotation ) )
                     {
                         try
                         {

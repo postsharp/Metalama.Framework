@@ -107,7 +107,7 @@ namespace Metalama.Framework.Engine.Linking
                             .WithOpenBraceToken( Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ) )
                             .WithCloseBraceToken( Token( closeBraceLeadingTrivia, SyntaxKind.CloseBraceToken, closeBraceTrailingTrivia ) )
                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
-                            .WithGeneratedCodeAnnotation() )
+                            .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) )
                     .WithSemicolonToken( default );
 
                 return ret;
@@ -170,7 +170,7 @@ namespace Metalama.Framework.Engine.Linking
                     .WithTrailingTrivia( ElasticLineFeed )
                     .WithBody( body )
                     .WithExpressionBody( expressionBody )
-                    .WithGeneratedCodeAnnotation();
+                    .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
     }
 }
