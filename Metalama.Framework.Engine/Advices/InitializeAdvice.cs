@@ -41,24 +41,26 @@ namespace Metalama.Framework.Engine.Advices
         {
             var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
 
-            var containingType =
-                targetDeclaration switch
-                {
-                    INamedType t => t,
-                    IMember m => m.DeclaringType,
-                    _ => throw new AssertionFailedException()
-                };
+            var containingType = targetDeclaration.GetDeclaringType().AssertNotNull();
+
+
 
             var constructors =
-                this.Kind switch
+                targetDeclaration switch
                 {
-                    InitializerKind.BeforeTypeConstructor =>
-                        new[] { containingType.StaticConstructor },
-                    InitializerKind.BeforeInstanceConstructor =>
-                        containingType.Constructors
-                            .Where( c => c.InitializerKind != ConstructorInitializerKind.This ),
+                    IConstructor constructor => new[] { constructor },
+                    INamedType => this.Kind switch
+                    {
+                        InitializerKind.BeforeTypeConstructor =>
+                            new[] { containingType.StaticConstructor },
+                        InitializerKind.BeforeInstanceConstructor =>
+                            containingType.Constructors
+                                .Where( c => c.InitializerKind != ConstructorInitializerKind.This ),
+                        _ => throw new AssertionFailedException()
+                    },
                     _ => throw new AssertionFailedException()
                 };
+                
 
             var transformations = new List<ITransformation>();
 

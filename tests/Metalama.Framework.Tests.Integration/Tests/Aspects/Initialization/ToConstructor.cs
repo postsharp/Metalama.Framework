@@ -25,4 +25,7 @@ public class C
 {
     [MyAspect]
     public C() { }
+
+    // The initializer should not be added here.
+    public C( int c ) { }
 }

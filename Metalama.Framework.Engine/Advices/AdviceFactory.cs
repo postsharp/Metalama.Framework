@@ -842,7 +842,7 @@ namespace Metalama.Framework.Engine.Advices
                 tags );
         }
 
-        public void AddInitializer( IMemberOrNamedType targetType, string template, InitializerKind kind, object? tags = null, object? args = null )
+        public void AddInitializer( INamedType targetType, string template, InitializerKind kind, object? tags = null, object? args = null )
         {
             if ( this._templateInstance == null )
             {

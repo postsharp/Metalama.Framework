@@ -354,7 +354,14 @@ namespace Metalama.Framework.Engine.Linking
             symbolInsertedStatements = new Dictionary<SyntaxNode, IReadOnlyList<LinkerInsertedStatement>>();
             introductionInsertedStatements = new Dictionary<IIntroduceMemberTransformation, IReadOnlyList<LinkerInsertedStatement>>();
 
-            foreach ( var insertStatementTransformation in allTransformations.OfType<IInsertStatementTransformation>() )
+            // Insert statements must be executed in inverse order (because we need the forward execution order and not the override order)
+            // except within an aspect, where the order needs to be preserved.
+            var insertStatementTransformations = allTransformations.OfType<IInsertStatementTransformation>()
+                .GroupBy( x => x.Advice.Aspect )
+                .Reverse()
+                .SelectMany( x => x );
+
+            foreach ( var insertStatementTransformation in insertStatementTransformations )
             {
                 // TODO: Supports only constructors without overrides.
                 //       Needs to be generalized for anything else (take into account overrides).
