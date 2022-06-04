@@ -121,7 +121,7 @@ namespace Metalama.Framework.Engine.Aspects
                     this.AspectInstance,
                     success,
                     this._diagnosticSink.ToImmutable(),
-                    this.AdviceFactory.Advices.ToImmutableArray(),
+                    this.AdviceFactory.State.Advices.ToImmutableArray(),
                     this._aspectSources,
                     this._validatorSources )
                 : new AspectInstanceResult(

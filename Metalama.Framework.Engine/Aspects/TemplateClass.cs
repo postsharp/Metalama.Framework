@@ -35,13 +35,13 @@ namespace Metalama.Framework.Engine.Aspects
         protected TemplateClass(
             IServiceProvider serviceProvider,
             Compilation compilation,
-            INamedTypeSymbol aspectTypeSymbol,
+            INamedTypeSymbol typeSymbol,
             IDiagnosticAdder diagnosticAdder,
             TemplateClass? baseClass )
         {
             this.ServiceProvider = serviceProvider;
             this.BaseClass = baseClass;
-            this.Members = this.GetMembers( compilation, aspectTypeSymbol, diagnosticAdder );
+            this.Members = this.GetMembers( compilation, typeSymbol, diagnosticAdder );
         }
 
         /// <summary>
@@ -51,7 +51,10 @@ namespace Metalama.Framework.Engine.Aspects
 
         internal ImmutableDictionary<string, TemplateClassMember> Members { get; }
 
-        public abstract Type AspectType { get; }
+        /// <summary>
+        /// Gets the reflection type for the current <see cref="TemplateClass"/>.
+        /// </summary>
+        public abstract Type Type { get; }
 
         internal TemplateDriver GetTemplateDriver( IMember sourceTemplate )
         {
@@ -64,7 +67,7 @@ namespace Metalama.Framework.Engine.Aspects
             }
 
             var templateName = TemplateNameHelper.GetCompiledTemplateName( templateSymbol );
-            var compiledTemplateMethodInfo = this.AspectType.GetMethod( templateName );
+            var compiledTemplateMethodInfo = this.Type.GetMethod( templateName );
 
             if ( compiledTemplateMethodInfo == null )
             {
@@ -228,7 +231,7 @@ namespace Metalama.Framework.Engine.Aspects
                         diagnosticAdder.Report(
                             GeneralDiagnosticDescriptors.TemplateWithSameNameAlreadyDefinedInBaseClass.CreateRoslynDiagnostic(
                                 memberSymbol.GetDiagnosticLocation(),
-                                (memberKey, type.Name, existingMember.TemplateClass.AspectType.Name) ) );
+                                (memberKey, type.Name, existingMember.TemplateClass.Type.Name) ) );
 
                         continue;
                     }

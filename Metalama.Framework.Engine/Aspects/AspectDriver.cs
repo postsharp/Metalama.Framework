@@ -138,12 +138,17 @@ namespace Metalama.Framework.Engine.Aspects
             var diagnosticSink = new UserDiagnosticSink( this._aspectClass.Project, pipelineConfiguration.CodeFixFilter );
 
             // Create the AdviceFactory.
-            var adviceFactory = new AdviceFactory(
+            var adviceFactoryState = new AdviceFactoryState(
+                serviceProvider,
                 compilationModelRevision,
-                diagnosticSink,
                 aspectInstance,
+                diagnosticSink,
+                pipelineConfiguration );
+
+            var adviceFactory = new AdviceFactory(
+                adviceFactoryState,
                 aspectInstance.TemplateInstances.Count == 1 ? aspectInstance.TemplateInstances.Values.Single() : null,
-                serviceProvider );
+                null );
 
             // Prepare declarative advice.
             var declarativeAdvice = this._aspectClass.TemplateClasses

@@ -379,6 +379,20 @@ namespace Metalama.Framework.Aspects
             object? tags = null,
             object? args = null );
 
+        /// <summary>
+        /// Returns a copy of the current <see cref="IAdviceFactory"/> that will add advice to a specified layer of the current aspect.
+        /// </summary>
+        /// <param name="layerName">The name of the aspect layer. It must be defined by adding a <see cref="LayersAttribute"/> to the aspect class.</param>
+        /// <returns></returns>
+        IAdviceFactory ForLayer( string layerName );
+
+        /// <summary>
+        /// Returns a copy of the current <see cref="IAdviceFactory"/> that will a specified object to find factory methods.
+        /// </summary>
+        /// <param name="templateProvider">Instance of an object with template members.</param>
+        /// <returns>An <see cref="IAdviceFactory"/>.</returns>
+        IAdviceFactory WithTemplateProvider( ITemplateProvider templateProvider );
+
         [Obsolete( "Not implemented.", true )]
         void ImplementInterface(
             INamedType targetType,

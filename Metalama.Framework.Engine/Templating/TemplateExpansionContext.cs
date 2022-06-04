@@ -64,7 +64,7 @@ namespace Metalama.Framework.Engine.Templating
         public MetaApi MetaApi { get; }
 
         public TemplateExpansionContext(
-            object templateInstance, // This is supposed to be an IAspect or a Fabric, but we may get different objects in tests.
+            object templateInstance, // This is supposed to be an ITemplateProvider, but we may get different objects in tests.
             MetaApi metaApi,
             CompilationModel compilation,
             TemplateLexicalScope lexicalScope,

@@ -37,12 +37,12 @@ namespace Metalama.Framework.Tests.UnitTests
                     CancellationToken.None,
                     out var compileTimeProject ) );
 
-            var aspectTypeFactory = new AspectClassMetadataFactory(
+            var aspectTypeFactory = new AspectClassFactory(
                 testContext.ServiceProvider,
                 new AspectDriverFactory( compilation.RoslynCompilation, ImmutableArray<object>.Empty, testContext.ServiceProvider ) );
 
             var aspectNamedTypes = aspectNames.Select( name => compilation.Types.OfName( name ).Single().GetSymbol() ).ToReadOnlyList();
-            var aspectTypes = aspectTypeFactory.GetAspectClasses( aspectNamedTypes, compileTimeProject!, diagnostics ).ToImmutableArray();
+            var aspectTypes = aspectTypeFactory.GetClasses( aspectNamedTypes, compileTimeProject!, diagnostics ).ToImmutableArray();
             var allLayers = aspectTypes.SelectMany( a => a.Layers ).ToImmutableArray();
 
             var dependencies = new IAspectOrderingSource[]

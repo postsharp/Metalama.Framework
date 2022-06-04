@@ -188,9 +188,9 @@ namespace Metalama.Framework.Engine.Pipeline
                 projectServiceProviderWithProject.WithService( new TemplateAttributeFactory( projectServiceProviderWithProject, roslynCompilation ) );
 
             var driverFactory = new AspectDriverFactory( compilation.Compilation, compilerPlugIns, serviceProviderForAspectClassFactory );
-            var aspectTypeFactory = new AspectClassMetadataFactory( serviceProviderForAspectClassFactory, driverFactory );
+            var aspectTypeFactory = new AspectClassFactory( serviceProviderForAspectClassFactory, driverFactory );
 
-            var aspectClasses = aspectTypeFactory.GetAspectClasses( compilation.Compilation, compileTimeProject, diagnosticAdder ).ToImmutableArray();
+            var aspectClasses = aspectTypeFactory.GetClasses( compilation.Compilation, compileTimeProject, diagnosticAdder ).ToImmutableArray();
 
             // Get aspect parts and sort them.
             var unsortedAspectLayers = aspectClasses
@@ -212,6 +212,13 @@ namespace Metalama.Framework.Engine.Pipeline
                 return false;
             }
 
+            // Create other template classes.
+            var otherTemplateClassFactory = new OtherTemplateClassFactory( serviceProviderForAspectClassFactory );
+
+            var otherTemplateClasses = otherTemplateClassFactory.GetClasses( compilation.Compilation, compileTimeProject, diagnosticAdder )
+                .ToImmutableDictionary( x => x.FullName, x => x );
+
+            // Add fabrics.
             ImmutableArray<OrderedAspectLayer> allOrderedAspectLayers;
             BoundAspectClassCollection allAspectClasses;
 
@@ -253,6 +260,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 this.Domain,
                 stages,
                 allAspectClasses,
+                otherTemplateClasses,
                 allOrderedAspectLayers,
                 compileTimeProject,
                 loader,

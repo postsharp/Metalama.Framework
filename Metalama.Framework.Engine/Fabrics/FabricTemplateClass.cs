@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.Fabrics
             this.Project = project;
         }
 
-        public override Type AspectType => this.Driver.Fabric.GetType();
+        public override Type Type => this.Driver.Fabric.GetType();
 
         internal override CompileTimeProject? Project { get; }
 

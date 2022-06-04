@@ -754,6 +754,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         var aspectType = compileTimeCompilation.GetTypeByMetadataName( typeof(IAspect).FullName );
                         var fabricType = compileTimeCompilation.GetTypeByMetadataName( typeof(Fabric).FullName );
                         var transitiveFabricType = compileTimeCompilation.GetTypeByMetadataName( typeof(TransitiveProjectFabric).FullName );
+                        var templateProviderType = compileTimeCompilation.GetTypeByMetadataName( typeof(ITemplateProvider).FullName );
 
                         var aspectTypes = compileTimeCompilation.Assembly
                             .GetTypes()
@@ -781,6 +782,12 @@ namespace Metalama.Framework.Engine.CompileTime
                             .Select( t => t.GetReflectionName().AssertNotNull() )
                             .ToList();
 
+                        var otherTemplateTypes = compileTimeCompilation.Assembly
+                            .GetTypes()
+                            .Where( t => compileTimeCompilation.HasImplicitConversion( t, templateProviderType ) )
+                            .Select( t => t.GetReflectionName().AssertNotNull() )
+                            .ToList();
+
                         var manifest = new CompileTimeProjectManifest(
                             runTimeCompilation.Assembly.Identity.ToString(),
                             compileTimeCompilation.AssemblyName!,
@@ -789,6 +796,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             compilerPlugInTypes,
                             fabricTypes,
                             transitiveFabricTypes,
+                            otherTemplateTypes,
                             referencedProjects.Select( r => r.RunTimeIdentity.GetDisplayName() ).ToList(),
                             sourceHash,
                             textMapDirectory.FilesByTargetPath.Values.Select( f => new CompileTimeFile( f ) ).ToImmutableList() );
