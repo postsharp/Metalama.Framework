@@ -34,6 +34,8 @@ namespace Metalama.Framework.Aspects
 
         public override void BuildEligibility( IEligibilityBuilder<IDeclaration> builder )
         {
+            builder.MustBe<IMemberOrNamedType>();
+            
             builder.AddRule(
                 new EligibilityRule<IDeclaration>(
                     EligibleScenarios.Inheritance,
