@@ -19,7 +19,7 @@ internal class TemplateAttributeFactory : IService
     private readonly Compilation _compilation;
     private readonly INamedTypeSymbol _attributeType;
 
-    private ConcurrentDictionary<SymbolId, TemplateAttribute?> _cache = new();
+    private readonly ConcurrentDictionary<SymbolId, TemplateAttribute?> _cache = new();
 
     public TemplateAttributeFactory( IServiceProvider serviceProvider, Compilation compilation )
     {

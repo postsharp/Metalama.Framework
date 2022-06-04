@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Project;
 using System;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.Advices
 {
