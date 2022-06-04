@@ -1,4 +1,7 @@
-﻿using Metalama.Framework.Aspects;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
@@ -28,7 +31,7 @@ internal class TemplateAttributeFactory : IService
     public bool TryGetTemplateAttribute(
         SymbolId memberId,
         IDiagnosticAdder diagnosticAdder,
-        [NotNullWhen(true)] out TemplateAttribute? templateAttribute )
+        [NotNullWhen( true )] out TemplateAttribute? templateAttribute )
     {
         templateAttribute =
             this._cache.GetOrAdd(

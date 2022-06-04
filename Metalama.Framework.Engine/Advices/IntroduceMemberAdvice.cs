@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.Advices
         IDeclarationBuilder IIntroductionAdvice.Builder => this.MemberBuilder;
 
         protected TemplateMember<TMember> Template { get; }
-        
+
         protected string MemberName { get; }
 
         protected IntroduceMemberAdvice(
@@ -42,7 +42,9 @@ namespace Metalama.Framework.Engine.Advices
             string? layerName,
             IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, layerName, tags )
         {
-            this.MemberName = explicitName ?? template.TemplateAttribute?.Name ?? template.Declaration?.Name ?? throw new ArgumentNullException(nameof(explicitName));
+            this.MemberName = explicitName ?? template.TemplateAttribute?.Name
+                ?? template.Declaration?.Name ?? throw new ArgumentNullException( nameof(explicitName) );
+
             this.Template = template;
 
             if ( scope != IntroductionScope.Default )
@@ -68,7 +70,7 @@ namespace Metalama.Framework.Engine.Advices
             this.MemberBuilder.Accessibility = templateAttribute?.GetAccessibility() ?? this.Template.Declaration?.Accessibility ?? Accessibility.Private;
             this.MemberBuilder.IsSealed = templateAttribute?.GetIsSealed() ?? this.Template.Declaration?.IsSealed ?? false;
             this.MemberBuilder.IsVirtual = templateAttribute?.GetIsVirtual() ?? this.Template.Declaration?.IsVirtual ?? false;
-            
+
             // Handle the introduction scope.
             var targetDeclaration = this.TargetDeclaration.GetTarget( this.SourceCompilation );
 

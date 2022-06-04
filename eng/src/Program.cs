@@ -26,11 +26,12 @@ var product = new Product( Dependencies.Metalama )
                 "Tests\\Metalama.Framework.Tests.Integration.Internals\\Tests\\**\\*",
                 
                 // XML formatting seems to be conflicting.
-                "*.props",
-                "*.targets",
-                "*.csproj",
-                "*.md",
-                "*.xml"
+                "**\\*.props",
+                "**\\*.targets",
+                "**\\*.csproj",
+                "**\\*.md",
+                "**\\*.xml",
+                "**\\*.config"
             }
         },
         new DotNetSolution( "Tests\\Metalama.Framework.TestApp\\Metalama.Framework.TestApp.sln" ) { IsTestOnly = true },

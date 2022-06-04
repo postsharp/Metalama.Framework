@@ -10,7 +10,8 @@ namespace Metalama.Framework.Engine.LamaSerialization.Serializers;
 internal class RefSerializer<T> : ValueTypeSerializer<Ref<T>>
     where T : class, ICompilationElement
 {
-    public override void SerializeObject( Ref<T> obj, IArgumentsWriter constructorArguments ) => constructorArguments.SetValue( "id", obj.ToSerializableId().Id );
+    public override void SerializeObject( Ref<T> obj, IArgumentsWriter constructorArguments )
+        => constructorArguments.SetValue( "id", obj.ToSerializableId().Id );
 
     public override Ref<T> DeserializeObject( IArgumentsReader constructorArguments )
     {

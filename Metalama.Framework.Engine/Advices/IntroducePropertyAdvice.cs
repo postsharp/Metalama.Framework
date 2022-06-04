@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.Advices
             OverrideStrategy overrideStrategy,
             string? layerName,
             IObjectReader tags )
-            : base( aspect, templateInstance, targetDeclaration,  explicitName, propertyTemplate, scope, overrideStrategy, layerName, tags )
+            : base( aspect, templateInstance, targetDeclaration, explicitName, propertyTemplate, scope, overrideStrategy, layerName, tags )
         {
             this._getTemplate = getTemplate;
             this._setTemplate = setTemplate;

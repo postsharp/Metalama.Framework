@@ -2,10 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Project;
-using System;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
@@ -27,7 +24,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// Gets a value indicating whether the template member can be referenced from a template as run-time code,
         /// which is typically the case with introductions.
         /// </summary>
-        public bool CanBeReferencedAsRunTimeCode => this.AttributeType is TemplateAttributeType.DeclarativeAdvice or TemplateAttributeType.InterfaceMember; 
+        public bool CanBeReferencedAsRunTimeCode => this.AttributeType is TemplateAttributeType.DeclarativeAdvice or TemplateAttributeType.InterfaceMember;
 
         /// <summary>
         /// Gets the <see cref="TemplateAttribute"/> if it could be instantiated by the <see cref="SymbolClassifier"/>, i.e.
@@ -36,7 +33,7 @@ namespace Metalama.Framework.Engine.CompileTime
         public TemplateAttribute? Attribute { get; }
 
         public TemplateAttributeType AttributeType { get; }
-        
+
         /// <summary>
         /// Gets the <see cref="SymbolId"/> of the template member.
         /// </summary>
@@ -59,7 +56,7 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             this.Attribute = prototype.Attribute;
             this.AttributeType = prototype.AttributeType;
-            this.SymbolId =  prototype.SymbolId;
+            this.SymbolId = prototype.SymbolId;
             this.IsAbstract = isAbstract;
         }
 

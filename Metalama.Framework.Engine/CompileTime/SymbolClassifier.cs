@@ -157,7 +157,7 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 case nameof(TemplateAttribute):
                 case "TestTemplateAttribute":
-                    return new TemplateInfo(  memberId, TemplateAttributeType.Template, templateAttribute );
+                    return new TemplateInfo( memberId, TemplateAttributeType.Template, templateAttribute );
 
                 case nameof(InterfaceMemberAttribute):
                     return new TemplateInfo( memberId, TemplateAttributeType.InterfaceMember, templateAttribute );
@@ -167,7 +167,7 @@ namespace Metalama.Framework.Engine.CompileTime
             }
         }
 
-        private static TemplatingScope? GetTemplatingScope( AttributeData attribute, bool compileTimeReturnsRunTimeOnly = false ) 
+        private static TemplatingScope? GetTemplatingScope( AttributeData attribute, bool compileTimeReturnsRunTimeOnly = false )
             => attribute.AttributeClass?.Name switch
             {
                 nameof(CompileTimeAttribute) when compileTimeReturnsRunTimeOnly => TemplatingScope.CompileTimeOnlyReturningRuntimeOnly,

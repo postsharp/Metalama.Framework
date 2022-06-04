@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.Aspects
     internal interface IAspectBuilderInternal : IAspectBuilder, IAspectOrValidatorSourceCollector
     {
         IServiceProvider ServiceProvider { get; }
-        
+
         AdviceFactory AdviceFactory { get; }
 
         DisposeAction WithPredecessor( in AspectPredecessor predecessor );

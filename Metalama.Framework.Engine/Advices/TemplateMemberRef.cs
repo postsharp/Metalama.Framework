@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Project;
 using System;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.Advices
 {
@@ -69,7 +68,6 @@ namespace Metalama.Framework.Engine.Advices
                     throw new AssertionFailedException( $"Cannot instantiate the template attribute for '{symbol.ToDisplayString()}'" );
                 }
             }
-        
 
             return Advices.TemplateMember.Create( typedSymbol, this.TemplateMember, templateAttribute, this.SelectedKind, this.InterpretedKind );
         }

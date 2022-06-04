@@ -9,7 +9,6 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline.LiveTemplates;
 using Metalama.Framework.Engine.Utilities;
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 

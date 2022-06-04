@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.Aspects
         {
             this._reflectionMapper = serviceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( compilation );
             this._aspectClass = aspectClass;
-            
+
             // We don't store the IServiceProvider because the AspectDriver is created during the pipeline initialization but used
             // during pipeline execution, and execution has a different service provider.
 
@@ -151,7 +151,14 @@ namespace Metalama.Framework.Engine.Aspects
                 .ToList();
 
             // Create the AspectBuilder.
-            var aspectBuilder = new AspectBuilder<T>( serviceProvider, targetDeclaration, diagnosticSink, adviceFactory, pipelineConfiguration, aspectInstance, cancellationToken );
+            var aspectBuilder = new AspectBuilder<T>(
+                serviceProvider,
+                targetDeclaration,
+                diagnosticSink,
+                adviceFactory,
+                pipelineConfiguration,
+                aspectInstance,
+                cancellationToken );
 
             using ( SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( compilationModelRevision, serviceProvider ) ) )
             {
