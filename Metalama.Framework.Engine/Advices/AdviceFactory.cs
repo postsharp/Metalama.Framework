@@ -43,7 +43,7 @@ namespace Metalama.Framework.Engine.Advices
             {
                 return this;
             }
-            
+
             if ( !this.State.AspectInstance.AspectClass.Layers.Any( l => l.LayerName == layerName ) )
             {
                 throw new ArgumentOutOfRangeException(
@@ -870,6 +870,34 @@ namespace Metalama.Framework.Engine.Advices
             this.State.Diagnostics.Report( diagnosticList );
         }
 
+        public void AddInitializer( IConstructor targetConstructor, string template, object? tags = null, object? args = null )
+        {
+            if ( this._templateInstance == null )
+            {
+                throw new InvalidOperationException();
+            }
+
+            var diagnosticList = new DiagnosticList();
+
+            var templateRef = this.ValidateTemplateName( template, TemplateKind.Default, true )
+                .GetTemplateMember<IMethod>( this.State.Compilation, this.State.ServiceProvider );
+
+            var advice = new InitializeAdvice(
+                this.State.AspectInstance,
+                this._templateInstance,
+                targetConstructor,
+                templateRef.ForInitializer( ObjectReader.GetReader( args ) ),
+                InitializerKind.BeforeInstanceConstructor,
+                this._layerName,
+                ObjectReader.GetReader( tags ) );
+
+            advice.Initialize( diagnosticList );
+            ThrowOnErrors( diagnosticList );
+            this.State.Advices.Add( advice );
+
+            this.State.Diagnostics.Report( diagnosticList );
+        }
+
         public void Override( IConstructor targetConstructor, string template, object? args = null, object? tags = null )
         {
             throw new NotImplementedException();
@@ -930,6 +958,20 @@ namespace Metalama.Framework.Engine.Advices
         {
             this.AddFilterImpl( targetMember, targetMember, template, kind, tags, args );
         }
+
+        public IParameterBuilder IntroduceParameterAndPull(
+            IConstructor targetConstructor,
+            string parameterName,
+            IType parameterType,
+            IExpression? defaultValue = null )
+            => throw new NotImplementedException();
+
+        public IParameterBuilder IntroduceParameterAndPull(
+            IConstructor targetConstructor,
+            string parameterName,
+            Type parameterType,
+            IExpression? defaultValue = null )
+            => throw new NotImplementedException();
 
         private void AddFilterImpl(
             IDeclaration targetDeclaration,

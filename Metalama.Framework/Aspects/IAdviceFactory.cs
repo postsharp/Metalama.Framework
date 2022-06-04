@@ -379,6 +379,20 @@ namespace Metalama.Framework.Aspects
             object? tags = null,
             object? args = null );
 
+        IParameterBuilder IntroduceParameterAndPull(
+            IConstructor targetConstructor,
+            string parameterName,
+            IType parameterType,
+            IExpression? defaultValue = null );
+
+        IParameterBuilder IntroduceParameterAndPull(
+            IConstructor targetConstructor,
+            string parameterName,
+            Type parameterType,
+            IExpression? defaultValue = null );
+
+        void AddInitializer( IConstructor targetConstructor, string template, object? tags = null, object? args = null );
+
         /// <summary>
         /// Returns a copy of the current <see cref="IAdviceFactory"/> that will add advice to a specified layer of the current aspect.
         /// </summary>

@@ -93,6 +93,7 @@ namespace Metalama.Framework.Engine.Linking
                     VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax } } => null,
                     BaseTypeDeclarationSyntax _ => null,
                     LocalFunctionStatementSyntax localFunction => (SyntaxNode?) localFunction.Body ?? localFunction.ExpressionBody,
+                    ConstructorDeclarationSyntax constructor => (SyntaxNode?) constructor.Body ?? constructor.ExpressionBody,
                     _ => throw new AssertionFailedException( $"Don't know how to get the body of a {syntaxReference.GetSyntax().Kind()}" )
                 };
 
