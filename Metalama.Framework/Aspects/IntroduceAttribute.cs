@@ -32,7 +32,7 @@ namespace Metalama.Framework.Aspects
         [Obsolete( "Not implemented." )]
         public OverrideStrategy WhenInherited { get; set; }
 
-        public override void BuildEligibility( IEligibilityBuilder<IDeclaration> builder )
+        public override void BuildAspectEligibility( IEligibilityBuilder<IDeclaration> builder )
         {
             builder.MustBe<IMemberOrNamedType>();
 
@@ -74,25 +74,27 @@ namespace Metalama.Framework.Aspects
                     return;
             }
 
+            var adviceFactory = builder.Advice.ForLayer( this.Layer );
+
             switch ( templateMember.DeclarationKind )
             {
                 case DeclarationKind.Method:
-                    builder.Advice.IntroduceMethod( targetType, templateMemberId, this.Scope, this.WhenExists );
+                    adviceFactory.IntroduceMethod( targetType, templateMemberId, this.Scope, this.WhenExists );
 
                     break;
 
                 case DeclarationKind.Property:
-                    builder.Advice.IntroduceProperty( targetType, templateMemberId, this.Scope, this.WhenExists );
+                    adviceFactory.IntroduceProperty( targetType, templateMemberId, this.Scope, this.WhenExists );
 
                     break;
 
                 case DeclarationKind.Event:
-                    builder.Advice.IntroduceEvent( targetType, templateMemberId, this.Scope, this.WhenExists );
+                    adviceFactory.IntroduceEvent( targetType, templateMemberId, this.Scope, this.WhenExists );
 
                     break;
 
                 case DeclarationKind.Field:
-                    builder.Advice.IntroduceField( targetType, templateMemberId, this.Scope, this.WhenExists );
+                    adviceFactory.IntroduceField( targetType, templateMemberId, this.Scope, this.WhenExists );
 
                     break;
 

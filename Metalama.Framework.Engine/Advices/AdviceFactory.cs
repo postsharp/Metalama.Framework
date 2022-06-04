@@ -37,8 +37,13 @@ namespace Metalama.Framework.Engine.Advices
         public AdviceFactory WithTemplateClassInstance( TemplateClassInstance templateClassInstance )
             => new( this.State, templateClassInstance, this._layerName );
 
-        public IAdviceFactory ForLayer( string layerName )
+        public IAdviceFactory ForLayer( string? layerName )
         {
+            if ( layerName == this._layerName )
+            {
+                return this;
+            }
+            
             if ( !this.State.AspectInstance.AspectClass.Layers.Any( l => l.LayerName == layerName ) )
             {
                 throw new ArgumentOutOfRangeException(

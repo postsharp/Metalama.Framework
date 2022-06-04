@@ -17,13 +17,12 @@ public abstract class DeclarativeAdviceAttribute : TemplateAttribute
     /// Gets or sets the name of the aspect layer into which the member will be introduced. The layer must have been defined
     /// using the <see cref="LayersAttribute"/> custom attribute.
     /// </summary>
-    [Obsolete( "Not implemented." )]
     public string? Layer { get; set; }
 
     /// <summary>
     /// Builds the eligibility of an aspect that contains the current declarative advice.
     /// </summary>
-    public virtual void BuildEligibility( IEligibilityBuilder<IDeclaration> builder ) { }
+    public virtual void BuildAspectEligibility( IEligibilityBuilder<IDeclaration> builder ) { }
 
     /// <summary>
     /// Builds the aspect, i.e. translates the current declarative advice into a programmatic advice or possibly diagnostics

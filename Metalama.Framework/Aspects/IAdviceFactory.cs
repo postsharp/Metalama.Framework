@@ -384,7 +384,7 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         /// <param name="layerName">The name of the aspect layer. It must be defined by adding a <see cref="LayersAttribute"/> to the aspect class.</param>
         /// <returns></returns>
-        IAdviceFactory ForLayer( string layerName );
+        IAdviceFactory ForLayer( string? layerName );
 
         /// <summary>
         /// Returns a copy of the current <see cref="IAdviceFactory"/> that will a specified object to find factory methods.
