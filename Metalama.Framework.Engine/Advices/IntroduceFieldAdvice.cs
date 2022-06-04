@@ -29,9 +29,9 @@ namespace Metalama.Framework.Engine.Advices
             OverrideStrategy overrideStrategy,
             string? layerName,
             IObjectReader tags )
-            : base( aspect, templateInstance, targetDeclaration, fieldTemplate, scope, overrideStrategy, layerName, tags )
+            : base( aspect, templateInstance, targetDeclaration,  explicitName, fieldTemplate, scope, overrideStrategy, layerName, tags )
         {
-            this.MemberBuilder = new FieldBuilder( this, targetDeclaration, (explicitName ?? fieldTemplate.Declaration?.Name).AssertNotNull(), tags );
+            this.MemberBuilder = new FieldBuilder( this, targetDeclaration, this.MemberName, tags );
             this.MemberBuilder.InitializerTemplate = fieldTemplate.GetInitializerTemplate();
         }
 

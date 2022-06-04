@@ -357,6 +357,10 @@ namespace Metalama.Framework.Engine.Pipeline
                     return false;
                 }
             }
+            
+            // Add services that have a reference to the compilation.
+            pipelineConfiguration =
+                pipelineConfiguration.WithServiceProvider(  pipelineConfiguration.ServiceProvider.WithService( new TemplateAttributeFactory( pipelineConfiguration.ServiceProvider, compilation.Compilation ) ));
 
             // When we reuse a pipeline configuration created from a different pipeline (e.g. design-time to code fix),
             // we need to substitute the code fix filter.

@@ -16,7 +16,5 @@ namespace Metalama.Framework.Aspects
         /// Gets or sets a value indicating whether the interface member should be introduced explicitly.
         /// </summary>
         public bool IsExplicit { get; set; }
-
-        internal override bool IsIntroduction => true;
     }
 }

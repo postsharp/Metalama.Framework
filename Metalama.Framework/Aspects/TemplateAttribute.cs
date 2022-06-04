@@ -14,11 +14,6 @@ namespace Metalama.Framework.Aspects
     {
         internal static TemplateAttribute Default { get; } = new IntroduceAttribute();
 
-        /// <summary>
-        /// Gets a value indicating whether the template is an introduction. Introductions can be referenced to by templates as run-time code.
-        /// </summary>
-        internal virtual bool IsIntroduction => false;
-
         private Accessibility? _accessibility;
         private bool? _isVirtual;
         private bool? _isSealed;

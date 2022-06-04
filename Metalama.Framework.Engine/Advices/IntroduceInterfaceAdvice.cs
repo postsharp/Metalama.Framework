@@ -274,7 +274,7 @@ namespace Metalama.Framework.Engine.Advices
                                     ? new OverrideMethodTransformation(
                                         this,
                                         (IMethod) memberBuilder,
-                                        TemplateMember.Create( implementationMethod, memberSpec.TemplateClassMember, TemplateKind.Introduction )
+                                        TemplateMember.Create( implementationMethod, memberSpec.TemplateClassMember, memberSpec.TemplateClassMember.TemplateInfo.Attribute.AssertNotNull(  ), TemplateKind.Introduction )
                                             .ForIntroduction(),
                                         memberSpec.Tags )
                                     : new RedirectMethodTransformation(

@@ -31,12 +31,12 @@ namespace Metalama.Framework.Engine.Advices
             OverrideStrategy overrideStrategy,
             string? layerName,
             IObjectReader tags )
-            : base( aspect, templateInstance, targetDeclaration, boundTemplate.Template, scope, overrideStrategy, layerName, tags )
+            : base( aspect, templateInstance, targetDeclaration, null, boundTemplate.Template, scope, overrideStrategy, layerName, tags )
         {
             this.BoundTemplate = boundTemplate;
             Invariant.Assert( !boundTemplate.IsNull );
 
-            this.MemberBuilder = new MethodBuilder( this, targetDeclaration, boundTemplate.Template.Declaration.AssertNotNull().Name, tags );
+            this.MemberBuilder = new MethodBuilder( this, targetDeclaration, this.MemberName, tags );
         }
 
         public override void Initialize( IDiagnosticAdder diagnosticAdder )

@@ -104,7 +104,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             if ( templateAttribute != null )
             {
-                var templateInfo = this.GetTemplateInfo( templateAttribute );
+                var templateInfo = this.GetTemplateInfo( symbol, templateAttribute );
 
                 if ( !templateInfo.IsNone )
                 {
@@ -141,54 +141,45 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private bool IsAttributeOfType( AttributeData a, ITypeSymbol type ) => this._compilation!.HasImplicitConversion( a.AttributeClass, type );
 
-        private TemplateInfo GetTemplateInfo( AttributeData attributeData )
+        private TemplateInfo GetTemplateInfo( ISymbol declaringSymbol, AttributeData attributeData )
         {
             if ( !this._attributeDeserializer.TryCreateAttribute( attributeData, NullDiagnosticAdder.Instance, out var attributeInstance ) )
             {
-                // We are not able to handle exceptions in instantiating an advice attribute at the moment.
-                throw new AssertionFailedException();
+                // This happens when the attribute class is defined in user code.
+                // In this case, we have to instantiate the attribute later, after we have the compile-time assembly for the user code.
             }
 
-            var templateAttribute = (TemplateAttribute) attributeInstance;
+            var memberId = SymbolId.Create( declaringSymbol );
+
+            var templateAttribute = (TemplateAttribute?) attributeInstance;
 
             switch ( attributeData.AttributeClass?.Name )
             {
                 case nameof(TemplateAttribute):
                 case "TestTemplateAttribute":
-                    return new TemplateInfo( TemplateAttributeType.Template, templateAttribute );
+                    return new TemplateInfo(  memberId, TemplateAttributeType.Template, templateAttribute );
 
                 case nameof(InterfaceMemberAttribute):
-                    return new TemplateInfo( TemplateAttributeType.InterfaceMember, templateAttribute );
+                    return new TemplateInfo( memberId, TemplateAttributeType.InterfaceMember, templateAttribute );
 
                 default:
-                    return new TemplateInfo( TemplateAttributeType.DeclarativeAdvice, templateAttribute );
+                    return new TemplateInfo( memberId, TemplateAttributeType.DeclarativeAdvice, templateAttribute );
             }
         }
 
-        private TemplatingScope? GetTemplatingScope( AttributeData attribute, bool compileTimeReturnsRunTimeOnly = false )
-        {
-            switch ( attribute.AttributeClass?.Name )
+        private static TemplatingScope? GetTemplatingScope( AttributeData attribute, bool compileTimeReturnsRunTimeOnly = false ) 
+            => attribute.AttributeClass?.Name switch
             {
-                default:
-                    return null;
+                nameof(CompileTimeAttribute) when compileTimeReturnsRunTimeOnly => TemplatingScope.CompileTimeOnlyReturningRuntimeOnly,
+                nameof(CompileTimeAttribute) when !compileTimeReturnsRunTimeOnly => TemplatingScope.CompileTimeOnly,
+                nameof(TemplateAttribute) => TemplatingScope.CompileTimeOnly,
+                nameof(RunTimeOrCompileTimeAttribute) => TemplatingScope.RunTimeOrCompileTime,
+                nameof(IntroduceAttribute) => TemplatingScope.RunTimeOnly,
+                nameof(InterfaceMemberAttribute) => TemplatingScope.RunTimeOnly,
+                _ => null
+            };
 
-                case nameof(CompileTimeAttribute) when compileTimeReturnsRunTimeOnly:
-                    return TemplatingScope.CompileTimeOnlyReturningRuntimeOnly;
-
-                case nameof(CompileTimeAttribute) when !compileTimeReturnsRunTimeOnly:
-                case nameof(TemplateAttribute):
-                    return TemplatingScope.CompileTimeOnly;
-
-                case nameof(RunTimeOrCompileTimeAttribute):
-                    return TemplatingScope.RunTimeOrCompileTime;
-
-                case nameof(IntroduceAttribute):
-                case nameof(InterfaceMemberAttribute):
-                    return TemplatingScope.RunTimeOnly;
-            }
-        }
-
-        private TemplatingScope? GetAssemblyScope( IAssemblySymbol? assembly )
+        private static TemplatingScope? GetAssemblyScope( IAssemblySymbol? assembly )
         {
             if ( assembly == null )
             {
@@ -197,7 +188,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             var scopeFromAttributes = assembly.GetAttributes()
                 .Concat( assembly.Modules.First().GetAttributes() )
-                .Select( x => this.GetTemplatingScope( x ) )
+                .Select( x => GetTemplatingScope( x ) )
                 .FirstOrDefault( s => s != null );
 
             if ( scopeFromAttributes != null )
@@ -236,7 +227,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     IFieldSymbol field => field.Type,
                     IPropertySymbol property => property.Type,
                     IMethodSymbol method when !method.GetReturnTypeAttributes()
-                        .Any( a => this.GetTemplatingScope( a ).GetValueOrDefault() == TemplatingScope.CompileTimeOnly ) => method
+                        .Any( a => GetTemplatingScope( a ).GetValueOrDefault() == TemplatingScope.CompileTimeOnly ) => method
                         .ReturnType,
                     _ => null
                 };
@@ -396,7 +387,7 @@ namespace Metalama.Framework.Engine.CompileTime
             }
 
             // From assembly.
-            var scopeFromAssembly = this.GetAssemblyScope( symbol.ContainingAssembly );
+            var scopeFromAssembly = GetAssemblyScope( symbol.ContainingAssembly );
 
             if ( scopeFromAssembly != null )
             {
@@ -500,7 +491,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             var scopeFromAttributes = symbol
                 .GetAttributes()
-                .Select( a => this.GetTemplatingScope( a, compileTimeReturnsRunTimeOnly ) )
+                .Select( a => GetTemplatingScope( a, compileTimeReturnsRunTimeOnly ) )
                 .FirstOrDefault( s => s != null );
 
             if ( scopeFromAttributes != null )

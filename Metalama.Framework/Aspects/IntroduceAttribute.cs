@@ -32,9 +32,7 @@ namespace Metalama.Framework.Aspects
         [Obsolete( "Not implemented." )]
         public OverrideStrategy WhenInherited { get; set; }
 
-        internal override bool IsIntroduction => true;
-
-        internal override void BuildEligibility( IEligibilityBuilder<IDeclaration> builder )
+        public override void BuildEligibility( IEligibilityBuilder<IDeclaration> builder )
         {
             builder.AddRule(
                 new EligibilityRule<IDeclaration>(
@@ -48,7 +46,7 @@ namespace Metalama.Framework.Aspects
                     _ => $"the aspect contains a declarative introduction and therefore cannot be applied to an interface" ) );
         }
 
-        internal override bool TryBuildAspect( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder )
+        public override bool TryBuildAspect( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder )
         {
             INamedType targetType;
 

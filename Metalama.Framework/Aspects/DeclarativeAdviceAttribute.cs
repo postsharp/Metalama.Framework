@@ -12,12 +12,6 @@ namespace Metalama.Framework.Aspects;
 /// </summary>
 public abstract class DeclarativeAdviceAttribute : TemplateAttribute
 {
-    // We intentionally forbid public implementations because the implementation assembly must be present or at least loadable in the AppDomain,
-    // i.e. it cannot be versioned. User compile-time code gets transformed and versioned, and the transformed assembly is loaded, where
-    // we need to instantiate DeclarativeAdviceAttribute _before_ the compile-time code is being transformed.
-    // To enable this use case for users, we would have ask them to deploy their assemblies as with the SDK scenario.
-    internal DeclarativeAdviceAttribute() { }
-
     /// <summary>
     /// Gets or sets the name of the aspect layer into which the member will be introduced. The layer must have been defined
     /// using the <see cref="LayersAttribute"/> custom attribute.
@@ -25,7 +19,19 @@ public abstract class DeclarativeAdviceAttribute : TemplateAttribute
     [Obsolete( "Not implemented." )]
     public string? Layer { get; set; }
 
-    internal abstract void BuildEligibility( IEligibilityBuilder<IDeclaration> builder );
+    /// <summary>
+    /// Builds the eligibility of an aspect that contains the current declarative advice.
+    /// </summary>
+    public abstract void BuildEligibility( IEligibilityBuilder<IDeclaration> builder );
 
-    internal abstract bool TryBuildAspect( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder );
+    /// <summary>
+    /// Builds the aspect, i.e. translates the current declarative advice into a programmatic advice or possibly diagnostics
+    /// and validators.
+    /// </summary>
+    /// <param name="templateMember">The member or type to which the current attribute is applied.</param>
+    /// <param name="templateMemberId">The a value that represents <paramref name="templateMember"/> and that must be supplied to <see cref="IAdviceFactory"/>.
+    /// It is not actually the name, but a unique identifier of <paramref name="templateMember"/>.</param>
+    /// <param name="builder">An <see cref="IAspectBuilder{TAspectTarget}"/>.</param>
+    /// <returns><c>true</c> in case of success, otherwise <c>false</c>. Returning <c>false</c> causes the aspect to be skipped.</returns>
+    public abstract bool TryBuildAspect( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder );
 }

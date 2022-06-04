@@ -172,7 +172,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 var templateInfo = this._symbolScopeClassifier.GetTemplateInfo( symbol );
 
-                return templateInfo.Attribute.IsIntroduction
+                return templateInfo.CanBeReferencedAsRunTimeCode
                     ? TemplatingScope.RunTimeOnly
                     : TemplatingScope.CompileTimeOnly;
             }
