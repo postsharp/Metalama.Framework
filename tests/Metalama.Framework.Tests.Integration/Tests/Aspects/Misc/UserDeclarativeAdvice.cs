@@ -1,0 +1,24 @@
+using System;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.UserDeclarativeAdvice;
+
+[AttributeUsage( AttributeTargets.Field )]
+public class MyAdviceAttribute : DeclarativeAdviceAttribute
+{
+    public override void BuildAspect( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder )
+    {
+        builder.Advice.IntroduceField( (INamedType) builder.Target, templateMemberId );
+    }
+}
+
+public class MyAspect : TypeAspect
+{
+    [MyAdvice]
+    private int f;
+}
+
+// <target>
+[MyAspect]
+public class Target { }

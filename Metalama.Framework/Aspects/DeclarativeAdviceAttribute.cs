@@ -10,6 +10,7 @@ namespace Metalama.Framework.Aspects;
 /// <summary>
 /// A base class for attributes that define declarative advice members. 
 /// </summary>
+[CompileTime]
 public abstract class DeclarativeAdviceAttribute : TemplateAttribute
 {
     /// <summary>
@@ -22,16 +23,15 @@ public abstract class DeclarativeAdviceAttribute : TemplateAttribute
     /// <summary>
     /// Builds the eligibility of an aspect that contains the current declarative advice.
     /// </summary>
-    public abstract void BuildEligibility( IEligibilityBuilder<IDeclaration> builder );
+    public virtual void BuildEligibility( IEligibilityBuilder<IDeclaration> builder ) { }
 
     /// <summary>
     /// Builds the aspect, i.e. translates the current declarative advice into a programmatic advice or possibly diagnostics
-    /// and validators.
+    /// and validators. In case of error, the implementation must report diagnostics and call <see cref="IAspectBuilder.SkipAspect"/>.
     /// </summary>
     /// <param name="templateMember">The member or type to which the current attribute is applied.</param>
     /// <param name="templateMemberId">The a value that represents <paramref name="templateMember"/> and that must be supplied to <see cref="IAdviceFactory"/>.
-    /// It is not actually the name, but a unique identifier of <paramref name="templateMember"/>.</param>
+    ///     It is not actually the name, but a unique identifier of <paramref name="templateMember"/>.</param>
     /// <param name="builder">An <see cref="IAspectBuilder{TAspectTarget}"/>.</param>
-    /// <returns><c>true</c> in case of success, otherwise <c>false</c>. Returning <c>false</c> causes the aspect to be skipped.</returns>
-    public abstract bool TryBuildAspect( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder );
+    public abstract void BuildAspect( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder );
 }

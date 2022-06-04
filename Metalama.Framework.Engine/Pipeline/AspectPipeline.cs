@@ -182,8 +182,13 @@ namespace Metalama.Framework.Engine.Pipeline
             var projectModel = new ProjectModel( compilation.Compilation, projectServiceProviderWithProject );
 
             // Create aspect types.
-            var driverFactory = new AspectDriverFactory( compilation.Compilation, compilerPlugIns, projectServiceProviderWithProject );
-            var aspectTypeFactory = new AspectClassMetadataFactory( projectServiceProviderWithProject, driverFactory );
+            // We create a TemplateAttributeFactory for this purpose but we cannot add it to the ServiceProvider that will flow out because
+            // we don't want to leak the compilation for the design-time scenario.
+            var serviceProviderForAspectClassFactory =
+                projectServiceProviderWithProject.WithService( new TemplateAttributeFactory( projectServiceProviderWithProject, roslynCompilation ) );
+
+            var driverFactory = new AspectDriverFactory( compilation.Compilation, compilerPlugIns, serviceProviderForAspectClassFactory );
+            var aspectTypeFactory = new AspectClassMetadataFactory( serviceProviderForAspectClassFactory, driverFactory );
 
             var aspectClasses = aspectTypeFactory.GetAspectClasses( compilation.Compilation, compileTimeProject, diagnosticAdder ).ToImmutableArray();
 
@@ -357,10 +362,12 @@ namespace Metalama.Framework.Engine.Pipeline
                     return false;
                 }
             }
-            
+
             // Add services that have a reference to the compilation.
             pipelineConfiguration =
-                pipelineConfiguration.WithServiceProvider(  pipelineConfiguration.ServiceProvider.WithService( new TemplateAttributeFactory( pipelineConfiguration.ServiceProvider, compilation.Compilation ) ));
+                pipelineConfiguration.WithServiceProvider(
+                    pipelineConfiguration.ServiceProvider.WithService(
+                        new TemplateAttributeFactory( pipelineConfiguration.ServiceProvider, compilation.Compilation ) ) );
 
             // When we reuse a pipeline configuration created from a different pipeline (e.g. design-time to code fix),
             // we need to substitute the code fix filter.

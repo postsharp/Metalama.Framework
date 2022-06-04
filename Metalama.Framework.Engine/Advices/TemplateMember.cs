@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Advices
             TemplateKind selectedKind = TemplateKind.Default )
             where T : class, IMemberOrNamedType
             => new( implementation, templateClassMember, templateAttribute, selectedKind );
-        
+
         public static TemplateMember<T> Create<T>(
             T? implementation,
             TemplateClassMember templateClassMember,
@@ -44,8 +44,6 @@ namespace Metalama.Framework.Engine.Advices
 
         public TemplateClassMember TemplateClassMember => this._templateClassMember ?? throw new InvalidOperationException();
 
-        public TemplateInfo TemplateInfo => this.TemplateClassMember.TemplateInfo;
-        
         public TemplateAttribute? TemplateAttribute { get; }
 
         public TemplateKind SelectedKind { get; }
@@ -56,14 +54,23 @@ namespace Metalama.Framework.Engine.Advices
 
         public bool IsNotNull => this.SelectedKind != TemplateKind.None;
 
-        public TemplateMember( T? implementation, TemplateClassMember? templateClassMember, TemplateAttribute templateAttribute, TemplateKind selectedKind = TemplateKind.Default ) : this(
+        public TemplateMember(
+            T? implementation,
+            TemplateClassMember? templateClassMember,
+            TemplateAttribute templateAttribute,
+            TemplateKind selectedKind = TemplateKind.Default ) : this(
             implementation,
             templateClassMember,
             templateAttribute,
             selectedKind,
             selectedKind ) { }
 
-        public TemplateMember( T? implementation, TemplateClassMember? templateClassMember, TemplateAttribute templateAttribute, TemplateKind selectedKind, TemplateKind interpretedKind )
+        public TemplateMember(
+            T? implementation,
+            TemplateClassMember? templateClassMember,
+            TemplateAttribute templateAttribute,
+            TemplateKind selectedKind,
+            TemplateKind interpretedKind )
         {
             this.Declaration = implementation;
             this._templateClassMember = templateClassMember;
@@ -88,7 +95,12 @@ namespace Metalama.Framework.Engine.Advices
         }
 
         public TemplateMember<IMemberOrNamedType> Cast()
-            => TemplateMember.Create<IMemberOrNamedType>( this.Declaration!, this.TemplateClassMember, this.TemplateAttribute, this.SelectedKind, this.InterpretedKind );
+            => TemplateMember.Create<IMemberOrNamedType>(
+                this.Declaration!,
+                this.TemplateClassMember,
+                this.TemplateAttribute,
+                this.SelectedKind,
+                this.InterpretedKind );
 
         public override string ToString() => this.IsNull ? "null" : $"{this.Declaration!.Name}:{this.SelectedKind}";
     }

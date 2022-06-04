@@ -35,7 +35,7 @@ namespace Metalama.Framework.Aspects
         public override void BuildEligibility( IEligibilityBuilder<IDeclaration> builder )
         {
             builder.MustBe<IMemberOrNamedType>();
-            
+
             builder.AddRule(
                 new EligibilityRule<IDeclaration>(
                     EligibleScenarios.Inheritance,
@@ -48,7 +48,7 @@ namespace Metalama.Framework.Aspects
                     _ => $"the aspect contains a declarative introduction and therefore cannot be applied to an interface" ) );
         }
 
-        public override bool TryBuildAspect( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder )
+        public override void BuildAspect( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder )
         {
             INamedType targetType;
 
@@ -69,7 +69,9 @@ namespace Metalama.Framework.Aspects
                         DeclarativeAdviceDiagnosticDescriptors.CannotUseIntroduceWithoutDeclaringType.WithArguments(
                             (builder.AspectInstance.AspectClass.ShortName, templateMember.DeclarationKind, builder.Target.DeclarationKind) ) );
 
-                    return false;
+                    builder.SkipAspect();
+
+                    return;
             }
 
             switch ( templateMember.DeclarationKind )
@@ -97,8 +99,6 @@ namespace Metalama.Framework.Aspects
                 default:
                     throw new InvalidOperationException( $"Don't know how to introduce a {templateMember.DeclarationKind}." );
             }
-
-            return true;
         }
     }
 }

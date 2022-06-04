@@ -10,7 +10,6 @@ using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Fabrics;
 using Microsoft.CodeAnalysis;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.Fabrics;
@@ -34,23 +33,17 @@ internal class TypeFabricDriver : FabricDriver
         var compilation = aspectBuilder.Target.GetCompilationModel();
 
         // Prepare declarative advice.
-        List<(IMemberOrNamedType TemplateDeclaration, string TemplateMemberId, DeclarativeAdviceAttribute Attribute)> declarativeAdvice = templateClass
-            .GetDeclarativeAdvices( compilation.RoslynCompilation )
-            .Select(
-                a => (TemplateDeclaration: (IMemberOrNamedType) compilation.Factory.GetDeclarationFromSymbolId( a.SymbolId ).AssertNotNull(),
-                      TemplateId: a.Key,
-                      Attribute: (DeclarativeAdviceAttribute) a.TemplateInfo.Attribute) )
+        var declarativeAdvice = templateClass
+            .GetDeclarativeAdvices( aspectBuilder.ServiceProvider, compilation )
             .ToList();
 
         // Execute the AmendType.
         var builder = new Amender( targetType, this.FabricManager, aspectBuilder, templateInstance, fabricInstance );
 
         var executionContext = new UserCodeExecutionContext(
-            this.FabricManager.ServiceProvider,
+            aspectBuilder.ServiceProvider,
             aspectBuilder.DiagnosticAdder,
             UserCodeMemberInfo.FromDelegate( new Action<ITypeAmender>( ((TypeFabric) this.Fabric).AmendType ) ) );
-
-        var success = true;
 
         return this.FabricManager.UserCodeInvoker.TryInvoke(
             () =>
@@ -58,18 +51,18 @@ internal class TypeFabricDriver : FabricDriver
                 // Execute declarative advice.
                 foreach ( var advice in declarativeAdvice )
                 {
-                    success |= advice.Attribute.TryBuildAspect(
-                        advice.TemplateDeclaration,
-                        advice.TemplateMemberId,
+                    ((DeclarativeAdviceAttribute) advice.TemplateAttribute!).BuildAspect(
+                        advice.Declaration.AssertNotNull(),
+                        advice.TemplateClassMember.Key,
                         (IAspectBuilder<IDeclaration>) aspectBuilder );
                 }
 
-                if ( success )
+                if ( !aspectBuilder.IsAspectSkipped )
                 {
                     ((TypeFabric) this.Fabric).AmendType( builder );
                 }
             },
-            executionContext ) && success;
+            executionContext );
     }
 
     public override FabricKind Kind => FabricKind.Type;

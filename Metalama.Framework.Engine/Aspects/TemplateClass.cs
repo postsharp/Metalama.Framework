@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
@@ -247,13 +248,44 @@ namespace Metalama.Framework.Engine.Aspects
             return members.ToImmutable();
         }
 
-        internal IEnumerable<TemplateClassMember> GetDeclarativeAdvices( Compilation compilation )
+        internal IEnumerable<TemplateMember<IMemberOrNamedType>> GetDeclarativeAdvices( IServiceProvider serviceProvider, CompilationModel compilation )
+            => this.GetDeclarativeAdvices( serviceProvider, compilation.RoslynCompilation )
+                .Select(
+                    x => TemplateMember.Create(
+                        (IMemberOrNamedType) compilation.Factory.GetDeclaration( x.Symbol ),
+                        x.TemplateClassMember,
+                        x.Attribute ) );
+
+        internal IEnumerable<(TemplateClassMember TemplateClassMember, ISymbol Symbol, DeclarativeAdviceAttribute Attribute)> GetDeclarativeAdvices(
+            IServiceProvider serviceProvider,
+            Compilation compilation )
         {
+            TemplateAttributeFactory? templateAttributeFactory = null;
+
             return this.Members
                 .Where( m => m.Value.TemplateInfo.AttributeType == TemplateAttributeType.DeclarativeAdvice )
-                .Select( m => m.Value )
-                .OrderBy( m => m.SymbolId.Resolve( compilation ).GetPrimarySyntaxReference()?.SyntaxTree.FilePath )
-                .ThenBy( m => m.SymbolId.Resolve( compilation ).GetPrimarySyntaxReference()?.Span.Start );
+                .Select(
+                    m =>
+                    {
+                        var symbol = m.Value.SymbolId.Resolve( compilation ).AssertNotNull();
+
+                        return (Template: m.Value, Symbol: symbol, Syntax: symbol.GetPrimarySyntaxReference());
+                    } )
+                .OrderBy( m => m.Syntax?.SyntaxTree.FilePath )
+                .ThenBy( m => m.Syntax?.Span.Start )
+                .Select( m => (m.Template, m.Symbol, ResolveAttribute( m.Template.SymbolId )) );
+
+            DeclarativeAdviceAttribute ResolveAttribute( SymbolId templateInfoSymbolId )
+            {
+                templateAttributeFactory ??= serviceProvider.GetRequiredService<TemplateAttributeFactory>();
+
+                if ( !templateAttributeFactory.TryGetTemplateAttribute( templateInfoSymbolId, NullDiagnosticAdder.Instance, out var attribute ) )
+                {
+                    throw new AssertionFailedException();
+                }
+
+                return (DeclarativeAdviceAttribute) attribute;
+            }
         }
     }
 }

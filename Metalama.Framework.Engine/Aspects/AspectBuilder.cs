@@ -32,6 +32,7 @@ namespace Metalama.Framework.Engine.Aspects
         private ImmutableArray<IValidatorSource> _validatorSources = ImmutableArray<IValidatorSource>.Empty;
 
         public AspectBuilder(
+            IServiceProvider serviceProvider,
             T target,
             UserDiagnosticSink diagnosticSink,
             AdviceFactory adviceFactory,
@@ -45,6 +46,7 @@ namespace Metalama.Framework.Engine.Aspects
             this.AspectInstance = aspectInstance;
             this.AdviceFactory = adviceFactory;
             this.CancellationToken = cancellationToken;
+            this.ServiceProvider = serviceProvider;
             this.AspectPredecessor = new AspectPredecessor( AspectPredecessorKind.ChildAspect, aspectInstance );
         }
 
@@ -61,6 +63,8 @@ namespace Metalama.Framework.Engine.Aspects
         {
             this._validatorSources = this._validatorSources.Add( validatorSource );
         }
+
+        public IServiceProvider ServiceProvider { get; }
 
         public AdviceFactory AdviceFactory { get; }
 
