@@ -1,11 +1,11 @@
-using System;
-using Metalama.TestFramework;
+﻿global using Metalama.Framework.Tests.Integration.TestInputs.Templating.NamespaceExpansion.GlobalUsing.MyNamespaceGoingGlobal;
+
 using Metalama.Framework.Aspects;
-using MyMath = System.Math;
+using Metalama.TestFramework;
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Templating.NamespaceExpansion
 {
-    namespace Alias
+    namespace GlobalUsing
     {
         [CompileTime]
         class Aspect
@@ -13,7 +13,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Templating.NamespaceEx
             [TestTemplate]
             dynamic? Template()
             {
-                Console.Write(MyMath.PI);
+                MyClassGoingGlobal.MyMethod();
 
                 return meta.Proceed();
             }
@@ -24,6 +24,16 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Templating.NamespaceEx
             int Method(int a)
             {
                 return a;
+            }
+        }
+
+        namespace MyNamespaceGoingGlobal
+        {
+            class MyClassGoingGlobal
+            {
+                public static void MyMethod()
+                {
+                }
             }
         }
     }
