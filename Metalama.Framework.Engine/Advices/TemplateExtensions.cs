@@ -73,7 +73,7 @@ namespace Metalama.Framework.Engine.Advices
                     return TemplateMember.Create(
                         fieldTemplate.Declaration,
                         fieldTemplate.TemplateClassMember,
-                        fieldTemplate.TemplateAttribute,
+                        fieldTemplate.TemplateAttribute.AssertNotNull(),
                         TemplateKind.InitializerExpression );
                 }
                 else
