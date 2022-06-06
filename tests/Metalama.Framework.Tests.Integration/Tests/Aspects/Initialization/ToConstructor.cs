@@ -1,7 +1,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-#pragma warning restore CS0414
+#pragma warning disable CS0414
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Initialization.ToConstructor;
 
