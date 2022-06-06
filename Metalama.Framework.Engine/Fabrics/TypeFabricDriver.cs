@@ -51,7 +51,7 @@ internal class TypeFabricDriver : FabricDriver
                 // Execute declarative advice.
                 foreach ( var advice in declarativeAdvice )
                 {
-                    ((DeclarativeAdviceAttribute) advice.TemplateAttribute!).BuildAspect(
+                    ((DeclarativeAdviceAttribute) advice.TemplateAttribute).BuildAspect(
                         advice.Declaration.AssertNotNull(),
                         advice.TemplateClassMember.Key,
                         (IAspectBuilder<IDeclaration>) aspectBuilder );

@@ -1,4 +1,7 @@
-﻿using Metalama.Framework.Engine.CompileTime;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System;
@@ -25,7 +28,13 @@ internal class OtherTemplateClassFactory : TemplateClassFactory<OtherTemplateCla
         Compilation compilation,
         [NotNullWhen( true )] out OtherTemplateClass? templateClass )
     {
-        templateClass = new OtherTemplateClass( this.ServiceProvider, compilation, templateTypeSymbol, diagnosticAdder, baseClass, compileTimeProject.AssertNotNull() );
+        templateClass = new OtherTemplateClass(
+            this.ServiceProvider,
+            compilation,
+            templateTypeSymbol,
+            diagnosticAdder,
+            baseClass,
+            compileTimeProject.AssertNotNull() );
 
         return true;
     }

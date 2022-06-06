@@ -55,7 +55,7 @@ internal class TemplateAttributeFactory : IService
 
         var attributeData = member
             .GetAttributes()
-            .Single( a => this._compilation!.HasImplicitConversion( a.AttributeClass, this._attributeType ) );
+            .Single( a => this._compilation.HasImplicitConversion( a.AttributeClass, this._attributeType ) );
 
         return this._attributeDeserializer.TryCreateAttribute( attributeData, diagnosticAdder, out templateAttribute );
     }

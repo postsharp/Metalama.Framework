@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.Aspects
     /// <summary>
     /// Represents the metadata of an aspect class. This class is compilation-independent. It is not used to represent a fabric class.
     /// </summary>
-    public class AspectClass : TemplateClass, IAspectClassImpl, IBoundAspectClass, IValidatorDriverFactory
+    public class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDriverFactory
     {
         private readonly UserCodeInvoker _userCodeInvoker;
         private readonly IAspect? _prototypeAspectInstance; // Null for abstract classes.
@@ -79,7 +79,7 @@ namespace Metalama.Framework.Engine.Aspects
         /// </summary>
         internal ImmutableArray<AspectLayer> Layers { get; }
 
-        ImmutableArray<AspectLayer> IAspectClassImpl.Layers => this.Layers; 
+        ImmutableArray<AspectLayer> IAspectClassImpl.Layers => this.Layers;
 
         public Location? DiagnosticLocation { get; }
 
