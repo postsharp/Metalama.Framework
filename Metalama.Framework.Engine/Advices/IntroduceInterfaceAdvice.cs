@@ -88,7 +88,8 @@ namespace Metalama.Framework.Engine.Advices
                         diagnosticAdder.Report(
                             AdviceDiagnosticDescriptors.MissingDeclarativeInterfaceMember.CreateRoslynDiagnostic(
                                 this.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), this.InterfaceType, interfaceMethod) ) );
+                                (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), this.InterfaceType,
+                                 interfaceMethod) ) );
                     }
                     else if (
                         !SignatureTypeSymbolComparer.Instance.Equals(
@@ -99,7 +100,8 @@ namespace Metalama.Framework.Engine.Advices
                         diagnosticAdder.Report(
                             AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberDoesNotMatch.CreateRoslynDiagnostic(
                                 this.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), this.InterfaceType, matchingMethod,
+                                (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), this.InterfaceType,
+                                 matchingMethod,
                                  interfaceMethod) ) );
                     }
                     else
@@ -120,7 +122,8 @@ namespace Metalama.Framework.Engine.Advices
                         diagnosticAdder.Report(
                             AdviceDiagnosticDescriptors.MissingDeclarativeInterfaceMember.CreateRoslynDiagnostic(
                                 this.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), this.InterfaceType, interfaceProperty) ) );
+                                (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), this.InterfaceType,
+                                 interfaceProperty) ) );
                     }
                     else if (
                         !this.SourceCompilation.InvariantComparer.Equals( interfaceProperty.Type, matchingProperty.Type )
@@ -129,7 +132,8 @@ namespace Metalama.Framework.Engine.Advices
                         diagnosticAdder.Report(
                             AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberDoesNotMatch.CreateRoslynDiagnostic(
                                 this.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), this.InterfaceType, matchingProperty,
+                                (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), this.InterfaceType,
+                                 matchingProperty,
                                  interfaceProperty) ) );
                     }
                     else
@@ -145,14 +149,16 @@ namespace Metalama.Framework.Engine.Advices
                         diagnosticAdder.Report(
                             AdviceDiagnosticDescriptors.MissingDeclarativeInterfaceMember.CreateRoslynDiagnostic(
                                 this.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), this.InterfaceType, interfaceEvent) ) );
+                                (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), this.InterfaceType,
+                                 interfaceEvent) ) );
                     }
                     else if ( !this.SourceCompilation.InvariantComparer.Equals( interfaceEvent.Type, matchingEvent.Type ) )
                     {
                         diagnosticAdder.Report(
                             AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberDoesNotMatch.CreateRoslynDiagnostic(
                                 this.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), this.InterfaceType, matchingEvent,
+                                (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), this.InterfaceType,
+                                 matchingEvent,
                                  interfaceEvent) ) );
                     }
                     else

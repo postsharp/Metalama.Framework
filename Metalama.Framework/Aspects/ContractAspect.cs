@@ -54,7 +54,8 @@ namespace Metalama.Framework.Aspects
 
         private static readonly Func<ContractDirection, IEligibilityRule<IParameter>> _returnValueEligibilityInvalidDirection =
             direction =>
-                EligibilityRuleFactory.CreateRule<IParameter>( builder => builder.MustSatisfy(x => false, x => $"Contract with \"{direction}\" direction is not valid on return parameter." ) );
+                EligibilityRuleFactory.CreateRule<IParameter>(
+                    builder => builder.MustSatisfy( x => false, x => $"Contract with \"{direction}\" direction is not valid on return parameter." ) );
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ContractAspect"/> class.
@@ -92,7 +93,7 @@ namespace Metalama.Framework.Aspects
                 ContractDirection.Both => _returnValueEligibilityInvalidDirection( ContractDirection.Both ),
                 ContractDirection.Input => _returnValueEligibilityInvalidDirection( ContractDirection.Input ),
                 ContractDirection.Output => _returnValueEligibilityMustNotBeVoid,
-                _ => throw new ArgumentOutOfRangeException( nameof( direction ) )
+                _ => throw new ArgumentOutOfRangeException( nameof(direction) )
             };
 
         private static IEligibilityRule<IFieldOrPropertyOrIndexer> GetPropertyEligibilityRule( ContractDirection direction )
@@ -125,10 +126,10 @@ namespace Metalama.Framework.Aspects
 
         public virtual void BuildAspect( IAspectBuilder<IParameter> builder )
         {
-            var eligibilityRule = 
+            var eligibilityRule =
                 builder.Target.IsReturnParameter
-                ? GetReturnParameterEligibilityRule( this.Direction )
-                : GetParameterEligibilityRule( this.Direction );
+                    ? GetReturnParameterEligibilityRule( this.Direction )
+                    : GetParameterEligibilityRule( this.Direction );
 
             if ( eligibilityRule != null && !builder.VerifyEligibility( eligibilityRule ) )
             {

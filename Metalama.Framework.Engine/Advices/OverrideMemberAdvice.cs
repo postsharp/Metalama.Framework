@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Advices
             TemplateClassInstance templateInstance,
             TMember targetDeclaration,
             string? layerName,
-            IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, layerName ) 
+            IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, layerName )
         {
             this.Tags = tags;
         }

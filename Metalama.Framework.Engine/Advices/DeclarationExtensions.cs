@@ -3,7 +3,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
-using Microsoft.CodeAnalysis;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.Advices
@@ -19,8 +18,8 @@ namespace Metalama.Framework.Engine.Advices
                        .Select( ( p, i ) => (p, i) )
                        .All(
                            amp =>
-                               SignatureTypeSymbolComparer.Instance.Equals( 
-                                   amp.p.Type.GetSymbol().AssertNotNull(), 
+                               SignatureTypeSymbolComparer.Instance.Equals(
+                                   amp.p.Type.GetSymbol().AssertNotNull(),
                                    other.Parameters[amp.i].Type.GetSymbol().AssertNotNull() )
                                && amp.p.RefKind == other.Parameters[amp.i].RefKind );
         }
@@ -43,8 +42,8 @@ namespace Metalama.Framework.Engine.Advices
                        .Select( ( p, i ) => (p, i) )
                        .All(
                            app =>
-                               SignatureTypeSymbolComparer.Instance.Equals( 
-                                   app.p.Type.GetSymbol().AssertNotNull(), 
+                               SignatureTypeSymbolComparer.Instance.Equals(
+                                   app.p.Type.GetSymbol().AssertNotNull(),
                                    other.Parameters[app.i].Type.GetSymbol().AssertNotNull() )
                                && app.p.RefKind == other.Parameters[app.i].RefKind );
         }

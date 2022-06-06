@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.Advices
     /// </summary>
     internal class SignatureTypeSymbolComparer : IEqualityComparer<ISymbol?>
     {
-        public static SignatureTypeSymbolComparer Instance { get; } = new SignatureTypeSymbolComparer( SymbolEqualityComparer.Default );
+        public static SignatureTypeSymbolComparer Instance { get; } = new( SymbolEqualityComparer.Default );
 
         private readonly SymbolEqualityComparer _inner;
 
@@ -26,23 +26,28 @@ namespace Metalama.Framework.Engine.Advices
         {
             switch ( (left, right) )
             {
-                case (IArrayTypeSymbol leftArray, IArrayTypeSymbol rightArray ):
+                case (IArrayTypeSymbol leftArray, IArrayTypeSymbol rightArray):
                     return leftArray.Rank == rightArray.Rank
-                        && this.Equals( leftArray.ElementType, rightArray.ElementType );
-                case (IDynamicTypeSymbol, IDynamicTypeSymbol ):
+                           && this.Equals( leftArray.ElementType, rightArray.ElementType );
+
+                case (IDynamicTypeSymbol, IDynamicTypeSymbol):
                     return true;
-                case (ITypeParameterSymbol leftTypeParameter, ITypeParameterSymbol rightTypeParameter ):
+
+                case (ITypeParameterSymbol leftTypeParameter, ITypeParameterSymbol rightTypeParameter):
                     // TODO: Interpret compile-time parameters for generic interfaces.
                     return
                         leftTypeParameter.TypeParameterKind == rightTypeParameter.TypeParameterKind
                         && leftTypeParameter.Ordinal == rightTypeParameter.Ordinal;
-                case (IPointerTypeSymbol leftPointerType, IPointerTypeSymbol rightPointerType ):
+
+                case (IPointerTypeSymbol leftPointerType, IPointerTypeSymbol rightPointerType):
                     // TODO: Constraints.
                     return this.Equals( leftPointerType.PointedAtType, rightPointerType.PointedAtType );
-                case (IFunctionPointerTypeSymbol leftFunctionPointerType, IFunctionPointerTypeSymbol rightFunctionPointerType ):
+
+                case (IFunctionPointerTypeSymbol leftFunctionPointerType, IFunctionPointerTypeSymbol rightFunctionPointerType):
                     return
                         this.Equals( leftFunctionPointerType.Signature, rightFunctionPointerType.Signature );
-                case (IMethodSymbol leftMethod, IMethodSymbol rightMethod ):
+
+                case (IMethodSymbol leftMethod, IMethodSymbol rightMethod):
                     // Whole method signature matching.
                     return
                         StringComparer.Ordinal.Equals( leftMethod.Name, rightMethod.Name )
@@ -53,12 +58,14 @@ namespace Metalama.Framework.Engine.Advices
                             ( l, r ) =>
                                 l.RefKind == r.RefKind
                                 && this.Equals( l, r ) );
-                case (INamedTypeSymbol leftNamedType, INamedTypeSymbol rightNamedType ):
+
+                case (INamedTypeSymbol leftNamedType, INamedTypeSymbol rightNamedType):
                     return
                         this._inner.Equals( leftNamedType.OriginalDefinition, rightNamedType.OriginalDefinition )
                         && leftNamedType.TypeArguments.SequenceEqual(
                             rightNamedType.TypeArguments,
                             ( l, r ) => this.Equals( l, r ) );
+
                 default:
                     return this._inner.Equals( left, right );
             }
@@ -66,7 +73,7 @@ namespace Metalama.Framework.Engine.Advices
 
         public int GetHashCode( ISymbol? obj )
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }
