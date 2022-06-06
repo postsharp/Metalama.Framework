@@ -44,7 +44,8 @@ namespace Metalama.Framework.Engine.Advices
 
         public TemplateClassMember TemplateClassMember => this._templateClassMember ?? throw new InvalidOperationException();
 
-        public TemplateAttribute TemplateAttribute { get; }
+        // Can be null in the default instance.
+        public TemplateAttribute? TemplateAttribute { get; }
 
         public TemplateKind SelectedKind { get; }
 
@@ -98,7 +99,7 @@ namespace Metalama.Framework.Engine.Advices
             => TemplateMember.Create<IMemberOrNamedType>(
                 this.Declaration!,
                 this.TemplateClassMember,
-                this.TemplateAttribute,
+                this.TemplateAttribute.AssertNotNull(),
                 this.SelectedKind,
                 this.InterpretedKind );
 

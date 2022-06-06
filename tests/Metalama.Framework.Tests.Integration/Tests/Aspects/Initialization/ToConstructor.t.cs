@@ -1,4 +1,3 @@
-// Warning CS0414 on `_f`: `The field 'C._f' is assigned but its value is never used`
 public class C
 {
     [MyAspect]

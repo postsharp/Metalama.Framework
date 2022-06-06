@@ -67,9 +67,9 @@ namespace Metalama.Framework.Engine.Advices
         {
             var templateAttribute = this.Template.TemplateAttribute;
 
-            this.MemberBuilder.Accessibility = templateAttribute.GetAccessibility() ?? this.Template.Declaration?.Accessibility ?? Accessibility.Private;
-            this.MemberBuilder.IsSealed = templateAttribute.GetIsSealed() ?? this.Template.Declaration?.IsSealed ?? false;
-            this.MemberBuilder.IsVirtual = templateAttribute.GetIsVirtual() ?? this.Template.Declaration?.IsVirtual ?? false;
+            this.MemberBuilder.Accessibility = templateAttribute?.GetAccessibility() ?? this.Template.Declaration?.Accessibility ?? Accessibility.Private;
+            this.MemberBuilder.IsSealed = templateAttribute?.GetIsSealed() ?? this.Template.Declaration?.IsSealed ?? false;
+            this.MemberBuilder.IsVirtual = templateAttribute?.GetIsVirtual() ?? this.Template.Declaration?.IsVirtual ?? false;
 
             // Handle the introduction scope.
             var targetDeclaration = this.TargetDeclaration.GetTarget( this.SourceCompilation );
