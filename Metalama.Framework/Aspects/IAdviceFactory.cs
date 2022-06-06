@@ -345,9 +345,8 @@ namespace Metalama.Framework.Aspects
             InitializerKind kind,
             object? tags = null,
             object? args = null );
-        
-        void AddInitializer( IConstructor targetConstructor, string template, object? tags = null, object? args = null );
 
+        void AddInitializer( IConstructor targetConstructor, string template, object? tags = null, object? args = null );
 
         /// <summary>
         /// Adds a contract to a parameter. Contracts are usually used to validate parameters (pre- or post-conditions) or to normalize their value (null-to-empty, trimming, normalizing case, ...).
@@ -394,7 +393,6 @@ namespace Metalama.Framework.Aspects
             Type parameterType,
             IExpression? defaultValue = null );
 
-      
         /// <summary>
         /// Returns a copy of the current <see cref="IAdviceFactory"/> that will add advice to a specified layer of the current aspect.
         /// </summary>

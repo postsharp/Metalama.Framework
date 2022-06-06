@@ -3,7 +3,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
-using System;
 
 namespace Metalama.Framework.Aspects;
 

@@ -44,7 +44,7 @@ namespace Metalama.Framework.Engine.Advices
 
         public TemplateClassMember TemplateClassMember => this._templateClassMember ?? throw new InvalidOperationException();
 
-        public TemplateAttribute? TemplateAttribute { get; }
+        public TemplateAttribute TemplateAttribute { get; }
 
         public TemplateKind SelectedKind { get; }
 
