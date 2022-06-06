@@ -66,7 +66,7 @@ namespace Metalama.Framework.Aspects
 
                 default:
                     builder.Diagnostics.Report(
-                        DeclarativeAdviceDiagnosticDescriptors.CannotUseIntroduceWithoutDeclaringType.WithArguments(
+                        FrameworkDiagnosticDescriptors.CannotUseIntroduceWithoutDeclaringType.WithArguments(
                             (builder.AspectInstance.AspectClass.ShortName, templateMember.DeclarationKind, builder.Target.DeclarationKind) ) );
 
                     builder.SkipAspect();
