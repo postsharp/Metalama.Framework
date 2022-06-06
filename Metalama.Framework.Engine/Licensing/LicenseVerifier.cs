@@ -12,7 +12,6 @@ using Metalama.Framework.Project;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Reflection;
 
 namespace Metalama.Framework.Engine.Licensing;
 
@@ -23,12 +22,12 @@ namespace Metalama.Framework.Engine.Licensing;
 /// </summary>
 internal class LicenseVerifier : IService
 {
-    private const int _maxFreemiumAspects = 1;
+    private const int _maxAspectClasses = int.MaxValue;
     private readonly bool _isLimitedLicense;
 
     public LicenseVerifier( IServiceProvider serviceProvider )
     {
-        var licenseConsumptionManager = (ILicenseConsumptionManager?) serviceProvider.GetService( typeof(ILicenseConsumptionManager));
+        var licenseConsumptionManager = (ILicenseConsumptionManager?) serviceProvider.GetService( typeof(ILicenseConsumptionManager) );
 
         if ( licenseConsumptionManager != null )
         {
@@ -43,33 +42,16 @@ internal class LicenseVerifier : IService
 
     public void VerifyCanAddChildAspect( AspectPredecessor predecessor )
     {
-        if ( this._isLimitedLicense )
-        {
-            switch ( predecessor.Instance )
-            {
-                case IAspectInstance aspectInstance:
-                    var aspectClass = (IAspectClassImpl) aspectInstance.AspectClass;
-
-                    if ( !aspectClass.IsFreemium && !HasRedistributionLicense( ((IAspectClassImpl) aspectInstance.AspectClass).Project ) )
-                    {
-                        throw new InvalidOperationException(
-                            $"The '{aspectInstance.AspectClass.ShortName}' aspect cannot add a child aspect because you are using the Metalama Essentials license and the aspect is not marked as [Freemium]." );
-                    }
-
-                    break;
-
-                case IFabricInstance fabricInstance:
-                    throw new InvalidOperationException(
-                        $"The '{fabricInstance.Fabric.GetType().Name}' fabric cannot add an aspect because this feature is not covered by Metalama Essentials license." );
-            }
-        }
+        // Adding children aspects is currently not limited.
     }
 
     private static bool HasRedistributionLicense( CompileTimeProject? project )
     {
         if ( project == null )
+        {
             return false;
-        
+        }
+
         // TODO: project.LicenseKeys
 
         return false;
@@ -90,17 +72,16 @@ internal class LicenseVerifier : IService
 
     public void VerifyCompilationResult( ImmutableArray<AspectInstanceResult> aspectInstanceResults, UserDiagnosticSink diagnostics )
     {
-        var freemiumAspects = aspectInstanceResults.Select( a => a.AspectInstance.AspectClass ).Where( c => ((IAspectClassImpl) c).IsFreemium ).Distinct().ToList();
-        var freemiumAspectsCount = freemiumAspects.Count;
+        var aspectClasses = aspectInstanceResults.Select( a => a.AspectInstance.AspectClass ).Distinct().ToList();
 
-        if ( freemiumAspectsCount > _maxFreemiumAspects )
+        if ( aspectClasses.Count > _maxAspectClasses )
         {
-            var freemiumAspectNames = string.Join( ",", freemiumAspects.Select( x => "'" + x.ShortName + "'" ) );
+            var aspectClassNames = string.Join( ",", aspectClasses.Select( x => "'" + x.ShortName + "'" ) );
 
             diagnostics.Report(
-                LicensingDiagnosticDescriptors.TooManyFreemiumAspects.CreateRoslynDiagnostic(
+                LicensingDiagnosticDescriptors.TooManyAspectClasses.CreateRoslynDiagnostic(
                     null,
-                    (freemiumAspectsCount, _maxFreemiumAspects, freemiumAspectNames) ) );
+                    (aspectClasses.Count, _maxAspectClasses, aspectClassNames) ) );
         }
     }
 
@@ -112,12 +93,6 @@ internal class LicenseVerifier : IService
             return;
         }
 
-        if ( this._isLimitedLicense )
-        {
-            if ( aspectClass.IsInherited && !aspectClass.IsFreemium && !HasRedistributionLicense( ((IAspectClassImpl)aspectClass).Project ) )
-            {
-                // TODO: report an error.
-            }
-        }
+        // Inheritance is currently unlimited.
     }
 }

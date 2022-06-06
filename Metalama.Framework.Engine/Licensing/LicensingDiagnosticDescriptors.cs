@@ -7,16 +7,15 @@ namespace Metalama.Framework.Engine.Licensing;
 
 internal static class LicensingDiagnosticDescriptors
 {
-    // Reserved range: 700-799
+    // Reserved range: 800-801
 
     private const string _category = "Metalama.General";
 
-    internal static readonly DiagnosticDefinition<(int ActualCount, int MaxCount, string ClassNames)> TooManyFreemiumAspects =
+    internal static readonly DiagnosticDefinition<(int ActualCount, int MaxCount, string ClassNames)> TooManyAspectClasses =
         new(
             "LAMA00700",
             _category,
-            "There are too {0} freemium aspects in the project, but only {1} are allowed. The freemium aspects are: {2}. " +
-            " Please report this issue at https://www.postsharp.net/support and attach this file to the ticket.",
+            "You have {0} aspect classes in the project exceed but only {1} are allowed by your license. The aspect classes are: {2}. ",
             Severity.Warning,
-            "Too many freemium aspects in the project." );
+            "Too many aspect classes in the project." );
 }
