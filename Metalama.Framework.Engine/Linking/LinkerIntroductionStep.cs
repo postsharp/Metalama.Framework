@@ -7,6 +7,9 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
+#if DEBUG
+using Metalama.Framework.Engine.Formatting;
+#endif
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Transformations;
@@ -439,7 +442,7 @@ namespace Metalama.Framework.Engine.Linking
                     var statement = insertStatementTransformation.GetInsertedStatement( context );
 
 #if DEBUG
-                    if ( statement != null && statement.Value.Statement.HasAnnotations( Metalama.Framework.Engine.Formatting.FormattingAnnotations.GeneratedCodeAnnotationKind ) )
+                    if ( statement != null && statement.Value.Statement.HasAnnotations( FormattingAnnotations.GeneratedCodeAnnotationKind ) )
                     {
                         throw new AssertionFailedException();
                     }
