@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.AspectWeavers;
@@ -10,7 +9,6 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -57,17 +55,15 @@ internal sealed class LowLevelPipelineStage : PipelineStage
             return true;
         }
 
-        var resources = new List<ManagedResource>();
-
         var context = new AspectWeaverContext(
             this._aspectClass,
             aspectInstances,
             input.Compilation,
             diagnostics.Report,
-            resources.Add,
             new AspectWeaverHelper( pipelineConfiguration.ServiceProvider, compilation ),
             pipelineConfiguration.ServiceProvider,
-            input.Project );
+            input.Project,
+            this._aspectClass.GeneratedCodeAnnotation );
 
         var executionContext = new UserCodeExecutionContext(
             this.ServiceProvider,

@@ -154,7 +154,7 @@ namespace Metalama.Framework.Engine.Linking
                                     Token( accessorListLeadingTrivia, SyntaxKind.OpenBraceToken, accessorStartingTrivia ),
                                     List( transformedAccessors ),
                                     Token( accessorEndingTrivia, SyntaxKind.CloseBraceToken, accessorListTrailingTrivia ) )
-                                .WithGeneratedCodeAnnotation() )
+                                .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) )
                         .WithExpressionBody( null )
                         .WithInitializer( null )
                         .WithSemicolonToken( default );
@@ -197,7 +197,7 @@ namespace Metalama.Framework.Engine.Linking
                             .WithOpenBraceToken( Token( openBraceLeadingTrivia, SyntaxKind.OpenBraceToken, openBraceTrailingTrivia ) )
                             .WithCloseBraceToken( Token( closeBraceLeadingTrivia, SyntaxKind.CloseBraceToken, closeBraceTrailingTrivia ) )
                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
-                            .WithGeneratedCodeAnnotation() )
+                            .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) )
                     .WithSemicolonToken( default );
             }
         }
@@ -218,7 +218,7 @@ namespace Metalama.Framework.Engine.Linking
                 .NormalizeWhitespace()
                 .WithLeadingTrivia( LineFeed, LineFeed )
                 .WithTrailingTrivia( LineFeed )
-                .WithGeneratedCodeAnnotation();
+                .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
         private static BlockSyntax GetImplicitGetterBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
             => Block(
@@ -231,7 +231,7 @@ namespace Metalama.Framework.Engine.Linking
                                 : ThisExpression(),
                             IdentifierName( GetBackingFieldName( (IPropertySymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
                         Token( SyntaxKind.SemicolonToken ) ) )
-                .WithGeneratedCodeAnnotation();
+                .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
         private static BlockSyntax GetImplicitSetterBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
             => Block(
@@ -245,7 +245,7 @@ namespace Metalama.Framework.Engine.Linking
                                     : ThisExpression(),
                                 IdentifierName( GetBackingFieldName( (IPropertySymbol) symbol.AssociatedSymbol.AssertNotNull() ) ) ),
                             IdentifierName( "value" ) ) ) )
-                .WithGeneratedCodeAnnotation();
+                .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
         private static MemberDeclarationSyntax GetOriginalImplProperty(
             PropertyDeclarationSyntax property,
@@ -289,11 +289,24 @@ namespace Metalama.Framework.Engine.Linking
                                         : null
                                 }.Where( a => a != null )
                                 .AssertNoneNull() ) )
-                    : property.AccessorList.AssertNotNull().WithSourceCodeAnnotation();
+                    : property.AccessorList?.WithSourceCodeAnnotation();
+
+            var expressionBody =
+                property.IsAutoPropertyDeclaration()
+                    ? null
+                    : property.AccessorList != null
+                        ? null
+                        : property.ExpressionBody;
 
             var initializer = property.Initializer;
 
-            return GetSpecialImplProperty( property.Type, accessorList, initializer.WithSourceCodeAnnotation(), symbol, GetOriginalImplMemberName( symbol ) );
+            return GetSpecialImplProperty(
+                property.Type,
+                accessorList,
+                expressionBody,
+                initializer.WithSourceCodeAnnotation(),
+                symbol,
+                GetOriginalImplMemberName( symbol ) );
         }
 
         private static MemberDeclarationSyntax GetEmptyImplProperty( PropertyDeclarationSyntax property, IPropertySymbol symbol )
@@ -320,12 +333,13 @@ namespace Metalama.Framework.Engine.Linking
                                 .AssertNoneNull() ) )
                     : property.AccessorList.AssertNotNull();
 
-            return GetSpecialImplProperty( property.Type, accessorList, null, symbol, GetEmptyImplMemberName( symbol ) );
+            return GetSpecialImplProperty( property.Type, accessorList, null, null, symbol, GetEmptyImplMemberName( symbol ) );
         }
 
         private static MemberDeclarationSyntax GetSpecialImplProperty(
             TypeSyntax propertyType,
-            AccessorListSyntax accessorList,
+            AccessorListSyntax? accessorList,
+            ArrowExpressionClauseSyntax? expressionBody,
             EqualsValueClauseSyntax? initializer,
             IPropertySymbol symbol,
             string name )
@@ -343,11 +357,12 @@ namespace Metalama.Framework.Engine.Linking
                         null,
                         null )
                     .WithAccessorList( accessorList )
+                    .WithExpressionBody( expressionBody )
                     .NormalizeWhitespace()
                     .WithInitializer( initializer.WithSourceCodeAnnotation() )
                     .WithLeadingTrivia( ElasticLineFeed )
                     .WithTrailingTrivia( ElasticLineFeed )
-                    .WithGeneratedCodeAnnotation();
+                    .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
     }
 }

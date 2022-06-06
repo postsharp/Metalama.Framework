@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Project;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Threading.Tasks;
@@ -39,7 +38,7 @@ namespace Metalama.TestFramework
             TestProjectReferences references,
             ITestOutputHelper? logger )
             : base(
-                serviceProvider.WithService( new OptionsWrapper( serviceProvider.GetRequiredService<IProjectOptions>() ) ),
+                serviceProvider.WithService( new FormattingTestProjectOptions( serviceProvider.GetRequiredService<IProjectOptions>() ) ),
                 projectDirectory,
                 references,
                 logger ) { }
@@ -150,51 +149,18 @@ namespace Metalama.TestFramework
             return result;
         }
 
-        private class OptionsWrapper : IProjectOptions
+        private class FormattingTestProjectOptions : ProjectOptionsWrapper
         {
-            private readonly IProjectOptions _underlying;
+            public FormattingTestProjectOptions( IProjectOptions underlying ) : base( underlying ) { }
 
-            public OptionsWrapper( IProjectOptions underlying )
+            public override bool FormatOutput => true;
+
+            public override IProjectOptions Apply( IProjectOptions options )
             {
-                this._underlying = underlying;
+                return new FormattingTestProjectOptions( options );
             }
 
-            public string ProjectId => this._underlying.ProjectId;
-
-            public string? BuildTouchFile => this._underlying.BuildTouchFile;
-
-            public string? SourceGeneratorTouchFile => this._underlying.SourceGeneratorTouchFile;
-
-            public string? AssemblyName => this._underlying.AssemblyName;
-
-            public ImmutableArray<object> PlugIns => this._underlying.PlugIns;
-
-            public bool IsFrameworkEnabled => this._underlying.IsFrameworkEnabled;
-
-            public bool FormatOutput => true;
-
-            public bool FormatCompileTimeCode => this._underlying.FormatCompileTimeCode;
-
-            public bool IsUserCodeTrusted => this._underlying.IsUserCodeTrusted;
-
-            public string? ProjectPath => this._underlying.ProjectPath;
-
-            public string? TargetFramework => this._underlying.TargetFramework;
-
-            public string? Configuration => this._underlying.Configuration;
-
-            public bool IsDesignTimeEnabled => this._underlying.IsDesignTimeEnabled;
-
-            public string? AdditionalCompilationOutputDirectory => this._underlying.AdditionalCompilationOutputDirectory;
-
-            public string? DotNetSdkDirectory => null;
-
-            public IProjectOptions Apply( IProjectOptions options )
-            {
-                return new OptionsWrapper( options );
-            }
-
-            public bool TryGetProperty( string name, [NotNullWhen( true )] out string? value )
+            public override bool TryGetProperty( string name, [NotNullWhen( true )] out string? value )
             {
                 if ( name == nameof(this.FormatOutput) )
                 {
@@ -204,7 +170,7 @@ namespace Metalama.TestFramework
                 }
                 else
                 {
-                    return this._underlying.TryGetProperty( name, out value );
+                    return this.Wrapped.TryGetProperty( name, out value );
                 }
             }
         }

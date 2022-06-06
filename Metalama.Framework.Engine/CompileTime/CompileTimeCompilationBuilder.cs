@@ -3,6 +3,7 @@
 
 using K4os.Hash.xxHash;
 using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Utilities;
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CodeModel;
@@ -58,7 +59,8 @@ namespace Metalama.Framework.Engine.CompileTime
             () =>
                 CSharpSyntaxTree.ParseText(
                     "namespace System.Runtime.CompilerServices { internal static class IsExternalInit {} }",
-                    path: CompileTimeConstants.PredefinedTypesFileName ) );
+                    path: CompileTimeConstants.PredefinedTypesFileName,
+                    encoding: Encoding.UTF8 ) );
 
         private static readonly Guid _buildId = AssemblyMetadataReader.GetInstance( typeof(CompileTimeCompilationBuilder).Assembly ).ModuleId;
         private readonly ReflectionMapperFactory _reflectionMapperFactory;
@@ -321,15 +323,17 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             this._logger.Trace?.Log( $"TryEmit( '{compileTimeCompilation.AssemblyName}' )" );
 
+            var outputDirectory = outputPaths.Directory.AssertNotNull();
+
             try
             {
                 var emitOptions = new EmitOptions( debugInformationFormat: DebugInformationFormat.PortablePdb );
 
                 // Write the generated files to disk if we should.
-                if ( !Directory.Exists( outputPaths.Directory ) )
+                if ( !Directory.Exists( outputDirectory ) )
                 {
-                    this._logger.Trace?.Log( $"Creating directory '{outputPaths.Directory}'." );
-                    Directory.CreateDirectory( outputPaths.Directory );
+                    this._logger.Trace?.Log( $"Creating directory '{outputDirectory}'." );
+                    Directory.CreateDirectory( outputDirectory );
                 }
 
                 compileTimeCompilation =
@@ -337,10 +341,12 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 foreach ( var compileTimeSyntaxTree in compileTimeCompilation.SyntaxTrees )
                 {
-                    var transformedFileName = Path.Combine( outputPaths.Directory, compileTimeSyntaxTree.FilePath );
+                    var transformedFileName = Path.Combine( outputDirectory, compileTimeSyntaxTree.FilePath );
 
-                    var path = Path.Combine( outputPaths.Directory, transformedFileName );
+                    var path = Path.Combine( outputDirectory, transformedFileName );
                     var text = compileTimeSyntaxTree.GetText();
+
+                    this._logger.Trace?.Log( $"Writing '{path}'." );
 
                     // Write the file in a retry loop to handle locks. It seems there are still file lock issues
                     // despite the Mutex. 
@@ -363,6 +369,8 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     compileTimeCompilation = compileTimeCompilation.ReplaceSyntaxTree( compileTimeSyntaxTree, newTree );
                 }
+
+                this._logger.Trace?.Log( $"Writing '{outputPaths.Pe}'." );
 
                 EmitResult emitResult;
 
@@ -399,7 +407,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     foreach ( var diagnostic in diagnostics )
                     {
-                        textMapDirectory ??= TextMapDirectory.Load( outputPaths.Directory );
+                        textMapDirectory ??= TextMapDirectory.Load( outputDirectory );
 
                         var transformedPath = diagnostic.Location.SourceTree?.FilePath;
 
@@ -465,7 +473,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                         foreach ( var reference in compileTimeCompilation.References )
                         {
-                            errorFile.WriteLine( "  " + reference );
+                            errorFile.WriteLine( "  " + reference.Display );
                         }
                     }
 
@@ -505,19 +513,9 @@ namespace Metalama.Framework.Engine.CompileTime
                 RetryHelper.Retry(
                     () =>
                     {
-                        if ( File.Exists( outputPaths.Pe ) )
+                        if ( Directory.Exists( outputDirectory ) )
                         {
-                            File.Delete( outputPaths.Pe );
-                        }
-                    },
-                    logger: this._logger );
-
-                RetryHelper.Retry(
-                    () =>
-                    {
-                        if ( File.Exists( outputPaths.Pdb ) )
-                        {
-                            File.Delete( outputPaths.Pdb );
+                            Directory.Delete( outputDirectory, true );
                         }
                     },
                     logger: this._logger );
@@ -766,7 +764,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             return false;
                         }
 
-                        textMapDirectory.Write( outputPaths.Directory );
+                        textMapDirectory.Write( outputPaths.Directory! );
 
                         var aspectType = compileTimeCompilation.GetTypeByMetadataName( typeof(IAspect).FullName );
                         var fabricType = compileTimeCompilation.GetTypeByMetadataName( typeof(Fabric).FullName );

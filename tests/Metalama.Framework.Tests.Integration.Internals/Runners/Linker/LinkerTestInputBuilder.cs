@@ -84,6 +84,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
             var layerOrderLookup = orderedLayers.ToDictionary( x => x.AspectLayerId, x => x.Order );
 
+            // TODO: All transformations should be ordered together, but there are no tests that would require that.
             var replacedCompilationModel = initialCompilationModel.WithTransformations(
                 this._rewriter.ReplacedTransformations.OrderBy( x => layerOrderLookup[x.Advice.AspectLayerId] ).ToList() );
 
@@ -93,7 +94,11 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
             var linkerInput = new AspectLinkerInput(
                 inputCompilation,
                 inputCompilationModel,
-                this._rewriter.NonObservableTransformations.OrderBy( x => layerOrderLookup[x.Advice.AspectLayerId] ).ToList(),
+                this._rewriter.ReplacedTransformations.Cast<ITransformation>()
+                    .Concat( this._rewriter.ObservableTransformations )
+                    .Concat( this._rewriter.NonObservableTransformations )
+                    .OrderBy( x => layerOrderLookup[x.Advice.AspectLayerId] )
+                    .ToList(),
                 orderedLayers,
                 new ArraySegment<ScopedSuppression>( Array.Empty<ScopedSuppression>() ),
                 null! );
@@ -224,7 +229,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                     if ( insertPositionNode != null )
                     {
-                        A.CallTo( () => ((IMemberIntroduction) overriddenDeclaration).InsertPosition )
+                        A.CallTo( () => ((IIntroduceMemberTransformation) overriddenDeclaration).InsertPosition )
                             .Returns( new InsertPosition( insertPositionRelation, (MemberDeclarationSyntax) insertPositionNode ) );
                     }
                     else
@@ -233,7 +238,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     }
 
                     A.CallTo( () => overriddenDeclaration.OverriddenDeclaration ).Returns( overridenMember );
-                    A.CallTo( () => ((IMemberIntroduction) overriddenDeclaration).TargetSyntaxTree ).Returns( symbolHelperNode.SyntaxTree );
+                    A.CallTo( () => ((IIntroduceMemberTransformation) overriddenDeclaration).TargetSyntaxTree ).Returns( symbolHelperNode.SyntaxTree );
                 }
                 else if ( transformation is IObservableTransformation observableTransformation )
                 {
@@ -251,7 +256,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                         insertPositionNode = insertPositionNode.Parent?.Parent.AssertNotNull();
                     }
 
-                    if ( transformation is IReplaceMember replaceMember )
+                    if ( transformation is IReplaceMemberTransformation replaceMember )
                     {
                         // This only supports fields being replaced by properties.
                         var replacedElementName = ((ITestTransformation) transformation).ReplacedElementName;
@@ -370,7 +375,6 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 insertPositionNode,
                 introducedElementName );
 
-            A.CallTo( () => ((IMethod) observableTransformation).LocalFunctions ).Returns( symbolHelperElement.LocalFunctions );
             A.CallTo( () => ((IMethod) observableTransformation).Parameters ).Returns( symbolHelperElement.Parameters );
             A.CallTo( () => ((IMethod) observableTransformation).TypeParameters ).Returns( symbolHelperElement.TypeParameters );
             A.CallTo( () => ((IMethod) observableTransformation).ReturnParameter ).Returns( symbolHelperElement.ReturnParameter );
@@ -457,10 +461,10 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
             A.CallTo( () => ((IDeclarationImpl) observableTransformation).ToRef() )
                 .Returns( new Ref<IDeclaration>( (IDeclarationBuilder) observableTransformation ) );
 
-            A.CallTo( () => ((IMemberIntroduction) observableTransformation).InsertPosition )
+            A.CallTo( () => ((IIntroduceMemberTransformation) observableTransformation).InsertPosition )
                 .Returns( new InsertPosition( insertPositionRelation, (MemberDeclarationSyntax) insertPositionNode ) );
 
-            A.CallTo( () => ((IMemberIntroduction) observableTransformation).TargetSyntaxTree ).Returns( symbolHelperNode.SyntaxTree );
+            A.CallTo( () => ((IIntroduceMemberTransformation) observableTransformation).TargetSyntaxTree ).Returns( symbolHelperNode.SyntaxTree );
 
             // ReSharper disable SuspiciousTypeConversion.Global
 

@@ -19,13 +19,13 @@ namespace Metalama.Framework.Engine.CodeModel
         public IParameterSymbol ParameterSymbol { get; }
 
         [Memo]
-        public MemberOrNamedType DeclaringMember => (MemberOrNamedType) this.Compilation.Factory.GetDeclaration( this.ParameterSymbol.ContainingSymbol );
+        public Member DeclaringMember => (Member) this.Compilation.Factory.GetDeclaration( this.ParameterSymbol.ContainingSymbol );
 
         public ParameterInfo ToParameterInfo() => CompileTimeParameterInfo.Create( this );
 
         public bool IsReturnParameter => false;
 
-        IMemberOrNamedType IParameter.DeclaringMember => this.DeclaringMember;
+        IMember IParameter.DeclaringMember => this.DeclaringMember;
 
         public Parameter( IParameterSymbol symbol, CompilationModel compilation ) : base( compilation )
         {

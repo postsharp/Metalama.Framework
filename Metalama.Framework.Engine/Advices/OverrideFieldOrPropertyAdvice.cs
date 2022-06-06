@@ -4,10 +4,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Transformations;
-using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Advices
 {
@@ -15,19 +12,19 @@ namespace Metalama.Framework.Engine.Advices
     {
         public TemplateMember<IProperty> PropertyTemplate { get; }
 
-        public TemplateMember<IMethod> GetTemplate { get; }
+        public BoundTemplateMethod GetTemplate { get; }
 
-        public TemplateMember<IMethod> SetTemplate { get; }
+        public BoundTemplateMethod SetTemplate { get; }
 
         public OverrideFieldOrPropertyAdvice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             IFieldOrPropertyOrIndexer targetDeclaration,
             TemplateMember<IProperty> propertyTemplate,
-            TemplateMember<IMethod> getTemplate,
-            TemplateMember<IMethod> setTemplate,
+            BoundTemplateMethod getTemplate,
+            BoundTemplateMethod setTemplate,
             string? layerName,
-            ITagReader tags )
+            IObjectReader tags )
             : base( aspect, templateInstance, targetDeclaration, layerName, tags )
         {
             this.PropertyTemplate = propertyTemplate;
@@ -37,28 +34,19 @@ namespace Metalama.Framework.Engine.Advices
 
         public override void Initialize( IDiagnosticAdder diagnosticAdder ) { }
 
-        public override AdviceResult ToResult( ICompilation compilation, IReadOnlyList<IObservableTransformation> observableTransformations )
+        public override AdviceResult ToResult( ICompilation compilation )
         {
             // TODO: Translate templates to this compilation.
             // TODO: order should be self if the target is introduced on the same layer.
             var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
 
-            if ( targetDeclaration is IField field )
-            {
-                var promotedField = new PromotedField( this, field, this.Tags );
-
-                return AdviceResult.Create(
-                    promotedField,
-                    new OverriddenProperty( this, promotedField, this.PropertyTemplate, this.GetTemplate, this.SetTemplate, this.Tags ) );
-            }
-            else if ( targetDeclaration is IProperty property )
-            {
-                return AdviceResult.Create( new OverriddenProperty( this, property, this.PropertyTemplate, this.GetTemplate, this.SetTemplate, this.Tags ) );
-            }
-            else
-            {
-                throw new AssertionFailedException();
-            }
+            return AdviceResult.Create(
+                OverrideHelper.OverrideProperty(
+                    this,
+                    targetDeclaration,
+                    this.GetTemplate,
+                    this.SetTemplate,
+                    this.Tags ) );
         }
     }
 }

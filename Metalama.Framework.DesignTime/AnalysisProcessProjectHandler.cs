@@ -2,7 +2,9 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Utilities;
 using Metalama.Framework.DesignTime.Pipeline;
+using Metalama.Framework.DesignTime.SourceGeneration;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Utilities;
@@ -168,7 +170,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
     protected void UpdateTouchFile()
     {
         this._logger.Trace?.Log( $"Touching '{this.ProjectOptions.SourceGeneratorTouchFile}'." );
-        RetryHelper.Retry( () => File.WriteAllText( this.ProjectOptions.SourceGeneratorTouchFile, Guid.NewGuid().ToString() ) );
+        RetryHelper.Retry( () => File.WriteAllText( this.ProjectOptions.SourceGeneratorTouchFile!, Guid.NewGuid().ToString() ) );
     }
 
     /// <summary>

@@ -14,25 +14,34 @@ version = "2021.2"
 project {
 
    buildType(DebugBuild)
-   buildType(ReleaseBuild)
    buildType(PublicBuild)
    buildType(PublicDeployment)
    buildType(VersionBump)
-   buildTypesOrder = arrayListOf(DebugBuild,ReleaseBuild,PublicBuild,PublicDeployment,VersionBump)
+   buildTypesOrder = arrayListOf(DebugBuild,PublicBuild,PublicDeployment,VersionBump)
 }
 
 object DebugBuild : BuildType({
 
     name = "Build [Debug]"
 
-    artifactRules = "+:artifacts/publish/public/**/*=>artifacts/publish/public\n+:artifacts/publish/private/**/*=>artifacts/publish/private\n+:%system.teamcity.build.tempDir%/Metalama/ExtractExceptions/**/*=>logs\n+:%system.teamcity.build.tempDir%/Metalama/Extract/**/.completed=>logs"
+    artifactRules = "+:artifacts/publish/public/**/*=>artifacts/publish/public\n+:artifacts/publish/private/**/*=>artifacts/publish/private\n+:%system.teamcity.build.tempDir%/Metalama/ExtractExceptions/**/*=>logs\n+:%system.teamcity.build.tempDir%/Metalama/Extract/**/.completed=>logs\n+:%system.teamcity.build.tempDir%/Metalama/CrashReports/**/*=>logs"
 
     vcs {
         root(DslContext.settingsRoot)
     }
 
     steps {
+        // Step to kill all dotnet or VBCSCompiler processes that might be locking files we delete in during cleanup.
         powerShell {
+            name = "Kill background processes before cleanup"
+            scriptMode = file {
+                path = "Build.ps1"
+            }
+            noProfile = false
+            param("jetbrains_powershell_scriptArguments", "tools kill")
+        }
+        powerShell {
+            name = "Build [Debug]"
             scriptMode = file {
                 path = "Build.ps1"
             }
@@ -63,48 +72,7 @@ object DebugBuild : BuildType({
 
     }
 
-  dependencies {
-
-        snapshot(AbsoluteId("Metalama_MetalamaCompiler_ReleaseBuild")) {
-                     onDependencyFailure = FailureAction.FAIL_TO_START
-                }
-
-     }
-
-})
-
-object ReleaseBuild : BuildType({
-
-    name = "Build [Release]"
-
-    artifactRules = "+:artifacts/publish/public/**/*=>artifacts/publish/public\n+:artifacts/publish/private/**/*=>artifacts/publish/private"
-
-    vcs {
-        root(DslContext.settingsRoot)
-    }
-
-    steps {
-        powerShell {
-            scriptMode = file {
-                path = "Build.ps1"
-            }
-            noProfile = false
-            param("jetbrains_powershell_scriptArguments", "test --configuration Release --buildNumber %build.number%")
-        }
-    }
-
-    requirements {
-        equals("env.BuildAgentType", "caravela02")
-    }
-
-    features {
-        swabra {
-            lockingProcesses = Swabra.LockingProcessPolicy.KILL
-            verbose = true
-        }
-    }
-
-  dependencies {
+    dependencies {
 
         snapshot(AbsoluteId("Metalama_MetalamaCompiler_ReleaseBuild")) {
                      onDependencyFailure = FailureAction.FAIL_TO_START
@@ -125,7 +93,17 @@ object PublicBuild : BuildType({
     }
 
     steps {
+        // Step to kill all dotnet or VBCSCompiler processes that might be locking files we delete in during cleanup.
         powerShell {
+            name = "Kill background processes before cleanup"
+            scriptMode = file {
+                path = "Build.ps1"
+            }
+            noProfile = false
+            param("jetbrains_powershell_scriptArguments", "tools kill")
+        }
+        powerShell {
+            name = "Build [Public]"
             scriptMode = file {
                 path = "Build.ps1"
             }
@@ -145,7 +123,7 @@ object PublicBuild : BuildType({
         }
     }
 
-  dependencies {
+    dependencies {
 
         snapshot(AbsoluteId("Metalama_MetalamaCompiler_PublicBuild")) {
                      onDependencyFailure = FailureAction.FAIL_TO_START
@@ -167,6 +145,7 @@ object PublicDeployment : BuildType({
 
     steps {
         powerShell {
+            name = "Deploy [Public]"
             scriptMode = file {
                 path = "Build.ps1"
             }
@@ -186,7 +165,11 @@ object PublicDeployment : BuildType({
         }
     }
 
-  dependencies {
+    dependencies {
+
+        snapshot(AbsoluteId("Metalama_MetalamaCompiler_PublicDeployment")) {
+                     onDependencyFailure = FailureAction.FAIL_TO_START
+                }
 
         dependency(PublicBuild) {
             snapshot {
@@ -215,6 +198,7 @@ object VersionBump : BuildType({
 
     steps {
         powerShell {
+            name = "Version Bump"
             scriptMode = file {
                 path = "Build.ps1"
             }
@@ -232,17 +216,6 @@ object VersionBump : BuildType({
             lockingProcesses = Swabra.LockingProcessPolicy.KILL
             verbose = true
         }
-    }
-
-    triggers {
-
-        finishBuildTrigger {
-            buildType = "Metalama_MetalamaCompiler_VersionBump"
-            // Only successful dependency version bump will trigger version bump of this product.
-            successfulOnly = true
-            branchFilter = "+:<default>"
-        }        
-
     }
 
 })

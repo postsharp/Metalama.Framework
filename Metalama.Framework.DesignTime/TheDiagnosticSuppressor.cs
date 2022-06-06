@@ -38,8 +38,17 @@ namespace Metalama.Framework.DesignTime
 
         public TheDiagnosticSuppressor( IServiceProvider serviceProvider )
         {
-            this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
-            this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
+            try
+            {
+                this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
+                this._pipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
+            }
+            catch ( Exception e ) when ( DesignTimeExceptionHandler.MustHandle( e ) )
+            {
+                DesignTimeExceptionHandler.ReportException( e );
+
+                throw;
+            }
         }
 
         public override void ReportSuppressions( SuppressionAnalysisContext context )
@@ -54,7 +63,7 @@ namespace Metalama.Framework.DesignTime
             {
                 this._logger.Trace?.Log( $"DesignTimeDiagnosticSuppressor.ReportSuppressions('{context.Compilation.AssemblyName}')." );
 
-                var buildOptions = new ProjectOptions( context.Options.AnalyzerConfigOptionsProvider );
+                var buildOptions = new MSBuildProjectOptions( context.Options.AnalyzerConfigOptionsProvider );
 
                 if ( !buildOptions.IsDesignTimeEnabled )
                 {
@@ -83,7 +92,7 @@ namespace Metalama.Framework.DesignTime
             Compilation compilation,
             ImmutableArray<Diagnostic> reportedDiagnostics,
             Action<Suppression> reportSuppression,
-            ProjectOptions options,
+            MSBuildProjectOptions options,
             CancellationToken cancellationToken )
         {
             // Execute the pipeline.

@@ -20,12 +20,12 @@ public static partial class OutputCodeFormatter
 
         public override void DefaultVisit( SyntaxNode node )
         {
-            if ( node.HasAnnotation( FormattingAnnotations.GeneratedCode ) ||
+            if ( node.HasAnnotations( FormattingAnnotations.GeneratedCodeAnnotationKind ) ||
                  node.HasAnnotation( Formatter.Annotation ) )
             {
                 this._collection.Add( node.FullSpan, TextSpanClassification.GeneratedCode );
             }
-            else if ( node.HasAnnotation( FormattingAnnotations.SourceCode ) )
+            else if ( node.HasAnnotation( FormattingAnnotations.SourceCodeAnnotation ) )
             {
                 this._collection.Add( node.FullSpan, TextSpanClassification.SourceCode );
             }

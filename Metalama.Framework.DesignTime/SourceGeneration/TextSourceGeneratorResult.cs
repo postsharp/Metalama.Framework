@@ -6,7 +6,7 @@ using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.DesignTime;
+namespace Metalama.Framework.DesignTime.SourceGeneration;
 
 /// <summary>
 /// An implementation of <see cref="SourceGeneratorResult"/> backed by strings. It is used in the VS user process,

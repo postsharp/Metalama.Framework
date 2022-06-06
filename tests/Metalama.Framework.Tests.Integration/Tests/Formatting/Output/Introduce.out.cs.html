@@ -68,26 +68,12 @@
         <span class="cr-CompileTime cs-punctuation">[</span><span class="cr-CompileTime cs-class-name">Introduce</span><span class="cr-CompileTime cs-punctuation">]</span>
         <span class="cr-CompileTime cs-keyword">public</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">event</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-delegate-name">EventHandler</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-event-name">Event</span><span class="cr-CompileTime cs-punctuation">;</span>
     <span class="cr-CompileTime cs-punctuation">}</span>
-<span class="cr-CompileTime cs-preprocessor-keyword">#pragma</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-preprocessor-keyword">warning</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-preprocessor-keyword">restore</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-identifier">CS006</span><span class="cs-identifier">7</span>
+<span class="cs-preprocessor-keyword">#pragma</span> <span class="cs-preprocessor-keyword">warning</span> <span class="cs-preprocessor-keyword">restore</span> <span class="cs-identifier">CS0067</span>
 
     <span class="cs-punctuation">[</span><span class="cs-class-name">IntroduceAspect</span><span class="cs-punctuation">]</span>
     <span class="cs-keyword">public</span> <span class="cs-keyword">class</span> <span class="cs-class-name">TargetCode</span>
     <span class="cs-punctuation">{</span>
-
-        <span class="cr-GeneratedCode cs-keyword">private</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-keyword">int</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-field-name">_property</span><span class="cr-GeneratedCode cs-punctuation">;</span>
-
-        <span class="cr-GeneratedCode cs-keyword">public</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-keyword">int</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-property-name">Property</span>
-        <span class="cr-GeneratedCode cs-punctuation">{</span>
-            <span class="cr-GeneratedCode cs-keyword">get</span>
-            <span class="cr-GeneratedCode cs-punctuation">{</span>
-                <span class="cr-GeneratedCode cs-keyword cs-control">return</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-keyword">this</span><span class="cr-GeneratedCode cs-operator">.</span><span class="cr-GeneratedCode cs-field-name">_property</span><span class="cr-GeneratedCode cs-punctuation">;</span>
-            <span class="cr-GeneratedCode cs-punctuation">}</span>
-
-            <span class="cr-GeneratedCode cs-keyword">set</span>
-            <span class="cr-GeneratedCode cs-punctuation">{</span>
-                <span class="cr-GeneratedCode cs-keyword">this</span><span class="cr-GeneratedCode cs-operator">.</span><span class="cr-GeneratedCode cs-field-name">_property</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-operator">=</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-keyword">value</span><span class="cr-GeneratedCode cs-punctuation">;</span>
-            <span class="cr-GeneratedCode cs-punctuation">}</span>
-        <span class="cr-GeneratedCode cs-punctuation">}</span>
+        <span class="cr-GeneratedCode cs-keyword">public</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-keyword">int</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-property-name">Property</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-punctuation">{</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-keyword">get</span><span class="cr-GeneratedCode cs-punctuation">;</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-keyword">set</span><span class="cr-GeneratedCode cs-punctuation">;</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-punctuation">}</span>
 
         <span class="cr-GeneratedCode cs-keyword">public</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-keyword">int</span><span class="cr-GeneratedCode"> </span><span class="cr-GeneratedCode cs-property-name">PropertyWithBody</span>
         <span class="cr-GeneratedCode cs-punctuation">{</span>

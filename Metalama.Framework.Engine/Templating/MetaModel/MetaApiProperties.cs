@@ -22,13 +22,13 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public TemplateMember<IMemberOrNamedType> Template { get; }
 
-        public ITagReader Tags { get; }
+        public IObjectReader Tags { get; }
 
         public AspectLayerId AspectLayerId { get; }
 
         public SyntaxGenerationContext SyntaxGenerationContext { get; }
 
-        public IAspectInstance AspectInstance { get; }
+        public IAspectInstanceInternal? AspectInstance { get; }
 
         public IServiceProvider ServiceProvider { get; }
 
@@ -39,10 +39,10 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         public MetaApiProperties(
             UserDiagnosticSink diagnostics,
             TemplateMember<IMemberOrNamedType> template,
-            ITagReader tags,
+            IObjectReader tags,
             AspectLayerId aspectLayerId,
             SyntaxGenerationContext syntaxGenerationContext,
-            IAspectInstance aspectInstance,
+            IAspectInstanceInternal? aspectInstance, // Can be null in tests.
             IServiceProvider serviceProvider,
             MetaApiStaticity staticity )
         {

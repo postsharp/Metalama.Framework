@@ -5,11 +5,10 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Transformations;
-using System.Collections.Generic;
+using System;
 
 namespace Metalama.Framework.Engine.Advices
 {
@@ -20,8 +19,6 @@ namespace Metalama.Framework.Engine.Advices
     {
         public IFieldBuilder Builder => this.MemberBuilder;
 
-        public new Ref<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
-
         public IntroduceFieldAdvice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
@@ -31,7 +28,7 @@ namespace Metalama.Framework.Engine.Advices
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             string? layerName,
-            ITagReader tags )
+            IObjectReader tags )
             : base( aspect, templateInstance, targetDeclaration, fieldTemplate, scope, overrideStrategy, layerName, tags )
         {
             this.MemberBuilder = new FieldBuilder( this, targetDeclaration, (explicitName ?? fieldTemplate.Declaration?.Name).AssertNotNull(), tags );
@@ -47,17 +44,71 @@ namespace Metalama.Framework.Engine.Advices
                 this.MemberBuilder.Type = this.Template.Declaration!.Type;
                 this.MemberBuilder.Accessibility = this.Template.Declaration!.Accessibility;
                 this.MemberBuilder.IsStatic = this.Template.Declaration!.IsStatic;
+                this.MemberBuilder.Writeability = this.Template.Declaration!.Writeability;
             }
             else
             {
-                this.MemberBuilder.Type = this.SourceCompilation.TypeFactory.GetSpecialType( SpecialType.Object );
+                this.MemberBuilder.Type = this.SourceCompilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.Object );
                 this.MemberBuilder.Accessibility = Accessibility.Private;
                 this.MemberBuilder.IsStatic = false;
+                this.MemberBuilder.Writeability = Writeability.All;
             }
         }
 
-        public override AdviceResult ToResult( ICompilation compilation, IReadOnlyList<IObservableTransformation> observableTransformations )
+        public override AdviceResult ToResult( ICompilation compilation )
         {
+            var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
+            var existingDeclaration = targetDeclaration.FindClosestUniquelyNamedMember( this.MemberBuilder.Name );
+
+            if ( existingDeclaration != null )
+            {
+                if ( existingDeclaration is not IField )
+                {
+                    return
+                        AdviceResult.Create(
+                            AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentKind.CreateRoslynDiagnostic(
+                                targetDeclaration.GetDiagnosticLocation(),
+                                (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration, existingDeclaration.DeclarationKind) ) );
+                }
+
+                if ( existingDeclaration.IsStatic != this.MemberBuilder.IsStatic )
+                {
+                    return
+                        AdviceResult.Create(
+                            AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentStaticity.CreateRoslynDiagnostic(
+                                targetDeclaration.GetDiagnosticLocation(),
+                                (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
+                                 existingDeclaration.DeclaringType) ) );
+                }
+
+                switch ( this.OverrideStrategy )
+                {
+                    case OverrideStrategy.Fail:
+                        // Produce fail diagnostic.
+                        return
+                            AdviceResult.Create(
+                                AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateRoslynDiagnostic(
+                                    targetDeclaration.GetDiagnosticLocation(),
+                                    (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
+                                     existingDeclaration.DeclaringType) ) );
+
+                    case OverrideStrategy.Ignore:
+                        // Do nothing.
+                        return AdviceResult.Create();
+
+                    case OverrideStrategy.New:
+                        this.MemberBuilder.IsNew = true;
+
+                        break;
+
+                    case OverrideStrategy.Override:
+                        throw new NotSupportedException( "Override is not a supported OverrideStrategy for fields." );
+
+                    default:
+                        throw new AssertionFailedException();
+                }
+            }
+
             return AdviceResult.Create( this.MemberBuilder );
         }
     }

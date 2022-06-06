@@ -19,11 +19,13 @@ namespace Metalama.Framework.Engine.Advices
             TemplateClassInstance templateInstance,
             TMember targetDeclaration,
             string? layerName,
-            ITagReader tags ) : base( aspect, templateInstance, targetDeclaration, layerName, tags ) { }
+            IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, layerName, tags ) { }
 
         public override void Initialize( IDiagnosticAdder diagnosticAdder )
         {
             // TODO: Test that the advice is not applied to declaration in a base class.
         }
+
+        public override string ToString() => $"Override {this.TargetDeclaration}";
     }
 }

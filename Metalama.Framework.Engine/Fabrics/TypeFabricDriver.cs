@@ -38,16 +38,18 @@ namespace Metalama.Framework.Engine.Fabrics
             // Add declarative advices.
             var aspectInstance = (IAspectInstanceInternal) aspectBuilder.AspectInstance;
 
+            var roslynCompilation = aspectBuilder.Target.Compilation.GetRoslynCompilation();
+
             var declarativeAdvices =
-                templateClass.GetDeclarativeAdvices()
+                templateClass.GetDeclarativeAdvices( roslynCompilation )
                     .Select(
                         x => CreateDeclarativeAdvice(
                             aspectInstance,
                             aspectInstance.TemplateInstances[x.TemplateClass],
                             aspectBuilder.DiagnosticAdder,
                             targetType,
-                            x.TemplateInfo,
-                            x.Symbol ) )
+                            x,
+                            x.SymbolId.Resolve( roslynCompilation ).AssertNotNull() ) )
                     .WhereNotNull();
 
             aspectBuilder.AdviceFactory.Advices.AddRange( declarativeAdvices );
@@ -68,7 +70,7 @@ namespace Metalama.Framework.Engine.Fabrics
             TemplateClassInstance templateInstance,
             IDiagnosticAdder diagnosticAdder,
             INamedType aspectTarget,
-            TemplateInfo template,
+            TemplateClassMember template,
             ISymbol templateDeclaration )
         {
             template.TryCreateAdvice(

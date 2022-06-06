@@ -405,12 +405,12 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 };
 
                 // Create transformation fake.
-                var transformation = (IMemberIntroduction) A.Fake<object>(
+                var transformation = (IIntroduceMemberTransformation) A.Fake<object>(
                     o =>
                     {
                         _ = o
                             .Implements<IObservableTransformation>()
-                            .Implements<IMemberIntroduction>()
+                            .Implements<IIntroduceMemberTransformation>()
                             .Implements<IMemberBuilder>()
                             .Implements<IDeclarationImpl>()
                             .Implements<ITestTransformation>();
@@ -426,7 +426,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                         if ( replacementAttribute != null )
                         {
-                            _ = o.Implements<IReplaceMember>();
+                            _ = o.Implements<IReplaceMemberTransformation>();
                         }
                     } );
 
@@ -563,10 +563,10 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                 var aspectLayer = this._owner.GetOrAddAspectLayer( aspectName.AssertNotNull(), layerName );
 
-                var transformation = (IMemberIntroduction) A.Fake<object>(
+                var transformation = (IIntroduceMemberTransformation) A.Fake<object>(
                     o => o
                         .Implements<INonObservableTransformation>()
-                        .Implements<IMemberIntroduction>()
+                        .Implements<IIntroduceMemberTransformation>()
                         .Implements<IOverriddenDeclaration>()
                         .Implements<ITestTransformation>() );
 
@@ -813,7 +813,6 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 var fakeAspectSymbol = A.Fake<INamedTypeSymbol>();
                 var fakeGlobalNamespaceSymbol = A.Fake<INamespaceSymbol>();
                 var fakeDiagnosticAdder = A.Fake<IDiagnosticAdder>();
-                var fakeCompilation = A.Fake<Compilation>();
 
                 A.CallTo( () => fakeAspectSymbol.MetadataName ).Returns( aspectLayer.AspectName.AssertNotNull() );
                 A.CallTo( () => fakeAspectSymbol.ContainingSymbol ).Returns( fakeGlobalNamespaceSymbol );
@@ -831,8 +830,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                         typeof(object),
                         null,
                         fakeDiagnosticAdder,
-                        null!,
-                        new AspectDriverFactory( fakeCompilation, ImmutableArray<object>.Empty, this._owner.ServiceProvider ) );
+                        null! );
 
                 var fakeAspectInstance = new AspectInstance( A.Fake<IAspect>(), default, aspectClass, default );
 

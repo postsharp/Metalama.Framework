@@ -4,7 +4,9 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Properties.PartialType_Declarations
 {
-    // Tests that overriding methods of types with multiple partial declarations does work and targets correct methods.
+    /*
+     * Tests that overriding properties of types with multiple partial declarations within a single syntax tree does work and targets correct methods.
+     */
 
     public class OverrideAttribute : TypeAspect
     {

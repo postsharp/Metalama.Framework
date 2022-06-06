@@ -52,7 +52,7 @@ namespace Metalama.LinqPad.Tests
             using var testContext = this.CreateTestContext();
             var compilation = testContext.CreateCompilation( "class C {}" );
 
-            var type = _facadeObjectFactory.GetFormatterType( compilation.Types[0].GetType() );
+            var type = _facadeObjectFactory.GetFormatterType( compilation.Types.Single().GetType() );
             Assert.Contains( "Methods", type.PropertyNames );
             Assert.Contains( "DeclaringAssembly", type.PropertyNames );
         }

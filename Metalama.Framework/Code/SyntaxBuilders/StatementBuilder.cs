@@ -33,7 +33,7 @@ namespace Metalama.Framework.Code.SyntaxBuilders
         /// be inserted into run-time code using the <see cref="meta.InsertStatement(Metalama.Framework.Code.SyntaxBuilders.IStatement)"/>
         /// method.
         /// </summary>
-        public IStatement ToStatement() => meta.ParseStatement( this.StringBuilder.ToString() );
+        public IStatement ToStatement() => StatementFactory.Parse( this.StringBuilder.ToString() );
 
         /// <summary>
         /// Appends a line break.

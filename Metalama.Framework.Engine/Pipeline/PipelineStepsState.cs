@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.Pipeline
         private readonly SkipListDictionary<PipelineStepId, PipelineStep> _steps;
         private readonly PipelineStepIdComparer _comparer;
         private readonly UserDiagnosticSink _diagnostics;
-        private readonly List<INonObservableTransformation> _nonObservableTransformations = new();
+        private readonly List<ITransformation> _transformations = new();
         private readonly List<IAspectInstance> _inheritableAspectInstances = new();
         private readonly List<AspectInstanceResult> _aspectInstanceResults = new();
         private readonly List<IValidatorSource> _validatorSources = new();
@@ -46,7 +46,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
         public ImmutableArray<CompilationModel> Compilations { get; private set; }
 
-        public IReadOnlyList<INonObservableTransformation> NonObservableTransformations => this._nonObservableTransformations;
+        public IReadOnlyList<ITransformation> Transformations => this._transformations;
 
         public ImmutableArray<IAspectInstance> InheritableAspectInstances => this._inheritableAspectInstances.ToImmutableArray();
 
@@ -299,8 +299,7 @@ namespace Metalama.Framework.Engine.Pipeline
             this._diagnostics.AddCodeFixes( codeFixInstances );
         }
 
-        public void AddNonObservableTransformations( IEnumerable<INonObservableTransformation> transformations )
-            => this._nonObservableTransformations.AddRange( transformations );
+        public void AddTransformations( IEnumerable<ITransformation> transformations ) => this._transformations.AddRange( transformations );
 
         public bool AddValidatorSources( IEnumerable<IValidatorSource> validatorSources )
         {

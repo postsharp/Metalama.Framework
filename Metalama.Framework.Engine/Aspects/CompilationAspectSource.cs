@@ -92,7 +92,7 @@ internal class CompilationAspectSource : IAspectSource
                                 new DescribedObject<IDeclaration>( targetDeclaration ) )!;
 
                             diagnosticAdder.Report(
-                                GeneralDiagnosticDescriptors.AspectNotEligibleOnAspect.CreateRoslynDiagnostic(
+                                GeneralDiagnosticDescriptors.AspectNotEligibleOnTarget.CreateRoslynDiagnostic(
                                     attribute.GetDiagnosticLocation(),
                                     (aspectClass.ShortName, targetDeclaration, reason) ) );
 

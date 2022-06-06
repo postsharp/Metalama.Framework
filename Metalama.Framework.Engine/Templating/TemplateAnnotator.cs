@@ -136,14 +136,21 @@ namespace Metalama.Framework.Engine.Templating
                 case { ContainingType: { IsAnonymousType: true } containingType }:
                     return GetMoreSpecificScope( this.GetSymbolScope( containingType ) );
 
-                case IParameterSymbol parameter when this._currentTemplateMember != null &&
-                                                     (SymbolEqualityComparer.Default.Equals( parameter.ContainingSymbol, this._currentTemplateMember ) ||
-                                                      (parameter.ContainingSymbol is IMethodSymbol { AssociatedSymbol: { } associatedSymbol }
-                                                       && SymbolEqualityComparer.Default.Equals( this._currentTemplateMember, associatedSymbol ))):
-                    // In the future, we may have parameters on the template parameters changing their meaning. However, now, all template
-                    // parameters map to run-time parameters of the same name.
+                // Template parameters are always evaluated at compile-time, but run-time template parameters return a run-time value.
+                case IParameterSymbol parameter when TemplateMemberClassifier.IsTemplateParameter( parameter ):
+                    var parameterScope = this._symbolScopeClassifier.GetTemplatingScope( parameter );
 
-                    return TemplatingScope.RunTimeOnly;
+                    return parameterScope == TemplatingScope.CompileTimeOnly
+                        ? TemplatingScope.CompileTimeOnly
+                        : TemplatingScope.CompileTimeOnlyReturningRuntimeOnly;
+
+                // Template type parameters can be run-time or compile-time. If a template type parameter is not marked as compile-time, it is run-time (there is no scope-neutral).
+                case ITypeParameterSymbol typeParameter when TemplateMemberClassifier.IsTemplateTypeParameter( typeParameter ):
+                    var typeParameterScope = this._symbolScopeClassifier.GetTemplatingScope( typeParameter );
+
+                    return typeParameterScope.GetExpressionExecutionScope() == TemplatingScope.CompileTimeOnly
+                        ? typeParameterScope
+                        : TemplatingScope.RunTimeOnly;
 
                 case IMethodSymbol method when this._templateMemberClassifier.IsRunTimeMethod( method ):
                     // The TemplateContext.runTime method must be processed separately. It is a compile-time-only method whose
@@ -687,7 +694,7 @@ namespace Metalama.Framework.Engine.Templating
 
                 if ( scope == TemplatingScope.RunTimeOrCompileTime )
                 {
-                    scope = this.GetNodeScope( transformedLeft );
+                    scope = this.GetNodeScope( transformedLeft ).GetExpressionValueScope( true );
                 }
 
                 // If both sides of the member are template keywords, display the . as a template keyword too.
@@ -2044,9 +2051,17 @@ namespace Metalama.Framework.Engine.Templating
 
         public override SyntaxNode? VisitNullableType( NullableTypeSyntax node )
         {
-            var transformedNode = (NullableTypeSyntax) base.VisitNullableType( node )!;
+            var transformedElementType = this.Visit( node.ElementType );
+            var transformedNode = node.WithElementType( transformedElementType );
 
-            return transformedNode.WithScopeAnnotationFrom( transformedNode.ElementType );
+            var elementScope = transformedElementType.GetScopeFromAnnotation();
+
+            if ( elementScope != null )
+            {
+                transformedNode = transformedNode.AddScopeAnnotation( elementScope.Value.GetExpressionValueScope() );
+            }
+
+            return transformedNode;
         }
 
         public override SyntaxNode? VisitObjectCreationExpression( ObjectCreationExpressionSyntax node )
@@ -2171,18 +2186,23 @@ namespace Metalama.Framework.Engine.Templating
 
         public override SyntaxNode? VisitTypeOfExpression( TypeOfExpressionSyntax node )
         {
-            // typeof(T) is always compile-time unless T is a run-time generic parameter.
+            // The processing of typeof(.) is very specific. It is always represented as a compile-time expression even if the type itself is run-time only.
+            // There is then compile-time-to-run-time conversion logic in the rewriter.
+            // The value of typeof is scope-neutral except if the type is run-time only.
+            TypeSyntax annotatedType;
 
-            var type = (ITypeSymbol?) this._syntaxTreeAnnotationMap.GetSymbol( node.Type );
+            using ( this.WithScopeContext( ScopeContext.CreateRunTimeOrCompileTimeScope( this._currentScopeContext, "typeof" ) ) )
+            {
+                annotatedType = this.Visit( node.Type );
+            }
 
-            if ( type is ITypeParameterSymbol && this._symbolScopeClassifier.GetTemplatingScope( type ) == TemplatingScope.RunTimeOnly )
-            {
-                return node.AddScopeAnnotation( TemplatingScope.RunTimeOnly );
-            }
-            else
-            {
-                return node.AddScopeAnnotation( TemplatingScope.CompileTimeOnly );
-            }
+            var typeScope = this.GetNodeScope( annotatedType );
+
+            var typeOfScope = typeScope.GetExpressionValueScope() == TemplatingScope.CompileTimeOnly
+                ? TemplatingScope.CompileTimeOnly
+                : TemplatingScope.CompileTimeOnlyReturningBoth;
+
+            return node.WithType( annotatedType ).AddScopeAnnotation( typeOfScope );
         }
 
         public override SyntaxNode? VisitArrayRankSpecifier( ArrayRankSpecifierSyntax node )

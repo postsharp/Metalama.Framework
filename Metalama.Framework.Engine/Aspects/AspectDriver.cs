@@ -13,7 +13,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
-using Metalama.Framework.Engine.Templating.MetaModel;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
@@ -46,7 +46,7 @@ namespace Metalama.Framework.Engine.Aspects
 
             // Introductions must have a deterministic order because of testing.
             this._declarativeAdviceAttributes = aspectClass
-                .TemplateClasses.SelectMany( c => c.GetDeclarativeAdvices() )
+                .TemplateClasses.SelectMany( c => c.GetDeclarativeAdvices( compilation ) )
                 .ToImmutableArray();
 
             // If we have any declarative introduction, the aspect cannot be added to an interface.
@@ -161,8 +161,8 @@ namespace Metalama.Framework.Engine.Aspects
                             aspectInstance.TemplateInstances[x.TemplateClass],
                             diagnosticSink,
                             targetDeclaration,
-                            x.TemplateInfo,
-                            x.Symbol ) )
+                            x,
+                            x.SymbolId.Resolve( compilationModelRevision.RoslynCompilation, cancellationToken: cancellationToken ).AssertNotNull() ) )
                     .WhereNotNull();
 
             adviceFactory.Advices.AddRange( declarativeAdvices );
@@ -176,7 +176,7 @@ namespace Metalama.Framework.Engine.Aspects
                 aspectInstance,
                 cancellationToken );
 
-            using ( SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( compilationModelRevision, OurSyntaxGenerator.Default ) ) )
+            using ( SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( compilationModelRevision, this._serviceProvider ) ) )
             {
                 var executionContext = new UserCodeExecutionContext(
                     this._serviceProvider,
@@ -233,7 +233,7 @@ namespace Metalama.Framework.Engine.Aspects
             TemplateClassInstance templateInstance,
             IDiagnosticAdder diagnosticAdder,
             T aspectTarget,
-            TemplateInfo template,
+            TemplateClassMember template,
             ISymbol templateDeclaration )
             where T : IDeclaration
         {

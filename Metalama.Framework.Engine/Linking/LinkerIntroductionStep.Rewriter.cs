@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.Linking
             private readonly ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> _diagnosticSuppressions;
             private readonly SyntaxTransformationCollection _introducedMemberCollection;
             private readonly IReadOnlyDictionary<SyntaxNode, IReadOnlyList<LinkerInsertedStatement>> _symbolInsertedStatements;
-            private readonly IReadOnlyDictionary<IMemberIntroduction, IReadOnlyList<LinkerInsertedStatement>> _introductionInsertedStatements;
+            private readonly IReadOnlyDictionary<IIntroduceMemberTransformation, IReadOnlyList<LinkerInsertedStatement>> _introductionInsertedStatements;
 
             // Maps a diagnostic id to the number of times it has been suppressed.
             private ImmutableHashSet<string> _activeSuppressions = ImmutableHashSet.Create<string>( StringComparer.OrdinalIgnoreCase );
@@ -40,7 +40,7 @@ namespace Metalama.Framework.Engine.Linking
                 CompilationModel compilation,
                 IReadOnlyList<OrderedAspectLayer> inputOrderedAspectLayers,
                 IReadOnlyDictionary<SyntaxNode, IReadOnlyList<LinkerInsertedStatement>> symbolInsertedStatements,
-                IReadOnlyDictionary<IMemberIntroduction, IReadOnlyList<LinkerInsertedStatement>> introductionInsertedStatements )
+                IReadOnlyDictionary<IIntroduceMemberTransformation, IReadOnlyList<LinkerInsertedStatement>> introductionInsertedStatements )
             {
                 this._diagnosticSuppressions = diagnosticSuppressions;
                 this._compilation = compilation;
@@ -130,7 +130,10 @@ namespace Metalama.Framework.Engine.Linking
                                 .WithErrorCodes( errorCodes )
                                 .NormalizeWhitespace() );
 
-                    transformedNode = transformedNode.WithLeadingTrivia( node.GetLeadingTrivia().Insert( 0, disable ) ).WithTrailingTrivia( LineFeed, restore );
+                    transformedNode =
+                        transformedNode
+                            .WithLeadingTrivia( node.GetLeadingTrivia().InsertRange( 0, new[] { ElasticLineFeed, disable, ElasticLineFeed } ) )
+                            .WithTrailingTrivia( transformedNode.GetTrailingTrivia().AddRange( new[] { ElasticLineFeed, restore, ElasticLineFeed } ) );
                 }
 
                 return transformedNode;
@@ -170,13 +173,18 @@ namespace Metalama.Framework.Engine.Linking
                         {
                             node = node
                                 .WithIdentifier( node.Identifier.WithTrailingTrivia() )
-                                .WithBaseList( BaseList( SeparatedList( additionalBaseList ) ).WithGeneratedCodeAnnotation() )
+                                .WithBaseList(
+                                    BaseList( SeparatedList( additionalBaseList ) )
+                                        .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) )
                                 .WithTrailingTrivia( node.Identifier.TrailingTrivia );
                         }
                         else
                         {
                             node = node.WithBaseList(
-                                BaseList( node.BaseList.Types.AddRange( additionalBaseList.Select( i => i.WithGeneratedCodeAnnotation() ) ) ) );
+                                BaseList(
+                                    node.BaseList.Types.AddRange(
+                                        additionalBaseList.Select(
+                                            i => i.WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) ) ) ) );
                         }
                     }
 
@@ -201,7 +209,7 @@ namespace Metalama.Framework.Engine.Linking
 
                         introducedNode = introducedNode.NormalizeWhitespace()
                             .WithLeadingTrivia( ElasticLineFeed, ElasticLineFeed )
-                            .WithGeneratedCodeAnnotation();
+                            .WithGeneratedCodeAnnotation( introducedMember.Introduction.Advice.Aspect.AspectClass.GeneratedCodeAnnotation );
 
                         // Insert inserted statements into 
                         switch ( introducedNode )
@@ -252,9 +260,8 @@ namespace Metalama.Framework.Engine.Linking
                                 .WithSemicolonToken( default )
                                 .WithBody(
                                     Block(
-                                            beginningStatements
-                                                .Append( ExpressionStatement( expressionBody.Expression.WithSourceCodeAnnotationIfNotGenerated() ) ) )
-                                        .WithGeneratedCodeAnnotation() );
+                                        beginningStatements
+                                            .Append( ExpressionStatement( expressionBody.Expression.WithSourceCodeAnnotationIfNotGenerated() ) ) ) );
 
                     case { Body: { } body }:
                         return
@@ -377,6 +384,16 @@ namespace Metalama.Framework.Engine.Linking
                 }
 
                 return base.VisitConstructorDeclaration( node );
+            }
+
+            public override SyntaxNode? VisitPropertyDeclaration( PropertyDeclarationSyntax node )
+            {
+                if ( this._introducedMemberCollection.IsAutoPropertyWithSynthesizedSetter( node ) )
+                {
+                    return node.WithSynthesizedSetter();
+                }
+
+                return base.VisitPropertyDeclaration( node );
             }
 
             public override SyntaxNode? VisitEventFieldDeclaration( EventFieldDeclarationSyntax node )

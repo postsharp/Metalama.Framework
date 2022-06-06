@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.LamaSerialization.Serializers
 
         public override decimal DeserializeObject( IArgumentsReader reader )
         {
-            return new decimal( reader.GetValue<int[]>( "d" ) );
+            return new decimal( reader.GetValue<int[]>( "d" )! );
         }
     }
 }

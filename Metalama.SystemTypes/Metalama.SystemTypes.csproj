@@ -17,12 +17,20 @@
         <InternalsVisibleTo Include="Metalama.Framework"/>
         <InternalsVisibleTo Include="Metalama.Framework.CompileTime"/>
         <InternalsVisibleTo Include="Metalama.Framework.Sdk"/>
-        <InternalsVisibleTo Include="Metalama.Framework.DesignTime.4.1.0"/>
+
         <InternalsVisibleTo Include="Metalama.Framework.DesignTime.4.0.1"/>
-        <InternalsVisibleTo Include="Metalama.Framework.DesignTime.VisualStudio.4.1.0"/>
         <InternalsVisibleTo Include="Metalama.Framework.DesignTime.VisualStudio.4.0.1"/>
-        <InternalsVisibleTo Include="Metalama.Framework.Engine.4.1.0"/>
         <InternalsVisibleTo Include="Metalama.Framework.Engine.4.0.1"/>
+    
+        <InternalsVisibleTo Include="Metalama.Framework.DesignTime.VisualStudio.4.1.0"/>
+        <InternalsVisibleTo Include="Metalama.Framework.DesignTime.4.1.0"/>
+        <InternalsVisibleTo Include="Metalama.Framework.Engine.4.1.0"/>
+
+        <InternalsVisibleTo Include="Metalama.Framework.DesignTime.VisualStudio.4.2.0"/>
+        <InternalsVisibleTo Include="Metalama.Framework.DesignTime.4.2.0"/>
+        <InternalsVisibleTo Include="Metalama.Framework.Engine.4.2.0"/>
+
+
         <InternalsVisibleTo Include="Metalama.TestFramework"/>
         <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration"/>
         <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.Internals"/>

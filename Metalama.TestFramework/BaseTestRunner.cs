@@ -223,7 +223,7 @@ namespace Metalama.TestFramework
 
                 if ( this.References.GlobalUsingsFile != null )
                 {
-                    var path = Path.Combine( this.ProjectDirectory, this.References.GlobalUsingsFile );
+                    var path = Path.Combine( this.ProjectDirectory!, this.References.GlobalUsingsFile );
 
                     if ( File.Exists( path ) )
                     {
@@ -238,7 +238,7 @@ namespace Metalama.TestFramework
 
                 testResult.InputProject = project;
                 testResult.InputCompilation = initialCompilation;
-                testResult.ProjectScopedServiceProvider = this.BaseServiceProvider.WithProjectScopedServices( initialCompilation.References );
+                testResult.ProjectScopedServiceProvider = this.BaseServiceProvider.WithProjectScopedServices( initialCompilation );
 
                 if ( this.ShouldStopOnInvalidInput( testInput.Options ) )
                 {

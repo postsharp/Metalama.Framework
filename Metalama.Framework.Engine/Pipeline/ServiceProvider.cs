@@ -52,7 +52,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
         public ServiceProvider WithUntypedService( Type interfaceType, object implementation )
         {
-            var serviceNode = new ServiceNode( provider => implementation, interfaceType );
+            var serviceNode = new ServiceNode( _ => implementation, interfaceType );
 
             return new ServiceProvider( this._services.Add( interfaceType, serviceNode ), this._nextProvider );
         }
@@ -137,6 +137,11 @@ namespace Metalama.Framework.Engine.Pipeline
         /// </summary>
         /// <param name="metadataReferences">A list of resolved metadata references for the current project.</param>
         public ServiceProvider WithProjectScopedServices( IEnumerable<MetadataReference> metadataReferences )
+            => this.WithProjectScopedServices( metadataReferences, null );
+
+        public ServiceProvider WithProjectScopedServices( Compilation compilation ) => this.WithProjectScopedServices( compilation.References, null );
+
+        private ServiceProvider WithProjectScopedServices( IEnumerable<MetadataReference> metadataReferences, Compilation? compilation )
         {
             // ReflectionMapperFactory cannot be a global service because it keeps a reference from compilations to types of the
             // user assembly. When we need to unload the user assembly, we first need to unload the ReflectionMapperFactory.
@@ -148,19 +153,24 @@ namespace Metalama.Framework.Engine.Pipeline
             serviceProvider = serviceProvider.WithService( new BuiltInSerializerFactoryProvider( serviceProvider ) );
             serviceProvider = serviceProvider.WithServices( new SyntaxSerializationService( serviceProvider ), new CompileTimeTypeFactory() );
             serviceProvider = serviceProvider.WithServices( new SystemTypeResolver( serviceProvider ) );
+
+            serviceProvider = serviceProvider.WithService(
+                new SyntaxGenerationContextFactory( compilation ?? SyntaxGenerationContext.EmptyCompilation, serviceProvider ) );
+
             serviceProvider = serviceProvider.WithMetricProviders();
 
             return serviceProvider;
         }
 
         /// <summary>
-        /// Adds the next service provider in a chain.
+        /// Sets or replaces the next service provider in a chain.
         /// </summary>
         /// <param name="nextProvider"></param>
         /// <remarks>
         /// When the current service provider fails to find a service, it will try to find it using the next provider in the chain.
+        /// When the next service provider has been set before, it gets replaced.
         /// </remarks>
-        internal ServiceProvider WithNextProvider( IServiceProvider nextProvider ) => new( this._services, nextProvider );
+        public ServiceProvider WithNextProvider( IServiceProvider nextProvider ) => new( this._services, nextProvider );
 
         public override string ToString()
         {

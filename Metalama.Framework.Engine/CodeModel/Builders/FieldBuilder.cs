@@ -10,7 +10,6 @@ using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -26,11 +25,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override string Name { get; set; }
 
-        [Memo]
-        public IMethod? GetMethod => new AccessorBuilder( this, MethodKind.PropertyGet );
+        public override bool IsImplicit => false;
 
         [Memo]
-        public IMethod? SetMethod => new AccessorBuilder( this, MethodKind.PropertySet );
+        public IMethod? GetMethod => new AccessorBuilder( this, MethodKind.PropertyGet, true );
+
+        [Memo]
+        public IMethod? SetMethod => new AccessorBuilder( this, MethodKind.PropertySet, true );
 
         public override bool IsExplicitInterfaceImplementation => false;
 
@@ -44,16 +45,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public bool IsAutoPropertyOrField => true;
 
-        public override InsertPosition InsertPosition
-            => new(
-                InsertPositionRelation.Within,
-                (MemberDeclarationSyntax) ((NamedType) this.DeclaringType).Symbol.GetPrimaryDeclaration().AssertNotNull() );
-
         public IExpression? InitializerExpression { get; set; }
 
         public TemplateMember<IField> InitializerTemplate { get; set; }
 
-        public FieldBuilder( Advice parentAdvice, INamedType targetType, string name, ITagReader tags )
+        public FieldBuilder( Advice parentAdvice, INamedType targetType, string name, IObjectReader tags )
             : base( parentAdvice, targetType, tags )
         {
             this.Name = name;
@@ -75,7 +71,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             var field =
                 FieldDeclaration(
-                    List<AttributeListSyntax>(), // TODO: Attributes.
+                    this.GetAttributeLists( context.SyntaxGenerationContext ),
                     this.GetSyntaxModifierList(),
                     VariableDeclaration(
                         syntaxGenerator.Type( this.Type.GetSymbol() ),

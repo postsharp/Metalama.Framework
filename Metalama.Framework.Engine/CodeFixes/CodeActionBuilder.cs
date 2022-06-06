@@ -6,6 +6,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.CodeFixes;
 using Metalama.Framework.Engine.CodeFixes.Implementations;
+using Metalama.Framework.Engine.CodeModel;
 using System;
 using System.Threading.Tasks;
 
@@ -32,7 +33,9 @@ internal class CodeActionBuilder : ICodeActionBuilder
         => new RemoveAttributeCodeAction( targetDeclaration, attributeType ).ExecuteAsync( this._context );
 
     public Task RemoveAttributesAsync( IDeclaration targetDeclaration, Type attributeType )
-        => this.RemoveAttributesAsync( targetDeclaration, (INamedType) targetDeclaration.Compilation.TypeFactory.GetTypeByReflectionType( attributeType ) );
+        => this.RemoveAttributesAsync(
+            targetDeclaration,
+            (INamedType) targetDeclaration.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( attributeType ) );
 
     public Task ApplyAspectAsync<TTarget>( TTarget targetDeclaration, IAspect<TTarget> aspect )
         where TTarget : class, IDeclaration

@@ -29,25 +29,27 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             INamedType targetType,
             string name,
             bool isEventField,
-            ITagReader tags )
+            IObjectReader tags )
             : base( parentAdvice, targetType, tags )
         {
             this.Name = name;
             this._isEventField = isEventField;
-            this.Type = (INamedType) targetType.Compilation.TypeFactory.GetTypeByReflectionType( typeof(EventHandler) );
+            this.Type = (INamedType) targetType.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(EventHandler) );
         }
 
         public override string Name { get; set; }
+
+        public override bool IsImplicit => false;
 
         public INamedType Type { get; set; }
 
         public IMethod Signature => this.Type.Methods.OfName( "Invoke" ).Single();
 
         [Memo]
-        public IMethodBuilder AddMethod => new AccessorBuilder( this, MethodKind.EventAdd );
+        public IMethodBuilder AddMethod => new AccessorBuilder( this, MethodKind.EventAdd, this._isEventField );
 
         [Memo]
-        public IMethodBuilder RemoveMethod => new AccessorBuilder( this, MethodKind.EventRemove );
+        public IMethodBuilder RemoveMethod => new AccessorBuilder( this, MethodKind.EventRemove, this._isEventField );
 
         public IMethodBuilder? RaiseMethod => null;
 
@@ -58,13 +60,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 this.OverriddenEvent != null );
 
         public IEvent? OverriddenEvent { get; set; }
-
-        public override InsertPosition InsertPosition
-            => new(
-                InsertPositionRelation.Within,
-                this.IsEventField()
-                    ? ((MemberDeclarationSyntax?) ((NamedType) this.DeclaringType).Symbol.GetPrimaryDeclaration()?.Parent?.Parent).AssertNotNull()
-                    : ((MemberDeclarationSyntax?) ((NamedType) this.DeclaringType).Symbol.GetPrimaryDeclaration()).AssertNotNull() );
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Event;
 
@@ -100,7 +95,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             MemberDeclarationSyntax @event =
                 this._isEventField && this.ExplicitInterfaceImplementations.Count == 0
                     ? EventFieldDeclaration(
-                        List<AttributeListSyntax>(), // TODO: Attributes.
+                        this.GetAttributeLists( context.SyntaxGenerationContext ),
                         this.GetSyntaxModifierList(),
                         VariableDeclaration(
                             syntaxGenerator.Type( this.Type.GetSymbol() ),
@@ -115,7 +110,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                                             : null ) // TODO: Initializer.
                                 } ) ) )
                     : EventDeclaration(
-                        List<AttributeListSyntax>(), // TODO: Attributes.
+                        this.GetAttributeLists( context.SyntaxGenerationContext ),
                         this.GetSyntaxModifierList(),
                         syntaxGenerator.Type( this.Type.GetSymbol() ),
                         this.ExplicitInterfaceImplementations.Count > 0

@@ -44,7 +44,7 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets the collection of custom attributes on the declaration.
         /// </summary>
-        IAttributeList Attributes { get; }
+        IAttributeCollection Attributes { get; }
 
         /// <summary>
         /// Gets the kind of declaration.

@@ -184,8 +184,8 @@ namespace Metalama.Framework.Engine.Linking
                             expression,
                             referenceSpecification );
                     }
-                    else if ( targetMemberIntroduction.Introduction is IReplaceMember { ReplacedMember: { } replacedMember }
-                              && replacedMember.GetTarget( this._finalCompilationModel ).GetSymbol() != null )
+                    else if ( targetMemberIntroduction.Introduction is IReplaceMemberTransformation { ReplacedMember: { } replacedMember }
+                              && replacedMember.GetTarget( this._finalCompilationModel, false ).GetSymbol() != null )
                     {
                         // Introduction replaced existing source member, resolve to default semantics, i.e. source symbol.
 
@@ -402,9 +402,9 @@ namespace Metalama.Framework.Engine.Linking
                 return null;
             }
 
-            if ( introducedMember.Introduction is IReplaceMember { ReplacedMember: { } replacedMemberRef } )
+            if ( introducedMember.Introduction is IReplaceMemberTransformation { ReplacedMember: { } replacedMemberRef } )
             {
-                var replacedMember = replacedMemberRef.GetTarget( this._finalCompilationModel );
+                var replacedMember = replacedMemberRef.GetTarget( this._finalCompilationModel, false );
 
                 IDeclaration canonicalReplacedMember = replacedMember switch
                 {

@@ -19,9 +19,9 @@ namespace Metalama.Framework.Engine.Transformations
         public DeclarationKind Kind { get; }
 
         /// <summary>
-        /// Gets the <see cref="IMemberIntroduction" /> that created this object.
+        /// Gets the <see cref="IIntroduceMemberTransformation" /> that created this object.
         /// </summary>
-        public IMemberIntroduction Introduction { get; }
+        public IIntroduceMemberTransformation Introduction { get; }
 
         /// <summary>
         /// Gets the syntax of the introduced member.
@@ -59,7 +59,7 @@ namespace Metalama.Framework.Engine.Transformations
             declaration ) { }
 
         public IntroducedMember(
-            OverriddenMember introduction,
+            OverrideMemberTransformation introduction,
             MemberDeclarationSyntax syntax,
             AspectLayerId aspectLayerId,
             IntroducedMemberSemantic semantic,
@@ -82,7 +82,7 @@ namespace Metalama.Framework.Engine.Transformations
             prototype.Declaration ) { }
 
         internal IntroducedMember(
-            IMemberIntroduction introduction,
+            IIntroduceMemberTransformation introduction,
             DeclarationKind kind,
             MemberDeclarationSyntax syntax,
             AspectLayerId aspectLayerId,
@@ -98,5 +98,10 @@ namespace Metalama.Framework.Engine.Transformations
         }
 
         public override string ToString() => this.Introduction.ToString();
+
+        internal IntroducedMember WithSyntax( MemberDeclarationSyntax newSyntax )
+        {
+            return new IntroducedMember( this, newSyntax );
+        }
     }
 }

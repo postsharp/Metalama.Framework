@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <Import Project="..\Build\RoslynVersion\Latest.imports" />
+    <Import Project="..\Build\RoslynVersion\Latest.imports"/>
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
@@ -8,9 +8,12 @@
         <MetalamaCompilerDisablePackCustomization>True</MetalamaCompilerDisablePackCustomization>
         <UseMetalamaCompiler>Private</UseMetalamaCompiler>
         <AssemblyName>Metalama.Framework.Engine.$(ThisRoslynVersion)</AssemblyName>
+        <PackageId>Metalama.Framework.Engine</PackageId>
     </PropertyGroup>
 
     <ItemGroup>
+
+		<ProjectReference Include="..\Metalama.Framework.CompileTime\Metalama.Framework.CompileTime.csproj" ReferenceOutputAssembly="false"/>
 
         <!-- We have to embed the compile-time build of Metalama.Framework so we can reference it to create
              the compile-time assembly. See ReferenceAssemblyLocator                                           -->
@@ -29,7 +32,6 @@
     <ItemGroup>
         <Compile Include="..\.generated\$(ThisRoslynVersion)\Metalama.Framework.Engine\*.cs" />
     </ItemGroup>
-
 
     <ItemGroup>
         <!-- By convention, we use InternalsVisibleTo only for test projects that must have access to internals.. -->
@@ -68,7 +70,7 @@
     <!-- Obfuscation -->
     <PropertyGroup>
         <PostSharpProperties>
-            ObfuscateMapFile=$(MSBuildThisFileDirectory)\bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).obmap;
+            ObfuscateMapFile=$(PackageOutputPath)\$(AssemblyName).obmap;
             ObfuscateRootPath=$(MSBuildThisFileDirectory)
         </PostSharpProperties>
         <PostSharpSearchPath>$(MSBuildThisFileDirectory)..\Build\Metalama.Obfuscator\bin\$(Configuration)\netstandard2.0</PostSharpSearchPath>
@@ -82,9 +84,6 @@
     <!-- This is a work-around of PostSharp not preserving the public-signing flag. (#29763) -->
     <ItemGroup>
         <PackageReference Include="FakeSign" Version="0.9.2" PrivateAssets="all" GeneratePathProperty="true" />
-    </ItemGroup>
-    <ItemGroup>
-        <Folder Include="Advices\Tags" />
     </ItemGroup>
 
     <PropertyGroup>

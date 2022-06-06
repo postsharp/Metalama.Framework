@@ -15,7 +15,7 @@ namespace Metalama.Framework.Engine.LamaSerialization.Serializers
 
         public override Guid DeserializeObject( IArgumentsReader reader )
         {
-            return new Guid( reader.GetValue<byte[]>( "g" ) );
+            return new Guid( reader.GetValue<byte[]>( "g" )! );
         }
     }
 }

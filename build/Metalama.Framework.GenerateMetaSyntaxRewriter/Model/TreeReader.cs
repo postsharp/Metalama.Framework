@@ -10,6 +10,7 @@ public static class TreeReader
 {
     public static Tree ReadTree( string inputFile )
     {
+        SyntaxXmlCleaner.Clean( inputFile );
         var reader = XmlReader.Create( inputFile, new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit } );
         var serializer = new XmlSerializer( typeof(Tree) );
         var tree = (Tree) serializer.Deserialize( reader );

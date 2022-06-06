@@ -57,7 +57,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
         ImmutableArray<TemplateClass> IAspectClassImpl.TemplateClasses => ImmutableArray<TemplateClass>.Empty;
 
-        public bool IsFreemium => false;
+        SyntaxAnnotation IAspectClassImpl.GeneratedCodeAnnotation => throw new NotSupportedException();
 
         public EligibleScenarios GetEligibility( IDeclaration obj ) => EligibleScenarios.Aspect;
 

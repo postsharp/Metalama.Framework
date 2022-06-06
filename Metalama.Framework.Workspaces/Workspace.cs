@@ -134,7 +134,7 @@ namespace Metalama.Framework.Workspaces
                     projectProperties = new Dictionary<string, string> { ["TargetFramework"] = targetFramework };
                 }
 
-                var msbuildProject = projectCollection.LoadProject( roslynProject.FilePath, projectProperties, null );
+                var msbuildProject = projectCollection.LoadProject( roslynProject.FilePath!, projectProperties, null );
 
                 // Gets a Roslyn compilation.
                 var compilation = (await roslynProject.GetCompilationAsync( cancellationToken )).AssertNotNull();
@@ -144,7 +144,7 @@ namespace Metalama.Framework.Workspaces
                 var projectOptions = new WorkspaceProjectOptions( roslynProject, msbuildProject, compilation, targetFramework );
 
                 var serviceProvider = ServiceProviderFactory.GetServiceProvider()
-                    .WithProjectScopedServices( compilation.References )
+                    .WithProjectScopedServices( compilation )
                     .WithService( projectOptions )
                     .WithServices( collection.CreateServices( context ) )
                     .WithMark( ServiceProviderMark.Test );

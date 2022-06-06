@@ -14,7 +14,7 @@ using System.Diagnostics.CodeAnalysis;
 
 #pragma warning disable SA1414 // Tuple items must have names.
 
-namespace Metalama.Framework.DesignTime
+namespace Metalama.Framework.DesignTime.SourceGeneration
 {
     /// <summary>
     /// Our base implementation of <see cref="ISourceGenerator"/>, which essentially delegates the work to a <see cref="ProjectHandler"/>.
@@ -37,84 +37,28 @@ namespace Metalama.Framework.DesignTime
 
         void IIncrementalGenerator.Initialize( IncrementalGeneratorInitializationContext context )
         {
-            if ( MetalamaCompilerInfo.IsActive )
-            {
-                return;
-            }
-
-            this._logger.Trace?.Log( $"{this.GetType().Name}.Initialize()" );
-
-            var touchIdProvider =
-                context.AnalyzerConfigOptionsProvider.Select( ( options, _ ) => options )
-                    .Combine( context.AdditionalTextsProvider.Select( ( text, _ ) => text ).Collect() )
-                    .Select( ( x, cancellationToken ) => (TouchId: GetTouchId( x.Left, x.Right, cancellationToken ), Options: x.Left) );
-
-            var generatedSourcesProvider =
-                context.CompilationProvider.Combine( touchIdProvider )
-                    .WithComparer( TouchIdComparer.Instance )
-                    .Select( ( x, cancellationToken ) => this.GetGeneratedSources( x.Item1, x.Item2.Options, cancellationToken ) );
-
-            context.RegisterSourceOutput( generatedSourcesProvider, ( productionContext, result ) => result.ProduceContent( productionContext ) );
-
-            this._logger.Trace?.Log( $"{this.GetType().Name}.Initialize(): completed." );
-        }
-
-        private SourceGeneratorResult GetGeneratedSources(
-            Compilation compilation,
-            AnalyzerConfigOptionsProvider options,
-            CancellationToken cancellationToken )
-        {
             try
             {
-                this._logger.Trace?.Log(
-                    $"{this.GetType().Name}.GetGeneratedSources('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )})." );
-
-                var projectOptions = new ProjectOptions( options );
-
-                if ( string.IsNullOrEmpty( projectOptions.ProjectId ) )
+                if ( MetalamaCompilerInfo.IsActive )
                 {
-                    // Metalama is not enabled for this project.
-
-                    return SourceGeneratorResult.Empty;
+                    return;
                 }
 
-                // Get or create an IProjectHandler instance.
-                if ( !this._projectHandlers.TryGetValue( projectOptions.ProjectId, out var projectHandler ) )
-                {
-                    projectHandler = this._projectHandlers.GetOrAdd(
-                        projectOptions.ProjectId,
-                        _ =>
-                        {
-                            if ( projectOptions.IsFrameworkEnabled )
-                            {
-                                if ( projectOptions.IsDesignTimeEnabled )
-                                {
-                                    return this.CreateSourceGeneratorImpl( projectOptions );
-                                }
-                                else
-                                {
-                                    return new OfflineProjectHandler( this.ServiceProvider, projectOptions );
-                                }
-                            }
-                            else
-                            {
-                                return null;
-                            }
-                        } );
-                }
+                this._logger.Trace?.Log( $"{this.GetType().Name}.Initialize()" );
 
-                if ( projectHandler == null )
-                {
-                    return SourceGeneratorResult.Empty;
-                }
+                var touchIdProvider =
+                    context.AnalyzerConfigOptionsProvider.Select( ( options, _ ) => options )
+                        .Combine( context.AdditionalTextsProvider.Select( ( text, _ ) => text ).Collect() )
+                        .Select( ( x, cancellationToken ) => (TouchId: GetTouchId( x.Left, x.Right, cancellationToken ), Options: x.Left) );
 
-                // Invoke GenerateSources for the project handler.
-                var result = projectHandler.GenerateSources( compilation, cancellationToken );
+                var generatedSourcesProvider =
+                    context.CompilationProvider.Combine( touchIdProvider )
+                        .WithComparer( TouchIdComparer.Instance )
+                        .Select( ( x, cancellationToken ) => this.GetGeneratedSources( x.Item1, x.Item2.Options, cancellationToken ) );
 
-                this._logger.Trace?.Log(
-                    $"{this.GetType().Name}.GetGeneratedSources('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): returned {result}." );
+                context.RegisterSourceOutput( generatedSourcesProvider, ( productionContext, result ) => result.ProduceContent( productionContext ) );
 
-                return result;
+                this._logger.Trace?.Log( $"{this.GetType().Name}.Initialize(): completed." );
             }
             catch ( Exception e ) when ( DesignTimeExceptionHandler.MustHandle( e ) )
             {
@@ -126,17 +70,72 @@ namespace Metalama.Framework.DesignTime
             }
         }
 
-        private class TouchIdComparer : IEqualityComparer<(Compilation Compilation, ( string TouchId, AnalyzerConfigOptionsProvider Options))>
+        private SourceGeneratorResult GetGeneratedSources(
+            Compilation compilation,
+            AnalyzerConfigOptionsProvider options,
+            CancellationToken cancellationToken )
+        {
+            this._logger.Trace?.Log(
+                $"{this.GetType().Name}.GetGeneratedSources('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )})." );
+
+            var projectOptions = new MSBuildProjectOptions( options );
+
+            if ( string.IsNullOrEmpty( projectOptions.ProjectId ) )
+            {
+                // Metalama is not enabled for this project.
+
+                return SourceGeneratorResult.Empty;
+            }
+
+            // Get or create an IProjectHandler instance.
+            if ( !this._projectHandlers.TryGetValue( projectOptions.ProjectId, out var projectHandler ) )
+            {
+                projectHandler = this._projectHandlers.GetOrAdd(
+                    projectOptions.ProjectId,
+                    _ =>
+                    {
+                        if ( projectOptions.IsFrameworkEnabled )
+                        {
+                            if ( projectOptions.IsDesignTimeEnabled )
+                            {
+                                return this.CreateSourceGeneratorImpl( projectOptions );
+                            }
+                            else
+                            {
+                                return new OfflineProjectHandler( this.ServiceProvider, projectOptions );
+                            }
+                        }
+                        else
+                        {
+                            return null;
+                        }
+                    } );
+            }
+
+            if ( projectHandler == null )
+            {
+                return SourceGeneratorResult.Empty;
+            }
+
+            // Invoke GenerateSources for the project handler.
+            var result = projectHandler.GenerateSources( compilation, cancellationToken );
+
+            this._logger.Trace?.Log(
+                $"{this.GetType().Name}.GetGeneratedSources('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): returned {result}." );
+
+            return result;
+        }
+
+        private class TouchIdComparer : IEqualityComparer<(Compilation Compilation, (string TouchId, AnalyzerConfigOptionsProvider Options))>
         {
             public static readonly TouchIdComparer Instance = new();
 
             public bool Equals(
-                (Compilation Compilation, ( string TouchId, AnalyzerConfigOptionsProvider Options) ) x,
-                (Compilation Compilation, ( string TouchId, AnalyzerConfigOptionsProvider Options) ) y )
+                (Compilation Compilation, (string TouchId, AnalyzerConfigOptionsProvider Options)) x,
+                (Compilation Compilation, (string TouchId, AnalyzerConfigOptionsProvider Options)) y )
                 => x.Item2.TouchId == y.Item2.TouchId;
 
-            public int GetHashCode( (Compilation Compilation, ( string TouchId, AnalyzerConfigOptionsProvider Options) ) obj )
-                => obj.Item2.TouchId.GetHashCode();
+            public int GetHashCode( (Compilation Compilation, (string TouchId, AnalyzerConfigOptionsProvider Options)) obj ) => obj.Item2.TouchId.GetHashCode();
         }
 
         private static string GetTouchId(

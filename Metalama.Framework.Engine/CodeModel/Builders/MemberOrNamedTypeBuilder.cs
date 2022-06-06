@@ -14,7 +14,7 @@ using Accessibility = Metalama.Framework.Code.Accessibility;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal abstract class MemberOrNamedTypeBuilder : DeclarationBuilder, IMemberOrNamedTypeBuilder, IMemberIntroduction, IObservableTransformation
+    internal abstract class MemberOrNamedTypeBuilder : DeclarationBuilder, IMemberOrNamedTypeBuilder, IIntroduceMemberTransformation, IObservableTransformation
     {
         public bool IsSealed { get; set; }
 
@@ -43,7 +43,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public abstract IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context );
 
-        public abstract InsertPosition InsertPosition { get; }
+        public InsertPosition InsertPosition => this.ToInsertPosition();
 
         // TODO: This is temporary.
 

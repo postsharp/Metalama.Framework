@@ -75,7 +75,7 @@ internal partial class AnalysisProcessEndpoint : ServiceEndpoint, IService, IDis
         this._service = new ApiImplementation( this );
     }
 
-    public static string GetPipeName( int processId ) => $"Metalama_{processId}_{AssemblyMetadataReader.BuildId}";
+    public static string GetPipeName( int processId ) => $"Metalama_{processId}_{EngineAssemblyMetadataReader.Instance.BuildId}";
 
     private static bool TryGetPipeName( [NotNullWhen( true )] out string? pipeName )
     {

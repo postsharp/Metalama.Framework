@@ -5,14 +5,4 @@
         <TargetFramework>net48</TargetFramework>
     </PropertyGroup>
 
-    <ItemGroup>
-        <None Update="Syntax-4.0.1.xml">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-        <None Update="Syntax-4.1.0.xml">
-            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-        </None>
-    </ItemGroup>
-
-
 </Project>

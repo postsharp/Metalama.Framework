@@ -16,8 +16,8 @@ namespace Metalama.Framework.Engine.Advices
 {
     internal class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty, PropertyBuilder>
     {
-        private readonly TemplateMember<IMethod> _getTemplate;
-        private readonly TemplateMember<IMethod> _setTemplate;
+        private readonly BoundTemplateMethod _getTemplate;
+        private readonly BoundTemplateMethod _setTemplate;
 
         public IPropertyBuilder Builder => this.MemberBuilder;
 
@@ -27,12 +27,12 @@ namespace Metalama.Framework.Engine.Advices
             INamedType targetDeclaration,
             string? explicitName,
             TemplateMember<IProperty> propertyTemplate,
-            TemplateMember<IMethod> getTemplate,
-            TemplateMember<IMethod> setTemplate,
+            BoundTemplateMethod getTemplate,
+            BoundTemplateMethod setTemplate,
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             string? layerName,
-            ITagReader tags )
+            IObjectReader tags )
             : base( aspect, templateInstance, targetDeclaration, propertyTemplate, scope, overrideStrategy, layerName, tags )
         {
             this._getTemplate = getTemplate;
@@ -51,6 +51,8 @@ namespace Metalama.Framework.Engine.Advices
                 hasSet,
                 this.Template.Declaration is { IsAutoPropertyOrField: true },
                 this.Template.Declaration is { Writeability: Writeability.InitOnly },
+                false,
+                this.Template.Declaration is { Writeability: Writeability.ConstructorOnly } && this.Template.Declaration.IsAutoPropertyOrField,
                 this.Tags );
 
             if ( propertyTemplate.IsNotNull )
@@ -67,35 +69,70 @@ namespace Metalama.Framework.Engine.Advices
 
             // TODO: Indexers.
 
-            this.MemberBuilder.Type = (this.Template.Declaration?.Type ?? this._getTemplate.Declaration?.ReturnType).AssertNotNull();
-            this.MemberBuilder.Accessibility = (this.Template.Declaration?.Accessibility ?? this._getTemplate.Declaration?.Accessibility).AssertNotNull();
+            this.MemberBuilder.Type = (this.Template.Declaration?.Type ?? this._getTemplate.Template.Declaration?.ReturnType).AssertNotNull();
+
+            this.MemberBuilder.Accessibility =
+                (this.Template.Declaration?.Accessibility
+                 ?? this._getTemplate.Template.Declaration?.Accessibility ?? this._setTemplate.Template.Declaration?.Accessibility).AssertNotNull();
+
+            if ( this.Template.IsNotNull )
+            {
+                if ( this.Template.Declaration.AssertNotNull().GetMethod != null )
+                {
+                    this.MemberBuilder.GetMethod.AssertNotNull().Accessibility = this.Template.Declaration!.GetMethod!.Accessibility;
+                }
+
+                if ( this.Template.Declaration.AssertNotNull().SetMethod != null )
+                {
+                    this.MemberBuilder.SetMethod.AssertNotNull().Accessibility = this.Template.Declaration!.SetMethod!.Accessibility;
+                }
+            }
+
+            // TODO: For get accessor template, we are ignoring accessibility of set accessor template because it can be easily incompatible.
         }
 
-        public override AdviceResult ToResult( ICompilation compilation, IReadOnlyList<IObservableTransformation> observableTransformations )
+        public override AdviceResult ToResult( ICompilation compilation )
         {
             // Determine whether we need introduction transformation (something may exist in the original code or could have been introduced by previous steps).
             var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
 
-            var existingDeclaration = targetDeclaration.FindClosestVisibleProperty(
-                this.MemberBuilder,
-                observableTransformations.OfType<IProperty>().ToList() );
+            var existingDeclaration = targetDeclaration.FindClosestUniquelyNamedMember( this.MemberBuilder.Name );
+
+            var hasNoOverrideSemantics = this.Template.Declaration != null && this.Template.Declaration.IsAutoPropertyOrField;
 
             // TODO: Introduce attributes that are added not present on the existing member?
             if ( existingDeclaration == null )
             {
-                // There is no existing declaration, we will introduce and override the introduced.
-                var overriddenMethod = new OverriddenProperty(
-                    this,
-                    this.MemberBuilder,
-                    this.Template,
-                    this._getTemplate,
-                    this._setTemplate,
-                    this.Tags );
+                // There is no existing declaration.
+                if ( hasNoOverrideSemantics )
+                {
+                    // Introduced auto property.
+                    return AdviceResult.Create( this.MemberBuilder );
+                }
+                else
+                {
+                    // Introduce and override using the template.
+                    var overriddenProperty = new OverridePropertyTransformation(
+                        this,
+                        this.MemberBuilder,
+                        this._getTemplate,
+                        this._setTemplate,
+                        this.Tags );
 
-                return AdviceResult.Create( this.MemberBuilder, overriddenMethod );
+                    return AdviceResult.Create( this.MemberBuilder, overriddenProperty );
+                }
             }
             else
             {
+                if ( existingDeclaration is not IProperty existingProperty )
+                {
+                    return
+                        AdviceResult.Create(
+                            AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentKind.CreateRoslynDiagnostic(
+                                targetDeclaration.GetDiagnosticLocation(),
+                                (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration, existingDeclaration.DeclarationKind) ) );
+                }
+
                 if ( existingDeclaration.IsStatic != this.MemberBuilder.IsStatic )
                 {
                     return
@@ -104,6 +141,15 @@ namespace Metalama.Framework.Engine.Advices
                                 targetDeclaration.GetDiagnosticLocation(),
                                 (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
                                  existingDeclaration.DeclaringType) ) );
+                }
+                else if ( !compilation.InvariantComparer.Equals( this.Builder.Type, existingProperty.Type ) )
+                {
+                    return
+                        AdviceResult.Create(
+                            AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateRoslynDiagnostic(
+                                targetDeclaration.GetDiagnosticLocation(),
+                                (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
+                                 existingDeclaration.DeclaringType, existingProperty.Type) ) );
                 }
 
                 switch ( this.OverrideStrategy )
@@ -125,10 +171,9 @@ namespace Metalama.Framework.Engine.Advices
                         // If the existing declaration is in the current type, we fail, otherwise, declare a new method and override.
                         if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( targetDeclaration, existingDeclaration.DeclaringType ) )
                         {
-                            var overriddenProperty = new OverriddenProperty(
+                            var overriddenProperty = new OverridePropertyTransformation(
                                 this,
-                                existingDeclaration,
-                                this.Template,
+                                existingProperty,
                                 this._getTemplate,
                                 this._setTemplate,
                                 this.Tags );
@@ -139,10 +184,9 @@ namespace Metalama.Framework.Engine.Advices
                         {
                             this.MemberBuilder.IsNew = true;
 
-                            var overriddenProperty = new OverriddenProperty(
+                            var overriddenProperty = new OverridePropertyTransformation(
                                 this,
                                 this.MemberBuilder,
-                                this.Template,
                                 this._getTemplate,
                                 this._setTemplate,
                                 this.Tags );
@@ -153,10 +197,9 @@ namespace Metalama.Framework.Engine.Advices
                     case OverrideStrategy.Override:
                         if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( targetDeclaration, existingDeclaration.DeclaringType ) )
                         {
-                            var overriddenMethod = new OverriddenProperty(
+                            var overriddenMethod = new OverridePropertyTransformation(
                                 this,
-                                existingDeclaration,
-                                this.Template,
+                                existingProperty,
                                 this._getTemplate,
                                 this._setTemplate,
                                 this.Tags );
@@ -172,29 +215,20 @@ namespace Metalama.Framework.Engine.Advices
                                         (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
                                          existingDeclaration.DeclaringType) ) );
                         }
-                        else if ( !compilation.InvariantComparer.Equals( this.Builder.Type, existingDeclaration.Type ) )
-                        {
-                            return
-                                AdviceResult.Create(
-                                    AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateRoslynDiagnostic(
-                                        targetDeclaration.GetDiagnosticLocation(),
-                                        (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
-                                         existingDeclaration.DeclaringType, existingDeclaration.Type) ) );
-                        }
                         else
                         {
                             this.MemberBuilder.IsOverride = true;
-                            this.MemberBuilder.OverriddenProperty = existingDeclaration;
+                            this.MemberBuilder.OverriddenProperty = existingProperty;
 
-                            var overriddenProperty = new OverriddenProperty(
-                                this,
-                                this.MemberBuilder,
-                                this.Template,
-                                this._getTemplate,
-                                this._setTemplate,
-                                this.Tags );
+                            var overrideTransformations =
+                                OverrideHelper.OverrideProperty(
+                                    this,
+                                    this.MemberBuilder,
+                                    this._getTemplate,
+                                    this._setTemplate,
+                                    this.Tags );
 
-                            return AdviceResult.Create( this.MemberBuilder, overriddenProperty );
+                            return AdviceResult.Create( new ITransformation[] { this.MemberBuilder }.Concat( overrideTransformations ) );
                         }
 
                     default:

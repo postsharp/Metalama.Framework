@@ -37,16 +37,16 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public IType ReturnType
             => this.MethodKind != MethodKind.PropertyGet
-                ? this.DeclaringMember.Compilation.TypeFactory.GetSpecialType( SpecialType.Void )
+                ? this.DeclaringMember.Compilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.Void )
                 : ((IFieldOrProperty) this.DeclaringMember).Type;
 
         [Memo]
-        public IGenericParameterList TypeParameters => GenericParameterList.Empty;
+        public IGenericParameterList TypeParameters => TypeParameterList.Empty;
 
         [Memo]
         public IReadOnlyList<IType> TypeArguments => ImmutableArray<IType>.Empty;
 
-        public bool IsImplicit => throw new NotImplementedException();
+        public bool IsImplicit => true;
 
         public bool IsOpenGeneric => this.DeclaringMember.DeclaringType.IsOpenGeneric;
 
@@ -58,13 +58,11 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public IMethod? OverriddenMethod => null;
 
-        public IMethodList LocalFunctions => MethodList.Empty;
-
         public abstract IParameterList Parameters { get; }
 
         public MethodKind MethodKind { get; }
 
-        public Accessibility Accessibility => this.DeclaringMember.Accessibility;
+        public abstract Accessibility Accessibility { get; }
 
         public abstract string Name { get; }
 
@@ -96,7 +94,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public IDeclaration? ContainingDeclaration => this.DeclaringMember;
 
-        public IAttributeList Attributes => AttributeList.Empty;
+        public IAttributeCollection Attributes => AttributeCollection.Empty;
 
         public DeclarationKind DeclarationKind => DeclarationKind.Method;
 
@@ -116,7 +114,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public ISymbol? Symbol => null;
 
-        public Ref<IDeclaration> ToRef() => throw new NotImplementedException();
+        public Ref<IDeclaration> ToRef() => Ref.FromImplicitMember( this );
 
         public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 

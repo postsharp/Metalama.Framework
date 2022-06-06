@@ -6,8 +6,10 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Advised;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Project;
 using System;
 using System.Diagnostics;
@@ -26,6 +28,8 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         private readonly IAdvisedEvent? _event;
         private readonly INamedType? _type;
         private readonly MetaApiProperties _common;
+        private readonly IAdvisedParameter? _parameter;
+        private readonly ContractDirection? _contractDirection;
 
         private Exception CreateInvalidOperationException( string memberName, string? description = null )
             => TemplatingDiagnosticDescriptors.MemberMemberNotAvailable.CreateException(
@@ -52,9 +56,13 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IAdvisedParameterList Parameters => this._method?.Parameters ?? throw this.CreateInvalidOperationException( nameof(this.Parameters) );
 
+        public IAdvisedParameter Parameter => this._parameter ?? throw this.CreateInvalidOperationException( nameof(this.Parameter) );
+
         public IIndexer Indexer => this.Member as IIndexer ?? throw this.CreateInvalidOperationException( nameof(this.Indexer) );
 
         public INamedType Type => this._type ?? throw this.CreateInvalidOperationException( nameof(this.Type) );
+
+        public ContractDirection ContractDirection => this._contractDirection ?? throw this.CreateInvalidOperationException( nameof(this.ContractDirection) );
 
         private ThisInstanceUserReceiver GetThisOrBase( string expressionName, AspectReferenceSpecification linkerAnnotation )
             => (this._common.Staticity, this._type, this.Declaration) switch
@@ -81,7 +89,10 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IMetaTarget Target => this;
 
-        public IAspectInstance AspectInstance => this._common.AspectInstance;
+        IAspectInstance IMetaApi.AspectInstance
+            => this._common.AspectInstance ?? throw new InvalidOperationException( "IAspectInstance has not been provided." );
+
+        public IAspectInstanceInternal? AspectInstance => this._common.AspectInstance;
 
         public object This => this.GetThisOrBase( "meta.This", new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Final ) );
 
@@ -93,7 +104,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         public object BaseStatic
             => new ThisTypeUserReceiver( this.Type, new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Base ) );
 
-        public ITagReader Tags => this._common.Tags;
+        public IObjectReader Tags => this._common.Tags;
 
         IDiagnosticSink IMetaApi.Diagnostics => this._common.Diagnostics;
 
@@ -117,7 +128,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public UserDiagnosticSink Diagnostics => this._common.Diagnostics;
 
-        private MetaApi( IDeclaration declaration, MetaApiProperties common ) : base( declaration.Compilation, common.SyntaxGenerationContext.SyntaxGenerator )
+        private MetaApi( IDeclaration declaration, MetaApiProperties common ) : base( declaration.GetCompilationModel(), common.SyntaxGenerationContext )
         {
             this.Declaration = declaration;
             this._common = common;
@@ -137,6 +148,36 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             this._type = constructor.DeclaringType;
         }
 
+        private MetaApi( IParameter parameter, MetaApiProperties common, ContractDirection? contractDirection ) : this( parameter, common )
+        {
+            switch ( parameter.DeclaringMember )
+            {
+                case IConstructor constructor:
+                    this._constructor = new AdvisedConstructor( constructor );
+
+                    break;
+
+                case IMethod method:
+                    this._method = new AdvisedMethod( method );
+
+                    break;
+
+                case IField field:
+                    this._fieldOrProperty = new AdvisedField( field );
+
+                    break;
+
+                case IProperty property:
+                    this._fieldOrProperty = new AdvisedProperty( property );
+
+                    break;
+            }
+
+            this._type = parameter.DeclaringMember.DeclaringType;
+            this._parameter = new AdvisedParameter( parameter );
+            this._contractDirection = contractDirection;
+        }
+
         private MetaApi( IFieldOrProperty fieldOrProperty, IMethod accessor, MetaApiProperties common ) : this( accessor, common )
         {
             this._method = new AdvisedMethod( accessor );
@@ -151,7 +192,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             this._type = fieldOrProperty.DeclaringType;
         }
 
-        private MetaApi( IFieldOrProperty fieldOrProperty, MetaApiProperties common ) : this( (IDeclaration) fieldOrProperty, common )
+        private MetaApi( IFieldOrProperty fieldOrProperty, MetaApiProperties common, ContractDirection? contractDirection ) : this( fieldOrProperty, common )
         {
             this._fieldOrProperty = fieldOrProperty switch
             {
@@ -161,6 +202,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             };
 
             this._type = fieldOrProperty.DeclaringType;
+            this._contractDirection = contractDirection;
         }
 
         private MetaApi( IEvent eventField, MetaApiProperties common ) : this( (IDeclaration) eventField, common )
@@ -181,14 +223,15 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             this._type = type;
         }
 
-        public static MetaApi ForDeclaration( IDeclaration declaration, MetaApiProperties common )
+        public static MetaApi ForDeclaration( IDeclaration declaration, MetaApiProperties common, ContractDirection? contractDirection = null )
             => declaration switch
             {
                 INamedType type => new MetaApi( type, common ),
                 IMethod method => new MetaApi( method, common ),
-                IFieldOrProperty fieldOrProperty => new MetaApi( fieldOrProperty, common ),
+                IFieldOrProperty fieldOrProperty => new MetaApi( fieldOrProperty, common, contractDirection ),
                 IEvent @event => new MetaApi( @event, common ),
                 IConstructor constructor => new MetaApi( constructor, common ),
+                IParameter parameter => new MetaApi( parameter, common, contractDirection ),
                 _ => throw new AssertionFailedException()
             };
 

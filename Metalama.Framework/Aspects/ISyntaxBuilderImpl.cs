@@ -13,7 +13,7 @@ internal interface ISyntaxBuilderImpl
 {
     ICompilation Compilation { get; }
 
-    IExpression Expression( object? expression );
+    IExpression Capture( object? expression );
 
     IExpression BuildArray( ArrayBuilder arrayBuilder );
 
@@ -25,6 +25,8 @@ internal interface ISyntaxBuilderImpl
 
     void AppendLiteral( object? value, StringBuilder stringBuilder, SpecialType specialType, bool stronglyTyped );
 
+    IExpression Literal( object? value, SpecialType specialType, bool stronglyTyped );
+
     void AppendTypeName( IType type, StringBuilder stringBuilder );
 
     void AppendTypeName( Type type, StringBuilder stringBuilder );
@@ -32,4 +34,6 @@ internal interface ISyntaxBuilderImpl
     void AppendExpression( IExpression expression, StringBuilder stringBuilder );
 
     void AppendDynamic( object? expression, StringBuilder stringBuilder );
+
+    IExpression Cast( IExpression expression, IType targetType );
 }

@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
                 case Accessibility.PrivateProtected:
                     tokenList.Add( Token( SyntaxKind.PrivateKeyword ) );
-                    tokenList.Add( Token( SyntaxKind.InternalKeyword ) );
+                    tokenList.Add( Token( SyntaxKind.ProtectedKeyword ) );
 
                     break;
 

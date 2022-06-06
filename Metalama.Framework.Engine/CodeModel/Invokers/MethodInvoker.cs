@@ -6,7 +6,7 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating;
-using Metalama.Framework.Engine.Templating.MetaModel;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -89,7 +89,9 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 name = GenericName(
                     Identifier( this._method.Name ),
                     TypeArgumentList(
-                        SeparatedList( this._method.TypeArguments.Select( t => generationContext.SyntaxGenerator.Type( t.GetSymbol() ) ).ToArray() ) ) );
+                        SeparatedList(
+                            this._method.TypeArguments.Select( t => generationContext.SyntaxGenerator.Type( t.GetSymbol() ) )
+                                .ToArray() ) ) );
             }
             else
             {
@@ -98,36 +100,35 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
             var arguments = this._method.GetArguments(
                 this._method.Parameters,
-                RuntimeExpression.FromValue( args, this.Compilation, generationContext ) );
+                RunTimeTemplateExpression.FromValue( args, this.Compilation, generationContext ) );
 
             if ( this._method.MethodKind == MethodKind.LocalFunction )
             {
-                var instanceExpression = RuntimeExpression.FromValue( instance, this.Compilation, generationContext );
+                var instanceExpression = RunTimeTemplateExpression.FromValue( instance, this.Compilation, generationContext );
 
                 if ( instanceExpression.Syntax.Kind() != SyntaxKind.NullLiteralExpression )
                 {
                     throw GeneralDiagnosticDescriptors.CannotProvideInstanceForLocalFunction.CreateException( this._method );
                 }
 
-                return this.CreateInvocationExpression( null, name, arguments, AspectReferenceTargetKind.Self, generationContext );
+                return this.CreateInvocationExpression( null, name, arguments, AspectReferenceTargetKind.Self );
             }
             else
             {
                 var instanceExpression =
                     this._method.GetReceiverSyntax(
-                        RuntimeExpression.FromValue( instance!, this.Compilation, generationContext ),
+                        RunTimeTemplateExpression.FromValue( instance!, this.Compilation, generationContext ),
                         generationContext );
 
-                return this.CreateInvocationExpression( instanceExpression, name, arguments, AspectReferenceTargetKind.Self, generationContext );
+                return this.CreateInvocationExpression( instanceExpression, name, arguments, AspectReferenceTargetKind.Self );
             }
         }
 
-        private UserExpression CreateInvocationExpression(
+        private BuiltUserExpression CreateInvocationExpression(
             ExpressionSyntax? instanceExpression,
             SimpleNameSyntax name,
             ArgumentSyntax[]? arguments,
-            AspectReferenceTargetKind targetKind,
-            SyntaxGenerationContext generationContext )
+            AspectReferenceTargetKind targetKind )
         {
             if ( this._method.DeclaringType.IsOpenGeneric )
             {
@@ -187,7 +188,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
                 }
             }
 
-            return new UserExpression( expression, returnType, generationContext );
+            return new BuiltUserExpression( expression, returnType );
         }
     }
 }

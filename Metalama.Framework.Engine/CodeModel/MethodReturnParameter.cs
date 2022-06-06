@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         public Method DeclaringMethod { get; }
 
-        public override IMemberOrNamedType DeclaringMember => this.DeclaringMethod;
+        public override IMember DeclaringMember => this.DeclaringMethod;
 
         public MethodReturnParameter( Method declaringMethod )
         {
@@ -43,11 +43,12 @@ namespace Metalama.Framework.Engine.CodeModel
         public override IDeclaration OriginalDefinition => ((Method) this.DeclaringMember.GetOriginalDefinition()).ReturnParameter;
 
         [Memo]
-        public override IAttributeList Attributes
-            => new AttributeList(
+        public override IAttributeCollection Attributes
+            => new AttributeCollection(
                 this,
                 this.DeclaringMethod.MethodSymbol.GetReturnTypeAttributes()
-                    .Select( a => new AttributeRef( a, this.ToRef() ) ) );
+                    .Select( a => new AttributeRef( a, this.ToRef() ) )
+                    .ToList() );
 
         public override bool IsReturnParameter => true;
 

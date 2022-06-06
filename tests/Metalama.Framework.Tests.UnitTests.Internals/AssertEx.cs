@@ -3,7 +3,8 @@
 
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine;
-using Metalama.Framework.Engine.Templating.MetaModel;
+using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis;
 using System;
 using Xunit;
@@ -15,20 +16,20 @@ namespace Metalama.Framework.Tests.UnitTests
         public static void DynamicEquals( object expression, string expected )
         {
             var meta = (IUserExpression) expression;
-            var actual = meta.ToRunTimeExpression().Syntax.NormalizeWhitespace().ToString();
+            var actual = meta.ToSyntax( TemplateExpansionContext.CurrentSyntaxGenerationContext ).NormalizeWhitespace().ToString();
 
             Assert.Equal( expected, actual );
         }
 
         public static void DynamicThrows<T>( Func<object?> func )
             where T : Exception
-            => Assert.Throws<T>( () => ((IUserExpression) func()!).ToRunTimeExpression().Syntax );
+            => Assert.Throws<T>( () => ((IUserExpression) func()!).ToSyntax( TemplateExpansionContext.CurrentSyntaxGenerationContext ) );
 
         public static void DynamicThrows<T>( object expression )
             where T : Exception
         {
             var meta = (IUserExpression) expression;
-            Assert.Throws<T>( () => meta.ToRunTimeExpression().Syntax );
+            Assert.Throws<T>( () => meta.ToSyntax( TemplateExpansionContext.CurrentSyntaxGenerationContext ) );
         }
 
         internal static void ThrowsWithDiagnostic( IDiagnosticDefinition diagnosticDefinition, Func<object?> testCode )
@@ -36,7 +37,7 @@ namespace Metalama.Framework.Tests.UnitTests
             try
             {
                 var runtimeExpression = (IUserExpression) testCode()!;
-                _ = runtimeExpression.ToRunTimeExpression().Syntax;
+                _ = runtimeExpression.ToSyntax( TemplateExpansionContext.CurrentSyntaxGenerationContext );
 
                 Assert.False( true, "Exception InvalidUserCodeException was not received." );
             }

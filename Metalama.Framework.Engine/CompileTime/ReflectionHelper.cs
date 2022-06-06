@@ -89,37 +89,40 @@ namespace Metalama.Framework.Engine.CompileTime
             bool TryAppend( INamespaceOrTypeSymbol symbol )
             {
                 // Append the containing namespace or type.
-                switch ( symbol.ContainingSymbol )
+                if ( symbol is not ITypeParameterSymbol )
                 {
-                    case null:
-                        break;
+                    switch ( symbol.ContainingSymbol )
+                    {
+                        case null:
+                            break;
 
-                    case ITypeSymbol typeSymbol:
-                        if ( !TryAppend( typeSymbol ) )
-                        {
-                            return false;
-                        }
-
-                        sb.Append( '+' );
-
-                        break;
-
-                    case INamespaceSymbol namespaceSymbol:
-                        if ( !namespaceSymbol.IsGlobalNamespace )
-                        {
-                            if ( !TryAppend( namespaceSymbol ) )
+                        case ITypeSymbol type:
+                            if ( !TryAppend( type ) )
                             {
                                 return false;
                             }
 
-                            sb.Append( '.' );
-                        }
+                            sb.Append( '+' );
 
-                        break;
+                            break;
 
-                    default:
-                        // A type is always contained in another type or in a namespace, possibly the global namespace.
-                        throw new AssertionFailedException();
+                        case INamespaceSymbol ns:
+                            if ( !ns.IsGlobalNamespace )
+                            {
+                                if ( !TryAppend( ns ) )
+                                {
+                                    return false;
+                                }
+
+                                sb.Append( '.' );
+                            }
+
+                            break;
+
+                        default:
+                            // A type is always contained in another type or in a namespace, possibly the global namespace.
+                            throw new AssertionFailedException();
+                    }
                 }
 
                 switch ( symbol )
@@ -226,7 +229,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             if ( type.HasElementType )
             {
-                VisitTypeElements( type.GetElementType(), visitor );
+                VisitTypeElements( type.GetElementType()!, visitor );
             }
             else if ( type.IsGenericType && !type.IsGenericTypeDefinition )
             {
@@ -243,7 +246,7 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             if ( type.HasElementType )
             {
-                return IsExported( type.GetElementType() );
+                return IsExported( type.GetElementType()! );
             }
 
             switch ( type.Attributes & TypeAttributes.VisibilityMask )
@@ -256,7 +259,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     return false;
 
                 case TypeAttributes.NestedPublic:
-                    return IsPublic( type.DeclaringType );
+                    return IsPublic( type.DeclaringType! );
 
                 case TypeAttributes.NotPublic:
                     return false;
@@ -273,7 +276,7 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             if ( type.HasElementType )
             {
-                return IsExported( type.GetElementType() );
+                return IsExported( type.GetElementType()! );
             }
 
             switch ( type.Attributes & TypeAttributes.VisibilityMask )
@@ -286,7 +289,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 case TypeAttributes.NestedFamily:
                 case TypeAttributes.NestedFamORAssem:
                 case TypeAttributes.NestedPublic:
-                    return IsExported( type.DeclaringType );
+                    return IsExported( type.DeclaringType! );
 
                 case TypeAttributes.NotPublic:
                     return false;

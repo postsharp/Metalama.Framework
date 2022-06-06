@@ -8,6 +8,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -37,7 +38,8 @@ namespace Metalama.Framework.Engine.CompileTime
                 (typeof(STAThreadAttribute), Scope: TemplatingScope.RunTimeOnly, false),
                 (typeof(AppDomain), Scope: TemplatingScope.RunTimeOnly, false),
                 (typeof(MemberInfo), Scope: TemplatingScope.RunTimeOnly, true),
-                (typeof(ParameterInfo), Scope: TemplatingScope.RunTimeOnly, true)
+                (typeof(ParameterInfo), Scope: TemplatingScope.RunTimeOnly, true),
+                (typeof(Debugger), Scope: TemplatingScope.RunTimeOrCompileTime, false)
             }.ToImmutableDictionary( t => t.ReflectionType.Name, t => (t.ReflectionType.Namespace, t.Scope, t.MembersOnly) );
 
         private static readonly ImmutableDictionary<string, (TemplatingScope Scope, bool IncludeDescendants)> _wellKnownNamespaces =
@@ -150,14 +152,17 @@ namespace Metalama.Framework.Engine.CompileTime
             }
         }
 
-        private TemplatingScope? GetTemplatingScope( AttributeData attribute )
+        private TemplatingScope? GetTemplatingScope( AttributeData attribute, bool compileTimeReturnsRunTimeOnly = false )
         {
             switch ( attribute.AttributeClass?.Name )
             {
                 default:
                     return null;
 
-                case nameof(CompileTimeAttribute):
+                case nameof(CompileTimeAttribute) when compileTimeReturnsRunTimeOnly:
+                    return TemplatingScope.CompileTimeOnlyReturningRuntimeOnly;
+
+                case nameof(CompileTimeAttribute) when !compileTimeReturnsRunTimeOnly:
                 case nameof(TemplateAttribute):
                     return TemplatingScope.CompileTimeOnly;
 
@@ -179,7 +184,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             var scopeFromAttributes = assembly.GetAttributes()
                 .Concat( assembly.Modules.First().GetAttributes() )
-                .Select( this.GetTemplatingScope )
+                .Select( x => this.GetTemplatingScope( x ) )
                 .FirstOrDefault( s => s != null );
 
             if ( scopeFromAttributes != null )
@@ -208,7 +213,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private TemplatingScope GetTemplatingScopeCore( ISymbol symbol )
         {
-            var scope = this.GetTemplatingScopeCore( symbol, 0 );
+            var scope = this.GetTemplatingScopeCore( symbol, GetTemplatingScopeOptions.Default, 0 );
 
             if ( scope == TemplatingScope.CompileTimeOnly )
             {
@@ -239,7 +244,7 @@ namespace Metalama.Framework.Engine.CompileTime
             return scope;
         }
 
-        private TemplatingScope GetTemplatingScopeCore( ISymbol symbol, int recursion )
+        private TemplatingScope GetTemplatingScopeCore( ISymbol symbol, GetTemplatingScopeOptions options, int recursion )
         {
             if ( recursion > 32 )
             {
@@ -252,7 +257,31 @@ namespace Metalama.Framework.Engine.CompileTime
                     return TemplatingScope.Dynamic;
 
                 case ITypeParameterSymbol typeParameterSymbol:
-                    return this.GetTemplatingScopeCore( typeParameterSymbol.ContainingSymbol, recursion + 1 );
+                    var scopeFromAttribute = this.GetScopeFromAttributes( typeParameterSymbol );
+
+                    if ( scopeFromAttribute != null )
+                    {
+                        return scopeFromAttribute.Value;
+                    }
+                    else if ( typeParameterSymbol.ContainingSymbol.Kind == SymbolKind.Method
+                              && !this.GetTemplateInfo( typeParameterSymbol.ContainingSymbol ).IsNone )
+                    {
+                        // Template parameters are run-time by default.
+                        return TemplatingScope.RunTimeOnly;
+                    }
+                    else if ( (options & GetTemplatingScopeOptions.TypeParametersAreNeutral) != 0 )
+                    {
+                        // Do not try to go to the containing symbol if we are called from the method level because this would
+                        // create an infinite recursion.
+
+                        return TemplatingScope.RunTimeOrCompileTime;
+                    }
+                    else
+                    {
+                        var declaringScope = this.GetTemplatingScopeCore( typeParameterSymbol.ContainingSymbol, options, recursion + 1 );
+
+                        return declaringScope;
+                    }
 
                 case IErrorTypeSymbol:
                     // We treat all error symbols as run-time only, by convention.
@@ -260,29 +289,27 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 case IArrayTypeSymbol array:
                     {
-                        var arrayScope = this.GetTemplatingScopeCore( array.ElementType, recursion + 1 );
+                        var elementScope = this.GetTemplatingScopeCore( array.ElementType, options, recursion + 1 );
 
-                        if ( arrayScope == TemplatingScope.Dynamic )
+                        if ( elementScope is TemplatingScope.Dynamic )
                         {
                             return TemplatingScope.Invalid;
                         }
                         else
                         {
-                            return arrayScope;
+                            return elementScope.GetExpressionValueScope();
                         }
                     }
 
                 case IPointerTypeSymbol pointer:
-                    return this.GetTemplatingScopeCore( pointer.PointedAtType, recursion + 1 );
+                    return this.GetTemplatingScopeCore( pointer.PointedAtType, options, recursion + 1 );
 
-                case INamedTypeSymbol { IsGenericType: true } namedType
-                    when !namedType.IsGenericTypeDefinition() &&
-                         !SymbolEqualityComparer.Default.Equals( namedType, namedType.OriginalDefinition ):
+                case INamedTypeSymbol { IsGenericType: true } namedType when !namedType.IsGenericTypeDefinition():
                     {
                         List<TemplatingScope> scopes = new( namedType.TypeArguments.Length + 1 );
-                        var declarationScope = this.GetTemplatingScopeCore( namedType.OriginalDefinition, recursion + 1 );
+                        var declarationScope = this.GetTemplatingScopeCore( namedType.OriginalDefinition, options, recursion + 1 );
                         scopes.Add( declarationScope );
-                        scopes.AddRange( namedType.TypeArguments.Select( arg => this.GetTemplatingScopeCore( arg, recursion + 1 ) ) );
+                        scopes.AddRange( namedType.TypeArguments.Select( arg => this.GetTemplatingScopeCore( arg, options, recursion + 1 ) ) );
 
                         var compileTimeOnlyCount = 0;
                         var runtimeCount = 0;
@@ -308,6 +335,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                     }
 
                                 case TemplatingScope.RunTimeOnly:
+                                case TemplatingScope.CompileTimeOnlyReturningRuntimeOnly:
                                     runtimeCount++;
 
                                     break;
@@ -371,12 +399,12 @@ namespace Metalama.Framework.Engine.CompileTime
             }
 
             // From signature.
-            return this.GetScopeFromSignature( symbol, recursion + 1 );
+            return this.GetScopeFromSignature( symbol, options, recursion + 1 );
         }
 
-        private void CombineScope( ITypeSymbol type, int recursion, ref TemplatingScope combinedScope )
+        private void CombineScope( ITypeSymbol type, GetTemplatingScopeOptions options, int recursion, ref TemplatingScope combinedScope )
         {
-            var typeScope = this.GetTemplatingScopeCore( type, recursion + 1 );
+            var typeScope = this.GetTemplatingScopeCore( type, options, recursion + 1 );
 
             if ( typeScope != combinedScope )
             {
@@ -384,6 +412,8 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     (TemplatingScope.Conflict, _) => TemplatingScope.Conflict,
                     (TemplatingScope.Invalid, _) => TemplatingScope.Invalid,
+                    (TemplatingScope.CompileTimeOnlyReturningRuntimeOnly, TemplatingScope.RunTimeOnly) => TemplatingScope.RunTimeOnly,
+                    (TemplatingScope.CompileTimeOnlyReturningRuntimeOnly, TemplatingScope.RunTimeOrCompileTime) => TemplatingScope.RunTimeOnly,
                     (_, TemplatingScope.RunTimeOrCompileTime) => typeScope,
                     (TemplatingScope.RunTimeOrCompileTime, _) => combinedScope,
                     (TemplatingScope.RunTimeOnly, TemplatingScope.CompileTimeOnly) => TemplatingScope.Conflict,
@@ -393,37 +423,41 @@ namespace Metalama.Framework.Engine.CompileTime
             }
         }
 
-        private TemplatingScope GetScopeFromSignature( ISymbol symbol, int recursion )
+        private TemplatingScope GetScopeFromSignature( ISymbol symbol, GetTemplatingScopeOptions options, int recursion )
         {
             var signatureScope = TemplatingScope.RunTimeOrCompileTime;
+            var signatureMemberOptions = options | GetTemplatingScopeOptions.TypeParametersAreNeutral;
 
             switch ( symbol )
             {
                 case IMethodSymbol method:
-                    this.CombineScope( method.ReturnType, recursion, ref signatureScope );
+                    this.CombineScope( method.ReturnType, signatureMemberOptions, recursion, ref signatureScope );
 
                     foreach ( var parameter in method.Parameters )
                     {
-                        this.CombineScope( parameter.Type, recursion, ref signatureScope );
+                        this.CombineScope( parameter.Type, signatureMemberOptions, recursion, ref signatureScope );
                     }
 
                     return signatureScope;
 
                 case IPropertySymbol property:
-                    this.CombineScope( property.Type, recursion, ref signatureScope );
+                    this.CombineScope( property.Type, signatureMemberOptions, recursion, ref signatureScope );
 
                     foreach ( var parameter in property.Parameters )
                     {
-                        this.CombineScope( parameter.Type, recursion, ref signatureScope );
+                        this.CombineScope( parameter.Type, signatureMemberOptions, recursion, ref signatureScope );
                     }
 
                     return signatureScope;
 
                 case IFieldSymbol field:
-                    return this.GetTemplatingScopeCore( field.Type, recursion + 1 );
+                    return this.GetTemplatingScopeCore( field.Type, signatureMemberOptions, recursion + 1 );
 
                 case IEventSymbol @event:
-                    return this.GetTemplatingScopeCore( @event.Type, recursion + 1 );
+                    return this.GetTemplatingScopeCore( @event.Type, signatureMemberOptions, recursion + 1 );
+
+                case IParameterSymbol parameter:
+                    return this.GetTemplatingScopeCore( parameter.Type, signatureMemberOptions, recursion + 1 );
 
                 default:
                     return TemplatingScope.RunTimeOrCompileTime;
@@ -449,9 +483,11 @@ namespace Metalama.Framework.Engine.CompileTime
             _ = AddToCache( null );
 
             // From attributes.
+            var compileTimeReturnsRunTimeOnly = symbol is ITypeParameterSymbol;
+
             var scopeFromAttributes = symbol
                 .GetAttributes()
-                .Select( this.GetTemplatingScope )
+                .Select( a => this.GetTemplatingScope( a, compileTimeReturnsRunTimeOnly ) )
                 .FirstOrDefault( s => s != null );
 
             if ( scopeFromAttributes != null )
@@ -490,7 +526,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     {
                         if ( member is IPropertySymbol property )
                         {
-                            this.CombineScope( property.Type, 0, ref combinedScope );
+                            this.CombineScope( property.Type, GetTemplatingScopeOptions.Default, 0, ref combinedScope );
                         }
                     }
 
@@ -603,6 +639,13 @@ namespace Metalama.Framework.Engine.CompileTime
                 default:
                     return false;
             }
+        }
+
+        [Flags]
+        private enum GetTemplatingScopeOptions
+        {
+            Default = 0,
+            TypeParametersAreNeutral = 1
         }
     }
 }

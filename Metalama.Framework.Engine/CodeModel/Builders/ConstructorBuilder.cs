@@ -6,7 +6,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advices;
-using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Transformations;
@@ -22,11 +21,9 @@ using ParameterList = Metalama.Framework.Engine.CodeModel.Collections.ParameterL
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class ConstructorBuilder : MemberBuilder, IConstructorBuilder, IConstructorImpl, IReplaceMember
+    internal class ConstructorBuilder : MemberBuilder, IConstructorBuilder, IConstructorImpl, IReplaceMemberTransformation
     {
         public ConstructorInitializerKind InitializerKind => ConstructorInitializerKind.Undetermined;
-
-        public IMethodList LocalFunctions => MethodList.Empty;
 
         public MethodKind MethodKind => this.IsStatic ? MethodKind.StaticConstructor : MethodKind.Constructor;
 
@@ -42,17 +39,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             set => throw new NotSupportedException();
         }
 
-        // TODO: Temporary.
-        public override InsertPosition InsertPosition
-            => new(
-                InsertPositionRelation.Within,
-                (MemberDeclarationSyntax) ((NamedType) this.DeclaringType).Symbol.GetPrimaryDeclaration().AssertNotNull() );
+        public override bool IsImplicit => false;
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Constructor;
 
-        public MemberRef<IMember>? ReplacedMember { get; }
+        public MemberRef<IMember> ReplacedMember { get; }
 
-        public ConstructorBuilder( Advice parentAdvice, INamedType targetType, ITagReader tags )
+        public ConstructorBuilder( Advice parentAdvice, INamedType targetType, IObjectReader tags )
             : base( parentAdvice, targetType, tags )
         {
             if ( targetType.Constructors.Any( c => c.GetSymbol().AssertNotNull().GetPrimarySyntaxReference() == null ) )
@@ -83,7 +76,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                         ((TypeDeclarationSyntax) this.DeclaringType.GetPrimaryDeclaration().AssertNotNull()).Identifier,
                         ParameterList(),
                         null,
-                        Block().WithGeneratedCodeAnnotation(),
+                        Block().WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation ),
                         null );
 
                 return new[] { new IntroducedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
@@ -97,7 +90,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                         ((TypeDeclarationSyntax) this.DeclaringType.GetPrimaryDeclaration().AssertNotNull()).Identifier,
                         ParameterList(),
                         null,
-                        Block().WithGeneratedCodeAnnotation(),
+                        Block().WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation ),
                         null );
 
                 return new[] { new IntroducedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };

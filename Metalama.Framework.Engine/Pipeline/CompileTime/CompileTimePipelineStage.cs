@@ -55,7 +55,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 new AspectLinkerInput(
                     input.Compilation,
                     pipelineStepsResult.LastCompilation,
-                    pipelineStepsResult.NonObservableTransformations,
+                    pipelineStepsResult.Transformations,
                     input.AspectLayers,
                     input.Diagnostics.DiagnosticSuppressions.Concat( pipelineStepsResult.Diagnostics.DiagnosticSuppressions )
                         .Concat( validationResult.Diagnostics.DiagnosticSuppressions ),
@@ -105,6 +105,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             DesignTimeSyntaxTreeGenerator.GenerateDesignTimeSyntaxTrees(
                 input.Compilation,
                 pipelineStepResult.LastCompilation,
+                pipelineStepResult.Transformations,
                 this.ServiceProvider,
                 diagnostics,
                 cancellationToken,
@@ -115,7 +116,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
 
             foreach ( var syntaxTree in additionalSyntaxTrees )
             {
-                var path = Path.GetDirectoryName( syntaxTree.Name );
+                var path = Path.GetDirectoryName( syntaxTree.Name )!;
                 var name = Path.GetFileNameWithoutExtension( syntaxTree.Name );
                 var ext = Path.GetExtension( syntaxTree.Name );
                 var relativePath = Path.Combine( path, $"{name}.g{ext}" );
@@ -150,7 +151,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 {
                     for ( var i = 1; /* Intentionally empty */; i++ )
                     {
-                        var path = Path.GetDirectoryName( filename );
+                        var path = Path.GetDirectoryName( filename )!;
                         var name = Path.GetFileNameWithoutExtension( filename );
                         var ext = Path.GetExtension( filename );
                         var relativePath = Path.Combine( path, $"{name}.g.{i}{ext}" );

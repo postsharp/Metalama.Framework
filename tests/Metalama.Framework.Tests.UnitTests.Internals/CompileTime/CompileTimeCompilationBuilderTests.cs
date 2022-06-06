@@ -6,6 +6,7 @@ using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.TestFramework;
 using Metalama.TestFramework.Utilities;
@@ -547,7 +548,7 @@ class ReferencingClass
 
             var testContext2 = this.CreateTestContext();
 
-            var referencedPath = Path.Combine( testContext2.ProjectOptions.CompileTimeProjectCacheDirectory, "referenced.dll" );
+            var referencedPath = Path.Combine( testContext2.ProjectOptions.PathOptions.CompileTimeProjectCacheDirectory, "referenced.dll" );
 
             using ( var testContext = this.CreateTestContext() )
             {
@@ -614,7 +615,7 @@ public class ReferencedClass
 
             // Emit the referenced assembly.
             var referencedCompilation = CreateCSharpCompilation( referencedCode );
-            var referencedPath = Path.Combine( testContext.ProjectOptions.CompileTimeProjectCacheDirectory, "referenced.dll" );
+            var referencedPath = Path.Combine( testContext.ProjectOptions.PathOptions.CompileTimeProjectCacheDirectory, "referenced.dll" );
 
             DiagnosticList diagnosticList = new();
 
@@ -686,12 +687,12 @@ using Metalama.Framework.Aspects;
 [CompileTime]
 public class CompileTimeOnlyClass
 {
-   static global::System.Type Type1 = global::Metalama.Framework.Engine.ReflectionMocks.CompileTimeType.GetCompileTimeType(""1 (D \""RunTimeOnlyClass\"" (N \""\"" 0 (U (S \""test\"" 3) 2) 1) 0 0 (% 0) 0)"",""RunTimeOnlyClass"");
+   static global::System.Type Type1 = global::Metalama.Framework.Engine.ReflectionMocks.CompileTimeType.ResolveCompileTimeTypeOf(""1 (D \""RunTimeOnlyClass\"" (N \""\"" 0 (U (S \""test\"" 3) 2) 1) 0 0 (% 0) 0)"",null);
    static global::System.Type Type2 = typeof(global::CompileTimeOnlyClass);
    static string Name1 = ""RunTimeOnlyClass"";
    static string Name2 = ""CompileTimeOnlyClass"";
 
-   void Method() { var t = global::Metalama.Framework.Engine.ReflectionMocks.CompileTimeType.GetCompileTimeType(""1 (D \""RunTimeOnlyClass\"" (N \""\"" 0 (U (S \""test\"" 3) 2) 1) 0 0 (% 0) 0)"",""RunTimeOnlyClass""); }
+   void Method() { var t = global::Metalama.Framework.Engine.ReflectionMocks.CompileTimeType.ResolveCompileTimeTypeOf(""1 (D \""RunTimeOnlyClass\"" (N \""\"" 0 (U (S \""test\"" 3) 2) 1) 0 0 (% 0) 0)"",null); }
    string Property => ""RunTimeOnlyClass"";
 }
 ";
@@ -774,8 +775,7 @@ public class SomeRunTimeClass
         [Fact]
         public void FormatCompileTimeCode()
         {
-            using var testContext = this.CreateTestContext();
-            testContext.ProjectOptions.FormatCompileTimeCode = true;
+            using var testContext = this.CreateTestContext( new TestProjectOptions( formatCompileTimeCode: true ) );
 
             var code = @"
 using System;
@@ -797,7 +797,9 @@ public class MyAspect : OverrideMethodAspect
         }
 
         private static string GetCompileTimeCode( TestContext testContext, string code, OutputKind outputKind = OutputKind.DynamicallyLinkedLibrary )
-            => GetCompileTimeCode( testContext, new Dictionary<string, string> { { "main.cs", code } }, outputKind ).Values.Single();
+        {
+            return GetCompileTimeCode( testContext, new Dictionary<string, string> { { "main.cs", code } }, outputKind ).Values.Single();
+        }
 
         private static IReadOnlyDictionary<string, string> GetCompileTimeCode(
             TestContext testContext,
@@ -851,8 +853,7 @@ public class MyAspect : OverrideMethodAspect
         [Fact]
         public void TopLevelStatementsAreRemoved()
         {
-            using var testContext = this.CreateTestContext();
-            testContext.ProjectOptions.FormatCompileTimeCode = true;
+            using var testContext = this.CreateTestContext( new TestProjectOptions( formatCompileTimeCode: true ) );
 
             var code = @"
 using System;
@@ -883,8 +884,7 @@ class CompileTimeClass { }
         [Fact]
         public void FabricClassesAreUnNested()
         {
-            using var testContext = this.CreateTestContext();
-            testContext.ProjectOptions.FormatCompileTimeCode = true;
+            using var testContext = this.CreateTestContext( new TestProjectOptions( formatCompileTimeCode: true ) );
 
             var code = @"
 using System;

@@ -4,6 +4,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
 using System.Reflection;
 
@@ -40,7 +41,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public MemberInfo ToMemberInfo() => this.Underlying.ToMemberInfo();
 
-        public IUserReceiver This
+        public UserReceiver This
             => new ThisInstanceUserReceiver(
                 this.DeclaringType,
                 new AspectReferenceSpecification( UserCodeExecutionContext.Current.AspectLayerId!.Value, AspectReferenceOrder.Base ) );

@@ -12,5 +12,7 @@ namespace Metalama.Framework.Engine.CodeModel
         internal DynamicType( IDynamicTypeSymbol typeSymbol, CompilationModel compilation ) : base( typeSymbol, compilation ) { }
 
         public override TypeKind TypeKind => TypeKind.Dynamic;
+
+        public override ITypeInternal Accept( TypeRewriter visitor ) => visitor.Visit( this );
     }
 }

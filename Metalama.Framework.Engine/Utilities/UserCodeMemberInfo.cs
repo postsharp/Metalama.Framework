@@ -41,7 +41,7 @@ namespace Metalama.Framework.Engine.Utilities
                 _ => throw new AssertionFailedException()
             };
 
-        private static string GetTypeName( Type t ) => typeof(Fabric).IsAssignableFrom( t ) ? t.FullName : t.Name;
+        private static string GetTypeName( Type t ) => typeof(Fabric).IsAssignableFrom( t ) ? t.FullName! : t.Name;
 
         public string ToString( string format, IFormatProvider formatProvider )
             => this._underlying switch

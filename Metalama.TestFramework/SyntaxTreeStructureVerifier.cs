@@ -5,7 +5,7 @@ using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
-using Xunit;
+using System.Text;
 
 namespace Metalama.TestFramework
 {
@@ -15,18 +15,23 @@ namespace Metalama.TestFramework
         /// Checks for "hidden" problems in a <see cref="SyntaxTree"/>, i.e. problems where the _text_
         /// of the source code is valid, but the semantic syntax tree is not.
         /// </summary>
-        public static void Verify( Compilation compilation, IServiceProvider serviceProvider )
+        public static bool Verify( Compilation compilation, IServiceProvider serviceProvider )
         {
             foreach ( var syntaxTree in compilation.SyntaxTrees )
             {
                 var actualSyntaxFactory = syntaxTree.GetRoot().ToSyntaxFactoryDebug( compilation, serviceProvider );
 
-                var parsedFromText = CSharpSyntaxTree.ParseText( syntaxTree.GetRoot().ToString() )
+                var parsedFromText = CSharpSyntaxTree.ParseText( syntaxTree.GetRoot().ToString(), encoding: Encoding.UTF8 )
                     .GetRoot()
                     .ToSyntaxFactoryDebug( compilation, serviceProvider );
 
-                Assert.Equal( parsedFromText, actualSyntaxFactory );
+                if ( parsedFromText != actualSyntaxFactory )
+                {
+                    return false;
+                }
             }
+
+            return true;
         }
     }
 }

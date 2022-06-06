@@ -71,12 +71,14 @@ namespace Metalama.TestFramework
         protected async Task RunTestAsync( string relativePath, [CallerMemberName] string? callerMemberName = null )
         {
             var directory = this.GetDirectory( callerMemberName! );
-            using var testOptions = new TestProjectOptions();
+            var assemblyAssets = GetAssemblyAssets( this.GetType().Assembly );
+            var projectReferences = TestAssemblyMetadataReader.GetMetadata( new ReflectionAssemblyInfo( this.GetType().Assembly ) ).ToProjectReferences();
+
+            using var testOptions = new TestProjectOptions( plugIns: projectReferences.PlugIns );
 
             var serviceProvider =
-                ServiceProviderFactory.GetServiceProvider( testOptions );
-
-            var assemblyAssets = GetAssemblyAssets( this.GetType().Assembly );
+                ServiceProviderFactory.GetServiceProvider( testOptions.PathOptions )
+                    .WithService( testOptions );
 
             var fullPath = Path.Combine( directory, relativePath );
 
@@ -84,8 +86,7 @@ namespace Metalama.TestFramework
             var projectRelativePath = PathUtil.GetRelativePath( assemblyAssets.ProjectProperties.ProjectDirectory, fullPath );
 
             var testInput = TestInput.FromFile( assemblyAssets.ProjectProperties, assemblyAssets.OptionsReader, projectRelativePath );
-            var assemblyMetadata = TestAssemblyMetadataReader.GetMetadata( new ReflectionAssemblyInfo( this.GetType().Assembly ) );
-            var testRunner = TestRunnerFactory.CreateTestRunner( testInput, serviceProvider, assemblyMetadata.ToProjectReferences(), this.Logger );
+            var testRunner = TestRunnerFactory.CreateTestRunner( testInput, serviceProvider, projectReferences, this.Logger );
             await testRunner.RunAndAssertAsync( testInput );
         }
     }

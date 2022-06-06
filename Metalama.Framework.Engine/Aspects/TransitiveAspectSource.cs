@@ -153,7 +153,15 @@ internal class TransitiveAspectSource : IAspectSource, IValidatorSource
     }
 
     private static ReferenceValidatorDriver GetReferenceValidatorDriver( Type type, string methodName )
-        => ValidatorDriverFactory.GetInstance( type )
-            .GetReferenceValidatorDriver(
-                type.GetMethod( methodName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic ) );
+    {
+        var method = type.GetMethod( methodName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic );
+
+        if ( method == null )
+        {
+            throw new ArgumentOutOfRangeException( nameof(methodName), $"Cannot find a method named '{methodName}' in '{type}'." );
+        }
+
+        return ValidatorDriverFactory.GetInstance( type )
+            .GetReferenceValidatorDriver( method );
+    }
 }

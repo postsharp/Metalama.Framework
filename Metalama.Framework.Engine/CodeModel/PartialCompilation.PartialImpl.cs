@@ -40,7 +40,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 PartialCompilation baseCompilation,
                 IReadOnlyList<SyntaxTreeModification>? modifiedSyntaxTrees,
                 IReadOnlyList<SyntaxTree>? addedTrees,
-                ImmutableArray<ManagedResource>? resources )
+                ImmutableArray<ManagedResource> resources )
                 : base( baseCompilation, modifiedSyntaxTrees, addedTrees, resources )
             {
                 this._types = types;
@@ -72,8 +72,10 @@ namespace Metalama.Framework.Engine.CodeModel
             public override PartialCompilation Update(
                 IReadOnlyList<SyntaxTreeModification>? replacedTrees = null,
                 IReadOnlyList<SyntaxTree>? addedTrees = null,
-                ImmutableArray<ManagedResource>? resources = null )
+                ImmutableArray<ManagedResource> resources = default )
             {
+                this.Validate( addedTrees, replacedTrees );
+
                 var syntaxTrees = this._syntaxTrees.ToBuilder();
 
                 if ( replacedTrees != null )

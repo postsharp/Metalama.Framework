@@ -77,7 +77,9 @@ public partial class DesignTimeEntryPointManager
                 {
                     foreach ( var entryPoint in this._parent._providers )
                     {
+#pragma warning disable CS0618
                         if ( version == MatchAllVersion || entryPoint.Version == version )
+#pragma warning restore CS0618
                         {
                             if ( this.ValidateContractVersions( entryPoint.ContractVersions ) )
                             {

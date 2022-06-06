@@ -10,10 +10,10 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
 {
     internal class SyntaxSerializationContext
     {
-        public SyntaxSerializationContext( CompilationModel compilation, OurSyntaxGenerator syntaxGenerator )
+        public SyntaxSerializationContext( CompilationModel compilation, SyntaxGenerationContext syntaxGenerationContext )
         {
             this.CompilationModel = compilation;
-            this.SyntaxGenerator = syntaxGenerator;
+            this.SyntaxGenerationContext = syntaxGenerationContext;
         }
 
         private ReflectionMapper ReflectionMapper => this.CompilationModel.ReflectionMapper;
@@ -26,6 +26,8 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
 
         public CompilationModel CompilationModel { get; }
 
-        public OurSyntaxGenerator SyntaxGenerator { get; }
+        public SyntaxGenerationContext SyntaxGenerationContext { get; }
+
+        public OurSyntaxGenerator SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;
     }
 }

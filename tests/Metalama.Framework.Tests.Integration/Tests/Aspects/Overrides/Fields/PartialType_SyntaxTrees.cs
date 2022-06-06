@@ -1,5 +1,4 @@
 ﻿#if TEST_OPTIONS
-// @Skipped(#30159)
 // @OutputAllSyntaxTrees
 #endif
 

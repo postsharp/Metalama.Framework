@@ -6,12 +6,13 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
-using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Advices
 {
     internal class OverrideEventAdvice : OverrideMemberAdvice<IEvent>
     {
+        private readonly IObjectReader _parameters;
+
         public TemplateMember<IEvent> EventTemplate { get; }
 
         public TemplateMember<IMethod> AddTemplate { get; }
@@ -26,9 +27,12 @@ namespace Metalama.Framework.Engine.Advices
             TemplateMember<IMethod> addTemplate,
             TemplateMember<IMethod> removeTemplate,
             string? layerName,
-            ITagReader tags )
+            IObjectReader tags,
+            IObjectReader parameters )
             : base( aspect, templateInstance, targetDeclaration, layerName, tags )
         {
+            this._parameters = parameters;
+
             // We need either property template or both accessor templates, but never both.
             Invariant.Assert( eventTemplate.IsNotNull || (addTemplate.IsNotNull && removeTemplate.IsNotNull) );
             Invariant.Assert( !(eventTemplate.IsNotNull && (addTemplate.IsNotNull || removeTemplate.IsNotNull)) );
@@ -40,17 +44,18 @@ namespace Metalama.Framework.Engine.Advices
 
         public override void Initialize( IDiagnosticAdder diagnosticAdder ) { }
 
-        public override AdviceResult ToResult( ICompilation compilation, IReadOnlyList<IObservableTransformation> observableTransformations )
+        public override AdviceResult ToResult( ICompilation compilation )
         {
             // TODO: order should be self if the target is introduced on the same layer.
             return AdviceResult.Create(
-                new OverriddenEvent(
+                new OverrideEventTransformation(
                     this,
                     this.TargetDeclaration.GetTarget( compilation ),
                     this.EventTemplate,
                     this.AddTemplate,
                     this.RemoveTemplate,
-                    this.Tags ) );
+                    this.Tags,
+                    this._parameters ) );
         }
     }
 }

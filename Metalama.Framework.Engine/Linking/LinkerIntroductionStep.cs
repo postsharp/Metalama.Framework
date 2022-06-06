@@ -2,11 +2,12 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.AspectOrdering;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Transformations;
@@ -43,18 +44,21 @@ namespace Metalama.Framework.Engine.Linking
             var nameProvider = new LinkerIntroductionNameProvider();
             var syntaxTransformationCollection = new SyntaxTransformationCollection();
 
-            // TODO: Merge observable and non-observable transformations so that the order is preserved.
-            //       Maybe have all transformations already together in the input?
+            // TODO: this sorting can be optimized.
             var allTransformations =
-                MergeOrderedTransformations(
-                        input.OrderedAspectLayers,
-                        input.CompilationModel.GetAllObservableTransformations( false ).Select( x => x.Transformations.OfType<ISyntaxTreeTransformation>() ),
-                        input.NonObservableTransformations.OfType<ISyntaxTreeTransformation>() )
+                input.Transformations.OfType<ISyntaxTreeTransformation>()
+                    .OrderBy( x => x.Advice.AspectLayerId, new AspectLayerIdComparer( input.OrderedAspectLayers ) )
+                    .Cast<ITransformation>()
                     .ToList();
 
             ProcessReplaceTransformations( input, allTransformations, syntaxTransformationCollection, out var replacedTransformations );
 
             var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
+
+            ProcessOverrideTransformations(
+                allTransformations,
+                syntaxTransformationCollection,
+                out var buildersWithSynthesizedSetters );
 
             this.ProcessIntroduceTransformations(
                 input,
@@ -62,6 +66,7 @@ namespace Metalama.Framework.Engine.Linking
                 diagnostics,
                 lexicalScopeFactory,
                 nameProvider,
+                buildersWithSynthesizedSetters,
                 syntaxTransformationCollection,
                 replacedTransformations );
 
@@ -131,36 +136,37 @@ namespace Metalama.Framework.Engine.Linking
             SyntaxTransformationCollection syntaxTransformationCollection,
             out HashSet<ISyntaxTreeTransformation> replacedTransformations )
         {
+            var compilation = input.CompilationModel;
             replacedTransformations = new HashSet<ISyntaxTreeTransformation>();
 
-            foreach ( var transformation in allTransformations.OfType<IReplaceMember>() )
+            foreach ( var transformation in allTransformations.OfType<IReplaceMemberTransformation>() )
             {
-                if ( transformation.ReplacedMember == null )
+                if ( transformation.ReplacedMember.IsDefault )
                 {
                     continue;
                 }
 
-                var replacedMember = transformation.ReplacedMember.Value.GetTarget( input.CompilationModel );
+                // We want to get the replaced member as it is in the compilation of the transformation, i.e. with applied redirections up to that point.
+                var replacedDeclaration = (IDeclaration) transformation.ReplacedMember.GetTarget( compilation, false );
 
-                IDeclaration canonicalReplacedMember = replacedMember switch
+                replacedDeclaration = replacedDeclaration switch
                 {
                     BuiltDeclaration declaration => declaration.Builder,
-                    _ => replacedMember
+                    _ => replacedDeclaration
                 };
 
-                switch ( canonicalReplacedMember )
+                switch ( replacedDeclaration )
                 {
                     case Field replacedField:
-                        var syntaxReference = replacedField.Symbol.GetPrimarySyntaxReference();
+                        var fieldSyntaxReference = replacedField.Symbol.GetPrimarySyntaxReference();
 
-                        if ( syntaxReference == null )
+                        if ( fieldSyntaxReference == null )
                         {
                             throw new AssertionFailedException();
                         }
 
-                        var removedSyntax = syntaxReference.GetSyntax();
-
-                        syntaxTransformationCollection.AddRemovedSyntax( removedSyntax );
+                        var removedFieldSyntax = fieldSyntaxReference.GetSyntax();
+                        syntaxTransformationCollection.AddRemovedSyntax( removedFieldSyntax );
 
                         break;
 
@@ -186,6 +192,7 @@ namespace Metalama.Framework.Engine.Linking
             UserDiagnosticSink diagnostics,
             LexicalScopeFactory lexicalScopeFactory,
             LinkerIntroductionNameProvider nameProvider,
+            IReadOnlyCollection<PropertyBuilder> buildersWithSynthesizedSetters,
             SyntaxTransformationCollection syntaxTransformationCollection,
             HashSet<ISyntaxTreeTransformation> replacedTransformations )
         {
@@ -199,7 +206,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 switch ( transformation )
                 {
-                    case IMemberIntroduction memberIntroduction:
+                    case IIntroduceMemberTransformation memberIntroduction:
                         // Create the SyntaxGenerationContext for the insertion point.
                         var positionInSyntaxTree = GetSyntaxTreePosition( memberIntroduction.InsertPosition );
 
@@ -219,15 +226,49 @@ namespace Metalama.Framework.Engine.Linking
 
                         var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext );
 
+                        introducedMembers = PostProcessIntroducedMembers( introducedMembers );
+
                         syntaxTransformationCollection.Add( memberIntroduction, introducedMembers );
 
                         break;
 
-                    case IIntroducedInterface interfaceIntroduction:
+                    case IIntroduceInterfaceTransformation interfaceIntroduction:
                         var introducedInterface = interfaceIntroduction.GetSyntax();
                         syntaxTransformationCollection.Add( interfaceIntroduction, introducedInterface );
 
                         break;
+                }
+
+                IEnumerable<IntroducedMember> PostProcessIntroducedMembers( IEnumerable<IntroducedMember> introducedMembers )
+                {
+                    if ( transformation is PropertyBuilder propertyBuilder && buildersWithSynthesizedSetters.Contains( propertyBuilder ) )
+                    {
+                        // This is a property which should have a synthesized setter added.
+                        return
+                            introducedMembers
+                                .Select(
+                                    im =>
+                                    {
+                                        switch ( im )
+                                        {
+                                            // ReSharper disable once MissingIndent
+                                            case
+                                            {
+                                                Semantic: IntroducedMemberSemantic.Introduction, Kind: DeclarationKind.Property,
+                                                Syntax: PropertyDeclarationSyntax propertyDeclaration
+                                            }:
+                                                return im.WithSyntax( propertyDeclaration.WithSynthesizedSetter() );
+
+                                            case { Semantic: IntroducedMemberSemantic.InitializerMethod }:
+                                                return im;
+
+                                            default:
+                                                throw new AssertionFailedException();
+                                        }
+                                    } );
+                    }
+
+                    return introducedMembers;
                 }
             }
         }
@@ -261,16 +302,57 @@ namespace Metalama.Framework.Engine.Linking
             return positionInSyntaxTree;
         }
 
+        private static void ProcessOverrideTransformations(
+            List<ITransformation> allTransformations,
+            SyntaxTransformationCollection syntaxTransformationCollection,
+            out IReadOnlyCollection<PropertyBuilder> buildersWithSynthesizedSetters )
+        {
+            buildersWithSynthesizedSetters = new HashSet<PropertyBuilder>();
+
+            foreach ( var transformation in allTransformations.OfType<IOverriddenDeclaration>() )
+            {
+#pragma warning disable SA1513
+                if ( transformation.OverriddenDeclaration is IProperty
+                    {
+                        IsAutoPropertyOrField: true, Writeability: Writeability.ConstructorOnly, SetMethod: { IsImplicit: true }
+                    } overriddenAutoProperty )
+#pragma warning restore SA1513
+                {
+                    switch ( overriddenAutoProperty )
+                    {
+                        case Property codeProperty:
+                            syntaxTransformationCollection.AddAutoPropertyWithSynthesizedSetter(
+                                (PropertyDeclarationSyntax) codeProperty.GetPrimaryDeclaration().AssertNotNull() );
+
+                            break;
+
+                        case BuiltProperty { PropertyBuilder: var builder }:
+                            ((HashSet<PropertyBuilder>) buildersWithSynthesizedSetters).Add( builder.AssertNotNull() );
+
+                            break;
+
+                        case PropertyBuilder builder:
+                            ((HashSet<PropertyBuilder>) buildersWithSynthesizedSetters).Add( builder.AssertNotNull() );
+
+                            break;
+
+                        default:
+                            throw new AssertionFailedException();
+                    }
+                }
+            }
+        }
+
         private void ProcessInsertStatementTransformations(
             AspectLinkerInput input,
             UserDiagnosticSink diagnostics,
             LexicalScopeFactory lexicalScopeFactory,
             List<ITransformation> allTransformations,
             out Dictionary<SyntaxNode, IReadOnlyList<LinkerInsertedStatement>> symbolInsertedStatements,
-            out Dictionary<IMemberIntroduction, IReadOnlyList<LinkerInsertedStatement>> introductionInsertedStatements )
+            out Dictionary<IIntroduceMemberTransformation, IReadOnlyList<LinkerInsertedStatement>> introductionInsertedStatements )
         {
             symbolInsertedStatements = new Dictionary<SyntaxNode, IReadOnlyList<LinkerInsertedStatement>>();
-            introductionInsertedStatements = new Dictionary<IMemberIntroduction, IReadOnlyList<LinkerInsertedStatement>>();
+            introductionInsertedStatements = new Dictionary<IIntroduceMemberTransformation, IReadOnlyList<LinkerInsertedStatement>>();
 
             foreach ( var insertStatementTransformation in allTransformations.OfType<IInsertStatementTransformation>() )
             {
@@ -309,8 +391,12 @@ namespace Metalama.Framework.Engine.Linking
                             break;
                         }
 
-                    case ConstructorBuilder constructorBuilder:
+                    case BuiltConstructor:
+                    case ConstructorBuilder:
                         {
+                            var constructorBuilder = insertStatementTransformation.TargetDeclaration as ConstructorBuilder
+                                                     ?? ((BuiltConstructor) insertStatementTransformation.TargetDeclaration).ConstructorBuilder;
+
                             var positionInSyntaxTree = GetSyntaxTreePosition( constructorBuilder.InsertPosition );
 
                             var syntaxGenerationContext = SyntaxGenerationContext.Create(
@@ -351,78 +437,17 @@ namespace Metalama.Framework.Engine.Linking
                         syntaxGenerationContext,
                         this._serviceProvider );
 
-                    return insertStatementTransformation.GetInsertedStatement( context );
-                }
-            }
-        }
+                    var statement = insertStatementTransformation.GetInsertedStatement( context );
 
-        private static IEnumerable<ITransformation> MergeOrderedTransformations(
-            IReadOnlyList<OrderedAspectLayer> orderedLayers,
-            IEnumerable<IEnumerable<ITransformation>> observableTransformationLists,
-            IEnumerable<ITransformation> nonObservableTransformations )
-        {
-            var enumerators = new LinkedList<IEnumerator<ITransformation>>();
-
-            foreach ( var observableTransformations in observableTransformationLists )
-            {
-                enumerators.AddLast( observableTransformations.GetEnumerator() );
-            }
-
-            enumerators.AddLast( nonObservableTransformations.GetEnumerator() );
-
-            // Initialize enumerators and remove empty ones.
-            var currentEnumerator = enumerators.First;
-
-            while ( currentEnumerator != null )
-            {
-                if ( !currentEnumerator.Value.MoveNext() )
-                {
-                    enumerators.Remove( currentEnumerator );
-                }
-
-                currentEnumerator = currentEnumerator.Next;
-            }
-
-            // Go through ordered layers and yield all transformations for these layers.
-            // Presumes all input enumerable are ordered according to ordered layers.
-            foreach ( var orderedLayer in orderedLayers )
-            {
-                currentEnumerator = enumerators.First;
-
-                if ( currentEnumerator == null )
-                {
-                    break;
-                }
-
-                do
-                {
-                    var current = currentEnumerator.Value.Current.AssertNotNull();
-
-                    while ( current.Advice.AspectLayerId == orderedLayer.AspectLayerId )
+#if DEBUG
+                    if ( statement != null && statement.Value.Statement.HasAnnotations( FormattingAnnotations.GeneratedCodeAnnotationKind ) )
                     {
-                        yield return current;
-
-                        if ( !currentEnumerator.Value.MoveNext() )
-                        {
-                            var toRemove = currentEnumerator;
-                            currentEnumerator = currentEnumerator.Next;
-                            enumerators.Remove( toRemove );
-
-                            goto next;
-                        }
-
-                        current = currentEnumerator.Value.Current;
+                        throw new AssertionFailedException();
                     }
+#endif
 
-                    currentEnumerator = currentEnumerator.Next;
-
-                next:
-
-                    // Comment to make the formatter happy.
-
-                    ;
+                    return statement;
                 }
-                while ( currentEnumerator != null );
             }
         }
     }

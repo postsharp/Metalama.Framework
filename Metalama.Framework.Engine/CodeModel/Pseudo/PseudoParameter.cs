@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         private IMethod DeclaringAccessor { get; }
 
-        public IMemberOrNamedType DeclaringMember => this.DeclaringAccessor;
+        public IMember DeclaringMember => this.DeclaringAccessor;
 
         public RefKind RefKind
             => this.DeclaringAccessor.ContainingDeclaration switch
@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public override IDeclaration? ContainingDeclaration => this.DeclaringAccessor;
 
-        public override IAttributeList Attributes => AttributeList.Empty;
+        public override IAttributeCollection Attributes => AttributeCollection.Empty;
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 

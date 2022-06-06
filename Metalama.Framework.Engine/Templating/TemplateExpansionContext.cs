@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.SyntaxSerialization;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
@@ -24,7 +25,7 @@ namespace Metalama.Framework.Engine.Templating
 {
     internal partial class TemplateExpansionContext : UserCodeExecutionContext
     {
-        private readonly TemplateMember<IMethod> _templateMethod;
+        private readonly BoundTemplateMethod _boundTemplate;
         private readonly IUserExpression? _proceedExpression;
         private static readonly AsyncLocal<SyntaxGenerationContext?> _currentSyntaxGenerationContext = new();
 
@@ -69,21 +70,21 @@ namespace Metalama.Framework.Engine.Templating
             TemplateLexicalScope lexicalScope,
             SyntaxSerializationService syntaxSerializationService,
             SyntaxGenerationContext syntaxGenerationContext,
-            TemplateMember<IMethod> templateMethod,
+            BoundTemplateMethod boundTemplate,
             IUserExpression? proceedExpression,
             AspectLayerId aspectLayerId ) : base(
             syntaxGenerationContext.ServiceProvider,
             metaApi.Diagnostics,
-            UserCodeMemberInfo.FromSymbol( templateMethod.Declaration?.GetSymbol() ),
+            UserCodeMemberInfo.FromSymbol( boundTemplate.Template.Declaration?.GetSymbol() ),
             aspectLayerId,
             compilation,
             metaApi.Target.Declaration )
         {
-            this._templateMethod = templateMethod;
+            this._boundTemplate = boundTemplate;
             this.TemplateInstance = templateInstance;
             this.MetaApi = metaApi;
             this.SyntaxSerializationService = syntaxSerializationService;
-            this.SyntaxSerializationContext = new SyntaxSerializationContext( compilation, syntaxGenerationContext.SyntaxGenerator );
+            this.SyntaxSerializationContext = new SyntaxSerializationContext( compilation, syntaxGenerationContext );
             this.SyntaxGenerationContext = syntaxGenerationContext;
             this.LexicalScope = lexicalScope;
             this._proceedExpression = proceedExpression;
@@ -134,7 +135,7 @@ namespace Metalama.Framework.Engine.Templating
                 var method = this.MetaApi.Method;
                 var returnType = method.ReturnType;
 
-                if ( this._templateMethod.MustInterpretAsAsyncTemplate() )
+                if ( this._boundTemplate.Template.MustInterpretAsAsyncTemplate() )
                 {
                     // If we are in an awaitable async method, the consider the return type as seen by the method body,
                     // not the one as seen from outside.
@@ -151,7 +152,7 @@ namespace Metalama.Framework.Engine.Templating
                     return CreateReturnStatementVoid( returnExpression );
                 }
                 else if ( method.GetIteratorInfoImpl() is { EnumerableKind: EnumerableKind.IAsyncEnumerable or EnumerableKind.IAsyncEnumerator } iteratorInfo &&
-                          this._templateMethod.MustInterpretAsAsyncIteratorTemplate() )
+                          this._boundTemplate.Template.MustInterpretAsAsyncIteratorTemplate() )
                 {
                     switch ( iteratorInfo.EnumerableKind )
                     {
@@ -190,7 +191,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 var compilation = returnType.GetCompilationModel().RoslynCompilation;
 
-                if ( RuntimeExpression.TryFindExpressionType( returnExpression, compilation, out var expressionType ) &&
+                if ( RunTimeTemplateExpression.TryFindExpressionType( returnExpression, compilation, out var expressionType ) &&
                      compilation.HasImplicitConversion( expressionType, returnType.GetSymbol() ) )
                 {
                     // No need to emit a cast.
@@ -402,7 +403,7 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     return
                         Block(
-                                ExpressionStatement( returnExpression.ToRunTimeExpression() ),
+                                ExpressionStatement( returnExpression.ToRunTimeTemplateExpression( this.SyntaxGenerationContext ) ),
                                 ReturnStatement().WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation ) )
                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                 }
@@ -414,14 +415,14 @@ namespace Metalama.Framework.Engine.Templating
             }
             else if ( awaitResult && TypeExtensions.Equals( returnExpression.Type.GetAsyncInfo().ResultType, SpecialType.Void ) )
             {
-                Invariant.Assert( this._templateMethod.MustInterpretAsAsyncTemplate() );
+                Invariant.Assert( this._boundTemplate.Template.MustInterpretAsAsyncTemplate() );
 
                 if ( TypeExtensions.Equals( this.MetaApi.Method.ReturnType, SpecialType.Void )
                      || TypeExtensions.Equals( this.MetaApi.Method.ReturnType.GetAsyncInfo().ResultType, SpecialType.Void ) )
                 {
                     return
                         Block(
-                                ExpressionStatement( AwaitExpression( returnExpression.ToRunTimeExpression() ) ),
+                                ExpressionStatement( AwaitExpression( returnExpression.ToRunTimeTemplateExpression( this.SyntaxGenerationContext ) ) ),
                                 ReturnStatement().WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation ) )
                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                 }
@@ -433,7 +434,7 @@ namespace Metalama.Framework.Engine.Templating
             }
             else
             {
-                return this.CreateReturnStatement( returnExpression.ToRunTimeExpression(), awaitResult );
+                return this.CreateReturnStatement( returnExpression.ToRunTimeTemplateExpression( this.SyntaxGenerationContext ), awaitResult );
             }
         }
 

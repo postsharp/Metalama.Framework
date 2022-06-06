@@ -1,7 +1,3 @@
-#if TEST_OPTIONS
-// @Skipped(These tests need MetalamaPlugInAttribute, but for some reason the assembly is not accessible (TODO).)
-#endif
-
 using System;
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
@@ -12,10 +8,10 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Sdk.Simple
 {
+    [RequireAspectWeaver( "Metalama.Framework.Tests.PublicPipeline.Aspects.Sdk.Simple.AspectWeaver" )]
     internal class Aspect : MethodAspect { }
 
     [MetalamaPlugIn]
-    [AspectWeaver( typeof(Aspect) )]
     internal class AspectWeaver : IAspectWeaver
     {
         public void Transform( AspectWeaverContext context )

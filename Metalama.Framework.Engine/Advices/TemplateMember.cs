@@ -4,26 +4,38 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CompileTime;
+using System;
 
 namespace Metalama.Framework.Engine.Advices
 {
     internal static class TemplateMember
     {
-        public static TemplateMember<T> Create<T>( T? implementation, TemplateInfo templateInfo, TemplateKind selectedKind, TemplateKind interpretedKind )
+        public static TemplateMember<T> Create<T>(
+            T? implementation,
+            TemplateClassMember? templateClassMember,
+            TemplateKind selectedKind,
+            TemplateKind interpretedKind )
             where T : class, IMemberOrNamedType
-            => new( implementation, templateInfo, selectedKind, interpretedKind );
+            => new( implementation, templateClassMember, selectedKind, interpretedKind );
 
-        public static TemplateMember<T> Create<T>( T? implementation, TemplateInfo templateInfo, TemplateKind selectedKind = TemplateKind.Default )
+        public static TemplateMember<T> Create<T>(
+            T? implementation,
+            TemplateClassMember? templateClassMember,
+            TemplateKind selectedKind = TemplateKind.Default )
             where T : class, IMemberOrNamedType
-            => new( implementation, templateInfo, selectedKind );
+            => new( implementation, templateClassMember, selectedKind );
     }
 
     internal readonly struct TemplateMember<T>
         where T : class, IMemberOrNamedType
     {
+        private readonly TemplateClassMember? _templateClassMember;
+
         public T? Declaration { get; }
 
-        public TemplateInfo TemplateInfo { get; }
+        public TemplateClassMember TemplateClassMember => this._templateClassMember ?? throw new InvalidOperationException();
+
+        public TemplateInfo TemplateInfo => this.TemplateClassMember.TemplateInfo;
 
         public TemplateKind SelectedKind { get; }
 
@@ -33,18 +45,24 @@ namespace Metalama.Framework.Engine.Advices
 
         public bool IsNotNull => this.SelectedKind != TemplateKind.None;
 
-        public TemplateMember( T? implementation, TemplateInfo templateInfo, TemplateKind selectedKind = TemplateKind.Default ) : this(
+        public TemplateMember( T? implementation, TemplateClassMember? templateClassMember, TemplateKind selectedKind = TemplateKind.Default ) : this(
             implementation,
-            templateInfo,
+            templateClassMember,
             selectedKind,
             selectedKind ) { }
 
-        public TemplateMember( T? implementation, TemplateInfo templateInfo, TemplateKind selectedKind, TemplateKind interpretedKind )
+        public TemplateMember( T? implementation, TemplateClassMember? templateClassMember, TemplateKind selectedKind, TemplateKind interpretedKind )
         {
             this.Declaration = implementation;
-            this.TemplateInfo = templateInfo;
+            this._templateClassMember = templateClassMember;
 
-            if ( implementation != null )
+            if ( implementation is IMethod { MethodKind: MethodKind.PropertySet or MethodKind.EventAdd or MethodKind.EventRemove }
+                 && templateClassMember?.Parameters.Length != 1 )
+            {
+                throw new AssertionFailedException();
+            }
+
+            if ( implementation != null && templateClassMember != null )
             {
                 this.SelectedKind = selectedKind;
                 this.InterpretedKind = interpretedKind != TemplateKind.None ? interpretedKind : selectedKind;
@@ -57,7 +75,7 @@ namespace Metalama.Framework.Engine.Advices
         }
 
         public TemplateMember<IMemberOrNamedType> Cast()
-            => TemplateMember.Create<IMemberOrNamedType>( this.Declaration!, this.TemplateInfo, this.SelectedKind, this.InterpretedKind );
+            => TemplateMember.Create<IMemberOrNamedType>( this.Declaration!, this.TemplateClassMember, this.SelectedKind, this.InterpretedKind );
 
         public override string ToString() => this.IsNull ? "null" : $"{this.Declaration!.Name}:{this.SelectedKind}";
     }

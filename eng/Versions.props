@@ -11,11 +11,12 @@
 
     <!-- Versions of dependencies -->
     <PropertyGroup>
-        <PostSharpEngineeringVersion>1.0.63-preview</PostSharpEngineeringVersion>
+        <PostSharpEngineeringVersion>1.0.70-preview</PostSharpEngineeringVersion>
         <MetalamaCompilerVersion>branch:master</MetalamaCompilerVersion>
         <MicrosoftCSharpVersion>4.7.0</MicrosoftCSharpVersion>
-        <!-- This is the minimal version of Roslyn we support. The version corresponding to Metalama.Compiler is stored in the RoslynVersion property. -->
-        <RoslynMinimalVersion>4.0.1</RoslynMinimalVersion>
+        <!-- This is the minimal version of the Roslyn AI we support. -->
+        <RoslynApiMinVersion>4.0.1</RoslynApiMinVersion>
+        <RoslynApiMaxVersion>4.2.0</RoslynApiMaxVersion>
         <!-- We should match the versions used by the lowest version of Roslyn we support.-->
         <NewtonsoftJsonVersion>13.0.1</NewtonsoftJsonVersion>
         <StreamJsonRpcVersion>2.8.28</StreamJsonRpcVersion>

@@ -2,6 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Extensibility;
+using Metalama.Backstage.Utilities;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Options;
@@ -15,7 +17,6 @@ using System.Collections.Immutable;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
@@ -68,24 +69,39 @@ namespace Metalama.Framework.Engine.CompileTime
             this._cacheDirectory = serviceProvider.GetRequiredService<IPathOptions>().AssemblyLocatorCacheDirectory;
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( nameof(ReferenceAssemblyLocator) );
 
-            var projectOptions = serviceProvider.GetService<IProjectOptions>();
+            var platformInfo = (IPlatformInfo?) serviceProvider.GetService( typeof(IPlatformInfo) );
 
-            if ( projectOptions != null )
+            if ( platformInfo != null )
             {
-                this._dotNetSdkDirectory = projectOptions.DotNetSdkDirectory;
-                this._logger.Trace?.Log( $"Project options available. DotNetSdkDirectory = '{this._dotNetSdkDirectory}'." );
+                this._dotNetSdkDirectory = platformInfo.DotNetSdkDirectory;
+                this._logger.Trace?.Log( $"Platform information available. DotNetSdkDirectory = '{this._dotNetSdkDirectory}'." );
             }
             else
             {
-                this._logger.Trace?.Log( $"No project options available." );
+                this._logger.Trace?.Log( $"Platform information not available." );
             }
 
             // Get Metalama implementation assemblies (but not the public API, for which we need a special compile-time build).
-            var metalamaImplementationAssemblies = new Dictionary<string, string>()
+            var metalamaImplementationAssemblies =
+                new[] { typeof(IAspectWeaver), typeof(TemplateSyntaxFactory) }.ToDictionary(
+                    x => x.Assembly.GetName().Name,
+                    x => x.Assembly.Location );
+
+            // Add the Metalama.Compiler.Interface" assembly. We cannot get it through typeof because types are directed to Microsoft.CodeAnalysis at compile time.
+            // Strangely, there can be many instances of this same assembly.
+            var metalamaCompilerInterfaceAssembly = AppDomain.CurrentDomain.GetAssemblies()
+                .Where( a => a.FullName.StartsWith( "Metalama.Compiler.Interface,", StringComparison.Ordinal ) )
+                .OrderByDescending( a => a.GetName().Version )
+                .FirstOrDefault();
+
+            if ( metalamaCompilerInterfaceAssembly == null )
             {
-                [typeof(AspectWeaverAttribute).Assembly.GetName().Name] = typeof(AspectWeaverAttribute).Assembly.Location,
-                [typeof(TemplateSyntaxFactory).Assembly.GetName().Name] = typeof(TemplateSyntaxFactory).Assembly.Location
-            };
+                throw new AssertionFailedException( "Cannot find the Metalama.Compiler.Interface assembly." );
+            }
+
+            metalamaImplementationAssemblies.Add(
+                "Metalama.Compiler.Interface",
+                metalamaCompilerInterfaceAssembly.Location );
 
             this.MetalamaImplementationAssemblyNames = metalamaImplementationAssemblies.Keys.ToImmutableArray();
             var metalamaImplementationPaths = metalamaImplementationAssemblies.Values;
@@ -109,7 +125,8 @@ namespace Metalama.Framework.Engine.CompileTime
                 new[] { _compileTimeFrameworkAssemblyName, "Metalama.Compiler.Interface" }.Select(
                     name => (MetadataReference)
                         MetadataReference.CreateFromStream(
-                            this.GetType().Assembly.GetManifestResourceStream( name + ".dll" ),
+                            this.GetType().Assembly.GetManifestResourceStream( name + ".dll" )
+                            ?? throw new InvalidOperationException( $"{name}.dll not found in assembly manifest resources." ),
                             filePath: $"[{this.GetType().Assembly.Location}]{name}.dll" ) );
 
             this.StandardCompileTimeMetadataReferences =
@@ -160,7 +177,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             File.WriteAllText( Path.Combine( this._cacheDirectory, "TempProject.csproj" ), projectText );
 
-            var dotnetPath = this.GetDotNetPath();
+            var dotnetPath = PlatformUtilities.GetDotNetPath( this._logger, this._dotNetSdkDirectory );
 
             // We may consider executing msbuild.exe instead of dotnet.exe when the build itself runs using msbuild.exe.
             // This way we wouldn't need to require a .NET SDK to be installed. Also, it seems that Rider requires the full path.
@@ -193,75 +210,6 @@ namespace Metalama.Framework.Engine.CompileTime
             }
 
             return File.ReadAllLines( referenceAssemblyListFile );
-        }
-
-        private string GetDotNetPath()
-        {
-            string dotnetPath;
-            string fileName;
-
-            if ( RuntimeInformation.IsOSPlatform( OSPlatform.Windows ) )
-            {
-                // Find dotnet.exe at well-known locations.
-
-                dotnetPath = Environment.ExpandEnvironmentVariables( "%ProgramFiles%\\dotnet\\dotnet.exe" );
-
-                if ( File.Exists( dotnetPath ) )
-                {
-                    this._logger.Trace?.Log( $"dotnet.exe found in '{dotnetPath}'." );
-
-                    return dotnetPath;
-                }
-                else
-                {
-                    this._logger.Trace?.Log( $"Looked for dotnet.exe in '{dotnetPath}' but it did not exist." );
-                }
-
-                dotnetPath = Environment.ExpandEnvironmentVariables( "%ProgramFiles(x86)%\\dotnet\\dotnet.exe" );
-
-                if ( File.Exists( dotnetPath ) )
-                {
-                    this._logger.Trace?.Log( $"dotnet.exe found in '{dotnetPath}'." );
-
-                    return dotnetPath;
-                }
-                else
-                {
-                    this._logger.Trace?.Log( $"Looked for dotnet.exe in '{dotnetPath}' but it did not exist." );
-                }
-
-                fileName = "dotnet.exe";
-            }
-            else
-            {
-                fileName = "dotnet";
-            }
-
-            // Look in the DotNetSdkDirectory, if we know it.
-
-            if ( this._dotNetSdkDirectory != null )
-            {
-                for ( var directory = this._dotNetSdkDirectory; directory != null; directory = Path.GetDirectoryName( directory ) )
-                {
-                    dotnetPath = Path.Combine( directory, fileName );
-
-                    if ( File.Exists( dotnetPath ) )
-                    {
-                        this._logger.Trace?.Log( $"dotnet.exe found in '{dotnetPath}'." );
-
-                        return dotnetPath;
-                    }
-                    else
-                    {
-                        this._logger.Trace?.Log( $"Looked for {fileName} in '{dotnetPath}' but it did not exist." );
-                    }
-                }
-            }
-
-            // The file was not found.
-            this._logger.Trace?.Log( $"{fileName} was found nowhere. We hope it will be in the path." );
-
-            return "dotnet";
         }
     }
 }

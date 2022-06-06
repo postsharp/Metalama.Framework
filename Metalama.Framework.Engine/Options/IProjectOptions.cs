@@ -1,16 +1,14 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Project;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Options
 {
     /// <summary>
     /// Exposes project options (typically defined in MSBuild or .editorconfig) in a strongly-typed manner.
-    /// The production implementation is <see cref="ProjectOptions"/> but tests can provide their own implementation.
+    /// The production implementation is <see cref="MSBuildProjectOptions"/> but tests can provide their own implementation.
     /// </summary>
     public interface IProjectOptions : IService
     {
@@ -60,7 +58,6 @@ namespace Metalama.Framework.Engine.Options
         /// </summary>
         IProjectOptions Apply( IProjectOptions options );
 
-        // Only for user properties.
         bool TryGetProperty( string name, [NotNullWhen( true )] out string? value );
 
         /// <summary>
@@ -73,6 +70,18 @@ namespace Metalama.Framework.Engine.Options
         /// </summary>
         string? AdditionalCompilationOutputDirectory { get; }
 
-        string? DotNetSdkDirectory { get; }
+        /// <summary>
+        /// Invoked when project options have been applied globally or contextually through the <see cref="!:ServiceProviderFactory" />,
+        /// and are then overridden by options provided by the compiler.
+        /// </summary>
+        IProjectOptions Apply( IProjectOptions options );
+
+        // Only for user properties.
+        bool TryGetProperty( string name, out string? value );
+
+        /// <summary>
+        /// Gets a value indicating whether the compile-time-only code should be removed from the main compiled assembly.
+        /// </summary>
+        bool RemoveCompileTimeOnlyCode { get; }
     }
 }

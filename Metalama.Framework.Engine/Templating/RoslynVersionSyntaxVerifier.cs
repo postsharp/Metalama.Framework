@@ -62,4 +62,17 @@ internal partial class RoslynVersionSyntaxVerifier : CSharpSyntaxWalker
             }
         }
     }
+    
+    private void VisitVersionSpecificFieldKind( in SyntaxNodeOrToken nodeOrToken, RoslynApiVersion version )
+    {
+        if ( version > this.MaximalAcceptableApiVersion )
+        {
+            this.OnForbiddenSyntaxUsed( nodeOrToken );
+        }
+
+        if ( version > this.MaximalUsedVersion )
+        {
+            this.MaximalUsedVersion = version;
+        }
+    }
 }

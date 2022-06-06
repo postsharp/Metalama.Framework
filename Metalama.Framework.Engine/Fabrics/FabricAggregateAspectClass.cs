@@ -1,13 +1,16 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Compiler;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Fabrics;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.Fabrics
 {
@@ -20,6 +23,9 @@ namespace Metalama.Framework.Engine.Fabrics
         {
             this.Project = project;
             this.TemplateClasses = templateClasses;
+
+            this.GeneratedCodeAnnotation =
+                MetalamaCompilerAnnotations.CreateGeneratedCodeAnnotation( "fabric " + string.Join( " or ", templateClasses.Select( x => x.FullName ) ) );
         }
 
         public string FullName => FabricTopLevelAspectClass.FabricAspectName;
@@ -42,7 +48,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
         public ImmutableArray<TemplateClass> TemplateClasses { get; }
 
-        public bool IsFreemium => false;
+        public SyntaxAnnotation GeneratedCodeAnnotation { get; }
 
         public EligibleScenarios GetEligibility( IDeclaration obj ) => EligibleScenarios.Aspect;
 

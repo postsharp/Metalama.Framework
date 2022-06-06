@@ -59,6 +59,14 @@ namespace Metalama.Framework.Engine.Templating
                     TemplatingScope.CompileTimeOnly,
                     reason );
 
+            public static ScopeContext CreateRunTimeOrCompileTimeScope( ScopeContext parentScope, string reason )
+                => new(
+                    parentScope.CurrentBreakOrContinueScope,
+                    parentScope.IsRuntimeConditionalBlock,
+                    parentScope.IsRuntimeConditionalBlockReason,
+                    TemplatingScope.RunTimeOrCompileTime,
+                    reason );
+
             public static ScopeContext CreatePreferredRunTimeScope( ScopeContext parentScope, string reason )
                 => new(
                     parentScope.CurrentBreakOrContinueScope,

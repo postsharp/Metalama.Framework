@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 PartialCompilation baseCompilation,
                 IReadOnlyList<SyntaxTreeModification>? modifiedSyntaxTrees,
                 IReadOnlyList<SyntaxTree>? addedTrees,
-                ImmutableArray<ManagedResource>? resources )
+                ImmutableArray<ManagedResource> resources )
                 : base( baseCompilation, modifiedSyntaxTrees, addedTrees, resources ) { }
 
             [Memo]
@@ -55,8 +55,12 @@ namespace Metalama.Framework.Engine.CodeModel
             public override PartialCompilation Update(
                 IReadOnlyList<SyntaxTreeModification>? replacedTrees = null,
                 IReadOnlyList<SyntaxTree>? addedTrees = null,
-                ImmutableArray<ManagedResource>? resources = null )
-                => new CompleteImpl( this, replacedTrees, addedTrees, resources );
+                ImmutableArray<ManagedResource> resources = default )
+            {
+                this.Validate( addedTrees, replacedTrees );
+
+                return new CompleteImpl( this, replacedTrees, addedTrees, resources );
+            }
         }
     }
 }

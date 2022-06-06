@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 ? this.Relationships[baseType].SelectManyRecursive( t => this.Relationships[t] ).ToImmutableArray()
                 : this.Relationships[baseType];
 
-        public DerivedTypeIndex WithIntroducedInterfaces( IEnumerable<IIntroducedInterface> introducedInterfaces )
+        public DerivedTypeIndex WithIntroducedInterfaces( IEnumerable<IIntroduceInterfaceTransformation> introducedInterfaces )
         {
             Builder? builder = null;
 

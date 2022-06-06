@@ -15,7 +15,9 @@ internal class Generator
     private readonly SyntaxDocument _syntax;
 
     private static string RemoveSuffix( string s, string suffix )
-        => s.EndsWith( suffix, StringComparison.Ordinal ) ? s.Substring( 0, s.Length - suffix.Length ) : s;
+    {
+        return s.EndsWith( suffix, StringComparison.Ordinal ) ? s.Substring( 0, s.Length - suffix.Length ) : s;
+    }
 
     public Generator( SyntaxDocument syntax, string targetDirectory )
     {
@@ -25,7 +27,7 @@ internal class Generator
 
     private static void CreateDirectoryForFile( string path )
     {
-        var directory = Path.GetDirectoryName( path );
+        var directory = Path.GetDirectoryName( path )!;
 
         if ( !Directory.Exists( directory ) )
         {
@@ -97,7 +99,7 @@ internal class Generator
         writer.WriteLine( "{" );
 
         // Process syntax types that are not common to all Roslyn versions.
-        foreach ( var type in this._syntax.Types.OfType<Node>().Where( t => t.MinimalRoslynVersion!.Index > 0 ) )
+        foreach ( var type in this._syntax.Types.OfType<Node>().Where( IsVersionSpecificType ) )
         {
             writer.WriteLine( $"\tpublic override void Visit{RemoveSuffix( type.Name, "Syntax" )}( {type.Name} node )" );
             writer.WriteLine( "\t{" );
@@ -107,20 +109,43 @@ internal class Generator
 
         // Process syntax types that are common to all Roslyn versions, but have version-specific fields.
         foreach ( var type in this._syntax.Types.OfType<Node>()
-                     .Where( t => t.MinimalRoslynVersion!.Index == 0 && t.Fields.Any( f => f.MinimalRoslynVersion!.Index > 0 ) ) )
+                     .Where( t => !IsVersionSpecificType( t ) && t.Fields.Any( f => IsVersionSpecificField( f ) || GetVersionSpecificKinds( f ).Any() ) ) )
         {
             writer.WriteLine( $"\tpublic override void Visit{RemoveSuffix( type.Name, "Syntax" )}( {type.Name} node )" );
             writer.WriteLine( "\t{" );
 
-            foreach ( var field in type.Fields.Where( f => f.MinimalRoslynVersion!.Index > 0 ) )
+            foreach ( var field in type.Fields.Where( f => IsVersionSpecificField( f ) || GetVersionSpecificKinds( f ).Any() ) )
             {
-                writer.WriteLine( $"\t\tthis.VisitVersionSpecificField( node.{field.Name}, {field.MinimalRoslynVersion!.QualifiedEnumValue} ); " );
+                if ( IsVersionSpecificField( field ) )
+                {
+                    writer.WriteLine( $"\t\tthis.VisitVersionSpecificField( node.{field.Name}, {field.MinimalRoslynVersion!.QualifiedEnumValue} ); " );
+                }
+                else
+                {
+                    writer.WriteLine( $"\t\tswitch( node.{field.Name}.Kind() )" );
+                    writer.WriteLine( "\t\t{" );
+
+                    foreach ( var k in GetVersionSpecificKinds( field ) )
+                    {
+                        writer.WriteLine( $"\t\t\tcase SyntaxKind.{k.Key.Name}:" );
+                        writer.WriteLine( $"\t\t\t\tthis.VisitVersionSpecificFieldKind( node.{field.Name}, {k.Value!.QualifiedEnumValue} ); " );
+                        writer.WriteLine( $"\t\t\t\tbreak;" );
+                    }
+
+                    writer.WriteLine( "\t\t}" );
+                }
             }
 
             writer.WriteLine( "\t}" );
         }
 
         writer.WriteLine( "}" );
+
+        bool IsVersionSpecificType( Node t ) => t.MinimalRoslynVersion!.Index > 0;
+
+        bool IsVersionSpecificField( Field f ) => f.MinimalRoslynVersion!.Index > 0;
+
+        IEnumerable<KeyValuePair<Kind, RoslynVersion>> GetVersionSpecificKinds( Field f ) => f.KindsMinimalRoslynVersions.Where( k => k.Value.Index > 0 );
     }
 
     private static void WriteUsings( StreamWriter writer )
@@ -155,7 +180,10 @@ internal class Generator
         return IsNodeList( typeName ) || IsSeparatedNodeList( typeName ) || typeName == "SyntaxNodeOrTokenList";
     }
 
-    private bool CanBeAutoCreated( Node node, Field field ) => IsAutoCreatableToken( node, field ) || this.IsAutoCreatableNode( field );
+    private bool CanBeAutoCreated( Node node, Field field )
+    {
+        return IsAutoCreatableToken( node, field ) || this.IsAutoCreatableNode( field );
+    }
 
     private bool IsAutoCreatableNode( Field field )
     {
@@ -190,9 +218,15 @@ internal class Generator
         return count;
     }
 
-    private static bool IsOptional( Field f ) => IsTrue( f.Optional );
+    private static bool IsOptional( Field f )
+    {
+        return IsTrue( f.Optional );
+    }
 
-    private static bool IsTrue( string? val ) => val != null && string.Compare( val, "true", StringComparison.OrdinalIgnoreCase ) == 0;
+    private static bool IsTrue( string? val )
+    {
+        return val != null && string.Compare( val, "true", StringComparison.OrdinalIgnoreCase ) == 0;
+    }
 
     private bool IsValueField( Field field )
     {
@@ -214,10 +248,14 @@ internal class Generator
         return typeName.StartsWith( "SeparatedSyntaxList<", StringComparison.Ordinal );
     }
 
-    private static string CommaJoin( params object[] values ) => Join( ", ", values );
+    private static string CommaJoin( params object[] values )
+    {
+        return Join( ", ", values );
+    }
 
     private static string Join( string separator, params object[] values )
-        => string.Join(
+    {
+        return string.Join(
             separator,
             values.SelectMany(
                 v => (v switch
@@ -226,6 +264,7 @@ internal class Generator
                     IEnumerable<string> ss => ss,
                     _ => throw new InvalidOperationException( "Join must be passed strings or collections of strings" )
                 }).Where( s => s != "" ) ) );
+    }
 
     private static string CamelCase( string name )
     {
@@ -375,7 +414,9 @@ internal class Generator
             writer.WriteLine( "\t\t\tthis.Indent();" );
             writer.WriteLine( "\t\t\tExpressionSyntax result;" );
 
-            if ( node.Fields.Select( f => f.MinimalRoslynVersion ).Distinct().Count() == 1 )
+            var minimalRoslynApiVersions = node.Fields.Select( f => f.MinimalRoslynVersion ).Distinct().OrderBy( v => v.Index ).ToList();
+
+            if ( minimalRoslynApiVersions.Count == 1 )
             {
                 // All fields in the syntax node are available in all versions of the Roslyn API supporting this syntax type.
                 GenerateForFields( "\t\t\t", node.Fields );
@@ -385,12 +426,22 @@ internal class Generator
                 writer.WriteLine( "\t\t\tswitch ( this.TargetApiVersion )" );
                 writer.WriteLine( "\t\t\t{" );
 
-                for ( var versionIndex = node.MinimalRoslynVersion!.Index; versionIndex <= this._syntax.Version.Index; versionIndex++ )
+                for ( var i = 0; i < minimalRoslynApiVersions.Count; i++ )
                 {
-                    var version = syntaxVersions[versionIndex].Version;
+                    var minVersion = minimalRoslynApiVersions[i];
+                    var maxVersionIndex = i == minimalRoslynApiVersions.Count - 1 ? syntaxVersions.Length - 1 : minimalRoslynApiVersions[i + 1].Index - 1;
 
-                    writer.WriteLine( $"\t\t\t\tcase {version.QualifiedEnumValue}:" );
-                    var fields = node.Fields.Where( f => f.MinimalRoslynVersion!.Index <= versionIndex ).ToList();
+                    if ( maxVersionIndex > this._syntax.Version.Index )
+                    {
+                        maxVersionIndex = this._syntax.Version.Index;
+                    }
+
+                    for ( var j = minVersion.Index; j <= maxVersionIndex; j++ )
+                    {
+                        writer.WriteLine( $"\t\t\t\tcase {syntaxVersions[j].Version.QualifiedEnumValue}:" );
+                    }
+
+                    var fields = node.Fields.Where( f => f.MinimalRoslynVersion!.Index <= minVersion.Index ).ToList();
                     GenerateForFields( "\t\t\t\t\t", fields );
                     writer.WriteLine( $"\t\t\t\t\tbreak;" );
                 }
@@ -515,6 +566,13 @@ internal class Generator
                 var orderedMinimalFactoryFields = node.Fields.Where( factoryWithNoAutoCreatableTokenFields.Contains ).ToList();
                 WriteMethod( orderedMinimalFactoryFields );
             }
+            else if ( node.Name == "LiteralExpressionSyntax" )
+            {
+                // This is added for backward compatibility because SyntaxFactory.LiteralExpression(kind) is implemented manually
+                // since Roslyn 4.2.0.
+                
+                WriteMethod( new List<Field>() );
+            }
         }
 
         writer.WriteLine( "}" );
@@ -629,16 +687,19 @@ internal class Generator
     }
 
     private static bool IgnoreFieldInRunTimeCode( string fieldType )
-        => fieldType switch
+    {
+        return fieldType switch
         {
             "BlockSyntax" => true,
             "ArrowExpressionClauseSyntax" => true,
             "EqualsValueClauseSyntax" => true,
             _ => false
         };
+    }
 
     private static bool IsTrivialToken( Kind tokenKind )
-        => tokenKind.Name switch
+    {
+        return tokenKind.Name switch
         {
             "StringLiteralToken" => false,
             "CharacterLiteralToken" => false,
@@ -646,4 +707,5 @@ internal class Generator
             "IdentifierToken" => false,
             _ => true
         };
+    }
 }
