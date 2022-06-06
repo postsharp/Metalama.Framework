@@ -31,6 +31,7 @@
 
     <ItemGroup>
         <Compile Include="..\.generated\$(ThisRoslynVersion)\Metalama.Framework.Engine\*.cs" />
+        <Compile Remove="Transformations\IntroduceConstructorParameterTransformation.cs" />
     </ItemGroup>
 
     <ItemGroup>

@@ -4,6 +4,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.DependencyInjection;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
@@ -15,7 +16,7 @@ namespace Metalama.Framework.Engine.Advices
     // ReSharper disable once UnusedType.Global
     // TODO: Use this type and remove the warning waiver.
 
-    internal class IntroduceFieldAdvice : IntroduceMemberAdvice<IField, FieldBuilder>
+    internal class IntroduceFieldAdvice : IntroduceFieldOrPropertyAdvice<IField, FieldBuilder>
     {
         public IFieldBuilder Builder => this.MemberBuilder;
 
@@ -28,8 +29,9 @@ namespace Metalama.Framework.Engine.Advices
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             string? layerName,
-            IObjectReader tags )
-            : base( aspect, templateInstance, targetDeclaration, explicitName, fieldTemplate, scope, overrideStrategy, layerName, tags )
+            IObjectReader tags,
+            IPullStrategy? pullStrategy )
+            : base( aspect, templateInstance, targetDeclaration, explicitName, fieldTemplate, scope, overrideStrategy, layerName, tags, pullStrategy )
         {
             this.MemberBuilder = new FieldBuilder( this, targetDeclaration, this.MemberName, tags );
             this.MemberBuilder.InitializerTemplate = fieldTemplate.GetInitializerTemplate();
@@ -109,7 +111,7 @@ namespace Metalama.Framework.Engine.Advices
                 }
             }
 
-            return AdviceResult.Create( this.MemberBuilder );
+            return this.IntroduceMemberAndPull( targetDeclaration );
         }
     }
 }

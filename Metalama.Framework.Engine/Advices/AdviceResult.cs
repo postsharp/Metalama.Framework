@@ -17,14 +17,16 @@ namespace Metalama.Framework.Engine.Advices
 
         public ImmutableArray<INonObservableTransformation> NonObservableTransformations { get; }
 
-        private AdviceResult(
-            ImmutableArray<Diagnostic> diagnostic,
-            ImmutableArray<IObservableTransformation> observableTransformations,
-            ImmutableArray<INonObservableTransformation> nonObservableTransformations )
+        public AdviceResult(
+            ImmutableArray<Diagnostic> diagnostic = default,
+            ImmutableArray<IObservableTransformation> observableTransformations = default,
+            ImmutableArray<INonObservableTransformation> nonObservableTransformations = default )
         {
-            this.Diagnostics = diagnostic;
-            this.ObservableTransformations = observableTransformations;
-            this.NonObservableTransformations = nonObservableTransformations;
+            this.Diagnostics = diagnostic.IsDefault ? ImmutableArray<Diagnostic>.Empty : diagnostic;
+            this.ObservableTransformations = observableTransformations.IsDefault ? ImmutableArray<IObservableTransformation>.Empty : observableTransformations;
+
+            this.NonObservableTransformations =
+                nonObservableTransformations.IsDefault ? ImmutableArray<INonObservableTransformation>.Empty : nonObservableTransformations;
         }
 
         public static AdviceResult Create()
@@ -40,7 +42,7 @@ namespace Metalama.Framework.Engine.Advices
             return Create( (IEnumerable<ITransformation>) transformations );
         }
 
-        public static AdviceResult Create( IEnumerable<ITransformation> transformations )
+        public static AdviceResult Create( IEnumerable<ITransformation> transformations, ImmutableArray<Diagnostic> diagnostics = default )
         {
             ImmutableArray<IObservableTransformation>.Builder? observableTransformations = null;
             ImmutableArray<INonObservableTransformation>.Builder? nonObservableTransformations = null;
@@ -68,7 +70,7 @@ namespace Metalama.Framework.Engine.Advices
             }
 
             return new AdviceResult(
-                ImmutableArray<Diagnostic>.Empty,
+                diagnostics.IsDefault ? ImmutableArray<Diagnostic>.Empty : diagnostics,
                 observableTransformations != null ? observableTransformations.ToImmutable() : ImmutableArray<IObservableTransformation>.Empty,
                 nonObservableTransformations != null ? nonObservableTransformations.ToImmutable() : ImmutableArray<INonObservableTransformation>.Empty );
         }

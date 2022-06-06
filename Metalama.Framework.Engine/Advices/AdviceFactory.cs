@@ -4,6 +4,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.DependencyInjection;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
@@ -425,7 +426,8 @@ namespace Metalama.Framework.Engine.Advices
             string templateName,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            object? tags = null )
+            object? tags = null,
+            IPullStrategy? pullStrategy = null )
         {
             if ( this._templateInstance == null )
             {
@@ -446,7 +448,8 @@ namespace Metalama.Framework.Engine.Advices
                 scope,
                 whenExists,
                 this._layerName,
-                ObjectReader.GetReader( tags ) );
+                ObjectReader.GetReader( tags ),
+                pullStrategy );
 
             advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
@@ -459,11 +462,12 @@ namespace Metalama.Framework.Engine.Advices
 
         public IFieldBuilder IntroduceField(
             INamedType targetType,
-            string templateName,
+            string fieldName,
             IType fieldType,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            object? tags = null )
+            object? tags = null,
+            IPullStrategy? pullStrategy = null )
         {
             if ( this._templateInstance == null )
             {
@@ -476,12 +480,13 @@ namespace Metalama.Framework.Engine.Advices
                 this.State.AspectInstance,
                 this._templateInstance,
                 targetType,
-                templateName,
+                fieldName,
                 default,
                 scope,
                 whenExists,
                 this._layerName,
-                ObjectReader.GetReader( tags ) );
+                ObjectReader.GetReader( tags ),
+                pullStrategy );
 
             advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
@@ -496,12 +501,70 @@ namespace Metalama.Framework.Engine.Advices
 
         public IFieldBuilder IntroduceField(
             INamedType targetType,
-            string templateName,
+            string fieldName,
             Type fieldType,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            object? tags = null )
-            => this.IntroduceField( targetType, templateName, this.State.Compilation.Factory.GetTypeByReflectionType( fieldType ), scope, whenExists, tags );
+            object? tags = null,
+            IPullStrategy? pullStrategy = null )
+            => this.IntroduceField( targetType, fieldName, this.State.Compilation.Factory.GetTypeByReflectionType( fieldType ), scope, whenExists, tags );
+
+        public IPropertyBuilder IntroduceAutomaticProperty(
+            INamedType targetType,
+            string propertyName,
+            IType propertyType,
+            IntroductionScope scope = IntroductionScope.Default,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            object? tags = null,
+            IPullStrategy? pullStrategy = null )
+        {
+            if ( this._templateInstance == null )
+            {
+                throw new InvalidOperationException();
+            }
+
+            var diagnosticList = new DiagnosticList();
+
+            var advice = new IntroducePropertyAdvice(
+                this.State.AspectInstance,
+                this._templateInstance,
+                targetType,
+                propertyName,
+                default,
+                default,
+                default,
+                scope,
+                whenExists,
+                this._layerName,
+                ObjectReader.GetReader( tags ),
+                pullStrategy );
+
+            advice.Initialize( diagnosticList );
+            ThrowOnErrors( diagnosticList );
+            this.State.Advices.Add( advice );
+
+            this.State.Diagnostics.Report( diagnosticList );
+
+            advice.Builder.Type = propertyType;
+
+            return advice.Builder;
+        }
+
+        public IPropertyBuilder IntroduceAutomaticProperty(
+            INamedType targetType,
+            string propertyName,
+            Type propertyType,
+            IntroductionScope scope = IntroductionScope.Default,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            object? tags = null,
+            IPullStrategy? pullStrategy = null )
+            => this.IntroduceAutomaticProperty(
+                targetType,
+                propertyName,
+                this.State.Compilation.Factory.GetTypeByReflectionType( propertyType ),
+                scope,
+                whenExists,
+                tags );
 
         public IPropertyBuilder IntroduceProperty(
             INamedType targetType,
@@ -539,7 +602,8 @@ namespace Metalama.Framework.Engine.Advices
                 scope,
                 whenExists,
                 this._layerName,
-                ObjectReader.GetReader( tags ) );
+                ObjectReader.GetReader( tags ),
+                null );
 
             advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
@@ -592,7 +656,8 @@ namespace Metalama.Framework.Engine.Advices
                 scope,
                 whenExists,
                 this._layerName,
-                ObjectReader.GetReader( tags ) );
+                ObjectReader.GetReader( tags ),
+                null );
 
             advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );

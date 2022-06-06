@@ -91,6 +91,9 @@ namespace Metalama.Framework.Engine.CodeModel
             InitializeDictionary( out this._indexers );
             InitializeDictionary( out this._interfaceImplementations );
 
+            this._parameters = ImmutableDictionary.Create<Ref<IHasParameters>, ParameterUpdatableCollection>()
+                .WithComparers( DeclarationRefEqualityComparer<Ref<IHasParameters>>.Default );
+
             this.Factory = new DeclarationFactory( this );
 
             // Discover custom attributes.
@@ -158,6 +161,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this._events = prototype._events;
             this._interfaceImplementations = prototype._interfaceImplementations;
             this._staticConstructors = prototype._staticConstructors;
+            this._parameters = prototype._parameters;
 
             this.Factory = new DeclarationFactory( this );
             this._depthsCache = prototype._depthsCache;

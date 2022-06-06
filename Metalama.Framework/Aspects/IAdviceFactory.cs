@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.DependencyInjection;
 using Metalama.Framework.Validation;
 using System;
 using System.Collections.Generic;
@@ -109,6 +110,7 @@ namespace Metalama.Framework.Aspects
         /// <param name="whenExists">Determines the implementation strategy when a property of the same name is already declared in the target type.
         ///     The default strategy is to fail with a compile-time error.</param>
         /// <param name="tags"></param>
+        /// <param name="pullStrategy"></param>
         /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
         /// <seealso href="@introducing-members"/>
         IFieldBuilder IntroduceField(
@@ -116,7 +118,8 @@ namespace Metalama.Framework.Aspects
             string template,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            object? tags = null );
+            object? tags = null,
+            IPullStrategy? pullStrategy = null );
 
         /// <summary>
         /// Introduces a field to the target type by specifying a field name and <see cref="IType"/>.
@@ -129,6 +132,7 @@ namespace Metalama.Framework.Aspects
         /// <param name="whenExists">Determines the implementation strategy when a property of the same name is already declared in the target type.
         ///     The default strategy is to fail with a compile-time error.</param>
         /// <param name="tags"></param>
+        /// <param name="pullStrategy"></param>
         /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
         /// <seealso href="@introducing-members"/>
         IFieldBuilder IntroduceField(
@@ -137,7 +141,8 @@ namespace Metalama.Framework.Aspects
             IType fieldType,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            object? tags = null );
+            object? tags = null,
+            IPullStrategy? pullStrategy = null );
 
         /// <summary>
         /// Introduces a field to the target type by specifying a field name and <see cref="Type"/>.
@@ -150,6 +155,7 @@ namespace Metalama.Framework.Aspects
         /// <param name="whenExists">Determines the implementation strategy when a property of the same name is already declared in the target type.
         ///     The default strategy is to fail with a compile-time error.</param>
         /// <param name="tags"></param>
+        /// <param name="pullStrategy"></param>
         /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
         /// <seealso href="@introducing-members"/>
         IFieldBuilder IntroduceField(
@@ -158,7 +164,54 @@ namespace Metalama.Framework.Aspects
             Type fieldType,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            object? tags = null );
+            object? tags = null,
+            IPullStrategy? pullStrategy = null );
+
+        /// <summary>
+        /// Introduces an automatic to the target type by specifying a property name and <see cref="Type"/>.
+        /// </summary>
+        /// <param name="targetType">The type into which the property must be introduced.</param>
+        /// <param name="propertyName">Name of the introduced field.</param>
+        /// <param name="propertyType">Type of the introduced field.</param>
+        /// <param name="scope">Determines the scope (e.g. <see cref="IntroductionScope.Instance"/> or <see cref="IntroductionScope.Static"/>) of the introduced
+        ///     field. The default scope is <see cref="IntroductionScope.Instance"/>.</param>
+        /// <param name="whenExists">Determines the implementation strategy when a property of the same name is already declared in the target type.
+        ///     The default strategy is to fail with a compile-time error.</param>
+        /// <param name="tags"></param>
+        /// <param name="pullStrategy"></param>
+        /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
+        /// <seealso href="@introducing-members"/>
+        IPropertyBuilder IntroduceAutomaticProperty(
+            INamedType targetType,
+            string propertyName,
+            Type propertyType,
+            IntroductionScope scope = IntroductionScope.Default,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            object? tags = null,
+            IPullStrategy? pullStrategy = null );
+
+        /// <summary>
+        /// Introduces an automatic to the target type by specifying a property name and <see cref="IType"/>.
+        /// </summary>
+        /// <param name="targetType">The type into which the property must be introduced.</param>
+        /// <param name="propertyName">Name of the introduced field.</param>
+        /// <param name="propertyType">Type of the introduced field.</param>
+        /// <param name="scope">Determines the scope (e.g. <see cref="IntroductionScope.Instance"/> or <see cref="IntroductionScope.Static"/>) of the introduced
+        ///     field. The default scope is <see cref="IntroductionScope.Instance"/>.</param>
+        /// <param name="whenExists">Determines the implementation strategy when a property of the same name is already declared in the target type.
+        ///     The default strategy is to fail with a compile-time error.</param>
+        /// <param name="tags"></param>
+        /// <param name="pullStrategy"></param>
+        /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
+        /// <seealso href="@introducing-members"/>
+        IPropertyBuilder IntroduceAutomaticProperty(
+            INamedType targetType,
+            string propertyName,
+            IType propertyType,
+            IntroductionScope scope = IntroductionScope.Default,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            object? tags = null,
+            IPullStrategy? pullStrategy = null );
 
         /// <summary>
         /// Introduces a property to the target type, or overrides the implementation of an existing one, by specifying a property template.
@@ -345,9 +398,16 @@ namespace Metalama.Framework.Aspects
             InitializerKind kind,
             object? tags = null,
             object? args = null );
-        
-        void AddInitializer( IConstructor targetConstructor, string template, object? tags = null, object? args = null );
 
+        /// <summary>
+        /// Adds an initializer to a specific constructor. 
+        /// </summary>
+        /// <param name="targetConstructor">The constructor into which the initializer should be added.</param>
+        /// <param name="template">The name of the template. This method must have no run-time parameter, be of <c>void</c> return type, and be annotated with the <see cref="TemplateAttribute"/> custom attribute.</param>
+        /// <param name="tags">An optional opaque object of anonymous type  passed to templates and exposed under the <see cref="meta.Tags"/> property of the
+        ///     <see cref="meta"/> API.</param>
+        /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template.</param>
+        void AddInitializer( IConstructor targetConstructor, string template, object? tags = null, object? args = null );
 
         /// <summary>
         /// Adds a contract to a parameter. Contracts are usually used to validate parameters (pre- or post-conditions) or to normalize their value (null-to-empty, trimming, normalizing case, ...).
@@ -382,19 +442,6 @@ namespace Metalama.Framework.Aspects
             object? tags = null,
             object? args = null );
 
-        IParameterBuilder IntroduceParameterAndPull(
-            IConstructor targetConstructor,
-            string parameterName,
-            IType parameterType,
-            IExpression? defaultValue = null );
-
-        IParameterBuilder IntroduceParameterAndPull(
-            IConstructor targetConstructor,
-            string parameterName,
-            Type parameterType,
-            IExpression? defaultValue = null );
-
-      
         /// <summary>
         /// Returns a copy of the current <see cref="IAdviceFactory"/> that will add advice to a specified layer of the current aspect.
         /// </summary>

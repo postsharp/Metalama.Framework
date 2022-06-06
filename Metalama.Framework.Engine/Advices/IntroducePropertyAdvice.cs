@@ -4,6 +4,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.DependencyInjection;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
@@ -14,10 +15,11 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Advices
 {
-    internal class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty, PropertyBuilder>
+    internal class IntroducePropertyAdvice : IntroduceFieldOrPropertyAdvice<IProperty, PropertyBuilder>
     {
         private readonly BoundTemplateMethod _getTemplate;
         private readonly BoundTemplateMethod _setTemplate;
+        private readonly bool _isProgrammaticAutoProperty;
 
         public IPropertyBuilder Builder => this.MemberBuilder;
 
@@ -32,16 +34,22 @@ namespace Metalama.Framework.Engine.Advices
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             string? layerName,
-            IObjectReader tags )
-            : base( aspect, templateInstance, targetDeclaration, explicitName, propertyTemplate, scope, overrideStrategy, layerName, tags )
+            IObjectReader tags,
+            IPullStrategy? pullStrategy )
+            : base( aspect, templateInstance, targetDeclaration, explicitName, propertyTemplate, scope, overrideStrategy, layerName, tags, pullStrategy )
         {
             this._getTemplate = getTemplate;
             this._setTemplate = setTemplate;
+            this._isProgrammaticAutoProperty = propertyTemplate.IsNull && getTemplate.IsNull && setTemplate.IsNull;
 
             var templatePropertyDeclaration = propertyTemplate.Declaration;
             var name = this.MemberName;
-            var hasGet = templatePropertyDeclaration != null ? templatePropertyDeclaration.GetMethod != null : getTemplate.IsNotNull;
-            var hasSet = templatePropertyDeclaration != null ? templatePropertyDeclaration.SetMethod != null : setTemplate.IsNotNull;
+
+            var hasGet = this._isProgrammaticAutoProperty
+                         || (templatePropertyDeclaration != null ? templatePropertyDeclaration.GetMethod != null : getTemplate.IsNotNull);
+
+            var hasSet = this._isProgrammaticAutoProperty
+                         || (templatePropertyDeclaration != null ? templatePropertyDeclaration.SetMethod != null : setTemplate.IsNotNull);
 
             this.MemberBuilder = new PropertyBuilder(
                 this,
@@ -49,7 +57,7 @@ namespace Metalama.Framework.Engine.Advices
                 name,
                 hasGet,
                 hasSet,
-                this.Template.Declaration is { IsAutoPropertyOrField: true },
+                this._isProgrammaticAutoProperty || this.Template.Declaration is { IsAutoPropertyOrField: true },
                 this.Template.Declaration is { Writeability: Writeability.InitOnly },
                 false,
                 this.Template.Declaration is { Writeability: Writeability.ConstructorOnly } && this.Template.Declaration.IsAutoPropertyOrField,
@@ -62,24 +70,25 @@ namespace Metalama.Framework.Engine.Advices
         {
             base.Initialize( diagnosticAdder );
 
-            // TODO: Indexers.
-
-            this.MemberBuilder.Type = (this.Template.Declaration?.Type ?? this._getTemplate.Template.Declaration?.ReturnType).AssertNotNull();
-
-            this.MemberBuilder.Accessibility =
-                (this.Template.Declaration?.Accessibility
-                 ?? this._getTemplate.Template.Declaration?.Accessibility ?? this._setTemplate.Template.Declaration?.Accessibility).AssertNotNull();
-
-            if ( this.Template.IsNotNull )
+            if ( !this._isProgrammaticAutoProperty )
             {
-                if ( this.Template.Declaration.AssertNotNull().GetMethod != null )
-                {
-                    this.MemberBuilder.GetMethod.AssertNotNull().Accessibility = this.Template.Declaration!.GetMethod!.Accessibility;
-                }
+                this.MemberBuilder.Type = (this.Template.Declaration?.Type ?? this._getTemplate.Template.Declaration?.ReturnType).AssertNotNull();
 
-                if ( this.Template.Declaration.AssertNotNull().SetMethod != null )
+                this.MemberBuilder.Accessibility =
+                    (this.Template.Declaration?.Accessibility
+                     ?? this._getTemplate.Template.Declaration?.Accessibility ?? this._setTemplate.Template.Declaration?.Accessibility).AssertNotNull();
+
+                if ( this.Template.IsNotNull )
                 {
-                    this.MemberBuilder.SetMethod.AssertNotNull().Accessibility = this.Template.Declaration!.SetMethod!.Accessibility;
+                    if ( this.Template.Declaration.AssertNotNull().GetMethod != null )
+                    {
+                        this.MemberBuilder.GetMethod.AssertNotNull().Accessibility = this.Template.Declaration!.GetMethod!.Accessibility;
+                    }
+
+                    if ( this.Template.Declaration.AssertNotNull().SetMethod != null )
+                    {
+                        this.MemberBuilder.SetMethod.AssertNotNull().Accessibility = this.Template.Declaration!.SetMethod!.Accessibility;
+                    }
                 }
             }
 
@@ -102,7 +111,7 @@ namespace Metalama.Framework.Engine.Advices
                 if ( hasNoOverrideSemantics )
                 {
                     // Introduced auto property.
-                    return AdviceResult.Create( this.MemberBuilder );
+                    return this.IntroduceMemberAndPull( targetDeclaration );
                 }
                 else
                 {

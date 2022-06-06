@@ -3,6 +3,8 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Reflection;
@@ -11,7 +13,7 @@ using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class ParameterBuilder : DeclarationBuilder, IParameterBuilder, IParameterImpl
+    internal class ParameterBuilder : DeclarationBuilder, IParameterBuilder, IParameterImpl, IObservableTransformation
     {
         private string? _name;
         private TypedConstant _defaultValue;
@@ -42,7 +44,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public bool IsParams { get; set; }
 
-        public override IDeclaration? ContainingDeclaration => this.DeclaringMember;
+        public override IDeclaration ContainingDeclaration => this.DeclaringMember;
+
+        bool IObservableTransformation.IsDesignTime => true;
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 
@@ -52,7 +56,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public bool IsReturnParameter => this.Index < 0;
 
-        public ParameterBuilder( MemberBuilder declaringMember, int index, string? name, IType type, RefKind refKind ) : base( declaringMember.ParentAdvice )
+        public ParameterBuilder( Advice advice, IMember declaringMember, int index, string? name, IType type, RefKind refKind ) : base( advice )
         {
             this.DeclaringMember = declaringMember;
             this.Index = index;

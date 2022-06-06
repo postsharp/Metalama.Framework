@@ -43,8 +43,6 @@ namespace Metalama.Framework.Engine.Advices
 
             var containingType = targetDeclaration.GetDeclaringType().AssertNotNull();
 
-
-
             var constructors =
                 targetDeclaration switch
                 {
@@ -60,7 +58,6 @@ namespace Metalama.Framework.Engine.Advices
                     },
                     _ => throw new AssertionFailedException()
                 };
-                
 
             var transformations = new List<ITransformation>();
 
@@ -87,7 +84,7 @@ namespace Metalama.Framework.Engine.Advices
                     targetCtor = ctor;
                 }
 
-                var initialization = new InitializationTransformation(
+                var initialization = new TemplateBasedInitializationTransformation(
                     this,
                     targetDeclaration,
                     targetCtor,

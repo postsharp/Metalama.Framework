@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using System.Linq;
@@ -292,5 +293,51 @@ class C
 
         // Assert that the method has been added.
         Assert.Single( type.Fields.OfName( "F" ) );
+    }
+
+    [Fact]
+    public void AddParameterToExplicitConstructor()
+    {
+        using var testContext = this.CreateTestContext();
+
+        var code = @"
+class C
+{    
+   public C() {}
+}";
+
+        var immutableCompilation = testContext.CreateCompilationModel( code );
+        var compilation = immutableCompilation.ToMutable();
+
+        var constructor = compilation.Types.Single().Constructors.Single();
+
+        // Add a field.
+        var parameterBuilder = new ParameterBuilder( null!, constructor, 0, "p", compilation.Factory.GetTypeByReflectionType( typeof(int) ), RefKind.In );
+        compilation.AddTransformation( parameterBuilder );
+
+        Assert.Single( constructor.Parameters );
+    }
+
+    [Fact]
+    public void AddParameterToImplicitConstructor()
+    {
+        using var testContext = this.CreateTestContext();
+
+        var code = @"
+class C
+{    
+  
+}";
+
+        var immutableCompilation = testContext.CreateCompilationModel( code );
+        var compilation = immutableCompilation.ToMutable();
+
+        var constructor = compilation.Types.Single().Constructors.Single();
+
+        // Add a field.
+        var parameterBuilder = new ParameterBuilder( null!, constructor, 0, "p", compilation.Factory.GetTypeByReflectionType( typeof(int) ), RefKind.In );
+        compilation.AddTransformation( parameterBuilder );
+
+        Assert.Single( constructor.Parameters );
     }
 }

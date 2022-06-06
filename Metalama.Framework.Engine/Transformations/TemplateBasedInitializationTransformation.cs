@@ -15,7 +15,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Transformations
 {
-    internal class InitializationTransformation : IInsertStatementTransformation
+    internal class TemplateBasedInitializationTransformation : IInsertStatementTransformation
     {
         private readonly IConstructor _targetConstructor;
         private readonly BoundTemplateMethod _boundTemplate;
@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.Transformations
 
         public IMethodBase TargetDeclaration => this._targetConstructor;
 
-        public InitializationTransformation(
+        public TemplateBasedInitializationTransformation(
             Advice advice,
             IMemberOrNamedType initializedDeclaration,
             IConstructor targetConstructor,

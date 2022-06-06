@@ -6,9 +6,9 @@ using Metalama.Framework.Code.Collections;
 namespace Metalama.Framework.Code
 {
     /// <summary>
-    /// Represents a method, constructor, or property.
+    /// Represents a method, constructor, or indexer.
     /// </summary>
-    public interface IHasParameters : ICompilationElement, IDisplayable
+    public interface IHasParameters : IDeclaration
     {
         /// <summary>
         /// Gets the list of parameters of the current method (but not the return parameter).

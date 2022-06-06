@@ -21,18 +21,19 @@ public partial class CompilationModel
     private ImmutableDictionary<INamedTypeSymbol, PropertyUpdatableCollection> _properties;
     private ImmutableDictionary<INamedTypeSymbol, IndexerUpdatableCollection> _indexers;
     private ImmutableDictionary<INamedTypeSymbol, InterfaceUpdatableCollection> _interfaceImplementations;
+    private ImmutableDictionary<Ref<IHasParameters>, ParameterUpdatableCollection> _parameters;
 
     private ImmutableDictionary<INamedTypeSymbol, IConstructorBuilder> _staticConstructors =
         ImmutableDictionary<INamedTypeSymbol, IConstructorBuilder>.Empty.WithComparers( SymbolEqualityComparer.Default );
 
     public bool IsMutable { get; private set; }
 
-    private TCollection GetMemberCollection<TDeclaration, TCollection>(
-        ref ImmutableDictionary<INamedTypeSymbol, TCollection> dictionary,
+    private TCollection GetMemberCollection<TKey, TDeclaration, TCollection>(
+        ref ImmutableDictionary<TKey, TCollection> dictionary,
         bool requestMutableCollection,
-        INamedTypeSymbol declaringTypeSymbol,
-        Func<CompilationModel, INamedTypeSymbol, TCollection> createCollection )
-        where TDeclaration : class, IMemberOrNamedType
+        TKey declaringTypeSymbol,
+        Func<CompilationModel, TKey, TCollection> createCollection )
+        where TDeclaration : class, IDeclaration
         where TCollection : UpdatableDeclarationCollection<TDeclaration>
     {
         if ( requestMutableCollection && !this.IsMutable )
@@ -67,42 +68,42 @@ public partial class CompilationModel
     }
 
     internal FieldUpdatableCollection GetFieldCollection( INamedTypeSymbol declaringType, bool mutable )
-        => this.GetMemberCollection<IField, FieldUpdatableCollection>(
+        => this.GetMemberCollection<INamedTypeSymbol, IField, FieldUpdatableCollection>(
             ref this._fields,
             mutable,
             declaringType,
             ( c, t ) => new FieldUpdatableCollection( c, t ) );
 
     internal MethodUpdatableCollection GetMethodCollection( INamedTypeSymbol declaringType, bool mutable )
-        => this.GetMemberCollection<IMethod, MethodUpdatableCollection>(
+        => this.GetMemberCollection<INamedTypeSymbol, IMethod, MethodUpdatableCollection>(
             ref this._methods,
             mutable,
             declaringType,
             ( c, t ) => new MethodUpdatableCollection( c, t ) );
 
     internal ConstructorUpdatableCollection GetConstructorCollection( INamedTypeSymbol declaringType, bool mutable )
-        => this.GetMemberCollection<IConstructor, ConstructorUpdatableCollection>(
+        => this.GetMemberCollection<INamedTypeSymbol, IConstructor, ConstructorUpdatableCollection>(
             ref this._constructors,
             mutable,
             declaringType,
             ( c, t ) => new ConstructorUpdatableCollection( c, t ) );
 
     internal PropertyUpdatableCollection GetPropertyCollection( INamedTypeSymbol declaringType, bool mutable )
-        => this.GetMemberCollection<IProperty, PropertyUpdatableCollection>(
+        => this.GetMemberCollection<INamedTypeSymbol, IProperty, PropertyUpdatableCollection>(
             ref this._properties,
             mutable,
             declaringType,
             ( c, t ) => new PropertyUpdatableCollection( c, t ) );
 
     internal IndexerUpdatableCollection GetIndexerCollection( INamedTypeSymbol declaringType, bool mutable )
-        => this.GetMemberCollection<IIndexer, IndexerUpdatableCollection>(
+        => this.GetMemberCollection<INamedTypeSymbol, IIndexer, IndexerUpdatableCollection>(
             ref this._indexers,
             mutable,
             declaringType,
             ( c, t ) => new IndexerUpdatableCollection( c, t ) );
 
     internal EventUpdatableCollection GetEventCollection( INamedTypeSymbol declaringType, bool mutable )
-        => this.GetMemberCollection<IEvent, EventUpdatableCollection>(
+        => this.GetMemberCollection<INamedTypeSymbol, IEvent, EventUpdatableCollection>(
             ref this._events,
             mutable,
             declaringType,
@@ -110,11 +111,20 @@ public partial class CompilationModel
 
     internal InterfaceUpdatableCollection GetInterfaceImplementationCollection( INamedTypeSymbol declaringType, bool mutable )
     {
-        return this.GetMemberCollection<INamedType, InterfaceUpdatableCollection>(
+        return this.GetMemberCollection<INamedTypeSymbol, INamedType, InterfaceUpdatableCollection>(
             ref this._interfaceImplementations,
             mutable,
             declaringType,
             ( c, t ) => new InterfaceUpdatableCollection( c, t ) );
+    }
+
+    internal ParameterUpdatableCollection GetParameterCollection( Ref<IHasParameters> parent, bool mutable )
+    {
+        return this.GetMemberCollection<Ref<IHasParameters>, IParameter, ParameterUpdatableCollection>(
+            ref this._parameters,
+            mutable,
+            parent,
+            ( c, t ) => new ParameterUpdatableCollection( c, t ) );
     }
 
     internal IConstructorBuilder? GetStaticConstructor( INamedTypeSymbol declaringType )
@@ -146,9 +156,9 @@ public partial class CompilationModel
             this.AddReplaceMemberTransformation( originCompilation, replaceMember );
         }
 
-        if ( transformation is IMemberBuilder builder )
+        if ( transformation is IDeclarationBuilder builder )
         {
-            this.AddMemberBuilderTransformation( builder );
+            this.AddDeclarationBuilderTransformation( builder );
         }
 
         if ( transformation is IIntroduceInterfaceTransformation introduceInterface )
@@ -198,7 +208,7 @@ public partial class CompilationModel
         }
     }
 
-    private void AddMemberBuilderTransformation( IMemberBuilder transformation )
+    private void AddDeclarationBuilderTransformation( IDeclarationBuilder transformation )
     {
         switch ( transformation )
         {
@@ -242,6 +252,12 @@ public partial class CompilationModel
             case IEvent @event:
                 var events = this.GetEventCollection( @event.DeclaringType.GetSymbol().AssertNotNull(), true );
                 events.Add( @event.ToMemberRef() );
+
+                break;
+
+            case IParameterBuilder parameter:
+                var parameters = this.GetParameterCollection( ((IHasParameters) parameter.ContainingDeclaration!).ToTypedRef(), true );
+                parameters.Add( parameter );
 
                 break;
 

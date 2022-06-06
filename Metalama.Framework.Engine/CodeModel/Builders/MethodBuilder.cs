@@ -48,7 +48,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant defaultValue = default )
         {
-            var parameter = new ParameterBuilder( this, this.Parameters.Count, name, type, refKind );
+            var parameter = new ParameterBuilder( this.ParentAdvice, this, this.Parameters.Count, name, type, refKind );
             parameter.DefaultValue = defaultValue;
             this.Parameters.Add( parameter );
 
@@ -113,6 +113,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             this.ReturnParameter =
                 new ParameterBuilder(
+                    this.ParentAdvice,
                     this,
                     -1,
                     null,
