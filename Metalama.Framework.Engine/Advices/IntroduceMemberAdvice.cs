@@ -42,7 +42,7 @@ namespace Metalama.Framework.Engine.Advices
             string? layerName,
             IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, layerName, tags )
         {
-            this.MemberName = explicitName ?? template.TemplateAttribute.Name
+            this.MemberName = explicitName ?? template.TemplateAttribute?.Name
                 ?? template.Declaration?.Name ?? throw new ArgumentNullException( nameof(explicitName) );
 
             this.Template = template;
