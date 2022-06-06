@@ -32,6 +32,8 @@ namespace Metalama.Framework.Engine.Advices
 
         public new Ref<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
 
+        public IObjectReader Tags { get; }
+
         public ImplementInterfaceAdvice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance template,
@@ -40,12 +42,13 @@ namespace Metalama.Framework.Engine.Advices
             OverrideStrategy overrideStrategy,
             IReadOnlyList<InterfaceMemberSpecification>? explicitMemberSpecifications,
             string? layerName,
-            IObjectReader tags ) : base( aspect, template, targetType, layerName, tags )
+            IObjectReader tags ) : base( aspect, template, targetType, layerName )
         {
             this.InterfaceType = interfaceType;
             this.ExplicitMemberSpecifications = explicitMemberSpecifications;
             this.OverrideStrategy = overrideStrategy;
             this._interfaceSpecifications = new List<InterfaceSpecification>();
+            this.Tags = tags;
         }
 
         public override void Initialize( IDiagnosticAdder diagnosticAdder )
@@ -85,18 +88,18 @@ namespace Metalama.Framework.Engine.Advices
                         diagnosticAdder.Report(
                             AdviceDiagnosticDescriptors.MissingDeclarativeInterfaceMember.CreateRoslynDiagnostic(
                                 this.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, this.TargetDeclaration, this.InterfaceType, interfaceMethod) ) );
+                                (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), this.InterfaceType, interfaceMethod) ) );
                     }
                     else if (
-                        !this.SourceCompilation.InvariantComparer.ParameterTypeEquals(
-                            interfaceMethod.ReturnParameter.Type,
-                            matchingMethod.ReturnParameter.Type )
+                        !SignatureTypeSymbolComparer.Instance.Equals(
+                            interfaceMethod.ReturnParameter.Type.GetSymbol().AssertNotNull(),
+                            matchingMethod.ReturnParameter.Type.GetSymbol().AssertNotNull() )
                         || interfaceMethod.ReturnParameter.RefKind != matchingMethod.ReturnParameter.RefKind )
                     {
                         diagnosticAdder.Report(
                             AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberDoesNotMatch.CreateRoslynDiagnostic(
                                 this.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, this.TargetDeclaration, this.InterfaceType, matchingMethod,
+                                (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), this.InterfaceType, matchingMethod,
                                  interfaceMethod) ) );
                     }
                     else
@@ -117,7 +120,7 @@ namespace Metalama.Framework.Engine.Advices
                         diagnosticAdder.Report(
                             AdviceDiagnosticDescriptors.MissingDeclarativeInterfaceMember.CreateRoslynDiagnostic(
                                 this.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, this.TargetDeclaration, this.InterfaceType, interfaceProperty) ) );
+                                (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), this.InterfaceType, interfaceProperty) ) );
                     }
                     else if (
                         !this.SourceCompilation.InvariantComparer.Equals( interfaceProperty.Type, matchingProperty.Type )
@@ -126,7 +129,7 @@ namespace Metalama.Framework.Engine.Advices
                         diagnosticAdder.Report(
                             AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberDoesNotMatch.CreateRoslynDiagnostic(
                                 this.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, this.TargetDeclaration, this.InterfaceType, matchingProperty,
+                                (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), this.InterfaceType, matchingProperty,
                                  interfaceProperty) ) );
                     }
                     else
@@ -142,14 +145,14 @@ namespace Metalama.Framework.Engine.Advices
                         diagnosticAdder.Report(
                             AdviceDiagnosticDescriptors.MissingDeclarativeInterfaceMember.CreateRoslynDiagnostic(
                                 this.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, this.TargetDeclaration, this.InterfaceType, interfaceEvent) ) );
+                                (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), this.InterfaceType, interfaceEvent) ) );
                     }
                     else if ( !this.SourceCompilation.InvariantComparer.Equals( interfaceEvent.Type, matchingEvent.Type ) )
                     {
                         diagnosticAdder.Report(
                             AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberDoesNotMatch.CreateRoslynDiagnostic(
                                 this.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, this.TargetDeclaration, this.InterfaceType, matchingEvent,
+                                (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), this.InterfaceType, matchingEvent,
                                  interfaceEvent) ) );
                     }
                     else

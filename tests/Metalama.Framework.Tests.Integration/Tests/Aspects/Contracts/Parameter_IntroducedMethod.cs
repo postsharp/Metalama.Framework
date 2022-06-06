@@ -4,7 +4,7 @@ using Metalama.Framework.Code;
 
 #pragma warning disable CS8618
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Filters.Parameter_IntroducedMethod
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Parameter_IntroducedMethod
 {
     /*
      * Tests that filter works on introduced method's parameter and return value within the same aspect.

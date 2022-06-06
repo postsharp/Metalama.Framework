@@ -1,17 +1,12 @@
 using System;
 using Metalama.Framework.Aspects;
 
-#pragma warning disable CS8618, CS0169
+#pragma warning disable CS8618 
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Filters.Field_Out
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Property_Set
 {
     internal class NotNullAttribute : ContractAspect
     {
-        public NotNullAttribute() : base( ContractDirection.Output )
-        {
-            
-        }
-        
         public override void Validate( dynamic? value )
         {
             if (value == null)
@@ -24,7 +19,16 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Filters.Field_Out
     // <target>
     internal class Target
     {
-        [NotNull]
         private string q;
+
+        [NotNull]
+        public string P { get; set; }
+
+        [NotNull]
+        public string Q
+        {
+            get => q;
+            set => q = value + "-";
+        }
     }
 }

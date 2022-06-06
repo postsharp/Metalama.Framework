@@ -28,6 +28,8 @@ namespace Metalama.Framework.Engine.Advices
 
         protected TemplateMember<TMember> Template { get; }
 
+        public IObjectReader Tags { get; }
+
         public IntroduceMemberAdvice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
@@ -36,11 +38,12 @@ namespace Metalama.Framework.Engine.Advices
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             string? layerName,
-            IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, layerName, tags )
+            IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, layerName )
         {
             this.Template = template;
             this.Scope = scope;
             this.OverrideStrategy = overrideStrategy;
+            this.Tags = tags;
 
             // This is to make the nullability analyzer happy. Derived classes are supposed to set this member in the
             // constructor. Other designs are more cumbersome.

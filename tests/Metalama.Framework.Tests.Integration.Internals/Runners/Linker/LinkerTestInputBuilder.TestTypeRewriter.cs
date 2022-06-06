@@ -841,8 +841,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                             fakeAspectInstance,
                             fakeAspectInstance.TemplateInstances.Values.Single(),
                             A.Fake<IDeclarationImpl>(),
-                            aspectLayer.LayerName,
-                            null
+                            aspectLayer.LayerName
                         } ) );
             }
         }

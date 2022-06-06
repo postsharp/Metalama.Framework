@@ -3,7 +3,7 @@ using Metalama.Framework.Aspects;
 
 #pragma warning disable CS8618
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Filters.PropertyOutput
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.PropertyInput
 {
 #pragma warning disable CS0067
     internal class NotNullAttribute : FilterAspect
@@ -17,35 +17,42 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Filters.PropertyOut
     {
         private string q;
 
+
+private string _p;
+        
         [NotNull]
         public string P 
 { get
-{
-        global::System.String returnValue ;returnValue = "p";
-goto __aspect_return_1;
-__aspect_return_1:        if (returnValue == null)
+{ 
+        return this._p;
+}
+set
+{ 
+        if (value == null)
         {
             throw new global::System.ArgumentNullException();
         }
 
-        return returnValue;
-
-}}
+        this._p=value;
+}
+}
 
         [NotNull]
         public string Q
         {
-            get
-            {
-        global::System.String returnValue ;                returnValue = q;
-goto __aspect_return_1;
-__aspect_return_1:        if (returnValue == null)
+            get 
+{ 
+        return q;
+}
+            set 
+{ 
+        if (value == null)
         {
             throw new global::System.ArgumentNullException();
         }
 
-        return returnValue;
-            }
+        q = value + "-";
+}
         }
         
         

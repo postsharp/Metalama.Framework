@@ -1,13 +1,9 @@
-#if TEST_OPTIONS
-// @Skipped(#30519 - TestFramework: System exceptions render to different diagnostic texts making them untestable)
-#endif
-
 using System;
 using Metalama.Framework.Aspects;
 
 #pragma warning disable CS8618
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Filters.Parameter_ReturnVoid
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Parameter_Return
 {
     internal class NotNullAttribute : ContractAspect
     {
@@ -24,8 +20,9 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Filters.Parameter_R
     internal class Target
     {
         [return: NotNull]
-        private void M()
+        private string M()
         {
+            return "";
         }
     }
 }

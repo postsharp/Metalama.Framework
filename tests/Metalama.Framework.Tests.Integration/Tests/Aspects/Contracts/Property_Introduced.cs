@@ -1,34 +1,34 @@
 using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Tests.Integration.Tests.Aspects.Filters.Field_Introduced;
+using Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Property_Introduced;
 
-#pragma warning disable CS8618, CS0169, CS0649
+#pragma warning disable CS8618, CS0169
 
 [assembly: AspectOrder(typeof(IntroduceAndFilterAttribute))]
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Filters.Field_Introduced
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Property_Introduced
 {
     /*
-     * Tests that filter works on introduced field within the same aspect.
+     * Tests that filter works on introduced property within the same aspect.
      */
 
     internal class IntroduceAndFilterAttribute : TypeAspect
     {
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            foreach (var field in builder.Target.Fields)
+            foreach (var property in builder.Target.Properties)
             {
-                builder.Advice.AddContract(field, nameof(Filter), ContractDirection.Both);
+                builder.Advice.AddContract(property, nameof(Filter), ContractDirection.Both);
             }
 
-            var introducedField = builder.Advice.IntroduceField(builder.Target, nameof(IntroducedField));
+            var introducedField = builder.Advice.IntroduceField(builder.Target, nameof(IntroducedProperty));
 
             builder.Advice.AddContract(introducedField, nameof(Filter), ContractDirection.Both);
         }
 
         [Template]
-        private string? IntroducedField;
+        public string? IntroducedProperty { get; set; }
 
         [Template]
         public void Filter(dynamic? value)
@@ -44,6 +44,6 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Filters.Field_Intro
     [IntroduceAndFilter]
     internal class Target
     {
-        private string ExistingField;
+        public string? ExistingProperty { get; set; }
     }
 }

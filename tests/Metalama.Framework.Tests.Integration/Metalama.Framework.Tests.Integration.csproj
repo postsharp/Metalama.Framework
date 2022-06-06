@@ -34,6 +34,10 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Compile Remove="Tests\Aspects\Introductions\Interfaces\ImplicitMembers - Copy.t.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
         <ProjectReference Include="..\..\Metalama.TestFramework\Metalama.TestFramework.csproj" />
@@ -41,6 +45,34 @@
 
     <ItemGroup>
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="Tests\Aspects\Contracts\Field_Both.t.cs" />
+      <None Include="Tests\Aspects\Contracts\Field_In.t.cs" />
+      <None Include="Tests\Aspects\Contracts\Field_Introduced.t.cs" />
+      <None Include="Tests\Aspects\Contracts\Field_Out.t.cs" />
+      <None Include="Tests\Aspects\Contracts\Parameter_In.t.cs" />
+      <None Include="Tests\Aspects\Contracts\Parameter_IntroducedMethod.t.cs" />
+      <None Include="Tests\Aspects\Contracts\Parameter_InvalidDirections.t.cs" />
+      <None Include="Tests\Aspects\Contracts\Parameter_Out.t.cs" />
+      <None Include="Tests\Aspects\Contracts\Parameter_ParamAndReturn.t.cs" />
+      <None Include="Tests\Aspects\Contracts\Parameter_Ref.t.cs" />
+      <None Include="Tests\Aspects\Contracts\Parameter_Ref_BothWays.t.cs" />
+      <None Include="Tests\Aspects\Contracts\Parameter_Return.t.cs" />
+      <None Include="Tests\Aspects\Contracts\Parameter_ReturnVoid.t.cs" />
+      <None Include="Tests\Aspects\Contracts\PropertyInput.t.cs" />
+      <None Include="Tests\Aspects\Contracts\PropertyOutput.t.cs" />
+      <None Include="Tests\Aspects\Contracts\Property_Get.t.cs" />
+      <None Include="Tests\Aspects\Contracts\Property_Introduced.t.cs" />
+      <None Include="Tests\Aspects\Contracts\Property_InvalidDirections.t.cs" />
+      <None Include="Tests\Aspects\Contracts\Property_Set.t.cs" />
+      <None Include="Tests\Aspects\Contracts\StaticEligibility.t.cs" />
+      <None Include="Tests\Aspects\Contracts\Tags.t.cs" />
+      <None Include="Tests\Aspects\Introductions\Interfaces\Signatures.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>Signatures.cs</DependentUpon>
+      </None>
     </ItemGroup>
 
     <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets" />

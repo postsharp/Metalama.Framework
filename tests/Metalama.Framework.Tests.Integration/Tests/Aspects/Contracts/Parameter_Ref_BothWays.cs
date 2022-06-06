@@ -1,7 +1,7 @@
 using System;
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Filters.Parameter_Ref_BothWays;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Parameter_Ref_BothWays;
 
 #pragma warning disable CS8618
 

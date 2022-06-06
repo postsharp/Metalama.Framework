@@ -3,7 +3,7 @@ using Metalama.Framework.Aspects;
 
 #pragma warning disable CS8618
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Filters.Parameter_Out
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Parameter_ReturnVoid
 {
     internal class NotNullAttribute : ContractAspect
     {
@@ -19,9 +19,9 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Filters.Parameter_O
     // <target>
     internal class Target
     {
-        private void M( [NotNull] out string m )
+        [return: NotNull]
+        private void M()
         {
-            m = "";
         }
     }
 }

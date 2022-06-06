@@ -3,7 +3,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Filters.StaticEligibility;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.StaticEligibility;
 
 internal class NotNullAttribute : ContractAspect
 {

@@ -1,9 +1,9 @@
 using System;
 using Metalama.Framework.Aspects;
 
-#pragma warning disable CS8618, CS0169, CS0649
+#pragma warning disable CS8618, CS0169
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Filters.Property_Get
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Field_In
 {
     internal class NotNullAttribute : ContractAspect
     {
@@ -19,18 +19,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Filters.Property_Ge
     // <target>
     internal class Target
     {
+        [NotNull]
         private string q;
-
-        [NotNull]
-        public string P => "p";
-
-        [NotNull]
-        public string Q
-        {
-            get
-            {
-                return q;
-            }
-        }
     }
 }

@@ -5,7 +5,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Validation;
 using System;
-using System.Collections.Generic;
 
 namespace Metalama.Framework.Aspects
 {
@@ -337,36 +336,32 @@ namespace Metalama.Framework.Aspects
             object? tags = null,
             object? args = null );
 
-        [Obsolete( "Not implemented.", true )]
-        void ImplementInterface(
-            INamedType targetType,
-            INamedType interfaceType,
-            IReadOnlyList<InterfaceMemberSpecification> interfaceMemberSpecifications,
-            OverrideStrategy whenExists = OverrideStrategy.Default,
-            object? tags = null );
+        // void ImplementInterface(
+        //     INamedType targetType,
+        //     INamedType interfaceType,
+        //     IReadOnlyList<InterfaceMemberSpecification> interfaceMemberSpecifications,
+        //     OverrideStrategy whenExists = OverrideStrategy.Default,
+        //     object? tags = null );
 
-        [Obsolete( "Not implemented.", true )]
-        void ImplementInterface(
-            INamedType targetType,
-            Type interfaceType,
-            IReadOnlyList<InterfaceMemberSpecification> interfaceMemberSpecifications,
-            OverrideStrategy whenExists = OverrideStrategy.Default,
-            object? tags = null );
+        // void ImplementInterface(
+        //     INamedType targetType,
+        //     Type interfaceType,
+        //     IReadOnlyList<InterfaceMemberSpecification> interfaceMemberSpecifications,
+        //     OverrideStrategy whenExists = OverrideStrategy.Default,
+        //     object? tags = null );
 
-        [Obsolete( "Not implemented.", true )]
-        void Override(
-            IConstructor targetConstructor,
-            string template,
-            object? args = null,
-            object? tags = null );
+        // void Override(
+        //     IConstructor targetConstructor,
+        //     string template,
+        //     object? args = null,
+        //     object? tags = null );
 
-        [Obsolete( "Not implemented.", true )]
-        void IntroduceConstructor(
-            INamedType targetType,
-            string template,
-            IntroductionScope scope = IntroductionScope.Default,
-            OverrideStrategy whenExists = OverrideStrategy.Default,
-            object? args = null,
-            object? tags = null );
+        // void IntroduceConstructor(
+        //     INamedType targetType,
+        //     string template,
+        //     IntroductionScope scope = IntroductionScope.Default,
+        //     OverrideStrategy whenExists = OverrideStrategy.Default,
+        //     object? args = null,
+        //     object? tags = null );
     }
 }

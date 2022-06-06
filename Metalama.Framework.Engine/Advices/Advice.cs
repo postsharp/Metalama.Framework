@@ -20,8 +20,6 @@ namespace Metalama.Framework.Engine.Advices
 
         public AspectLayerId AspectLayerId { get; }
 
-        protected IObjectReader Tags { get; }
-
         public int Order { get; set; }
 
         /// <summary>
@@ -33,10 +31,8 @@ namespace Metalama.Framework.Engine.Advices
             IAspectInstanceInternal aspect,
             TemplateClassInstance template,
             IDeclaration targetDeclaration,
-            string? layerName,
-            IObjectReader tags )
+            string? layerName )
         {
-            this.Tags = tags;
             this.Aspect = aspect;
             this.TemplateInstance = template;
             this.TargetDeclaration = targetDeclaration.AssertNotNull().ToTypedRef();
@@ -54,7 +50,7 @@ namespace Metalama.Framework.Engine.Advices
         public abstract void Initialize( IDiagnosticAdder diagnosticAdder );
 
         /// <summary>
-        /// Applies the advice on the given compilation.
+        /// Applies the advice on the given compilation and returns the set of resulting transformations and diagnostics.
         /// </summary>
         /// <param name="compilation">Input compilation.</param>
         /// <returns>Advice result containing transformations and diagnostics.</returns>

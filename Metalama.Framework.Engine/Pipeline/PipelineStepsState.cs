@@ -244,7 +244,7 @@ namespace Metalama.Framework.Engine.Pipeline
                     this._diagnostics.Report(
                         GeneralDiagnosticDescriptors.CannotAddAdviceToPreviousPipelineStep.CreateRoslynDiagnostic(
                             this._currentStep.AspectLayer.AspectClass.DiagnosticLocation,
-                            (this._currentStep.AspectLayer.AspectClass.ShortName, advice.TargetDeclaration) ) );
+                            (this._currentStep.AspectLayer.AspectClass.ShortName, adviceTargetDeclaration) ) );
 
                     success = false;
 

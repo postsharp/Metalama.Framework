@@ -4,7 +4,7 @@ using Metalama.Framework.Code;
 
 #pragma warning disable CS8618, CS0169
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Filters.Tags;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Tags;
 
 internal class MyAspect : FieldAspect
 {

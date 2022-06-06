@@ -3,7 +3,7 @@ using Metalama.Framework.Aspects;
 
 #pragma warning disable CS8618
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Filters.Parameter_InvalidDirections
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Parameter_InvalidDirections
 {
     internal class NotNullAttribute : ContractAspect
     {
