@@ -27,7 +27,7 @@ internal class AttributeUpdatableCollection : UpdatableDeclarationCollection<IAt
             case ISymbol symbol:
                 foreach ( var attribute in symbol.GetAttributes() )
                 {
-                    if ( attribute.AttributeClass == null || attribute.AttributeClass is IErrorTypeSymbol )
+                    if ( attribute.AttributeClass == null || attribute.AttributeClass is IErrorTypeSymbol || attribute.AttributeConstructor == null )
                     {
                         continue;
                     }
