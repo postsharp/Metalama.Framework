@@ -76,7 +76,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     ConstructorDeclaration(
                         List<AttributeListSyntax>(),
                         TokenList( Token( SyntaxKind.StaticKeyword ) ),
-                        ((TypeDeclarationSyntax) this.DeclaringType.GetPrimaryDeclaration().AssertNotNull()).Identifier,
+                        ((TypeDeclarationSyntax) this.DeclaringType.GetPrimaryDeclarationSyntax().AssertNotNull()).Identifier,
                         ParameterList(),
                         null,
                         Block().WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation ),
@@ -90,7 +90,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     ConstructorDeclaration(
                         List<AttributeListSyntax>(),
                         TokenList( Token( SyntaxKind.PublicKeyword ) ),
-                        ((TypeDeclarationSyntax) this.DeclaringType.GetPrimaryDeclaration().AssertNotNull()).Identifier,
+                        ((TypeDeclarationSyntax) this.DeclaringType.GetPrimaryDeclarationSyntax().AssertNotNull()).Identifier,
                         ParameterList(),
                         null,
                         Block().WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation ),

@@ -11,8 +11,6 @@ using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Project;
-using Microsoft.CodeAnalysis;
-using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Transformations
 {
@@ -24,11 +22,6 @@ namespace Metalama.Framework.Engine.Transformations
         public Advice Advice { get; }
 
         public IMemberOrNamedType ContextDeclaration { get; }
-
-        public ImmutableArray<SyntaxTree> TargetSyntaxTrees
-            => ImmutableArray.Create(
-                this._targetConstructor.GetPrimaryDeclaration()?.SyntaxTree
-                ?? this._targetConstructor.DeclaringType.GetPrimaryDeclaration().AssertNotNull().SyntaxTree );
 
         public IMember TargetMember => this._targetConstructor;
 

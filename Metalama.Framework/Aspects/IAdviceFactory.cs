@@ -451,6 +451,10 @@ namespace Metalama.Framework.Aspects
             IDeclaration targetDeclaration,
             INamedType attributeType );
 
+        void RemoveAttributes(
+            IDeclaration targetDeclaration,
+            Type attributeType );
+
         /// <summary>
         /// Returns a copy of the current <see cref="IAdviceFactory"/> that will add advice to a specified layer of the current aspect.
         /// </summary>

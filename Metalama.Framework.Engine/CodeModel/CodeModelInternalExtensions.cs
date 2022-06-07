@@ -38,7 +38,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => false
             };
 
-        public static SyntaxNode? GetPrimaryDeclaration( this IDeclaration declaration )
+        public static SyntaxNode? GetPrimaryDeclarationSyntax( this IDeclaration declaration )
         {
             return declaration.GetSymbol()?.GetPrimaryDeclaration();
         }
@@ -56,7 +56,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 case IMemberOrNamedTypeBuilder { DeclaringType: { } declaringType }:
                     return new InsertPosition(
                         InsertPositionRelation.Within,
-                        (MemberDeclarationSyntax) declaringType.GetPrimaryDeclaration().AssertNotNull() );
+                        (MemberDeclarationSyntax) declaringType.GetPrimaryDeclarationSyntax().AssertNotNull() );
 
                 case SymbolBasedDeclaration baseDeclaration:
                     var symbol = baseDeclaration.Symbol;

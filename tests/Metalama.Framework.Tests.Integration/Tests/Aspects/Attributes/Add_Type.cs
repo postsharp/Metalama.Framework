@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.AddAttribute;
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.Add_Type;
 
+[Inherited]
 public class MyAspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
@@ -13,8 +14,11 @@ public class MyAspect : TypeAspect
     }
 }
 
-[MyAspect]
-internal class C
+// <target>
+internal class Output
 {
-    
+    [MyAspect]
+    internal class C { }
+
+    internal class D : C { }
 }

@@ -85,12 +85,12 @@ namespace Metalama.Framework.Engine.CodeModel
                     switch ( targetKind )
                     {
                         case SyntaxKind.ModuleKeyword:
-                            this._builder.Add( name, new AttributeRef( node, Ref.FromSymbol( this._compilation.Assembly, this. _compilation ) ) );
+                            this._builder.Add( name, new AttributeRef( node, Ref.FromSymbol( this._compilation.SourceModule, this._compilation ) ) );
 
                             break;
 
                         case SyntaxKind.AssemblyKeyword:
-                            this._builder.Add( name, new AttributeRef( node, Ref.FromSymbol( this._compilation.SourceModule, this._compilation ) ) );
+                            this._builder.Add( name, new AttributeRef( node, Ref.FromSymbol( this._compilation.Assembly, this._compilation ) ) );
 
                             break;
 

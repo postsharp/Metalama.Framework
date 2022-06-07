@@ -147,7 +147,7 @@ public partial class CompilationModel
 
     internal AttributeUpdatableCollection GetAttributeCollection( Ref<IDeclaration> parent, bool mutable = false )
     {
-        var moduleSymbol = parent.TargetKind == DeclarationRefTargetKind.Assembly ? this.RoslynCompilation.SourceModule : null;
+        var moduleSymbol = parent.Target is ISourceAssemblySymbol ? this.RoslynCompilation.SourceModule : null;
 
         return this.GetMemberCollection<Ref<IDeclaration>, IAttribute, AttributeRef, AttributeUpdatableCollection>(
             ref this._attributes,

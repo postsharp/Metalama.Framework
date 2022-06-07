@@ -1075,8 +1075,11 @@ namespace Metalama.Framework.Engine.Advices
 
         public void RemoveAttributes( IDeclaration targetDeclaration, INamedType attributeType )
         {
-            this.State.Advices.Remove(
+            this.State.Advices.Add(
                 new RemoveAttributesAdvice( this.State.AspectInstance, this._templateInstance!, targetDeclaration, attributeType, this._layerName ) );
         }
+
+        public void RemoveAttributes( IDeclaration targetDeclaration, Type attributeType )
+            => this.RemoveAttributes( targetDeclaration, (INamedType) this.State.Compilation.Factory.GetTypeByReflectionType( attributeType ) );
     }
 }

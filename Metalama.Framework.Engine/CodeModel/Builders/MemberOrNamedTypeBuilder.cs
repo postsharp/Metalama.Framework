@@ -9,7 +9,6 @@ using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Reflection;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 
@@ -48,7 +47,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         // TODO: This is temporary.
 
-        public virtual ImmutableArray<SyntaxTree> TargetSyntaxTrees => ImmutableArray.Create( this.PrimarySyntaxTree! );
+        SyntaxTree IIntroduceMemberTransformation.TransformedSyntaxTree => this.PrimarySyntaxTree.AssertNotNull();
 
         public override SyntaxTree? PrimarySyntaxTree => ((NamedType) this.DeclaringType).Symbol.GetPrimarySyntaxReference().AssertNotNull().SyntaxTree;
     }

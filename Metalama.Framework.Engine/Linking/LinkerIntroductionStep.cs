@@ -244,7 +244,7 @@ namespace Metalama.Framework.Engine.Linking
                         var syntaxGenerationContext = SyntaxGenerationContext.Create(
                             this._serviceProvider,
                             input.InitialCompilation.Compilation,
-                            memberIntroduction.TargetSyntaxTrees[0],
+                            memberIntroduction.TransformedSyntaxTree,
                             positionInSyntaxTree );
 
                         // Call GetIntroducedMembers
@@ -332,7 +332,7 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         case Property codeProperty:
                             syntaxTransformationCollection.AddAutoPropertyWithSynthesizedSetter(
-                                (PropertyDeclarationSyntax) codeProperty.GetPrimaryDeclaration().AssertNotNull() );
+                                (PropertyDeclarationSyntax) codeProperty.GetPrimaryDeclarationSyntax().AssertNotNull() );
 
                             break;
 
@@ -377,7 +377,7 @@ namespace Metalama.Framework.Engine.Linking
                 //       Needs to be generalized for anything else (take into account overrides).
 
                 MemberLevelTransformations? memberLevelTransformations;
-                var declarationSyntax = transformation.TargetMember.GetPrimaryDeclaration();
+                var declarationSyntax = transformation.TargetMember.GetPrimaryDeclarationSyntax();
 
                 if ( declarationSyntax != null )
                 {
@@ -402,7 +402,7 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     case (IInsertStatementTransformation insertStatementTransformation, Constructor constructor):
                         {
-                            var primaryDeclaration = constructor.GetPrimaryDeclaration().AssertNotNull();
+                            var primaryDeclaration = constructor.GetPrimaryDeclarationSyntax().AssertNotNull();
 
                             var syntaxGenerationContext = SyntaxGenerationContext.Create(
                                 this._serviceProvider,

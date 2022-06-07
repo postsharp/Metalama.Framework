@@ -14,8 +14,6 @@ internal class RemoveAttributesTransformation : ISyntaxTreeTransformation, IObse
 
     public Advice Advice { get; }
 
-    public ImmutableArray<SyntaxTree> TargetSyntaxTrees { get; }
-
     public RemoveAttributesTransformation(
         Advice advice,
         IDeclaration targetDeclaration,
@@ -25,7 +23,6 @@ internal class RemoveAttributesTransformation : ISyntaxTreeTransformation, IObse
         this.AttributeType = attributeType;
         this.ContainingDeclaration = targetDeclaration;
         this.Advice = advice;
-        this.TargetSyntaxTrees = targetSyntaxTrees;
     }
 
     public IDeclaration ContainingDeclaration { get; set; }

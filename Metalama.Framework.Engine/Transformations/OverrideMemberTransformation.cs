@@ -10,7 +10,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -25,13 +24,6 @@ namespace Metalama.Framework.Engine.Transformations
         public IMember OverriddenDeclaration { get; }
 
         IDeclaration IOverriddenDeclaration.OverriddenDeclaration => this.OverriddenDeclaration;
-
-        public ImmutableArray<SyntaxTree> TargetSyntaxTrees
-            => this.OverriddenDeclaration switch
-            {
-                IDeclarationImpl declaration => ImmutableArray.Create( declaration.PrimarySyntaxTree.AssertNotNull() ),
-                _ => throw new AssertionFailedException()
-            };
 
         protected OverrideMemberTransformation( Advice advice, IMember overriddenDeclaration, IObjectReader tags )
         {
@@ -106,6 +98,11 @@ namespace Metalama.Framework.Engine.Transformations
                     referenceTargetKind,
                     flags: AspectReferenceFlags.Inlineable );
         }
+
+        SyntaxTree IIntroduceMemberTransformation.TransformedSyntaxTree
+            => (this.OverriddenDeclaration.GetPrimaryDeclarationSyntax() ?? this.OverriddenDeclaration.DeclaringType.GetPrimaryDeclarationSyntax())
+                .AssertNotNull()
+                .SyntaxTree;
 
         public InsertPosition InsertPosition => this.OverriddenDeclaration.ToInsertPosition();
 

@@ -142,8 +142,12 @@ namespace Metalama.Framework.Engine.CodeModel.References
         public override string ToString() => this.Target?.ToString() ?? "null";
 
         public bool IsSyntax( AttributeSyntax attribute )
-            => this.Target == attribute || (this.Target is AttributeSyntax attributeSyntax
-                                            && attributeSyntax.SyntaxTree.FilePath == attribute.SyntaxTree.FilePath
-                                            && attributeSyntax.SpanStart == attribute.SpanStart);
+            => this.Target switch
+            {
+                null => false,
+                AttributeData targetAttributeData => targetAttributeData.ApplicationSyntaxReference?.GetSyntax() == attribute,
+                AttributeSyntax targetAttributeSyntax => targetAttributeSyntax == attribute,
+                _ => throw new AssertionFailedException()
+            };
     }
 }

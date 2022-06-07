@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Transformations
@@ -10,6 +11,8 @@ namespace Metalama.Framework.Engine.Transformations
     /// </summary>
     internal interface IIntroduceMemberTransformation : ISyntaxTreeTransformation
     {
+        SyntaxTree TransformedSyntaxTree { get; }
+
         /// <summary>
         /// Gets the full syntax of introduced members including the body.
         /// </summary>

@@ -464,7 +464,8 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 A.CallTo( () => ((ISdkDeclaration) transformation).Symbol ).Returns( null );
                 A.CallTo( () => transformation.GetHashCode() ).Returns( 0 );
                 A.CallTo( () => transformation.ToString() ).Returns( "Introduced" );
-                A.CallTo( () => transformation.TargetSyntaxTrees ).Returns( ImmutableArray.Create( node.SyntaxTree ) );
+                A.CallTo( () => transformation.TransformedSyntaxTree ).Returns( node.SyntaxTree );
+                A.CallTo( () => ((IDeclarationImpl) transformation).PrimarySyntaxTree ).Returns( node.SyntaxTree );
 
                 var advice = this.CreateFakeAdvice( aspectLayer );
                 A.CallTo( () => transformation.Advice ).Returns( advice );

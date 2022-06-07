@@ -164,7 +164,8 @@ namespace Metalama.Framework.Engine.Linking
             ISymbol? GetFromBuilder( IDeclarationBuilder builder )
             {
                 var introducedBuilder = this._builderLookup[builder];
-                var intermediateSyntaxTree = this._introducedTreeMap[((ISyntaxTreeTransformation) builder).TargetSyntaxTrees[0]];
+                var sourceSyntaxTree = ((IIntroduceMemberTransformation) builder).TransformedSyntaxTree.AssertNotNull();
+                var intermediateSyntaxTree = this._introducedTreeMap[sourceSyntaxTree];
                 var intermediateNode = intermediateSyntaxTree.GetRoot().GetCurrentNode( introducedBuilder.Syntax );
                 var intermediateSemanticModel = this._intermediateCompilation.GetSemanticModel( intermediateSyntaxTree );
 
@@ -226,7 +227,7 @@ namespace Metalama.Framework.Engine.Linking
         /// <returns></returns>
         public ISymbol GetSymbolForIntroducedMember( LinkerIntroducedMember introducedMember )
         {
-            var intermediateSyntaxTree = this._introducedTreeMap[introducedMember.Introduction.TargetSyntaxTrees[0]];
+            var intermediateSyntaxTree = this._introducedTreeMap[introducedMember.Introduction.TransformedSyntaxTree];
             var intermediateSyntax = intermediateSyntaxTree.GetRoot().GetCurrentNode( introducedMember.Syntax ).AssertNotNull();
 
             SyntaxNode symbolSyntax = intermediateSyntax switch

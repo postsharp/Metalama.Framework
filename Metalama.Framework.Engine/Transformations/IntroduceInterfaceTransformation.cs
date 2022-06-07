@@ -5,10 +5,8 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Transformations
@@ -26,9 +24,6 @@ namespace Metalama.Framework.Engine.Transformations
         Advice ITransformation.Advice => this.Advice;
 
         public INamedType TargetType { get; }
-
-        public ImmutableArray<SyntaxTree> TargetSyntaxTrees
-            => ImmutableArray.Create( this.TargetType.GetSymbol().GetPrimarySyntaxReference().AssertNotNull().SyntaxTree );
 
         public IReadOnlyDictionary<IMember, IMember> MemberMap { get; }
 

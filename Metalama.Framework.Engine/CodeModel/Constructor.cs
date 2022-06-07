@@ -27,7 +27,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         [Memo]
         public ConstructorInitializerKind InitializerKind
-            => (ConstructorDeclarationSyntax?) this.GetPrimaryDeclaration() switch
+            => (ConstructorDeclarationSyntax?) this.GetPrimaryDeclarationSyntax() switch
             {
                 null => ConstructorInitializerKind.None,
                 { Initializer: null } => ConstructorInitializerKind.None,
@@ -52,7 +52,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public IConstructor? GetBaseConstructor()
         {
-            var declaration = (ConstructorDeclarationSyntax?) this.GetPrimaryDeclaration();
+            var declaration = (ConstructorDeclarationSyntax?) this.GetPrimaryDeclarationSyntax();
 
             if ( declaration == null || declaration.Initializer == null )
             {

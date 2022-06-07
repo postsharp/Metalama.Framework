@@ -36,7 +36,7 @@ internal class AddAttributeCodeAction : ICodeAction
             throw new ArgumentOutOfRangeException( nameof(this.TargetDeclaration), "The declaration is not declared in source." );
         }
 
-        var originalNode = this.TargetDeclaration.GetPrimaryDeclaration().AssertNotNull();
+        var originalNode = this.TargetDeclaration.GetPrimaryDeclarationSyntax().AssertNotNull();
 
         if ( originalNode is VariableDeclaratorSyntax { Parent: VariableDeclarationSyntax variableDeclaration } )
         {

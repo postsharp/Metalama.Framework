@@ -66,7 +66,7 @@ namespace Metalama.Framework.Engine.Advices
         {
             if ( fieldTemplate.IsNotNull )
             {
-                var fieldSyntax = (VariableDeclaratorSyntax) fieldTemplate.Declaration!.GetPrimaryDeclaration().AssertNotNull();
+                var fieldSyntax = (VariableDeclaratorSyntax) fieldTemplate.Declaration!.GetPrimaryDeclarationSyntax().AssertNotNull();
 
                 if ( fieldSyntax.Initializer != null )
                 {
@@ -90,7 +90,7 @@ namespace Metalama.Framework.Engine.Advices
         public static TemplateMember<IEvent> GetInitializerTemplate( this in TemplateMember<IEvent> eventFieldTemplate )
         {
             if ( eventFieldTemplate.IsNotNull
-                 && eventFieldTemplate.Declaration!.GetPrimaryDeclaration().AssertNotNull() is VariableDeclaratorSyntax eventFieldSyntax )
+                 && eventFieldTemplate.Declaration!.GetPrimaryDeclarationSyntax().AssertNotNull() is VariableDeclaratorSyntax eventFieldSyntax )
             {
                 if ( eventFieldSyntax.Initializer != null )
                 {
@@ -111,7 +111,7 @@ namespace Metalama.Framework.Engine.Advices
         {
             if ( propertyTemplate.IsNotNull )
             {
-                var propertySyntax = (PropertyDeclarationSyntax) propertyTemplate.Declaration!.GetPrimaryDeclaration().AssertNotNull();
+                var propertySyntax = (PropertyDeclarationSyntax) propertyTemplate.Declaration!.GetPrimaryDeclarationSyntax().AssertNotNull();
 
                 if ( propertySyntax.Initializer != null )
                 {

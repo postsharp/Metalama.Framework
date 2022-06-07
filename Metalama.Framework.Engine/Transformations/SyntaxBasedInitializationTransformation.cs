@@ -7,10 +7,8 @@ using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
-using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Transformations;
 
@@ -22,11 +20,6 @@ internal class SyntaxBasedInitializationTransformation : IInsertStatementTransfo
     public Advice Advice { get; }
 
     public IMemberOrNamedType ContextDeclaration { get; }
-
-    public ImmutableArray<SyntaxTree> TargetSyntaxTrees
-        => ImmutableArray.Create(
-            this._targetConstructor.GetPrimaryDeclaration()?.SyntaxTree
-            ?? this._targetConstructor.DeclaringType.GetPrimaryDeclaration().AssertNotNull().SyntaxTree );
 
     public IMember TargetMember => this._targetConstructor;
 
