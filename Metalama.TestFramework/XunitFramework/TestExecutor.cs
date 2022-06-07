@@ -138,7 +138,6 @@ namespace Metalama.TestFramework.XunitFramework
                         };
 
                         testMetrics.Finished += () =>
-
                         {
                             executionMessageSink.OnMessage( new TestFinished( test, testMetrics.ExecutionTime, logger.ToString() ) );
 
@@ -173,7 +172,7 @@ namespace Metalama.TestFramework.XunitFramework
                             semaphore.Wait();
 
                             // When the task is over, release the semaphore.
-                            task.ContinueWith( t => { semaphore.Release(); } );
+                            task.ContinueWith( _ => { semaphore.Release(); } );
 
                             tasks.TryAdd( task, task );
                         }

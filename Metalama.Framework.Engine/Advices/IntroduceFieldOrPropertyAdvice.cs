@@ -137,13 +137,7 @@ internal abstract class IntroduceFieldOrPropertyAdvice<TMember, TBuilder> : Intr
                                     pullFieldOrPropertyAction.ParameterType.AssertNotNull(),
                                     RefKind.None );
 
-                                // Allow the IPullStrategy to add custom attributes.
-                                if ( pullFieldOrPropertyAction.BuildParameterAction != null )
-                                {
-                                    userCodeInvoker.Invoke(
-                                        () => pullFieldOrPropertyAction.BuildParameterAction?.Invoke( newParameter ),
-                                        userCodeInvocationContext );
-                                }
+                                newParameter.AddAttributes( pullFieldOrPropertyAction.ParameterAttributes );
 
                                 transformations.Add( new AppendParameterTransformation( this, newParameter ) );
 
@@ -211,14 +205,7 @@ internal abstract class IntroduceFieldOrPropertyAdvice<TMember, TBuilder> : Intr
                                                     pullParameterAction.ParameterType.AssertNotNull(),
                                                     RefKind.None );
 
-                                                // Allow the strategy to add custom attributes.
-                                                if ( pullParameterAction.BuildParameterAction != null )
-                                                {
-                                                    // ReSharper disable once AccessToModifiedClosure
-                                                    userCodeInvoker.Invoke(
-                                                        () => pullParameterAction.BuildParameterAction?.Invoke( recursiveNewParameter ),
-                                                        userCodeInvocationContext );
-                                                }
+                                                recursiveNewParameter.AddAttributes( pullParameterAction.ParameterAttributes );
 
                                                 transformations.Add( new AppendParameterTransformation( this, recursiveNewParameter ) );
 

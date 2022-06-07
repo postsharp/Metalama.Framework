@@ -11,7 +11,6 @@ using Microsoft.CodeAnalysis.Editing;
 using Microsoft.CodeAnalysis.Simplification;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -413,22 +412,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             if ( valueType.IsEnum )
             {
-                var name = Enum.GetName( valueType, value );
-                var enumType = reflectionMapper.GetTypeSymbol( valueType );
-
-                if ( name != null )
-                {
-                    return MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        this.Type( enumType ),
-                        SyntaxFactory.IdentifierName( name ) );
-                }
-                else
-                {
-                    var underlyingValue = Convert.ChangeType( value, Enum.GetUnderlyingType( valueType ), CultureInfo.InvariantCulture )!;
-
-                    return this.CastExpression( enumType, this.LiteralExpression( underlyingValue ) );
-                }
+                return this.EnumValueExpression( (INamedTypeSymbol) reflectionMapper.GetTypeSymbol( valueType ), value );
             }
 
             throw new ArgumentOutOfRangeException( nameof(value), $"The value '{value}' cannot be converted to a custom attribute argument value." );

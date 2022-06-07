@@ -8,13 +8,13 @@ namespace Metalama.TestFramework.XunitFramework;
 
 internal class Metrics
 {
+    private readonly Metrics? _parent;
+
     private int _testsRun;
     private int _testFailed;
     private int _testSkipped;
     private int _testsRemaining;
     private int _testsStarted;
-
-    private Metrics? _parent;
     private long _executionTime;
 
     public Metrics( Metrics? parent = null )

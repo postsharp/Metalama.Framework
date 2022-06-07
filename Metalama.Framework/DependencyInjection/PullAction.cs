@@ -5,7 +5,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.SyntaxBuilders;
-using System;
+using System.Collections.Immutable;
 
 namespace Metalama.Framework.DependencyInjection;
 
@@ -21,21 +21,21 @@ public readonly struct PullAction
 
     internal IType? ParameterType { get; }
 
-    internal string? ParameterName { get; }
+    internal ImmutableArray<AttributeConstruction> ParameterAttributes { get; }
 
-    internal Action<IParameterBuilder>? BuildParameterAction { get; }
+    internal string? ParameterName { get; }
 
     private PullAction(
         DependencyPullStrategyKind kind,
-        Action<IParameterBuilder>? buildParameterAction = null,
         IExpression? assignmentExpression = null,
         string? parameterName = null,
-        IType? parameterType = null )
+        IType? parameterType = null,
+        ImmutableArray<AttributeConstruction> parameterAttributes = default )
     {
         this.Kind = kind;
-        this.BuildParameterAction = buildParameterAction;
         this.AssignmentExpression = assignmentExpression;
         this.ParameterType = parameterType;
+        this.ParameterAttributes = parameterAttributes.IsDefault ? ImmutableArray<AttributeConstruction>.Empty : parameterAttributes;
         this.ParameterName = parameterName;
     }
 
@@ -57,14 +57,13 @@ public readonly struct PullAction
     /// <param name="assignmentExpression">The right side of the statement that assigns the field or property dependency to the parameter.
     /// This value is optional. It is ignored if the dependency is a parameter (i.e. in the <see cref="IPullStrategy.PullParameter"/> method).
     /// When the dependency is a field or property, the default value is <paramref name="parameterName"/>.</param>
-    /// <param name="buildParameterAction">An optional action that receives an <see cref="IParameterBuilder"/> and can add custom attributes to it.</param>
     /// <returns></returns>
     public static PullAction IntroduceParameterAndPull(
         string parameterName,
         IType parameterType,
         IExpression? assignmentExpression = null,
-        Action<IParameterBuilder>? buildParameterAction = null )
-        => new( DependencyPullStrategyKind.AppendParameterAndPull, buildParameterAction, assignmentExpression, parameterName, parameterType );
+        ImmutableArray<AttributeConstruction> parameterAttributes = default )
+        => new( DependencyPullStrategyKind.AppendParameterAndPull, assignmentExpression, parameterName, parameterType, parameterAttributes );
 
     /// <summary>
     /// Creates a <see cref="PullAction"/> that means that the dependency should be assigned to a given expression.

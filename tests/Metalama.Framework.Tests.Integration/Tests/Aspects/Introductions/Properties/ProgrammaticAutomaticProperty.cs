@@ -17,7 +17,7 @@ public class MyAspect : TypeAspect
         // Change accessor visibility.
         var property3 = builder.Advice.IntroduceAutomaticProperty( builder.Target, "P3", typeof(int) );
         property3.Accessibility = Accessibility.Public;
-        property3.SetMethod.Accessibility = Accessibility.Protected;
+        property3.SetMethod!.Accessibility = Accessibility.Protected;
     }
 }
 

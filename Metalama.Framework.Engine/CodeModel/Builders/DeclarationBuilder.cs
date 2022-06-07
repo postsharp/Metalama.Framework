@@ -12,6 +12,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
@@ -52,6 +53,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public abstract string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null );
 
         public void AddAttribute( AttributeConstruction attribute ) => this.Attributes.Add( new AttributeBuilder( this, attribute ) );
+
+        public void AddAttributes( IEnumerable<AttributeConstruction> attributes )
+            => this.Attributes.AddRange( attributes.Select( a => new AttributeBuilder( this, a ) ) );
 
         public void RemoveAttributes( INamedType type ) => this.Attributes.RemoveAll( a => a.Type.Is( type ) );
 
