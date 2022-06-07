@@ -37,7 +37,35 @@ namespace Metalama.Framework.Engine.Advices
             this.Source = instance;
         }
 
-        public static IObjectReader Merge( params IObjectReader?[] readers ) => new MergeWrapper( readers );
+        public static IObjectReader Merge( params IObjectReader?[] readers )
+        {
+            var nonEmptyCount = 0;
+            var nonEmptyIndex = -1;
+
+            for ( var i = 0; i < readers.Length; i++ )
+            {
+                if ( readers[i] != null && readers[i]!.Count > 0 )
+                {
+                    nonEmptyIndex = i;
+                    nonEmptyCount++;
+
+                    if ( nonEmptyCount >= 2 )
+                    {
+                        break;
+                    }
+                }
+            }
+
+            switch ( nonEmptyCount )
+            {
+                case 0:
+                    return Empty;
+                case 1:
+                    return readers[nonEmptyIndex].AssertNotNull();
+                default:
+                    return new MergeWrapper( readers );
+            }
+        }
 
         public object? this[ string key ]
         {

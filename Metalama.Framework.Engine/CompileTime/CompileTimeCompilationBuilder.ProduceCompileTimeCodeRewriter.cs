@@ -211,7 +211,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                                             var originalNameAttribute = Attribute( this._originalNameTypeSyntax )
                                                 .WithArgumentList(
-                                                    AttributeArgumentList(
+                                                      MetaSyntaxRewriter.Transform[T]( T node )(
                                                         SingletonSeparatedList( AttributeArgument( SyntaxFactoryEx.LiteralExpression( originalId ) ) ) ) );
 
                                             // Transform the type.

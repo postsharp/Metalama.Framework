@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.Advices
     {
         internal class MergeWrapper : IObjectReader
         {
-            private readonly IReadOnlyDictionary<string, object?> _inner;
+            private readonly ImmutableDictionary<string, object?> _inner;
 
             public MergeWrapper( IObjectReader?[] readers )
             {
