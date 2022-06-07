@@ -17,5 +17,7 @@ namespace Metalama.Framework.Engine.Aspects
         ImmutableDictionary<TemplateClass, TemplateClassInstance> TemplateInstances { get; }
 
         void SetState( IAspectState? value );
+
+        new IAspectClassImpl AspectClass { get; }
     }
 }

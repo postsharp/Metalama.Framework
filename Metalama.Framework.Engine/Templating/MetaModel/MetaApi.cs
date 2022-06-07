@@ -89,7 +89,10 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IMetaTarget Target => this;
 
-        public IAspectInstance AspectInstance => this._common.AspectInstance;
+        IAspectInstance IMetaApi.AspectInstance
+            => this._common.AspectInstance ?? throw new InvalidOperationException( "IAspectInstance has not been provided." );
+
+        public IAspectInstanceInternal? AspectInstance => this._common.AspectInstance;
 
         public object This => this.GetThisOrBase( "meta.This", new AspectReferenceSpecification( this._common.AspectLayerId, AspectReferenceOrder.Final ) );
 

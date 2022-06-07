@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.Aspects
     /// <summary>
     /// An <see cref="IAspectClass"/> for which an <see cref="IAspectDriver"/> has been created.
     /// </summary>
-    internal interface IBoundAspectClass : IAspectClass
+    internal interface IBoundAspectClass : IAspectClassImpl
     {
         IAspectDriver AspectDriver { get; }
 
