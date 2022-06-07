@@ -52,10 +52,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public abstract string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null );
 
-        public void AddAttribute( AttributeConstruction attribute ) => this.Attributes.Add( new AttributeBuilder( this, attribute ) );
+        public void AddAttribute( AttributeConstruction attribute ) => this.Attributes.Add( new AttributeBuilder( this.ParentAdvice, this, attribute ) );
 
         public void AddAttributes( IEnumerable<AttributeConstruction> attributes )
-            => this.Attributes.AddRange( attributes.Select( a => new AttributeBuilder( this, a ) ) );
+            => this.Attributes.AddRange( attributes.Select( a => new AttributeBuilder( this.ParentAdvice, this, a ) ) );
 
         public void RemoveAttributes( INamedType type ) => this.Attributes.RemoveAll( a => a.Type.Is( type ) );
 

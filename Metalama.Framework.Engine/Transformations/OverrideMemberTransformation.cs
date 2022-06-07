@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -25,10 +26,10 @@ namespace Metalama.Framework.Engine.Transformations
 
         IDeclaration IOverriddenDeclaration.OverriddenDeclaration => this.OverriddenDeclaration;
 
-        public SyntaxTree TargetSyntaxTree
+        public ImmutableArray<SyntaxTree> TargetSyntaxTrees
             => this.OverriddenDeclaration switch
             {
-                IDeclarationImpl declaration => declaration.PrimarySyntaxTree.AssertNotNull(),
+                IDeclarationImpl declaration => ImmutableArray.Create( declaration.PrimarySyntaxTree.AssertNotNull() ),
                 _ => throw new AssertionFailedException()
             };
 

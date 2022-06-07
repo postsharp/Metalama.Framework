@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.Linking;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Transformations;
 
@@ -22,9 +23,10 @@ internal class SyntaxBasedInitializationTransformation : IInsertStatementTransfo
 
     public IMemberOrNamedType ContextDeclaration { get; }
 
-    public SyntaxTree TargetSyntaxTree
-        => this._targetConstructor.GetPrimaryDeclaration()?.SyntaxTree
-           ?? this._targetConstructor.DeclaringType.GetPrimaryDeclaration().AssertNotNull().SyntaxTree;
+    public ImmutableArray<SyntaxTree> TargetSyntaxTrees
+        => ImmutableArray.Create(
+            this._targetConstructor.GetPrimaryDeclaration()?.SyntaxTree
+            ?? this._targetConstructor.DeclaringType.GetPrimaryDeclaration().AssertNotNull().SyntaxTree );
 
     public IMember TargetMember => this._targetConstructor;
 

@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Transformations;
 
@@ -18,8 +19,9 @@ internal class AppendParameterTransformation : IObservableTransformation, IMembe
 
     public bool IsDesignTime => true;
 
-    public SyntaxTree TargetSyntaxTree
-        => (this.TargetMember.GetPrimaryDeclaration() ?? this.TargetMember.DeclaringType.GetPrimaryDeclaration().AssertNotNull()).SyntaxTree;
+    public ImmutableArray<SyntaxTree> TargetSyntaxTrees
+        => ImmutableArray.Create(
+            (this.TargetMember.GetPrimaryDeclaration() ?? this.TargetMember.DeclaringType.GetPrimaryDeclaration().AssertNotNull()).SyntaxTree );
 
     public IMember TargetMember => this.Parameter.DeclaringMember;
 

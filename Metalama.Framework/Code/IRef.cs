@@ -13,7 +13,7 @@ namespace Metalama.Framework.Code
         where T : class, ICompilationElement
     {
         /// <summary>
-        /// Returns a string that uniquely identifies the declaration represented by the current reference. This identifier can then be resolved using <see cref="ITypeFactory.GetDeclarationFromSerializableId"/>, even in
+        /// Returns a string that uniquely identifies the declaration represented by the current reference. This identifier can then be resolved using <see cref="IDeclarationFactory.GetDeclarationFromSerializableId"/>, even in
         /// a different process or with a different version of Metalama than the one that created the id.
         /// </summary>
         /// <returns>A string, or <c>null</c> if the current reference cannot be serialized to a public id.</returns>

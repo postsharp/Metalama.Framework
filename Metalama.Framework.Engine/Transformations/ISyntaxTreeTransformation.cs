@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Microsoft.CodeAnalysis;
+using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Transformations
 {
@@ -11,8 +12,8 @@ namespace Metalama.Framework.Engine.Transformations
     internal interface ISyntaxTreeTransformation : ITransformation
     {
         /// <summary>
-        /// Gets the syntax tree that needs to be modified.
+        /// Gets the syntax trees that needs to be modified.
         /// </summary>
-        SyntaxTree TargetSyntaxTree { get; }
+        ImmutableArray<SyntaxTree> TargetSyntaxTrees { get; }
     }
 }

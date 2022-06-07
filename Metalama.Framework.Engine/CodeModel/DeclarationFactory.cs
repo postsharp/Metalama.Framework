@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.CodeModel
     /// <summary>
     /// Creates instances of <see cref="IDeclaration"/> for a given <see cref="CompilationModel"/>.
     /// </summary>
-    public class DeclarationFactory : ITypeFactory
+    public class DeclarationFactory : IDeclarationFactory
     {
         private readonly ConcurrentDictionary<Ref<ICompilationElement>, object> _defaultCache =
             new( DeclarationRefEqualityComparer<Ref<ICompilationElement>>.Default );
@@ -266,10 +266,10 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        IArrayType ITypeFactory.ConstructArrayType( IType elementType, int rank )
+        IArrayType IDeclarationFactory.ConstructArrayType( IType elementType, int rank )
             => (IArrayType) this.GetIType( this.RoslynCompilation.CreateArrayTypeSymbol( ((ITypeInternal) elementType).TypeSymbol.AssertNotNull(), rank ) );
 
-        IPointerType ITypeFactory.ConstructPointerType( IType pointedType )
+        IPointerType IDeclarationFactory.ConstructPointerType( IType pointedType )
             => (IPointerType) this.GetIType( this.RoslynCompilation.CreatePointerTypeSymbol( ((ITypeInternal) pointedType).TypeSymbol.AssertNotNull() ) );
 
         public T ConstructNullable<T>( T type )
@@ -303,9 +303,9 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        object? ITypeFactory.DefaultValue( IType type ) => new DefaultUserExpression( type );
+        object? IDeclarationFactory.DefaultValue( IType type ) => new DefaultUserExpression( type );
 
-        object? ITypeFactory.Cast( IType type, object? value ) => new CastUserExpression( type, value );
+        object? IDeclarationFactory.Cast( IType type, object? value ) => new CastUserExpression( type, value );
 
         public IDeclaration GetDeclarationFromSymbolId( SymbolId symbolId )
             => this.GetDeclaration( symbolId.Resolve( this.RoslynCompilation ).AssertNotNull() );
@@ -321,6 +321,18 @@ namespace Metalama.Framework.Engine.CodeModel
             }
 
             return this.GetDeclaration( symbol );
+        }
+
+        public IDeclaration Translate( IDeclaration declaration )
+        {
+            if ( ReferenceEquals( declaration.Compilation, this._compilationModel ) )
+            {
+                return declaration;
+            }
+            else
+            {
+                return declaration.ToTypedRef().GetTarget( this._compilationModel );
+            }
         }
 
         internal IAttribute GetAttribute( AttributeBuilder attributeBuilder )

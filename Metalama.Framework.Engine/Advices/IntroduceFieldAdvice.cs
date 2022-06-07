@@ -96,7 +96,7 @@ namespace Metalama.Framework.Engine.Advices
 
                     case OverrideStrategy.Ignore:
                         // Do nothing.
-                        return AdviceResult.Create();
+                        return AdviceResult.Empty;
 
                     case OverrideStrategy.New:
                         this.MemberBuilder.IsNew = true;

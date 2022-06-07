@@ -4,6 +4,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
@@ -19,8 +20,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
     {
         private readonly AttributeConstruction _attributeConstruction;
 
-        public AttributeBuilder( DeclarationBuilder containingDeclaration, AttributeConstruction attributeConstruction ) : base(
-            containingDeclaration.ParentAdvice )
+        public AttributeBuilder( Advice advice, IDeclaration containingDeclaration, AttributeConstruction attributeConstruction ) : base( advice )
         {
             this._attributeConstruction = attributeConstruction;
             this.ContainingDeclaration = containingDeclaration;

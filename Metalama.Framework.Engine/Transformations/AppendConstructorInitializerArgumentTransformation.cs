@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Transformations;
 
@@ -33,8 +34,9 @@ internal class AppendConstructorInitializerArgumentTransformation : INonObservab
         this.Value = value;
     }
 
-    public SyntaxTree TargetSyntaxTree
-        => (this.Constructor.GetPrimaryDeclaration() ?? this.Constructor.DeclaringType.GetPrimaryDeclaration().AssertNotNull()).SyntaxTree;
+    public ImmutableArray<SyntaxTree> TargetSyntaxTrees
+        => ImmutableArray.Create(
+            (this.Constructor.GetPrimaryDeclaration() ?? this.Constructor.DeclaringType.GetPrimaryDeclaration().AssertNotNull()).SyntaxTree );
 
     public ArgumentSyntax ToSyntax()
         => SyntaxFactory.Argument( this.Value ).WithAdditionalAnnotations( this.Advice.Aspect.AspectClass.GeneratedCodeAnnotation );

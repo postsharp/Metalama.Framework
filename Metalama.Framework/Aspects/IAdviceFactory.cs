@@ -442,6 +442,15 @@ namespace Metalama.Framework.Aspects
             object? tags = null,
             object? args = null );
 
+        void AddAttribute(
+            IDeclaration targetDeclaration,
+            AttributeConstruction attribute,
+            OverrideStrategy whenExists = OverrideStrategy.Default );
+
+        void RemoveAttributes(
+            IDeclaration targetDeclaration,
+            INamedType attributeType );
+
         /// <summary>
         /// Returns a copy of the current <see cref="IAdviceFactory"/> that will add advice to a specified layer of the current aspect.
         /// </summary>

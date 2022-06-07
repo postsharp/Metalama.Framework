@@ -102,5 +102,13 @@ namespace Metalama.Framework.Engine.Advices
                 "The aspect '{0}' cannot introduce member '{1}' into type '{2}' because there is already a {3} of the same name in the type.",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition<(string AspectType, INamedType AttributeType, IDeclaration TargetDeclaration)>
+            AttributeAlreadyPresent = new(
+                "LAMA0515",
+                "Cannot introduce a custom attribute when the attribute is already present on the target declaration.",
+                "The aspect '{0}' cannot the custom attribute '{1}' into '{2}' because it this attribute is already present on the declaration and WhenExists is set to Fail.",
+                _category,
+                Error );
     }
 }

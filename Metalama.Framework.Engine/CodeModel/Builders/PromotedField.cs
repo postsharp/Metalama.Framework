@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Immutable;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
@@ -46,12 +47,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
         }
 
-        public override SyntaxTree TargetSyntaxTree
-            => this._field switch
-            {
-                IDeclarationImpl declaration => declaration.PrimarySyntaxTree.AssertNotNull(),
-                _ => throw new AssertionFailedException()
-            };
+        public override ImmutableArray<SyntaxTree> TargetSyntaxTrees => ImmutableArray.Create( this.PrimarySyntaxTree.AssertNotNull() );
 
         public override SyntaxTree? PrimarySyntaxTree => this._field.PrimarySyntaxTree;
 

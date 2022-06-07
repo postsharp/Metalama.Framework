@@ -10,7 +10,6 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
@@ -19,7 +18,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
     /// The base class for the read-only facade of introduced declarations, represented by <see cref="DeclarationBuilder"/>. Facades
     /// are consistent with the consuming <see cref="CompilationModel"/>, while builders are consistent with the producing <see cref="CompilationModel"/>. 
     /// </summary>
-    internal abstract class BuiltDeclaration : BaseDeclaration
+    internal abstract class BuiltDeclaration : BaseDeclaration, IRefImpl
     {
         protected BuiltDeclaration( CompilationModel compilation )
         {
@@ -43,9 +42,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public override IAttributeCollection Attributes
             => new AttributeCollection(
                 this,
-                this.Builder.Attributes
-                    .Select<AttributeBuilder, AttributeRef>( a => new AttributeRef( a ) )
-                    .ToList() );
+                this.GetCompilationModel().GetAttributeCollection( this.ToTypedRef<IDeclaration>(), false ) );
 
         public override DeclarationKind DeclarationKind => this.Builder.DeclarationKind;
 
@@ -70,5 +67,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public override Location? DiagnosticLocation => this.Builder.DiagnosticLocation;
 
         public override SyntaxTree? PrimarySyntaxTree => this.Builder.PrimarySyntaxTree;
+
+        object? IRefImpl.Target => this;
+
+        bool IRefImpl.IsDefault => false;
     }
 }

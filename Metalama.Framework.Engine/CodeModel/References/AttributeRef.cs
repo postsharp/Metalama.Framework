@@ -18,6 +18,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public object? Target { get; private set; }
 
+        bool IRefImpl.IsDefault => false;
+
         private (AttributeData? Attribute, ISymbol? Parent) ResolveAttributeData( AttributeSyntax attributeSyntax, Compilation compilation )
         {
             // Find the parent declaration.

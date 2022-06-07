@@ -10,10 +10,11 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
-internal abstract class UpdatableDeclarationCollection<T> : ILazy, IReadOnlyList<Ref<T>>
-    where T : class, IDeclaration
+internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : ILazy, IReadOnlyList<TRef>
+    where TDeclaration : class, IDeclaration
+    where TRef : IRefImpl<TDeclaration>
 {
-    private List<Ref<T>>? _allItems;
+    private List<TRef>? _allItems;
 
     protected UpdatableDeclarationCollection( CompilationModel compilation )
     {
@@ -31,7 +32,7 @@ internal abstract class UpdatableDeclarationCollection<T> : ILazy, IReadOnlyList
     {
         if ( !this.IsComplete )
         {
-            this._allItems = new List<Ref<T>>();
+            this._allItems = new List<TRef>();
 
 #if DEBUG
             this.PopulateAllItems(
@@ -51,9 +52,9 @@ internal abstract class UpdatableDeclarationCollection<T> : ILazy, IReadOnlyList
         }
     }
 
-    protected abstract void PopulateAllItems( Action<Ref<T>> action );
+    protected abstract void PopulateAllItems( Action<TRef> action );
 
-    protected void AddItem( Ref<T> item )
+    protected void AddItem( in TRef item )
     {
         if ( this.IsComplete )
         {
@@ -61,7 +62,7 @@ internal abstract class UpdatableDeclarationCollection<T> : ILazy, IReadOnlyList
         }
     }
 
-    protected void RemoveItem( Ref<T> item )
+    protected void RemoveItem( in TRef item )
     {
         if ( this.IsComplete )
         {
@@ -79,28 +80,28 @@ internal abstract class UpdatableDeclarationCollection<T> : ILazy, IReadOnlyList
         }
     }
 
-    public bool Contains( Ref<T> item )
+    public bool Contains( TRef item )
     {
         this.EnsureComplete();
 
-        return this._allItems!.Any( i => DeclarationRefEqualityComparer<Ref<T>>.Default.Equals( i, item ) );
+        return this._allItems!.Any( i => DeclarationRefEqualityComparer<TRef>.Default.Equals( i, item ) );
     }
 
-    public UpdatableDeclarationCollection<T> Clone( CompilationModel compilation )
+    public UpdatableDeclarationCollection<TDeclaration, TRef> Clone( CompilationModel compilation )
     {
-        var clone = (UpdatableDeclarationCollection<T>) this.MemberwiseClone();
+        var clone = (UpdatableDeclarationCollection<TDeclaration, TRef>) this.MemberwiseClone();
         clone.Compilation = compilation;
 
         if ( this._allItems != null )
         {
-            clone._allItems = new List<Ref<T>>( this._allItems.Count );
+            clone._allItems = new List<TRef>( this._allItems.Count );
             clone._allItems.AddRange( this._allItems );
         }
 
         return clone;
     }
 
-    public IEnumerator<Ref<T>> GetEnumerator()
+    public IEnumerator<TRef> GetEnumerator()
     {
         for ( var i = 0; i < this.Count; i++ )
         {
@@ -110,7 +111,7 @@ internal abstract class UpdatableDeclarationCollection<T> : ILazy, IReadOnlyList
 
     IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
-    public Ref<T> this[ int index ]
+    public TRef this[ int index ]
     {
         get
         {
@@ -119,4 +120,10 @@ internal abstract class UpdatableDeclarationCollection<T> : ILazy, IReadOnlyList
             return this._allItems![index];
         }
     }
+}
+
+internal abstract class UpdatableDeclarationCollection<TDeclaration> : UpdatableDeclarationCollection<TDeclaration, Ref<TDeclaration>>
+    where TDeclaration : class, IDeclaration
+{
+    protected UpdatableDeclarationCollection( CompilationModel compilation ) : base( compilation ) { }
 }

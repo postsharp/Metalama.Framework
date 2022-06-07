@@ -214,7 +214,7 @@ namespace Metalama.Framework.Engine.Linking
                         var syntaxGenerationContext = SyntaxGenerationContext.Create(
                             this._serviceProvider,
                             input.InitialCompilation.Compilation,
-                            memberIntroduction.TargetSyntaxTree,
+                            memberIntroduction.TargetSyntaxTrees[0],
                             positionInSyntaxTree );
 
                         // Call GetIntroducedMembers

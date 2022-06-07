@@ -19,6 +19,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 // ReSharper disable SuspiciousTypeConversion.Global
@@ -238,7 +239,9 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     }
 
                     A.CallTo( () => overriddenDeclaration.OverriddenDeclaration ).Returns( overridenMember );
-                    A.CallTo( () => ((IIntroduceMemberTransformation) overriddenDeclaration).TargetSyntaxTree ).Returns( symbolHelperNode.SyntaxTree );
+
+                    A.CallTo( () => ((IIntroduceMemberTransformation) overriddenDeclaration).TargetSyntaxTrees )
+                        .Returns( ImmutableArray.Create( symbolHelperNode.SyntaxTree ) );
                 }
                 else if ( transformation is IObservableTransformation observableTransformation )
                 {
@@ -464,7 +467,8 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
             A.CallTo( () => ((IIntroduceMemberTransformation) observableTransformation).InsertPosition )
                 .Returns( new InsertPosition( insertPositionRelation, (MemberDeclarationSyntax) insertPositionNode ) );
 
-            A.CallTo( () => ((IIntroduceMemberTransformation) observableTransformation).TargetSyntaxTree ).Returns( symbolHelperNode.SyntaxTree );
+            A.CallTo( () => ((IIntroduceMemberTransformation) observableTransformation).TargetSyntaxTrees )
+                .Returns( ImmutableArray.Create( symbolHelperNode.SyntaxTree ) );
 
             // ReSharper disable SuspiciousTypeConversion.Global
 

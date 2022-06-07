@@ -139,7 +139,7 @@ namespace Metalama.Framework.Engine.Advices
 
                     case OverrideStrategy.Ignore:
                         // Do nothing.
-                        return AdviceResult.Create();
+                        return AdviceResult.Empty;
 
                     case OverrideStrategy.New:
                         // If the existing declaration is in the current type, we fail, otherwise, declare a new method and override.
@@ -147,7 +147,7 @@ namespace Metalama.Framework.Engine.Advices
                         {
                             if ( hasNoOverrideSemantics )
                             {
-                                return AdviceResult.Create();
+                                return AdviceResult.Empty;
                             }
                             else
                             {
@@ -191,7 +191,7 @@ namespace Metalama.Framework.Engine.Advices
                         {
                             if ( hasNoOverrideSemantics )
                             {
-                                return AdviceResult.Create();
+                                return AdviceResult.Empty;
                             }
                             else
                             {

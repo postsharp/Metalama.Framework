@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Transformations
@@ -26,7 +27,8 @@ namespace Metalama.Framework.Engine.Transformations
 
         public INamedType TargetType { get; }
 
-        public SyntaxTree TargetSyntaxTree => this.TargetType.GetSymbol().GetPrimarySyntaxReference().AssertNotNull().SyntaxTree;
+        public ImmutableArray<SyntaxTree> TargetSyntaxTrees
+            => ImmutableArray.Create( this.TargetType.GetSymbol().GetPrimarySyntaxReference().AssertNotNull().SyntaxTree );
 
         public IReadOnlyDictionary<IMember, IMember> MemberMap { get; }
 

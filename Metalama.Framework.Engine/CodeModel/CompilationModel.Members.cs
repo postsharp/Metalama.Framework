@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 using Metalama.Framework.Engine.Transformations;
@@ -22,6 +23,7 @@ public partial class CompilationModel
     private ImmutableDictionary<INamedTypeSymbol, IndexerUpdatableCollection> _indexers;
     private ImmutableDictionary<INamedTypeSymbol, InterfaceUpdatableCollection> _interfaceImplementations;
     private ImmutableDictionary<Ref<IHasParameters>, ParameterUpdatableCollection> _parameters;
+    private ImmutableDictionary<Ref<IDeclaration>, AttributeUpdatableCollection> _attributes;
 
     private ImmutableDictionary<INamedTypeSymbol, IConstructorBuilder> _staticConstructors =
         ImmutableDictionary<INamedTypeSymbol, IConstructorBuilder>.Empty.WithComparers( SymbolEqualityComparer.Default );
@@ -36,6 +38,21 @@ public partial class CompilationModel
         where TDeclaration : class, IDeclaration
         where TCollection : UpdatableDeclarationCollection<TDeclaration>
         where TKey : notnull
+        => this.GetMemberCollection<TKey, TDeclaration, Ref<TDeclaration>, TCollection>(
+            ref dictionary,
+            requestMutableCollection,
+            declaringTypeSymbol,
+            createCollection );
+
+    private TCollection GetMemberCollection<TKey, TDeclaration, TRef, TCollection>(
+        ref ImmutableDictionary<TKey, TCollection> dictionary,
+        bool requestMutableCollection,
+        TKey declaringTypeSymbol,
+        Func<CompilationModel, TKey, TCollection> createCollection )
+        where TDeclaration : class, IDeclaration
+        where TCollection : UpdatableDeclarationCollection<TDeclaration, TRef>
+        where TKey : notnull
+        where TRef : IRefImpl<TDeclaration>
     {
         if ( requestMutableCollection && !this.IsMutable )
         {
@@ -128,6 +145,15 @@ public partial class CompilationModel
             ( c, t ) => new ParameterUpdatableCollection( c, t ) );
     }
 
+    internal AttributeUpdatableCollection GetAttributeCollection( Ref<IDeclaration> parent, bool mutable )
+    {
+        return this.GetMemberCollection<Ref<IDeclaration>, IAttribute, AttributeRef, AttributeUpdatableCollection>(
+            ref this._attributes,
+            mutable,
+            parent,
+            ( c, t ) => new AttributeUpdatableCollection( c, t ) );
+    }
+
     internal IConstructorBuilder? GetStaticConstructor( INamedTypeSymbol declaringType )
     {
         this._staticConstructors.TryGetValue( declaringType, out var value );
@@ -157,6 +183,11 @@ public partial class CompilationModel
             this.AddReplaceMemberTransformation( originCompilation, replaceMember );
         }
 
+        if ( transformation is RemoveAttributesTransformation removeAttributes )
+        {
+            this.RemoveAttributes( removeAttributes );
+        }
+
         if ( transformation is IDeclarationBuilder builder )
         {
             this.AddDeclaration( builder );
@@ -171,6 +202,12 @@ public partial class CompilationModel
         {
             this.AddIntroduceInterfaceTransformation( introduceInterface );
         }
+    }
+
+    private void RemoveAttributes( RemoveAttributesTransformation removeAttributes )
+    {
+        var attributes = this.GetAttributeCollection( removeAttributes.ContainingDeclaration.ToTypedRef(), true );
+        attributes.Remove( removeAttributes.AttributeType );
     }
 
     private void AddReplaceMemberTransformation( CompilationModel originCompilation, IReplaceMemberTransformation transformation )
@@ -264,6 +301,12 @@ public partial class CompilationModel
             case IParameterBuilder parameter:
                 var parameters = this.GetParameterCollection( ((IHasParameters) parameter.ContainingDeclaration!).ToTypedRef(), true );
                 parameters.Add( parameter );
+
+                break;
+
+            case AttributeBuilder attribute:
+                var attributes = this.GetAttributeCollection( attribute.ContainingDeclaration.ToTypedRef(), true );
+                attributes.Add( attribute );
 
                 break;
 

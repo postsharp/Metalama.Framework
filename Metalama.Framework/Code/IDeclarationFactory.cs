@@ -11,7 +11,7 @@ namespace Metalama.Framework.Code
     /// Allows to get instances of the <see cref="IType"/> interface or to test for type equality or inheritance.
     /// </summary>
     [CompileTime]
-    internal interface ITypeFactory
+    internal interface IDeclarationFactory
     {
         /// <summary>
         /// Get type based on its full name, as used in reflection.
@@ -76,5 +76,7 @@ namespace Metalama.Framework.Code
         /// Gets a declaration from a serialized identifier generated to <see cref="IRef{T}.ToSerializableId"/>.
         /// </summary>
         IDeclaration? GetDeclarationFromSerializableId( DeclarationSerializableId declarationId );
+
+        IDeclaration Translate( IDeclaration declaration );
     }
 }

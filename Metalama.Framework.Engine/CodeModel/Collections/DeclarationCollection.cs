@@ -50,7 +50,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 
         protected TDeclaration GetItem( in TRef reference ) => reference.GetTarget( this.Compilation );
 
-        protected IEnumerable<TDeclaration> GetItems( IEnumerable<Ref<TDeclaration>> references ) => references.Select( x => x.GetTarget( this.Compilation ) );
+        protected IEnumerable<TDeclaration> GetItems( IEnumerable<TRef> references ) => references.Select( x => x.GetTarget( this.Compilation ) );
 
         public override string ToString()
         {

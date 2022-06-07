@@ -94,6 +94,10 @@ namespace Metalama.Framework.Engine.CodeModel
             this._parameters = ImmutableDictionary.Create<Ref<IHasParameters>, ParameterUpdatableCollection>()
                 .WithComparers( DeclarationRefEqualityComparer<Ref<IHasParameters>>.Default );
 
+            this._attributes =
+                ImmutableDictionary<Ref<IDeclaration>, AttributeUpdatableCollection>.Empty.WithComparers(
+                    DeclarationRefEqualityComparer<Ref<IDeclaration>>.Default );
+
             this.Factory = new DeclarationFactory( this );
 
             // Discover custom attributes.
@@ -162,6 +166,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this._interfaceImplementations = prototype._interfaceImplementations;
             this._staticConstructors = prototype._staticConstructors;
             this._parameters = prototype._parameters;
+            this._attributes = prototype._attributes;
 
             this.Factory = new DeclarationFactory( this );
             this._depthsCache = prototype._depthsCache;
@@ -219,7 +224,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public Compilation RoslynCompilation => this.PartialCompilation.Compilation;
 
-        ITypeFactory ICompilationInternal.TypeFactory => this.Factory;
+        IDeclarationFactory ICompilationInternal.Factory => this.Factory;
 
         public IReadOnlyList<IManagedResource> ManagedResources => throw new NotImplementedException();
 

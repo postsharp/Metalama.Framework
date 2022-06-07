@@ -1,0 +1,80 @@
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Transformations;
+using System;
+using System.Collections.Immutable;
+using System.Linq;
+
+namespace Metalama.Framework.Engine.Advices;
+
+internal class AddAttributeAdvice : Advice
+{
+    private readonly AttributeConstruction _attribute;
+    private readonly OverrideStrategy _overrideStrategy;
+
+    public AddAttributeAdvice(
+        IAspectInstanceInternal aspect,
+        TemplateClassInstance template,
+        IDeclaration targetDeclaration,
+        AttributeConstruction attribute,
+        OverrideStrategy overrideStrategy,
+        string? layerName ) : base( aspect, template, targetDeclaration, layerName, ObjectReader.Empty )
+    {
+        this._attribute = attribute;
+        this._overrideStrategy = overrideStrategy;
+    }
+
+    public override void Initialize( IDiagnosticAdder diagnosticAdder ) { }
+
+    public override AdviceResult ToResult( IServiceProvider serviceProvider, ICompilation compilation )
+    {
+        var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
+
+        if ( this._overrideStrategy != OverrideStrategy.New )
+        {
+            // Determine if we already have a custom attribute of this type, and handle conflict.
+
+            if ( targetDeclaration.Attributes.OfAttributeType( this._attribute.Type ).Any() )
+            {
+                // There is a conflict.
+
+                switch ( this._overrideStrategy )
+                {
+                    case OverrideStrategy.Fail:
+                        return AdviceResult.Create(
+                            AdviceDiagnosticDescriptors.AttributeAlreadyPresent.CreateRoslynDiagnostic(
+                                targetDeclaration.GetDiagnosticLocation(),
+                                (this.Aspect.AspectClass.ShortName, this._attribute.Type, targetDeclaration) ) );
+
+                    case OverrideStrategy.Ignore:
+                        return AdviceResult.Empty;
+
+                    case OverrideStrategy.New:
+                        return AdviceResult.Create( new AttributeBuilder( this, targetDeclaration, this._attribute ) );
+
+                    case OverrideStrategy.Override:
+                        var removeTransformation = new RemoveAttributesTransformation(
+                            this,
+                            targetDeclaration,
+                            this._attribute.Type,
+                            targetDeclaration.GetDeclaringSyntaxReferences().Select( r => r.SyntaxTree ).Distinct().ToImmutableArray() );
+
+                        return AdviceResult.Create( removeTransformation, new AttributeBuilder( this, targetDeclaration, this._attribute ) );
+
+                    default:
+                        throw new AssertionFailedException();
+                }
+            }
+        }
+
+        return AdviceResult.Create( new AttributeBuilder( this, targetDeclaration, this._attribute ) );
+    }
+}

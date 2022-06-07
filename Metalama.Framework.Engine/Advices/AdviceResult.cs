@@ -29,13 +29,11 @@ namespace Metalama.Framework.Engine.Advices
                 nonObservableTransformations.IsDefault ? ImmutableArray<INonObservableTransformation>.Empty : nonObservableTransformations;
         }
 
-        public static AdviceResult Create()
-        {
-            return new AdviceResult(
+        public static AdviceResult Empty
+            => new(
                 ImmutableArray<Diagnostic>.Empty,
                 ImmutableArray<IObservableTransformation>.Empty,
                 ImmutableArray<INonObservableTransformation>.Empty );
-        }
 
         public static AdviceResult Create( params ITransformation[] transformations )
         {

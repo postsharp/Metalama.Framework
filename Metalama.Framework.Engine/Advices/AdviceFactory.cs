@@ -1031,20 +1031,6 @@ namespace Metalama.Framework.Engine.Advices
             this.AddFilterImpl( targetMember, targetMember, template, kind, tags, args );
         }
 
-        public IParameterBuilder IntroduceParameterAndPull(
-            IConstructor targetConstructor,
-            string parameterName,
-            IType parameterType,
-            IExpression? defaultValue = null )
-            => throw new NotImplementedException();
-
-        public IParameterBuilder IntroduceParameterAndPull(
-            IConstructor targetConstructor,
-            string parameterName,
-            Type parameterType,
-            IExpression? defaultValue = null )
-            => throw new NotImplementedException();
-
         private void AddFilterImpl(
             IDeclaration targetDeclaration,
             IMember targetMember,
@@ -1079,6 +1065,18 @@ namespace Metalama.Framework.Engine.Advices
             }
 
             advice.Contracts.Add( new Contract( targetDeclaration, templateRef, direction, ObjectReader.GetReader( tags ), ObjectReader.GetReader( args ) ) );
+        }
+
+        public void AddAttribute( IDeclaration targetDeclaration, AttributeConstruction attribute, OverrideStrategy whenExists = OverrideStrategy.Default )
+        {
+            this.State.Advices.Add(
+                new AddAttributeAdvice( this.State.AspectInstance, this._templateInstance!, targetDeclaration, attribute, whenExists, this._layerName ) );
+        }
+
+        public void RemoveAttributes( IDeclaration targetDeclaration, INamedType attributeType )
+        {
+            this.State.Advices.Remove(
+                new RemoveAttributesAdvice( this.State.AspectInstance, this._templateInstance!, targetDeclaration, attributeType, this._layerName ) );
         }
     }
 }
