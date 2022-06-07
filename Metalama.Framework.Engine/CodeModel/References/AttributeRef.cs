@@ -53,6 +53,11 @@ namespace Metalama.Framework.Engine.CodeModel.References
             this.Target = attributeSyntax;
             this._declaringDeclaration = new Ref<IDeclaration>( declaration, targetKind, compilation );
         }
+        public AttributeRef( AttributeSyntax attributeSyntax, in Ref <IDeclaration> declaration )
+        {
+            this.Target = attributeSyntax;
+            this._declaringDeclaration = declaration;
+        }
 
         public AttributeRef( AttributeBuilder builder )
         {

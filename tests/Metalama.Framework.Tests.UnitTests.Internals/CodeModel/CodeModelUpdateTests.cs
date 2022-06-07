@@ -2,9 +2,11 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Transformations;
+using System;
 using System.Linq;
 using Xunit;
 
@@ -341,4 +343,62 @@ class C
 
         Assert.Single( constructor.Parameters );
     }
+    
+    [Fact]
+    public void AddAttribute_Type()
+    {
+        using var testContext = this.CreateTestContext();
+
+        var code = @"
+class C
+{    
+  
+}";
+
+        var immutableCompilation = testContext.CreateCompilationModel( code );
+        var compilation = immutableCompilation.ToMutable();
+        var type = compilation.Types.Single();
+        
+        Assert.Empty( type.Attributes );
+        compilation.AddTransformation( new AttributeBuilder( null!, type, AttributeConstruction.Create( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(SerializableAttribute) ) ) ) );
+        Assert.Single( type.Attributes );
+    }
+
+    [Fact]
+    public void AddAttribute_Compilation()
+    {
+        using var testContext = this.CreateTestContext();
+
+        var code = @"";
+
+        var immutableCompilation = testContext.CreateCompilationModel( code );
+        var compilation = immutableCompilation.ToMutable();
+        
+        Assert.Empty( compilation.Attributes );
+        compilation.AddTransformation( new AttributeBuilder( null!, compilation, AttributeConstruction.Create( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(SerializableAttribute) ) ) ) );
+        Assert.Single( compilation.Attributes );
+    }
+    
+     
+    [Fact]
+    public void RemoveAttribute_Type()
+    {
+        using var testContext = this.CreateTestContext();
+
+        var code = @"
+[System.Serializable]
+class C
+{    
+  
+}";
+
+        var immutableCompilation = testContext.CreateCompilationModel( code );
+        var compilation = immutableCompilation.ToMutable();
+        var type = compilation.Types.Single();
+        
+        Assert.Single( type.Attributes );
+        compilation.AddTransformation( new RemoveAttributesTransformation( null!, type, (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(SerializableAttribute) ) , default  ) );
+        Assert.Empty( type.Attributes );
+    }
+    
 }

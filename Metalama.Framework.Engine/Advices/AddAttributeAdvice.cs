@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
 using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -58,7 +59,7 @@ internal class AddAttributeAdvice : Advice
                         return AdviceResult.Empty;
 
                     case OverrideStrategy.New:
-                        return AdviceResult.Create( new AttributeBuilder( this, targetDeclaration, this._attribute ) );
+                        return CreateResult();
 
                     case OverrideStrategy.Override:
                         var removeTransformation = new RemoveAttributesTransformation(
@@ -67,7 +68,7 @@ internal class AddAttributeAdvice : Advice
                             this._attribute.Type,
                             targetDeclaration.GetDeclaringSyntaxReferences().Select( r => r.SyntaxTree ).Distinct().ToImmutableArray() );
 
-                        return AdviceResult.Create( removeTransformation, new AttributeBuilder( this, targetDeclaration, this._attribute ) );
+                        return CreateResult( removeTransformation );
 
                     default:
                         throw new AssertionFailedException();
@@ -75,6 +76,25 @@ internal class AddAttributeAdvice : Advice
             }
         }
 
-        return AdviceResult.Create( new AttributeBuilder( this, targetDeclaration, this._attribute ) );
+        return CreateResult();
+
+        AdviceResult CreateResult( RemoveAttributesTransformation? removeTransformation = null )
+        {
+            List<ITransformation> transformations = new();
+
+            if ( removeTransformation != null )
+            {
+                transformations.Add( removeTransformation );
+            }
+
+            if ( targetDeclaration.ContainingDeclaration is IConstructor { IsImplicit: true } constructor )
+            {
+                transformations.Add( new ConstructorBuilder( this, constructor.DeclaringType, ObjectReader.Empty ) );
+            }
+
+            transformations.Add( new AttributeBuilder( this, targetDeclaration, this._attribute ) );
+
+            return AdviceResult.Create( transformations );
+        }
     }
 }

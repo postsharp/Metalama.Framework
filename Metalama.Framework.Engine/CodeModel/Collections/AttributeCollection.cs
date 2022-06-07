@@ -23,8 +23,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
         private AttributeCollection() { }
 
         public IEnumerable<IAttribute> OfAttributeType( INamedType type )
-            => this.GetItems(
-                this.Source.Where( a => a.AttributeTypeName == type.Name && a.GetTarget( this.ContainingDeclaration!.Compilation ).Type.Is( type ) ) );
+            => this.GetItems( this.Source ).Where( a => a.Type.Is( type ) );
 
         public IEnumerable<IAttribute> OfAttributeType( Type type )
             => this.OfAttributeType( (INamedType) this.ContainingDeclaration!.GetCompilationModel().Factory.GetTypeByReflectionType( type ) );

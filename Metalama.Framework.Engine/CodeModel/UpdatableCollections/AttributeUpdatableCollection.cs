@@ -14,8 +14,12 @@ namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 internal class AttributeUpdatableCollection : UpdatableDeclarationCollection<IAttribute, AttributeRef>
 {
     private readonly Ref<IDeclaration> _parent;
+    
+    // This field is set only when _parent is the ISourceAssemblySymbol.
+    private readonly IModuleSymbol? _moduleSymbol;
+    
 
-    public AttributeUpdatableCollection( CompilationModel compilation, Ref<IDeclaration> parent ) : base( compilation )
+    public AttributeUpdatableCollection( CompilationModel compilation, Ref<IDeclaration> parent, IModuleSymbol? moduleSymbol ) : base( compilation )
     {
         this._parent = parent;
     }
@@ -27,7 +31,7 @@ internal class AttributeUpdatableCollection : UpdatableDeclarationCollection<IAt
             case ISymbol symbol:
                 foreach ( var attribute in symbol.GetAttributes() )
                 {
-                    if ( attribute.AttributeClass == null || attribute.AttributeClass is IErrorTypeSymbol || attribute.AttributeConstructor == null )
+                    if ( attribute.AttributeConstructor == null )
                     {
                         continue;
                     }
@@ -44,9 +48,22 @@ internal class AttributeUpdatableCollection : UpdatableDeclarationCollection<IAt
                 }
 
                 break;
-
+            
             default:
                 throw new AssertionFailedException();
+        }
+
+        if ( this._moduleSymbol != null )
+        {
+            foreach ( var attribute in this._moduleSymbol.GetAttributes() )
+            {
+                if ( attribute.AttributeConstructor == null )
+                {
+                    continue;
+                }
+                    
+                action( new AttributeRef( attribute, this._parent ) );
+            }
         }
     }
 
@@ -60,9 +77,7 @@ internal class AttributeUpdatableCollection : UpdatableDeclarationCollection<IAt
     {
         this.EnsureComplete();
 
-        var itemsToRemove = this.Where(
-                a => a.AttributeTypeName == namedType.Name && a.TryGetTarget( namedType.GetCompilationModel(), out var attribute )
-                                                           && attribute.Type.Is( namedType ) )
+        var itemsToRemove = this.Where( x => x.GetTarget(namedType.Compilation).Constructor.DeclaringType.Is( namedType ) )
             .ToList();
 
         foreach ( var item in itemsToRemove )

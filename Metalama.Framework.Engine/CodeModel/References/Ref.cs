@@ -81,7 +81,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
         public static Ref<IDeclaration> ReturnParameter( IMethodSymbol methodSymbol, Compilation compilation )
             => new( methodSymbol, compilation, DeclarationRefTargetKind.Return );
 
-        internal static Ref<ICompilation> Compilation( Compilation compilation ) => new( DeclarationRefTargetKind.Assembly, compilation );
+        internal static Ref<ICompilation> Compilation( Compilation compilation ) => FromSymbol( compilation.Assembly, compilation ).As<ICompilation>();
     }
 
     /// <summary>
@@ -232,17 +232,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
             switch ( this.Target )
             {
                 case null:
-                    switch ( this.TargetKind )
-                    {
-                        case DeclarationRefTargetKind.Assembly:
-                            return compilation.Assembly;
-
-                        case DeclarationRefTargetKind.Module:
-                            return compilation.SourceModule;
-
-                        default:
-                            throw new AssertionFailedException();
-                    }
+                    throw new AssertionFailedException();
 
                 case ISymbol symbol:
                     return symbol.Translate( this._compilation, compilation ).AssertNotNull();

@@ -147,11 +147,13 @@ public partial class CompilationModel
 
     internal AttributeUpdatableCollection GetAttributeCollection( Ref<IDeclaration> parent, bool mutable )
     {
+        var moduleSymbol = parent.TargetKind == DeclarationRefTargetKind.Assembly ? this.RoslynCompilation.SourceModule : null;
+        
         return this.GetMemberCollection<Ref<IDeclaration>, IAttribute, AttributeRef, AttributeUpdatableCollection>(
             ref this._attributes,
             mutable,
             parent,
-            ( c, t ) => new AttributeUpdatableCollection( c, t ) );
+            ( c, t ) => new AttributeUpdatableCollection( c, t, moduleSymbol ) );
     }
 
     internal IConstructorBuilder? GetStaticConstructor( INamedTypeSymbol declaringType )

@@ -208,12 +208,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public override IAttributeCollection Attributes
             => new AttributeCollection(
                 this,
-                this.RoslynCompilation.Assembly
-                    .GetAttributes()
-                    .Union( this.RoslynCompilation.SourceModule.GetAttributes() )
-                    .Where( a => a.AttributeConstructor != null )
-                    .Select( a => new AttributeRef( a, Ref.FromSymbol( this.RoslynCompilation.Assembly, this.RoslynCompilation ) ) )
-                    .ToList() );
+                this.GetAttributeCollection( Ref.Compilation( this.RoslynCompilation ).As<IDeclaration>(), false ));
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Compilation;
 
