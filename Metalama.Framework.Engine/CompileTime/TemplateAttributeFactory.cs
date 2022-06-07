@@ -38,7 +38,7 @@ internal class TemplateAttributeFactory : IService
                 memberId,
                 m =>
                 {
-                    this.TryGetTemplateAttributeCore( m, diagnosticAdder, out var attribute );
+                    _ = this.TryGetTemplateAttributeCore( m, diagnosticAdder, out var attribute );
 
                     return attribute;
                 } );

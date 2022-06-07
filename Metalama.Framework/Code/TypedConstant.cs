@@ -51,7 +51,7 @@ namespace Metalama.Framework.Code
         }
 
         /// <summary>
-        /// Gets a value indicating whether the value is <c>null</c> or <c>default/c>. Not to be confused with <see cref="IsAssigned"/>.
+        /// Gets a value indicating whether the value is <c>null</c> or <c>default</c>. Not to be confused with <see cref="IsAssigned"/>.
         /// </summary>
         public bool IsDefault
         {

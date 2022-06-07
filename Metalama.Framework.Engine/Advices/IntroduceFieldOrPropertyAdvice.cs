@@ -65,8 +65,7 @@ internal abstract class IntroduceFieldOrPropertyAdvice<TMember, TBuilder> : Intr
             var compilation = targetType.GetCompilationModel();
 
             // Add the field or property introduction itself.
-            var transformations = new List<ITransformation>();
-            transformations.Add( this.MemberBuilder );
+            var transformations = new List<ITransformation> { this.MemberBuilder };
 
             // Find all constructors except those who call `: this(...)`.
             foreach ( var constructor in targetType.Constructors )

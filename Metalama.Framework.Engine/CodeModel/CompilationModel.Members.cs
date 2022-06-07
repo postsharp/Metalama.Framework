@@ -35,6 +35,7 @@ public partial class CompilationModel
         Func<CompilationModel, TKey, TCollection> createCollection )
         where TDeclaration : class, IDeclaration
         where TCollection : UpdatableDeclarationCollection<TDeclaration>
+        where TKey : notnull
     {
         if ( requestMutableCollection && !this.IsMutable )
         {

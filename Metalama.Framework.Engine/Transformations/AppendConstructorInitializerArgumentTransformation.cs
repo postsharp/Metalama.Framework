@@ -10,50 +10,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal class AppendParameterTransformation : IObservableTransformation, IMemberLevelTransformation
-{
-    public Advice Advice { get; }
-
-    IDeclaration IObservableTransformation.ContainingDeclaration => this.TargetMember;
-
-    public bool IsDesignTime => true;
-
-    public SyntaxTree TargetSyntaxTree
-        => (this.TargetMember.GetPrimaryDeclaration() ?? this.TargetMember.DeclaringType.GetPrimaryDeclaration().AssertNotNull()).SyntaxTree;
-
-    public IMember TargetMember => this.Parameter.DeclaringMember;
-
-    public IParameter Parameter { get; }
-
-    public AppendParameterTransformation( Advice advice, IParameter parameter )
-    {
-        this.Advice = advice;
-        this.Parameter = parameter;
-    }
-
-    public ParameterSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
-    {
-        var syntax = SyntaxFactory.Parameter(
-            default,
-            default,
-            syntaxGenerationContext.SyntaxGenerator.Type( this.Parameter.Type.GetSymbol() ).WithTrailingTrivia( SyntaxFactory.ElasticSpace ),
-            SyntaxFactory.Identifier( this.Parameter.Name ),
-            null );
-
-        if ( this.Parameter.DefaultValue.IsAssigned )
-        {
-            syntax = syntax.WithDefault(
-                SyntaxFactory.EqualsValueClause(
-                    SyntaxFactory.Token( SyntaxKind.EqualsToken )
-                        .WithLeadingTrivia( SyntaxFactory.ElasticSpace )
-                        .WithTrailingTrivia( SyntaxFactory.ElasticSpace ),
-                    syntaxGenerationContext.SyntaxGenerator.TypedConstant( this.Parameter.DefaultValue ) ) );
-        }
-
-        return syntax;
-    }
-}
-
 /// <summary>
 /// A transformation that appends an argument to the initializer call of a constructor.
 /// </summary>
