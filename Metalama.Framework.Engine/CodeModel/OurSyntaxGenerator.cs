@@ -17,6 +17,7 @@ using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
+using TypeKind = Metalama.Framework.Code.TypeKind;
 using VarianceKind = Metalama.Framework.Code.VarianceKind;
 
 namespace Metalama.Framework.Engine.CodeModel
@@ -433,25 +434,37 @@ namespace Metalama.Framework.Engine.CodeModel
             throw new ArgumentOutOfRangeException( nameof(value), $"The value '{value}' cannot be converted to a custom attribute argument value." );
         }
 
-        private class SubstitutionRewriter : CSharpSyntaxRewriter
+        public ExpressionSyntax EnumValueExpression( INamedTypeSymbol type, object value )
         {
-            private readonly IReadOnlyDictionary<string, TypeSyntax> _substitutions;
+            var member = type.GetMembers().OfType<IFieldSymbol>().FirstOrDefault( f => f.IsConst && f.ConstantValue == value );
 
-            public SubstitutionRewriter( IReadOnlyDictionary<string, TypeSyntax> substitutions )
+            if ( member == null )
             {
-                this._substitutions = substitutions;
+                return this.CastExpression( type, this.LiteralExpression( value ) );
             }
-
-            public override SyntaxNode? VisitIdentifierName( IdentifierNameSyntax node )
+            else
             {
-                if ( this._substitutions.TryGetValue( node.Identifier.Text, out var substitution ) )
-                {
-                    return substitution;
-                }
-                else
-                {
-                    return base.VisitIdentifierName( node );
-                }
+                return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, this.Type( type ), this.IdentifierName( member.Name ) );
+            }
+        }
+
+        public ExpressionSyntax TypedConstant( in TypedConstant typedConstant )
+        {
+            if ( !typedConstant.IsAssigned )
+            {
+                throw new ArgumentOutOfRangeException( nameof(typedConstant), "The TypedConstant is undefined." );
+            }
+            else if ( typedConstant.IsDefault )
+            {
+                return this.DefaultExpression( typedConstant.Type.GetSymbol() );
+            }
+            else if ( typedConstant.Type is INamedType { TypeKind: TypeKind.Enum } enumType )
+            {
+                return this.EnumValueExpression( enumType.GetSymbol(), typedConstant.Value! );
+            }
+            else
+            {
+                return this.LiteralExpression( typedConstant.Value! );
             }
         }
     }

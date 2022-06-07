@@ -26,7 +26,7 @@ internal class SyntaxBasedInitializationTransformation : IInsertStatementTransfo
         => this._targetConstructor.GetPrimaryDeclaration()?.SyntaxTree
            ?? this._targetConstructor.DeclaringType.GetPrimaryDeclaration().AssertNotNull().SyntaxTree;
 
-    public IMethodBase TargetDeclaration => this._targetConstructor;
+    public IMember TargetMember => this._targetConstructor;
 
     public SyntaxBasedInitializationTransformation(
         Advice advice,

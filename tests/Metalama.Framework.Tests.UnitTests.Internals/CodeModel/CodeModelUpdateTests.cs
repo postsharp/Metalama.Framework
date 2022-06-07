@@ -4,6 +4,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.Transformations;
 using System.Linq;
 using Xunit;
 
@@ -313,7 +314,7 @@ class C
 
         // Add a field.
         var parameterBuilder = new ParameterBuilder( null!, constructor, 0, "p", compilation.Factory.GetTypeByReflectionType( typeof(int) ), RefKind.In );
-        compilation.AddTransformation( parameterBuilder );
+        compilation.AddTransformation( new AppendParameterTransformation( null!, parameterBuilder ) );
 
         Assert.Single( constructor.Parameters );
     }
@@ -336,7 +337,7 @@ class C
 
         // Add a field.
         var parameterBuilder = new ParameterBuilder( null!, constructor, 0, "p", compilation.Factory.GetTypeByReflectionType( typeof(int) ), RefKind.In );
-        compilation.AddTransformation( parameterBuilder );
+        compilation.AddTransformation( new AppendParameterTransformation( null!, parameterBuilder ) );
 
         Assert.Single( constructor.Parameters );
     }

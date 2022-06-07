@@ -70,13 +70,13 @@ namespace Metalama.Framework.Engine.Linking
                 syntaxTransformationCollection,
                 replacedTransformations );
 
-            this.ProcessInsertStatementTransformations(
+            this.ProcessMemberLevelTransformations(
                 input,
                 diagnostics,
                 lexicalScopeFactory,
                 allTransformations,
-                out var syntaxNodeInsertStatements,
-                out var memberIntroductionInsertStatements );
+                out var syntaxMemberLevelTransformations,
+                out var introductionMemberLevelTransformations );
 
             // Group diagnostic suppressions by target.
             var suppressionsByTarget = input.DiagnosticSuppressions.ToMultiValueDictionary(
@@ -84,12 +84,13 @@ namespace Metalama.Framework.Engine.Linking
                 input.CompilationModel.InvariantComparer );
 
             Rewriter rewriter = new(
+                this._serviceProvider,
                 syntaxTransformationCollection,
                 suppressionsByTarget,
                 input.CompilationModel,
                 input.OrderedAspectLayers,
-                syntaxNodeInsertStatements,
-                memberIntroductionInsertStatements );
+                syntaxMemberLevelTransformations,
+                introductionMemberLevelTransformations );
 
             var syntaxTreeMapping = new Dictionary<SyntaxTree, SyntaxTree>();
 
@@ -343,31 +344,54 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private void ProcessInsertStatementTransformations(
+        private void ProcessMemberLevelTransformations(
             AspectLinkerInput input,
             UserDiagnosticSink diagnostics,
             LexicalScopeFactory lexicalScopeFactory,
             List<ITransformation> allTransformations,
-            out Dictionary<SyntaxNode, IReadOnlyList<LinkerInsertedStatement>> symbolInsertedStatements,
-            out Dictionary<IIntroduceMemberTransformation, IReadOnlyList<LinkerInsertedStatement>> introductionInsertedStatements )
+            out Dictionary<SyntaxNode, MemberLevelTransformations> symbolMemberLevelTransformations,
+            out Dictionary<IIntroduceMemberTransformation, MemberLevelTransformations> introductionMemberLevelTransformations )
         {
-            symbolInsertedStatements = new Dictionary<SyntaxNode, IReadOnlyList<LinkerInsertedStatement>>();
-            introductionInsertedStatements = new Dictionary<IIntroduceMemberTransformation, IReadOnlyList<LinkerInsertedStatement>>();
+            symbolMemberLevelTransformations = new Dictionary<SyntaxNode, MemberLevelTransformations>();
+            introductionMemberLevelTransformations = new Dictionary<IIntroduceMemberTransformation, MemberLevelTransformations>();
 
             // Insert statements must be executed in inverse order (because we need the forward execution order and not the override order)
             // except within an aspect, where the order needs to be preserved.
-            var insertStatementTransformations = allTransformations.OfType<IInsertStatementTransformation>()
+            var allMemberLevelTransformations = allTransformations.OfType<IMemberLevelTransformation>()
                 .GroupBy( x => x.Advice.Aspect )
                 .Reverse()
                 .SelectMany( x => x );
 
-            foreach ( var insertStatementTransformation in insertStatementTransformations )
+            foreach ( var transformation in allMemberLevelTransformations )
             {
                 // TODO: Supports only constructors without overrides.
                 //       Needs to be generalized for anything else (take into account overrides).
-                switch ( insertStatementTransformation.TargetDeclaration )
+
+                MemberLevelTransformations? memberLevelTransformations;
+                var declarationSyntax = transformation.TargetMember.GetPrimaryDeclaration();
+
+                if ( declarationSyntax != null )
                 {
-                    case Constructor constructor:
+                    if ( !symbolMemberLevelTransformations.TryGetValue( declarationSyntax, out memberLevelTransformations ) )
+                    {
+                        symbolMemberLevelTransformations[declarationSyntax] = memberLevelTransformations = new MemberLevelTransformations();
+                    }
+                }
+                else
+                {
+                    var parentTransformation = (transformation.TargetMember as IIntroduceMemberTransformation
+                                                ?? (transformation.TargetMember as BuiltDeclaration)?.Builder as IIntroduceMemberTransformation)
+                        .AssertNotNull();
+
+                    if ( !introductionMemberLevelTransformations.TryGetValue( parentTransformation, out memberLevelTransformations ) )
+                    {
+                        introductionMemberLevelTransformations[parentTransformation] = memberLevelTransformations = new MemberLevelTransformations();
+                    }
+                }
+
+                switch (transformation, transformation.TargetMember)
+                {
+                    case (IInsertStatementTransformation insertStatementTransformation, Constructor constructor):
                         {
                             var primaryDeclaration = constructor.GetPrimaryDeclaration().AssertNotNull();
 
@@ -376,20 +400,13 @@ namespace Metalama.Framework.Engine.Linking
                                 input.InitialCompilation.Compilation,
                                 primaryDeclaration );
 
-                            var insertedStatement = GetInsertedStatement( syntaxGenerationContext );
+                            var insertedStatement = GetInsertedStatement( insertStatementTransformation, syntaxGenerationContext );
 
                             if ( insertedStatement != null )
                             {
-                                var syntaxNode = constructor.GetPrimaryDeclaration().AssertNotNull();
-
-                                if ( !symbolInsertedStatements.TryGetValue( syntaxNode, out var list ) )
-                                {
-                                    symbolInsertedStatements[syntaxNode] = list = new List<LinkerInsertedStatement>();
-                                }
-
-                                ((List<LinkerInsertedStatement>) list).Add(
+                                memberLevelTransformations.Add(
                                     new LinkerInsertedStatement(
-                                        insertStatementTransformation,
+                                        transformation,
                                         primaryDeclaration,
                                         insertedStatement.Value.Statement,
                                         insertedStatement.Value.ContextDeclaration ) );
@@ -398,11 +415,10 @@ namespace Metalama.Framework.Engine.Linking
                             break;
                         }
 
-                    case BuiltConstructor:
-                    case ConstructorBuilder:
+                    case (IInsertStatementTransformation insertStatementTransformation, BuiltConstructor or ConstructorBuilder):
                         {
-                            var constructorBuilder = insertStatementTransformation.TargetDeclaration as ConstructorBuilder
-                                                     ?? ((BuiltConstructor) insertStatementTransformation.TargetDeclaration).ConstructorBuilder;
+                            var constructorBuilder = transformation.TargetMember as ConstructorBuilder
+                                                     ?? ((BuiltConstructor) transformation.TargetMember).ConstructorBuilder;
 
                             var positionInSyntaxTree = GetSyntaxTreePosition( constructorBuilder.InsertPosition );
 
@@ -412,18 +428,13 @@ namespace Metalama.Framework.Engine.Linking
                                 constructorBuilder.PrimarySyntaxTree.AssertNotNull(),
                                 positionInSyntaxTree );
 
-                            var insertedStatement = GetInsertedStatement( syntaxGenerationContext );
+                            var insertedStatement = GetInsertedStatement( insertStatementTransformation, syntaxGenerationContext );
 
                             if ( insertedStatement != null )
                             {
-                                if ( !introductionInsertedStatements.TryGetValue( constructorBuilder, out var list ) )
-                                {
-                                    introductionInsertedStatements[constructorBuilder] = list = new List<LinkerInsertedStatement>();
-                                }
-
-                                ((List<LinkerInsertedStatement>) list).Add(
+                                memberLevelTransformations.Add(
                                     new LinkerInsertedStatement(
-                                        insertStatementTransformation,
+                                        transformation,
                                         constructorBuilder,
                                         insertedStatement.Value.Statement,
                                         insertedStatement.Value.ContextDeclaration ) );
@@ -432,11 +443,23 @@ namespace Metalama.Framework.Engine.Linking
                             break;
                         }
 
+                    case (AppendParameterTransformation appendParameterTransformation, _):
+                        memberLevelTransformations.Add( appendParameterTransformation );
+
+                        break;
+
+                    case (AppendConstructorInitializerArgumentTransformation appendArgumentTransformation, _):
+                        memberLevelTransformations.Add( appendArgumentTransformation );
+
+                        break;
+
                     default:
                         throw new AssertionFailedException();
                 }
 
-                InsertedStatement? GetInsertedStatement( SyntaxGenerationContext syntaxGenerationContext )
+                InsertedStatement? GetInsertedStatement(
+                    IInsertStatementTransformation insertStatementTransformation,
+                    SyntaxGenerationContext syntaxGenerationContext )
                 {
                     var context = new InsertStatementTransformationContext(
                         diagnostics,
@@ -447,7 +470,9 @@ namespace Metalama.Framework.Engine.Linking
                     var statement = insertStatementTransformation.GetInsertedStatement( context );
 
 #if DEBUG
-                    if ( statement != null && statement.Value.Statement.HasAnnotations( FormattingAnnotations.GeneratedCodeAnnotationKind ) )
+                    if ( statement != null && (statement.Value.Statement is BlockSyntax block
+                                               && !block.Statements.All( s => s.HasAnnotations( FormattingAnnotations.GeneratedCodeAnnotationKind ) )
+                                               || !statement.Value.Statement.HasAnnotations( FormattingAnnotations.GeneratedCodeAnnotationKind )) )
                     {
                         throw new AssertionFailedException();
                     }

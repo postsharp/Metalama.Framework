@@ -26,28 +26,31 @@ namespace Metalama.Framework.Engine.Linking
         {
             private readonly CompilationModel _compilation;
             private readonly ImmutableDictionary<AspectLayerId, OrderedAspectLayer> _orderedAspectLayers;
+            private readonly SyntaxGenerationContextFactory _syntaxGenerationContextFactory;
             private readonly ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> _diagnosticSuppressions;
             private readonly SyntaxTransformationCollection _introducedMemberCollection;
-            private readonly IReadOnlyDictionary<SyntaxNode, IReadOnlyList<LinkerInsertedStatement>> _symbolInsertedStatements;
-            private readonly IReadOnlyDictionary<IIntroduceMemberTransformation, IReadOnlyList<LinkerInsertedStatement>> _introductionInsertedStatements;
+            private readonly IReadOnlyDictionary<SyntaxNode, MemberLevelTransformations> _symbolMemberLevelTransformations;
+            private readonly IReadOnlyDictionary<IIntroduceMemberTransformation, MemberLevelTransformations> _introductionMemberLevelTransformations;
 
             // Maps a diagnostic id to the number of times it has been suppressed.
             private ImmutableHashSet<string> _activeSuppressions = ImmutableHashSet.Create<string>( StringComparer.OrdinalIgnoreCase );
 
             public Rewriter(
+                IServiceProvider serviceProvider,
                 SyntaxTransformationCollection introducedMemberCollection,
                 ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> diagnosticSuppressions,
                 CompilationModel compilation,
                 IReadOnlyList<OrderedAspectLayer> inputOrderedAspectLayers,
-                IReadOnlyDictionary<SyntaxNode, IReadOnlyList<LinkerInsertedStatement>> symbolInsertedStatements,
-                IReadOnlyDictionary<IIntroduceMemberTransformation, IReadOnlyList<LinkerInsertedStatement>> introductionInsertedStatements )
+                IReadOnlyDictionary<SyntaxNode, MemberLevelTransformations> symbolMemberLevelTransformations,
+                IReadOnlyDictionary<IIntroduceMemberTransformation, MemberLevelTransformations> introductionMemberLevelTransformations )
             {
+                this._syntaxGenerationContextFactory = new SyntaxGenerationContextFactory( compilation.RoslynCompilation, serviceProvider );
                 this._diagnosticSuppressions = diagnosticSuppressions;
                 this._compilation = compilation;
                 this._orderedAspectLayers = inputOrderedAspectLayers.ToImmutableDictionary( e => e.AspectLayerId, e => e );
                 this._introducedMemberCollection = introducedMemberCollection;
-                this._symbolInsertedStatements = symbolInsertedStatements;
-                this._introductionInsertedStatements = introductionInsertedStatements;
+                this._symbolMemberLevelTransformations = symbolMemberLevelTransformations;
+                this._introductionMemberLevelTransformations = introductionMemberLevelTransformations;
             }
 
             public override bool VisitIntoStructuredTrivia => true;
@@ -143,6 +146,7 @@ namespace Metalama.Framework.Engine.Linking
             {
                 var members = new List<MemberDeclarationSyntax>( node.Members.Count );
                 var additionalBaseList = this._introducedMemberCollection.GetIntroducedInterfacesForTypeDecl( node );
+                var syntaxGenerationContext = this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( node );
 
                 using ( var classSuppressions = this.WithSuppressions( node ) )
                 {
@@ -207,7 +211,7 @@ namespace Metalama.Framework.Engine.Linking
                         // IMPORTANT: This need to be here and cannot be in introducedMember.Syntax, result of TrackNodes is not trackable!
                         var introducedNode = introducedMember.Syntax.TrackNodes( introducedMember.Syntax );
 
-                        introducedNode = introducedNode.NormalizeWhitespace()
+                        introducedNode = introducedNode
                             .WithLeadingTrivia( ElasticLineFeed, ElasticLineFeed )
                             .WithGeneratedCodeAnnotation( introducedMember.Introduction.Advice.Aspect.AspectClass.GeneratedCodeAnnotation );
 
@@ -215,9 +219,14 @@ namespace Metalama.Framework.Engine.Linking
                         switch ( introducedNode )
                         {
                             case ConstructorDeclarationSyntax constructorDeclaration:
-                                if ( this._introductionInsertedStatements.TryGetValue( introducedMember.Introduction, out var insertedStatements ) )
+                                if ( this._introductionMemberLevelTransformations.TryGetValue(
+                                        introducedMember.Introduction,
+                                        out var memberLevelTransformations ) )
                                 {
-                                    introducedNode = this.WithInsertedStatements( constructorDeclaration, insertedStatements );
+                                    introducedNode = this.ApplyMemberLevelTransformations(
+                                        constructorDeclaration,
+                                        memberLevelTransformations,
+                                        syntaxGenerationContext );
                                 }
 
                                 break;
@@ -236,11 +245,67 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            private ConstructorDeclarationSyntax WithInsertedStatements(
+            private ConstructorDeclarationSyntax ApplyMemberLevelTransformations(
                 ConstructorDeclarationSyntax constructorDeclaration,
-                IReadOnlyList<LinkerInsertedStatement>? insertedStatements )
+                MemberLevelTransformations memberLevelTransformations,
+                SyntaxGenerationContext syntaxGenerationContext )
             {
-                if ( insertedStatements == null )
+                constructorDeclaration = this.InsertStatements( constructorDeclaration, memberLevelTransformations.Statements );
+
+                constructorDeclaration = constructorDeclaration.WithParameterList(
+                    AppendParameters( constructorDeclaration.ParameterList, memberLevelTransformations.Parameters, syntaxGenerationContext ) );
+
+                constructorDeclaration = constructorDeclaration.WithInitializer(
+                    AppendInitializerArguments( constructorDeclaration.Initializer, memberLevelTransformations.Arguments ) );
+
+                return constructorDeclaration;
+            }
+
+            private static ParameterListSyntax AppendParameters(
+                ParameterListSyntax existingParameters,
+                ImmutableArray<AppendParameterTransformation> newParameters,
+                SyntaxGenerationContext syntaxGenerationContext )
+            {
+                if ( newParameters.IsEmpty )
+                {
+                    return existingParameters;
+                }
+                else
+                {
+                    return existingParameters.WithParameters(
+                        existingParameters.Parameters.AddRange(
+                            newParameters.Select( x => x.ToSyntax( syntaxGenerationContext ).WithTrailingTrivia( ElasticSpace ) ) ) );
+                }
+            }
+
+            private static ConstructorInitializerSyntax? AppendInitializerArguments(
+                ConstructorInitializerSyntax? initializerSyntax,
+                ImmutableArray<AppendConstructorInitializerArgumentTransformation> newArguments )
+            {
+                if ( newArguments.IsEmpty )
+                {
+                    return initializerSyntax;
+                }
+
+                var newArgumentsSyntax = newArguments.Select( a => a.ToSyntax().WithTrailingTrivia( ElasticSpace ) );
+
+                if ( initializerSyntax == null )
+                {
+                    return ConstructorInitializer(
+                        SyntaxKind.BaseConstructorInitializer,
+                        ArgumentList( SeparatedList( newArgumentsSyntax ) ) );
+                }
+                else
+                {
+                    return initializerSyntax.WithArgumentList( initializerSyntax.ArgumentList.AddArguments( newArgumentsSyntax.ToArray() ) );
+                }
+            }
+
+            private ConstructorDeclarationSyntax InsertStatements(
+                ConstructorDeclarationSyntax constructorDeclaration,
+                ImmutableArray<LinkerInsertedStatement> insertedStatements )
+            {
+                if ( insertedStatements.IsEmpty )
                 {
                     return constructorDeclaration;
                 }
@@ -378,9 +443,10 @@ namespace Metalama.Framework.Engine.Linking
 
             public override SyntaxNode? VisitConstructorDeclaration( ConstructorDeclarationSyntax node )
             {
-                if ( this._symbolInsertedStatements.TryGetValue( node, out var insertedStatements ) )
+                if ( this._symbolMemberLevelTransformations.TryGetValue( node, out var memberLevelTransformations ) )
                 {
-                    node = this.WithInsertedStatements( node, insertedStatements );
+                    var syntaxGenerationContext = this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( node );
+                    node = this.ApplyMemberLevelTransformations( node, memberLevelTransformations, syntaxGenerationContext );
                 }
 
                 return base.VisitConstructorDeclaration( node );

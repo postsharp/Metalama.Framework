@@ -62,7 +62,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             public ISymbol? Symbol => null;
 
-            public ConstructorInitializerKind InitializerKind => ConstructorInitializerKind.Undetermined;
+            public ConstructorInitializerKind InitializerKind => ConstructorInitializerKind.None;
 
             public bool IsImplicit => false;
 

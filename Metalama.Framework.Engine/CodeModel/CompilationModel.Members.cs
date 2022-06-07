@@ -158,7 +158,12 @@ public partial class CompilationModel
 
         if ( transformation is IDeclarationBuilder builder )
         {
-            this.AddDeclarationBuilderTransformation( builder );
+            this.AddDeclaration( builder );
+        }
+
+        if ( transformation is AppendParameterTransformation appendParameterTransformation )
+        {
+            this.AddDeclaration( appendParameterTransformation.Parameter );
         }
 
         if ( transformation is IIntroduceInterfaceTransformation introduceInterface )
@@ -208,9 +213,9 @@ public partial class CompilationModel
         }
     }
 
-    private void AddDeclarationBuilderTransformation( IDeclarationBuilder transformation )
+    private void AddDeclaration( IDeclaration declaration )
     {
-        switch ( transformation )
+        switch ( declaration )
         {
             case IMethod method:
                 var methods = this.GetMethodCollection( method.DeclaringType.GetSymbol().AssertNotNull(), true );

@@ -36,4 +36,6 @@ internal interface ISyntaxBuilderImpl
     void AppendDynamic( object? expression, StringBuilder stringBuilder );
 
     IExpression Cast( IExpression expression, IType targetType );
+
+    object TypedConstant( in TypedConstant typedConstant );
 }

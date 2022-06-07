@@ -29,8 +29,8 @@ namespace Metalama.Framework.Engine.CodeModel
         public ConstructorInitializerKind InitializerKind
             => (ConstructorDeclarationSyntax?) this.GetPrimaryDeclaration() switch
             {
-                null => ConstructorInitializerKind.Undetermined,
-                { Initializer: null } => ConstructorInitializerKind.Undetermined,
+                null => ConstructorInitializerKind.None,
+                { Initializer: null } => ConstructorInitializerKind.None,
                 { Initializer: { } initializer } when initializer.IsKind( SyntaxKind.ThisConstructorInitializer ) =>
                     ConstructorInitializerKind.This,
                 { Initializer: { } initializer } when initializer.IsKind( SyntaxKind.BaseConstructorInitializer ) =>

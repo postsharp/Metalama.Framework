@@ -1,24 +1,24 @@
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.TestFramework;
-using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.PatternMatching.PropertyPatternScopeMismatch
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
             var rt = new object();
-            var a3 = rt is IParameter p3 && p3.DefaultValue.IsNull;
-                    
+            var a3 = rt is IParameter p3 && p3.DefaultValue.IsDefault;
+
             return meta.Proceed();
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
-        int Method(int a)
+        private int Method( int a )
         {
             return a;
         }

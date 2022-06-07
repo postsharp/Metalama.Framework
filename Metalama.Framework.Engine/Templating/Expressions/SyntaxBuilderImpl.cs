@@ -14,6 +14,7 @@ using System;
 using System.Reflection;
 using System.Text;
 using SpecialType = Metalama.Framework.Code.SpecialType;
+using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.Templating.Expressions;
 
@@ -161,4 +162,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
     public IExpression Cast( IExpression expression, IType targetType )
         => expression.Type.Is( targetType ) ? expression : new CastUserExpression( targetType, expression );
+
+    public object TypedConstant( in TypedConstant typedConstant )
+        => new BuiltUserExpression( this.SyntaxGenerator.TypedConstant( typedConstant ), typedConstant.Type );
 }

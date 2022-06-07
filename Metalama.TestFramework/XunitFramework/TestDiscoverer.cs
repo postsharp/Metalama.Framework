@@ -142,6 +142,12 @@ namespace Metalama.TestFramework.XunitFramework
                 foreach ( var testPath in Directory.EnumerateFiles( directory, "*.cs" ) )
                 {
                     var fileName = Path.GetFileName( testPath );
+
+                    if ( fileName[0] == '_' )
+                    {
+                        continue;
+                    }
+
                     var firstDotPosition = fileName.IndexOfOrdinal( '.' );
                     var extension = fileName.Substring( firstDotPosition );
 

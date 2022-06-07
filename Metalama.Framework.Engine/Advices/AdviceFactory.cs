@@ -507,7 +507,14 @@ namespace Metalama.Framework.Engine.Advices
             OverrideStrategy whenExists = OverrideStrategy.Default,
             object? tags = null,
             IPullStrategy? pullStrategy = null )
-            => this.IntroduceField( targetType, fieldName, this.State.Compilation.Factory.GetTypeByReflectionType( fieldType ), scope, whenExists, tags );
+            => this.IntroduceField(
+                targetType,
+                fieldName,
+                this.State.Compilation.Factory.GetTypeByReflectionType( fieldType ),
+                scope,
+                whenExists,
+                tags,
+                pullStrategy );
 
         public IPropertyBuilder IntroduceAutomaticProperty(
             INamedType targetType,

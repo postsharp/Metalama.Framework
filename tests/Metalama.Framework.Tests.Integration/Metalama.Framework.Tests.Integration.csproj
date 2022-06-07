@@ -31,6 +31,7 @@
     <ItemGroup>
         <!-- Exclude files that intentionally do not compile -->
         <Compile Remove="Tests\**\__*.cs" />
+        <Compile Include="Tests\Aspects\DependencyInjection\__PullStrategy.cs" />
     </ItemGroup>
 
     <ItemGroup>

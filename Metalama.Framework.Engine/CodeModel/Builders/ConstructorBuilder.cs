@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal class ConstructorBuilder : MemberBuilder, IConstructorBuilder, IConstructorImpl, IReplaceMemberTransformation
     {
-        public ConstructorInitializerKind InitializerKind => ConstructorInitializerKind.Undetermined;
+        public ConstructorInitializerKind InitializerKind => ConstructorInitializerKind.None;
 
         public MethodKind MethodKind => this.IsStatic ? MethodKind.StaticConstructor : MethodKind.Constructor;
 

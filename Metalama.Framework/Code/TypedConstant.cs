@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code.SyntaxBuilders;
 using System;
 using System.Collections.Generic;
 
@@ -14,7 +15,7 @@ namespace Metalama.Framework.Code
     /// for instance <see cref="IParameter.DefaultValue"/>, or custom attribute arguments.
     /// </summary>
     [CompileTime]
-    public readonly struct TypedConstant : IHasType
+    public readonly struct TypedConstant : IExpression
     {
         // ReSharper disable once UnassignedReadonlyField
         public static readonly TypedConstant Null;
@@ -50,9 +51,9 @@ namespace Metalama.Framework.Code
         }
 
         /// <summary>
-        /// Gets a value indicating whether the value is <c>null</c>. Not to be confused with <see cref="IsAssigned"/>.
+        /// Gets a value indicating whether the value is <c>null</c> or <c>default/c>. Not to be confused with <see cref="IsAssigned"/>.
         /// </summary>
-        public bool IsNull
+        public bool IsDefault
         {
             get
             {
@@ -60,6 +61,14 @@ namespace Metalama.Framework.Code
 
                 return this.Value == null;
             }
+        }
+
+        bool IExpression.IsAssignable => false;
+
+        dynamic? IExpression.Value
+        {
+            get => SyntaxBuilder.CurrentImplementation.TypedConstant( this );
+            set => throw new NotSupportedException();
         }
 
         /// <summary>
@@ -97,6 +106,6 @@ namespace Metalama.Framework.Code
             this._type = type;
         }
 
-        public override string ToString() => this.IsAssigned ? this._value?.ToString() ?? "null" : "(unset)";
+        public override string ToString() => this.IsAssigned ? this._value?.ToString() ?? "default" : "(unset)";
     }
 }

@@ -54,6 +54,7 @@ internal abstract class IntroduceFieldOrPropertyAdvice<TMember, TBuilder> : Intr
     {
         if ( this.PullStrategy == null )
         {
+            // The field or property should not be pulled or initialized.
             return AdviceResult.Create( this.MemberBuilder );
         }
         else
@@ -61,13 +62,19 @@ internal abstract class IntroduceFieldOrPropertyAdvice<TMember, TBuilder> : Intr
             UserDiagnosticSink diagnosticSink = new();
             var scopedDiagnosticSink = new ScopedDiagnosticSink( diagnosticSink, targetType, targetType );
 
+            var compilation = targetType.GetCompilationModel();
+
+            // Add the field or property introduction itself.
             var transformations = new List<ITransformation>();
             transformations.Add( this.MemberBuilder );
 
+            // Find all constructors except those who call `: this(...)`.
             foreach ( var constructor in targetType.Constructors )
             {
-                if ( constructor.InitializerKind == ConstructorInitializerKind.Base )
+                if ( constructor.InitializerKind != ConstructorInitializerKind.This )
                 {
+                    // Invoke the IPullStrategy.
+
                     // TODO: use UserCodeInvoker.
 
                     var pullFieldOrPropertyAction = this.PullStrategy.PullFieldOrProperty(
@@ -85,12 +92,15 @@ internal abstract class IntroduceFieldOrPropertyAdvice<TMember, TBuilder> : Intr
                         case DependencyPullStrategyKind.AppendParameterAndPull:
                             var initializedConstructor = constructor;
 
+                            // If we have an implicit constructor, make it explicit.
                             if ( constructor.IsImplicitInstanceConstructor() )
                             {
                                 var constructorBuilder = new ConstructorBuilder( this, constructor.DeclaringType, this.Tags );
                                 initializedConstructor = constructorBuilder;
+                                transformations.Add( constructorBuilder );
                             }
 
+                            // Add an initializer for the field or property into the constructor.
                             var initialization = new SyntaxBasedInitializationTransformation(
                                 this,
                                 initializedConstructor,
@@ -104,13 +114,16 @@ internal abstract class IntroduceFieldOrPropertyAdvice<TMember, TBuilder> : Intr
                                                 SyntaxFactory.IdentifierName( this.MemberBuilder.Name ) ),
                                             ((IUserExpression?) pullFieldOrPropertyAction.AssignmentExpression)?.ToSyntax( context )
                                             ?? SyntaxFactory.IdentifierName( pullFieldOrPropertyAction.ParameterName.AssertNotNull() ) ) )
-                                    .NormalizeWhitespace(),
+                                    .NormalizeWhitespace()
+                                    .WithAdditionalAnnotations( this.Aspect.AspectClass.GeneratedCodeAnnotation ),
                                 this.Tags );
 
                             transformations.Add( initialization );
 
+                            // Pull the parameter from the constructor.
                             if ( pullFieldOrPropertyAction.Kind == DependencyPullStrategyKind.AppendParameterAndPull )
                             {
+                                // Create the parameter.
                                 var newParameter = new ParameterBuilder(
                                     this,
                                     initializedConstructor,
@@ -119,19 +132,21 @@ internal abstract class IntroduceFieldOrPropertyAdvice<TMember, TBuilder> : Intr
                                     pullFieldOrPropertyAction.ParameterType.AssertNotNull(),
                                     RefKind.None );
 
+                                // Allow the IPullStrategy to add custom attributes.
                                 // TODO: UserCodeInvoker
                                 pullFieldOrPropertyAction.BuildParameterAction?.Invoke( newParameter );
 
-                                transformations.Add( newParameter );
+                                transformations.Add( new AppendParameterTransformation( this, newParameter ) );
 
-                                var compilation = targetType.GetCompilationModel();
+                                // Pull from constructors that call the current constructor, and recursively.
                                 PullConstructorParameterRecursive( constructor, newParameter );
 
                                 void PullConstructorParameterRecursive( IConstructor baseConstructor, IParameter baseParameter )
                                 {
+                                    // Identity constructors that call the current constructor.
                                     var sameTypeConstructors =
                                         baseConstructor.DeclaringType.Constructors.Where( c => c.InitializerKind == ConstructorInitializerKind.This );
-                                    
+
                                     var derivedConstructors = compilation
                                         .GetDerivedTypes( baseConstructor.DeclaringType, false )
                                         .SelectMany( t => t.Constructors )
@@ -140,69 +155,75 @@ internal abstract class IntroduceFieldOrPropertyAdvice<TMember, TBuilder> : Intr
                                     var chainedConstructors =
                                         sameTypeConstructors.Concat( derivedConstructors )
                                             .Where( c => ((IConstructorImpl) c).GetBaseConstructor() == baseConstructor );
-                                        
+
+                                    // Process all of these constructors.
                                     foreach ( var chainedConstructor in chainedConstructors )
                                     {
-                                        if ( chainedConstructor.InitializerKind == ConstructorInitializerKind.Base
-                                             && ((IConstructorImpl) chainedConstructor).GetBaseConstructor() == baseConstructor )
+                                        // Ask the IPullStrategy what to do.
+                                        var pullParameterAction = this.PullStrategy.PullParameter(
+                                            baseParameter,
+                                            chainedConstructor,
+                                            scopedDiagnosticSink );
+
+                                        // If we have an implicit constructor, make it explicit.
+                                        var initializedChainedConstructor = chainedConstructor;
+
+                                        if ( chainedConstructor.IsImplicitInstanceConstructor() )
                                         {
-                                            var pullParameterAction = this.PullStrategy.PullParameter(
-                                                baseParameter,
-                                                chainedConstructor,
-                                                scopedDiagnosticSink );
+                                            var derivedConstructorBuilder = new ConstructorBuilder( this, chainedConstructor.DeclaringType, this.Tags );
+                                            transformations.Add( derivedConstructorBuilder );
+                                            initializedChainedConstructor = derivedConstructorBuilder;
+                                        }
 
-                                            var initializedChainedConstructor = chainedConstructor;
+                                        // Execute the strategy.
+                                        ExpressionSyntax parameterValue;
 
-                                            if ( chainedConstructor.IsImplicitInstanceConstructor() )
-                                            {
-                                                var derivedConstructorBuilder = new ConstructorBuilder( this, constructor.DeclaringType, this.Tags );
-                                                initializedChainedConstructor = derivedConstructorBuilder;
-                                            }
+                                        switch ( pullParameterAction.Kind )
+                                        {
+                                            case DependencyPullStrategyKind.DoNotPull:
+                                                parameterValue = SyntaxFactoryEx.Default;
 
-                                            ExpressionSyntax parameterValue;
+                                                break;
 
-                                            switch ( pullParameterAction.Kind )
-                                            {
-                                                case DependencyPullStrategyKind.DoNotPull:
-                                                    parameterValue = SyntaxFactoryEx.Default;
+                                            case DependencyPullStrategyKind.UseExistingParameter:
+                                                parameterValue = SyntaxFactory.IdentifierName( pullParameterAction.ParameterName.AssertNotNull() );
 
-                                                    break;
+                                                break;
 
-                                                case DependencyPullStrategyKind.UseExistingParameter:
-                                                    parameterValue = SyntaxFactory.IdentifierName( pullParameterAction.ParameterName.AssertNotNull() );
+                                            case DependencyPullStrategyKind.AppendParameterAndPull:
+                                                // Create a new parameter.
+                                                parameterValue = SyntaxFactory.IdentifierName( pullParameterAction.ParameterName.AssertNotNull() );
 
-                                                    break;
-
-                                                case DependencyPullStrategyKind.AppendParameterAndPull:
-                                                    parameterValue = SyntaxFactory.IdentifierName( pullParameterAction.ParameterName.AssertNotNull() );
-
-                                                    var recursiveNewParameter = new ParameterBuilder(
-                                                        this,
-                                                        initializedChainedConstructor,
-                                                        initializedChainedConstructor.Parameters.Count,
-                                                        pullParameterAction.ParameterName.AssertNotNull(),
-                                                        pullParameterAction.ParameterType.AssertNotNull(),
-                                                        RefKind.None );
-                                                    
-                                                    pullParameterAction.BuildParameterAction?.Invoke( recursiveNewParameter );
-
-                                                    transformations.Add( recursiveNewParameter );
-
-                                                    PullConstructorParameterRecursive( chainedConstructor, recursiveNewParameter );
-
-                                                    break;
-
-                                                default:
-                                                    throw new AssertionFailedException();
-                                            }
-
-                                            transformations.Add(
-                                                new AppendConstructorInitializerArgumentTransformation(
+                                                var recursiveNewParameter = new ParameterBuilder(
                                                     this,
                                                     initializedChainedConstructor,
-                                                    baseParameter.Index,
-                                                    parameterValue ) );
+                                                    initializedChainedConstructor.Parameters.Count,
+                                                    pullParameterAction.ParameterName.AssertNotNull(),
+                                                    pullParameterAction.ParameterType.AssertNotNull(),
+                                                    RefKind.None );
+
+                                                // Allow the strategy to add custom attributes.
+                                                // TODO: use UserInvoker.
+                                                pullParameterAction.BuildParameterAction?.Invoke( recursiveNewParameter );
+
+                                                transformations.Add( new AppendParameterTransformation( this, recursiveNewParameter ) );
+
+                                                // Process all constructors calling this constructor.
+                                                PullConstructorParameterRecursive( chainedConstructor, recursiveNewParameter );
+
+                                                break;
+
+                                            default:
+                                                throw new AssertionFailedException();
                                         }
+
+                                        // Append an argument to the call to the current constructor. 
+                                        transformations.Add(
+                                            new AppendConstructorInitializerArgumentTransformation(
+                                                this,
+                                                initializedChainedConstructor,
+                                                baseParameter.Index,
+                                                parameterValue ) );
                                     }
                                 }
                             }

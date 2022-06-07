@@ -16,7 +16,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
             Assert.False( c.IsAssigned );
             Assert.Throws<ArgumentNullException>( () => c.Type );
             Assert.Throws<ArgumentNullException>( () => c.Value );
-            Assert.Throws<ArgumentNullException>( () => c.IsNull );
+            Assert.Throws<ArgumentNullException>( () => c.IsDefault );
         }
 
         [Fact]
@@ -29,7 +29,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
             Assert.True( c.IsAssigned );
             Assert.NotNull( c.Type );
             Assert.NotNull( c.Value );
-            Assert.False( c.IsNull );
+            Assert.False( c.IsDefault );
         }
 
         [Fact]
@@ -42,7 +42,7 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
             Assert.True( c.IsAssigned );
             Assert.NotNull( c.Type );
             Assert.Null( c.Value );
-            Assert.True( c.IsNull );
+            Assert.True( c.IsDefault );
         }
     }
 }

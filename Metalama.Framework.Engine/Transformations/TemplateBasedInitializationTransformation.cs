@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.Transformations
             => this._targetConstructor.GetPrimaryDeclaration()?.SyntaxTree
                ?? this._targetConstructor.DeclaringType.GetPrimaryDeclaration().AssertNotNull().SyntaxTree;
 
-        public IMethodBase TargetDeclaration => this._targetConstructor;
+        public IMember TargetMember => this._targetConstructor;
 
         public TemplateBasedInitializationTransformation(
             Advice advice,
