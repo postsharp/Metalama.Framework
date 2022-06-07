@@ -85,42 +85,42 @@ public partial class CompilationModel
         return collection;
     }
 
-    internal FieldUpdatableCollection GetFieldCollection( INamedTypeSymbol declaringType, bool mutable )
+    internal FieldUpdatableCollection GetFieldCollection( INamedTypeSymbol declaringType, bool mutable = false )
         => this.GetMemberCollection<INamedTypeSymbol, IField, FieldUpdatableCollection>(
             ref this._fields,
             mutable,
             declaringType,
             ( c, t ) => new FieldUpdatableCollection( c, t ) );
 
-    internal MethodUpdatableCollection GetMethodCollection( INamedTypeSymbol declaringType, bool mutable )
+    internal MethodUpdatableCollection GetMethodCollection( INamedTypeSymbol declaringType, bool mutable = false )
         => this.GetMemberCollection<INamedTypeSymbol, IMethod, MethodUpdatableCollection>(
             ref this._methods,
             mutable,
             declaringType,
             ( c, t ) => new MethodUpdatableCollection( c, t ) );
 
-    internal ConstructorUpdatableCollection GetConstructorCollection( INamedTypeSymbol declaringType, bool mutable )
+    internal ConstructorUpdatableCollection GetConstructorCollection( INamedTypeSymbol declaringType, bool mutable = false )
         => this.GetMemberCollection<INamedTypeSymbol, IConstructor, ConstructorUpdatableCollection>(
             ref this._constructors,
             mutable,
             declaringType,
             ( c, t ) => new ConstructorUpdatableCollection( c, t ) );
 
-    internal PropertyUpdatableCollection GetPropertyCollection( INamedTypeSymbol declaringType, bool mutable )
+    internal PropertyUpdatableCollection GetPropertyCollection( INamedTypeSymbol declaringType, bool mutable = false )
         => this.GetMemberCollection<INamedTypeSymbol, IProperty, PropertyUpdatableCollection>(
             ref this._properties,
             mutable,
             declaringType,
             ( c, t ) => new PropertyUpdatableCollection( c, t ) );
 
-    internal IndexerUpdatableCollection GetIndexerCollection( INamedTypeSymbol declaringType, bool mutable )
+    internal IndexerUpdatableCollection GetIndexerCollection( INamedTypeSymbol declaringType, bool mutable = false )
         => this.GetMemberCollection<INamedTypeSymbol, IIndexer, IndexerUpdatableCollection>(
             ref this._indexers,
             mutable,
             declaringType,
             ( c, t ) => new IndexerUpdatableCollection( c, t ) );
 
-    internal EventUpdatableCollection GetEventCollection( INamedTypeSymbol declaringType, bool mutable )
+    internal EventUpdatableCollection GetEventCollection( INamedTypeSymbol declaringType, bool mutable = false )
         => this.GetMemberCollection<INamedTypeSymbol, IEvent, EventUpdatableCollection>(
             ref this._events,
             mutable,
@@ -136,7 +136,7 @@ public partial class CompilationModel
             ( c, t ) => new InterfaceUpdatableCollection( c, t ) );
     }
 
-    internal ParameterUpdatableCollection GetParameterCollection( Ref<IHasParameters> parent, bool mutable )
+    internal ParameterUpdatableCollection GetParameterCollection( Ref<IHasParameters> parent, bool mutable = false )
     {
         return this.GetMemberCollection<Ref<IHasParameters>, IParameter, ParameterUpdatableCollection>(
             ref this._parameters,
@@ -145,10 +145,10 @@ public partial class CompilationModel
             ( c, t ) => new ParameterUpdatableCollection( c, t ) );
     }
 
-    internal AttributeUpdatableCollection GetAttributeCollection( Ref<IDeclaration> parent, bool mutable )
+    internal AttributeUpdatableCollection GetAttributeCollection( Ref<IDeclaration> parent, bool mutable = false )
     {
         var moduleSymbol = parent.TargetKind == DeclarationRefTargetKind.Assembly ? this.RoslynCompilation.SourceModule : null;
-        
+
         return this.GetMemberCollection<Ref<IDeclaration>, IAttribute, AttributeRef, AttributeUpdatableCollection>(
             ref this._attributes,
             mutable,

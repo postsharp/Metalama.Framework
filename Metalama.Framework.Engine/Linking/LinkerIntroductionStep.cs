@@ -43,6 +43,7 @@ namespace Metalama.Framework.Engine.Linking
 
             var nameProvider = new LinkerIntroductionNameProvider();
             var syntaxTransformationCollection = new SyntaxTransformationCollection();
+            var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
 
             // TODO: this sorting can be optimized.
             var allTransformations =
@@ -51,16 +52,14 @@ namespace Metalama.Framework.Engine.Linking
                     .Cast<ITransformation>()
                     .ToList();
 
-            ProcessReplaceTransformations( input, allTransformations, syntaxTransformationCollection, out var replacedTransformations );
+            IndexReplaceTransformations( input, allTransformations, syntaxTransformationCollection, out var replacedTransformations );
 
-            var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
-
-            ProcessOverrideTransformations(
+            IndexOverrideTransformations(
                 allTransformations,
                 syntaxTransformationCollection,
                 out var buildersWithSynthesizedSetters );
 
-            this.ProcessIntroduceTransformations(
+            this.IndexIntroduceTransformations(
                 input,
                 allTransformations,
                 diagnostics,
@@ -70,13 +69,15 @@ namespace Metalama.Framework.Engine.Linking
                 syntaxTransformationCollection,
                 replacedTransformations );
 
-            this.ProcessMemberLevelTransformations(
+            this.IndexMemberLevelTransformations(
                 input,
                 diagnostics,
                 lexicalScopeFactory,
                 allTransformations,
                 out var syntaxMemberLevelTransformations,
                 out var introductionMemberLevelTransformations );
+
+            IndexNodesWithModifiedAttributes( allTransformations, out var nodesWithModifiedAttributes );
 
             // Group diagnostic suppressions by target.
             var suppressionsByTarget = input.DiagnosticSuppressions.ToMultiValueDictionary(
@@ -90,7 +91,8 @@ namespace Metalama.Framework.Engine.Linking
                 input.CompilationModel,
                 input.OrderedAspectLayers,
                 syntaxMemberLevelTransformations,
-                introductionMemberLevelTransformations );
+                introductionMemberLevelTransformations,
+                nodesWithModifiedAttributes );
 
             var syntaxTreeMapping = new Dictionary<SyntaxTree, SyntaxTree>();
 
@@ -131,7 +133,35 @@ namespace Metalama.Framework.Engine.Linking
                 projectOptions );
         }
 
-        private static void ProcessReplaceTransformations(
+        private static void IndexNodesWithModifiedAttributes(
+            List<ITransformation> allTransformations,
+            out HashSet<SyntaxNode> nodesWithModifiedAttributes )
+        {
+            // We only need to index transformations on syntax (i.e. on source code) because introductions on generated code
+            // are taken from the compilation model.
+
+            nodesWithModifiedAttributes = new HashSet<SyntaxNode>();
+
+            foreach ( var transformation in allTransformations )
+            {
+                if ( transformation is AttributeBuilder attributeBuilder )
+                {
+                    foreach ( var declaringSyntax in attributeBuilder.ContainingDeclaration.GetDeclaringSyntaxReferences() )
+                    {
+                        nodesWithModifiedAttributes.Add( declaringSyntax.GetSyntax() );
+                    }
+                }
+                else if ( transformation is RemoveAttributesTransformation removeAttributesTransformation )
+                {
+                    foreach ( var declaringSyntax in removeAttributesTransformation.ContainingDeclaration.GetDeclaringSyntaxReferences() )
+                    {
+                        nodesWithModifiedAttributes.Add( declaringSyntax.GetSyntax() );
+                    }
+                }
+            }
+        }
+
+        private static void IndexReplaceTransformations(
             AspectLinkerInput input,
             List<ITransformation> allTransformations,
             SyntaxTransformationCollection syntaxTransformationCollection,
@@ -187,7 +217,7 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private void ProcessIntroduceTransformations(
+        private void IndexIntroduceTransformations(
             AspectLinkerInput input,
             List<ITransformation> allTransformations,
             UserDiagnosticSink diagnostics,
@@ -275,35 +305,14 @@ namespace Metalama.Framework.Engine.Linking
         }
 
         private static int GetSyntaxTreePosition( InsertPosition insertPosition )
-        {
-            var positionInSyntaxTree = 0;
-
-            if ( insertPosition.SyntaxNode != null )
+            => insertPosition.Relation switch
             {
-                switch ( insertPosition.Relation )
-                {
-                    case InsertPositionRelation.After:
-                        positionInSyntaxTree = insertPosition.SyntaxNode.Span.End + 1;
+                InsertPositionRelation.After => insertPosition.SyntaxNode.Span.End + 1,
+                InsertPositionRelation.Within => ((BaseTypeDeclarationSyntax) insertPosition.SyntaxNode).CloseBraceToken.Span.Start - 1,
+                _ => 0
+            };
 
-                        break;
-
-                    case InsertPositionRelation.Within:
-                        positionInSyntaxTree = ((BaseTypeDeclarationSyntax) insertPosition.SyntaxNode).CloseBraceToken.Span.Start
-                                               - 1;
-
-                        break;
-
-                    default:
-                        positionInSyntaxTree = 0;
-
-                        break;
-                }
-            }
-
-            return positionInSyntaxTree;
-        }
-
-        private static void ProcessOverrideTransformations(
+        private static void IndexOverrideTransformations(
             List<ITransformation> allTransformations,
             SyntaxTransformationCollection syntaxTransformationCollection,
             out IReadOnlyCollection<PropertyBuilder> buildersWithSynthesizedSetters )
@@ -344,7 +353,7 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private void ProcessMemberLevelTransformations(
+        private void IndexMemberLevelTransformations(
             AspectLinkerInput input,
             UserDiagnosticSink diagnostics,
             LexicalScopeFactory lexicalScopeFactory,

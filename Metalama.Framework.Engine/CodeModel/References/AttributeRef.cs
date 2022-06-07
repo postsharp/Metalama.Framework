@@ -53,7 +53,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
             this.Target = attributeSyntax;
             this._declaringDeclaration = new Ref<IDeclaration>( declaration, targetKind, compilation );
         }
-        public AttributeRef( AttributeSyntax attributeSyntax, in Ref <IDeclaration> declaration )
+
+        public AttributeRef( AttributeSyntax attributeSyntax, in Ref<IDeclaration> declaration )
         {
             this.Target = attributeSyntax;
             this._declaringDeclaration = declaration;
@@ -139,5 +140,10 @@ namespace Metalama.Framework.Engine.CodeModel.References
         ISymbol? ISdkRef<IAttribute>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => throw new NotSupportedException();
 
         public override string ToString() => this.Target?.ToString() ?? "null";
+
+        public bool IsSyntax( AttributeSyntax attribute )
+            => this.Target == attribute || (this.Target is AttributeSyntax attributeSyntax
+                                            && attributeSyntax.SyntaxTree.FilePath == attribute.SyntaxTree.FilePath
+                                            && attributeSyntax.SpanStart == attribute.SpanStart);
     }
 }

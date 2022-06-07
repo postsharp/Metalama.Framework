@@ -5,6 +5,8 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
@@ -31,6 +33,7 @@ namespace Metalama.Framework.Engine.Linking
             private readonly SyntaxTransformationCollection _introducedMemberCollection;
             private readonly IReadOnlyDictionary<SyntaxNode, MemberLevelTransformations> _symbolMemberLevelTransformations;
             private readonly IReadOnlyDictionary<IIntroduceMemberTransformation, MemberLevelTransformations> _introductionMemberLevelTransformations;
+            private readonly HashSet<SyntaxNode> _nodesWithModifiedAttributes;
 
             // Maps a diagnostic id to the number of times it has been suppressed.
             private ImmutableHashSet<string> _activeSuppressions = ImmutableHashSet.Create<string>( StringComparer.OrdinalIgnoreCase );
@@ -42,7 +45,8 @@ namespace Metalama.Framework.Engine.Linking
                 CompilationModel compilation,
                 IReadOnlyList<OrderedAspectLayer> inputOrderedAspectLayers,
                 IReadOnlyDictionary<SyntaxNode, MemberLevelTransformations> symbolMemberLevelTransformations,
-                IReadOnlyDictionary<IIntroduceMemberTransformation, MemberLevelTransformations> introductionMemberLevelTransformations )
+                IReadOnlyDictionary<IIntroduceMemberTransformation, MemberLevelTransformations> introductionMemberLevelTransformations,
+                HashSet<SyntaxNode> nodesWithModifiedAttributes )
             {
                 this._syntaxGenerationContextFactory = new SyntaxGenerationContextFactory( compilation.RoslynCompilation, serviceProvider );
                 this._diagnosticSuppressions = diagnosticSuppressions;
@@ -51,6 +55,7 @@ namespace Metalama.Framework.Engine.Linking
                 this._introducedMemberCollection = introducedMemberCollection;
                 this._symbolMemberLevelTransformations = symbolMemberLevelTransformations;
                 this._introductionMemberLevelTransformations = introductionMemberLevelTransformations;
+                this._nodesWithModifiedAttributes = nodesWithModifiedAttributes;
             }
 
             public override bool VisitIntoStructuredTrivia => true;
@@ -142,10 +147,79 @@ namespace Metalama.Framework.Engine.Linking
                 return transformedNode;
             }
 
+            private SyntaxList<AttributeListSyntax> RewriteAttributeLists( SyntaxNode declaringNode, SyntaxList<AttributeListSyntax> attributeLists )
+            {
+                if ( !this._nodesWithModifiedAttributes.Contains( declaringNode ) )
+                {
+                    return attributeLists;
+                }
+
+                // Resolve the symbol.
+                var semanticModel = this._compilation.RoslynCompilation.GetSemanticModel( declaringNode.SyntaxTree );
+                var symbol = semanticModel.GetDeclaredSymbol( declaringNode );
+
+                if ( symbol == null )
+                {
+                    return attributeLists;
+                }
+
+                // Get the final list of attributes.
+                var finalModelAttributes = this._compilation.GetAttributeCollection( Ref.FromSymbol( symbol, this._compilation.RoslynCompilation ) );
+
+                var outputLists = new List<AttributeListSyntax>();
+                SyntaxGenerationContext? syntaxGenerationContext = null;
+
+                // Remove attributes from the list.
+                foreach ( var list in attributeLists )
+                {
+                    var modifiedList = list;
+
+                    foreach ( var attribute in list.Attributes )
+                    {
+                        if ( !finalModelAttributes.Any( a => a.IsSyntax( attribute ) ) )
+                        {
+                            modifiedList = modifiedList.RemoveNode( attribute, SyntaxRemoveOptions.KeepDirectives );
+                        }
+                    }
+
+                    if ( modifiedList.Attributes.Count > 0 )
+                    {
+                        outputLists.Add( list );
+                    }
+                }
+
+                // Add new attributes.
+                foreach ( var attribute in finalModelAttributes )
+                {
+                    if ( attribute.Target is AttributeBuilder attributeBuilder
+                         && attributeBuilder.ContainingDeclaration.GetPrimaryDeclaration() == declaringNode )
+                    {
+                        syntaxGenerationContext ??= this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( declaringNode );
+
+                        var newAttribute = syntaxGenerationContext.SyntaxGenerator.Attribute( attributeBuilder, syntaxGenerationContext.ReflectionMapper )
+                            .AssertNotNull();
+
+                        var newList = AttributeList( SingletonSeparatedList( newAttribute ) )
+                            .WithAdditionalAnnotations( attributeBuilder.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation );
+
+                        outputLists.Add( newList );
+                    }
+                }
+
+                if ( outputLists.Count == 0 )
+                {
+                    return default;
+                }
+                else
+                {
+                    return List( outputLists );
+                }
+            }
+
             public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
             {
                 var members = new List<MemberDeclarationSyntax>( node.Members.Count );
-                var additionalBaseList = this._introducedMemberCollection.GetIntroducedInterfacesForTypeDecl( node );
+                var additionalBaseList = this._introducedMemberCollection.GetIntroducedInterfacesForTypeDeclaration( node );
                 var syntaxGenerationContext = this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( node );
 
                 using ( var classSuppressions = this.WithSuppressions( node ) )
@@ -191,6 +265,8 @@ namespace Metalama.Framework.Engine.Linking
                                             i => i.WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) ) ) ) );
                         }
                     }
+
+                    node = node.WithAttributeLists( this.RewriteAttributeLists( node, node.AttributeLists ) );
 
                     return node;
                 }
