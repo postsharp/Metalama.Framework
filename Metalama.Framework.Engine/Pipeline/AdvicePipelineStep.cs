@@ -54,7 +54,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
                 foreach ( var advice in adviceGroup.OrderBy( a => a.Order ) )
                 {
-                    var result = advice.ToResult( compilationForThisType );
+                    var result = advice.ToResult( this.Parent.PipelineConfiguration.ServiceProvider, compilationForThisType );
 
                     foreach ( var transformation in result.ObservableTransformations )
                     {

@@ -57,7 +57,7 @@ namespace Metalama.Framework.Engine.Advices
             }
         }
 
-        public override AdviceResult ToResult( ICompilation compilation )
+        public override AdviceResult ToResult( IServiceProvider serviceProvider, ICompilation compilation )
         {
             var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
             var existingDeclaration = targetDeclaration.FindClosestUniquelyNamedMember( this.MemberBuilder.Name );
@@ -111,7 +111,7 @@ namespace Metalama.Framework.Engine.Advices
                 }
             }
 
-            return this.IntroduceMemberAndPull( targetDeclaration );
+            return this.IntroduceMemberAndPull( serviceProvider, targetDeclaration );
         }
     }
 }

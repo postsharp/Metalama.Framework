@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
+using System;
 
 namespace Metalama.Framework.Engine.Advices
 {
@@ -46,6 +47,6 @@ namespace Metalama.Framework.Engine.Advices
 
         public abstract void Initialize( IDiagnosticAdder diagnosticAdder );
 
-        public abstract AdviceResult ToResult( ICompilation compilation );
+        public abstract AdviceResult ToResult( IServiceProvider serviceProvider, ICompilation compilation );
     }
 }

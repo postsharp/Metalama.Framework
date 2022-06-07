@@ -14,9 +14,11 @@ using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using RefKind = Metalama.Framework.Code.RefKind;
@@ -50,7 +52,7 @@ internal abstract class IntroduceFieldOrPropertyAdvice<TMember, TBuilder> : Intr
     /// pull the new member from the constructor.
     /// </summary>
     /// <returns></returns>
-    protected AdviceResult IntroduceMemberAndPull( INamedType targetType )
+    protected AdviceResult IntroduceMemberAndPull( IServiceProvider serviceProvider, INamedType targetType )
     {
         if ( this.PullStrategy == null )
         {
@@ -59,6 +61,9 @@ internal abstract class IntroduceFieldOrPropertyAdvice<TMember, TBuilder> : Intr
         }
         else
         {
+            var userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
+            var userCodeInvocationContext = new UserCodeExecutionContext( serviceProvider, this.AspectLayerId, targetType.GetCompilationModel(), targetType );
+
             UserDiagnosticSink diagnosticSink = new();
             var scopedDiagnosticSink = new ScopedDiagnosticSink( diagnosticSink, targetType, targetType );
 
@@ -74,12 +79,13 @@ internal abstract class IntroduceFieldOrPropertyAdvice<TMember, TBuilder> : Intr
                 {
                     // Invoke the IPullStrategy.
 
-                    // TODO: use UserCodeInvoker.
-
-                    var pullFieldOrPropertyAction = this.PullStrategy.PullFieldOrProperty(
-                        this.MemberBuilder,
-                        constructor,
-                        scopedDiagnosticSink );
+                    var pullFieldOrPropertyAction =
+                        userCodeInvoker.Invoke(
+                            () => this.PullStrategy.PullFieldOrProperty(
+                                this.MemberBuilder,
+                                constructor,
+                                scopedDiagnosticSink ),
+                            userCodeInvocationContext );
 
                     switch ( pullFieldOrPropertyAction.Kind )
                     {
@@ -132,8 +138,12 @@ internal abstract class IntroduceFieldOrPropertyAdvice<TMember, TBuilder> : Intr
                                     RefKind.None );
 
                                 // Allow the IPullStrategy to add custom attributes.
-                                // TODO: UserCodeInvoker
-                                pullFieldOrPropertyAction.BuildParameterAction?.Invoke( newParameter );
+                                if ( pullFieldOrPropertyAction.BuildParameterAction != null )
+                                {
+                                    userCodeInvoker.Invoke(
+                                        () => pullFieldOrPropertyAction.BuildParameterAction?.Invoke( newParameter ),
+                                        userCodeInvocationContext );
+                                }
 
                                 transformations.Add( new AppendParameterTransformation( this, newParameter ) );
 
@@ -202,8 +212,13 @@ internal abstract class IntroduceFieldOrPropertyAdvice<TMember, TBuilder> : Intr
                                                     RefKind.None );
 
                                                 // Allow the strategy to add custom attributes.
-                                                // TODO: use UserInvoker.
-                                                pullParameterAction.BuildParameterAction?.Invoke( recursiveNewParameter );
+                                                if ( pullParameterAction.BuildParameterAction != null )
+                                                {
+                                                    // ReSharper disable once AccessToModifiedClosure
+                                                    userCodeInvoker.Invoke(
+                                                        () => pullParameterAction.BuildParameterAction?.Invoke( recursiveNewParameter ),
+                                                        userCodeInvocationContext );
+                                                }
 
                                                 transformations.Add( new AppendParameterTransformation( this, recursiveNewParameter ) );
 

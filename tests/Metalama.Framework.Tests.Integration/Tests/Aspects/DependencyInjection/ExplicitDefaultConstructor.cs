@@ -1,4 +1,8 @@
-﻿namespace Metalama.Framework.Tests.Integration.Tests.Aspects.DependencyInjection.ExplicitDefaultConstructor;
+﻿#if TEST_OPTIONS
+//@Include(_PullStrategy.cs)
+#endif
+
+namespace Metalama.Framework.Tests.Integration.Tests.Aspects.DependencyInjection.ExplicitDefaultConstructor;
 
 // <target>
 [MyAspect]

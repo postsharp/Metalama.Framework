@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -95,7 +96,7 @@ namespace Metalama.Framework.Engine.Advices
             // TODO: For get accessor template, we are ignoring accessibility of set accessor template because it can be easily incompatible.
         }
 
-        public override AdviceResult ToResult( ICompilation compilation )
+        public override AdviceResult ToResult( IServiceProvider serviceProvider, ICompilation compilation )
         {
             // Determine whether we need introduction transformation (something may exist in the original code or could have been introduced by previous steps).
             var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
@@ -111,7 +112,7 @@ namespace Metalama.Framework.Engine.Advices
                 if ( hasNoOverrideSemantics )
                 {
                     // Introduced auto property.
-                    return this.IntroduceMemberAndPull( targetDeclaration );
+                    return this.IntroduceMemberAndPull( serviceProvider, targetDeclaration );
                 }
                 else
                 {

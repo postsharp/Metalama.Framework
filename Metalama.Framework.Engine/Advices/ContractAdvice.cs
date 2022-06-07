@@ -13,6 +13,7 @@ using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
@@ -25,7 +26,7 @@ namespace Metalama.Framework.Engine.Advices
 
         public override void Initialize( IDiagnosticAdder diagnosticAdder ) { }
 
-        public override AdviceResult ToResult( ICompilation compilation )
+        public override AdviceResult ToResult( IServiceProvider serviceProvider, ICompilation compilation )
         {
             var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
 

@@ -470,11 +470,22 @@ namespace Metalama.Framework.Engine.Linking
                     var statement = insertStatementTransformation.GetInsertedStatement( context );
 
 #if DEBUG
-                    if ( statement != null && ((statement.Value.Statement is BlockSyntax block
-                                                && !block.Statements.All( s => s.HasAnnotations( FormattingAnnotations.GeneratedCodeAnnotationKind ) ))
-                                               || !statement.Value.Statement.HasAnnotations( FormattingAnnotations.GeneratedCodeAnnotationKind )) )
+                    if ( statement != null )
                     {
-                        throw new AssertionFailedException();
+                        if ( statement.Value.Statement is BlockSyntax block )
+                        {
+                            if ( !block.Statements.All( s => s.HasAnnotations( FormattingAnnotations.GeneratedCodeAnnotationKind ) ) )
+                            {
+                                throw new AssertionFailedException();
+                            }
+                        }
+                        else
+                        {
+                            if ( !statement.Value.Statement.HasAnnotations( FormattingAnnotations.GeneratedCodeAnnotationKind ) )
+                            {
+                                throw new AssertionFailedException();
+                            }
+                        }
                     }
 #endif
 
