@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.CodeModel
     public class DeclarationFactory : IDeclarationFactory
     {
         private readonly ConcurrentDictionary<Ref<ICompilationElement>, object> _defaultCache =
-            new( DeclarationRefEqualityComparer<Ref<ICompilationElement>>.Default );
+            new( RefEqualityComparer<ICompilationElement>.Default );
 
         // For types, we have a null-sensitive comparer to that 'object' and 'object?' are cached as two distinct items.
         private readonly ConcurrentDictionary<ITypeSymbol, object> _typeCache =

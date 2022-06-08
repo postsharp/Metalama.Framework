@@ -165,58 +165,92 @@ namespace Metalama.Framework.Engine.Linking
                     return (attributeLists, default);
                 }
 
-                // Get the final list of attributes.
-                var finalModelAttributes = this._compilation.GetAttributeCollection( Ref.FromSymbol( symbol, this._compilation.RoslynCompilation ) );
-
                 var outputLists = new List<AttributeListSyntax>();
                 var outputTrivias = new List<SyntaxTrivia>();
                 SyntaxGenerationContext? syntaxGenerationContext = null;
 
-                // Remove attributes from the list.
-                foreach ( var list in attributeLists )
-                {
-                    var modifiedList = list;
+                ProcessTarget( Ref.FromSymbol( symbol, this._compilation.RoslynCompilation ), SyntaxKind.None );
 
-                    foreach ( var attribute in list.Attributes )
+                switch ( symbol )
+                {
+                    case IMethodSymbol method:
+                        ProcessTarget( Ref.ReturnParameter( method, this._compilation.RoslynCompilation ), SyntaxKind.ReturnKeyword );
+
+                        break;
+                }
+
+                void ProcessTarget( Ref<IDeclaration> target, SyntaxKind targetKind )
+                {
+                    // Get the final list of attributes.
+                    var finalModelAttributes = this._compilation.GetAttributeCollection( target );
+
+                    // Remove attributes from the list.
+                    foreach ( var list in attributeLists )
                     {
-                        if ( !finalModelAttributes.Any( a => a.IsSyntax( attribute ) ) )
+                        // Skip the different target kinds.
+                        if ( list.Target == null )
                         {
-                            modifiedList = modifiedList.RemoveNode( attribute, SyntaxRemoveOptions.KeepDirectives );
+                            if ( targetKind != SyntaxKind.None )
+                            {
+                                continue;
+                            }
+                        }
+                        else
+                        {
+                            if ( !list.Target.IsKind( targetKind ) )
+                            {
+                                continue;
+                            }
+                        }
+
+                        var modifiedList = list;
+
+                        foreach ( var attribute in list.Attributes )
+                        {
+                            if ( !finalModelAttributes.Any( a => a.IsSyntax( attribute ) ) )
+                            {
+                                modifiedList = modifiedList.RemoveNode( attribute, SyntaxRemoveOptions.KeepDirectives )!;
+                            }
+                        }
+
+                        if ( modifiedList.Attributes.Count > 0 )
+                        {
+                            outputLists.Add( list );
+                        }
+                        else
+                        {
+                            // If we are removing a custom attribute, keep its trivia.
+                            outputTrivias.AddRange(
+                                list.GetLeadingTrivia()
+                                    .Where(
+                                        t => t.Kind() is SyntaxKind.MultiLineCommentTrivia
+                                            or SyntaxKind.MultiLineDocumentationCommentTrivia or
+                                            SyntaxKind.SingleLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia ) );
                         }
                     }
 
-                    if ( modifiedList.Attributes.Count > 0 )
+                    // Add new attributes.
+                    foreach ( var attribute in finalModelAttributes )
                     {
-                        outputLists.Add( list );
-                    }
-                    else
-                    {
-                        // If we are removing a custom attribute, keep its trivia.
-                        outputTrivias.AddRange(
-                            list.GetLeadingTrivia()
-                                .Where(
-                                    t => t.Kind() is SyntaxKind.MultiLineCommentTrivia
-                                        or SyntaxKind.MultiLineDocumentationCommentTrivia or
-                                        SyntaxKind.SingleLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia ) );
-                    }
-                }
+                        if ( attribute.Target is AttributeBuilder attributeBuilder
+                             && attributeBuilder.ContainingDeclaration.GetPrimaryDeclarationSyntax() == originalDeclaringNode )
+                        {
+                            syntaxGenerationContext ??= this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( originalDeclaringNode );
 
-                // Add new attributes.
-                foreach ( var attribute in finalModelAttributes )
-                {
-                    if ( attribute.Target is AttributeBuilder attributeBuilder
-                         && attributeBuilder.ContainingDeclaration.GetPrimaryDeclarationSyntax() == originalDeclaringNode )
-                    {
-                        syntaxGenerationContext ??= this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( originalDeclaringNode );
+                            var newAttribute = syntaxGenerationContext.SyntaxGenerator.Attribute( attributeBuilder, syntaxGenerationContext.ReflectionMapper )
+                                .AssertNotNull();
 
-                        var newAttribute = syntaxGenerationContext.SyntaxGenerator.Attribute( attributeBuilder, syntaxGenerationContext.ReflectionMapper )
-                            .AssertNotNull();
+                            var newList = AttributeList( SingletonSeparatedList( newAttribute ) )
+                                .WithTrailingTrivia( ElasticCarriageReturn )
+                                .WithAdditionalAnnotations( attributeBuilder.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation );
 
-                        var newList = AttributeList( SingletonSeparatedList( newAttribute ) )
-                            .WithTrailingTrivia( ElasticCarriageReturn )
-                            .WithAdditionalAnnotations( attributeBuilder.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation );
+                            if ( targetKind != SyntaxKind.None )
+                            {
+                                newList = newList.WithTarget( AttributeTargetSpecifier( Token( targetKind ) ) );
+                            }
 
-                        outputLists.Add( newList );
+                            outputLists.Add( newList );
+                        }
                     }
                 }
 

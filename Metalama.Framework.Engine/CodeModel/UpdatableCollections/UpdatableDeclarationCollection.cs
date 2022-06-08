@@ -10,9 +10,11 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
+#pragma warning disable SA1402
+
 internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : ILazy, IReadOnlyList<TRef>
     where TDeclaration : class, IDeclaration
-    where TRef : IRefImpl<TDeclaration>
+    where TRef : IRefImpl<TDeclaration>, IEquatable<TRef>
 {
     private List<TRef>? _allItems;
 
@@ -84,7 +86,7 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : ILa
     {
         this.EnsureComplete();
 
-        return this._allItems!.Any( i => DeclarationRefEqualityComparer<TRef>.Default.Equals( i, item ) );
+        return this._allItems!.Any( i => i.Equals( item ) );
     }
 
     public UpdatableDeclarationCollection<TDeclaration, TRef> Clone( CompilationModel compilation )

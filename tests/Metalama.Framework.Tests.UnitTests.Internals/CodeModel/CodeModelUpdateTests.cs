@@ -343,7 +343,7 @@ class C
 
         Assert.Single( constructor.Parameters );
     }
-    
+
     [Fact]
     public void AddAttribute_Type()
     {
@@ -358,9 +358,15 @@ class C
         var immutableCompilation = testContext.CreateCompilationModel( code );
         var compilation = immutableCompilation.ToMutable();
         var type = compilation.Types.Single();
-        
+
         Assert.Empty( type.Attributes );
-        compilation.AddTransformation( new AttributeBuilder( null!, type, AttributeConstruction.Create( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(SerializableAttribute) ) ) ) );
+
+        compilation.AddTransformation(
+            new AttributeBuilder(
+                null!,
+                type,
+                AttributeConstruction.Create( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(SerializableAttribute) ) ) ) );
+
         Assert.Single( type.Attributes );
     }
 
@@ -373,13 +379,18 @@ class C
 
         var immutableCompilation = testContext.CreateCompilationModel( code );
         var compilation = immutableCompilation.ToMutable();
-        
+
         Assert.Empty( compilation.Attributes );
-        compilation.AddTransformation( new AttributeBuilder( null!, compilation, AttributeConstruction.Create( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(SerializableAttribute) ) ) ) );
+
+        compilation.AddTransformation(
+            new AttributeBuilder(
+                null!,
+                compilation,
+                AttributeConstruction.Create( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(SerializableAttribute) ) ) ) );
+
         Assert.Single( compilation.Attributes );
     }
-    
-     
+
     [Fact]
     public void RemoveAttribute_Type()
     {
@@ -395,10 +406,15 @@ class C
         var immutableCompilation = testContext.CreateCompilationModel( code );
         var compilation = immutableCompilation.ToMutable();
         var type = compilation.Types.Single();
-        
+
         Assert.Single( type.Attributes );
-        compilation.AddTransformation( new RemoveAttributesTransformation( null!, type, (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(SerializableAttribute) ) , default  ) );
+
+        compilation.AddTransformation(
+            new RemoveAttributesTransformation(
+                null!,
+                type,
+                (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(SerializableAttribute) ) ) );
+
         Assert.Empty( type.Attributes );
     }
-    
 }

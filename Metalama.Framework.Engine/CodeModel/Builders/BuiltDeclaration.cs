@@ -42,7 +42,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public override IAttributeCollection Attributes
             => new AttributeCollection(
                 this,
-                this.GetCompilationModel().GetAttributeCollection( this.ToTypedRef<IDeclaration>(), false ) );
+                this.GetCompilationModel().GetAttributeCollection( this.ToTypedRef<IDeclaration>() ) );
 
         public override DeclarationKind DeclarationKind => this.Builder.DeclarationKind;
 

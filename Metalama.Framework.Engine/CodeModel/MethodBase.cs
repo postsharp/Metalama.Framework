@@ -42,7 +42,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public IParameterList Parameters
             => new ParameterList(
                 this,
-                this.GetCompilationModel().GetParameterCollection( this.ToTypedRef<IHasParameters>(), false ) );
+                this.GetCompilationModel().GetParameterCollection( this.ToTypedRef<IHasParameters>() ) );
 
         MethodKind IMethodBase.MethodKind
             => this.MethodSymbol.MethodKind switch

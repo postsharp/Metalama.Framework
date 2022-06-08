@@ -11,7 +11,6 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.Advices;
@@ -65,8 +64,7 @@ internal class AddAttributeAdvice : Advice
                         var removeTransformation = new RemoveAttributesTransformation(
                             this,
                             targetDeclaration,
-                            this._attribute.Type,
-                            targetDeclaration.GetDeclaringSyntaxReferences().Select( r => r.SyntaxTree ).Distinct().ToImmutableArray() );
+                            this._attribute.Type );
 
                         return CreateResult( removeTransformation );
 

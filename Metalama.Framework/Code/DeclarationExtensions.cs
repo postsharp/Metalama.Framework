@@ -63,7 +63,7 @@ namespace Metalama.Framework.Code
             }
             else
             {
-                return (T) ((ICompilationInternal) compilation).Factory.Translate( declaration )!;
+                return (T) ((ICompilationInternal) compilation).Factory.Translate( declaration );
             }
         }
     }

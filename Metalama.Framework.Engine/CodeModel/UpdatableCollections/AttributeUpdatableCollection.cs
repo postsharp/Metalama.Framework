@@ -29,7 +29,15 @@ internal class AttributeUpdatableCollection : UpdatableDeclarationCollection<IAt
         switch ( this._parent.Target )
         {
             case ISymbol symbol:
-                foreach ( var attribute in symbol.GetAttributes() )
+
+                var attributes = this._parent.TargetKind switch
+                {
+                    DeclarationRefTargetKind.Return => ((IMethodSymbol) symbol).GetReturnTypeAttributes(),
+                    DeclarationRefTargetKind.Default => symbol.GetAttributes(),
+                    _ => throw new NotImplementedException()
+                };
+                    
+                foreach ( var attribute in attributes )
                 {
                     if ( attribute.AttributeConstructor == null )
                     {

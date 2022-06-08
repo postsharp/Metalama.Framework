@@ -47,9 +47,8 @@ namespace Metalama.Framework.Engine.Linking
 
             // TODO: this sorting can be optimized.
             var allTransformations =
-                input.Transformations.OfType<ITransformation>()
+                input.Transformations
                     .OrderBy( x => x.Advice.AspectLayerId, new AspectLayerIdComparer( input.OrderedAspectLayers ) )
-                    .Cast<ITransformation>()
                     .ToList();
 
             IndexReplaceTransformations( input, allTransformations, syntaxTransformationCollection, out var replacedTransformations );

@@ -3,12 +3,10 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advices;
-using Microsoft.CodeAnalysis;
-using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal class RemoveAttributesTransformation : IObservableTransformation, ITransformation
+internal class RemoveAttributesTransformation : IObservableTransformation
 {
     public INamedType AttributeType { get; }
 
@@ -17,8 +15,7 @@ internal class RemoveAttributesTransformation : IObservableTransformation, ITran
     public RemoveAttributesTransformation(
         Advice advice,
         IDeclaration targetDeclaration,
-        INamedType attributeType,
-        ImmutableArray<SyntaxTree> targetSyntaxTrees )
+        INamedType attributeType )
     {
         this.AttributeType = attributeType;
         this.ContainingDeclaration = targetDeclaration;

@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public override IAttributeCollection Attributes
             => new AttributeCollection(
                 this,
-                this.Compilation.GetAttributeCollection( this.ToTypedRef<IDeclaration>(), false ) );
+                this.Compilation.GetAttributeCollection( this.ToTypedRef<IDeclaration>() ) );
 
         [Memo]
         public override IAssembly DeclaringAssembly => this.Compilation.Factory.GetAssembly( this.Symbol.ContainingAssembly );

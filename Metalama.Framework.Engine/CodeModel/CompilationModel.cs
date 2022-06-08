@@ -92,11 +92,10 @@ namespace Metalama.Framework.Engine.CodeModel
             InitializeDictionary( out this._interfaceImplementations );
 
             this._parameters = ImmutableDictionary.Create<Ref<IHasParameters>, ParameterUpdatableCollection>()
-                .WithComparers( DeclarationRefEqualityComparer<Ref<IHasParameters>>.Default );
+                .WithComparers( RefEqualityComparer<IHasParameters>.Default );
 
             this._attributes =
-                ImmutableDictionary<Ref<IDeclaration>, AttributeUpdatableCollection>.Empty.WithComparers(
-                    DeclarationRefEqualityComparer<Ref<IDeclaration>>.Default );
+                ImmutableDictionary<Ref<IDeclaration>, AttributeUpdatableCollection>.Empty.WithComparers( RefEqualityComparer<IDeclaration>.Default );
 
             this.Factory = new DeclarationFactory( this );
 
@@ -208,7 +207,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public override IAttributeCollection Attributes
             => new AttributeCollection(
                 this,
-                this.GetAttributeCollection( Ref.Compilation( this.RoslynCompilation ).As<IDeclaration>(), false ));
+                this.GetAttributeCollection( Ref.Compilation( this.RoslynCompilation ).As<IDeclaration>() ) );
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Compilation;
 

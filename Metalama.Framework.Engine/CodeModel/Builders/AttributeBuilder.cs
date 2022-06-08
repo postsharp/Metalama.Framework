@@ -16,7 +16,7 @@ using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class AttributeBuilder : DeclarationBuilder, IAttribute, IObservableTransformation, ITransformation
+    internal class AttributeBuilder : DeclarationBuilder, IAttribute, IObservableTransformation
     {
         private readonly AttributeConstruction _attributeConstruction;
 

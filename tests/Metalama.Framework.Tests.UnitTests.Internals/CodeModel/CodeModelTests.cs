@@ -272,6 +272,30 @@ class MyAttribute : Attribute
         }
 
         [Fact]
+        public void AttributeOnReturnValue()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = @"
+using System;
+
+class C 
+{
+   [return: MyAttribute]
+   void M() {}
+}
+
+class MyAttribute : Attribute
+{
+    public MyAttribute() {}
+}
+";
+
+            var compilation = testContext.CreateCompilationModel( code );
+            Assert.Single( compilation.Types.OfName( "C" ).Single().Methods.Single().ReturnParameter.Attributes );
+        }
+
+        [Fact]
         public void Arrays()
         {
             using var testContext = this.CreateTestContext();

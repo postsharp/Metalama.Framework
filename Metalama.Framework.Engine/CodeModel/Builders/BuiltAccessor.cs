@@ -59,7 +59,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IParameterList Parameters
             => new ParameterList(
                 this,
-                this.GetCompilationModel().GetParameterCollection( this.AccessorBuilder.ToTypedRef<IHasParameters>(), false ) );
+                this.GetCompilationModel().GetParameterCollection( this.AccessorBuilder.ToTypedRef<IHasParameters>() ) );
 
         public MethodKind MethodKind => this.AccessorBuilder.MethodKind;
 

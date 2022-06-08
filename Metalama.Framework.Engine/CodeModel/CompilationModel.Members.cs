@@ -52,7 +52,7 @@ public partial class CompilationModel
         where TDeclaration : class, IDeclaration
         where TCollection : UpdatableDeclarationCollection<TDeclaration, TRef>
         where TKey : notnull
-        where TRef : IRefImpl<TDeclaration>
+        where TRef : IRefImpl<TDeclaration>, IEquatable<TRef>
     {
         if ( requestMutableCollection && !this.IsMutable )
         {

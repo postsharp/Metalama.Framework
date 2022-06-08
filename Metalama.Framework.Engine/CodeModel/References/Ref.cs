@@ -89,7 +89,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
     /// </summary>
     /// <typeparam name="T"></typeparam>
     [Obfuscation( Exclude = true /* Serialized */ )]
-    internal readonly struct Ref<T> : IRefImpl<T>
+    internal readonly struct Ref<T> : IRefImpl<T>, IEquatable<Ref<T>>
         where T : class, ICompilationElement
     {
         // The compilation for which the symbol (stored in Target) is valid.
@@ -365,12 +365,24 @@ namespace Metalama.Framework.Engine.CodeModel.References
             }
         }
 
-        public override string ToString() => this.Target?.ToString() ?? "null";
+        public override string ToString()
+        {
+            var value = this.Target?.ToString() ?? "null";
+
+            if ( this.TargetKind != DeclarationRefTargetKind.Default )
+            {
+                value += $" ({this.TargetKind}";
+            }
+
+            return value;
+        }
 
         public Ref<TOut> As<TOut>()
             where TOut : class, ICompilationElement
             => new( this.Target, this._compilation, this.TargetKind );
 
-        public override int GetHashCode() => this.Target?.GetHashCode() ?? 0;
+        public override int GetHashCode() => RefEqualityComparer<T>.Default.GetHashCode( this );
+
+        public bool Equals( Ref<T> other ) => RefEqualityComparer<T>.Default.Equals( this, other );
     }
 }

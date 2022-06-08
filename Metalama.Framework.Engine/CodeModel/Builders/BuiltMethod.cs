@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IParameterList Parameters
             => new ParameterList(
                 this,
-                this.GetCompilationModel().GetParameterCollection( this.MethodBuilder.ToTypedRef<IHasParameters>(), false ) );
+                this.GetCompilationModel().GetParameterCollection( this.MethodBuilder.ToTypedRef<IHasParameters>() ) );
 
         public MethodKind MethodKind => this.MethodBuilder.MethodKind;
 
