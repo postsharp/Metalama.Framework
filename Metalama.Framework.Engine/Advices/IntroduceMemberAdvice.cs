@@ -118,16 +118,20 @@ namespace Metalama.Framework.Engine.Advices
 
             if ( this.Template.Declaration != null )
             {
-                CopyAttributes( this.Template.Declaration, this.MemberBuilder );
+                CopyTemplateAttributes( this.Template.Declaration, this.MemberBuilder );
             }
         }
 
-        protected static void CopyAttributes( IDeclaration declaration, IDeclarationBuilder builder )
+        protected static void CopyTemplateAttributes( IDeclaration declaration, IDeclarationBuilder builder )
         {
-            // TODO: Don't copy all attributes, but how to decide which ones to keep?
+            var templateAttributeType = declaration.GetCompilationModel().Factory.GetSpecialType( InternalSpecialType.TemplateAttribute );
+
             foreach ( var codeElementAttribute in declaration.Attributes )
             {
-                builder.AddAttribute( codeElementAttribute.ToAttributeConstruction() );
+                if ( !codeElementAttribute.Type.Is( templateAttributeType ) )
+                {
+                    builder.AddAttribute( codeElementAttribute.ToAttributeConstruction() );
+                }
             }
         }
 

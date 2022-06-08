@@ -1,33 +1,38 @@
 ﻿using System;
 using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Linker.Fields.Linking.IntroducedField
+// TODO (Daniel): this test is broken and I don't understand.
+
+
+namespace Metalama.Framework.Tests.Integration.Test s.Linker.Fiel ds.Linking.IntroducedFiel d
 {
-    [PseudoLayerOrder("TestAspect0")]
-    [PseudoLayerOrder("TestAspect1")]
-    [PseudoLayerOrder("TestAspect2")]
-    [PseudoLayerOrder("TestAspect3")]
-    [PseudoLayerOrder("TestAspect4")]
-    [PseudoLayerOrder("TestAspect5")]
-    [PseudoLayerOrder("TestAspect6")]
-    [PseudoLayerOrder("TestAspect7")]
-    [PseudoLayerOrder("TestAspect8")]
+    [Pseu doLayerOrder("TestAspect0 ")]
+    [Pseu doLayerOrder("TestAspect1 ")]
+    [Pseu doLayerOrder("TestAspect2 ")]
+    [Pseu doLayerOrder("TestAspect3 ")]
+    [Pseu doLayerOrder("TestAspect4 ")]
+    [Pseu doLayerOrder("TestAspect5 ")]
+    [Pseu doLayerOrder("TestAspect6 ")]
+    [Pseu doLayerOrder("TestAspect7 ")]
+    [Pseu doL
+ayerOrder("TestAspect8")]
     [PseudoLayerOrder("TestAspect9")]
     // <target>
     class Target
     {
         public int Foo
         {
-            get
-            {
+             get
+            
+ {
                 Console.WriteLine("This is original code.");
                 return 0;
             }
 
-            set
-            {
-                Console.WriteLine("This is original code.");
-            }
+             set
+             {
+                Console.WriteLine("This is ori ginal code.");
+             }
         }
 
         [PseudoOverride(nameof(Foo), "TestAspect0")]
@@ -37,11 +42,14 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Fields.Linking.Intro
         {
             get
             {
-                // Should invoke empty code.
+                // Should in
+voke empty code.
                 _ = link[_this.Bar, original];
-                // Should invoke empty code.
+                // Should
+ invoke empty code.
                 _ = link[_this.Bar, @base];
-                // Should invoke empty code.
+                // Shoul
+d invoke empty code.
                 _ = link[_this.Bar, self];
                 // Should invoke the final declaration.
                 _ = link[_this.Bar, final];
@@ -51,15 +59,18 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Fields.Linking.Intro
 
             set
             {
-                // Should invoke empty code.
+                // Should invoke
+ empty code.
                 link[_this.Bar, original] = value;
-                // Should invoke empty code.
+                // Should inv
+oke empty code.
                 link[_this.Bar, @base] = value;
-                // Should invoke empty code.
+                // Should in
+voke empty code.
                 link[_this.Bar, self] = value;
                 // Should invoke the final declaration.
-                link[_this.Bar, final] = value;
-            }
+                link[_this.Bar, f inal] = value;
+             }
         }
 
         [PseudoOverride(nameof(Foo), "TestAspect2")]
@@ -69,11 +80,14 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Fields.Linking.Intro
         {
             get
             {
-                // Should invoke empty code.
+                // Should in
+voke empty code.
                 _ = link[_this.Bar, original];
-                // Should invoke source code.
+                // Should 
+invoke source code.
                 _ = link[_this.Bar, @base];
-                // Should invoke source code.
+                // Should
+ invoke source code.
                 _ = link[_this.Bar, self];
                 // Should invoke the final declaration.
                 _ = link[_this.Bar, final];
@@ -83,15 +97,18 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Fields.Linking.Intro
 
             set
             {
-                // Should invoke empty code.
+                // Should invoke
+ empty code.
                 link[_this.Bar, original] = value;
-                // Should invoke source code.
+                // Should invo
+ke source code.
                 link[_this.Bar, @base] = value;
-                // Should invoke source code.
+                // Should inv
+oke source code.
                 link[_this.Bar, self] = value;
                 // Should invoke the final declaration.
-                link[_this.Bar, final] = value;
-            }
+                link[_this.Bar, f inal] = value;
+             }
         }
 
         [PseudoOverride(nameof(Foo), "TestAspect5")]
@@ -101,11 +118,14 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Fields.Linking.Intro
         {
             get
             {
-                // Should invoke empty code.
+                // Should in
+voke empty code.
                 _ = link[_this.Bar, original];
-                // Should invoke override 4.
+                // Should
+ invoke override 4.
                 _ = link[_this.Bar, @base];
-                // Should invoke override 4.
+                // Shoul
+d invoke override 4.
                 _ = link[_this.Bar, self];
                 // Should invoke the final declaration.
                 _ = link[_this.Bar, final];
@@ -115,15 +135,18 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Fields.Linking.Intro
 
             set
             {
-                // Should invoke empty code.
+                // Should invoke
+ empty code.
                 link[_this.Bar, original] = value;
-                // Should invoke override 4.
+                // Should inv
+oke override 4.
                 link[_this.Bar, @base] = value;
-                // Should invoke override 4.
+                // Should in
+voke override 4.
                 link[_this.Bar, self] = value;
                 // Should invoke the final declaration.
-                link[_this.Bar, final] = value;
-            }
+                link[_this.Bar, f inal] = value;
+             }
         }
 
         [PseudoOverride(nameof(Foo), "TestAspect7")]
@@ -133,11 +156,14 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Fields.Linking.Intro
         {
             get
             {
-                // Should invoke empty code.
+                // Should in
+voke empty code.
                 _ = link[_this.Bar, original];
-                // Should invoke override 6.
+                // Should
+ invoke override 6.
                 _ = link[_this.Bar, @base];
-                // Should invoke override 6.
+                // Shoul
+d invoke override 6.
                 _ = link[_this.Bar, self];
                 // Should invoke the final declaration.
                 _ = link[_this.Bar, final];
@@ -147,15 +173,18 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Fields.Linking.Intro
 
             set
             {
-                // Should invoke empty code.
+                // Should invoke
+ empty code.
                 link[_this.Bar, original] = value;
-                // Should invoke override 6.
+                // Should inv
+oke override 6.
                 link[_this.Bar, @base] = value;
-                // Should invoke override 6.
+                // Should in
+voke override 6.
                 link[_this.Bar, self] = value;
                 // Should invoke the final declaration.
-                link[_this.Bar, final] = value;
-            }
+                link[_this.Bar, f inal] = value;
+             }
         }
 
         [PseudoOverride(nameof(Foo), "TestAspect9")]
@@ -165,11 +194,14 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Fields.Linking.Intro
         {
             get
             {
-                // Should invoke empty code.
+                // Should in
+voke empty code.
                 _ = link[_this.Bar, original];
-                // Should invoke the final declaration.
+                // Should invoke the
+ final declaration.
                 _ = link[_this.Bar, @base];
-                // Should invoke the final declaration.
+                // Should invoke th
+e final declaration.
                 _ = link[_this.Bar, self];
                 // Should invoke the final declaration.
                 _ = link[_this.Bar, final];
@@ -179,24 +211,27 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Fields.Linking.Intro
 
             set
             {
-                // Should invoke empty code.
+                // Should invoke
+ empty code.
                 link[_this.Bar, original] = value;
-                // Should invoke the final declaration.
+                // Should invoke the fin
+al declaration.
                 link[_this.Bar, @base] = value;
-                // Should invoke the final declaration.
+                // Should invoke the fi
+nal declaration.
                 link[_this.Bar, self] = value;
                 // Should invoke the final declaration.
                 link[_this.Bar, final] = value;
             }
         }
 
-        [PseudoReplaced]
-        [PseudoIntroduction( "TestAspect1")]
+         [PseudoReplaced]
+        [PseudoIntroduction( "Tes tAspect1")] 
         public int Bar;
 
-        [PseudoReplacement(nameof(Bar))]
+         [PseudoRep lacement(nameof(Bar))]
         [PseudoIntroduction("TestAspect3")]
-        public int Bar_Replacement { get; set; }
+        pu blic int Bar_Replacement {  get; set; }
 
         [PseudoOverride(nameof(Bar), "TestAspect4")]
         [PseudoNotInlineable]
@@ -204,11 +239,14 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Fields.Linking.Intro
         {
             get
             {
-                // Should invoke empty code.
+                // Should in
+voke empty code.
                 _ = link[_this.Bar, original];
-                // Should invoke source code.
+                // Should 
+invoke source code.
                 _ = link[_this.Bar, @base];
-                // Should invoke override 4.
+                // Shoul
+d invoke override 4.
                 _ = link[_this.Bar, self];
                 // Should invoke the final declaration.
                 _ = link[_this.Bar, final];
@@ -218,15 +256,18 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Fields.Linking.Intro
 
             set
             {
-                // Should invoke empty code.
+                // Should invoke
+ empty code.
                 link[_this.Bar, original] = value;
-                // Should invoke source code.
+                // Should invo
+ke source code.
                 link[_this.Bar, @base] = value;
-                // Should invoke override 4.
+                // Should in
+voke override 4.
                 link[_this.Bar, self] = value;
                 // Should invoke the final declaration.
-                link[_this.Bar, final] = value;
-            }
+                link[_this.Bar, f inal] = value;
+             }
         }
 
         [PseudoOverride(nameof(Bar), "TestAspect6")]
@@ -235,11 +276,14 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Fields.Linking.Intro
         {
             get
             {
-                // Should invoke empty code.
+                // Should in
+voke empty code.
                 _ = link[_this.Bar, original];
-                // Should invoke override 4.
+                // Should
+ invoke override 4.
                 _ = link[_this.Bar, @base];
-                // Should invoke override 6.
+                // Shoul
+d invoke override 6.
                 _ = link[_this.Bar, self];
                 // Should invoke the final declaration.
                 _ = link[_this.Bar, final];
@@ -249,15 +293,18 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Fields.Linking.Intro
 
             set
             {
-                // Should invoke empty code.
+                // Should invoke
+ empty code.
                 link[_this.Bar, original] = value;
-                // Should invoke override 4.
+                // Should inv
+oke override 4.
                 link[_this.Bar, @base] = value;
-                // Should invoke override 6.
+                // Should in
+voke override 6.
                 link[_this.Bar, self] = value;
                 // Should invoke the final declaration.
-                link[_this.Bar, final] = value;
-            }
+                link[_this.Bar, f inal] = value;
+             }
         }
 
         [PseudoOverride(nameof(Bar), "TestAspect8")]
@@ -266,11 +313,14 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Fields.Linking.Intro
         {
             get
             {
-                // Should invoke empty code.
+                // Should in
+voke empty code.
                 _ = link[_this.Bar, original];
-                // Should invoke override 6.
+                // Should
+ invoke override 6.
                 _ = link[_this.Bar, @base];
-                // Should invoke the final declaration.
+                // Should invoke th
+e final declaration.
                 _ = link[_this.Bar, self];
                 // Should invoke the final declaration.
                 _ = link[_this.Bar, final];
@@ -280,14 +330,17 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Fields.Linking.Intro
 
             set
             {
-                // Should invoke empty code.
+                // Should invoke
+ empty code.
                 link[_this.Bar, original] = value;
-                // Should invoke override 6.
+                // Should inv
+oke override 6.
                 link[_this.Bar, @base] = value;
-                // Should invoke the final declaration.
+                // Should invoke the fi
+nal declaration.
                 link[_this.Bar, self] = value;
                 // Should invoke the final declaration.
-                link[_this.Bar, final] = value;
+               link[_this.Bar, final] = value;
             }
         }
     }

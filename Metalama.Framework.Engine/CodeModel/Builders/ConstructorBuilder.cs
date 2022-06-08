@@ -74,7 +74,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             {
                 var syntax =
                     ConstructorDeclaration(
-                        List<AttributeListSyntax>(),
+                        context.SyntaxGenerator.AttributesForDeclaration( this ),
                         TokenList( Token( SyntaxKind.StaticKeyword ) ),
                         ((TypeDeclarationSyntax) this.DeclaringType.GetPrimaryDeclarationSyntax().AssertNotNull()).Identifier,
                         ParameterList(),
@@ -88,7 +88,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             {
                 var syntax =
                     ConstructorDeclaration(
-                        List<AttributeListSyntax>(),
+                        context.SyntaxGenerator.AttributesForDeclaration( this ),
                         TokenList( Token( SyntaxKind.PublicKeyword ) ),
                         ((TypeDeclarationSyntax) this.DeclaringType.GetPrimaryDeclarationSyntax().AssertNotNull()).Identifier,
                         ParameterList(),

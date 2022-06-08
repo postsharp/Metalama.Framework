@@ -213,7 +213,7 @@ namespace Metalama.Framework.Engine.Linking
                 SyntaxKind targetKind,
                 SyntaxNode originalDeclaringNode,
                 SyntaxList<AttributeListSyntax> inputAttributeLists,
-                Func<AttributeBuilder,SyntaxNode,bool> isPrimaryNode,
+                Func<AttributeBuilder, SyntaxNode, bool> isPrimaryNode,
                 List<AttributeListSyntax> outputAttributeLists,
                 List<SyntaxTrivia> outputTrivia,
                 ref SyntaxGenerationContext? syntaxGenerationContext )
@@ -269,11 +269,11 @@ namespace Metalama.Framework.Engine.Linking
                 // Add new attributes.
                 foreach ( var attribute in finalModelAttributes )
                 {
-                    if ( attribute.Target is AttributeBuilder attributeBuilder && isPrimaryNode( attributeBuilder, originalDeclaringNode) )
+                    if ( attribute.Target is AttributeBuilder attributeBuilder && isPrimaryNode( attributeBuilder, originalDeclaringNode ) )
                     {
                         syntaxGenerationContext ??= this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( originalDeclaringNode );
 
-                        var newAttribute = syntaxGenerationContext.SyntaxGenerator.Attribute( attributeBuilder, syntaxGenerationContext.ReflectionMapper )
+                        var newAttribute = syntaxGenerationContext.SyntaxGenerator.Attribute( attributeBuilder )
                             .AssertNotNull();
 
                         var newList = AttributeList( SingletonSeparatedList( newAttribute ) )
@@ -812,7 +812,7 @@ namespace Metalama.Framework.Engine.Linking
                     SyntaxKind.AssemblyKeyword,
                     node,
                     node.AttributeLists,
-                    (_,n) => n.SyntaxTree == this._syntaxTreeForGlobalAttributes,
+                    ( _, n ) => n.SyntaxTree == this._syntaxTreeForGlobalAttributes,
                     outputLists,
                     outputTrivias,
                     ref syntaxGenerationContext );

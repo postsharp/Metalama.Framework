@@ -59,7 +59,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IGenericParameterList TypeParameters
             => new TypeParameterList(
                 this,
-                this.MethodBuilder.GenericParameters.AsBuilderList.Select( Ref.FromBuilder<ITypeParameter, TypeParameterBuilder> ).ToList() );
+                this.MethodBuilder.TypeParameters.AsBuilderList.Select( Ref.FromBuilder<ITypeParameter, TypeParameterBuilder> ).ToList() );
 
         public IReadOnlyList<IType> TypeArguments => throw new NotImplementedException();
 

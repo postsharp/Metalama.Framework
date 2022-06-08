@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
@@ -13,36 +12,74 @@ using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class ParameterBuilder : DeclarationBuilder, IParameterBuilder, IParameterImpl, IObservableTransformation
+    internal class ParameterBuilder : BaseParameterBuilder, IObservableTransformation
     {
         private string? _name;
         private TypedConstant _defaultValue;
+        private RefKind _refKind;
+        private IType _type;
+        private bool _isParams;
 
-        public RefKind RefKind { get; set; }
+        public override RefKind RefKind
+        {
+            get => this._refKind;
+            set
+            {
+                this.CheckNotFrozen();
 
-        public IType Type { get; set; }
+                this._refKind = value;
+            }
+        }
 
-        public string Name
+        public override IType Type
+        {
+            get => this._type;
+            set
+            {
+                this.CheckNotFrozen();
+
+                this._type = value;
+            }
+        }
+
+        public override string Name
         {
             get => this._name ?? throw new NotSupportedException( "Cannot get the name of a return parameter." );
             set
-                => this._name = this._name != null
+            {
+                this.CheckNotFrozen();
+
+                this._name = this._name != null
                     ? value ?? throw new NotSupportedException( "Cannot set the parameter name to null." )
                     : throw new NotSupportedException( "Cannot set the name of a return parameter." );
+            }
         }
 
-        public int Index { get; }
+        public override int Index { get; }
 
-        public TypedConstant DefaultValue
+        public override TypedConstant DefaultValue
         {
             get => this._defaultValue;
             set
-                => this._defaultValue = this._name != null
+            {
+                this.CheckNotFrozen();
+
+                this._defaultValue = this._name != null
                     ? value
                     : throw new NotSupportedException( "Cannot set default value of a return parameter." );
+            }
         }
 
-        public bool IsParams { get; set; }
+        public override bool IsParams
+        {
+            get => this._isParams;
+            set
+            {
+                this.CheckNotFrozen();
+
+                this._isParams = value;
+            }
+        }
 
         public override IDeclaration ContainingDeclaration => this.DeclaringMember;
 
@@ -50,11 +87,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 
-        public IMember DeclaringMember { get; }
+        public override IMember DeclaringMember { get; }
 
-        public ParameterInfo ToParameterInfo() => throw new NotImplementedException();
+        public override ParameterInfo ToParameterInfo() => throw new NotImplementedException();
 
-        public bool IsReturnParameter => this.Index < 0;
+        public override bool IsReturnParameter => this.Index < 0;
 
         public ParameterBuilder( Advice advice, IMember declaringMember, int index, string? name, IType type, RefKind refKind ) : base( advice )
         {

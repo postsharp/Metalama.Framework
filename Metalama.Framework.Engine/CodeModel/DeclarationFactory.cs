@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Types;
@@ -20,6 +21,12 @@ using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
+    internal enum InternalSpecialType
+    {
+        TemplateAttribute,
+        Count
+    }
+
     /// <summary>
     /// Creates instances of <see cref="IDeclaration"/> for a given <see cref="CompilationModel"/>.
     /// </summary>
@@ -33,6 +40,7 @@ namespace Metalama.Framework.Engine.CodeModel
             new( SymbolEqualityComparer.IncludeNullability );
 
         private readonly INamedType?[] _specialTypes = new INamedType?[(int) SpecialType.Count];
+        private readonly INamedType?[] _internalSpecialTypes = new INamedType?[(int) InternalSpecialType.Count];
 
         private readonly CompilationModel _compilationModel;
 
@@ -278,6 +286,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public INamedType GetSpecialType( SpecialType specialType ) => this._specialTypes[(int) specialType] ??= this.GetSpecialTypeCore( specialType );
 
+        internal INamedType GetSpecialType( InternalSpecialType specialType )
+            => this._internalSpecialTypes[(int) specialType] ??= this.GetSpecialTypeCore( specialType );
+
         private INamedType GetSpecialTypeCore( SpecialType specialType )
         {
             var roslynSpecialType = specialType.ToRoslynSpecialType();
@@ -301,6 +312,17 @@ namespace Metalama.Framework.Engine.CodeModel
                         _ => throw new ArgumentOutOfRangeException( nameof(specialType) )
                     };
             }
+        }
+
+        private INamedType GetSpecialTypeCore( InternalSpecialType specialType )
+
+        {
+            return
+                specialType switch
+                {
+                    InternalSpecialType.TemplateAttribute => (INamedType) this.GetTypeByReflectionType( typeof(TemplateAttribute) ),
+                    _ => throw new ArgumentOutOfRangeException( nameof(specialType) )
+                };
         }
 
         object? IDeclarationFactory.DefaultValue( IType type ) => new DefaultUserExpression( type );

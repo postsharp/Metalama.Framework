@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.Transformations
 
         public SyntaxGenerationContext SyntaxGenerationContext { get; }
 
-        public OurSyntaxGenerator SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;
+        public SyntaxGeneratorWithContext SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;
 
         public MemberIntroductionContext(
             UserDiagnosticSink diagnosticSink,

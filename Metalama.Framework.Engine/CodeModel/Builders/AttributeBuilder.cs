@@ -60,7 +60,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public AttributeSyntax GetSyntax( SyntaxGenerationContext generationContext )
         {
-            return generationContext.SyntaxGenerator.Attribute( this._attributeConstruction, generationContext.ReflectionMapper );
+            return generationContext.SyntaxGenerator.Attribute( this._attributeConstruction );
         }
     }
 }

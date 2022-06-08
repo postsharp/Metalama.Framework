@@ -16,21 +16,81 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal abstract class MemberOrNamedTypeBuilder : DeclarationBuilder, IMemberOrNamedTypeBuilder, IIntroduceMemberTransformation, IObservableTransformation
     {
-        public bool IsSealed { get; set; }
+        private Accessibility _accessibility;
+        private string _name;
+        private bool _isSealed;
+        private bool _isNew;
+        private bool _isAbstract;
+        private bool _isStatic;
 
-        public bool IsNew { get; set; }
+        public bool IsSealed
+        {
+            get => this._isSealed;
+            set
+            {
+                this.CheckNotFrozen();
+                this._isSealed = value;
+            }
+        }
+
+        public bool IsNew
+        {
+            get => this._isNew;
+            set
+            {
+                this.CheckNotFrozen();
+
+                this._isNew = value;
+            }
+        }
 
         public INamedType DeclaringType { get; }
 
         public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 
-        public Accessibility Accessibility { get; set; }
+        public Accessibility Accessibility
+        {
+            get => this._accessibility;
+            set
+            {
+                this.CheckNotFrozen();
 
-        public abstract string Name { get; set; }
+                this._accessibility = value;
+            }
+        }
 
-        public bool IsAbstract { get; set; }
+        public virtual string Name
+        {
+            get => this._name;
+            set
+            {
+                this.CheckNotFrozen();
 
-        public bool IsStatic { get; set; }
+                this._name = value;
+            }
+        }
+
+        public bool IsAbstract
+        {
+            get => this._isAbstract;
+            set
+            {
+                this.CheckNotFrozen();
+
+                this._isAbstract = value;
+            }
+        }
+
+        public bool IsStatic
+        {
+            get => this._isStatic;
+            set
+            {
+                this.CheckNotFrozen();
+
+                this._isStatic = value;
+            }
+        }
 
         public sealed override IDeclaration ContainingDeclaration => this.DeclaringType;
 

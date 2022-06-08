@@ -202,5 +202,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         }
 
         IType IHasType.Type => this.Type;
+
+        public override void Freeze()
+        {
+            base.Freeze();
+
+            ((DeclarationBuilder?) this.AddMethod)?.Freeze();
+            ((DeclarationBuilder?) this.RemoveMethod)?.Freeze();
+        }
     }
 }

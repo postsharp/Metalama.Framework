@@ -43,6 +43,14 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public bool IsFrozen { get; private set; }
 
+        protected void CheckNotFrozen()
+        {
+            if ( this.IsFrozen )
+            {
+                throw new InvalidOperationException( $"You can no longer modify '{this.ToDisplayString()}'." );
+            }
+        }
+
         Advice ITransformation.Advice => this.ParentAdvice;
 
         protected DeclarationBuilder( Advice parentAdvice )
@@ -52,12 +60,26 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public abstract string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null );
 
-        public void AddAttribute( AttributeConstruction attribute ) => this.Attributes.Add( new AttributeBuilder( this.ParentAdvice, this, attribute ) );
+        public void AddAttribute( AttributeConstruction attribute )
+        {
+            this.CheckNotFrozen();
+
+            this.Attributes.Add( new AttributeBuilder( this.ParentAdvice, this, attribute ) );
+        }
 
         public void AddAttributes( IEnumerable<AttributeConstruction> attributes )
-            => this.Attributes.AddRange( attributes.Select( a => new AttributeBuilder( this.ParentAdvice, this, a ) ) );
+        {
+            this.CheckNotFrozen();
 
-        public void RemoveAttributes( INamedType type ) => this.Attributes.RemoveAll( a => a.Type.Is( type ) );
+            this.Attributes.AddRange( attributes.Select( a => new AttributeBuilder( this.ParentAdvice, this, a ) ) );
+        }
+
+        public void RemoveAttributes( INamedType type )
+        {
+            this.CheckNotFrozen();
+
+            this.Attributes.RemoveAll( a => a.Type.Is( type ) );
+        }
 
         public virtual void Freeze() => this.IsFrozen = true;
 

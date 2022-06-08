@@ -15,7 +15,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -23,6 +22,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder, IMemberImpl
     {
+        private bool _isVirtual;
+        private bool _isAsync;
+        private bool _isOverride;
+
         protected MemberBuilder( Advice parentAdvice, INamedType declaringType, IObjectReader tags ) : base( parentAdvice, declaringType )
         {
             this.Tags = tags;
@@ -36,11 +39,38 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public abstract bool IsExplicitInterfaceImplementation { get; }
 
-        public bool IsVirtual { get; set; }
+        public bool IsVirtual
+        {
+            get => this._isVirtual;
+            set
+            {
+                this.CheckNotFrozen();
 
-        public bool IsAsync { get; set; }
+                this._isVirtual = value;
+            }
+        }
 
-        public bool IsOverride { get; set; }
+        public bool IsAsync
+        {
+            get => this._isAsync;
+            set
+            {
+                this.CheckNotFrozen();
+
+                this._isAsync = value;
+            }
+        }
+
+        public bool IsOverride
+        {
+            get => this._isOverride;
+            set
+            {
+                this.CheckNotFrozen();
+
+                this._isOverride = value;
+            }
+        }
 
         public override bool IsDesignTime => !this.IsOverride;
 
@@ -187,34 +217,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         }
 
         protected virtual SyntaxList<AttributeListSyntax> GetAttributeLists( in SyntaxGenerationContext syntaxGenerationContext )
-        {
-            var attributeLists = default(List<AttributeListSyntax>);
-            var templateAttribute = this.Compilation.Factory.GetTypeByReflectionType( typeof(TemplateAttribute) );
-
-            foreach ( var attributeBuilder in this.Attributes )
-            {
-                if ( attributeBuilder.Constructor.DeclaringType.Is( templateAttribute ) )
-                {
-                    // TODO: This is temporary logic - aspect-related attributes should be marked as compile time and all compile time attributes should be skipped.
-                    continue;
-                }
-
-                if ( attributeLists == null )
-                {
-                    attributeLists = new List<AttributeListSyntax>();
-                }
-
-                attributeLists.Add( AttributeList( SingletonSeparatedList( attributeBuilder.GetSyntax( syntaxGenerationContext ) ) ) );
-            }
-
-            if ( attributeLists != null )
-            {
-                return List( attributeLists );
-            }
-            else
-            {
-                return List<AttributeListSyntax>();
-            }
-        }
+            => syntaxGenerationContext.SyntaxGenerator.AttributesForDeclaration( this );
     }
 }

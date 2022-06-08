@@ -59,7 +59,7 @@ namespace Metalama.Framework.Engine.Advices
                 this.MemberBuilder.ReturnParameter.RefKind = this.Template.Declaration.ReturnParameter.RefKind;
             }
 
-            CopyAttributes( this.Template.Declaration.ReturnParameter, this.MemberBuilder.ReturnParameter );
+            CopyTemplateAttributes( this.Template.Declaration.ReturnParameter, this.MemberBuilder.ReturnParameter );
 
             foreach ( var templateParameter in this.Template.Declaration.Parameters )
             {
@@ -74,7 +74,7 @@ namespace Metalama.Framework.Engine.Advices
                     templateParameter.RefKind,
                     templateParameter.DefaultValue );
 
-                CopyAttributes( templateParameter, parameterBuilder );
+                CopyTemplateAttributes( templateParameter, parameterBuilder );
             }
 
             foreach ( var templateGenericParameter in this.Template.Declaration.TypeParameters )
@@ -94,7 +94,7 @@ namespace Metalama.Framework.Engine.Advices
                     genericParameterBuilder.AddTypeConstraint( typeRewriter.Visit( templateGenericParameterConstraint ) );
                 }
 
-                CopyAttributes( templateGenericParameter.AssertNotNull(), genericParameterBuilder );
+                CopyTemplateAttributes( templateGenericParameter.AssertNotNull(), genericParameterBuilder );
             }
         }
 

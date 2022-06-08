@@ -1,4 +1,6 @@
-﻿#if TEST_OPTIONS
+﻿// TODO (Daniel): this test is broken and I don't understand.
+
+#if TEST_OPTIONS
 // @OutputAllSyntaxTrees
 #endif
 

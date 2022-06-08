@@ -47,7 +47,7 @@ internal class AddAttributeCodeAction : ICodeAction
         var originalRoot = await originalTree.GetRootAsync( context.CancellationToken );
 
         var generationContext = SyntaxGenerationContext.Create( context.ServiceProvider, compilation, originalNode );
-        var transformedNode = generationContext.SyntaxGenerator.AddAttribute( originalNode, this.Attribute, generationContext.ReflectionMapper );
+        var transformedNode = generationContext.SyntaxGenerator.AddAttribute( originalNode, this.Attribute );
 
         var transformedRoot = originalRoot.ReplaceNode( originalNode, transformedNode );
 

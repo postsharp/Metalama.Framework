@@ -25,6 +25,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
     internal class PropertyBuilder : MemberBuilder, IPropertyBuilder, IPropertyImpl
     {
         private readonly bool _hasInitOnlySetter;
+        private IType _type;
+        private IExpression? _initializerExpression;
+        private TemplateMember<IProperty> _initializerTemplate;
 
         public RefKind RefKind { get; set; }
 
@@ -37,13 +40,20 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 _ => Writeability.All
             };
 
-        public sealed override string Name { get; set; }
-
         public override bool IsImplicit => false;
 
         public bool IsAutoPropertyOrField { get; }
 
-        public IType Type { get; set; }
+        public IType Type
+        {
+            get => this._type;
+            set
+            {
+                this.CheckNotFrozen();
+
+                this._type = value;
+            }
+        }
 
         public IMethodBuilder? GetMethod { get; }
 
@@ -73,11 +83,27 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override IMember? OverriddenMember => this.OverriddenProperty;
 
-        public bool IsIndexer => string.Equals( this.Name, "Items", StringComparison.Ordinal );
+        public IExpression? InitializerExpression
+        {
+            get => this._initializerExpression;
+            set
+            {
+                this.CheckNotFrozen();
 
-        public IExpression? InitializerExpression { get; set; }
+                this._initializerExpression = value;
+            }
+        }
 
-        public TemplateMember<IProperty> InitializerTemplate { get; set; }
+        public TemplateMember<IProperty> InitializerTemplate
+        {
+            get => this._initializerTemplate;
+            set
+            {
+                this.CheckNotFrozen();
+
+                this._initializerTemplate = value;
+            }
+        }
 
         public PropertyBuilder(
             Advice parentAdvice,
@@ -295,5 +321,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => throw new NotImplementedException();
 
         public void SetExplicitInterfaceImplementation( IProperty interfaceProperty ) => this.ExplicitInterfaceImplementations = new[] { interfaceProperty };
+
+        public override void Freeze()
+        {
+            base.Freeze();
+
+            ((DeclarationBuilder?) this.GetMethod)?.Freeze();
+            ((DeclarationBuilder?) this.SetMethod)?.Freeze();
+        }
     }
 }
