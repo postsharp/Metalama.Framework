@@ -24,6 +24,11 @@ namespace Metalama.Framework.Engine.Linking
             {
                 this._returnStatements.Add( node );
             }
+
+            public override void VisitLocalFunctionStatement( LocalFunctionStatementSyntax node )
+            {
+                // Never visit local functions.
+            }
         }
     }
 }
