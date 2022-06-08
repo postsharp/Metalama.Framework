@@ -31,7 +31,6 @@ namespace Metalama.Framework.Engine.Advices
 
         protected string MemberName { get; }
 
-        protected IntroduceMemberAdvice(
         public IObjectReader Tags { get; }
 
         public IntroduceMemberAdvice(

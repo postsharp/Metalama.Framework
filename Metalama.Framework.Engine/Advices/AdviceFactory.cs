@@ -772,13 +772,13 @@ namespace Metalama.Framework.Engine.Advices
             var diagnosticList = new DiagnosticList();
 
             var advice = new ImplementInterfaceAdvice(
-                this._aspect,
+                this.State.AspectInstance,
                 this._templateInstance,
                 targetType,
                 interfaceType,
                 whenExists,
                 null,
-                _layerName,
+                this._layerName,
                 ObjectReader.GetReader( tags ) );
 
             advice.Initialize( diagnosticList );
@@ -815,18 +815,18 @@ namespace Metalama.Framework.Engine.Advices
             var diagnosticList = new DiagnosticList();
 
             var advice = new ImplementInterfaceAdvice(
-                this._aspect,
+                this.State.AspectInstance,
                 this._templateInstance,
                 targetType,
                 interfaceType,
                 whenExists,
                 interfaceMemberSpecifications,
-                _layerName,
+                this._layerName,
                 ObjectReader.GetReader( tags ) );
 
             advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
-            this.Advices.Add( advice );
+            this.State.Advices.Add( advice );
 
             this.State.Diagnostics.Report( diagnosticList );
         }
@@ -1004,8 +1004,8 @@ namespace Metalama.Framework.Engine.Advices
 
             if ( !this.State.ContractAdvices.TryGetValue( targetMember, out var advice ) )
             {
-                this._contractAdvices[targetMember] = advice = new ContractAdvice(
-                    this._aspect,
+                this.State.ContractAdvices[targetMember] = advice = new ContractAdvice(
+                    this.State.AspectInstance,
                     this._templateInstance,
                     targetMember,
                     this._layerName );

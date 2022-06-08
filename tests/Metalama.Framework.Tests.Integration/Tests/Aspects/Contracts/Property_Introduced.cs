@@ -22,7 +22,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Property_
                 builder.Advice.AddContract(property, nameof(Filter), ContractDirection.Both);
             }
 
-            var introducedField = builder.Advice.IntroduceField(builder.Target, nameof(IntroducedProperty));
+            var introducedField = builder.Advice.IntroduceProperty(builder.Target, nameof(IntroducedProperty));
 
             builder.Advice.AddContract(introducedField, nameof(Filter), ContractDirection.Both);
         }

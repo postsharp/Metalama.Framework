@@ -17,11 +17,9 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         public bool IsExplicit { get; set; }
 
-        // TODO: Remove "new" when WhenExists is moved from TemplateAttribute to IntroduceAttribute.
-
         /// <summary>
         /// Gets or sets a value indication the override strategy when interface member conflicts with an existing class member.
         /// </summary>
-        public new InterfaceMemberOverrideStrategy WhenExists { get; set; }
+        public InterfaceMemberOverrideStrategy WhenExists { get; set; }
     }
 }
