@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Advices
 {
-    internal static partial class DeclarationExtensions
+    internal static class DeclarationExtensions
     {
         public static bool SignatureEquals( this IMethod method, IMethod other )
         {

@@ -175,7 +175,7 @@ namespace Metalama.Framework.Engine.Advices
                 [NotNullWhen( true )] out IMethod? aspectMethod,
                 [NotNullWhen( true )] out TemplateClassMember? templateClassMember )
             {
-                var method = aspectType!.AllMethods.SingleOrDefault( m => m.SignatureEquals( interfaceMethod ) );
+                var method = aspectType.AllMethods.SingleOrDefault( m => m.SignatureEquals( interfaceMethod ) );
 
                 if ( method != null && TryGetInterfaceMemberTemplate( method, out var classMember ) )
                 {
@@ -196,7 +196,7 @@ namespace Metalama.Framework.Engine.Advices
                 [NotNullWhen( true )] out IProperty? aspectProperty,
                 [NotNullWhen( true )] out TemplateClassMember? templateClassMember )
             {
-                var property = aspectType!.AllProperties.SingleOrDefault( p => p.SignatureEquals( interfaceProperty ) );
+                var property = aspectType.AllProperties.SingleOrDefault( p => p.SignatureEquals( interfaceProperty ) );
 
                 if ( property != null && TryGetInterfaceMemberTemplate( property, out var classMember ) )
                 {
@@ -385,7 +385,7 @@ namespace Metalama.Framework.Engine.Advices
 
                             break;
 
-                        case IIndexer interfaceIndexer:
+                        case IIndexer:
                             throw new NotImplementedException();
 
                         case IEvent interfaceEvent:

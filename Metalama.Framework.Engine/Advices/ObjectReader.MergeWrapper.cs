@@ -18,14 +18,14 @@ namespace Metalama.Framework.Engine.Advices
             {
                 var builder = ImmutableDictionary<string, object?>.Empty.ToBuilder();
 
-                for ( var i = 0; i < readers.Length; i++ )
+                foreach ( var reader in readers )
                 {
-                    if ( readers[i] == null )
+                    if ( reader == null )
                     {
                         continue;
                     }
 
-                    foreach ( var kvp in readers[i]! )
+                    foreach ( var kvp in reader! )
                     {
                         builder[kvp.Key] = kvp.Value;
                     }
