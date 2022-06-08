@@ -1,7 +1,7 @@
 ﻿#if TEST_OPTIONS
-// @Include(__TopLevelStatements.cs)
+// @Include(Include\__TopLevelStatements.cs)
 // @OutputAllSyntaxTrees
-// @Executable
+// @ExecuteProgram
 #endif
 
 using System;
