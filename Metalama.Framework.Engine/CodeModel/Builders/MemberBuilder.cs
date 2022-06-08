@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         private bool _isAsync;
         private bool _isOverride;
 
-        protected MemberBuilder( Advice parentAdvice, INamedType declaringType, IObjectReader tags ) : base( parentAdvice, declaringType )
+        protected MemberBuilder( Advice parentAdvice, INamedType declaringType, string name, IObjectReader tags ) : base( parentAdvice, declaringType, name )
         {
             this.Tags = tags;
         }

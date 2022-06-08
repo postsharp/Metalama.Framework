@@ -1,8 +1,10 @@
-﻿// TODO (Daniel): this test is broken and I don't understand.
-
-#if TEST_OPTIONS
+﻿#if TEST_OPTIONS
 // @OutputAllSyntaxTrees
 #endif
+
+// TODO (Daniel): this test is broken and I don't understand.
+
+
 
 using System;
 using Metalama.Framework.Aspects;

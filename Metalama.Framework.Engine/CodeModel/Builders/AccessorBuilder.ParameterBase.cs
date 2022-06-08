@@ -27,11 +27,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                         "Cannot directly set the default value of indexer accessor parameter, set the value on indexer itself." );
             }
 
-            public override IType Type { get; set; }
-
             public override RefKind RefKind { get; set; }
-
-            public override string Name { get; set; }
 
             public override int Index { get; }
 

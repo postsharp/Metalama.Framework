@@ -270,8 +270,9 @@ namespace Metalama.TestFramework
                         this.OutputCompilationDiagnostics.ToArray() );
 
                     // Add assembly-level custom attributes. We do not include AspectOrder because this would pollute many tests.
-                    consolidatedCompilationUnit = consolidatedCompilationUnit.WithAttributeLists( 
-                        consolidatedCompilationUnit.AttributeLists.AddRange( outputSyntaxRoot.AttributeLists.Where( a => !a.ToString().Contains("AspectOrder" ) ) ));
+                    consolidatedCompilationUnit = consolidatedCompilationUnit.WithAttributeLists(
+                        consolidatedCompilationUnit.AttributeLists.AddRange(
+                            outputSyntaxRoot.AttributeLists.Where( a => !a.ToString().Contains( "AspectOrder" ) ) ) );
 
                     // Find notes annotated with // <target> or with a comment containing <target> and choose the first one. If there is none, the test output is the whole tree
                     // passed to this method.
@@ -285,7 +286,7 @@ namespace Metalama.TestFramework
                                      m.AttributeLists.Any( a => a.GetLeadingTrivia().ToString().ContainsOrdinal( "<target>" ) ) )
                             .Cast<SyntaxNode>()
                             .ToArray();
-                    
+
                     outputMembers = outputMembers switch
                     {
                         { Length: 0 } => new SyntaxNode[] { outputSyntaxRoot },

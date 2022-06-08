@@ -98,8 +98,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             this.DeclaringMember = declaringMember;
             this.Index = index;
             this._name = name;
-            this.Type = type;
-            this.RefKind = refKind;
+            this._type = type;
+            this._refKind = refKind;
         }
 
         // TODO: How to implement this?

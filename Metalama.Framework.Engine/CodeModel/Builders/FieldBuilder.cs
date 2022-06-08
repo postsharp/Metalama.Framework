@@ -23,8 +23,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IType Type { get; set; }
 
-        public override string Name { get; set; }
-
         public override bool IsImplicit => false;
 
         [Memo]
@@ -50,9 +48,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public TemplateMember<IField> InitializerTemplate { get; set; }
 
         public FieldBuilder( Advice parentAdvice, INamedType targetType, string name, IObjectReader tags )
-            : base( parentAdvice, targetType, tags )
+            : base( parentAdvice, targetType, name, tags )
         {
-            this.Name = name;
             this.Type = this.Compilation.Factory.GetSpecialType( SpecialType.Object );
         }
 

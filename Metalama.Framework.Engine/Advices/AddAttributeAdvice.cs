@@ -3,7 +3,6 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
@@ -17,14 +16,14 @@ namespace Metalama.Framework.Engine.Advices;
 
 internal class AddAttributeAdvice : Advice
 {
-    private readonly AttributeConstruction _attribute;
+    private readonly IAttributeData _attribute;
     private readonly OverrideStrategy _overrideStrategy;
 
     public AddAttributeAdvice(
         IAspectInstanceInternal aspect,
         TemplateClassInstance template,
         IDeclaration targetDeclaration,
-        AttributeConstruction attribute,
+        IAttributeData attribute,
         OverrideStrategy overrideStrategy,
         string? layerName ) : base( aspect, template, targetDeclaration, layerName, ObjectReader.Empty )
     {

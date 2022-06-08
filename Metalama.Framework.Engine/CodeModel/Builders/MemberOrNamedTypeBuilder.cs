@@ -96,9 +96,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public abstract bool IsDesignTime { get; }
 
-        public MemberOrNamedTypeBuilder( Advice parentAdvice, INamedType declaringType ) : base( parentAdvice )
+        public MemberOrNamedTypeBuilder( Advice parentAdvice, INamedType declaringType, string name ) : base( parentAdvice )
         {
             this.DeclaringType = declaringType;
+            this._name = name;
         }
 
         public abstract IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context );

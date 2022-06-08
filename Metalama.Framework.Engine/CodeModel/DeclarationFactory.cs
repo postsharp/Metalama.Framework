@@ -315,15 +315,11 @@ namespace Metalama.Framework.Engine.CodeModel
         }
 
         private INamedType GetSpecialTypeCore( InternalSpecialType specialType )
-
-        {
-            return
-                specialType switch
-                {
-                    InternalSpecialType.TemplateAttribute => (INamedType) this.GetTypeByReflectionType( typeof(TemplateAttribute) ),
-                    _ => throw new ArgumentOutOfRangeException( nameof(specialType) )
-                };
-        }
+            => specialType switch
+            {
+                InternalSpecialType.TemplateAttribute => (INamedType) this.GetTypeByReflectionType( typeof(TemplateAttribute) ),
+                _ => throw new ArgumentOutOfRangeException( nameof(specialType) )
+            };
 
         object? IDeclarationFactory.DefaultValue( IType type ) => new DefaultUserExpression( type );
 

@@ -442,15 +442,34 @@ namespace Metalama.Framework.Aspects
             object? tags = null,
             object? args = null );
 
+        /// <summary>
+        /// Adds a custom attribute to a given declaration.
+        /// </summary>
+        /// <param name="targetDeclaration">The declaration to which the custom attribute should be added.</param>
+        /// <param name="attribute">The custom attribute to be added. It can be an existing <see cref="IAttribute"/>, or you can use <see cref="AttributeConstruction"/>
+        /// to specify a new attribute.</param>
+        /// <param name="whenExists">Specifies the strategy to follow when an attribute of the same type already exists on the target declaration. <see cref="OverrideStrategy.Fail"/> will fail the
+        /// compilation with an error and is the default strategy. <see cref="OverrideStrategy.Ignore"/> will silently ignore the introduction. <see cref="OverrideStrategy.Override"/> will remove
+        /// all previous instances and replace them by the new one. <see cref="OverrideStrategy.New"/> will add the new instance regardless.</param>
         void AddAttribute(
             IDeclaration targetDeclaration,
-            AttributeConstruction attribute,
+            IAttributeData attribute,
             OverrideStrategy whenExists = OverrideStrategy.Default );
 
+        /// <summary>
+        /// Removes all custom attributes of a given <see cref="INamedType"/> from a given declaration.
+        /// </summary>
+        /// <param name="targetDeclaration">The declaration from which custom attributes have to be removed.</param>
+        /// <param name="attributeType">The type of custom attributes to be removed.</param>
         void RemoveAttributes(
             IDeclaration targetDeclaration,
             INamedType attributeType );
 
+        /// <summary>
+        /// Removes all custom attributes of a given <see cref="Type"/> from a given declaration.
+        /// </summary>
+        /// <param name="targetDeclaration">The declaration from which custom attributes have to be removed.</param>
+        /// <param name="attributeType">The type of custom attributes to be removed.</param>
         void RemoveAttributes(
             IDeclaration targetDeclaration,
             Type attributeType );

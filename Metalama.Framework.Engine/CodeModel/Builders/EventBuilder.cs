@@ -30,14 +30,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             string name,
             bool isEventField,
             IObjectReader tags )
-            : base( parentAdvice, targetType, tags )
+            : base( parentAdvice, targetType, name, tags )
         {
-            this.Name = name;
             this._isEventField = isEventField;
             this.Type = (INamedType) targetType.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(EventHandler) );
         }
-
-        public override string Name { get; set; }
 
         public override bool IsImplicit => false;
 

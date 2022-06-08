@@ -3,36 +3,33 @@ using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
 
 // TODO (Daniel): this test is broken and I don't understand.
 
-
-namespace Metalama.Framework.Tests.Integration.Test s.Linker.Fiel ds.Linking.IntroducedFiel d
+namespace Metalama.Framework.Tests.Integration.Tests.Linker.Fields.Linking.IntroducedField
 {
-    [Pseu doLayerOrder("TestAspect0 ")]
-    [Pseu doLayerOrder("TestAspect1 ")]
-    [Pseu doLayerOrder("TestAspect2 ")]
-    [Pseu doLayerOrder("TestAspect3 ")]
-    [Pseu doLayerOrder("TestAspect4 ")]
-    [Pseu doLayerOrder("TestAspect5 ")]
-    [Pseu doLayerOrder("TestAspect6 ")]
-    [Pseu doLayerOrder("TestAspect7 ")]
-    [Pseu doL
-ayerOrder("TestAspect8")]
+    [PseudoLayerOrder("TestAspect0")]
+    [PseudoLayerOrder("TestAspect1")]
+    [PseudoLayerOrder("TestAspect2")]
+    [PseudoLayerOrder("TestAspect3")]
+    [PseudoLayerOrder("TestAspect4")]
+    [PseudoLayerOrder("TestAspect5")]
+    [PseudoLayerOrder("TestAspect6")]
+    [PseudoLayerOrder("TestAspect7")]
+    [PseudoLayerOrder("TestAspect8")]
     [PseudoLayerOrder("TestAspect9")]
     // <target>
     class Target
     {
         public int Foo
         {
-             get
-            
- {
+            get
+            {
                 Console.WriteLine("This is original code.");
                 return 0;
             }
 
-             set
-             {
-                Console.WriteLine("This is ori ginal code.");
-             }
+            set
+            {
+                Console.WriteLine("This is original code.");
+            }
         }
 
         [PseudoOverride(nameof(Foo), "TestAspect0")]
@@ -42,14 +39,11 @@ ayerOrder("TestAspect8")]
         {
             get
             {
-                // Should in
-voke empty code.
+                // Should invoke empty code.
                 _ = link[_this.Bar, original];
-                // Should
- invoke empty code.
+                // Should invoke empty code.
                 _ = link[_this.Bar, @base];
-                // Shoul
-d invoke empty code.
+                // Should invoke empty code.
                 _ = link[_this.Bar, self];
                 // Should invoke the final declaration.
                 _ = link[_this.Bar, final];
@@ -59,18 +53,15 @@ d invoke empty code.
 
             set
             {
-                // Should invoke
- empty code.
+                // Should invoke empty code.
                 link[_this.Bar, original] = value;
-                // Should inv
-oke empty code.
+                // Should invoke empty code.
                 link[_this.Bar, @base] = value;
-                // Should in
-voke empty code.
+                // Should invoke empty code.
                 link[_this.Bar, self] = value;
                 // Should invoke the final declaration.
-                link[_this.Bar, f inal] = value;
-             }
+                link[_this.Bar, final] = value;
+            }
         }
 
         [PseudoOverride(nameof(Foo), "TestAspect2")]
@@ -80,14 +71,11 @@ voke empty code.
         {
             get
             {
-                // Should in
-voke empty code.
+                // Should invoke empty code.
                 _ = link[_this.Bar, original];
-                // Should 
-invoke source code.
+                // Should invoke source code.
                 _ = link[_this.Bar, @base];
-                // Should
- invoke source code.
+                // Should invoke source code.
                 _ = link[_this.Bar, self];
                 // Should invoke the final declaration.
                 _ = link[_this.Bar, final];
@@ -97,18 +85,15 @@ invoke source code.
 
             set
             {
-                // Should invoke
- empty code.
+                // Should invoke empty code.
                 link[_this.Bar, original] = value;
-                // Should invo
-ke source code.
+                // Should invoke source code.
                 link[_this.Bar, @base] = value;
-                // Should inv
-oke source code.
+                // Should invoke source code.
                 link[_this.Bar, self] = value;
                 // Should invoke the final declaration.
-                link[_this.Bar, f inal] = value;
-             }
+                link[_this.Bar, final] = value;
+            }
         }
 
         [PseudoOverride(nameof(Foo), "TestAspect5")]
@@ -118,14 +103,11 @@ oke source code.
         {
             get
             {
-                // Should in
-voke empty code.
+                // Should invoke empty code.
                 _ = link[_this.Bar, original];
-                // Should
- invoke override 4.
+                // Should invoke override 4.
                 _ = link[_this.Bar, @base];
-                // Shoul
-d invoke override 4.
+                // Should invoke override 4.
                 _ = link[_this.Bar, self];
                 // Should invoke the final declaration.
                 _ = link[_this.Bar, final];
@@ -135,18 +117,15 @@ d invoke override 4.
 
             set
             {
-                // Should invoke
- empty code.
+                // Should invoke empty code.
                 link[_this.Bar, original] = value;
-                // Should inv
-oke override 4.
+                // Should invoke override 4.
                 link[_this.Bar, @base] = value;
-                // Should in
-voke override 4.
+                // Should invoke override 4.
                 link[_this.Bar, self] = value;
                 // Should invoke the final declaration.
-                link[_this.Bar, f inal] = value;
-             }
+                link[_this.Bar, final] = value;
+            }
         }
 
         [PseudoOverride(nameof(Foo), "TestAspect7")]
@@ -156,14 +135,11 @@ voke override 4.
         {
             get
             {
-                // Should in
-voke empty code.
+                // Should invoke empty code.
                 _ = link[_this.Bar, original];
-                // Should
- invoke override 6.
+                // Should invoke override 6.
                 _ = link[_this.Bar, @base];
-                // Shoul
-d invoke override 6.
+                // Should invoke override 6.
                 _ = link[_this.Bar, self];
                 // Should invoke the final declaration.
                 _ = link[_this.Bar, final];
@@ -173,18 +149,15 @@ d invoke override 6.
 
             set
             {
-                // Should invoke
- empty code.
+                // Should invoke empty code.
                 link[_this.Bar, original] = value;
-                // Should inv
-oke override 6.
+                // Should invoke override 6.
                 link[_this.Bar, @base] = value;
-                // Should in
-voke override 6.
+                // Should invoke override 6.
                 link[_this.Bar, self] = value;
                 // Should invoke the final declaration.
-                link[_this.Bar, f inal] = value;
-             }
+                link[_this.Bar, final] = value;
+            }
         }
 
         [PseudoOverride(nameof(Foo), "TestAspect9")]
@@ -194,14 +167,11 @@ voke override 6.
         {
             get
             {
-                // Should in
-voke empty code.
+                // Should invoke empty code.
                 _ = link[_this.Bar, original];
-                // Should invoke the
- final declaration.
+                // Should invoke the final declaration.
                 _ = link[_this.Bar, @base];
-                // Should invoke th
-e final declaration.
+                // Should invoke the final declaration.
                 _ = link[_this.Bar, self];
                 // Should invoke the final declaration.
                 _ = link[_this.Bar, final];
@@ -211,27 +181,24 @@ e final declaration.
 
             set
             {
-                // Should invoke
- empty code.
+                // Should invoke empty code.
                 link[_this.Bar, original] = value;
-                // Should invoke the fin
-al declaration.
+                // Should invoke the final declaration.
                 link[_this.Bar, @base] = value;
-                // Should invoke the fi
-nal declaration.
+                // Should invoke the final declaration.
                 link[_this.Bar, self] = value;
                 // Should invoke the final declaration.
                 link[_this.Bar, final] = value;
             }
         }
 
-         [PseudoReplaced]
-        [PseudoIntroduction( "Tes tAspect1")] 
+        [PseudoReplaced]
+        [PseudoIntroduction( "TestAspect1")]
         public int Bar;
 
-         [PseudoRep lacement(nameof(Bar))]
+        [PseudoReplacement(nameof(Bar))]
         [PseudoIntroduction("TestAspect3")]
-        pu blic int Bar_Replacement {  get; set; }
+        public int Bar_Replacement { get; set; }
 
         [PseudoOverride(nameof(Bar), "TestAspect4")]
         [PseudoNotInlineable]
@@ -239,14 +206,11 @@ nal declaration.
         {
             get
             {
-                // Should in
-voke empty code.
+                // Should invoke empty code.
                 _ = link[_this.Bar, original];
-                // Should 
-invoke source code.
+                // Should invoke source code.
                 _ = link[_this.Bar, @base];
-                // Shoul
-d invoke override 4.
+                // Should invoke override 4.
                 _ = link[_this.Bar, self];
                 // Should invoke the final declaration.
                 _ = link[_this.Bar, final];
@@ -256,18 +220,15 @@ d invoke override 4.
 
             set
             {
-                // Should invoke
- empty code.
+                // Should invoke empty code.
                 link[_this.Bar, original] = value;
-                // Should invo
-ke source code.
+                // Should invoke source code.
                 link[_this.Bar, @base] = value;
-                // Should in
-voke override 4.
+                // Should invoke override 4.
                 link[_this.Bar, self] = value;
                 // Should invoke the final declaration.
-                link[_this.Bar, f inal] = value;
-             }
+                link[_this.Bar, final] = value;
+            }
         }
 
         [PseudoOverride(nameof(Bar), "TestAspect6")]
@@ -276,14 +237,11 @@ voke override 4.
         {
             get
             {
-                // Should in
-voke empty code.
+                // Should invoke empty code.
                 _ = link[_this.Bar, original];
-                // Should
- invoke override 4.
+                // Should invoke override 4.
                 _ = link[_this.Bar, @base];
-                // Shoul
-d invoke override 6.
+                // Should invoke override 6.
                 _ = link[_this.Bar, self];
                 // Should invoke the final declaration.
                 _ = link[_this.Bar, final];
@@ -293,18 +251,15 @@ d invoke override 6.
 
             set
             {
-                // Should invoke
- empty code.
+                // Should invoke empty code.
                 link[_this.Bar, original] = value;
-                // Should inv
-oke override 4.
+                // Should invoke override 4.
                 link[_this.Bar, @base] = value;
-                // Should in
-voke override 6.
+                // Should invoke override 6.
                 link[_this.Bar, self] = value;
                 // Should invoke the final declaration.
-                link[_this.Bar, f inal] = value;
-             }
+                link[_this.Bar, final] = value;
+            }
         }
 
         [PseudoOverride(nameof(Bar), "TestAspect8")]
@@ -313,14 +268,11 @@ voke override 6.
         {
             get
             {
-                // Should in
-voke empty code.
+                // Should invoke empty code.
                 _ = link[_this.Bar, original];
-                // Should
- invoke override 6.
+                // Should invoke override 6.
                 _ = link[_this.Bar, @base];
-                // Should invoke th
-e final declaration.
+                // Should invoke the final declaration.
                 _ = link[_this.Bar, self];
                 // Should invoke the final declaration.
                 _ = link[_this.Bar, final];
@@ -330,17 +282,14 @@ e final declaration.
 
             set
             {
-                // Should invoke
- empty code.
+                // Should invoke empty code.
                 link[_this.Bar, original] = value;
-                // Should inv
-oke override 6.
+                // Should invoke override 6.
                 link[_this.Bar, @base] = value;
-                // Should invoke the fi
-nal declaration.
+                // Should invoke the final declaration.
                 link[_this.Bar, self] = value;
                 // Should invoke the final declaration.
-               link[_this.Bar, final] = value;
+                link[_this.Bar, final] = value;
             }
         }
     }

@@ -49,7 +49,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public MemberRef<IMember> ReplacedMember { get; }
 
         public ConstructorBuilder( Advice parentAdvice, INamedType targetType, IObjectReader tags )
-            : base( parentAdvice, targetType, tags )
+            : base( parentAdvice, targetType, null!, tags )
         {
             if ( targetType.Constructors.Any( c => c.GetSymbol().AssertNotNull().GetPrimarySyntaxReference() == null ) )
             {

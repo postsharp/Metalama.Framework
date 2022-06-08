@@ -116,7 +116,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             bool hasImplicitGetter,
             bool hasImplicitSetter,
             IObjectReader tags )
-            : base( parentAdvice, targetType, tags )
+            : base( parentAdvice, targetType, name, tags )
         {
             // TODO: Sanity checks.
 
@@ -125,8 +125,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             Invariant.Assert( !(hasInitOnlySetter && hasImplicitSetter) );
             Invariant.Assert( !(!isAutoProperty && hasImplicitSetter) );
 
-            this.Name = name;
-            this.Type = targetType.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(object) );
+            this._type = targetType.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(object) );
 
             if ( hasGetter )
             {

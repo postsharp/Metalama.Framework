@@ -1067,7 +1067,7 @@ namespace Metalama.Framework.Engine.Advices
             advice.Contracts.Add( new Contract( targetDeclaration, templateRef, direction, ObjectReader.GetReader( tags ), ObjectReader.GetReader( args ) ) );
         }
 
-        public void AddAttribute( IDeclaration targetDeclaration, AttributeConstruction attribute, OverrideStrategy whenExists = OverrideStrategy.Default )
+        public void AddAttribute( IDeclaration targetDeclaration, IAttributeData attribute, OverrideStrategy whenExists = OverrideStrategy.Default )
         {
             this.State.Advices.Add(
                 new AddAttributeAdvice( this.State.AspectInstance, this._templateInstance!, targetDeclaration, attribute, whenExists, this._layerName ) );
