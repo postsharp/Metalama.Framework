@@ -3,14 +3,12 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Eligibility.Implementation;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Templating.Expressions;
@@ -22,7 +20,6 @@ using System;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
-using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.Aspects
 {
@@ -31,8 +28,6 @@ namespace Metalama.Framework.Engine.Aspects
     /// </summary>
     internal class AspectDriver : IAspectDriver
     {
-        private readonly IServiceProvider _serviceProvider;
-        private readonly ImmutableArray<TemplateClassMember> _declarativeAdviceAttributes;
         private readonly ReflectionMapper _reflectionMapper;
         private readonly IAspectClassImpl _aspectClass;
 
@@ -40,27 +35,23 @@ namespace Metalama.Framework.Engine.Aspects
 
         public AspectDriver( IServiceProvider serviceProvider, IAspectClassImpl aspectClass, Compilation compilation )
         {
-            this._serviceProvider = serviceProvider;
             this._reflectionMapper = serviceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( compilation );
             this._aspectClass = aspectClass;
 
+            // We don't store the IServiceProvider because the AspectDriver is created during the pipeline initialization but used
+            // during pipeline execution, and execution has a different service provider.
+
             // Introductions must have a deterministic order because of testing.
-            this._declarativeAdviceAttributes = aspectClass
-                .TemplateClasses.SelectMany( c => c.GetDeclarativeAdvices( compilation ) )
+            var declarativeAdviceAttributes = aspectClass
+                .TemplateClasses.SelectMany( c => c.GetDeclarativeAdvices( serviceProvider, compilation ) )
                 .ToImmutableArray();
 
             // If we have any declarative introduction, the aspect cannot be added to an interface.
-            if ( this._declarativeAdviceAttributes.Any( a => a.TemplateInfo.AttributeType is TemplateAttributeType.Introduction ) )
+            foreach ( var declarativeAdvice in declarativeAdviceAttributes )
             {
-                this.EligibilityRule = new EligibilityRule<IDeclaration>(
-                    EligibleScenarios.Inheritance,
-                    x =>
-                    {
-                        var t = x.GetDeclaringType();
-
-                        return t != null && t.TypeKind != TypeKind.Interface;
-                    },
-                    _ => $"the aspect {this._aspectClass.ShortName} cannot be added to an interface (because the aspect contains a declarative introduction)" );
+                var eligibilityBuilder = new EligibilityBuilder<IDeclaration>();
+                declarativeAdvice.Attribute.BuildAspectEligibility( eligibilityBuilder );
+                this.EligibilityRule = eligibilityBuilder.Build();
             }
         }
 
@@ -124,6 +115,8 @@ namespace Metalama.Framework.Engine.Aspects
 
             cancellationToken.ThrowIfCancellationRequested();
 
+            var serviceProvider = pipelineConfiguration.ServiceProvider;
+
             // Map the target declaration to the correct revision of the compilation model.
             targetDeclaration = compilationModelRevision.Factory.GetDeclaration( targetDeclaration );
 
@@ -145,30 +138,26 @@ namespace Metalama.Framework.Engine.Aspects
             var diagnosticSink = new UserDiagnosticSink( this._aspectClass.Project, pipelineConfiguration.CodeFixFilter );
 
             // Create the AdviceFactory.
-            var adviceFactory = new AdviceFactory(
+            var adviceFactoryState = new AdviceFactoryState(
+                serviceProvider,
                 compilationModelRevision,
-                diagnosticSink,
                 aspectInstance,
+                diagnosticSink,
+                pipelineConfiguration );
+
+            var adviceFactory = new AdviceFactory(
+                adviceFactoryState,
                 aspectInstance.TemplateInstances.Count == 1 ? aspectInstance.TemplateInstances.Values.Single() : null,
-                this._serviceProvider );
+                null );
 
-            // Add declarative advices to the factory.
-            var declarativeAdvices =
-                this._declarativeAdviceAttributes
-                    .Select(
-                        x => CreateDeclarativeAdvice(
-                            aspectInstance,
-                            aspectInstance.TemplateInstances[x.TemplateClass],
-                            diagnosticSink,
-                            targetDeclaration,
-                            x,
-                            x.SymbolId.Resolve( compilationModelRevision.RoslynCompilation, cancellationToken: cancellationToken ).AssertNotNull() ) )
-                    .WhereNotNull();
-
-            adviceFactory.Advices.AddRange( declarativeAdvices );
+            // Prepare declarative advice.
+            var declarativeAdvice = this._aspectClass.TemplateClasses
+                .SelectMany( c => c.GetDeclarativeAdvices( serviceProvider, compilationModelRevision ) )
+                .ToList();
 
             // Create the AspectBuilder.
             var aspectBuilder = new AspectBuilder<T>(
+                serviceProvider,
                 targetDeclaration,
                 diagnosticSink,
                 adviceFactory,
@@ -176,17 +165,35 @@ namespace Metalama.Framework.Engine.Aspects
                 aspectInstance,
                 cancellationToken );
 
-            using ( SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( compilationModelRevision, this._serviceProvider ) ) )
+            using ( SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( compilationModelRevision, serviceProvider ) ) )
             {
                 var executionContext = new UserCodeExecutionContext(
-                    this._serviceProvider,
+                    serviceProvider,
                     diagnosticSink,
                     UserCodeMemberInfo.FromDelegate( new Action<IAspectBuilder<T>>( aspectOfT.BuildAspect ) ),
                     new AspectLayerId( this._aspectClass ),
                     compilationModelRevision,
                     targetDeclaration );
 
-                if ( !this._serviceProvider.GetRequiredService<UserCodeInvoker>().TryInvoke( () => aspectOfT.BuildAspect( aspectBuilder ), executionContext ) )
+                if ( !serviceProvider.GetRequiredService<UserCodeInvoker>()
+                        .TryInvoke(
+                            () =>
+                            {
+                                // Execute declarative advice.
+                                foreach ( var advice in declarativeAdvice )
+                                {
+                                    ((DeclarativeAdviceAttribute) advice.TemplateAttribute.AssertNotNull()).BuildAspect(
+                                        advice.Declaration!,
+                                        advice.TemplateClassMember.Key,
+                                        aspectBuilder );
+                                }
+
+                                if ( !aspectBuilder.IsAspectSkipped )
+                                {
+                                    aspectOfT.BuildAspect( aspectBuilder );
+                                }
+                            },
+                            executionContext ) )
                 {
                     aspectInstance.Skip();
 
@@ -226,27 +233,6 @@ namespace Metalama.Framework.Engine.Aspects
 
                 return aspectResult;
             }
-        }
-
-        private static Advice? CreateDeclarativeAdvice<T>(
-            IAspectInstanceInternal aspect,
-            TemplateClassInstance templateInstance,
-            IDiagnosticAdder diagnosticAdder,
-            T aspectTarget,
-            TemplateClassMember template,
-            ISymbol templateDeclaration )
-            where T : IDeclaration
-        {
-            template.TryCreateAdvice(
-                aspect,
-                templateInstance,
-                diagnosticAdder,
-                aspectTarget,
-                ((CompilationModel) aspectTarget.Compilation).Factory.GetDeclaration( templateDeclaration ),
-                null,
-                out var advice );
-
-            return advice;
         }
     }
 }

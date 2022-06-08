@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.Advices
 
             public IMember? AspectInterfaceMember { get; }
 
-            public bool IsExplicit => ((InterfaceMemberAttribute) this.TemplateClassMember.TemplateInfo.Attribute).IsExplicit;
+            public bool IsExplicit => ((InterfaceMemberAttribute) this.TemplateClassMember.TemplateInfo.Attribute!).IsExplicit;
 
             public TemplateClassMember TemplateClassMember { get; }
 

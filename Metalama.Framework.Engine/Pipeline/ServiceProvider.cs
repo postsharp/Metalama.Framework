@@ -141,7 +141,9 @@ namespace Metalama.Framework.Engine.Pipeline
 
         public ServiceProvider WithProjectScopedServices( Compilation compilation ) => this.WithProjectScopedServices( compilation.References, null );
 
-        private ServiceProvider WithProjectScopedServices( IEnumerable<MetadataReference> metadataReferences, Compilation? compilation )
+        private ServiceProvider WithProjectScopedServices(
+            IEnumerable<MetadataReference> metadataReferences,
+            Compilation? compilation )
         {
             // ReflectionMapperFactory cannot be a global service because it keeps a reference from compilations to types of the
             // user assembly. When we need to unload the user assembly, we first need to unload the ReflectionMapperFactory.

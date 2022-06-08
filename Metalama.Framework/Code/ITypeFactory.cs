@@ -75,6 +75,6 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets a declaration from a serialized identifier generated to <see cref="IRef{T}.ToSerializableId"/>.
         /// </summary>
-        IDeclaration? GetDeclarationFromId( string declarationId );
+        IDeclaration? GetDeclarationFromSerializableId( DeclarationSerializableId declarationId );
     }
 }

@@ -67,9 +67,9 @@ namespace Metalama.Framework.Engine.CodeModel.References
             where T : class, ICompilationElement
             => new( symbolKey );
 
-        public static Ref<T> FromSerializedId<T>( string id )
+        public static Ref<T> FromSerializedId<T>( DeclarationSerializableId id )
             where T : class, ICompilationElement
-            => new( id );
+            => new( id.Id );
 
         /// <summary>
         /// Creates a <see cref="Ref{T}"/> from a Roslyn symbol.
@@ -159,7 +159,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public DeclarationRefTargetKind TargetKind { get; }
 
-        public string? ToSerializableId()
+        public DeclarationSerializableId ToSerializableId()
         {
             if ( this._compilation == null )
             {
@@ -168,7 +168,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
             var symbol = this.GetSymbol( this._compilation, true );
 
-            return DocumentationCommentId.CreateDeclarationId( symbol );
+            return new DeclarationSerializableId( DocumentationCommentId.CreateDeclarationId( symbol ) );
         }
 
         private static bool IsSerializableId( string id ) => char.IsLetter( id[0] ) && id[1] == ':';

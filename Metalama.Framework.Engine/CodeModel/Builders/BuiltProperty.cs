@@ -58,7 +58,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public PropertyInfo ToPropertyInfo() => this.PropertyBuilder.ToPropertyInfo();
 
-        string? IRef<IProperty>.ToSerializableId() => null;
+        DeclarationSerializableId IRef<IProperty>.ToSerializableId() => throw new NotImplementedException();
 
         IProperty IRef<IProperty>.GetTarget( ICompilation compilation ) => (IProperty) this.GetForCompilation( compilation );
 

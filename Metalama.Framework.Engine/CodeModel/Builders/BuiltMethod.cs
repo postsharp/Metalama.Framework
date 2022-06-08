@@ -78,7 +78,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IMethod? OverriddenMethod => this.Compilation.Factory.GetDeclaration( this.MethodBuilder.OverriddenMethod );
 
-        string? IRef<IMethod>.ToSerializableId() => null;
+        DeclarationSerializableId IRef<IMethod>.ToSerializableId() => throw new NotImplementedException();
 
         IMethod IRef<IMethod>.GetTarget( ICompilation compilation ) => (IMethod) this.GetForCompilation( compilation );
 

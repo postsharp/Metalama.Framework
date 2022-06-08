@@ -13,7 +13,7 @@
 
     <ItemGroup>
 
-		<ProjectReference Include="..\Metalama.Framework.CompileTime\Metalama.Framework.CompileTime.csproj" ReferenceOutputAssembly="false"/>
+		<ProjectReference Include="..\Metalama.Framework.CompileTime\Metalama.Framework.CompileTime.csproj" ReferenceOutputAssembly="false" />
 
         <!-- We have to embed the compile-time build of Metalama.Framework so we can reference it to create
              the compile-time assembly. See ReferenceAssemblyLocator                                           -->

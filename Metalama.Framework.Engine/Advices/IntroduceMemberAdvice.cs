@@ -9,12 +9,13 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
+using System;
 
 namespace Metalama.Framework.Engine.Advices
 {
     internal abstract class IntroduceMemberAdvice<TMember, TBuilder> : Advice, IIntroductionAdvice
-        where TMember : class, IMemberOrNamedType
-        where TBuilder : MemberOrNamedTypeBuilder
+        where TMember : class, IMember
+        where TBuilder : MemberBuilder
     {
         public IntroductionScope Scope { get; }
 
@@ -28,20 +29,35 @@ namespace Metalama.Framework.Engine.Advices
 
         protected TemplateMember<TMember> Template { get; }
 
+        protected string MemberName { get; }
+
         public IObjectReader Tags { get; }
 
         public IntroduceMemberAdvice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             INamedType targetDeclaration,
+            string? explicitName,
             TemplateMember<TMember> template,
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             string? layerName,
             IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, layerName )
         {
+            this.MemberName = explicitName ?? template.TemplateAttribute?.Name
+                ?? template.Declaration?.Name ?? throw new ArgumentNullException( nameof(explicitName) );
+
             this.Template = template;
-            this.Scope = scope;
+
+            if ( scope != IntroductionScope.Default )
+            {
+                this.Scope = scope;
+            }
+            else if ( template.TemplateAttribute is IntroduceAttribute introduceAttribute )
+            {
+                this.Scope = introduceAttribute.Scope;
+            }
+
             this.OverrideStrategy = overrideStrategy;
             this.Tags = tags;
 
@@ -52,7 +68,11 @@ namespace Metalama.Framework.Engine.Advices
 
         public override void Initialize( IDiagnosticAdder diagnosticAdder )
         {
-            this.MemberBuilder.Accessibility = this.Template.Declaration?.Accessibility ?? Accessibility.Private;
+            var templateAttribute = this.Template.TemplateAttribute;
+
+            this.MemberBuilder.Accessibility = templateAttribute?.GetAccessibility() ?? this.Template.Declaration?.Accessibility ?? Accessibility.Private;
+            this.MemberBuilder.IsSealed = templateAttribute?.GetIsSealed() ?? this.Template.Declaration?.IsSealed ?? false;
+            this.MemberBuilder.IsVirtual = templateAttribute?.GetIsVirtual() ?? this.Template.Declaration?.IsVirtual ?? false;
 
             // Handle the introduction scope.
             var targetDeclaration = this.TargetDeclaration.GetTarget( this.SourceCompilation );

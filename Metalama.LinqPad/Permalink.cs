@@ -27,7 +27,7 @@ namespace Metalama.LinqPad
 
             try
             {
-                serializedReference = this._declaration.ToRef().ToSerializableId();
+                serializedReference = this._declaration.ToRef().ToSerializableId().ToString();
             }
             catch
             {

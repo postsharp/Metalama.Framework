@@ -38,7 +38,7 @@ namespace Metalama.Framework.Engine.Advices
             string? layerName,
             IObjectReader tags,
             IObjectReader parameters )
-            : base( aspect, templateInstance, targetDeclaration, eventTemplate, scope, overrideStrategy, layerName, tags )
+            : base( aspect, templateInstance, targetDeclaration, explicitName, eventTemplate, scope, overrideStrategy, layerName, tags )
         {
             this._addTemplate = addTemplate;
             this._removeTemplate = removeTemplate;
@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.Advices
             this.MemberBuilder = new EventBuilder(
                 this,
                 targetDeclaration,
-                eventTemplate.Declaration?.Name ?? explicitName.AssertNotNull(),
+                this.MemberName,
                 eventTemplate.Declaration != null && eventTemplate.Declaration.IsEventField(),
                 tags );
 

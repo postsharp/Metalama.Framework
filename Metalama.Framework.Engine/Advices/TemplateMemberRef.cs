@@ -5,6 +5,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Project;
 using System;
 using System.Linq;
@@ -51,7 +52,25 @@ namespace Metalama.Framework.Engine.Advices
                     $"The template '{symbol}' is a {declaration.DeclarationKind} but it was expected to be an {typeof(T).Name}" );
             }
 
-            return Advices.TemplateMember.Create( typedSymbol, this.TemplateMember, this.SelectedKind, this.InterpretedKind );
+            // Create the attribute instance.
+            TemplateAttribute? templateAttribute;
+
+            if ( this.TemplateMember.TemplateInfo.Attribute != null )
+            {
+                // If we have a system attribute, return it.
+
+                templateAttribute = this.TemplateMember.TemplateInfo.Attribute;
+            }
+            else
+            {
+                if ( !serviceProvider.GetRequiredService<TemplateAttributeFactory>()
+                        .TryGetTemplateAttribute( this.TemplateMember.TemplateInfo.SymbolId, NullDiagnosticAdder.Instance, out templateAttribute ) )
+                {
+                    throw new AssertionFailedException( $"Cannot instantiate the template attribute for '{symbol.ToDisplayString()}'" );
+                }
+            }
+
+            return Advices.TemplateMember.Create( typedSymbol, this.TemplateMember, templateAttribute, this.SelectedKind, this.InterpretedKind );
         }
 
         public TemplateMemberRef InterpretedAs( TemplateKind interpretedKind ) => new( this.TemplateMember, this.SelectedKind, interpretedKind );

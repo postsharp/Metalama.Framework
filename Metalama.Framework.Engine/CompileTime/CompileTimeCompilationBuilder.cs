@@ -161,13 +161,6 @@ namespace Metalama.Framework.Engine.CompileTime
                 return true;
             }
 
-            // Validate the code (some validations are not done by the template compiler).
-            foreach ( var syntaxTree in treesWithCompileTimeCode )
-            {
-                var semanticModel = runTimeCompilation.GetSemanticModel( syntaxTree );
-                TemplatingCodeValidator.Validate( this._serviceProvider, semanticModel, diagnosticSink.Report, false, false, cancellationToken );
-            }
-
             var assemblyName = GetCompileTimeAssemblyName( runTimeCompilation.AssemblyName!, hash );
             compileTimeCompilation = this.CreateEmptyCompileTimeCompilation( assemblyName, referencedProjects );
             var serializableTypes = this.GetSerializableTypes( runTimeCompilation, treesWithCompileTimeCode, cancellationToken );
@@ -761,6 +754,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         var aspectType = compileTimeCompilation.GetTypeByMetadataName( typeof(IAspect).FullName );
                         var fabricType = compileTimeCompilation.GetTypeByMetadataName( typeof(Fabric).FullName );
                         var transitiveFabricType = compileTimeCompilation.GetTypeByMetadataName( typeof(TransitiveProjectFabric).FullName );
+                        var templateProviderType = compileTimeCompilation.GetTypeByMetadataName( typeof(ITemplateProvider).FullName );
 
                         var aspectTypes = compileTimeCompilation.Assembly
                             .GetTypes()
@@ -788,6 +782,12 @@ namespace Metalama.Framework.Engine.CompileTime
                             .Select( t => t.GetReflectionName().AssertNotNull() )
                             .ToList();
 
+                        var otherTemplateTypes = compileTimeCompilation.Assembly
+                            .GetTypes()
+                            .Where( t => compileTimeCompilation.HasImplicitConversion( t, templateProviderType ) )
+                            .Select( t => t.GetReflectionName().AssertNotNull() )
+                            .ToList();
+
                         var manifest = new CompileTimeProjectManifest(
                             runTimeCompilation.Assembly.Identity.ToString(),
                             compileTimeCompilation.AssemblyName!,
@@ -796,6 +796,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             compilerPlugInTypes,
                             fabricTypes,
                             transitiveFabricTypes,
+                            otherTemplateTypes,
                             referencedProjects.Select( r => r.RunTimeIdentity.GetDisplayName() ).ToList(),
                             sourceHash,
                             textMapDirectory.FilesByTargetPath.Values.Select( f => new CompileTimeFile( f ) ).ToImmutableList() );

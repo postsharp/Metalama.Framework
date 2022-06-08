@@ -4,6 +4,7 @@
 using Metalama.Compiler;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
+using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Fabrics;
@@ -49,6 +50,8 @@ namespace Metalama.Framework.Engine.Fabrics
         public ImmutableArray<TemplateClass> TemplateClasses { get; }
 
         public SyntaxAnnotation GeneratedCodeAnnotation { get; }
+
+        public ImmutableArray<AspectLayer> Layers => ImmutableArray<AspectLayer>.Empty;
 
         public EligibleScenarios GetEligibility( IDeclaration obj ) => EligibleScenarios.Aspect;
 

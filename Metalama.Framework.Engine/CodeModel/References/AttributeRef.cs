@@ -73,7 +73,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                     _ => throw new AssertionFailedException()
                 } );
 
-        public string? ToSerializableId() => null;
+        public DeclarationSerializableId ToSerializableId() => throw new NotSupportedException();
 
         public IAttribute GetTarget( ICompilation compilation )
         {

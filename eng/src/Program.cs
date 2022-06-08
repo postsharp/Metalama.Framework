@@ -25,9 +25,13 @@ var product = new Product( Dependencies.Metalama )
                 "Tests\\Metalama.Framework.Tests.Integration\\Tests\\**\\*",
                 "Tests\\Metalama.Framework.Tests.Integration.Internals\\Tests\\**\\*",
                 
-                // This file should not be formatted because it contains assembly aliases, and JetBrains tools
-                // don't support them properly.
-                "Metalama.Framework.Engine\\Utilities\\SymbolId.cs"
+                // XML formatting seems to be conflicting.
+                "**\\*.props",
+                "**\\*.targets",
+                "**\\*.csproj",
+                "**\\*.md",
+                "**\\*.xml",
+                "**\\*.config"
             }
         },
         new DotNetSolution( "Tests\\Metalama.Framework.TestApp\\Metalama.Framework.TestApp.sln" ) { IsTestOnly = true },

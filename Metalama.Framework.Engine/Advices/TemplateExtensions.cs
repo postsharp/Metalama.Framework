@@ -70,7 +70,11 @@ namespace Metalama.Framework.Engine.Advices
 
                 if ( fieldSyntax.Initializer != null )
                 {
-                    return TemplateMember.Create( fieldTemplate.Declaration, fieldTemplate.TemplateClassMember, TemplateKind.InitializerExpression );
+                    return TemplateMember.Create(
+                        fieldTemplate.Declaration,
+                        fieldTemplate.TemplateClassMember,
+                        fieldTemplate.TemplateAttribute.AssertNotNull(),
+                        TemplateKind.InitializerExpression );
                 }
                 else
                 {

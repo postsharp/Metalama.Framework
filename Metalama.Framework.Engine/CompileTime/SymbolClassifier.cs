@@ -2,7 +2,9 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
@@ -61,15 +63,17 @@ namespace Metalama.Framework.Engine.CompileTime
         private readonly ConcurrentDictionary<ISymbol, TemplateInfo> _cacheInheritedTemplateInfo = new( SymbolEqualityComparer.Default );
         private readonly ConcurrentDictionary<ISymbol, TemplateInfo> _cacheNonInheritedTemplateInfo = new( SymbolEqualityComparer.Default );
         private readonly ReferenceAssemblyLocator _referenceAssemblyLocator;
+        private readonly AttributeDeserializer _attributeDeserializer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SymbolClassifier"/> class.
         /// </summary>
         /// <param name="referenceAssemblyLocator"></param>
         /// <param name="compilation">The compilation, or null if the compilation has no reference to Metalama.</param>
-        public SymbolClassifier( ReferenceAssemblyLocator referenceAssemblyLocator, Compilation? compilation )
+        public SymbolClassifier( IServiceProvider serviceProvider, Compilation? compilation, AttributeDeserializer attributeDeserializer )
         {
-            this._referenceAssemblyLocator = referenceAssemblyLocator;
+            this._referenceAssemblyLocator = serviceProvider.GetRequiredService<ReferenceAssemblyLocator>();
+            this._attributeDeserializer = attributeDeserializer;
 
             if ( compilation != null )
             {
@@ -100,7 +104,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             if ( templateAttribute != null )
             {
-                var templateInfo = GetTemplateInfo( templateAttribute );
+                var templateInfo = this.GetTemplateInfo( symbol, templateAttribute );
 
                 if ( !templateInfo.IsNone )
                 {
@@ -137,45 +141,45 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private bool IsAttributeOfType( AttributeData a, ITypeSymbol type ) => this._compilation!.HasImplicitConversion( a.AttributeClass, type );
 
-        private static TemplateInfo GetTemplateInfo( AttributeData templateAttribute )
+        private TemplateInfo GetTemplateInfo( ISymbol declaringSymbol, AttributeData attributeData )
         {
-            switch ( templateAttribute.AttributeClass?.Name )
+            if ( !this._attributeDeserializer.TryCreateAttribute( attributeData, NullDiagnosticAdder.Instance, out var attributeInstance ) )
             {
-                case nameof(IntroduceAttribute):
-                    return new TemplateInfo( TemplateAttributeType.Introduction, templateAttribute );
-
-                case nameof(InterfaceMemberAttribute):
-                    return new TemplateInfo( TemplateAttributeType.InterfaceMember, templateAttribute );
-
-                default:
-                    return new TemplateInfo( TemplateAttributeType.Template, templateAttribute );
+                // This happens when the attribute class is defined in user code.
+                // In this case, we have to instantiate the attribute later, after we have the compile-time assembly for the user code.
             }
-        }
 
-        private TemplatingScope? GetTemplatingScope( AttributeData attribute, bool compileTimeReturnsRunTimeOnly = false )
-        {
-            switch ( attribute.AttributeClass?.Name )
+            var memberId = SymbolId.Create( declaringSymbol );
+
+            var templateAttribute = (TemplateAttribute?) attributeInstance;
+
+            switch ( attributeData.AttributeClass?.Name )
             {
-                default:
-                    return null;
-
-                case nameof(CompileTimeAttribute) when compileTimeReturnsRunTimeOnly:
-                    return TemplatingScope.CompileTimeOnlyReturningRuntimeOnly;
-
-                case nameof(CompileTimeAttribute) when !compileTimeReturnsRunTimeOnly:
                 case nameof(TemplateAttribute):
-                    return TemplatingScope.CompileTimeOnly;
+                case "TestTemplateAttribute":
+                    return new TemplateInfo( memberId, TemplateAttributeType.Template, templateAttribute );
 
-                case nameof(RunTimeOrCompileTimeAttribute):
-                    return TemplatingScope.RunTimeOrCompileTime;
-
-                case nameof(IntroduceAttribute):
                 case nameof(InterfaceMemberAttribute):
-                    return TemplatingScope.RunTimeOnly;
+                    return new TemplateInfo( memberId, TemplateAttributeType.InterfaceMember, templateAttribute );
+
+                default:
+                    return new TemplateInfo( memberId, TemplateAttributeType.DeclarativeAdvice, templateAttribute );
             }
         }
 
-        private TemplatingScope? GetAssemblyScope( IAssemblySymbol? assembly )
+        private static TemplatingScope? GetTemplatingScope( AttributeData attribute, bool compileTimeReturnsRunTimeOnly = false )
+            => attribute.AttributeClass?.Name switch
+            {
+                nameof(CompileTimeAttribute) when compileTimeReturnsRunTimeOnly => TemplatingScope.CompileTimeOnlyReturningRuntimeOnly,
+                nameof(CompileTimeAttribute) when !compileTimeReturnsRunTimeOnly => TemplatingScope.CompileTimeOnly,
+                nameof(TemplateAttribute) => TemplatingScope.CompileTimeOnly,
+                nameof(RunTimeOrCompileTimeAttribute) => TemplatingScope.RunTimeOrCompileTime,
+                nameof(IntroduceAttribute) => TemplatingScope.RunTimeOnly,
+                nameof(InterfaceMemberAttribute) => TemplatingScope.RunTimeOnly,
+                _ => null
+            };
+
+        private static TemplatingScope? GetAssemblyScope( IAssemblySymbol? assembly )
         {
             if ( assembly == null )
             {
@@ -184,7 +188,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             var scopeFromAttributes = assembly.GetAttributes()
                 .Concat( assembly.Modules.First().GetAttributes() )
-                .Select( x => this.GetTemplatingScope( x ) )
+                .Select( x => GetTemplatingScope( x ) )
                 .FirstOrDefault( s => s != null );
 
             if ( scopeFromAttributes != null )
@@ -223,7 +227,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     IFieldSymbol field => field.Type,
                     IPropertySymbol property => property.Type,
                     IMethodSymbol method when !method.GetReturnTypeAttributes()
-                        .Any( a => this.GetTemplatingScope( a ).GetValueOrDefault() == TemplatingScope.CompileTimeOnly ) => method
+                        .Any( a => GetTemplatingScope( a ).GetValueOrDefault() == TemplatingScope.CompileTimeOnly ) => method
                         .ReturnType,
                     _ => null
                 };
@@ -383,7 +387,7 @@ namespace Metalama.Framework.Engine.CompileTime
             }
 
             // From assembly.
-            var scopeFromAssembly = this.GetAssemblyScope( symbol.ContainingAssembly );
+            var scopeFromAssembly = GetAssemblyScope( symbol.ContainingAssembly );
 
             if ( scopeFromAssembly != null )
             {
@@ -487,7 +491,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             var scopeFromAttributes = symbol
                 .GetAttributes()
-                .Select( a => this.GetTemplatingScope( a, compileTimeReturnsRunTimeOnly ) )
+                .Select( a => GetTemplatingScope( a, compileTimeReturnsRunTimeOnly ) )
                 .FirstOrDefault( s => s != null );
 
             if ( scopeFromAttributes != null )

@@ -141,13 +141,15 @@ class Expression
         protected TestContext CreateTestContext( Func<ServiceProvider, ServiceProvider>? addServices, TestProjectOptions? projectOptions = null )
             => new( this, projectOptions, addServices );
 
+        protected virtual IEnumerable<Assembly> GetTestAssemblies() => new[] { this.GetType().Assembly };
+
         protected class TestContext : IDisposable
         {
             public TestProjectOptions ProjectOptions { get; }
 
             public ServiceProvider ServiceProvider { get; }
 
-            public TestContext( TestBase parent, TestProjectOptions? projectOptions, Func<ServiceProvider, ServiceProvider>? addServices )
+            public TestContext( TestBase parent, TestProjectOptions? projectOptions = null, Func<ServiceProvider, ServiceProvider>? addServices = null )
             {
                 this.ProjectOptions = projectOptions ?? new TestProjectOptions();
 

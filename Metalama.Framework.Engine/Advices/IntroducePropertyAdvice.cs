@@ -33,13 +33,13 @@ namespace Metalama.Framework.Engine.Advices
             OverrideStrategy overrideStrategy,
             string? layerName,
             IObjectReader tags )
-            : base( aspect, templateInstance, targetDeclaration, propertyTemplate, scope, overrideStrategy, layerName, tags )
+            : base( aspect, templateInstance, targetDeclaration, explicitName, propertyTemplate, scope, overrideStrategy, layerName, tags )
         {
             this._getTemplate = getTemplate;
             this._setTemplate = setTemplate;
 
             var templatePropertyDeclaration = propertyTemplate.Declaration;
-            var name = templatePropertyDeclaration?.Name ?? explicitName ?? throw new AssertionFailedException();
+            var name = this.MemberName;
             var hasGet = templatePropertyDeclaration != null ? templatePropertyDeclaration.GetMethod != null : getTemplate.IsNotNull;
             var hasSet = templatePropertyDeclaration != null ? templatePropertyDeclaration.SetMethod != null : setTemplate.IsNotNull;
 
@@ -54,11 +54,6 @@ namespace Metalama.Framework.Engine.Advices
                 false,
                 this.Template.Declaration is { Writeability: Writeability.ConstructorOnly } && this.Template.Declaration.IsAutoPropertyOrField,
                 this.Tags );
-
-            if ( propertyTemplate.IsNotNull )
-            {
-                this.MemberBuilder.ApplyTemplateAttribute( propertyTemplate.TemplateInfo.Attribute );
-            }
 
             this.MemberBuilder.InitializerTemplate = propertyTemplate.GetInitializerTemplate();
         }

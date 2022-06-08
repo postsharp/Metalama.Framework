@@ -53,8 +53,23 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                     ImmutableArray<AdditionalCompilationOutputFile>.Empty );
             }
 
-            // Run the code analyzers that normally run at design time.
-            if ( !TemplatingCodeValidator.Validate( compilation, diagnosticAdder, this.ServiceProvider, cancellationToken ) )
+            // Validate the code (some validations are not done by the template compiler).
+            var isTemplatingCodeValidatorSuccessful = true;
+
+            foreach ( var syntaxTree in compilation.SyntaxTrees )
+            {
+                var semanticModel = compilation.GetSemanticModel( syntaxTree );
+
+                isTemplatingCodeValidatorSuccessful &= TemplatingCodeValidator.Validate(
+                    this.ServiceProvider,
+                    semanticModel,
+                    diagnosticAdder.Report,
+                    false,
+                    false,
+                    cancellationToken );
+            }
+
+            if ( !isTemplatingCodeValidatorSuccessful )
             {
                 return null;
             }
@@ -65,6 +80,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 return null;
             }
 
+            // Run the pipeline.
             return await this.ExecuteCoreAsync(
                 diagnosticAdder,
                 partialCompilation,

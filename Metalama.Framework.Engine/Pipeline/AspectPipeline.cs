@@ -90,6 +90,7 @@ namespace Metalama.Framework.Engine.Pipeline
             var roslynCompilation = compilation.Compilation;
 
             // Create dependencies.
+
             var loader = CompileTimeProjectLoader.Create( this.Domain, this.ServiceProvider );
 
             // Prepare the compile-time assembly.
@@ -107,7 +108,9 @@ namespace Metalama.Framework.Engine.Pipeline
             }
 
             // Create a project-level service provider.
-            var projectServiceProviderWithoutPlugins = this.ServiceProvider.WithService( loader ).WithMark( ServiceProviderMark.Project );
+            var projectServiceProviderWithoutPlugins = this.ServiceProvider.WithService( loader )
+                .WithMark( ServiceProviderMark.Project );
+
             var projectServiceProviderWithProject = projectServiceProviderWithoutPlugins;
 
             // Create compiler plug-ins found in compile-time code.
@@ -179,10 +182,15 @@ namespace Metalama.Framework.Engine.Pipeline
             var projectModel = new ProjectModel( compilation.Compilation, projectServiceProviderWithProject );
 
             // Create aspect types.
-            var driverFactory = new AspectDriverFactory( compilation.Compilation, compilerPlugIns, projectServiceProviderWithProject );
-            var aspectTypeFactory = new AspectClassMetadataFactory( projectServiceProviderWithProject, driverFactory );
+            // We create a TemplateAttributeFactory for this purpose but we cannot add it to the ServiceProvider that will flow out because
+            // we don't want to leak the compilation for the design-time scenario.
+            var serviceProviderForAspectClassFactory =
+                projectServiceProviderWithProject.WithService( new TemplateAttributeFactory( projectServiceProviderWithProject, roslynCompilation ) );
 
-            var aspectClasses = aspectTypeFactory.GetAspectClasses( compilation.Compilation, compileTimeProject, diagnosticAdder ).ToImmutableArray();
+            var driverFactory = new AspectDriverFactory( compilation.Compilation, compilerPlugIns, serviceProviderForAspectClassFactory );
+            var aspectTypeFactory = new AspectClassFactory( serviceProviderForAspectClassFactory, driverFactory );
+
+            var aspectClasses = aspectTypeFactory.GetClasses( compilation.Compilation, compileTimeProject, diagnosticAdder ).ToImmutableArray();
 
             // Get aspect parts and sort them.
             var unsortedAspectLayers = aspectClasses
@@ -204,6 +212,13 @@ namespace Metalama.Framework.Engine.Pipeline
                 return false;
             }
 
+            // Create other template classes.
+            var otherTemplateClassFactory = new OtherTemplateClassFactory( serviceProviderForAspectClassFactory );
+
+            var otherTemplateClasses = otherTemplateClassFactory.GetClasses( compilation.Compilation, compileTimeProject, diagnosticAdder )
+                .ToImmutableDictionary( x => x.FullName, x => x );
+
+            // Add fabrics.
             ImmutableArray<OrderedAspectLayer> allOrderedAspectLayers;
             BoundAspectClassCollection allAspectClasses;
 
@@ -245,6 +260,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 this.Domain,
                 stages,
                 allAspectClasses,
+                otherTemplateClasses,
                 allOrderedAspectLayers,
                 compileTimeProject,
                 loader,
@@ -354,6 +370,12 @@ namespace Metalama.Framework.Engine.Pipeline
                     return false;
                 }
             }
+
+            // Add services that have a reference to the compilation.
+            pipelineConfiguration =
+                pipelineConfiguration.WithServiceProvider(
+                    pipelineConfiguration.ServiceProvider.WithService(
+                        new TemplateAttributeFactory( pipelineConfiguration.ServiceProvider, compilation.Compilation ) ) );
 
             // When we reuse a pipeline configuration created from a different pipeline (e.g. design-time to code fix),
             // we need to substitute the code fix filter.

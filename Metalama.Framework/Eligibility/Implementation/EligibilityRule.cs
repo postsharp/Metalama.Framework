@@ -18,6 +18,11 @@ namespace Metalama.Framework.Eligibility.Implementation
             this._getJustification = getJustification;
         }
 
+        public static IEligibilityRule<T> Empty { get; } = new EligibilityRule<T>(
+            EligibleScenarios.All,
+            _ => true,
+            _ => throw new InvalidOperationException() );
+
         public EligibleScenarios GetEligibility( T obj ) => this._predicate( obj ) ? EligibleScenarios.All : this._ineligibility;
 
         public FormattableString? GetIneligibilityJustification( EligibleScenarios requestedEligibility, IDescribedObject<T> describedObject )

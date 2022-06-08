@@ -49,29 +49,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         protected IObjectReader Tags { get; }
 
-        public void ApplyTemplateAttribute( TemplateAttribute templateAttribute )
-        {
-            if ( templateAttribute.Name != null )
-            {
-                this.Name = templateAttribute.Name;
-            }
-
-            if ( templateAttribute.GetIsSealed().HasValue )
-            {
-                this.IsSealed = templateAttribute.GetIsSealed()!.Value;
-            }
-
-            if ( templateAttribute.GetAccessibility().HasValue )
-            {
-                this.Accessibility = templateAttribute.GetAccessibility()!.Value;
-            }
-
-            if ( templateAttribute.GetIsVirtual().HasValue )
-            {
-                this.IsVirtual = templateAttribute.GetIsVirtual().HasValue;
-            }
-        }
-
         public abstract IMember? OverriddenMember { get; }
 
         public override bool CanBeInherited => this.IsVirtual && !this.IsSealed && ((IDeclarationImpl) this.DeclaringType).CanBeInherited;

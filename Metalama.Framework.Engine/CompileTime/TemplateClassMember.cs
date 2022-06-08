@@ -9,10 +9,9 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
-    // TODO: a class member should not store an ISymbol because we should not store references to a Roslyn compilation.
-
     internal record TemplateClassMember(
         string Name,
+        string Key,
         TemplateClass TemplateClass,
         TemplateInfo TemplateInfo,
         SymbolId SymbolId,

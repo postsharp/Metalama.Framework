@@ -99,10 +99,10 @@ namespace Metalama.Framework.Aspects
             object? tags = null );
 
         /// <summary>
-        /// Introduces a field to the target type.
+        /// Introduces a field to the target type by specifying a template.
         /// </summary>
         /// <param name="targetType">The type into which the property must be introduced.</param>
-        /// <param name="name">Name of the introduced field.</param>
+        /// <param name="template">Name of the introduced field.</param>
         /// <param name="scope">Determines the scope (e.g. <see cref="IntroductionScope.Instance"/> or <see cref="IntroductionScope.Static"/>) of the introduced
         ///     field. The default scope is <see cref="IntroductionScope.Instance"/>.</param>
         /// <param name="whenExists">Determines the implementation strategy when a property of the same name is already declared in the target type.
@@ -112,7 +112,49 @@ namespace Metalama.Framework.Aspects
         /// <seealso href="@introducing-members"/>
         IFieldBuilder IntroduceField(
             INamedType targetType,
-            string name,
+            string template,
+            IntroductionScope scope = IntroductionScope.Default,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            object? tags = null );
+
+        /// <summary>
+        /// Introduces a field to the target type by specifying a field name and <see cref="IType"/>.
+        /// </summary>
+        /// <param name="targetType">The type into which the property must be introduced.</param>
+        /// <param name="fieldName">Name of the introduced field.</param>
+        /// <param name="fieldType">Type of the introduced field.</param>
+        /// <param name="scope">Determines the scope (e.g. <see cref="IntroductionScope.Instance"/> or <see cref="IntroductionScope.Static"/>) of the introduced
+        ///     field. The default scope is <see cref="IntroductionScope.Instance"/>.</param>
+        /// <param name="whenExists">Determines the implementation strategy when a property of the same name is already declared in the target type.
+        ///     The default strategy is to fail with a compile-time error.</param>
+        /// <param name="tags"></param>
+        /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
+        /// <seealso href="@introducing-members"/>
+        IFieldBuilder IntroduceField(
+            INamedType targetType,
+            string fieldName,
+            IType fieldType,
+            IntroductionScope scope = IntroductionScope.Default,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            object? tags = null );
+
+        /// <summary>
+        /// Introduces a field to the target type by specifying a field name and <see cref="Type"/>.
+        /// </summary>
+        /// <param name="targetType">The type into which the property must be introduced.</param>
+        /// <param name="fieldName">Name of the introduced field.</param>
+        /// <param name="fieldType">Type of the introduced field.</param>
+        /// <param name="scope">Determines the scope (e.g. <see cref="IntroductionScope.Instance"/> or <see cref="IntroductionScope.Static"/>) of the introduced
+        ///     field. The default scope is <see cref="IntroductionScope.Instance"/>.</param>
+        /// <param name="whenExists">Determines the implementation strategy when a property of the same name is already declared in the target type.
+        ///     The default strategy is to fail with a compile-time error.</param>
+        /// <param name="tags"></param>
+        /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
+        /// <seealso href="@introducing-members"/>
+        IFieldBuilder IntroduceField(
+            INamedType targetType,
+            string fieldName,
+            Type fieldType,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
             object? tags = null );
@@ -297,11 +339,13 @@ namespace Metalama.Framework.Aspects
         ///     <see cref="meta"/> API.</param>
         /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template.</param>
         void AddInitializer(
-            IMemberOrNamedType targetType,
+            INamedType targetType,
             string template,
             InitializerKind kind,
             object? tags = null,
             object? args = null );
+
+        void AddInitializer( IConstructor targetConstructor, string template, object? tags = null, object? args = null );
 
         /// <summary>
         /// Adds a contract to a parameter. Contracts are usually used to validate parameters (pre- or post-conditions) or to normalize their value (null-to-empty, trimming, normalizing case, ...).
@@ -335,6 +379,20 @@ namespace Metalama.Framework.Aspects
             ContractDirection direction = ContractDirection.Default,
             object? tags = null,
             object? args = null );
+
+        /// <summary>
+        /// Returns a copy of the current <see cref="IAdviceFactory"/> that will add advice to a specified layer of the current aspect.
+        /// </summary>
+        /// <param name="layerName">The name of the aspect layer. It must be defined by adding a <see cref="LayersAttribute"/> to the aspect class.</param>
+        /// <returns></returns>
+        IAdviceFactory ForLayer( string? layerName );
+
+        /// <summary>
+        /// Returns a copy of the current <see cref="IAdviceFactory"/> that will a specified object to find factory methods.
+        /// </summary>
+        /// <param name="templateProvider">Instance of an object with template members.</param>
+        /// <returns>An <see cref="IAdviceFactory"/>.</returns>
+        IAdviceFactory WithTemplateProvider( ITemplateProvider templateProvider );
 
         // void ImplementInterface(
         //     INamedType targetType,

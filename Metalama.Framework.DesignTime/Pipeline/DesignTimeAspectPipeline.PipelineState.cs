@@ -130,7 +130,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     {
                         cancellationToken.ThrowIfCancellationRequested();
 
-                        if ( CompileTimeCodeDetector.HasCompileTimeCode( syntaxTree.GetRoot() ) )
+                        if ( CompileTimeCodeFastDetector.HasCompileTimeCode( syntaxTree.GetRoot() ) )
                         {
                             newCompileTimeSyntaxTrees = newCompileTimeSyntaxTrees.Add( syntaxTree.FilePath, syntaxTree );
                             trees.Add( syntaxTree );

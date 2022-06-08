@@ -1,6 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Aspects;
+
 namespace Metalama.Framework.Engine.CompileTime
 {
     /// <summary>
@@ -19,9 +21,9 @@ namespace Metalama.Framework.Engine.CompileTime
         Template,
 
         /// <summary>
-        /// Declarative introduction advice.
+        /// A declarative advice, which derives from <see cref="DeclarativeAdviceAttribute"/>.
         /// </summary>
-        Introduction,
+        DeclarativeAdvice,
 
         /// <summary>
         /// Interface member.

@@ -8,13 +8,11 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Field.Progra
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             {
-                var introduced = builder.Advice.IntroduceField( builder.Target, "IntroducedField" );
-                introduced.Type = TypeFactory.GetType( typeof(int) );
+                var introduced = builder.Advice.IntroduceField( builder.Target, "IntroducedField", typeof(int) );
             }
 
             {
-                var introduced = builder.Advice.IntroduceField( builder.Target, "IntroducedField_Static" );
-                introduced.Type = TypeFactory.GetType( typeof(int) );
+                var introduced = builder.Advice.IntroduceField( builder.Target, "IntroducedField_Static", typeof(int)) ;
                 introduced.IsStatic = true;
             }
 

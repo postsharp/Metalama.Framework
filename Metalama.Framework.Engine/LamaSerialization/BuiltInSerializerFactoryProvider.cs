@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.LamaSerialization.Serializers;
 using System;
@@ -45,6 +46,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
 
             // Our own types.
             this.AddSerializer( typeof(Ref<>), typeof(RefSerializer<>) );
+            this.AddSerializer( typeof(DeclarationSerializableId), typeof(DeclarationSerializableIdSerializer) );
 
             this.MakeReadOnly();
         }
