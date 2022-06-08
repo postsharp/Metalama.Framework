@@ -3,7 +3,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 
-#pragma warning disable CS0414, CS1696
+#pragma warning disable CS0414, CS1696, CS8618, CS0067
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.Remove;
 

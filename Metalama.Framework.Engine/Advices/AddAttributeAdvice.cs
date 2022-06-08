@@ -25,7 +25,7 @@ internal class AddAttributeAdvice : Advice
         IDeclaration targetDeclaration,
         IAttributeData attribute,
         OverrideStrategy overrideStrategy,
-        string? layerName ) : base( aspect, template, targetDeclaration, layerName, ObjectReader.Empty )
+        string? layerName ) : base( aspect, template, targetDeclaration, layerName )
     {
         this._attribute = attribute;
         this._overrideStrategy = overrideStrategy;

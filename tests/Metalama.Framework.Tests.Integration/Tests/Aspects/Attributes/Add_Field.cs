@@ -5,6 +5,8 @@ using Metalama.Framework.Code.DeclarationBuilders;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.Add_Field;
 
+#pragma warning disable CS8618, CS0169
+
 public class MyAttribute : Attribute { }
 
 public class MyAspect : FieldAspect

@@ -52,6 +52,7 @@ namespace Metalama.Framework.Engine.Advices
         /// <summary>
         /// Applies the advice on the given compilation and returns the set of resulting transformations and diagnostics.
         /// </summary>
+        /// <param name="serviceProvider">Service provider.</param>
         /// <param name="compilation">Input compilation.</param>
         /// <returns>Advice result containing transformations and diagnostics.</returns>
         public abstract AdviceResult ToResult( IServiceProvider serviceProvider, ICompilation compilation );

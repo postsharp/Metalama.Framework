@@ -23,8 +23,7 @@ internal class RemoveAttributesAdvice : Advice
         aspect,
         template,
         targetDeclaration,
-        layerName,
-        ObjectReader.Empty )
+        layerName )
     {
         this._attributeType = attributeType;
     }
