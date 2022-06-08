@@ -10,6 +10,6 @@ internal class C
         add { }
         remove { }
     }
-    class D { }
-    struct S { }
+    private class D { }
+    private struct S { }
 }

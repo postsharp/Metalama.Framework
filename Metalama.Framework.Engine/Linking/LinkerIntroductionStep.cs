@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.Linking
 
             // TODO: this sorting can be optimized.
             var allTransformations =
-                input.Transformations.OfType<ISyntaxTreeTransformation>()
+                input.Transformations.OfType<ITransformation>()
                     .OrderBy( x => x.Advice.AspectLayerId, new AspectLayerIdComparer( input.OrderedAspectLayers ) )
                     .Cast<ITransformation>()
                     .ToList();
@@ -165,10 +165,10 @@ namespace Metalama.Framework.Engine.Linking
             AspectLinkerInput input,
             List<ITransformation> allTransformations,
             SyntaxTransformationCollection syntaxTransformationCollection,
-            out HashSet<ISyntaxTreeTransformation> replacedTransformations )
+            out HashSet<ITransformation> replacedTransformations )
         {
             var compilation = input.CompilationModel;
-            replacedTransformations = new HashSet<ISyntaxTreeTransformation>();
+            replacedTransformations = new HashSet<ITransformation>();
 
             foreach ( var transformation in allTransformations.OfType<IReplaceMemberTransformation>() )
             {
@@ -206,7 +206,7 @@ namespace Metalama.Framework.Engine.Linking
 
                         break;
 
-                    case ISyntaxTreeTransformation replacedTransformation:
+                    case ITransformation replacedTransformation:
                         replacedTransformations.Add( replacedTransformation );
 
                         break;
@@ -225,7 +225,7 @@ namespace Metalama.Framework.Engine.Linking
             LinkerIntroductionNameProvider nameProvider,
             IReadOnlyCollection<PropertyBuilder> buildersWithSynthesizedSetters,
             SyntaxTransformationCollection syntaxTransformationCollection,
-            HashSet<ISyntaxTreeTransformation> replacedTransformations )
+            HashSet<ITransformation> replacedTransformations )
         {
             // Visit all transformations, respect aspect part ordering.
             foreach ( var transformation in allTransformations )

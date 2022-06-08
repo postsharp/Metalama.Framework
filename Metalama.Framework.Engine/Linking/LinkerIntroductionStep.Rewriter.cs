@@ -547,8 +547,6 @@ namespace Metalama.Framework.Engine.Linking
 
             private IReadOnlyList<MemberDeclarationSyntax> VisitFieldDeclarationCore( FieldDeclarationSyntax node )
             {
-                // TODO: If we have several fields in the same declaration, and we have changes in custom attributes, we have to split the fields.
-
                 var originalNode = node;
                 var rewrittenDeclaration = (VariableDeclarationSyntax?) this.Visit( node.Declaration );
 
@@ -580,7 +578,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    var rewrittenAttributes = this.RewriteAttributeLists( originalNode, node.AttributeLists );
+                    var rewrittenAttributes = this.RewriteAttributeLists( originalNode.Declaration.Variables[0], node.AttributeLists );
                     node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
 
                     return new[] { node.WithDeclaration( rewrittenDeclaration ) };

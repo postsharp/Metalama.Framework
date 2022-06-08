@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.Transformations
     /// <summary>
     /// Represents an introduced member (but not a type), observable or not.
     /// </summary>
-    internal interface IIntroduceMemberTransformation : ISyntaxTreeTransformation
+    internal interface IIntroduceMemberTransformation : ITransformation
     {
         SyntaxTree TransformedSyntaxTree { get; }
 

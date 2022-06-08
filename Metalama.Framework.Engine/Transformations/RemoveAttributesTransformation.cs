@@ -8,7 +8,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal class RemoveAttributesTransformation : ISyntaxTreeTransformation, IObservableTransformation
+internal class RemoveAttributesTransformation : IObservableTransformation, ITransformation
 {
     public INamedType AttributeType { get; }
 

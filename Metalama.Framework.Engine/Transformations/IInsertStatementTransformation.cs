@@ -27,7 +27,7 @@ namespace Metalama.Framework.Engine.Transformations
         //       This is fine for initialization, which is currently the only use case.
     }
 
-    internal interface IMemberLevelTransformation : ISyntaxTreeTransformation
+    internal interface IMemberLevelTransformation : ITransformation
     {
         /// <summary>
         /// Gets a target method base of this code transformation.
