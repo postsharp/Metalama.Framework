@@ -78,6 +78,8 @@ namespace Metalama.Framework.Engine.Linking
 
             IndexNodesWithModifiedAttributes( allTransformations, out var nodesWithModifiedAttributes );
 
+            FindPrimarySyntaxTreeForGlobalAttributes( input.CompilationModel, out var syntaxTreeForGlobalAttributes );
+
             // Group diagnostic suppressions by target.
             var suppressionsByTarget = input.DiagnosticSuppressions.ToMultiValueDictionary(
                 s => s.Declaration,
@@ -91,7 +93,8 @@ namespace Metalama.Framework.Engine.Linking
                 input.OrderedAspectLayers,
                 syntaxMemberLevelTransformations,
                 introductionMemberLevelTransformations,
-                nodesWithModifiedAttributes );
+                nodesWithModifiedAttributes,
+                syntaxTreeForGlobalAttributes );
 
             var syntaxTreeMapping = new Dictionary<SyntaxTree, SyntaxTree>();
 
@@ -132,12 +135,27 @@ namespace Metalama.Framework.Engine.Linking
                 projectOptions );
         }
 
+        private static void FindPrimarySyntaxTreeForGlobalAttributes( CompilationModel compilation, out SyntaxTree globalAttributeSyntaxTree )
+        {
+            globalAttributeSyntaxTree =
+                compilation.Attributes.SelectMany( a => a.GetDeclaringSyntaxReferences() )
+                    .Select( x => x.SyntaxTree )
+                    .OrderByDescending( t => t.FilePath.Length )
+                    .FirstOrDefault()
+                ?? compilation.PartialCompilation.SyntaxTrees.OrderByDescending( t => t.Key.Length )
+                    .FirstOrDefault()
+                    .Value;
+        }
+
         private static void IndexNodesWithModifiedAttributes(
             List<ITransformation> allTransformations,
             out HashSet<SyntaxNode> nodesWithModifiedAttributes )
         {
             // We only need to index transformations on syntax (i.e. on source code) because introductions on generated code
             // are taken from the compilation model.
+
+            // Note: Compilation-level attributes will not be indexed because the containing declaration has no
+            // syntax reference.
 
             nodesWithModifiedAttributes = new HashSet<SyntaxNode>();
 

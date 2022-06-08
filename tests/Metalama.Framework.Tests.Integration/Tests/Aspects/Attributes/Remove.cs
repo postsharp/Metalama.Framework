@@ -17,24 +17,33 @@ public class MyAspect : Aspect, IAspect<IDeclaration>
     }
 }
 
+internal class KeepItAttribute : Attribute { }
+
 // <target>
 [MyAspect]
 internal class C
 {
     [MyAspect]
+    [KeepIt]
     private C() { }
 
-    [MyAspect]
+    [MyAspect, KeepIt]
+    [return: MyAspect]
     private void M( [MyAspect] int p ) { }
 
-    [MyAspect]
+    [MyAspect, KeepIt]
     private int _a = 5, _b = 3;
 
     [MyAspect]
-    private event Action MyEvent;
+    [KeepIt]
+    private event Action MyEvent1, MyEvent2;
 
     [MyAspect]
-    private event Action MyEvent2
+    [KeepIt]
+    private event Action MyEvent3;
+
+    [MyAspect]
+    private event Action MyEvent4
     {
         add { }
         remove { }
