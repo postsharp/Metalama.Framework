@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public string Name
         {
-            get => this._name ?? throw new NotSupportedException( "Cannot get the name of a return parameter." );
+            get => this._name ?? "<return>";
             set
                 => this._name = this._name != null
                     ? value ?? throw new NotSupportedException( "Cannot set the parameter name to null." )

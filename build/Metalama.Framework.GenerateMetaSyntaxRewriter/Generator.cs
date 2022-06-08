@@ -570,7 +570,7 @@ internal class Generator
             {
                 // This is added for backward compatibility because SyntaxFactory.LiteralExpression(kind) is implemented manually
                 // since Roslyn 4.2.0.
-                
+
                 WriteMethod( new List<Field>() );
             }
         }

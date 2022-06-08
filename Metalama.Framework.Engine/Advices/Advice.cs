@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
@@ -20,8 +19,6 @@ namespace Metalama.Framework.Engine.Advices
 
         public AspectLayerId AspectLayerId { get; }
 
-        protected IObjectReader Tags { get; }
-
         public int Order { get; set; }
 
         /// <summary>
@@ -33,10 +30,8 @@ namespace Metalama.Framework.Engine.Advices
             IAspectInstanceInternal aspect,
             TemplateClassInstance template,
             IDeclaration targetDeclaration,
-            string? layerName,
-            IObjectReader tags )
+            string? layerName )
         {
-            this.Tags = tags;
             this.Aspect = aspect;
             this.TemplateInstance = template;
             this.TargetDeclaration = targetDeclaration.AssertNotNull().ToTypedRef();
@@ -44,8 +39,20 @@ namespace Metalama.Framework.Engine.Advices
             this.AspectLayerId = new AspectLayerId( this.Aspect.AspectClass, layerName );
         }
 
+        /// <summary>
+        /// Initializes the advice. Executed before any advices are executed.
+        /// </summary>
+        /// <param name="diagnosticAdder">Diagnostic adder.</param>
+        /// <remarks>
+        /// The advice should only report diagnostics that do not take into account the target declaration(s).
+        /// </remarks>
         public abstract void Initialize( IDiagnosticAdder diagnosticAdder );
 
+        /// <summary>
+        /// Applies the advice on the given compilation and returns the set of resulting transformations and diagnostics.
+        /// </summary>
+        /// <param name="compilation">Input compilation.</param>
+        /// <returns>Advice result containing transformations and diagnostics.</returns>
         public abstract AdviceResult ToResult( ICompilation compilation );
     }
 }

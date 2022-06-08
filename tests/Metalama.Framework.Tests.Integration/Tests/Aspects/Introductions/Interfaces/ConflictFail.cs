@@ -5,7 +5,7 @@ using Metalama.Framework.Code;
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ConflictFail
 {
     /*
-     * Simple case with implicit interface members.
+     * Tests that when interface
      */
 
     public interface IInterface

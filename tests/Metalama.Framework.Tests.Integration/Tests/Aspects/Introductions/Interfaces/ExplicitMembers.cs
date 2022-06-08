@@ -34,7 +34,6 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         public int InterfaceMethod()
         {
             Console.WriteLine( "This is introduced interface member." );
-
             return meta.Proceed();
         }
 

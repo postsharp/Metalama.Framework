@@ -16,7 +16,12 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Methods.AdvisedIn
     public class TestIntroductionAttribute : TypeAspect
     {
         [Introduce]
-        public int Method( int x )
+        public void VoidMethod()
+        {
+        }
+
+        [Introduce]
+        public int Method(int x)
         {
             return x;
         }
@@ -27,13 +32,23 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Methods.AdvisedIn
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.Override( builder.Target.Methods.OfName( nameof(TestIntroductionAttribute.Method) ).Single(), nameof(MethodTemplate) );
+            foreach (var method in builder.Target.Methods)
+            {
+                builder.Advice.Override(method, nameof(MethodTemplate));
+            }
         }
 
         [Template]
         public dynamic MethodTemplate()
         {
-            return meta.Target.Method.Invokers.Base!.Invoke( meta.This, meta.Target.Method.Parameters[0].Value );
+            if (meta.Target.Method.Parameters.Count == 0)
+            {
+                return meta.Target.Method.Invokers.Base!.Invoke(meta.This);
+            }
+            else
+            {
+                return meta.Target.Method.Invokers.Base!.Invoke(meta.This, meta.Target.Method.Parameters[0].Value);
+            }
         }
     }
 

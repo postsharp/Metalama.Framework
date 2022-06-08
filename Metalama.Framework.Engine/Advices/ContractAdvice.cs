@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Advices
     internal class ContractAdvice : Advice
     {
         public ContractAdvice( IAspectInstanceInternal aspect, TemplateClassInstance templateInstance, IDeclaration targetDeclaration, string? layerName )
-            : base( aspect, templateInstance, targetDeclaration, layerName, ObjectReader.Empty ) { }
+            : base( aspect, templateInstance, targetDeclaration, layerName ) { }
 
         public override void Initialize( IDiagnosticAdder diagnosticAdder ) { }
 
@@ -38,7 +38,7 @@ namespace Metalama.Framework.Engine.Advices
                     return AdviceResult.Create( new FilterPropertyTransformation( this, property ) );
 
                 case IField field:
-                    var promotedField = new PromotedField( this, field, this.Tags );
+                    var promotedField = new PromotedField( this, field, ObjectReader.Empty );
 
                     return AdviceResult.Create(
                         promotedField,

@@ -15,6 +15,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using RefKind = Metalama.Framework.Code.RefKind;
+using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.Advices
@@ -30,7 +31,6 @@ namespace Metalama.Framework.Engine.Advices
         private readonly IServiceProvider _serviceProvider;
         private readonly IDiagnosticAdder _diagnosticAdder;
 
-        private readonly Dictionary<INamedType, ImplementInterfaceAdvice> _implementInterfaceAdvices;
         private readonly Dictionary<IMember, ContractAdvice> _contractAdvices;
 
         internal List<Advice> Advices { get; }
@@ -47,7 +47,6 @@ namespace Metalama.Framework.Engine.Advices
             this._serviceProvider = serviceProvider;
             this._compilation = compilation;
             this._diagnosticAdder = diagnosticAdder;
-            this._implementInterfaceAdvices = new Dictionary<INamedType, ImplementInterfaceAdvice>( compilation.InvariantComparer );
             this._contractAdvices = new Dictionary<IMember, ContractAdvice>( compilation.InvariantComparer );
             this.Advices = new List<Advice>();
         }
@@ -65,7 +64,6 @@ namespace Metalama.Framework.Engine.Advices
             this._serviceProvider = parent._serviceProvider;
             this._compilation = parent._compilation;
             this._diagnosticAdder = parent._diagnosticAdder;
-            this._implementInterfaceAdvices = parent._implementInterfaceAdvices;
             this._contractAdvices = parent._contractAdvices;
             this.Advices = parent.Advices;
         }
@@ -755,17 +753,19 @@ namespace Metalama.Framework.Engine.Advices
 
             var diagnosticList = new DiagnosticList();
 
-            if ( !this._implementInterfaceAdvices.TryGetValue( targetType, out var advice ) )
-            {
-                this._implementInterfaceAdvices[targetType] =
-                    advice = new ImplementInterfaceAdvice( this._aspect, this._templateInstance, targetType, _layerName );
+            var advice = new ImplementInterfaceAdvice(
+                this._aspect,
+                this._templateInstance,
+                targetType,
+                interfaceType,
+                whenExists,
+                null,
+                _layerName,
+                ObjectReader.GetReader( tags ) );
 
-                advice.Initialize( diagnosticList );
-                this.Advices.Add( advice );
-            }
-
-            advice.AddInterfaceImplementation( interfaceType, whenExists, null, diagnosticList, ObjectReader.GetReader( tags ) );
+            advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
+            this.Advices.Add( advice );
 
             this._diagnosticAdder.Report( diagnosticList );
         }
@@ -797,17 +797,19 @@ namespace Metalama.Framework.Engine.Advices
 
             var diagnosticList = new DiagnosticList();
 
-            if ( !this._implementInterfaceAdvices.TryGetValue( targetType, out var advice ) )
-            {
-                this._implementInterfaceAdvices[targetType] =
-                    advice = new ImplementInterfaceAdvice( this._aspect, this._templateInstance, targetType, _layerName );
+            var advice = new ImplementInterfaceAdvice(
+                this._aspect,
+                this._templateInstance,
+                targetType,
+                interfaceType,
+                whenExists,
+                interfaceMemberSpecifications,
+                _layerName,
+                ObjectReader.GetReader( tags ) );
 
-                advice.Initialize( diagnosticList );
-                this.Advices.Add( advice );
-            }
-
-            advice.AddInterfaceImplementation( interfaceType, whenExists, null, diagnosticList, ObjectReader.GetReader( tags ) );
+            advice.Initialize( diagnosticList );
             ThrowOnErrors( diagnosticList );
+            this.Advices.Add( advice );
 
             this._diagnosticAdder.Report( diagnosticList );
         }
@@ -892,7 +894,8 @@ namespace Metalama.Framework.Engine.Advices
             {
                 throw new ArgumentOutOfRangeException(
                     nameof(kind),
-                    UserMessageFormatter.Format( $"Cannot add an output contract to the parameter '{targetParameter}' because it is neither 'ref' nor 'out'." ) );
+                    UserMessageFormatter.Format(
+                        $"Cannot add an output contract to the parameter '{targetParameter}' because it is neither 'ref' nor 'out'." ) );
             }
 
             if ( kind == ContractDirection.Input && targetParameter.RefKind is not RefKind.None or RefKind.Ref or RefKind.In )
@@ -900,6 +903,13 @@ namespace Metalama.Framework.Engine.Advices
                 throw new ArgumentOutOfRangeException(
                     nameof(kind),
                     UserMessageFormatter.Format( $"Cannot add an input contract to the out parameter '{targetParameter}' " ) );
+            }
+
+            if ( targetParameter.IsReturnParameter && targetParameter.Type.Is( SpecialType.Void ) )
+            {
+                throw new ArgumentOutOfRangeException(
+                    nameof(targetParameter),
+                    UserMessageFormatter.Format( $"Cannot add a contract to the return parameter of a void method." ) );
             }
 
             this.AddFilterImpl( targetParameter, targetParameter.DeclaringMember, template, kind, tags, args );
@@ -935,7 +945,7 @@ namespace Metalama.Framework.Engine.Advices
 
             if ( !this._contractAdvices.TryGetValue( targetMember, out var advice ) )
             {
-                advice = new ContractAdvice(
+                this._contractAdvices[targetMember] = advice = new ContractAdvice(
                     this._aspect,
                     this._templateInstance,
                     targetMember,

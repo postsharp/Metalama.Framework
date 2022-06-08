@@ -45,7 +45,7 @@ internal static class VersionDetector
                 foreach ( var anyVersionField in fields )
                 {
                     anyVersionField.Field!.MinimalRoslynVersion = fieldMinimalVersion;
-                    
+
                     anyVersionField.Field.KindsMinimalRoslynVersions = kindsMinimalVersion.Where( k => k.Version.Index <= anyVersionField.Version.Index )
                         .ToDictionary( i => i.Kind, i => i.Version );
                 }

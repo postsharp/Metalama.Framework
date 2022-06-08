@@ -1,8 +1,15 @@
-    internal class TargetClass
-    {
-        [Test]
-        public int Method(int x)
+internal class TargetClass
 {
-    return this.Method(x);
-}
+    [Test]
+    public void VoidMethod()
+    {
+        this.VoidMethod();
+        return;
     }
+
+    [Test]
+    public int Method(int x)
+    {
+        return this.Method(x);
+    }
+}
