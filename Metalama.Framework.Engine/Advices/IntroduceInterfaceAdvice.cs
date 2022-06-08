@@ -22,52 +22,215 @@ namespace Metalama.Framework.Engine.Advices
 {
     internal partial class ImplementInterfaceAdvice : Advice
     {
-        private readonly List<(IMethod Method, TemplateClassMember Template)> _aspectInterfaceMethods = new();
-        private readonly List<(IProperty Property, TemplateClassMember Template)> _aspectInterfaceProperties = new();
+        private readonly List<InterfaceSpecification> _interfaceSpecifications;
 
-        private readonly List<(IEvent Event, TemplateClassMember Template)> _aspectInterfaceEvents = new();
+        public IReadOnlyList<InterfaceMemberSpecification>? ExplicitMemberSpecifications { get; }
 
-        private readonly List<IntroducedInterfaceSpecification> _introducedInterfaceTypes;
+        public INamedType InterfaceType { get; }
 
-        private new Ref<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
+        public OverrideStrategy OverrideStrategy { get; }
+
+        public new Ref<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
+
+        public IObjectReader Tags { get; }
 
         public ImplementInterfaceAdvice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance template,
             INamedType targetType,
-            string? layerName ) : base( aspect, template, targetType, layerName, ObjectReader.Empty )
+            INamedType interfaceType,
+            OverrideStrategy overrideStrategy,
+            IReadOnlyList<InterfaceMemberSpecification>? explicitMemberSpecifications,
+            string? layerName,
+            IObjectReader tags ) : base( aspect, template, targetType, layerName )
         {
-            this._introducedInterfaceTypes = new List<IntroducedInterfaceSpecification>();
+            this.InterfaceType = interfaceType;
+            this.ExplicitMemberSpecifications = explicitMemberSpecifications;
+            this.OverrideStrategy = overrideStrategy;
+            this._interfaceSpecifications = new List<InterfaceSpecification>();
+            this.Tags = tags;
         }
 
         public override void Initialize( IDiagnosticAdder diagnosticAdder )
         {
+            // When initializing, it is not known which types the target type is implementing.
+            // Therefore, a specification for all interfaces should be prepared and only diagnostics related advice parameters and aspect class
+            // should be reported.            
+
             var aspectTypeName = this.Aspect.AspectClass.FullName.AssertNotNull();
-            var compilation = this.SourceCompilation;
-            var aspectType = compilation.GetCompilationModel().Factory.GetTypeByReflectionName( aspectTypeName );
+            var aspectType = this.SourceCompilation.GetCompilationModel().Factory.GetTypeByReflectionName( aspectTypeName );
 
-            foreach ( var aspectMethod in aspectType.Methods )
+            // We introduce all interfaces except the base interfaces that were added before. That means that the previous introductions
+            // have precedence.
+            var interfacesToIntroduce =
+                new[] { (InterfaceType: this.InterfaceType, IsTopLevel: true) }
+                    .Concat( this.InterfaceType.AllImplementedInterfaces.Select( i => (InterfaceType: i, IsTopLevel: false) ) )
+                    .ToDictionary( x => x.InterfaceType, x => x.IsTopLevel, this.SourceCompilation.InvariantComparer );
+
+            if ( this.ExplicitMemberSpecifications != null )
             {
-                if ( TryGetInterfaceMemberTemplate( aspectMethod, out var interfaceMemberAttribute ) )
-                {
-                    this._aspectInterfaceMethods.Add( (aspectMethod, interfaceMemberAttribute) );
-                }
+                // TODO: When interface member is not specified but there is an equal visible member in the base class, C# will take use it, so
+                //       we can allow the user to specify member from the base class and not necessarily a new builder.
+                throw new NotImplementedException();
             }
 
-            foreach ( var aspectProperty in aspectType.Properties )
+            // No explicit member specification was given, we have to detect introduced members corresponding to all interface members.
+            foreach ( var pair in interfacesToIntroduce )
             {
-                if ( TryGetInterfaceMemberTemplate( aspectProperty, out var interfaceMemberAttribute ) )
+                var introducedInterface = pair.Key;
+                var isTopLevel = pair.Value;
+                List<MemberSpecification> memberSpecifications = new();
+
+                foreach ( var interfaceMethod in introducedInterface.Methods )
                 {
-                    this._aspectInterfaceProperties.Add( (aspectProperty, interfaceMemberAttribute) );
+                    if ( !TryGetAspectInterfaceMethod( interfaceMethod, out var matchingMethod, out var matchingTemplate ) )
+                    {
+                        diagnosticAdder.Report(
+                            AdviceDiagnosticDescriptors.MissingDeclarativeInterfaceMember.CreateRoslynDiagnostic(
+                                this.GetDiagnosticLocation(),
+                                (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), this.InterfaceType,
+                                 interfaceMethod) ) );
+                    }
+                    else if (
+                        !SignatureTypeSymbolComparer.Instance.Equals(
+                            interfaceMethod.ReturnParameter.Type.GetSymbol().AssertNotNull(),
+                            matchingMethod.ReturnParameter.Type.GetSymbol().AssertNotNull() )
+                        || interfaceMethod.ReturnParameter.RefKind != matchingMethod.ReturnParameter.RefKind )
+                    {
+                        diagnosticAdder.Report(
+                            AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberDoesNotMatch.CreateRoslynDiagnostic(
+                                this.GetDiagnosticLocation(),
+                                (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), this.InterfaceType,
+                                 matchingMethod,
+                                 interfaceMethod) ) );
+                    }
+                    else
+                    {
+                        memberSpecifications.Add( new MemberSpecification( interfaceMethod, null, matchingMethod, matchingTemplate, null ) );
+                    }
                 }
+
+                foreach ( var interfaceIndexer in introducedInterface.Indexers )
+                {
+                    throw new NotImplementedException();
+                }
+
+                foreach ( var interfaceProperty in introducedInterface.Properties )
+                {
+                    if ( !TryGetAspectInterfaceProperty( interfaceProperty, out var matchingProperty, out var matchingTemplate ) )
+                    {
+                        diagnosticAdder.Report(
+                            AdviceDiagnosticDescriptors.MissingDeclarativeInterfaceMember.CreateRoslynDiagnostic(
+                                this.GetDiagnosticLocation(),
+                                (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), this.InterfaceType,
+                                 interfaceProperty) ) );
+                    }
+                    else if (
+                        !this.SourceCompilation.InvariantComparer.Equals( interfaceProperty.Type, matchingProperty.Type )
+                        || interfaceProperty.RefKind != matchingProperty.RefKind )
+                    {
+                        diagnosticAdder.Report(
+                            AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberDoesNotMatch.CreateRoslynDiagnostic(
+                                this.GetDiagnosticLocation(),
+                                (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), this.InterfaceType,
+                                 matchingProperty,
+                                 interfaceProperty) ) );
+                    }
+                    else
+                    {
+                        memberSpecifications.Add( new MemberSpecification( interfaceProperty, null, matchingProperty, matchingTemplate, null ) );
+                    }
+                }
+
+                foreach ( var interfaceEvent in introducedInterface.Events )
+                {
+                    if ( !TryGetAspectInterfaceEvent( interfaceEvent, out var matchingEvent, out var matchingTemplate ) )
+                    {
+                        diagnosticAdder.Report(
+                            AdviceDiagnosticDescriptors.MissingDeclarativeInterfaceMember.CreateRoslynDiagnostic(
+                                this.GetDiagnosticLocation(),
+                                (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), this.InterfaceType,
+                                 interfaceEvent) ) );
+                    }
+                    else if ( !this.SourceCompilation.InvariantComparer.Equals( interfaceEvent.Type, matchingEvent.Type ) )
+                    {
+                        diagnosticAdder.Report(
+                            AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberDoesNotMatch.CreateRoslynDiagnostic(
+                                this.GetDiagnosticLocation(),
+                                (this.Aspect.AspectClass.ShortName, this.TargetDeclaration.GetTarget( this.SourceCompilation ), this.InterfaceType,
+                                 matchingEvent,
+                                 interfaceEvent) ) );
+                    }
+                    else
+                    {
+                        memberSpecifications.Add( new MemberSpecification( interfaceEvent, null, matchingEvent, matchingTemplate, null ) );
+                    }
+                }
+
+                this._interfaceSpecifications.Add( new InterfaceSpecification( introducedInterface, isTopLevel, memberSpecifications ) );
             }
 
-            foreach ( var aspectEvent in aspectType.Events )
+            bool TryGetAspectInterfaceMethod(
+                IMethod interfaceMethod,
+                [NotNullWhen( true )] out IMethod? aspectMethod,
+                [NotNullWhen( true )] out TemplateClassMember? templateClassMember )
             {
-                if ( TryGetInterfaceMemberTemplate( aspectEvent, out var interfaceMemberAttribute ) )
+                var method = aspectType!.AllMethods.SingleOrDefault( m => m.SignatureEquals( interfaceMethod ) );
+
+                if ( method != null && TryGetInterfaceMemberTemplate( method, out var classMember ) )
                 {
-                    this._aspectInterfaceEvents.Add( (aspectEvent, interfaceMemberAttribute) );
+                    aspectMethod = method;
+                    templateClassMember = classMember;
+
+                    return true;
                 }
+
+                aspectMethod = null;
+                templateClassMember = null;
+
+                return false;
+            }
+
+            bool TryGetAspectInterfaceProperty(
+                IProperty interfaceProperty,
+                [NotNullWhen( true )] out IProperty? aspectProperty,
+                [NotNullWhen( true )] out TemplateClassMember? templateClassMember )
+            {
+                var property = aspectType!.AllProperties.SingleOrDefault( p => p.SignatureEquals( interfaceProperty ) );
+
+                if ( property != null && TryGetInterfaceMemberTemplate( property, out var classMember ) )
+                {
+                    aspectProperty = property;
+                    templateClassMember = classMember;
+
+                    return true;
+                }
+
+                aspectProperty = null;
+                templateClassMember = null;
+
+                return false;
+            }
+
+            bool TryGetAspectInterfaceEvent(
+                IEvent interfaceEvent,
+                [NotNullWhen( true )] out IEvent? aspectEvent,
+                [NotNullWhen( true )] out TemplateClassMember? templateClassMember )
+            {
+                var @event = aspectType!.AllEvents.SingleOrDefault( e => e.SignatureEquals( interfaceEvent ) );
+
+                if ( @event != null && TryGetInterfaceMemberTemplate( @event, out var classMember ) )
+                {
+                    aspectEvent = @event;
+                    templateClassMember = classMember;
+
+                    return true;
+                }
+
+                aspectEvent = null;
+                templateClassMember = null;
+
+                return false;
             }
 
             bool TryGetInterfaceMemberTemplate(
@@ -80,194 +243,75 @@ namespace Metalama.Framework.Engine.Advices
             }
         }
 
-        public void AddInterfaceImplementation(
-            INamedType interfaceType,
-            OverrideStrategy overrideStrategy,
-            IReadOnlyList<InterfaceMemberSpecification>? explicitMemberSpecification,
-            IDiagnosticAdder diagnosticAdder,
-            IObjectReader tags )
+        public override AdviceResult ToResult( ICompilation compilation )
         {
             // Adding interfaces may run into three problems:
             //      1) Target type already implements the interface.
             //      2) Target type already implements an ancestor of the interface.
-            //      3) The interface or it's ancestor was implemented by another ImplementInterface call.
 
-            var compilation = interfaceType.Compilation;
-            var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
-
-            Location? GetDiagnosticLocation() => targetDeclaration.GetDiagnosticLocation();
-
-            bool AlreadyContainsInterface( INamedType i ) => this._introducedInterfaceTypes.Any( x => x.InterfaceType.Equals( i ) );
-
-            if ( AlreadyContainsInterface( interfaceType ) )
-            {
-                // The aspect conflicts with itself, introducing the base interface after the derived interface.
-                diagnosticAdder.Report(
-                    AdviceDiagnosticDescriptors.InterfaceIsAlreadyIntroducedByTheAspect.CreateRoslynDiagnostic(
-                        GetDiagnosticLocation(),
-                        (this.Aspect.AspectClass.ShortName, interfaceType, targetDeclaration) ) );
-            }
-
-            // We introduce all interfaces except the base interfaces that were added before. That means that the previous introductions
-            // have precedence.
-            var interfacesToIntroduce = new HashSet<INamedType>(
-                new[] { interfaceType }.Concat( interfaceType.AllImplementedInterfaces ).Where( i => !AlreadyContainsInterface( i ) ),
-                compilation.InvariantComparer );
-
-            if ( explicitMemberSpecification != null )
-            {
-                throw new NotImplementedException();
-            }
-
-            // No explicit member specification was given, we have to detect introduced members corresponding to all interface members.
-
-            foreach ( var introducedInterface in interfacesToIntroduce )
-            {
-                List<MemberSpecification> memberSpecifications = new();
-
-                foreach ( var interfaceMethod in introducedInterface.Methods )
-                {
-                    var matchingAspectMethod =
-                        this._aspectInterfaceMethods
-                            .SingleOrDefault( am => am.Method.SignatureEquals( interfaceMethod ) );
-
-                    if ( matchingAspectMethod.Method == null )
-                    {
-                        diagnosticAdder.Report(
-                            AdviceDiagnosticDescriptors.MissingDeclarativeInterfaceMember.CreateRoslynDiagnostic(
-                                GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, targetDeclaration, interfaceType, interfaceMethod) ) );
-                    }
-                    else if (
-                        !compilation.InvariantComparer.Equals(
-                            interfaceMethod.ReturnParameter.Type,
-                            matchingAspectMethod.Method.ReturnParameter.Type )
-                        || interfaceMethod.ReturnParameter.RefKind != matchingAspectMethod.Method.ReturnParameter.RefKind )
-                    {
-                        diagnosticAdder.Report(
-                            AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberDoesNotMatch.CreateRoslynDiagnostic(
-                                GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, targetDeclaration, interfaceType, matchingAspectMethod.Method,
-                                 interfaceMethod) ) );
-                    }
-                    else
-                    {
-                        memberSpecifications.Add(
-                            new MemberSpecification( interfaceMethod, null, matchingAspectMethod.Method, matchingAspectMethod.Template, tags ) );
-                    }
-                }
-
-                foreach ( var interfaceProperty in introducedInterface.Properties )
-                {
-                    var matchingAspectProperty =
-                        this._aspectInterfaceProperties
-                            .SingleOrDefault( ap => ap.Property.SignatureEquals( interfaceProperty ) );
-
-                    if ( matchingAspectProperty.Property == null )
-                    {
-                        diagnosticAdder.Report(
-                            AdviceDiagnosticDescriptors.MissingDeclarativeInterfaceMember.CreateRoslynDiagnostic(
-                                GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, targetDeclaration, interfaceType, interfaceProperty) ) );
-                    }
-                    else if (
-                        !compilation.InvariantComparer.Equals( interfaceProperty.Type, matchingAspectProperty.Property.Type )
-                        || interfaceProperty.RefKind != matchingAspectProperty.Property.RefKind )
-                    {
-                        diagnosticAdder.Report(
-                            AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberDoesNotMatch.CreateRoslynDiagnostic(
-                                GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, targetDeclaration, interfaceType, matchingAspectProperty.Property,
-                                 interfaceProperty) ) );
-                    }
-                    else
-                    {
-                        memberSpecifications.Add(
-                            new MemberSpecification(
-                                interfaceProperty,
-                                null,
-                                matchingAspectProperty.Property,
-                                matchingAspectProperty.Template,
-                                tags ) );
-                    }
-                }
-
-                foreach ( var interfaceEvent in introducedInterface.Events )
-                {
-                    var matchingAspectEvent = this._aspectInterfaceEvents.SingleOrDefault( ae => ae.Event.Name == interfaceEvent.Name );
-
-                    if ( matchingAspectEvent.Event == null )
-                    {
-                        diagnosticAdder.Report(
-                            AdviceDiagnosticDescriptors.MissingDeclarativeInterfaceMember.CreateRoslynDiagnostic(
-                                GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, targetDeclaration, interfaceType, interfaceEvent) ) );
-                    }
-                    else if ( !compilation.InvariantComparer.Equals( interfaceEvent.Type, matchingAspectEvent.Event.Type ) )
-                    {
-                        diagnosticAdder.Report(
-                            AdviceDiagnosticDescriptors.DeclarativeInterfaceMemberDoesNotMatch.CreateRoslynDiagnostic(
-                                GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, targetDeclaration, interfaceType, matchingAspectEvent.Event,
-                                 interfaceEvent) ) );
-                    }
-                    else
-                    {
-                        memberSpecifications.Add(
-                            new MemberSpecification( interfaceEvent, null, matchingAspectEvent.Event, matchingAspectEvent.Template, tags ) );
-                    }
-                }
-
-                this._introducedInterfaceTypes.Add( new IntroducedInterfaceSpecification( introducedInterface, memberSpecifications, overrideStrategy ) );
-            }
-        }
-
-        public override AdviceResult ToResult( ICompilation compilation )
-        {
-            var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
+            var targetType = this.TargetDeclaration.GetTarget( compilation );
+            var diagnosticList = new DiagnosticList();
 
             var transformations = new List<ITransformation>();
 
-            foreach ( var interfaceSpec in this._introducedInterfaceTypes )
+            foreach ( var interfaceSpecification in this._interfaceSpecifications )
             {
                 // Validate that the interface must be introduced to the specific target.
 
-                if ( targetDeclaration.AllImplementedInterfaces.Any(
-                        t => compilation.GetCompilationModel().InvariantComparer.Equals( t, interfaceSpec.InterfaceType ) ) )
+                if ( targetType.AllImplementedInterfaces.Any(
+                        t => compilation.GetCompilationModel().InvariantComparer.Equals( t, interfaceSpecification.InterfaceType ) ) )
                 {
                     // Conflict on the introduced interface itself.
-                    switch ( interfaceSpec.OverrideStrategy )
+                    switch ( this.OverrideStrategy )
                     {
                         case OverrideStrategy.Fail:
-                            // Report the diagnostic and return.
-                            return AdviceResult.Create(
+                            // Report the diagnostic.
+                            diagnosticList.Report(
                                 AdviceDiagnosticDescriptors.InterfaceIsAlreadyImplemented.CreateRoslynDiagnostic(
-                                    targetDeclaration.GetDiagnosticLocation(),
-                                    (this.Aspect.AspectClass.ShortName, interfaceSpec.InterfaceType, targetDeclaration) ) );
+                                    targetType.GetDiagnosticLocation(),
+                                    (this.Aspect.AspectClass.ShortName, interfaceSpecification.InterfaceType, targetType) ) );
+
+                            break;
 
                         case OverrideStrategy.Ignore:
                             // Nothing to do.
-                            continue;
+                            break;
 
                         default:
-                            throw new NotImplementedException( $"The OverrideStrategy {interfaceSpec.OverrideStrategy} is not implemented." );
+                            throw new NotImplementedException( $"The OverrideStrategy {this.OverrideStrategy} is not implemented." );
                     }
+
+                    continue;
                 }
 
                 var interfaceMemberMap = new Dictionary<IMember, IMember>();
 
-                foreach ( var memberSpec in interfaceSpec.MemberSpecifications )
+                foreach ( var memberSpec in interfaceSpecification.MemberSpecifications )
                 {
                     // Collect implemented interface members and add non-observable transformations.
                     MemberBuilder memberBuilder;
 
+                    var mergedTags = ObjectReader.Merge( this.Tags, memberSpec.Tags );
+
                     switch ( memberSpec.InterfaceMember )
                     {
                         case IMethod interfaceMethod:
-                            memberBuilder = this.GetImplMethodBuilder( targetDeclaration, interfaceMethod, memberSpec.IsExplicit, memberSpec.Tags );
-                            interfaceMemberMap.Add( interfaceMethod, memberBuilder );
+                            var existingMethod = targetType.Methods.SingleOrDefault( m => m.SignatureEquals( interfaceMethod ) );
 
-                            var implementationMethod = (IMethod) memberSpec.AspectInterfaceMember!;
+                            if ( existingMethod != null && !memberSpec.IsExplicit )
+                            {
+                                // TODO: Handle WhenExists.
+                                diagnosticList.Report(
+                                    AdviceDiagnosticDescriptors.ImplicitInterfaceMemberConflict.CreateRoslynDiagnostic(
+                                        targetType.GetDiagnosticLocation(),
+                                        (this.Aspect.AspectClass.ShortName, interfaceSpecification.InterfaceType, targetType, existingMethod) ) );
+
+                                continue;
+                            }
+
+                            var aspectMethod = (IMethod) memberSpec.AspectInterfaceMember!;
+                            memberBuilder = this.GetImplMethodBuilder( targetType, interfaceMethod, memberSpec.IsExplicit, mergedTags );
+                            interfaceMemberMap.Add( interfaceMethod, memberBuilder );
 
                             transformations.Add(
                                 memberSpec.AspectInterfaceMember != null
@@ -275,32 +319,45 @@ namespace Metalama.Framework.Engine.Advices
                                         this,
                                         (IMethod) memberBuilder,
                                         TemplateMember.Create(
-                                                implementationMethod,
+                                                aspectMethod,
                                                 memberSpec.TemplateClassMember,
                                                 memberSpec.TemplateClassMember.TemplateInfo.Attribute.AssertNotNull(),
                                                 TemplateKind.Introduction )
                                             .ForIntroduction(),
-                                        memberSpec.Tags )
+                                        mergedTags )
                                     : new RedirectMethodTransformation(
                                         this,
                                         (IMethod) memberBuilder,
                                         (IMethod) memberSpec.TargetMember.AssertNotNull(),
-                                        memberSpec.Tags ) );
+                                        mergedTags ) );
 
                             break;
 
                         case IProperty interfaceProperty:
+                            var existingProperty = targetType.Properties.SingleOrDefault( p => p.SignatureEquals( interfaceProperty ) );
+
+                            if ( existingProperty != null && !memberSpec.IsExplicit )
+                            {
+                                // TODO: Handle WhenExists.
+                                diagnosticList.Report(
+                                    AdviceDiagnosticDescriptors.ImplicitInterfaceMemberConflict.CreateRoslynDiagnostic(
+                                        targetType.GetDiagnosticLocation(),
+                                        (this.Aspect.AspectClass.ShortName, interfaceSpecification.InterfaceType, targetType, existingProperty) ) );
+
+                                continue;
+                            }
+
                             var aspectProperty = (IProperty?) memberSpec.AspectInterfaceMember;
                             var buildAutoProperty = aspectProperty?.IsAutoPropertyOrField == true;
 
                             var propertyBuilder = this.GetImplPropertyBuilder(
-                                targetDeclaration,
+                                targetType,
                                 interfaceProperty,
                                 (IProperty?) memberSpec.TargetMember ?? (IProperty) memberSpec.AspectInterfaceMember.AssertNotNull(),
                                 buildAutoProperty,
                                 memberSpec.IsExplicit,
                                 aspectProperty?.SetMethod?.IsImplicit ?? false,
-                                memberSpec.Tags );
+                                mergedTags );
 
                             memberBuilder = propertyBuilder;
 
@@ -318,21 +375,37 @@ namespace Metalama.Framework.Engine.Advices
                                             (IProperty) memberBuilder,
                                             accessorTemplates.Get.ForOverride( propertyBuilder.GetMethod ),
                                             accessorTemplates.Set.ForOverride( propertyBuilder.SetMethod ),
-                                            memberSpec.Tags )
+                                            mergedTags )
                                         : new RedirectPropertyTransformation(
                                             this,
                                             (IProperty) memberBuilder,
                                             (IProperty) memberSpec.TargetMember.AssertNotNull(),
-                                            memberSpec.Tags ) );
+                                            mergedTags ) );
                             }
 
                             break;
 
-                        case IEvent interfaceEvent:
-                            var isEventField = memberSpec.AspectInterfaceMember != null
-                                               && ((IEvent) memberSpec.AspectInterfaceMember).IsEventField();
+                        case IIndexer interfaceIndexer:
+                            throw new NotImplementedException();
 
-                            memberBuilder = this.GetImplEventBuilder( targetDeclaration, interfaceEvent, isEventField, memberSpec.IsExplicit );
+                        case IEvent interfaceEvent:
+                            var existingEvent = targetType.Events.SingleOrDefault( p => p.SignatureEquals( interfaceEvent ) );
+
+                            if ( existingEvent != null && !memberSpec.IsExplicit )
+                            {
+                                // TODO: Handle WhenExists.
+                                diagnosticList.Report(
+                                    AdviceDiagnosticDescriptors.ImplicitInterfaceMemberConflict.CreateRoslynDiagnostic(
+                                        targetType.GetDiagnosticLocation(),
+                                        (this.Aspect.AspectClass.ShortName, interfaceSpecification.InterfaceType, targetType, existingEvent) ) );
+
+                                continue;
+                            }
+
+                            var aspectEvent = memberSpec.AspectInterfaceMember;
+                            var isEventField = aspectEvent != null && ((IEvent) aspectEvent).IsEventField();
+
+                            memberBuilder = this.GetImplEventBuilder( targetType, interfaceEvent, isEventField, memberSpec.IsExplicit );
                             interfaceMemberMap.Add( interfaceEvent, memberBuilder );
 
                             if ( !isEventField )
@@ -348,13 +421,13 @@ namespace Metalama.Framework.Engine.Advices
                                                 TemplateKind.Introduction ),
                                             default,
                                             default,
-                                            memberSpec.Tags,
+                                            mergedTags,
                                             null )
                                         : new RedirectEventTransformation(
                                             this,
                                             (IEvent) memberBuilder,
                                             (IEvent) memberSpec.TargetMember.AssertNotNull(),
-                                            memberSpec.Tags ) );
+                                            mergedTags ) );
                             }
 
                             break;
@@ -366,10 +439,14 @@ namespace Metalama.Framework.Engine.Advices
                     transformations.Add( memberBuilder );
                 }
 
-                transformations.Add( new IntroduceInterfaceTransformation( this, targetDeclaration, interfaceSpec.InterfaceType, interfaceMemberMap ) );
+                if ( interfaceSpecification.IsTopLevel )
+                {
+                    // We are adding the interface only when 
+                    transformations.Add( new IntroduceInterfaceTransformation( this, targetType, interfaceSpecification.InterfaceType, interfaceMemberMap ) );
+                }
             }
 
-            return AdviceResult.Create( transformations );
+            return AdviceResult.Create( transformations ).WithDiagnostics( diagnosticList.ToArray() );
         }
 
         private MemberBuilder GetImplMethodBuilder(
@@ -476,6 +553,8 @@ namespace Metalama.Framework.Engine.Advices
 
             return propertyBuilder;
         }
+
+        private Location? GetDiagnosticLocation() => this.TargetDeclaration.GetTarget( this.SourceCompilation ).GetDiagnosticLocation();
 
         private MemberBuilder GetImplEventBuilder( INamedType declaringType, IEvent interfaceEvent, bool isEventField, bool isExplicit )
         {

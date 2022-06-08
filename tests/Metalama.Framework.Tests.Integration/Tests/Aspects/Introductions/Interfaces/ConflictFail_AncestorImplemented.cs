@@ -7,7 +7,7 @@ using Metalama.Framework.Code;
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ConflictFail_AncestorImplemented
 {
     /*
-     * Case with base interface being already implemented and fail behavior being specified.
+     * Tests that when base interface being already implemented and fail behavior being specified, an error is emitted.
      */
 
     public interface IBaseInterface

@@ -102,5 +102,13 @@ namespace Metalama.Framework.Engine.Advices
                 "The aspect '{0}' cannot introduce member '{1}' into type '{2}' because there is already a {3} of the same name in the type.",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition<(string AspectType, INamedType InterfaceType, INamedType TargetType, IMember InterfaceMember)>
+            ImplicitInterfaceMemberConflict = new(
+                "LAMA0515",
+                "Cannot introduce an implicit interface member when the target type already contains a declaration with the same signature.",
+                "The aspect '{0}' cannot introduce interface '{1}' into type '{2}' because the type already contains '{3}' and WhenExists is set to Fail.",
+                _category,
+                Error );
     }
 }

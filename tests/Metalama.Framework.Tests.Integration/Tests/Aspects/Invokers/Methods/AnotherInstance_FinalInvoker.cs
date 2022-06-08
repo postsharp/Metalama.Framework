@@ -1,4 +1,8 @@
-﻿using System;
+﻿#if TEST_OPTIONS
+// @Skipped(#30509 Introduced method's parameters are not included in the initial lexical scope)
+# endif
+
+using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -11,9 +15,14 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AnotherIns
     {
         public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            var overrideBuilder = aspectBuilder.Advice.IntroduceMethod( aspectBuilder.Target, nameof(OverrideMethod), whenExists: OverrideStrategy.Override );
-            overrideBuilder.Name = "Foo";
-            overrideBuilder.ReturnType = TypeFactory.GetType( SpecialType.Void );
+            var voidMethodOverrideBuilder = aspectBuilder.Advice.IntroduceMethod(aspectBuilder.Target, nameof(OverrideMethod), whenExists: OverrideStrategy.Override);
+            voidMethodOverrideBuilder.Name = "VoidMethod";
+            voidMethodOverrideBuilder.ReturnType = TypeFactory.GetType(SpecialType.Void);
+
+            var methodOverrideBuilder = aspectBuilder.Advice.IntroduceMethod(aspectBuilder.Target, nameof(OverrideMethod), whenExists: OverrideStrategy.Override);
+            methodOverrideBuilder.Name = "Method";
+            methodOverrideBuilder.ReturnType = TypeFactory.GetType(SpecialType.Int32);
+            methodOverrideBuilder.AddParameter("x", TypeFactory.GetType(SpecialType.Int32));
         }
 
         [Template]
@@ -21,14 +30,28 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AnotherIns
         {
             var x = meta.This;
 
-            return meta.Target.Method.Invokers.Final.Invoke( x );
+            if (meta.Target.Method.Parameters.Count == 0)
+            {
+                return meta.Target.Method.Invokers.Final!.Invoke(x);
+            }
+            else
+            {
+                return meta.Target.Method.Invokers.Final!.Invoke(x, meta.Target.Method.Parameters[0].Value);
+            }
+        }
+    }
+
+    internal class BaseClass
+    {
+        public virtual void VoidMethod() { }
+
+        public virtual int Method(int x)
+        {
+            return x;
         }
     }
 
     // <target>
     [TestAttribute]
-    internal class TargetClass
-    {
-        public void Foo() { }
-    }
+    internal class TargetClass : BaseClass { }
 }
