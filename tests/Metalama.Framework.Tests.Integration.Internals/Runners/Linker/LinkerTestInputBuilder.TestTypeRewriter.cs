@@ -839,11 +839,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     i => i.WithArgumentsForConstructor(
                         new object?[]
                         {
-                            fakeAspectInstance,
-                            fakeAspectInstance.TemplateInstances.Values.Single(),
-                            A.Fake<IDeclarationImpl>(),
-                            aspectLayer.LayerName,
-                            null
+                            fakeAspectInstance, fakeAspectInstance.TemplateInstances.Values.Single(), A.Fake<IDeclarationImpl>(), aspectLayer.LayerName
                         } ) );
             }
         }

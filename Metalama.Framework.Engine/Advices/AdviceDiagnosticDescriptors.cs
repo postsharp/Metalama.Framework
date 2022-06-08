@@ -110,5 +110,13 @@ namespace Metalama.Framework.Engine.Advices
                 "The aspect '{0}' cannot the custom attribute '{1}' into '{2}' because it this attribute is already present on the declaration and WhenExists is set to Fail.",
                 _category,
                 Error );
+
+        internal static readonly DiagnosticDefinition<(string AspectType, INamedType InterfaceType, INamedType TargetType, IMember InterfaceMember)>
+            ImplicitInterfaceMemberConflict = new(
+                "LAMA0516",
+                "Cannot introduce an implicit interface member when the target type already contains a declaration with the same signature.",
+                "The aspect '{0}' cannot introduce interface '{1}' into type '{2}' because the type already contains '{3}' and WhenExists is set to Fail.",
+                _category,
+                Error );
     }
 }

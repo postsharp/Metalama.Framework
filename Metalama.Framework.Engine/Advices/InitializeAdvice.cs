@@ -23,6 +23,8 @@ namespace Metalama.Framework.Engine.Advices
 
         public new Ref<IMemberOrNamedType> TargetDeclaration => base.TargetDeclaration.As<IMemberOrNamedType>();
 
+        public IObjectReader Tags { get; }
+
         public InitializeAdvice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
@@ -30,10 +32,11 @@ namespace Metalama.Framework.Engine.Advices
             BoundTemplateMethod boundTemplate,
             InitializerKind kind,
             string? layerName,
-            IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, layerName, tags )
+            IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, layerName )
         {
             this.BoundTemplate = boundTemplate;
             this.Kind = kind;
+            this.Tags = tags;
         }
 
         public override void Initialize( IDiagnosticAdder diagnosticAdder ) { }
