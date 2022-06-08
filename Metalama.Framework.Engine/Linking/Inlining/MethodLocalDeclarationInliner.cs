@@ -3,7 +3,6 @@
 
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.Formatting;
-using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
