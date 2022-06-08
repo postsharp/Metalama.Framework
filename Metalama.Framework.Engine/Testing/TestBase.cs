@@ -71,7 +71,7 @@ namespace Metalama.Framework.Engine.Testing
                 throw new InvalidOperationException( string.Join( Environment.NewLine, lines ) );
             }
         }
-        
+
         protected TestContext CreateTestContext( TestProjectOptions? projectOptions = null ) => this.CreateTestContext( null, projectOptions );
 
         protected TestContext CreateTestContext( Func<ServiceProvider, ServiceProvider>? addServices, TestProjectOptions? projectOptions = null )
@@ -107,7 +107,7 @@ namespace Metalama.Framework.Engine.Testing
                 IEnumerable<MetadataReference>? additionalReferences = null,
                 string? name = null )
                 => this.CreateCompilationModel( code, dependentCode, ignoreErrors, additionalReferences, name );
-            
+
             private CompilationModel CreateCompilationModel(
                 string code,
                 string? dependentCode = null,

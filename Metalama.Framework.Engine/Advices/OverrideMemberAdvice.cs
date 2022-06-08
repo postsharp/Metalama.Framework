@@ -14,12 +14,17 @@ namespace Metalama.Framework.Engine.Advices
     {
         public new Ref<TMember> TargetDeclaration => base.TargetDeclaration.As<TMember>();
 
+        public IObjectReader Tags { get; }
+
         public OverrideMemberAdvice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             TMember targetDeclaration,
             string? layerName,
-            IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, layerName, tags ) { }
+            IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, layerName )
+        {
+            this.Tags = tags;
+        }
 
         public override void Initialize( IDiagnosticAdder diagnosticAdder )
         {

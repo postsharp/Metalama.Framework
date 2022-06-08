@@ -130,6 +130,12 @@ namespace Metalama.Framework.Eligibility
             eligibilityBuilder.Aggregate( BooleanCombinationOperator.And, requirements );
         }
 
+        public static IEligibilityBuilder<T> If<T>( this IEligibilityBuilder<T> eligibilityBuilder, Predicate<T> condition )
+            where T : class
+        {
+            return new ConditionalEligibilityBuilder<T>( eligibilityBuilder, condition );
+        }
+
         /// <summary>
         /// Adds a condition to the current <see cref="IEligibilityBuilder"/>, where the condition must be
         /// satisfied by the declaration in order to be eligible for the aspect.
@@ -238,6 +244,16 @@ namespace Metalama.Framework.Eligibility
             eligibilityBuilder.MustSatisfy(
                 p => p.RefKind == RefKind.Ref,
                 member => $"{member} must be a 'ref' parameter" );
+        }
+
+        /// <summary>
+        /// Requires the parameter not to be <c>void</c>.
+        /// </summary>
+        public static void MustNotBeVoid( this IEligibilityBuilder<IParameter> eligibilityBuilder )
+        {
+            eligibilityBuilder.MustSatisfy(
+                p => !p.Type.Is( SpecialType.Void ),
+                member => $"{member} must not have type 'void'" );
         }
 
         private static string GetInterfaceName<T>() => GetInterfaceName( typeof(T) );

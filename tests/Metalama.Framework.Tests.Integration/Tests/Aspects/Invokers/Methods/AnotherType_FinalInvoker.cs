@@ -18,22 +18,42 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AnotherTyp
         [Template]
         public dynamic? OverrideMethod()
         {
-            var parameterType = (INamedType)( (IExpression)meta.Target.Method.Parameters[0] ).Type;
-            var barMethod = parameterType.Methods.OfName( "Bar" ).First();
+            var parameterType = (INamedType)((IExpression)meta.Target.Method.Parameters[0]).Type;
+            var otherClassMethod = parameterType.Methods.OfName(meta.Target.Method.Name).First();
 
-            return barMethod.Invokers.Final!.Invoke( meta.Target.Method.Parameters[0].Value );
+            if (otherClassMethod.Parameters.Count == 0)
+            {
+                return otherClassMethod.Invokers.Final!.Invoke(meta.Target.Method.Parameters[0]);
+            }
+            else
+            {
+                return otherClassMethod.Invokers.Final!.Invoke(meta.Target.Method.Parameters[0], meta.Target.Method.Parameters[1].Value);
+            }
         }
     }
 
     internal class OtherClass
     {
-        public void Bar() { }
+        public void VoidMethod() { }
+
+        public int Method(int x)
+        {
+            return x;
+        }
     }
 
     // <target>
     internal class TargetClass
     {
         [TestAttribute]
-        public void Foo( OtherClass other ) { }
+        public void VoidMethod(OtherClass other)
+        {
+        }
+
+        [TestAttribute]
+        public int Method(OtherClass other, int x)
+        {
+            return x;
+        }
     }
 }
