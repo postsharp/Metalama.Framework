@@ -4,29 +4,45 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Builders;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.Utilities
 {
     internal static class DeclarationExtensions
     {
         public static bool IsEventField( this IEvent @event )
-        {
-            // TODO: 
-            var eventSymbol = @event.GetSymbol();
-
-            if ( eventSymbol != null )
+        {   
+            if ( @event is Event codeEvent )
             {
+                var eventSymbol = codeEvent.GetSymbol().AssertNotNull();
+
                 // TODO: partial events.
-                var eventDeclarationSyntax = eventSymbol.GetPrimaryDeclaration();
-
-                if ( eventDeclarationSyntax is VariableDeclaratorSyntax )
+                return eventSymbol.GetPrimaryDeclaration() switch
                 {
-                    return true;
-                }
+                    VariableDeclaratorSyntax => true,
+                    { } => false,
+                    _ => @event.AddMethod.IsCompilerGenerated() && @event.RemoveMethod.IsCompilerGenerated(),
+                };
             }
+            else if ( @event is BuiltEvent builtEvent )
+            {
+                return builtEvent.EventBuilder.IsEventField;
+            }
+            else if ( @event is EventBuilder eventBuilder )
+            {
+                return eventBuilder.IsEventField;
+            }
+            else
+            {
+                throw new AssertionFailedException();
+            }
+        }
 
-            return false;
+        public static bool IsCompilerGenerated( this IDeclaration declaration)
+        {
+            return declaration.GetSymbol()?.GetAttributes().Any( a => a.AttributeConstructor?.ContainingType.Name == nameof( System.Runtime.CompilerServices.CompilerGeneratedAttribute ) ) == true;
         }
 
         /// <summary>

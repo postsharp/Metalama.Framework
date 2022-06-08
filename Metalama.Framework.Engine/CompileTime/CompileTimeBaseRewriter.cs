@@ -30,6 +30,65 @@ namespace Metalama.Framework.Engine.CompileTime
             where T : SyntaxNode
             => node;
 
+        private static T WithSupressedDiagnostics<T>(T member, params string[] suppressedDiagnostics )
+            where T : MemberDeclarationSyntax
+        {
+            if (suppressedDiagnostics.Length == 0)
+            {
+                return member;
+            }
+
+            switch ( member )
+            {
+                case MethodDeclarationSyntax { Body: { } } method:
+                    return (T)(MemberDeclarationSyntax)method
+                        .WithLeadingTrivia(
+                            method
+                                .GetLeadingTrivia()
+                                .Add( Trivia( GetPragmaTrivia( true ) ) ) )
+                        .WithBody(
+                            method.Body
+                            .WithLeadingTrivia(
+                                TriviaList( Trivia( GetPragmaTrivia( false ) ) )
+                                .AddRange( method.Body.GetLeadingTrivia() ) ) );
+
+                case MethodDeclarationSyntax { ExpressionBody: { } } method:
+                    return (T) (MemberDeclarationSyntax) method
+                        .WithLeadingTrivia(
+                            method
+                                .GetLeadingTrivia()
+                                .Add( Trivia( GetPragmaTrivia( true ) ) ) )
+                        .WithExpressionBody(
+                            method.ExpressionBody
+                            .WithLeadingTrivia(
+                                TriviaList( Trivia( GetPragmaTrivia( false ) ) )
+                                .AddRange( method.ExpressionBody.GetLeadingTrivia() ) ) );
+
+                case MethodDeclarationSyntax method:
+                    return (T) (MemberDeclarationSyntax) method
+                        .WithLeadingTrivia(
+                            method
+                                .GetLeadingTrivia()
+                                .Add( Trivia( GetPragmaTrivia( true ) ) ) )
+                        .WithTrailingTrivia(
+                            TriviaList( Trivia( GetPragmaTrivia( false ) ) )
+                            .AddRange( method.GetTrailingTrivia() ) );
+
+                default:
+                    throw new AssertionFailedException();
+            }
+
+            StructuredTriviaSyntax GetPragmaTrivia( bool disable )
+                => PragmaWarningDirectiveTrivia(
+                    Token(SyntaxKind.HashToken).WithLeadingTrivia(ElasticLineFeed),
+                    Token(SyntaxKind.PragmaKeyword),
+                    Token(SyntaxKind.WarningKeyword),
+                    disable ? Token( SyntaxKind.DisableKeyword ) : Token( SyntaxKind.RestoreKeyword ),
+                    SeparatedList<ExpressionSyntax>( suppressedDiagnostics.Select( diagnosticCode => IdentifierName( diagnosticCode ) ) ),
+                    Token(SyntaxKind.EndOfDirectiveToken).WithTrailingTrivia(ElasticLineFeed),
+                    true );
+        }
+
         protected MethodDeclarationSyntax WithThrowNotSupportedExceptionBody( MethodDeclarationSyntax method, string message )
         {
             // Method does not have a body (e.g. because it's abstract) , so there is nothing to replace.
@@ -39,15 +98,19 @@ namespace Metalama.Framework.Engine.CompileTime
                 throw new ArgumentOutOfRangeException( nameof(method) );
             }
 
-            return this.RewriteThrowNotSupported(
-                method
-                    .WithBody( null )
-                    .WithExpressionBody( ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
-                    .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) )
-                    .WithModifiers( TokenList( method.Modifiers.Where( m => !m.IsKind( SyntaxKind.AsyncKeyword ) ) ) )
-                    .NormalizeWhitespace()
-                    .WithLeadingTrivia( method.GetLeadingTrivia() )
-                    .WithTrailingTrivia( LineFeed, LineFeed ) );
+            return
+                this.RewriteThrowNotSupported(
+                    WithSupressedDiagnostics(
+                        method
+                            .WithBody( null )
+                            .WithExpressionBody( ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
+                            .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) )
+                            .NormalizeWhitespace()
+                            .WithLeadingTrivia( method.GetLeadingTrivia() )
+                            .WithTrailingTrivia( LineFeed, LineFeed ),
+                        method.Modifiers.Any( x => x.IsKind( SyntaxKind.AsyncKeyword ) )
+                        ? new[] { "CS1998" }
+                        : Array.Empty<string>() ) );
         }
 
         protected BasePropertyDeclarationSyntax WithThrowNotSupportedExceptionBody( BasePropertyDeclarationSyntax memberDeclaration, string message )

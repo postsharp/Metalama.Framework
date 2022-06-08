@@ -75,7 +75,11 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override bool IsExplicitInterfaceImplementation => !this.MethodSymbol.ExplicitInterfaceImplementations.IsEmpty;
 
-        public override bool IsAsync => this.MethodSymbol.IsAsync;
+        [Memo]
+        public override bool IsAsync => 
+            this.MethodSymbol.MetadataToken == 0
+                ? this.MethodSymbol.IsAsync
+                : this.MethodSymbol.GetAttributes().Any( a => a.AttributeConstructor?.ContainingType.Name == nameof(System.Runtime.CompilerServices.AsyncStateMachineAttribute));
 
         public IMethod? OverriddenMethod
         {

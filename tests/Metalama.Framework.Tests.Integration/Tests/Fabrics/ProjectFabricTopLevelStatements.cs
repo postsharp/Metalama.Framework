@@ -12,7 +12,9 @@ using Metalama.TestFramework;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.Target_TopLevelStatements
 {
-    // Tests single OverrideMethod aspect with trivial template on methods with trivial bodies.
+    /*
+     * Tests that applying an override on all methods does not target the method containing top-level statements.
+     */
 
     public class OverrideAttribute : OverrideMethodAspect
     {
