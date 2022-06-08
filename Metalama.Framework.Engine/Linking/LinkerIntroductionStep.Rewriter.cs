@@ -719,11 +719,25 @@ namespace Metalama.Framework.Engine.Linking
                     return node.WithSynthesizedSetter();
                 }
 
+                node = (PropertyDeclarationSyntax) this.VisitPropertyDeclaration( node )!;
+
                 // Rewrite attributes.
                 var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, node.AttributeLists );
                 node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
 
-                return (PropertyDeclarationSyntax) this.VisitPropertyDeclaration( node )!;
+                return node;
+            }
+
+            public override SyntaxNode? VisitAccessorDeclaration( AccessorDeclarationSyntax node )
+            {
+                var originalNode = node;
+                node = (AccessorDeclarationSyntax) base.VisitAccessorDeclaration( node )!;
+
+                // Rewrite attributes.
+                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, node.AttributeLists );
+                node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
+
+                return node;
             }
 
             private EventDeclarationSyntax VisitEventDeclarationCore( EventDeclarationSyntax node )
