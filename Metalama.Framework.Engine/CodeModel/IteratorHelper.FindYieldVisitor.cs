@@ -23,6 +23,26 @@ namespace Metalama.Framework.Engine.CodeModel
 
             public override bool VisitBlock( BlockSyntax node ) => node.Statements.Any( s => this.Visit( s ) );
 
+            public override bool VisitForEachStatement( ForEachStatementSyntax node ) => this.Visit( node.Statement );
+
+            public override bool VisitForStatement( ForStatementSyntax node ) => this.Visit( node.Statement );
+
+            public override bool VisitWhileStatement( WhileStatementSyntax node ) => this.Visit( node.Statement );
+
+            public override bool VisitDoStatement( DoStatementSyntax node ) => this.Visit( node.Statement );
+
+            public override bool VisitSwitchStatement( SwitchStatementSyntax node ) => node.Sections.Any( s => this.Visit( s ) );
+
+            public override bool VisitSwitchSection( SwitchSectionSyntax node ) => node.Statements.Any( s => this.Visit( s ) );
+
+            // TODO: Probably something else.
+
+            public override bool VisitIfStatement( IfStatementSyntax node )
+                => this.Visit( node.Statement ) || this.Visit( node.Else );
+
+            public override bool VisitElseClause( ElseClauseSyntax node )
+                => this.Visit( node.Statement );
+
             public override bool DefaultVisit( SyntaxNode node ) => false;
         }
     }

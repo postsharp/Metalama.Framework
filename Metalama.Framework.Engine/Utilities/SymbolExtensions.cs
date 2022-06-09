@@ -305,5 +305,10 @@ namespace Metalama.Framework.Engine.Utilities
 
             return new FrameworkName( frameworkNameString );
         }
+
+        public static bool IsCompilerGenerated( this ISymbol declaration )
+        {
+            return declaration.GetAttributes().Any( a => a.AttributeConstructor?.ContainingType.Name == nameof( System.Runtime.CompilerServices.CompilerGeneratedAttribute ) ) == true;
+        }
     }
 }

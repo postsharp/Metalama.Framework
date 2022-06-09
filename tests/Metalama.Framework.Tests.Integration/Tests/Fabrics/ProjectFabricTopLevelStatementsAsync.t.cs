@@ -1,4 +1,4 @@
-// --- ProjectFabricTopLevelStatements.cs ---
+// --- ProjectFabricTopLevelStatementsAsync.cs ---
 
 using System;
 using System.Linq;
@@ -6,11 +6,11 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Fabrics;
 using Metalama.TestFramework;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.Fabrics.ProjectFabricTopLevelStatements
+namespace Metalama.Framework.IntegrationTests.Aspects.Fabrics.ProjectFabricTopLevelStatementsAsync
 {
 #pragma warning disable CS0067
     /*
-     * Tests that applying an override on all methods does not target the Main method containing top-level statements.
+     * Tests that applying an override on all methods does not target the async Main method containing top-level statements.
      */
 
     public class OverrideAttribute : OverrideMethodAspect
@@ -31,8 +31,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Fabrics.ProjectFabricTopLe
 #pragma warning restore CS0067
 }
     
-    // --- __TopLevelStatements.cs ---
+    // --- __TopLevelStatementsAsync.cs ---
     
     using System;
+    using System.Threading.Tasks;
     
-    Console.WriteLine("TopLevelStatement");
+    Console.WriteLine("TopLevelStatement1");
+
+await Task.Yield();
+
+Console.WriteLine("TopLevelStatement2");

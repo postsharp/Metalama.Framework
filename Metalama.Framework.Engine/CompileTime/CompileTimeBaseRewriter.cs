@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -46,11 +47,9 @@ namespace Metalama.Framework.Engine.CompileTime
                             method
                                 .GetLeadingTrivia()
                                 .Add( Trivia( GetPragmaTrivia( true ) ) ) )
-                        .WithBody(
-                            method.Body
-                            .WithLeadingTrivia(
-                                TriviaList( Trivia( GetPragmaTrivia( false ) ) )
-                                .AddRange( method.Body.GetLeadingTrivia() ) ) );
+                        .WithTrailingTrivia(
+                            TriviaList( Trivia( GetPragmaTrivia( false ) ) )
+                            .AddRange( method.GetTrailingTrivia() ) );
 
                 case MethodDeclarationSyntax { ExpressionBody: { } } method:
                     return (T) (MemberDeclarationSyntax) method
@@ -58,11 +57,9 @@ namespace Metalama.Framework.Engine.CompileTime
                             method
                                 .GetLeadingTrivia()
                                 .Add( Trivia( GetPragmaTrivia( true ) ) ) )
-                        .WithExpressionBody(
-                            method.ExpressionBody
-                            .WithLeadingTrivia(
-                                TriviaList( Trivia( GetPragmaTrivia( false ) ) )
-                                .AddRange( method.ExpressionBody.GetLeadingTrivia() ) ) );
+                        .WithTrailingTrivia(
+                            TriviaList( Trivia( GetPragmaTrivia( false ) ) )
+                            .AddRange( method.GetTrailingTrivia() ) );
 
                 case MethodDeclarationSyntax method:
                     return (T) (MemberDeclarationSyntax) method
@@ -98,19 +95,44 @@ namespace Metalama.Framework.Engine.CompileTime
                 throw new ArgumentOutOfRangeException( nameof(method) );
             }
 
+            // Otherwise we need to preserve "asyncness" and "iteratorness" of the method.
+
+            var isAsync = method.Modifiers.Any( x => x.IsKind( SyntaxKind.AsyncKeyword ) );
+            var isIterator = IteratorHelper.IsIterator( method );
+
+            var suppressedWarnings = new System.Collections.Generic.List<string>();
+
+            if ( isAsync )
+            {
+                // Throwing async method does not have an await.
+                suppressedWarnings.Add( "CS1998" );
+            }
+
+            if ( isIterator )
+            {
+                // Throwing iterator has unreachable yield break.
+                suppressedWarnings.Add( "CS0162" );
+            }
+
             return
                 this.RewriteThrowNotSupported(
                     WithSupressedDiagnostics(
                         method
-                            .WithBody( null )
-                            .WithExpressionBody( ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
+                            .WithBody(
+                                isIterator
+                                ? Block(
+                                    ThrowStatement( GetNotSupportedExceptionExpression( message ).Expression ),
+                                    YieldStatement( SyntaxKind.YieldBreakStatement ) )
+                                : null )
+                            .WithExpressionBody(
+                                isIterator
+                                ? null
+                                : ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
                             .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) )
                             .NormalizeWhitespace()
                             .WithLeadingTrivia( method.GetLeadingTrivia() )
                             .WithTrailingTrivia( LineFeed, LineFeed ),
-                        method.Modifiers.Any( x => x.IsKind( SyntaxKind.AsyncKeyword ) )
-                        ? new[] { "CS1998" }
-                        : Array.Empty<string>() ) );
+                        suppressedWarnings.ToArray() ) );
         }
 
         protected BasePropertyDeclarationSyntax WithThrowNotSupportedExceptionBody( BasePropertyDeclarationSyntax memberDeclaration, string message )

@@ -1,5 +1,5 @@
 ﻿#if TEST_OPTIONS
-// @Include(Include\__TopLevelStatements.cs)
+// @Include(Include\__TopLevelStatementsAsync.cs)
 // @OutputAllSyntaxTrees
 // @ExecuteProgram
 #endif
@@ -10,10 +10,10 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Fabrics;
 using Metalama.TestFramework;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.Fabrics.ProjectFabricTopLevelStatements
+namespace Metalama.Framework.IntegrationTests.Aspects.Fabrics.ProjectFabricTopLevelStatementsAsync
 {
     /*
-     * Tests that applying an override on all methods does not target the Main method containing top-level statements.
+     * Tests that applying an override on all methods does not target the async Main method containing top-level statements.
      */
 
     public class OverrideAttribute : OverrideMethodAspect
