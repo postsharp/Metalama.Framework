@@ -145,6 +145,11 @@ namespace Metalama.TestFramework
         public bool? ExecuteProgram { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indiciating which type of the output assembly should be used for the test. Currently valid values are <c>Dll</c> <c>Exe</c> (default).
+        /// </summary>
+        public string? OutputAssemblyType { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether the test should be executed even if the input compilation has errors.
         /// To enable this option in a test, add this comment to your test file: <c>// @AcceptInvalidInput</c>.
         /// </summary>
@@ -217,6 +222,8 @@ namespace Metalama.TestFramework
             this.AllowCompileTimeDynamicCode ??= baseOptions.AllowCompileTimeDynamicCode;
 
             this.ExecuteProgram ??= baseOptions.ExecuteProgram;
+
+            this.OutputAssemblyType ??= baseOptions.OutputAssemblyType;
 
             this.AcceptInvalidInput ??= baseOptions.AcceptInvalidInput;
 
@@ -352,6 +359,11 @@ namespace Metalama.TestFramework
 
                     case "ExecuteProgram":
                         this.ExecuteProgram = true;
+
+                        break;
+
+                    case "OutputAssemblyType":
+                        this.OutputAssemblyType = optionArg;
 
                         break;
 

@@ -1,7 +1,7 @@
 ﻿#if TEST_OPTIONS
 // @Include(Include\__TopLevelStatements.cs)
 // @OutputAllSyntaxTrees
-// @ExecuteProgram
+// @OutputAssemblyType(Exe)
 #endif
 
 using System;

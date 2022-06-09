@@ -14,11 +14,11 @@ internal sealed class MethodUpdatableCollection : NonUniquelyNamedMemberUpdatabl
 
     protected override Func<ISymbol, bool> Predicate
         => m => m.Kind == SymbolKind.Method &&
-                m is not { Name: "<Main>$", ContainingType: { Name: "Program" } } &&
                 ((IMethodSymbol) m).MethodKind is not (MethodKind.Constructor
                 or MethodKind.StaticConstructor or MethodKind.PropertyGet
                 or MethodKind.PropertySet
                 or MethodKind.EventAdd
                 or MethodKind.EventRemove
-                or MethodKind.EventRaise);
+                or MethodKind.EventRaise) &&
+                m is not { Name: "<Main>$", ContainingType: { Name: "Program" } };
 }
