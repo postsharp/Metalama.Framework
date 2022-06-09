@@ -9,6 +9,7 @@ namespace Metalama.TestFramework.XunitFramework;
 internal class Metrics
 {
     private readonly Metrics? _parent;
+    private readonly object _eventLock;
 
     private int _testsRun;
     private int _testFailed;
@@ -17,9 +18,15 @@ internal class Metrics
     private int _testsStarted;
     private long _executionTime;
 
-    public Metrics( Metrics? parent = null )
+    public Metrics( Metrics parent )
     {
         this._parent = parent;
+        this._eventLock = parent._eventLock;
+    }
+
+    public Metrics( object eventLock )
+    {
+        this._eventLock = eventLock;
     }
 
     public int TestsRun => this._testsRun;
@@ -41,7 +48,10 @@ internal class Metrics
 
         if ( count == 0 )
         {
-            this.Finished?.Invoke();
+            lock ( this._eventLock )
+            {
+                this.Finished?.Invoke();
+            }
         }
     }
 
@@ -49,7 +59,10 @@ internal class Metrics
     {
         if ( Interlocked.Increment( ref this._testsStarted ) == 1 )
         {
-            this.Started?.Invoke();
+            lock ( this._eventLock )
+            {
+                this.Started?.Invoke();
+            }
         }
 
         this._parent?.OnTestStarted();
@@ -59,7 +72,10 @@ internal class Metrics
     {
         if ( Interlocked.Decrement( ref this._testsRemaining ) == 0 )
         {
-            this.Finished?.Invoke();
+            lock ( this._eventLock )
+            {
+                this.Finished?.Invoke();
+            }
         }
 
         this._parent?.OnTestFinished();

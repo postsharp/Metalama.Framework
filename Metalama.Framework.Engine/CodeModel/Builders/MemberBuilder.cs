@@ -11,7 +11,6 @@ using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Project;
-using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -215,8 +214,5 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             return templateDriver.TryExpandDeclaration( expansionContext, Array.Empty<object>(), out expression );
         }
-
-        protected virtual SyntaxList<AttributeListSyntax> GetAttributeLists( in SyntaxGenerationContext syntaxGenerationContext )
-            => syntaxGenerationContext.SyntaxGenerator.AttributesForDeclaration( this );
     }
 }

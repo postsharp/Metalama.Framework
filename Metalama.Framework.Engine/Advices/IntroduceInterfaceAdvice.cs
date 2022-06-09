@@ -63,7 +63,7 @@ namespace Metalama.Framework.Engine.Advices
             // We introduce all interfaces except the base interfaces that were added before. That means that the previous introductions
             // have precedence.
             var interfacesToIntroduce =
-                new[] { (InterfaceType: this.InterfaceType, IsTopLevel: true) }
+                new[] { (this.InterfaceType, IsTopLevel: true) }
                     .Concat( this.InterfaceType.AllImplementedInterfaces.Select( i => (InterfaceType: i, IsTopLevel: false) ) )
                     .ToDictionary( x => x.InterfaceType, x => x.IsTopLevel, this.SourceCompilation.InvariantComparer );
 
@@ -217,7 +217,7 @@ namespace Metalama.Framework.Engine.Advices
                 [NotNullWhen( true )] out IEvent? aspectEvent,
                 [NotNullWhen( true )] out TemplateClassMember? templateClassMember )
             {
-                var @event = aspectType!.AllEvents.SingleOrDefault( e => e.SignatureEquals( interfaceEvent ) );
+                var @event = aspectType.AllEvents.SingleOrDefault( e => e.SignatureEquals( interfaceEvent ) );
 
                 if ( @event != null && TryGetInterfaceMemberTemplate( @event, out var classMember ) )
                 {

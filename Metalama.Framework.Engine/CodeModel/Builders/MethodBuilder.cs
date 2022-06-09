@@ -164,8 +164,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             var method =
                 MethodDeclaration(
-                    this.GetAttributeLists( context.SyntaxGenerationContext )
-                        .AddRange( context.SyntaxGenerator.AttributesForDeclaration( this.ReturnParameter, SyntaxKind.ReturnKeyword ) ),
+                    this.GetAttributeLists( context )
+                        .AddRange( this.ReturnParameter.GetAttributeLists( context ) ),
                     this.GetSyntaxModifierList(),
                     context.SyntaxGenerator.ReturnType( this ),
                     this.ExplicitInterfaceImplementations.Count > 0

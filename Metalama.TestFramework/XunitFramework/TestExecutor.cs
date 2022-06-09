@@ -59,10 +59,11 @@ namespace Metalama.TestFramework.XunitFramework
 
             var tasks = new ConcurrentDictionary<Task, Task>();
             var semaphore = new SemaphoreSlim( executionOptions.MaxParallelThreadsOrDefault() );
+            var eventLock = new object();
 
             foreach ( var collection in collections )
             {
-                var collectionMetrics = new Metrics();
+                var collectionMetrics = new Metrics( eventLock );
 
                 collectionMetrics.Started += () =>
                 {

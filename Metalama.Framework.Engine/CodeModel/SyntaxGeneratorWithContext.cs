@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -45,9 +46,12 @@ internal class SyntaxGeneratorWithContext : OurSyntaxGenerator
         return attributeSyntax;
     }
 
-    public SyntaxList<AttributeListSyntax> AttributesForDeclaration( IDeclaration declaration, SyntaxKind attributeTargetKind = SyntaxKind.None )
+    public SyntaxList<AttributeListSyntax> AttributesForDeclaration(
+        in Ref<IDeclaration> declaration,
+        CompilationModel compilation,
+        SyntaxKind attributeTargetKind = SyntaxKind.None )
     {
-        var attributes = declaration.GetCompilationModel().GetAttributeCollection( declaration.ToTypedRef() );
+        var attributes = compilation.GetAttributeCollection( declaration );
 
         if ( attributes.Count == 0 )
         {
@@ -59,7 +63,7 @@ internal class SyntaxGeneratorWithContext : OurSyntaxGenerator
 
             foreach ( var attribute in attributes )
             {
-                var attributeList = SyntaxFactory.AttributeList( SyntaxFactory.SingletonSeparatedList( this.Attribute( attribute.GetTarget( declaration.Compilation ) ) ) );
+                var attributeList = SyntaxFactory.AttributeList( SyntaxFactory.SingletonSeparatedList( this.Attribute( attribute.GetTarget( compilation ) ) ) );
 
                 if ( attributeTargetKind != SyntaxKind.None )
                 {

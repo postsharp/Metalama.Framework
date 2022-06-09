@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
@@ -87,12 +86,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
                 return true;
             }
-        }
-
-        protected override SyntaxList<AttributeListSyntax> GetAttributeLists( in SyntaxGenerationContext syntaxGenerationContext )
-        {
-            // TODO: 
-            return List<AttributeListSyntax>();
         }
     }
 }

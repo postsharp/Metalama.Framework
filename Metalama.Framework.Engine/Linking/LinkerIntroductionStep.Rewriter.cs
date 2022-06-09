@@ -348,7 +348,7 @@ namespace Metalama.Framework.Engine.Linking
                     }
 
                     // Rewrite attributes.
-                    var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, node.AttributeLists );
+                    var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
                     node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
 
                     return node;
@@ -625,7 +625,7 @@ namespace Metalama.Framework.Engine.Linking
                     foreach ( var variable in originalNode.Declaration.Variables )
                     {
                         var declaration = VariableDeclaration( node.Declaration.Type, SingletonSeparatedList( variable ) );
-                        var attributes = this.RewriteDeclarationAttributeLists( variable, node.AttributeLists );
+                        var attributes = this.RewriteDeclarationAttributeLists( variable, originalNode.AttributeLists );
 
                         var fieldDeclaration = FieldDeclaration( attributes.Attributes, node.Modifiers, declaration, Token( SyntaxKind.SemicolonToken ) )
                             .WithTrailingTrivia( ElasticLineFeed )
@@ -638,7 +638,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode.Declaration.Variables[0], node.AttributeLists );
+                    var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode.Declaration.Variables[0], originalNode.AttributeLists );
                     node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
 
                     return new[] { node.WithDeclaration( rewrittenDeclaration ) };
@@ -656,7 +656,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
 
                 // Rewrite attributes.
-                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, node.AttributeLists );
+                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
                 node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
 
                 return (ConstructorDeclarationSyntax) this.VisitConstructorDeclaration( node )!;
@@ -668,7 +668,7 @@ namespace Metalama.Framework.Engine.Linking
                 node = (MethodDeclarationSyntax) this.VisitMethodDeclaration( node )!;
 
                 // Rewrite attributes.
-                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, node.AttributeLists );
+                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
                 node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
 
                 return node;
@@ -680,7 +680,7 @@ namespace Metalama.Framework.Engine.Linking
                 node = (OperatorDeclarationSyntax) this.VisitOperatorDeclaration( node )!;
 
                 // Rewrite attributes.
-                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, node.AttributeLists );
+                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
                 node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
 
                 return node;
@@ -692,7 +692,7 @@ namespace Metalama.Framework.Engine.Linking
                 node = (ParameterSyntax) base.VisitParameter( node )!;
 
                 // Rewrite attributes.
-                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, node.AttributeLists );
+                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
                 node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
 
                 return node;
@@ -704,7 +704,7 @@ namespace Metalama.Framework.Engine.Linking
                 node = (TypeParameterSyntax) base.VisitTypeParameter( node )!;
 
                 // Rewrite attributes.
-                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, node.AttributeLists );
+                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
                 node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
 
                 return node;
@@ -722,7 +722,7 @@ namespace Metalama.Framework.Engine.Linking
                 node = (PropertyDeclarationSyntax) this.VisitPropertyDeclaration( node )!;
 
                 // Rewrite attributes.
-                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, node.AttributeLists );
+                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
                 node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
 
                 return node;
@@ -734,7 +734,7 @@ namespace Metalama.Framework.Engine.Linking
                 node = (AccessorDeclarationSyntax) base.VisitAccessorDeclaration( node )!;
 
                 // Rewrite attributes.
-                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, node.AttributeLists );
+                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
                 node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
 
                 return node;
@@ -746,7 +746,7 @@ namespace Metalama.Framework.Engine.Linking
                 node = (EventDeclarationSyntax) this.VisitEventDeclaration( node )!;
 
                 // Rewrite attributes.
-                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, node.AttributeLists );
+                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
                 node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
 
                 return node;
@@ -776,7 +776,7 @@ namespace Metalama.Framework.Engine.Linking
                     foreach ( var variable in originalNode.Declaration.Variables )
                     {
                         var declaration = VariableDeclaration( node.Declaration.Type, SingletonSeparatedList( variable ) );
-                        var attributes = this.RewriteDeclarationAttributeLists( variable, node.AttributeLists );
+                        var attributes = this.RewriteDeclarationAttributeLists( variable, originalNode.AttributeLists );
 
                         var eventDeclaration = EventFieldDeclaration(
                                 attributes.Attributes,
@@ -794,7 +794,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode.Declaration.Variables[0], node.AttributeLists );
+                    var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode.Declaration.Variables[0], originalNode.AttributeLists );
                     node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
 
                     return new[] { node.WithDeclaration( rewrittenDeclaration ) };

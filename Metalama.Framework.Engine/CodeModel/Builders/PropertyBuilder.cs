@@ -167,7 +167,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             // TODO: Indexers.
             var property =
                 PropertyDeclaration(
-                    this.GetAttributeLists( context.SyntaxGenerationContext ),
+                    this.GetAttributeLists( context ),
                     this.GetSyntaxModifierList(),
                     syntaxGenerator.Type( this.Type.GetSymbol() ),
                     this.ExplicitInterfaceImplementations.Count > 0

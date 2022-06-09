@@ -47,7 +47,7 @@ public partial class CompilationModel
     private TCollection GetMemberCollection<TKey, TDeclaration, TRef, TCollection>(
         ref ImmutableDictionary<TKey, TCollection> dictionary,
         bool requestMutableCollection,
-        TKey declaringTypeSymbol,
+        TKey declaration,
         Func<CompilationModel, TKey, TCollection> createCollection )
         where TDeclaration : class, IDeclaration
         where TCollection : UpdatableDeclarationCollection<TDeclaration, TRef>
@@ -64,22 +64,22 @@ public partial class CompilationModel
         // front-end collection is returned.
         var returnMutableCollection = requestMutableCollection || this.IsMutable;
 
-        if ( dictionary.TryGetValue( declaringTypeSymbol, out var collection ) )
+        if ( dictionary.TryGetValue( declaration, out var collection ) )
         {
             if ( collection.Compilation != this && returnMutableCollection )
             {
                 // The UpdateArray was created in another compilation snapshot, so it is not mutable in the current compilation.
                 // We need to take a copy of it.
                 collection = (TCollection) collection.Clone( this.Compilation );
-                dictionary = dictionary.SetItem( declaringTypeSymbol, collection );
+                dictionary = dictionary.SetItem( declaration, collection );
             }
 
             return collection;
         }
         else
         {
-            collection = createCollection( this.Compilation, declaringTypeSymbol );
-            dictionary = dictionary.SetItem( declaringTypeSymbol, collection );
+            collection = createCollection( this.Compilation, declaration );
+            dictionary = dictionary.SetItem( declaration, collection );
         }
 
         return collection;
@@ -136,7 +136,7 @@ public partial class CompilationModel
             ( c, t ) => new InterfaceUpdatableCollection( c, t ) );
     }
 
-    internal ParameterUpdatableCollection GetParameterCollection( Ref<IHasParameters> parent, bool mutable = false )
+    internal ParameterUpdatableCollection GetParameterCollection( in Ref<IHasParameters> parent, bool mutable = false )
     {
         return this.GetMemberCollection<Ref<IHasParameters>, IParameter, ParameterUpdatableCollection>(
             ref this._parameters,
@@ -145,7 +145,7 @@ public partial class CompilationModel
             ( c, t ) => new ParameterUpdatableCollection( c, t ) );
     }
 
-    internal AttributeUpdatableCollection GetAttributeCollection( Ref<IDeclaration> parent, bool mutable = false )
+    internal AttributeUpdatableCollection GetAttributeCollection( in Ref<IDeclaration> parent, bool mutable = false )
     {
         var moduleSymbol = parent.Target is ISourceAssemblySymbol ? this.RoslynCompilation.SourceModule : null;
 

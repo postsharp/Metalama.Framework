@@ -54,7 +54,6 @@ namespace Metalama.Framework.Engine.Aspects
 
         public string ShortName { get; }
 
-        /// <inheritdoc />
         public string DisplayName { get; }
 
         public string? Description { get; }
@@ -83,7 +82,6 @@ namespace Metalama.Framework.Engine.Aspects
 
         public Location? DiagnosticLocation { get; }
 
-        /// <inheritdoc />
         public bool IsAbstract { get; }
 
         public bool IsInherited { get; }

@@ -7,9 +7,6 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
-#if DEBUG
-using Metalama.Framework.Engine.Formatting;
-#endif
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Transformations;
@@ -20,6 +17,9 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+#if DEBUG
+using Metalama.Framework.Engine.Formatting;
+#endif
 
 namespace Metalama.Framework.Engine.Linking
 {
@@ -272,7 +272,8 @@ namespace Metalama.Framework.Engine.Linking
                             nameProvider,
                             lexicalScopeFactory,
                             syntaxGenerationContext,
-                            this._serviceProvider );
+                            this._serviceProvider,
+                            input.CompilationModel );
 
                         var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext );
 

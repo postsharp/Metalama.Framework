@@ -9,6 +9,8 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Metrics;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -110,5 +112,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public TExtension GetMetric<TExtension>()
             where TExtension : IMetric
             => this.GetCompilationModel().MetricManager.GetMetric<TExtension>( this );
+
+        protected virtual SyntaxKind AttributeTargetSyntaxKind => SyntaxKind.None;
+
+        public SyntaxList<AttributeListSyntax> GetAttributeLists( in MemberIntroductionContext context )
+            => context.SyntaxGenerator.AttributesForDeclaration( this.ToRef(), context.Compilation, this.AttributeTargetSyntaxKind );
     }
 }
