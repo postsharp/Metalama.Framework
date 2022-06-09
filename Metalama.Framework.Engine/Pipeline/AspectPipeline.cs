@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
@@ -374,8 +375,9 @@ namespace Metalama.Framework.Engine.Pipeline
             // Add services that have a reference to the compilation.
             pipelineConfiguration =
                 pipelineConfiguration.WithServiceProvider(
-                    pipelineConfiguration.ServiceProvider.WithService(
-                        new TemplateAttributeFactory( pipelineConfiguration.ServiceProvider, compilation.Compilation ) ) );
+                    pipelineConfiguration.ServiceProvider
+                        .WithService( new TemplateAttributeFactory( pipelineConfiguration.ServiceProvider, compilation.Compilation ) )
+                        .WithService( new AttributeClassificationService() ) );
 
             // When we reuse a pipeline configuration created from a different pipeline (e.g. design-time to code fix),
             // we need to substitute the code fix filter.

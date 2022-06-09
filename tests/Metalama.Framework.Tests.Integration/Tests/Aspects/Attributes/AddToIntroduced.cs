@@ -4,6 +4,8 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.AddToIntroduced;
 
+#pragma warning disable CS0067, CS0169
+
 [assembly: AspectOrder( typeof(AddAttributeAspect), typeof(IntroducingAspect) )]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.AddToIntroduced

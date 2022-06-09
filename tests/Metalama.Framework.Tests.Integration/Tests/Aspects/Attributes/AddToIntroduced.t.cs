@@ -1,7 +1,7 @@
-[IntroducingAspect, AddAttributeAspect]
+[IntroducingAspect]
+[AddAttributeAspect]
 internal class C
 {
-
 
     [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.AddToIntroduced.MyAttribute]
     private global::System.Int32 _field;

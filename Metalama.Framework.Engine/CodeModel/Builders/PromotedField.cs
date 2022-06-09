@@ -6,8 +6,10 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
@@ -19,7 +21,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override Writeability Writeability => this._field.Writeability;
 
-        public PromotedField( Advice advice, IField field, IObjectReader tags ) : base(
+        public PromotedField( IServiceProvider serviceProvider, Advice advice, IField field, IObjectReader tags ) : base(
             advice,
             field.DeclaringType,
             field.Name,
@@ -39,9 +41,17 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             this.GetMethod.AssertNotNull().Accessibility = this._field.Accessibility;
             this.SetMethod.AssertNotNull().Accessibility = this._field.Accessibility;
 
-            foreach ( var attribute in field.Attributes )
+            if ( field.Attributes.Count > 0 )
             {
-                this.AddAttribute( attribute.ToAttributeConstruction() );
+                var classificationService = serviceProvider.GetRequiredService<AttributeClassificationService>();
+
+                foreach ( var attribute in field.Attributes )
+                {
+                    if ( classificationService.MustMoveFromFieldToProperty( attribute.Type.GetSymbol() ) )
+                    {
+                        this.AddAttribute( attribute.ToAttributeConstruction() );
+                    }
+                }
             }
         }
 

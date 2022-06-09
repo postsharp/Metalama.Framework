@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.Advices
                     return AdviceResult.Create( new FilterPropertyTransformation( this, property ) );
 
                 case IField field:
-                    var promotedField = new PromotedField( this, field, ObjectReader.Empty );
+                    var promotedField = new PromotedField( serviceProvider, this, field, ObjectReader.Empty );
 
                     return AdviceResult.Create(
                         promotedField,

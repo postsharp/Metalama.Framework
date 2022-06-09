@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Microsoft.CodeAnalysis;
 using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
@@ -123,6 +124,31 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
             this._logger.WriteLine( "Actual: " + typeOf );
 
             Assert.Equal( expectedTypeOf, typeOf );
+        }
+
+        [Theory]
+        [InlineData( "0", "0" )]
+        [InlineData( "null", "default(global::System.Object)" )]
+        [InlineData( "typeof(string)", "typeof(global::System.String)" )]
+        [InlineData( "DayOfWeek.Monday", "global::System.DayOfWeek.Monday" )]
+        [InlineData( "new[] { 0 }", "new global::System.Int32[]{0}" )]
+        [InlineData( "new[] { (string?) null }", "new global::System.String[]{null}" )]
+        [InlineData( "new[] { typeof(string) }", "new global::System.Type[]{typeof(global::System.String)}" )]
+        [InlineData( "new[] { DayOfWeek.Monday }", "new global::System.DayOfWeek[]{global::System.DayOfWeek.Monday}" )]
+        public void AttributeValue( string inputSyntax, string expectedOutputSyntax )
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code =
+                $"using System; class MyAttribute : Attribute {{ public MyAttribute( object value ) {{}} }} [MyAttribute( {inputSyntax} )] class C {{}} ";
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var syntaxGenerationContext = SyntaxGenerationContext.Create( testContext.ServiceProvider, compilation.RoslynCompilation );
+            var syntaxGenerator = new SyntaxGeneratorWithContext( OurSyntaxGenerator.Default, syntaxGenerationContext );
+            var type = compilation.Types.OfName( "C" ).Single();
+            var attribute = type.Attributes.Single();
+            var codeModelOutput = syntaxGenerator.Attribute( attribute ).ArgumentList!.Arguments[0].NormalizeWhitespace().ToFullString();
+            Assert.Equal( expectedOutputSyntax, codeModelOutput );
         }
     }
 }

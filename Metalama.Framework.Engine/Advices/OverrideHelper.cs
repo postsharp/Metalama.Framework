@@ -5,12 +5,14 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Transformations;
+using System;
 
 namespace Metalama.Framework.Engine.Advices
 {
     internal static class OverrideHelper
     {
         public static ITransformation[] OverrideProperty(
+            IServiceProvider serviceProvider,
             Advice advice,
             IFieldOrPropertyOrIndexer targetDeclaration,
             BoundTemplateMethod getTemplate,
@@ -19,7 +21,7 @@ namespace Metalama.Framework.Engine.Advices
         {
             if ( targetDeclaration is IField field )
             {
-                var promotedField = new PromotedField( advice, field, tags );
+                var promotedField = new PromotedField( serviceProvider, advice, field, tags );
 
                 return new ITransformation[] { promotedField, new OverridePropertyTransformation( advice, promotedField, getTemplate, setTemplate, tags ) };
             }

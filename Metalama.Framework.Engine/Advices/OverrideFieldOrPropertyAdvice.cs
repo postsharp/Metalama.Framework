@@ -43,6 +43,7 @@ namespace Metalama.Framework.Engine.Advices
 
             return AdviceResult.Create(
                 OverrideHelper.OverrideProperty(
+                    serviceProvider,
                     this,
                     targetDeclaration,
                     this.GetTemplate,

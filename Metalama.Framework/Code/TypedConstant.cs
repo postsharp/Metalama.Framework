@@ -4,7 +4,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.SyntaxBuilders;
 using System;
-using System.Collections.Generic;
+using System.Collections.Immutable;
 
 namespace Metalama.Framework.Code
 {
@@ -82,7 +82,7 @@ namespace Metalama.Framework.Code
         /// For enum values whose type is compile-time, <see cref="Value"/> is of enum type.
         /// </para>
         /// <para>
-        /// Arrays are represented as an <see cref="IReadOnlyList{T}" />.
+        /// The type <c>ImmutableArray&gt;TypedConstant&gt;</c> is used to represent an array. The <see cref="Values"/> is also set in this case.
         /// </para>
         /// </remarks>
         public object? Value
@@ -94,6 +94,8 @@ namespace Metalama.Framework.Code
                 return this._value;
             }
         }
+
+        public ImmutableArray<TypedConstant> Values => (this.Value as ImmutableArray<TypedConstant>?).GetValueOrDefault();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TypedConstant"/> struct that represents the fact that the value

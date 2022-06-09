@@ -227,6 +227,7 @@ namespace Metalama.Framework.Engine.Advices
 
                             var overrideTransformations =
                                 OverrideHelper.OverrideProperty(
+                                    serviceProvider,
                                     this,
                                     this.MemberBuilder,
                                     this._getTemplate,
