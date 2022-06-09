@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -31,10 +32,10 @@ namespace Metalama.Framework.Engine.CompileTime
             where T : SyntaxNode
             => node;
 
-        private static T WithSupressedDiagnostics<T>(T member, params string[] suppressedDiagnostics )
+        private static T WithSupressedDiagnostics<T>( T member, params string[] suppressedDiagnostics )
             where T : MemberDeclarationSyntax
         {
-            if (suppressedDiagnostics.Length == 0)
+            if ( suppressedDiagnostics.Length == 0 )
             {
                 return member;
             }
@@ -42,14 +43,14 @@ namespace Metalama.Framework.Engine.CompileTime
             switch ( member )
             {
                 case MethodDeclarationSyntax { Body: { } } method:
-                    return (T)(MemberDeclarationSyntax)method
+                    return (T) (MemberDeclarationSyntax) method
                         .WithLeadingTrivia(
                             method
                                 .GetLeadingTrivia()
                                 .Add( Trivia( GetPragmaTrivia( true ) ) ) )
                         .WithTrailingTrivia(
                             TriviaList( Trivia( GetPragmaTrivia( false ) ) )
-                            .AddRange( method.GetTrailingTrivia() ) );
+                                .AddRange( method.GetTrailingTrivia() ) );
 
                 case MethodDeclarationSyntax { ExpressionBody: { } } method:
                     return (T) (MemberDeclarationSyntax) method
@@ -59,7 +60,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                 .Add( Trivia( GetPragmaTrivia( true ) ) ) )
                         .WithTrailingTrivia(
                             TriviaList( Trivia( GetPragmaTrivia( false ) ) )
-                            .AddRange( method.GetTrailingTrivia() ) );
+                                .AddRange( method.GetTrailingTrivia() ) );
 
                 case MethodDeclarationSyntax method:
                     return (T) (MemberDeclarationSyntax) method
@@ -69,7 +70,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                 .Add( Trivia( GetPragmaTrivia( true ) ) ) )
                         .WithTrailingTrivia(
                             TriviaList( Trivia( GetPragmaTrivia( false ) ) )
-                            .AddRange( method.GetTrailingTrivia() ) );
+                                .AddRange( method.GetTrailingTrivia() ) );
 
                 default:
                     throw new AssertionFailedException();
@@ -77,12 +78,12 @@ namespace Metalama.Framework.Engine.CompileTime
 
             StructuredTriviaSyntax GetPragmaTrivia( bool disable )
                 => PragmaWarningDirectiveTrivia(
-                    Token(SyntaxKind.HashToken).WithLeadingTrivia(ElasticLineFeed),
-                    Token(SyntaxKind.PragmaKeyword),
-                    Token(SyntaxKind.WarningKeyword),
+                    Token( SyntaxKind.HashToken ).WithLeadingTrivia( ElasticLineFeed ),
+                    Token( SyntaxKind.PragmaKeyword ),
+                    Token( SyntaxKind.WarningKeyword ),
                     disable ? Token( SyntaxKind.DisableKeyword ) : Token( SyntaxKind.RestoreKeyword ),
                     SeparatedList<ExpressionSyntax>( suppressedDiagnostics.Select( diagnosticCode => IdentifierName( diagnosticCode ) ) ),
-                    Token(SyntaxKind.EndOfDirectiveToken).WithTrailingTrivia(ElasticLineFeed),
+                    Token( SyntaxKind.EndOfDirectiveToken ).WithTrailingTrivia( ElasticLineFeed ),
                     true );
         }
 
@@ -100,7 +101,7 @@ namespace Metalama.Framework.Engine.CompileTime
             var isAsync = method.Modifiers.Any( x => x.IsKind( SyntaxKind.AsyncKeyword ) );
             var isIterator = IteratorHelper.IsIterator( method );
 
-            var suppressedWarnings = new System.Collections.Generic.List<string>();
+            var suppressedWarnings = new List<string>();
 
             if ( isAsync )
             {
@@ -120,14 +121,14 @@ namespace Metalama.Framework.Engine.CompileTime
                         method
                             .WithBody(
                                 isIterator
-                                ? Block(
-                                    ThrowStatement( GetNotSupportedExceptionExpression( message ).Expression ),
-                                    YieldStatement( SyntaxKind.YieldBreakStatement ) )
-                                : null )
+                                    ? Block(
+                                        ThrowStatement( GetNotSupportedExceptionExpression( message ).Expression ),
+                                        YieldStatement( SyntaxKind.YieldBreakStatement ) )
+                                    : null )
                             .WithExpressionBody(
                                 isIterator
-                                ? null
-                                : ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
+                                    ? null
+                                    : ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
                             .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) )
                             .NormalizeWhitespace()
                             .WithLeadingTrivia( method.GetLeadingTrivia() )

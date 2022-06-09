@@ -5,7 +5,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Templating;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Advices
 {
@@ -68,8 +67,7 @@ namespace Metalama.Framework.Engine.Advices
             if ( fieldTemplate.IsNotNull )
             {
                 // Initializer template is compiled into a template for the field.
-                var templateName = TemplateNameHelper.GetCompiledTemplateName(
-                    fieldTemplate.Declaration.AssertNotNull().GetSymbol().AssertNotNull() );
+                var templateName = TemplateNameHelper.GetCompiledTemplateName( fieldTemplate.Declaration.AssertNotNull().GetSymbol().AssertNotNull() );
 
                 if ( fieldTemplate.TemplateClassMember.TemplateClass.AspectType.GetMethod( templateName ) != null )
                 {
@@ -91,8 +89,7 @@ namespace Metalama.Framework.Engine.Advices
             if ( eventFieldTemplate.IsNotNull )
             {
                 // Initializer template is compiled into a template for event.
-                var templateName = TemplateNameHelper.GetCompiledTemplateName(
-                    eventFieldTemplate.Declaration.AssertNotNull().GetSymbol().AssertNotNull() );
+                var templateName = TemplateNameHelper.GetCompiledTemplateName( eventFieldTemplate.Declaration.AssertNotNull().GetSymbol().AssertNotNull() );
 
                 if ( eventFieldTemplate.TemplateClassMember.TemplateClass.AspectType.GetMethod( templateName ) != null )
                 {
@@ -114,8 +111,7 @@ namespace Metalama.Framework.Engine.Advices
             if ( propertyTemplate.IsNotNull )
             {
                 // Initializer template is compiled into a template for property.
-                var templateName = TemplateNameHelper.GetCompiledTemplateName( 
-                    propertyTemplate.Declaration.AssertNotNull().GetSymbol().AssertNotNull() );
+                var templateName = TemplateNameHelper.GetCompiledTemplateName( propertyTemplate.Declaration.AssertNotNull().GetSymbol().AssertNotNull() );
 
                 if ( propertyTemplate.TemplateClassMember.TemplateClass.AspectType.GetMethod( templateName ) != null )
                 {

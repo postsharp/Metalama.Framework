@@ -7,13 +7,14 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Metalama.Framework.Engine.Utilities
 {
     internal static class DeclarationExtensions
     {
         public static bool IsEventField( this IEvent @event )
-        {   
+        {
             if ( @event is Event codeEvent )
             {
                 var eventSymbol = codeEvent.GetSymbol().AssertNotNull();
@@ -23,7 +24,7 @@ namespace Metalama.Framework.Engine.Utilities
                 {
                     VariableDeclaratorSyntax => true,
                     { } => false,
-                    _ => @event.AddMethod.IsCompilerGenerated() && @event.RemoveMethod.IsCompilerGenerated(),
+                    _ => @event.AddMethod.IsCompilerGenerated() && @event.RemoveMethod.IsCompilerGenerated()
                 };
             }
             else if ( @event is BuiltEvent builtEvent )
@@ -40,9 +41,10 @@ namespace Metalama.Framework.Engine.Utilities
             }
         }
 
-        public static bool IsCompilerGenerated( this IDeclaration declaration)
+        public static bool IsCompilerGenerated( this IDeclaration declaration )
         {
-            return declaration.GetSymbol()?.GetAttributes().Any( a => a.AttributeConstructor?.ContainingType.Name == nameof( System.Runtime.CompilerServices.CompilerGeneratedAttribute ) ) == true;
+            return declaration.GetSymbol()?.GetAttributes().Any( a => a.AttributeConstructor?.ContainingType.Name == nameof(CompilerGeneratedAttribute) )
+                   == true;
         }
 
         /// <summary>

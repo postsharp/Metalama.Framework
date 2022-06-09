@@ -71,14 +71,14 @@ namespace Metalama.Framework.Engine.CodeModel
             => method switch
             {
                 { Body: { } body } => FindYieldVisitor.Instance.VisitBlock( body ),
-                _ => false,
+                _ => false
             };
 
-        public static bool IsIterator( AccessorDeclarationSyntax accessor)
+        public static bool IsIterator( AccessorDeclarationSyntax accessor )
             => accessor switch
             {
                 { Body: { } body } => FindYieldVisitor.Instance.VisitBlock( body ),
-                _ => false,
+                _ => false
             };
 
         // We use the Impl suffix to resolve an ambiguity with the public API.

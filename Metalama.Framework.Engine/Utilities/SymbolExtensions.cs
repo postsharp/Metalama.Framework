@@ -7,6 +7,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.Versioning;
 using RoslynSpecialType = Microsoft.CodeAnalysis.SpecialType;
 using SpecialType = Metalama.Framework.Code.SpecialType;
@@ -308,7 +309,7 @@ namespace Metalama.Framework.Engine.Utilities
 
         public static bool IsCompilerGenerated( this ISymbol declaration )
         {
-            return declaration.GetAttributes().Any( a => a.AttributeConstructor?.ContainingType.Name == nameof( System.Runtime.CompilerServices.CompilerGeneratedAttribute ) ) == true;
+            return declaration.GetAttributes().Any( a => a.AttributeConstructor?.ContainingType.Name == nameof(CompilerGeneratedAttribute) ) == true;
         }
     }
 }

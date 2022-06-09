@@ -21,11 +21,11 @@ namespace Metalama.Framework.Engine.CodeModel
 
             public override bool VisitYieldStatement( YieldStatementSyntax node ) => true;
 
-            public override bool DefaultVisit( SyntaxNode node ) =>
-                node switch
+            public override bool DefaultVisit( SyntaxNode node )
+                => node switch
                 {
                     ExpressionSyntax => false,
-                    _ => node.ChildNodes().Any( x => this.Visit( x ) ),
+                    _ => node.ChildNodes().Any( x => this.Visit( x ) )
                 };
         }
     }
