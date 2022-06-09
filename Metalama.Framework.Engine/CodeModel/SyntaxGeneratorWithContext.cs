@@ -11,5 +11,4 @@ internal class SyntaxGeneratorWithContext : OurSyntaxGenerator
     }
     
     // This class would have members that require context, but we don't have any now.
-
 }
