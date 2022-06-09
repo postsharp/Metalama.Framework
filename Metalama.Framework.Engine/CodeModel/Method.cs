@@ -16,6 +16,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel
@@ -75,7 +76,11 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override bool IsExplicitInterfaceImplementation => !this.MethodSymbol.ExplicitInterfaceImplementations.IsEmpty;
 
-        public override bool IsAsync => this.MethodSymbol.IsAsync;
+        [Memo]
+        public override bool IsAsync
+            => this.MethodSymbol.MetadataToken == 0
+                ? this.MethodSymbol.IsAsync
+                : this.MethodSymbol.GetAttributes().Any( a => a.AttributeConstructor?.ContainingType.Name == nameof(AsyncStateMachineAttribute) );
 
         public IMethod? OverriddenMethod
         {

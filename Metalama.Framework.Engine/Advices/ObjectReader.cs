@@ -60,8 +60,10 @@ namespace Metalama.Framework.Engine.Advices
             {
                 case 0:
                     return Empty;
+
                 case 1:
                     return readers[nonEmptyIndex].AssertNotNull();
+
                 default:
                     return new MergeWrapper( readers );
             }
