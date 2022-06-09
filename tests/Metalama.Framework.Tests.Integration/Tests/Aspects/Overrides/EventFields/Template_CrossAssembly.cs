@@ -6,6 +6,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+#pragma warning disable CS0067
+
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.EventFields.Template_CrossAssembly
 {
     // <target>
