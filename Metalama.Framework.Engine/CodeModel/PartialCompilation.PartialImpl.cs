@@ -49,7 +49,6 @@ namespace Metalama.Framework.Engine.CodeModel
                 this.CheckTrees();
             }
 
-#pragma warning disable CA1822
             private void CheckTrees()
             {
 #if DEBUG
@@ -59,7 +58,6 @@ namespace Metalama.Framework.Engine.CodeModel
                 }
 #endif
             }
-#pragma warning restore CA1822
 
             public override ImmutableDictionary<string, SyntaxTree> SyntaxTrees => this._syntaxTrees;
 
