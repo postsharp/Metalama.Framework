@@ -497,7 +497,7 @@ namespace Metalama.TestFramework
                 options.OutputAssemblyType switch
                 {
                     "Exe" => OutputKind.ConsoleApplication,
-                    _ => OutputKind.DynamicallyLinkedLibrary,
+                    _ => OutputKind.DynamicallyLinkedLibrary
                 },
                 nullableContextOptions: options.NullabilityDisabled == true ? NullableContextOptions.Disable : NullableContextOptions.Enable );
 

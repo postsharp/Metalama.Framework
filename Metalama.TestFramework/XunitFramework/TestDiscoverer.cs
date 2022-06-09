@@ -161,12 +161,12 @@ namespace Metalama.TestFramework.XunitFramework
 
                     var testCase = new TestCase( factory, PathUtil.GetRelativePath( projectProperties.ProjectDirectory, testPath ) );
 
-                    this._messageSink?.Trace( 
+                    this._messageSink?.Trace(
                         $"    {((ITestCase) testCase).TestMethod.TestClass.TestCollection.TestAssembly.Assembly.Name} " +
                         $"/ {((ITestCase) testCase).TestMethod.TestClass.TestCollection.DisplayName}" +
                         $"/ {((ITestCase) testCase).TestMethod.TestClass.Class.Name} " +
                         $"/ {((ITestCase) testCase).TestMethod.Method.Name} " +
-                        $"/ {((ITestCase)testCase).DisplayName}" );
+                        $"/ {((ITestCase) testCase).DisplayName}" );
 
                     onTestCaseDiscovered( testCase );
                 }
