@@ -190,7 +190,7 @@ public partial class CompilationModel
             this.RemoveAttributes( removeAttributes );
         }
 
-        if ( transformation is DeclarationBuilder builder )
+        if ( transformation is IDeclarationBuilder builder )
         {
             builder.Freeze();
 
