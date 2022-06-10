@@ -198,7 +198,7 @@ namespace Metalama.Framework.Engine.Transformations
                     MetaApiStaticity.Default ) );
 
             var expansionContext = new TemplateExpansionContext(
-                this.Advice.Aspect.Aspect,
+                this.Advice.TemplateInstance.Instance,
                 metaApi,
                 (CompilationModel) this.OverriddenDeclaration.Compilation,
                 context.LexicalScopeProvider.GetLexicalScope( accessor ),

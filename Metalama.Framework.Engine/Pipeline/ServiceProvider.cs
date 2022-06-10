@@ -9,6 +9,8 @@ using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
+using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Pipeline
@@ -55,7 +57,7 @@ namespace Metalama.Framework.Engine.Pipeline
             return new ServiceProvider( this._services.Add( interfaceType, serviceNode ), this._nextProvider );
         }
 
-        private static void AddService( ServiceNode service, ImmutableDictionary<A, ServiceNode>.Builder builder )
+        private static void AddService( ServiceNode service, ImmutableDictionary<Type, ServiceNode>.Builder builder )
         {
             var interfaces = service.ServiceType.GetInterfaces();
 

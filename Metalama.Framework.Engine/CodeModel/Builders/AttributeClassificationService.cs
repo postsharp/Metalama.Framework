@@ -4,6 +4,10 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
+using System;
+using System.Collections.Concurrent;
+using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 

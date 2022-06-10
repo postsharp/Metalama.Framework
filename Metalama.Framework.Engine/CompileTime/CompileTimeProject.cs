@@ -3,13 +3,21 @@
 
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating.Mapping;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
 using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
+using System;
+using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.IO;
+using System.IO.Compression;
+using System.Linq;
+using System.Reflection;
+using System.Text;
 
 namespace Metalama.Framework.Engine.CompileTime
 {

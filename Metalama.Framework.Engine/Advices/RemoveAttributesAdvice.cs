@@ -5,6 +5,8 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
+using System;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.Advices;
 

@@ -6,7 +6,9 @@ using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Validation;
+using System;
 using System.Collections.Immutable;
+using System.Threading;
 
 namespace Metalama.Framework.Engine.Aspects;
 
@@ -26,8 +28,6 @@ internal class AspectBuilderState
 
     public IAspectInstance AspectInstance { get; }
 
-    public AspectPredecessor AspectPredecessor { get; }
-
     public AdviceFactoryState AdviceFactoryState { get; }
 
     public bool IsAspectSkipped { get; set; }
@@ -36,16 +36,15 @@ internal class AspectBuilderState
         IServiceProvider serviceProvider,
         UserDiagnosticSink diagnostics,
         AspectPipelineConfiguration configuration,
-        CancellationToken cancellationToken,
         IAspectInstance aspectInstance,
-        AdviceFactoryState adviceFactoryState )
+        AdviceFactoryState adviceFactoryState,
+        CancellationToken cancellationToken )
     {
         this.ServiceProvider = serviceProvider;
         this.Diagnostics = diagnostics;
         this.Configuration = configuration;
         this.CancellationToken = cancellationToken;
         this.AspectInstance = aspectInstance;
-        this.AspectPredecessor = new AspectPredecessor( AspectPredecessorKind.ChildAspect, aspectInstance );
         this.CancellationToken = cancellationToken;
         this.AdviceFactoryState = adviceFactoryState;
     }

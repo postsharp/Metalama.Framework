@@ -14,6 +14,10 @@ using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
 using Metalama.Framework.Validation;
+using System;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Threading;
 
 namespace Metalama.Framework.Engine.Aspects
 {
@@ -26,11 +30,13 @@ namespace Metalama.Framework.Engine.Aspects
         public AspectBuilder(
             T target,
             AspectBuilderState aspectBuilderState,
-            AdviceFactory adviceFactory )
+            AdviceFactory adviceFactory,
+            AspectPredecessor? aspectPredecessor = null )
         {
             this.Target = target;
             this._aspectBuilderState = aspectBuilderState;
             this.AdviceFactory = adviceFactory;
+            this.AspectPredecessor = aspectPredecessor ?? new AspectPredecessor( AspectPredecessorKind.ChildAspect, aspectBuilderState.AspectInstance );
         }
 
         public IProject Project => this.Target.Compilation.Project;
@@ -128,7 +134,8 @@ namespace Metalama.Framework.Engine.Aspects
             }
         }
 
-        public IAspectBuilder<TNewTarget> WithTarget<TNewTarget>( TNewTarget newTarget ) where TNewTarget : class, IDeclaration
+        public IAspectBuilder<TNewTarget> WithTarget<TNewTarget>( TNewTarget newTarget ) 
+            where TNewTarget : class, IDeclaration
         {
             if ( newTarget == this.Target )
             {
@@ -136,7 +143,7 @@ namespace Metalama.Framework.Engine.Aspects
             }
             else
             {
-                return new AspectBuilder<TNewTarget>( newTarget, this._aspectBuilderState, this.AdviceFactory );
+                return new AspectBuilder<TNewTarget>( newTarget, this._aspectBuilderState, this.AdviceFactory, this.AspectPredecessor );
             }
         }
 

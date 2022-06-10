@@ -14,8 +14,9 @@ public class MyAspect : TypeAspect
 internal class TemplateProvider : ITemplateProvider
 {
     [Template]
-    public int MyProperty { get; set; }
+    public string MyProperty => meta.Target.Type.Name;
 }
 
+// <target>
 [MyAspect]
 public class C { }

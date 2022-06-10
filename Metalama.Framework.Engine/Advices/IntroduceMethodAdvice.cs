@@ -10,6 +10,8 @@ using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
+using System;
+using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Advices
 {

@@ -6,6 +6,9 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
+using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Threading;
 
 namespace Metalama.Framework.Engine.Pipeline
 {

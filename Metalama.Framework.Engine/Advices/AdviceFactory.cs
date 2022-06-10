@@ -9,6 +9,11 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Microsoft.CodeAnalysis;
+using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
+using System.Reflection;
 using DiagnosticDescriptorExtensions = Metalama.Framework.Engine.Diagnostics.DiagnosticDescriptorExtensions;
 using RefKind = Metalama.Framework.Code.RefKind;
 using SpecialType = Metalama.Framework.Code.SpecialType;
@@ -279,7 +284,7 @@ namespace Metalama.Framework.Engine.Advices
             ThrowOnErrors( diagnosticList );
             this.State.Advices.Add( advice );
 
-            this.State.Diagnostics.Report( (Diagnostic) diagnosticList );
+            this.State.Diagnostics.Report( diagnosticList );
         }
 
         public IMethodBuilder IntroduceMethod(
@@ -320,7 +325,7 @@ namespace Metalama.Framework.Engine.Advices
             ThrowOnErrors( diagnosticList );
             this.State.Advices.Add( advice );
 
-            this.State.Diagnostics.Report( (Diagnostic) diagnosticList );
+            this.State.Diagnostics.Report( diagnosticList );
 
             return advice.Builder;
         }
@@ -365,7 +370,7 @@ namespace Metalama.Framework.Engine.Advices
             ThrowOnErrors( diagnosticList );
             this.State.Advices.Add( advice );
 
-            this.State.Diagnostics.Report( (Diagnostic) diagnosticList );
+            this.State.Diagnostics.Report( diagnosticList );
         }
 
         public void OverrideAccessors(
@@ -418,7 +423,7 @@ namespace Metalama.Framework.Engine.Advices
             ThrowOnErrors( diagnosticList );
             this.State.Advices.Add( advice );
 
-            this.State.Diagnostics.Report( (Diagnostic) diagnosticList );
+            this.State.Diagnostics.Report( diagnosticList );
         }
 
         public IFieldBuilder IntroduceField(
@@ -455,7 +460,7 @@ namespace Metalama.Framework.Engine.Advices
             ThrowOnErrors( diagnosticList );
             this.State.Advices.Add( advice );
 
-            this.State.Diagnostics.Report( (Diagnostic) diagnosticList );
+            this.State.Diagnostics.Report( diagnosticList );
 
             return advice.Builder;
         }
@@ -492,7 +497,7 @@ namespace Metalama.Framework.Engine.Advices
             ThrowOnErrors( diagnosticList );
             this.State.Advices.Add( advice );
 
-            this.State.Diagnostics.Report( (Diagnostic) diagnosticList );
+            this.State.Diagnostics.Report( diagnosticList );
 
             advice.Builder.Type = fieldType;
 
@@ -550,7 +555,7 @@ namespace Metalama.Framework.Engine.Advices
             ThrowOnErrors( diagnosticList );
             this.State.Advices.Add( advice );
 
-            this.State.Diagnostics.Report( (Diagnostic) diagnosticList );
+            this.State.Diagnostics.Report( diagnosticList );
 
             advice.Builder.Type = propertyType;
 
@@ -616,7 +621,7 @@ namespace Metalama.Framework.Engine.Advices
             ThrowOnErrors( diagnosticList );
             this.State.Advices.Add( advice );
 
-            this.State.Diagnostics.Report( (Diagnostic) diagnosticList );
+            this.State.Diagnostics.Report( diagnosticList );
 
             return advice.Builder;
         }
@@ -670,7 +675,7 @@ namespace Metalama.Framework.Engine.Advices
             ThrowOnErrors( diagnosticList );
             this.State.Advices.Add( advice );
 
-            this.State.Diagnostics.Report( (Diagnostic) diagnosticList );
+            this.State.Diagnostics.Report( diagnosticList );
 
             return advice.Builder;
         }
@@ -727,7 +732,7 @@ namespace Metalama.Framework.Engine.Advices
             ThrowOnErrors( diagnosticList );
             this.State.Advices.Add( advice );
 
-            this.State.Diagnostics.Report( (Diagnostic) diagnosticList );
+            this.State.Diagnostics.Report( diagnosticList );
         }
 
         public IEventBuilder IntroduceEvent(
@@ -771,7 +776,7 @@ namespace Metalama.Framework.Engine.Advices
             ThrowOnErrors( diagnosticList );
             this.State.Advices.Add( advice );
 
-            this.State.Diagnostics.Report( (Diagnostic) diagnosticList );
+            this.State.Diagnostics.Report( diagnosticList );
 
             return advice.Builder;
         }
@@ -824,7 +829,7 @@ namespace Metalama.Framework.Engine.Advices
             ThrowOnErrors( diagnosticList );
             this.State.Advices.Add( advice );
 
-            this.State.Diagnostics.Report( (Diagnostic) diagnosticList );
+            this.State.Diagnostics.Report( diagnosticList );
 
             return advice.Builder;
         }
@@ -855,7 +860,7 @@ namespace Metalama.Framework.Engine.Advices
             advice.Initialize( this.State.ServiceProvider, diagnosticList );
             ThrowOnErrors( diagnosticList );
             this.State.Advices.Add( advice );
-            this.State.Diagnostics.Report( (Diagnostic) diagnosticList );
+            this.State.Diagnostics.Report( diagnosticList );
         }
 
         public void ImplementInterface(
@@ -899,7 +904,7 @@ namespace Metalama.Framework.Engine.Advices
             ThrowOnErrors( diagnosticList );
             this.State.Advices.Add( advice );
 
-            this.State.Diagnostics.Report( (Diagnostic) diagnosticList );
+            this.State.Diagnostics.Report( diagnosticList );
         }
 
         public void ImplementInterface(
@@ -942,7 +947,7 @@ namespace Metalama.Framework.Engine.Advices
             ThrowOnErrors( diagnosticList );
             this.State.Advices.Add( advice );
 
-            this.State.Diagnostics.Report( (Diagnostic) diagnosticList );
+            this.State.Diagnostics.Report( diagnosticList );
         }
 
         public void AddInitializer( IConstructor targetConstructor, string template, object? tags = null, object? args = null )
@@ -970,7 +975,7 @@ namespace Metalama.Framework.Engine.Advices
             ThrowOnErrors( diagnosticList );
             this.State.Advices.Add( advice );
 
-            this.State.Diagnostics.Report( (Diagnostic) diagnosticList );
+            this.State.Diagnostics.Report( diagnosticList );
         }
 
         public void Override( IConstructor targetConstructor, string template, object? args = null, object? tags = null )
@@ -1071,7 +1076,7 @@ namespace Metalama.Framework.Engine.Advices
                 ThrowOnErrors( diagnosticList );
                 this.State.Advices.Add( advice );
 
-                this.State.Diagnostics.Report( (Diagnostic) diagnosticList );
+                this.State.Diagnostics.Report( diagnosticList );
             }
 
             advice.Contracts.Add( new Contract( targetDeclaration, templateRef, direction, ObjectReader.GetReader( tags ), ObjectReader.GetReader( args ) ) );

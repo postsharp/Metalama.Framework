@@ -4,6 +4,11 @@
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
+using System;
+using System.Collections.Concurrent;
+using System.Globalization;
+using System.Reflection;
+using System.Threading;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
