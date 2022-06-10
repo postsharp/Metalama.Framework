@@ -100,9 +100,11 @@ namespace Metalama.Framework.Engine.Transformations
         }
 
         SyntaxTree IIntroduceMemberTransformation.TransformedSyntaxTree
-            => (this.OverriddenDeclaration.GetPrimaryDeclarationSyntax() ?? this.OverriddenDeclaration.DeclaringType.GetPrimaryDeclarationSyntax())
-                .AssertNotNull()
-                .SyntaxTree;
+            => this.OverriddenDeclaration switch
+            {
+                IDeclarationImpl declaration => declaration.PrimarySyntaxTree.AssertNotNull(),
+                _ => throw new AssertionFailedException(),
+            };
 
         public InsertPosition InsertPosition => this.OverriddenDeclaration.ToInsertPosition();
 

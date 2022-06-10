@@ -27,7 +27,7 @@ namespace Metalama.Framework.Engine.CodeModel
         bool CanBeInherited { get; }
 
         /// <summary>
-        /// Gets a value indicating the syntax tree where the declaration primary resides.
+        /// Gets a value indicating the syntax tree of the input compilation where the declaration primary resides.
         /// </summary>
         SyntaxTree? PrimarySyntaxTree { get; }
 

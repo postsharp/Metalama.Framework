@@ -10,6 +10,8 @@ namespace Metalama.Framework.Code.DeclarationBuilders
     {
         bool IsFrozen { get; }
 
+        void Freeze();
+
         /// <summary>
         /// Adds a custom attribute to the current declaration.
         /// </summary>
