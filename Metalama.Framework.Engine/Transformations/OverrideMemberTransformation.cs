@@ -99,12 +99,7 @@ namespace Metalama.Framework.Engine.Transformations
                     flags: AspectReferenceFlags.Inlineable );
         }
 
-        SyntaxTree IIntroduceMemberTransformation.TransformedSyntaxTree
-            => this.OverriddenDeclaration switch
-            {
-                IDeclarationImpl declaration => declaration.PrimarySyntaxTree.AssertNotNull(),
-                _ => throw new AssertionFailedException(),
-            };
+        SyntaxTree IIntroduceMemberTransformation.TransformedSyntaxTree => this.OverriddenDeclaration.GetPrimarySyntaxTree().AssertNotNull();
 
         public InsertPosition InsertPosition => this.OverriddenDeclaration.ToInsertPosition();
 

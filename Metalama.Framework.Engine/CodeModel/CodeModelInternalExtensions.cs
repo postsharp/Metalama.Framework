@@ -43,6 +43,13 @@ namespace Metalama.Framework.Engine.CodeModel
             return declaration.GetSymbol()?.GetPrimaryDeclaration();
         }
 
+        public static SyntaxTree? GetPrimarySyntaxTree( this IDeclaration declaration ) 
+            => declaration switch
+            {
+                IDeclarationImpl declarationImpl => declarationImpl.PrimarySyntaxTree,
+                _ => throw new AssertionFailedException(),
+            };
+
         public static InsertPosition ToInsertPosition( this IDeclaration declaration )
         {
             switch ( declaration )
