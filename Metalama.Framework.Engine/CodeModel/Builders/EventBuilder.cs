@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
     {
-        private readonly bool _isEventField;
+        public bool IsEventField { get; }
 
         public EventBuilder(
             Advice parentAdvice,
@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             IObjectReader tags )
             : base( parentAdvice, targetType, name, tags )
         {
-            this._isEventField = isEventField;
+            this.IsEventField = isEventField;
             this.Type = (INamedType) targetType.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(EventHandler) );
         }
 
@@ -43,10 +43,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IMethod Signature => this.Type.Methods.OfName( "Invoke" ).Single();
 
         [Memo]
-        public IMethodBuilder AddMethod => new AccessorBuilder( this, MethodKind.EventAdd, this._isEventField );
+        public IMethodBuilder AddMethod => new AccessorBuilder( this, MethodKind.EventAdd, this.IsEventField );
 
         [Memo]
-        public IMethodBuilder RemoveMethod => new AccessorBuilder( this, MethodKind.EventRemove, this._isEventField );
+        public IMethodBuilder RemoveMethod => new AccessorBuilder( this, MethodKind.EventRemove, this.IsEventField );
 
         public IMethodBuilder? RaiseMethod => null;
 
@@ -87,10 +87,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 out var initializerExpression,
                 out var initializerMethod );
 
-            Invariant.Assert( !(!this._isEventField && initializerExpression != null) );
+            Invariant.Assert( !(!this.IsEventField && initializerExpression != null) );
 
             MemberDeclarationSyntax @event =
-                this._isEventField && this.ExplicitInterfaceImplementations.Count == 0
+                this.IsEventField && this.ExplicitInterfaceImplementations.Count == 0
                     ? EventFieldDeclaration(
                         this.GetAttributeLists( context ),
                         this.GetSyntaxModifierList(),
@@ -117,7 +117,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                         Identifier( this.Name ),
                         GenerateAccessorList() );
 
-            if ( this._isEventField && this.ExplicitInterfaceImplementations.Count > 0 )
+            if ( this.IsEventField && this.ExplicitInterfaceImplementations.Count > 0 )
             {
                 // Add annotation to the explicit annotation that the linker should treat this an event field.
                 @event = @event.WithLinkerDeclarationFlags( LinkerDeclarationFlags.EventField );

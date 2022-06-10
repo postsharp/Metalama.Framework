@@ -1,11 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -30,6 +32,61 @@ namespace Metalama.Framework.Engine.CompileTime
             where T : SyntaxNode
             => node;
 
+        private static T WithSupressedDiagnostics<T>( T member, params string[] suppressedDiagnostics )
+            where T : MemberDeclarationSyntax
+        {
+            if ( suppressedDiagnostics.Length == 0 )
+            {
+                return member;
+            }
+
+            switch ( member )
+            {
+                case MethodDeclarationSyntax { Body: { } } method:
+                    return (T) (MemberDeclarationSyntax) method
+                        .WithLeadingTrivia(
+                            method
+                                .GetLeadingTrivia()
+                                .Add( Trivia( GetPragmaTrivia( true ) ) ) )
+                        .WithTrailingTrivia(
+                            TriviaList( Trivia( GetPragmaTrivia( false ) ) )
+                                .AddRange( method.GetTrailingTrivia() ) );
+
+                case MethodDeclarationSyntax { ExpressionBody: { } } method:
+                    return (T) (MemberDeclarationSyntax) method
+                        .WithLeadingTrivia(
+                            method
+                                .GetLeadingTrivia()
+                                .Add( Trivia( GetPragmaTrivia( true ) ) ) )
+                        .WithTrailingTrivia(
+                            TriviaList( Trivia( GetPragmaTrivia( false ) ) )
+                                .AddRange( method.GetTrailingTrivia() ) );
+
+                case MethodDeclarationSyntax method:
+                    return (T) (MemberDeclarationSyntax) method
+                        .WithLeadingTrivia(
+                            method
+                                .GetLeadingTrivia()
+                                .Add( Trivia( GetPragmaTrivia( true ) ) ) )
+                        .WithTrailingTrivia(
+                            TriviaList( Trivia( GetPragmaTrivia( false ) ) )
+                                .AddRange( method.GetTrailingTrivia() ) );
+
+                default:
+                    throw new AssertionFailedException();
+            }
+
+            StructuredTriviaSyntax GetPragmaTrivia( bool disable )
+                => PragmaWarningDirectiveTrivia(
+                    Token( SyntaxKind.HashToken ).WithLeadingTrivia( ElasticLineFeed ),
+                    Token( SyntaxKind.PragmaKeyword ),
+                    Token( SyntaxKind.WarningKeyword ),
+                    disable ? Token( SyntaxKind.DisableKeyword ) : Token( SyntaxKind.RestoreKeyword ),
+                    SeparatedList<ExpressionSyntax>( suppressedDiagnostics.Select( diagnosticCode => IdentifierName( diagnosticCode ) ) ),
+                    Token( SyntaxKind.EndOfDirectiveToken ).WithTrailingTrivia( ElasticLineFeed ),
+                    true );
+        }
+
         protected MethodDeclarationSyntax WithThrowNotSupportedExceptionBody( MethodDeclarationSyntax method, string message )
         {
             // Method does not have a body (e.g. because it's abstract) , so there is nothing to replace.
@@ -39,15 +96,44 @@ namespace Metalama.Framework.Engine.CompileTime
                 throw new ArgumentOutOfRangeException( nameof(method) );
             }
 
-            return this.RewriteThrowNotSupported(
-                method
-                    .WithBody( null )
-                    .WithExpressionBody( ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
-                    .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) )
-                    .WithModifiers( TokenList( method.Modifiers.Where( m => !m.IsKind( SyntaxKind.AsyncKeyword ) ) ) )
-                    .NormalizeWhitespace()
-                    .WithLeadingTrivia( method.GetLeadingTrivia() )
-                    .WithTrailingTrivia( LineFeed, LineFeed ) );
+            // Otherwise we need to preserve "asyncness" and "iteratorness" of the method.
+
+            var isAsync = method.Modifiers.Any( x => x.IsKind( SyntaxKind.AsyncKeyword ) );
+            var isIterator = IteratorHelper.IsIterator( method );
+
+            var suppressedWarnings = new List<string>();
+
+            if ( isAsync )
+            {
+                // Throwing async method does not have an await.
+                suppressedWarnings.Add( "CS1998" );
+            }
+
+            if ( isIterator )
+            {
+                // Throwing iterator has unreachable yield break.
+                suppressedWarnings.Add( "CS0162" );
+            }
+
+            return
+                this.RewriteThrowNotSupported(
+                    WithSupressedDiagnostics(
+                        method
+                            .WithBody(
+                                isIterator
+                                    ? Block(
+                                        ThrowStatement( GetNotSupportedExceptionExpression( message ).Expression ),
+                                        YieldStatement( SyntaxKind.YieldBreakStatement ) )
+                                    : null )
+                            .WithExpressionBody(
+                                isIterator
+                                    ? null
+                                    : ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
+                            .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) )
+                            .NormalizeWhitespace()
+                            .WithLeadingTrivia( method.GetLeadingTrivia() )
+                            .WithTrailingTrivia( LineFeed, LineFeed ),
+                        suppressedWarnings.ToArray() ) );
         }
 
         protected BasePropertyDeclarationSyntax WithThrowNotSupportedExceptionBody( BasePropertyDeclarationSyntax memberDeclaration, string message )
