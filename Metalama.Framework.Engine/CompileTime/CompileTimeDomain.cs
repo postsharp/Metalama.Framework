@@ -1,12 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Backstage.Diagnostics;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Concurrent;
-using System.Globalization;
-using System.Reflection;
-using System.Threading;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
@@ -21,12 +18,14 @@ namespace Metalama.Framework.Engine.CompileTime
         private static int _nextDomainId;
         private readonly ConcurrentDictionary<AssemblyIdentity, Assembly> _assemblyCache = new();
         private readonly int _domainId = Interlocked.Increment( ref _nextDomainId );
+        private ILogger _logger;
 
         private readonly ConcurrentDictionary<string, (Assembly Assembly, AssemblyIdentity Identity)> _assembliesByName = new();
 
         public CompileTimeDomain()
         {
             AppDomain.CurrentDomain.AssemblyResolve += this.OnAssemblyResolve;
+            this._logger = Logger.Domain;
         }
 
         private Assembly? OnAssemblyResolve( object sender, ResolveEventArgs args )
@@ -48,14 +47,24 @@ namespace Metalama.Framework.Engine.CompileTime
         /// Loads an assembly in the CLR. The default implementation is compatible with the .NET Framework,
         /// but it can be overwritten for .NET Core.
         /// </summary>
-        protected virtual Assembly LoadAssembly( string path ) => Assembly.LoadFile( path );
+        protected virtual Assembly LoadAssembly( string path )
+        {
+            return Assembly.LoadFile( path );
+        }
 
         /// <summary>
         /// Gets an assembly given its <see cref="AssemblyIdentity"/> and image, or loads it.
         /// </summary>
         internal Assembly GetOrLoadAssembly( AssemblyIdentity compileTimeIdentity, string path )
         {
-            var assembly = this._assemblyCache.GetOrAdd( compileTimeIdentity, _ => this.LoadAssembly( path ) );
+            var assembly = this._assemblyCache.GetOrAdd(
+                compileTimeIdentity,
+                _ =>
+                {
+                    this._logger.Trace?.Log( $"Loading assembly '{path}'." );
+
+                    return this.LoadAssembly( path );
+                } );
 
             // CompileTimeDomain is used only for compile-time assemblies, which always have a unique name, so we can have safely
             // index assemblies by name only.

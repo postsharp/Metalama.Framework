@@ -14,23 +14,17 @@ using Metalama.Framework.Engine.Observers;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Mapping;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Fabrics;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Emit;
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.Versioning;
-using System.Text;
-using System.Threading;
+using HashUtilities = Metalama.Framework.Engine.Utilities.HashUtilities;
+using MutexHelper = Metalama.Framework.Engine.Utilities.MutexHelper;
+using RoslynExtensions = Metalama.Framework.Engine.Utilities.RoslynExtensions;
+using SymbolExtensions = Metalama.Framework.Engine.Utilities.SymbolExtensions;
+using TempPathHelper = Metalama.Framework.Engine.Utilities.TempPathHelper;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
@@ -131,7 +125,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 log?.AppendLineInvariant( $"Reference:={reference.RunTimeIdentity.Name}={reference.Hash}" );
             }
 
-            h.Update( sourceHash );
+            HashUtilities.Update( h, sourceHash );
             log?.AppendLineInvariant( $"Source:={sourceHash:x}" );
 
             var digest = h.Digest();
@@ -205,7 +199,7 @@ namespace Metalama.Framework.Engine.CompileTime
             }
 
             compileTimeCompilation = compileTimeCompilation.AddSyntaxTrees( syntaxTrees.Select( t => t.TransformedTree ) );
-            compileTimeCompilation = new RemoveInvalidUsingRewriter( compileTimeCompilation ).VisitTrees( compileTimeCompilation );
+            compileTimeCompilation = RoslynExtensions.VisitTrees( new RemoveInvalidUsingRewriter( compileTimeCompilation ), compileTimeCompilation );
 
             if ( this._projectOptions is { FormatCompileTimeCode: true } && OutputCodeFormatter.CanFormat )
             {
@@ -334,18 +328,20 @@ namespace Metalama.Framework.Engine.CompileTime
                     var path = Path.Combine( outputDirectory, transformedFileName );
                     var text = compileTimeSyntaxTree.GetText();
 
-                    this._logger.Trace?.Log( $"Writing '{path}'." );
+                    this._logger.Trace?.Log( $"Writing code to '{path}'." );
 
                     // Write the file in a retry loop to handle locks. It seems there are still file lock issues
                     // despite the Mutex. 
-                    RetryHelper.Retry(
-                        () =>
+                    RetryHelper.RetryWithLockDetection(
+                        path,
+                        _ =>
                         {
                             using ( var textWriter = new StreamWriter( path, false, Encoding.UTF8 ) )
                             {
                                 text.Write( textWriter, cancellationToken );
                             }
                         },
+                        this._serviceProvider,
                         logger: this._logger );
 
                     // Update the link to the file path.
@@ -358,9 +354,9 @@ namespace Metalama.Framework.Engine.CompileTime
                     compileTimeCompilation = compileTimeCompilation.ReplaceSyntaxTree( compileTimeSyntaxTree, newTree );
                 }
 
-                this._logger.Trace?.Log( $"Writing '{outputPaths.Pe}'." );
+                this._logger.Trace?.Log( $"Writing binary to '{outputPaths.Pe}'." );
 
-                EmitResult emitResult;
+                EmitResult? emitResult = null;
 
                 if ( this._rewriter != null )
                 {
@@ -381,14 +377,21 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
                 else
                 {
-                    using ( var peStream = File.Create( outputPaths.Pe ) )
-                    using ( var pdbStream = File.Create( outputPaths.Pdb ) )
-                    {
-                        emitResult = compileTimeCompilation.Emit( peStream, pdbStream, options: emitOptions, cancellationToken: cancellationToken );
-                    }
+                    RetryHelper.RetryWithLockDetection(
+                        outputPaths.Pe,
+                        _ =>
+                        {
+                            using ( var peStream = File.Create( outputPaths.Pe ) )
+                            using ( var pdbStream = File.Create( outputPaths.Pdb ) )
+                            {
+                                emitResult = compileTimeCompilation.Emit( peStream, pdbStream, options: emitOptions, cancellationToken: cancellationToken );
+                            }
+                        },
+                        this._serviceProvider,
+                        logger: this._logger );
                 }
 
-                this._observer?.OnCompileTimeCompilationEmit( compileTimeCompilation, emitResult.Diagnostics );
+                this._observer?.OnCompileTimeCompilationEmit( compileTimeCompilation, emitResult!.Diagnostics );
 
                 // Reports a diagnostic in the original syntax tree.
                 void ReportDiagnostics( IEnumerable<Diagnostic> diagnostics )
@@ -498,15 +501,32 @@ namespace Metalama.Framework.Engine.CompileTime
 
             void DeleteOutputFiles()
             {
-                RetryHelper.Retry(
-                    () =>
+                this._logger.Warning?.Log( $"Deleting directory '{outputDirectory}'." );
+
+                try
+                {
+                    // Try to delete with lock detection first to get a better error message.
+                    if ( Directory.Exists( outputDirectory ) )
                     {
-                        if ( Directory.Exists( outputDirectory ) )
+                        var files = Directory.GetFiles( outputDirectory );
+                        RetryHelper.RetryWithLockDetection( files, File.Delete, this._serviceProvider );
+                    }
+
+                    // Then delete the directory itself. At this point, we should no longer have locks. 
+                    RetryHelper.Retry(
+                        () =>
                         {
-                            Directory.Delete( outputDirectory, true );
-                        }
-                    },
-                    logger: this._logger );
+                            if ( Directory.Exists( outputDirectory ) )
+                            {
+                                Directory.Delete( outputDirectory, true );
+                            }
+                        },
+                        logger: this._logger );
+                }
+                catch ( Exception e )
+                {
+                    this._logger.Error?.Log( $"Cannot delete directory '{outputDirectory}': {e.Message}" );
+                }
             }
         }
 
@@ -626,9 +646,18 @@ namespace Metalama.Framework.Engine.CompileTime
             }
 
             // Look on disk.
-            if ( !File.Exists( outputPaths.Pe ) || !File.Exists( outputPaths.Manifest ) )
+            if ( !File.Exists( outputPaths.Pe ) )
             {
-                this._logger.Trace?.Log( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation.AssemblyName}' ): not found." );
+                this._logger.Trace?.Log( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation.AssemblyName}' ): '{outputPaths.Pe}' not found." );
+
+                project = null;
+
+                return false;
+            }
+
+            if ( !File.Exists( outputPaths.Manifest ) )
+            {
+                this._logger.Trace?.Log( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation.AssemblyName}' ): '{outputPaths.Manifest}' not found." );
 
                 project = null;
 
@@ -756,34 +785,29 @@ namespace Metalama.Framework.Engine.CompileTime
                         var transitiveFabricType = compileTimeCompilation.GetTypeByMetadataName( typeof(TransitiveProjectFabric).FullName );
                         var templateProviderType = compileTimeCompilation.GetTypeByMetadataName( typeof(ITemplateProvider).FullName );
 
-                        var aspectTypes = compileTimeCompilation.Assembly
-                            .GetTypes()
+                        var aspectTypes = SymbolExtensions.GetTypes( compileTimeCompilation.Assembly )
                             .Where( t => compileTimeCompilation.HasImplicitConversion( t, aspectType ) )
                             .Select( t => t.GetReflectionName().AssertNotNull() )
                             .ToList();
 
-                        var fabricTypes = compileTimeCompilation.Assembly
-                            .GetTypes()
+                        var fabricTypes = SymbolExtensions.GetTypes( compileTimeCompilation.Assembly )
                             .Where(
                                 t => compileTimeCompilation.HasImplicitConversion( t, fabricType ) &&
                                      !compileTimeCompilation.HasImplicitConversion( t, transitiveFabricType ) )
                             .Select( t => t.GetReflectionName().AssertNotNull() )
                             .ToList();
 
-                        var transitiveFabricTypes = compileTimeCompilation.Assembly
-                            .GetTypes()
+                        var transitiveFabricTypes = SymbolExtensions.GetTypes( compileTimeCompilation.Assembly )
                             .Where( t => compileTimeCompilation.HasImplicitConversion( t, transitiveFabricType ) )
                             .Select( t => t.GetReflectionName().AssertNotNull() )
                             .ToList();
 
-                        var compilerPlugInTypes = compileTimeCompilation.Assembly
-                            .GetTypes()
+                        var compilerPlugInTypes = SymbolExtensions.GetTypes( compileTimeCompilation.Assembly )
                             .Where( t => t.GetAttributes().Any( a => a is { AttributeClass: { Name: nameof(MetalamaPlugInAttribute) } } ) )
                             .Select( t => t.GetReflectionName().AssertNotNull() )
                             .ToList();
 
-                        var otherTemplateTypes = compileTimeCompilation.Assembly
-                            .GetTypes()
+                        var otherTemplateTypes = SymbolExtensions.GetTypes( compileTimeCompilation.Assembly )
                             .Where( t => compileTimeCompilation.HasImplicitConversion( t, templateProviderType ) )
                             .Select( t => t.GetReflectionName().AssertNotNull() )
                             .ToList();
@@ -791,7 +815,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         var manifest = new CompileTimeProjectManifest(
                             runTimeCompilation.Assembly.Identity.ToString(),
                             compileTimeCompilation.AssemblyName!,
-                            runTimeCompilation.GetTargetFramework()?.ToString() ?? "",
+                            SymbolExtensions.GetTargetFramework( runTimeCompilation )?.ToString() ?? "",
                             aspectTypes,
                             compilerPlugInTypes,
                             fabricTypes,
@@ -812,6 +836,8 @@ namespace Metalama.Framework.Engine.CompileTime
                             outputPaths.Directory,
                             name => textMapDirectory.GetByName( name ) );
 
+                        this._logger.Trace?.Log( $"Writing manifest to '{outputPaths.Manifest}'." );
+
                         using ( var manifestStream = File.Create( outputPaths.Manifest ) )
                         {
                             manifest.Serialize( manifestStream );
@@ -831,7 +857,7 @@ namespace Metalama.Framework.Engine.CompileTime
             IReadOnlyList<CompileTimeProject> referencedProjects,
             StringBuilder? log = null )
         {
-            var targetFramework = runTimeCompilation.GetTargetFramework();
+            var targetFramework = SymbolExtensions.GetTargetFramework( runTimeCompilation );
 
             var sourceHash = ComputeSourceHash( targetFramework, sourceTreesWithCompileTimeCode, log );
             var projectHash = ComputeProjectHash( referencedProjects, sourceHash, log );

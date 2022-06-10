@@ -9,11 +9,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Linq;
-using System.Reflection;
+using DiagnosticDescriptorExtensions = Metalama.Framework.Engine.Diagnostics.DiagnosticDescriptorExtensions;
 using RefKind = Metalama.Framework.Code.RefKind;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypeKind = Metalama.Framework.Code.TypeKind;
@@ -39,7 +35,7 @@ namespace Metalama.Framework.Engine.Advices
         public AdviceFactory WithTemplateClassInstance( TemplateClassInstance templateClassInstance )
             => new( this.State, templateClassInstance, this._layerName );
 
-        public IAdviceFactory ForLayer( string? layerName )
+        public IAdviceFactory WithLayer( string? layerName )
         {
             if ( layerName == this._layerName )
             {
@@ -89,7 +85,9 @@ namespace Metalama.Framework.Engine.Advices
                     // It is possible that the aspect has a member of the required name, but the user did not use the custom attribute. In this case,
                     // we want a proper error message.
 
-                    throw GeneralDiagnosticDescriptors.MemberDoesNotHaveTemplateAttribute.CreateException( (template.TemplateClass.FullName, templateName) );
+                    throw DiagnosticDescriptorExtensions.CreateException(
+                        GeneralDiagnosticDescriptors.MemberDoesNotHaveTemplateAttribute,
+                        (template.TemplateClass.FullName, templateName) );
                 }
 
                 if ( template.TemplateInfo.IsAbstract )
@@ -108,8 +106,9 @@ namespace Metalama.Framework.Engine.Advices
             }
             else
             {
-                throw GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMember.CreateException(
-                    (this.State.AspectInstance.AspectClass.ShortName, templateName) );
+                throw DiagnosticDescriptorExtensions.CreateException(
+                    GeneralDiagnosticDescriptors.AspectMustHaveExactlyOneTemplateMember,
+                    (this._templateInstance.TemplateClass.ShortName, templateName) );
             }
         }
 
@@ -276,11 +275,11 @@ namespace Metalama.Framework.Engine.Advices
                 this._layerName,
                 ObjectReader.GetReader( tags ) );
 
-            advice.Initialize( diagnosticList );
+            advice.Initialize( this.State.ServiceProvider, diagnosticList );
             ThrowOnErrors( diagnosticList );
             this.State.Advices.Add( advice );
 
-            this.State.Diagnostics.Report( diagnosticList );
+            this.State.Diagnostics.Report( (Diagnostic) diagnosticList );
         }
 
         public IMethodBuilder IntroduceMethod(
@@ -317,11 +316,11 @@ namespace Metalama.Framework.Engine.Advices
                 this._layerName,
                 ObjectReader.GetReader( tags ) );
 
-            advice.Initialize( diagnosticList );
+            advice.Initialize( this.State.ServiceProvider, diagnosticList );
             ThrowOnErrors( diagnosticList );
             this.State.Advices.Add( advice );
 
-            this.State.Diagnostics.Report( diagnosticList );
+            this.State.Diagnostics.Report( (Diagnostic) diagnosticList );
 
             return advice.Builder;
         }
@@ -362,11 +361,11 @@ namespace Metalama.Framework.Engine.Advices
                 this._layerName,
                 ObjectReader.GetReader( tags ) );
 
-            advice.Initialize( diagnosticList );
+            advice.Initialize( this.State.ServiceProvider, diagnosticList );
             ThrowOnErrors( diagnosticList );
             this.State.Advices.Add( advice );
 
-            this.State.Diagnostics.Report( diagnosticList );
+            this.State.Diagnostics.Report( (Diagnostic) diagnosticList );
         }
 
         public void OverrideAccessors(
@@ -415,11 +414,11 @@ namespace Metalama.Framework.Engine.Advices
                 this._layerName,
                 ObjectReader.GetReader( tags ) );
 
-            advice.Initialize( diagnosticList );
+            advice.Initialize( this.State.ServiceProvider, diagnosticList );
             ThrowOnErrors( diagnosticList );
             this.State.Advices.Add( advice );
 
-            this.State.Diagnostics.Report( diagnosticList );
+            this.State.Diagnostics.Report( (Diagnostic) diagnosticList );
         }
 
         public IFieldBuilder IntroduceField(
@@ -452,11 +451,11 @@ namespace Metalama.Framework.Engine.Advices
                 ObjectReader.GetReader( tags ),
                 pullStrategy );
 
-            advice.Initialize( diagnosticList );
+            advice.Initialize( this.State.ServiceProvider, diagnosticList );
             ThrowOnErrors( diagnosticList );
             this.State.Advices.Add( advice );
 
-            this.State.Diagnostics.Report( diagnosticList );
+            this.State.Diagnostics.Report( (Diagnostic) diagnosticList );
 
             return advice.Builder;
         }
@@ -489,11 +488,11 @@ namespace Metalama.Framework.Engine.Advices
                 ObjectReader.GetReader( tags ),
                 pullStrategy );
 
-            advice.Initialize( diagnosticList );
+            advice.Initialize( this.State.ServiceProvider, diagnosticList );
             ThrowOnErrors( diagnosticList );
             this.State.Advices.Add( advice );
 
-            this.State.Diagnostics.Report( diagnosticList );
+            this.State.Diagnostics.Report( (Diagnostic) diagnosticList );
 
             advice.Builder.Type = fieldType;
 
@@ -547,11 +546,11 @@ namespace Metalama.Framework.Engine.Advices
                 ObjectReader.GetReader( tags ),
                 pullStrategy );
 
-            advice.Initialize( diagnosticList );
+            advice.Initialize( this.State.ServiceProvider, diagnosticList );
             ThrowOnErrors( diagnosticList );
             this.State.Advices.Add( advice );
 
-            this.State.Diagnostics.Report( diagnosticList );
+            this.State.Diagnostics.Report( (Diagnostic) diagnosticList );
 
             advice.Builder.Type = propertyType;
 
@@ -613,11 +612,11 @@ namespace Metalama.Framework.Engine.Advices
                 ObjectReader.GetReader( tags ),
                 null );
 
-            advice.Initialize( diagnosticList );
+            advice.Initialize( this.State.ServiceProvider, diagnosticList );
             ThrowOnErrors( diagnosticList );
             this.State.Advices.Add( advice );
 
-            this.State.Diagnostics.Report( diagnosticList );
+            this.State.Diagnostics.Report( (Diagnostic) diagnosticList );
 
             return advice.Builder;
         }
@@ -667,11 +666,11 @@ namespace Metalama.Framework.Engine.Advices
                 ObjectReader.GetReader( tags ),
                 null );
 
-            advice.Initialize( diagnosticList );
+            advice.Initialize( this.State.ServiceProvider, diagnosticList );
             ThrowOnErrors( diagnosticList );
             this.State.Advices.Add( advice );
 
-            this.State.Diagnostics.Report( diagnosticList );
+            this.State.Diagnostics.Report( (Diagnostic) diagnosticList );
 
             return advice.Builder;
         }
@@ -691,7 +690,7 @@ namespace Metalama.Framework.Engine.Advices
 
             if ( invokeTemplate != null )
             {
-                throw GeneralDiagnosticDescriptors.UnsupportedFeature.CreateException( $"Invoker overrides." );
+                throw DiagnosticDescriptorExtensions.CreateException( GeneralDiagnosticDescriptors.UnsupportedFeature, $"Invoker overrides." );
             }
 
             if ( targetDeclaration.IsAbstract )
@@ -724,11 +723,11 @@ namespace Metalama.Framework.Engine.Advices
                 ObjectReader.GetReader( tags ),
                 ObjectReader.GetReader( args ) );
 
-            advice.Initialize( diagnosticList );
+            advice.Initialize( this.State.ServiceProvider, diagnosticList );
             ThrowOnErrors( diagnosticList );
             this.State.Advices.Add( advice );
 
-            this.State.Diagnostics.Report( diagnosticList );
+            this.State.Diagnostics.Report( (Diagnostic) diagnosticList );
         }
 
         public IEventBuilder IntroduceEvent(
@@ -768,11 +767,11 @@ namespace Metalama.Framework.Engine.Advices
                 ObjectReader.GetReader( tags ),
                 ObjectReader.Empty );
 
-            advice.Initialize( diagnosticList );
+            advice.Initialize( this.State.ServiceProvider, diagnosticList );
             ThrowOnErrors( diagnosticList );
             this.State.Advices.Add( advice );
 
-            this.State.Diagnostics.Report( diagnosticList );
+            this.State.Diagnostics.Report( (Diagnostic) diagnosticList );
 
             return advice.Builder;
         }
@@ -821,11 +820,11 @@ namespace Metalama.Framework.Engine.Advices
                 ObjectReader.GetReader( tags ),
                 ObjectReader.GetReader( args ) );
 
-            advice.Initialize( diagnosticList );
+            advice.Initialize( this.State.ServiceProvider, diagnosticList );
             ThrowOnErrors( diagnosticList );
             this.State.Advices.Add( advice );
 
-            this.State.Diagnostics.Report( diagnosticList );
+            this.State.Diagnostics.Report( (Diagnostic) diagnosticList );
 
             return advice.Builder;
         }
@@ -853,10 +852,10 @@ namespace Metalama.Framework.Engine.Advices
                 this._layerName,
                 ObjectReader.GetReader( tags ) );
 
-            advice.Initialize( diagnosticList );
+            advice.Initialize( this.State.ServiceProvider, diagnosticList );
             ThrowOnErrors( diagnosticList );
             this.State.Advices.Add( advice );
-            this.State.Diagnostics.Report( diagnosticList );
+            this.State.Diagnostics.Report( (Diagnostic) diagnosticList );
         }
 
         public void ImplementInterface(
@@ -896,11 +895,11 @@ namespace Metalama.Framework.Engine.Advices
                 this._layerName,
                 ObjectReader.GetReader( tags ) );
 
-            advice.Initialize( diagnosticList );
+            advice.Initialize( this.State.ServiceProvider, diagnosticList );
             ThrowOnErrors( diagnosticList );
             this.State.Advices.Add( advice );
 
-            this.State.Diagnostics.Report( diagnosticList );
+            this.State.Diagnostics.Report( (Diagnostic) diagnosticList );
         }
 
         public void ImplementInterface(
@@ -939,11 +938,11 @@ namespace Metalama.Framework.Engine.Advices
                 this._layerName,
                 ObjectReader.GetReader( tags ) );
 
-            advice.Initialize( diagnosticList );
+            advice.Initialize( this.State.ServiceProvider, diagnosticList );
             ThrowOnErrors( diagnosticList );
             this.State.Advices.Add( advice );
 
-            this.State.Diagnostics.Report( diagnosticList );
+            this.State.Diagnostics.Report( (Diagnostic) diagnosticList );
         }
 
         public void AddInitializer( IConstructor targetConstructor, string template, object? tags = null, object? args = null )
@@ -967,11 +966,11 @@ namespace Metalama.Framework.Engine.Advices
                 this._layerName,
                 ObjectReader.GetReader( tags ) );
 
-            advice.Initialize( diagnosticList );
+            advice.Initialize( this.State.ServiceProvider, diagnosticList );
             ThrowOnErrors( diagnosticList );
             this.State.Advices.Add( advice );
 
-            this.State.Diagnostics.Report( diagnosticList );
+            this.State.Diagnostics.Report( (Diagnostic) diagnosticList );
         }
 
         public void Override( IConstructor targetConstructor, string template, object? args = null, object? tags = null )
@@ -1068,11 +1067,11 @@ namespace Metalama.Framework.Engine.Advices
                     targetMember,
                     this._layerName );
 
-                advice.Initialize( diagnosticList );
+                advice.Initialize( this.State.ServiceProvider, diagnosticList );
                 ThrowOnErrors( diagnosticList );
                 this.State.Advices.Add( advice );
 
-                this.State.Diagnostics.Report( diagnosticList );
+                this.State.Diagnostics.Report( (Diagnostic) diagnosticList );
             }
 
             advice.Contracts.Add( new Contract( targetDeclaration, templateRef, direction, ObjectReader.GetReader( tags ), ObjectReader.GetReader( args ) ) );

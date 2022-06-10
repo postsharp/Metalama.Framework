@@ -74,7 +74,7 @@ namespace Metalama.Framework.Aspects
                     return;
             }
 
-            var adviceFactory = builder.Advice.ForLayer( this.Layer );
+            var adviceFactory = builder.Advice.WithLayer( this.Layer );
 
             switch ( templateMember.DeclarationKind )
             {

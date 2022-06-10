@@ -5,7 +5,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Microsoft.CodeAnalysis;
-using System;
 
 namespace Metalama.Framework.Engine.Aspects;
 
@@ -21,7 +20,7 @@ internal class OtherTemplateClass : TemplateClass
         IDiagnosticAdder diagnosticAdder,
         OtherTemplateClass? baseClass,
         CompileTimeProject project )
-        : base( serviceProvider, compilation, typeSymbol, diagnosticAdder, baseClass )
+        : base( serviceProvider, compilation, typeSymbol, diagnosticAdder, baseClass, typeSymbol.Name )
     {
         this.Project = project;
         this.Type = project.GetType( typeSymbol.GetReflectionName().AssertNotNull() );

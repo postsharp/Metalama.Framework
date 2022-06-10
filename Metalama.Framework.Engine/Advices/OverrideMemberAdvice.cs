@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Advices
             this.Tags = tags;
         }
 
-        public override void Initialize( IDiagnosticAdder diagnosticAdder )
+        public override void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
         {
             // TODO: Test that the advice is not applied to declaration in a base class.
         }

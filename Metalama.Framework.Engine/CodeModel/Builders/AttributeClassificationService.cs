@@ -1,11 +1,9 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Code;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Concurrent;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders;
 
@@ -36,5 +34,13 @@ internal class AttributeClassificationService : IService
         {
             return (AttributeTargets) Enum.ToObject( typeof(AttributeTargets), (int) attributeUsageAttribute.ConstructorArguments[0].Value! );
         }
+    }
+
+    public bool MustCopyTemplateAttribute( IAttribute attribute )
+    {
+        var declarationFactory = attribute.GetCompilationModel().Factory;
+        var templateAttributeType = declarationFactory.GetSpecialType( InternalSpecialType.TemplateAttribute );
+
+        return !attribute.Type.Is( templateAttributeType ) && !attribute.Type.Name.Equals( nameof(DynamicAttribute) );
     }
 }

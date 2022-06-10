@@ -9,9 +9,6 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.Advices
 {
@@ -39,7 +36,7 @@ namespace Metalama.Framework.Engine.Advices
             this.Tags = tags;
         }
 
-        public override void Initialize( IDiagnosticAdder diagnosticAdder ) { }
+        public override void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder ) { }
 
         public override AdviceResult ToResult( IServiceProvider serviceProvider, ICompilation compilation )
         {

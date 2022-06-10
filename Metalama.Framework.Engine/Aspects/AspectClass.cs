@@ -5,7 +5,6 @@ using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
-using Metalama.Framework.Eligibility.Implementation;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
@@ -14,17 +13,9 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Validation;
-using Metalama.Framework.Project;
 using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Reflection;
-using System.Runtime.Serialization;
 using Attribute = System.Attribute;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using TypeKind = Microsoft.CodeAnalysis.TypeKind;
@@ -51,8 +42,6 @@ namespace Metalama.Framework.Engine.Aspects
         public override Type Type { get; }
 
         public override string FullName { get; }
-
-        public string ShortName { get; }
 
         public string DisplayName { get; }
 
@@ -105,10 +94,16 @@ namespace Metalama.Framework.Engine.Aspects
             Type aspectType,
             IAspect? prototype,
             IDiagnosticAdder diagnosticAdder,
-            Compilation compilation ) : base( serviceProvider, compilation, typeSymbol, diagnosticAdder, baseClass )
+            Compilation compilation ) : base(
+            serviceProvider,
+            compilation,
+            typeSymbol,
+            diagnosticAdder,
+            baseClass,
+            AttributeHelper.GetShortName( typeSymbol.Name ) )
         {
             this.FullName = typeSymbol.GetReflectionName().AssertNotNull();
-            this.DisplayName = this.ShortName = AttributeHelper.GetShortName( typeSymbol.Name );
+            this.DisplayName = this.ShortName;
             this.IsAbstract = typeSymbol.IsAbstract;
             this.Project = project;
             this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();

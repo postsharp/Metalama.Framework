@@ -3,22 +3,13 @@
 
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating.Mapping;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
 using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.IO;
-using System.IO.Compression;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
@@ -198,7 +189,7 @@ namespace Metalama.Framework.Engine.CompileTime
             this.DiagnosticManifest = diagnosticManifest ?? this.GetDiagnosticManifest( serviceProvider );
             this.ClosureDiagnosticManifest = new DiagnosticManifest( this.ClosureProjects.Select( p => p.DiagnosticManifest ).ToList() );
 
-#if DEBUG
+            // Check that the directory is valid.
             if ( manifest != null && directory != null )
             {
                 foreach ( var file in manifest.Files )
@@ -207,11 +198,11 @@ namespace Metalama.Framework.Engine.CompileTime
 
                     if ( !File.Exists( path ) )
                     {
-                        throw new AssertionFailedException( $"'{path}' does not exist." );
+                        throw new InvalidOperationException(
+                            $"'The directory '{directory}' is in invalid state. Terminate all build processes, delete the directory and retry the build." );
                     }
                 }
             }
-#endif
         }
 
         /// <summary>

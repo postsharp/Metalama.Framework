@@ -10,9 +10,6 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.Advices
 {
@@ -67,9 +64,9 @@ namespace Metalama.Framework.Engine.Advices
             this.MemberBuilder.InitializerTemplate = propertyTemplate.GetInitializerTemplate();
         }
 
-        public override void Initialize( IDiagnosticAdder diagnosticAdder )
+        public override void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
         {
-            base.Initialize( diagnosticAdder );
+            base.Initialize( serviceProvider, diagnosticAdder );
 
             if ( !this._isProgrammaticAutoProperty )
             {

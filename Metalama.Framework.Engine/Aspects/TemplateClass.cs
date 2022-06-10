@@ -10,14 +10,8 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Reflection;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.Aspects
@@ -37,12 +31,16 @@ namespace Metalama.Framework.Engine.Aspects
             Compilation compilation,
             INamedTypeSymbol typeSymbol,
             IDiagnosticAdder diagnosticAdder,
-            TemplateClass? baseClass )
+            TemplateClass? baseClass,
+            string shortName )
         {
             this.ServiceProvider = serviceProvider;
             this.BaseClass = baseClass;
             this.Members = this.GetMembers( compilation, typeSymbol, diagnosticAdder );
+            this.ShortName = shortName;
         }
+
+        public string ShortName { get; }
 
         /// <summary>
         /// Gets metadata of the base aspect class.

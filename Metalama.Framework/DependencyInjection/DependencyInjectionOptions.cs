@@ -52,7 +52,7 @@ public sealed class DependencyInjectionOptions : ProjectExtension
 
     internal bool TryGetFramework( WeaveDependencyContext context, [NotNullWhen( true )] out IDependencyInjectionFramework? framework )
     {
-        var eligibleFrameworks = this._frameworks.Where( f => f.CanWeave( context ) ).ToImmutableArray();
+        var eligibleFrameworks = this._frameworks.Where( f => f.CanInjectDependency( context ) ).ToImmutableArray();
 
         if ( eligibleFrameworks.IsEmpty )
         {

@@ -4,6 +4,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.DependencyInjection;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Aspects;
@@ -14,13 +15,9 @@ using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using RefKind = Metalama.Framework.Code.RefKind;
 
 namespace Metalama.Framework.Engine.Advices;
@@ -62,6 +59,7 @@ internal abstract class IntroduceFieldOrPropertyAdvice<TMember, TBuilder> : Intr
         else
         {
             var userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
+            var syntaxGenerationContextFactory = serviceProvider.GetRequiredService<SyntaxGenerationContextFactory>();
             var userCodeInvocationContext = new UserCodeExecutionContext( serviceProvider, this.AspectLayerId, targetType.GetCompilationModel(), targetType );
 
             UserDiagnosticSink diagnosticSink = new();
@@ -78,14 +76,20 @@ internal abstract class IntroduceFieldOrPropertyAdvice<TMember, TBuilder> : Intr
                 if ( constructor.InitializerKind != ConstructorInitializerKind.This )
                 {
                     // Invoke the IPullStrategy.
+                    PullAction pullFieldOrPropertyAction;
 
-                    var pullFieldOrPropertyAction =
-                        userCodeInvoker.Invoke(
+                    var syntaxGenerationContext = syntaxGenerationContextFactory.GetSyntaxGenerationContext(
+                        constructor.GetPrimaryDeclarationSyntax() ?? constructor.DeclaringType.GetPrimaryDeclarationSyntax().AssertNotNull() );
+
+                    using ( SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( compilation, syntaxGenerationContext ) ) )
+                    {
+                        pullFieldOrPropertyAction = userCodeInvoker.Invoke(
                             () => this.PullStrategy.PullFieldOrProperty(
                                 this.MemberBuilder,
                                 constructor,
                                 scopedDiagnosticSink ),
                             userCodeInvocationContext );
+                    }
 
                     switch ( pullFieldOrPropertyAction.Kind )
                     {
@@ -162,11 +166,20 @@ internal abstract class IntroduceFieldOrPropertyAdvice<TMember, TBuilder> : Intr
                                     // Process all of these constructors.
                                     foreach ( var chainedConstructor in chainedConstructors )
                                     {
-                                        // Ask the IPullStrategy what to do.
-                                        var pullParameterAction = this.PullStrategy.PullParameter(
-                                            baseParameter,
-                                            chainedConstructor,
-                                            scopedDiagnosticSink );
+                                        var chainedSyntaxGenerationContext = syntaxGenerationContextFactory.GetSyntaxGenerationContext(
+                                            constructor.GetPrimaryDeclarationSyntax()
+                                            ?? constructor.DeclaringType.GetPrimaryDeclarationSyntax().AssertNotNull() );
+
+                                        PullAction pullParameterAction;
+
+                                        using ( SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( compilation, chainedSyntaxGenerationContext ) ) )
+                                        {
+                                            // Ask the IPullStrategy what to do.
+                                            pullParameterAction = this.PullStrategy.PullParameter(
+                                                baseParameter,
+                                                chainedConstructor,
+                                                scopedDiagnosticSink );
+                                        }
 
                                         // If we have an implicit constructor, make it explicit.
                                         var initializedChainedConstructor = chainedConstructor;

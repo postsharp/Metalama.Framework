@@ -11,11 +11,7 @@ using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Advices
 {
@@ -24,7 +20,7 @@ namespace Metalama.Framework.Engine.Advices
         public ContractAdvice( IAspectInstanceInternal aspect, TemplateClassInstance templateInstance, IDeclaration targetDeclaration, string? layerName )
             : base( aspect, templateInstance, targetDeclaration, layerName ) { }
 
-        public override void Initialize( IDiagnosticAdder diagnosticAdder ) { }
+        public override void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder ) { }
 
         public override AdviceResult ToResult( IServiceProvider serviceProvider, ICompilation compilation )
         {

@@ -6,7 +6,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
-using System;
 
 namespace Metalama.Framework.Engine.Advices
 {
@@ -43,7 +42,7 @@ namespace Metalama.Framework.Engine.Advices
             this.RemoveTemplate = removeTemplate;
         }
 
-        public override void Initialize( IDiagnosticAdder diagnosticAdder ) { }
+        public override void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder ) { }
 
         public override AdviceResult ToResult( IServiceProvider serviceProvider, ICompilation compilation )
         {

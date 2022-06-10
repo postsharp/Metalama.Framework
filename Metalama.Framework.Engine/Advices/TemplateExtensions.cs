@@ -64,11 +64,13 @@ namespace Metalama.Framework.Engine.Advices
 
         public static TemplateMember<IField> GetInitializerTemplate( this in TemplateMember<IField> fieldTemplate )
         {
+            // TODO 30576 - do not rely on syntax for templates.
+
             if ( fieldTemplate.IsNotNull )
             {
-                var fieldSyntax = (VariableDeclaratorSyntax) fieldTemplate.Declaration!.GetPrimaryDeclarationSyntax().AssertNotNull();
+                var fieldSyntax = (VariableDeclaratorSyntax?) fieldTemplate.Declaration!.GetPrimaryDeclarationSyntax();
 
-                if ( fieldSyntax.Initializer != null )
+                if ( fieldSyntax?.Initializer != null )
                 {
                     return TemplateMember.Create(
                         fieldTemplate.Declaration,
@@ -89,8 +91,10 @@ namespace Metalama.Framework.Engine.Advices
 
         public static TemplateMember<IEvent> GetInitializerTemplate( this in TemplateMember<IEvent> eventFieldTemplate )
         {
+            // TODO 30576 - do not rely on syntax for templates.
+
             if ( eventFieldTemplate.IsNotNull
-                 && eventFieldTemplate.Declaration!.GetPrimaryDeclarationSyntax().AssertNotNull() is VariableDeclaratorSyntax eventFieldSyntax )
+                 && eventFieldTemplate.Declaration!.GetPrimaryDeclarationSyntax() is VariableDeclaratorSyntax eventFieldSyntax )
             {
                 if ( eventFieldSyntax.Initializer != null )
                 {
@@ -109,11 +113,13 @@ namespace Metalama.Framework.Engine.Advices
 
         public static TemplateMember<IProperty> GetInitializerTemplate( this in TemplateMember<IProperty> propertyTemplate )
         {
+            // TODO 30576 - do not rely on syntax for templates.
+
             if ( propertyTemplate.IsNotNull )
             {
-                var propertySyntax = (PropertyDeclarationSyntax) propertyTemplate.Declaration!.GetPrimaryDeclarationSyntax().AssertNotNull();
+                var propertySyntax = (PropertyDeclarationSyntax?) propertyTemplate.Declaration!.GetPrimaryDeclarationSyntax();
 
-                if ( propertySyntax.Initializer != null )
+                if ( propertySyntax?.Initializer != null )
                 {
                     return TemplateMember.Create( propertyTemplate.Declaration, propertyTemplate.TemplateClassMember, TemplateKind.InitializerExpression );
                 }

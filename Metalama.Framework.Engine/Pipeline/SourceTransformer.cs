@@ -9,15 +9,6 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Project;
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
-using System.IO;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Pipeline
 {
@@ -29,11 +20,7 @@ namespace Metalama.Framework.Engine.Pipeline
     {
         public void Execute( TransformerContext context )
         {
-            var serviceProvider = ServiceProviderFactory.GetServiceProvider();
-
-            // The global backstage service provider, that has been added in ServiceProvider.CreateBaseServiceProvider,
-            // gets replaced here by a project-scoped one.
-            serviceProvider = serviceProvider.WithNextProvider( context.Services );
+            var serviceProvider = ServiceProviderFactory.GetServiceProvider( nextProvider: context.Services );
 
             var applicationInfoProvider = (IApplicationInfoProvider?) context.Services.GetService( typeof(IApplicationInfoProvider) );
 

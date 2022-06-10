@@ -5,7 +5,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Diagnostics;
-using System;
 
 namespace Metalama.Framework.Engine.Advices
 {
@@ -33,7 +32,7 @@ namespace Metalama.Framework.Engine.Advices
             this.SetTemplate = setTemplate;
         }
 
-        public override void Initialize( IDiagnosticAdder diagnosticAdder ) { }
+        public override void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder ) { }
 
         public override AdviceResult ToResult( IServiceProvider serviceProvider, ICompilation compilation )
         {

@@ -20,7 +20,7 @@ namespace Metalama.Framework.Validation
         private readonly IDiagnosticSink _diagnostics;
 
         /// <summary>
-        /// Gets the optional opaque object defined by the aspect for the specific target declaration using the <see cref="IAspectBuilder.State"/>
+        /// Gets the optional opaque object defined by the aspect for the specific target declaration using the <see cref="IAspectBuilder.AspectState"/>
         /// property of the <see cref="IAspectBuilder"/> interface. 
         /// </summary>
         public IAspectState? AspectState { get; }

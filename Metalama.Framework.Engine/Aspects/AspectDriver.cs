@@ -5,7 +5,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
-using Metalama.Framework.Eligibility.Implementation;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
@@ -14,12 +13,8 @@ using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Validation;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Immutable;
-using System.Linq;
-using System.Threading;
 
 namespace Metalama.Framework.Engine.Aspects
 {
@@ -156,14 +151,15 @@ namespace Metalama.Framework.Engine.Aspects
                 .ToList();
 
             // Create the AspectBuilder.
-            var aspectBuilder = new AspectBuilder<T>(
+            var aspectBuilderState = new AspectBuilderState(
                 serviceProvider,
-                targetDeclaration,
                 diagnosticSink,
-                adviceFactory,
                 pipelineConfiguration,
+                cancellationToken,
                 aspectInstance,
-                cancellationToken );
+                adviceFactoryState );
+
+            var aspectBuilder = new AspectBuilder<T>( targetDeclaration, aspectBuilderState, adviceFactory );
 
             using ( SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( compilationModelRevision, serviceProvider ) ) )
             {
@@ -207,7 +203,7 @@ namespace Metalama.Framework.Engine.Aspects
                             ImmutableArray<IValidatorSource>.Empty );
                 }
 
-                var aspectResult = aspectBuilder.ToResult();
+                var aspectResult = aspectBuilderState.ToResult();
 
                 if ( !aspectResult.Success )
                 {

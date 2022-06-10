@@ -31,11 +31,11 @@ namespace Metalama.Framework.Aspects
         /// <summary>
         /// Gets or sets an arbitrary object that is then exposed on the <see cref="IAspectInstance.State"/> property of
         /// the <see cref="IAspectInstance"/> interface. While a single instance of an aspect class can be used for
-        /// several target declarations, the <see cref="State"/> is specific to the target declaration. If the aspect
-        /// is inherited, the <see cref="State"/> must be lama-serializable (<see cref="ILamaSerializable"/> or
+        /// several target declarations, the <see cref="AspectState"/> is specific to the target declaration. If the aspect
+        /// is inherited, the <see cref="AspectState"/> must be lama-serializable (<see cref="ILamaSerializable"/> or
         /// default serializable classes).
         /// </summary>
-        IAspectState? State { get; set; }
+        IAspectState? AspectState { get; set; }
     }
 
     /// <summary>
@@ -61,5 +61,8 @@ namespace Metalama.Framework.Aspects
         /// field of the aspect.</param>
         /// <returns><c>true</c> if the aspect target qualifies for the given rule, otherwise <c>false</c> (in this case, the <see cref="IAspectBuilder.SkipAspect"/> method is automatically called. </returns>
         bool VerifyEligibility( IEligibilityRule<TAspectTarget> rule );
+
+        IAspectBuilder<T> WithTarget<T>( T newTarget )
+            where T : class, IDeclaration;
     }
 }

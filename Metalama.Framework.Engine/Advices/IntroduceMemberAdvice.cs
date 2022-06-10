@@ -9,7 +9,6 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
-using System;
 
 namespace Metalama.Framework.Engine.Advices
 {
@@ -66,7 +65,7 @@ namespace Metalama.Framework.Engine.Advices
             this.MemberBuilder = null!;
         }
 
-        public override void Initialize( IDiagnosticAdder diagnosticAdder )
+        public override void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
         {
             var templateAttribute = this.Template.TemplateAttribute;
 
@@ -121,17 +120,17 @@ namespace Metalama.Framework.Engine.Advices
 
             if ( this.Template.Declaration != null )
             {
-                CopyTemplateAttributes( this.Template.Declaration, this.MemberBuilder );
+                CopyTemplateAttributes( this.Template.Declaration, this.MemberBuilder, serviceProvider );
             }
         }
 
-        protected static void CopyTemplateAttributes( IDeclaration declaration, IDeclarationBuilder builder )
+        protected static void CopyTemplateAttributes( IDeclaration declaration, IDeclarationBuilder builder, IServiceProvider serviceProvider )
         {
-            var templateAttributeType = declaration.GetCompilationModel().Factory.GetSpecialType( InternalSpecialType.TemplateAttribute );
+            var classificationService = serviceProvider.GetRequiredService<AttributeClassificationService>();
 
             foreach ( var codeElementAttribute in declaration.Attributes )
             {
-                if ( !codeElementAttribute.Type.Is( templateAttributeType ) )
+                if ( classificationService.MustCopyTemplateAttribute( codeElementAttribute ) )
                 {
                     builder.AddAttribute( codeElementAttribute.ToAttributeConstruction() );
                 }

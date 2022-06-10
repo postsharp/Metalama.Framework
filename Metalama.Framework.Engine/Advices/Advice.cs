@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
-using System;
 
 namespace Metalama.Framework.Engine.Advices
 {
@@ -43,11 +42,12 @@ namespace Metalama.Framework.Engine.Advices
         /// <summary>
         /// Initializes the advice. Executed before any advices are executed.
         /// </summary>
+        /// <param name="serviceProvider"></param>
         /// <param name="diagnosticAdder">Diagnostic adder.</param>
         /// <remarks>
         /// The advice should only report diagnostics that do not take into account the target declaration(s).
         /// </remarks>
-        public abstract void Initialize( IDiagnosticAdder diagnosticAdder );
+        public abstract void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder );
 
         /// <summary>
         /// Applies the advice on the given compilation and returns the set of resulting transformations and diagnostics.

@@ -13,9 +13,16 @@ namespace Metalama.Framework.DependencyInjection;
 /// </summary>
 public class DependencyAttribute : DeclarativeAdviceAttribute
 {
+    private bool? _isLazy;
+
     public sealed override void BuildAspect( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder )
     {
-        var context = new WeaveDependencyContext( (IFieldOrProperty) templateMember, this, builder.Target.GetDeclaringType()!, builder.Diagnostics );
+        var context = new WeaveDependencyContext(
+            (IFieldOrProperty) templateMember,
+            templateMemberId,
+            this,
+            builder.Target.GetDeclaringType()!,
+            builder.Diagnostics );
 
         if ( !builder.Project.DependencyInjectionOptions().TryGetFramework( context, out var framework ) )
         {
@@ -24,6 +31,20 @@ public class DependencyAttribute : DeclarativeAdviceAttribute
             return;
         }
 
-        framework.Weave( templateMember, templateMemberId, builder );
+        framework.InjectDependency( context, builder.WithTarget( builder.Target.GetDeclaringType()! ) );
+    }
+
+    /// <summary>
+    /// Gets the value of the <see cref="IsLazy"/> if it has been assigned, or <c>null</c> if it has not been assigned.
+    /// </summary>
+    public bool? GetIsLazy() => this._isLazy;
+
+    /// <summary>
+    /// Gets or sets a value indicating whether the dependency should be pulled from the container lazily, i.e. upon first use.
+    /// </summary>
+    public bool IsLazy
+    {
+        get => this._isLazy.GetValueOrDefault();
+        set => this._isLazy = value;
     }
 }

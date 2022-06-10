@@ -12,10 +12,6 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 
 namespace Metalama.Framework.Engine.Advices
@@ -51,7 +47,7 @@ namespace Metalama.Framework.Engine.Advices
             this.Tags = tags;
         }
 
-        public override void Initialize( IDiagnosticAdder diagnosticAdder )
+        public override void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
         {
             // When initializing, it is not known which types the target type is implementing.
             // Therefore, a specification for all interfaces should be prepared and only diagnostics related advice parameters and aspect class

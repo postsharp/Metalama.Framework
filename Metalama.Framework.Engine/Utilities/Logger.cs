@@ -3,7 +3,6 @@
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Utilities;
-using System;
 
 namespace Metalama.Framework.Engine.Utilities
 {
@@ -27,6 +26,7 @@ namespace Metalama.Framework.Engine.Utilities
             DesignTime = loggerFactory.DesignTime();
             Remoting = loggerFactory.Remoting();
             DesignTimeEntryPointManager = loggerFactory.GetLogger( "DesignTimeEntryPointManager" );
+            Domain = loggerFactory.GetLogger( "Domain" );
         }
 
         // The DesignTime logger is used before the service container is initialized, therefore we use the global instance.
@@ -35,5 +35,7 @@ namespace Metalama.Framework.Engine.Utilities
         public static ILogger Remoting { get; private set; } = NullLogger.Instance;
 
         public static ILogger DesignTimeEntryPointManager { get; private set; } = NullLogger.Instance;
+
+        public static ILogger Domain { get; private set; } = NullLogger.Instance;
     }
 }

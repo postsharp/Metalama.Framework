@@ -14,57 +14,40 @@ using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
 using Metalama.Framework.Validation;
-using System;
-using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Reflection;
-using System.Threading;
 
 namespace Metalama.Framework.Engine.Aspects
 {
     internal class AspectBuilder<T> : IAspectBuilder<T>, IAspectBuilderInternal, IAspectReceiverParent
         where T : class, IDeclaration
     {
-        private readonly UserDiagnosticSink _diagnosticSink;
-        private readonly AspectPipelineConfiguration _configuration;
+        private readonly AspectBuilderState _aspectBuilderState;
         private AspectReceiverSelector<T>? _declarationSelector;
-        private ImmutableArray<IAspectSource> _aspectSources = ImmutableArray<IAspectSource>.Empty;
-        private ImmutableArray<IValidatorSource> _validatorSources = ImmutableArray<IValidatorSource>.Empty;
 
         public AspectBuilder(
-            IServiceProvider serviceProvider,
             T target,
-            UserDiagnosticSink diagnosticSink,
-            AdviceFactory adviceFactory,
-            AspectPipelineConfiguration configuration,
-            IAspectInstance aspectInstance,
-            CancellationToken cancellationToken )
+            AspectBuilderState aspectBuilderState,
+            AdviceFactory adviceFactory )
         {
             this.Target = target;
-            this._diagnosticSink = diagnosticSink;
-            this._configuration = configuration;
-            this.AspectInstance = aspectInstance;
+            this._aspectBuilderState = aspectBuilderState;
             this.AdviceFactory = adviceFactory;
-            this.CancellationToken = cancellationToken;
-            this.ServiceProvider = serviceProvider;
-            this.AspectPredecessor = new AspectPredecessor( AspectPredecessorKind.ChildAspect, aspectInstance );
         }
 
         public IProject Project => this.Target.Compilation.Project;
 
-        public IAspectInstance AspectInstance { get; }
+        public IAspectInstance AspectInstance => this._aspectBuilderState.AspectInstance;
 
         void IAspectOrValidatorSourceCollector.AddAspectSource( IAspectSource aspectSource )
         {
-            this._aspectSources = this._aspectSources.Add( aspectSource );
+            this._aspectBuilderState.AspectSources = this._aspectBuilderState.AspectSources.Add( aspectSource );
         }
 
         void IAspectOrValidatorSourceCollector.AddValidatorSource( IValidatorSource validatorSource )
         {
-            this._validatorSources = this._validatorSources.Add( validatorSource );
+            this._aspectBuilderState.ValidatorSources = this._aspectBuilderState.ValidatorSources.Add( validatorSource );
         }
 
-        public IServiceProvider ServiceProvider { get; }
+        public IServiceProvider ServiceProvider => this._aspectBuilderState.ServiceProvider;
 
         public AdviceFactory AdviceFactory { get; }
 
@@ -76,9 +59,9 @@ namespace Metalama.Framework.Engine.Aspects
             return new DisposeAction( () => this.AspectPredecessor = oldPredecessor );
         }
 
-        IDiagnosticAdder IAspectBuilderInternal.DiagnosticAdder => this._diagnosticSink;
+        IDiagnosticAdder IAspectBuilderInternal.DiagnosticAdder => this._aspectBuilderState.Diagnostics;
 
-        public ScopedDiagnosticSink Diagnostics => new( this._diagnosticSink, this.Target, this.Target );
+        public ScopedDiagnosticSink Diagnostics => new( this._aspectBuilderState.Diagnostics, this.Target, this.Target );
 
         public T Target { get; }
 
@@ -100,38 +83,17 @@ namespace Metalama.Framework.Engine.Aspects
 
         public IAdviceFactory Advice => this.AdviceFactory;
 
-        public void SkipAspect() => this.IsAspectSkipped = true;
+        public void SkipAspect() => this._aspectBuilderState.IsAspectSkipped = true;
 
-        public bool IsAspectSkipped { get; private set; }
+        public bool IsAspectSkipped => this._aspectBuilderState.IsAspectSkipped;
 
-        public IAspectState? State
+        public IAspectState? AspectState
         {
             get => this.AspectInstance.State;
             set => ((IAspectInstanceInternal) this.AspectInstance).SetState( value );
         }
 
-        public CancellationToken CancellationToken { get; }
-
-        internal AspectInstanceResult ToResult()
-        {
-            var success = this._diagnosticSink.ErrorCount == 0;
-
-            return success && !this.IsAspectSkipped
-                ? new AspectInstanceResult(
-                    this.AspectInstance,
-                    success,
-                    this._diagnosticSink.ToImmutable(),
-                    this.AdviceFactory.State.Advices.ToImmutableArray(),
-                    this._aspectSources,
-                    this._validatorSources )
-                : new AspectInstanceResult(
-                    this.AspectInstance,
-                    success,
-                    this._diagnosticSink.ToImmutable(),
-                    ImmutableArray<Advice>.Empty,
-                    ImmutableArray<IAspectSource>.Empty,
-                    ImmutableArray<IValidatorSource>.Empty );
-        }
+        public CancellationToken CancellationToken => this._aspectBuilderState.CancellationToken;
 
         public void SetAspectLayerBuildAction( string layerName, Action<IAspectLayerBuilder<T>> buildAction ) => throw new NotImplementedException();
 
@@ -143,7 +105,7 @@ namespace Metalama.Framework.Engine.Aspects
             {
                 var justification = rule.GetIneligibilityJustification( EligibleScenarios.Aspect, new DescribedObject<T>( this.Target ) );
 
-                this._diagnosticSink.Report(
+                this._aspectBuilderState.Diagnostics.Report(
                     GeneralDiagnosticDescriptors.AspectNotEligibleOnTarget.CreateRoslynDiagnostic(
                         this.Diagnostics.DefaultTargetLocation.GetDiagnosticLocation(),
                         (this.AspectInstance.AspectClass.ShortName, this.Target, justification!) ) );
@@ -166,15 +128,27 @@ namespace Metalama.Framework.Engine.Aspects
             }
         }
 
+        public IAspectBuilder<TNewTarget> WithTarget<TNewTarget>( TNewTarget newTarget ) where TNewTarget : class, IDeclaration
+        {
+            if ( newTarget == this.Target )
+            {
+                return (IAspectBuilder<TNewTarget>) this;
+            }
+            else
+            {
+                return new AspectBuilder<TNewTarget>( newTarget, this._aspectBuilderState, this.AdviceFactory );
+            }
+        }
+
         public AspectPredecessor AspectPredecessor { get; private set; }
 
         Type IAspectReceiverParent.Type => this.AspectInstance.AspectClass.Type;
 
-        UserCodeInvoker IAspectReceiverParent.UserCodeInvoker => this._configuration.UserCodeInvoker;
+        UserCodeInvoker IAspectReceiverParent.UserCodeInvoker => this._aspectBuilderState.Configuration.UserCodeInvoker;
 
-        IServiceProvider IAspectReceiverParent.ServiceProvider => this._configuration.ServiceProvider;
+        IServiceProvider IAspectReceiverParent.ServiceProvider => this._aspectBuilderState.Configuration.ServiceProvider;
 
-        BoundAspectClassCollection IAspectReceiverParent.AspectClasses => this._configuration.BoundAspectClasses;
+        BoundAspectClassCollection IAspectReceiverParent.AspectClasses => this._aspectBuilderState.Configuration.BoundAspectClasses;
 
         public ReferenceValidatorDriver GetReferenceValidatorDriver( MethodInfo validateMethod )
             => ((IValidatorDriverFactory) this.AspectInstance.AspectClass).GetReferenceValidatorDriver( validateMethod );

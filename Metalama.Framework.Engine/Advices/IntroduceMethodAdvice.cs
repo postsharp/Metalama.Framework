@@ -10,8 +10,6 @@ using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
-using System;
-using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Advices
 {
@@ -40,9 +38,9 @@ namespace Metalama.Framework.Engine.Advices
             this.MemberBuilder = new MethodBuilder( this, targetDeclaration, this.MemberName, tags );
         }
 
-        public override void Initialize( IDiagnosticAdder diagnosticAdder )
+        public override void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
         {
-            base.Initialize( diagnosticAdder );
+            base.Initialize( serviceProvider, diagnosticAdder );
 
             this.MemberBuilder.IsAsync = this.Template.Declaration!.IsAsync;
             var typeRewriter = TemplateTypeRewriter.Get( this.BoundTemplate );
@@ -59,7 +57,7 @@ namespace Metalama.Framework.Engine.Advices
                 this.MemberBuilder.ReturnParameter.RefKind = this.Template.Declaration.ReturnParameter.RefKind;
             }
 
-            CopyTemplateAttributes( this.Template.Declaration.ReturnParameter, this.MemberBuilder.ReturnParameter );
+            CopyTemplateAttributes( this.Template.Declaration.ReturnParameter, this.MemberBuilder.ReturnParameter, serviceProvider );
 
             foreach ( var templateParameter in this.Template.Declaration.Parameters )
             {
@@ -74,7 +72,7 @@ namespace Metalama.Framework.Engine.Advices
                     templateParameter.RefKind,
                     templateParameter.DefaultValue );
 
-                CopyTemplateAttributes( templateParameter, parameterBuilder );
+                CopyTemplateAttributes( templateParameter, parameterBuilder, serviceProvider );
             }
 
             foreach ( var templateGenericParameter in this.Template.Declaration.TypeParameters )
@@ -94,7 +92,7 @@ namespace Metalama.Framework.Engine.Advices
                     genericParameterBuilder.AddTypeConstraint( typeRewriter.Visit( templateGenericParameterConstraint ) );
                 }
 
-                CopyTemplateAttributes( templateGenericParameter.AssertNotNull(), genericParameterBuilder );
+                CopyTemplateAttributes( templateGenericParameter.AssertNotNull(), genericParameterBuilder, serviceProvider );
             }
         }
 

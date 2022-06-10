@@ -9,7 +9,6 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Diagnostics;
-using System;
 
 namespace Metalama.Framework.Engine.Advices
 {
@@ -37,9 +36,9 @@ namespace Metalama.Framework.Engine.Advices
             this.MemberBuilder.InitializerTemplate = fieldTemplate.GetInitializerTemplate();
         }
 
-        public override void Initialize( IDiagnosticAdder diagnosticAdder )
+        public override void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
         {
-            base.Initialize( diagnosticAdder );
+            base.Initialize( serviceProvider, diagnosticAdder );
 
             if ( !this.Template.IsNull )
             {

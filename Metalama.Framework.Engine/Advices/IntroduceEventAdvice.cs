@@ -10,9 +10,6 @@ using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.Advices
 {
@@ -55,9 +52,9 @@ namespace Metalama.Framework.Engine.Advices
             this.MemberBuilder.InitializerTemplate = eventTemplate.GetInitializerTemplate();
         }
 
-        public override void Initialize( IDiagnosticAdder diagnosticAdder )
+        public override void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
         {
-            base.Initialize( diagnosticAdder );
+            base.Initialize( serviceProvider, diagnosticAdder );
 
             this.MemberBuilder.Type =
                 (this.Template.Declaration?.Type ?? (INamedType?) this._addTemplate.Declaration?.Parameters.FirstOrDefault().AssertNotNull().Type)

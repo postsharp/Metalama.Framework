@@ -5,7 +5,6 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Microsoft.CodeAnalysis;
-using System;
 
 namespace Metalama.Framework.Engine.Fabrics
 {
@@ -23,7 +22,7 @@ namespace Metalama.Framework.Engine.Fabrics
             IDiagnosticAdder diagnosticAdder,
             TemplateClass? baseClass,
             CompileTimeProject project ) :
-            base( serviceProvider, compilation, fabricDriver.FabricSymbol, diagnosticAdder, baseClass )
+            base( serviceProvider, compilation, fabricDriver.FabricSymbol, diagnosticAdder, baseClass, fabricDriver.FabricSymbol.Name )
         {
             this.Driver = fabricDriver;
             this.Project = project;
