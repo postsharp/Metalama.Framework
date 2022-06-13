@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.CompileTime
         private static int _nextDomainId;
         private readonly ConcurrentDictionary<AssemblyIdentity, Assembly> _assemblyCache = new();
         private readonly int _domainId = Interlocked.Increment( ref _nextDomainId );
-        private ILogger _logger;
+        private readonly ILogger _logger;
 
         private readonly ConcurrentDictionary<string, (Assembly Assembly, AssemblyIdentity Identity)> _assembliesByName = new();
 

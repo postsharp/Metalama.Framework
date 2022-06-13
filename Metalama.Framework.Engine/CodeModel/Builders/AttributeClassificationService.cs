@@ -45,6 +45,6 @@ internal class AttributeClassificationService : IService
         var declarationFactory = attribute.GetCompilationModel().Factory;
         var templateAttributeType = declarationFactory.GetSpecialType( InternalSpecialType.TemplateAttribute );
 
-        return !attribute.Type.Is( templateAttributeType ) && !attribute.Type.Name.Equals( nameof(DynamicAttribute) );
+        return !attribute.Type.Is( templateAttributeType ) && !attribute.Type.Name.Equals( nameof(DynamicAttribute), StringComparison.Ordinal );
     }
 }

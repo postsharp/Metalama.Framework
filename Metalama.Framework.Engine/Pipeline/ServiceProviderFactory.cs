@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.Pipeline
         /// </summary>
         public static void InitializeAsyncLocalProvider( IPathOptions? directoryOptions = null, IServiceProvider? nextProvider = null )
         {
-            _asyncLocalInstance.Value = CreateBaseServiceProvider( directoryOptions ?? DefaultPathOptions.Instance, nextProvider )
+            _asyncLocalInstance.Value = CreateBaseServiceProvider( directoryOptions ?? DefaultPathOptions.Instance )
                 .WithMark( ServiceProviderMark.AsyncLocal );
         }
 
@@ -58,7 +58,7 @@ namespace Metalama.Framework.Engine.Pipeline
             _asyncLocalInstance.Value = AsyncLocalProvider.WithServices( service );
         }
 
-        private static ServiceProvider CreateBaseServiceProvider( IPathOptions pathOptions, IServiceProvider? nextProvider )
+        private static ServiceProvider CreateBaseServiceProvider( IPathOptions pathOptions )
         {
             // If support services are not initialized at this point, do it.
             // When transformer execution starts, these services are replaced
@@ -66,7 +66,7 @@ namespace Metalama.Framework.Engine.Pipeline
             MetalamaDiagnosticsServiceFactory.Initialize( nameof(ServiceProviderFactory) );
 
             var serviceProvider = ServiceProvider.Empty
-                .WithNextProvider( nextProvider ?? DiagnosticServiceFactory.ServiceProvider )
+                .WithNextProvider( DiagnosticServiceFactory.ServiceProvider )
                 .WithServices(
                     pathOptions,
                     new DefaultCompileTimeDomainFactory() )
@@ -82,7 +82,7 @@ namespace Metalama.Framework.Engine.Pipeline
         public static ServiceProvider GlobalProvider
             => LazyInitializer.EnsureInitialized(
                 ref _globalInstance,
-                () => CreateBaseServiceProvider( DefaultPathOptions.Instance, null ).WithMark( ServiceProviderMark.Global ) )!;
+                () => CreateBaseServiceProvider( DefaultPathOptions.Instance ).WithMark( ServiceProviderMark.Global ) )!;
 
         internal static ServiceProvider AsyncLocalProvider => _asyncLocalInstance.Value ??= GlobalProvider;
 
@@ -92,7 +92,7 @@ namespace Metalama.Framework.Engine.Pipeline
         /// <see cref="AddAsyncLocalService"/> are ignored). This scenario is used in tests. Otherwise, a shallow clone of the async-local or the global
         /// provider is provided.
         /// </summary>
-        public static ServiceProvider GetServiceProvider( IPathOptions? pathOptions = null, IServiceProvider? nextProvider = null )
+        public static ServiceProvider GetServiceProvider( IPathOptions? pathOptions = null, IServiceProvider? nextServiceProvider = null )
         {
             ServiceProvider serviceProvider;
 
@@ -104,7 +104,12 @@ namespace Metalama.Framework.Engine.Pipeline
             }
             else
             {
-                serviceProvider = CreateBaseServiceProvider( pathOptions, nextProvider );
+                serviceProvider = CreateBaseServiceProvider( pathOptions );
+            }
+
+            if ( nextServiceProvider != null )
+            {
+                serviceProvider = serviceProvider.WithNextProvider( nextServiceProvider );
             }
 
             return serviceProvider;

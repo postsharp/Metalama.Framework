@@ -31,11 +31,7 @@ using System.Reflection;
 using System.Runtime.Versioning;
 using System.Text;
 using System.Threading;
-using HashUtilities = Metalama.Framework.Engine.Utilities.HashUtilities;
-using MutexHelper = Metalama.Framework.Engine.Utilities.MutexHelper;
-using RoslynExtensions = Metalama.Framework.Engine.Utilities.RoslynExtensions;
 using SymbolExtensions = Metalama.Framework.Engine.Utilities.SymbolExtensions;
-using TempPathHelper = Metalama.Framework.Engine.Utilities.TempPathHelper;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
@@ -151,6 +147,7 @@ namespace Metalama.Framework.Engine.CompileTime
             IEnumerable<CompileTimeProject> referencedProjects,
             ImmutableArray<UsingDirectiveSyntax> globalUsings,
             ulong hash,
+            OutputPaths outputPaths,
             IDiagnosticAdder diagnosticSink,
             CancellationToken cancellationToken,
             out Compilation? compileTimeCompilation,
@@ -189,7 +186,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                   CSharpParseOptions.Default,
                                   t.FilePath,
                                   Encoding.UTF8 )
-                              .WithFilePath( GetTransformedFilePath( t.FilePath ) ),
+                              .WithFilePath( GetTransformedFilePath( outputPaths, t.FilePath ) ),
                           SourceTree: t) )
                 .ToList();
 
@@ -233,12 +230,21 @@ namespace Metalama.Framework.Engine.CompileTime
             return true;
         }
 
-        private static string GetTransformedFilePath( string originalFilePath )
+        private static string GetTransformedFilePath( OutputPaths outputPaths, string originalFilePath )
         {
             // Find a decent and unique name.
             var transformedFileName = !string.IsNullOrWhiteSpace( originalFilePath )
                 ? Path.GetFileNameWithoutExtension( originalFilePath )
                 : "Anonymous";
+            
+            // Shorten the path if we may exceed the largest allowed size.
+            var remainingSizeForName = 254 - outputPaths.Directory.Length - 1 /* backslash */ - 4 /* .xxx */ - 1 /* _ */ - 8 /* hash */;
+
+            if ( transformedFileName.Length > remainingSizeForName )
+            {
+                transformedFileName = transformedFileName.Substring( 0, remainingSizeForName );
+            }
+            
 
             transformedFileName += "_" + HashUtilities.HashString( originalFilePath );
             transformedFileName += Path.GetExtension( originalFilePath );
@@ -334,9 +340,14 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 foreach ( var compileTimeSyntaxTree in compileTimeCompilation.SyntaxTrees )
                 {
-                    var transformedFileName = Path.Combine( outputDirectory, compileTimeSyntaxTree.FilePath );
+                    var path = Path.Combine( outputDirectory, compileTimeSyntaxTree.FilePath );
 
-                    var path = Path.Combine( outputDirectory, transformedFileName );
+                    if ( path.Length > 254 )
+                    {
+                        // We should generate, upstream, a path that is short enough. At this stage, it is too late to shorten it.
+                        throw new AssertionFailedException( $"Path too long: '{path}'" );
+                    }
+
                     var text = compileTimeSyntaxTree.GetText();
 
                     this._logger.Trace?.Log( $"Writing code to '{path}'." );
@@ -440,7 +451,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     }
                 }
 
-                if ( !emitResult.Success )
+                if ( !emitResult!.Success )
                 {
                     // When the compile-time assembly is invalid, to enable troubleshooting, we store the source files and the list of diagnostics
                     // to a directory that will not be deleted after the build.
@@ -748,6 +759,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             referencedProjects,
                             globalUsings,
                             projectHash,
+                            outputPaths,
                             diagnosticSink,
                             cancellationToken,
                             out var compileTimeCompilation,
@@ -868,7 +880,7 @@ namespace Metalama.Framework.Engine.CompileTime
             IReadOnlyList<CompileTimeProject> referencedProjects,
             StringBuilder? log = null )
         {
-            var targetFramework = SymbolExtensions.GetTargetFramework( runTimeCompilation );
+            var targetFramework = runTimeCompilation.GetTargetFramework();
 
             var sourceHash = ComputeSourceHash( targetFramework, sourceTreesWithCompileTimeCode, log );
             var projectHash = ComputeProjectHash( referencedProjects, sourceHash, log );
@@ -879,20 +891,86 @@ namespace Metalama.Framework.Engine.CompileTime
             return (sourceHash, projectHash, compileTimeAssemblyName, outputPaths);
         }
 
-        private record OutputPaths( string? Directory, string Pe, string Pdb, string Manifest );
+        private record OutputPaths( string Directory, string Pe, string Pdb, string Manifest );
 
         private OutputPaths GetOutputPaths( string runTimeAssemblyName, FrameworkName? targetFramework, string compileTimeAssemblyName )
         {
-            // We cannot include the full assembly name in the path because we're hitting the max path length.
+            // Note: we must generate file paths that are smaller than 256 characters.
+
+            // Get a shorter name for the target framework.
+            string targetFrameworkName;
+
+            if ( targetFramework != null )
+            {
+                targetFrameworkName = "";
+
+                var splitByComma = targetFramework.FullName.Split( ',' );
+
+                for ( var partIndex = 0; partIndex < splitByComma.Length; partIndex++ )
+                {
+                    var namePart = splitByComma[partIndex];
+                    var splitByEqual = namePart.Split( '=' );
+
+                    string part;
+
+                    if ( splitByEqual.Length == 1 )
+                    {
+                        part = splitByEqual[0].ToLowerInvariant();
+                    }
+                    else
+                    {
+                        part = splitByEqual[1].ToLowerInvariant();
+                    }
+
+                    if ( partIndex == 1 )
+                    {
+                        part = part.TrimStart( 'v' );
+                    }
+
+                    if ( partIndex > 1 )
+                    {
+                        targetFrameworkName += "-";
+                    }
+
+                    targetFrameworkName += part;
+                }
+            }
+            else
+            {
+                targetFrameworkName = "unspecified";
+            }
+
+            // Get a shorter assembly name.
+            string shortAssemblyName;
+
+            if ( runTimeAssemblyName.Length > 32 )
+            {
+                // It does not matter if we put several assemblies in the same directory because we include a unique hash of the full name in a subdirectory anyway.
+                shortAssemblyName = runTimeAssemblyName.Substring( 0, 32 );
+            }
+            else
+            {
+                shortAssemblyName = runTimeAssemblyName;
+            }
+
+            // Get the directory name.
+            var hash = HashUtilities.HashString( compileTimeAssemblyName );
+
             var directory = Path.Combine(
                 this._pathOptions.CompileTimeProjectCacheDirectory,
-                runTimeAssemblyName,
-                targetFramework?.FullName ?? "unspecified",
-                HashUtilities.HashString( compileTimeAssemblyName ) );
+                shortAssemblyName,
+                targetFrameworkName,
+                hash );
 
-            var pe = Path.Combine( directory, compileTimeAssemblyName + ".dll" );
+            // Make sure that the base path is short enough. There should be 16 characters left.
+            if ( directory.Length > 240 )
+            {
+                throw new InvalidOperationException( $"The temporary path '{this._pathOptions.CompileTimeProjectCacheDirectory}' is too long." );
+            }
+
+            var pe = Path.Combine( directory, hash + ".dll" );
             var pdb = Path.ChangeExtension( pe, ".pdb" );
-            var manifest = Path.ChangeExtension( pe, ".manifest" );
+            var manifest = Path.Combine( directory, "manifest.json" );
 
             return new OutputPaths( directory, pe, pdb, manifest );
         }
