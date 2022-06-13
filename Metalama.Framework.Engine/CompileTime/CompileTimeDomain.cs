@@ -52,10 +52,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// Loads an assembly in the CLR. The default implementation is compatible with the .NET Framework,
         /// but it can be overwritten for .NET Core.
         /// </summary>
-        protected virtual Assembly LoadAssembly( string path )
-        {
-            return Assembly.LoadFile( path );
-        }
+        protected virtual Assembly LoadAssembly( string path ) => Assembly.LoadFile( path );
 
         /// <summary>
         /// Gets an assembly given its <see cref="AssemblyIdentity"/> and image, or loads it.

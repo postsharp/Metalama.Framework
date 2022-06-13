@@ -4,10 +4,10 @@
 using Metalama.Framework.Aspects;
 using System;
 using System.Collections;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace Metalama.Framework.Engine.Advices
 {
@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.Advices
     /// </summary>
     internal partial class ObjectReader : IObjectReader
     {
-        private static readonly ConcurrentDictionary<Type, TypeAdapter> _types = new();
+        private static readonly ConditionalWeakTable<Type, TypeAdapter> _types = new();
 
         public static readonly IObjectReader Empty = new DictionaryWrapper( ImmutableDictionary<string, object?>.Empty );
 
@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.Advices
 
         private ObjectReader( object instance )
         {
-            this._typeAdapter = _types.GetOrAdd( instance.GetType(), t => new TypeAdapter( t ) );
+            this._typeAdapter = _types.GetValue( instance.GetType(), t => new TypeAdapter( t ) );
             this.Source = instance;
         }
 

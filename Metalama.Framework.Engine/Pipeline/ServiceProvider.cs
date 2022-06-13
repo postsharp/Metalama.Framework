@@ -155,6 +155,7 @@ namespace Metalama.Framework.Engine.Pipeline
             serviceProvider = serviceProvider.WithService( new BuiltInSerializerFactoryProvider( serviceProvider ) );
             serviceProvider = serviceProvider.WithServices( new SyntaxSerializationService( serviceProvider ), new CompileTimeTypeFactory() );
             serviceProvider = serviceProvider.WithServices( new SystemTypeResolver( serviceProvider ) );
+            serviceProvider = serviceProvider.WithSharedLazyInitializedService( sp => new SymbolClassificationService( sp ) );
 
             serviceProvider = serviceProvider.WithService(
                 new SyntaxGenerationContextFactory( compilation ?? SyntaxGenerationContext.EmptyCompilation, serviceProvider ) );
