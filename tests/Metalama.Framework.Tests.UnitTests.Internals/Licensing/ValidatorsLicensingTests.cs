@@ -1,0 +1,97 @@
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using System.Threading.Tasks;
+using Xunit;
+
+namespace Metalama.Framework.Tests.UnitTests.Licensing
+{
+    public class ValidatorsLicensingTests : LicensingTestsBase
+    {
+        private const string _declarationValidationAspectAppliedCode = @"
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Validation;
+
+namespace DeclarationValidatorTests;
+
+class ValidateAspect : TypeAspect
+{
+    private static readonly DiagnosticDefinition<IDeclaration> _error = new(
+            ""DEMO01"",
+            Severity.Error,
+            ""'{0}' is validated."" );
+
+    public override void BuildAspect( IAspectBuilder<INamedType> builder )
+    {
+        builder.With( t => t.Methods ).AfterAllAspects().Validate( Validate );
+    }
+
+    private static void Validate( in DeclarationValidationContext context )
+    {
+        context.Diagnostics.Report( _error.WithArguments( context.Declaration ) );
+    }
+}
+
+[ValidateAspect]
+class TargetClass
+{
+    void TargetMethod() { }
+}
+";
+
+        private const string _declarationValidationFabricAppliedCode = @"
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Fabrics;
+using Metalama.Framework.Validation;
+
+namespace DeclarationValidatorTests;
+
+class Fabric : ProjectFabric
+{
+    private static readonly DiagnosticDefinition<IDeclaration> _error = new(
+            ""DEMO02"",
+            Severity.Error,
+            ""'{0}' is validated."" );
+
+    public override void AmendProject( IProjectAmender project )
+    {
+        project.With( x => x ).Validate( Validate );
+    }
+
+    private static void Validate( in DeclarationValidationContext context )
+    {
+        context.Diagnostics.Report( _error.WithArguments( context.Declaration ) );
+    }
+}
+
+class TargetClass
+{
+    void TargetMethod() { }
+}
+";
+
+        [Theory]
+        [InlineData( TestLicenseKeys.MetalamaUltimateEssentials )]
+        [InlineData( TestLicenseKeys.MetalamaUltimateBusiness )]
+        public async Task DeclarationValidatorIsAcceptedViaAspectAsync( string licenseKey )
+        {
+            var diagnostics = await this.GetDiagnosticsAsync( _declarationValidationAspectAppliedCode, licenseKey );
+
+            Assert.Single( diagnostics, d => d.Id == "DEMO01" );
+        }
+
+        [Theory]
+        [InlineData( TestLicenseKeys.MetalamaUltimateEssentials )]
+        [InlineData( TestLicenseKeys.MetalamaUltimateBusiness )]
+        public async Task DeclarationValidatorIsAcceptedViaFabricAsync( string licenseKey )
+        {
+            var diagnostics = await this.GetDiagnosticsAsync( _declarationValidationFabricAppliedCode, licenseKey );
+
+            Assert.Single( diagnostics, d => d.Id == "DEMO02" );
+        }
+    }
+}
