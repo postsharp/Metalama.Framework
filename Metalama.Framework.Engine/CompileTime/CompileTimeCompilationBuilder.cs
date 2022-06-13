@@ -796,7 +796,6 @@ namespace Metalama.Framework.Engine.CompileTime
                             .Select( t => t.GetReflectionName().AssertNotNull() )
                             .ToList();
 
-                        
                         var manifest = new CompileTimeProjectManifest(
                             runTimeCompilation.Assembly.Identity.ToString(),
                             compileTimeCompilation.AssemblyName!,
@@ -806,7 +805,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             fabricTypes,
                             transitiveFabricTypes,
                             referencedProjects.Select( r => r.RunTimeIdentity.GetDisplayName() ).ToList(),
-                            redistributionLicenseInfo.LicenseKeys,
+                            redistributionLicenseInfo?.LicenseKeys,
                             sourceHash,
                             textMapDirectory.FilesByTargetPath.Values.Select( f => new CompileTimeFile( f ) ).ToImmutableList() );
 
