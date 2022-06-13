@@ -10,9 +10,14 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var typedMethod = builder.Advice.IntroduceMethod( builder.Target, nameof(CloneImpl) );
-            typedMethod.Name = "Clone";
-            typedMethod.ReturnType = builder.Target;
+            var typedMethod = builder.Advice.IntroduceMethod(
+                builder.Target,
+                nameof(CloneImpl),
+                buildAction: m =>
+                {
+                    m.Name = "Clone";
+                    m.ReturnType = builder.Target;
+                } );
 
             builder.Advice.ImplementInterface( builder.Target, typeof(ICloneable), whenExists: OverrideStrategy.Ignore );
         }

@@ -243,7 +243,7 @@ namespace Metalama.Framework.Engine.Advices
             }
         }
 
-        public override AdviceResult ToResult( IServiceProvider serviceProvider, ICompilation compilation )
+        public override AdviceImplementationResult Implement( IServiceProvider serviceProvider, ICompilation compilation )
         {
             // Adding interfaces may run into three problems:
             //      1) Target type already implements the interface.
@@ -446,7 +446,7 @@ namespace Metalama.Framework.Engine.Advices
                 }
             }
 
-            return AdviceResult.Create( transformations ).WithDiagnostics( diagnosticList.ToArray() );
+            return AdviceImplementationResult.Create( transformations ).WithDiagnostics( diagnosticList.ToArray() );
         }
 
         private MemberBuilder GetImplMethodBuilder(

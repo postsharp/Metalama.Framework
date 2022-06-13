@@ -49,16 +49,16 @@ internal abstract class IntroduceFieldOrPropertyAdvice<TMember, TBuilder> : Intr
     }
 
     /// <summary>
-    /// Creates an <see cref="AdviceResult"/> that introduces the <see cref="MemberBuilder"/> and appends any transformation necessary to
+    /// Creates an <see cref="AdviceImplementationResult"/> that introduces the <see cref="MemberBuilder"/> and appends any transformation necessary to
     /// pull the new member from the constructor.
     /// </summary>
     /// <returns></returns>
-    protected AdviceResult IntroduceMemberAndPull( IServiceProvider serviceProvider, INamedType targetType )
+    protected AdviceImplementationResult IntroduceMemberAndPull( IServiceProvider serviceProvider, INamedType targetType )
     {
         if ( this.PullStrategy == null )
         {
             // The field or property should not be pulled or initialized.
-            return AdviceResult.Create( this.MemberBuilder );
+            return AdviceImplementationResult.Create( this.MemberBuilder );
         }
         else
         {
@@ -254,7 +254,7 @@ internal abstract class IntroduceFieldOrPropertyAdvice<TMember, TBuilder> : Intr
                 }
             }
 
-            return AdviceResult.Create( transformations, diagnosticSink.ToImmutable().ReportedDiagnostics );
+            return AdviceImplementationResult.Create( transformations, diagnosticSink.ToImmutable().ReportedDiagnostics );
         }
     }
 }

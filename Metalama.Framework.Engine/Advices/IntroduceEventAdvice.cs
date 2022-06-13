@@ -66,7 +66,7 @@ namespace Metalama.Framework.Engine.Advices
             this.MemberBuilder.Accessibility = (this.Template.Declaration?.Accessibility ?? this._addTemplate.Declaration?.Accessibility).AssertNotNull();
         }
 
-        public override AdviceResult ToResult( IServiceProvider serviceProvider, ICompilation compilation )
+        public override AdviceImplementationResult Implement( IServiceProvider serviceProvider, ICompilation compilation )
         {
             // this.Tags: Override transformations.
             var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
@@ -81,11 +81,11 @@ namespace Metalama.Framework.Engine.Advices
                 // There is no existing declaration, we will introduce and override the introduced.
                 if ( hasNoOverrideSemantics )
                 {
-                    return AdviceResult.Create( this.MemberBuilder );
+                    return AdviceImplementationResult.Create( this.MemberBuilder );
                 }
                 else
                 {
-                    return AdviceResult.Create(
+                    return AdviceImplementationResult.Create(
                         this.MemberBuilder,
                         new OverrideEventTransformation(
                             this,
@@ -102,7 +102,7 @@ namespace Metalama.Framework.Engine.Advices
                 if ( existingDeclaration is not IEvent existingEvent )
                 {
                     return
-                        AdviceResult.Create(
+                        AdviceImplementationResult.Create(
                             AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentKind.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
                                 (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration, existingDeclaration.DeclarationKind) ) );
@@ -110,7 +110,7 @@ namespace Metalama.Framework.Engine.Advices
                 else if ( existingDeclaration.IsStatic != this.MemberBuilder.IsStatic )
                 {
                     return
-                        AdviceResult.Create(
+                        AdviceImplementationResult.Create(
                             AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentStaticity.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
                                 (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
@@ -119,7 +119,7 @@ namespace Metalama.Framework.Engine.Advices
                 else if ( !compilation.InvariantComparer.Equals( this.Builder.Type, existingEvent.Type ) )
                 {
                     return
-                        AdviceResult.Create(
+                        AdviceImplementationResult.Create(
                             AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
                                 (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
@@ -131,7 +131,7 @@ namespace Metalama.Framework.Engine.Advices
                     case OverrideStrategy.Fail:
                         // Produce fail diagnostic.
                         return
-                            AdviceResult.Create(
+                            AdviceImplementationResult.Create(
                                 AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateRoslynDiagnostic(
                                     targetDeclaration.GetDiagnosticLocation(),
                                     (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
@@ -139,7 +139,7 @@ namespace Metalama.Framework.Engine.Advices
 
                     case OverrideStrategy.Ignore:
                         // Do nothing.
-                        return AdviceResult.Empty;
+                        return AdviceImplementationResult.Empty;
 
                     case OverrideStrategy.New:
                         // If the existing declaration is in the current type, we fail, otherwise, declare a new method and override.
@@ -147,7 +147,7 @@ namespace Metalama.Framework.Engine.Advices
                         {
                             if ( hasNoOverrideSemantics )
                             {
-                                return AdviceResult.Empty;
+                                return AdviceImplementationResult.Empty;
                             }
                             else
                             {
@@ -160,7 +160,7 @@ namespace Metalama.Framework.Engine.Advices
                                     this.Tags,
                                     this._parameters );
 
-                                return AdviceResult.Create( overriddenMethod );
+                                return AdviceImplementationResult.Create( overriddenMethod );
                             }
                         }
                         else
@@ -169,7 +169,7 @@ namespace Metalama.Framework.Engine.Advices
 
                             if ( hasNoOverrideSemantics )
                             {
-                                return AdviceResult.Create( this.MemberBuilder );
+                                return AdviceImplementationResult.Create( this.MemberBuilder );
                             }
                             else
                             {
@@ -182,7 +182,7 @@ namespace Metalama.Framework.Engine.Advices
                                     this.Tags,
                                     this._parameters );
 
-                                return AdviceResult.Create( this.MemberBuilder, overriddenMethod );
+                                return AdviceImplementationResult.Create( this.MemberBuilder, overriddenMethod );
                             }
                         }
 
@@ -191,7 +191,7 @@ namespace Metalama.Framework.Engine.Advices
                         {
                             if ( hasNoOverrideSemantics )
                             {
-                                return AdviceResult.Empty;
+                                return AdviceImplementationResult.Empty;
                             }
                             else
                             {
@@ -204,13 +204,13 @@ namespace Metalama.Framework.Engine.Advices
                                     this.Tags,
                                     this._parameters );
 
-                                return AdviceResult.Create( overriddenMethod );
+                                return AdviceImplementationResult.Create( overriddenMethod );
                             }
                         }
                         else if ( existingDeclaration.IsSealed || !existingDeclaration.IsVirtual )
                         {
                             return
-                                AdviceResult.Create(
+                                AdviceImplementationResult.Create(
                                     AdviceDiagnosticDescriptors.CannotIntroduceOverrideOfSealed.CreateRoslynDiagnostic(
                                         targetDeclaration.GetDiagnosticLocation(),
                                         (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
@@ -223,7 +223,7 @@ namespace Metalama.Framework.Engine.Advices
 
                             if ( hasNoOverrideSemantics )
                             {
-                                return AdviceResult.Create( this.MemberBuilder );
+                                return AdviceImplementationResult.Create( this.MemberBuilder );
                             }
                             else
                             {
@@ -236,7 +236,7 @@ namespace Metalama.Framework.Engine.Advices
                                     this.Tags,
                                     this._parameters );
 
-                                return AdviceResult.Create( this.MemberBuilder, overriddenEvent );
+                                return AdviceImplementationResult.Create( this.MemberBuilder, overriddenEvent );
                             }
                         }
 

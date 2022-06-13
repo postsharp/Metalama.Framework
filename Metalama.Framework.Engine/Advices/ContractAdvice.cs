@@ -6,7 +6,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.MetaModel;
@@ -24,24 +23,22 @@ namespace Metalama.Framework.Engine.Advices
         public ContractAdvice( IAspectInstanceInternal aspect, TemplateClassInstance templateInstance, IDeclaration targetDeclaration, string? layerName )
             : base( aspect, templateInstance, targetDeclaration, layerName ) { }
 
-        public override void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder ) { }
-
-        public override AdviceResult ToResult( IServiceProvider serviceProvider, ICompilation compilation )
+        public override AdviceImplementationResult Implement( IServiceProvider serviceProvider, ICompilation compilation )
         {
             var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
 
             switch ( targetDeclaration )
             {
                 case IMethod method:
-                    return AdviceResult.Create( new FilterMethodTransformation( this, method ) );
+                    return AdviceImplementationResult.Create( new FilterMethodTransformation( this, method ) );
 
                 case IProperty property:
-                    return AdviceResult.Create( new FilterPropertyTransformation( this, property ) );
+                    return AdviceImplementationResult.Create( new FilterPropertyTransformation( this, property ) );
 
                 case IField field:
                     var promotedField = new PromotedField( serviceProvider, this, field, ObjectReader.Empty );
 
-                    return AdviceResult.Create(
+                    return AdviceImplementationResult.Create(
                         promotedField,
                         new FilterPropertyTransformation( this, promotedField ) );
 

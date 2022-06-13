@@ -96,7 +96,7 @@ namespace Metalama.Framework.Engine.Advices
             // TODO: For get accessor template, we are ignoring accessibility of set accessor template because it can be easily incompatible.
         }
 
-        public override AdviceResult ToResult( IServiceProvider serviceProvider, ICompilation compilation )
+        public override AdviceImplementationResult Implement( IServiceProvider serviceProvider, ICompilation compilation )
         {
             // Determine whether we need introduction transformation (something may exist in the original code or could have been introduced by previous steps).
             var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
@@ -124,7 +124,7 @@ namespace Metalama.Framework.Engine.Advices
                         this._setTemplate,
                         this.Tags );
 
-                    return AdviceResult.Create( this.MemberBuilder, overriddenProperty );
+                    return AdviceImplementationResult.Create( this.MemberBuilder, overriddenProperty );
                 }
             }
             else
@@ -132,7 +132,7 @@ namespace Metalama.Framework.Engine.Advices
                 if ( existingDeclaration is not IProperty existingProperty )
                 {
                     return
-                        AdviceResult.Create(
+                        AdviceImplementationResult.Create(
                             AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentKind.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
                                 (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration, existingDeclaration.DeclarationKind) ) );
@@ -141,7 +141,7 @@ namespace Metalama.Framework.Engine.Advices
                 if ( existingDeclaration.IsStatic != this.MemberBuilder.IsStatic )
                 {
                     return
-                        AdviceResult.Create(
+                        AdviceImplementationResult.Create(
                             AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentStaticity.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
                                 (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
@@ -150,7 +150,7 @@ namespace Metalama.Framework.Engine.Advices
                 else if ( !compilation.InvariantComparer.Equals( this.Builder.Type, existingProperty.Type ) )
                 {
                     return
-                        AdviceResult.Create(
+                        AdviceImplementationResult.Create(
                             AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
                                 (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
@@ -162,7 +162,7 @@ namespace Metalama.Framework.Engine.Advices
                     case OverrideStrategy.Fail:
                         // Produce fail diagnostic.
                         return
-                            AdviceResult.Create(
+                            AdviceImplementationResult.Create(
                                 AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateRoslynDiagnostic(
                                     targetDeclaration.GetDiagnosticLocation(),
                                     (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
@@ -170,7 +170,7 @@ namespace Metalama.Framework.Engine.Advices
 
                     case OverrideStrategy.Ignore:
                         // Do nothing.
-                        return AdviceResult.Empty;
+                        return AdviceImplementationResult.Empty;
 
                     case OverrideStrategy.New:
                         // If the existing declaration is in the current type, we fail, otherwise, declare a new method and override.
@@ -183,7 +183,7 @@ namespace Metalama.Framework.Engine.Advices
                                 this._setTemplate,
                                 this.Tags );
 
-                            return AdviceResult.Create( overriddenProperty );
+                            return AdviceImplementationResult.Create( overriddenProperty );
                         }
                         else
                         {
@@ -196,7 +196,7 @@ namespace Metalama.Framework.Engine.Advices
                                 this._setTemplate,
                                 this.Tags );
 
-                            return AdviceResult.Create( this.MemberBuilder, overriddenProperty );
+                            return AdviceImplementationResult.Create( this.MemberBuilder, overriddenProperty );
                         }
 
                     case OverrideStrategy.Override:
@@ -209,12 +209,12 @@ namespace Metalama.Framework.Engine.Advices
                                 this._setTemplate,
                                 this.Tags );
 
-                            return AdviceResult.Create( overriddenMethod );
+                            return AdviceImplementationResult.Create( overriddenMethod );
                         }
                         else if ( existingDeclaration.IsSealed || !existingDeclaration.IsVirtual )
                         {
                             return
-                                AdviceResult.Create(
+                                AdviceImplementationResult.Create(
                                     AdviceDiagnosticDescriptors.CannotIntroduceOverrideOfSealed.CreateRoslynDiagnostic(
                                         targetDeclaration.GetDiagnosticLocation(),
                                         (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
@@ -234,7 +234,7 @@ namespace Metalama.Framework.Engine.Advices
                                     this._setTemplate,
                                     this.Tags );
 
-                            return AdviceResult.Create( new ITransformation[] { this.MemberBuilder }.Concat( overrideTransformations ) );
+                            return AdviceImplementationResult.Create( new ITransformation[] { this.MemberBuilder }.Concat( overrideTransformations ) );
                         }
 
                     default:

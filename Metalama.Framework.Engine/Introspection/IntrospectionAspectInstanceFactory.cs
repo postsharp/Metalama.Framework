@@ -26,5 +26,5 @@ internal class IntrospectionAspectInstanceFactory
         => this._instances.GetOrAdd( aspectInstanceResult, x => new IntrospectionAspectInstance( x, this._compilation, this ) );
 
     public IntrospectionAdvice GetIntrospectionAdvice( Advice advice )
-        => new( advice, this._pipelineListener?.GetAdviceResult( advice ) ?? AdviceResult.Empty, this._compilation );
+        => new( advice, this._pipelineListener?.GetAdviceResult( advice ) ?? AdviceImplementationResult.Empty, this._compilation );
 }

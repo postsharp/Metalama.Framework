@@ -315,6 +315,7 @@ namespace Metalama.Framework.Engine.Pipeline
             this._aspectInstanceResults.AddRange( aspectInstanceResults );
         }
 
-        public void AddAdviceResult( Advice advice, AdviceResult result ) => this._introspectionPipelineListener?.AddAdviceResult( advice, result );
+        public void AddAdviceResult( Advice advice, AdviceImplementationResult result )
+            => this._introspectionPipelineListener?.AddAdviceResult( advice, result );
     }
 }

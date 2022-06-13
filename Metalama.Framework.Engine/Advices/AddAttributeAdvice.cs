@@ -31,9 +31,7 @@ internal class AddAttributeAdvice : Advice
         this._overrideStrategy = overrideStrategy;
     }
 
-    public override void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder ) { }
-
-    public override AdviceResult ToResult( IServiceProvider serviceProvider, ICompilation compilation )
+    public override AdviceImplementationResult Implement( IServiceProvider serviceProvider, ICompilation compilation )
     {
         var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
 
@@ -48,13 +46,13 @@ internal class AddAttributeAdvice : Advice
                 switch ( this._overrideStrategy )
                 {
                     case OverrideStrategy.Fail:
-                        return AdviceResult.Create(
+                        return AdviceImplementationResult.Create(
                             AdviceDiagnosticDescriptors.AttributeAlreadyPresent.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
                                 (this.Aspect.AspectClass.ShortName, this._attribute.Type, targetDeclaration) ) );
 
                     case OverrideStrategy.Ignore:
-                        return AdviceResult.Empty;
+                        return AdviceImplementationResult.Empty;
 
                     case OverrideStrategy.New:
                         return CreateResult();
@@ -75,7 +73,7 @@ internal class AddAttributeAdvice : Advice
 
         return CreateResult();
 
-        AdviceResult CreateResult( RemoveAttributesTransformation? removeTransformation = null )
+        AdviceImplementationResult CreateResult( RemoveAttributesTransformation? removeTransformation = null )
         {
             List<ITransformation> transformations = new();
 
@@ -91,7 +89,7 @@ internal class AddAttributeAdvice : Advice
 
             transformations.Add( new AttributeBuilder( this, targetDeclaration, this._attribute ) );
 
-            return AdviceResult.Create( transformations );
+            return AdviceImplementationResult.Create( transformations );
         }
     }
 }

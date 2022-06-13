@@ -48,7 +48,7 @@ namespace Metalama.Framework.Engine.Advices
         /// <remarks>
         /// The advice should only report diagnostics that do not take into account the target declaration(s).
         /// </remarks>
-        public abstract void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder );
+        public virtual void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder ) { }
 
         /// <summary>
         /// Applies the advice on the given compilation and returns the set of resulting transformations and diagnostics.
@@ -56,6 +56,6 @@ namespace Metalama.Framework.Engine.Advices
         /// <param name="serviceProvider">Service provider.</param>
         /// <param name="compilation">Input compilation.</param>
         /// <returns>Advice result containing transformations and diagnostics.</returns>
-        public abstract AdviceResult ToResult( IServiceProvider serviceProvider, ICompilation compilation );
+        public abstract AdviceImplementationResult Implement( IServiceProvider serviceProvider, ICompilation compilation );
     }
 }

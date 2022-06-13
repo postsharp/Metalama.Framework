@@ -5,8 +5,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.References;
-using Metalama.Framework.Engine.Diagnostics;
-using System;
 
 namespace Metalama.Framework.Engine.Advices
 {
@@ -25,11 +23,6 @@ namespace Metalama.Framework.Engine.Advices
             IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, layerName )
         {
             this.Tags = tags;
-        }
-
-        public override void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
-        {
-            // TODO: Test that the advice is not applied to declaration in a base class.
         }
 
         public override string ToString() => $"Override {this.TargetDeclaration}";

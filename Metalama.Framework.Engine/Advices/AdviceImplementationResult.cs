@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Advices
 {
-    internal class AdviceResult
+    internal class AdviceImplementationResult
     {
         public ImmutableArray<Diagnostic> Diagnostics { get; }
 
@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.Advices
 
         public ImmutableArray<INonObservableTransformation> NonObservableTransformations { get; }
 
-        public AdviceResult(
+        public AdviceImplementationResult(
             ImmutableArray<Diagnostic> diagnostic = default,
             ImmutableArray<IObservableTransformation> observableTransformations = default,
             ImmutableArray<INonObservableTransformation> nonObservableTransformations = default )
@@ -29,18 +29,18 @@ namespace Metalama.Framework.Engine.Advices
                 nonObservableTransformations.IsDefault ? ImmutableArray<INonObservableTransformation>.Empty : nonObservableTransformations;
         }
 
-        public static AdviceResult Empty
+        public static AdviceImplementationResult Empty
             => new(
                 ImmutableArray<Diagnostic>.Empty,
                 ImmutableArray<IObservableTransformation>.Empty,
                 ImmutableArray<INonObservableTransformation>.Empty );
 
-        public static AdviceResult Create( params ITransformation[] transformations )
+        public static AdviceImplementationResult Create( params ITransformation[] transformations )
         {
             return Create( (IEnumerable<ITransformation>) transformations );
         }
 
-        public static AdviceResult Create( IEnumerable<ITransformation> transformations, ImmutableArray<Diagnostic> diagnostics = default )
+        public static AdviceImplementationResult Create( IEnumerable<ITransformation> transformations, ImmutableArray<Diagnostic> diagnostics = default )
         {
             ImmutableArray<IObservableTransformation>.Builder? observableTransformations = null;
             ImmutableArray<INonObservableTransformation>.Builder? nonObservableTransformations = null;
@@ -67,36 +67,39 @@ namespace Metalama.Framework.Engine.Advices
                 }
             }
 
-            return new AdviceResult(
+            return new AdviceImplementationResult(
                 diagnostics.IsDefault ? ImmutableArray<Diagnostic>.Empty : diagnostics,
                 observableTransformations != null ? observableTransformations.ToImmutable() : ImmutableArray<IObservableTransformation>.Empty,
                 nonObservableTransformations != null ? nonObservableTransformations.ToImmutable() : ImmutableArray<INonObservableTransformation>.Empty );
         }
 
-        public static AdviceResult Create( params Diagnostic[] diagnostics )
+        public static AdviceImplementationResult Create( params Diagnostic[] diagnostics )
         {
-            return new AdviceResult(
+            return new AdviceImplementationResult(
                 ImmutableArray.Create( diagnostics ),
                 ImmutableArray<IObservableTransformation>.Empty,
                 ImmutableArray<INonObservableTransformation>.Empty );
         }
 
-        public AdviceResult WithTransformations( params ITransformation[] transformations )
+        public AdviceImplementationResult WithTransformations( params ITransformation[] transformations )
         {
             return this.WithTransformations( (IReadOnlyList<ITransformation>) transformations );
         }
 
-        public AdviceResult WithTransformations( IReadOnlyList<ITransformation> transformations )
+        public AdviceImplementationResult WithTransformations( IReadOnlyList<ITransformation> transformations )
         {
-            return new AdviceResult(
+            return new AdviceImplementationResult(
                 this.Diagnostics,
                 this.ObservableTransformations.AddRange( transformations.OfType<IObservableTransformation>() ),
                 this.NonObservableTransformations.AddRange( transformations.OfType<INonObservableTransformation>() ) );
         }
 
-        public AdviceResult WithDiagnostics( params Diagnostic[] diagnostics )
+        public AdviceImplementationResult WithDiagnostics( params Diagnostic[] diagnostics )
         {
-            return new AdviceResult( this.Diagnostics.AddRange( diagnostics ), this.ObservableTransformations, this.NonObservableTransformations );
+            return new AdviceImplementationResult(
+                this.Diagnostics.AddRange( diagnostics ),
+                this.ObservableTransformations,
+                this.NonObservableTransformations );
         }
     }
 }

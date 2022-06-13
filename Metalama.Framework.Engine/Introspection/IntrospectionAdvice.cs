@@ -11,10 +11,10 @@ namespace Metalama.Framework.Engine.Introspection;
 internal class IntrospectionAdvice : IIntrospectionAdvice
 {
     private readonly Advice _advice;
-    private readonly AdviceResult _adviceResult;
+    private readonly AdviceImplementationResult _adviceResult;
     private readonly ICompilation _compilation;
 
-    public IntrospectionAdvice( Advice advice, AdviceResult adviceResult, ICompilation compilation )
+    public IntrospectionAdvice( Advice advice, AdviceImplementationResult adviceResult, ICompilation compilation )
     {
         this._advice = advice;
         this._adviceResult = adviceResult;

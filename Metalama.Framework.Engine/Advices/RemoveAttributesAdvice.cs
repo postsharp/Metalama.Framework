@@ -3,7 +3,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
 using System;
 using System.Linq;
@@ -28,15 +27,13 @@ internal class RemoveAttributesAdvice : Advice
         this._attributeType = attributeType;
     }
 
-    public override void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder ) { }
-
-    public override AdviceResult ToResult( IServiceProvider serviceProvider, ICompilation compilation )
+    public override AdviceImplementationResult Implement( IServiceProvider serviceProvider, ICompilation compilation )
     {
         var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
 
         if ( targetDeclaration.Attributes.OfAttributeType( this._attributeType ).Any() )
         {
-            return AdviceResult.Create(
+            return AdviceImplementationResult.Create(
                 new RemoveAttributesTransformation(
                     this,
                     targetDeclaration,
@@ -44,7 +41,7 @@ internal class RemoveAttributesAdvice : Advice
         }
         else
         {
-            return AdviceResult.Empty;
+            return AdviceImplementationResult.Empty;
         }
     }
 }

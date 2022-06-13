@@ -14,7 +14,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
-using DiagnosticDescriptorExtensions = Metalama.Framework.Engine.Diagnostics.DiagnosticDescriptorExtensions;
 using RefKind = Metalama.Framework.Code.RefKind;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypeKind = Metalama.Framework.Code.TypeKind;
@@ -287,11 +286,12 @@ namespace Metalama.Framework.Engine.Advices
             this.State.Diagnostics.Report( diagnosticList );
         }
 
-        public IMethodBuilder IntroduceMethod(
+        public AdviceResult<IMethod> IntroduceMethod(
             INamedType targetType,
             string defaultTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IMethodBuilder>? buildAction = null,
             object? args = null,
             object? tags = null )
         {
@@ -327,11 +327,13 @@ namespace Metalama.Framework.Engine.Advices
 
             this.State.Diagnostics.Report( diagnosticList );
 
-            return advice.Builder;
+            buildAction?.Invoke( advice.Builder );
+
+            return new AdviceResult<IMethod>( advice.Builder );
         }
 
-        public void Override(
-            IFieldOrPropertyOrIndexer targetDeclaration,
+        public AdviceResult<IProperty> Override(
+            IFieldOrProperty targetDeclaration,
             string defaultTemplate,
             object? tags = null )
         {
@@ -371,10 +373,12 @@ namespace Metalama.Framework.Engine.Advices
             this.State.Advices.Add( advice );
 
             this.State.Diagnostics.Report( diagnosticList );
+
+            return new AdviceResult<IProperty>( null! );
         }
 
-        public void OverrideAccessors(
-            IFieldOrPropertyOrIndexer targetDeclaration,
+        public AdviceResult<IProperty> OverrideAccessors(
+            IFieldOrProperty targetDeclaration,
             in GetterTemplateSelector getTemplateSelector,
             string? setTemplate = null,
             object? args = null,
@@ -405,8 +409,7 @@ namespace Metalama.Framework.Engine.Advices
 
             if ( getTemplateRef.IsNull && setTemplateRef.IsNull )
             {
-                // There is no applicable template because the property has no getter or no setter matching the selection.
-                return;
+                throw new InvalidOperationException( "There is no accessor to override." );
             }
 
             var advice = new OverrideFieldOrPropertyAdvice(
@@ -424,13 +427,16 @@ namespace Metalama.Framework.Engine.Advices
             this.State.Advices.Add( advice );
 
             this.State.Diagnostics.Report( diagnosticList );
+
+            return new AdviceResult<IProperty>( null!, true );
         }
 
-        public IFieldBuilder IntroduceField(
+        public AdviceResult<IField> IntroduceField(
             INamedType targetType,
             string templateName,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IFieldBuilder>? buildAction = null,
             object? tags = null,
             IPullStrategy? pullStrategy = null )
         {
@@ -460,17 +466,20 @@ namespace Metalama.Framework.Engine.Advices
             ThrowOnErrors( diagnosticList );
             this.State.Advices.Add( advice );
 
+            buildAction?.Invoke( advice.Builder );
+
             this.State.Diagnostics.Report( diagnosticList );
 
-            return advice.Builder;
+            return new AdviceResult<IField>( advice.Builder );
         }
 
-        public IFieldBuilder IntroduceField(
+        public AdviceResult<IField> IntroduceField(
             INamedType targetType,
             string fieldName,
             IType fieldType,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IFieldBuilder>? buildAction = null,
             object? tags = null,
             IPullStrategy? pullStrategy = null )
         {
@@ -501,15 +510,18 @@ namespace Metalama.Framework.Engine.Advices
 
             advice.Builder.Type = fieldType;
 
-            return advice.Builder;
+            buildAction?.Invoke( advice.Builder );
+
+            return new AdviceResult<IField>( advice.Builder );
         }
 
-        public IFieldBuilder IntroduceField(
+        public AdviceResult<IField> IntroduceField(
             INamedType targetType,
             string fieldName,
             Type fieldType,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IFieldBuilder>? buildAction = null,
             object? tags = null,
             IPullStrategy? pullStrategy = null )
             => this.IntroduceField(
@@ -518,15 +530,17 @@ namespace Metalama.Framework.Engine.Advices
                 this.State.Compilation.Factory.GetTypeByReflectionType( fieldType ),
                 scope,
                 whenExists,
+                buildAction,
                 tags,
                 pullStrategy );
 
-        public IPropertyBuilder IntroduceAutomaticProperty(
+        public AdviceResult<IProperty> IntroduceAutomaticProperty(
             INamedType targetType,
             string propertyName,
             IType propertyType,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IPropertyBuilder>? buildAction = null,
             object? tags = null,
             IPullStrategy? pullStrategy = null )
         {
@@ -559,15 +573,18 @@ namespace Metalama.Framework.Engine.Advices
 
             advice.Builder.Type = propertyType;
 
-            return advice.Builder;
+            buildAction?.Invoke( advice.Builder );
+
+            return new AdviceResult<IProperty>( advice.Builder );
         }
 
-        public IPropertyBuilder IntroduceAutomaticProperty(
+        public AdviceResult<IProperty> IntroduceAutomaticProperty(
             INamedType targetType,
             string propertyName,
             Type propertyType,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IPropertyBuilder>? buildAction = null,
             object? tags = null,
             IPullStrategy? pullStrategy = null )
             => this.IntroduceAutomaticProperty(
@@ -576,13 +593,15 @@ namespace Metalama.Framework.Engine.Advices
                 this.State.Compilation.Factory.GetTypeByReflectionType( propertyType ),
                 scope,
                 whenExists,
+                buildAction,
                 tags );
 
-        public IPropertyBuilder IntroduceProperty(
+        public AdviceResult<IProperty> IntroduceProperty(
             INamedType targetType,
             string defaultTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IPropertyBuilder>? buildAction = null,
             object? tags = null )
         {
             if ( this._templateInstance == null )
@@ -621,18 +640,21 @@ namespace Metalama.Framework.Engine.Advices
             ThrowOnErrors( diagnosticList );
             this.State.Advices.Add( advice );
 
+            buildAction?.Invoke( advice.Builder );
+
             this.State.Diagnostics.Report( diagnosticList );
 
-            return advice.Builder;
+            return new AdviceResult<IProperty>( advice.Builder );
         }
 
-        public IPropertyBuilder IntroduceProperty(
+        public AdviceResult<IProperty> IntroduceProperty(
             INamedType targetType,
             string name,
             string? getTemplate,
             string? setTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IPropertyBuilder>? buildAction = null,
             object? args = null,
             object? tags = null )
         {
@@ -677,7 +699,9 @@ namespace Metalama.Framework.Engine.Advices
 
             this.State.Diagnostics.Report( diagnosticList );
 
-            return advice.Builder;
+            buildAction?.Invoke( advice.Builder );
+
+            return new AdviceResult<IProperty>( advice.Builder );
         }
 
         public void OverrideAccessors(
@@ -735,11 +759,12 @@ namespace Metalama.Framework.Engine.Advices
             this.State.Diagnostics.Report( diagnosticList );
         }
 
-        public IEventBuilder IntroduceEvent(
+        public AdviceResult<IEvent> IntroduceEvent(
             INamedType targetType,
             string eventTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IEventBuilder>? buildAction = null,
             object? tags = null )
         {
             if ( this._templateInstance == null )
@@ -778,10 +803,10 @@ namespace Metalama.Framework.Engine.Advices
 
             this.State.Diagnostics.Report( diagnosticList );
 
-            return advice.Builder;
+            return new AdviceResult<IEvent>( advice.Builder );
         }
 
-        public IEventBuilder IntroduceEvent(
+        public AdviceResult<IEvent> IntroduceEvent(
             INamedType targetType,
             string name,
             string addTemplate,
@@ -789,6 +814,7 @@ namespace Metalama.Framework.Engine.Advices
             string? invokeTemplate = null,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IEventBuilder>? buildAction = null,
             object? args = null,
             object? tags = null )
         {
@@ -831,7 +857,7 @@ namespace Metalama.Framework.Engine.Advices
 
             this.State.Diagnostics.Report( diagnosticList );
 
-            return advice.Builder;
+            return new AdviceResult<IEvent>( advice.Builder );
         }
 
         public void ImplementInterface(
@@ -1036,14 +1062,16 @@ namespace Metalama.Framework.Engine.Advices
             this.AddFilterImpl( targetParameter, targetParameter.DeclaringMember, template, kind, tags, args );
         }
 
-        public void AddContract(
+        public AdviceResult<IPropertyOrIndexer> AddContract(
             IFieldOrPropertyOrIndexer targetMember,
             string template,
-            ContractDirection kind = ContractDirection.Input,
+            ContractDirection kind = ContractDirection.Default,
             object? tags = null,
             object? args = null )
         {
             this.AddFilterImpl( targetMember, targetMember, template, kind, tags, args );
+
+            return new AdviceResult<IPropertyOrIndexer>( null! );
         }
 
         private void AddFilterImpl(

@@ -11,13 +11,18 @@ public class MyAspect : TypeAspect
         builder.Advice.IntroduceAutomaticProperty( builder.Target, "P1", typeof(int) );
 
         // Change property visibility.
-        var property2 = builder.Advice.IntroduceAutomaticProperty( builder.Target, "P2", typeof(int) );
-        property2.Accessibility = Accessibility.Protected;
+        builder.Advice.IntroduceAutomaticProperty( builder.Target, "P2", typeof(int), buildAction: p => { p.Accessibility = Accessibility.Protected; } );
 
         // Change accessor visibility.
-        var property3 = builder.Advice.IntroduceAutomaticProperty( builder.Target, "P3", typeof(int) );
-        property3.Accessibility = Accessibility.Public;
-        property3.SetMethod!.Accessibility = Accessibility.Protected;
+        builder.Advice.IntroduceAutomaticProperty(
+            builder.Target,
+            "P3",
+            typeof(int),
+            buildAction: p =>
+            {
+                p.Accessibility = Accessibility.Public;
+                p.SetMethod!.Accessibility = Accessibility.Protected;
+            } );
     }
 }
 

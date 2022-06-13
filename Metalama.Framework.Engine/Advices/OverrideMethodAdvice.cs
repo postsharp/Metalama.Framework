@@ -4,7 +4,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
 using System;
 
@@ -25,12 +24,10 @@ namespace Metalama.Framework.Engine.Advices
             this.BoundTemplate = boundTemplate;
         }
 
-        public override void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder ) { }
-
-        public override AdviceResult ToResult( IServiceProvider serviceProvider, ICompilation compilation )
+        public override AdviceImplementationResult Implement( IServiceProvider serviceProvider, ICompilation compilation )
         {
             // TODO: order should be self if the target is introduced on the same layer.
-            return AdviceResult.Create(
+            return AdviceImplementationResult.Create(
                 new OverrideMethodTransformation( this, this.TargetDeclaration.GetTarget( compilation ), this.BoundTemplate, this.Tags ) );
         }
     }

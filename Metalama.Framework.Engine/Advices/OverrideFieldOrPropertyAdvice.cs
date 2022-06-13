@@ -4,7 +4,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.Diagnostics;
 using System;
 
 namespace Metalama.Framework.Engine.Advices
@@ -33,15 +32,13 @@ namespace Metalama.Framework.Engine.Advices
             this.SetTemplate = setTemplate;
         }
 
-        public override void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder ) { }
-
-        public override AdviceResult ToResult( IServiceProvider serviceProvider, ICompilation compilation )
+        public override AdviceImplementationResult Implement( IServiceProvider serviceProvider, ICompilation compilation )
         {
             // TODO: Translate templates to this compilation.
             // TODO: order should be self if the target is introduced on the same layer.
             var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
 
-            return AdviceResult.Create(
+            return AdviceImplementationResult.Create(
                 OverrideHelper.OverrideProperty(
                     serviceProvider,
                     this,

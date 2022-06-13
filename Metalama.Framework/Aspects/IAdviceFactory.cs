@@ -51,11 +51,12 @@ namespace Metalama.Framework.Aspects
         ///     of the <see cref="meta"/> API.</param>
         /// <returns>An <see cref="IMethodBuilder"/> that allows to modify the name or signature, or to add custom attributes.</returns>
         /// <seealso href="@introducing-members"/>
-        IMethodBuilder IntroduceMethod(
+        AdviceResult<IMethod> IntroduceMethod(
             INamedType targetType,
             string template,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IMethodBuilder>? buildAction = null,
             object? args = null,
             object? tags = null );
 
@@ -69,8 +70,8 @@ namespace Metalama.Framework.Aspects
         ///     <see cref="meta"/> API.</param>
         /// <remarks>When an aspect overrides the same declaration in same aspect part multiple, the order of distinct pieces of advice is equal to the inverse of order of calls of this method.</remarks>
         /// <seealso href="@overriding-members"/>
-        void Override(
-            IFieldOrPropertyOrIndexer targetDeclaration,
+        AdviceResult<IProperty> Override(
+            IFieldOrProperty targetDeclaration,
             string template,
             object? tags = null );
 
@@ -92,8 +93,8 @@ namespace Metalama.Framework.Aspects
         ///     <see cref="meta"/> API.</param>
         /// <remarks>When an aspect overrides the same declaration in same aspect part multiple, the order of distinct pieces of advice is equal to the inverse of order of calls of this method.</remarks>
         /// <seealso href="@overriding-members"/>
-        void OverrideAccessors(
-            IFieldOrPropertyOrIndexer targetDeclaration,
+        AdviceResult<IProperty> OverrideAccessors(
+            IFieldOrProperty targetDeclaration,
             in GetterTemplateSelector getTemplate = default,
             string? setTemplate = null,
             object? args = null,
@@ -112,11 +113,12 @@ namespace Metalama.Framework.Aspects
         /// <param name="pullStrategy"></param>
         /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
         /// <seealso href="@introducing-members"/>
-        IFieldBuilder IntroduceField(
+        AdviceResult<IField> IntroduceField(
             INamedType targetType,
             string template,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IFieldBuilder>? buildAction = null,
             object? tags = null,
             IPullStrategy? pullStrategy = null );
 
@@ -134,12 +136,13 @@ namespace Metalama.Framework.Aspects
         /// <param name="pullStrategy"></param>
         /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
         /// <seealso href="@introducing-members"/>
-        IFieldBuilder IntroduceField(
+        AdviceResult<IField> IntroduceField(
             INamedType targetType,
             string fieldName,
             IType fieldType,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IFieldBuilder>? buildAction = null,
             object? tags = null,
             IPullStrategy? pullStrategy = null );
 
@@ -157,12 +160,13 @@ namespace Metalama.Framework.Aspects
         /// <param name="pullStrategy"></param>
         /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
         /// <seealso href="@introducing-members"/>
-        IFieldBuilder IntroduceField(
+        AdviceResult<IField> IntroduceField(
             INamedType targetType,
             string fieldName,
             Type fieldType,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IFieldBuilder>? buildAction = null,
             object? tags = null,
             IPullStrategy? pullStrategy = null );
 
@@ -180,12 +184,13 @@ namespace Metalama.Framework.Aspects
         /// <param name="pullStrategy"></param>
         /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
         /// <seealso href="@introducing-members"/>
-        IPropertyBuilder IntroduceAutomaticProperty(
+        AdviceResult<IProperty> IntroduceAutomaticProperty(
             INamedType targetType,
             string propertyName,
             Type propertyType,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IPropertyBuilder>? buildAction = null,
             object? tags = null,
             IPullStrategy? pullStrategy = null );
 
@@ -203,12 +208,13 @@ namespace Metalama.Framework.Aspects
         /// <param name="pullStrategy"></param>
         /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
         /// <seealso href="@introducing-members"/>
-        IPropertyBuilder IntroduceAutomaticProperty(
+        AdviceResult<IProperty> IntroduceAutomaticProperty(
             INamedType targetType,
             string propertyName,
             IType propertyType,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IPropertyBuilder>? buildAction = null,
             object? tags = null,
             IPullStrategy? pullStrategy = null );
 
@@ -230,11 +236,12 @@ namespace Metalama.Framework.Aspects
         ///     <see cref="meta"/> API.</param>
         /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
         /// <seealso href="@introducing-members"/>
-        IPropertyBuilder IntroduceProperty(
+        AdviceResult<IProperty> IntroduceProperty(
             INamedType targetType,
             string template,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IPropertyBuilder>? buildAction = null,
             object? tags = null );
 
         /// <summary>
@@ -258,13 +265,14 @@ namespace Metalama.Framework.Aspects
         ///     <see cref="meta"/> API.</param>
         /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
         /// <seealso href="@introducing-members"/>
-        IPropertyBuilder IntroduceProperty(
+        AdviceResult<IProperty> IntroduceProperty(
             INamedType targetType,
             string name,
             string? getTemplate,
             string? setTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IPropertyBuilder>? buildAction = null,
             object? args = null,
             object? tags = null );
 
@@ -309,11 +317,12 @@ namespace Metalama.Framework.Aspects
         ///     <see cref="meta"/> API.</param>
         /// <returns>An <see cref="IEventBuilder"/> that allows to change the name and the type of the event.</returns>
         /// <seealso href="@introducing-members"/>
-        IEventBuilder IntroduceEvent(
+        AdviceResult<IEvent> IntroduceEvent(
             INamedType targetType,
             string eventTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IEventBuilder>? buildAction = null,
             object? tags = null );
 
         /// <summary>
@@ -339,7 +348,7 @@ namespace Metalama.Framework.Aspects
         ///     <see cref="meta"/> API.</param>
         /// <returns>An <see cref="IEventBuilder"/> that allows to change the name and the type of the event.</returns>
         /// <seealso href="@introducing-members"/>
-        IEventBuilder IntroduceEvent(
+        AdviceResult<IEvent> IntroduceEvent(
             INamedType targetType,
             string eventName,
             string addTemplate,
@@ -347,6 +356,7 @@ namespace Metalama.Framework.Aspects
             string? raiseTemplate = null,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IEventBuilder>? buildAction = null,
             object? args = null,
             object? tags = null );
 
@@ -433,8 +443,8 @@ namespace Metalama.Framework.Aspects
         /// <param name="direction">Direction of the data flow to which the contract should apply. See <see cref="ContractDirection"/> for details.</param>
         /// <param name="tags">An optional opaque object of anonymous type passed to templates and exposed under the <see cref="meta.Tags"/> property of the
         ///     <see cref="meta"/> API.</param>
-        /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template.</param>      
-        void AddContract(
+        /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template.</param>
+        AdviceResult<IPropertyOrIndexer> AddContract(
             IFieldOrPropertyOrIndexer targetMember,
             string template,
             ContractDirection direction = ContractDirection.Default,

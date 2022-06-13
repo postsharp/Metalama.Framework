@@ -19,13 +19,15 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            var typedMethod = builder.Advice.IntroduceMethod(
+            builder.Advice.IntroduceMethod(
                 builder.Target,
                 nameof(CloneImpl),
-                whenExists: OverrideStrategy.Override );
-
-            typedMethod.Name = "Clone";
-            typedMethod.ReturnType = builder.Target;
+                whenExists: OverrideStrategy.Override,
+                buildAction: m =>
+                {
+                    m.Name = "Clone";
+                    m.ReturnType = builder.Target;
+                } );
 
             builder.Advice.ImplementInterface(
                 builder.Target,
@@ -60,7 +62,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
             {
                 field.Invokers.Final.SetValue(
                     clone,
-                    meta.Cast( field.Type, ( (ICloneable)field.Invokers.Final.GetValue( meta.This ) ).Clone() ) );
+                    meta.Cast( field.Type, ( (ICloneable) field.Invokers.Final.GetValue( meta.This ) ).Clone() ) );
             }
 
             return clone;

@@ -9,9 +9,9 @@ namespace Metalama.Framework.Engine.Introspection;
 
 internal class IntrospectionPipelineListener : IService
 {
-    private readonly Dictionary<Advice, AdviceResult> _adviceResults = new();
+    private readonly Dictionary<Advice, AdviceImplementationResult> _adviceResults = new();
 
-    public void AddAdviceResult( Advice advice, AdviceResult result ) => this._adviceResults.Add( advice, result );
+    public void AddAdviceResult( Advice advice, AdviceImplementationResult result ) => this._adviceResults.Add( advice, result );
 
-    public AdviceResult GetAdviceResult( Advice advice ) => this._adviceResults[advice];
+    public AdviceImplementationResult GetAdviceResult( Advice advice ) => this._adviceResults[advice];
 }

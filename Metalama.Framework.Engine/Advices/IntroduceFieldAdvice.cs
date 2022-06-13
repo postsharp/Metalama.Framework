@@ -57,7 +57,7 @@ namespace Metalama.Framework.Engine.Advices
             }
         }
 
-        public override AdviceResult ToResult( IServiceProvider serviceProvider, ICompilation compilation )
+        public override AdviceImplementationResult Implement( IServiceProvider serviceProvider, ICompilation compilation )
         {
             var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
             var existingDeclaration = targetDeclaration.FindClosestUniquelyNamedMember( this.MemberBuilder.Name );
@@ -67,7 +67,7 @@ namespace Metalama.Framework.Engine.Advices
                 if ( existingDeclaration is not IField )
                 {
                     return
-                        AdviceResult.Create(
+                        AdviceImplementationResult.Create(
                             AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentKind.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
                                 (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration, existingDeclaration.DeclarationKind) ) );
@@ -76,7 +76,7 @@ namespace Metalama.Framework.Engine.Advices
                 if ( existingDeclaration.IsStatic != this.MemberBuilder.IsStatic )
                 {
                     return
-                        AdviceResult.Create(
+                        AdviceImplementationResult.Create(
                             AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentStaticity.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
                                 (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
@@ -88,7 +88,7 @@ namespace Metalama.Framework.Engine.Advices
                     case OverrideStrategy.Fail:
                         // Produce fail diagnostic.
                         return
-                            AdviceResult.Create(
+                            AdviceImplementationResult.Create(
                                 AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateRoslynDiagnostic(
                                     targetDeclaration.GetDiagnosticLocation(),
                                     (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
@@ -96,7 +96,7 @@ namespace Metalama.Framework.Engine.Advices
 
                     case OverrideStrategy.Ignore:
                         // Do nothing.
-                        return AdviceResult.Empty;
+                        return AdviceImplementationResult.Empty;
 
                     case OverrideStrategy.New:
                         this.MemberBuilder.IsNew = true;
