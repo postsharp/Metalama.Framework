@@ -1,0 +1,4 @@
+[AspectWithParametrizedConstructor(default)]
+class TargetCode
+{
+}
