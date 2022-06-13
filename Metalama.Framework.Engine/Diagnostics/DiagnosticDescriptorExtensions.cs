@@ -44,7 +44,7 @@ namespace Metalama.Framework.Engine.Diagnostics
             return definition.CreateRoslynDiagnosticImpl( location, argumentArray, additionalLocations, codeFixes, properties );
         }
 
-        public static Diagnostic CreateRoslynDiagnostic(
+        internal static Diagnostic CreateRoslynDiagnosticImpl(
             this IDiagnosticDefinition definition,
             Location? location,
             object? arguments,

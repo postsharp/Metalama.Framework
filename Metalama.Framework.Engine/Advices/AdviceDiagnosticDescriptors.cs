@@ -23,14 +23,6 @@ namespace Metalama.Framework.Engine.Advices
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<(string AspectType, DeclarationKind IntroducedDeclarationKind, DeclarationKind TargetDeclarationKind)>
-            CannotUseIntroduceWithoutDeclaringType = new(
-                "LAMA0501",
-                "Cannot use [Introduce] in an aspect that is applied to a declaration that is neither a type nor a type member.",
-                "The aspect '{0}' cannot introduce a {1} because it has been applied to a {2}, which is neither a type nor a type member.",
-                _category,
-                Error );
-
         internal static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType, IDeclaration DeclaringType)>
             CannotIntroduceOverrideOfSealed = new(
                 "LAMA0502",
@@ -108,6 +100,14 @@ namespace Metalama.Framework.Engine.Advices
                 "LAMA0514",
                 "Cannot introduce member into a type because another member of a different kind already exists.",
                 "The aspect '{0}' cannot introduce member '{1}' into type '{2}' because there is already a {3} of the same name in the type.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<(string AspectType, INamedType InterfaceType, INamedType TargetType, IMember InterfaceMember)>
+            ImplicitInterfaceMemberConflict = new(
+                "LAMA0515",
+                "Cannot introduce an implicit interface member when the target type already contains a declaration with the same signature.",
+                "The aspect '{0}' cannot introduce interface '{1}' into type '{2}' because the type already contains '{3}' and WhenExists is set to Fail.",
                 _category,
                 Error );
     }

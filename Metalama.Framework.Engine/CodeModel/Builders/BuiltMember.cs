@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public sealed override DeclarationBuilder Builder => this.MemberBuilder;
 
-        string? IRef<IMember>.ToSerializableId() => null;
+        DeclarationSerializableId IRef<IMember>.ToSerializableId() => throw new NotImplementedException();
 
         IMember IRef<IMember>.GetTarget( ICompilation compilation ) => throw new NotImplementedException();
 

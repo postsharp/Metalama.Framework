@@ -31,6 +31,7 @@
     <ItemGroup>
         <!-- Exclude files that intentionally do not compile -->
         <Compile Remove="Tests\**\__*.cs" />
+        <None Include="Tests\**\__*.cs" />
     </ItemGroup>
 
     <ItemGroup>
@@ -42,8 +43,6 @@
     <ItemGroup>
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
     </ItemGroup>
-
-
 
     <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets" />
 

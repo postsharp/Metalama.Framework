@@ -31,7 +31,7 @@ namespace Metalama.Framework.GenerateMetaSyntaxRewriter.Model
         [XmlAttribute]
         public bool AllowTrailingSeparator { get; set; }
 
-        [XmlElement( ElementName = "Kind", Type = typeof( Kind ) )]
+        [XmlElement( ElementName = "Kind", Type = typeof(Kind) )]
         public List<Kind> Kinds { get; set; } = new();
 
         [XmlElement]

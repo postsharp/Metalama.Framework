@@ -4,7 +4,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Metalama.Framework.Engine.Templating;
 
 namespace Metalama.Framework.Engine.Advices
 {
@@ -66,11 +66,16 @@ namespace Metalama.Framework.Engine.Advices
         {
             if ( fieldTemplate.IsNotNull )
             {
-                var fieldSyntax = (VariableDeclaratorSyntax) fieldTemplate.Declaration!.GetPrimaryDeclaration().AssertNotNull();
+                // Initializer template is compiled into a template for the field.
+                var templateName = TemplateNameHelper.GetCompiledTemplateName( fieldTemplate.Declaration.AssertNotNull().GetSymbol().AssertNotNull() );
 
-                if ( fieldSyntax.Initializer != null )
+                if ( fieldTemplate.TemplateClassMember.TemplateClass.Type.GetMethod( templateName ) != null )
                 {
-                    return TemplateMember.Create( fieldTemplate.Declaration, fieldTemplate.TemplateClassMember, TemplateKind.InitializerExpression );
+                    return TemplateMember.Create(
+                        fieldTemplate.Declaration,
+                        fieldTemplate.TemplateClassMember,
+                        fieldTemplate.TemplateAttribute.AssertNotNull(),
+                        TemplateKind.InitializerExpression );
                 }
                 else
                 {
@@ -85,10 +90,12 @@ namespace Metalama.Framework.Engine.Advices
 
         public static TemplateMember<IEvent> GetInitializerTemplate( this in TemplateMember<IEvent> eventFieldTemplate )
         {
-            if ( eventFieldTemplate.IsNotNull
-                 && eventFieldTemplate.Declaration!.GetPrimaryDeclaration().AssertNotNull() is VariableDeclaratorSyntax eventFieldSyntax )
+            if ( eventFieldTemplate.IsNotNull )
             {
-                if ( eventFieldSyntax.Initializer != null )
+                // Initializer template is compiled into a template for event.
+                var templateName = TemplateNameHelper.GetCompiledTemplateName( eventFieldTemplate.Declaration.AssertNotNull().GetSymbol().AssertNotNull() );
+
+                if ( eventFieldTemplate.TemplateClassMember.TemplateClass.Type.GetMethod( templateName ) != null )
                 {
                     return TemplateMember.Create( eventFieldTemplate.Declaration, eventFieldTemplate.TemplateClassMember, TemplateKind.InitializerExpression );
                 }
@@ -107,9 +114,10 @@ namespace Metalama.Framework.Engine.Advices
         {
             if ( propertyTemplate.IsNotNull )
             {
-                var propertySyntax = (PropertyDeclarationSyntax) propertyTemplate.Declaration!.GetPrimaryDeclaration().AssertNotNull();
+                // Initializer template is compiled into a template for property.
+                var templateName = TemplateNameHelper.GetCompiledTemplateName( propertyTemplate.Declaration.AssertNotNull().GetSymbol().AssertNotNull() );
 
-                if ( propertySyntax.Initializer != null )
+                if ( propertyTemplate.TemplateClassMember.TemplateClass.Type.GetMethod( templateName ) != null )
                 {
                     return TemplateMember.Create( propertyTemplate.Declaration, propertyTemplate.TemplateClassMember, TemplateKind.InitializerExpression );
                 }

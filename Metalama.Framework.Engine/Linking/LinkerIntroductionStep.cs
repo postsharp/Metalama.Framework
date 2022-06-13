@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Transformations;
@@ -18,6 +17,9 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+#if DEBUG
+using Metalama.Framework.Engine.Formatting;
+#endif
 
 namespace Metalama.Framework.Engine.Linking
 {
@@ -354,7 +356,14 @@ namespace Metalama.Framework.Engine.Linking
             symbolInsertedStatements = new Dictionary<SyntaxNode, IReadOnlyList<LinkerInsertedStatement>>();
             introductionInsertedStatements = new Dictionary<IIntroduceMemberTransformation, IReadOnlyList<LinkerInsertedStatement>>();
 
-            foreach ( var insertStatementTransformation in allTransformations.OfType<IInsertStatementTransformation>() )
+            // Insert statements must be executed in inverse order (because we need the forward execution order and not the override order)
+            // except within an aspect, where the order needs to be preserved.
+            var insertStatementTransformations = allTransformations.OfType<IInsertStatementTransformation>()
+                .GroupBy( x => x.Advice.Aspect )
+                .Reverse()
+                .SelectMany( x => x );
+
+            foreach ( var insertStatementTransformation in insertStatementTransformations )
             {
                 // TODO: Supports only constructors without overrides.
                 //       Needs to be generalized for anything else (take into account overrides).

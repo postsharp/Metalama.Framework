@@ -3,7 +3,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Aspects.Initialization.InstanceConstructing;
 
-[assembly: AspectOrder( typeof(Aspect2), typeof(Aspect1) )]
+[assembly: AspectOrder( typeof(Aspect1), typeof(Aspect2) )]
 
 namespace Metalama.Framework.Tests.Integration.Aspects.Initialization.InstanceConstructing
 {

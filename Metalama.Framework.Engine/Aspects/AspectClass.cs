@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.Aspects;
 /// <summary>
 /// Represents the metadata of an aspect class. This class is compilation-independent. It is not used to represent a fabric class.
 /// </summary>
-public class AspectClass : TemplateClass, IAspectClassImpl, IBoundAspectClass, IValidatorDriverFactory
+public class AspectClass : TemplateClass, IBoundAspectClass, IValidatorDriverFactory
 {
     private readonly UserCodeInvoker _userCodeInvoker;
     private readonly IAspect? _prototypeAspectInstance; // Null for abstract classes.
@@ -49,7 +49,7 @@ public class AspectClass : TemplateClass, IAspectClassImpl, IBoundAspectClass, I
 
     private ImmutableArray<KeyValuePair<Type, IEligibilityRule<IDeclaration>>> _eligibilityRules;
 
-    public override Type AspectType { get; }
+    public override Type Type { get; }
 
     public override string FullName { get; }
 
@@ -80,6 +80,8 @@ public class AspectClass : TemplateClass, IAspectClassImpl, IBoundAspectClass, I
     /// </summary>
     internal ImmutableArray<AspectLayer> Layers { get; }
 
+    ImmutableArray<AspectLayer> IAspectClassImpl.Layers => this.Layers;
+
     public Location? DiagnosticLocation { get; }
 
     /// <inheritdoc />
@@ -87,9 +89,9 @@ public class AspectClass : TemplateClass, IAspectClassImpl, IBoundAspectClass, I
 
     public bool IsInherited { get; }
 
-    public bool IsAttribute => typeof(Attribute).IsAssignableFrom( this.AspectType );
+    public bool IsAttribute => typeof(Attribute).IsAssignableFrom( this.Type );
 
-    Type IAspectClass.Type => this.AspectType;
+    Type IAspectClass.Type => this.Type;
 
     public bool IsLiveTemplate { get; }
 
@@ -100,21 +102,21 @@ public class AspectClass : TemplateClass, IAspectClassImpl, IBoundAspectClass, I
     /// </summary>
     internal AspectClass(
         IServiceProvider serviceProvider,
-        INamedTypeSymbol aspectTypeSymbol,
+        INamedTypeSymbol typeSymbol,
         AspectClass? baseClass,
         CompileTimeProject? project,
         Type aspectType,
         IAspect? prototype,
         IDiagnosticAdder diagnosticAdder,
-        Compilation compilation ) : base( serviceProvider, compilation, aspectTypeSymbol, diagnosticAdder, baseClass )
+        Compilation compilation ) : base( serviceProvider, compilation, typeSymbol, diagnosticAdder, baseClass )
     {
-        this.FullName = aspectTypeSymbol.GetReflectionName().AssertNotNull();
-        this.DisplayName = this.ShortName = AttributeHelper.GetShortName( aspectTypeSymbol.Name );
-        this.IsAbstract = aspectTypeSymbol.IsAbstract;
+        this.FullName = typeSymbol.GetReflectionName().AssertNotNull();
+        this.DisplayName = this.ShortName = AttributeHelper.GetShortName( typeSymbol.Name );
+        this.IsAbstract = typeSymbol.IsAbstract;
         this.Project = project;
         this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
-        this.DiagnosticLocation = aspectTypeSymbol.GetDiagnosticLocation();
-        this.AspectType = aspectType;
+        this.DiagnosticLocation = typeSymbol.GetDiagnosticLocation();
+        this.Type = aspectType;
         this._prototypeAspectInstance = prototype;
         this.TemplateClasses = ImmutableArray.Create<TemplateClass>( this );
         this.GeneratedCodeAnnotation = MetalamaCompilerAnnotations.CreateGeneratedCodeAnnotation( $"aspect '{this.ShortName}'" );
@@ -135,9 +137,7 @@ public class AspectClass : TemplateClass, IAspectClassImpl, IBoundAspectClass, I
             layers.Add( null );
         }
 
-        foreach ( var attribute in aspectTypeSymbol.GetAttributes() )
-        {
-            switch ( attribute.AttributeClass?.Name )
+        foreach ( var attribute in typeSymbol.GetAttributes() )
             {
                 case null:
                     continue;
@@ -148,12 +148,12 @@ public class AspectClass : TemplateClass, IAspectClassImpl, IBoundAspectClass, I
                     break;
 
                 case nameof(LiveTemplateAttribute):
-                    if ( !aspectTypeSymbol.HasDefaultConstructor() )
+                    if ( !typeSymbol.HasDefaultConstructor() )
                     {
                         diagnosticAdder.Report(
                             GeneralDiagnosticDescriptors.LiveTemplateMustHaveDefaultConstructor.CreateRoslynDiagnostic(
                                 attribute.GetDiagnosticLocation(),
-                                aspectTypeSymbol ) );
+                                typeSymbol ) );
 
                         this.HasError = true;
                     }
@@ -392,12 +392,7 @@ public class AspectClass : TemplateClass, IAspectClassImpl, IBoundAspectClass, I
         return aspectInterface.IsAssignableFrom( this.AspectType );
     }
 
-    public EligibleScenarios GetEligibility( IDeclaration obj )
-    {
-        if ( this._eligibilityRules.IsDefaultOrEmpty )
-        {
-            // Linker tests do not set this member but don't need to test eligibility.
-            return EligibleScenarios.Aspect;
+       return aspectInterface.IsAssignableFrom( this.Type );
         }
 
         // We may execute user code, so we need to execute in a user context. This is not optimal, but we don't know,
@@ -460,20 +455,20 @@ public class AspectClass : TemplateClass, IAspectClassImpl, IBoundAspectClass, I
             executionContext );
     }
 
-    public IAspect CreateDefaultInstance() => (IAspect) Activator.CreateInstance( this.AspectType );
+    public IAspect CreateDefaultInstance() => (IAspect) Activator.CreateInstance( this.Type );
 
     public override string ToString() => this.FullName;
 
     ReferenceValidatorDriver IValidatorDriverFactory.GetReferenceValidatorDriver( MethodInfo validateMethod )
     {
-        this._validatorDriverFactory ??= ValidatorDriverFactory.GetInstance( this.AspectType );
+        this._validatorDriverFactory ??= ValidatorDriverFactory.GetInstance( this.Type );
 
         return this._validatorDriverFactory.GetReferenceValidatorDriver( validateMethod );
     }
 
     DeclarationValidatorDriver IValidatorDriverFactory.GetDeclarationValidatorDriver( ValidatorDelegate<DeclarationValidationContext> validate )
     {
-        this._validatorDriverFactory ??= ValidatorDriverFactory.GetInstance( this.AspectType );
+        this._validatorDriverFactory ??= ValidatorDriverFactory.GetInstance( this.Type );
 
         return this._validatorDriverFactory.GetDeclarationValidatorDriver( validate );
     }

@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 
-        string? IRef<IMemberOrNamedType>.ToSerializableId() => null;
+        DeclarationSerializableId IRef<IMemberOrNamedType>.ToSerializableId() => throw new NotImplementedException();
 
         IMemberOrNamedType IRef<IMemberOrNamedType>.GetTarget( ICompilation compilation ) => (IMemberOrNamedType) this.GetForCompilation( compilation );
 

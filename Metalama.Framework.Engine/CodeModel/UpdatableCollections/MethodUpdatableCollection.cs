@@ -19,5 +19,6 @@ internal sealed class MethodUpdatableCollection : NonUniquelyNamedMemberUpdatabl
                 or MethodKind.PropertySet
                 or MethodKind.EventAdd
                 or MethodKind.EventRemove
-                or MethodKind.EventRaise);
+                or MethodKind.EventRaise) &&
+                m is not { Name: "<Main>$", ContainingType: { Name: "Program" } };
 }

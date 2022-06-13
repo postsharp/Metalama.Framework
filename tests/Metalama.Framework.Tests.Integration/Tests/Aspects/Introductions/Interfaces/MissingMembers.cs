@@ -7,7 +7,7 @@ using Metalama.Framework.Code;
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.MissingMembers
 {
     /*
-     * Case with missing interface members.
+     * Tests that missing interface members result in an error.
      */
 
     public interface IInterface

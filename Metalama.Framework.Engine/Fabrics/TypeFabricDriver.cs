@@ -3,12 +3,8 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Fabrics;
@@ -16,108 +12,91 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Linq;
 
-namespace Metalama.Framework.Engine.Fabrics
+namespace Metalama.Framework.Engine.Fabrics;
+
+/// <summary>
+/// Implementation of <see cref="FabricAspect{T}"/> for type-level fabrics.
+/// </summary>
+internal class TypeFabricDriver : FabricDriver
 {
-    /// <summary>
-    /// Implementation of <see cref="FabricAspect{T}"/> for type-level fabrics.
-    /// </summary>
-    internal class TypeFabricDriver : FabricDriver
+    public TypeFabricDriver( FabricManager fabricManager, Fabric fabric, Compilation runTimeCompilation ) : base(
+        fabricManager,
+        fabric,
+        runTimeCompilation ) { }
+
+    private ISymbol TargetSymbol => this.FabricSymbol.ContainingType;
+
+    public bool TryExecute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass templateClass, FabricInstance fabricInstance )
     {
-        public TypeFabricDriver( FabricManager fabricManager, Fabric fabric, Compilation runTimeCompilation ) : base(
-            fabricManager,
-            fabric,
-            runTimeCompilation ) { }
+        var templateInstance = new TemplateClassInstance( this.Fabric, templateClass );
+        var targetType = (INamedType) aspectBuilder.Target;
+        var compilation = aspectBuilder.Target.GetCompilationModel();
 
-        private ISymbol TargetSymbol => this.FabricSymbol.ContainingType;
+        // Prepare declarative advice.
+        var declarativeAdvice = templateClass
+            .GetDeclarativeAdvices( aspectBuilder.ServiceProvider, compilation )
+            .ToList();
 
-        public bool TryExecute( IAspectBuilderInternal aspectBuilder, FabricTemplateClass templateClass, FabricInstance fabricInstance )
-        {
-            var templateInstance = new TemplateClassInstance( this.Fabric, templateClass );
-            var targetType = (INamedType) aspectBuilder.Target;
+        // Execute the AmendType.
+        var builder = new Amender( targetType, this.FabricManager, aspectBuilder, templateInstance, fabricInstance );
 
-            // Add declarative advices.
-            var aspectInstance = (IAspectInstanceInternal) aspectBuilder.AspectInstance;
+        var executionContext = new UserCodeExecutionContext(
+            aspectBuilder.ServiceProvider,
+            aspectBuilder.DiagnosticAdder,
+            UserCodeMemberInfo.FromDelegate( new Action<ITypeAmender>( ((TypeFabric) this.Fabric).AmendType ) ) );
 
-            var roslynCompilation = aspectBuilder.Target.Compilation.GetRoslynCompilation();
-
-            var declarativeAdvices =
-                templateClass.GetDeclarativeAdvices( roslynCompilation )
-                    .Select(
-                        x => CreateDeclarativeAdvice(
-                            aspectInstance,
-                            aspectInstance.TemplateInstances[x.TemplateClass],
-                            aspectBuilder.DiagnosticAdder,
-                            targetType,
-                            x,
-                            x.SymbolId.Resolve( roslynCompilation ).AssertNotNull() ) )
-                    .WhereNotNull();
-
-            aspectBuilder.AdviceFactory.Advices.AddRange( declarativeAdvices );
-
-            // Execute the AmendType.
-            var builder = new Amender( targetType, this.FabricManager, aspectBuilder, templateInstance, fabricInstance );
-
-            var executionContext = new UserCodeExecutionContext(
-                this.FabricManager.ServiceProvider,
-                aspectBuilder.DiagnosticAdder,
-                UserCodeMemberInfo.FromDelegate( new Action<ITypeAmender>( ((TypeFabric) this.Fabric).AmendType ) ) );
-
-            return this.FabricManager.UserCodeInvoker.TryInvoke( () => ((TypeFabric) this.Fabric).AmendType( builder ), executionContext );
-        }
-
-        private static Advice? CreateDeclarativeAdvice(
-            IAspectInstanceInternal aspect,
-            TemplateClassInstance templateInstance,
-            IDiagnosticAdder diagnosticAdder,
-            INamedType aspectTarget,
-            TemplateClassMember template,
-            ISymbol templateDeclaration )
-        {
-            template.TryCreateAdvice(
-                aspect,
-                templateInstance,
-                diagnosticAdder,
-                aspectTarget,
-                ((CompilationModel) aspectTarget.Compilation).Factory.GetDeclaration( templateDeclaration ),
-                null,
-                out var advice );
-
-            return advice;
-        }
-
-        public override FabricKind Kind => FabricKind.Type;
-
-        public IDeclaration GetTarget( CompilationModel compilation ) => compilation.Factory.GetNamedType( (INamedTypeSymbol) this.TargetSymbol );
-
-        public override FormattableString FormatPredecessor() => $"type fabric on '{this.TargetSymbol}'";
-
-        private class Amender : BaseAmender<INamedType>, ITypeAmender
-        {
-            private readonly IAspectBuilderInternal _aspectBuilder;
-
-            public Amender(
-                INamedType namedType,
-                FabricManager fabricManager,
-                IAspectBuilderInternal aspectBuilder,
-                TemplateClassInstance templateClassInstance,
-                FabricInstance fabricInstance ) : base(
-                namedType.Compilation.Project,
-                fabricManager,
-                fabricInstance,
-                fabricInstance.TargetDeclaration.As<INamedType>() )
+        return this.FabricManager.UserCodeInvoker.TryInvoke(
+            () =>
             {
-                this._aspectBuilder = aspectBuilder;
-                this.Type = namedType;
-                this.Advices = aspectBuilder.AdviceFactory.WithTemplateClassInstance( templateClassInstance );
-            }
+                // Execute declarative advice.
+                foreach ( var advice in declarativeAdvice )
+                {
+                    ((DeclarativeAdviceAttribute) advice.TemplateAttribute.AssertNotNull()).BuildAspect(
+                        advice.Declaration.AssertNotNull(),
+                        advice.TemplateClassMember.Key,
+                        (IAspectBuilder<IDeclaration>) aspectBuilder );
+                }
 
-            public INamedType Type { get; }
+                if ( !aspectBuilder.IsAspectSkipped )
+                {
+                    ((TypeFabric) this.Fabric).AmendType( builder );
+                }
+            },
+            executionContext );
+    }
 
-            public IAdviceFactory Advices { get; }
+    public override FabricKind Kind => FabricKind.Type;
 
-            public override void AddAspectSource( IAspectSource aspectSource ) => this._aspectBuilder.AddAspectSource( aspectSource );
+    public IDeclaration GetTarget( CompilationModel compilation ) => compilation.Factory.GetNamedType( (INamedTypeSymbol) this.TargetSymbol );
 
-            public override void AddValidatorSource( IValidatorSource validatorSource ) => this._aspectBuilder.AddValidatorSource( validatorSource );
+    public override FormattableString FormatPredecessor() => $"type fabric on '{this.TargetSymbol}'";
+
+    private class Amender : BaseAmender<INamedType>, ITypeAmender
+    {
+        private readonly IAspectBuilderInternal _aspectBuilder;
+
+        public Amender(
+            INamedType namedType,
+            FabricManager fabricManager,
+            IAspectBuilderInternal aspectBuilder,
+            TemplateClassInstance templateClassInstance,
+            FabricInstance fabricInstance ) : base(
+            namedType.Compilation.Project,
+            fabricManager,
+            fabricInstance,
+            fabricInstance.TargetDeclaration.As<INamedType>() )
+        {
+            this._aspectBuilder = aspectBuilder;
+            this.Type = namedType;
+            this.Advices = aspectBuilder.AdviceFactory.WithTemplateClassInstance( templateClassInstance );
         }
+
+        public INamedType Type { get; }
+
+        public IAdviceFactory Advices { get; }
+
+        public override void AddAspectSource( IAspectSource aspectSource ) => this._aspectBuilder.AddAspectSource( aspectSource );
+
+        public override void AddValidatorSource( IValidatorSource validatorSource ) => this._aspectBuilder.AddValidatorSource( validatorSource );
     }
 }

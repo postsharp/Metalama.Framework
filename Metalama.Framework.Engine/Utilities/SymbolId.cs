@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.Utilities
     /// <summary>
     /// An identifier of an <see cref="ISymbol"/> that works across compilations, but not across different versions of Roslyn.  
     /// </summary>
-    public readonly struct SymbolId
+    public readonly struct SymbolId : IEquatable<SymbolId>
     {
         // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
         private static readonly Func<string, object> _newSymbolKeyFunc;

@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.AspectOrdering;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
@@ -29,6 +30,8 @@ namespace Metalama.Framework.Engine.Pipeline
 
         public IReadOnlyCollection<IAspectClass> AspectClasses => this.BoundAspectClasses;
 
+        internal IReadOnlyDictionary<string, OtherTemplateClass> OtherTemplateClasses { get; }
+
         internal ImmutableArray<OrderedAspectLayer> AspectLayers { get; }
 
         public CompileTimeProject? CompileTimeProject { get; }
@@ -47,6 +50,7 @@ namespace Metalama.Framework.Engine.Pipeline
             CompileTimeDomain domain,
             ImmutableArray<PipelineStageConfiguration> stages,
             BoundAspectClassCollection aspectClasses,
+            IReadOnlyDictionary<string, OtherTemplateClass> otherTemplateClasses,
             ImmutableArray<OrderedAspectLayer> aspectLayers,
             CompileTimeProject? compileTimeProject,
             CompileTimeProjectLoader compileTimeProjectLoader,
@@ -58,6 +62,7 @@ namespace Metalama.Framework.Engine.Pipeline
             this.Domain = domain;
             this.Stages = stages;
             this.BoundAspectClasses = aspectClasses;
+            this.OtherTemplateClasses = otherTemplateClasses;
             this.AspectLayers = aspectLayers;
             this.CompileTimeProject = compileTimeProject;
             this.CompileTimeProjectLoader = compileTimeProjectLoader;
@@ -72,6 +77,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 this.Domain,
                 this.Stages,
                 this.BoundAspectClasses,
+                this.OtherTemplateClasses,
                 this.AspectLayers,
                 this.CompileTimeProject,
                 this.CompileTimeProjectLoader,
@@ -87,6 +93,7 @@ namespace Metalama.Framework.Engine.Pipeline
                     this.Domain,
                     this.Stages,
                     this.BoundAspectClasses,
+                    this.OtherTemplateClasses,
                     this.AspectLayers,
                     this.CompileTimeProject,
                     this.CompileTimeProjectLoader,

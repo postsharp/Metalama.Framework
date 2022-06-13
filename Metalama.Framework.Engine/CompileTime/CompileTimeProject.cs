@@ -42,7 +42,7 @@ namespace Metalama.Framework.Engine.CompileTime
             ImmutableArray<string>.Empty,
             ImmutableArray<string>.Empty,
             ImmutableArray<string>.Empty,
-            ImmutableArray<string>.Empty, 
+            ImmutableArray<string>.Empty,
             0,
             ImmutableArray<CompileTimeFile>.Empty );
 
@@ -99,6 +99,8 @@ namespace Metalama.Framework.Engine.CompileTime
         /// declared in the current project.
         /// </summary>
         public IReadOnlyList<string> AspectTypes => this._manifest?.AspectTypes ?? Array.Empty<string>();
+
+        public IReadOnlyList<string> OtherTemplateTypes => this._manifest?.OtherTemplateTypes ?? Array.Empty<string>();
 
         /// <summary>
         /// Gets the list of types that are exported using the <c>CompilerPlugin</c> attribute.

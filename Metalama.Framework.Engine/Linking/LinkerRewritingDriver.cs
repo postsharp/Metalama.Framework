@@ -197,7 +197,8 @@ namespace Metalama.Framework.Engine.Linking
 
                             if ( returnStatement.Expression != null )
                             {
-                                var assignStatement = CreateAssignmentStatement( returnStatement.Expression ).WithOriginalLocationAnnotationFrom( returnStatement );
+                                var assignStatement = CreateAssignmentStatement( returnStatement.Expression )
+                                    .WithOriginalLocationAnnotationFrom( returnStatement );
 
                                 replacements[returnStatement] =
                                     Block(

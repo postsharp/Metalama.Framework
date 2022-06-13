@@ -26,6 +26,7 @@ namespace Metalama.Framework.Engine.CompileTime
             IReadOnlyList<string> plugInTypes,
             IReadOnlyList<string> fabricTypes,
             IReadOnlyList<string> transitiveFabricTypes,
+            IReadOnlyList<string> otherTemplateTypes,
             IReadOnlyList<string>? references,
             IReadOnlyList<string>? redistributionLicenseKeys,
 
@@ -39,6 +40,7 @@ namespace Metalama.Framework.Engine.CompileTime
             this.PlugInTypes = plugInTypes;
             this.FabricTypes = fabricTypes;
             this.TransitiveFabricTypes = transitiveFabricTypes;
+            this.OtherTemplateTypes = otherTemplateTypes;
             this.References = references;
             this.RedistributionLicenseKeys = redistributionLicenseKeys;
             this.SourceHash = sourceHash;
@@ -64,6 +66,11 @@ namespace Metalama.Framework.Engine.CompileTime
         /// Gets the list of all aspect types (specified by fully qualified name) of the aspect library.
         /// </summary>
         public IReadOnlyList<string> AspectTypes { get; }
+
+        /// <summary>
+        /// Gets the list of all template types (specified by fully qualified name) that are neither aspects nor fabrics in the aspect library.
+        /// </summary>
+        public IReadOnlyList<string> OtherTemplateTypes { get; }
 
         /// <summary>
         /// Gets the list of types that are exported using the <c>CompilerPlugin</c> attribute.

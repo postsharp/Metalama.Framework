@@ -498,7 +498,11 @@ namespace Metalama.TestFramework
             var compilation = TestCompilationFactory.CreateEmptyCSharpCompilation(
                 null,
                 this.References.MetadataReferences,
-                OutputKind.DynamicallyLinkedLibrary,
+                options.OutputAssemblyType switch
+                {
+                    "Exe" => OutputKind.ConsoleApplication,
+                    _ => OutputKind.DynamicallyLinkedLibrary
+                },
                 nullableContextOptions: options.NullabilityDisabled == true ? NullableContextOptions.Disable : NullableContextOptions.Enable );
 
             var projectName = "test";

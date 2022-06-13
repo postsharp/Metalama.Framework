@@ -98,7 +98,7 @@ namespace Metalama.Framework.Aspects
         /// Gets the project being compiled.
         /// </summary>
         IProject Project { get; }
-        
+
         /// <summary>
         /// Gets the direction of the contract for which the template is being expanded.
         /// </summary>

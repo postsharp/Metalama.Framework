@@ -59,6 +59,8 @@ namespace Metalama.Framework.Engine.Fabrics
 
         SyntaxAnnotation IAspectClassImpl.GeneratedCodeAnnotation => throw new NotSupportedException();
 
+        public ImmutableArray<AspectLayer> Layers => ImmutableArray<AspectLayer>.Empty;
+
         public EligibleScenarios GetEligibility( IDeclaration obj ) => EligibleScenarios.Aspect;
 
         FormattableString? IEligibilityRule<IDeclaration>.GetIneligibilityJustification(

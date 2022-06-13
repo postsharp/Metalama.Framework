@@ -334,12 +334,18 @@ namespace Metalama.Framework.Engine.CodeModel
             };
 
         internal static bool IsAutoProperty( this IPropertySymbol symbol )
-            => !symbol.IsAbstract
-               && symbol.DeclaringSyntaxReferences.All(
-                   sr =>
-                       sr.GetSyntax() is BasePropertyDeclarationSyntax propertyDecl
-                       && propertyDecl.AccessorList != null
-                       && propertyDecl.AccessorList.Accessors.All( a => a.Body == null && a.ExpressionBody == null ) );
+            => symbol switch
+            {
+                { IsAbstract: true } => false,
+                { DeclaringSyntaxReferences: { Length: > 0 } syntaxReferences } =>
+                    syntaxReferences.All(
+                        sr =>
+                            sr.GetSyntax() is BasePropertyDeclarationSyntax propertyDecl
+                            && propertyDecl.AccessorList != null
+                            && propertyDecl.AccessorList.Accessors.All( a => a.Body == null && a.ExpressionBody == null ) ),
+                { GetMethod: { } getMethod, SetMethod: { } setMethod } => getMethod.IsCompilerGenerated() && setMethod.IsCompilerGenerated(),
+                _ => false
+            };
 
         internal static bool IsEventField( this IEventSymbol symbol )
             => !symbol.IsAbstract

@@ -32,32 +32,25 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.Simple_T
     {
         [InnerOverride]
         [OuterOverride]
-        public void TargetMethod_Void()
+        public void VoidMethod()
         {
             Console.WriteLine("This is the original method.");
         }
 
         [InnerOverride]
         [OuterOverride]
-        public void TargetMethod_Void(int x, int y)
+        public int Method(int x)
         {
-            Console.WriteLine($"This is the original method {x} {y}.");
+            Console.WriteLine($"This is the original method.");
+            return x;
         }
 
         [InnerOverride]
         [OuterOverride]
-        public int TargetMethod_Int()
+        public T? GenericMethod<T>(T? x)
         {
             Console.WriteLine("This is the original method.");
-            return 42;
-        }
-
-        [InnerOverride]
-        [OuterOverride]
-        public int TargetMethod_Int(int x, int y)
-        {
-            Console.WriteLine($"This is the original method {x} {y}.");
-            return x + y;
+            return x;
         }
     }
 }

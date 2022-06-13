@@ -2,34 +2,53 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Aspects;
-using Microsoft.CodeAnalysis;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using Accessibility = Metalama.Framework.Code.Accessibility;
+using Metalama.Framework.Engine.Utilities;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
     internal class TemplateInfo
     {
+        /// <summary>
+        /// Gets a magic value representing the fact that the member is not a template.
+        /// </summary>
         public static TemplateInfo None { get; } = new();
 
         public bool IsNone => this.AttributeType == TemplateAttributeType.None;
 
+        /// <summary>
+        /// Gets a value indicating whether the template member is abstract.
+        /// </summary>
         public bool IsAbstract { get; }
 
-        public TemplateAttribute Attribute { get; }
+        /// <summary>
+        /// Gets a value indicating whether the template member can be referenced from a template as run-time code,
+        /// which is typically the case with introductions.
+        /// </summary>
+        public bool CanBeReferencedAsRunTimeCode => this.AttributeType is TemplateAttributeType.DeclarativeAdvice or TemplateAttributeType.InterfaceMember;
+
+        /// <summary>
+        /// Gets the <see cref="TemplateAttribute"/> if it could be instantiated by the <see cref="SymbolClassifier"/>, i.e.
+        /// only if it is a system attribute but not if it is defined in user code.
+        /// </summary>
+        public TemplateAttribute? Attribute { get; }
 
         public TemplateAttributeType AttributeType { get; }
 
-        public TemplateInfo( TemplateAttributeType attributeType, AttributeData attributeData )
+        /// <summary>
+        /// Gets the <see cref="SymbolId"/> of the template member.
+        /// </summary>
+        public SymbolId SymbolId { get; }
+
+        public TemplateInfo( SymbolId symbolId, TemplateAttributeType attributeType, TemplateAttribute? attribute )
         {
             this.AttributeType = attributeType;
-            this.Attribute = Parse( attributeType, attributeData );
+            this.Attribute = attribute;
+            this.SymbolId = symbolId;
         }
 
         private TemplateInfo()
         {
-            this.Attribute = new TemplateAttribute();
+            this.Attribute = TemplateAttribute.Default;
             this.AttributeType = TemplateAttributeType.None;
         }
 
@@ -37,76 +56,16 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             this.Attribute = prototype.Attribute;
             this.AttributeType = prototype.AttributeType;
+            this.SymbolId = prototype.SymbolId;
             this.IsAbstract = isAbstract;
         }
 
+        /// <summary>
+        /// Returns a copy of the current <see cref="TemplateInfo"/>, but with the <see cref="IsAbstract"/> property set to <c>true</c>.
+        /// </summary>
+        /// <returns></returns>
         public TemplateInfo AsAbstract() => new( this, true );
 
-        private static TemplateAttribute Parse( TemplateAttributeType attributeType, AttributeData attributeData )
-        {
-            var attribute = attributeType switch
-            {
-                TemplateAttributeType.Introduction => new IntroduceAttribute(),
-                TemplateAttributeType.Template => new TemplateAttribute(),
-                TemplateAttributeType.InterfaceMember => new InterfaceMemberAttribute(),
-                _ => throw new AssertionFailedException()
-            };
-
-            var namedArguments = attributeData.NamedArguments.ToDictionary( p => p.Key, p => p.Value );
-
-            bool TryGetNamedArgument<TArg>( string argumentName, [NotNullWhen( true )] out TArg? value )
-            {
-                if ( namedArguments.TryGetValue( argumentName, out var objectValue ) && objectValue.Value != null )
-                {
-                    value = (TArg) objectValue.Value;
-
-                    return true;
-                }
-
-                value = default;
-
-                return false;
-            }
-
-            if ( TryGetNamedArgument<string>( nameof(TemplateAttribute.Name), out var name ) )
-            {
-                attribute.Name = name;
-            }
-
-            if ( TryGetNamedArgument<IntroductionScope>( nameof(TemplateAttribute.Scope), out var scope ) )
-            {
-                attribute.Scope = scope;
-            }
-
-            if ( TryGetNamedArgument<OverrideStrategy>( nameof(TemplateAttribute.WhenExists), out var overrideStrategy ) )
-            {
-                attribute.WhenExists = overrideStrategy;
-            }
-
-            if ( TryGetNamedArgument<bool>( nameof(TemplateAttribute.IsVirtual), out var isVirtual ) )
-            {
-                attribute.IsVirtual = isVirtual;
-            }
-
-            if ( TryGetNamedArgument<bool>( nameof(TemplateAttribute.IsSealed), out var isSealed ) )
-            {
-                attribute.IsSealed = isSealed;
-            }
-
-            if ( TryGetNamedArgument<Accessibility>( nameof(TemplateAttribute.Accessibility), out var accessibility ) )
-            {
-                attribute.Accessibility = accessibility;
-            }
-
-            if ( attributeType == TemplateAttributeType.InterfaceMember )
-            {
-                if ( TryGetNamedArgument<bool>( nameof(InterfaceMemberAttribute.IsExplicit), out var isExplicit ) )
-                {
-                    ((InterfaceMemberAttribute) attribute).IsExplicit = isExplicit;
-                }
-            }
-
-            return attribute;
-        }
+        public override string ToString() => $"Type={this.AttributeType}, Attribute={this.Attribute}";
     }
 }

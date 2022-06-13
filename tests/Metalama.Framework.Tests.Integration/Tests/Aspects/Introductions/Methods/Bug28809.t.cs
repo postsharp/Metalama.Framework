@@ -1,7 +1,7 @@
 [IntroducePropertyChangedAspect]
     internal class TargetCode { 
 
-protected void OnPropertyChanged(global::System.String propertyName)
+protected virtual void OnPropertyChanged(global::System.String propertyName)
 {
     this.PropertyChanged?.Invoke(this, (global::System.ComponentModel.PropertyChangedEventArgs)new global::System.ComponentModel.PropertyChangedEventArgs(propertyName));
 }
