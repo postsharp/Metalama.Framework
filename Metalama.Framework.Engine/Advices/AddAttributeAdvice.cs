@@ -22,9 +22,10 @@ internal class AddAttributeAdvice : Advice
         IAspectInstanceInternal aspect,
         TemplateClassInstance template,
         IDeclaration targetDeclaration,
+        ICompilation sourceCompilation,
         IAttributeData attribute,
         OverrideStrategy overrideStrategy,
-        string? layerName ) : base( aspect, template, targetDeclaration, layerName )
+        string? layerName ) : base( aspect, template, targetDeclaration, sourceCompilation, layerName )
     {
         this._attribute = attribute;
         this._overrideStrategy = overrideStrategy;

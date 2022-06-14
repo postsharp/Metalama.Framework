@@ -30,12 +30,13 @@ namespace Metalama.Framework.Engine.Advices
             IAspectInstanceInternal aspect,
             TemplateClassInstance template,
             IDeclaration targetDeclaration,
+            ICompilation sourceCompilation,
             string? layerName )
         {
             this.Aspect = aspect;
             this.TemplateInstance = template;
             this.TargetDeclaration = targetDeclaration.AssertNotNull().ToTypedRef();
-            this.SourceCompilation = targetDeclaration.Compilation;
+            this.SourceCompilation = sourceCompilation;
             this.AspectLayerId = new AspectLayerId( this.Aspect.AspectClass, layerName );
         }
 

@@ -38,11 +38,12 @@ namespace Metalama.Framework.Engine.Advices
             IAspectInstanceInternal aspect,
             TemplateClassInstance template,
             INamedType targetType,
+            ICompilation sourceCompilation,
             INamedType interfaceType,
             OverrideStrategy overrideStrategy,
             IReadOnlyList<InterfaceMemberSpecification>? explicitMemberSpecifications,
             string? layerName,
-            IObjectReader tags ) : base( aspect, template, targetType, layerName )
+            IObjectReader tags ) : base( aspect, template, targetType, sourceCompilation, layerName )
         {
             this.InterfaceType = interfaceType;
             this.ExplicitMemberSpecifications = explicitMemberSpecifications;

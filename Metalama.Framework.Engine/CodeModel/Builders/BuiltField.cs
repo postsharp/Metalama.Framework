@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         DeclarationSerializableId IRef<IField>.ToSerializableId() => throw new NotImplementedException();
 
-        IField IRef<IField>.GetTarget( ICompilation compilation ) => (IField) this.GetForCompilation( compilation );
+        IField IRef<IField>.GetTarget( ICompilation compilation, ReferenceResolutionOptions options ) => (IField) this.GetForCompilation( compilation, options );
 
         ISymbol? ISdkRef<IField>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => throw new NotSupportedException();
 

@@ -54,7 +54,7 @@ namespace Metalama.Framework.Code
             };
 
         [return: NotNullIfNotNull( "declaration" )]
-        public static T? Translate<T>( this T? declaration, ICompilation compilation )
+        public static T? Translate<T>( this T? declaration, ICompilation compilation, ReferenceResolutionOptions options = default)
             where T : class, IDeclaration
         {
             if ( declaration == null )
@@ -63,7 +63,7 @@ namespace Metalama.Framework.Code
             }
             else
             {
-                return (T) ((ICompilationInternal) compilation).Factory.Translate( declaration );
+                return (T) ((ICompilationInternal) compilation).Factory.Translate( declaration, options );
             }
         }
     }

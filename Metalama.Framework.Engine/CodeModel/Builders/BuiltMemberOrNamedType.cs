@@ -10,7 +10,7 @@ using Accessibility = Metalama.Framework.Code.Accessibility;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal abstract class BuiltMemberOrNamedType : BuiltDeclaration, IMemberOrNamedType, IMemberRef<IMemberOrNamedType>
+    internal abstract class BuiltMemberOrNamedType : BuiltDeclaration, IMemberOrNamedType
     {
         protected BuiltMemberOrNamedType( CompilationModel compilation, MemberOrNamedTypeBuilder builder ) : base( compilation, builder ) { }
 
@@ -32,11 +32,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public MemberInfo ToMemberInfo() => throw new NotImplementedException();
 
-        DeclarationSerializableId IRef<IMemberOrNamedType>.ToSerializableId() => throw new NotImplementedException();
-
-        IMemberOrNamedType IRef<IMemberOrNamedType>.GetTarget( ICompilation compilation ) => (IMemberOrNamedType) this.GetForCompilation( compilation );
-
-        ISymbol? ISdkRef<IMemberOrNamedType>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => throw new NotSupportedException();
 
         public object? Target => throw new NotImplementedException();
     }

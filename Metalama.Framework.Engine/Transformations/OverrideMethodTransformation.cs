@@ -36,6 +36,7 @@ namespace Metalama.Framework.Engine.Transformations
             var metaApi = MetaApi.ForMethod(
                 this.OverriddenDeclaration,
                 new MetaApiProperties(
+                    this.ParentAdvice.SourceCompilation,
                     context.DiagnosticSink,
                     this.BoundTemplate.Template.Cast(),
                     this.Tags,
@@ -48,7 +49,6 @@ namespace Metalama.Framework.Engine.Transformations
             var expansionContext = new TemplateExpansionContext(
                 this.ParentAdvice.TemplateInstance.Instance,
                 metaApi,
-                (CompilationModel) this.OverriddenDeclaration.Compilation,
                 context.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ),
                 context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
                 context.SyntaxGenerationContext,

@@ -18,11 +18,13 @@ internal class RemoveAttributesAdvice : Advice
         IAspectInstanceInternal aspect,
         TemplateClassInstance template,
         IDeclaration targetDeclaration,
+        ICompilation sourceCompilation,
         INamedType attributeType,
         string? layerName ) : base(
         aspect,
         template,
         targetDeclaration,
+        sourceCompilation,
         layerName )
     {
         this._attributeType = attributeType;

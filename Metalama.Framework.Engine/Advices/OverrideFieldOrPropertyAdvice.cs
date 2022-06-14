@@ -22,12 +22,13 @@ namespace Metalama.Framework.Engine.Advices
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             IFieldOrPropertyOrIndexer targetDeclaration,
+            ICompilation sourceCompilation,
             TemplateMember<IProperty> propertyTemplate,
             BoundTemplateMethod getTemplate,
             BoundTemplateMethod setTemplate,
             string? layerName,
             IObjectReader tags )
-            : base( aspect, templateInstance, targetDeclaration, layerName, tags )
+            : base( aspect, templateInstance, targetDeclaration, sourceCompilation, layerName, tags )
         {
             this.PropertyTemplate = propertyTemplate;
             this.GetTemplate = getTemplate;

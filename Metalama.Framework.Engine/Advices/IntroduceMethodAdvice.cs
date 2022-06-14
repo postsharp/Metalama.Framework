@@ -25,13 +25,14 @@ namespace Metalama.Framework.Engine.Advices
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             INamedType targetDeclaration,
+            ICompilation sourceCompilation,
             BoundTemplateMethod boundTemplate,
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             Action<IMethodBuilder>? buildAction,
             string? layerName,
             IObjectReader tags )
-            : base( aspect, templateInstance, targetDeclaration, null, boundTemplate.Template, scope, overrideStrategy, buildAction, layerName, tags )
+            : base( aspect, templateInstance, targetDeclaration, sourceCompilation, null, boundTemplate.Template, scope, overrideStrategy, buildAction, layerName, tags )
         {
             this.BoundTemplate = boundTemplate;
             Invariant.Assert( !boundTemplate.IsNull );

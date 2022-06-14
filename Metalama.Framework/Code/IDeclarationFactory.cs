@@ -77,6 +77,6 @@ namespace Metalama.Framework.Code
         /// </summary>
         IDeclaration? GetDeclarationFromSerializableId( DeclarationSerializableId declarationId );
 
-        IDeclaration Translate( IDeclaration declaration );
+        IDeclaration Translate( IDeclaration declaration, ReferenceResolutionOptions options = default );
     }
 }

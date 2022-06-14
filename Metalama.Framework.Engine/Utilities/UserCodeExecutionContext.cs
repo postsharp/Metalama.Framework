@@ -74,7 +74,7 @@ namespace Metalama.Framework.Engine.Utilities
             IDiagnosticAdder diagnostics,
             UserCodeMemberInfo invokedMember,
             AspectLayerId? aspectAspectLayerId = null,
-            CompilationModel? compilationModel = null,
+            ICompilation? compilationModel = null,
             IDeclaration? targetDeclaration = null )
         {
             this.ServiceProvider = serviceProvider;
@@ -104,7 +104,7 @@ namespace Metalama.Framework.Engine.Utilities
 
         internal AspectLayerId? AspectLayerId { get; }
 
-        public CompilationModel? Compilation { get; }
+        public ICompilation? Compilation { get; }
 
         public IExecutionScenario ExecutionScenario
             => this._executionScenario ??= this.ServiceProvider.GetRequiredService<AspectPipelineDescription>().ExecutionScenario;

@@ -39,11 +39,12 @@ internal abstract class IntroduceFieldOrPropertyAdvice<TMember, TBuilder> : Intr
         TemplateMember<TMember> template,
         IntroductionScope scope,
         OverrideStrategy overrideStrategy,
+        ICompilation sourceCompilation,
         Action<TBuilder>? buildAction,
         string? layerName,
         IObjectReader tags,
         IPullStrategy? pullStrategy )
-        : base( aspect, templateInstance, targetDeclaration, explicitName, template, scope, overrideStrategy, buildAction, layerName, tags )
+        : base( aspect, templateInstance, targetDeclaration, sourceCompilation, explicitName, template, scope, overrideStrategy, buildAction, layerName, tags )
     {
         this.PullStrategy = pullStrategy;
     }

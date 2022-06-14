@@ -282,7 +282,7 @@ namespace Metalama.Framework.Engine.Advices
             return new AdviceResult<T>( result.NewDeclaration.As<T>(), this.State.CurrentCompilation, result.Outcome );
         }
 
-        private CompilationModel ValidateCompilation( IDeclaration target, IDeclaration? target2 = null ) 
+        private CompilationModel ValidateCompilation( IDeclaration target, IDeclaration? target2 = null )
         {
             if ( target.Compilation != this.State.InitialCompilation && target.Compilation != this.State.CurrentCompilation )
             {
@@ -332,7 +332,11 @@ namespace Metalama.Framework.Engine.Advices
 
         public ICompilation Compilation => this.State.CurrentCompilation;
 
-        public void Override( IMethod targetMethod, in MethodTemplateSelector templateSelector, object? args = null, object? tags = null )
+        public void Override(
+            IMethod targetMethod,
+            in MethodTemplateSelector templateSelector,
+            object? args = null,
+            object? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -355,6 +359,7 @@ namespace Metalama.Framework.Engine.Advices
                 this.State.AspectInstance,
                 this._templateInstance,
                 targetMethod,
+                this.State.InitialCompilation,
                 template,
                 this._layerName,
                 ObjectReader.GetReader( tags ) );
@@ -391,6 +396,7 @@ namespace Metalama.Framework.Engine.Advices
                 this.State.AspectInstance,
                 this._templateInstance,
                 targetType,
+                this.State.InitialCompilation,
                 template.ForIntroduction( ObjectReader.GetReader( args ) ),
                 scope,
                 whenExists,
@@ -431,6 +437,7 @@ namespace Metalama.Framework.Engine.Advices
                 this.State.AspectInstance,
                 this._templateInstance,
                 targetFieldOrProperty,
+                this.State.InitialCompilation,
                 propertyTemplate,
                 getTemplate.ForIntroduction(),
                 setTemplate.ForIntroduction(),
@@ -479,6 +486,7 @@ namespace Metalama.Framework.Engine.Advices
                 this.State.AspectInstance,
                 this._templateInstance,
                 targetFieldOrProperty,
+                this.State.InitialCompilation,
                 default,
                 getTemplateRef,
                 setTemplateRef,
@@ -511,6 +519,7 @@ namespace Metalama.Framework.Engine.Advices
                 this.State.AspectInstance,
                 this._templateInstance,
                 targetType,
+                this.State.InitialCompilation,
                 null,
                 template,
                 scope,
@@ -537,13 +546,14 @@ namespace Metalama.Framework.Engine.Advices
             {
                 throw new InvalidOperationException();
             }
-            
+
             var compilation = this.ValidateCompilation( targetType );
 
             var advice = new IntroduceFieldAdvice(
                 this.State.AspectInstance,
                 this._templateInstance,
                 targetType,
+                this.State.InitialCompilation,
                 fieldName,
                 default,
                 scope,
@@ -593,13 +603,14 @@ namespace Metalama.Framework.Engine.Advices
             {
                 throw new InvalidOperationException();
             }
-            
+
             var compilation = this.ValidateCompilation( targetType );
 
             var advice = new IntroducePropertyAdvice(
                 this.State.AspectInstance,
                 this._templateInstance,
                 targetType,
+                this.State.InitialCompilation,
                 propertyName,
                 propertyType,
                 default,
@@ -651,7 +662,7 @@ namespace Metalama.Framework.Engine.Advices
                 throw new InvalidOperationException(
                     UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
             }
-            
+
             var compilation = this.ValidateCompilation( targetType );
 
             var propertyTemplate = this.ValidateTemplateName( defaultTemplate, TemplateKind.Default, true )
@@ -663,6 +674,7 @@ namespace Metalama.Framework.Engine.Advices
                 this.State.AspectInstance,
                 this._templateInstance,
                 targetType,
+                this.State.InitialCompilation,
                 null,
                 null,
                 propertyTemplate,
@@ -699,7 +711,7 @@ namespace Metalama.Framework.Engine.Advices
                 throw new InvalidOperationException(
                     UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
             }
-            
+
             var compilation = this.ValidateCompilation( targetType );
 
             var getTemplateRef = this.ValidateTemplateName( getTemplate, TemplateKind.Default, true )
@@ -714,6 +726,7 @@ namespace Metalama.Framework.Engine.Advices
                 this.State.AspectInstance,
                 this._templateInstance,
                 targetType,
+                this.State.InitialCompilation,
                 name,
                 null,
                 default,
@@ -752,7 +765,7 @@ namespace Metalama.Framework.Engine.Advices
                 throw new InvalidOperationException(
                     UserMessageFormatter.Format( $"Cannot add an OverrideEventAccessors advice to '{targetEvent}' because it is an abstract." ) );
             }
-            
+
             var compilation = this.ValidateCompilation( targetEvent );
 
             var addTemplateRef = this.ValidateTemplateName( addTemplate, TemplateKind.Default, true )
@@ -770,6 +783,7 @@ namespace Metalama.Framework.Engine.Advices
                 this.State.AspectInstance,
                 this._templateInstance,
                 targetEvent,
+                this.State.InitialCompilation,
                 default,
                 addTemplateRef,
                 removeTemplateRef,
@@ -808,6 +822,7 @@ namespace Metalama.Framework.Engine.Advices
                 this.State.AspectInstance,
                 this._templateInstance,
                 targetType,
+                this.State.InitialCompilation,
                 null,
                 template,
                 default,
@@ -844,7 +859,7 @@ namespace Metalama.Framework.Engine.Advices
                 throw new InvalidOperationException(
                     UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
             }
-            
+
             var compilation = this.ValidateCompilation( targetType );
 
             var addTemplateRef = this.ValidateTemplateName( addTemplate, TemplateKind.Default, true )
@@ -857,6 +872,7 @@ namespace Metalama.Framework.Engine.Advices
                 this.State.AspectInstance,
                 this._templateInstance,
                 targetType,
+                this.State.InitialCompilation,
                 name,
                 default,
                 addTemplateRef,
@@ -881,13 +897,14 @@ namespace Metalama.Framework.Engine.Advices
             {
                 throw new InvalidOperationException();
             }
-            
-            var compilation = this.ValidateCompilation( targetType );
+
+            this.ValidateCompilation( targetType );
 
             var advice = new ImplementInterfaceAdvice(
                 this.State.AspectInstance,
                 this._templateInstance,
                 targetType,
+                this.State.InitialCompilation,
                 interfaceType,
                 whenExists,
                 null,
@@ -921,13 +938,14 @@ namespace Metalama.Framework.Engine.Advices
             {
                 throw new InvalidOperationException();
             }
-            
+
             var compilation = this.ValidateCompilation( targetType );
 
             var advice = new ImplementInterfaceAdvice(
                 this.State.AspectInstance,
                 this._templateInstance,
                 targetType,
+                this.State.InitialCompilation,
                 interfaceType,
                 whenExists,
                 interfaceMemberSpecifications,
@@ -958,7 +976,7 @@ namespace Metalama.Framework.Engine.Advices
             {
                 throw new InvalidOperationException();
             }
-            
+
             var compilation = this.ValidateCompilation( targetType );
 
             var templateRef = this.ValidateTemplateName( template, TemplateKind.Default, true )
@@ -968,6 +986,7 @@ namespace Metalama.Framework.Engine.Advices
                 this.State.AspectInstance,
                 this._templateInstance,
                 targetType,
+                this.State.InitialCompilation,
                 templateRef.ForInitializer( ObjectReader.GetReader( args ) ),
                 kind,
                 this._layerName,
@@ -982,7 +1001,7 @@ namespace Metalama.Framework.Engine.Advices
             {
                 throw new InvalidOperationException();
             }
-            
+
             var compilation = this.ValidateCompilation( targetConstructor );
 
             var templateRef = this.ValidateTemplateName( template, TemplateKind.Default, true )
@@ -992,6 +1011,7 @@ namespace Metalama.Framework.Engine.Advices
                 this.State.AspectInstance,
                 this._templateInstance,
                 targetConstructor,
+                this.State.InitialCompilation,
                 templateRef.ForInitializer( ObjectReader.GetReader( args ) ),
                 InitializerKind.BeforeInstanceConstructor,
                 this._layerName,
@@ -1085,7 +1105,7 @@ namespace Metalama.Framework.Engine.Advices
             AdviceResult<T> result;
 
             var compilation = this.ValidateCompilation( targetDeclaration, targetMember );
-            
+
             var templateRef = this.ValidateTemplateName( template, TemplateKind.Default, true )
                 .GetTemplateMember<IMethod>( compilation, this.State.ServiceProvider );
 
@@ -1095,6 +1115,7 @@ namespace Metalama.Framework.Engine.Advices
                     this.State.AspectInstance,
                     this._templateInstance,
                     targetMember,
+                    this.State.InitialCompilation,
                     this._layerName );
 
                 result = this.ExecuteAdvice<T>( advice );
@@ -1116,13 +1137,13 @@ namespace Metalama.Framework.Engine.Advices
         public void AddAttribute( IDeclaration targetDeclaration, IAttributeData attribute, OverrideStrategy whenExists = OverrideStrategy.Default )
         {
             this.ExecuteAdvice<IDeclaration>(
-                new AddAttributeAdvice( this.State.AspectInstance, this._templateInstance!, targetDeclaration, attribute, whenExists, this._layerName ) );
+                new AddAttributeAdvice( this.State.AspectInstance, this._templateInstance!, targetDeclaration, this.State.InitialCompilation, attribute, whenExists, this._layerName ) );
         }
 
         public void RemoveAttributes( IDeclaration targetDeclaration, INamedType attributeType )
         {
             this.ExecuteAdvice<IDeclaration>(
-                new RemoveAttributesAdvice( this.State.AspectInstance, this._templateInstance!, targetDeclaration, attributeType, this._layerName ) );
+                new RemoveAttributesAdvice( this.State.AspectInstance, this._templateInstance!, targetDeclaration, this.State.InitialCompilation, attributeType, this._layerName ) );
         }
 
         public void RemoveAttributes( IDeclaration targetDeclaration, Type attributeType )

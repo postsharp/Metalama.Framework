@@ -13,6 +13,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
         Parameter,
         Method,
         Property,
-        Event
+        Event,
+        PropertyGet,
+        PropertySet
     }
 }

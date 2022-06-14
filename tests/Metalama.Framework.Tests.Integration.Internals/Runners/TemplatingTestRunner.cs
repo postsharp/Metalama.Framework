@@ -323,6 +323,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             var metaApi = MetaApi.ForMethod(
                 targetMethod,
                 new MetaApiProperties(
+                    compilation,
                     diagnostics,
                     template.Template.Cast(),
                     ObjectReader.GetReader( new { TestKey = "TestValue" } ),
@@ -335,7 +336,6 @@ namespace Metalama.Framework.Tests.Integration.Runners
             return (new TemplateExpansionContext(
                         templateInstance,
                         metaApi,
-                        compilation,
                         lexicalScope,
                         serviceProvider.GetRequiredService<SyntaxSerializationService>(),
                         syntaxGenerationContext,

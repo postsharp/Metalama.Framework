@@ -40,13 +40,14 @@ namespace Metalama.Framework.Engine.Advices
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             INamedType targetDeclaration,
+            ICompilation sourceCompilation,
             string? explicitName,
             TemplateMember<TMember> template,
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             Action<TBuilder>? buildAction,
             string? layerName,
-            IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, layerName )
+            IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, sourceCompilation, layerName )
         {
             this.MemberName = explicitName ?? template.TemplateAttribute?.Name
                 ?? template.Declaration?.Name ?? throw new ArgumentNullException( nameof(explicitName) );

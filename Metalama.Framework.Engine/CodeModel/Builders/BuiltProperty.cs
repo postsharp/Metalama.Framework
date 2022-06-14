@@ -16,7 +16,7 @@ using RefKind = Metalama.Framework.Code.RefKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class BuiltProperty : BuiltMember, IPropertyImpl, IMemberRef<IProperty>
+    internal class BuiltProperty : BuiltMember, IPropertyImpl
     {
         public BuiltProperty( PropertyBuilder builder, CompilationModel compilation ) : base( compilation, builder )
         {
@@ -57,12 +57,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => this.PropertyBuilder.ToFieldOrPropertyInfo();
 
         public PropertyInfo ToPropertyInfo() => this.PropertyBuilder.ToPropertyInfo();
-
-        DeclarationSerializableId IRef<IProperty>.ToSerializableId() => throw new NotImplementedException();
-
-        IProperty IRef<IProperty>.GetTarget( ICompilation compilation ) => (IProperty) this.GetForCompilation( compilation );
-
-        ISymbol? ISdkRef<IProperty>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => throw new NotSupportedException();
 
         public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 

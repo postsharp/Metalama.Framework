@@ -190,6 +190,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             var metaApi = MetaApi.ForInitializer(
                 this,
                 new MetaApiProperties(
+                    this.ParentAdvice.SourceCompilation,
                     context.DiagnosticSink,
                     initializerTemplate.Cast(),
                     this.Tags,
@@ -202,7 +203,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             var expansionContext = new TemplateExpansionContext(
                 this.ParentAdvice.TemplateInstance.Instance,
                 metaApi,
-                this.Compilation,
                 context.LexicalScopeProvider.GetLexicalScope( this ),
                 context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
                 context.SyntaxGenerationContext,

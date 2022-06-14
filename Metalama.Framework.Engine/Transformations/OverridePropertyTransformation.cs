@@ -110,6 +110,7 @@ namespace Metalama.Framework.Engine.Transformations
                 this.OverriddenDeclaration,
                 accessor,
                 new MetaApiProperties(
+                    this.ParentAdvice.SourceCompilation,
                     context.DiagnosticSink,
                     accessorTemplate.Template.Cast(),
                     this.Tags,
@@ -122,7 +123,6 @@ namespace Metalama.Framework.Engine.Transformations
             var expansionContext = new TemplateExpansionContext(
                 this.ParentAdvice.TemplateInstance.Instance,
                 metaApi,
-                (CompilationModel) this.OverriddenDeclaration.Compilation,
                 context.LexicalScopeProvider.GetLexicalScope( accessor ),
                 context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
                 context.SyntaxGenerationContext,

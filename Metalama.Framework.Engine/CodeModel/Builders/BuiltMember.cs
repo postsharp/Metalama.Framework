@@ -8,7 +8,7 @@ using System;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal abstract class BuiltMember : BuiltMemberOrNamedType, IMemberImpl, IMemberRef<IMember>
+    internal abstract class BuiltMember : BuiltMemberOrNamedType, IMemberImpl
     {
         protected BuiltMember( CompilationModel compilation, MemberBuilder builder ) : base( compilation, builder ) { }
 
@@ -16,12 +16,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public sealed override DeclarationBuilder Builder => this.MemberBuilder;
 
-        DeclarationSerializableId IRef<IMember>.ToSerializableId() => throw new NotImplementedException();
-
-        IMember IRef<IMember>.GetTarget( ICompilation compilation ) => throw new NotImplementedException();
-
-        ISymbol? ISdkRef<IMember>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => throw new NotImplementedException();
-
+        
         public bool IsExplicitInterfaceImplementation => this.MemberBuilder.IsExplicitInterfaceImplementation;
 
         public bool IsImplicit => this.MemberBuilder.IsImplicit;

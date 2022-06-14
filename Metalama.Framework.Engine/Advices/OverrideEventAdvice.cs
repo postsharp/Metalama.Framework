@@ -24,13 +24,14 @@ namespace Metalama.Framework.Engine.Advices
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             IEvent targetDeclaration,
+            ICompilation sourceCompilation,
             TemplateMember<IEvent> eventTemplate,
             TemplateMember<IMethod> addTemplate,
             TemplateMember<IMethod> removeTemplate,
             string? layerName,
             IObjectReader tags,
             IObjectReader parameters )
-            : base( aspect, templateInstance, targetDeclaration, layerName, tags )
+            : base( aspect, templateInstance, targetDeclaration, sourceCompilation, layerName, tags )
         {
             this._parameters = parameters;
 

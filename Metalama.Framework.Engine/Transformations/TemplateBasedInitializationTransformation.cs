@@ -41,6 +41,7 @@ namespace Metalama.Framework.Engine.Transformations
             var metaApi = MetaApi.ForConstructor(
                 this._targetConstructor,
                 new MetaApiProperties(
+                    this.ParentAdvice.SourceCompilation,
                     context.DiagnosticSink,
                     this._boundTemplate.Template.Cast(),
                     this.Tags,
@@ -53,7 +54,6 @@ namespace Metalama.Framework.Engine.Transformations
             var expansionContext = new TemplateExpansionContext(
                 this.ParentAdvice.TemplateInstance.Instance,
                 metaApi,
-                (CompilationModel) this.ContextDeclaration.Compilation,
                 context.LexicalScopeProvider.GetLexicalScope( this.ContextDeclaration ),
                 context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
                 context.SyntaxGenerationContext,

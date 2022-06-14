@@ -20,8 +20,9 @@ namespace Metalama.Framework.Engine.Advices
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             TMember targetDeclaration,
+            ICompilation sourceCompilation,
             string? layerName,
-            IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, layerName )
+            IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, sourceCompilation, layerName )
         {
             this.Tags = tags;
             

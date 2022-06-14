@@ -28,6 +28,7 @@ namespace Metalama.Framework.Engine.Advices
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             INamedType targetDeclaration,
+            ICompilation sourceCompilation,
             string? explicitName,
             TemplateMember<IEvent> eventTemplate,
             TemplateMember<IMethod> addTemplate,
@@ -38,7 +39,7 @@ namespace Metalama.Framework.Engine.Advices
             string? layerName,
             IObjectReader tags,
             IObjectReader parameters )
-            : base( aspect, templateInstance, targetDeclaration, explicitName, eventTemplate, scope, overrideStrategy, buildAction, layerName, tags )
+            : base( aspect, templateInstance, targetDeclaration, sourceCompilation, explicitName, eventTemplate, scope, overrideStrategy, buildAction, layerName, tags )
         {
             this._addTemplate = addTemplate;
             this._removeTemplate = removeTemplate;

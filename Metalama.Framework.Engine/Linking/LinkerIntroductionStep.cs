@@ -198,7 +198,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 // We want to get the replaced member as it is in the compilation of the transformation, i.e. with applied redirections up to that point.
                 // TODO: the target may have been removed from the
-                var replacedDeclaration = (IDeclaration) transformation.ReplacedMember.GetTarget( compilation, false );
+                var replacedDeclaration = (IDeclaration) transformation.ReplacedMember.GetTarget( (ICompilation) compilation, ReferenceResolutionOptions.DoNotFollowRedirections );
 
                 replacedDeclaration = replacedDeclaration switch
                 {

@@ -85,7 +85,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public DeclarationSerializableId ToSerializableId() => throw new NotSupportedException();
 
-        public IAttribute GetTarget( ICompilation compilation )
+        public IAttribute GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default)
         {
             if ( !this.TryGetTarget( (CompilationModel) compilation, out var attribute ) )
             {

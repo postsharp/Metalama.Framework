@@ -13,8 +13,8 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets the target of the reference for the current execution context.
         /// </summary>
-        public static T GetTarget<T>( this IRef<T> reference )
+        public static T GetTarget<T>( this IRef<T> reference, ReferenceResolutionOptions options )
             where T : class, ICompilationElement
-            => reference.GetTarget( MetalamaExecutionContext.Current.Compilation );
+            => reference.GetTarget( MetalamaExecutionContext.Current.Compilation, options );
     }
 }

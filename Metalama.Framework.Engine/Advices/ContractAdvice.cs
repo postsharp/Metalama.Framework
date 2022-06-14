@@ -20,8 +20,8 @@ namespace Metalama.Framework.Engine.Advices
 {
     internal class ContractAdvice : Advice
     {
-        public ContractAdvice( IAspectInstanceInternal aspect, TemplateClassInstance templateInstance, IDeclaration targetDeclaration, string? layerName )
-            : base( aspect, templateInstance, targetDeclaration, layerName ) { }
+        public ContractAdvice( IAspectInstanceInternal aspect, TemplateClassInstance templateInstance, IDeclaration targetDeclaration, ICompilation sourceCompilation, string? layerName )
+            : base( aspect, templateInstance, targetDeclaration, sourceCompilation, layerName ) { }
 
         public override AdviceImplementationResult Implement(
             IServiceProvider serviceProvider,
@@ -102,6 +102,7 @@ namespace Metalama.Framework.Engine.Advices
                 statements ??= new List<StatementSyntax>();
 
                 var metaApiProperties = new MetaApiProperties(
+                    this.SourceCompilation,
                     context.DiagnosticSink,
                     filter.Template.Cast(),
                     filter.Tags,
@@ -121,7 +122,6 @@ namespace Metalama.Framework.Engine.Advices
                 var expansionContext = new TemplateExpansionContext(
                     this.TemplateInstance.Instance,
                     metaApi,
-                    (CompilationModel) targetMember.Compilation,
                     context.LexicalScopeProvider.GetLexicalScope( targetMember ),
                     context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
                     context.SyntaxGenerationContext,

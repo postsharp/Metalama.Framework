@@ -435,7 +435,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     case DeclarationKind.Method:
                         A.CallTo( () => ((IRefImpl<IMethod>) transformation).Target ).Returns( transformation );
 
-                        A.CallTo( () => ((IRefImpl<IMethod>) transformation).GetTarget( A<CompilationModel>.Ignored ) )
+                        A.CallTo( () => ((IRefImpl<IMethod>) transformation).GetTarget( A<CompilationModel>.Ignored, A<ReferenceResolutionOptions>.Ignored ) )
                             .Returns( (IMethod) transformation );
 
                         break;
@@ -443,20 +443,20 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     case DeclarationKind.Property:
                         A.CallTo( () => ((IRefImpl<IProperty>) transformation).Target ).Returns( transformation );
 
-                        A.CallTo( () => ((IRefImpl<IProperty>) transformation).GetTarget( A<CompilationModel>.Ignored ) )
+                        A.CallTo( () => ((IRefImpl<IProperty>) transformation).GetTarget( A<CompilationModel>.Ignored , A<ReferenceResolutionOptions>.Ignored) )
                             .Returns( (IProperty) transformation );
 
                         break;
 
                     case DeclarationKind.Event:
                         A.CallTo( () => ((IRefImpl<IEvent>) transformation).Target ).Returns( transformation );
-                        A.CallTo( () => ((IRefImpl<IEvent>) transformation).GetTarget( A<CompilationModel>.Ignored ) ).Returns( (IEvent) transformation );
+                        A.CallTo( () => ((IRefImpl<IEvent>) transformation).GetTarget( A<CompilationModel>.Ignored , A<ReferenceResolutionOptions>.Ignored) ).Returns( (IEvent) transformation );
 
                         break;
 
                     case DeclarationKind.Field:
                         A.CallTo( () => ((IRefImpl<IField>) transformation).Target ).Returns( transformation );
-                        A.CallTo( () => ((IRefImpl<IField>) transformation).GetTarget( A<CompilationModel>.Ignored ) ).Returns( (IField) transformation );
+                        A.CallTo( () => ((IRefImpl<IField>) transformation).GetTarget( A<CompilationModel>.Ignored, A<ReferenceResolutionOptions>.Ignored ) ).Returns( (IField) transformation );
 
                         break;
                 }
@@ -835,11 +835,12 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
                 var fakeAspectInstance = new AspectInstance( A.Fake<IAspect>(), default, aspectClass, default );
 
+                
                 return A.Fake<Advice>(
                     i => i.WithArgumentsForConstructor(
                         new object?[]
                         {
-                            fakeAspectInstance, fakeAspectInstance.TemplateInstances.Values.Single(), A.Fake<IDeclarationImpl>(), aspectLayer.LayerName
+                            fakeAspectInstance, fakeAspectInstance.TemplateInstances.Values.Single(), A.Fake<IDeclarationImpl>(), A.Fake<ICompilation>(), aspectLayer.LayerName
                         } ) );
             }
         }

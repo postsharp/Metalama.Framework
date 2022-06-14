@@ -28,10 +28,11 @@ namespace Metalama.Framework.Engine.Advices
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             IMemberOrNamedType targetDeclaration,
+            ICompilation sourceCompilation,
             BoundTemplateMethod boundTemplate,
             InitializerKind kind,
             string? layerName,
-            IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, layerName )
+            IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, sourceCompilation, layerName )
         {
             this.BoundTemplate = boundTemplate;
             this.Kind = kind;

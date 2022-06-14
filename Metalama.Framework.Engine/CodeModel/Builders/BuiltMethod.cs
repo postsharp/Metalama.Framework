@@ -17,7 +17,7 @@ using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class BuiltMethod : BuiltMember, IMethodImpl, IMemberRef<IMethod>
+    internal class BuiltMethod : BuiltMember, IMethodImpl
     {
         public BuiltMethod( MethodBuilder builder, CompilationModel compilation ) : base( compilation, builder )
         {
@@ -77,10 +77,5 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IMethod? OverriddenMethod => this.Compilation.Factory.GetDeclaration( this.MethodBuilder.OverriddenMethod );
 
-        DeclarationSerializableId IRef<IMethod>.ToSerializableId() => throw new NotImplementedException();
-
-        IMethod IRef<IMethod>.GetTarget( ICompilation compilation ) => (IMethod) this.GetForCompilation( compilation );
-
-        ISymbol? ISdkRef<IMethod>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => throw new NotSupportedException();
     }
 }
