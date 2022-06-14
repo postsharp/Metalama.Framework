@@ -105,20 +105,7 @@ set
 
 public global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.OptionalValue<global::System.String?> Name { get; set; }
 
-public global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.OptionalValue<global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account.Optional> OptionalValues { get; set; }
-
 public global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.OptionalValue<global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account?> Parent { get; set; }}
 
 
-public global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account.Optional OptionalValues 
-{ get
-{ 
-        return (global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account.Optional)((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account.Optional)this.OptionalValues).OptionalValues.Value;
-
-}
-set
-{ 
-        ((global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account.Optional)this.OptionalValues).OptionalValues = new global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.OptionalValue<global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account.Optional>(value);
-
-}
-} }
+public global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.Account.Optional OptionalValues { get; set; } = new Optional();}
