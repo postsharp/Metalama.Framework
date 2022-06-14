@@ -45,12 +45,12 @@ namespace Metalama.Framework.Engine.Transformations
                         Identifier(
                             context.IntroductionNameProvider.GetOverrideName(
                                 this.OverriddenDeclaration.DeclaringType,
-                                this.Advice.AspectLayerId,
+                                this.ParentAdvice.AspectLayerId,
                                 this.OverriddenDeclaration ) ),
                         AccessorList( List( GetAccessors() ) ),
                         null,
                         null ),
-                    this.Advice.AspectLayerId,
+                    this.ParentAdvice.AspectLayerId,
                     IntroducedMemberSemantic.Override,
                     this.OverriddenDeclaration )
             };
@@ -105,7 +105,7 @@ namespace Metalama.Framework.Engine.Transformations
                     this.OverriddenDeclaration.IsStatic
                         ? IdentifierName( this.OverriddenDeclaration.Name )
                         : MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( this.OverriddenDeclaration.Name ) )
-                            .WithAspectReferenceAnnotation( this.Advice.AspectLayerId, AspectReferenceOrder.Base );
+                            .WithAspectReferenceAnnotation( this.ParentAdvice.AspectLayerId, AspectReferenceOrder.Base );
             }
         }
     }

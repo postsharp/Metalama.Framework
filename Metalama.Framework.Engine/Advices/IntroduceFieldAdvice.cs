@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Transformations;
 using System;
 
 namespace Metalama.Framework.Engine.Advices
@@ -18,8 +19,6 @@ namespace Metalama.Framework.Engine.Advices
 
     internal class IntroduceFieldAdvice : IntroduceFieldOrPropertyAdvice<IField, FieldBuilder>
     {
-        public IFieldBuilder Builder => this.MemberBuilder;
-
         public IntroduceFieldAdvice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
@@ -28,58 +27,73 @@ namespace Metalama.Framework.Engine.Advices
             TemplateMember<IField> fieldTemplate,
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
+            Action<IFieldBuilder>? buildAction,
             string? layerName,
             IObjectReader tags,
             IPullStrategy? pullStrategy )
-            : base( aspect, templateInstance, targetDeclaration, explicitName, fieldTemplate, scope, overrideStrategy, layerName, tags, pullStrategy )
+            : base(
+                aspect,
+                templateInstance,
+                targetDeclaration,
+                explicitName,
+                fieldTemplate,
+                scope,
+                overrideStrategy,
+                buildAction,
+                layerName,
+                tags,
+                pullStrategy )
         {
-            this.MemberBuilder = new FieldBuilder( this, targetDeclaration, this.MemberName, tags );
-            this.MemberBuilder.InitializerTemplate = fieldTemplate.GetInitializerTemplate();
+            this.Builder = new FieldBuilder( this, targetDeclaration, this.MemberName, tags );
+            this.Builder.InitializerTemplate = fieldTemplate.GetInitializerTemplate();
         }
 
-        public override void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
+        protected override void InitializeCore( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
         {
-            base.Initialize( serviceProvider, diagnosticAdder );
+            base.InitializeCore( serviceProvider, diagnosticAdder );
 
             if ( !this.Template.IsNull )
             {
-                this.MemberBuilder.Type = this.Template.Declaration!.Type;
-                this.MemberBuilder.Accessibility = this.Template.Declaration!.Accessibility;
-                this.MemberBuilder.IsStatic = this.Template.Declaration!.IsStatic;
-                this.MemberBuilder.Writeability = this.Template.Declaration!.Writeability;
+                this.Builder.Type = this.Template.Declaration!.Type;
+                this.Builder.Accessibility = this.Template.Declaration!.Accessibility;
+                this.Builder.IsStatic = this.Template.Declaration!.IsStatic;
+                this.Builder.Writeability = this.Template.Declaration!.Writeability;
             }
             else
             {
-                this.MemberBuilder.Type = this.SourceCompilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.Object );
-                this.MemberBuilder.Accessibility = Accessibility.Private;
-                this.MemberBuilder.IsStatic = false;
-                this.MemberBuilder.Writeability = Writeability.All;
+                this.Builder.Type = this.SourceCompilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.Object );
+                this.Builder.Accessibility = Accessibility.Private;
+                this.Builder.IsStatic = false;
+                this.Builder.Writeability = Writeability.All;
             }
         }
 
-        public override AdviceImplementationResult Implement( IServiceProvider serviceProvider, ICompilation compilation )
+        public override AdviceImplementationResult Implement(
+            IServiceProvider serviceProvider,
+            CompilationModel compilation,
+            Action<ITransformation> addTransformation )
         {
             var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
-            var existingDeclaration = targetDeclaration.FindClosestUniquelyNamedMember( this.MemberBuilder.Name );
+            var existingDeclaration = targetDeclaration.FindClosestUniquelyNamedMember( this.Builder.Name );
 
             if ( existingDeclaration != null )
             {
                 if ( existingDeclaration is not IField )
                 {
                     return
-                        AdviceImplementationResult.Create(
+                        AdviceImplementationResult.Failed(
                             AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentKind.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration, existingDeclaration.DeclarationKind) ) );
+                                (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration, existingDeclaration.DeclarationKind) ) );
                 }
 
-                if ( existingDeclaration.IsStatic != this.MemberBuilder.IsStatic )
+                if ( existingDeclaration.IsStatic != this.Builder.IsStatic )
                 {
                     return
-                        AdviceImplementationResult.Create(
+                        AdviceImplementationResult.Failed(
                             AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentStaticity.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
+                                (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
                                  existingDeclaration.DeclaringType) ) );
                 }
 
@@ -88,20 +102,20 @@ namespace Metalama.Framework.Engine.Advices
                     case OverrideStrategy.Fail:
                         // Produce fail diagnostic.
                         return
-                            AdviceImplementationResult.Create(
+                            AdviceImplementationResult.Failed(
                                 AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateRoslynDiagnostic(
                                     targetDeclaration.GetDiagnosticLocation(),
-                                    (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
+                                    (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
                                      existingDeclaration.DeclaringType) ) );
 
                     case OverrideStrategy.Ignore:
                         // Do nothing.
-                        return AdviceImplementationResult.Empty;
+                        return AdviceImplementationResult.Ignored;
 
                     case OverrideStrategy.New:
-                        this.MemberBuilder.IsNew = true;
+                        this.Builder.IsNew = true;
 
-                        break;
+                        return this.IntroduceMemberAndPull( serviceProvider, targetDeclaration, addTransformation, AdviceOutcome.New );
 
                     case OverrideStrategy.Override:
                         throw new NotSupportedException( "Override is not a supported OverrideStrategy for fields." );
@@ -110,8 +124,10 @@ namespace Metalama.Framework.Engine.Advices
                         throw new AssertionFailedException();
                 }
             }
-
-            return this.IntroduceMemberAndPull( serviceProvider, targetDeclaration );
+            else
+            {
+                return this.IntroduceMemberAndPull( serviceProvider, targetDeclaration, addTransformation, AdviceOutcome.Default );
+            }
         }
     }
 }

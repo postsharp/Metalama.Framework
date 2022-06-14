@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Transformations;
 using System;
 
 namespace Metalama.Framework.Engine.Advices
@@ -19,8 +20,6 @@ namespace Metalama.Framework.Engine.Advices
         public Ref<IDeclaration> TargetDeclaration { get; }
 
         public AspectLayerId AspectLayerId { get; }
-
-        public int Order { get; set; }
 
         /// <summary>
         /// Gets the compilation from which the advice was instantiated.
@@ -55,7 +54,11 @@ namespace Metalama.Framework.Engine.Advices
         /// </summary>
         /// <param name="serviceProvider">Service provider.</param>
         /// <param name="compilation">Input compilation.</param>
+        /// <param name="addTransformation"></param>
         /// <returns>Advice result containing transformations and diagnostics.</returns>
-        public abstract AdviceImplementationResult Implement( IServiceProvider serviceProvider, ICompilation compilation );
+        public abstract AdviceImplementationResult Implement(
+            IServiceProvider serviceProvider,
+            CompilationModel compilation,
+            Action<ITransformation> addTransformation );
     }
 }

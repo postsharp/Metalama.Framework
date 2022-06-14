@@ -12,6 +12,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Templating.Expressions;
+using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
@@ -106,9 +107,9 @@ namespace Metalama.Framework.Engine.Aspects
             {
                 return new AspectInstanceResult(
                     aspectInstance,
-                    false,
+                    AdviceOutcome.Error,
                     new ImmutableUserDiagnosticList( ImmutableArray.Create( diagnostic ), ImmutableArray<ScopedSuppression>.Empty ),
-                    ImmutableArray<Advice>.Empty,
+                    ImmutableArray<ITransformation>.Empty,
                     ImmutableArray<IAspectSource>.Empty,
                     ImmutableArray<IValidatorSource>.Empty );
             }
@@ -201,16 +202,16 @@ namespace Metalama.Framework.Engine.Aspects
                     return
                         new AspectInstanceResult(
                             aspectInstance,
-                            false,
+                            AdviceOutcome.Error,
                             diagnosticSink.ToImmutable(),
-                            ImmutableArray<Advice>.Empty,
+                            ImmutableArray<ITransformation>.Empty,
                             ImmutableArray<IAspectSource>.Empty,
                             ImmutableArray<IValidatorSource>.Empty );
                 }
 
                 var aspectResult = aspectBuilderState.ToResult();
 
-                if ( !aspectResult.Success )
+                if ( aspectResult.Outcome == AdviceOutcome.Error )
                 {
                     aspectInstance.Skip();
                 }

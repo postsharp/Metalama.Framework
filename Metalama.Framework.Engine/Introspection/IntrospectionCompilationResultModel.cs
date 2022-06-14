@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Introspection;
-using System;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -19,7 +18,6 @@ internal class IntrospectionCompilationResultModel : IIntrospectionCompilationOu
     private readonly IntrospectionAspectInstanceFactory _introspectionAspectInstanceFactory;
 
     public IntrospectionCompilationResultModel(
-        IServiceProvider serviceProvider,
         bool isSuccessful,
         CompilationModel compilationModel,
         ImmutableArray<IIntrospectionDiagnostic> diagnostics,
@@ -29,7 +27,7 @@ internal class IntrospectionCompilationResultModel : IIntrospectionCompilationOu
         this.IsSuccessful = isSuccessful;
         this.Diagnostics = diagnostics;
         this._compilation = compilationModel;
-        this._introspectionAspectInstanceFactory = new IntrospectionAspectInstanceFactory( serviceProvider, compilationModel );
+        this._introspectionAspectInstanceFactory = new IntrospectionAspectInstanceFactory( compilationModel );
     }
 
     public bool IsSuccessful { get; }
@@ -40,7 +38,8 @@ internal class IntrospectionCompilationResultModel : IIntrospectionCompilationOu
     public ImmutableArray<IIntrospectionAspectInstance> AspectInstances
         => this._pipelineResult == null
             ? ImmutableArray<IIntrospectionAspectInstance>.Empty
-            : this._pipelineResult.AspectInstanceResults.Select( x => this._introspectionAspectInstanceFactory.GetIntrospectionAspectInstance( x ) )
+            : this._pipelineResult.AspectInstanceResults
+                .Select( x => this._introspectionAspectInstanceFactory.GetIntrospectionAspectInstance( x.AspectInstance ) )
                 .ToImmutableArray<IIntrospectionAspectInstance>();
 
     [Memo]
@@ -54,7 +53,11 @@ internal class IntrospectionCompilationResultModel : IIntrospectionCompilationOu
         }
 
         return this._pipelineResult.AspectInstanceResults.GroupBy( x => x.AspectInstance.AspectClass )
-            .Select( x => new IntrospectionAspectClass( x.Key, x.ToImmutableArray(), this._introspectionAspectInstanceFactory.GetIntrospectionAspectInstance ) )
+            .Select(
+                x => new IntrospectionAspectClass(
+                    x.Key,
+                    x.ToImmutableArray(),
+                    result => this._introspectionAspectInstanceFactory.GetIntrospectionAspectInstance( result.AspectInstance ) ) )
             .ToImmutableArray<IIntrospectionAspectClass>();
     }
 

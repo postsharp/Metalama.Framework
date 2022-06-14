@@ -4,6 +4,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Transformations;
 using System;
 
@@ -42,10 +43,13 @@ namespace Metalama.Framework.Engine.Advices
             this.RemoveTemplate = removeTemplate;
         }
 
-        public override AdviceImplementationResult Implement( IServiceProvider serviceProvider, ICompilation compilation )
+        public override AdviceImplementationResult Implement(
+            IServiceProvider serviceProvider,
+            CompilationModel compilation,
+            Action<ITransformation> addTransformation )
         {
             // TODO: order should be self if the target is introduced on the same layer.
-            return AdviceImplementationResult.Create(
+            addTransformation(
                 new OverrideEventTransformation(
                     this,
                     this.TargetDeclaration.GetTarget( compilation ),
@@ -54,6 +58,8 @@ namespace Metalama.Framework.Engine.Advices
                     this.RemoveTemplate,
                     this.Tags,
                     this._parameters ) );
+
+            return AdviceImplementationResult.Success();
         }
     }
 }

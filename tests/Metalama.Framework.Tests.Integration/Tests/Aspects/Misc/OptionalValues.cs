@@ -45,8 +45,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues
                 var optionalProperty = builder.Advice.IntroduceProperty(
                         nestedType,
                         nameof(OptionalPropertyTemplate),
-                        buildAction:
-                        p =>
+                        buildAction: p =>
                         {
                             p.Name = property.Name;
                             p.Type = optionalValueType.ConstructGenericInstance( property.Type );

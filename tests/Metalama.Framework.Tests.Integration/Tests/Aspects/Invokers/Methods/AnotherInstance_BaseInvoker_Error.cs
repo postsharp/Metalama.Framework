@@ -15,8 +15,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AnotherIns
                 aspectBuilder.Target,
                 nameof(OverrideMethod),
                 whenExists: OverrideStrategy.Override,
-                buildAction:
-                m =>
+                buildAction: m =>
                 {
                     m.Name = "VoidMethod";
                     m.ReturnType = TypeFactory.GetType( SpecialType.Void );

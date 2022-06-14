@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.Transformations;
 /// <summary>
 /// A transformation that appends an argument to the initializer call of a constructor.
 /// </summary>
-internal class AppendConstructorInitializerArgumentTransformation : INonObservableTransformation, IMemberLevelTransformation
+internal class AppendConstructorInitializerArgumentTransformation : BaseTransformation, INonObservableTransformation, IMemberLevelTransformation
 {
     public IConstructor Constructor { get; }
 
@@ -20,18 +20,16 @@ internal class AppendConstructorInitializerArgumentTransformation : INonObservab
 
     public int ParameterIndex { get; }
 
-    public Advice Advice { get; }
-
     public ExpressionSyntax Value { get; }
 
-    public AppendConstructorInitializerArgumentTransformation( Advice advice, IConstructor constructor, int parameterIndex, ExpressionSyntax value )
+    public AppendConstructorInitializerArgumentTransformation( Advice advice, IConstructor constructor, int parameterIndex, ExpressionSyntax value ) : base(
+        advice )
     {
         this.Constructor = constructor;
         this.ParameterIndex = parameterIndex;
-        this.Advice = advice;
         this.Value = value;
     }
 
     public ArgumentSyntax ToSyntax()
-        => SyntaxFactory.Argument( this.Value ).WithAdditionalAnnotations( this.Advice.Aspect.AspectClass.GeneratedCodeAnnotation );
+        => SyntaxFactory.Argument( this.Value ).WithAdditionalAnnotations( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation );
 }

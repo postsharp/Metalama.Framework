@@ -10,10 +10,8 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal class AppendParameterTransformation : IObservableTransformation, IMemberLevelTransformation
+internal class AppendParameterTransformation : BaseTransformation, IObservableTransformation, IMemberLevelTransformation
 {
-    public Advice Advice { get; }
-
     IDeclaration IObservableTransformation.ContainingDeclaration => this.TargetMember;
 
     public bool IsDesignTime => true;
@@ -22,9 +20,8 @@ internal class AppendParameterTransformation : IObservableTransformation, IMembe
 
     public IParameter Parameter { get; }
 
-    public AppendParameterTransformation( Advice advice, IParameter parameter )
+    public AppendParameterTransformation( Advice advice, IParameter parameter ) : base( advice )
     {
-        this.Advice = advice;
         this.Parameter = parameter;
     }
 

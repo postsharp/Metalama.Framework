@@ -372,7 +372,7 @@ namespace Metalama.Framework.Engine.Linking
 
                         introducedNode = introducedNode
                             .WithLeadingTrivia( ElasticLineFeed, ElasticLineFeed )
-                            .WithGeneratedCodeAnnotation( introducedMember.Introduction.Advice.Aspect.AspectClass.GeneratedCodeAnnotation );
+                            .WithGeneratedCodeAnnotation( introducedMember.Introduction.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation );
 
                         // Insert inserted statements into 
                         switch ( introducedNode )

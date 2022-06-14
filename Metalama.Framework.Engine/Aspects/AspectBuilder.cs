@@ -89,7 +89,7 @@ namespace Metalama.Framework.Engine.Aspects
 
         public IAdviceFactory Advice => this.AdviceFactory;
 
-        public void SkipAspect() => this._aspectBuilderState.IsAspectSkipped = true;
+        public void SkipAspect() => this._aspectBuilderState.AdviceFactoryState.SkipAspect();
 
         public bool IsAspectSkipped => this._aspectBuilderState.IsAspectSkipped;
 
@@ -134,7 +134,7 @@ namespace Metalama.Framework.Engine.Aspects
             }
         }
 
-        public IAspectBuilder<TNewTarget> WithTarget<TNewTarget>( TNewTarget newTarget ) 
+        public IAspectBuilder<TNewTarget> WithTarget<TNewTarget>( TNewTarget newTarget )
             where TNewTarget : class, IDeclaration
         {
             if ( newTarget == this.Target )

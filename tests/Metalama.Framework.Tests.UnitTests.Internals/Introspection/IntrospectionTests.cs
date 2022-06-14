@@ -56,7 +56,7 @@ class MyClass
         Assert.Single( compilerOutput.Diagnostics );
         Assert.Single( compilerOutput.AspectInstances );
         Assert.Single( compilerOutput.AspectInstances[0].Diagnostics );
-        Assert.Single( compilerOutput.AspectInstances[0].Advices );
+        Assert.Single( compilerOutput.AspectInstances[0].Advice );
         var aspectClass = compilerOutput.AspectClasses.Single( x => x.ShortName == "Aspect" );
         Assert.Same( compilerOutput.AspectInstances[0], aspectClass.Instances[0] );
     }
@@ -107,7 +107,7 @@ class MyClass
         Assert.Single( compilerOutput.Diagnostics );
         Assert.Single( compilerOutput.AspectInstances );
         Assert.Single( compilerOutput.AspectInstances[0].Diagnostics );
-        Assert.Empty( compilerOutput.AspectInstances[0].Advices );
+        Assert.Empty( compilerOutput.AspectInstances[0].Advice );
     }
 
     [Fact]

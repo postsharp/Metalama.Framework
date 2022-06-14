@@ -3,10 +3,8 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
@@ -38,7 +36,6 @@ namespace Metalama.Framework.Engine.Pipeline
         private readonly List<AspectInstanceResult> _aspectInstanceResults = new();
         private readonly List<IValidatorSource> _validatorSources = new();
         private readonly OverflowAspectSource _overflowAspectSource = new();
-        private readonly IntrospectionPipelineListener? _introspectionPipelineListener;
 
         private PipelineStep? _currentStep;
 
@@ -52,7 +49,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
         public ImmutableArray<IValidatorSource> ValidatorSources => this._validatorSources.ToImmutableArray();
 
-        public ImmutableUserDiagnosticList Diagnostics => this._diagnostics.ToImmutable();
+        ImmutableUserDiagnosticList IPipelineStepsResult.Diagnostics => this._diagnostics.ToImmutable();
 
         public ImmutableArray<IAspectSource> ExternalAspectSources => ImmutableArray.Create<IAspectSource>( this._overflowAspectSource );
 
@@ -67,7 +64,7 @@ namespace Metalama.Framework.Engine.Pipeline
             ImmutableArray<IValidatorSource> inputValidatorSources,
             AspectPipelineConfiguration pipelineConfiguration )
         {
-            this._introspectionPipelineListener = pipelineConfiguration.ServiceProvider.GetService<IntrospectionPipelineListener>();
+            pipelineConfiguration.ServiceProvider.GetService<IntrospectionPipelineListener>();
 
             this._diagnostics = new UserDiagnosticSink( pipelineConfiguration.CompileTimeProject, pipelineConfiguration.CodeFixFilter );
             this.LastCompilation = inputLastCompilation;
@@ -205,56 +202,11 @@ namespace Metalama.Framework.Engine.Pipeline
 
             if ( !this._steps.TryGetValue( stepId, out step ) )
             {
-                if ( aspectLayer.IsDefault )
-                {
-                    step = new InitializeAspectInstancesPipelineStep( this, stepId, aspectLayer );
-                }
-                else
-                {
-                    step = new AdvicePipelineStep( this, stepId, aspectLayer );
-                }
-
+                step = new ExecuteAspectLayerPipelineStep( this, stepId, aspectLayer );
                 _ = this._steps.Add( stepId, step );
             }
 
             return true;
-        }
-
-        public bool AddAdvices( IEnumerable<Advice> advices, ICompilation compilation )
-        {
-            Invariant.Assert( this._currentStep != null );
-
-            var success = true;
-
-            foreach ( var advice in advices )
-            {
-                var adviceTargetDeclaration = advice.TargetDeclaration.GetTarget( compilation );
-                var aspectTargetDeclaration = advice.Aspect.TargetDeclaration.GetTarget( compilation );
-                var aspectTargetTypeDeclaration = aspectTargetDeclaration.GetDeclaringType() ?? aspectTargetDeclaration;
-
-                var stepId = new PipelineStepId(
-                    advice.AspectLayerId,
-                    this.LastCompilation.GetDepth( aspectTargetTypeDeclaration ),
-                    this.LastCompilation.GetDepth( aspectTargetDeclaration ),
-                    PipelineStepPhase.Transform,
-                    this.LastCompilation.GetDepth( adviceTargetDeclaration ) );
-
-                if ( !this.TryGetOrAddStep( stepId, true, out var step ) )
-                {
-                    this._diagnostics.Report(
-                        GeneralDiagnosticDescriptors.CannotAddAdviceToPreviousPipelineStep.CreateRoslynDiagnostic(
-                            this._currentStep.AspectLayer.AspectClass.DiagnosticLocation,
-                            (this._currentStep.AspectLayer.AspectClass.ShortName, adviceTargetDeclaration) ) );
-
-                    success = false;
-
-                    continue;
-                }
-
-                ((AdvicePipelineStep) step).AddAdvice( advice );
-            }
-
-            return success;
         }
 
         public void AddAspectInstances( IEnumerable<ResolvedAspectInstance> aspectInstances )
@@ -280,7 +232,7 @@ namespace Metalama.Framework.Engine.Pipeline
                     throw new AssertionFailedException();
                 }
 
-                ((InitializeAspectInstancesPipelineStep) step).AddAspectInstance( aspectInstance );
+                ((ExecuteAspectLayerPipelineStep) step).AddAspectInstance( aspectInstance );
             }
         }
 
@@ -289,14 +241,11 @@ namespace Metalama.Framework.Engine.Pipeline
             this._inheritableAspectInstances.AddRange( inheritedAspectInstances );
         }
 
-        public void AddDiagnostics(
-            IEnumerable<Diagnostic> diagnostics,
-            IEnumerable<ScopedSuppression> suppressions,
-            IEnumerable<CodeFixInstance> codeFixInstances )
+        public void AddDiagnostics( ImmutableUserDiagnosticList diagnostics )
         {
-            this._diagnostics.Report( diagnostics );
-            this._diagnostics.Suppress( suppressions );
-            this._diagnostics.AddCodeFixes( codeFixInstances );
+            this._diagnostics.Report( diagnostics.ReportedDiagnostics );
+            this._diagnostics.Suppress( diagnostics.DiagnosticSuppressions );
+            this._diagnostics.AddCodeFixes( diagnostics.CodeFixes );
         }
 
         public void AddTransformations( IEnumerable<ITransformation> transformations ) => this._transformations.AddRange( transformations );
@@ -314,8 +263,5 @@ namespace Metalama.Framework.Engine.Pipeline
         {
             this._aspectInstanceResults.AddRange( aspectInstanceResults );
         }
-
-        public void AddAdviceResult( Advice advice, AdviceImplementationResult result )
-            => this._introspectionPipelineListener?.AddAdviceResult( advice, result );
     }
 }

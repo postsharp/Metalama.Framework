@@ -118,7 +118,9 @@ namespace Metalama.Framework.Engine.CodeModel
         /// </summary>
         /// <param name="prototype"></param>
         /// <param name="observableTransformations"></param>
-        private CompilationModel( CompilationModel prototype, IReadOnlyList<IObservableTransformation> observableTransformations ) : this( prototype, true )
+        private CompilationModel( CompilationModel prototype, IReadOnlyCollection<IObservableTransformation> observableTransformations ) : this(
+            prototype,
+            true )
         {
             foreach ( var transformation in observableTransformations )
             {
@@ -182,9 +184,9 @@ namespace Metalama.Framework.Engine.CodeModel
             this._aspects = this._aspects.AddRange( aspectInstances, a => a.TargetDeclaration );
         }
 
-        internal CompilationModel WithTransformations( IReadOnlyList<IObservableTransformation> introducedDeclarations )
+        internal CompilationModel WithTransformations( IReadOnlyCollection<IObservableTransformation> introducedDeclarations )
         {
-            if ( !introducedDeclarations.Any() )
+            if ( introducedDeclarations.Count == 0 )
             {
                 return this;
             }
@@ -423,6 +425,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override SyntaxTree? PrimarySyntaxTree => null;
 
-        public CompilationModel ToMutable() => new( this, true );
+        public CompilationModel CreateMutableClone() => new( this, true );
     }
 }

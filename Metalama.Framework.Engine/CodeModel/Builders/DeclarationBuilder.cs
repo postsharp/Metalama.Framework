@@ -25,10 +25,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
     /// <see cref="ISdkRef{T}"/> so they can resolve, using <see cref="DeclarationFactory"/>, to the consuming <see cref="CompilationModel"/>.
     /// 
     /// </summary>
-    internal abstract class DeclarationBuilder : IDeclarationBuilder, IDeclarationImpl, ITransformation
+    internal abstract class DeclarationBuilder : BaseTransformation, IDeclarationBuilder, IDeclarationImpl
     {
-        internal Advice ParentAdvice { get; }
-
         public DeclarationOrigin Origin => DeclarationOrigin.Aspect;
 
         public abstract IDeclaration? ContainingDeclaration { get; }
@@ -53,12 +51,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
         }
 
-        Advice ITransformation.Advice => this.ParentAdvice;
-
-        protected DeclarationBuilder( Advice parentAdvice )
-        {
-            this.ParentAdvice = parentAdvice;
-        }
+        protected DeclarationBuilder( Advice parentAdvice ) : base( parentAdvice ) { }
 
         public abstract string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null );
 

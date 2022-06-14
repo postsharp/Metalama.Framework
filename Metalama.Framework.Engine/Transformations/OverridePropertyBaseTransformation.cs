@@ -32,7 +32,7 @@ internal abstract class OverridePropertyBaseTransformation : OverrideMemberTrans
     {
         var propertyName = context.IntroductionNameProvider.GetOverrideName(
             this.OverriddenDeclaration.DeclaringType,
-            this.Advice.AspectLayerId,
+            this.ParentAdvice.AspectLayerId,
             this.OverriddenDeclaration );
 
         var setAccessorDeclarationKind = this.OverriddenDeclaration.Writeability == Writeability.InitOnly
@@ -71,7 +71,7 @@ internal abstract class OverridePropertyBaseTransformation : OverrideMemberTrans
                                 .AssertNoneNull() ) ),
                     null,
                     null ),
-                this.Advice.AspectLayerId,
+                this.ParentAdvice.AspectLayerId,
                 IntroducedMemberSemantic.Override,
                 this.OverriddenDeclaration )
         };

@@ -20,7 +20,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using RefKind = Metalama.Framework.Code.RefKind;
 
@@ -40,10 +39,11 @@ internal abstract class IntroduceFieldOrPropertyAdvice<TMember, TBuilder> : Intr
         TemplateMember<TMember> template,
         IntroductionScope scope,
         OverrideStrategy overrideStrategy,
+        Action<TBuilder>? buildAction,
         string? layerName,
         IObjectReader tags,
         IPullStrategy? pullStrategy )
-        : base( aspect, templateInstance, targetDeclaration, explicitName, template, scope, overrideStrategy, layerName, tags )
+        : base( aspect, templateInstance, targetDeclaration, explicitName, template, scope, overrideStrategy, buildAction, layerName, tags )
     {
         this.PullStrategy = pullStrategy;
     }
@@ -53,12 +53,18 @@ internal abstract class IntroduceFieldOrPropertyAdvice<TMember, TBuilder> : Intr
     /// pull the new member from the constructor.
     /// </summary>
     /// <returns></returns>
-    protected AdviceImplementationResult IntroduceMemberAndPull( IServiceProvider serviceProvider, INamedType targetType )
+    protected AdviceImplementationResult IntroduceMemberAndPull(
+        IServiceProvider serviceProvider,
+        INamedType targetType,
+        Action<ITransformation> addTransformation,
+        AdviceOutcome outcome )
     {
+        addTransformation( this.Builder );
+
         if ( this.PullStrategy == null )
         {
             // The field or property should not be pulled or initialized.
-            return AdviceImplementationResult.Create( this.MemberBuilder );
+            return AdviceImplementationResult.Success( outcome, this.Builder );
         }
         else
         {
@@ -70,9 +76,6 @@ internal abstract class IntroduceFieldOrPropertyAdvice<TMember, TBuilder> : Intr
             var scopedDiagnosticSink = new ScopedDiagnosticSink( diagnosticSink, targetType, targetType );
 
             var compilation = targetType.GetCompilationModel();
-
-            // Add the field or property introduction itself.
-            var transformations = new List<ITransformation> { this.MemberBuilder };
 
             // Find all constructors except those who call `: this(...)`.
             foreach ( var constructor in targetType.Constructors )
@@ -89,10 +92,15 @@ internal abstract class IntroduceFieldOrPropertyAdvice<TMember, TBuilder> : Intr
                     {
                         pullFieldOrPropertyAction = userCodeInvoker.Invoke(
                             () => this.PullStrategy.PullFieldOrProperty(
-                                this.MemberBuilder,
+                                this.Builder,
                                 constructor,
                                 scopedDiagnosticSink ),
                             userCodeInvocationContext );
+                    }
+
+                    if ( diagnosticSink.ErrorCount > 0 )
+                    {
+                        return AdviceImplementationResult.Failed( diagnosticSink );
                     }
 
                     switch ( pullFieldOrPropertyAction.Kind )
@@ -110,7 +118,7 @@ internal abstract class IntroduceFieldOrPropertyAdvice<TMember, TBuilder> : Intr
                             {
                                 var constructorBuilder = new ConstructorBuilder( this, constructor.DeclaringType, this.Tags );
                                 initializedConstructor = constructorBuilder;
-                                transformations.Add( constructorBuilder );
+                                addTransformation( constructorBuilder );
                             }
 
                             // Add an initializer for the field or property into the constructor.
@@ -124,14 +132,14 @@ internal abstract class IntroduceFieldOrPropertyAdvice<TMember, TBuilder> : Intr
                                             SyntaxFactory.MemberAccessExpression(
                                                 SyntaxKind.SimpleMemberAccessExpression,
                                                 SyntaxFactory.ThisExpression(),
-                                                SyntaxFactory.IdentifierName( this.MemberBuilder.Name ) ),
+                                                SyntaxFactory.IdentifierName( this.Builder.Name ) ),
                                             ((IUserExpression?) pullFieldOrPropertyAction.AssignmentExpression)?.ToSyntax( context )
                                             ?? SyntaxFactory.IdentifierName( pullFieldOrPropertyAction.ParameterName.AssertNotNull() ) ) )
                                     .NormalizeWhitespace()
                                     .WithAdditionalAnnotations( this.Aspect.AspectClass.GeneratedCodeAnnotation ),
                                 this.Tags );
 
-                            transformations.Add( initialization );
+                            addTransformation( initialization );
 
                             // Pull the parameter from the constructor.
                             if ( pullFieldOrPropertyAction.Kind == DependencyPullStrategyKind.AppendParameterAndPull )
@@ -147,12 +155,17 @@ internal abstract class IntroduceFieldOrPropertyAdvice<TMember, TBuilder> : Intr
 
                                 newParameter.AddAttributes( pullFieldOrPropertyAction.ParameterAttributes );
 
-                                transformations.Add( new AppendParameterTransformation( this, newParameter ) );
+                                addTransformation( new AppendParameterTransformation( this, newParameter ) );
 
                                 // Pull from constructors that call the current constructor, and recursively.
-                                PullConstructorParameterRecursive( constructor, newParameter );
+                                var pullResult = PullConstructorParameterRecursive( constructor, newParameter );
 
-                                void PullConstructorParameterRecursive( IConstructor baseConstructor, IParameter baseParameter )
+                                if ( pullResult != null )
+                                {
+                                    return pullResult;
+                                }
+
+                                AdviceImplementationResult? PullConstructorParameterRecursive( IConstructor baseConstructor, IParameter baseParameter )
                                 {
                                     // Identity constructors that call the current constructor.
                                     var sameTypeConstructors =
@@ -185,13 +198,18 @@ internal abstract class IntroduceFieldOrPropertyAdvice<TMember, TBuilder> : Intr
                                                 scopedDiagnosticSink );
                                         }
 
+                                        if ( diagnosticSink.ErrorCount > 0 )
+                                        {
+                                            return AdviceImplementationResult.Failed( diagnosticSink );
+                                        }
+
                                         // If we have an implicit constructor, make it explicit.
                                         var initializedChainedConstructor = chainedConstructor;
 
                                         if ( chainedConstructor.IsImplicitInstanceConstructor() )
                                         {
                                             var derivedConstructorBuilder = new ConstructorBuilder( this, chainedConstructor.DeclaringType, this.Tags );
-                                            transformations.Add( derivedConstructorBuilder );
+                                            addTransformation( derivedConstructorBuilder );
                                             initializedChainedConstructor = derivedConstructorBuilder;
                                         }
 
@@ -224,10 +242,15 @@ internal abstract class IntroduceFieldOrPropertyAdvice<TMember, TBuilder> : Intr
 
                                                 recursiveNewParameter.AddAttributes( pullParameterAction.ParameterAttributes );
 
-                                                transformations.Add( new AppendParameterTransformation( this, recursiveNewParameter ) );
+                                                addTransformation( new AppendParameterTransformation( this, recursiveNewParameter ) );
 
                                                 // Process all constructors calling this constructor.
-                                                PullConstructorParameterRecursive( chainedConstructor, recursiveNewParameter );
+                                                var recursiveResult = PullConstructorParameterRecursive( chainedConstructor, recursiveNewParameter );
+
+                                                if ( recursiveResult != null )
+                                                {
+                                                    return recursiveResult;
+                                                }
 
                                                 break;
 
@@ -236,13 +259,15 @@ internal abstract class IntroduceFieldOrPropertyAdvice<TMember, TBuilder> : Intr
                                         }
 
                                         // Append an argument to the call to the current constructor. 
-                                        transformations.Add(
+                                        addTransformation(
                                             new AppendConstructorInitializerArgumentTransformation(
                                                 this,
                                                 initializedChainedConstructor,
                                                 baseParameter.Index,
                                                 parameterValue ) );
                                     }
+
+                                    return null;
                                 }
                             }
 
@@ -254,7 +279,7 @@ internal abstract class IntroduceFieldOrPropertyAdvice<TMember, TBuilder> : Intr
                 }
             }
 
-            return AdviceImplementationResult.Create( transformations, diagnosticSink.ToImmutable().ReportedDiagnostics );
+            return AdviceImplementationResult.Success( this.Builder );
         }
     }
 }

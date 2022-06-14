@@ -17,6 +17,7 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : ILa
     where TRef : IRefImpl<TDeclaration>, IEquatable<TRef>
 {
     private List<TRef>? _allItems;
+    private volatile int _removeOperationsCount;
 
     protected UpdatableDeclarationCollection( CompilationModel compilation )
     {
@@ -68,6 +69,7 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : ILa
     {
         if ( this.IsComplete )
         {
+            this._removeOperationsCount++;
             this._allItems!.Remove( item );
         }
     }
@@ -103,13 +105,9 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : ILa
         return clone;
     }
 
-    public IEnumerator<TRef> GetEnumerator()
-    {
-        for ( var i = 0; i < this.Count; i++ )
-        {
-            yield return this[i];
-        }
-    }
+    IEnumerator<TRef> IEnumerable<TRef>.GetEnumerator() => this.GetEnumerator();
+
+    public Enumerator GetEnumerator() => new Enumerator( this );
 
     IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
@@ -122,7 +120,57 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : ILa
             return this._allItems![index];
         }
     }
-}
+
+ 
+    public struct Enumerator : IEnumerator<TRef>
+    {
+        private readonly UpdatableDeclarationCollection<TDeclaration, TRef> _parent;
+        private readonly int _initialCount;
+        private readonly int _initialRemoveOperationsCount;
+        private int _index = -1;
+
+        internal Enumerator(UpdatableDeclarationCollection<TDeclaration, TRef> parent)
+        {
+            this._parent = parent;
+
+            // In case elements are added while iterating, we only return the items that were present when iteration started.
+            this._initialCount = parent.Count;
+        
+            // In case elements are removed while iterating, we fail.
+            this._initialRemoveOperationsCount = parent._removeOperationsCount;
+
+        }
+
+        public bool MoveNext()
+        {
+            if ( this._index + 1 < this._initialCount )
+            {
+                if ( this._parent._removeOperationsCount != _initialRemoveOperationsCount )
+                {
+                    throw new InvalidOperationException( "An item was removed from the collection while an enumeration was in progress." );
+                }
+
+                
+                this._index++;
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public void Reset() => this._index = -1;
+
+        public TRef Current => this._parent[this._index];
+
+        object IEnumerator.Current => this.Current;
+
+        public void Dispose() { }
+        }
+    }
+
 
 internal abstract class UpdatableDeclarationCollection<TDeclaration> : UpdatableDeclarationCollection<TDeclaration, Ref<TDeclaration>>
     where TDeclaration : class, IDeclaration

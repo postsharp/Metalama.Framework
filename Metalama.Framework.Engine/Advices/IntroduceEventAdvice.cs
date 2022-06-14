@@ -24,8 +24,6 @@ namespace Metalama.Framework.Engine.Advices
 
         // ReSharper disable once MemberCanBePrivate.Global
 
-        public IEventBuilder Builder => this.MemberBuilder;
-
         public IntroduceEventAdvice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
@@ -36,42 +34,46 @@ namespace Metalama.Framework.Engine.Advices
             TemplateMember<IMethod> removeTemplate,
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
+            Action<IEventBuilder>? buildAction,
             string? layerName,
             IObjectReader tags,
             IObjectReader parameters )
-            : base( aspect, templateInstance, targetDeclaration, explicitName, eventTemplate, scope, overrideStrategy, layerName, tags )
+            : base( aspect, templateInstance, targetDeclaration, explicitName, eventTemplate, scope, overrideStrategy, buildAction, layerName, tags )
         {
             this._addTemplate = addTemplate;
             this._removeTemplate = removeTemplate;
             this._parameters = parameters;
 
-            this.MemberBuilder = new EventBuilder(
+            this.Builder = new EventBuilder(
                 this,
                 targetDeclaration,
                 this.MemberName,
                 eventTemplate.Declaration != null && eventTemplate.Declaration.IsEventField(),
                 tags );
 
-            this.MemberBuilder.InitializerTemplate = eventTemplate.GetInitializerTemplate();
+            this.Builder.InitializerTemplate = eventTemplate.GetInitializerTemplate();
         }
 
-        public override void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
+        protected override void InitializeCore( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
         {
-            base.Initialize( serviceProvider, diagnosticAdder );
+            base.InitializeCore( serviceProvider, diagnosticAdder );
 
-            this.MemberBuilder.Type =
+            this.Builder.Type =
                 (this.Template.Declaration?.Type ?? (INamedType?) this._addTemplate.Declaration?.Parameters.FirstOrDefault().AssertNotNull().Type)
                 .AssertNotNull();
 
-            this.MemberBuilder.Accessibility = (this.Template.Declaration?.Accessibility ?? this._addTemplate.Declaration?.Accessibility).AssertNotNull();
+            this.Builder.Accessibility = (this.Template.Declaration?.Accessibility ?? this._addTemplate.Declaration?.Accessibility).AssertNotNull();
         }
 
-        public override AdviceImplementationResult Implement( IServiceProvider serviceProvider, ICompilation compilation )
+        public override AdviceImplementationResult Implement(
+            IServiceProvider serviceProvider,
+            CompilationModel compilation,
+            Action<ITransformation> addTransformation )
         {
             // this.Tags: Override transformations.
             var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
 
-            var existingDeclaration = targetDeclaration.FindClosestUniquelyNamedMember( this.MemberBuilder.Name );
+            var existingDeclaration = targetDeclaration.FindClosestUniquelyNamedMember( this.Builder.Name );
             var hasNoOverrideSemantics = this.Template.Declaration != null && this.Template.Declaration.IsEventField();
 
             if ( existingDeclaration == null )
@@ -79,67 +81,62 @@ namespace Metalama.Framework.Engine.Advices
                 // TODO: validate event type.
 
                 // There is no existing declaration, we will introduce and override the introduced.
-                if ( hasNoOverrideSemantics )
+                addTransformation( this.Builder );
+
+                if ( !hasNoOverrideSemantics )
                 {
-                    return AdviceImplementationResult.Create( this.MemberBuilder );
-                }
-                else
-                {
-                    return AdviceImplementationResult.Create(
-                        this.MemberBuilder,
+                    addTransformation(
                         new OverrideEventTransformation(
                             this,
-                            this.MemberBuilder,
+                            this.Builder,
                             this.Template,
                             this._addTemplate,
                             this._removeTemplate,
                             this.Tags,
                             this._parameters ) );
                 }
+
+                return AdviceImplementationResult.Success( this.Builder );
             }
             else
             {
                 if ( existingDeclaration is not IEvent existingEvent )
                 {
-                    return
-                        AdviceImplementationResult.Create(
-                            AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentKind.CreateRoslynDiagnostic(
-                                targetDeclaration.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration, existingDeclaration.DeclarationKind) ) );
+                    return AdviceImplementationResult.Failed(
+                        AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentKind.CreateRoslynDiagnostic(
+                            targetDeclaration.GetDiagnosticLocation(),
+                            (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration, existingDeclaration.DeclarationKind) ) );
                 }
-                else if ( existingDeclaration.IsStatic != this.MemberBuilder.IsStatic )
+                else if ( existingDeclaration.IsStatic != this.Builder.IsStatic )
                 {
-                    return
-                        AdviceImplementationResult.Create(
-                            AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentStaticity.CreateRoslynDiagnostic(
-                                targetDeclaration.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
-                                 existingDeclaration.DeclaringType) ) );
+                    return AdviceImplementationResult.Failed(
+                        AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentStaticity.CreateRoslynDiagnostic(
+                            targetDeclaration.GetDiagnosticLocation(),
+                            (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
+                             existingDeclaration.DeclaringType) ) );
                 }
                 else if ( !compilation.InvariantComparer.Equals( this.Builder.Type, existingEvent.Type ) )
                 {
-                    return
-                        AdviceImplementationResult.Create(
-                            AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateRoslynDiagnostic(
-                                targetDeclaration.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
-                                 existingDeclaration.DeclaringType, existingEvent.Type) ) );
+                    return AdviceImplementationResult.Failed(
+                        AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateRoslynDiagnostic(
+                            targetDeclaration.GetDiagnosticLocation(),
+                            (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
+                             existingDeclaration.DeclaringType, existingEvent.Type) ) );
                 }
 
                 switch ( this.OverrideStrategy )
                 {
                     case OverrideStrategy.Fail:
                         // Produce fail diagnostic.
-                        return
-                            AdviceImplementationResult.Create(
-                                AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateRoslynDiagnostic(
-                                    targetDeclaration.GetDiagnosticLocation(),
-                                    (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
-                                     existingDeclaration.DeclaringType) ) );
+                        return AdviceImplementationResult.Failed(
+                            AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateRoslynDiagnostic(
+                                targetDeclaration.GetDiagnosticLocation(),
+                                (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
+                                 existingDeclaration.DeclaringType) ) );
 
                     case OverrideStrategy.Ignore:
                         // Do nothing.
-                        return AdviceImplementationResult.Empty;
+                        return AdviceImplementationResult.Ignored;
 
                     case OverrideStrategy.New:
                         // If the existing declaration is in the current type, we fail, otherwise, declare a new method and override.
@@ -147,7 +144,7 @@ namespace Metalama.Framework.Engine.Advices
                         {
                             if ( hasNoOverrideSemantics )
                             {
-                                return AdviceImplementationResult.Empty;
+                                return AdviceImplementationResult.Ignored;
                             }
                             else
                             {
@@ -160,29 +157,36 @@ namespace Metalama.Framework.Engine.Advices
                                     this.Tags,
                                     this._parameters );
 
-                                return AdviceImplementationResult.Create( overriddenMethod );
+                                addTransformation( overriddenMethod );
+
+                                return AdviceImplementationResult.Success( AdviceOutcome.New );
                             }
                         }
                         else
                         {
-                            this.MemberBuilder.IsNew = true;
+                            this.Builder.IsNew = true;
 
                             if ( hasNoOverrideSemantics )
                             {
-                                return AdviceImplementationResult.Create( this.MemberBuilder );
+                                addTransformation( this.Builder );
+
+                                return AdviceImplementationResult.Success( AdviceOutcome.New );
                             }
                             else
                             {
                                 var overriddenMethod = new OverrideEventTransformation(
                                     this,
-                                    this.MemberBuilder,
+                                    this.Builder,
                                     this.Template,
                                     this._addTemplate,
                                     this._removeTemplate,
                                     this.Tags,
                                     this._parameters );
 
-                                return AdviceImplementationResult.Create( this.MemberBuilder, overriddenMethod );
+                                addTransformation( this.Builder );
+                                addTransformation( overriddenMethod );
+
+                                return AdviceImplementationResult.Success( AdviceOutcome.New );
                             }
                         }
 
@@ -191,7 +195,7 @@ namespace Metalama.Framework.Engine.Advices
                         {
                             if ( hasNoOverrideSemantics )
                             {
-                                return AdviceImplementationResult.Empty;
+                                return AdviceImplementationResult.Ignored;
                             }
                             else
                             {
@@ -204,39 +208,46 @@ namespace Metalama.Framework.Engine.Advices
                                     this.Tags,
                                     this._parameters );
 
-                                return AdviceImplementationResult.Create( overriddenMethod );
+                                addTransformation( overriddenMethod );
+
+                                return AdviceImplementationResult.Success( AdviceOutcome.Override );
                             }
                         }
                         else if ( existingDeclaration.IsSealed || !existingDeclaration.IsVirtual )
                         {
                             return
-                                AdviceImplementationResult.Create(
+                                AdviceImplementationResult.Failed(
                                     AdviceDiagnosticDescriptors.CannotIntroduceOverrideOfSealed.CreateRoslynDiagnostic(
                                         targetDeclaration.GetDiagnosticLocation(),
-                                        (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
+                                        (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
                                          existingDeclaration.DeclaringType) ) );
                         }
                         else
                         {
-                            this.MemberBuilder.IsOverride = true;
-                            this.MemberBuilder.OverriddenEvent = existingEvent;
+                            this.Builder.IsOverride = true;
+                            this.Builder.OverriddenEvent = existingEvent;
 
                             if ( hasNoOverrideSemantics )
                             {
-                                return AdviceImplementationResult.Create( this.MemberBuilder );
+                                addTransformation( this.Builder );
+
+                                return AdviceImplementationResult.Success( AdviceOutcome.Override );
                             }
                             else
                             {
                                 var overriddenEvent = new OverrideEventTransformation(
                                     this,
-                                    this.MemberBuilder,
+                                    this.Builder,
                                     this.Template,
                                     this._addTemplate,
                                     this._removeTemplate,
                                     this.Tags,
                                     this._parameters );
 
-                                return AdviceImplementationResult.Create( this.MemberBuilder, overriddenEvent );
+                                addTransformation( this.Builder );
+                                addTransformation( overriddenEvent );
+
+                                return AdviceImplementationResult.Success( AdviceOutcome.Override );
                             }
                         }
 

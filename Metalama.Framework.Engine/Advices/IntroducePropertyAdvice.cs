@@ -8,7 +8,6 @@ using Metalama.Framework.DependencyInjection;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
 using System;
@@ -22,22 +21,33 @@ namespace Metalama.Framework.Engine.Advices
         private readonly BoundTemplateMethod _setTemplate;
         private readonly bool _isProgrammaticAutoProperty;
 
-        public IPropertyBuilder Builder => this.MemberBuilder;
-
         public IntroducePropertyAdvice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             INamedType targetDeclaration,
             string? explicitName,
+            IType? explicitType,
             TemplateMember<IProperty> propertyTemplate,
             BoundTemplateMethod getTemplate,
             BoundTemplateMethod setTemplate,
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
+            Action<IPropertyBuilder>? buildAction,
             string? layerName,
             IObjectReader tags,
             IPullStrategy? pullStrategy )
-            : base( aspect, templateInstance, targetDeclaration, explicitName, propertyTemplate, scope, overrideStrategy, layerName, tags, pullStrategy )
+            : base(
+                aspect,
+                templateInstance,
+                targetDeclaration,
+                explicitName,
+                propertyTemplate,
+                scope,
+                overrideStrategy,
+                buildAction,
+                layerName,
+                tags,
+                pullStrategy )
         {
             this._getTemplate = getTemplate;
             this._setTemplate = setTemplate;
@@ -52,7 +62,7 @@ namespace Metalama.Framework.Engine.Advices
             var hasSet = this._isProgrammaticAutoProperty
                          || (templatePropertyDeclaration != null ? templatePropertyDeclaration.SetMethod != null : setTemplate.IsNotNull);
 
-            this.MemberBuilder = new PropertyBuilder(
+            this.Builder = new PropertyBuilder(
                 this,
                 targetDeclaration,
                 name,
@@ -64,18 +74,23 @@ namespace Metalama.Framework.Engine.Advices
                 this.Template.Declaration is { Writeability: Writeability.ConstructorOnly } && this.Template.Declaration.IsAutoPropertyOrField,
                 this.Tags );
 
-            this.MemberBuilder.InitializerTemplate = propertyTemplate.GetInitializerTemplate();
+            if ( explicitType != null )
+            {
+                this.Builder.Type = explicitType;
+            }
+
+            this.Builder.InitializerTemplate = propertyTemplate.GetInitializerTemplate();
         }
 
-        public override void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
+        protected override void InitializeCore( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
         {
-            base.Initialize( serviceProvider, diagnosticAdder );
+            base.InitializeCore( serviceProvider, diagnosticAdder );
 
             if ( !this._isProgrammaticAutoProperty )
             {
-                this.MemberBuilder.Type = (this.Template.Declaration?.Type ?? this._getTemplate.Template.Declaration?.ReturnType).AssertNotNull();
+                this.Builder.Type = (this.Template.Declaration?.Type ?? this._getTemplate.Template.Declaration?.ReturnType).AssertNotNull();
 
-                this.MemberBuilder.Accessibility =
+                this.Builder.Accessibility =
                     (this.Template.Declaration?.Accessibility
                      ?? this._getTemplate.Template.Declaration?.Accessibility ?? this._setTemplate.Template.Declaration?.Accessibility).AssertNotNull();
 
@@ -83,12 +98,12 @@ namespace Metalama.Framework.Engine.Advices
                 {
                     if ( this.Template.Declaration.AssertNotNull().GetMethod != null )
                     {
-                        this.MemberBuilder.GetMethod.AssertNotNull().Accessibility = this.Template.Declaration!.GetMethod!.Accessibility;
+                        this.Builder.GetMethod.AssertNotNull().Accessibility = this.Template.Declaration!.GetMethod!.Accessibility;
                     }
 
                     if ( this.Template.Declaration.AssertNotNull().SetMethod != null )
                     {
-                        this.MemberBuilder.SetMethod.AssertNotNull().Accessibility = this.Template.Declaration!.SetMethod!.Accessibility;
+                        this.Builder.SetMethod.AssertNotNull().Accessibility = this.Template.Declaration!.SetMethod!.Accessibility;
                     }
                 }
             }
@@ -96,12 +111,15 @@ namespace Metalama.Framework.Engine.Advices
             // TODO: For get accessor template, we are ignoring accessibility of set accessor template because it can be easily incompatible.
         }
 
-        public override AdviceImplementationResult Implement( IServiceProvider serviceProvider, ICompilation compilation )
+        public override AdviceImplementationResult Implement(
+            IServiceProvider serviceProvider,
+            CompilationModel compilation,
+            Action<ITransformation> addTransformation )
         {
             // Determine whether we need introduction transformation (something may exist in the original code or could have been introduced by previous steps).
             var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
 
-            var existingDeclaration = targetDeclaration.FindClosestUniquelyNamedMember( this.MemberBuilder.Name );
+            var existingDeclaration = targetDeclaration.FindClosestUniquelyNamedMember( this.Builder.Name );
 
             var hasNoOverrideSemantics = this.Template.Declaration != null && this.Template.Declaration.IsAutoPropertyOrField;
 
@@ -112,19 +130,22 @@ namespace Metalama.Framework.Engine.Advices
                 if ( hasNoOverrideSemantics )
                 {
                     // Introduced auto property.
-                    return this.IntroduceMemberAndPull( serviceProvider, targetDeclaration );
+                    return this.IntroduceMemberAndPull( serviceProvider, targetDeclaration, addTransformation, AdviceOutcome.Default );
                 }
                 else
                 {
                     // Introduce and override using the template.
                     var overriddenProperty = new OverridePropertyTransformation(
                         this,
-                        this.MemberBuilder,
+                        this.Builder,
                         this._getTemplate,
                         this._setTemplate,
                         this.Tags );
 
-                    return AdviceImplementationResult.Create( this.MemberBuilder, overriddenProperty );
+                    addTransformation( this.Builder );
+                    addTransformation( overriddenProperty );
+
+                    return AdviceImplementationResult.Success( this.Builder );
                 }
             }
             else
@@ -132,28 +153,28 @@ namespace Metalama.Framework.Engine.Advices
                 if ( existingDeclaration is not IProperty existingProperty )
                 {
                     return
-                        AdviceImplementationResult.Create(
+                        AdviceImplementationResult.Failed(
                             AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentKind.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration, existingDeclaration.DeclarationKind) ) );
+                                (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration, existingDeclaration.DeclarationKind) ) );
                 }
 
-                if ( existingDeclaration.IsStatic != this.MemberBuilder.IsStatic )
+                if ( existingDeclaration.IsStatic != this.Builder.IsStatic )
                 {
                     return
-                        AdviceImplementationResult.Create(
+                        AdviceImplementationResult.Failed(
                             AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentStaticity.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
+                                (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
                                  existingDeclaration.DeclaringType) ) );
                 }
                 else if ( !compilation.InvariantComparer.Equals( this.Builder.Type, existingProperty.Type ) )
                 {
                     return
-                        AdviceImplementationResult.Create(
+                        AdviceImplementationResult.Failed(
                             AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
+                                (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
                                  existingDeclaration.DeclaringType, existingProperty.Type) ) );
                 }
 
@@ -162,15 +183,15 @@ namespace Metalama.Framework.Engine.Advices
                     case OverrideStrategy.Fail:
                         // Produce fail diagnostic.
                         return
-                            AdviceImplementationResult.Create(
+                            AdviceImplementationResult.Failed(
                                 AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateRoslynDiagnostic(
                                     targetDeclaration.GetDiagnosticLocation(),
-                                    (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
+                                    (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
                                      existingDeclaration.DeclaringType) ) );
 
                     case OverrideStrategy.Ignore:
                         // Do nothing.
-                        return AdviceImplementationResult.Empty;
+                        return AdviceImplementationResult.Ignored;
 
                     case OverrideStrategy.New:
                         // If the existing declaration is in the current type, we fail, otherwise, declare a new method and override.
@@ -183,20 +204,25 @@ namespace Metalama.Framework.Engine.Advices
                                 this._setTemplate,
                                 this.Tags );
 
-                            return AdviceImplementationResult.Create( overriddenProperty );
+                            addTransformation( overriddenProperty );
+
+                            return AdviceImplementationResult.Success( AdviceOutcome.Override );
                         }
                         else
                         {
-                            this.MemberBuilder.IsNew = true;
+                            this.Builder.IsNew = true;
 
                             var overriddenProperty = new OverridePropertyTransformation(
                                 this,
-                                this.MemberBuilder,
+                                this.Builder,
                                 this._getTemplate,
                                 this._setTemplate,
                                 this.Tags );
 
-                            return AdviceImplementationResult.Create( this.MemberBuilder, overriddenProperty );
+                            addTransformation( this.Builder );
+                            addTransformation( overriddenProperty );
+
+                            return AdviceImplementationResult.Success( AdviceOutcome.New, this.Builder );
                         }
 
                     case OverrideStrategy.Override:
@@ -209,32 +235,36 @@ namespace Metalama.Framework.Engine.Advices
                                 this._setTemplate,
                                 this.Tags );
 
-                            return AdviceImplementationResult.Create( overriddenMethod );
+                            addTransformation( overriddenMethod );
+
+                            return AdviceImplementationResult.Success( AdviceOutcome.Override );
                         }
                         else if ( existingDeclaration.IsSealed || !existingDeclaration.IsVirtual )
                         {
                             return
-                                AdviceImplementationResult.Create(
+                                AdviceImplementationResult.Failed(
                                     AdviceDiagnosticDescriptors.CannotIntroduceOverrideOfSealed.CreateRoslynDiagnostic(
                                         targetDeclaration.GetDiagnosticLocation(),
-                                        (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
+                                        (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
                                          existingDeclaration.DeclaringType) ) );
                         }
                         else
                         {
-                            this.MemberBuilder.IsOverride = true;
-                            this.MemberBuilder.OverriddenProperty = existingProperty;
+                            this.Builder.IsOverride = true;
+                            this.Builder.OverriddenProperty = existingProperty;
 
-                            var overrideTransformations =
-                                OverrideHelper.OverrideProperty(
-                                    serviceProvider,
-                                    this,
-                                    this.MemberBuilder,
-                                    this._getTemplate,
-                                    this._setTemplate,
-                                    this.Tags );
+                            addTransformation( this.Builder );
 
-                            return AdviceImplementationResult.Create( new ITransformation[] { this.MemberBuilder }.Concat( overrideTransformations ) );
+                            OverrideHelper.OverrideProperty(
+                                serviceProvider,
+                                this,
+                                this.Builder,
+                                this._getTemplate,
+                                this._setTemplate,
+                                this.Tags,
+                                addTransformation );
+
+                            return AdviceImplementationResult.Success( AdviceOutcome.Override );
                         }
 
                     default:

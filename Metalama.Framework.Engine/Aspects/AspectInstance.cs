@@ -30,6 +30,8 @@ namespace Metalama.Framework.Engine.Aspects
 
         IAspectClass IAspectInstance.AspectClass => this.AspectClass;
 
+        public int OrderWithinTypeAndAspectLayer { get; set; }
+
         public IAspectClassImpl AspectClass { get; }
 
         IRef<IDeclaration> IAspectInstance.TargetDeclaration => this.TargetDeclaration;

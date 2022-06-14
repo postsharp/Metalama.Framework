@@ -468,7 +468,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 A.CallTo( () => ((IDeclarationImpl) transformation).PrimarySyntaxTree ).Returns( node.SyntaxTree );
 
                 var advice = this.CreateFakeAdvice( aspectLayer );
-                A.CallTo( () => transformation.Advice ).Returns( advice );
+                A.CallTo( () => transformation.ParentAdvice ).Returns( advice );
 
                 A.CallTo( () => transformation.GetIntroducedMembers( A<MemberIntroductionContext>.Ignored ) )
                     .Returns(
@@ -666,7 +666,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 A.CallTo( () => transformation.ToString() ).Returns( "Override" );
 
                 var advice = this.CreateFakeAdvice( aspectLayer );
-                A.CallTo( () => transformation.Advice ).Returns( advice );
+                A.CallTo( () => transformation.ParentAdvice ).Returns( advice );
 
                 A.CallTo( () => transformation.GetIntroducedMembers( A<MemberIntroductionContext>.Ignored ) )
                     .Returns(

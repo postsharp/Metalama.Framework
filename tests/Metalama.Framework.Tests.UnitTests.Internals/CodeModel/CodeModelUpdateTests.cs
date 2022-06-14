@@ -27,7 +27,7 @@ class C
         var immutableCompilation = testContext.CreateCompilationModel( code );
         Assert.Empty( immutableCompilation.Types.Single().Methods );
 
-        var compilation = immutableCompilation.ToMutable();
+        var compilation = immutableCompilation.CreateMutableClone();
 
         var type = Assert.Single( compilation.Types )!;
 
@@ -58,7 +58,7 @@ class C
         var immutableCompilation = testContext.CreateCompilationModel( code );
         Assert.Empty( immutableCompilation.Types.Single().Methods.OfName( "M" ) );
 
-        var compilation = immutableCompilation.ToMutable();
+        var compilation = immutableCompilation.CreateMutableClone();
 
         var type = Assert.Single( compilation.Types )!;
 
@@ -87,7 +87,7 @@ class C
 }";
 
         var immutableCompilation = testContext.CreateCompilationModel( code );
-        var compilation = immutableCompilation.ToMutable();
+        var compilation = immutableCompilation.CreateMutableClone();
 
         var type = Assert.Single( compilation.Types )!;
 
@@ -113,7 +113,7 @@ class C
 }";
 
         var immutableCompilation = testContext.CreateCompilationModel( code );
-        var compilation = immutableCompilation.ToMutable();
+        var compilation = immutableCompilation.CreateMutableClone();
 
         var type = Assert.Single( compilation.Types )!;
 
@@ -140,7 +140,7 @@ class C
 }";
 
         var immutableCompilation = testContext.CreateCompilationModel( code );
-        var compilation = immutableCompilation.ToMutable();
+        var compilation = immutableCompilation.CreateMutableClone();
 
         var type = Assert.Single( compilation.Types )!;
 
@@ -161,7 +161,7 @@ void M(int p){}
 }";
 
         var immutableCompilation = testContext.CreateCompilationModel( code );
-        var compilation = immutableCompilation.ToMutable();
+        var compilation = immutableCompilation.CreateMutableClone();
 
         var type = Assert.Single( compilation.Types )!;
 
@@ -185,7 +185,7 @@ void M(int p){}
 }";
 
         var immutableCompilation = testContext.CreateCompilationModel( code );
-        var compilation = immutableCompilation.ToMutable();
+        var compilation = immutableCompilation.CreateMutableClone();
 
         var type = Assert.Single( compilation.Types )!;
 
@@ -211,7 +211,7 @@ class C
 }";
 
         var immutableCompilation = testContext.CreateCompilationModel( code );
-        var compilation = immutableCompilation.ToMutable();
+        var compilation = immutableCompilation.CreateMutableClone();
 
         var type = Assert.Single( compilation.Types )!;
 
@@ -237,7 +237,7 @@ class C
 }";
 
         var immutableCompilation = testContext.CreateCompilationModel( code );
-        var compilation = immutableCompilation.ToMutable();
+        var compilation = immutableCompilation.CreateMutableClone();
 
         var type = Assert.Single( compilation.Types )!;
 
@@ -260,7 +260,7 @@ class C
 }";
 
         var immutableCompilation = testContext.CreateCompilationModel( code );
-        var compilation = immutableCompilation.ToMutable();
+        var compilation = immutableCompilation.CreateMutableClone();
 
         var type = Assert.Single( compilation.Types )!;
 
@@ -286,7 +286,7 @@ class C
 }";
 
         var immutableCompilation = testContext.CreateCompilationModel( code );
-        var compilation = immutableCompilation.ToMutable();
+        var compilation = immutableCompilation.CreateMutableClone();
 
         var type = Assert.Single( compilation.Types )!;
 
@@ -310,7 +310,7 @@ class C
 }";
 
         var immutableCompilation = testContext.CreateCompilationModel( code );
-        var compilation = immutableCompilation.ToMutable();
+        var compilation = immutableCompilation.CreateMutableClone();
 
         var constructor = compilation.Types.Single().Constructors.Single();
 
@@ -333,7 +333,7 @@ class C
 }";
 
         var immutableCompilation = testContext.CreateCompilationModel( code );
-        var compilation = immutableCompilation.ToMutable();
+        var compilation = immutableCompilation.CreateMutableClone();
 
         var constructor = compilation.Types.Single().Constructors.Single();
 
@@ -356,7 +356,7 @@ class C
 }";
 
         var immutableCompilation = testContext.CreateCompilationModel( code );
-        var compilation = immutableCompilation.ToMutable();
+        var compilation = immutableCompilation.CreateMutableClone();
         var type = compilation.Types.Single();
 
         Assert.Empty( type.Attributes );
@@ -378,7 +378,7 @@ class C
         var code = @"";
 
         var immutableCompilation = testContext.CreateCompilationModel( code );
-        var compilation = immutableCompilation.ToMutable();
+        var compilation = immutableCompilation.CreateMutableClone();
 
         Assert.Empty( compilation.Attributes );
 
@@ -404,7 +404,7 @@ class C
 }";
 
         var immutableCompilation = testContext.CreateCompilationModel( code );
-        var compilation = immutableCompilation.ToMutable();
+        var compilation = immutableCompilation.CreateMutableClone();
         var type = compilation.Types.Single();
 
         Assert.Single( type.Attributes );

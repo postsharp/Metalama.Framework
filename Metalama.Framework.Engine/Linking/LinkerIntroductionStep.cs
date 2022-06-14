@@ -50,7 +50,7 @@ namespace Metalama.Framework.Engine.Linking
             // TODO: this sorting can be optimized.
             var allTransformations =
                 input.Transformations
-                    .OrderBy( x => x.Advice.AspectLayerId, new AspectLayerIdComparer( input.OrderedAspectLayers ) )
+                    .OrderBy( x => x.ParentAdvice.AspectLayerId, new AspectLayerIdComparer( input.OrderedAspectLayers ) )
                     .ToList();
 
             IndexReplaceTransformations( input, allTransformations, syntaxTransformationCollection, out var replacedTransformations );
@@ -387,7 +387,7 @@ namespace Metalama.Framework.Engine.Linking
             // Insert statements must be executed in inverse order (because we need the forward execution order and not the override order)
             // except within an aspect, where the order needs to be preserved.
             var allMemberLevelTransformations = allTransformations.OfType<IMemberLevelTransformation>()
-                .GroupBy( x => x.Advice.Aspect )
+                .GroupBy( x => x.ParentAdvice.Aspect )
                 .Reverse()
                 .SelectMany( x => x );
 

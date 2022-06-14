@@ -46,12 +46,13 @@ namespace Metalama.Framework.Aspects
         ///     copies of the scope of the target declaration of the aspect.</param>
         /// <param name="whenExists">Determines the implementation strategy when a method of the same name and signature is already declared in the target type.
         ///     The default strategy is to fail with a compile-time error.</param>
+        /// <param name="buildAction"></param>
         /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template methods.</param>
         /// <param name="tags">An optional opaque object of anonymous type passed to the template method and exposed under the <see cref="meta.Tags"/> property
         ///     of the <see cref="meta"/> API.</param>
         /// <returns>An <see cref="IMethodBuilder"/> that allows to modify the name or signature, or to add custom attributes.</returns>
         /// <seealso href="@introducing-members"/>
-        AdviceResult<IMethod> IntroduceMethod(
+        IIntroductionAdviceResult<IMethod> IntroduceMethod(
             INamedType targetType,
             string template,
             IntroductionScope scope = IntroductionScope.Default,
@@ -70,7 +71,7 @@ namespace Metalama.Framework.Aspects
         ///     <see cref="meta"/> API.</param>
         /// <remarks>When an aspect overrides the same declaration in same aspect part multiple, the order of distinct pieces of advice is equal to the inverse of order of calls of this method.</remarks>
         /// <seealso href="@overriding-members"/>
-        AdviceResult<IProperty> Override(
+        IAdviceResult<IProperty> Override(
             IFieldOrProperty targetDeclaration,
             string template,
             object? tags = null );
@@ -93,7 +94,7 @@ namespace Metalama.Framework.Aspects
         ///     <see cref="meta"/> API.</param>
         /// <remarks>When an aspect overrides the same declaration in same aspect part multiple, the order of distinct pieces of advice is equal to the inverse of order of calls of this method.</remarks>
         /// <seealso href="@overriding-members"/>
-        AdviceResult<IProperty> OverrideAccessors(
+        IAdviceResult<IProperty> OverrideAccessors(
             IFieldOrProperty targetDeclaration,
             in GetterTemplateSelector getTemplate = default,
             string? setTemplate = null,
@@ -109,11 +110,12 @@ namespace Metalama.Framework.Aspects
         ///     field. The default scope is <see cref="IntroductionScope.Instance"/>.</param>
         /// <param name="whenExists">Determines the implementation strategy when a property of the same name is already declared in the target type.
         ///     The default strategy is to fail with a compile-time error.</param>
+        /// <param name="buildAction"></param>
         /// <param name="tags"></param>
         /// <param name="pullStrategy"></param>
         /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
         /// <seealso href="@introducing-members"/>
-        AdviceResult<IField> IntroduceField(
+        IIntroductionAdviceResult<IField> IntroduceField(
             INamedType targetType,
             string template,
             IntroductionScope scope = IntroductionScope.Default,
@@ -132,11 +134,12 @@ namespace Metalama.Framework.Aspects
         ///     field. The default scope is <see cref="IntroductionScope.Instance"/>.</param>
         /// <param name="whenExists">Determines the implementation strategy when a property of the same name is already declared in the target type.
         ///     The default strategy is to fail with a compile-time error.</param>
+        /// <param name="buildAction"></param>
         /// <param name="tags"></param>
         /// <param name="pullStrategy"></param>
         /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
         /// <seealso href="@introducing-members"/>
-        AdviceResult<IField> IntroduceField(
+        IIntroductionAdviceResult<IField> IntroduceField(
             INamedType targetType,
             string fieldName,
             IType fieldType,
@@ -156,11 +159,12 @@ namespace Metalama.Framework.Aspects
         ///     field. The default scope is <see cref="IntroductionScope.Instance"/>.</param>
         /// <param name="whenExists">Determines the implementation strategy when a property of the same name is already declared in the target type.
         ///     The default strategy is to fail with a compile-time error.</param>
+        /// <param name="buildAction"></param>
         /// <param name="tags"></param>
         /// <param name="pullStrategy"></param>
         /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
         /// <seealso href="@introducing-members"/>
-        AdviceResult<IField> IntroduceField(
+        IIntroductionAdviceResult<IField> IntroduceField(
             INamedType targetType,
             string fieldName,
             Type fieldType,
@@ -180,11 +184,12 @@ namespace Metalama.Framework.Aspects
         ///     field. The default scope is <see cref="IntroductionScope.Instance"/>.</param>
         /// <param name="whenExists">Determines the implementation strategy when a property of the same name is already declared in the target type.
         ///     The default strategy is to fail with a compile-time error.</param>
+        /// <param name="buildAction"></param>
         /// <param name="tags"></param>
         /// <param name="pullStrategy"></param>
         /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
         /// <seealso href="@introducing-members"/>
-        AdviceResult<IProperty> IntroduceAutomaticProperty(
+        IIntroductionAdviceResult<IProperty> IntroduceAutomaticProperty(
             INamedType targetType,
             string propertyName,
             Type propertyType,
@@ -204,11 +209,12 @@ namespace Metalama.Framework.Aspects
         ///     field. The default scope is <see cref="IntroductionScope.Instance"/>.</param>
         /// <param name="whenExists">Determines the implementation strategy when a property of the same name is already declared in the target type.
         ///     The default strategy is to fail with a compile-time error.</param>
+        /// <param name="buildAction"></param>
         /// <param name="tags"></param>
         /// <param name="pullStrategy"></param>
         /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
         /// <seealso href="@introducing-members"/>
-        AdviceResult<IProperty> IntroduceAutomaticProperty(
+        IIntroductionAdviceResult<IProperty> IntroduceAutomaticProperty(
             INamedType targetType,
             string propertyName,
             IType propertyType,
@@ -232,11 +238,12 @@ namespace Metalama.Framework.Aspects
         ///     template property is non-static, then the introduced property copies of the scope of the target declaration of the aspect.</param>
         /// <param name="whenExists">Determines the implementation strategy when a property of the same name is already declared in the target type.
         ///     The default strategy is to fail with a compile-time error.</param>
+        /// <param name="buildAction"></param>
         /// <param name="tags">An optional opaque object of anonymous type passed to the template property and exposed under the <see cref="meta.Tags"/> property of the
         ///     <see cref="meta"/> API.</param>
         /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
         /// <seealso href="@introducing-members"/>
-        AdviceResult<IProperty> IntroduceProperty(
+        IIntroductionAdviceResult<IProperty> IntroduceProperty(
             INamedType targetType,
             string template,
             IntroductionScope scope = IntroductionScope.Default,
@@ -260,12 +267,13 @@ namespace Metalama.Framework.Aspects
         ///     template accessors are non-static, then the introduced property copies of the scope of the target declaration of the aspect.</param>
         /// <param name="whenExists">Determines the implementation strategy when a property of the same name is already declared in the target type.
         ///     The default strategy is to fail with a compile-time error.</param>
+        /// <param name="buildAction"></param>
         /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template methods.</param>
         /// <param name="tags">An optional opaque object of anonymous type passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
         ///     <see cref="meta"/> API.</param>
         /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
         /// <seealso href="@introducing-members"/>
-        AdviceResult<IProperty> IntroduceProperty(
+        IIntroductionAdviceResult<IProperty> IntroduceProperty(
             INamedType targetType,
             string name,
             string? getTemplate,
@@ -313,11 +321,12 @@ namespace Metalama.Framework.Aspects
         ///     template event is non-static, then the introduced event copies of the scope of the target declaration of the aspect.</param>
         /// <param name="whenExists">Determines the implementation strategy when an event of the same name is already declared in the target type.
         ///     The default strategy is to fail with a compile-time error.</param>
+        /// <param name="buildAction"></param>
         /// <param name="tags">An optional opaque object of anonymous type passed to the template event and exposed under the <see cref="meta.Tags"/> property of the
         ///     <see cref="meta"/> API.</param>
         /// <returns>An <see cref="IEventBuilder"/> that allows to change the name and the type of the event.</returns>
         /// <seealso href="@introducing-members"/>
-        AdviceResult<IEvent> IntroduceEvent(
+        IIntroductionAdviceResult<IEvent> IntroduceEvent(
             INamedType targetType,
             string eventTemplate,
             IntroductionScope scope = IntroductionScope.Default,
@@ -343,12 +352,13 @@ namespace Metalama.Framework.Aspects
         ///     template event is non-static, then the introduced event copies of the scope of the target declaration of the aspect.</param>
         /// <param name="whenExists">Determines the implementation strategy when an event of the same name is already declared in the target type.
         ///     The default strategy is to fail with a compile-time error.</param>
+        /// <param name="buildAction"></param>
         /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template methods.</param>
         /// <param name="tags">An optional opaque object of anonymous type passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
         ///     <see cref="meta"/> API.</param>
         /// <returns>An <see cref="IEventBuilder"/> that allows to change the name and the type of the event.</returns>
         /// <seealso href="@introducing-members"/>
-        AdviceResult<IEvent> IntroduceEvent(
+        IIntroductionAdviceResult<IEvent> IntroduceEvent(
             INamedType targetType,
             string eventName,
             string addTemplate,
@@ -444,7 +454,7 @@ namespace Metalama.Framework.Aspects
         /// <param name="tags">An optional opaque object of anonymous type passed to templates and exposed under the <see cref="meta.Tags"/> property of the
         ///     <see cref="meta"/> API.</param>
         /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template.</param>
-        AdviceResult<IPropertyOrIndexer> AddContract(
+        IIntroductionAdviceResult<IPropertyOrIndexer> AddContract(
             IFieldOrPropertyOrIndexer targetMember,
             string template,
             ContractDirection direction = ContractDirection.Default,

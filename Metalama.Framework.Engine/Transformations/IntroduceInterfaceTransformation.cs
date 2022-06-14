@@ -11,17 +11,13 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Transformations
 {
-    internal class IntroduceInterfaceTransformation : IIntroduceInterfaceTransformation
+    internal class IntroduceInterfaceTransformation : BaseTransformation, IIntroduceInterfaceTransformation
     {
         public IDeclaration ContainingDeclaration => this.TargetType;
 
         public bool IsDesignTime => true;
 
         public INamedType InterfaceType { get; }
-
-        private ImplementInterfaceAdvice Advice { get; }
-
-        Advice ITransformation.Advice => this.Advice;
 
         public INamedType TargetType { get; }
 
@@ -31,9 +27,8 @@ namespace Metalama.Framework.Engine.Transformations
             ImplementInterfaceAdvice implementInterfaceAdvice,
             INamedType targetType,
             INamedType interfaceType,
-            Dictionary<IMember, IMember> memberMap )
+            Dictionary<IMember, IMember> memberMap ) : base( implementInterfaceAdvice )
         {
-            this.Advice = implementInterfaceAdvice;
             this.TargetType = targetType;
             this.InterfaceType = interfaceType;
             this.MemberMap = memberMap;

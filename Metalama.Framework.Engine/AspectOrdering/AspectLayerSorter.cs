@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.AspectOrdering
             IDiagnosticAdder diagnosticAdder,
             out ImmutableArray<OrderedAspectLayer> sortedAspectLayers )
         {
-            // Build a graph of dependencies between unorderedTransformations.
+            // Build a graph of dependencies between unITransformations.
             var n = unsortedAspectLayers.Length;
 
             var partNameToIndexMapping =
@@ -144,7 +144,7 @@ namespace Metalama.Framework.Engine.AspectOrdering
             // Detect cycles.
             if ( cycle >= 0 )
             {
-                // Build a string containing the unorderedTransformations of the cycle.
+                // Build a string containing the unITransformations of the cycle.
                 Stack<int> cycleStack = new( unsortedAspectLayers.Length );
 
                 var cursor = cycle;

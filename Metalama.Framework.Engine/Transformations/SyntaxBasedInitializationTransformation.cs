@@ -12,12 +12,10 @@ using System;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal class SyntaxBasedInitializationTransformation : IInsertStatementTransformation
+internal class SyntaxBasedInitializationTransformation : BaseTransformation, IInsertStatementTransformation
 {
     private readonly IConstructor _targetConstructor;
     private readonly Func<SyntaxGenerationContext, StatementSyntax> _initializationStatement;
-
-    public Advice Advice { get; }
 
     public IMemberOrNamedType ContextDeclaration { get; }
 
@@ -28,20 +26,19 @@ internal class SyntaxBasedInitializationTransformation : IInsertStatementTransfo
         IMemberOrNamedType initializedDeclaration,
         IConstructor targetConstructor,
         Func<SyntaxGenerationContext, StatementSyntax> initializationStatement,
-        IObjectReader tags )
+        IObjectReader tags ) : base( advice )
     {
         this.ContextDeclaration = initializedDeclaration;
         this._targetConstructor = targetConstructor;
         this._initializationStatement = initializationStatement;
         this.Tags = tags;
-        this.Advice = advice;
     }
 
     public InsertedStatement? GetInsertedStatement( InsertStatementTransformationContext context )
     {
         return new InsertedStatement(
             this._initializationStatement( context.SyntaxGenerationContext )
-                .WithGeneratedCodeAnnotation( this.Advice.Aspect.AspectClass.GeneratedCodeAnnotation )
+                .WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation )
                 .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
             this.ContextDeclaration );
     }

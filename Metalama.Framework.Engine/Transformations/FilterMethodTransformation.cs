@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Transformations
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
-            var advice = (ContractAdvice) this.Advice;
+            var advice = (ContractAdvice) this.ParentAdvice;
 
             // Execute the templates.
 

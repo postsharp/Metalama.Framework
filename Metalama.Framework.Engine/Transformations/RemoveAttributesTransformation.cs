@@ -6,20 +6,17 @@ using Metalama.Framework.Engine.Advices;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal class RemoveAttributesTransformation : IObservableTransformation
+internal class RemoveAttributesTransformation : BaseTransformation, IObservableTransformation
 {
     public INamedType AttributeType { get; }
-
-    public Advice Advice { get; }
 
     public RemoveAttributesTransformation(
         Advice advice,
         IDeclaration targetDeclaration,
-        INamedType attributeType )
+        INamedType attributeType ) : base( advice )
     {
         this.AttributeType = attributeType;
         this.ContainingDeclaration = targetDeclaration;
-        this.Advice = advice;
     }
 
     public IDeclaration ContainingDeclaration { get; set; }

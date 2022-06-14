@@ -10,6 +10,20 @@ namespace Metalama.Framework.Engine.Transformations
     /// </summary>
     internal interface ITransformation
     {
-        Advice Advice { get; }
+        Advice ParentAdvice { get; }
+
+        int OrderWithinAspectInstance { get; set; }
+    }
+
+    internal abstract class BaseTransformation : ITransformation
+    {
+        protected BaseTransformation( Advice advice )
+        {
+            this.ParentAdvice = advice;
+        }
+
+        public Advice ParentAdvice { get; }
+
+        public int OrderWithinAspectInstance { get; set; }
     }
 }

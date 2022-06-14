@@ -113,14 +113,14 @@ namespace Metalama.Framework.Engine.Transformations
                     context.DiagnosticSink,
                     accessorTemplate.Template.Cast(),
                     this.Tags,
-                    this.Advice.AspectLayerId,
+                    this.ParentAdvice.AspectLayerId,
                     context.SyntaxGenerationContext,
-                    this.Advice.Aspect,
+                    this.ParentAdvice.Aspect,
                     context.ServiceProvider,
                     MetaApiStaticity.Default ) );
 
             var expansionContext = new TemplateExpansionContext(
-                this.Advice.TemplateInstance.Instance,
+                this.ParentAdvice.TemplateInstance.Instance,
                 metaApi,
                 (CompilationModel) this.OverriddenDeclaration.Compilation,
                 context.LexicalScopeProvider.GetLexicalScope( accessor ),
@@ -128,9 +128,9 @@ namespace Metalama.Framework.Engine.Transformations
                 context.SyntaxGenerationContext,
                 default,
                 proceedExpression,
-                this.Advice.AspectLayerId );
+                this.ParentAdvice.AspectLayerId );
 
-            var templateDriver = this.Advice.TemplateInstance.TemplateClass.GetTemplateDriver( accessorTemplate.Template.Declaration! );
+            var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( accessorTemplate.Template.Declaration! );
 
             return templateDriver.TryExpandDeclaration( expansionContext, accessorTemplate.TemplateArguments, out body );
         }

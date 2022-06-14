@@ -415,7 +415,7 @@ namespace Metalama.Framework.Engine.Linking
                 if ( canonicalReplacedMember is ITransformation replacedTransformation )
                 {
                     // This is introduced field, which is then promoted. Semantics of the field and of the property are the same.
-                    return new MemberLayerIndex( this._layerIndex[replacedTransformation.Advice.AspectLayerId], 0 );
+                    return new MemberLayerIndex( this._layerIndex[replacedTransformation.ParentAdvice.AspectLayerId], 0 );
                 }
                 else
                 {

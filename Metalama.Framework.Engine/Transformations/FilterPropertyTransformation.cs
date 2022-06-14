@@ -20,7 +20,7 @@ internal class FilterPropertyTransformation : OverridePropertyBaseTransformation
 
     public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
     {
-        var advice = (ContractAdvice) this.Advice;
+        var advice = (ContractAdvice) this.ParentAdvice;
         var contextCopy = context;
         BlockSyntax? getterBody, setterBody;
 

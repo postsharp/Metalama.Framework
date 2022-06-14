@@ -21,8 +21,6 @@ namespace Metalama.Framework.Engine.Advices
 
         public new Ref<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
 
-        public IMethodBuilder Builder => this.MemberBuilder;
-
         public IntroduceMethodAdvice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
@@ -30,36 +28,37 @@ namespace Metalama.Framework.Engine.Advices
             BoundTemplateMethod boundTemplate,
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
+            Action<IMethodBuilder>? buildAction,
             string? layerName,
             IObjectReader tags )
-            : base( aspect, templateInstance, targetDeclaration, null, boundTemplate.Template, scope, overrideStrategy, layerName, tags )
+            : base( aspect, templateInstance, targetDeclaration, null, boundTemplate.Template, scope, overrideStrategy, buildAction, layerName, tags )
         {
             this.BoundTemplate = boundTemplate;
             Invariant.Assert( !boundTemplate.IsNull );
 
-            this.MemberBuilder = new MethodBuilder( this, targetDeclaration, this.MemberName, tags );
+            this.Builder = new MethodBuilder( this, targetDeclaration, this.MemberName, tags );
         }
 
-        public override void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
+        protected override void InitializeCore( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
         {
-            base.Initialize( serviceProvider, diagnosticAdder );
+            base.InitializeCore( serviceProvider, diagnosticAdder );
 
-            this.MemberBuilder.IsAsync = this.Template.Declaration!.IsAsync;
+            this.Builder.IsAsync = this.Template.Declaration!.IsAsync;
             var typeRewriter = TemplateTypeRewriter.Get( this.BoundTemplate );
 
             // Handle return type.
             if ( this.Template.Declaration.ReturnParameter.Type.TypeKind == TypeKind.Dynamic )
             {
                 // Templates with dynamic return value result in object return type of the introduced member.
-                this.MemberBuilder.ReturnParameter.Type = this.MemberBuilder.Compilation.Factory.GetTypeByReflectionType( typeof(object) );
+                this.Builder.ReturnParameter.Type = this.Builder.Compilation.Factory.GetTypeByReflectionType( typeof(object) );
             }
             else
             {
-                this.MemberBuilder.ReturnParameter.Type = typeRewriter.Visit( this.Template.Declaration.ReturnParameter.Type );
-                this.MemberBuilder.ReturnParameter.RefKind = this.Template.Declaration.ReturnParameter.RefKind;
+                this.Builder.ReturnParameter.Type = typeRewriter.Visit( this.Template.Declaration.ReturnParameter.Type );
+                this.Builder.ReturnParameter.RefKind = this.Template.Declaration.ReturnParameter.RefKind;
             }
 
-            CopyTemplateAttributes( this.Template.Declaration.ReturnParameter, this.MemberBuilder.ReturnParameter, serviceProvider );
+            CopyTemplateAttributes( this.Template.Declaration.ReturnParameter, this.Builder.ReturnParameter, serviceProvider );
 
             foreach ( var templateParameter in this.Template.Declaration.Parameters )
             {
@@ -68,7 +67,7 @@ namespace Metalama.Framework.Engine.Advices
                     continue;
                 }
 
-                var parameterBuilder = this.MemberBuilder.AddParameter(
+                var parameterBuilder = this.Builder.AddParameter(
                     templateParameter.Name,
                     typeRewriter.Visit( templateParameter.Type ),
                     templateParameter.RefKind,
@@ -84,7 +83,7 @@ namespace Metalama.Framework.Engine.Advices
                     continue;
                 }
 
-                var genericParameterBuilder = this.MemberBuilder.AddTypeParameter( templateGenericParameter.Name );
+                var genericParameterBuilder = this.Builder.AddTypeParameter( templateGenericParameter.Name );
                 genericParameterBuilder.Variance = templateGenericParameter.Variance;
                 genericParameterBuilder.HasDefaultConstructorConstraint = templateGenericParameter.HasDefaultConstructorConstraint;
                 genericParameterBuilder.TypeKindConstraint = templateGenericParameter.TypeKindConstraint;
@@ -98,44 +97,50 @@ namespace Metalama.Framework.Engine.Advices
             }
         }
 
-        public override AdviceImplementationResult Implement( IServiceProvider serviceProvider, ICompilation compilation )
+        public override AdviceImplementationResult Implement(
+            IServiceProvider serviceProvider,
+            CompilationModel compilation,
+            Action<ITransformation> addTransformation )
         {
             // Determine whether we need introduction transformation (something may exist in the original code or could have been introduced by previous steps).
             var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
 
-            var existingMethod = targetDeclaration.FindClosestVisibleMethod( this.MemberBuilder );
+            var existingMethod = targetDeclaration.FindClosestVisibleMethod( this.Builder );
 
             // TODO: Introduce attributes that are added not present on the existing member?
             if ( existingMethod == null )
             {
                 // Check that there is no other member named the same, otherwise we cannot add a method.
-                var existingOtherMember = targetDeclaration.FindClosestUniquelyNamedMember( this.MemberBuilder.Name );
+                var existingOtherMember = targetDeclaration.FindClosestUniquelyNamedMember( this.Builder.Name );
 
                 if ( existingOtherMember != null )
                 {
                     return
-                        AdviceImplementationResult.Create(
+                        AdviceImplementationResult.Failed(
                             AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentKind.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration, existingOtherMember.DeclarationKind) ) );
+                                (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration, existingOtherMember.DeclarationKind) ) );
                 }
 
                 // There is no existing declaration, we will introduce and override the introduced.
-                var overriddenMethod = new OverrideMethodTransformation( this, this.MemberBuilder, this.BoundTemplate, this.Tags );
-                this.MemberBuilder.IsOverride = false;
-                this.MemberBuilder.IsNew = false;
+                var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this.BoundTemplate, this.Tags );
+                this.Builder.IsOverride = false;
+                this.Builder.IsNew = false;
 
-                return AdviceImplementationResult.Create( this.MemberBuilder, overriddenMethod );
+                addTransformation( this.Builder );
+                addTransformation( overriddenMethod );
+
+                return AdviceImplementationResult.Success( this.Builder );
             }
             else
             {
-                if ( existingMethod.IsStatic != this.MemberBuilder.IsStatic )
+                if ( existingMethod.IsStatic != this.Builder.IsStatic )
                 {
                     return
-                        AdviceImplementationResult.Create(
+                        AdviceImplementationResult.Failed(
                             AdviceDiagnosticDescriptors.CannotIntroduceWithDifferentStaticity.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
+                                (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
                                  existingMethod.DeclaringType) ) );
                 }
                 else if ( !compilation.InvariantComparer.Is(
@@ -144,10 +149,10 @@ namespace Metalama.Framework.Engine.Advices
                              ConversionKind.ImplicitReference ) )
                 {
                     return
-                        AdviceImplementationResult.Create(
+                        AdviceImplementationResult.Failed(
                             AdviceDiagnosticDescriptors.CannotIntroduceDifferentExistingReturnType.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
+                                (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
                                  existingMethod.DeclaringType, existingMethod.ReturnType) ) );
                 }
 
@@ -156,15 +161,15 @@ namespace Metalama.Framework.Engine.Advices
                     case OverrideStrategy.Fail:
                         // Produce fail diagnostic.
                         return
-                            AdviceImplementationResult.Create(
+                            AdviceImplementationResult.Failed(
                                 AdviceDiagnosticDescriptors.CannotIntroduceMemberAlreadyExists.CreateRoslynDiagnostic(
                                     targetDeclaration.GetDiagnosticLocation(),
-                                    (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
+                                    (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
                                      existingMethod.DeclaringType) ) );
 
                     case OverrideStrategy.Ignore:
                         // Do nothing.
-                        return AdviceImplementationResult.Empty;
+                        return AdviceImplementationResult.Ignored;
 
                     case OverrideStrategy.New:
                         // If the existing declaration is in the current type, override it, otherwise, declare a new method and override.
@@ -172,42 +177,51 @@ namespace Metalama.Framework.Engine.Advices
                         {
                             var overriddenMethod = new OverrideMethodTransformation( this, existingMethod, this.BoundTemplate, this.Tags );
 
-                            return AdviceImplementationResult.Create( overriddenMethod );
+                            addTransformation( overriddenMethod );
+
+                            return AdviceImplementationResult.Success( AdviceOutcome.Override );
                         }
                         else
                         {
-                            this.MemberBuilder.IsNew = true;
-                            this.MemberBuilder.IsOverride = false;
+                            this.Builder.IsNew = true;
+                            this.Builder.IsOverride = false;
 
-                            var overriddenMethod = new OverrideMethodTransformation( this, this.MemberBuilder, this.BoundTemplate, this.Tags );
+                            var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this.BoundTemplate, this.Tags );
 
-                            return AdviceImplementationResult.Create( this.MemberBuilder, overriddenMethod );
+                            addTransformation( overriddenMethod );
+                            addTransformation( this.Builder );
+
+                            return AdviceImplementationResult.Success( AdviceOutcome.New );
                         }
 
                     case OverrideStrategy.Override:
                         if ( ((IEqualityComparer<IType>) compilation.InvariantComparer).Equals( targetDeclaration, existingMethod.DeclaringType ) )
                         {
                             var overriddenMethod = new OverrideMethodTransformation( this, existingMethod, this.BoundTemplate, this.Tags );
+                            addTransformation( overriddenMethod );
 
-                            return AdviceImplementationResult.Create( overriddenMethod );
+                            return AdviceImplementationResult.Success( AdviceOutcome.Override );
                         }
                         else if ( existingMethod.IsSealed || !existingMethod.IsVirtual )
                         {
                             return
-                                AdviceImplementationResult.Create(
+                                AdviceImplementationResult.Failed(
                                     AdviceDiagnosticDescriptors.CannotIntroduceOverrideOfSealed.CreateRoslynDiagnostic(
                                         targetDeclaration.GetDiagnosticLocation(),
-                                        (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration,
+                                        (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration,
                                          existingMethod.DeclaringType) ) );
                         }
                         else
                         {
-                            this.MemberBuilder.IsOverride = true;
-                            this.MemberBuilder.IsNew = false;
-                            this.MemberBuilder.OverriddenMethod = existingMethod;
-                            var overriddenMethod = new OverrideMethodTransformation( this, this.MemberBuilder, this.BoundTemplate, this.Tags );
+                            this.Builder.IsOverride = true;
+                            this.Builder.IsNew = false;
+                            this.Builder.OverriddenMethod = existingMethod;
+                            var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this.BoundTemplate, this.Tags );
 
-                            return AdviceImplementationResult.Create( this.MemberBuilder, overriddenMethod );
+                            addTransformation( this.Builder );
+                            addTransformation( overriddenMethod );
+
+                            return AdviceImplementationResult.Success( AdviceOutcome.Override );
                         }
 
                     default:

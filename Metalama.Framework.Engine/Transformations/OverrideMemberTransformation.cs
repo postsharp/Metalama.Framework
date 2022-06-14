@@ -15,22 +15,20 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Transformations
 {
-    internal abstract class OverrideMemberTransformation : INonObservableTransformation, IIntroduceMemberTransformation, IOverriddenDeclaration
+    internal abstract class OverrideMemberTransformation : BaseTransformation, INonObservableTransformation, IIntroduceMemberTransformation,
+                                                           IOverriddenDeclaration
     {
         protected IObjectReader Tags { get; }
-
-        public Advice Advice { get; }
 
         public IMember OverriddenDeclaration { get; }
 
         IDeclaration IOverriddenDeclaration.OverriddenDeclaration => this.OverriddenDeclaration;
 
-        protected OverrideMemberTransformation( Advice advice, IMember overriddenDeclaration, IObjectReader tags )
+        protected OverrideMemberTransformation( Advice advice, IMember overriddenDeclaration, IObjectReader tags ) : base( advice )
         {
             Invariant.Assert( advice != null! );
             Invariant.Assert( overriddenDeclaration != null! );
 
-            this.Advice = advice;
             this.OverriddenDeclaration = overriddenDeclaration;
             this.Tags = tags;
         }
@@ -93,7 +91,7 @@ namespace Metalama.Framework.Engine.Transformations
 
             return expression
                 .WithAspectReferenceAnnotation(
-                    this.Advice.AspectLayerId,
+                    this.ParentAdvice.AspectLayerId,
                     AspectReferenceOrder.Base,
                     referenceTargetKind,
                     flags: AspectReferenceFlags.Inlineable );
@@ -103,6 +101,6 @@ namespace Metalama.Framework.Engine.Transformations
 
         public InsertPosition InsertPosition => this.OverriddenDeclaration.ToInsertPosition();
 
-        public override string ToString() => $"Override {this.OverriddenDeclaration} by {this.Advice.AspectLayerId}";
+        public override string ToString() => $"Override {this.OverriddenDeclaration} by {this.ParentAdvice.AspectLayerId}";
     }
 }

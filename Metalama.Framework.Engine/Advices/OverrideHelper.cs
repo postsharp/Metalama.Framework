@@ -11,23 +11,28 @@ namespace Metalama.Framework.Engine.Advices
 {
     internal static class OverrideHelper
     {
-        public static ITransformation[] OverrideProperty(
+        public static IPropertyOrIndexer OverrideProperty(
             IServiceProvider serviceProvider,
             Advice advice,
             IFieldOrPropertyOrIndexer targetDeclaration,
             BoundTemplateMethod getTemplate,
             BoundTemplateMethod setTemplate,
-            IObjectReader tags )
+            IObjectReader tags,
+            Action<ITransformation> addTransformation )
         {
             if ( targetDeclaration is IField field )
             {
                 var promotedField = new PromotedField( serviceProvider, advice, field, tags );
+                addTransformation( promotedField );
+                addTransformation( new OverridePropertyTransformation( advice, promotedField, getTemplate, setTemplate, tags ) );
 
-                return new ITransformation[] { promotedField, new OverridePropertyTransformation( advice, promotedField, getTemplate, setTemplate, tags ) };
+                return promotedField;
             }
             else if ( targetDeclaration is IProperty property )
             {
-                return new ITransformation[] { new OverridePropertyTransformation( advice, property, getTemplate, setTemplate, tags ) };
+                addTransformation( new OverridePropertyTransformation( advice, property, getTemplate, setTemplate, tags ) );
+
+                return property;
             }
             else
             {

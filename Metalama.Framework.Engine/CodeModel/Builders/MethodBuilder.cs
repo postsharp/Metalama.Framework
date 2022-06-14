@@ -107,7 +107,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         IParameterBuilder IMethodBuilder.ReturnParameter => this.ReturnParameter;
 
-        IType IMethodBuilder.ReturnType
+        public IType ReturnType
         {
             get => this.ReturnParameter.Type;
             set

@@ -4,12 +4,12 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.Advices
@@ -38,7 +38,10 @@ namespace Metalama.Framework.Engine.Advices
             this.Tags = tags;
         }
 
-        public override AdviceImplementationResult Implement( IServiceProvider serviceProvider, ICompilation compilation )
+        public override AdviceImplementationResult Implement(
+            IServiceProvider serviceProvider,
+            CompilationModel compilation,
+            Action<ITransformation> addTransformation )
         {
             var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
 
@@ -60,8 +63,6 @@ namespace Metalama.Framework.Engine.Advices
                     _ => throw new AssertionFailedException()
                 };
 
-            var transformations = new List<ITransformation>();
-
             foreach ( var ctor in constructors )
             {
                 IConstructor targetCtor;
@@ -70,14 +71,14 @@ namespace Metalama.Framework.Engine.Advices
                 {
                     // Missing static ctor.
                     var builder = new ConstructorBuilder( this, ctor.DeclaringType, this.Tags ) { IsStatic = true };
-                    transformations.Add( builder );
+                    addTransformation( builder );
                     targetCtor = builder;
                 }
                 else if ( ctor.IsImplicitInstanceConstructor() )
                 {
                     // Missing implicit ctor.
                     var builder = new ConstructorBuilder( this, ctor.DeclaringType, this.Tags );
-                    transformations.Add( builder );
+                    addTransformation( builder );
                     targetCtor = builder;
                 }
                 else
@@ -92,10 +93,10 @@ namespace Metalama.Framework.Engine.Advices
                     this.BoundTemplate,
                     this.Tags );
 
-                transformations.Add( initialization );
+                addTransformation( initialization );
             }
 
-            return AdviceImplementationResult.Create( transformations );
+            return AdviceImplementationResult.Success();
         }
     }
 }

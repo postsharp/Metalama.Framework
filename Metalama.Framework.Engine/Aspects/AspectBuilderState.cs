@@ -5,6 +5,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Validation;
 using System;
 using System.Collections.Immutable;
@@ -30,7 +31,7 @@ internal class AspectBuilderState
 
     public AdviceFactoryState AdviceFactoryState { get; }
 
-    public bool IsAspectSkipped { get; set; }
+    public bool IsAspectSkipped => this.AdviceFactoryState.IsAspectSkipped;
 
     public AspectBuilderState(
         IServiceProvider serviceProvider,
@@ -51,21 +52,21 @@ internal class AspectBuilderState
 
     internal AspectInstanceResult ToResult()
     {
-        var success = this.Diagnostics.ErrorCount == 0;
+        var outcome = this.Diagnostics.ErrorCount == 0 ? this.IsAspectSkipped ? AdviceOutcome.Ignored : AdviceOutcome.Default : AdviceOutcome.Error;
 
-        return success && !this.IsAspectSkipped
+        return outcome == AdviceOutcome.Default
             ? new AspectInstanceResult(
                 this.AspectInstance,
-                success,
+                outcome,
                 this.Diagnostics.ToImmutable(),
-                this.AdviceFactoryState.Advices.ToImmutableArray(),
+                this.AdviceFactoryState.Transformations.ToImmutableArray(),
                 this.AspectSources,
                 this.ValidatorSources )
             : new AspectInstanceResult(
                 this.AspectInstance,
-                success,
+                outcome,
                 this.Diagnostics.ToImmutable(),
-                ImmutableArray<Advice>.Empty,
+                ImmutableArray<ITransformation>.Empty,
                 ImmutableArray<IAspectSource>.Empty,
                 ImmutableArray<IValidatorSource>.Empty );
     }

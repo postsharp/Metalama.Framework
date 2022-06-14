@@ -97,8 +97,7 @@ internal class OptionalValueTypeAttribute : TypeAspect
             builder.Advice.IntroduceProperty(
                 builder.Target,
                 nameof(OptionalValues),
-                buildAction:
-                p =>
+                buildAction: p =>
                 {
                     p.Type = nestedType;
                     p.InitializerExpression = ExpressionFactory.Parse( $"new {nestedType.Name}()" );

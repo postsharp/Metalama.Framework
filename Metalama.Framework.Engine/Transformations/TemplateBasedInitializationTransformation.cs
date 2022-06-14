@@ -14,12 +14,10 @@ using Metalama.Framework.Project;
 
 namespace Metalama.Framework.Engine.Transformations
 {
-    internal class TemplateBasedInitializationTransformation : IInsertStatementTransformation
+    internal class TemplateBasedInitializationTransformation : BaseTransformation, IInsertStatementTransformation
     {
         private readonly IConstructor _targetConstructor;
         private readonly BoundTemplateMethod _boundTemplate;
-
-        public Advice Advice { get; }
 
         public IMemberOrNamedType ContextDeclaration { get; }
 
@@ -30,13 +28,12 @@ namespace Metalama.Framework.Engine.Transformations
             IMemberOrNamedType initializedDeclaration,
             IConstructor targetConstructor,
             BoundTemplateMethod boundTemplate,
-            IObjectReader tags )
+            IObjectReader tags ) : base( advice )
         {
             this.ContextDeclaration = initializedDeclaration;
             this._targetConstructor = targetConstructor;
             this._boundTemplate = boundTemplate;
             this.Tags = tags;
-            this.Advice = advice;
         }
 
         public InsertedStatement? GetInsertedStatement( InsertStatementTransformationContext context )
@@ -47,14 +44,14 @@ namespace Metalama.Framework.Engine.Transformations
                     context.DiagnosticSink,
                     this._boundTemplate.Template.Cast(),
                     this.Tags,
-                    this.Advice.AspectLayerId,
+                    this.ParentAdvice.AspectLayerId,
                     context.SyntaxGenerationContext,
-                    this.Advice.Aspect,
+                    this.ParentAdvice.Aspect,
                     context.ServiceProvider,
                     this._targetConstructor.IsStatic ? MetaApiStaticity.AlwaysStatic : MetaApiStaticity.AlwaysInstance ) );
 
             var expansionContext = new TemplateExpansionContext(
-                this.Advice.TemplateInstance.Instance,
+                this.ParentAdvice.TemplateInstance.Instance,
                 metaApi,
                 (CompilationModel) this.ContextDeclaration.Compilation,
                 context.LexicalScopeProvider.GetLexicalScope( this.ContextDeclaration ),
@@ -62,9 +59,9 @@ namespace Metalama.Framework.Engine.Transformations
                 context.SyntaxGenerationContext,
                 this._boundTemplate,
                 null,
-                this.Advice.AspectLayerId );
+                this.ParentAdvice.AspectLayerId );
 
-            var templateDriver = this.Advice.TemplateInstance.TemplateClass.GetTemplateDriver( this._boundTemplate.Template.Declaration! );
+            var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( this._boundTemplate.Template.Declaration! );
 
             if ( !templateDriver.TryExpandDeclaration( expansionContext, this._boundTemplate.TemplateArguments, out var expandedBody ) )
             {

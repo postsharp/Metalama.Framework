@@ -9,7 +9,6 @@ using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace Metalama.Framework.Engine.Advices;
@@ -31,7 +30,10 @@ internal class AddAttributeAdvice : Advice
         this._overrideStrategy = overrideStrategy;
     }
 
-    public override AdviceImplementationResult Implement( IServiceProvider serviceProvider, ICompilation compilation )
+    public override AdviceImplementationResult Implement(
+        IServiceProvider serviceProvider,
+        CompilationModel compilation,
+        Action<ITransformation> addTransformation )
     {
         var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
 
@@ -46,16 +48,18 @@ internal class AddAttributeAdvice : Advice
                 switch ( this._overrideStrategy )
                 {
                     case OverrideStrategy.Fail:
-                        return AdviceImplementationResult.Create(
+                        return AdviceImplementationResult.Failed(
                             AdviceDiagnosticDescriptors.AttributeAlreadyPresent.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
                                 (this.Aspect.AspectClass.ShortName, this._attribute.Type, targetDeclaration) ) );
 
                     case OverrideStrategy.Ignore:
-                        return AdviceImplementationResult.Empty;
+                        return AdviceImplementationResult.Ignored;
 
                     case OverrideStrategy.New:
-                        return CreateResult();
+                        AddTransformations();
+
+                        return AdviceImplementationResult.Success( AdviceOutcome.New );
 
                     case OverrideStrategy.Override:
                         var removeTransformation = new RemoveAttributesTransformation(
@@ -63,7 +67,9 @@ internal class AddAttributeAdvice : Advice
                             targetDeclaration,
                             this._attribute.Type );
 
-                        return CreateResult( removeTransformation );
+                        AddTransformations( removeTransformation );
+
+                        return AdviceImplementationResult.Success( AdviceOutcome.Override );
 
                     default:
                         throw new AssertionFailedException();
@@ -71,25 +77,23 @@ internal class AddAttributeAdvice : Advice
             }
         }
 
-        return CreateResult();
+        AddTransformations();
 
-        AdviceImplementationResult CreateResult( RemoveAttributesTransformation? removeTransformation = null )
+        return AdviceImplementationResult.Success();
+
+        void AddTransformations( RemoveAttributesTransformation? removeTransformation = null )
         {
-            List<ITransformation> transformations = new();
-
             if ( removeTransformation != null )
             {
-                transformations.Add( removeTransformation );
+                addTransformation( removeTransformation );
             }
 
             if ( targetDeclaration.ContainingDeclaration is IConstructor { IsImplicit: true } constructor )
             {
-                transformations.Add( new ConstructorBuilder( this, constructor.DeclaringType, ObjectReader.Empty ) );
+                addTransformation( new ConstructorBuilder( this, constructor.DeclaringType, ObjectReader.Empty ) );
             }
 
-            transformations.Add( new AttributeBuilder( this, targetDeclaration, this._attribute ) );
-
-            return AdviceImplementationResult.Create( transformations );
+            addTransformation( new AttributeBuilder( this, targetDeclaration, this._attribute ) );
         }
     }
 }

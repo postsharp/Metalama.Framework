@@ -24,15 +24,17 @@ namespace Metalama.Framework.Engine.Advices
 
         public new Ref<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
 
-        protected TBuilder MemberBuilder { get; init; }
+        public TBuilder Builder { get; protected init; }
 
-        IDeclarationBuilder IIntroductionAdvice.Builder => this.MemberBuilder;
+        IDeclarationBuilder IIntroductionAdvice.Builder => this.Builder;
 
         protected TemplateMember<TMember> Template { get; }
 
         protected string MemberName { get; }
 
         public IObjectReader Tags { get; }
+
+        private Action<TBuilder>? _buildAction;
 
         public IntroduceMemberAdvice(
             IAspectInstanceInternal aspect,
@@ -42,6 +44,7 @@ namespace Metalama.Framework.Engine.Advices
             TemplateMember<TMember> template,
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
+            Action<TBuilder>? buildAction,
             string? layerName,
             IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, layerName )
         {
@@ -60,20 +63,23 @@ namespace Metalama.Framework.Engine.Advices
             }
 
             this.OverrideStrategy = overrideStrategy;
+            this._buildAction = buildAction;
             this.Tags = tags;
 
             // This is to make the nullability analyzer happy. Derived classes are supposed to set this member in the
             // constructor. Other designs are more cumbersome.
-            this.MemberBuilder = null!;
+            this.Builder = null!;
         }
 
-        public override void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
+        protected virtual void InitializeCore( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder ) { }
+
+        public sealed override void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
         {
             var templateAttribute = this.Template.TemplateAttribute;
 
-            this.MemberBuilder.Accessibility = templateAttribute?.GetAccessibility() ?? this.Template.Declaration?.Accessibility ?? Accessibility.Private;
-            this.MemberBuilder.IsSealed = templateAttribute?.GetIsSealed() ?? this.Template.Declaration?.IsSealed ?? false;
-            this.MemberBuilder.IsVirtual = templateAttribute?.GetIsVirtual() ?? this.Template.Declaration?.IsVirtual ?? false;
+            this.Builder.Accessibility = templateAttribute?.GetAccessibility() ?? this.Template.Declaration?.Accessibility ?? Accessibility.Private;
+            this.Builder.IsSealed = templateAttribute?.GetIsSealed() ?? this.Template.Declaration?.IsSealed ?? false;
+            this.Builder.IsVirtual = templateAttribute?.GetIsVirtual() ?? this.Template.Declaration?.IsVirtual ?? false;
 
             // Handle the introduction scope.
             var targetDeclaration = this.TargetDeclaration.GetTarget( this.SourceCompilation );
@@ -83,11 +89,11 @@ namespace Metalama.Framework.Engine.Advices
                 case IntroductionScope.Default:
                     if ( this.Template.Declaration is { IsStatic: true } || targetDeclaration.IsStatic )
                     {
-                        this.MemberBuilder.IsStatic = true;
+                        this.Builder.IsStatic = true;
                     }
                     else
                     {
-                        this.MemberBuilder.IsStatic = false;
+                        this.Builder.IsStatic = false;
                     }
 
                     break;
@@ -95,24 +101,23 @@ namespace Metalama.Framework.Engine.Advices
                 case IntroductionScope.Instance:
                     if ( targetDeclaration.IsStatic )
                     {
-                        // Diagnostics are reported to a sink when the advice is declarative, but as an exception when it is programmatic. 
                         diagnosticAdder.Report(
                             AdviceDiagnosticDescriptors.CannotIntroduceInstanceMemberIntoStaticType.CreateRoslynDiagnostic(
                                 targetDeclaration.GetDiagnosticLocation(),
-                                (this.Aspect.AspectClass.ShortName, this.MemberBuilder, targetDeclaration) ) );
+                                (this.Aspect.AspectClass.ShortName, this.Builder, targetDeclaration) ) );
                     }
 
-                    this.MemberBuilder.IsStatic = false;
+                    this.Builder.IsStatic = false;
 
                     break;
 
                 case IntroductionScope.Static:
-                    this.MemberBuilder.IsStatic = true;
+                    this.Builder.IsStatic = true;
 
                     break;
 
                 case IntroductionScope.Target:
-                    this.MemberBuilder.IsStatic = targetDeclaration.IsStatic;
+                    this.Builder.IsStatic = targetDeclaration.IsStatic;
 
                     break;
 
@@ -122,8 +127,12 @@ namespace Metalama.Framework.Engine.Advices
 
             if ( this.Template.Declaration != null )
             {
-                CopyTemplateAttributes( this.Template.Declaration, this.MemberBuilder, serviceProvider );
+                CopyTemplateAttributes( this.Template.Declaration, this.Builder, serviceProvider );
             }
+
+            this.InitializeCore( serviceProvider, diagnosticAdder );
+
+            this._buildAction?.Invoke( this.Builder );
         }
 
         protected static void CopyTemplateAttributes( IDeclaration declaration, IDeclarationBuilder builder, IServiceProvider serviceProvider )
@@ -139,6 +148,6 @@ namespace Metalama.Framework.Engine.Advices
             }
         }
 
-        public override string ToString() => $"Introduce {this.MemberBuilder}";
+        public override string ToString() => $"Introduce {this.Builder}";
     }
 }

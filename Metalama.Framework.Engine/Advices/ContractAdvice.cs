@@ -23,24 +23,47 @@ namespace Metalama.Framework.Engine.Advices
         public ContractAdvice( IAspectInstanceInternal aspect, TemplateClassInstance templateInstance, IDeclaration targetDeclaration, string? layerName )
             : base( aspect, templateInstance, targetDeclaration, layerName ) { }
 
-        public override AdviceImplementationResult Implement( IServiceProvider serviceProvider, ICompilation compilation )
+        public override AdviceImplementationResult Implement(
+            IServiceProvider serviceProvider,
+            CompilationModel compilation,
+            Action<ITransformation> addTransformation )
+        {
+#if DEBUG
+            if ( this.LastAdviceImplementationResult != null )
+            {
+                throw new AssertionFailedException();
+            }
+#endif
+            return this.LastAdviceImplementationResult = this.ImplementCore( serviceProvider, compilation, addTransformation );
+        }
+
+        public AdviceImplementationResult? LastAdviceImplementationResult { get; private set; }
+
+        private AdviceImplementationResult ImplementCore(
+            IServiceProvider serviceProvider,
+            CompilationModel compilation,
+            Action<ITransformation> addTransformation )
         {
             var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
 
             switch ( targetDeclaration )
             {
                 case IMethod method:
-                    return AdviceImplementationResult.Create( new FilterMethodTransformation( this, method ) );
+                    addTransformation( new FilterMethodTransformation( this, method ) );
+
+                    return AdviceImplementationResult.Success( method );
 
                 case IProperty property:
-                    return AdviceImplementationResult.Create( new FilterPropertyTransformation( this, property ) );
+                    addTransformation( new FilterPropertyTransformation( this, property ) );
+
+                    return AdviceImplementationResult.Success( property );
 
                 case IField field:
                     var promotedField = new PromotedField( serviceProvider, this, field, ObjectReader.Empty );
+                    addTransformation( promotedField );
+                    addTransformation( new FilterPropertyTransformation( this, promotedField ) );
 
-                    return AdviceImplementationResult.Create(
-                        promotedField,
-                        new FilterPropertyTransformation( this, promotedField ) );
+                    return AdviceImplementationResult.Success( promotedField );
 
                 default:
                     throw new AssertionFailedException();

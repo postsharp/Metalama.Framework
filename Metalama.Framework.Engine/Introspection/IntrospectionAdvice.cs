@@ -14,6 +14,8 @@ internal class IntrospectionAdvice : IIntrospectionAdvice
     private readonly AdviceImplementationResult _adviceResult;
     private readonly ICompilation _compilation;
 
+    // TODO: we should not store an ICompilation here because it causes several compilation versions to be mixed in the introspection output.
+
     public IntrospectionAdvice( Advice advice, AdviceImplementationResult adviceResult, ICompilation compilation )
     {
         this._advice = advice;
@@ -25,6 +27,5 @@ internal class IntrospectionAdvice : IIntrospectionAdvice
 
     public string AspectLayerId => this._advice.AspectLayerId.ToString();
 
-    public ImmutableArray<object> Transformations
-        => this._adviceResult.ObservableTransformations.As<object>().AddRange( this._adviceResult.NonObservableTransformations );
+    public ImmutableArray<object> Transformations => this._adviceResult.Transformations.As<object>();
 }

@@ -26,7 +26,7 @@ internal class AggregatedIntrospectionAspectClass : BaseIntrospectionAspectClass
                 {
                     var instance = (IntrospectionAspectInstance) x;
 
-                    return new IntrospectionAspectInstance( instance.AspectInstanceResult, instance.Compilation, instance.Factory );
+                    return new IntrospectionAspectInstance( instance, instance.Compilation, instance.Factory );
                 } )
             .ToImmutableArray<IIntrospectionAspectInstance>();
 }

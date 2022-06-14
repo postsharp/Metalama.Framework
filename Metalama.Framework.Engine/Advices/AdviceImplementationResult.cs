@@ -1,11 +1,14 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
-using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.Advices
 {
@@ -13,93 +16,34 @@ namespace Metalama.Framework.Engine.Advices
     {
         public ImmutableArray<Diagnostic> Diagnostics { get; }
 
-        public ImmutableArray<IObservableTransformation> ObservableTransformations { get; }
+        // This property is used only by the introspection API.
+        public ImmutableArray<ITransformation> Transformations { get; internal set; } = ImmutableArray<ITransformation>.Empty;
 
-        public ImmutableArray<INonObservableTransformation> NonObservableTransformations { get; }
+        public AdviceOutcome Outcome { get; }
 
-        public AdviceImplementationResult(
-            ImmutableArray<Diagnostic> diagnostic = default,
-            ImmutableArray<IObservableTransformation> observableTransformations = default,
-            ImmutableArray<INonObservableTransformation> nonObservableTransformations = default )
+        public Ref<IDeclaration> NewDeclaration { get; }
+
+        private AdviceImplementationResult( AdviceOutcome outcome, Ref<IDeclaration> newDeclaration, ImmutableArray<Diagnostic> diagnostics )
         {
-            this.Diagnostics = diagnostic.IsDefault ? ImmutableArray<Diagnostic>.Empty : diagnostic;
-            this.ObservableTransformations = observableTransformations.IsDefault ? ImmutableArray<IObservableTransformation>.Empty : observableTransformations;
-
-            this.NonObservableTransformations =
-                nonObservableTransformations.IsDefault ? ImmutableArray<INonObservableTransformation>.Empty : nonObservableTransformations;
+            this.Diagnostics = diagnostics;
+            this.Outcome = outcome;
+            this.NewDeclaration = newDeclaration;
         }
 
-        public static AdviceImplementationResult Empty
-            => new(
-                ImmutableArray<Diagnostic>.Empty,
-                ImmutableArray<IObservableTransformation>.Empty,
-                ImmutableArray<INonObservableTransformation>.Empty );
+        public static AdviceImplementationResult Success( IDeclaration newDeclaration ) => Success( AdviceOutcome.Default, newDeclaration.ToTypedRef() );
 
-        public static AdviceImplementationResult Create( params ITransformation[] transformations )
-        {
-            return Create( (IEnumerable<ITransformation>) transformations );
-        }
+        public static AdviceImplementationResult Success( AdviceOutcome outcome = AdviceOutcome.Default, Ref<IDeclaration> newDeclaration = default )
+            => new( outcome, newDeclaration, ImmutableArray<Diagnostic>.Empty );
 
-        public static AdviceImplementationResult Create( IEnumerable<ITransformation> transformations, ImmutableArray<Diagnostic> diagnostics = default )
-        {
-            ImmutableArray<IObservableTransformation>.Builder? observableTransformations = null;
-            ImmutableArray<INonObservableTransformation>.Builder? nonObservableTransformations = null;
+        public static AdviceImplementationResult Success( AdviceOutcome outcome, IDeclaration newDeclaration )
+            => new( outcome, newDeclaration.ToTypedRef(), ImmutableArray<Diagnostic>.Empty );
 
-            foreach ( var transformation in transformations )
-            {
-                if ( transformation is IObservableTransformation observableTransformation )
-                {
-                    if ( observableTransformations == null )
-                    {
-                        observableTransformations = ImmutableArray.CreateBuilder<IObservableTransformation>();
-                    }
+        public static AdviceImplementationResult Ignored => new( AdviceOutcome.Ignored, default, ImmutableArray<Diagnostic>.Empty );
 
-                    observableTransformations.Add( observableTransformation );
-                }
-                else if ( transformation is INonObservableTransformation nonObservableTransformation )
-                {
-                    if ( nonObservableTransformations == null )
-                    {
-                        nonObservableTransformations = ImmutableArray.CreateBuilder<INonObservableTransformation>();
-                    }
+        public static AdviceImplementationResult Failed( Diagnostic diagnostic ) => Failed( ImmutableArray.Create( diagnostic ) );
 
-                    nonObservableTransformations.Add( nonObservableTransformation );
-                }
-            }
+        public static AdviceImplementationResult Failed( UserDiagnosticSink diagnostics ) => Failed( diagnostics.ToImmutable().ReportedDiagnostics );
 
-            return new AdviceImplementationResult(
-                diagnostics.IsDefault ? ImmutableArray<Diagnostic>.Empty : diagnostics,
-                observableTransformations != null ? observableTransformations.ToImmutable() : ImmutableArray<IObservableTransformation>.Empty,
-                nonObservableTransformations != null ? nonObservableTransformations.ToImmutable() : ImmutableArray<INonObservableTransformation>.Empty );
-        }
-
-        public static AdviceImplementationResult Create( params Diagnostic[] diagnostics )
-        {
-            return new AdviceImplementationResult(
-                ImmutableArray.Create( diagnostics ),
-                ImmutableArray<IObservableTransformation>.Empty,
-                ImmutableArray<INonObservableTransformation>.Empty );
-        }
-
-        public AdviceImplementationResult WithTransformations( params ITransformation[] transformations )
-        {
-            return this.WithTransformations( (IReadOnlyList<ITransformation>) transformations );
-        }
-
-        public AdviceImplementationResult WithTransformations( IReadOnlyList<ITransformation> transformations )
-        {
-            return new AdviceImplementationResult(
-                this.Diagnostics,
-                this.ObservableTransformations.AddRange( transformations.OfType<IObservableTransformation>() ),
-                this.NonObservableTransformations.AddRange( transformations.OfType<INonObservableTransformation>() ) );
-        }
-
-        public AdviceImplementationResult WithDiagnostics( params Diagnostic[] diagnostics )
-        {
-            return new AdviceImplementationResult(
-                this.Diagnostics.AddRange( diagnostics ),
-                this.ObservableTransformations,
-                this.NonObservableTransformations );
-        }
+        public static AdviceImplementationResult Failed( ImmutableArray<Diagnostic> diagnostics ) => new( AdviceOutcome.Error, default, diagnostics );
     }
 }

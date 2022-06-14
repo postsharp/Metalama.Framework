@@ -19,5 +19,7 @@ namespace Metalama.Framework.Engine.Aspects
         void SetState( IAspectState? value );
 
         new IAspectClassImpl AspectClass { get; }
+
+        int OrderWithinTypeAndAspectLayer { get; set; }
     }
 }
