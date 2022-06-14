@@ -14,7 +14,7 @@ internal class BuiltConstructor : BuiltMember, IConstructorImpl
 {
     public ConstructorBuilder ConstructorBuilder { get; }
 
-    public BuiltConstructor( ConstructorBuilder constructorBuilder, CompilationModel compilation ) : base( compilation )
+    public BuiltConstructor( ConstructorBuilder constructorBuilder, CompilationModel compilation ) : base( compilation, constructorBuilder )
     {
         this.ConstructorBuilder = constructorBuilder;
     }

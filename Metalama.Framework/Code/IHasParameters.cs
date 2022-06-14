@@ -8,7 +8,7 @@ namespace Metalama.Framework.Code
     /// <summary>
     /// Represents a method, constructor, or indexer.
     /// </summary>
-    public interface IHasParameters : IDeclaration
+    public interface IHasParameters : IMember
     {
         /// <summary>
         /// Gets the list of parameters of the current method (but not the return parameter).

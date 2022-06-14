@@ -124,7 +124,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             foreach ( var transformation in observableTransformations )
             {
-                this.AddTransformation( prototype, transformation );
+                this.AddTransformation( transformation );
             }
 
             this.IsMutable = false;
@@ -394,7 +394,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public string? Name => this.RoslynCompilation.AssemblyName;
 
-        public override string ToString() => $"{this.RoslynCompilation.AssemblyName}";
+        public override string ToString() => $"{this.RoslynCompilation.AssemblyName} ({this.Revision})";
 
         internal ICompilationHelpers Helpers { get; } = new CompilationHelpers();
 
@@ -426,5 +426,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public override SyntaxTree? PrimarySyntaxTree => null;
 
         public CompilationModel CreateMutableClone() => new( this, true );
+
+        public bool Freeze() => this.IsMutable = false;
     }
 }

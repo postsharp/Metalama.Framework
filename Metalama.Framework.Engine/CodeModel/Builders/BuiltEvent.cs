@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal class BuiltEvent : BuiltMember, IEventImpl, IMemberRef<IEvent>
     {
-        public BuiltEvent( EventBuilder builder, CompilationModel compilation ) : base( compilation )
+        public BuiltEvent( EventBuilder builder, CompilationModel compilation ) : base( compilation, builder )
         {
             this.EventBuilder = builder;
         }

@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
     {
         private readonly BuiltMember _builtMember;
 
-        public BuiltAccessor( BuiltMember builtMember, AccessorBuilder builder ) : base( builtMember.Compilation )
+        public BuiltAccessor( BuiltMember builtMember, AccessorBuilder builder ) : base( builtMember.Compilation, builder )
         {
             this._builtMember = builtMember;
             this.AccessorBuilder = builder;

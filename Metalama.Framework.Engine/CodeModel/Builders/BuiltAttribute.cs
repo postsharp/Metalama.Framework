@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal class BuiltAttribute : BuiltDeclaration, IAttribute
     {
-        public BuiltAttribute( AttributeBuilder builder, CompilationModel compilation ) : base( compilation )
+        public BuiltAttribute( AttributeBuilder builder, CompilationModel compilation ) : base( compilation, builder )
         {
             this.AttributeBuilder = builder;
         }

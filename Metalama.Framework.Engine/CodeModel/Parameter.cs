@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public bool IsReturnParameter => false;
 
-        IMember IParameter.DeclaringMember => this.DeclaringMember;
+        IHasParameters IParameter.DeclaringMember => (IHasParameters) this.DeclaringMember;
 
         public Parameter( IParameterSymbol symbol, CompilationModel compilation ) : base( compilation )
         {

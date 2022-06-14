@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal class BuiltTypeParameter : BuiltDeclaration, ITypeParameter
     {
-        public BuiltTypeParameter( TypeParameterBuilder builder, CompilationModel compilation ) : base( compilation )
+        public BuiltTypeParameter( TypeParameterBuilder builder, CompilationModel compilation ) : base( compilation, builder )
         {
             this.TypeParameterBuilder = builder;
         }

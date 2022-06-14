@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         private IMethod DeclaringAccessor { get; }
 
-        public IMember DeclaringMember => this.DeclaringAccessor;
+        public IHasParameters DeclaringMember => this.DeclaringAccessor;
 
         public RefKind RefKind
             => this.DeclaringAccessor.ContainingDeclaration switch

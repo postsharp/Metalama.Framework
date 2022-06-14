@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public bool IsParams => this.Underlying.IsParams;
 
-        public IMember DeclaringMember => this.Underlying.DeclaringMember;
+        public IHasParameters DeclaringMember => this.Underlying.DeclaringMember;
 
         public ParameterInfo ToParameterInfo() => this.Underlying.ToParameterInfo();
 

@@ -74,14 +74,17 @@ internal class ExecuteAspectLayerPipelineStep : PipelineStep
             index++;
 
             // Create a snapshot of the compilation.
-            var compilationForThisAspect = currentCompilation.CreateMutableClone();
+            var mutableCompilationForThisAspect = currentCompilation.CreateMutableClone();
 
             // Execute the aspect.
             var aspectResult = aspectDriver.ExecuteAspect(
                 aspect.AspectInstance,
-                compilationForThisAspect,
+                currentCompilation, 
+                mutableCompilationForThisAspect,
                 this.Parent.PipelineConfiguration,
                 cancellationToken );
+
+            mutableCompilationForThisAspect.Freeze();
 
             this.Parent.AddDiagnostics( aspectResult.Diagnostics );
 
@@ -94,7 +97,7 @@ internal class ExecuteAspectLayerPipelineStep : PipelineStep
 
                 default:
                     // Apply the changes done by the aspects.
-                    currentCompilation = compilationForThisAspect;
+                    currentCompilation = mutableCompilationForThisAspect;
 
                     this.Parent.AddAspectSources( aspectResult.AspectSources );
                     this.Parent.AddValidatorSources( aspectResult.ValidatorSources );

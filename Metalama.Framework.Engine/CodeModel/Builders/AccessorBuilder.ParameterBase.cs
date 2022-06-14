@@ -41,7 +41,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 
-            public override IMember DeclaringMember => (IMember) this.Accessor.ContainingDeclaration.AssertNotNull();
+            public override IHasParameters DeclaringMember => (IHasParameters) this.Accessor.ContainingDeclaration.AssertNotNull();
 
             public override ParameterInfo ToParameterInfo()
             {

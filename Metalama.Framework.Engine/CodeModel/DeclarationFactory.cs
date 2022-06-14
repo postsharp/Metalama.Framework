@@ -358,10 +358,20 @@ namespace Metalama.Framework.Engine.CodeModel
                 Ref.FromBuilder( attributeBuilder ).As<ICompilationElement>(),
                 l => new BuiltAttribute( (AttributeBuilder) l.Target!, this._compilationModel ) );
 
-        internal IParameter GetParameter( IParameterBuilder parameterBuilder )
-            => (IParameter) this._defaultCache.GetOrAdd(
+        private Exception CreateBuilderNotExists( IDeclarationBuilder builder )
+            => new InvalidOperationException( $"The declaration '{builder}' does not exist in the current compilation." );
+        
+        internal IParameter GetParameter( ParameterBuilder parameterBuilder )
+        {
+            if ( !this._compilationModel.Contains( parameterBuilder ) )
+            {
+                throw this.CreateBuilderNotExists( parameterBuilder );
+            }
+                
+            return (IParameter) this._defaultCache.GetOrAdd(
                 Ref.FromBuilder( parameterBuilder ).As<ICompilationElement>(),
                 l => new BuiltParameter( (IParameterBuilder) l.Target!, this._compilationModel ) );
+        }
 
         internal ITypeParameter GetGenericParameter( TypeParameterBuilder typeParameterBuilder )
             => (ITypeParameter) this._defaultCache.GetOrAdd(
@@ -369,39 +379,76 @@ namespace Metalama.Framework.Engine.CodeModel
                 l => new BuiltTypeParameter( (TypeParameterBuilder) l.Target!, this._compilationModel ) );
 
         internal IMethod GetMethod( MethodBuilder methodBuilder )
-            => (IMethod) this._defaultCache.GetOrAdd(
+        {
+            if ( !this._compilationModel.Contains( methodBuilder ) )
+            {
+                throw this.CreateBuilderNotExists( methodBuilder );
+            }
+            
+            return (IMethod) this._defaultCache.GetOrAdd(
                 Ref.FromBuilder( methodBuilder ).As<ICompilationElement>(),
                 l => new BuiltMethod( (MethodBuilder) l.Target!, this._compilationModel ) );
+        }
 
         internal IMethod GetMethod( AccessorBuilder methodBuilder )
-            => (IMethod) this._defaultCache.GetOrAdd(
+        {
+            return (IMethod) this._defaultCache.GetOrAdd(
                 Ref.FromBuilder( methodBuilder ).As<ICompilationElement>(),
-                valueFactory: l =>
+                l =>
                 {
                     var builder = (AccessorBuilder) l.Target!;
 
                     return ((IMemberWithAccessors) this.GetDeclaration( builder.ContainingMember )).GetAccessor( builder.MethodKind )!;
                 } );
+        }
 
         internal IConstructor GetConstructor( ConstructorBuilder methodBuilder )
-            => (IConstructor) this._defaultCache.GetOrAdd(
+        {
+            if ( !this._compilationModel.Contains( methodBuilder ) )
+            {
+                throw this.CreateBuilderNotExists( methodBuilder );
+            }
+            
+            return (IConstructor) this._defaultCache.GetOrAdd(
                 Ref.FromBuilder( methodBuilder ).As<ICompilationElement>(),
                 l => new BuiltConstructor( (ConstructorBuilder) l.Target!, this._compilationModel ) );
+        }
 
-        internal IField GetField( IFieldBuilder fieldBuilder )
-            => (IField) this._defaultCache.GetOrAdd(
+        internal IField GetField( FieldBuilder fieldBuilder )
+        {
+            if ( !this._compilationModel.Contains( fieldBuilder ) )
+            {
+                throw this.CreateBuilderNotExists( fieldBuilder );
+            }
+            
+            return (IField) this._defaultCache.GetOrAdd(
                 Ref.FromBuilder( fieldBuilder ).As<ICompilationElement>(),
                 l => new BuiltField( (FieldBuilder) l.Target!, this._compilationModel ) );
+        }
 
         internal IProperty GetProperty( PropertyBuilder propertyBuilder )
-            => (IProperty) this._defaultCache.GetOrAdd(
+        {
+            if ( !this._compilationModel.Contains( propertyBuilder ) )
+            {
+                throw this.CreateBuilderNotExists( propertyBuilder );
+            }
+            
+            return (IProperty) this._defaultCache.GetOrAdd(
                 Ref.FromBuilder( propertyBuilder ).As<ICompilationElement>(),
                 l => new BuiltProperty( (PropertyBuilder) l.Target!, this._compilationModel ) );
+        }
 
         internal IEvent GetEvent( EventBuilder propertyBuilder )
-            => (IEvent) this._defaultCache.GetOrAdd(
+        {
+            if ( !this._compilationModel.Contains( propertyBuilder ) )
+            {
+                throw this.CreateBuilderNotExists( propertyBuilder );
+            }
+            
+            return (IEvent) this._defaultCache.GetOrAdd(
                 Ref.FromBuilder( propertyBuilder ).As<ICompilationElement>(),
                 l => new BuiltEvent( (EventBuilder) l.Target!, this._compilationModel ) );
+        }
 
         internal IDeclaration GetDeclaration( IDeclarationBuilder builder )
             => builder switch
@@ -410,7 +457,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 FieldBuilder fieldBuilder => this.GetField( fieldBuilder ),
                 PropertyBuilder propertyBuilder => this.GetProperty( propertyBuilder ),
                 EventBuilder eventBuilder => this.GetEvent( eventBuilder ),
-                IParameterBuilder parameterBuilder => this.GetParameter( parameterBuilder ),
+                ParameterBuilder parameterBuilder => this.GetParameter( parameterBuilder ),
                 AttributeBuilder attributeBuilder => this.GetAttribute( attributeBuilder ),
                 TypeParameterBuilder genericParameterBuilder => this.GetGenericParameter( genericParameterBuilder ),
                 AccessorBuilder accessorBuilder => this.GetMethod( accessorBuilder ),

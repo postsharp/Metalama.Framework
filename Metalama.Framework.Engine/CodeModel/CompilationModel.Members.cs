@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
@@ -29,6 +30,49 @@ public partial class CompilationModel
         ImmutableDictionary<INamedTypeSymbol, IConstructorBuilder>.Empty.WithComparers( SymbolEqualityComparer.Default );
 
     public bool IsMutable { get; private set; }
+
+    internal bool Contains( FieldBuilder fieldBuilder )
+        => (this._fields.TryGetValue( fieldBuilder.DeclaringType.GetSymbol(), out var fields ) && fields.Contains( fieldBuilder.ToTypedRef<IField>() ))
+           || this.TryGetRedirectedDeclaration( fieldBuilder.ToRef(), out _ );
+
+    internal bool Contains( MethodBuilder methodBuilder )
+        => this._methods.TryGetValue( methodBuilder.DeclaringType.GetSymbol(), out var methods ) && methods.Contains( methodBuilder.ToTypedRef<IMethod>() );
+
+    internal bool Contains( ConstructorBuilder constructorBuilder )
+        => this._constructors.TryGetValue( constructorBuilder.DeclaringType.GetSymbol(), out var constructors ) && constructors.Contains( constructorBuilder.ToTypedRef<IConstructor>() );
+    internal bool Contains( EventBuilder eventBuilder )
+        => this._events.TryGetValue( eventBuilder.DeclaringType.GetSymbol(), out var events ) && events.Contains( eventBuilder.ToTypedRef<IEvent>() );
+
+    internal bool Contains( PropertyBuilder propertyBuilder )
+        => this._properties.TryGetValue( propertyBuilder.DeclaringType.GetSymbol(), out var properties ) && properties.Contains( propertyBuilder.ToTypedRef<IProperty>() );
+
+    internal bool Contains( DeclarationBuilder builder )
+        => builder switch
+        {
+            FieldBuilder fieldBuilder => this.Contains( fieldBuilder ),
+            MethodBuilder methodBuilder => this.Contains( methodBuilder ),
+            ConstructorBuilder constructorBuilder => this.Contains( constructorBuilder ),
+            EventBuilder eventBuilder => this.Contains( eventBuilder ),
+            PropertyBuilder propertyBuilder => this.Contains( propertyBuilder ),
+            _ => throw new AssertionFailedException()
+        };
+    
+    internal bool Contains( ParameterBuilder parameterBuilder )
+    {
+        if ( parameterBuilder.IsReturnParameter )
+        {
+            return this.Contains( (DeclarationBuilder) parameterBuilder.DeclaringMember );
+        }
+        else if ( parameterBuilder.DeclaringMember is DeclarationBuilder declarationBuilder )
+        {
+            return this.Contains( declarationBuilder ) && ((IHasParameters) declarationBuilder).Parameters.Contains( parameterBuilder );
+        }
+        
+        
+        // This can also be a parameter appended to an existing declaration.
+        return this._parameters.TryGetValue( parameterBuilder.DeclaringMember.ToTypedRef(), out var events )
+               && events.Contains( parameterBuilder.ToTypedRef<IParameter>() );
+    }
 
     private TCollection GetMemberCollection<TKey, TDeclaration, TCollection>(
         ref ImmutableDictionary<TKey, TCollection> dictionary,
@@ -170,19 +214,10 @@ public partial class CompilationModel
             throw new InvalidOperationException( "Cannot add transformation to an immutable compilation." );
         }
 
-        this.AddTransformation( this, transformation );
-    }
-
-    private void AddTransformation( CompilationModel originCompilation, IObservableTransformation transformation )
-    {
-        // "originCompilation" is intended for resolving references, i.e. it should be fully initialized.
-        //  * For immutable compilation models, this should be the prototype.
-        //  * For mutable compilation models, this should be the compilation itself.
-
         // Replaced declaration should be always removed before adding the replacement.
         if ( transformation is IReplaceMemberTransformation replaceMember )
         {
-            this.AddReplaceMemberTransformation( originCompilation, replaceMember );
+            this.AddReplaceMemberTransformation( replaceMember );
         }
 
         if ( transformation is RemoveAttributesTransformation removeAttributes )
@@ -214,7 +249,7 @@ public partial class CompilationModel
         attributes.Remove( removeAttributes.AttributeType );
     }
 
-    private void AddReplaceMemberTransformation( CompilationModel originCompilation, IReplaceMemberTransformation transformation )
+    private void AddReplaceMemberTransformation( IReplaceMemberTransformation transformation )
     {
         if ( transformation.ReplacedMember.IsDefault )
         {
@@ -223,7 +258,7 @@ public partial class CompilationModel
 
         var replaced = transformation.ReplacedMember;
 
-        switch ( replaced.GetTarget( originCompilation ) )
+        switch ( replaced.GetTarget( this ) )
         {
             case IConstructor { IsStatic: false } replacedConstructor:
                 var constructors = this.GetConstructorCollection( replacedConstructor.DeclaringType.GetSymbol().AssertNotNull(), true );
@@ -303,7 +338,7 @@ public partial class CompilationModel
                 break;
 
             case IParameterBuilder parameter:
-                var parameters = this.GetParameterCollection( ((IHasParameters) parameter.ContainingDeclaration!).ToTypedRef(), true );
+                var parameters = this.GetParameterCollection( ((IHasParameters) parameter.DeclaringMember!).ToTypedRef(), true );
                 parameters.Add( parameter );
 
                 break;

@@ -30,7 +30,7 @@ internal class Aspect1 : TypeAspect
     {
         Console.WriteLine(
             $"Executing Aspect1 on {meta.Target.Method.Name}. Methods present before applying Aspect1: "
-            + string.Join( ", ", meta.Target.Type.Methods.Select( m => m.Name ).ToArray() ) );
+            + string.Join( ", ", meta.Target.Type.Methods.Select( m => m.Name ).OrderBy( m => m ).ToArray() ) );
 
         return meta.Proceed();
     }
@@ -57,7 +57,7 @@ internal class Aspect2 : TypeAspect
     {
         Console.WriteLine(
             $"Executing Aspect2 on {meta.Target.Method.Name}. Methods present before applying Aspect2: "
-            + string.Join( ", ", meta.Target.Type.Methods.Select( m => m.Name ).ToArray() ) );
+            + string.Join( ", ", meta.Target.Type.Methods.Select( m => m.Name ).OrderBy( m => m ).ToArray() ) );
 
         return meta.Proceed();
     }

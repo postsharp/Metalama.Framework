@@ -58,39 +58,43 @@ namespace Metalama.Framework.Engine.Aspects
 
         public AspectInstanceResult ExecuteAspect(
             IAspectInstanceInternal aspectInstance,
-            CompilationModel compilationModelRevision,
+            CompilationModel initialCompilationRevision,
+            CompilationModel currentCompilationRevision,
             AspectPipelineConfiguration pipelineConfiguration,
             CancellationToken cancellationToken )
         {
-            var target = aspectInstance.TargetDeclaration.GetTarget( compilationModelRevision );
+            var target = aspectInstance.TargetDeclaration.GetTarget( initialCompilationRevision );
 
             return target switch
             {
                 ICompilation compilation => this.EvaluateAspect(
                     compilation,
                     aspectInstance,
-                    compilationModelRevision,
+                    initialCompilationRevision,
+                    currentCompilationRevision,
                     pipelineConfiguration,
                     cancellationToken ),
-                INamedType type => this.EvaluateAspect( type, aspectInstance, compilationModelRevision, pipelineConfiguration, cancellationToken ),
-                IMethod method => this.EvaluateAspect( method, aspectInstance, compilationModelRevision, pipelineConfiguration, cancellationToken ),
-                IField field => this.EvaluateAspect( field, aspectInstance, compilationModelRevision, pipelineConfiguration, cancellationToken ),
-                IProperty property => this.EvaluateAspect( property, aspectInstance, compilationModelRevision, pipelineConfiguration, cancellationToken ),
+                INamedType type => this.EvaluateAspect( type, aspectInstance, initialCompilationRevision, currentCompilationRevision, pipelineConfiguration, cancellationToken ),
+                IMethod method => this.EvaluateAspect( method, aspectInstance, initialCompilationRevision, currentCompilationRevision, pipelineConfiguration, cancellationToken ),
+                IField field => this.EvaluateAspect( field, aspectInstance, initialCompilationRevision, currentCompilationRevision, pipelineConfiguration, cancellationToken ),
+                IProperty property => this.EvaluateAspect( property, aspectInstance, initialCompilationRevision, currentCompilationRevision, pipelineConfiguration, cancellationToken ),
                 IConstructor constructor => this.EvaluateAspect(
                     constructor,
                     aspectInstance,
-                    compilationModelRevision,
+                    initialCompilationRevision,
+                    currentCompilationRevision,
                     pipelineConfiguration,
                     cancellationToken ),
-                IParameter parameter => this.EvaluateAspect( parameter, aspectInstance, compilationModelRevision, pipelineConfiguration, cancellationToken ),
+                IParameter parameter => this.EvaluateAspect( parameter, aspectInstance, initialCompilationRevision, currentCompilationRevision, pipelineConfiguration, cancellationToken ),
                 ITypeParameter genericParameter => this.EvaluateAspect(
                     genericParameter,
                     aspectInstance,
-                    compilationModelRevision,
+                    initialCompilationRevision,
+                    currentCompilationRevision,
                     pipelineConfiguration,
                     cancellationToken ),
-                IEvent @event => this.EvaluateAspect( @event, aspectInstance, compilationModelRevision, pipelineConfiguration, cancellationToken ),
-                INamespace ns => this.EvaluateAspect( ns, aspectInstance, compilationModelRevision, pipelineConfiguration, cancellationToken ),
+                IEvent @event => this.EvaluateAspect( @event, aspectInstance, initialCompilationRevision, currentCompilationRevision, pipelineConfiguration, cancellationToken ),
+                INamespace ns => this.EvaluateAspect( ns, aspectInstance, initialCompilationRevision, currentCompilationRevision, pipelineConfiguration, cancellationToken ),
                 _ => throw new NotSupportedException( $"Cannot add an aspect to a declaration of type {target.DeclarationKind}." )
             };
         }
@@ -98,7 +102,8 @@ namespace Metalama.Framework.Engine.Aspects
         private AspectInstanceResult EvaluateAspect<T>(
             T targetDeclaration,
             IAspectInstanceInternal aspectInstance,
-            CompilationModel compilationModelRevision,
+            CompilationModel initialCompilationRevision,
+            CompilationModel currentCompilationRevision,
             AspectPipelineConfiguration pipelineConfiguration,
             CancellationToken cancellationToken )
             where T : class, IDeclaration
@@ -119,7 +124,7 @@ namespace Metalama.Framework.Engine.Aspects
             var serviceProvider = pipelineConfiguration.ServiceProvider;
 
             // Map the target declaration to the correct revision of the compilation model.
-            targetDeclaration = compilationModelRevision.Factory.GetDeclaration( targetDeclaration );
+            targetDeclaration = initialCompilationRevision.Factory.GetDeclaration( targetDeclaration );
 
             if ( aspectInstance.Aspect is not IAspect<T> aspectOfT )
             {
@@ -141,7 +146,8 @@ namespace Metalama.Framework.Engine.Aspects
             // Create the AdviceFactory.
             var adviceFactoryState = new AdviceFactoryState(
                 serviceProvider,
-                compilationModelRevision,
+                initialCompilationRevision,
+                currentCompilationRevision,
                 aspectInstance,
                 diagnosticSink,
                 pipelineConfiguration );
@@ -153,7 +159,7 @@ namespace Metalama.Framework.Engine.Aspects
 
             // Prepare declarative advice.
             var declarativeAdvice = this._aspectClass.TemplateClasses
-                .SelectMany( c => c.GetDeclarativeAdvices( serviceProvider, compilationModelRevision ) )
+                .SelectMany( c => c.GetDeclarativeAdvices( serviceProvider, initialCompilationRevision ) )
                 .ToList();
 
             // Create the AspectBuilder.
@@ -167,14 +173,14 @@ namespace Metalama.Framework.Engine.Aspects
 
             var aspectBuilder = new AspectBuilder<T>( targetDeclaration, aspectBuilderState, adviceFactory );
 
-            using ( SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( compilationModelRevision, serviceProvider ) ) )
+            using ( SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( initialCompilationRevision, serviceProvider ) ) )
             {
                 var executionContext = new UserCodeExecutionContext(
                     serviceProvider,
                     diagnosticSink,
                     UserCodeMemberInfo.FromDelegate( new Action<IAspectBuilder<T>>( aspectOfT.BuildAspect ) ),
                     new AspectLayerId( this._aspectClass ),
-                    compilationModelRevision,
+                    initialCompilationRevision,
                     targetDeclaration );
 
                 if ( !serviceProvider.GetRequiredService<UserCodeInvoker>()
@@ -224,7 +230,7 @@ namespace Metalama.Framework.Engine.Aspects
                         diagnosticSink.Reset();
 
                         var validationRunner = new ValidationRunner( pipelineConfiguration, aspectResult.ValidatorSources, CancellationToken.None );
-                        validationRunner.RunDeclarationValidators( compilationModelRevision, CompilationModelVersion.Current, diagnosticSink );
+                        validationRunner.RunDeclarationValidators( initialCompilationRevision, CompilationModelVersion.Current, diagnosticSink );
 
                         if ( !diagnosticSink.IsEmpty )
                         {

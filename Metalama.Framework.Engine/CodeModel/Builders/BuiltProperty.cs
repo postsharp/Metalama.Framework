@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal class BuiltProperty : BuiltMember, IPropertyImpl, IMemberRef<IProperty>
     {
-        public BuiltProperty( PropertyBuilder builder, CompilationModel compilation ) : base( compilation )
+        public BuiltProperty( PropertyBuilder builder, CompilationModel compilation ) : base( compilation, builder )
         {
             this.PropertyBuilder = builder;
         }

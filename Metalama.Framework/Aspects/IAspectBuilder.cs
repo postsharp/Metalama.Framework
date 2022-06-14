@@ -51,8 +51,7 @@ namespace Metalama.Framework.Aspects
         /// </summary>
         /// <param name="layerName"></param>
         /// <param name="buildAction"></param>
-        [Obsolete( "Not implemented." )]
-        void SetAspectLayerBuildAction( string layerName, Action<IAspectLayerBuilder<TAspectTarget>> buildAction );
+        void BuildLayer( string? layerName, Action<IAspectLayerBuilder<TAspectTarget>> buildAction );
 
         /// <summary>
         /// Verifies that the target of the aspect matches an eligibility rule. If not, reports an eligibility error (unless the aspect can be used by inheritance) and skips the aspect.  

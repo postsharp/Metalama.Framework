@@ -88,13 +88,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 
-        public override IMember DeclaringMember { get; }
+        public override IHasParameters DeclaringMember { get; }
 
         public override ParameterInfo ToParameterInfo() => throw new NotImplementedException();
 
         public override bool IsReturnParameter => this.Index < 0;
 
-        public ParameterBuilder( Advice advice, IMember declaringMember, int index, string? name, IType type, RefKind refKind ) : base( advice )
+        public ParameterBuilder( Advice advice, IHasParameters declaringMember, int index, string? name, IType type, RefKind refKind ) : base( advice )
         {
             this.DeclaringMember = declaringMember;
             this.Index = index;

@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal class BuiltMethod : BuiltMember, IMethodImpl, IMemberRef<IMethod>
     {
-        public BuiltMethod( MethodBuilder builder, CompilationModel compilation ) : base( compilation )
+        public BuiltMethod( MethodBuilder builder, CompilationModel compilation ) : base( compilation, builder )
         {
             this.MethodBuilder = builder;
         }

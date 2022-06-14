@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public bool IsParams => false;
 
-        public abstract IMember DeclaringMember { get; }
+        public abstract IHasParameters DeclaringMember { get; }
 
         public ParameterInfo ToParameterInfo() => CompileTimeReturnParameterInfo.Create( this );
 

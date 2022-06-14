@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal abstract class BuiltMemberOrNamedType : BuiltDeclaration, IMemberOrNamedType, IMemberRef<IMemberOrNamedType>
     {
-        protected BuiltMemberOrNamedType( CompilationModel compilation ) : base( compilation ) { }
+        protected BuiltMemberOrNamedType( CompilationModel compilation, MemberOrNamedTypeBuilder builder ) : base( compilation, builder ) { }
 
         public abstract MemberOrNamedTypeBuilder MemberOrNamedTypeBuilder { get; }
 

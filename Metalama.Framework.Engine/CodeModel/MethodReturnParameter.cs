@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         public Method DeclaringMethod { get; }
 
-        public override IMember DeclaringMember => this.DeclaringMethod;
+        public override IHasParameters DeclaringMember => this.DeclaringMethod;
 
         public MethodReturnParameter( Method declaringMethod )
         {

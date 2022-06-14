@@ -24,7 +24,7 @@ internal abstract class BaseParameterBuilder : DeclarationBuilder, IParameterBui
 
     public abstract bool IsParams { get; set; }
 
-    public abstract IMember DeclaringMember { get; }
+    public abstract IHasParameters DeclaringMember { get; }
 
     public abstract ParameterInfo ToParameterInfo();
 

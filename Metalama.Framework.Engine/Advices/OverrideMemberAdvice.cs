@@ -4,6 +4,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 
 namespace Metalama.Framework.Engine.Advices
@@ -23,6 +24,7 @@ namespace Metalama.Framework.Engine.Advices
             IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, layerName )
         {
             this.Tags = tags;
+            
         }
 
         public override string ToString() => $"Override {this.TargetDeclaration}";

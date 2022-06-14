@@ -101,7 +101,18 @@ namespace Metalama.Framework.Engine.Aspects
 
         public CancellationToken CancellationToken => this._aspectBuilderState.CancellationToken;
 
-        public void SetAspectLayerBuildAction( string layerName, Action<IAspectLayerBuilder<T>> buildAction ) => throw new NotImplementedException();
+        public void BuildLayer( string? layerName, Action<IAspectLayerBuilder<T>> buildAction )
+        {
+            if ( layerName == null )
+            {
+                buildAction( this );
+            }
+            else
+            {
+                throw new NotImplementedException();
+            }
+            
+        }
 
         public bool VerifyEligibility( IEligibilityRule<T> rule )
         {

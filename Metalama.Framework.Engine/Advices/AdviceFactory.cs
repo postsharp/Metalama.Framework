@@ -70,23 +70,6 @@ namespace Metalama.Framework.Engine.Advices
         public AdviceFactory WithTemplateClassInstance( TemplateClassInstance templateClassInstance )
             => new( this.State, templateClassInstance, this._layerName );
 
-        public IAdviceFactory WithLayer( string? layerName )
-        {
-            if ( layerName == this._layerName )
-            {
-                return this;
-            }
-
-            if ( !this.State.AspectInstance.AspectClass.Layers.Any( l => l.LayerName == layerName ) )
-            {
-                throw new ArgumentOutOfRangeException(
-                    nameof(layerName),
-                    $"The aspect '{this.State.AspectInstance.AspectClass.ShortName}' does not contain an aspect layer '{layerName}'." );
-            }
-
-            return new AdviceFactory( this.State, this._templateInstance, this._layerName );
-        }
-
         public IAdviceFactory WithTemplateProvider( ITemplateProvider templateProvider )
         {
             return this.WithTemplateClassInstance(
@@ -264,7 +247,7 @@ namespace Metalama.Framework.Engine.Advices
             // These errors are reported as diagnostics.
             var result = advice.Implement(
                 this.State.ServiceProvider,
-                this.State.Compilation,
+                this.State.CurrentCompilation,
                 t =>
                 {
                     t.OrderWithinAspectInstance = this.State.GetTransformationOrder();
@@ -273,7 +256,7 @@ namespace Metalama.Framework.Engine.Advices
 
             this.State.Diagnostics.Report( result.Diagnostics );
 
-            this.State.IntrospectionListener?.AddAdviceResult( this.State.AspectInstance, advice, result, this.State.Compilation );
+            this.State.IntrospectionListener?.AddAdviceResult( this.State.AspectInstance, advice, result, this.State.CurrentCompilation );
 
             switch ( result.Outcome )
             {
@@ -296,7 +279,22 @@ namespace Metalama.Framework.Engine.Advices
                     break;
             }
 
-            return new AdviceResult<T>( result.NewDeclaration.As<T>(), this.State.Compilation, result.Outcome );
+            return new AdviceResult<T>( result.NewDeclaration.As<T>(), this.State.CurrentCompilation, result.Outcome );
+        }
+
+        private CompilationModel ValidateCompilation( IDeclaration target, IDeclaration? target2 = null ) 
+        {
+            if ( target.Compilation != this.State.InitialCompilation && target.Compilation != this.State.CurrentCompilation )
+            {
+                throw new InvalidOperationException( "The target declaration is not in the current compilation." );
+            }
+
+            if ( target2 != null && target2.Compilation != target.Compilation )
+            {
+                throw new InvalidOperationException( "Compilation mismatch." );
+            }
+
+            return target.GetCompilationModel();
         }
 
         private TemplateMemberRef SelectTemplate( IFieldOrPropertyOrIndexer targetFieldOrProperty, in GetterTemplateSelector templateSelector, bool required )
@@ -332,6 +330,8 @@ namespace Metalama.Framework.Engine.Advices
             return selectedTemplate;
         }
 
+        public ICompilation Compilation => this.State.CurrentCompilation;
+
         public void Override( IMethod targetMethod, in MethodTemplateSelector templateSelector, object? args = null, object? tags = null )
         {
             if ( this._templateInstance == null )
@@ -345,8 +345,10 @@ namespace Metalama.Framework.Engine.Advices
                     UserMessageFormatter.Format( $"Cannot add an OverrideMethod advice to '{targetMethod}' because it is an abstract." ) );
             }
 
+            var compilation = this.ValidateCompilation( targetMethod );
+
             var template = this.SelectTemplate( targetMethod, templateSelector )
-                .GetTemplateMember<IMethod>( this.State.Compilation, this.State.ServiceProvider )
+                .GetTemplateMember<IMethod>( compilation, this.State.ServiceProvider )
                 .ForOverride( targetMethod, ObjectReader.GetReader( args ) );
 
             var advice = new OverrideMethodAdvice(
@@ -380,8 +382,10 @@ namespace Metalama.Framework.Engine.Advices
                     UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
             }
 
+            var compilation = this.ValidateCompilation( targetType );
+
             var template = this.ValidateTemplateName( defaultTemplate, TemplateKind.Default, true )
-                .GetTemplateMember<IMethod>( this.State.Compilation, this.State.ServiceProvider );
+                .GetTemplateMember<IMethod>( compilation, this.State.ServiceProvider );
 
             var advice = new IntroduceMethodAdvice(
                 this.State.AspectInstance,
@@ -398,7 +402,7 @@ namespace Metalama.Framework.Engine.Advices
         }
 
         public IAdviceResult<IProperty> Override(
-            IFieldOrProperty targetDeclaration,
+            IFieldOrProperty targetFieldOrProperty,
             string defaultTemplate,
             object? tags = null )
         {
@@ -407,15 +411,17 @@ namespace Metalama.Framework.Engine.Advices
                 throw new InvalidOperationException();
             }
 
-            if ( targetDeclaration.IsAbstract )
+            if ( targetFieldOrProperty.IsAbstract )
             {
                 throw new InvalidOperationException(
-                    UserMessageFormatter.Format( $"Cannot add an OverrideFieldOrProperty advice to '{targetDeclaration}' because it is an abstract." ) );
+                    UserMessageFormatter.Format( $"Cannot add an OverrideFieldOrProperty advice to '{targetFieldOrProperty}' because it is an abstract." ) );
             }
+
+            var compilation = this.ValidateCompilation( targetFieldOrProperty );
 
             // Set template represents both set and init accessors.
             var propertyTemplate = this.ValidateTemplateName( defaultTemplate, TemplateKind.Default, true )
-                .GetTemplateMember<IProperty>( this.State.Compilation, this.State.ServiceProvider );
+                .GetTemplateMember<IProperty>( compilation, this.State.ServiceProvider );
 
             var accessorTemplates = propertyTemplate.GetAccessorTemplates();
             var getTemplate = accessorTemplates.Get;
@@ -424,7 +430,7 @@ namespace Metalama.Framework.Engine.Advices
             var advice = new OverrideFieldOrPropertyAdvice(
                 this.State.AspectInstance,
                 this._templateInstance,
-                targetDeclaration,
+                targetFieldOrProperty,
                 propertyTemplate,
                 getTemplate.ForIntroduction(),
                 setTemplate.ForIntroduction(),
@@ -435,7 +441,7 @@ namespace Metalama.Framework.Engine.Advices
         }
 
         public IAdviceResult<IProperty> OverrideAccessors(
-            IFieldOrProperty targetDeclaration,
+            IFieldOrProperty targetFieldOrProperty,
             in GetterTemplateSelector getTemplateSelector,
             string? setTemplate = null,
             object? args = null,
@@ -446,21 +452,23 @@ namespace Metalama.Framework.Engine.Advices
                 throw new InvalidOperationException();
             }
 
-            if ( targetDeclaration.IsAbstract )
+            if ( targetFieldOrProperty.IsAbstract )
             {
                 throw new InvalidOperationException(
                     UserMessageFormatter.Format(
-                        $"Cannot add an OverrideFieldOrPropertyAccessors advice to '{targetDeclaration}' because it is an abstract." ) );
+                        $"Cannot add an OverrideFieldOrPropertyAccessors advice to '{targetFieldOrProperty}' because it is an abstract." ) );
             }
 
+            var compilation = this.ValidateCompilation( targetFieldOrProperty );
+
             // Set template represents both set and init accessors.
-            var getTemplateRef = this.SelectTemplate( targetDeclaration, getTemplateSelector, setTemplate == null )
-                .GetTemplateMember<IMethod>( this.State.Compilation, this.State.ServiceProvider )
-                .ForOverride( targetDeclaration.GetMethod, ObjectReader.GetReader( args ) );
+            var getTemplateRef = this.SelectTemplate( targetFieldOrProperty, getTemplateSelector, setTemplate == null )
+                .GetTemplateMember<IMethod>( compilation, this.State.ServiceProvider )
+                .ForOverride( targetFieldOrProperty.GetMethod, ObjectReader.GetReader( args ) );
 
             var setTemplateRef = this.ValidateTemplateName( setTemplate, TemplateKind.Default, getTemplateSelector.IsNull )
-                .GetTemplateMember<IMethod>( this.State.Compilation, this.State.ServiceProvider )
-                .ForOverride( targetDeclaration.SetMethod, ObjectReader.GetReader( args ) );
+                .GetTemplateMember<IMethod>( compilation, this.State.ServiceProvider )
+                .ForOverride( targetFieldOrProperty.SetMethod, ObjectReader.GetReader( args ) );
 
             if ( getTemplateRef.IsNull && setTemplateRef.IsNull )
             {
@@ -470,7 +478,7 @@ namespace Metalama.Framework.Engine.Advices
             var advice = new OverrideFieldOrPropertyAdvice(
                 this.State.AspectInstance,
                 this._templateInstance,
-                targetDeclaration,
+                targetFieldOrProperty,
                 default,
                 getTemplateRef,
                 setTemplateRef,
@@ -494,8 +502,10 @@ namespace Metalama.Framework.Engine.Advices
                 throw new InvalidOperationException();
             }
 
+            var compilation = this.ValidateCompilation( targetType );
+
             var template = this.ValidateTemplateName( templateName, TemplateKind.Default, true )
-                .GetTemplateMember<IField>( this.State.Compilation, this.State.ServiceProvider );
+                .GetTemplateMember<IField>( compilation, this.State.ServiceProvider );
 
             var advice = new IntroduceFieldAdvice(
                 this.State.AspectInstance,
@@ -527,6 +537,8 @@ namespace Metalama.Framework.Engine.Advices
             {
                 throw new InvalidOperationException();
             }
+            
+            var compilation = this.ValidateCompilation( targetType );
 
             var advice = new IntroduceFieldAdvice(
                 this.State.AspectInstance,
@@ -560,7 +572,7 @@ namespace Metalama.Framework.Engine.Advices
             => this.IntroduceField(
                 targetType,
                 fieldName,
-                this.State.Compilation.Factory.GetTypeByReflectionType( fieldType ),
+                this.State.InitialCompilation.Factory.GetTypeByReflectionType( fieldType ),
                 scope,
                 whenExists,
                 buildAction,
@@ -581,6 +593,8 @@ namespace Metalama.Framework.Engine.Advices
             {
                 throw new InvalidOperationException();
             }
+            
+            var compilation = this.ValidateCompilation( targetType );
 
             var advice = new IntroducePropertyAdvice(
                 this.State.AspectInstance,
@@ -613,7 +627,7 @@ namespace Metalama.Framework.Engine.Advices
             => this.IntroduceAutomaticProperty(
                 targetType,
                 propertyName,
-                this.State.Compilation.Factory.GetTypeByReflectionType( propertyType ),
+                this.State.InitialCompilation.Factory.GetTypeByReflectionType( propertyType ),
                 scope,
                 whenExists,
                 buildAction,
@@ -637,9 +651,11 @@ namespace Metalama.Framework.Engine.Advices
                 throw new InvalidOperationException(
                     UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
             }
+            
+            var compilation = this.ValidateCompilation( targetType );
 
             var propertyTemplate = this.ValidateTemplateName( defaultTemplate, TemplateKind.Default, true )
-                .GetTemplateMember<IProperty>( this.State.Compilation, this.State.ServiceProvider );
+                .GetTemplateMember<IProperty>( compilation, this.State.ServiceProvider );
 
             var accessorTemplates = propertyTemplate.GetAccessorTemplates();
 
@@ -683,12 +699,14 @@ namespace Metalama.Framework.Engine.Advices
                 throw new InvalidOperationException(
                     UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
             }
+            
+            var compilation = this.ValidateCompilation( targetType );
 
             var getTemplateRef = this.ValidateTemplateName( getTemplate, TemplateKind.Default, true )
-                .GetTemplateMember<IMethod>( this.State.Compilation, this.State.ServiceProvider );
+                .GetTemplateMember<IMethod>( compilation, this.State.ServiceProvider );
 
             var setTemplateRef = this.ValidateTemplateName( setTemplate, TemplateKind.Default, true )
-                .GetTemplateMember<IMethod>( this.State.Compilation, this.State.ServiceProvider );
+                .GetTemplateMember<IMethod>( compilation, this.State.ServiceProvider );
 
             var parameterReaders = ObjectReader.GetReader( args );
 
@@ -712,7 +730,7 @@ namespace Metalama.Framework.Engine.Advices
         }
 
         public void OverrideAccessors(
-            IEvent targetDeclaration,
+            IEvent targetEvent,
             string? addTemplate,
             string? removeTemplate,
             string? invokeTemplate,
@@ -729,17 +747,19 @@ namespace Metalama.Framework.Engine.Advices
                 throw GeneralDiagnosticDescriptors.UnsupportedFeature.CreateException( $"Invoker overrides." );
             }
 
-            if ( targetDeclaration.IsAbstract )
+            if ( targetEvent.IsAbstract )
             {
                 throw new InvalidOperationException(
-                    UserMessageFormatter.Format( $"Cannot add an OverrideEventAccessors advice to '{targetDeclaration}' because it is an abstract." ) );
+                    UserMessageFormatter.Format( $"Cannot add an OverrideEventAccessors advice to '{targetEvent}' because it is an abstract." ) );
             }
+            
+            var compilation = this.ValidateCompilation( targetEvent );
 
             var addTemplateRef = this.ValidateTemplateName( addTemplate, TemplateKind.Default, true )
-                .GetTemplateMember<IMethod>( this.State.Compilation, this.State.ServiceProvider );
+                .GetTemplateMember<IMethod>( compilation, this.State.ServiceProvider );
 
             var removeTemplateRef = this.ValidateTemplateName( removeTemplate, TemplateKind.Default, true )
-                .GetTemplateMember<IMethod>( this.State.Compilation, this.State.ServiceProvider );
+                .GetTemplateMember<IMethod>( compilation, this.State.ServiceProvider );
 
             if ( invokeTemplate != null )
             {
@@ -749,7 +769,7 @@ namespace Metalama.Framework.Engine.Advices
             var advice = new OverrideEventAdvice(
                 this.State.AspectInstance,
                 this._templateInstance,
-                targetDeclaration,
+                targetEvent,
                 default,
                 addTemplateRef,
                 removeTemplateRef,
@@ -779,8 +799,10 @@ namespace Metalama.Framework.Engine.Advices
                     UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
             }
 
+            var compilation = this.ValidateCompilation( targetType );
+
             var template = this.ValidateTemplateName( eventTemplate, TemplateKind.Default, true )
-                .GetTemplateMember<IEvent>( this.State.Compilation, this.State.ServiceProvider );
+                .GetTemplateMember<IEvent>( compilation, this.State.ServiceProvider );
 
             var advice = new IntroduceEventAdvice(
                 this.State.AspectInstance,
@@ -822,12 +844,14 @@ namespace Metalama.Framework.Engine.Advices
                 throw new InvalidOperationException(
                     UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
             }
+            
+            var compilation = this.ValidateCompilation( targetType );
 
             var addTemplateRef = this.ValidateTemplateName( addTemplate, TemplateKind.Default, true )
-                .GetTemplateMember<IMethod>( this.State.Compilation, this.State.ServiceProvider );
+                .GetTemplateMember<IMethod>( compilation, this.State.ServiceProvider );
 
             var removeTemplateRef = this.ValidateTemplateName( removeTemplate, TemplateKind.Default, true )
-                .GetTemplateMember<IMethod>( this.State.Compilation, this.State.ServiceProvider );
+                .GetTemplateMember<IMethod>( compilation, this.State.ServiceProvider );
 
             var advice = new IntroduceEventAdvice(
                 this.State.AspectInstance,
@@ -857,6 +881,8 @@ namespace Metalama.Framework.Engine.Advices
             {
                 throw new InvalidOperationException();
             }
+            
+            var compilation = this.ValidateCompilation( targetType );
 
             var advice = new ImplementInterfaceAdvice(
                 this.State.AspectInstance,
@@ -895,6 +921,8 @@ namespace Metalama.Framework.Engine.Advices
             {
                 throw new InvalidOperationException();
             }
+            
+            var compilation = this.ValidateCompilation( targetType );
 
             var advice = new ImplementInterfaceAdvice(
                 this.State.AspectInstance,
@@ -930,9 +958,11 @@ namespace Metalama.Framework.Engine.Advices
             {
                 throw new InvalidOperationException();
             }
+            
+            var compilation = this.ValidateCompilation( targetType );
 
             var templateRef = this.ValidateTemplateName( template, TemplateKind.Default, true )
-                .GetTemplateMember<IMethod>( this.State.Compilation, this.State.ServiceProvider );
+                .GetTemplateMember<IMethod>( compilation, this.State.ServiceProvider );
 
             var advice = new InitializeAdvice(
                 this.State.AspectInstance,
@@ -952,9 +982,11 @@ namespace Metalama.Framework.Engine.Advices
             {
                 throw new InvalidOperationException();
             }
+            
+            var compilation = this.ValidateCompilation( targetConstructor );
 
             var templateRef = this.ValidateTemplateName( template, TemplateKind.Default, true )
-                .GetTemplateMember<IMethod>( this.State.Compilation, this.State.ServiceProvider );
+                .GetTemplateMember<IMethod>( compilation, this.State.ServiceProvider );
 
             var advice = new InitializeAdvice(
                 this.State.AspectInstance,
@@ -1052,8 +1084,10 @@ namespace Metalama.Framework.Engine.Advices
 
             AdviceResult<T> result;
 
+            var compilation = this.ValidateCompilation( targetDeclaration, targetMember );
+            
             var templateRef = this.ValidateTemplateName( template, TemplateKind.Default, true )
-                .GetTemplateMember<IMethod>( this.State.Compilation, this.State.ServiceProvider );
+                .GetTemplateMember<IMethod>( compilation, this.State.ServiceProvider );
 
             if ( !this.State.ContractAdvices.TryGetValue( targetMember, out var advice ) )
             {
@@ -1069,7 +1103,7 @@ namespace Metalama.Framework.Engine.Advices
             {
                 result = new AdviceResult<T>(
                     advice.LastAdviceImplementationResult.AssertNotNull().NewDeclaration.As<T>(),
-                    this.State.Compilation,
+                    this.State.CurrentCompilation,
                     AdviceOutcome.Default );
             }
 
@@ -1092,6 +1126,6 @@ namespace Metalama.Framework.Engine.Advices
         }
 
         public void RemoveAttributes( IDeclaration targetDeclaration, Type attributeType )
-            => this.RemoveAttributes( targetDeclaration, (INamedType) this.State.Compilation.Factory.GetTypeByReflectionType( attributeType ) );
+            => this.RemoveAttributes( targetDeclaration, (INamedType) this.State.InitialCompilation.Factory.GetTypeByReflectionType( attributeType ) );
     }
 }

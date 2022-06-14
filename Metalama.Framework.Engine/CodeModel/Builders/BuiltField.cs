@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal class BuiltField : BuiltMember, IFieldImpl, IMemberRef<IField>
     {
-        public BuiltField( FieldBuilder builder, CompilationModel compilation ) : base( compilation )
+        public BuiltField( FieldBuilder builder, CompilationModel compilation ) : base( compilation, builder )
         {
             this.FieldBuilder = builder;
         }

@@ -20,7 +20,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             aspectBuilder.Advice.ImplementInterface(
                 aspectBuilder.Target,
                 typeof(IInterface),
-                whenExists: OverrideStrategy.Ignore );
+                whenExists: OverrideStrategy.Fail );
         }
 
         [InterfaceMember(IsExplicit = false)]

@@ -20,11 +20,13 @@ internal class AdviceFactoryState
     
     public Dictionary<IMember, ContractAdvice> ContractAdvices { get; }
 
-    public CompilationModel Compilation { get; }
+    public CompilationModel CurrentCompilation { get; }
 
     public IAspectInstanceInternal AspectInstance { get; }
 
     public IServiceProvider ServiceProvider { get; }
+
+    public CompilationModel InitialCompilation { get; }
 
     public IDiagnosticAdder Diagnostics { get; }
 
@@ -38,17 +40,19 @@ internal class AdviceFactoryState
 
     public AdviceFactoryState(
         IServiceProvider serviceProvider,
-        CompilationModel compilation,
+        CompilationModel initialCompilation,
+        CompilationModel currentCompilation,
         IAspectInstanceInternal aspectInstance,
         IDiagnosticAdder diagnostics,
         AspectPipelineConfiguration pipelineConfiguration )
     {
-        this.Compilation = compilation;
+        this.InitialCompilation = initialCompilation;
+        this.CurrentCompilation = currentCompilation;
         this.AspectInstance = aspectInstance;
         this.ServiceProvider = serviceProvider;
         this.Diagnostics = diagnostics;
         this.PipelineConfiguration = pipelineConfiguration;
-        this.ContractAdvices = new Dictionary<IMember, ContractAdvice>( compilation.InvariantComparer );
+        this.ContractAdvices = new Dictionary<IMember, ContractAdvice>( currentCompilation.InvariantComparer );
         this.IntrospectionListener = serviceProvider.GetService<IntrospectionPipelineListener>();
     }
 
@@ -65,7 +69,7 @@ internal class AdviceFactoryState
         {
             if ( transformation is IObservableTransformation observableTransformation )
             {
-                this.Compilation.AddTransformation( observableTransformation );
+                this.CurrentCompilation.AddTransformation( observableTransformation );
             }
         }
     }

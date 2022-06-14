@@ -18,6 +18,8 @@ namespace Metalama.Framework.Aspects
     [CompileTime]
     public interface IAdviceFactory
     {
+        ICompilation Compilation { get; }
+        
         /// <summary>
         /// Overrides the implementation of a method.
         /// </summary>
@@ -64,7 +66,7 @@ namespace Metalama.Framework.Aspects
         /// <summary>
         /// Overrides a field or property by specifying a property template.
         /// </summary>
-        /// <param name="targetDeclaration">The field or property to override.</param>
+        /// <param name="targetFieldOrProperty">The field or property to override.</param>
         /// <param name="template">The name of a property of the aspect class, with a getter, a setter, or both, whose implementation will be used as a template.
         ///     This property must be annotated with <see cref="TemplateAttribute"/>.</param>
         /// <param name="tags">An optional opaque object of anonymous type passed to the template property and exposed under the <see cref="meta.Tags"/> property of the
@@ -72,14 +74,14 @@ namespace Metalama.Framework.Aspects
         /// <remarks>When an aspect overrides the same declaration in same aspect part multiple, the order of distinct pieces of advice is equal to the inverse of order of calls of this method.</remarks>
         /// <seealso href="@overriding-members"/>
         IAdviceResult<IProperty> Override(
-            IFieldOrProperty targetDeclaration,
+            IFieldOrProperty targetFieldOrProperty,
             string template,
             object? tags = null );
 
         /// <summary>
         /// Overrides a field or property by specifying a method template for the getter, the setter, or both.
         /// </summary>
-        /// <param name="targetDeclaration">The field or property to override.</param>
+        /// <param name="targetFieldOrProperty">The field or property to override.</param>
         /// <param name="getTemplate">The name of the method of the aspect class whose implementation will be used as a template for the getter, or <c>null</c>
         ///     if the getter should not be overridden. This method must be annotated with <see cref="TemplateAttribute"/>. The signature of this method must
         ///     be <c>T Get()</c> where <c>T</c> is either <c>dynamic</c> or a type compatible with the type of the field or property.
@@ -95,7 +97,7 @@ namespace Metalama.Framework.Aspects
         /// <remarks>When an aspect overrides the same declaration in same aspect part multiple, the order of distinct pieces of advice is equal to the inverse of order of calls of this method.</remarks>
         /// <seealso href="@overriding-members"/>
         IAdviceResult<IProperty> OverrideAccessors(
-            IFieldOrProperty targetDeclaration,
+            IFieldOrProperty targetFieldOrProperty,
             in GetterTemplateSelector getTemplate = default,
             string? setTemplate = null,
             object? args = null,
@@ -492,13 +494,6 @@ namespace Metalama.Framework.Aspects
         void RemoveAttributes(
             IDeclaration targetDeclaration,
             Type attributeType );
-
-        /// <summary>
-        /// Returns a copy of the current <see cref="IAdviceFactory"/> that will add advice to a specified layer of the current aspect.
-        /// </summary>
-        /// <param name="layerName">The name of the aspect layer. It must be defined by adding a <see cref="LayersAttribute"/> to the aspect class.</param>
-        /// <returns></returns>
-        IAdviceFactory WithLayer( string? layerName );
 
         /// <summary>
         /// Returns a copy of the current <see cref="IAdviceFactory"/> that will a specified object to find factory methods.
