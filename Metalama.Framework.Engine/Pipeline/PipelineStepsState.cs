@@ -38,6 +38,7 @@ namespace Metalama.Framework.Engine.Pipeline
         private readonly OverflowAspectSource _overflowAspectSource = new();
 
         private PipelineStep? _currentStep;
+        private readonly IntrospectionPipelineListener? _introspectionListener;
 
         public CompilationModel LastCompilation { get; private set; }
 
@@ -64,7 +65,7 @@ namespace Metalama.Framework.Engine.Pipeline
             ImmutableArray<IValidatorSource> inputValidatorSources,
             AspectPipelineConfiguration pipelineConfiguration )
         {
-            pipelineConfiguration.ServiceProvider.GetService<IntrospectionPipelineListener>();
+            this._introspectionListener = pipelineConfiguration.ServiceProvider.GetService<IntrospectionPipelineListener>();
 
             this._diagnostics = new UserDiagnosticSink( pipelineConfiguration.CompileTimeProject, pipelineConfiguration.CodeFixFilter );
             this.LastCompilation = inputLastCompilation;
@@ -259,9 +260,10 @@ namespace Metalama.Framework.Engine.Pipeline
 
         public void Report( Diagnostic diagnostic ) => this._diagnostics.Report( diagnostic );
 
-        public void AddAspectInstanceResults( ImmutableArray<AspectInstanceResult> aspectInstanceResults )
+        public void AddAspectInstanceResult( AspectInstanceResult aspectInstanceResult )
         {
-            this._aspectInstanceResults.AddRange( aspectInstanceResults );
+            this._aspectInstanceResults.Add( aspectInstanceResult );
+            this._introspectionListener?.AddAspectResult( aspectInstanceResult );
         }
     }
 }

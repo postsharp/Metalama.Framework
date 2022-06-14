@@ -46,11 +46,12 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         {
             if ( this.Invokers.Base == null )
             {
-                throw new InvalidOperationException(
-                    UserMessageFormatter.Format( $"Cannot get or set the base value of '{this}' because there is no base property or field." ) );
+                return this.Invokers.Final.GetValue( this.This );
             }
-
-            return this.Invokers.Base.GetValue( this.This );
+            else
+            {
+                return this.Invokers.Base.GetValue( this.This );
+            }
         }
 
         public IMethod? GetAccessor( MethodKind methodKind ) => this.Underlying.GetAccessor( methodKind );

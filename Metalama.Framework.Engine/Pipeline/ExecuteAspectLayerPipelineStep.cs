@@ -113,6 +113,8 @@ internal class ExecuteAspectLayerPipelineStep : PipelineStep
 
                     break;
             }
+            
+            this.Parent.AddAspectInstanceResult( aspectResult );
         }
     }
 }

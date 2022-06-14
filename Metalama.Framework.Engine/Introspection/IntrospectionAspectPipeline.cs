@@ -37,8 +37,9 @@ internal class IntrospectionAspectPipeline : AspectPipeline
         {
             return new IntrospectionCompilationResultModel( false, compilation, MapDiagnostics() );
         }
-        
-        var serviceProvider = configuration.ServiceProvider.WithService( new IntrospectionAspectInstanceFactory( compilation.Compilation) );
+
+        var introspectionAspectInstanceFactory = new IntrospectionAspectInstanceFactory( compilation.Compilation);
+        var serviceProvider = configuration.ServiceProvider.WithService( introspectionAspectInstanceFactory );
         serviceProvider = serviceProvider.WithService( new IntrospectionPipelineListener( serviceProvider ) );
 
 
@@ -57,6 +58,6 @@ internal class IntrospectionAspectPipeline : AspectPipeline
             outputCompilationModel = compilation;
         }
 
-        return new IntrospectionCompilationResultModel( success, outputCompilationModel, MapDiagnostics(), pipelineResult );
+        return new IntrospectionCompilationResultModel( success, outputCompilationModel, MapDiagnostics(), introspectionAspectInstanceFactory, pipelineResult );
     }
 }

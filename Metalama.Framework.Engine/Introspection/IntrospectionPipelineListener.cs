@@ -4,6 +4,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Project;
 using System;
 
@@ -22,5 +23,11 @@ internal class IntrospectionPipelineListener : IService
     {
         var introspectionAdviceInstance = this._introspectionFactory.GetIntrospectionAspectInstance( aspectInstance );
         introspectionAdviceInstance.Advice.Add( new IntrospectionAdvice( advice, result, compilation ) );
+    }
+
+    public void AddAspectResult( AspectInstanceResult result )
+    {
+        var introspectionAdviceInstance = this._introspectionFactory.GetIntrospectionAspectInstance( result.AspectInstance );
+        introspectionAdviceInstance.AspectInstanceResult = result;
     }
 }

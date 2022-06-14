@@ -15,19 +15,20 @@ internal class IntrospectionCompilationResultModel : IIntrospectionCompilationOu
 {
     private readonly AspectPipelineResult? _pipelineResult;
     private readonly CompilationModel _compilation;
-    private readonly IntrospectionAspectInstanceFactory _introspectionAspectInstanceFactory;
+    private readonly IntrospectionAspectInstanceFactory? _introspectionAspectInstanceFactory;
 
     public IntrospectionCompilationResultModel(
         bool isSuccessful,
         CompilationModel compilationModel,
         ImmutableArray<IIntrospectionDiagnostic> diagnostics,
+        IntrospectionAspectInstanceFactory? introspectionAspectInstanceFactory = null,
         AspectPipelineResult? pipelineResult = null )
     {
         this._pipelineResult = pipelineResult;
         this.IsSuccessful = isSuccessful;
         this.Diagnostics = diagnostics;
+        this._introspectionAspectInstanceFactory = introspectionAspectInstanceFactory;
         this._compilation = compilationModel;
-        this._introspectionAspectInstanceFactory = new IntrospectionAspectInstanceFactory( compilationModel );
     }
 
     public bool IsSuccessful { get; }
@@ -39,7 +40,7 @@ internal class IntrospectionCompilationResultModel : IIntrospectionCompilationOu
         => this._pipelineResult == null
             ? ImmutableArray<IIntrospectionAspectInstance>.Empty
             : this._pipelineResult.AspectInstanceResults
-                .Select( x => this._introspectionAspectInstanceFactory.GetIntrospectionAspectInstance( x.AspectInstance ) )
+                .Select( x => this._introspectionAspectInstanceFactory.AssertNotNull(  ).GetIntrospectionAspectInstance( x.AspectInstance ) )
                 .ToImmutableArray<IIntrospectionAspectInstance>();
 
     [Memo]
