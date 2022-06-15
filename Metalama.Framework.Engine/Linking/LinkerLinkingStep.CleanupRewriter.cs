@@ -35,6 +35,13 @@ namespace Metalama.Framework.Engine.Linking
                         .WithBody( this.RewriteBodyBlock( node.Body ) );
             }
 
+            public override SyntaxNode? VisitDestructorDeclaration( DestructorDeclarationSyntax node )
+            {
+                return
+                    node
+                        .WithBody( this.RewriteBodyBlock( node.Body ) );
+            }
+
             public override SyntaxNode? VisitPropertyDeclaration( PropertyDeclarationSyntax node )
             {
                 return this.VisitBasePropertyDeclaration( node );

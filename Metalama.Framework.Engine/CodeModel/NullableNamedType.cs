@@ -144,6 +144,8 @@ internal class NullableNamedType : INamedTypeInternal
 
     IConstructor INamedType.StaticConstructor => this._underlying.StaticConstructor;
 
+    IFinalizer? INamedType.Finalizer => this._underlying.Finalizer;
+
     bool INamedType.IsReadOnly => this._underlying.IsReadOnly;
 
     bool INamedType.IsSubclassOf( INamedType type ) => this._underlying.IsSubclassOf( type );

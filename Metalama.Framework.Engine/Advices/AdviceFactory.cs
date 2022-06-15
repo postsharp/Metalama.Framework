@@ -282,6 +282,34 @@ namespace Metalama.Framework.Engine.Advices
             this.State.Diagnostics.Report( diagnosticList );
         }
 
+        public void Override( IFinalizer targetFinalizer, string template, object? args = null, object? tags = null )
+        {
+            if ( this._templateInstance == null )
+            {
+                throw new InvalidOperationException();
+            }
+
+            var diagnosticList = new DiagnosticList();
+
+            var templateMember = this.ValidateTemplateName( template, TemplateKind.Default, true )
+                .GetTemplateMember<IMethod>( this.State.Compilation, this.State.ServiceProvider )
+                .ForOverride(targetFinalizer, ObjectReader.GetReader( args ) );
+
+            var advice = new OverrideFinalizerAdvice(
+                this.State.AspectInstance,
+                this._templateInstance,
+                targetFinalizer,
+                templateMember,
+                this._layerName,
+                ObjectReader.GetReader( tags ) );
+
+            advice.Initialize( diagnosticList );
+            ThrowOnErrors( diagnosticList );
+            this.State.Advices.Add( advice );
+
+            this.State.Diagnostics.Report( diagnosticList );
+        }
+
         public IMethodBuilder IntroduceMethod(
             INamedType targetType,
             string defaultTemplate,

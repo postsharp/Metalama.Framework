@@ -394,6 +394,12 @@ namespace Metalama.Framework.Aspects
         /// <returns>An <see cref="IAdviceFactory"/>.</returns>
         IAdviceFactory WithTemplateProvider( ITemplateProvider templateProvider );
 
+        void Override(
+            IFinalizer targetFinalizer,
+            string template,
+            object? args = null,
+            object? tags = null );
+
         // void ImplementInterface(
         //     INamedType targetType,
         //     INamedType interfaceType,

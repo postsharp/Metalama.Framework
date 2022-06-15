@@ -206,6 +206,9 @@ namespace Metalama.Framework.Engine.CodeModel
         [Memo]
         public IConstructor StaticConstructor => this.GetStaticConstructorImpl();
 
+        [Memo]
+        public IFinalizer? Finalizer => this.GetFinalizerImpl();
+
         private IConstructor GetStaticConstructorImpl()
         {
             var builder = this.Compilation.GetStaticConstructor( this.TypeSymbol );
@@ -223,6 +226,32 @@ namespace Metalama.Framework.Engine.CodeModel
             }
 
             return new ImplicitStaticConstructor( this );
+        }
+
+        private IFinalizer? GetFinalizerImpl()
+        {
+            if (!this.TypeSymbol.IsValueType)
+            {
+                var builder = this.Compilation.GetFinalizer( this.TypeSymbol );
+
+                if ( builder != null )
+                {
+                    return this.Compilation.Factory.GetDeclaration<IFinalizer>( builder );
+                }
+
+                var symbol = this.TypeSymbol.GetMembers().OfType<IMethodSymbol>().SingleOrDefault(m => m.Name == "Finalize" && m.TypeParameters.Length == 0 && m.Parameters.Length == 0);
+
+                if ( symbol != null )
+                {
+                    return this.Compilation.Factory.GetFinalizer( symbol );
+                }
+
+                return new ImplicitFinalizer( this );
+            }
+            else
+            {
+                return null;
+            }
         }
 
         public bool IsPartial
@@ -334,7 +363,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 case DeclarationKind.Event:
                     members = this.Events;
 
-                    break;
+                    break; 
 
                 default:
                     return Enumerable.Empty<IMember>();

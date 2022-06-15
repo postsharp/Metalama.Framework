@@ -12,13 +12,13 @@ internal readonly struct BoundTemplateMethod
     /// <summary>
     /// Gets the overridden method in case of override, or <c>null</c> in case of introduction.
     /// </summary>
-    public Ref<IMethod> OverriddenMethod { get; }
+    public Ref<IMethodBase> OverriddenMethodBase { get; }
 
     public TemplateMember<IMethod> Template { get; }
 
-    public BoundTemplateMethod( TemplateMember<IMethod> template, IMethod? overriddenMethod, object?[] templateArguments )
+    public BoundTemplateMethod( TemplateMember<IMethod> template, IMethodBase? overriddenMethodBase, object?[] templateArguments )
     {
-        this.OverriddenMethod = overriddenMethod != null ? overriddenMethod.ToTypedRef() : default;
+        this.OverriddenMethodBase = overriddenMethodBase != null ? overriddenMethodBase.ToTypedRef() : default;
         this.Template = template;
         this.TemplateArguments = templateArguments;
 

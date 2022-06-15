@@ -158,6 +158,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this._events = prototype._events;
             this._interfaceImplementations = prototype._interfaceImplementations;
             this._staticConstructors = prototype._staticConstructors;
+            this._finalizers = prototype._finalizers;
 
             this.Factory = new DeclarationFactory( this );
             this._depthsCache = prototype._depthsCache;

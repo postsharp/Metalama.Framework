@@ -61,7 +61,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
         /// </summary>
         public static Ref<IDeclaration> FromSymbol( ISymbol symbol, Compilation compilation ) => new( symbol, compilation );
 
-        public static Ref<IDeclaration> FromImplicitMember( IMember member ) => new( member );
+        // TODO: This probably introduces leaks as it points to an old compilation, but there seems to be no other working way at the moment.
+        public static Ref<IDeclaration> FromImplicitMember( IDeclaration parent, Func<IDeclaration, IDeclaration> selector ) => new( parent, selector );
 
         public static Ref<T> FromSymbolId<T>( SymbolId symbolKey )
             where T : class, ICompilationElement
@@ -140,11 +141,11 @@ namespace Metalama.Framework.Engine.CodeModel.References
             this._compilation = null;
         }
 
-        internal Ref( IMember implicitMember )
+        internal Ref( IDeclaration parent, Func<IDeclaration, IDeclaration> selector )
         {
-            this.Target = implicitMember;
+            this.Target = new RefImplicitDeclarationRecord( parent.ToRef(), selector );
             this.TargetKind = DeclarationRefTargetKind.Default;
-            this._compilation = implicitMember.Compilation.GetRoslynCompilation();
+            this._compilation = parent.Compilation.GetRoslynCompilation();
         }
 
         // ReSharper disable once UnusedParameter.Local
@@ -349,6 +350,9 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 case IDeclarationBuilder builder:
                     return (T) compilation.Factory.GetDeclaration( builder );
 
+                case RefImplicitDeclarationRecord implicitDeclaration:
+                    return (T) implicitDeclaration.Selector( implicitDeclaration.Parent.GetTarget( compilation ) );
+
                 case string id:
                     {
                         ISymbol? symbol;
@@ -382,5 +386,18 @@ namespace Metalama.Framework.Engine.CodeModel.References
             => new( this.Target, this._compilation, this.TargetKind );
 
         public override int GetHashCode() => this.Target?.GetHashCode() ?? 0;
+    }
+
+    internal class RefImplicitDeclarationRecord
+    {
+        public IRef<IDeclaration> Parent { get; }
+
+        public Func<IDeclaration, IDeclaration> Selector { get; }
+
+        public RefImplicitDeclarationRecord( IRef<IDeclaration> parent, Func<IDeclaration, IDeclaration> selector )
+        {
+            this.Parent = parent;
+            this.Selector = selector;
+        }
     }
 }

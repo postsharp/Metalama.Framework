@@ -25,6 +25,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         private readonly IAdvisedFieldOrProperty? _fieldOrProperty;
         private readonly IAdvisedMethod? _method;
         private readonly IAdvisedConstructor? _constructor;
+        private readonly IAdvisedFinalizer? _finalizer;
         private readonly IAdvisedEvent? _event;
         private readonly INamedType? _type;
         private readonly MetaApiProperties _common;
@@ -38,7 +39,9 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IConstructor Constructor => this._constructor ?? throw this.CreateInvalidOperationException( nameof(this.Constructor) );
 
-        public IMethodBase MethodBase => this._method ?? throw this.CreateInvalidOperationException( nameof(this.MethodBase) );
+        public IFinalizer Finalizer => this._finalizer ?? throw this.CreateInvalidOperationException( nameof( this.Finalizer ) );
+
+        public IMethodBase MethodBase => (IMethodBase?) this._method ?? this._finalizer ?? throw this.CreateInvalidOperationException( nameof( this.MethodBase ) );
 
         public IAdvisedField Field => this._fieldOrProperty as IAdvisedField ?? throw this.CreateInvalidOperationException( nameof(this.Field) );
 
@@ -142,6 +145,14 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             this._type = method.DeclaringType;
         }
 
+        private MetaApi( IFinalizer finalizer, MetaApiProperties common ) : this(
+            (IDeclaration) finalizer,
+            common )
+        {
+            this._finalizer = new AdvisedFinalizer( finalizer );
+            this._type = finalizer.DeclaringType;
+        }
+
         private MetaApi( IConstructor constructor, MetaApiProperties common ) : this( (IDeclaration) constructor, common )
         {
             this._constructor = new AdvisedConstructor( constructor );
@@ -228,6 +239,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             {
                 INamedType type => new MetaApi( type, common ),
                 IMethod method => new MetaApi( method, common ),
+                IFinalizer finalizer => new MetaApi( finalizer, common ),
                 IFieldOrProperty fieldOrProperty => new MetaApi( fieldOrProperty, common, contractDirection ),
                 IEvent @event => new MetaApi( @event, common ),
                 IConstructor constructor => new MetaApi( constructor, common ),
@@ -238,6 +250,8 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         public static MetaApi ForConstructor( IConstructor constructor, MetaApiProperties common ) => new( constructor, common );
 
         public static MetaApi ForMethod( IMethod method, MetaApiProperties common ) => new( method, common );
+
+        public static MetaApi ForFinalizer( IFinalizer finalizer, MetaApiProperties common ) => new( finalizer, common );
 
         public static MetaApi ForFieldOrProperty( IFieldOrProperty fieldOrProperty, IMethod accessor, MetaApiProperties common )
             => new( fieldOrProperty, accessor, common );

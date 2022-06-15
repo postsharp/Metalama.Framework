@@ -1,0 +1,40 @@
+﻿using System;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.TestFramework;
+
+namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Finalizers.Derived
+{
+    // Tests single OverrideMethod aspect with trivial template on methods with trivial bodies.
+
+    public class OverrideAttribute : TypeAspect
+    {
+        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        {
+            builder.Advice.Override(builder.Target.Finalizer!, nameof(Template));
+        }
+
+        [Template]
+        public dynamic? Template()
+        {
+            Console.WriteLine("This is the override.");
+            return meta.Proceed();
+        }
+    }
+
+    // <target>
+    [Override]
+    internal class BaseClass
+    {
+        ~BaseClass()
+        {
+            Console.WriteLine($"This is the original finalizer.");
+        }
+    }
+
+    // <target>
+    [Override]
+    internal class DerivedClass : BaseClass
+    {
+    }
+}

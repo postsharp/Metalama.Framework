@@ -486,6 +486,12 @@ namespace Metalama.Framework.Engine.Linking
                 return containingSymbol.ContainingType.AssertNotNull().FindImplementationForInterfaceMember( referencedSymbol ).AssertNotNull();
             }
 
+            if ( referencedSymbol is IMethodSymbol { Name: "Finalizer", ContainingType: { Name: "__LinkerIntroductionHelpers__" } } )
+            {
+                // Referencing type's finalizer.
+                return containingSymbol.ContainingType.GetMembers( "Finalize" ).OfType<IMethodSymbol>().Single( m => m.Parameters.Length == 0 && m.TypeParameters.Length == 0 );
+            }
+
             return referencedSymbol;
         }
 
@@ -582,6 +588,7 @@ namespace Metalama.Framework.Engine.Linking
                 case (IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation }, IMethodSymbol { MethodKind: MethodKind.Ordinary }):
                 case (IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation },
                     IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation }):
+                case (IMethodSymbol { MethodKind: MethodKind.Destructor }, IMethodSymbol { MethodKind: MethodKind.Ordinary } ):
                 case (IPropertySymbol, IPropertySymbol):
                 case (IEventSymbol, IEventSymbol):
                 case (IFieldSymbol, IFieldSymbol):
