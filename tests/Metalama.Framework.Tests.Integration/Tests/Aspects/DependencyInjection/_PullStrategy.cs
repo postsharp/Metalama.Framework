@@ -1,4 +1,5 @@
 using System;
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
@@ -43,6 +44,6 @@ public class MyAspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.IntroduceField( builder.Target, "formatter", typeof(ICustomFormatter), pullStrategy: new Strategy() );
+        builder.Advice.IntroduceField( builder.Target, "formatter", typeof(ICustomFormatter) );
     }
 }

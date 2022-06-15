@@ -49,6 +49,8 @@ namespace Metalama.Framework.Engine.Advising
         public AdviceFactory WithTemplateClassInstance( TemplateClassInstance templateClassInstance )
             => new( this.State, templateClassInstance, this._layerName );
 
+     
+
         public IAdviceFactory WithTemplateProvider( ITemplateProvider templateProvider )
         {
             return this.WithTemplateClassInstance(
@@ -487,8 +489,7 @@ namespace Metalama.Framework.Engine.Advising
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
             Action<IFieldBuilder>? buildAction = null,
-            object? tags = null,
-            IPullStrategy? pullStrategy = null )
+            object? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -511,8 +512,7 @@ namespace Metalama.Framework.Engine.Advising
                 whenExists,
                 buildAction,
                 this._layerName,
-                ObjectReader.GetReader( tags ),
-                pullStrategy );
+                ObjectReader.GetReader( tags ) );
 
             return this.ExecuteAdvice<IField>( advice );
         }
@@ -524,8 +524,7 @@ namespace Metalama.Framework.Engine.Advising
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
             Action<IFieldBuilder>? buildAction = null,
-            object? tags = null,
-            IPullStrategy? pullStrategy = null )
+            object? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -549,8 +548,7 @@ namespace Metalama.Framework.Engine.Advising
                     buildAction?.Invoke( builder );
                 },
                 this._layerName,
-                ObjectReader.GetReader( tags ),
-                pullStrategy );
+                ObjectReader.GetReader( tags ) );
 
             return this.ExecuteAdvice<IField>( advice );
         }
@@ -562,8 +560,7 @@ namespace Metalama.Framework.Engine.Advising
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
             Action<IFieldBuilder>? buildAction = null,
-            object? tags = null,
-            IPullStrategy? pullStrategy = null )
+            object? tags = null )
             => this.IntroduceField(
                 targetType,
                 fieldName,
@@ -571,8 +568,7 @@ namespace Metalama.Framework.Engine.Advising
                 scope,
                 whenExists,
                 buildAction,
-                tags,
-                pullStrategy );
+                tags );
 
         public IIntroductionAdviceResult<IProperty> IntroduceAutomaticProperty(
             INamedType targetType,
@@ -581,8 +577,7 @@ namespace Metalama.Framework.Engine.Advising
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
             Action<IPropertyBuilder>? buildAction = null,
-            object? tags = null,
-            IPullStrategy? pullStrategy = null )
+            object? tags = null )
         {
             if ( this._templateInstance == null )
             {
@@ -605,8 +600,7 @@ namespace Metalama.Framework.Engine.Advising
                 whenExists,
                 buildAction,
                 this._layerName,
-                ObjectReader.GetReader( tags ),
-                pullStrategy );
+                ObjectReader.GetReader( tags ) );
 
             return this.ExecuteAdvice<IProperty>( advice );
         }
@@ -618,8 +612,7 @@ namespace Metalama.Framework.Engine.Advising
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
             Action<IPropertyBuilder>? buildAction = null,
-            object? tags = null,
-            IPullStrategy? pullStrategy = null )
+            object? tags = null )
             => this.IntroduceAutomaticProperty(
                 targetType,
                 propertyName,
@@ -669,8 +662,7 @@ namespace Metalama.Framework.Engine.Advising
                 whenExists,
                 buildAction,
                 this._layerName,
-                ObjectReader.GetReader( tags ),
-                null );
+                ObjectReader.GetReader( tags ) );
 
             return this.ExecuteAdvice<IProperty>( advice );
         }
@@ -721,8 +713,7 @@ namespace Metalama.Framework.Engine.Advising
                 whenExists,
                 buildAction,
                 this._layerName,
-                ObjectReader.GetReader( tags ),
-                null );
+                ObjectReader.GetReader( tags ) );
 
             return this.ExecuteAdvice<IProperty>( advice );
         }
@@ -1008,22 +999,7 @@ namespace Metalama.Framework.Engine.Advising
             return this.ExecuteAdvice<IConstructor>( advice );
         }
 
-        public void Override( IConstructor targetConstructor, string template, object? args = null, object? tags = null )
-        {
-            throw new NotImplementedException();
-        }
-
-        public void IntroduceConstructor(
-            INamedType targetType,
-            string template,
-            IntroductionScope scope = IntroductionScope.Default,
-            OverrideStrategy whenExists = OverrideStrategy.Default,
-            object? args = null,
-            object? tags = null )
-        {
-            throw new NotImplementedException();
-        }
-
+   
         private static void ThrowOnErrors( DiagnosticList diagnosticList )
         {
             if ( diagnosticList.HasErrors() )
@@ -1144,7 +1120,36 @@ namespace Metalama.Framework.Engine.Advising
                 new RemoveAttributesAdvice( this.State.AspectInstance, this._templateInstance!, targetDeclaration, this._compilation, attributeType, this._layerName ) );
         }
 
-        public void RemoveAttributes( IDeclaration targetDeclaration, Type attributeType )
+        public IRemoveAttributesAdviceResult RemoveAttributes( IDeclaration targetDeclaration, Type attributeType )
             => this.RemoveAttributes( targetDeclaration, (INamedType) this._compilation.Factory.GetTypeByReflectionType( attributeType ) );
+
+        public IAppendParameterAdviceResult AppendParameter(
+            IConstructor constructor,
+            string parameterName,
+            IType parameterType,
+            Func<IConstructor, PullAction> pullAction,
+            Action<IParameterBuilder>? buildAction = null )
+        {
+            if ( this._templateInstance == null )
+            {
+                throw new InvalidOperationException();
+            }
+
+            this.ValidateTarget( constructor );
+
+             var advice = new AppendConstructorParameterAdvice(
+                this.State.AspectInstance,
+                this._templateInstance,
+                constructor,
+                this._compilation,
+                this._layerName,
+                parameterName,
+                parameterType,
+                buildAction,
+                pullAction
+                 );
+
+            return this.ExecuteAdvice<IConstructor>( advice );
+        }
     }
 }

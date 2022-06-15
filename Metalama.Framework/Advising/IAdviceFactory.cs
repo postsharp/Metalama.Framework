@@ -4,7 +4,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
-using Metalama.Framework.DependencyInjection;
 using Metalama.Framework.Validation;
 using System;
 
@@ -115,7 +114,6 @@ namespace Metalama.Framework.Advising
         ///     The default strategy is to fail with a compile-time error.</param>
         /// <param name="buildAction"></param>
         /// <param name="tags"></param>
-        /// <param name="pullStrategy"></param>
         /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
         /// <seealso href="@introducing-members"/>
         IIntroductionAdviceResult<IField> IntroduceField(
@@ -124,8 +122,7 @@ namespace Metalama.Framework.Advising
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
             Action<IFieldBuilder>? buildAction = null,
-            object? tags = null,
-            IPullStrategy? pullStrategy = null );
+            object? tags = null );
 
         /// <summary>
         /// Introduces a field to the target type by specifying a field name and <see cref="IType"/>.
@@ -139,7 +136,6 @@ namespace Metalama.Framework.Advising
         ///     The default strategy is to fail with a compile-time error.</param>
         /// <param name="buildAction"></param>
         /// <param name="tags"></param>
-        /// <param name="pullStrategy"></param>
         /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
         /// <seealso href="@introducing-members"/>
         IIntroductionAdviceResult<IField> IntroduceField(
@@ -149,8 +145,7 @@ namespace Metalama.Framework.Advising
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
             Action<IFieldBuilder>? buildAction = null,
-            object? tags = null,
-            IPullStrategy? pullStrategy = null );
+            object? tags = null );
 
         /// <summary>
         /// Introduces a field to the target type by specifying a field name and <see cref="Type"/>.
@@ -164,7 +159,6 @@ namespace Metalama.Framework.Advising
         ///     The default strategy is to fail with a compile-time error.</param>
         /// <param name="buildAction"></param>
         /// <param name="tags"></param>
-        /// <param name="pullStrategy"></param>
         /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
         /// <seealso href="@introducing-members"/>
         IIntroductionAdviceResult<IField> IntroduceField(
@@ -174,8 +168,7 @@ namespace Metalama.Framework.Advising
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
             Action<IFieldBuilder>? buildAction = null,
-            object? tags = null,
-            IPullStrategy? pullStrategy = null );
+            object? tags = null );
 
         /// <summary>
         /// Introduces an automatic to the target type by specifying a property name and <see cref="Type"/>.
@@ -189,7 +182,6 @@ namespace Metalama.Framework.Advising
         ///     The default strategy is to fail with a compile-time error.</param>
         /// <param name="buildAction"></param>
         /// <param name="tags"></param>
-        /// <param name="pullStrategy"></param>
         /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
         /// <seealso href="@introducing-members"/>
         IIntroductionAdviceResult<IProperty> IntroduceAutomaticProperty(
@@ -199,8 +191,7 @@ namespace Metalama.Framework.Advising
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
             Action<IPropertyBuilder>? buildAction = null,
-            object? tags = null,
-            IPullStrategy? pullStrategy = null );
+            object? tags = null );
 
         /// <summary>
         /// Introduces an automatic to the target type by specifying a property name and <see cref="IType"/>.
@@ -214,7 +205,6 @@ namespace Metalama.Framework.Advising
         ///     The default strategy is to fail with a compile-time error.</param>
         /// <param name="buildAction"></param>
         /// <param name="tags"></param>
-        /// <param name="pullStrategy"></param>
         /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
         /// <seealso href="@introducing-members"/>
         IIntroductionAdviceResult<IProperty> IntroduceAutomaticProperty(
@@ -224,8 +214,7 @@ namespace Metalama.Framework.Advising
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
             Action<IPropertyBuilder>? buildAction = null,
-            object? tags = null,
-            IPullStrategy? pullStrategy = null );
+            object? tags = null );
 
         /// <summary>
         /// Introduces a property to the target type, or overrides the implementation of an existing one, by specifying a property template.
@@ -492,9 +481,16 @@ namespace Metalama.Framework.Advising
         /// </summary>
         /// <param name="targetDeclaration">The declaration from which custom attributes have to be removed.</param>
         /// <param name="attributeType">The type of custom attributes to be removed.</param>
-        void RemoveAttributes(
+        IRemoveAttributesAdviceResult RemoveAttributes(
             IDeclaration targetDeclaration,
             Type attributeType );
+
+        IAppendParameterAdviceResult AppendParameter(
+            IConstructor constructor,
+            string parameterName,
+            IType parameterType,
+            Func<IConstructor, PullAction> pullAction,
+            Action<IParameterBuilder>? buildAction = null );
 
         /// <summary>
         /// Returns a copy of the current <see cref="IAdviceFactory"/> that will a specified object to find factory methods.

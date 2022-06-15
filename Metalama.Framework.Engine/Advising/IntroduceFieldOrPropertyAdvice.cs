@@ -25,12 +25,11 @@ using RefKind = Metalama.Framework.Code.RefKind;
 
 namespace Metalama.Framework.Engine.Advising;
 
+/*
 internal abstract class IntroduceFieldOrPropertyAdvice<TMember, TBuilder> : IntroduceMemberAdvice<TMember, TBuilder>
     where TMember : class, IFieldOrProperty
     where TBuilder : MemberBuilder, IFieldOrPropertyBuilder
 {
-    public IPullStrategy? PullStrategy { get; }
-
     protected IntroduceFieldOrPropertyAdvice(
         IAspectInstanceInternal aspect,
         TemplateClassInstance templateInstance,
@@ -42,11 +41,9 @@ internal abstract class IntroduceFieldOrPropertyAdvice<TMember, TBuilder> : Intr
         ICompilation sourceCompilation,
         Action<TBuilder>? buildAction,
         string? layerName,
-        IObjectReader tags,
-        IPullStrategy? pullStrategy )
+        IObjectReader tags )
         : base( aspect, templateInstance, targetDeclaration, sourceCompilation, explicitName, template, scope, overrideStrategy, buildAction, layerName, tags )
     {
-        this.PullStrategy = pullStrategy;
     }
 
     /// <summary>
@@ -284,3 +281,4 @@ internal abstract class IntroduceFieldOrPropertyAdvice<TMember, TBuilder> : Intr
         }
     }
 }
+*/

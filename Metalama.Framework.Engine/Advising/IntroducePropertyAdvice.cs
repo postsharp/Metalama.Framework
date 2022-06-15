@@ -4,7 +4,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
-using Metalama.Framework.DependencyInjection;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
@@ -15,7 +14,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Advising
 {
-    internal class IntroducePropertyAdvice : IntroduceFieldOrPropertyAdvice<IProperty, PropertyBuilder>
+    internal class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty, PropertyBuilder>
     {
         private readonly BoundTemplateMethod _getTemplate;
         private readonly BoundTemplateMethod _setTemplate;
@@ -35,21 +34,19 @@ namespace Metalama.Framework.Engine.Advising
             OverrideStrategy overrideStrategy,
             Action<IPropertyBuilder>? buildAction,
             string? layerName,
-            IObjectReader tags,
-            IPullStrategy? pullStrategy )
+            IObjectReader tags )
             : base(
                 aspect,
                 templateInstance,
                 targetDeclaration,
+                sourceCompilation,
                 explicitName,
                 propertyTemplate,
                 scope,
                 overrideStrategy,
-                sourceCompilation,
                 buildAction,
                 layerName,
-                tags,
-                pullStrategy )
+                tags )
         {
             this._getTemplate = getTemplate;
             this._setTemplate = setTemplate;
@@ -132,7 +129,8 @@ namespace Metalama.Framework.Engine.Advising
                 if ( hasNoOverrideSemantics )
                 {
                     // Introduced auto property.
-                    return this.IntroduceMemberAndPull( serviceProvider, targetDeclaration, addTransformation, AdviceOutcome.Default );
+                    addTransformation( this.Builder );
+                    return AdviceImplementationResult.Success( this.Builder );
                 }
                 else
                 {

@@ -5,9 +5,10 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.SyntaxBuilders;
+using Metalama.Framework.DependencyInjection;
 using System.Collections.Immutable;
 
-namespace Metalama.Framework.DependencyInjection;
+namespace Metalama.Framework.Advising;
 
 /// <summary>
 /// Represents a way to pull a field or property.

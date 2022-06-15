@@ -4,7 +4,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
-using Metalama.Framework.DependencyInjection;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
@@ -17,7 +16,7 @@ namespace Metalama.Framework.Engine.Advising
     // ReSharper disable once UnusedType.Global
     // TODO: Use this type and remove the warning waiver.
 
-    internal class IntroduceFieldAdvice : IntroduceFieldOrPropertyAdvice<IField, FieldBuilder>
+    internal class IntroduceFieldAdvice : IntroduceMemberAdvice<IField, FieldBuilder>
     {
         public IntroduceFieldAdvice(
             IAspectInstanceInternal aspect,
@@ -30,21 +29,19 @@ namespace Metalama.Framework.Engine.Advising
             OverrideStrategy overrideStrategy,
             Action<IFieldBuilder>? buildAction,
             string? layerName,
-            IObjectReader tags,
-            IPullStrategy? pullStrategy )
+            IObjectReader tags )
             : base(
                 aspect,
                 templateInstance,
                 targetDeclaration,
+                sourceCompilation,
                 explicitName,
                 fieldTemplate,
                 scope,
                 overrideStrategy,
-                sourceCompilation,
                 buildAction,
                 layerName,
-                tags,
-                pullStrategy )
+                tags )
         {
             this.Builder = new FieldBuilder( this, targetDeclaration, this.MemberName, tags );
             this.Builder.InitializerTemplate = fieldTemplate.GetInitializerTemplate();
@@ -116,8 +113,9 @@ namespace Metalama.Framework.Engine.Advising
 
                     case OverrideStrategy.New:
                         this.Builder.IsNew = true;
+                        addTransformation( this.Builder );
 
-                        return this.IntroduceMemberAndPull( serviceProvider, targetDeclaration, addTransformation, AdviceOutcome.New );
+                        return AdviceImplementationResult.Success( AdviceOutcome.New, this.Builder );
 
                     case OverrideStrategy.Override:
                         throw new NotSupportedException( "Override is not a supported OverrideStrategy for fields." );
@@ -128,7 +126,8 @@ namespace Metalama.Framework.Engine.Advising
             }
             else
             {
-                return this.IntroduceMemberAndPull( serviceProvider, targetDeclaration, addTransformation, AdviceOutcome.Default );
+                addTransformation( this.Builder );
+                return AdviceImplementationResult.Success( AdviceOutcome.Default, this.Builder );
             }
         }
     }
