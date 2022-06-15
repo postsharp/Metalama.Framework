@@ -74,19 +74,20 @@ namespace Metalama.Framework.Engine.Transformations
                 MethodDeclaration(
                     List<AttributeListSyntax>(),
                     TokenList(),
-                    PredefinedType(Token(SyntaxKind.VoidKeyword)),
+                    PredefinedType( Token( SyntaxKind.VoidKeyword ) ),
                     null,
-                    Identifier( context.IntroductionNameProvider.GetOverrideName( this.OverriddenDeclaration.DeclaringType, this.Advice.AspectLayerId, this.OverriddenDeclaration ) ),
+                    Identifier(
+                        context.IntroductionNameProvider.GetOverrideName(
+                            this.OverriddenDeclaration.DeclaringType,
+                            this.Advice.AspectLayerId,
+                            this.OverriddenDeclaration ) ),
                     null,
                     ParameterList(),
                     List<TypeParameterConstraintClauseSyntax>(),
                     newMethodBody,
                     null );
 
-            return new[]
-            {
-                new IntroducedMember(this, syntax, this.Advice.AspectLayerId, IntroducedMemberSemantic.Override, this.OverriddenDeclaration)
-            };
+            return new[] { new IntroducedMember( this, syntax, this.Advice.AspectLayerId, IntroducedMemberSemantic.Override, this.OverriddenDeclaration ) };
         }
 
         private BuiltUserExpression CreateProceedExpression( in MemberIntroductionContext context, TemplateKind templateKind )

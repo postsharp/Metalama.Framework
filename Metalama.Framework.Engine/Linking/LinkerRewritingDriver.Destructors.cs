@@ -143,7 +143,7 @@ namespace Metalama.Framework.Engine.Linking
                 MethodDeclaration(
                         List<AttributeListSyntax>(),
                         modifiers,
-                        PredefinedType(Token(SyntaxKind.VoidKeyword)),
+                        PredefinedType( Token( SyntaxKind.VoidKeyword ) ),
                         null,
                         Identifier( name ),
                         null,

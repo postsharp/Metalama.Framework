@@ -32,12 +32,12 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 INamespaceSymbol => DeclarationKind.Namespace,
                 INamedTypeSymbol => DeclarationKind.NamedType,
-                IMethodSymbol method => 
+                IMethodSymbol method =>
                     method.MethodKind switch
                     {
                         MethodKind.Constructor or MethodKind.StaticConstructor => DeclarationKind.Constructor,
                         MethodKind.Destructor => DeclarationKind.Finalizer,
-                        _ => DeclarationKind.Method,
+                        _ => DeclarationKind.Method
                     },
                 IPropertySymbol => DeclarationKind.Property,
                 IFieldSymbol => DeclarationKind.Field,

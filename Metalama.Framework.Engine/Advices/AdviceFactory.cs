@@ -293,7 +293,7 @@ namespace Metalama.Framework.Engine.Advices
 
             var templateMember = this.ValidateTemplateName( template, TemplateKind.Default, true )
                 .GetTemplateMember<IMethod>( this.State.Compilation, this.State.ServiceProvider )
-                .ForOverride(targetFinalizer, ObjectReader.GetReader( args ) );
+                .ForOverride( targetFinalizer, ObjectReader.GetReader( args ) );
 
             var advice = new OverrideFinalizerAdvice(
                 this.State.AspectInstance,

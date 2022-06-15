@@ -50,6 +50,7 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        public override System.Reflection.MethodBase ToMethodBase() => throw new NotSupportedException("Finalizers cannot be converted to reflection objects.");
+        public override System.Reflection.MethodBase ToMethodBase()
+            => throw new NotSupportedException( "Finalizers cannot be converted to reflection objects." );
     }
 }

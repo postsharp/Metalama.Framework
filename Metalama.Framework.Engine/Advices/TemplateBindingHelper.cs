@@ -201,8 +201,8 @@ namespace Metalama.Framework.Engine.Advices
                 }
 
                 throw new InvalidTemplateSignatureException(
-                        UserMessageFormatter.Format(
-                            $"Cannot use the template '{template.Declaration}' to override the finalizer '{targetFinalizer}': finalizers do not have generic parameters." ) );
+                    UserMessageFormatter.Format(
+                        $"Cannot use the template '{template.Declaration}' to override the finalizer '{targetFinalizer}': finalizers do not have generic parameters." ) );
             }
 
             return new BoundTemplateMethod( template, targetFinalizer, templateArguments );

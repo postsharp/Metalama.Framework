@@ -119,12 +119,12 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
         private IDeclaration SelectSelf( IMember newParent )
             => (newParent, this.MethodKind) switch
             {
-                (IFieldOrProperty { GetMethod: { } getMethod }, Code.MethodKind.PropertyGet ) => getMethod,
-                (IFieldOrProperty { SetMethod: { } setMethod }, Code.MethodKind.PropertySet ) => setMethod,
-                (IEvent { AddMethod: { } addMethod }, Code.MethodKind.EventAdd ) => addMethod,
-                (IEvent { RemoveMethod: { } removeMethod }, Code.MethodKind.EventRemove ) => removeMethod,
-                (IEvent { RaiseMethod: { } raiseMethod }, Code.MethodKind.EventRaise ) => raiseMethod,
-                _ => throw new AssertionFailedException(),
+                (IFieldOrProperty { GetMethod: { } getMethod }, MethodKind.PropertyGet) => getMethod,
+                (IFieldOrProperty { SetMethod: { } setMethod }, MethodKind.PropertySet) => setMethod,
+                (IEvent { AddMethod: { } addMethod }, MethodKind.EventAdd) => addMethod,
+                (IEvent { RemoveMethod: { } removeMethod }, MethodKind.EventRemove) => removeMethod,
+                (IEvent { RaiseMethod: { } raiseMethod }, MethodKind.EventRaise) => raiseMethod,
+                _ => throw new AssertionFailedException()
             };
 
         public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;

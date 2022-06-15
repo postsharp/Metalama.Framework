@@ -230,7 +230,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private IFinalizer? GetFinalizerImpl()
         {
-            if (!this.TypeSymbol.IsValueType)
+            if ( !this.TypeSymbol.IsValueType )
             {
                 var builder = this.Compilation.GetFinalizer( this.TypeSymbol );
 
@@ -239,7 +239,9 @@ namespace Metalama.Framework.Engine.CodeModel
                     return this.Compilation.Factory.GetDeclaration<IFinalizer>( builder );
                 }
 
-                var symbol = this.TypeSymbol.GetMembers().OfType<IMethodSymbol>().SingleOrDefault(m => m.Name == "Finalize" && m.TypeParameters.Length == 0 && m.Parameters.Length == 0);
+                var symbol = this.TypeSymbol.GetMembers()
+                    .OfType<IMethodSymbol>()
+                    .SingleOrDefault( m => m.Name == "Finalize" && m.TypeParameters.Length == 0 && m.Parameters.Length == 0 );
 
                 if ( symbol != null )
                 {
@@ -363,7 +365,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 case DeclarationKind.Event:
                     members = this.Events;
 
-                    break; 
+                    break;
 
                 default:
                     return Enumerable.Empty<IMember>();

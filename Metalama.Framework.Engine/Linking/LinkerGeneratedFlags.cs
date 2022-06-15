@@ -26,8 +26,9 @@ namespace Metalama.Framework.Engine.Linking
         EmptyTriviaStatement = 4,
 
         /// <summary>
-        /// Null literal expression that replaced the original aspect reference. It's parent expression should be removed.
+        /// Null literal expression that replaced the original aspect reference. 
+        /// It's parent statement should be removed and parent expression should be converted to "default".
         /// </summary>
-        NullAspectReferenceExpression = 8,
+        NullAspectReferenceExpression = 8
     }
 }

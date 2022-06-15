@@ -69,7 +69,7 @@ namespace Metalama.Framework.Engine.Linking
 
             var linkedCompilation =
                 input.IntermediateCompilation
-                .Update( replacedTrees );
+                    .Update( replacedTrees );
 
             return new AspectLinkerResult( linkedCompilation, input.DiagnosticSink.ToImmutable() );
         }

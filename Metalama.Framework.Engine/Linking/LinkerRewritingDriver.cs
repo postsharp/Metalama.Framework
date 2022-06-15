@@ -723,12 +723,12 @@ namespace Metalama.Framework.Engine.Linking
                             else if ( aspectReference.ContainingSymbol.ContainingType.Is( targetSymbol.ContainingType ) )
                             {
                                 // Resolved symbol is declared in a base class.
-                                switch ( ( targetSymbol, memberAccessExpression.Expression ) )
+                                switch ( (targetSymbol, memberAccessExpression.Expression) )
                                 {
                                     case (IMethodSymbol { MethodKind: MethodKind.Destructor }, _):
-                                        return 
+                                        return
                                             IdentifierName( "__LINKER_TO_BE_REMOVED__" )
-                                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.NullAspectReferenceExpression );
+                                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.NullAspectReferenceExpression );
 
                                     case (_, IdentifierNameSyntax):
                                     case (_, BaseExpressionSyntax):

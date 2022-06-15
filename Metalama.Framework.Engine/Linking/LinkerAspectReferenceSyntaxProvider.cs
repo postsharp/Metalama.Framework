@@ -5,7 +5,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -15,28 +14,25 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal class LinkerAspectReferenceSyntaxProvider : AspectReferenceSyntaxProvider
     {
-        public LinkerAspectReferenceSyntaxProvider()
-        {
-        }
+        public LinkerAspectReferenceSyntaxProvider() { }
 
         public override ExpressionSyntax GetFinalizerReference( AspectLayerId aspectLayer, IFinalizer overriddenFinalizer, OurSyntaxGenerator syntaxGenerator )
         {
             return
                 InvocationExpression(
                     MemberAccessExpression(
-                        SyntaxKind.SimpleMemberAccessExpression,
-                        HelperTypeName,
-                        GenericName(
-                            Identifier( "Finalizer" ),
-                            TypeArgumentList(
-                                SingletonSeparatedList(
-                                    syntaxGenerator.Type( overriddenFinalizer.DeclaringType.GetSymbol().AssertNotNull() ) ) ) ) )
-                    .WithAspectReferenceAnnotation(
-                        aspectLayer,
-                        AspectReferenceOrder.Base,
-                        AspectReferenceTargetKind.Self,
-                        flags: AspectReferenceFlags.Inlineable ) )
-;            
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            HelperTypeName,
+                            GenericName(
+                                Identifier( "Finalizer" ),
+                                TypeArgumentList(
+                                    SingletonSeparatedList( syntaxGenerator.Type( overriddenFinalizer.DeclaringType.GetSymbol().AssertNotNull() ) ) ) ) )
+                        .WithAspectReferenceAnnotation(
+                            aspectLayer,
+                            AspectReferenceOrder.Base,
+                            AspectReferenceTargetKind.Self,
+                            flags: AspectReferenceFlags.Inlineable ) )
+                ;
         }
 
         private static NameSyntax HelperTypeName => IdentifierName( "__LinkerIntroductionHelpers__" );

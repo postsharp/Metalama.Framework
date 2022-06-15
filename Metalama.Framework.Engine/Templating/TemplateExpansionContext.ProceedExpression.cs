@@ -45,11 +45,11 @@ namespace Metalama.Framework.Engine.Templating
                     case IMethod targetMethod:
                         var isValid = this._methodName switch
                         {
-                            nameof( meta.Proceed ) => true,
-                            nameof( meta.ProceedAsync ) => targetMethod.GetAsyncInfoImpl().IsAwaitableOrVoid,
-                            nameof( meta.ProceedEnumerable ) => targetMethod.GetIteratorInfoImpl().EnumerableKind is EnumerableKind.IEnumerable or EnumerableKind
+                            nameof(meta.Proceed) => true,
+                            nameof(meta.ProceedAsync) => targetMethod.GetAsyncInfoImpl().IsAwaitableOrVoid,
+                            nameof(meta.ProceedEnumerable) => targetMethod.GetIteratorInfoImpl().EnumerableKind is EnumerableKind.IEnumerable or EnumerableKind
                                 .UntypedIEnumerable,
-                            nameof( meta.ProceedEnumerator ) => targetMethod.GetIteratorInfoImpl().EnumerableKind is EnumerableKind.IEnumerator or EnumerableKind
+                            nameof(meta.ProceedEnumerator) => targetMethod.GetIteratorInfoImpl().EnumerableKind is EnumerableKind.IEnumerator or EnumerableKind
                                 .UntypedIEnumerator,
                             "ProceedAsyncEnumerable" => targetMethod.GetIteratorInfoImpl().EnumerableKind is EnumerableKind.IAsyncEnumerable,
                             "ProceedAsyncEnumerator" => targetMethod.GetIteratorInfoImpl().EnumerableKind is EnumerableKind.IAsyncEnumerator,

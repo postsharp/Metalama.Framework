@@ -41,8 +41,7 @@ namespace Metalama.Framework.Engine.Advices
             }
             else
             {
-                return AdviceResult.Create(
-                    new OverrideFinalizerTransformation( this, target, this.BoundTemplate, this.Tags ) );
+                return AdviceResult.Create( new OverrideFinalizerTransformation( this, target, this.BoundTemplate, this.Tags ) );
             }
         }
     }

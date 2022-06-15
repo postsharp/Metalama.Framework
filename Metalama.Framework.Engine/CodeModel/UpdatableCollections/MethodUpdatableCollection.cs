@@ -19,12 +19,12 @@ internal sealed class MethodUpdatableCollection : NonUniquelyNamedMemberUpdatabl
                 method switch
                 {
                     { Name: "<Main>$", ContainingType: { Name: "Program" } } => false,
-                    { MethodKind: MethodKind.Constructor or MethodKind.StaticConstructor} => false,
+                    { MethodKind: MethodKind.Constructor or MethodKind.StaticConstructor } => false,
                     { MethodKind: MethodKind.PropertyGet or MethodKind.PropertySet } => false,
                     { MethodKind: MethodKind.EventAdd or MethodKind.EventRemove or MethodKind.EventRaise } => false,
                     { MethodKind: MethodKind.Destructor } => false,
-                    _ => true,
+                    _ => true
                 },
-            _ => false,
+            _ => false
         };
 }

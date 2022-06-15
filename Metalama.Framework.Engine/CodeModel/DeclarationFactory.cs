@@ -231,16 +231,16 @@ namespace Metalama.Framework.Engine.CodeModel
                     {
                         var method = (IMethodSymbol) symbol;
 
-                        return 
-                            kind == DeclarationRefTargetKind.Return 
-                            ? this.GetReturnParameter( method ) 
-                            : method.GetDeclarationKind() switch
-                            {
-                                DeclarationKind.Method => this.GetMethod( method ),
-                                DeclarationKind.Constructor => this.GetConstructor( method ),
-                                DeclarationKind.Finalizer => this.GetFinalizer( method),
-                                _ => throw new AssertionFailedException(),
-                            };
+                        return
+                            kind == DeclarationRefTargetKind.Return
+                                ? this.GetReturnParameter( method )
+                                : method.GetDeclarationKind() switch
+                                {
+                                    DeclarationKind.Method => this.GetMethod( method ),
+                                    DeclarationKind.Constructor => this.GetConstructor( method ),
+                                    DeclarationKind.Finalizer => this.GetFinalizer( method ),
+                                    _ => throw new AssertionFailedException()
+                                };
                     }
 
                 case SymbolKind.Property:

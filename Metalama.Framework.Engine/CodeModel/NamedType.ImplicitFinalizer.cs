@@ -7,10 +7,14 @@ using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Metrics;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Reflection;
 using System.Text;
+using Accessibility = Metalama.Framework.Code.Accessibility;
+using MethodKind = Metalama.Framework.Code.MethodKind;
+using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
@@ -55,7 +59,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 }
             }
 
-            public Code.MethodKind MethodKind => Code.MethodKind.Finalizer;
+            public MethodKind MethodKind => MethodKind.Finalizer;
 
             public bool IsVirtual => true;
 
@@ -68,7 +72,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             public bool IsImplicit => true;
 
-            public Code.Accessibility Accessibility => Code.Accessibility.Protected;
+            public Accessibility Accessibility => Accessibility.Protected;
 
             public bool IsAbstract => false;
 
@@ -84,7 +88,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             public IMember? OverriddenMember => this.OverriddenFinalizer;
 
-            public ImmutableArray<Microsoft.CodeAnalysis.SyntaxReference> DeclaringSyntaxReferences => ImmutableArray<Microsoft.CodeAnalysis.SyntaxReference>.Empty;
+            public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 
             public bool CanBeInherited => true;
 
@@ -106,15 +110,15 @@ namespace Metalama.Framework.Engine.CodeModel
 
             public MemberInfo ToMemberInfo()
             {
-                throw new System.NotImplementedException();
+                throw new NotImplementedException();
             }
 
             public System.Reflection.MethodBase ToMethodBase()
             {
-                throw new System.NotImplementedException();
+                throw new NotImplementedException();
             }
 
-            public IRef<IDeclaration> ToRef() => Ref.FromImplicitMember( this.DeclaringType, t => ((INamedType)t).Finalizer.AssertNotNull());
+            public IRef<IDeclaration> ToRef() => Ref.FromImplicitMember( this.DeclaringType, t => ((INamedType) t).Finalizer.AssertNotNull() );
 
             Ref<IDeclaration> IDeclarationImpl.ToRef() => Ref.FromImplicitMember( this.DeclaringType, t => ((INamedType) t).Finalizer.AssertNotNull() );
 
@@ -128,7 +132,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             public T GetMetric<T>()
                 where T : IMetric
-                => ((IDeclarationImpl)this.DeclaringType).GetMetric<T>();
+                => ((IDeclarationImpl) this.DeclaringType).GetMetric<T>();
         }
     }
 }

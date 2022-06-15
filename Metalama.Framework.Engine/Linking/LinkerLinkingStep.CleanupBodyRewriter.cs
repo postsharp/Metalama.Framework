@@ -197,9 +197,9 @@ namespace Metalama.Framework.Engine.Linking
 
             public override SyntaxNode? VisitInvocationExpression( InvocationExpressionSyntax node )
             {
-                if (node.Expression.GetLinkerGeneratedFlags().HasFlag( LinkerGeneratedFlags.NullAspectReferenceExpression ) )
+                if ( node.Expression.GetLinkerGeneratedFlags().HasFlag( LinkerGeneratedFlags.NullAspectReferenceExpression ) )
                 {
-                    return IdentifierName("__LINKER_TO_BE_REMOVED__")
+                    return IdentifierName( "__LINKER_TO_BE_REMOVED__" )
                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.NullAspectReferenceExpression );
                 }
 
@@ -208,7 +208,7 @@ namespace Metalama.Framework.Engine.Linking
 
             public override SyntaxNode? VisitExpressionStatement( ExpressionStatementSyntax node )
             {
-                var transformed = (ExpressionSyntax)this.Visit( node.Expression ).AssertNotNull();
+                var transformed = (ExpressionSyntax) this.Visit( node.Expression ).AssertNotNull();
 
                 if ( transformed.GetLinkerGeneratedFlags().HasFlag( LinkerGeneratedFlags.NullAspectReferenceExpression ) )
                 {

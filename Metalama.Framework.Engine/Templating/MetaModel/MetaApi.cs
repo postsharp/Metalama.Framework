@@ -39,9 +39,10 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IConstructor Constructor => this._constructor ?? throw this.CreateInvalidOperationException( nameof(this.Constructor) );
 
-        public IFinalizer Finalizer => this._finalizer ?? throw this.CreateInvalidOperationException( nameof( this.Finalizer ) );
+        public IFinalizer Finalizer => this._finalizer ?? throw this.CreateInvalidOperationException( nameof(this.Finalizer) );
 
-        public IMethodBase MethodBase => (IMethodBase?) this._method ?? this._finalizer ?? throw this.CreateInvalidOperationException( nameof( this.MethodBase ) );
+        public IMethodBase MethodBase
+            => (IMethodBase?) this._method ?? this._finalizer ?? throw this.CreateInvalidOperationException( nameof(this.MethodBase) );
 
         public IAdvisedField Field => this._fieldOrProperty as IAdvisedField ?? throw this.CreateInvalidOperationException( nameof(this.Field) );
 

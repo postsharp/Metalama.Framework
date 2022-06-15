@@ -83,6 +83,19 @@ namespace Metalama.Framework.Engine.CodeModel.References
             => new( methodSymbol, compilation, DeclarationRefTargetKind.Return );
 
         internal static Ref<ICompilation> Compilation( Compilation compilation ) => new( DeclarationRefTargetKind.Assembly, compilation );
+
+        internal class ImplicitDeclarationRecord
+        {
+            public IRef<IDeclaration> Parent { get; }
+
+            public Func<IDeclaration, IDeclaration> Selector { get; }
+
+            public ImplicitDeclarationRecord( IRef<IDeclaration> parent, Func<IDeclaration, IDeclaration> selector )
+            {
+                this.Parent = parent;
+                this.Selector = selector;
+            }
+        }
     }
 
     /// <summary>
@@ -143,7 +156,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         internal Ref( IDeclaration parent, Func<IDeclaration, IDeclaration> selector )
         {
-            this.Target = new RefImplicitDeclarationRecord( parent.ToRef(), selector );
+            this.Target = new Ref.ImplicitDeclarationRecord( parent.ToRef(), selector );
             this.TargetKind = DeclarationRefTargetKind.Default;
             this._compilation = parent.Compilation.GetRoslynCompilation();
         }
@@ -350,7 +363,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 case IDeclarationBuilder builder:
                     return (T) compilation.Factory.GetDeclaration( builder );
 
-                case RefImplicitDeclarationRecord implicitDeclaration:
+                case Ref.ImplicitDeclarationRecord implicitDeclaration:
                     return (T) implicitDeclaration.Selector( implicitDeclaration.Parent.GetTarget( compilation ) );
 
                 case string id:
@@ -386,18 +399,5 @@ namespace Metalama.Framework.Engine.CodeModel.References
             => new( this.Target, this._compilation, this.TargetKind );
 
         public override int GetHashCode() => this.Target?.GetHashCode() ?? 0;
-    }
-
-    internal class RefImplicitDeclarationRecord
-    {
-        public IRef<IDeclaration> Parent { get; }
-
-        public Func<IDeclaration, IDeclaration> Selector { get; }
-
-        public RefImplicitDeclarationRecord( IRef<IDeclaration> parent, Func<IDeclaration, IDeclaration> selector )
-        {
-            this.Parent = parent;
-            this.Selector = selector;
-        }
     }
 }
