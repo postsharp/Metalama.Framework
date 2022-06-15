@@ -108,7 +108,10 @@ namespace Metalama.Framework.Engine.Advices
             if ( existingMethod == null )
             {
                 // Check that there is no other member named the same, otherwise we cannot add a method.
-                var existingOtherMember = targetDeclaration.FindClosestUniquelyNamedMember( this.MemberBuilder.Name );
+                var existingOtherMember =
+                    this.Builder is { Name: "Finalize", Parameters: { Count: 0 }, TypeParameters: { Count: 0 } }
+                    ? targetDeclaration.Finalizer
+                    : targetDeclaration.FindClosestUniquelyNamedMember( this.MemberBuilder.Name );
 
                 if ( existingOtherMember != null )
                 {
