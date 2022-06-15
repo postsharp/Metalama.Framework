@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Advising;
 
 namespace Metalama.Framework.Engine.Transformations;
 

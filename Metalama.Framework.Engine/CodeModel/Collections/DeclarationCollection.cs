@@ -64,7 +64,9 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 
         public int Count => this.Source.Count;
 
-        protected TDeclaration GetItem( in TRef reference ) => reference.GetTarget( this.Compilation );
+        // We allow resolving references to missing declarations because the collection may be a child collection of a missing declaration,
+        // for instance the parameters of a method that has been introduced into the current compilation but is not included in the current compilation.
+        protected TDeclaration GetItem( in TRef reference ) => reference.GetTarget( this.Compilation, ReferenceResolutionOptions.CanBeMissing );
 
         protected IEnumerable<TDeclaration> GetItems( IEnumerable<TRef> references ) => references.Select( x => x.GetTarget( this.Compilation ) );
 

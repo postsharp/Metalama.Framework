@@ -4,6 +4,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
@@ -63,6 +64,6 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         }
 
         internal T Translate<T>( T declaration ) where T : class, IDeclaration
-            => declaration.Translate( this.SourceCompilation, ReferenceResolutionOptions.CanBeMissing );
+            => declaration.ForCompilation( this.SourceCompilation, ReferenceResolutionOptions.CanBeMissing );
     }
 }

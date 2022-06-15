@@ -4,6 +4,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;

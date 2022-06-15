@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Options;

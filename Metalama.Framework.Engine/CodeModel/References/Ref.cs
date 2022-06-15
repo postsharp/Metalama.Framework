@@ -357,7 +357,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
             if ( this.TargetKind != DeclarationRefTargetKind.Default )
             {
-                value += $" ({this.TargetKind}";
+                value += $" ({this.TargetKind})";
             }
 
             return value;
