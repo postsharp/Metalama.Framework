@@ -250,6 +250,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
                 _ => throw new AssertionFailedException()
             };
 
-        public static MetaApi ForEvent( IEvent @event, IMethod accessor, MetaApiProperties common ) => new( common.Translate( @event ), common.Translate( accessor ), common );
+        public static MetaApi ForEvent( IEvent @event, IMethod accessor, MetaApiProperties common )
+            => new( common.Translate( @event ), common.Translate( accessor ), common );
     }
 }

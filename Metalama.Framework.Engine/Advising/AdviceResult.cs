@@ -1,4 +1,7 @@
-﻿using Metalama.Framework.Advising;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System;
@@ -9,7 +12,8 @@ namespace Metalama.Framework.Engine.Advising;
 /// Represents the result of a method of <see cref="IAdviceFactory"/>.
 /// </summary>
 /// <typeparam name="T">The type of declaration returned by the advice method.</typeparam>
-internal class AdviceResult<T> : IIntroductionAdviceResult<T>, IOverrideAdviceResult<T>, IImplementInterfaceAdviceResult, IAddContractAdviceResult<T>, IAddInitializerAdviceResult,
+internal class AdviceResult<T> : IIntroductionAdviceResult<T>, IOverrideAdviceResult<T>, IImplementInterfaceAdviceResult, IAddContractAdviceResult<T>,
+                                 IAddInitializerAdviceResult,
                                  IAddAttributeAdviceResult, IRemoveAttributesAdviceResult, IAppendParameterAdviceResult
     where T : class, IDeclaration
 {

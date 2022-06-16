@@ -62,11 +62,15 @@ namespace Metalama.Framework.Engine.CodeModel.References
         /// </summary>
         public static Ref<IDeclaration> FromSymbol( ISymbol symbol, Compilation compilation ) => new( symbol, compilation );
 
-        public static Ref<IDeclaration> PseudoAccessor( IMemberWithAccessors declaringMember, MethodKind methodKind ) => new( declaringMember.GetSymbol().AssertNotNull(  ), declaringMember.GetCompilationModel().RoslynCompilation, methodKind switch
-        {
-            MethodKind.PropertyGet => DeclarationRefTargetKind.PropertyGet,
-            MethodKind.PropertySet => DeclarationRefTargetKind.PropertySet,
-        } );
+        public static Ref<IDeclaration> PseudoAccessor( IMemberWithAccessors declaringMember, MethodKind methodKind )
+            => new(
+                declaringMember.GetSymbol().AssertNotNull(),
+                declaringMember.GetCompilationModel().RoslynCompilation,
+                methodKind switch
+                {
+                    MethodKind.PropertyGet => DeclarationRefTargetKind.PropertyGet,
+                    MethodKind.PropertySet => DeclarationRefTargetKind.PropertySet
+                } );
 
         public static Ref<T> FromSymbolId<T>( SymbolId symbolKey )
             where T : class, ICompilationElement
@@ -123,7 +127,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
             this.TargetKind = targetKind;
             this._compilation = compilation;
         }
-        
+
         internal Ref( SymbolId symbolKey )
         {
             this.Target = symbolKey.ToString();
@@ -304,7 +308,11 @@ namespace Metalama.Framework.Engine.CodeModel.References
             return symbol;
         }
 
-        private static T Resolve( object? reference, CompilationModel compilation, ReferenceResolutionOptions options = default, DeclarationRefTargetKind kind = DeclarationRefTargetKind.Default )
+        private static T Resolve(
+            object? reference,
+            CompilationModel compilation,
+            ReferenceResolutionOptions options = default,
+            DeclarationRefTargetKind kind = DeclarationRefTargetKind.Default )
         {
             switch ( reference )
             {
@@ -371,10 +379,11 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public bool Equals( Ref<T> other ) => RefEqualityComparer<T>.Default.Equals( this, other );
     }
-    
+
     internal static class ReferenceResolutionOptionsExtensions
     {
         public static bool MustExist( this ReferenceResolutionOptions options ) => (options & ReferenceResolutionOptions.CanBeMissing) == 0;
+
         public static bool FollowRedirections( this ReferenceResolutionOptions options ) => (options & ReferenceResolutionOptions.DoNotFollowRedirections) == 0;
     }
 }

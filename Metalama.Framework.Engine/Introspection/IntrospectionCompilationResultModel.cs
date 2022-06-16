@@ -40,7 +40,7 @@ internal class IntrospectionCompilationResultModel : IIntrospectionCompilationOu
         => this._pipelineResult == null
             ? ImmutableArray<IIntrospectionAspectInstance>.Empty
             : this._pipelineResult.AspectInstanceResults
-                .Select( x => this._introspectionAspectInstanceFactory.AssertNotNull(  ).GetIntrospectionAspectInstance( x.AspectInstance ) )
+                .Select( x => this._introspectionAspectInstanceFactory.AssertNotNull().GetIntrospectionAspectInstance( x.AspectInstance ) )
                 .ToImmutableArray<IIntrospectionAspectInstance>();
 
     [Memo]

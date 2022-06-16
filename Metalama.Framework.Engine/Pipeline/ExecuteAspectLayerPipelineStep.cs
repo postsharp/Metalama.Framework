@@ -79,7 +79,7 @@ internal class ExecuteAspectLayerPipelineStep : PipelineStep
             // Execute the aspect.
             var aspectResult = aspectDriver.ExecuteAspect(
                 aspect.AspectInstance,
-                currentCompilation, 
+                currentCompilation,
                 mutableCompilationForThisAspect,
                 this.Parent.PipelineConfiguration,
                 cancellationToken );
@@ -113,7 +113,7 @@ internal class ExecuteAspectLayerPipelineStep : PipelineStep
 
                     break;
             }
-            
+
             this.Parent.AddAspectInstanceResult( aspectResult );
         }
     }

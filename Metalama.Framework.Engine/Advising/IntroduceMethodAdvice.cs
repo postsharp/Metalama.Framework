@@ -32,7 +32,18 @@ namespace Metalama.Framework.Engine.Advising
             Action<IMethodBuilder>? buildAction,
             string? layerName,
             IObjectReader tags )
-            : base( aspect, templateInstance, targetDeclaration, sourceCompilation, null, boundTemplate.Template, scope, overrideStrategy, buildAction, layerName, tags )
+            : base(
+                aspect,
+                templateInstance,
+                targetDeclaration,
+                sourceCompilation,
+                null,
+                boundTemplate.Template,
+                scope,
+                overrideStrategy,
+                buildAction,
+                layerName,
+                tags )
         {
             this.BoundTemplate = boundTemplate;
             Invariant.Assert( !boundTemplate.IsNull );

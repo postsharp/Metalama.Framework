@@ -410,7 +410,7 @@ namespace Metalama.Framework.Advising
             InitializerKind kind,
             object? tags = null,
             object? args = null );
-        
+
         IAddInitializerAdviceResult AddInitializer(
             INamedType targetType,
             IStatement statement,
@@ -425,7 +425,7 @@ namespace Metalama.Framework.Advising
         ///     <see cref="meta"/> API.</param>
         /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template.</param>
         IAddInitializerAdviceResult AddInitializer( IConstructor targetConstructor, string template, object? tags = null, object? args = null );
-        
+
         IAddInitializerAdviceResult AddInitializer( IConstructor targetConstructor, IStatement statement );
 
         /// <summary>

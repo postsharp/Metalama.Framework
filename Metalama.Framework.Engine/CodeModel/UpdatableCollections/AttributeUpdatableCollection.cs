@@ -36,7 +36,7 @@ internal class AttributeUpdatableCollection : UpdatableDeclarationCollection<IAt
                     DeclarationRefTargetKind.Default => symbol.GetAttributes(),
                     _ => throw new NotImplementedException()
                 };
-                    
+
                 foreach ( var attribute in attributes )
                 {
                     if ( attribute.AttributeConstructor == null )

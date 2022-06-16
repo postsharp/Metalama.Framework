@@ -43,8 +43,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public DeclarationSerializableId ToSerializableId() => this._underlying.ToSerializableId();
 
-        
-        public T GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default) => this._underlying.GetTarget( compilation, options );
+        public T GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default ) => this._underlying.GetTarget( compilation, options );
 
         public ISymbol? GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => this._underlying.GetSymbol( compilation );
 

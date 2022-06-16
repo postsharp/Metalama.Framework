@@ -47,13 +47,13 @@ namespace Metalama.Framework.Engine.Advising
             }
             else
             {
-                #if DEBUG
+#if DEBUG
                 if ( direction == ContractDirection.Input && targetDeclaration is IParameter { IsReturnParameter: true } )
                 {
                     throw new AssertionFailedException();
                 }
-                
-                #endif
+
+#endif
                 this.Direction = direction;
             }
         }

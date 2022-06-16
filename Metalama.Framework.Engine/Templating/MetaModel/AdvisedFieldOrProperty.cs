@@ -5,7 +5,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Advised;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis.CSharp;

@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.Advising
             this.State = state;
             this._templateInstance = templateInstance;
             this._layerName = layerName;
-            
+
             // The AdviceFactory is now always working on the initial compilation.
             // In the future, AdviceFactory could work on a compilation snapshot, however we have no use case for this feature yet.
             this._compilation = state.InitialCompilation;
@@ -48,8 +48,6 @@ namespace Metalama.Framework.Engine.Advising
 
         public AdviceFactory WithTemplateClassInstance( TemplateClassInstance templateClassInstance )
             => new( this.State, templateClassInstance, this._layerName );
-
-     
 
         public IAdviceFactory WithTemplateProvider( ITemplateProvider templateProvider )
         {
@@ -260,7 +258,7 @@ namespace Metalama.Framework.Engine.Advising
                     break;
             }
 
-            return new AdviceResult<T>( result.NewDeclaration.As<T>(), this._compilation, result.Outcome, this.State.AspectBuilder.AssertNotNull(  ) );
+            return new AdviceResult<T>( result.NewDeclaration.As<T>(), this._compilation, result.Outcome, this.State.AspectBuilder.AssertNotNull() );
         }
 
         private void ValidateTarget( IDeclaration target, params IDeclaration[] otherTargets )
@@ -270,7 +268,7 @@ namespace Metalama.Framework.Engine.Advising
             {
                 throw new InvalidOperationException( "The target declaration is not in the current compilation." );
             }
-            
+
             // Check that the advised target is under the current the aspect target.
             if ( !target.IsContainedIn( this._aspectTarget.GetDeclaringType() ?? this._aspectTarget ) )
             {
@@ -280,7 +278,7 @@ namespace Metalama.Framework.Engine.Advising
             // Check other targets.
             foreach ( var t in otherTargets )
             {
-                   this.ValidateTarget( t );
+                this.ValidateTarget( t );
             }
         }
 
@@ -978,7 +976,8 @@ namespace Metalama.Framework.Engine.Advising
             INamedType targetType,
             IStatement statement,
             InitializerKind kind )
-        {if ( this._templateInstance == null )
+        {
+            if ( this._templateInstance == null )
             {
                 throw new InvalidOperationException();
             }
@@ -995,7 +994,6 @@ namespace Metalama.Framework.Engine.Advising
                 this._layerName );
 
             return this.ExecuteAdvice<INamedType>( advice );
-            
         }
 
         public IAddInitializerAdviceResult AddInitializer( IConstructor targetConstructor, string template, object? tags = null, object? args = null )
@@ -1031,7 +1029,6 @@ namespace Metalama.Framework.Engine.Advising
             }
 
             this.ValidateTarget( targetConstructor );
-
 
             var advice = new SyntaxBasedInitializeAdvice(
                 this.State.AspectInstance,
@@ -1076,7 +1073,7 @@ namespace Metalama.Framework.Engine.Advising
                     nameof(kind),
                     UserMessageFormatter.Format( $"Cannot add an input contract to the out parameter '{targetParameter}' " ) );
             }
-            
+
             if ( kind == ContractDirection.Input && targetParameter.IsReturnParameter )
             {
                 throw new ArgumentOutOfRangeException(
@@ -1142,7 +1139,7 @@ namespace Metalama.Framework.Engine.Advising
                     advice.LastAdviceImplementationResult.AssertNotNull().NewDeclaration.As<T>(),
                     this.State.CurrentCompilation,
                     AdviceOutcome.Default,
-                    this.State.AspectBuilder.AssertNotNull(  ));
+                    this.State.AspectBuilder.AssertNotNull() );
             }
 
             // We keep adding contracts to the same advice instance even after it has produced a transformation because the transformation will use this list of advice.
@@ -1157,13 +1154,26 @@ namespace Metalama.Framework.Engine.Advising
             OverrideStrategy whenExists = OverrideStrategy.Default )
         {
             return this.ExecuteAdvice<IDeclaration>(
-                new AddAttributeAdvice( this.State.AspectInstance, this._templateInstance!, targetDeclaration, this._compilation, attribute, whenExists, this._layerName ) );
+                new AddAttributeAdvice(
+                    this.State.AspectInstance,
+                    this._templateInstance!,
+                    targetDeclaration,
+                    this._compilation,
+                    attribute,
+                    whenExists,
+                    this._layerName ) );
         }
 
         public IRemoveAttributesAdviceResult RemoveAttributes( IDeclaration targetDeclaration, INamedType attributeType )
         {
             return this.ExecuteAdvice<IDeclaration>(
-                new RemoveAttributesAdvice( this.State.AspectInstance, this._templateInstance!, targetDeclaration, this._compilation, attributeType, this._layerName ) );
+                new RemoveAttributesAdvice(
+                    this.State.AspectInstance,
+                    this._templateInstance!,
+                    targetDeclaration,
+                    this._compilation,
+                    attributeType,
+                    this._layerName ) );
         }
 
         public IRemoveAttributesAdviceResult RemoveAttributes( IDeclaration targetDeclaration, Type attributeType )
@@ -1173,7 +1183,7 @@ namespace Metalama.Framework.Engine.Advising
             IConstructor constructor,
             string parameterName,
             IType parameterType,
-            Func<IParameter,IConstructor, PullAction> pullAction,
+            Func<IParameter, IConstructor, PullAction> pullAction,
             Action<IParameterBuilder>? buildAction = null )
         {
             if ( this._templateInstance == null )
@@ -1183,7 +1193,7 @@ namespace Metalama.Framework.Engine.Advising
 
             this.ValidateTarget( constructor );
 
-             var advice = new AppendConstructorParameterAdvice(
+            var advice = new AppendConstructorParameterAdvice(
                 this.State.AspectInstance,
                 this._templateInstance,
                 constructor,
@@ -1192,8 +1202,7 @@ namespace Metalama.Framework.Engine.Advising
                 parameterName,
                 parameterType,
                 buildAction,
-                pullAction
-                 );
+                pullAction );
 
             return this.ExecuteAdvice<IConstructor>( advice );
         }

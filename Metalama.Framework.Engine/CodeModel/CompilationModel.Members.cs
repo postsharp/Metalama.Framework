@@ -39,12 +39,15 @@ public partial class CompilationModel
         => this._methods.TryGetValue( methodBuilder.DeclaringType.GetSymbol(), out var methods ) && methods.Contains( methodBuilder.ToTypedRef<IMethod>() );
 
     internal bool Contains( ConstructorBuilder constructorBuilder )
-        => this._constructors.TryGetValue( constructorBuilder.DeclaringType.GetSymbol(), out var constructors ) && constructors.Contains( constructorBuilder.ToTypedRef<IConstructor>() );
+        => this._constructors.TryGetValue( constructorBuilder.DeclaringType.GetSymbol(), out var constructors )
+           && constructors.Contains( constructorBuilder.ToTypedRef<IConstructor>() );
+
     internal bool Contains( EventBuilder eventBuilder )
         => this._events.TryGetValue( eventBuilder.DeclaringType.GetSymbol(), out var events ) && events.Contains( eventBuilder.ToTypedRef<IEvent>() );
 
     internal bool Contains( PropertyBuilder propertyBuilder )
-        => this._properties.TryGetValue( propertyBuilder.DeclaringType.GetSymbol(), out var properties ) && properties.Contains( propertyBuilder.ToTypedRef<IProperty>() );
+        => this._properties.TryGetValue( propertyBuilder.DeclaringType.GetSymbol(), out var properties )
+           && properties.Contains( propertyBuilder.ToTypedRef<IProperty>() );
 
     internal bool Contains( DeclarationBuilder builder )
         => builder switch
@@ -56,7 +59,7 @@ public partial class CompilationModel
             PropertyBuilder propertyBuilder => this.Contains( propertyBuilder ),
             _ => throw new AssertionFailedException()
         };
-    
+
     internal bool Contains( ParameterBuilder parameterBuilder )
     {
         if ( parameterBuilder.IsReturnParameter )
@@ -67,8 +70,7 @@ public partial class CompilationModel
         {
             return this.Contains( declarationBuilder ) && ((IHasParameters) declarationBuilder).Parameters.Contains( parameterBuilder );
         }
-        
-        
+
         // This can also be a parameter appended to an existing declaration.
         return this._parameters.TryGetValue( parameterBuilder.DeclaringMember.ToTypedRef(), out var events )
                && events.Contains( parameterBuilder.ToTypedRef<IParameter>() );

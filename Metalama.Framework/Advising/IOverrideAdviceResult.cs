@@ -14,5 +14,4 @@ public interface IOverrideAdviceResult<out T> : IAdviceResult
     /// this is the property that now represents the field.
     /// </summary>
     T Declaration { get; }
-
 }

@@ -39,7 +39,18 @@ namespace Metalama.Framework.Engine.Advising
             string? layerName,
             IObjectReader tags,
             IObjectReader parameters )
-            : base( aspect, templateInstance, targetDeclaration, sourceCompilation, explicitName, eventTemplate, scope, overrideStrategy, buildAction, layerName, tags )
+            : base(
+                aspect,
+                templateInstance,
+                targetDeclaration,
+                sourceCompilation,
+                explicitName,
+                eventTemplate,
+                scope,
+                overrideStrategy,
+                buildAction,
+                layerName,
+                tags )
         {
             this._addTemplate = addTemplate;
             this._removeTemplate = removeTemplate;

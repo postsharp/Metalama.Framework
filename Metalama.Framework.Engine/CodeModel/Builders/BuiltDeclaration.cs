@@ -48,7 +48,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override DeclarationKind DeclarationKind => this.Builder.DeclarationKind;
 
-        protected IDeclaration GetForCompilation( ICompilation compilation, ReferenceResolutionOptions options ) => this.GetForCompilation( (CompilationModel) compilation, options );
+        protected IDeclaration GetForCompilation( ICompilation compilation, ReferenceResolutionOptions options )
+            => this.GetForCompilation( (CompilationModel) compilation, options );
 
         protected IDeclaration GetForCompilation( CompilationModel compilation, ReferenceResolutionOptions options )
             => this.Compilation == compilation ? this : compilation.Factory.GetDeclaration( this.Builder, options );

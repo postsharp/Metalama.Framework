@@ -241,14 +241,16 @@ namespace Metalama.Framework.Engine.CodeModel
                 case SymbolKind.Property:
                     var propertySymbol = (IPropertySymbol) symbol;
 
-                    var propertyOrIndexer = propertySymbol.IsIndexer ? (IPropertyOrIndexer) this.GetIndexer( propertySymbol ) : this.GetProperty( propertySymbol );
+                    var propertyOrIndexer = propertySymbol.IsIndexer
+                        ? (IPropertyOrIndexer) this.GetIndexer( propertySymbol )
+                        : this.GetProperty( propertySymbol );
 
                     return kind switch
                     {
                         // Implicit getter or setter.
                         DeclarationRefTargetKind.PropertyGet => propertyOrIndexer.GetMethod,
                         DeclarationRefTargetKind.PropertySet => propertyOrIndexer.SetMethod,
-                        
+
                         // The property itself.
                         DeclarationRefTargetKind.Default => propertyOrIndexer,
                         _ => throw new AssertionFailedException()
@@ -371,14 +373,14 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private Exception CreateBuilderNotExists( IDeclarationBuilder builder )
             => new InvalidOperationException( $"The declaration '{builder}' does not exist in the current compilation." );
-        
+
         internal IParameter GetParameter( ParameterBuilder parameterBuilder, ReferenceResolutionOptions options )
         {
-            if (  options.MustExist() && !this._compilationModel.Contains( parameterBuilder ) )
+            if ( options.MustExist() && !this._compilationModel.Contains( parameterBuilder ) )
             {
                 throw this.CreateBuilderNotExists( parameterBuilder );
             }
-                
+
             return (IParameter) this._defaultCache.GetOrAdd(
                 Ref.FromBuilder( parameterBuilder ).As<ICompilationElement>(),
                 l => new BuiltParameter( (IParameterBuilder) l.Target!, this._compilationModel ) );
@@ -395,7 +397,7 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 throw this.CreateBuilderNotExists( methodBuilder );
             }
-            
+
             return (IMethod) this._defaultCache.GetOrAdd(
                 Ref.FromBuilder( methodBuilder ).As<ICompilationElement>(),
                 l => new BuiltMethod( (MethodBuilder) l.Target!, this._compilationModel ) );
@@ -415,11 +417,11 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal IConstructor GetConstructor( ConstructorBuilder methodBuilder, ReferenceResolutionOptions options )
         {
-            if (  options.MustExist() && !this._compilationModel.Contains( methodBuilder ) )
+            if ( options.MustExist() && !this._compilationModel.Contains( methodBuilder ) )
             {
                 throw this.CreateBuilderNotExists( methodBuilder );
             }
-            
+
             return (IConstructor) this._defaultCache.GetOrAdd(
                 Ref.FromBuilder( methodBuilder ).As<ICompilationElement>(),
                 l => new BuiltConstructor( (ConstructorBuilder) l.Target!, this._compilationModel ) );
@@ -427,11 +429,11 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal IField GetField( FieldBuilder fieldBuilder, ReferenceResolutionOptions options )
         {
-            if (  options.MustExist() && !this._compilationModel.Contains( fieldBuilder ) )
+            if ( options.MustExist() && !this._compilationModel.Contains( fieldBuilder ) )
             {
                 throw this.CreateBuilderNotExists( fieldBuilder );
             }
-            
+
             return (IField) this._defaultCache.GetOrAdd(
                 Ref.FromBuilder( fieldBuilder ).As<ICompilationElement>(),
                 l => new BuiltField( (FieldBuilder) l.Target!, this._compilationModel ) );
@@ -439,11 +441,11 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal IProperty GetProperty( PropertyBuilder propertyBuilder, ReferenceResolutionOptions options )
         {
-            if ( options.MustExist() &&  !this._compilationModel.Contains( propertyBuilder ) )
+            if ( options.MustExist() && !this._compilationModel.Contains( propertyBuilder ) )
             {
                 throw this.CreateBuilderNotExists( propertyBuilder );
             }
-            
+
             return (IProperty) this._defaultCache.GetOrAdd(
                 Ref.FromBuilder( propertyBuilder ).As<ICompilationElement>(),
                 l => new BuiltProperty( (PropertyBuilder) l.Target!, this._compilationModel ) );
@@ -451,11 +453,11 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal IEvent GetEvent( EventBuilder propertyBuilder, ReferenceResolutionOptions options )
         {
-            if (  options.MustExist() && !this._compilationModel.Contains( propertyBuilder ) )
+            if ( options.MustExist() && !this._compilationModel.Contains( propertyBuilder ) )
             {
                 throw this.CreateBuilderNotExists( propertyBuilder );
             }
-            
+
             return (IEvent) this._defaultCache.GetOrAdd(
                 Ref.FromBuilder( propertyBuilder ).As<ICompilationElement>(),
                 l => new BuiltEvent( (EventBuilder) l.Target!, this._compilationModel ) );

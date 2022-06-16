@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Advising;
 internal class AdviceFactoryState
 {
     private int _nextTransformationOrder;
-    
+
     public Dictionary<IMember, ContractAdvice> ContractAdvices { get; }
 
     public CompilationModel CurrentCompilation { get; }
@@ -78,5 +78,4 @@ internal class AdviceFactoryState
     }
 
     public int GetTransformationOrder() => this._nextTransformationOrder++;
-
 }

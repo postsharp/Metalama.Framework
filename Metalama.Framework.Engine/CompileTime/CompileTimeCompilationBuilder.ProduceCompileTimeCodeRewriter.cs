@@ -29,7 +29,6 @@ namespace Metalama.Framework.Engine.CompileTime
 {
     internal static class SystemTypeDetector
     {
-
         public static bool IsSystemType( INamedTypeSymbol namedType )
         {
             switch ( namedType.GetReflectionName() )
@@ -48,6 +47,7 @@ namespace Metalama.Framework.Engine.CompileTime
             return false;
         }
     }
+
     internal partial class CompileTimeCompilationBuilder
     {
         /// <summary>
@@ -153,6 +153,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 else
                 {
                     this.FoundCompileTimeCode = true;
+
                     return base.VisitEnumDeclaration( node )!.WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
                 }
             }
@@ -298,13 +299,12 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
             }
 
-
             private IEnumerable<MemberDeclarationSyntax> VisitTypeDeclaration( TypeDeclarationSyntax node )
             {
                 this._cancellationToken.ThrowIfCancellationRequested();
 
                 var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
-                
+
                 // Eliminate system types.
                 if ( SystemTypeDetector.IsSystemType( symbol ) )
                 {
@@ -1046,7 +1046,7 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 // Get the list of members that are not statements, local variables, local functions,...
                 var nonTopLevelMembers = node.Members.Where(
-                        m => m is BaseTypeDeclarationSyntax or NamespaceDeclarationSyntax or DelegateDeclarationSyntax or FileScopedNamespaceDeclarationSyntax  )
+                        m => m is BaseTypeDeclarationSyntax or NamespaceDeclarationSyntax or DelegateDeclarationSyntax or FileScopedNamespaceDeclarationSyntax )
                     .ToList();
 
                 var transformedMembers = this.VisitTypeOrNamespaceMembers( nonTopLevelMembers );

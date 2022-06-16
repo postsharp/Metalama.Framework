@@ -1,27 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
-using Metalama.Framework.Code.DeclarationBuilders;
-using Metalama.Framework.Code.SyntaxBuilders;
-using Metalama.Framework.Diagnostics;
-using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Templating;
-using Metalama.Framework.Engine.Templating.Expressions;
-using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Project;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
-using System.Linq;
-using RefKind = Metalama.Framework.Code.RefKind;
-
 namespace Metalama.Framework.Engine.Advising;
 
 /*

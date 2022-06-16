@@ -51,9 +51,9 @@ namespace Metalama.Framework.Engine.CompileTime
         private readonly ICompileTimeAssemblyBinaryRewriter? _rewriter;
         private readonly ILogger _logger;
 
-        private static readonly Lazy<ImmutableDictionary<string,string>> _predefinedTypesSyntaxTree = new( GetPredefinedSyntaxTrees  );
+        private static readonly Lazy<ImmutableDictionary<string, string>> _predefinedTypesSyntaxTree = new( GetPredefinedSyntaxTrees );
 
-        private static ImmutableDictionary<string,string> GetPredefinedSyntaxTrees()
+        private static ImmutableDictionary<string, string> GetPredefinedSyntaxTrees()
         {
             var prefix = "Metalama.Framework.Engine._Resources_.";
 
@@ -62,7 +62,7 @@ namespace Metalama.Framework.Engine.CompileTime
             return assembly.GetManifestResourceNames()
                 .Where( n => n.StartsWith( prefix, StringComparison.Ordinal ) )
                 .ToImmutableDictionary(
-                    name => CompileTimeConstants.GetPrefixedSyntaxTreeName( name.Substring( prefix.Length ) )+ ".cs",
+                    name => CompileTimeConstants.GetPrefixedSyntaxTreeName( name.Substring( prefix.Length ) ) + ".cs",
                     name =>
                     {
                         using var reader = new StreamReader( assembly.GetManifestResourceStream( name )! );

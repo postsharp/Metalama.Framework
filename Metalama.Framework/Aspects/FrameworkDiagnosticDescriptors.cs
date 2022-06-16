@@ -17,5 +17,4 @@ internal static class FrameworkDiagnosticDescriptors
             "The aspect '{0}' cannot introduce a {1} because it has been applied to a {2}, which is neither a type nor a type member.",
             "Metalama.Advices",
             Severity.Error );
-
 }

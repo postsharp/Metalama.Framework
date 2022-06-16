@@ -147,7 +147,6 @@ internal class AppendConstructorParameterAdvice : Advice
                             pullParameterAction.ParameterName.AssertNotNull(),
                             pullParameterAction.ParameterType.AssertNotNull(),
                             RefKind.None );
-                        
 
                         recursiveParameterBuilder.AddAttributes( pullParameterAction.ParameterAttributes );
 

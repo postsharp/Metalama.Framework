@@ -9,7 +9,6 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Advising;
 
-
 [CompileTime]
 internal enum PullActionKind
 {
@@ -77,6 +76,5 @@ public readonly struct PullAction
     /// <summary>
     /// Creates a <see cref="PullAction"/> that means that the dependency should be assigned to a given expression.
     /// </summary>
-    public static PullAction UseExpression( IExpression expression )
-        => new( PullActionKind.UseExistingParameter, assignmentExpression: expression );
+    public static PullAction UseExpression( IExpression expression ) => new( PullActionKind.UseExistingParameter, assignmentExpression: expression );
 }

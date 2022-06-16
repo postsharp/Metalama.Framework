@@ -6,7 +6,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Eligibility.Implementation;
-using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
@@ -75,10 +74,34 @@ namespace Metalama.Framework.Engine.Aspects
                     currentCompilationRevision,
                     pipelineConfiguration,
                     cancellationToken ),
-                INamedType type => this.EvaluateAspect( type, aspectInstance, initialCompilationRevision, currentCompilationRevision, pipelineConfiguration, cancellationToken ),
-                IMethod method => this.EvaluateAspect( method, aspectInstance, initialCompilationRevision, currentCompilationRevision, pipelineConfiguration, cancellationToken ),
-                IField field => this.EvaluateAspect( field, aspectInstance, initialCompilationRevision, currentCompilationRevision, pipelineConfiguration, cancellationToken ),
-                IProperty property => this.EvaluateAspect( property, aspectInstance, initialCompilationRevision, currentCompilationRevision, pipelineConfiguration, cancellationToken ),
+                INamedType type => this.EvaluateAspect(
+                    type,
+                    aspectInstance,
+                    initialCompilationRevision,
+                    currentCompilationRevision,
+                    pipelineConfiguration,
+                    cancellationToken ),
+                IMethod method => this.EvaluateAspect(
+                    method,
+                    aspectInstance,
+                    initialCompilationRevision,
+                    currentCompilationRevision,
+                    pipelineConfiguration,
+                    cancellationToken ),
+                IField field => this.EvaluateAspect(
+                    field,
+                    aspectInstance,
+                    initialCompilationRevision,
+                    currentCompilationRevision,
+                    pipelineConfiguration,
+                    cancellationToken ),
+                IProperty property => this.EvaluateAspect(
+                    property,
+                    aspectInstance,
+                    initialCompilationRevision,
+                    currentCompilationRevision,
+                    pipelineConfiguration,
+                    cancellationToken ),
                 IConstructor constructor => this.EvaluateAspect(
                     constructor,
                     aspectInstance,
@@ -86,7 +109,13 @@ namespace Metalama.Framework.Engine.Aspects
                     currentCompilationRevision,
                     pipelineConfiguration,
                     cancellationToken ),
-                IParameter parameter => this.EvaluateAspect( parameter, aspectInstance, initialCompilationRevision, currentCompilationRevision, pipelineConfiguration, cancellationToken ),
+                IParameter parameter => this.EvaluateAspect(
+                    parameter,
+                    aspectInstance,
+                    initialCompilationRevision,
+                    currentCompilationRevision,
+                    pipelineConfiguration,
+                    cancellationToken ),
                 ITypeParameter genericParameter => this.EvaluateAspect(
                     genericParameter,
                     aspectInstance,
@@ -94,8 +123,20 @@ namespace Metalama.Framework.Engine.Aspects
                     currentCompilationRevision,
                     pipelineConfiguration,
                     cancellationToken ),
-                IEvent @event => this.EvaluateAspect( @event, aspectInstance, initialCompilationRevision, currentCompilationRevision, pipelineConfiguration, cancellationToken ),
-                INamespace ns => this.EvaluateAspect( ns, aspectInstance, initialCompilationRevision, currentCompilationRevision, pipelineConfiguration, cancellationToken ),
+                IEvent @event => this.EvaluateAspect(
+                    @event,
+                    aspectInstance,
+                    initialCompilationRevision,
+                    currentCompilationRevision,
+                    pipelineConfiguration,
+                    cancellationToken ),
+                INamespace ns => this.EvaluateAspect(
+                    ns,
+                    aspectInstance,
+                    initialCompilationRevision,
+                    currentCompilationRevision,
+                    pipelineConfiguration,
+                    cancellationToken ),
                 _ => throw new NotSupportedException( $"Cannot add an aspect to a declaration of type {target.DeclarationKind}." )
             };
         }
@@ -173,7 +214,7 @@ namespace Metalama.Framework.Engine.Aspects
                 cancellationToken );
 
             var aspectBuilder = new AspectBuilder<T>( targetDeclaration, aspectBuilderState, adviceFactory );
-            
+
             adviceFactoryState.AspectBuilder = aspectBuilder;
 
             using ( SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( initialCompilationRevision, serviceProvider ) ) )

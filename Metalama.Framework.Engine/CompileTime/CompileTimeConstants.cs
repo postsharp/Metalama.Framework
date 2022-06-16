@@ -8,10 +8,11 @@ namespace Metalama.Framework.Engine.CompileTime
     public static class CompileTimeConstants
     {
         public static string GetPrefixedSyntaxTreeName( string name ) => "(" + name + ")";
-        
-        public static bool IsPredefinedSyntaxTree(string path)
+
+        public static bool IsPredefinedSyntaxTree( string path )
         {
             var fileName = Path.GetFileNameWithoutExtension( path );
+
             return fileName.StartsWith( "(" ) && fileName.EndsWith( ")" );
         }
 

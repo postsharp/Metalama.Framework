@@ -107,7 +107,7 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : ILa
 
     IEnumerator<TRef> IEnumerable<TRef>.GetEnumerator() => this.GetEnumerator();
 
-    public Enumerator GetEnumerator() => new Enumerator( this );
+    public Enumerator GetEnumerator() => new( this );
 
     IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
@@ -121,7 +121,6 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : ILa
         }
     }
 
- 
     public struct Enumerator : IEnumerator<TRef>
     {
         private readonly UpdatableDeclarationCollection<TDeclaration, TRef> _parent;
@@ -129,28 +128,26 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : ILa
         private readonly int _initialRemoveOperationsCount;
         private int _index = -1;
 
-        internal Enumerator(UpdatableDeclarationCollection<TDeclaration, TRef> parent)
+        internal Enumerator( UpdatableDeclarationCollection<TDeclaration, TRef> parent )
         {
             this._parent = parent;
 
             // In case elements are added while iterating, we only return the items that were present when iteration started.
             this._initialCount = parent.Count;
-        
+
             // In case elements are removed while iterating, we fail.
             this._initialRemoveOperationsCount = parent._removeOperationsCount;
-
         }
 
         public bool MoveNext()
         {
             if ( this._index + 1 < this._initialCount )
             {
-                if ( this._parent._removeOperationsCount != _initialRemoveOperationsCount )
+                if ( this._parent._removeOperationsCount != this._initialRemoveOperationsCount )
                 {
                     throw new InvalidOperationException( "An item was removed from the collection while an enumeration was in progress." );
                 }
 
-                
                 this._index++;
 
                 return true;
@@ -168,9 +165,8 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : ILa
         object IEnumerator.Current => this.Current;
 
         public void Dispose() { }
-        }
     }
-
+}
 
 internal abstract class UpdatableDeclarationCollection<TDeclaration> : UpdatableDeclarationCollection<TDeclaration, Ref<TDeclaration>>
     where TDeclaration : class, IDeclaration

@@ -18,7 +18,6 @@ internal class IntrospectionAspectPipeline : AspectPipeline
     public IntrospectionAspectPipeline( ServiceProvider serviceProvider, CompileTimeDomain domain, bool isTest ) :
         base( serviceProvider, ExecutionScenario.Introspection, isTest, domain ) { }
 
-
     private protected override HighLevelPipelineStage CreateHighLevelStage( PipelineStageConfiguration configuration, CompileTimeProject compileTimeProject )
         => new CompileTimePipelineStage( compileTimeProject, configuration.AspectLayers, this.ServiceProvider );
 
@@ -38,12 +37,16 @@ internal class IntrospectionAspectPipeline : AspectPipeline
             return new IntrospectionCompilationResultModel( false, compilation, MapDiagnostics() );
         }
 
-        var introspectionAspectInstanceFactory = new IntrospectionAspectInstanceFactory( compilation.Compilation);
+        var introspectionAspectInstanceFactory = new IntrospectionAspectInstanceFactory( compilation.Compilation );
         var serviceProvider = configuration.ServiceProvider.WithService( introspectionAspectInstanceFactory );
         serviceProvider = serviceProvider.WithService( new IntrospectionPipelineListener( serviceProvider ) );
 
-
-        var success = this.TryExecute( compilation, diagnostics, configuration.WithServiceProvider( serviceProvider ), cancellationToken, out var pipelineResult );
+        var success = this.TryExecute(
+            compilation,
+            diagnostics,
+            configuration.WithServiceProvider( serviceProvider ),
+            cancellationToken,
+            out var pipelineResult );
 
         CompilationModel outputCompilationModel;
 

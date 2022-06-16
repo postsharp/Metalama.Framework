@@ -92,7 +92,7 @@ namespace Metalama.Framework.Engine.Advising
         public static TemplateMember<IEvent> GetInitializerTemplate( this in TemplateMember<IEvent> eventFieldTemplate )
         {
             // TODO 30576 - do not rely on syntax for templates.
-            
+
             if ( eventFieldTemplate.IsNotNull )
             {
                 // Initializer template is compiled into a template for event.

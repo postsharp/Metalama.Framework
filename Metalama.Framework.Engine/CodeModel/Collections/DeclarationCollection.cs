@@ -55,9 +55,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
                 {
                     yield return this.GetItem( reference );
                 }
-                
             }
-            
         }
 
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();

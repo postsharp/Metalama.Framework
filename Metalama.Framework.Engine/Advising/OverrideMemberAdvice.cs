@@ -24,7 +24,6 @@ namespace Metalama.Framework.Engine.Advising
             IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, sourceCompilation, layerName )
         {
             this.Tags = tags;
-            
         }
 
         public override string ToString() => $"Override {this.TargetDeclaration}";

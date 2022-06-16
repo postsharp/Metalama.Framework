@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
@@ -40,6 +39,4 @@ internal class SyntaxBasedInitializationTransformation : BaseTransformation, IIn
                 .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
             this.ContextDeclaration );
     }
-
-    
 }

@@ -2,9 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel.References;
-using Microsoft.CodeAnalysis;
-using System;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
@@ -16,7 +13,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public sealed override DeclarationBuilder Builder => this.MemberBuilder;
 
-        
         public bool IsExplicitInterfaceImplementation => this.MemberBuilder.IsExplicitInterfaceImplementation;
 
         public bool IsImplicit => this.MemberBuilder.IsImplicit;

@@ -9,6 +9,6 @@ internal class SyntaxGeneratorWithContext : OurSyntaxGenerator
     {
         _ = context;
     }
-    
+
     // This class would have members that require context, but we don't have any now.
 }

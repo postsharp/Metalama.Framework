@@ -127,6 +127,7 @@ namespace Metalama.Framework.Engine.Advising
             else
             {
                 addTransformation( this.Builder );
+
                 return AdviceImplementationResult.Success( AdviceOutcome.Default, this.Builder );
             }
         }

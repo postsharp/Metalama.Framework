@@ -1,4 +1,7 @@
-﻿using Metalama.Framework.Aspects;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Validation;
 
@@ -13,7 +16,8 @@ namespace Metalama.Framework.Advising;
 [InternalImplement]
 public interface IAdviceResult
 {
-    AdviceOutcome Outcome { get; } 
+    AdviceOutcome Outcome { get; }
+
     IAspectBuilder AspectBuilder { get; }
 }
 
@@ -22,4 +26,3 @@ public interface IAddContractAdviceResult<out T> : IAdviceResult
 {
     T Declaration { get; }
 }
-

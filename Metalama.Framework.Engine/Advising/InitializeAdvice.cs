@@ -1,4 +1,7 @@
-﻿using Metalama.Framework.Aspects;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
@@ -13,12 +16,10 @@ namespace Metalama.Framework.Engine.Advising;
 
 internal abstract class InitializeAdvice : Advice
 {
-
     public InitializerKind Kind { get; }
 
     public new Ref<IMemberOrNamedType> TargetDeclaration => base.TargetDeclaration.As<IMemberOrNamedType>();
 
-        
     public InitializeAdvice(
         IAspectInstanceInternal aspect,
         TemplateClassInstance templateInstance,
@@ -79,7 +80,6 @@ internal abstract class InitializeAdvice : Advice
             }
 
             this.AddTransformation( targetDeclaration, targetCtor, addTransformation );
-              
         }
 
         return AdviceImplementationResult.Success();

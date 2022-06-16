@@ -12,6 +12,7 @@ namespace Metalama.Framework.Engine.Advising
     internal class TemplateBasedInitializeAdvice : InitializeAdvice
     {
         public BoundTemplateMethod BoundTemplate { get; }
+
         public IObjectReader Tags { get; }
 
         public TemplateBasedInitializeAdvice(

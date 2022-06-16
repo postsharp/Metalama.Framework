@@ -3,7 +3,6 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
@@ -36,7 +35,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         public AspectPipelineDescription PipelineDescription => this.ServiceProvider.GetRequiredService<AspectPipelineDescription>();
 
         public MetaApiStaticity Staticity { get; }
-        
+
         public ICompilation SourceCompilation { get; }
 
         public MetaApiProperties(

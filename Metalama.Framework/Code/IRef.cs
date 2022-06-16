@@ -33,6 +33,6 @@ namespace Metalama.Framework.Code
     {
         Default,
         CanBeMissing,
-        DoNotFollowRedirections,
+        DoNotFollowRedirections
     }
 }

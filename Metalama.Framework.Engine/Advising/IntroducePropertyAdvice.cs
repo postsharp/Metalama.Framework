@@ -130,6 +130,7 @@ namespace Metalama.Framework.Engine.Advising
                 {
                     // Introduced auto property.
                     addTransformation( this.Builder );
+
                     return AdviceImplementationResult.Success( this.Builder );
                 }
                 else

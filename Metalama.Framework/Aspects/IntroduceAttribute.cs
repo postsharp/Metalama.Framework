@@ -74,37 +74,36 @@ namespace Metalama.Framework.Aspects
                     return;
             }
 
-            builder.BuildLayer( this.Layer,
-                                               layerBuilder =>
-                                               {
-                                                   switch ( templateMember.DeclarationKind )
-                                                   {
-                                                       case DeclarationKind.Method:
-                                                           layerBuilder.Advice.IntroduceMethod( targetType, templateMemberId, this.Scope, this.WhenExists );
+            builder.BuildLayer(
+                this.Layer,
+                layerBuilder =>
+                {
+                    switch ( templateMember.DeclarationKind )
+                    {
+                        case DeclarationKind.Method:
+                            layerBuilder.Advice.IntroduceMethod( targetType, templateMemberId, this.Scope, this.WhenExists );
 
-                                                           break;
+                            break;
 
-                                                       case DeclarationKind.Property:
-                                                           layerBuilder.Advice.IntroduceProperty( targetType, templateMemberId, this.Scope, this.WhenExists );
+                        case DeclarationKind.Property:
+                            layerBuilder.Advice.IntroduceProperty( targetType, templateMemberId, this.Scope, this.WhenExists );
 
-                                                           break;
+                            break;
 
-                                                       case DeclarationKind.Event:
-                                                           layerBuilder.Advice.IntroduceEvent( targetType, templateMemberId, this.Scope, this.WhenExists );
+                        case DeclarationKind.Event:
+                            layerBuilder.Advice.IntroduceEvent( targetType, templateMemberId, this.Scope, this.WhenExists );
 
-                                                           break;
+                            break;
 
-                                                       case DeclarationKind.Field:
-                                                           layerBuilder.Advice.IntroduceField( targetType, templateMemberId, this.Scope, this.WhenExists );
+                        case DeclarationKind.Field:
+                            layerBuilder.Advice.IntroduceField( targetType, templateMemberId, this.Scope, this.WhenExists );
 
-                                                           break;
+                            break;
 
-                                                       default:
-                                                           throw new InvalidOperationException( $"Don't know how to introduce a {templateMember.DeclarationKind}." );
-                                                   }
-                                               } );
-
-          
+                        default:
+                            throw new InvalidOperationException( $"Don't know how to introduce a {templateMember.DeclarationKind}." );
+                    }
+                } );
         }
     }
 }

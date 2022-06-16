@@ -3,7 +3,4 @@
 
 namespace Metalama.Framework.Advising;
 
-public interface IImplementInterfaceAdviceResult : IAdviceResult
-{
-    
-}
+public interface IImplementInterfaceAdviceResult : IAdviceResult { }

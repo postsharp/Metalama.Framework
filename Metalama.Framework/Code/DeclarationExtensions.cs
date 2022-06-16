@@ -54,7 +54,7 @@ namespace Metalama.Framework.Code
             };
 
         [return: NotNullIfNotNull( "declaration" )]
-        public static T? ForCompilation<T>( this T? declaration, ICompilation compilation, ReferenceResolutionOptions options = default)
+        public static T? ForCompilation<T>( this T? declaration, ICompilation compilation, ReferenceResolutionOptions options = default )
             where T : class, IDeclaration
         {
             if ( declaration == null )

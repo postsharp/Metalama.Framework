@@ -39,7 +39,6 @@ namespace Metalama.Framework.Aspects
 
         IAspectBuilder<T> WithTarget<T>( T newTarget )
             where T : class, IDeclaration;
-        
     }
 
     /// <summary>
@@ -64,7 +63,5 @@ namespace Metalama.Framework.Aspects
         /// field of the aspect.</param>
         /// <returns><c>true</c> if the aspect target qualifies for the given rule, otherwise <c>false</c> (in this case, the <see cref="IAspectBuilder.SkipAspect"/> method is automatically called. </returns>
         bool VerifyEligibility( IEligibilityRule<TAspectTarget> rule );
-
-        
     }
 }

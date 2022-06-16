@@ -24,10 +24,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         private bool _isVirtual;
         private bool _isAsync;
         private bool _isOverride;
-        
-        protected MemberBuilder( Advice parentAdvice, INamedType declaringType, string name ) : base( parentAdvice, declaringType, name )
-        {
-        }
+
+        protected MemberBuilder( Advice parentAdvice, INamedType declaringType, string name ) : base( parentAdvice, declaringType, name ) { }
 
         public abstract bool IsImplicit { get; }
 

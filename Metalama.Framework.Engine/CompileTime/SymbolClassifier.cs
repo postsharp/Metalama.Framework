@@ -384,7 +384,7 @@ namespace Metalama.Framework.Engine.CompileTime
             }
 
             // From well-known types.
-            if ( TryGetWellKnownScope( symbol, false, out var scopeFromWellKnown ) )
+            if ( this.TryGetWellKnownScope( symbol, false, out var scopeFromWellKnown ) )
             {
                 return scopeFromWellKnown;
             }
@@ -618,24 +618,24 @@ namespace Metalama.Framework.Engine.CompileTime
                     {
                         // Some namespaces inside system assemblies have a well-known scope.
                         for ( var ns = namedType.ContainingNamespace; ns != null; ns = ns.ContainingNamespace )
-                    {
-                        var nsString = ns.ToDisplayString();
-
-                        if ( _wellKnownNamespaces.TryGetValue( nsString, out var wellKnownNamespace ) )
                         {
-                            if ( wellKnownNamespace.IncludeDescendants || ns.Equals( namedType.ContainingNamespace ) )
-                            {
-                                scope = wellKnownNamespace.Scope;
+                            var nsString = ns.ToDisplayString();
 
-                                return true;
+                            if ( _wellKnownNamespaces.TryGetValue( nsString, out var wellKnownNamespace ) )
+                            {
+                                if ( wellKnownNamespace.IncludeDescendants || ns.Equals( namedType.ContainingNamespace ) )
+                                {
+                                    scope = wellKnownNamespace.Scope;
+
+                                    return true;
                                 }
                             }
                         }
 
-                            // The default scope in system assemblies is run-time-only.
-                            scope = TemplatingScope.RunTimeOnly;
+                        // The default scope in system assemblies is run-time-only.
+                        scope = TemplatingScope.RunTimeOnly;
 
-                            return true;
+                        return true;
                     }
 
                     return false;

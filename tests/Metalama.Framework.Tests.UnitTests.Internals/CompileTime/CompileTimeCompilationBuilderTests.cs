@@ -787,7 +787,8 @@ public class MyAspect : OverrideMethodAspect
             var compileTimeSyntaxTrees = GetCompileTimeCode( testContext, new Dictionary<string, string> { { "main.cs", code } }, outputKind );
 
             return compileTimeSyntaxTrees
-                .Single( x => !x.Key.StartsWith( "__", StringComparison.Ordinal ) ).Value;
+                .Single( x => !x.Key.StartsWith( "__", StringComparison.Ordinal ) )
+                .Value;
         }
 
         private static IReadOnlyDictionary<string, string> GetCompileTimeCode(
@@ -975,7 +976,6 @@ namespace SomeNamespace
             Assert.Equal( expected, compileTimeCode );
         }
 
-        
         [Fact]
         public void CompileTypeTypesOfAllTKindsAreCopied()
         {
@@ -1046,8 +1046,6 @@ public delegate void SomeDelegate();
             Assert.Equal( expected, compileTimeCode );
         }
 
-
-          
         [Fact]
         public void SyntaxTreeWithOnlyCompileTimeInterfaceIsCopied()
         {
@@ -1080,7 +1078,6 @@ public interface SomeInterface
             Assert.Equal( expected, compileTimeCode );
         }
 
-   
         private class Rewriter : ICompileTimeAssemblyBinaryRewriter
         {
             public bool IsInvoked { get; private set; }

@@ -18,7 +18,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
-using TestProjectOptions = Metalama.Framework.Engine.Testing.TestProjectOptions;
 
 namespace Metalama.AspectWorkbench.ViewModels
 {

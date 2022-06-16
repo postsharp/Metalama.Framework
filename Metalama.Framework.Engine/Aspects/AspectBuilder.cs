@@ -6,7 +6,6 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
-using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
@@ -113,7 +112,6 @@ namespace Metalama.Framework.Engine.Aspects
             {
                 throw new NotImplementedException();
             }
-            
         }
 
         public bool VerifyEligibility( IEligibilityRule<T> rule )

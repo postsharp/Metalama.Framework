@@ -14,13 +14,17 @@ using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Advising
 {
     internal class ContractAdvice : Advice
     {
-        public ContractAdvice( IAspectInstanceInternal aspect, TemplateClassInstance templateInstance, IDeclaration targetDeclaration, ICompilation sourceCompilation, string? layerName )
+        public ContractAdvice(
+            IAspectInstanceInternal aspect,
+            TemplateClassInstance templateInstance,
+            IDeclaration targetDeclaration,
+            ICompilation sourceCompilation,
+            string? layerName )
             : base( aspect, templateInstance, targetDeclaration, sourceCompilation, layerName ) { }
 
         public override AdviceImplementationResult Implement(
