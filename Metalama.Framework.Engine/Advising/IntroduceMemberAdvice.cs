@@ -18,6 +18,8 @@ namespace Metalama.Framework.Engine.Advising
         where TMember : class, IMember
         where TBuilder : MemberBuilder
     {
+        private readonly Action<TBuilder>? _buildAction;
+
         public IntroductionScope Scope { get; }
 
         public OverrideStrategy OverrideStrategy { get; }
@@ -33,9 +35,7 @@ namespace Metalama.Framework.Engine.Advising
         protected string MemberName { get; }
 
         public IObjectReader Tags { get; }
-
-        private Action<TBuilder>? _buildAction;
-
+ 
         public IntroduceMemberAdvice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,

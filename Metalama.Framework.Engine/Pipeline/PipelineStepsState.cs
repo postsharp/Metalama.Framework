@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.Pipeline
     /// <summary>
     /// Maintains the state of <see cref="HighLevelPipelineStage"/>, composed of several <see cref="PipelineStep"/>.
     /// The current object is essentially a mutable list of <see cref="PipelineStep"/> instances. It exposes methods
-    /// like <see cref="AddAdvices"/>, <see cref="AddAspectInstances"/> or <see cref="AddAspectSources"/> that
+    /// like <see cref="AddAspectInstances"/> or <see cref="AddAspectSources"/> that
     /// allow to add inputs to different steps of the pipeline. This object must create the steps in the appropriate order.
     /// </summary>
     internal class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdder
@@ -36,9 +36,8 @@ namespace Metalama.Framework.Engine.Pipeline
         private readonly List<AspectInstanceResult> _aspectInstanceResults = new();
         private readonly List<IValidatorSource> _validatorSources = new();
         private readonly OverflowAspectSource _overflowAspectSource = new();
-
-        private PipelineStep? _currentStep;
         private readonly IntrospectionPipelineListener? _introspectionListener;
+        private PipelineStep? _currentStep;
 
         public CompilationModel LastCompilation { get; private set; }
 

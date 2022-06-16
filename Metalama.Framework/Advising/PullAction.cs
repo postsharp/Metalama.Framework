@@ -13,7 +13,7 @@ namespace Metalama.Framework.Advising;
 internal enum PullActionKind
 {
     AppendParameterAndPull,
-    UseExistingParameter,
+    UseExpression,
     DoNotPull
 }
 
@@ -25,23 +25,23 @@ public readonly struct PullAction
 {
     internal PullActionKind Kind { get; }
 
-    internal IExpression? AssignmentExpression { get; }
-
     internal IType? ParameterType { get; }
 
     internal ImmutableArray<AttributeConstruction> ParameterAttributes { get; }
 
     internal string? ParameterName { get; }
 
+    public IExpression? Expression { get; }
+
     private PullAction(
         PullActionKind kind,
-        IExpression? assignmentExpression = null,
+        IExpression? expression = null,
         string? parameterName = null,
         IType? parameterType = null,
         ImmutableArray<AttributeConstruction> parameterAttributes = default )
     {
         this.Kind = kind;
-        this.AssignmentExpression = assignmentExpression;
+        this.Expression = expression;
         this.ParameterType = parameterType;
         this.ParameterAttributes = parameterAttributes.IsDefault ? ImmutableArray<AttributeConstruction>.Empty : parameterAttributes;
         this.ParameterName = parameterName;
@@ -62,19 +62,14 @@ public readonly struct PullAction
     /// </summary>
     /// <param name="parameterName">Name of the new parameter.</param>
     /// <param name="parameterType">Type of the new parameter.</param>
-    /// <param name="assignmentExpression">The right side of the statement that assigns the field or property dependency to the parameter.
-    /// This value is optional. It is ignored if the dependency is a parameter (i.e. in the <see cref="IPullStrategy.PullParameter"/> method).
-    /// When the dependency is a field or property, the default value is <paramref name="parameterName"/>.</param>
-    /// <returns></returns>
     public static PullAction IntroduceParameterAndPull(
         string parameterName,
         IType parameterType,
-        IExpression? assignmentExpression = null,
         ImmutableArray<AttributeConstruction> parameterAttributes = default )
-        => new( PullActionKind.AppendParameterAndPull, assignmentExpression, parameterName, parameterType, parameterAttributes );
+        => new( PullActionKind.AppendParameterAndPull, null,  parameterName, parameterType, parameterAttributes );
 
     /// <summary>
     /// Creates a <see cref="PullAction"/> that means that the dependency should be assigned to a given expression.
     /// </summary>
-    public static PullAction UseExpression( IExpression expression ) => new( PullActionKind.UseExistingParameter, assignmentExpression: expression );
+    public static PullAction UseExpression( IExpression expression ) => new( PullActionKind.UseExpression, expression );
 }

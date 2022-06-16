@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using System;
 using System.IO;
 
 namespace Metalama.Framework.Engine.CompileTime
@@ -13,7 +14,7 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             var fileName = Path.GetFileNameWithoutExtension( path );
 
-            return fileName.StartsWith( "(" ) && fileName.EndsWith( ")" );
+            return fileName.StartsWith( "(", StringComparison.Ordinal ) && fileName.EndsWith( ")", StringComparison.Ordinal );
         }
 
         public const string CompileTimeProjectResourceName = "Metalama.CompileTimeProject";

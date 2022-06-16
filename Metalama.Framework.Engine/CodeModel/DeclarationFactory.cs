@@ -371,14 +371,14 @@ namespace Metalama.Framework.Engine.CodeModel
                 Ref.FromBuilder( attributeBuilder ).As<ICompilationElement>(),
                 l => new BuiltAttribute( (AttributeBuilder) l.Target!, this._compilationModel ) );
 
-        private Exception CreateBuilderNotExists( IDeclarationBuilder builder )
+        private static Exception CreateBuilderNotExists( IDeclarationBuilder builder )
             => new InvalidOperationException( $"The declaration '{builder}' does not exist in the current compilation." );
 
         internal IParameter GetParameter( ParameterBuilder parameterBuilder, ReferenceResolutionOptions options )
         {
             if ( options.MustExist() && !this._compilationModel.Contains( parameterBuilder ) )
             {
-                throw this.CreateBuilderNotExists( parameterBuilder );
+                throw CreateBuilderNotExists( parameterBuilder );
             }
 
             return (IParameter) this._defaultCache.GetOrAdd(
@@ -395,7 +395,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             if ( options.MustExist() && !this._compilationModel.Contains( methodBuilder ) )
             {
-                throw this.CreateBuilderNotExists( methodBuilder );
+                throw CreateBuilderNotExists( methodBuilder );
             }
 
             return (IMethod) this._defaultCache.GetOrAdd(
@@ -419,7 +419,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             if ( options.MustExist() && !this._compilationModel.Contains( methodBuilder ) )
             {
-                throw this.CreateBuilderNotExists( methodBuilder );
+                throw CreateBuilderNotExists( methodBuilder );
             }
 
             return (IConstructor) this._defaultCache.GetOrAdd(
@@ -431,7 +431,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             if ( options.MustExist() && !this._compilationModel.Contains( fieldBuilder ) )
             {
-                throw this.CreateBuilderNotExists( fieldBuilder );
+                throw CreateBuilderNotExists( fieldBuilder );
             }
 
             return (IField) this._defaultCache.GetOrAdd(
@@ -443,7 +443,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             if ( options.MustExist() && !this._compilationModel.Contains( propertyBuilder ) )
             {
-                throw this.CreateBuilderNotExists( propertyBuilder );
+                throw CreateBuilderNotExists( propertyBuilder );
             }
 
             return (IProperty) this._defaultCache.GetOrAdd(
@@ -455,7 +455,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             if ( options.MustExist() && !this._compilationModel.Contains( propertyBuilder ) )
             {
-                throw this.CreateBuilderNotExists( propertyBuilder );
+                throw CreateBuilderNotExists( propertyBuilder );
             }
 
             return (IEvent) this._defaultCache.GetOrAdd(

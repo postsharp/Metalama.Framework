@@ -273,8 +273,6 @@ namespace Metalama.Framework.Engine.Advising
                                     targetType.GetDiagnosticLocation(),
                                     (this.Aspect.AspectClass.ShortName, interfaceSpecification.InterfaceType, targetType) ) );
 
-                            break;
-
                         case OverrideStrategy.Ignore:
                             // Nothing to do.
                             break;
@@ -294,7 +292,6 @@ namespace Metalama.Framework.Engine.Advising
                     MemberBuilder memberBuilder;
 
                     var mergedTags = ObjectReader.Merge( this.Tags, memberSpec.Tags );
-                    
 
                     switch ( memberSpec.InterfaceMember )
                     {
@@ -310,10 +307,10 @@ namespace Metalama.Framework.Engine.Advising
                                             AdviceDiagnosticDescriptors.ImplicitInterfaceMemberConflict.CreateRoslynDiagnostic(
                                                 targetType.GetDiagnosticLocation(),
                                                 (this.Aspect.AspectClass.ShortName, interfaceSpecification.InterfaceType, targetType, existingMethod) ) );
-                                    
+
                                     case OverrideStrategy.Ignore:
                                         continue;
-                                    
+
                                     default:
                                         throw new NotImplementedException( $"The strategy OverrideStrategy.{this.OverrideStrategy} is not implemented." );
                                 }
@@ -355,10 +352,10 @@ namespace Metalama.Framework.Engine.Advising
                                             AdviceDiagnosticDescriptors.ImplicitInterfaceMemberConflict.CreateRoslynDiagnostic(
                                                 targetType.GetDiagnosticLocation(),
                                                 (this.Aspect.AspectClass.ShortName, interfaceSpecification.InterfaceType, targetType, existingProperty) ) );
-                                    
+
                                     case OverrideStrategy.Ignore:
                                         continue;
-                                    
+
                                     default:
                                         throw new NotImplementedException( $"The strategy OverrideStrategy.{this.OverrideStrategy} is not implemented." );
                                 }
@@ -417,10 +414,10 @@ namespace Metalama.Framework.Engine.Advising
                                             AdviceDiagnosticDescriptors.ImplicitInterfaceMemberConflict.CreateRoslynDiagnostic(
                                                 targetType.GetDiagnosticLocation(),
                                                 (this.Aspect.AspectClass.ShortName, interfaceSpecification.InterfaceType, targetType, existingEvent) ) );
-                                    
+
                                     case OverrideStrategy.Ignore:
                                         continue;
-                                    
+
                                     default:
                                         throw new NotImplementedException( $"The strategy OverrideStrategy.{this.OverrideStrategy} is not implemented." );
                                 }
@@ -538,9 +535,10 @@ namespace Metalama.Framework.Engine.Advising
                 interfaceProperty.Writeability == Writeability.InitOnly,
                 false,
                 hasImplicitSetter,
-                tags );
-
-            propertyBuilder.Type = interfaceProperty.Type;
+                tags )
+            {
+                Type = interfaceProperty.Type
+            };
 
             if ( isExplicit )
             {
@@ -578,7 +576,10 @@ namespace Metalama.Framework.Engine.Advising
             return propertyBuilder;
         }
 
-        private Location? GetDiagnosticLocation() => this.TargetDeclaration.GetTarget( this.SourceCompilation ).GetDiagnosticLocation();
+        private Location? GetDiagnosticLocation()
+        {
+            return this.TargetDeclaration.GetTarget( this.SourceCompilation ).GetDiagnosticLocation();
+        }
 
         private MemberBuilder GetImplEventBuilder( INamedType declaringType, IEvent interfaceEvent, bool isEventField, bool isExplicit )
         {
@@ -587,7 +588,8 @@ namespace Metalama.Framework.Engine.Advising
                 declaringType,
                 interfaceEvent.Name,
                 isEventField,
-                this.Tags ) { Type = interfaceEvent.Type };
+                this.Tags )
+            { Type = interfaceEvent.Type };
 
             if ( isExplicit )
             {

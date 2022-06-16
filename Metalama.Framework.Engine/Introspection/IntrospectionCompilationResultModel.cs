@@ -58,7 +58,7 @@ internal class IntrospectionCompilationResultModel : IIntrospectionCompilationOu
                 x => new IntrospectionAspectClass(
                     x.Key,
                     x.ToImmutableArray(),
-                    result => this._introspectionAspectInstanceFactory.GetIntrospectionAspectInstance( result.AspectInstance ) ) )
+                    result => this._introspectionAspectInstanceFactory!.GetIntrospectionAspectInstance( result.AspectInstance ) ) )
             .ToImmutableArray<IIntrospectionAspectClass>();
     }
 

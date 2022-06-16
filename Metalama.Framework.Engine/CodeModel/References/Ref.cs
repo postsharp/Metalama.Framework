@@ -69,7 +69,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 methodKind switch
                 {
                     MethodKind.PropertyGet => DeclarationRefTargetKind.PropertyGet,
-                    MethodKind.PropertySet => DeclarationRefTargetKind.PropertySet
+                    MethodKind.PropertySet => DeclarationRefTargetKind.PropertySet,
+                    _ => throw new AssertionFailedException()
                 } );
 
         public static Ref<T> FromSymbolId<T>( SymbolId symbolKey )
@@ -378,12 +379,5 @@ namespace Metalama.Framework.Engine.CodeModel.References
         public override int GetHashCode() => RefEqualityComparer<T>.Default.GetHashCode( this );
 
         public bool Equals( Ref<T> other ) => RefEqualityComparer<T>.Default.Equals( this, other );
-    }
-
-    internal static class ReferenceResolutionOptionsExtensions
-    {
-        public static bool MustExist( this ReferenceResolutionOptions options ) => (options & ReferenceResolutionOptions.CanBeMissing) == 0;
-
-        public static bool FollowRedirections( this ReferenceResolutionOptions options ) => (options & ReferenceResolutionOptions.DoNotFollowRedirections) == 0;
     }
 }

@@ -62,7 +62,8 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             this.Staticity = staticity;
         }
 
-        internal T Translate<T>( T declaration ) where T : class, IDeclaration
+        internal T Translate<T>( T declaration ) 
+            where T : class, IDeclaration
             => declaration.ForCompilation( this.SourceCompilation, ReferenceResolutionOptions.CanBeMissing );
     }
 }
