@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.AspectOrdering
             IDiagnosticAdder diagnosticAdder,
             out ImmutableArray<OrderedAspectLayer> sortedAspectLayers )
         {
-            // Build a graph of dependencies between unITransformations.
+            // Build a graph of dependencies between unordered transformations.
             var n = unsortedAspectLayers.Length;
 
             var partNameToIndexMapping =

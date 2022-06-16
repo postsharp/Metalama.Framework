@@ -19,7 +19,11 @@ namespace Metalama.Framework.Advising
     [CompileTime]
     public interface IAdviceFactory
     {
-        ICompilation Compilation { get; }
+        /// <summary>
+        /// Gets the mutable compilation that the current aspect builder is working on. It includes all modifications done by
+        /// the current aspect in the current type thanks to the <see cref="IAdviceFactory"/>.
+        /// </summary>
+        ICompilation MutableCompilation { get; }
 
         /// <summary>
         /// Overrides the implementation of a method.

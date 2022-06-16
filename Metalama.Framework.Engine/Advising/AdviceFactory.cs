@@ -316,7 +316,7 @@ namespace Metalama.Framework.Engine.Advising
             return selectedTemplate;
         }
 
-        public ICompilation Compilation => this.State.CurrentCompilation;
+        public ICompilation MutableCompilation => this.State.CurrentCompilation;
 
         public IOverrideAdviceResult<IMethod> Override(
             IMethod targetMethod,

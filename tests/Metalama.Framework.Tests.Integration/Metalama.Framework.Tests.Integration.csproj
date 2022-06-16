@@ -32,8 +32,6 @@
         <!-- Exclude files that intentionally do not compile -->
         <Compile Remove="Tests\**\__*.cs" />
         <None Include="Tests\**\__*.cs" />
-        <None Include="Tests\Aspects\AppendParameter\Pull.t.cs" />
-        <None Include="Tests\Aspects\AppendParameter\UseExpression.t.cs" />
     </ItemGroup>
 
     <ItemGroup>
