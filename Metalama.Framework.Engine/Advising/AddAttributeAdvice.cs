@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
@@ -58,9 +59,8 @@ internal class AddAttributeAdvice : Advice
                         return AdviceImplementationResult.Ignored;
 
                     case OverrideStrategy.New:
-                        AddTransformations();
 
-                        return AdviceImplementationResult.Success( AdviceOutcome.New );
+                        return AddTransformations( AdviceOutcome.New );
 
                     case OverrideStrategy.Override:
                         var removeTransformation = new RemoveAttributesTransformation(
@@ -68,9 +68,7 @@ internal class AddAttributeAdvice : Advice
                             targetDeclaration,
                             this._attribute.Type );
 
-                        AddTransformations( removeTransformation );
-
-                        return AdviceImplementationResult.Success( AdviceOutcome.Override );
+                        return AddTransformations( AdviceOutcome.Override, removeTransformation );
 
                     default:
                         throw new AssertionFailedException();
@@ -78,11 +76,9 @@ internal class AddAttributeAdvice : Advice
             }
         }
 
-        AddTransformations();
+        return AddTransformations( AdviceOutcome.Default );
 
-        return AdviceImplementationResult.Success();
-
-        void AddTransformations( RemoveAttributesTransformation? removeTransformation = null )
+        AdviceImplementationResult AddTransformations( AdviceOutcome outcome, RemoveAttributesTransformation? removeTransformation = null )
         {
             if ( removeTransformation != null )
             {
@@ -94,7 +90,10 @@ internal class AddAttributeAdvice : Advice
                 addTransformation( new ConstructorBuilder( this, constructor.DeclaringType ) );
             }
 
-            addTransformation( new AttributeBuilder( this, targetDeclaration, this._attribute ) );
+            var attributeBuilder = new AttributeBuilder( this, targetDeclaration, this._attribute );
+            addTransformation( attributeBuilder );
+
+            return AdviceImplementationResult.Success( outcome, attributeBuilder.ToTypedRef<IDeclaration>() );
         }
     }
 }

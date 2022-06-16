@@ -3,4 +3,8 @@
 
 namespace Metalama.Framework.Advising;
 
+/// <summary>
+/// Represents the result of the <see cref="IAdviceFactory.ImplementInterface(Metalama.Framework.Code.INamedType,Metalama.Framework.Code.INamedType,Metalama.Framework.Aspects.OverrideStrategy,object?)"/>
+/// method.
+/// </summary>
 public interface IImplementInterfaceAdviceResult : IAdviceResult { }

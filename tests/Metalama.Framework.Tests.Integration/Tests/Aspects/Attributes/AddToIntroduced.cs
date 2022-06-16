@@ -33,27 +33,27 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Attributes.AddToInt
 
             foreach (var field in builder.Target.Fields)
             {
-                builder.Advice.AddAttribute( field, attribute );
+                builder.Advice.IntroduceAttribute( field, attribute );
             }
 
             foreach (var property in builder.Target.Properties)
             {
-                builder.Advice.AddAttribute( property, attribute );
+                builder.Advice.IntroduceAttribute( property, attribute );
             }
 
             foreach (var @event in builder.Target.Events)
             {
-                builder.Advice.AddAttribute( @event, attribute );
+                builder.Advice.IntroduceAttribute( @event, attribute );
             }
 
             foreach (var method in builder.Target.Methods)
             {
-                builder.Advice.AddAttribute( method, attribute );
-                builder.Advice.AddAttribute( method.ReturnParameter, attribute );
+                builder.Advice.IntroduceAttribute( method, attribute );
+                builder.Advice.IntroduceAttribute( method.ReturnParameter, attribute );
 
                 foreach (var parameter in method.Parameters)
                 {
-                    builder.Advice.AddAttribute( parameter, attribute );
+                    builder.Advice.IntroduceAttribute( parameter, attribute );
                 }
             }
         }

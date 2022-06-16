@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
 using Metalama.Framework.Validation;
 
 namespace Metalama.Framework.Advising;
@@ -12,17 +11,21 @@ namespace Metalama.Framework.Advising;
     - it is possible to extend the interfaces with more properties 
 */
 
+/// <summary>
+/// A base interface that represents the result of any advice method of the <see cref="IAdviceFactory"/> interface.
+/// </summary>
 [CompileTime]
 [InternalImplement]
 public interface IAdviceResult
 {
+    /// <summary>
+    /// Gets the advice outcome, i.e. indication whether the advice was applied, was ignored because the same declaration already exists (according to <see cref="OverrideStrategy"/>),
+    /// or an error for different reasons. 
+    /// </summary>
     AdviceOutcome Outcome { get; }
 
+    /// <summary>
+    /// Gets the <see cref="IAspectBuilder"/>.
+    /// </summary>
     IAspectBuilder AspectBuilder { get; }
-}
-
-public interface IAddContractAdviceResult<out T> : IAdviceResult
-    where T : IDeclaration
-{
-    T Declaration { get; }
 }

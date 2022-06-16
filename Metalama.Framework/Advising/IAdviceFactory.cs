@@ -396,7 +396,7 @@ namespace Metalama.Framework.Advising
             object? tags = null );
 
         /// <summary>
-        /// Adds a type or instance initializer. 
+        /// Adds a type or instance initializer by using a template. 
         /// </summary>
         /// <param name="targetType">The type into which the initializer should be added.</param>
         /// <param name="template">The name of the template. This method must have no run-time parameter, be of <c>void</c> return type, and be annotated with the <see cref="TemplateAttribute"/> custom attribute.</param>
@@ -411,13 +411,19 @@ namespace Metalama.Framework.Advising
             object? tags = null,
             object? args = null );
 
+        /// <summary>
+        /// Adds a type or instance initializer by specifying an <see cref="IStatement"/>. 
+        /// </summary>
+        /// <param name="targetType">The type into which the initializer should be added.</param>
+        /// <param name="statement">The statement to be inserted at the top of constructors.</param>
+        /// <param name="kind">The type of initializer to add.</param>
         IAddInitializerAdviceResult AddInitializer(
             INamedType targetType,
             IStatement statement,
             InitializerKind kind );
 
         /// <summary>
-        /// Adds an initializer to a specific constructor. 
+        /// Adds an initializer to a specific constructor by using a template.
         /// </summary>
         /// <param name="targetConstructor">The constructor into which the initializer should be added.</param>
         /// <param name="template">The name of the template. This method must have no run-time parameter, be of <c>void</c> return type, and be annotated with the <see cref="TemplateAttribute"/> custom attribute.</param>
@@ -426,6 +432,11 @@ namespace Metalama.Framework.Advising
         /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template.</param>
         IAddInitializerAdviceResult AddInitializer( IConstructor targetConstructor, string template, object? tags = null, object? args = null );
 
+        /// <summary>
+        /// Adds an initializer to a specific constructor by specifying an <see cref="IStatement"/>
+        /// </summary>
+        /// <param name="targetConstructor">The constructor into which the initializer should be added.</param>
+        /// <param name="statement">The statement to be inserted at the top of the constructor.</param>
         IAddInitializerAdviceResult AddInitializer( IConstructor targetConstructor, IStatement statement );
 
         /// <summary>
@@ -470,7 +481,7 @@ namespace Metalama.Framework.Advising
         /// <param name="whenExists">Specifies the strategy to follow when an attribute of the same type already exists on the target declaration. <see cref="OverrideStrategy.Fail"/> will fail the
         ///     compilation with an error and is the default strategy. <see cref="OverrideStrategy.Ignore"/> will silently ignore the introduction. <see cref="OverrideStrategy.Override"/> will remove
         ///     all previous instances and replace them by the new one. <see cref="OverrideStrategy.New"/> will add the new instance regardless.</param>
-        IAddAttributeAdviceResult AddAttribute(
+        IIntroductionAdviceResult<IAttribute> IntroduceAttribute(
             IDeclaration targetDeclaration,
             IAttributeData attribute,
             OverrideStrategy whenExists = OverrideStrategy.Default );
@@ -495,8 +506,20 @@ namespace Metalama.Framework.Advising
 
         // We require an explicit TypedConstant value instead of providing 'default' as the default value because a next Metalama version may allow to
         // append parameters without a default value; in this case, we would have a different signature.
-        
-        IAppendParameterAdviceResult IntroduceParameter(
+
+        /// <summary>
+        /// Appends a parameter to a constructor by specifying its name and <see cref="IType"/>.
+        /// </summary>
+        /// <param name="constructor">The constructor into which the new parameter will be appended.</param>
+        /// <param name="parameterName">The name of the parameter.</param>
+        /// <param name="parameterType">The type of the parameter.</param>
+        /// <param name="defaultValue">The default value of the parameter (required). It must be type-compatible with <see cref="parameterType"/>.
+        /// To specify <c>default</c> as the default value, use <see cref="TypedConstant.Default(Metalama.Framework.Code.IType)"/>.</param>
+        /// <param name="pullAction">An optional delegate that returns a <see cref="PullAction"/> specifying how to pull the new parameter from other child constructors.
+        /// A <c>null</c> value is equivalent to <see cref="PullAction.None"/>, i.e. <see cref="defaultValue"/> of the parameter will be used.
+        /// </param>
+        /// <param name="buildAction">An optional delegate that can add custom attributes to the parameter.</param>
+        IIntroductionAdviceResult<IParameter> IntroduceParameter(
             IConstructor constructor,
             string parameterName,
             IType parameterType,
@@ -504,14 +527,26 @@ namespace Metalama.Framework.Advising
             Func<IParameter, IConstructor, PullAction>? pullAction = null,
             Action<IParameterBuilder>? buildAction = null );
 
-        IAppendParameterAdviceResult IntroduceParameter(
+        /// <summary>
+        /// Appends a parameter to a constructor by specifying its name and <see cref="Type"/>.
+        /// </summary>
+        /// <param name="constructor">The constructor into which the new parameter will be appended.</param>
+        /// <param name="parameterName">The name of the parameter.</param>
+        /// <param name="parameterType">The type of the parameter.</param>
+        /// <param name="defaultValue">The default value of the parameter (required). It must be type-compatible with <see cref="parameterType"/>.
+        /// To specify <c>default</c> as the default value, use <see cref="TypedConstant.Default(Metalama.Framework.Code.IType)"/>.</param>
+        /// <param name="pullAction">An optional delegate that returns a <see cref="PullAction"/> specifying how to pull the new parameter from other child constructors.
+        /// A <c>null</c> value is equivalent to <see cref="PullAction.None"/>, i.e. <see cref="defaultValue"/> of the parameter will be used.
+        /// </param>
+        /// <param name="buildAction">An optional delegate that can add custom attributes to the parameter.</param>
+        IIntroductionAdviceResult<IParameter> IntroduceParameter(
             IConstructor constructor,
             string parameterName,
             Type parameterType,
             TypedConstant defaultValue,
             Func<IParameter, IConstructor, PullAction>? pullAction = null,
             Action<IParameterBuilder>? buildAction = null );
-        
+
         /// <summary>
         /// Returns a copy of the current <see cref="IAdviceFactory"/> that will a specified object to find factory methods.
         /// </summary>

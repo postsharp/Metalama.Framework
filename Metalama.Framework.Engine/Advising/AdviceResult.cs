@@ -13,8 +13,7 @@ namespace Metalama.Framework.Engine.Advising;
 /// </summary>
 /// <typeparam name="T">The type of declaration returned by the advice method.</typeparam>
 internal class AdviceResult<T> : IIntroductionAdviceResult<T>, IOverrideAdviceResult<T>, IImplementInterfaceAdviceResult, IAddContractAdviceResult<T>,
-                                 IAddInitializerAdviceResult,
-                                 IAddAttributeAdviceResult, IRemoveAttributesAdviceResult, IAppendParameterAdviceResult
+                                 IAddInitializerAdviceResult, IRemoveAttributesAdviceResult
     where T : class, IDeclaration
 {
     private readonly IRef<T> _declaration;
@@ -41,6 +40,4 @@ internal class AdviceResult<T> : IIntroductionAdviceResult<T>, IOverrideAdviceRe
         this.Outcome = outcome;
         this.AspectBuilder = aspectBuilder;
     }
-
-    IParameter IAppendParameterAdviceResult.Parameter => (IParameter) this.Declaration;
 }

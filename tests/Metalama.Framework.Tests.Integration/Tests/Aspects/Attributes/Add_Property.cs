@@ -11,16 +11,16 @@ public class MyAspect : PropertyAspect
 {
     public override void BuildAspect( IAspectBuilder<IProperty> builder )
     {
-        builder.Advice.AddAttribute( builder.Target, AttributeConstruction.Create( typeof(MyAttribute) ) );
+        builder.Advice.IntroduceAttribute( builder.Target, AttributeConstruction.Create( typeof(MyAttribute) ) );
 
-        if ( builder.Target.GetMethod != null )
+        if (builder.Target.GetMethod != null)
         {
-            builder.Advice.AddAttribute(builder.Target.GetMethod, AttributeConstruction.Create(typeof(MyAttribute)));
+            builder.Advice.IntroduceAttribute( builder.Target.GetMethod, AttributeConstruction.Create( typeof(MyAttribute) ) );
         }
 
         if (builder.Target.SetMethod != null)
         {
-            builder.Advice.AddAttribute(builder.Target.SetMethod, AttributeConstruction.Create(typeof(MyAttribute)));
+            builder.Advice.IntroduceAttribute( builder.Target.SetMethod, AttributeConstruction.Create( typeof(MyAttribute) ) );
         }
     }
 }
@@ -30,5 +30,4 @@ internal class C
 {
     [MyAspect]
     private int Property1 { get; set; }
-
 }

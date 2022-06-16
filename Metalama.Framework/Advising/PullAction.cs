@@ -9,14 +9,6 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.Advising;
 
-[CompileTime]
-internal enum PullActionKind
-{
-    AppendParameterAndPull,
-    UseExpression,
-    DoNotPull
-}
-
 /// <summary>
 /// Represents a way to pull a field or property.
 /// </summary>
@@ -41,8 +33,7 @@ public readonly struct PullAction
         string? parameterName = null,
         IType? parameterType = null,
         TypedConstant? parameterDefaultValue = null,
-        ImmutableArray<AttributeConstruction> parameterAttributes = default
-        )
+        ImmutableArray<AttributeConstruction> parameterAttributes = default )
     {
         this.Kind = kind;
         this.Expression = expression;
@@ -72,7 +63,7 @@ public readonly struct PullAction
         IType parameterType,
         TypedConstant parameterDefaultValue,
         ImmutableArray<AttributeConstruction> parameterAttributes = default )
-        => new( PullActionKind.AppendParameterAndPull, null,  parameterName, parameterType, parameterDefaultValue, parameterAttributes );
+        => new( PullActionKind.AppendParameterAndPull, null, parameterName, parameterType, parameterDefaultValue, parameterAttributes );
 
     /// <summary>
     /// Creates a <see cref="PullAction"/> that means that the dependency should be assigned to a given expression.

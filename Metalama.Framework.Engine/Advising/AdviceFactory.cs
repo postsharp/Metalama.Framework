@@ -1149,12 +1149,12 @@ namespace Metalama.Framework.Engine.Advising
             return result;
         }
 
-        public IAddAttributeAdviceResult AddAttribute(
+        public IIntroductionAdviceResult<IAttribute> IntroduceAttribute(
             IDeclaration targetDeclaration,
             IAttributeData attribute,
             OverrideStrategy whenExists = OverrideStrategy.Default )
         {
-            return this.ExecuteAdvice<IDeclaration>(
+            return this.ExecuteAdvice<IAttribute>(
                 new AddAttributeAdvice(
                     this.State.AspectInstance,
                     this._templateInstance!,
@@ -1180,7 +1180,7 @@ namespace Metalama.Framework.Engine.Advising
         public IRemoveAttributesAdviceResult RemoveAttributes( IDeclaration targetDeclaration, Type attributeType )
             => this.RemoveAttributes( targetDeclaration, (INamedType) this._compilation.Factory.GetTypeByReflectionType( attributeType ) );
 
-        public IAppendParameterAdviceResult IntroduceParameter(
+        public IIntroductionAdviceResult<IParameter> IntroduceParameter(
             IConstructor constructor,
             string parameterName,
             IType parameterType,
@@ -1205,14 +1205,24 @@ namespace Metalama.Framework.Engine.Advising
                 parameterType,
                 buildAction,
                 pullAction,
-                defaultValue);
+                defaultValue );
 
             return this.ExecuteAdvice<IParameter>( advice );
         }
 
-
-        public IAppendParameterAdviceResult IntroduceParameter( IConstructor constructor, string parameterName, Type parameterType, TypedConstant defaultValue, Func<IParameter, IConstructor, PullAction>? pullAction = null, Action<IParameterBuilder>? buildAction = null )
-         => this.IntroduceParameter( constructor, parameterName, this._compilation.Factory.GetTypeByReflectionType( parameterType ), defaultValue, pullAction, buildAction );
-
+        public IIntroductionAdviceResult<IParameter> IntroduceParameter(
+            IConstructor constructor,
+            string parameterName,
+            Type parameterType,
+            TypedConstant defaultValue,
+            Func<IParameter, IConstructor, PullAction>? pullAction = null,
+            Action<IParameterBuilder>? buildAction = null )
+            => this.IntroduceParameter(
+                constructor,
+                parameterName,
+                this._compilation.Factory.GetTypeByReflectionType( parameterType ),
+                defaultValue,
+                pullAction,
+                buildAction );
     }
 }
