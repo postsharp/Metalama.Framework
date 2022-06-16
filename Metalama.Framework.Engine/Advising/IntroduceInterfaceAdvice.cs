@@ -15,6 +15,7 @@ using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 
@@ -293,6 +294,7 @@ namespace Metalama.Framework.Engine.Advising
                     MemberBuilder memberBuilder;
 
                     var mergedTags = ObjectReader.Merge( this.Tags, memberSpec.Tags );
+                    
 
                     switch ( memberSpec.InterfaceMember )
                     {
@@ -308,10 +310,10 @@ namespace Metalama.Framework.Engine.Advising
                                             AdviceDiagnosticDescriptors.ImplicitInterfaceMemberConflict.CreateRoslynDiagnostic(
                                                 targetType.GetDiagnosticLocation(),
                                                 (this.Aspect.AspectClass.ShortName, interfaceSpecification.InterfaceType, targetType, existingMethod) ) );
-
+                                    
                                     case OverrideStrategy.Ignore:
                                         continue;
-
+                                    
                                     default:
                                         throw new NotImplementedException( $"The strategy OverrideStrategy.{this.OverrideStrategy} is not implemented." );
                                 }
@@ -353,10 +355,10 @@ namespace Metalama.Framework.Engine.Advising
                                             AdviceDiagnosticDescriptors.ImplicitInterfaceMemberConflict.CreateRoslynDiagnostic(
                                                 targetType.GetDiagnosticLocation(),
                                                 (this.Aspect.AspectClass.ShortName, interfaceSpecification.InterfaceType, targetType, existingProperty) ) );
-
+                                    
                                     case OverrideStrategy.Ignore:
                                         continue;
-
+                                    
                                     default:
                                         throw new NotImplementedException( $"The strategy OverrideStrategy.{this.OverrideStrategy} is not implemented." );
                                 }
@@ -415,10 +417,10 @@ namespace Metalama.Framework.Engine.Advising
                                             AdviceDiagnosticDescriptors.ImplicitInterfaceMemberConflict.CreateRoslynDiagnostic(
                                                 targetType.GetDiagnosticLocation(),
                                                 (this.Aspect.AspectClass.ShortName, interfaceSpecification.InterfaceType, targetType, existingEvent) ) );
-
+                                    
                                     case OverrideStrategy.Ignore:
                                         continue;
-
+                                    
                                     default:
                                         throw new NotImplementedException( $"The strategy OverrideStrategy.{this.OverrideStrategy} is not implemented." );
                                 }

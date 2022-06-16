@@ -184,7 +184,7 @@ namespace Metalama.TestFramework.XunitFramework
                             $"/ {((ITestCase) testCase).TestMethod.TestClass.Class.Name} " +
                             $"/ {((ITestCase) testCase).TestMethod.Method.Name} " +
                             $"/ {((ITestCase) testCase).DisplayName}" );
-
+                        
                         // Somehow xunit does not like if we call onTestCaseDiscovered concurrently.
                         lock ( sync )
                         {

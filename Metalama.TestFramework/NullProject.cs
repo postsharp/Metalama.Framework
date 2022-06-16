@@ -5,6 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Project;
 using System;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.TestFramework
 {
