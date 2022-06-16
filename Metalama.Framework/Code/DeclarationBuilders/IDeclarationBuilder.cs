@@ -8,10 +8,11 @@ namespace Metalama.Framework.Code.DeclarationBuilders
     /// </summary>
     public interface IDeclarationBuilder : IDeclaration
     {
+        /// <summary>
+        /// Gets a value indicating whether the builder has been frozen. When the value is <c>true</c>, modifications can no longer be performed.
+        /// </summary>
         bool IsFrozen { get; }
-
-        void Freeze();
-
+        
         /// <summary>
         /// Adds a custom attribute to the current declaration.
         /// </summary>

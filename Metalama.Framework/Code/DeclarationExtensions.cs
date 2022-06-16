@@ -53,6 +53,9 @@ namespace Metalama.Framework.Code
                 _ => null
             };
 
+        /// <summary>
+        /// Gets a representation of the current declaration in a different version of the compilation.
+        /// </summary>
         [return: NotNullIfNotNull( "declaration" )]
         public static T? ForCompilation<T>( this T? declaration, ICompilation compilation, ReferenceResolutionOptions options = default )
             where T : class, IDeclaration

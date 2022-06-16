@@ -134,6 +134,8 @@ namespace Metalama.Framework.Engine.Advising
             this.InitializeCore( serviceProvider, diagnosticAdder );
 
             this._buildAction?.Invoke( this.Builder );
+            
+            this.Builder.Freeze();
         }
 
         protected static void CopyTemplateAttributes( IDeclaration declaration, IDeclarationBuilder builder, IServiceProvider serviceProvider )
