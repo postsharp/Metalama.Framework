@@ -153,7 +153,7 @@ namespace Metalama.TestFramework
 
             foreach ( var syntaxTree in compilation.SyntaxTrees )
             {
-                if ( Path.GetFileName( syntaxTree.FilePath ) == CompileTimeConstants.PredefinedTypesFileName )
+                if ( CompileTimeConstants.IsPredefinedSyntaxTree( syntaxTree.FilePath ) )
                 {
                     // This is the "Intrinsics" syntax tree.
                     continue;

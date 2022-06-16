@@ -28,10 +28,15 @@ internal class AdviceResult<T> : IIntroductionAdviceResult<T>, IOverrideAdviceRe
 
     public AdviceOutcome Outcome { get; }
 
-    internal AdviceResult( IRef<T> declaration, ICompilation compilation, AdviceOutcome outcome )
+    public IAspectBuilder AspectBuilder { get; }
+
+    internal AdviceResult( IRef<T> declaration, ICompilation compilation, AdviceOutcome outcome, IAspectBuilder aspectBuilder )
     {
         this._declaration = declaration;
         this._compilation = compilation;
         this.Outcome = outcome;
+        this.AspectBuilder = aspectBuilder;
     }
+
+    IParameter IAppendParameterAdviceResult.Parameter => (IParameter) this.Declaration;
 }

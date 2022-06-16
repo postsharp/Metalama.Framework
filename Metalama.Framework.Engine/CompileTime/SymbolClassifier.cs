@@ -41,7 +41,8 @@ namespace Metalama.Framework.Engine.CompileTime
                 (typeof(AppDomain), Scope: TemplatingScope.RunTimeOnly, false),
                 (typeof(MemberInfo), Scope: TemplatingScope.RunTimeOnly, true),
                 (typeof(ParameterInfo), Scope: TemplatingScope.RunTimeOnly, true),
-                (typeof(Debugger), Scope: TemplatingScope.RunTimeOrCompileTime, false)
+                (typeof(Debugger), Scope: TemplatingScope.RunTimeOrCompileTime, false),
+                (typeof(Index), TemplatingScope.RunTimeOrCompileTime, false)
             }.ToImmutableDictionary( t => t.ReflectionType.Name, t => (t.ReflectionType.Namespace, t.Scope, t.MembersOnly) );
 
         private static readonly ImmutableDictionary<string, (TemplatingScope Scope, bool IncludeDescendants)> _wellKnownNamespaces =
@@ -52,7 +53,9 @@ namespace Metalama.Framework.Engine.CompileTime
                 ("System.Text", TemplatingScope.RunTimeOrCompileTime, true),
                 ("System.Collections", TemplatingScope.RunTimeOrCompileTime, true),
                 ("System.Linq", TemplatingScope.RunTimeOrCompileTime, true),
-                ("Microsoft.CodeAnalysis", TemplatingScope.RunTimeOnly, true)
+                ("Microsoft.CodeAnalysis", TemplatingScope.RunTimeOnly, true),
+                ("System.Runtime.CompilerServices", TemplatingScope.RunTimeOrCompileTime, true),
+                ("System.Diagnostics.CodeAnalysis", TemplatingScope.RunTimeOrCompileTime, true)
             }.ToImmutableDictionary( t => t.Namespace, t => (t.Scope, t.IncludeDescendants), StringComparer.Ordinal );
 
         private readonly Compilation? _compilation;
@@ -381,7 +384,7 @@ namespace Metalama.Framework.Engine.CompileTime
             }
 
             // From well-known types.
-            if ( this.TryGetWellKnownScope( symbol, false, out var scopeFromWellKnown ) )
+            if ( TryGetWellKnownScope( symbol, false, out var scopeFromWellKnown ) )
             {
                 return scopeFromWellKnown;
             }
@@ -615,24 +618,24 @@ namespace Metalama.Framework.Engine.CompileTime
                     {
                         // Some namespaces inside system assemblies have a well-known scope.
                         for ( var ns = namedType.ContainingNamespace; ns != null; ns = ns.ContainingNamespace )
+                    {
+                        var nsString = ns.ToDisplayString();
+
+                        if ( _wellKnownNamespaces.TryGetValue( nsString, out var wellKnownNamespace ) )
                         {
-                            var nsString = ns.ToDisplayString();
-
-                            if ( _wellKnownNamespaces.TryGetValue( nsString, out var wellKnownNamespace ) )
+                            if ( wellKnownNamespace.IncludeDescendants || ns.Equals( namedType.ContainingNamespace ) )
                             {
-                                if ( wellKnownNamespace.IncludeDescendants || ns.Equals( namedType.ContainingNamespace ) )
-                                {
-                                    scope = wellKnownNamespace.Scope;
+                                scope = wellKnownNamespace.Scope;
 
-                                    return true;
+                                return true;
                                 }
                             }
                         }
 
-                        // The default scope in system assemblies is run-time-only.
-                        scope = TemplatingScope.RunTimeOnly;
+                            // The default scope in system assemblies is run-time-only.
+                            scope = TemplatingScope.RunTimeOnly;
 
-                        return true;
+                            return true;
                     }
 
                     return false;

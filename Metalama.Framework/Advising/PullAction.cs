@@ -5,10 +5,18 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.SyntaxBuilders;
-using Metalama.Framework.DependencyInjection;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Advising;
+
+
+[CompileTime]
+internal enum PullActionKind
+{
+    AppendParameterAndPull,
+    UseExistingParameter,
+    DoNotPull
+}
 
 /// <summary>
 /// Represents a way to pull a field or property.
@@ -16,7 +24,7 @@ namespace Metalama.Framework.Advising;
 [CompileTime]
 public readonly struct PullAction
 {
-    internal DependencyPullStrategyKind Kind { get; }
+    internal PullActionKind Kind { get; }
 
     internal IExpression? AssignmentExpression { get; }
 
@@ -27,7 +35,7 @@ public readonly struct PullAction
     internal string? ParameterName { get; }
 
     private PullAction(
-        DependencyPullStrategyKind kind,
+        PullActionKind kind,
         IExpression? assignmentExpression = null,
         string? parameterName = null,
         IType? parameterType = null,
@@ -43,7 +51,7 @@ public readonly struct PullAction
     /// <summary>
     /// Gets a <see cref="PullAction"/> that means that the dependency has to be set to its default value.
     /// </summary>
-    public static PullAction None => new( DependencyPullStrategyKind.DoNotPull );
+    public static PullAction None => new( PullActionKind.DoNotPull );
 
     /// <summary>
     /// Creates a <see cref="PullAction"/> that means that the dependency should be pulled from an existing constructor parameter.
@@ -64,11 +72,11 @@ public readonly struct PullAction
         IType parameterType,
         IExpression? assignmentExpression = null,
         ImmutableArray<AttributeConstruction> parameterAttributes = default )
-        => new( DependencyPullStrategyKind.AppendParameterAndPull, assignmentExpression, parameterName, parameterType, parameterAttributes );
+        => new( PullActionKind.AppendParameterAndPull, assignmentExpression, parameterName, parameterType, parameterAttributes );
 
     /// <summary>
     /// Creates a <see cref="PullAction"/> that means that the dependency should be assigned to a given expression.
     /// </summary>
     public static PullAction UseExpression( IExpression expression )
-        => new( DependencyPullStrategyKind.UseExistingParameter, assignmentExpression: expression );
+        => new( PullActionKind.UseExistingParameter, assignmentExpression: expression );
 }

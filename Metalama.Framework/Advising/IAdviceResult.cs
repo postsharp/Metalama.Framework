@@ -14,6 +14,7 @@ namespace Metalama.Framework.Advising;
 public interface IAdviceResult
 {
     AdviceOutcome Outcome { get; } 
+    IAspectBuilder AspectBuilder { get; }
 }
 
 public interface IAddContractAdviceResult<out T> : IAdviceResult

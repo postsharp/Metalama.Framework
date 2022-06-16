@@ -23,4 +23,21 @@
         <!-- <Optimize>False</Optimize> -->
     </PropertyGroup>
 
+
+
+    <ItemGroup Condition="'$(ReferenceMetalamaSystemTypes)'!='False' AND '$(TargetFramework)'=='netstandard2.0'">
+        <ProjectReference Include="..\Metalama.SystemTypes\Metalama.SystemTypes.csproj" ReferenceOutputAssembly="false" />
+        <Reference Include="..\Metalama.SystemTypes\bin\$(Configuration)\netstandard2.0\Metalama.SystemTypes.dll" />
+    </ItemGroup>
+
+	<PropertyGroup  Condition="'$(PackMetalamaSystemTypes)'=='True' AND '$(TargetFramework)'=='netstandard2.0'">
+		<TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);MetalamaFrameworkSetLibAssembliesInPackage</TargetsForTfmSpecificBuildOutput>
+	</PropertyGroup>
+
+	<Target Name="MetalamaFrameworkSetLibAssembliesInPackage" DependsOnTargets="ResolveReferences">
+		<ItemGroup>
+          <TfmSpecificPackageFile Include="..\Metalama.SystemTypes\bin\$(Configuration)\netstandard2.0\Metalama.SystemTypes.dll" PackagePath="lib/netstandard2.0" />
+		</ItemGroup>
+	</Target>
+
 </Project>

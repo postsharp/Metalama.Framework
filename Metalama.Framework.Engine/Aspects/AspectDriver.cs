@@ -173,6 +173,8 @@ namespace Metalama.Framework.Engine.Aspects
                 cancellationToken );
 
             var aspectBuilder = new AspectBuilder<T>( targetDeclaration, aspectBuilderState, adviceFactory );
+            
+            adviceFactoryState.AspectBuilder = aspectBuilder;
 
             using ( SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( initialCompilationRevision, serviceProvider ) ) )
             {

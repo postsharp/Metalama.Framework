@@ -17,9 +17,7 @@
     </ItemGroup>
 
 
-    <ItemGroup>
-        <Compile Include="..\NullableAttributes.cs" Link="NullableAttributes.cs"/>
-        <Compile Include="..\IsExternalInit.cs" Link="NullableAttributes.cs"/>
-    </ItemGroup>
+    <Import Sdk="PostSharp.Engineering.Sdk" Project="SystemTypes.props"/>
+
 
 </Project>

@@ -784,7 +784,10 @@ public class MyAspect : OverrideMethodAspect
 
         private static string GetCompileTimeCode( TestContext testContext, string code, OutputKind outputKind = OutputKind.DynamicallyLinkedLibrary )
         {
-            return GetCompileTimeCode( testContext, new Dictionary<string, string> { { "main.cs", code } }, outputKind ).Values.Single();
+            var compileTimeSyntaxTrees = GetCompileTimeCode( testContext, new Dictionary<string, string> { { "main.cs", code } }, outputKind );
+
+            return compileTimeSyntaxTrees
+                .Single( x => !x.Key.StartsWith( "__", StringComparison.Ordinal ) ).Value;
         }
 
         private static IReadOnlyDictionary<string, string> GetCompileTimeCode(
@@ -805,7 +808,7 @@ public class MyAspect : OverrideMethodAspect
             // Just test that the output file has gone through formatting (we don't test that the whole formatting is correct). 
             var files = Directory
                 .GetFiles( project.Directory!, "*.cs" )
-                .Where( f => !f.EndsWith( CompileTimeConstants.PredefinedTypesFileName, StringComparison.OrdinalIgnoreCase ) );
+                .Where( f => !CompileTimeConstants.IsPredefinedSyntaxTree( f ) );
 
             return files.ToImmutableDictionary( f => Path.GetFileName( f ), File.ReadAllText );
         }
@@ -972,6 +975,112 @@ namespace SomeNamespace
             Assert.Equal( expected, compileTimeCode );
         }
 
+        
+        [Fact]
+        public void CompileTypeTypesOfAllTKindsAreCopied()
+        {
+            using var testContext = this.CreateTestContext( new TestProjectOptions( formatCompileTimeCode: true ) );
+
+            var code = @"
+using System;
+using Metalama.Framework.Aspects;
+
+namespace System.Runtime.CompilerServices { internal static class IsExternalInit {} }
+
+[CompileTime]
+public class SomeClass
+{
+    public void M() {}
+}
+
+[CompileTime]
+public struct SomeStruct
+{
+    public void M() {}
+}
+
+[CompileTime]
+public interface SomeInterface
+{
+    void M();
+}
+
+[CompileTime]
+public record SomeRecord( int P );
+
+[CompileTime]
+public delegate void SomeDelegate();
+";
+
+            var compileTimeCode = GetCompileTimeCode( testContext, code );
+
+            var expected = @"
+using System;
+using Metalama.Framework.Aspects;
+
+[CompileTime]
+public class SomeClass
+{
+    public void M() { }
+}
+
+[CompileTime]
+public struct SomeStruct
+{
+    public void M() { }
+}
+
+[CompileTime]
+public interface SomeInterface
+{
+    void M();
+}
+
+[CompileTime]
+public record SomeRecord(int P);
+
+[CompileTime]
+public delegate void SomeDelegate();
+";
+
+            Assert.Equal( expected, compileTimeCode );
+        }
+
+
+          
+        [Fact]
+        public void SyntaxTreeWithOnlyCompileTimeInterfaceIsCopied()
+        {
+            using var testContext = this.CreateTestContext( new TestProjectOptions( formatCompileTimeCode: true ) );
+
+            var code = @"
+using System;
+using Metalama.Framework.Aspects;
+
+[CompileTime]
+public interface SomeInterface
+{
+    void M();
+}
+";
+
+            var compileTimeCode = GetCompileTimeCode( testContext, code );
+
+            var expected = @"
+using System;
+using Metalama.Framework.Aspects;
+
+[CompileTime]
+public interface SomeInterface
+{
+    void M();
+}
+";
+
+            Assert.Equal( expected, compileTimeCode );
+        }
+
+   
         private class Rewriter : ICompileTimeAssemblyBinaryRewriter
         {
             public bool IsInvoked { get; private set; }

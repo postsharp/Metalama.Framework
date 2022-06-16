@@ -5,7 +5,7 @@ using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
-using Metalama.Framework.DependencyInjection;
+using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
@@ -260,7 +260,7 @@ namespace Metalama.Framework.Engine.Advising
                     break;
             }
 
-            return new AdviceResult<T>( result.NewDeclaration.As<T>(), this._compilation, result.Outcome );
+            return new AdviceResult<T>( result.NewDeclaration.As<T>(), this._compilation, result.Outcome, this.State.AspectBuilder.AssertNotNull(  ) );
         }
 
         private void ValidateTarget( IDeclaration target, params IDeclaration[] otherTargets )
@@ -961,7 +961,7 @@ namespace Metalama.Framework.Engine.Advising
             var templateRef = this.ValidateTemplateName( template, TemplateKind.Default, true )
                 .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
 
-            var advice = new InitializeAdvice(
+            var advice = new TemplateBasedInitializeAdvice(
                 this.State.AspectInstance,
                 this._templateInstance,
                 targetType,
@@ -972,6 +972,30 @@ namespace Metalama.Framework.Engine.Advising
                 ObjectReader.GetReader( tags ) );
 
             return this.ExecuteAdvice<INamedType>( advice );
+        }
+
+        public IAddInitializerAdviceResult AddInitializer(
+            INamedType targetType,
+            IStatement statement,
+            InitializerKind kind )
+        {if ( this._templateInstance == null )
+            {
+                throw new InvalidOperationException();
+            }
+
+            this.ValidateTarget( targetType );
+
+            var advice = new SyntaxBasedInitializeAdvice(
+                this.State.AspectInstance,
+                this._templateInstance,
+                targetType,
+                this._compilation,
+                statement,
+                kind,
+                this._layerName );
+
+            return this.ExecuteAdvice<INamedType>( advice );
+            
         }
 
         public IAddInitializerAdviceResult AddInitializer( IConstructor targetConstructor, string template, object? tags = null, object? args = null )
@@ -986,7 +1010,7 @@ namespace Metalama.Framework.Engine.Advising
             var templateRef = this.ValidateTemplateName( template, TemplateKind.Default, true )
                 .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
 
-            var advice = new InitializeAdvice(
+            var advice = new TemplateBasedInitializeAdvice(
                 this.State.AspectInstance,
                 this._templateInstance,
                 targetConstructor,
@@ -999,7 +1023,28 @@ namespace Metalama.Framework.Engine.Advising
             return this.ExecuteAdvice<IConstructor>( advice );
         }
 
-   
+        public IAddInitializerAdviceResult AddInitializer( IConstructor targetConstructor, IStatement statement )
+        {
+            if ( this._templateInstance == null )
+            {
+                throw new InvalidOperationException();
+            }
+
+            this.ValidateTarget( targetConstructor );
+
+
+            var advice = new SyntaxBasedInitializeAdvice(
+                this.State.AspectInstance,
+                this._templateInstance,
+                targetConstructor,
+                this._compilation,
+                statement,
+                InitializerKind.BeforeInstanceConstructor,
+                this._layerName );
+
+            return this.ExecuteAdvice<IConstructor>( advice );
+        }
+
         private static void ThrowOnErrors( DiagnosticList diagnosticList )
         {
             if ( diagnosticList.HasErrors() )
@@ -1096,7 +1141,8 @@ namespace Metalama.Framework.Engine.Advising
                 result = new AdviceResult<T>(
                     advice.LastAdviceImplementationResult.AssertNotNull().NewDeclaration.As<T>(),
                     this.State.CurrentCompilation,
-                    AdviceOutcome.Default );
+                    AdviceOutcome.Default,
+                    this.State.AspectBuilder.AssertNotNull(  ));
             }
 
             // We keep adding contracts to the same advice instance even after it has produced a transformation because the transformation will use this list of advice.
@@ -1127,7 +1173,7 @@ namespace Metalama.Framework.Engine.Advising
             IConstructor constructor,
             string parameterName,
             IType parameterType,
-            Func<IConstructor, PullAction> pullAction,
+            Func<IParameter,IConstructor, PullAction> pullAction,
             Action<IParameterBuilder>? buildAction = null )
         {
             if ( this._templateInstance == null )

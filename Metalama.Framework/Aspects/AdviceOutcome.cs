@@ -3,6 +3,7 @@
 
 namespace Metalama.Framework.Aspects;
 
+[CompileTime]
 public enum AdviceOutcome
 {
     Default,

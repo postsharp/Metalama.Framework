@@ -23,6 +23,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
     {
+        private readonly IObjectReader _initializerTags;
+
         public bool IsEventField { get; }
 
         public EventBuilder(
@@ -30,9 +32,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             INamedType targetType,
             string name,
             bool isEventField,
-            IObjectReader tags )
-            : base( parentAdvice, targetType, name, tags )
+            IObjectReader initializerTags )
+            : base( parentAdvice, targetType, name )
         {
+            this._initializerTags = initializerTags;
             this.IsEventField = isEventField;
             this.Type = (INamedType) targetType.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(EventHandler) );
         }
@@ -85,6 +88,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 this.Type,
                 this.InitializerExpression,
                 this.InitializerTemplate,
+                this._initializerTags,
                 out var initializerExpression,
                 out var initializerMethod );
 

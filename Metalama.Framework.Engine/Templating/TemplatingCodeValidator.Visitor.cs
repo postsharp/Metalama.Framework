@@ -314,7 +314,7 @@ namespace Metalama.Framework.Engine.Templating
 
                         default:
                             {
-                                if ( scope != TemplatingScope.RunTimeOnly && !this._hasCompileTimeCodeFast )
+                                if ( scope != TemplatingScope.RunTimeOnly && !this._hasCompileTimeCodeFast && !SystemTypeDetector.IsSystemType( declaredSymbol as INamedTypeSymbol ?? declaredSymbol.ContainingType ) )
                                 {
                                     this.Report(
                                         TemplatingDiagnosticDescriptors.CompileTimeCodeNeedsNamespaceImport.CreateRoslynDiagnostic(

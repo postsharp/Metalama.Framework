@@ -51,12 +51,25 @@ namespace Metalama.Framework.Engine.CompileTime
         private readonly ICompileTimeAssemblyBinaryRewriter? _rewriter;
         private readonly ILogger _logger;
 
-        private static readonly Lazy<SyntaxTree> _predefinedTypesSyntaxTree = new(
-            () =>
-                CSharpSyntaxTree.ParseText(
-                    "namespace System.Runtime.CompilerServices { internal static class IsExternalInit {} }",
-                    path: CompileTimeConstants.PredefinedTypesFileName,
-                    encoding: Encoding.UTF8 ) );
+        private static readonly Lazy<ImmutableDictionary<string,string>> _predefinedTypesSyntaxTree = new( GetPredefinedSyntaxTrees  );
+
+        private static ImmutableDictionary<string,string> GetPredefinedSyntaxTrees()
+        {
+            var prefix = "Metalama.Framework.Engine._Resources_.";
+
+            var assembly = typeof(CompileTimeCompilationBuilder).Assembly;
+
+            return assembly.GetManifestResourceNames()
+                .Where( n => n.StartsWith( prefix, StringComparison.Ordinal ) )
+                .ToImmutableDictionary(
+                    name => CompileTimeConstants.GetPrefixedSyntaxTreeName( name.Substring( prefix.Length ) )+ ".cs",
+                    name =>
+                    {
+                        using var reader = new StreamReader( assembly.GetManifestResourceStream( name )! );
+
+                        return reader.ReadToEnd();
+                    } );
+        }
 
         private static readonly Guid _buildId = AssemblyMetadataReader.GetInstance( typeof(CompileTimeCompilationBuilder).Assembly ).ModuleId;
         private readonly ReflectionMapperFactory _reflectionMapperFactory;
@@ -146,7 +159,6 @@ namespace Metalama.Framework.Engine.CompileTime
             IReadOnlyList<SyntaxTree> treesWithCompileTimeCode,
             IEnumerable<CompileTimeProject> referencedProjects,
             ImmutableArray<UsingDirectiveSyntax> globalUsings,
-            ulong hash,
             OutputPaths outputPaths,
             IDiagnosticAdder diagnosticSink,
             CancellationToken cancellationToken,
@@ -271,17 +283,20 @@ namespace Metalama.Framework.Engine.CompileTime
             }
         }
 
-        private CSharpCompilation CreateEmptyCompileTimeCompilation(
-            string assemblyName,
-            IEnumerable<CompileTimeProject> referencedProjects )
+        private CSharpCompilation CreateEmptyCompileTimeCompilation( string assemblyName, IEnumerable<CompileTimeProject> referencedProjects )
         {
             var assemblyLocator = this._serviceProvider.GetRequiredService<ReferenceAssemblyLocator>();
 
+            var parseOptions = new CSharpParseOptions( preprocessorSymbols: new[] { "NETSTANDARD_2_0" } );
+
             var standardReferences = assemblyLocator.StandardCompileTimeMetadataReferences;
+
+            var predefinedSyntaxTrees =
+                _predefinedTypesSyntaxTree.Value.Select( x => CSharpSyntaxTree.ParseText( x.Value, parseOptions, x.Key, Encoding.UTF8 ) );
 
             return CSharpCompilation.Create(
                     assemblyName,
-                    new[] { _predefinedTypesSyntaxTree.Value },
+                    predefinedSyntaxTrees,
                     standardReferences,
                     new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, deterministic: true ) )
                 .AddReferences(
@@ -732,7 +747,6 @@ namespace Metalama.Framework.Engine.CompileTime
                             sourceTreesWithCompileTimeCode,
                             referencedProjects,
                             globalUsings,
-                            projectHash,
                             outputPaths,
                             diagnosticSink,
                             cancellationToken,

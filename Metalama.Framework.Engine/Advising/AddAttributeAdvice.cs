@@ -91,7 +91,7 @@ internal class AddAttributeAdvice : Advice
 
             if ( targetDeclaration.ContainingDeclaration is IConstructor { IsImplicit: true } constructor )
             {
-                addTransformation( new ConstructorBuilder( this, constructor.DeclaringType, ObjectReader.Empty ) );
+                addTransformation( new ConstructorBuilder( this, constructor.DeclaringType ) );
             }
 
             addTransformation( new AttributeBuilder( this, targetDeclaration, this._attribute ) );

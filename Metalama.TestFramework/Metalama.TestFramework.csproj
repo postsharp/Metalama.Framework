@@ -29,12 +29,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Include="..\IsExternalInit.cs">
-            <Link>SystemTypes\IsExternalInit.cs</Link>
-        </Compile>
-    </ItemGroup>
-
-    <ItemGroup>
         <None Include="Metalama.TestFramework.props">
             <Pack>true</Pack>
             <PackagePath>build</PackagePath>

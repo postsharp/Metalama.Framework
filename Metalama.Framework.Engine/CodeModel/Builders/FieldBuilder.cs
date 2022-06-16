@@ -20,6 +20,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
     {
+        private readonly IObjectReader _initializerTags;
+
         public override DeclarationKind DeclarationKind => DeclarationKind.Field;
 
         public IType Type { get; set; }
@@ -48,9 +50,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public TemplateMember<IField> InitializerTemplate { get; set; }
 
-        public FieldBuilder( Advice parentAdvice, INamedType targetType, string name, IObjectReader tags )
-            : base( parentAdvice, targetType, name, tags )
+        public FieldBuilder( Advice parentAdvice, INamedType targetType, string name, IObjectReader initializerTags )
+            : base( parentAdvice, targetType, name )
         {
+            this._initializerTags = initializerTags;
             this.Type = this.Compilation.Factory.GetSpecialType( SpecialType.Object );
         }
 
@@ -64,6 +67,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 this.Type,
                 this.InitializerExpression,
                 this.InitializerTemplate,
+                this._initializerTags,
                 out var initializerExpression,
                 out var initializerMethod );
 

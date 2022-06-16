@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override Writeability Writeability => this._field.Writeability;
 
-        public PromotedField( IServiceProvider serviceProvider, Advice advice, IField field, IObjectReader tags ) : base(
+        public PromotedField( IServiceProvider serviceProvider, Advice advice, IField field, IObjectReader initializerTags ) : base(
             advice,
             field.DeclaringType,
             field.Name,
@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             false,
             true,
             true,
-            tags )
+            initializerTags )
         {
             this._field = (IFieldImpl) field;
             this.Type = field.Type;
@@ -76,6 +76,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     this.Type,
                     fieldBuilder.InitializerExpression,
                     fieldBuilder.InitializerTemplate,
+                    this.InitializerTags,
                     out initializerExpression,
                     out initializerMethod );
             }

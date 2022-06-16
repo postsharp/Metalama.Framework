@@ -7,8 +7,8 @@
         </PackageDescription>
         <RootNamespace>Metalama.Framework.Engine</RootNamespace>
         <!-- This is to prevent the Metalama.Compiler.Sdk package to change our nuspec -->
-        <MetalamaCompilerDisablePackCustomization>True</MetalamaCompilerDisablePackCustomization>
-
+		<MetalamaCompilerCustomizePack>False</MetalamaCompilerCustomizePack>
+        
     </PropertyGroup>
 
     <ItemGroup>

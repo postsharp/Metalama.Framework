@@ -45,6 +45,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public bool IsAutoPropertyOrField { get; }
 
+        public IObjectReader InitializerTags { get; }
+
         public IType Type
         {
             get => this._type;
@@ -116,8 +118,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             bool hasInitOnlySetter,
             bool hasImplicitGetter,
             bool hasImplicitSetter,
-            IObjectReader tags )
-            : base( parentAdvice, targetType, name, tags )
+            IObjectReader initializerTags )
+            : base( parentAdvice, targetType, name )
         {
             // TODO: Sanity checks.
 
@@ -139,6 +141,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
 
             this.IsAutoPropertyOrField = isAutoProperty;
+            this.InitializerTags = initializerTags;
             this._hasInitOnlySetter = hasInitOnlySetter;
         }
 
@@ -152,6 +155,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 this.Type,
                 this.InitializerExpression,
                 this.InitializerTemplate,
+                this.InitializerTags,
                 out initializerExpression,
                 out initializerMethod );
         }
@@ -288,6 +292,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 this.Type,
                 this.InitializerExpression,
                 this.InitializerTemplate,
+                this.InitializerTags,
                 out initializerExpression,
                 out initializerMethod );
         }

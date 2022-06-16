@@ -27,6 +27,27 @@ using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
+    internal static class SystemTypeDetector
+    {
+
+        public static bool IsSystemType( INamedTypeSymbol namedType )
+        {
+            switch ( namedType.GetReflectionName() )
+            {
+                case "System.Index":
+                    return true;
+            }
+
+            switch ( namedType.ContainingNamespace.ToDisplayString() )
+            {
+                case "System.Runtime.CompilerServices":
+                case "System.Diagnostics.CodeAnalysis":
+                    return true;
+            }
+
+            return false;
+        }
+    }
     internal partial class CompileTimeCompilationBuilder
     {
         /// <summary>
@@ -131,6 +152,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
                 else
                 {
+                    this.FoundCompileTimeCode = true;
                     return base.VisitEnumDeclaration( node )!.WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
                 }
             }
@@ -276,24 +298,18 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
             }
 
+
             private IEnumerable<MemberDeclarationSyntax> VisitTypeDeclaration( TypeDeclarationSyntax node )
             {
-                // Eliminate System.Runtime.CompilerServices.IsExternalInit.
-                if ( node.Identifier.Text == "IsExternalInit" )
-                {
-                    var semanticModel = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree );
-
-                    if ( semanticModel.GetDeclaredSymbol( node ) is { } type
-                         && type.ContainingNamespace.ToDisplayString() == "System.Runtime.CompilerServices" )
-                    {
-                        // We are inserting this type anyway, so skip it if we find it in user code.
-                        return Array.Empty<MemberDeclarationSyntax>();
-                    }
-                }
-
                 this._cancellationToken.ThrowIfCancellationRequested();
 
                 var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
+                
+                // Eliminate system types.
+                if ( SystemTypeDetector.IsSystemType( symbol ) )
+                {
+                    return Array.Empty<MemberDeclarationSyntax>();
+                }
 
                 var scope = this.SymbolClassifier.GetTemplatingScope( symbol );
 
@@ -1030,7 +1046,7 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 // Get the list of members that are not statements, local variables, local functions,...
                 var nonTopLevelMembers = node.Members.Where(
-                        m => m is BaseTypeDeclarationSyntax or NamespaceDeclarationSyntax or DelegateDeclarationSyntax or FileScopedNamespaceDeclarationSyntax )
+                        m => m is BaseTypeDeclarationSyntax or NamespaceDeclarationSyntax or DelegateDeclarationSyntax or FileScopedNamespaceDeclarationSyntax  )
                     .ToList();
 
                 var transformedMembers = this.VisitTypeOrNamespaceMembers( nonTopLevelMembers );

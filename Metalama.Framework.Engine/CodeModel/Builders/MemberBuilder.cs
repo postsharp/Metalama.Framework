@@ -4,7 +4,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
-using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
@@ -25,10 +24,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         private bool _isVirtual;
         private bool _isAsync;
         private bool _isOverride;
-
-        protected MemberBuilder( Advice parentAdvice, INamedType declaringType, string name, IObjectReader tags ) : base( parentAdvice, declaringType, name )
+        
+        protected MemberBuilder( Advice parentAdvice, INamedType declaringType, string name ) : base( parentAdvice, declaringType, name )
         {
-            this.Tags = tags;
         }
 
         public abstract bool IsImplicit { get; }
@@ -77,8 +75,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.DeclaringType.ToDisplayString( format, context ) + "." + this.Name;
 
-        protected IObjectReader Tags { get; }
-
         public abstract IMember? OverriddenMember { get; }
 
         public override bool CanBeInherited => this.IsVirtual && !this.IsSealed && ((IDeclarationImpl) this.DeclaringType).CanBeInherited;
@@ -88,6 +84,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             IType targetType,
             IExpression? initializerExpression,
             TemplateMember<T> initializerTemplate,
+            IObjectReader tags,
             out ExpressionSyntax? initializerExpressionSyntax,
             out MethodDeclarationSyntax? initializerMethodSyntax )
             where T : class, IMember
@@ -126,7 +123,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             {
                 initializerExpressionSyntax = null;
 
-                if ( !this.TryExpandInitializerTemplate( context, initializerTemplate, out var initializerBlock ) )
+                if ( !this.TryExpandInitializerTemplate( context, initializerTemplate, tags, out var initializerBlock ) )
                 {
                     // Template expansion error.
                     initializerMethodSyntax = null;
@@ -185,6 +182,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         private bool TryExpandInitializerTemplate<T>(
             MemberIntroductionContext context,
             TemplateMember<T> initializerTemplate,
+            IObjectReader tags,
             [NotNullWhen( true )] out BlockSyntax? expression )
             where T : class, IMember
         {
@@ -194,7 +192,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     this.ParentAdvice.SourceCompilation,
                     context.DiagnosticSink,
                     initializerTemplate.Cast(),
-                    this.Tags,
+                    tags,
                     this.ParentAdvice.AspectLayerId,
                     context.SyntaxGenerationContext,
                     this.ParentAdvice.Aspect,

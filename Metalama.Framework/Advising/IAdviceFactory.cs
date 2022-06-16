@@ -4,6 +4,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Validation;
 using System;
 
@@ -409,6 +410,11 @@ namespace Metalama.Framework.Advising
             InitializerKind kind,
             object? tags = null,
             object? args = null );
+        
+        IAddInitializerAdviceResult AddInitializer(
+            INamedType targetType,
+            IStatement statement,
+            InitializerKind kind );
 
         /// <summary>
         /// Adds an initializer to a specific constructor. 
@@ -419,6 +425,8 @@ namespace Metalama.Framework.Advising
         ///     <see cref="meta"/> API.</param>
         /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template.</param>
         IAddInitializerAdviceResult AddInitializer( IConstructor targetConstructor, string template, object? tags = null, object? args = null );
+        
+        IAddInitializerAdviceResult AddInitializer( IConstructor targetConstructor, IStatement statement );
 
         /// <summary>
         /// Adds a contract to a parameter. Contracts are usually used to validate parameters (pre- or post-conditions) or to normalize their value (null-to-empty, trimming, normalizing case, ...).
@@ -489,7 +497,7 @@ namespace Metalama.Framework.Advising
             IConstructor constructor,
             string parameterName,
             IType parameterType,
-            Func<IConstructor, PullAction> pullAction,
+            Func<IParameter, IConstructor, PullAction> pullAction,
             Action<IParameterBuilder>? buildAction = null );
 
         /// <summary>
