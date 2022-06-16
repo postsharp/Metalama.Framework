@@ -1158,7 +1158,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     return PredefinedType( Token( SyntaxKind.ObjectKeyword ) ).WithTriviaFrom( node );
                 }
-                else if ( node.Identifier.IsKind( SyntaxKind.IdentifierToken ) && !node.IsVar )
+                else if ( node.Identifier.IsKind( SyntaxKind.IdentifierToken ) && !node.IsVar && node.Parent is not QualifiedNameSyntax)
                 {
                     // Fully qualifies simple identifiers.
 

@@ -346,11 +346,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public ExpressionSyntax TypedConstant( in TypedConstant typedConstant )
         {
-            if ( !typedConstant.IsAssigned )
-            {
-                throw new ArgumentOutOfRangeException( nameof(typedConstant), "The TypedConstant is undefined." );
-            }
-            else if ( typedConstant.IsDefault )
+            if ( typedConstant.IsNullOrDefault )
             {
                 return this.DefaultExpression( typedConstant.Type.GetSymbol() );
             }
@@ -454,12 +450,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private ExpressionSyntax AttributeValueExpression( TypedConstant typedConstant )
         {
-            if ( !typedConstant.IsAssigned )
-            {
-                throw new AssertionFailedException();
-            }
-
-            if ( typedConstant.IsDefault )
+            if ( typedConstant.IsNullOrDefault )
             {
                 return this.DefaultExpression( typedConstant.Type.GetSymbol() );
             }

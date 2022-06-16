@@ -25,7 +25,7 @@ namespace Metalama.Framework.Code
         /// value of the parameter is the default value of the struct type.
         /// </remarks>
         /// <exception cref="System.InvalidOperationException">The parameter has no default value.</exception>
-        TypedConstant DefaultValue { get; }
+        TypedConstant? DefaultValue { get; }
 
         /// <summary>
         /// Gets a value indicating whether the parameter has the <c>params</c> modifier.

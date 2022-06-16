@@ -18,12 +18,11 @@ namespace Metalama.Framework.Code
     public readonly struct TypedConstant : IExpression
     {
         // ReSharper disable once UnassignedReadonlyField
-        public static readonly TypedConstant Null;
-
+      
         private readonly object? _value;
         private readonly IType? _type;
 
-        private void CheckAssigned()
+        private void CheckInitialized()
         {
             if ( this._type == null )
             {
@@ -34,7 +33,7 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets a value indicating whether the <see cref="Value"/> has been specified (including when it is set to <c>null</c>).
         /// </summary>
-        public bool IsAssigned => this._type != null;
+        public bool IsInitialized => this._type != null;
 
         /// <summary>
         /// Gets the type of the value. This is important if the type is an enum, because in this case, if the enum type is not compile-time,
@@ -44,20 +43,20 @@ namespace Metalama.Framework.Code
         {
             get
             {
-                this.CheckAssigned();
+                this.CheckInitialized();
 
                 return this._type!;
             }
         }
 
         /// <summary>
-        /// Gets a value indicating whether the value is <c>null</c> or <c>default</c>. Not to be confused with <see cref="IsAssigned"/>.
+        /// Gets a value indicating whether the value is <c>null</c> or <c>default</c>. Not to be confused with <see cref="IsInitialized"/>.
         /// </summary>
-        public bool IsDefault
+        public bool IsNullOrDefault
         {
             get
             {
-                this.CheckAssigned();
+                this.CheckInitialized();
 
                 return this.Value == null;
             }
@@ -89,7 +88,7 @@ namespace Metalama.Framework.Code
         {
             get
             {
-                this.CheckAssigned();
+                this.CheckInitialized();
 
                 return this._value;
             }
@@ -102,12 +101,22 @@ namespace Metalama.Framework.Code
         /// was set to something, even <c>null</c>. To represent the fact that the default value was not set, use <c>default(OptionalValue)</c>.
         /// </summary>
         /// <param name="value">The value (even <c>null</c>).</param>
-        public TypedConstant( IType type, object? value ) : this()
+        internal TypedConstant( IType type, object? value ) : this()
         {
             this._value = value;
             this._type = type;
         }
 
-        public override string ToString() => this.IsAssigned ? this._value?.ToString() ?? "default" : "(unset)";
+        public override string ToString() => this._type != null ? this._value?.ToString() ?? "default" : "(uninitialized)";
+
+        public static TypedConstant Default( IType type ) => new TypedConstant( type, null );
+
+        public static TypedConstant Default( Type type ) => new TypedConstant( TypeFactory.GetType( type ), null );
+        public static TypedConstant Default<T>() => Default( typeof(T) );
+
+        public static TypedConstant Create( object value ) => new TypedConstant( TypeFactory.GetType( value.GetType() ), value );
+
+        public static TypedConstant Create( IType type, object? value ) => new TypedConstant( type, value );
+
     }
 }

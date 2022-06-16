@@ -20,7 +20,7 @@ internal abstract class BaseParameterBuilder : DeclarationBuilder, IParameterBui
 
     public abstract int Index { get; }
 
-    public abstract TypedConstant DefaultValue { get; set; }
+    public abstract TypedConstant? DefaultValue { get; set; }
 
     public abstract bool IsParams { get; set; }
 

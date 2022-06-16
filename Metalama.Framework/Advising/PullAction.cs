@@ -29,6 +29,8 @@ public readonly struct PullAction
 
     internal ImmutableArray<AttributeConstruction> ParameterAttributes { get; }
 
+    internal TypedConstant? ParameterDefaultValue { get; }
+
     internal string? ParameterName { get; }
 
     public IExpression? Expression { get; }
@@ -38,13 +40,16 @@ public readonly struct PullAction
         IExpression? expression = null,
         string? parameterName = null,
         IType? parameterType = null,
-        ImmutableArray<AttributeConstruction> parameterAttributes = default )
+        TypedConstant? parameterDefaultValue = null,
+        ImmutableArray<AttributeConstruction> parameterAttributes = default
+        )
     {
         this.Kind = kind;
         this.Expression = expression;
         this.ParameterType = parameterType;
         this.ParameterAttributes = parameterAttributes.IsDefault ? ImmutableArray<AttributeConstruction>.Empty : parameterAttributes;
         this.ParameterName = parameterName;
+        this.ParameterDefaultValue = parameterDefaultValue;
     }
 
     /// <summary>
@@ -65,8 +70,9 @@ public readonly struct PullAction
     public static PullAction IntroduceParameterAndPull(
         string parameterName,
         IType parameterType,
+        TypedConstant parameterDefaultValue,
         ImmutableArray<AttributeConstruction> parameterAttributes = default )
-        => new( PullActionKind.AppendParameterAndPull, null,  parameterName, parameterType, parameterAttributes );
+        => new( PullActionKind.AppendParameterAndPull, null,  parameterName, parameterType, parameterDefaultValue, parameterAttributes );
 
     /// <summary>
     /// Creates a <see cref="PullAction"/> that means that the dependency should be assigned to a given expression.

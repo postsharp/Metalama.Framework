@@ -19,6 +19,7 @@ using System.Linq;
 using System.Reflection;
 using RefKind = Metalama.Framework.Code.RefKind;
 using SpecialType = Metalama.Framework.Code.SpecialType;
+using TypedConstant = Metalama.Framework.Code.TypedConstant;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.Advising
@@ -1179,11 +1180,12 @@ namespace Metalama.Framework.Engine.Advising
         public IRemoveAttributesAdviceResult RemoveAttributes( IDeclaration targetDeclaration, Type attributeType )
             => this.RemoveAttributes( targetDeclaration, (INamedType) this._compilation.Factory.GetTypeByReflectionType( attributeType ) );
 
-        public IAppendParameterAdviceResult AppendParameter(
+        public IAppendParameterAdviceResult IntroduceParameter(
             IConstructor constructor,
             string parameterName,
             IType parameterType,
-            Func<IParameter, IConstructor, PullAction> pullAction,
+            TypedConstant defaultValue,
+            Func<IParameter, IConstructor, PullAction>? pullAction = null,
             Action<IParameterBuilder>? buildAction = null )
         {
             if ( this._templateInstance == null )
@@ -1202,9 +1204,15 @@ namespace Metalama.Framework.Engine.Advising
                 parameterName,
                 parameterType,
                 buildAction,
-                pullAction );
+                pullAction,
+                defaultValue);
 
-            return this.ExecuteAdvice<IConstructor>( advice );
+            return this.ExecuteAdvice<IParameter>( advice );
         }
+
+
+        public IAppendParameterAdviceResult IntroduceParameter( IConstructor constructor, string parameterName, Type parameterType, TypedConstant defaultValue, Func<IParameter, IConstructor, PullAction>? pullAction = null, Action<IParameterBuilder>? buildAction = null )
+         => this.IntroduceParameter( constructor, parameterName, this._compilation.Factory.GetTypeByReflectionType( parameterType ), defaultValue, pullAction, buildAction );
+
     }
 }

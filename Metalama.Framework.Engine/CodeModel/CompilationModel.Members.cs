@@ -234,7 +234,7 @@ public partial class CompilationModel
             this.AddDeclaration( builder );
         }
 
-        if ( transformation is AppendParameterTransformation appendParameterTransformation )
+        if ( transformation is IntroduceParameterTransformation appendParameterTransformation )
         {
             this.AddDeclaration( appendParameterTransformation.Parameter );
         }

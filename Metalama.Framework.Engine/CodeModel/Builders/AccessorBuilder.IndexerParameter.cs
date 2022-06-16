@@ -18,13 +18,12 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         {
             public IndexerParameter( AccessorBuilder accessor, int index, string name, IType parameterType, RefKind refKind ) : base( accessor, index )
             {
-                this.DefaultValue = TypedConstant.Null;
                 this.Name = name;
                 this.Type = parameterType;
                 this.RefKind = refKind;
             }
 
-            public override TypedConstant DefaultValue { get; set; }
+            public override TypedConstant? DefaultValue { get; set; }
 
             public override IType Type { get; set; }
 

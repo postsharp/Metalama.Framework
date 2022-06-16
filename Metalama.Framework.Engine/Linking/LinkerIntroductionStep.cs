@@ -475,12 +475,12 @@ namespace Metalama.Framework.Engine.Linking
                             break;
                         }
 
-                    case (AppendParameterTransformation appendParameterTransformation, _):
+                    case (IntroduceParameterTransformation appendParameterTransformation, _):
                         memberLevelTransformations.Add( appendParameterTransformation );
 
                         break;
 
-                    case (AppendConstructorInitializerArgumentTransformation appendArgumentTransformation, _):
+                    case (IntroduceConstructorInitializerArgumentTransformation appendArgumentTransformation, _):
                         memberLevelTransformations.Add( appendArgumentTransformation );
 
                         break;

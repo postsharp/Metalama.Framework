@@ -439,7 +439,7 @@ namespace Metalama.Framework.Engine.Linking
 
             private static ParameterListSyntax AppendParameters(
                 ParameterListSyntax existingParameters,
-                ImmutableArray<AppendParameterTransformation> newParameters,
+                ImmutableArray<IntroduceParameterTransformation> newParameters,
                 SyntaxGenerationContext syntaxGenerationContext )
             {
                 if ( newParameters.IsEmpty )
@@ -456,7 +456,7 @@ namespace Metalama.Framework.Engine.Linking
 
             private static ConstructorInitializerSyntax? AppendInitializerArguments(
                 ConstructorInitializerSyntax? initializerSyntax,
-                ImmutableArray<AppendConstructorInitializerArgumentTransformation> newArguments )
+                ImmutableArray<IntroduceConstructorInitializerArgumentTransformation> newArguments )
             {
                 if ( newArguments.IsEmpty )
                 {

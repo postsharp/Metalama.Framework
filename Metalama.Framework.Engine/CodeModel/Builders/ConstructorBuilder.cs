@@ -57,12 +57,12 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
         }
 
-        public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant defaultValue = default )
+        public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant? defaultValue = null )
         {
             throw new NotImplementedException();
         }
 
-        public IParameterBuilder AddParameter( string name, Type type, RefKind refKind = RefKind.None, object? defaultValue = null )
+        public IParameterBuilder AddParameter( string name, Type type, RefKind refKind = RefKind.None, TypedConstant? defaultValue = null )
         {
             throw new NotImplementedException();
         }

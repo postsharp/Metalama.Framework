@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public int Index { get; }
 
-        public TypedConstant DefaultValue => default;
+        public TypedConstant? DefaultValue => default;
 
         public bool IsParams => false;
 

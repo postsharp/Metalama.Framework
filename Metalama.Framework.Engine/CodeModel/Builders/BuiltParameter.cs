@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public int Index => this.ParameterBuilder.Index;
 
-        public TypedConstant DefaultValue => this.ParameterBuilder.DefaultValue;
+        public TypedConstant? DefaultValue => this.ParameterBuilder.DefaultValue;
 
         public bool IsParams => this.ParameterBuilder.IsParams;
 

@@ -62,10 +62,10 @@ namespace Metalama.Framework.Engine.CodeModel
         public override IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true )
             => this.DeclaringMember.GetDerivedDeclarations().Select( d => ((IHasParameters) d).Parameters[this.Index] );
 
-        public TypedConstant DefaultValue
+        public TypedConstant? DefaultValue
             => this.ParameterSymbol.HasExplicitDefaultValue
                 ? new TypedConstant( this.Compilation.Factory.GetIType( this.Type ), this.ParameterSymbol.ExplicitDefaultValue )
-                : default;
+                : null;
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.DeclaringMember.ToDisplayString( format, context ) + "/" + this.Name;

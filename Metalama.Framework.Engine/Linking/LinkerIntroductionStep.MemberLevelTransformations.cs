@@ -12,15 +12,15 @@ internal partial class LinkerIntroductionStep
     {
         public ImmutableArray<LinkerInsertedStatement> Statements { get; private set; } = ImmutableArray<LinkerInsertedStatement>.Empty;
 
-        public ImmutableArray<AppendParameterTransformation> Parameters { get; private set; } = ImmutableArray<AppendParameterTransformation>.Empty;
+        public ImmutableArray<IntroduceParameterTransformation> Parameters { get; private set; } = ImmutableArray<IntroduceParameterTransformation>.Empty;
 
-        public ImmutableArray<AppendConstructorInitializerArgumentTransformation> Arguments { get; private set; } =
-            ImmutableArray<AppendConstructorInitializerArgumentTransformation>.Empty;
+        public ImmutableArray<IntroduceConstructorInitializerArgumentTransformation> Arguments { get; private set; } =
+            ImmutableArray<IntroduceConstructorInitializerArgumentTransformation>.Empty;
 
         public void Add( LinkerInsertedStatement statement ) => this.Statements = this.Statements.Add( statement );
 
-        public void Add( AppendParameterTransformation transformation ) => this.Parameters = this.Parameters.Add( transformation );
+        public void Add( IntroduceParameterTransformation transformation ) => this.Parameters = this.Parameters.Add( transformation );
 
-        public void Add( AppendConstructorInitializerArgumentTransformation argument ) => this.Arguments = this.Arguments.Add( argument );
+        public void Add( IntroduceConstructorInitializerArgumentTransformation argument ) => this.Arguments = this.Arguments.Add( argument );
     }
 }

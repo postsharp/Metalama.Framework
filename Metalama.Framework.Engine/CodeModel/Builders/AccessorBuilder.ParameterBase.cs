@@ -19,9 +19,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 this.Index = index;
             }
 
-            public override TypedConstant DefaultValue
+            public override TypedConstant? DefaultValue
             {
-                get => TypedConstant.Null;
+                get => null;
                 set
                     => throw new NotSupportedException(
                         "Cannot directly set the default value of indexer accessor parameter, set the value on indexer itself." );

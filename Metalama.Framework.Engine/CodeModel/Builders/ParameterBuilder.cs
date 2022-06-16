@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
     internal class ParameterBuilder : BaseParameterBuilder, IObservableTransformation
     {
         private string? _name;
-        private TypedConstant _defaultValue;
+        private TypedConstant? _defaultValue;
         private RefKind _refKind;
         private IType _type;
         private bool _isParams;
@@ -58,16 +58,19 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override int Index { get; }
 
-        public override TypedConstant DefaultValue
+        public override TypedConstant? DefaultValue
         {
             get => this._defaultValue;
             set
             {
                 this.CheckNotFrozen();
 
-                this._defaultValue = this._name != null
-                    ? value
-                    : throw new NotSupportedException( "Cannot set default value of a return parameter." );
+                if ( this.IsReturnParameter )
+                {
+                    throw new NotSupportedException( "Cannot set default value of a return parameter." );
+                }
+
+                this._defaultValue = value;
             }
         }
 

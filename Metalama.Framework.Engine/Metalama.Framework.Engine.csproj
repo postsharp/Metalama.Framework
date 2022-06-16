@@ -9,6 +9,8 @@
         <UseMetalamaCompiler>Private</UseMetalamaCompiler>
         <AssemblyName>Metalama.Framework.Engine.$(ThisRoslynVersion)</AssemblyName>
         <PackageId>Metalama.Framework.Engine</PackageId>
+		<!-- We need to pack Metalama.SystemTypes.dll because the test projects will not include it if they do not target .NET Standard 2.0 themselves. -->
+		<PackMetalamaSystemTypes>True</PackMetalamaSystemTypes>
     </PropertyGroup>
 
 
@@ -97,10 +99,10 @@
     </Target>
     
     <!-- Include system types as managed resources -->
-    <Import Sdk="PostSharp.Engineering.Sdk" Project="Assets.props"/>
+    <Import Sdk="PostSharp.Engineering.Sdk" Project="Assets.props" />
 
     <ItemGroup>
-        <EmbeddedResource Include="$(AssetsDirectory)\system-types\*.cs" Link="(Resources)\%(Filename)"/>
+        <EmbeddedResource Include="$(AssetsDirectory)\system-types\*.cs" Link="(Resources)\%(Filename)" />
     </ItemGroup>
 
 

@@ -12,7 +12,7 @@ namespace Metalama.Framework.Tests.Integration.PatternMatching.PropertyPattern
         {
             // Compile time
             var ct = meta.CompileTime( new object() );
-            var a1 = ct is IParameter { Index: var index } p && p.DefaultValue.IsDefault && index > 0;
+            var a1 = ct is IParameter { Index: var index } p && p.DefaultValue.HasValue && index > 0;
             meta.InsertComment( "a1 = " + a1 );
 
             // Run-time

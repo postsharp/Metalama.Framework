@@ -493,13 +493,25 @@ namespace Metalama.Framework.Advising
             IDeclaration targetDeclaration,
             Type attributeType );
 
-        IAppendParameterAdviceResult AppendParameter(
+        // We require an explicit TypedConstant value instead of providing 'default' as the default value because a next Metalama version may allow to
+        // append parameters without a default value; in this case, we would have a different signature.
+        
+        IAppendParameterAdviceResult IntroduceParameter(
             IConstructor constructor,
             string parameterName,
             IType parameterType,
-            Func<IParameter, IConstructor, PullAction> pullAction,
+            TypedConstant defaultValue,
+            Func<IParameter, IConstructor, PullAction>? pullAction = null,
             Action<IParameterBuilder>? buildAction = null );
 
+        IAppendParameterAdviceResult IntroduceParameter(
+            IConstructor constructor,
+            string parameterName,
+            Type parameterType,
+            TypedConstant defaultValue,
+            Func<IParameter, IConstructor, PullAction>? pullAction = null,
+            Action<IParameterBuilder>? buildAction = null );
+        
         /// <summary>
         /// Returns a copy of the current <see cref="IAdviceFactory"/> that will a specified object to find factory methods.
         /// </summary>

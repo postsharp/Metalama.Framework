@@ -7,7 +7,6 @@ using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
@@ -24,7 +23,8 @@ internal class AppendConstructorParameterAdvice : Advice
     private readonly string _parameterName;
     private readonly IType _parameterType;
     private readonly Action<ParameterBuilder>? _buildAction;
-    private readonly Func<IParameter, IConstructor, PullAction> _pullActionFunc;
+    private readonly Func<IParameter, IConstructor, PullAction>? _pullActionFunc;
+    private readonly TypedConstant _defaultValue;
 
     public AppendConstructorParameterAdvice(
         IAspectInstanceInternal aspect,
@@ -35,12 +35,14 @@ internal class AppendConstructorParameterAdvice : Advice
         string parameterName,
         IType parameterType,
         Action<ParameterBuilder>? buildAction,
-        Func<IParameter, IConstructor, PullAction> pullActionFunc ) : base( aspect, template, targetDeclaration, sourceCompilation, layerName )
+        Func<IParameter, IConstructor, PullAction>? pullActionFunc,
+        TypedConstant defaultValue ) : base( aspect, template, targetDeclaration, sourceCompilation, layerName )
     {
         this._parameterName = parameterName;
         this._parameterType = parameterType;
         this._buildAction = buildAction;
         this._pullActionFunc = pullActionFunc;
+        this._defaultValue = defaultValue;
     }
 
     public override AdviceImplementationResult Implement(
@@ -70,16 +72,18 @@ internal class AppendConstructorParameterAdvice : Advice
             this._parameterType,
             RefKind.None );
 
+        parameterBuilder.DefaultValue = this._defaultValue;
+
         var parameter = parameterBuilder.ForCompilation( compilation, ReferenceResolutionOptions.CanBeMissing );
 
         this._buildAction?.Invoke( parameterBuilder );
 
-        addTransformation( new AppendParameterTransformation( this, parameterBuilder ) );
+        addTransformation( new IntroduceParameterTransformation( this, parameterBuilder ) );
 
         // Pull from constructors that call the current constructor, and recursively.
         PullConstructorParameterRecursive( constructor, parameter );
 
-        return AdviceImplementationResult.Success( initializedConstructor );
+        return AdviceImplementationResult.Success( parameterBuilder );
 
         void PullConstructorParameterRecursive( IConstructor baseConstructor, IParameter baseParameter )
         {
@@ -105,10 +109,17 @@ internal class AppendConstructorParameterAdvice : Advice
 
                 PullAction pullParameterAction;
 
-                using ( SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( compilation, chainedSyntaxGenerationContext ) ) )
+                if ( this._pullActionFunc != null )
                 {
-                    // Ask the IPullStrategy what to do.
-                    pullParameterAction = this._pullActionFunc( parameterBuilder, chainedConstructor );
+                    using ( SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( compilation, chainedSyntaxGenerationContext ) ) )
+                    {
+                        // Ask the IPullStrategy what to do.
+                        pullParameterAction = this._pullActionFunc( parameterBuilder, chainedConstructor );
+                    }
+                }
+                else
+                {
+                    pullParameterAction = PullAction.None;
                 }
 
                 // If we have an implicit constructor, make it explicit.
@@ -127,9 +138,8 @@ internal class AppendConstructorParameterAdvice : Advice
                 switch ( pullParameterAction.Kind )
                 {
                     case PullActionKind.DoNotPull:
-                        parameterValue = SyntaxFactoryEx.Default;
-
-                        break;
+                        // We do not add a new argument and reply on the optional value.
+                        continue;
 
                     case PullActionKind.UseExpression:
                         parameterValue = ((IUserExpression) pullParameterAction.Expression.AssertNotNull()).ToSyntax( chainedSyntaxGenerationContext );
@@ -148,9 +158,10 @@ internal class AppendConstructorParameterAdvice : Advice
                             pullParameterAction.ParameterType.AssertNotNull(),
                             RefKind.None );
 
+                        recursiveParameterBuilder.DefaultValue = pullParameterAction.ParameterDefaultValue;
                         recursiveParameterBuilder.AddAttributes( pullParameterAction.ParameterAttributes );
 
-                        addTransformation( new AppendParameterTransformation( this, recursiveParameterBuilder ) );
+                        addTransformation( new IntroduceParameterTransformation( this, recursiveParameterBuilder ) );
 
                         var recursiveParameter = recursiveParameterBuilder.ForCompilation( compilation, ReferenceResolutionOptions.CanBeMissing );
 
@@ -165,7 +176,7 @@ internal class AppendConstructorParameterAdvice : Advice
 
                 // Append an argument to the call to the current constructor. 
                 addTransformation(
-                    new AppendConstructorInitializerArgumentTransformation(
+                    new IntroduceConstructorInitializerArgumentTransformation(
                         this,
                         initializedChainedConstructor,
                         baseParameter.Index,

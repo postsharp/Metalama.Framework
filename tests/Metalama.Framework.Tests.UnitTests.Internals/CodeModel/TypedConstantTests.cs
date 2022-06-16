@@ -13,10 +13,10 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
         public void Unassigned()
         {
             TypedConstant c = default;
-            Assert.False( c.IsAssigned );
+            Assert.False( c.IsInitialized );
             Assert.Throws<ArgumentNullException>( () => c.Type );
             Assert.Throws<ArgumentNullException>( () => c.Value );
-            Assert.Throws<ArgumentNullException>( () => c.IsDefault );
+            Assert.Throws<ArgumentNullException>( () => c.IsNullOrDefault );
         }
 
         [Fact]
@@ -26,10 +26,10 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 
             var emptyCompilation = testContext.CreateCompilationModel( "" );
             var c = new TypedConstant( emptyCompilation.Factory.GetSpecialType( SpecialType.Int32 ), 1 );
-            Assert.True( c.IsAssigned );
+            Assert.True( c.IsInitialized );
             Assert.NotNull( c.Type );
             Assert.NotNull( c.Value );
-            Assert.False( c.IsDefault );
+            Assert.False( c.IsNullOrDefault );
         }
 
         [Fact]
@@ -39,10 +39,10 @@ namespace Metalama.Framework.Tests.UnitTests.CodeModel
 
             var emptyCompilation = testContext.CreateCompilationModel( "" );
             var c = new TypedConstant( emptyCompilation.Factory.GetSpecialType( SpecialType.String ), null );
-            Assert.True( c.IsAssigned );
+            Assert.True( c.IsInitialized );
             Assert.NotNull( c.Type );
             Assert.Null( c.Value );
-            Assert.True( c.IsDefault );
+            Assert.True( c.IsNullOrDefault );
         }
     }
 }

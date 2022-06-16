@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Transformations;
 
-internal class AppendParameterTransformation : BaseTransformation, IObservableTransformation, IMemberLevelTransformation
+internal class IntroduceParameterTransformation : BaseTransformation, IObservableTransformation, IMemberLevelTransformation
 {
     IDeclaration IObservableTransformation.ContainingDeclaration => this.TargetMember;
 
@@ -20,7 +20,7 @@ internal class AppendParameterTransformation : BaseTransformation, IObservableTr
 
     public IParameter Parameter { get; }
 
-    public AppendParameterTransformation( Advice advice, IParameter parameter ) : base( advice )
+    public IntroduceParameterTransformation( Advice advice, IParameter parameter ) : base( advice )
     {
         this.Parameter = parameter;
     }
@@ -34,14 +34,14 @@ internal class AppendParameterTransformation : BaseTransformation, IObservableTr
             SyntaxFactory.Identifier( this.Parameter.Name ),
             null );
 
-        if ( this.Parameter.DefaultValue.IsAssigned )
+        if ( this.Parameter.DefaultValue != null )
         {
             syntax = syntax.WithDefault(
                 SyntaxFactory.EqualsValueClause(
                     SyntaxFactory.Token( SyntaxKind.EqualsToken )
                         .WithLeadingTrivia( SyntaxFactory.ElasticSpace )
                         .WithTrailingTrivia( SyntaxFactory.ElasticSpace ),
-                    syntaxGenerationContext.SyntaxGenerator.TypedConstant( this.Parameter.DefaultValue ) ) );
+                    syntaxGenerationContext.SyntaxGenerator.TypedConstant( this.Parameter.DefaultValue.Value ) ) );
         }
 
         return syntax;

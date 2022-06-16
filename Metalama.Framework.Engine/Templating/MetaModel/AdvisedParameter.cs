@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public RefKind RefKind => this.Underlying.RefKind;
 
-        public TypedConstant DefaultValue => this.Underlying.DefaultValue;
+        public TypedConstant? DefaultValue => this.Underlying.DefaultValue;
 
         public bool IsParams => this.Underlying.IsParams;
 

@@ -74,7 +74,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             this.ReturnParameter.Freeze();
         }
 
-        public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant defaultValue = default )
+        public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant? defaultValue = null )
         {
             this.CheckNotFrozen();
 
@@ -85,7 +85,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             return parameter;
         }
 
-        public IParameterBuilder AddParameter( string name, Type type, RefKind refKind = RefKind.None, object? defaultValue = null )
+        public IParameterBuilder AddParameter( string name, Type type, RefKind refKind = RefKind.None, TypedConstant? defaultValue = null )
         {
             this.CheckNotFrozen();
 

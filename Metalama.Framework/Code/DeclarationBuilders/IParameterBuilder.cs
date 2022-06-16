@@ -5,7 +5,7 @@ namespace Metalama.Framework.Code.DeclarationBuilders
 {
     /// <summary>
     /// Allows to complete the construction of a parameter that has been created using e.g.
-    /// <see cref="IMethodBaseBuilder.AddParameter(string,Metalama.Framework.Code.IType,Metalama.Framework.Code.RefKind,Metalama.Framework.Code.TypedConstant)"/>.
+    /// <see cref="IMethodBaseBuilder.AddParameter(string,Metalama.Framework.Code.IType,Metalama.Framework.Code.RefKind,System.Nullable{Metalama.Framework.Code.TypedConstant})"/>.
     /// </summary>
     public interface IParameterBuilder : IParameter, IDeclarationBuilder
     {
@@ -14,7 +14,7 @@ namespace Metalama.Framework.Code.DeclarationBuilders
         /// value of the parameter is the default value of the struct type.
         /// </remarks>
         /// <exception cref="System.InvalidOperationException">The parameter has no default value.</exception>
-        new TypedConstant DefaultValue { get; set; }
+        new TypedConstant? DefaultValue { get; set; }
 
         /// <summary>
         /// Gets or sets the parameter type.

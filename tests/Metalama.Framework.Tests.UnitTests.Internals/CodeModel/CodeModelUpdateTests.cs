@@ -316,7 +316,7 @@ class C
 
         // Add a field.
         var parameterBuilder = new ParameterBuilder( null!, constructor, 0, "p", compilation.Factory.GetTypeByReflectionType( typeof(int) ), RefKind.In );
-        compilation.AddTransformation( new AppendParameterTransformation( null!, parameterBuilder ) );
+        compilation.AddTransformation( new IntroduceParameterTransformation( null!, parameterBuilder ) );
 
         Assert.Single( constructor.Parameters );
     }
@@ -339,7 +339,7 @@ class C
 
         // Add a field.
         var parameterBuilder = new ParameterBuilder( null!, constructor, 0, "p", compilation.Factory.GetTypeByReflectionType( typeof(int) ), RefKind.In );
-        compilation.AddTransformation( new AppendParameterTransformation( null!, parameterBuilder ) );
+        compilation.AddTransformation( new IntroduceParameterTransformation( null!, parameterBuilder ) );
 
         Assert.Single( constructor.Parameters );
     }

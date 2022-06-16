@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public int Index => -1;
 
-        TypedConstant IParameter.DefaultValue => default;
+        TypedConstant? IParameter.DefaultValue => default;
 
         public bool IsParams => false;
 
