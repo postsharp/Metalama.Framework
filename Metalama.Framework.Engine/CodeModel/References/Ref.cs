@@ -62,16 +62,35 @@ namespace Metalama.Framework.Engine.CodeModel.References
         /// </summary>
         public static Ref<IDeclaration> FromSymbol( ISymbol symbol, Compilation compilation ) => new( symbol, compilation );
 
-        public static Ref<IDeclaration> PseudoAccessor( IMemberWithAccessors declaringMember, MethodKind methodKind )
-            => new(
+        public static Ref<IDeclaration> PseudoAccessor( IMethod accessor )
+        {
+            Invariant.Assert( accessor.IsImplicit );
+
+            if ( accessor.ContainingDeclaration is not IMemberWithAccessors declaringMember )
+            {
+                throw new AssertionFailedException();
+            }                        
+
+            return new(
                 declaringMember.GetSymbol().AssertNotNull(),
                 declaringMember.GetCompilationModel().RoslynCompilation,
-                methodKind switch
+                accessor.MethodKind switch
                 {
                     MethodKind.PropertyGet => DeclarationRefTargetKind.PropertyGet,
                     MethodKind.PropertySet => DeclarationRefTargetKind.PropertySet,
                     _ => throw new AssertionFailedException()
                 } );
+        }
+
+        public static Ref<IDeclaration> ImplicitStaticConstructor( IConstructor constructor )
+        {
+            Invariant.Assert( constructor.IsImplicitStaticConstructor() );
+
+            return new(
+                constructor.DeclaringType.GetSymbol().AssertNotNull(),
+                constructor.DeclaringType.GetCompilationModel().RoslynCompilation,
+                DeclarationRefTargetKind.StaticConstructor );
+        }
 
         public static Ref<T> FromSymbolId<T>( SymbolId symbolKey )
             where T : class, ICompilationElement

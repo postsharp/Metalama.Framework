@@ -109,16 +109,10 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 throw new NotImplementedException();
             }
-
-            // Waits for finalizer PR:
-            // IRef<IDeclaration> ToRef() => Ref.FromImplicitMember( this.DeclaringType, t => ((INamedType) t).StaticConstructor.AssertNotNull() );
-
-            public IRef<IDeclaration> ToRef() => throw new NotImplementedException();
-
-            // Waits for finalizer PR:
-            // Ref<IDeclaration> IDeclarationImpl.ToRef() => Ref.FromImplicitMember( this.DeclaringType, t => ((INamedType) t).StaticConstructor.AssertNotNull() );
-
-            Ref<IDeclaration> IDeclarationImpl.ToRef() => throw new NotImplementedException();
+            
+            public IRef<IDeclaration> ToRef() => Ref.ImplicitStaticConstructor( this );
+            
+            Ref<IDeclaration> IDeclarationImpl.ToRef() => Ref.ImplicitStaticConstructor( this );
 
             public IConstructor? GetBaseConstructor()
             {

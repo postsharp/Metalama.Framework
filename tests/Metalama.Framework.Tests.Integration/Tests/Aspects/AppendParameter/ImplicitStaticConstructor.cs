@@ -1,5 +1,3 @@
-// @Skipped(#30329 - Waits for finalizer PR)
-
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;

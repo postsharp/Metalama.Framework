@@ -1,2 +1,2 @@
 // CompileTimeAspectPipeline.ExecuteAsync failed. 
-// Error LAMA0041 on `builder.Advice.IntroduceParameter(builder.Target.StaticConstructor, "p", typeof(int), TypedConstant.Create(15));`: `'MyAspect.BuildAspect' threw 'InvalidCastException' when applied to 'C': Unable to cast object of type 'ImplicitStaticConstructor' to type 'Metalama.Framework.Code.IDeclarationInternal'. Exception details are in '(none)'. To attach a debugger to the compiler, use the  '-p:MetalamaDebugCompiler=True' command-line option.`
+// Error LAMA0520 on `C`: `The aspect 'MyAspect' cannot introduce a parameter into 'C.C' because it is a static constructor.`
