@@ -15,6 +15,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
         Property,
         Event,
         PropertyGet,
-        PropertySet
+        PropertySet,
+        StaticConstructor,
+        Finalizer,
     }
 }

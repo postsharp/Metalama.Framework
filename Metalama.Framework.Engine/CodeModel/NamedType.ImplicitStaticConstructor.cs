@@ -4,8 +4,12 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Collections;
+using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Metrics;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Reflection;
 using System.Text;
 using Accessibility = Metalama.Framework.Code.Accessibility;
@@ -15,7 +19,7 @@ namespace Metalama.Framework.Engine.CodeModel
 {
     internal sealed partial class NamedType
     {
-        private class ImplicitStaticConstructor : IConstructor, ISdkDeclaration
+        private class ImplicitStaticConstructor : IConstructorImpl, ISdkDeclaration
         {
             public ImplicitStaticConstructor( INamedType declaringType )
             {
@@ -64,7 +68,22 @@ namespace Metalama.Framework.Engine.CodeModel
 
             public ConstructorInitializerKind InitializerKind => ConstructorInitializerKind.None;
 
-            public bool IsImplicit => false;
+            public bool IsImplicit => true;
+
+            public IMember? OverriddenMember => throw new NotImplementedException();
+
+            public ImmutableArray<Microsoft.CodeAnalysis.SyntaxReference> DeclaringSyntaxReferences => throw new NotImplementedException();
+
+            public bool CanBeInherited => false;
+
+            // Waits for finalizer PR:
+            // public SyntaxTree? PrimarySyntaxTree => this.DeclaringType.GetPrimaryDeclaration().AssertNotNull().SyntaxTree;
+
+            public SyntaxTree? PrimarySyntaxTree => this.DeclaringType.GetPrimaryDeclarationSyntax().AssertNotNull().SyntaxTree;
+
+            public IDeclaration OriginalDefinition => this;
+
+            public Location? DiagnosticLocation => this.DeclaringType.GetDiagnosticLocation();
 
             public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             {
@@ -90,11 +109,24 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 throw new NotImplementedException();
             }
+            
+            public IRef<IDeclaration> ToRef() => Ref.ImplicitStaticConstructor( this );
+            
+            Ref<IDeclaration> IDeclarationImpl.ToRef() => Ref.ImplicitStaticConstructor( this );
 
-            public IRef<IDeclaration> ToRef()
+            public IConstructor? GetBaseConstructor()
             {
-                throw new NotImplementedException();
+                return null;
             }
+
+            public IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true )
+            {
+                return Array.Empty<IDeclaration>();
+            }
+
+            public T GetMetric<T>()
+                where T : IMetric
+                => ((IDeclarationImpl) this.DeclaringType).GetMetric<T>();
         }
     }
 }

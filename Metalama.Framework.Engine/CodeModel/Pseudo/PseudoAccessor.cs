@@ -114,7 +114,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public ISymbol? Symbol => null;
 
-        public Ref<IDeclaration> ToRef() => Ref.PseudoAccessor( this.DeclaringMember, this.MethodKind );
+        public Ref<IDeclaration> ToRef() => Ref.PseudoAccessor( this );
 
         public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 

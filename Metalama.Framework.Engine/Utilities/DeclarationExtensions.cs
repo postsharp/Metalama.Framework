@@ -70,12 +70,12 @@ namespace Metalama.Framework.Engine.Utilities
 
         public static bool IsImplicitStaticConstructor( this IConstructor ctor )
         {
-            return ctor.IsStatic && ctor.GetSymbol() == null && ctor is not IConstructorBuilder;
+            return ctor.IsStatic && ctor.IsImplicit;
         }
 
         public static bool IsImplicitInstanceConstructor( this IConstructor ctor )
         {
-            return !ctor.IsStatic && ctor.GetSymbol() != null && ctor.GetSymbol()!.GetPrimaryDeclaration() == null;
+            return !ctor.IsStatic && ctor.IsImplicit;
         }
     }
 }

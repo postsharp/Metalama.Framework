@@ -219,7 +219,14 @@ namespace Metalama.Framework.Engine.CodeModel
             switch ( symbol.Kind )
             {
                 case SymbolKind.NamedType:
-                    return this.GetNamedType( (INamedTypeSymbol) symbol );
+                    var type = this.GetNamedType( (INamedTypeSymbol) symbol );
+
+                    return kind switch
+                    {
+                        DeclarationRefTargetKind.StaticConstructor => type.StaticConstructor,
+                        DeclarationRefTargetKind.Default => type,
+                        _ => throw new AssertionFailedException(),
+                    };
 
                 case SymbolKind.ArrayType:
                     return this.GetArrayType( (IArrayTypeSymbol) symbol );
