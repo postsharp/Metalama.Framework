@@ -68,6 +68,7 @@ namespace Metalama.Framework.Engine.Templating
                 double s => LiteralExpression( s, options ),
                 float s => LiteralExpression( s, options ),
                 decimal s => LiteralExpression( s, options ),
+                bool b => LiteralExpression( b, options ),
                 _ => null
             };
 
@@ -131,6 +132,9 @@ namespace Metalama.Framework.Engine.Templating
 
         public static LiteralExpressionSyntax LiteralExpression( char c, ObjectDisplayOptions options = ObjectDisplayOptions.None )
             => SyntaxFactory.LiteralExpression( SyntaxKind.CharacterLiteralExpression, LiteralImpl( c, options ) );
+        
+        public static LiteralExpressionSyntax LiteralExpression( bool b, ObjectDisplayOptions options = ObjectDisplayOptions.None )
+            => SyntaxFactory.LiteralExpression( b ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression );
 
         private static ExpressionSyntax EmptyExpression => SyntaxFactory.IdentifierName( SyntaxFactory.MissingToken( SyntaxKind.IdentifierToken ) );
 
