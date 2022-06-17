@@ -15,6 +15,8 @@ namespace Metalama.Framework.Engine.Advising
 
         private const string _category = "Metalama.Advices";
 
+        // Subrange 500-509: General introduction diagnostics.
+
         internal static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType, IDeclaration DeclaringType)>
             CannotIntroduceMemberAlreadyExists = new(
                 "LAMA0500",
@@ -59,6 +61,24 @@ namespace Metalama.Framework.Engine.Advising
                 _category,
                 Error );
 
+        internal static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType, DeclarationKind DeclarationKind)>
+            CannotIntroduceWithDifferentKind = new(
+                "LAMA0506",
+                "Cannot introduce member into a type because another member of a different kind already exists.",
+                "The aspect '{0}' cannot introduce member '{1}' into type '{2}' because there is already a {3} of the same name in the type.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<(string AspectType, INamedType AttributeType, IDeclaration TargetDeclaration)>
+            AttributeAlreadyPresent = new(
+                "LAMA0507",
+                "Cannot introduce a custom attribute when the attribute is already present on the target declaration.",
+                "The aspect '{0}' cannot introduce the custom attribute '{1}' into '{2}' because it this attribute is already present on the declaration and WhenExists is set to Fail.",
+                _category,
+                Error );
+
+        // Subrange 510-519: Interface implementation diagnostics.
+
         internal static readonly DiagnosticDefinition<(string AspectType, INamedType TargetType, INamedType InterfaceType, IMember InterfaceMember)>
             MissingDeclarativeInterfaceMember = new(
                 "LAMA0510",
@@ -95,27 +115,20 @@ namespace Metalama.Framework.Engine.Advising
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType, DeclarationKind DeclarationKind)>
-            CannotIntroduceWithDifferentKind = new(
-                "LAMA0514",
-                "Cannot introduce member into a type because another member of a different kind already exists.",
-                "The aspect '{0}' cannot introduce member '{1}' into type '{2}' because there is already a {3} of the same name in the type.",
-                _category,
-                Error );
-
-        internal static readonly DiagnosticDefinition<(string AspectType, INamedType AttributeType, IDeclaration TargetDeclaration)>
-            AttributeAlreadyPresent = new(
-                "LAMA0515",
-                "Cannot introduce a custom attribute when the attribute is already present on the target declaration.",
-                "The aspect '{0}' cannot the custom attribute '{1}' into '{2}' because it this attribute is already present on the declaration and WhenExists is set to Fail.",
-                _category,
-                Error );
-
         internal static readonly DiagnosticDefinition<(string AspectType, INamedType InterfaceType, INamedType TargetType, IMember InterfaceMember)>
             ImplicitInterfaceMemberConflict = new(
-                "LAMA0516",
+                "LAMA0514",
                 "Cannot introduce an implicit interface member when the target type already contains a declaration with the same signature.",
                 "The aspect '{0}' cannot introduce interface '{1}' into type '{2}' because the type already contains '{3}' and WhenExists is set to Fail.",
+                _category,
+                Error );
+
+        // 520-529: Parameter introduction diagnostics.
+        internal static readonly DiagnosticDefinition<(string AspectType, IConstructor Constructor)>
+            CannotIntroduceParameterIntoStaticConstructor = new(
+                "LAMA0520",
+                "Cannot introduce a parameter into a static constructor.",
+                "The aspect '{0}' cannot introduce a parameter into '{1}' because it is a static constructor.",
                 _category,
                 Error );
     }

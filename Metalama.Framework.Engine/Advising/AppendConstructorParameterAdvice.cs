@@ -7,6 +7,7 @@ using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
@@ -54,6 +55,15 @@ internal class AppendConstructorParameterAdvice : Advice
 
         var constructor = (IConstructor) this.TargetDeclaration.GetTarget( compilation );
         var initializedConstructor = constructor;
+
+        // Introducing parameters into static constructors is not allowed.
+        if (constructor.IsStatic)
+        {
+            return AdviceImplementationResult.Failed(
+                AdviceDiagnosticDescriptors.CannotIntroduceParameterIntoStaticConstructor.CreateRoslynDiagnostic(
+                    constructor.GetDiagnosticLocation(),
+                    (this.Aspect.AspectClass.ShortName, constructor) ) );
+        }
 
         // If we have an implicit constructor, make it explicit.
         if ( constructor.IsImplicitInstanceConstructor() )
