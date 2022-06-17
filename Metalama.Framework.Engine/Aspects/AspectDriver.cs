@@ -235,7 +235,7 @@ namespace Metalama.Framework.Engine.Aspects
                                 // Execute declarative advice.
                                 foreach ( var advice in declarativeAdvice )
                                 {
-                                    ((DeclarativeAdviceAttribute) advice.TemplateAttribute.AssertNotNull()).BuildAspect(
+                                    ((DeclarativeAdviceAttribute) advice.AdviceAttribute.AssertNotNull()).BuildAspect(
                                         advice.Declaration!,
                                         advice.TemplateClassMember.Key,
                                         aspectBuilder );

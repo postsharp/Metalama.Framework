@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.Advising
         protected string MemberName { get; }
 
         public IObjectReader Tags { get; }
- 
+
         public IntroduceMemberAdvice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
@@ -49,7 +49,9 @@ namespace Metalama.Framework.Engine.Advising
             string? layerName,
             IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, sourceCompilation, layerName )
         {
-            this.MemberName = explicitName ?? template.TemplateAttribute?.Name
+            var templateAttribute = (ITemplateAttribute?) template.AdviceAttribute;
+
+            this.MemberName = explicitName ?? templateAttribute?.Name
                 ?? template.Declaration?.Name ?? throw new ArgumentNullException( nameof(explicitName) );
 
             this.Template = template;
@@ -58,7 +60,7 @@ namespace Metalama.Framework.Engine.Advising
             {
                 this.Scope = scope;
             }
-            else if ( template.TemplateAttribute is IntroduceAttribute introduceAttribute )
+            else if ( templateAttribute is IntroduceAttribute introduceAttribute )
             {
                 this.Scope = introduceAttribute.Scope;
             }
@@ -76,7 +78,7 @@ namespace Metalama.Framework.Engine.Advising
 
         public sealed override void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
         {
-            var templateAttribute = this.Template.TemplateAttribute;
+            var templateAttribute = (ITemplateAttribute?) this.Template.AdviceAttribute;
 
             this.Builder.Accessibility = templateAttribute?.Accessibility ?? this.Template.Declaration?.Accessibility ?? Accessibility.Private;
             this.Builder.IsSealed = templateAttribute?.IsSealed ?? this.Template.Declaration?.IsSealed ?? false;
