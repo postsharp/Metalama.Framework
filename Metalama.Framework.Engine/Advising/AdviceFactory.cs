@@ -688,12 +688,17 @@ namespace Metalama.Framework.Engine.Advising
                     UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
             }
 
+            if ( getTemplate == null && setTemplate == null )
+            {
+                throw new ArgumentNullException(nameof(getTemplate), "Either getTemplate or setTemplate must be provided.");
+            }
+
             this.ValidateTarget( targetType );
 
-            var getTemplateRef = this.ValidateTemplateName( getTemplate, TemplateKind.Default, true )
+            var getTemplateRef = this.ValidateTemplateName( getTemplate, TemplateKind.Default )
                 .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
 
-            var setTemplateRef = this.ValidateTemplateName( setTemplate, TemplateKind.Default, true )
+            var setTemplateRef = this.ValidateTemplateName( setTemplate, TemplateKind.Default )
                 .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
 
             var parameterReaders = ObjectReader.GetReader( args );

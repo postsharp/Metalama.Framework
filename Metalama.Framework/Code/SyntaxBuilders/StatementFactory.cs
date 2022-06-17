@@ -18,4 +18,6 @@ public static class StatementFactory
     /// </summary>
     /// <seealso href="@templates"/>
     public static IStatement Parse( string code ) => SyntaxBuilder.CurrentImplementation.ParseStatement( code );
+
+    public static IStatement FromExpression( IExpression expression ) => SyntaxBuilder.CurrentImplementation.CreateExpressionStatement( expression );
 }

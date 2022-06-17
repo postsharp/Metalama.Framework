@@ -18,6 +18,61 @@ using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.Templating.Expressions;
 
+internal class ParameterExpression : UserExpression
+{
+    private IParameter _parameter;
+
+    public ParameterExpression( IParameter parameter ) {
+        this._parameter = parameter;
+    }
+
+    public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext ) => SyntaxFactory.IdentifierName( this._parameter.Name );
+
+    public override IType Type => this._parameter.Type;
+}
+
+internal class FieldOrPropertyExpression : UserExpression
+{
+    private readonly IFieldOrProperty _fieldOrProperty;
+    private readonly UserExpression? _instance;
+
+    public FieldOrPropertyExpression( IFieldOrProperty fieldOrProperty, UserExpression? instance )
+    {
+        this._fieldOrProperty = fieldOrProperty;
+        this._instance = instance;
+    }
+
+    public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
+    {
+        if ( this._fieldOrProperty.IsStatic )
+        {
+            return SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                syntaxGenerationContext.SyntaxGenerator.Type( this._fieldOrProperty.DeclaringType.GetSymbol() ),
+                SyntaxFactory.IdentifierName( this._fieldOrProperty.Name ));            
+        }
+        else if ( this._instance != null )
+        {
+            return SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                this._instance.ToSyntax( syntaxGenerationContext ),
+                SyntaxFactory.IdentifierName( this._fieldOrProperty.Name ));
+            
+        }
+        else
+        {
+            return SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                SyntaxFactory.ThisExpression(),
+                SyntaxFactory.IdentifierName( this._fieldOrProperty.Name ) );
+        }
+        
+
+       
+    }
+
+    public override IType Type => this._fieldOrProperty.Type;
+}
 internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 {
     // Note that the implementation of this class cannot use TemplateExpansionContext because there is no necessarily one active.
@@ -75,6 +130,9 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
         return new UserStatement( statement );
     }
+
+    public IStatement CreateExpressionStatement( IExpression expression )
+        => new UserStatement( SyntaxFactory.ExpressionStatement( ((UserExpression) expression).ToSyntax( this._syntaxGenerationContext ) ) );
 
     public void AppendLiteral( object? value, StringBuilder stringBuilder, SpecialType specialType, bool stronglyTyped )
     {
@@ -165,4 +223,10 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
     public object TypedConstant( in TypedConstant typedConstant )
         => new BuiltUserExpression( this.SyntaxGenerator.TypedConstant( typedConstant ), typedConstant.Type );
+
+    public IExpression This( INamedType type ) => new BuiltUserExpression( SyntaxFactory.ThisExpression(), type, false );
+
+    public IExpression ToExpression( IFieldOrProperty fieldOrProperty, IExpression? instance ) => new FieldOrPropertyExpression( fieldOrProperty, (UserExpression?) instance );
+
+    public IExpression ToExpression( IParameter parameter ) => new ParameterExpression( parameter );
 }
