@@ -227,7 +227,8 @@ public partial class CompilationModel
             this.RemoveAttributes( removeAttributes );
         }
 
-        if ( transformation is DeclarationBuilder builder )
+        // IMPORTANT: Keep the builder interface in this condition for linker tests, which use fake builders.
+        if ( transformation is IDeclarationBuilder builder )
         {
             builder.Freeze();
 
