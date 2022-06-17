@@ -261,7 +261,7 @@ namespace Metalama.Framework.Engine.Aspects
                     x => TemplateMember.Create(
                         (IMemberOrNamedType) compilation.Factory.GetDeclaration( x.Symbol ),
                         x.TemplateClassMember,
-                        x.Attribute ) );
+                         (ITemplateAttribute) x.Attribute ) );
 
         internal IEnumerable<(TemplateClassMember TemplateClassMember, ISymbol Symbol, DeclarativeAdviceAttribute Attribute)> GetDeclarativeAdvices(
             IServiceProvider serviceProvider,

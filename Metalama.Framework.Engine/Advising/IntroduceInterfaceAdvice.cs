@@ -328,7 +328,7 @@ namespace Metalama.Framework.Engine.Advising
                                         TemplateMember.Create(
                                                 aspectMethod,
                                                 memberSpec.TemplateClassMember,
-                                                memberSpec.TemplateClassMember.TemplateInfo.Attribute.AssertNotNull(),
+                                                 (ITemplateAttribute) memberSpec.TemplateClassMember.TemplateInfo.Attribute.AssertNotNull(),
                                                 TemplateKind.Introduction )
                                             .ForIntroduction(),
                                         mergedTags )

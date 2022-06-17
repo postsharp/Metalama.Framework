@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.CodeModel
 {
     internal enum InternalSpecialType
     {
-        TemplateAttribute,
+        ITemplateAttribute,
         Count
     }
 
@@ -330,7 +330,7 @@ namespace Metalama.Framework.Engine.CodeModel
         private INamedType GetSpecialTypeCore( InternalSpecialType specialType )
             => specialType switch
             {
-                InternalSpecialType.TemplateAttribute => (INamedType) this.GetTypeByReflectionType( typeof(TemplateAttribute) ),
+                InternalSpecialType.ITemplateAttribute => (INamedType) this.GetTypeByReflectionType( typeof(ITemplateAttribute) ),
                 _ => throw new ArgumentOutOfRangeException( nameof(specialType) )
             };
 

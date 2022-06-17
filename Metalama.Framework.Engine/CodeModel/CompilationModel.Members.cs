@@ -227,7 +227,7 @@ public partial class CompilationModel
             this.RemoveAttributes( removeAttributes );
         }
 
-        if ( transformation is IDeclarationBuilder builder )
+        if ( transformation is DeclarationBuilder builder )
         {
             builder.Freeze();
 

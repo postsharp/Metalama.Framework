@@ -43,7 +43,7 @@ internal class AttributeClassificationService : IService
     public bool MustCopyTemplateAttribute( IAttribute attribute )
     {
         var declarationFactory = attribute.GetCompilationModel().Factory;
-        var templateAttributeType = declarationFactory.GetSpecialType( InternalSpecialType.TemplateAttribute );
+        var templateAttributeType = declarationFactory.GetSpecialType( InternalSpecialType.ITemplateAttribute );
 
         return !attribute.Type.Is( templateAttributeType ) && !attribute.Type.Name.Equals( nameof(DynamicAttribute), StringComparison.Ordinal );
     }

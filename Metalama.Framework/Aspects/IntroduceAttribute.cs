@@ -14,8 +14,38 @@ namespace Metalama.Framework.Aspects
     /// </summary>
     /// <seealso href="@introducing-members"/>
     [AttributeUsage( AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Method | AttributeTargets.Event )]
-    public sealed class IntroduceAttribute : DeclarativeAdviceAttribute
+    public sealed class IntroduceAttribute : DeclarativeAdviceAttribute, ITemplateAttribute
     {
+        private TemplateAttributeImpl _impl;
+
+        public string? Name { get => this._impl.Name; set => this._impl.Name = value; }
+
+        public Accessibility Accessibility
+        {
+            get => this._impl.Accessibility;
+            set => this._impl.Accessibility = value;
+        }
+
+        public bool IsVirtual
+        {
+            get
+                => this._impl.IsVirtual;
+
+            set => this._impl.IsVirtual = true;
+        }
+
+        public bool IsSealed
+        {
+            get => this._impl.IsSealed;
+            set => this._impl.IsSealed = true;
+        }
+
+        bool? ITemplateAttribute.IsVirtual => this._impl.GetIsVirtual();
+
+        bool? ITemplateAttribute.IsSealed => this._impl.GetIsSealed();
+
+        Accessibility? ITemplateAttribute.Accessibility => this._impl.GetAccessibility();
+        
         public IntroductionScope Scope { get; set; }
 
         /// <summary>

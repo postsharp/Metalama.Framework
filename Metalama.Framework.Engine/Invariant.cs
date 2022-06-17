@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 #else
 using Metalama.Framework.Engine.Collections;
 #endif
+using Metalama.Framework.Aspects;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;

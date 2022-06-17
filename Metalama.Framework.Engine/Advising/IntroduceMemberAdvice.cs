@@ -78,9 +78,9 @@ namespace Metalama.Framework.Engine.Advising
         {
             var templateAttribute = this.Template.TemplateAttribute;
 
-            this.Builder.Accessibility = templateAttribute?.GetAccessibility() ?? this.Template.Declaration?.Accessibility ?? Accessibility.Private;
-            this.Builder.IsSealed = templateAttribute?.GetIsSealed() ?? this.Template.Declaration?.IsSealed ?? false;
-            this.Builder.IsVirtual = templateAttribute?.GetIsVirtual() ?? this.Template.Declaration?.IsVirtual ?? false;
+            this.Builder.Accessibility = templateAttribute?.Accessibility ?? this.Template.Declaration?.Accessibility ?? Accessibility.Private;
+            this.Builder.IsSealed = templateAttribute?.IsSealed ?? this.Template.Declaration?.IsSealed ?? false;
+            this.Builder.IsVirtual = templateAttribute?.IsVirtual ?? this.Template.Declaration?.IsVirtual ?? false;
 
             // Handle the introduction scope.
             var targetDeclaration = this.TargetDeclaration.GetTarget( this.SourceCompilation );
@@ -134,8 +134,6 @@ namespace Metalama.Framework.Engine.Advising
             this.InitializeCore( serviceProvider, diagnosticAdder );
 
             this._buildAction?.Invoke( this.Builder );
-            
-            this.Builder.Freeze();
         }
 
         protected static void CopyTemplateAttributes( IDeclaration declaration, IDeclarationBuilder builder, IServiceProvider serviceProvider )

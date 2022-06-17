@@ -53,13 +53,13 @@ namespace Metalama.Framework.Engine.Advising
             }
 
             // Create the attribute instance.
-            TemplateAttribute? templateAttribute;
+            ITemplateAttribute? templateAttribute;
 
             if ( this.TemplateMember.TemplateInfo.Attribute != null )
             {
                 // If we have a system attribute, return it.
 
-                templateAttribute = this.TemplateMember.TemplateInfo.Attribute;
+                templateAttribute = (ITemplateAttribute) this.TemplateMember.TemplateInfo.Attribute;
             }
             else
             {

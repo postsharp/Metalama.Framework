@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Utilities;
+using System;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
@@ -30,7 +31,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// Gets the <see cref="TemplateAttribute"/> if it could be instantiated by the <see cref="SymbolClassifier"/>, i.e.
         /// only if it is a system attribute but not if it is defined in user code.
         /// </summary>
-        public TemplateAttribute? Attribute { get; }
+        public Attribute? Attribute { get; }
 
         public TemplateAttributeType AttributeType { get; }
 
@@ -39,7 +40,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// </summary>
         public SymbolId SymbolId { get; }
 
-        public TemplateInfo( SymbolId symbolId, TemplateAttributeType attributeType, TemplateAttribute? attribute )
+        public TemplateInfo( SymbolId symbolId, TemplateAttributeType attributeType, Attribute? attribute )
         {
             this.AttributeType = attributeType;
             this.Attribute = attribute;

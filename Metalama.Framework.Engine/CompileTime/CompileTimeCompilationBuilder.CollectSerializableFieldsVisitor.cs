@@ -41,7 +41,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 this._cancellationToken = cancellationToken;
                 this._serializableFieldsOrProperties = new List<ISymbol>();
                 this._nonSerializedAttribute = reflectionMapper.GetTypeSymbol( typeof(LamaNonSerializedAttribute) );
-                this._templateAttribute = reflectionMapper.GetTypeSymbol( typeof(TemplateAttribute) );
+                this._templateAttribute = reflectionMapper.GetTypeSymbol( typeof(ITemplateAttribute) );
             }
 
             public override void VisitFieldDeclaration( FieldDeclarationSyntax node )

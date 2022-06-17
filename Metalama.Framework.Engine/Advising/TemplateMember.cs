@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.Advising
         public static TemplateMember<T> Create<T>(
             T? implementation,
             TemplateClassMember? templateClassMember,
-            TemplateAttribute templateAttribute,
+            ITemplateAttribute templateAttribute,
             TemplateKind selectedKind,
             TemplateKind interpretedKind )
             where T : class, IMemberOrNamedType
@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.Advising
         public static TemplateMember<T> Create<T>(
             T? implementation,
             TemplateClassMember? templateClassMember,
-            TemplateAttribute templateAttribute,
+            ITemplateAttribute templateAttribute,
             TemplateKind selectedKind = TemplateKind.Default )
             where T : class, IMemberOrNamedType
             => new( implementation, templateClassMember, templateAttribute, selectedKind );
@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Advising
             TemplateClassMember templateClassMember,
             TemplateKind selectedKind = TemplateKind.Default )
             where T : class, IMemberOrNamedType
-            => new( implementation, templateClassMember, templateClassMember.TemplateInfo.Attribute.AssertNotNull(), selectedKind );
+            => new( implementation, templateClassMember, (ITemplateAttribute) templateClassMember.TemplateInfo.Attribute.AssertNotNull(), selectedKind );
     }
 
     internal readonly struct TemplateMember<T>
@@ -45,7 +45,7 @@ namespace Metalama.Framework.Engine.Advising
         public TemplateClassMember TemplateClassMember => this._templateClassMember ?? throw new InvalidOperationException();
 
         // Can be null in the default instance.
-        public TemplateAttribute? TemplateAttribute { get; }
+        public ITemplateAttribute? TemplateAttribute { get; }
 
         public TemplateKind SelectedKind { get; }
 
@@ -58,7 +58,7 @@ namespace Metalama.Framework.Engine.Advising
         public TemplateMember(
             T? implementation,
             TemplateClassMember? templateClassMember,
-            TemplateAttribute templateAttribute,
+            ITemplateAttribute templateAttribute,
             TemplateKind selectedKind = TemplateKind.Default ) : this(
             implementation,
             templateClassMember,
@@ -69,7 +69,7 @@ namespace Metalama.Framework.Engine.Advising
         public TemplateMember(
             T? implementation,
             TemplateClassMember? templateClassMember,
-            TemplateAttribute templateAttribute,
+            ITemplateAttribute templateAttribute,
             TemplateKind selectedKind,
             TemplateKind interpretedKind )
         {

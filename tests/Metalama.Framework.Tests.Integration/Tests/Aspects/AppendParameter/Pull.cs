@@ -9,7 +9,8 @@ public class MyAspect : ConstructorAspect
 {
     public override void BuildAspect(IAspectBuilder<IConstructor> builder)
     {
-        builder.Advice.IntroduceParameter(builder.Target, "p", typeof(int), TypedConstant.Create(15), ( parameter, constructor ) => PullAction.IntroduceParameterAndPull( parameter.Name, parameter.Type, TypedConstant.Create(20) ) );
+        builder.Advice.IntroduceParameter(builder.Target, "p", typeof(int), TypedConstant.Create(15),
+            ( parameter, constructor ) => PullAction.IntroduceParameterAndPull( parameter.Name, parameter.Type, TypedConstant.Create(20) ) );
     }
 }
 
