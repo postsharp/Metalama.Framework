@@ -1,8 +1,6 @@
 ﻿using System;
 using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
 
-// TODO (Daniel): this test is broken and I don't understand.
-
 namespace Metalama.Framework.Tests.Integration.Tests.Linker.Fields.Linking.IntroducedField
 {
     [PseudoLayerOrder("TestAspect0")]
