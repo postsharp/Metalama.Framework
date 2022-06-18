@@ -5,6 +5,7 @@ using K4os.Hash.xxHash;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
@@ -35,7 +36,8 @@ public sealed class SyntaxTreeSourceGeneratorResult : SourceGeneratorResult
         foreach ( var tree in this.AdditionalSources.Values )
         {
             xxh.Reset();
-            hasher.Visit( tree.SourceSyntaxTree.GetRoot() );
+            xxh.Update( tree.Name );
+            hasher.Visit( tree.GeneratedSyntaxTree.GetRoot() );
 
             var digest = xxh.Digest();
             

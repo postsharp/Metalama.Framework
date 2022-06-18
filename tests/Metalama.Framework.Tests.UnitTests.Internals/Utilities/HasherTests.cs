@@ -33,7 +33,7 @@ public class HasherTests
     // Trivia.
     [InlineData("class C { int M() { return 5; } } /* Trivia */", "class C { int M() { return 5; } }", true, true)]
     
-    public void CompileTime(string code1, string code2, bool shouldBeEqualCompileTime, bool shouldBeEqualRunTime )
+    public void IsEqual(string code1, string code2, bool shouldBeEqualCompileTime, bool shouldBeEqualRunTime )
     {
         var xxh = new XXH64();
 
@@ -53,6 +53,8 @@ public class HasherTests
         
         ulong HashCompileTime( SyntaxTree tree )
         {
+            xxh.Reset();
+            
             var hasher = new CompileTimeCodeHasher( xxh );
             hasher.EnableLogging();
             hasher.Visit( tree.GetRoot() );
