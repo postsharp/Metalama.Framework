@@ -16,6 +16,7 @@ using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.Pipeline
 {

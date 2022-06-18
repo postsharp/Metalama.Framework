@@ -626,7 +626,7 @@ namespace Metalama.Framework.Engine.Advising
             string defaultTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Action<IPropertyBuilder>? buildAction = null,
+            Action<IPropertyBuilder>? buildProperty = null,
             object? tags = null )
         {
             if ( this._templateInstance == null )
@@ -659,7 +659,7 @@ namespace Metalama.Framework.Engine.Advising
                 accessorTemplates.Set.ForIntroduction(),
                 scope,
                 whenExists,
-                buildAction,
+                buildProperty,
                 this._layerName,
                 ObjectReader.GetReader( tags ) );
 
@@ -673,7 +673,7 @@ namespace Metalama.Framework.Engine.Advising
             string? setTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Action<IPropertyBuilder>? buildAction = null,
+            Action<IPropertyBuilder>? buildProperty = null,
             object? args = null,
             object? tags = null )
         {
@@ -715,7 +715,7 @@ namespace Metalama.Framework.Engine.Advising
                 setTemplateRef.ForIntroduction( parameterReaders ),
                 scope,
                 whenExists,
-                buildAction,
+                buildProperty,
                 this._layerName,
                 ObjectReader.GetReader( tags ) );
 

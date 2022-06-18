@@ -30,7 +30,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Samples.EnumViewModel
                 var propertyBuilder = builder.Advice.IntroduceProperty(
                     builder.Target,
                     nameof(IsMemberTemplate),
-                    buildAction: p => p.Name = "Is" + member.Name,
+                    buildProperty: p => p.Name = "Is" + member.Name,
                     tags: new { member = member } );
             }
         }

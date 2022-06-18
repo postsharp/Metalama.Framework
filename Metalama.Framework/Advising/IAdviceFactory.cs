@@ -236,7 +236,7 @@ namespace Metalama.Framework.Advising
         ///     template property is non-static, then the introduced property copies of the scope of the target declaration of the aspect.</param>
         /// <param name="whenExists">Determines the implementation strategy when a property of the same name is already declared in the target type.
         ///     The default strategy is to fail with a compile-time error.</param>
-        /// <param name="buildAction"></param>
+        /// <param name="buildProperty"></param>
         /// <param name="tags">An optional opaque object of anonymous type passed to the template property and exposed under the <see cref="meta.Tags"/> property of the
         ///     <see cref="meta"/> API.</param>
         /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
@@ -246,7 +246,7 @@ namespace Metalama.Framework.Advising
             string template,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Action<IPropertyBuilder>? buildAction = null,
+            Action<IPropertyBuilder>? buildProperty = null,
             object? tags = null );
 
         /// <summary>
@@ -265,7 +265,7 @@ namespace Metalama.Framework.Advising
         ///     template accessors are non-static, then the introduced property copies of the scope of the target declaration of the aspect.</param>
         /// <param name="whenExists">Determines the implementation strategy when a property of the same name is already declared in the target type.
         ///     The default strategy is to fail with a compile-time error.</param>
-        /// <param name="buildAction"></param>
+        /// <param name="buildProperty"></param>
         /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template methods.</param>
         /// <param name="tags">An optional opaque object of anonymous type passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
         ///     <see cref="meta"/> API.</param>
@@ -278,7 +278,7 @@ namespace Metalama.Framework.Advising
             string? setTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Action<IPropertyBuilder>? buildAction = null,
+            Action<IPropertyBuilder>? buildProperty = null,
             object? args = null,
             object? tags = null );
 

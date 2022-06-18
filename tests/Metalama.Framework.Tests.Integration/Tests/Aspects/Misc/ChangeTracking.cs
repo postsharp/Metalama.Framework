@@ -14,7 +14,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.ChangeTracking
                 var isSpecifiedProperty = builder.Advice.IntroduceProperty(
                         builder.Target,
                         nameof(IsSpecifiedTemplate),
-                        buildAction: p =>
+                        buildProperty: p =>
                         {
                             p.Name = $"_is{property.Name}Specified";
                             p.Type = TypeFactory.GetType( typeof(bool) );

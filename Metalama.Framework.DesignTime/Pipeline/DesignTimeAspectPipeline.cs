@@ -20,6 +20,7 @@ using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.Pipeline
 {
