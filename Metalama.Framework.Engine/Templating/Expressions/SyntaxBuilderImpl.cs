@@ -22,7 +22,8 @@ internal class ParameterExpression : UserExpression
 {
     private IParameter _parameter;
 
-    public ParameterExpression( IParameter parameter ) {
+    public ParameterExpression( IParameter parameter )
+    {
         this._parameter = parameter;
     }
 
@@ -49,15 +50,14 @@ internal class FieldOrPropertyExpression : UserExpression
             return SyntaxFactory.MemberAccessExpression(
                 SyntaxKind.SimpleMemberAccessExpression,
                 syntaxGenerationContext.SyntaxGenerator.Type( this._fieldOrProperty.DeclaringType.GetSymbol() ),
-                SyntaxFactory.IdentifierName( this._fieldOrProperty.Name ));            
+                SyntaxFactory.IdentifierName( this._fieldOrProperty.Name ) );
         }
         else if ( this._instance != null )
         {
             return SyntaxFactory.MemberAccessExpression(
                 SyntaxKind.SimpleMemberAccessExpression,
                 this._instance.ToSyntax( syntaxGenerationContext ),
-                SyntaxFactory.IdentifierName( this._fieldOrProperty.Name ));
-            
+                SyntaxFactory.IdentifierName( this._fieldOrProperty.Name ) );
         }
         else
         {
@@ -66,13 +66,11 @@ internal class FieldOrPropertyExpression : UserExpression
                 SyntaxFactory.ThisExpression(),
                 SyntaxFactory.IdentifierName( this._fieldOrProperty.Name ) );
         }
-        
-
-       
     }
 
     public override IType Type => this._fieldOrProperty.Type;
 }
+
 internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 {
     // Note that the implementation of this class cannot use TemplateExpansionContext because there is no necessarily one active.
@@ -226,7 +224,8 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
     public IExpression This( INamedType type ) => new BuiltUserExpression( SyntaxFactory.ThisExpression(), type, false );
 
-    public IExpression ToExpression( IFieldOrProperty fieldOrProperty, IExpression? instance ) => new FieldOrPropertyExpression( fieldOrProperty, (UserExpression?) instance );
+    public IExpression ToExpression( IFieldOrProperty fieldOrProperty, IExpression? instance )
+        => new FieldOrPropertyExpression( fieldOrProperty, (UserExpression?) instance );
 
     public IExpression ToExpression( IParameter parameter ) => new ParameterExpression( parameter );
 }

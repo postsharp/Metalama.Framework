@@ -225,7 +225,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     {
                         DeclarationRefTargetKind.StaticConstructor => type.StaticConstructor,
                         DeclarationRefTargetKind.Default => type,
-                        _ => throw new AssertionFailedException(),
+                        _ => throw new AssertionFailedException()
                     };
 
                 case SymbolKind.ArrayType:

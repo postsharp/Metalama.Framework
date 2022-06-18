@@ -69,9 +69,9 @@ namespace Metalama.Framework.Engine.CodeModel.References
             if ( accessor.ContainingDeclaration is not IMemberWithAccessors declaringMember )
             {
                 throw new AssertionFailedException();
-            }                        
+            }
 
-            return new(
+            return new Ref<IDeclaration>(
                 declaringMember.GetSymbol().AssertNotNull(),
                 declaringMember.GetCompilationModel().RoslynCompilation,
                 accessor.MethodKind switch
@@ -86,7 +86,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
         {
             Invariant.Assert( constructor.IsImplicitStaticConstructor() );
 
-            return new(
+            return new Ref<IDeclaration>(
                 constructor.DeclaringType.GetSymbol().AssertNotNull(),
                 constructor.DeclaringType.GetCompilationModel().RoslynCompilation,
                 DeclarationRefTargetKind.StaticConstructor );

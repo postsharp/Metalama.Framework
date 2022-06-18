@@ -17,7 +17,7 @@ namespace Metalama.Framework.Code.DeclarationBuilders
         /// Freezes the declaration so that modifications can no longer be performed.
         /// </summary>
         void Freeze();
-        
+
         /// <summary>
         /// Adds a custom attribute to the current declaration.
         /// </summary>

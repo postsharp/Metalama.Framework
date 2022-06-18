@@ -132,7 +132,7 @@ namespace Metalama.Framework.Engine.Templating
 
         public static LiteralExpressionSyntax LiteralExpression( char c, ObjectDisplayOptions options = ObjectDisplayOptions.None )
             => SyntaxFactory.LiteralExpression( SyntaxKind.CharacterLiteralExpression, LiteralImpl( c, options ) );
-        
+
         public static LiteralExpressionSyntax LiteralExpression( bool b, ObjectDisplayOptions options = ObjectDisplayOptions.None )
             => SyntaxFactory.LiteralExpression( b ? SyntaxKind.TrueLiteralExpression : SyntaxKind.FalseLiteralExpression );
 
