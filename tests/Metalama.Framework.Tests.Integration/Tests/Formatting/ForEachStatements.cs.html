@@ -66,9 +66,9 @@
     <span class="cr-CompileTime cs-punctuation">[</span><span class="cr-CompileTime cs-class-name">RunTimeOrCompileTime</span><span class="cr-CompileTime cs-punctuation">]</span>
     <span class="cr-CompileTime cs-keyword">class</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-class-name">Aspect</span>
     <span class="cr-CompileTime cs-punctuation">{</span>
-        <span class="cr-CompileTime cs-punctuation">[</span><span class="cr-CompileTime cs-class-name">TestTemplate</span><span class="cr-CompileTime cs-punctuation">]</span>
-        <span class="cr-CompileTime cs-keyword">dynamic</span><span class="cr-CompileTime cs-operator">?</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-method-name">Template</span><span class="cr-CompileTime cs-punctuation">()</span>
-        <span class="cr-CompileTime cs-punctuation">{</span>
+        <span class="cs-punctuation">[</span><span class="cs-class-name">TestTemplate</span><span class="cs-punctuation">]</span>
+        <span class="cs-keyword">dynamic</span><span class="cs-operator">?</span> <span class="cs-method-name">Template</span><span class="cs-punctuation">()</span>
+        <span class="cr-RunTime cs-punctuation">{</span>
             <span class="cr-RunTime cs-keyword">var</span><span class="cr-RunTime"> </span><span class="cr-RunTime cs-local-name">runTimeObject</span><span class="cr-RunTime"> </span><span class="cr-RunTime cs-operator">=</span><span class="cr-RunTime"> </span><span class="cr-RunTime cs-keyword">new</span><span class="cr-RunTime"> </span><span class="cr-RunTime cs-class-name">RunTimeClass</span><span class="cr-RunTime cs-punctuation">();</span>
             <span class="cr-CompileTime cs-keyword">var</span><span class="cr-CompileTime"> </span><span class="cr-CompileTimeVariable cs-local-name">compileTimeObject</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-operator">=</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-keyword">new</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-class-name">CompileTimeClass</span><span class="cr-CompileTime cs-punctuation">();</span>
 
@@ -84,7 +84,7 @@
             <span class="cr-RunTime cs-punctuation">}</span>
 
             <span class="cr-RunTime cs-keyword cs-control">return</span><span class="cr-RunTime"> </span><span class="cr-TemplateKeyword cs-class-name cs-static-symbol">meta</span><span class="cr-TemplateKeyword cs-operator">.</span><span class="cr-TemplateKeyword cs-method-name cs-static-symbol">Proceed</span><span class="cr-CompileTime cs-punctuation">()</span><span class="cr-RunTime cs-punctuation">;</span>
-        <span class="cr-CompileTime cs-punctuation">}</span>
+        <span class="cr-RunTime cs-punctuation">}</span>
     <span class="cr-CompileTime cs-punctuation">}</span>
 <span class="cs-punctuation">}</span>
 </code></pre>
