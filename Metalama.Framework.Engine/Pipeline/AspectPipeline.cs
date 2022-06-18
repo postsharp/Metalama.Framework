@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Diagnostics;
@@ -23,7 +24,6 @@ using MoreLinq;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 
@@ -45,6 +45,8 @@ namespace Metalama.Framework.Engine.Pipeline
         // but the pipeline can be used by many projects.
         public ServiceProvider ServiceProvider { get; }
 
+        protected ILogger Logger { get; }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="AspectPipeline"/> class.
         /// </summary>
@@ -58,6 +60,8 @@ namespace Metalama.Framework.Engine.Pipeline
             bool isTest,
             CompileTimeDomain? domain )
         {
+            this.Logger = serviceProvider.GetLoggerFactory().GetLogger( "AspectPipeline" );
+
             this.ProjectOptions = serviceProvider.GetRequiredService<IProjectOptions>();
 
             this.ServiceProvider = serviceProvider
@@ -103,6 +107,8 @@ namespace Metalama.Framework.Engine.Pipeline
                     cancellationToken,
                     out var compileTimeProject ) )
             {
+                this.Logger.Warning?.Log( $"TryInitialized({this.ProjectOptions.AssemblyName}) failed: cannot get the compile-time compilation." );
+
                 configuration = null;
 
                 return false;
@@ -208,6 +214,8 @@ namespace Metalama.Framework.Engine.Pipeline
 
             if ( !AspectLayerSorter.TrySort( unsortedAspectLayers, aspectOrderSources, diagnosticAdder, out var orderedAspectLayers ) )
             {
+                this.Logger.Warning?.Log( $"TryInitialized({this.ProjectOptions.AssemblyName}) failed: cannot sort aspect layers." );
+
                 configuration = null;
 
                 return false;
