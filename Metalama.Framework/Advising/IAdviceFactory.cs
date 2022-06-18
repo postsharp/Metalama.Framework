@@ -7,6 +7,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Validation;
 using System;
+using System.Collections.Immutable;
 
 namespace Metalama.Framework.Advising
 {
@@ -53,7 +54,7 @@ namespace Metalama.Framework.Advising
         ///     copies of the scope of the target declaration of the aspect.</param>
         /// <param name="whenExists">Determines the implementation strategy when a method of the same name and signature is already declared in the target type.
         ///     The default strategy is to fail with a compile-time error.</param>
-        /// <param name="buildAction"></param>
+        /// <param name="buildMethod"></param>
         /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template methods.</param>
         /// <param name="tags">An optional opaque object of anonymous type passed to the template method and exposed under the <see cref="meta.Tags"/> property
         ///     of the <see cref="meta"/> API.</param>
@@ -64,7 +65,7 @@ namespace Metalama.Framework.Advising
             string template,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Action<IMethodBuilder>? buildAction = null,
+            Action<IMethodBuilder>? buildMethod = null,
             object? args = null,
             object? tags = null );
 
@@ -117,7 +118,7 @@ namespace Metalama.Framework.Advising
         ///     field. The default scope is <see cref="IntroductionScope.Instance"/>.</param>
         /// <param name="whenExists">Determines the implementation strategy when a property of the same name is already declared in the target type.
         ///     The default strategy is to fail with a compile-time error.</param>
-        /// <param name="buildAction"></param>
+        /// <param name="buildField"></param>
         /// <param name="tags"></param>
         /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
         /// <seealso href="@introducing-members"/>
@@ -126,7 +127,7 @@ namespace Metalama.Framework.Advising
             string template,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Action<IFieldBuilder>? buildAction = null,
+            Action<IFieldBuilder>? buildField = null,
             object? tags = null );
 
         /// <summary>
@@ -139,7 +140,7 @@ namespace Metalama.Framework.Advising
         ///     field. The default scope is <see cref="IntroductionScope.Instance"/>.</param>
         /// <param name="whenExists">Determines the implementation strategy when a property of the same name is already declared in the target type.
         ///     The default strategy is to fail with a compile-time error.</param>
-        /// <param name="buildAction"></param>
+        /// <param name="buildField"></param>
         /// <param name="tags"></param>
         /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
         /// <seealso href="@introducing-members"/>
@@ -149,7 +150,7 @@ namespace Metalama.Framework.Advising
             IType fieldType,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Action<IFieldBuilder>? buildAction = null,
+            Action<IFieldBuilder>? buildField = null,
             object? tags = null );
 
         /// <summary>
@@ -162,7 +163,7 @@ namespace Metalama.Framework.Advising
         ///     field. The default scope is <see cref="IntroductionScope.Instance"/>.</param>
         /// <param name="whenExists">Determines the implementation strategy when a property of the same name is already declared in the target type.
         ///     The default strategy is to fail with a compile-time error.</param>
-        /// <param name="buildAction"></param>
+        /// <param name="buildField"></param>
         /// <param name="tags"></param>
         /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
         /// <seealso href="@introducing-members"/>
@@ -172,7 +173,7 @@ namespace Metalama.Framework.Advising
             Type fieldType,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Action<IFieldBuilder>? buildAction = null,
+            Action<IFieldBuilder>? buildField = null,
             object? tags = null );
 
         /// <summary>
@@ -185,7 +186,7 @@ namespace Metalama.Framework.Advising
         ///     field. The default scope is <see cref="IntroductionScope.Instance"/>.</param>
         /// <param name="whenExists">Determines the implementation strategy when a property of the same name is already declared in the target type.
         ///     The default strategy is to fail with a compile-time error.</param>
-        /// <param name="buildAction"></param>
+        /// <param name="buildProperty"></param>
         /// <param name="tags"></param>
         /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
         /// <seealso href="@introducing-members"/>
@@ -195,7 +196,7 @@ namespace Metalama.Framework.Advising
             Type propertyType,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Action<IPropertyBuilder>? buildAction = null,
+            Action<IPropertyBuilder>? buildProperty = null,
             object? tags = null );
 
         /// <summary>
@@ -208,7 +209,7 @@ namespace Metalama.Framework.Advising
         ///     field. The default scope is <see cref="IntroductionScope.Instance"/>.</param>
         /// <param name="whenExists">Determines the implementation strategy when a property of the same name is already declared in the target type.
         ///     The default strategy is to fail with a compile-time error.</param>
-        /// <param name="buildAction"></param>
+        /// <param name="buildProperty"></param>
         /// <param name="tags"></param>
         /// <returns>An <see cref="IPropertyBuilder"/> that allows to dynamically change the name or type of the introduced property.</returns>
         /// <seealso href="@introducing-members"/>
@@ -218,7 +219,7 @@ namespace Metalama.Framework.Advising
             IType propertyType,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Action<IPropertyBuilder>? buildAction = null,
+            Action<IPropertyBuilder>? buildProperty = null,
             object? tags = null );
 
         /// <summary>
@@ -318,7 +319,7 @@ namespace Metalama.Framework.Advising
         ///     template event is non-static, then the introduced event copies of the scope of the target declaration of the aspect.</param>
         /// <param name="whenExists">Determines the implementation strategy when an event of the same name is already declared in the target type.
         ///     The default strategy is to fail with a compile-time error.</param>
-        /// <param name="buildAction"></param>
+        /// <param name="buildEvent"></param>
         /// <param name="tags">An optional opaque object of anonymous type passed to the template event and exposed under the <see cref="meta.Tags"/> property of the
         ///     <see cref="meta"/> API.</param>
         /// <returns>An <see cref="IEventBuilder"/> that allows to change the name and the type of the event.</returns>
@@ -328,7 +329,7 @@ namespace Metalama.Framework.Advising
             string eventTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Action<IEventBuilder>? buildAction = null,
+            Action<IEventBuilder>? buildEvent = null,
             object? tags = null );
 
         /// <summary>
@@ -349,7 +350,7 @@ namespace Metalama.Framework.Advising
         ///     template event is non-static, then the introduced event copies of the scope of the target declaration of the aspect.</param>
         /// <param name="whenExists">Determines the implementation strategy when an event of the same name is already declared in the target type.
         ///     The default strategy is to fail with a compile-time error.</param>
-        /// <param name="buildAction"></param>
+        /// <param name="buildEvent"></param>
         /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template methods.</param>
         /// <param name="tags">An optional opaque object of anonymous type passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
         ///     <see cref="meta"/> API.</param>
@@ -363,7 +364,7 @@ namespace Metalama.Framework.Advising
             string? raiseTemplate = null,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Action<IEventBuilder>? buildAction = null,
+            Action<IEventBuilder>? buildEvent = null,
             object? args = null,
             object? tags = null );
 
@@ -437,7 +438,7 @@ namespace Metalama.Framework.Advising
         IAddInitializerAdviceResult AddInitializer( IConstructor targetConstructor, string template, object? tags = null, object? args = null );
 
         /// <summary>
-        /// Adds an initializer to a specific constructor by specifying an <see cref="IStatement"/>
+        /// Adds an initializer to a specific constructor by specifying an <see cref="IStatement"/>.
         /// </summary>
         /// <param name="targetConstructor">The constructor into which the initializer should be added.</param>
         /// <param name="statement">The statement to be inserted at the top of the constructor.</param>
@@ -517,19 +518,19 @@ namespace Metalama.Framework.Advising
         /// <param name="constructor">The constructor into which the new parameter will be appended.</param>
         /// <param name="parameterName">The name of the parameter.</param>
         /// <param name="parameterType">The type of the parameter.</param>
-        /// <param name="defaultValue">The default value of the parameter (required). It must be type-compatible with <see cref="parameterType"/>.
-        /// To specify <c>default</c> as the default value, use <see cref="TypedConstant.Default(Metalama.Framework.Code.IType)"/>.</param>
+        /// <param name="defaultValue">The default value of the parameter (required). It must be type-compatible with <paramref name="parameterType"/>.
+        ///     To specify <c>default</c> as the default value, use <see cref="TypedConstant.Default(Metalama.Framework.Code.IType)"/>.</param>
         /// <param name="pullAction">An optional delegate that returns a <see cref="PullAction"/> specifying how to pull the new parameter from other child constructors.
-        /// A <c>null</c> value is equivalent to <see cref="PullAction.None"/>, i.e. <see cref="defaultValue"/> of the parameter will be used.
+        ///     A <c>null</c> value is equivalent to <see cref="PullAction.None"/>, i.e. <paramref name="defaultValue"/> of the parameter will be used.
         /// </param>
-        /// <param name="buildAction">An optional delegate that can add custom attributes to the parameter.</param>
+        /// <param name="attributes"></param>
         IIntroductionAdviceResult<IParameter> IntroduceParameter(
             IConstructor constructor,
             string parameterName,
             IType parameterType,
             TypedConstant defaultValue,
             Func<IParameter, IConstructor, PullAction>? pullAction = null,
-            Action<IParameterBuilder>? buildAction = null );
+            ImmutableArray<AttributeConstruction> attributes = default );
 
         /// <summary>
         /// Appends a parameter to a constructor by specifying its name and <see cref="Type"/>.
@@ -537,19 +538,19 @@ namespace Metalama.Framework.Advising
         /// <param name="constructor">The constructor into which the new parameter will be appended.</param>
         /// <param name="parameterName">The name of the parameter.</param>
         /// <param name="parameterType">The type of the parameter.</param>
-        /// <param name="defaultValue">The default value of the parameter (required). It must be type-compatible with <see cref="parameterType"/>.
-        /// To specify <c>default</c> as the default value, use <see cref="TypedConstant.Default(Metalama.Framework.Code.IType)"/>.</param>
+        /// <param name="defaultValue">The default value of the parameter (required). It must be type-compatible with <paramref name="parameterType"/>.
+        ///     To specify <c>default</c> as the default value, use <see cref="TypedConstant.Default(Metalama.Framework.Code.IType)"/>.</param>
         /// <param name="pullAction">An optional delegate that returns a <see cref="PullAction"/> specifying how to pull the new parameter from other child constructors.
-        /// A <c>null</c> value is equivalent to <see cref="PullAction.None"/>, i.e. <see cref="defaultValue"/> of the parameter will be used.
+        ///     A <c>null</c> value is equivalent to <see cref="PullAction.None"/>, i.e. <paramref name="defaultValue"/> of the parameter will be used.
         /// </param>
-        /// <param name="buildAction">An optional delegate that can add custom attributes to the parameter.</param>
+        /// <param name="attributes"></param>
         IIntroductionAdviceResult<IParameter> IntroduceParameter(
             IConstructor constructor,
             string parameterName,
             Type parameterType,
             TypedConstant defaultValue,
             Func<IParameter, IConstructor, PullAction>? pullAction = null,
-            Action<IParameterBuilder>? buildAction = null );
+            ImmutableArray<AttributeConstruction> attributes = default );
 
         /// <summary>
         /// Returns a copy of the current <see cref="IAdviceFactory"/> that will a specified object to find factory methods.

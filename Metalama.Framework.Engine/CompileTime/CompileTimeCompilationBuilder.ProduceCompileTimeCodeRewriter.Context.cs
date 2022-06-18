@@ -4,8 +4,6 @@
 using Microsoft.CodeAnalysis;
 using System;
 
-#pragma warning disable CA1001 // IDisposable is not owned.
-
 namespace Metalama.Framework.Engine.CompileTime;
 
 internal partial class CompileTimeCompilationBuilder

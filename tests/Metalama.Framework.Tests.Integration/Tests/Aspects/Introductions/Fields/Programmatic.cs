@@ -13,7 +13,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Field.Progra
                 builder.Target,
                 "IntroducedField_Static",
                 typeof(int),
-                buildAction: p => { p.IsStatic = true; } );
+                buildField: p => { p.IsStatic = true; } );
 
             // TODO: Other members.
         }

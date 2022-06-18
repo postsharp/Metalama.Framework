@@ -13,7 +13,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Metho
             var typedMethod = builder.Advice.IntroduceMethod(
                 builder.Target,
                 nameof(CloneImpl),
-                buildAction: m =>
+                buildMethod: m =>
                 {
                     m.Name = "Clone";
                     m.ReturnType = builder.Target;

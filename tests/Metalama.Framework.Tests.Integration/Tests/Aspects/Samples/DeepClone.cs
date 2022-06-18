@@ -23,7 +23,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Samples.Dirty
                 builder.Target,
                 nameof(CloneImpl),
                 whenExists: OverrideStrategy.Override,
-                buildAction: m =>
+                buildMethod: m =>
                 {
                     m.Name = "Clone";
                     m.ReturnType = builder.Target;

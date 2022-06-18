@@ -8,15 +8,15 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Events.Progr
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            builder.Advice.IntroduceEvent( builder.Target, nameof(EventField), buildAction: e => e.Accessibility = Accessibility.Public );
-            builder.Advice.IntroduceEvent( builder.Target, nameof(Event), buildAction: e => e.Accessibility = Accessibility.Public );
+            builder.Advice.IntroduceEvent( builder.Target, nameof(EventField), buildEvent: e => e.Accessibility = Accessibility.Public );
+            builder.Advice.IntroduceEvent( builder.Target, nameof(Event), buildEvent: e => e.Accessibility = Accessibility.Public );
 
             builder.Advice.IntroduceEvent(
                 builder.Target,
                 "EventFromAccessors",
                 nameof(AddEventTemplate),
                 nameof(RemoveEventTemplace),
-                buildAction: e => e.Accessibility = Accessibility.Public );
+                buildEvent: e => e.Accessibility = Accessibility.Public );
 
             // TODO: Expression bodied template.
         }

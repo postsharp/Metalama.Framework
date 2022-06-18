@@ -11,7 +11,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Prog
             builder.Advice.IntroduceMethod(
                 builder.Target,
                 nameof(Template),
-                buildAction: introduced =>
+                buildMethod: introduced =>
                 {
                     introduced.Name = "IntroducedMethod_Parameters";
                     introduced.AddParameter( "x", typeof(int) );
@@ -21,7 +21,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Prog
             builder.Advice.IntroduceMethod(
                 builder.Target,
                 nameof(Template),
-                buildAction: introduced =>
+                buildMethod: introduced =>
                 {
                     introduced.Name = "IntroducedMethod_ReturnType";
                     introduced.ReturnType = TypeFactory.GetType( typeof(int) );
@@ -30,7 +30,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Prog
             builder.Advice.IntroduceMethod(
                 builder.Target,
                 nameof(Template),
-                buildAction: introduced =>
+                buildMethod: introduced =>
                 {
                     introduced.Name = "IntroducedMethod_Accessibility";
                     introduced.Accessibility = Accessibility.Private;
@@ -39,7 +39,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Prog
             builder.Advice.IntroduceMethod(
                 builder.Target,
                 nameof(Template),
-                buildAction: introduced =>
+                buildMethod: introduced =>
                 {
                     introduced.Name = "IntroducedMethod_IsStatic";
                     introduced.IsStatic = true;
@@ -48,7 +48,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Prog
             builder.Advice.IntroduceMethod(
                 builder.Target,
                 nameof(Template),
-                buildAction: introduced =>
+                buildMethod: introduced =>
                 {
                     introduced.Name = "IntroducedMethod_IsVirtual";
                     introduced.IsVirtual = true;

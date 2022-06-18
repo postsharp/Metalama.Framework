@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Metalama.Framework.Code.SyntaxBuilders;
 
-#pragma warning disable CS1717
+#pragma warning disable CS1717, CS0414
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.FieldOrPropertyValueShortcuts
 {

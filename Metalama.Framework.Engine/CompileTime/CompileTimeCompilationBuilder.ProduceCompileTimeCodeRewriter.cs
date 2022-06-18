@@ -33,7 +33,9 @@ namespace Metalama.Framework.Engine.CompileTime
         /// Rewrites a run-time syntax tree into a compile-time syntax tree. Calls <see cref="TemplateCompiler"/> on templates,
         /// and removes run-time-only sub trees.
         /// </summary>
+#pragma warning disable CA1001 // Types that own disposable fields should be disposable
         private sealed partial class ProduceCompileTimeCodeRewriter : CompileTimeBaseRewriter
+#pragma warning restore CA1001 // Types that own disposable fields should be disposable
         {
             private static readonly SyntaxAnnotation _hasCompileTimeCodeAnnotation = new( "Metalama_HasCompileTimeCode" );
             private readonly Compilation _compileTimeCompilation;
