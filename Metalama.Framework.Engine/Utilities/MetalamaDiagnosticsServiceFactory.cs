@@ -9,10 +9,8 @@ namespace Metalama.Framework.Engine.Utilities
     {
         public static void Initialize( string caller, string? projectName = null )
         {
-            if ( DiagnosticServiceFactory.Initialize( () => new MetalamaApplicationInfo(), caller, projectName ) )
-            {
-                Logger.Initialize();
-            }
+            DiagnosticServiceFactory.Initialize( () => new MetalamaApplicationInfo(), caller, projectName );
+            Logger.Initialize();
         }
     }
 }

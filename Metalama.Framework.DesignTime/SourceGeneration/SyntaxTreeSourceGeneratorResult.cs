@@ -3,6 +3,7 @@
 
 using K4os.Hash.xxHash;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Pipeline;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
@@ -26,13 +27,27 @@ public sealed class SyntaxTreeSourceGeneratorResult : SourceGeneratorResult
         var xxh = new XXH64();
         var hasher = new RunTimeCodeHasher( xxh );
         ulong hash = 0;
+        
+        #if DEBUG
+        var uniqueHashes = new HashSet<ulong>();
+        #endif
 
         foreach ( var tree in this.AdditionalSources.Values )
         {
             xxh.Reset();
             hasher.Visit( tree.SourceSyntaxTree.GetRoot() );
 
-            hash ^= xxh.Digest();
+            var digest = xxh.Digest();
+            
+            #if DEBUG
+            if ( !uniqueHashes.Add( digest ) )
+            {
+                // It is essential that hashes are distinct, because identical hashes nullify themselves.
+                throw new AssertionFailedException();
+            }
+            #endif
+            
+            hash ^= digest;
         }
 
         return hash;
