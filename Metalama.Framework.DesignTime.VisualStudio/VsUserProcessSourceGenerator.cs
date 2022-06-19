@@ -5,7 +5,6 @@ using Metalama.Framework.DesignTime.SourceGeneration;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace Metalama.Framework.DesignTime.VisualStudio;
 

@@ -16,10 +16,11 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff;
 public abstract class BaseCodeHasher : CSharpSyntaxWalker
 {
     private readonly XXH64 _hasher;
+
     public StringBuilder? Log { get; private set; }
 
     internal void EnableLogging() => this.Log = new StringBuilder();
-    
+
     protected BaseCodeHasher( XXH64 hasher )
     {
         this._hasher = hasher;

@@ -28,10 +28,10 @@ public sealed class SyntaxTreeSourceGeneratorResult : SourceGeneratorResult
         var xxh = new XXH64();
         var hasher = new RunTimeCodeHasher( xxh );
         ulong hash = 0;
-        
-        #if DEBUG
+
+#if DEBUG
         var uniqueHashes = new HashSet<ulong>();
-        #endif
+#endif
 
         foreach ( var tree in this.AdditionalSources.Values )
         {
@@ -40,15 +40,15 @@ public sealed class SyntaxTreeSourceGeneratorResult : SourceGeneratorResult
             hasher.Visit( tree.GeneratedSyntaxTree.GetRoot() );
 
             var digest = xxh.Digest();
-            
-            #if DEBUG
+
+#if DEBUG
             if ( !uniqueHashes.Add( digest ) )
             {
                 // It is essential that hashes are distinct, because identical hashes nullify themselves.
                 throw new AssertionFailedException();
             }
-            #endif
-            
+#endif
+
             hash ^= digest;
         }
 

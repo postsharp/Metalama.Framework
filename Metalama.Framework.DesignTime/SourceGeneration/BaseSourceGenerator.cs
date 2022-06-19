@@ -7,10 +7,10 @@ using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.Diagnostics;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using AnalyzerConfigOptions = Microsoft.CodeAnalysis.Diagnostics.AnalyzerConfigOptions;
 
 #pragma warning disable SA1414 // Tuple items must have names.
 
@@ -46,13 +46,12 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
 
                 this._logger.Trace?.Log( $"{this.GetType().Name}.Initialize()" );
 
-                IEqualityComparer<(AnalyzerConfigOptionsProvider Options, Compilation Compilation, string TouchId)> comparer;
-
                 var source =
-                    context.AnalyzerConfigOptionsProvider.Select( (x, _ ) => ( AnalyzerOptions: x.GlobalOptions, PipelineOptions: new MSBuildProjectOptions( x.GlobalOptions )) )
+                    context.AnalyzerConfigOptionsProvider.Select(
+                            ( x, _ ) => (AnalyzerOptions: x.GlobalOptions, PipelineOptions: new MSBuildProjectOptions( x.GlobalOptions )) )
                         .Combine( context.CompilationProvider )
                         .Combine( context.AdditionalTextsProvider.Select( ( text, _ ) => text ).Collect() )
-                        .Select( (x, _) => (Compilation: x.Left.Right, x.Left.Left.AnalyzerOptions,  x.Left.Left.PipelineOptions, AdditionalTexts: x.Right )  )
+                        .Select( ( x, _ ) => (Compilation: x.Left.Right, x.Left.Left.AnalyzerOptions, x.Left.Left.PipelineOptions, AdditionalTexts: x.Right) )
                         .Select( this.OnGeneratedSourceRequested )
                         .WithComparer( TouchIdComparer.Instance )
                         .Select( ( x, cancellationToken ) => this.GetGeneratedSources( x.Compilation, x.Options, cancellationToken ) );
@@ -71,12 +70,15 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
             }
         }
 
-        private (MSBuildProjectOptions Options, Compilation Compilation, string TouchId) OnGeneratedSourceRequested( (Compilation Compilation, AnalyzerConfigOptions AnalyzerOptions, MSBuildProjectOptions PipelineOptions, ImmutableArray<AdditionalText> AdditionalTexts) args, CancellationToken cancellationToken )
+        private (MSBuildProjectOptions Options, Compilation Compilation, string TouchId) OnGeneratedSourceRequested(
+            (Compilation Compilation, AnalyzerConfigOptions AnalyzerOptions, MSBuildProjectOptions PipelineOptions, ImmutableArray<AdditionalText>
+                AdditionalTexts) args,
+            CancellationToken cancellationToken )
         {
             this.OnGeneratedSourceRequested( args.Compilation, args.PipelineOptions, cancellationToken );
 
             var touchId = GetTouchId( args.AnalyzerOptions, args.AdditionalTexts, cancellationToken );
-            
+
             return (args.PipelineOptions, args.Compilation, touchId);
         }
 
@@ -143,14 +145,13 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
         private class TouchIdComparer : IEqualityComparer<(MSBuildProjectOptions Options, Compilation Compilation, string TouchId)>
         {
             public static readonly TouchIdComparer Instance = new();
-         
+
             public bool Equals(
                 (MSBuildProjectOptions Options, Compilation Compilation, string TouchId) x,
                 (MSBuildProjectOptions Options, Compilation Compilation, string TouchId) y )
                 => x.TouchId == y.TouchId;
 
-            public int GetHashCode( (MSBuildProjectOptions Options, Compilation Compilation, string TouchId) obj )
-                => obj.TouchId.GetHashCode();
+            public int GetHashCode( (MSBuildProjectOptions Options, Compilation Compilation, string TouchId) obj ) => obj.TouchId.GetHashCode();
         }
 
         private static string GetTouchId(

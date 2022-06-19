@@ -3,7 +3,6 @@
 
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
-using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.VisualStudio;
 

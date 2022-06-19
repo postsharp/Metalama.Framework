@@ -19,8 +19,8 @@ using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
-using System.Runtime.CompilerServices;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace Metalama.Framework.DesignTime.Pipeline
 {

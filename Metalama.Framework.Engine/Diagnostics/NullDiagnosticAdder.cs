@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.Diagnostics
         {
             MetalamaDiagnosticsServiceFactory.Initialize( nameof(NullDiagnosticAdder) );
         }
-        
+
         private readonly ILogger _logger;
 
         public static NullDiagnosticAdder Instance { get; } = new();

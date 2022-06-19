@@ -11,12 +11,8 @@ namespace Metalama.Framework.Engine.Utilities
     {
         private static readonly object _initializeSync = new();
         private static ILoggerFactory? _loggerFactory;
-        
 
-        public static ILoggerFactory LoggerFactory
-        {
-            get => _loggerFactory ?? throw new InvalidOperationException( "Logger.Initialize has not been called." );
-        }
+        public static ILoggerFactory LoggerFactory => _loggerFactory ?? throw new InvalidOperationException( "Logger.Initialize has not been called." );
 
         /// <summary>
         /// Initializes all loggers from the support services.
@@ -32,8 +28,6 @@ namespace Metalama.Framework.Engine.Utilities
                 {
                     return;
                 }
-
-
 
                 _loggerFactory = DiagnosticServiceFactory.ServiceProvider.GetLoggerFactory();
                 var processInfo = _loggerFactory.GetLogger( "ProcessInfo" );
