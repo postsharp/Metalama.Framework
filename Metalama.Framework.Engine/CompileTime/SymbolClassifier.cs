@@ -156,18 +156,17 @@ namespace Metalama.Framework.Engine.CompileTime
 
             var memberId = SymbolId.Create( declaringSymbol );
 
-            
             switch ( attributeData.AttributeClass?.Name )
             {
                 case nameof(TemplateAttribute):
                 case "TestTemplateAttribute":
-                    return new TemplateInfo( memberId, TemplateAttributeType.Template, attributeInstance );
+                    return new TemplateInfo( memberId, TemplateAttributeType.Template, (IAdviceAttribute?) attributeInstance );
 
                 case nameof(InterfaceMemberAttribute):
-                    return new TemplateInfo( memberId, TemplateAttributeType.InterfaceMember, attributeInstance );
+                    return new TemplateInfo( memberId, TemplateAttributeType.InterfaceMember, (IAdviceAttribute?) attributeInstance );
 
                 default:
-                    return new TemplateInfo( memberId, TemplateAttributeType.DeclarativeAdvice, attributeInstance );
+                    return new TemplateInfo( memberId, TemplateAttributeType.DeclarativeAdvice, (IAdviceAttribute?) attributeInstance );
             }
         }
 

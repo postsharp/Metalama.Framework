@@ -14,6 +14,7 @@ using System.Reflection;
 using System.Text;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 using MethodKind = Metalama.Framework.Code.MethodKind;
+using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
@@ -72,7 +73,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             public IMember? OverriddenMember => throw new NotImplementedException();
 
-            public ImmutableArray<Microsoft.CodeAnalysis.SyntaxReference> DeclaringSyntaxReferences => throw new NotImplementedException();
+            public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => throw new NotImplementedException();
 
             public bool CanBeInherited => false;
 
@@ -109,9 +110,9 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 throw new NotImplementedException();
             }
-            
+
             public IRef<IDeclaration> ToRef() => Ref.ImplicitStaticConstructor( this );
-            
+
             Ref<IDeclaration> IDeclarationImpl.ToRef() => Ref.ImplicitStaticConstructor( this );
 
             public IConstructor? GetBaseConstructor()

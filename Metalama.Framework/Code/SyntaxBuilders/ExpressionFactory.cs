@@ -149,4 +149,24 @@ public static class ExpressionFactory
     /// Returns an expression obtained by casting another expression to a type given as a generic parameter.
     /// </summary>
     public static IExpression CastTo<T>( this IExpression expression ) => expression.CastTo( TypeFactory.GetType( typeof(T) ) );
+
+    /// <summary>
+    /// Gets a <c>this</c> expression for the given type.
+    /// </summary>
+    /// <param name="type">A type.</param>
+    public static IExpression This( INamedType type ) => SyntaxBuilder.CurrentImplementation.This( type );
+
+    /// <summary>
+    /// Gets an <see cref="IExpression"/> that represents a given field or property.
+    /// </summary>
+    /// <param name="fieldOrProperty">A field or property.</param>
+    /// <param name="instance">An expression representing the instance. This argument is ignored for static members. Its default value is the <c>this</c> expression.</param>
+    public static IExpression ToExpression( this IFieldOrProperty fieldOrProperty, IExpression? instance = null )
+        => SyntaxBuilder.CurrentImplementation.ToExpression( fieldOrProperty, instance );
+
+    /// <summary>
+    /// Gets an <see cref="IExpression"/> that represents a given parameter.
+    /// </summary>
+    /// <param name="parameter">A parameter.</param>
+    public static IExpression ToExpression( this IParameter parameter ) => SyntaxBuilder.CurrentImplementation.ToExpression( parameter );
 }

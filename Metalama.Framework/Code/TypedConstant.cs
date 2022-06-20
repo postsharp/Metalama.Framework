@@ -18,7 +18,7 @@ namespace Metalama.Framework.Code
     public readonly struct TypedConstant : IExpression
     {
         // ReSharper disable once UnassignedReadonlyField
-      
+
         private readonly object? _value;
         private readonly IType? _type;
 
@@ -109,14 +109,14 @@ namespace Metalama.Framework.Code
 
         public override string ToString() => this._type != null ? this._value?.ToString() ?? "default" : "(uninitialized)";
 
-        public static TypedConstant Default( IType type ) => new TypedConstant( type, null );
+        public static TypedConstant Default( IType type ) => new( type, null );
 
-        public static TypedConstant Default( Type type ) => new TypedConstant( TypeFactory.GetType( type ), null );
+        public static TypedConstant Default( Type type ) => new( TypeFactory.GetType( type ), null );
+
         public static TypedConstant Default<T>() => Default( typeof(T) );
 
-        public static TypedConstant Create( object value ) => new TypedConstant( TypeFactory.GetType( value.GetType() ), value );
+        public static TypedConstant Create( object value ) => new( TypeFactory.GetType( value.GetType() ), value );
 
-        public static TypedConstant Create( IType type, object? value ) => new TypedConstant( type, value );
-
+        public static TypedConstant Create( IType type, object? value ) => new( type, value );
     }
 }

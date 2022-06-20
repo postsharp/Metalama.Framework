@@ -13,19 +13,19 @@ namespace Metalama.Framework.Engine.Advising
         public static TemplateMember<T> Create<T>(
             T? implementation,
             TemplateClassMember? templateClassMember,
-            ITemplateAttribute templateAttribute,
+            IAdviceAttribute adviceAttribute,
             TemplateKind selectedKind,
             TemplateKind interpretedKind )
             where T : class, IMemberOrNamedType
-            => new( implementation, templateClassMember, templateAttribute, selectedKind, interpretedKind );
+            => new( implementation, templateClassMember, adviceAttribute, selectedKind, interpretedKind );
 
         public static TemplateMember<T> Create<T>(
             T? implementation,
             TemplateClassMember? templateClassMember,
-            ITemplateAttribute templateAttribute,
+            IAdviceAttribute adviceAttribute,
             TemplateKind selectedKind = TemplateKind.Default )
             where T : class, IMemberOrNamedType
-            => new( implementation, templateClassMember, templateAttribute, selectedKind );
+            => new( implementation, templateClassMember, adviceAttribute, selectedKind );
 
         public static TemplateMember<T> Create<T>(
             T? implementation,
@@ -45,7 +45,7 @@ namespace Metalama.Framework.Engine.Advising
         public TemplateClassMember TemplateClassMember => this._templateClassMember ?? throw new InvalidOperationException();
 
         // Can be null in the default instance.
-        public ITemplateAttribute? TemplateAttribute { get; }
+        public IAdviceAttribute? AdviceAttribute { get; }
 
         public TemplateKind SelectedKind { get; }
 
@@ -58,24 +58,24 @@ namespace Metalama.Framework.Engine.Advising
         public TemplateMember(
             T? implementation,
             TemplateClassMember? templateClassMember,
-            ITemplateAttribute templateAttribute,
+            IAdviceAttribute adviceAttribute,
             TemplateKind selectedKind = TemplateKind.Default ) : this(
             implementation,
             templateClassMember,
-            templateAttribute,
+            adviceAttribute,
             selectedKind,
             selectedKind ) { }
 
         public TemplateMember(
             T? implementation,
             TemplateClassMember? templateClassMember,
-            ITemplateAttribute templateAttribute,
+            IAdviceAttribute adviceAttribute,
             TemplateKind selectedKind,
             TemplateKind interpretedKind )
         {
             this.Declaration = implementation;
             this._templateClassMember = templateClassMember;
-            this.TemplateAttribute = templateAttribute.AssertNotNull();
+            this.AdviceAttribute = adviceAttribute.AssertNotNull();
 
             if ( implementation is IMethod { MethodKind: MethodKind.PropertySet or MethodKind.EventAdd or MethodKind.EventRemove }
                  && templateClassMember?.Parameters.Length != 1 )
@@ -99,7 +99,7 @@ namespace Metalama.Framework.Engine.Advising
             => TemplateMember.Create<IMemberOrNamedType>(
                 this.Declaration!,
                 this.TemplateClassMember,
-                this.TemplateAttribute.AssertNotNull(),
+                this.AdviceAttribute.AssertNotNull(),
                 this.SelectedKind,
                 this.InterpretedKind );
 

@@ -23,6 +23,8 @@ internal interface ISyntaxBuilderImpl
 
     IStatement ParseStatement( string code );
 
+    IStatement CreateExpressionStatement( IExpression expression );
+
     void AppendLiteral( object? value, StringBuilder stringBuilder, SpecialType specialType, bool stronglyTyped );
 
     IExpression Literal( object? value, SpecialType specialType, bool stronglyTyped );
@@ -38,4 +40,10 @@ internal interface ISyntaxBuilderImpl
     IExpression Cast( IExpression expression, IType targetType );
 
     object TypedConstant( in TypedConstant typedConstant );
+
+    IExpression This( INamedType type );
+
+    IExpression ToExpression( IFieldOrProperty fieldOrProperty, IExpression? instance );
+
+    IExpression ToExpression( IParameter parameter );
 }

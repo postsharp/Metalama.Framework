@@ -57,7 +57,7 @@ internal class AppendConstructorParameterAdvice : Advice
         var initializedConstructor = constructor;
 
         // Introducing parameters into static constructors is not allowed.
-        if (constructor.IsStatic)
+        if ( constructor.IsStatic )
         {
             return AdviceImplementationResult.Failed(
                 AdviceDiagnosticDescriptors.CannotIntroduceParameterIntoStaticConstructor.CreateRoslynDiagnostic(

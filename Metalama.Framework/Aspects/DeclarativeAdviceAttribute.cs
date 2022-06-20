@@ -12,7 +12,7 @@ namespace Metalama.Framework.Aspects;
 /// A base class for attributes that define declarative advice members. 
 /// </summary>
 [CompileTime]
-public abstract class DeclarativeAdviceAttribute : Attribute
+public abstract class DeclarativeAdviceAttribute : Attribute, IAdviceAttribute
 {
     /// <summary>
     /// Gets or sets the name of the aspect layer into which the member will be introduced. The layer must have been defined

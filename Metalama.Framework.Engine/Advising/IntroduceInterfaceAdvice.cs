@@ -585,10 +585,7 @@ namespace Metalama.Framework.Engine.Advising
                 interfaceProperty.Writeability == Writeability.InitOnly,
                 false,
                 hasImplicitSetter,
-                tags )
-            {
-                Type = interfaceProperty.Type
-            };
+                tags ) { Type = interfaceProperty.Type };
 
             if ( isExplicit )
             {
@@ -638,8 +635,7 @@ namespace Metalama.Framework.Engine.Advising
                 declaringType,
                 interfaceEvent.Name,
                 isEventField,
-                this.Tags )
-            { Type = interfaceEvent.Type };
+                this.Tags ) { Type = interfaceEvent.Type };
 
             if ( isExplicit )
             {

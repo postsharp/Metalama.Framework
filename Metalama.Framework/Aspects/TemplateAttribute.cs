@@ -12,7 +12,7 @@ namespace Metalama.Framework.Aspects
     [AttributeUsage( AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Event )]
     public class TemplateAttribute : Attribute, ITemplateAttribute
     {
-        internal static TemplateAttribute Default { get; } = new TemplateAttribute();
+        internal static TemplateAttribute Default { get; } = new();
 
         private TemplateAttributeImpl _impl;
 
@@ -26,8 +26,7 @@ namespace Metalama.Framework.Aspects
 
         public bool IsVirtual
         {
-            get
-                => this._impl.IsVirtual;
+            get => this._impl.IsVirtual;
 
             set => this._impl.IsVirtual = true;
         }

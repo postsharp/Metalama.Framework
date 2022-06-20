@@ -28,8 +28,7 @@ namespace Metalama.Framework.Aspects
 
         public bool IsVirtual
         {
-            get
-                => this._impl.IsVirtual;
+            get => this._impl.IsVirtual;
 
             set => this._impl.IsVirtual = true;
         }
@@ -45,7 +44,7 @@ namespace Metalama.Framework.Aspects
         bool? ITemplateAttribute.IsSealed => this._impl.GetIsSealed();
 
         Accessibility? ITemplateAttribute.Accessibility => this._impl.GetAccessibility();
-        
+
         public IntroductionScope Scope { get; set; }
 
         /// <summary>

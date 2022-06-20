@@ -17,23 +17,23 @@ internal class TemplateAttributeFactory : IService
 {
     private readonly AttributeDeserializer _attributeDeserializer;
     private readonly Compilation _compilation;
-    private readonly INamedTypeSymbol _attributeType;
+    private readonly INamedTypeSymbol _adviceAttributeType;
 
-    private readonly ConcurrentDictionary<SymbolId, ITemplateAttribute?> _cache = new();
+    private readonly ConcurrentDictionary<SymbolId, IAdviceAttribute?> _cache = new();
 
     public TemplateAttributeFactory( IServiceProvider serviceProvider, Compilation compilation )
     {
         this._compilation = compilation;
-        this._attributeType = this._compilation.GetTypeByMetadataName( typeof( ITemplateAttribute ).FullName ).AssertNotNull();
+        this._adviceAttributeType = this._compilation.GetTypeByMetadataName( typeof(IAdviceAttribute).FullName ).AssertNotNull();
         this._attributeDeserializer = serviceProvider.GetRequiredService<CompileTimeProjectLoader>().AttributeDeserializer;
     }
 
     public bool TryGetTemplateAttribute(
         SymbolId memberId,
         IDiagnosticAdder diagnosticAdder,
-        [NotNullWhen( true )] out ITemplateAttribute? templateAttribute )
+        [NotNullWhen( true )] out IAdviceAttribute? adviceAttribute )
     {
-        templateAttribute =
+        adviceAttribute =
             this._cache.GetOrAdd(
                 memberId,
                 m =>
@@ -43,27 +43,31 @@ internal class TemplateAttributeFactory : IService
                     return attribute;
                 } );
 
-        return templateAttribute != null;
+        return adviceAttribute != null;
     }
 
     private bool TryGetTemplateAttributeCore(
         SymbolId memberId,
         IDiagnosticAdder diagnosticAdder,
-        out ITemplateAttribute? templateAttribute )
+        out IAdviceAttribute? adviceAttribute )
     {
         var member = memberId.Resolve( this._compilation ).AssertNotNull();
 
         var attributeData = member
             .GetAttributes()
-            .Single( a => this._compilation.HasImplicitConversion( a.AttributeClass, this._attributeType ) );
+            .Single( a => this._compilation.HasImplicitConversion( a.AttributeClass, this._adviceAttributeType ) );
 
         if ( !this._attributeDeserializer.TryCreateAttribute( attributeData, diagnosticAdder, out var attribute ) )
         {
-            templateAttribute = null;
+            adviceAttribute = null;
+
             return false;
         }
+        else
+        {
+            adviceAttribute = (IAdviceAttribute) attribute;
 
-        templateAttribute = (ITemplateAttribute) attribute;
-        return true;
+            return true;
+        }
     }
 }

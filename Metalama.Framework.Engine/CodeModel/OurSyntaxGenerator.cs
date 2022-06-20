@@ -100,6 +100,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             var rewrittenTypeSyntax = rewriter.Visit( typeSyntax );
 
+            // Substitute type arguments.
             if ( substitutions != null && substitutions.Count > 0 )
             {
                 var substitutionRewriter = new SubstitutionRewriter( substitutions );

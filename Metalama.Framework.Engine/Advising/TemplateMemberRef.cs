@@ -53,24 +53,31 @@ namespace Metalama.Framework.Engine.Advising
             }
 
             // Create the attribute instance.
-            ITemplateAttribute? templateAttribute;
+            IAdviceAttribute? attribute;
 
             if ( this.TemplateMember.TemplateInfo.Attribute != null )
             {
                 // If we have a system attribute, return it.
 
-                templateAttribute = (ITemplateAttribute) this.TemplateMember.TemplateInfo.Attribute;
+                attribute = this.TemplateMember.TemplateInfo.Attribute;
             }
             else
             {
                 if ( !serviceProvider.GetRequiredService<TemplateAttributeFactory>()
-                        .TryGetTemplateAttribute( this.TemplateMember.TemplateInfo.SymbolId, NullDiagnosticAdder.Instance, out templateAttribute ) )
+                        .TryGetTemplateAttribute( this.TemplateMember.TemplateInfo.SymbolId, NullDiagnosticAdder.Instance, out attribute ) )
                 {
                     throw new AssertionFailedException( $"Cannot instantiate the template attribute for '{symbol.ToDisplayString()}'" );
                 }
             }
 
-            return Advising.TemplateMember.Create( typedSymbol, this.TemplateMember, templateAttribute, this.SelectedKind, this.InterpretedKind );
+            if ( attribute is ITemplateAttribute templateAttribute )
+            {
+                return Advising.TemplateMember.Create( typedSymbol, this.TemplateMember, templateAttribute, this.SelectedKind, this.InterpretedKind );
+            }
+            else
+            {
+                return default;
+            }
         }
 
         public TemplateMemberRef InterpretedAs( TemplateKind interpretedKind ) => new( this.TemplateMember, this.SelectedKind, interpretedKind );

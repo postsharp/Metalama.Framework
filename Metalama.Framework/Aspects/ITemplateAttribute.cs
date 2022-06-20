@@ -1,9 +1,14 @@
-﻿using Metalama.Framework.Code;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Aspects;
 
 [RunTimeOrCompileTime]
-public interface ITemplateAttribute
+public interface IAdviceAttribute { }
+
+public interface ITemplateAttribute : IAdviceAttribute
 {
     string? Name { get; }
 
