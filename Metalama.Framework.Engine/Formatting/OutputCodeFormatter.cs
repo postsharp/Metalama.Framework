@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
@@ -160,6 +161,6 @@ namespace Metalama.Framework.Engine.Formatting
         // Code formatting is used by TryMetalama only now. Somehow TryMetalama also builds through the command line for some
         // initialization, which triggers an error because we don't ship all necessary assemblies.
 
-        public static bool CanFormat => AppDomain.CurrentDomain.GetAssemblies().Any( a => a.GetName().Name == "Microsoft.CodeAnalysis.Workspaces" );
+        public static bool CanFormat => AppDomainUtility.HasAnyLoadedAssembly( a => a.GetName().Name == "Microsoft.CodeAnalysis.Workspaces" );
     }
 }

@@ -1,8 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
+using System;
 
 namespace Metalama.Framework.Aspects;
 
@@ -10,7 +12,7 @@ namespace Metalama.Framework.Aspects;
 /// A base class for attributes that define declarative advice members. 
 /// </summary>
 [CompileTime]
-public abstract class DeclarativeAdviceAttribute : TemplateAttribute
+public abstract class DeclarativeAdviceAttribute : Attribute, IAdviceAttribute
 {
     /// <summary>
     /// Gets or sets the name of the aspect layer into which the member will be introduced. The layer must have been defined
@@ -31,5 +33,5 @@ public abstract class DeclarativeAdviceAttribute : TemplateAttribute
     /// <param name="templateMemberId">The a value that represents <paramref name="templateMember"/> and that must be supplied to <see cref="IAdviceFactory"/>.
     ///     It is not actually the name, but a unique identifier of <paramref name="templateMember"/>.</param>
     /// <param name="builder">An <see cref="IAspectBuilder{TAspectTarget}"/>.</param>
-    public abstract void BuildAspect( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder );
+    public abstract void BuildAdvice( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder );
 }

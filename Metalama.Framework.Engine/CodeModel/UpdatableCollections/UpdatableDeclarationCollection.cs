@@ -10,10 +10,14 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
-internal abstract class UpdatableDeclarationCollection<T> : ILazy, IReadOnlyList<Ref<T>>
-    where T : class, IDeclaration
+#pragma warning disable SA1402
+
+internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : ILazy, IReadOnlyList<TRef>
+    where TDeclaration : class, IDeclaration
+    where TRef : IRefImpl<TDeclaration>, IEquatable<TRef>
 {
-    private List<Ref<T>>? _allItems;
+    private List<TRef>? _allItems;
+    private volatile int _removeOperationsCount;
 
     protected UpdatableDeclarationCollection( CompilationModel compilation )
     {
@@ -31,7 +35,7 @@ internal abstract class UpdatableDeclarationCollection<T> : ILazy, IReadOnlyList
     {
         if ( !this.IsComplete )
         {
-            this._allItems = new List<Ref<T>>();
+            this._allItems = new List<TRef>();
 
 #if DEBUG
             this.PopulateAllItems(
@@ -51,9 +55,9 @@ internal abstract class UpdatableDeclarationCollection<T> : ILazy, IReadOnlyList
         }
     }
 
-    protected abstract void PopulateAllItems( Action<Ref<T>> action );
+    protected abstract void PopulateAllItems( Action<TRef> action );
 
-    protected void AddItem( Ref<T> item )
+    protected void AddItem( in TRef item )
     {
         if ( this.IsComplete )
         {
@@ -61,10 +65,11 @@ internal abstract class UpdatableDeclarationCollection<T> : ILazy, IReadOnlyList
         }
     }
 
-    protected void RemoveItem( Ref<T> item )
+    protected void RemoveItem( in TRef item )
     {
         if ( this.IsComplete )
         {
+            this._removeOperationsCount++;
             this._allItems!.Remove( item );
         }
     }
@@ -79,38 +84,34 @@ internal abstract class UpdatableDeclarationCollection<T> : ILazy, IReadOnlyList
         }
     }
 
-    public bool Contains( Ref<T> item )
+    public bool Contains( TRef item )
     {
         this.EnsureComplete();
 
-        return this._allItems!.Any( i => DeclarationRefEqualityComparer<Ref<T>>.Default.Equals( i, item ) );
+        return this._allItems!.Any( i => i.Equals( item ) );
     }
 
-    public UpdatableDeclarationCollection<T> Clone( CompilationModel compilation )
+    public UpdatableDeclarationCollection<TDeclaration, TRef> Clone( CompilationModel compilation )
     {
-        var clone = (UpdatableDeclarationCollection<T>) this.MemberwiseClone();
+        var clone = (UpdatableDeclarationCollection<TDeclaration, TRef>) this.MemberwiseClone();
         clone.Compilation = compilation;
 
         if ( this._allItems != null )
         {
-            clone._allItems = new List<Ref<T>>( this._allItems.Count );
+            clone._allItems = new List<TRef>( this._allItems.Count );
             clone._allItems.AddRange( this._allItems );
         }
 
         return clone;
     }
 
-    public IEnumerator<Ref<T>> GetEnumerator()
-    {
-        for ( var i = 0; i < this.Count; i++ )
-        {
-            yield return this[i];
-        }
-    }
+    IEnumerator<TRef> IEnumerable<TRef>.GetEnumerator() => this.GetEnumerator();
+
+    public Enumerator GetEnumerator() => new( this );
 
     IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
-    public Ref<T> this[ int index ]
+    public TRef this[ int index ]
     {
         get
         {
@@ -119,4 +120,56 @@ internal abstract class UpdatableDeclarationCollection<T> : ILazy, IReadOnlyList
             return this._allItems![index];
         }
     }
+
+    public struct Enumerator : IEnumerator<TRef>
+    {
+        private readonly UpdatableDeclarationCollection<TDeclaration, TRef> _parent;
+        private readonly int _initialCount;
+        private readonly int _initialRemoveOperationsCount;
+        private int _index = -1;
+
+        internal Enumerator( UpdatableDeclarationCollection<TDeclaration, TRef> parent )
+        {
+            this._parent = parent;
+
+            // In case elements are added while iterating, we only return the items that were present when iteration started.
+            this._initialCount = parent.Count;
+
+            // In case elements are removed while iterating, we fail.
+            this._initialRemoveOperationsCount = parent._removeOperationsCount;
+        }
+
+        public bool MoveNext()
+        {
+            if ( this._index + 1 < this._initialCount )
+            {
+                if ( this._parent._removeOperationsCount != this._initialRemoveOperationsCount )
+                {
+                    throw new InvalidOperationException( "An item was removed from the collection while an enumeration was in progress." );
+                }
+
+                this._index++;
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        public void Reset() => this._index = -1;
+
+        public TRef Current => this._parent[this._index];
+
+        object IEnumerator.Current => this.Current;
+
+        public void Dispose() { }
+    }
+}
+
+internal abstract class UpdatableDeclarationCollection<TDeclaration> : UpdatableDeclarationCollection<TDeclaration, Ref<TDeclaration>>
+    where TDeclaration : class, IDeclaration
+{
+    protected UpdatableDeclarationCollection( CompilationModel compilation ) : base( compilation ) { }
 }

@@ -3,7 +3,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
@@ -12,7 +11,6 @@ using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 using MethodKind = Metalama.Framework.Code.MethodKind;
@@ -23,7 +21,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
     {
         private readonly BuiltMember _builtMember;
 
-        public BuiltAccessor( BuiltMember builtMember, AccessorBuilder builder ) : base( builtMember.Compilation )
+        public BuiltAccessor( BuiltMember builtMember, AccessorBuilder builder ) : base( builtMember.Compilation, builder )
         {
             this._builtMember = builtMember;
             this.AccessorBuilder = builder;
@@ -61,7 +59,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IParameterList Parameters
             => new ParameterList(
                 this,
-                this.AccessorBuilder.Parameters.AsBuilderList.Select( Ref.FromBuilder<IParameter, IParameterBuilder> ).ToList() );
+                this.GetCompilationModel().GetParameterCollection( this.AccessorBuilder.ToTypedRef<IHasParameters>() ) );
 
         public MethodKind MethodKind => this.AccessorBuilder.MethodKind;
 
@@ -94,7 +92,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public DeclarationSerializableId ToSerializableId() => throw new NotImplementedException();
 
-        IMethod IRef<IMethod>.GetTarget( ICompilation compilation ) => (IMethod) this.GetForCompilation( compilation );
+        IMethod IRef<IMethod>.GetTarget( ICompilation compilation, ReferenceResolutionOptions options )
+            => (IMethod) this.GetForCompilation( compilation, options );
 
         ISymbol? ISdkRef<IMethod>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => this.GetSymbol();
 

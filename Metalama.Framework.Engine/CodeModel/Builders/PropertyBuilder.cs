@@ -5,7 +5,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
-using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
@@ -25,6 +25,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
     internal class PropertyBuilder : MemberBuilder, IPropertyBuilder, IPropertyImpl
     {
         private readonly bool _hasInitOnlySetter;
+        private IType _type;
+        private IExpression? _initializerExpression;
+        private TemplateMember<IProperty> _initializerTemplate;
 
         public RefKind RefKind { get; set; }
 
@@ -37,13 +40,22 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 _ => Writeability.All
             };
 
-        public sealed override string Name { get; set; }
-
         public override bool IsImplicit => false;
 
         public bool IsAutoPropertyOrField { get; }
 
-        public IType Type { get; set; }
+        public IObjectReader InitializerTags { get; }
+
+        public IType Type
+        {
+            get => this._type;
+            set
+            {
+                this.CheckNotFrozen();
+
+                this._type = value;
+            }
+        }
 
         public IMethodBuilder? GetMethod { get; }
 
@@ -73,11 +85,27 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override IMember? OverriddenMember => this.OverriddenProperty;
 
-        public bool IsIndexer => string.Equals( this.Name, "Items", StringComparison.Ordinal );
+        public IExpression? InitializerExpression
+        {
+            get => this._initializerExpression;
+            set
+            {
+                this.CheckNotFrozen();
 
-        public IExpression? InitializerExpression { get; set; }
+                this._initializerExpression = value;
+            }
+        }
 
-        public TemplateMember<IProperty> InitializerTemplate { get; set; }
+        public TemplateMember<IProperty> InitializerTemplate
+        {
+            get => this._initializerTemplate;
+            set
+            {
+                this.CheckNotFrozen();
+
+                this._initializerTemplate = value;
+            }
+        }
 
         public PropertyBuilder(
             Advice parentAdvice,
@@ -89,8 +117,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             bool hasInitOnlySetter,
             bool hasImplicitGetter,
             bool hasImplicitSetter,
-            IObjectReader tags )
-            : base( parentAdvice, targetType, tags )
+            IObjectReader initializerTags )
+            : base( parentAdvice, targetType, name )
         {
             // TODO: Sanity checks.
 
@@ -99,8 +127,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             Invariant.Assert( !(hasInitOnlySetter && hasImplicitSetter) );
             Invariant.Assert( !(!isAutoProperty && hasImplicitSetter) );
 
-            this.Name = name;
-            this.Type = targetType.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(object) );
+            this._type = targetType.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(object) );
 
             if ( hasGetter )
             {
@@ -113,6 +140,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
 
             this.IsAutoPropertyOrField = isAutoProperty;
+            this.InitializerTags = initializerTags;
             this._hasInitOnlySetter = hasInitOnlySetter;
         }
 
@@ -126,6 +154,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 this.Type,
                 this.InitializerExpression,
                 this.InitializerTemplate,
+                this.InitializerTags,
                 out initializerExpression,
                 out initializerMethod );
         }
@@ -142,7 +171,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             // TODO: Indexers.
             var property =
                 PropertyDeclaration(
-                    this.GetAttributeLists( context.SyntaxGenerationContext ),
+                    this.GetAttributeLists( context ),
                     this.GetSyntaxModifierList(),
                     syntaxGenerator.Type( this.Type.GetSymbol() ),
                     this.ExplicitInterfaceImplementations.Count > 0
@@ -262,6 +291,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 this.Type,
                 this.InitializerExpression,
                 this.InitializerTemplate,
+                this.InitializerTags,
                 out initializerExpression,
                 out initializerMethod );
         }
@@ -295,5 +325,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => throw new NotImplementedException();
 
         public void SetExplicitInterfaceImplementation( IProperty interfaceProperty ) => this.ExplicitInterfaceImplementations = new[] { interfaceProperty };
+
+        public override void Freeze()
+        {
+            base.Freeze();
+
+            ((DeclarationBuilder?) this.GetMethod)?.Freeze();
+            ((DeclarationBuilder?) this.SetMethod)?.Freeze();
+        }
     }
 }

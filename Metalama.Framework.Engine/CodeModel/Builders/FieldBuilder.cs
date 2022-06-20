@@ -5,7 +5,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
-using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
@@ -19,11 +19,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal sealed class FieldBuilder : MemberBuilder, IFieldBuilder, IFieldImpl
     {
+        private readonly IObjectReader _initializerTags;
+
         public override DeclarationKind DeclarationKind => DeclarationKind.Field;
 
         public IType Type { get; set; }
-
-        public override string Name { get; set; }
 
         public override bool IsImplicit => false;
 
@@ -49,10 +49,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public TemplateMember<IField> InitializerTemplate { get; set; }
 
-        public FieldBuilder( Advice parentAdvice, INamedType targetType, string name, IObjectReader tags )
-            : base( parentAdvice, targetType, tags )
+        public FieldBuilder( Advice parentAdvice, INamedType targetType, string name, IObjectReader initializerTags )
+            : base( parentAdvice, targetType, name )
         {
-            this.Name = name;
+            this._initializerTags = initializerTags;
             this.Type = this.Compilation.Factory.GetSpecialType( SpecialType.Object );
         }
 
@@ -66,12 +66,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 this.Type,
                 this.InitializerExpression,
                 this.InitializerTemplate,
+                this._initializerTags,
                 out var initializerExpression,
                 out var initializerMethod );
 
             var field =
                 FieldDeclaration(
-                    this.GetAttributeLists( context.SyntaxGenerationContext ),
+                    this.GetAttributeLists( context ),
                     this.GetSyntaxModifierList(),
                     VariableDeclaration(
                         syntaxGenerator.Type( this.Type.GetSymbol() ),

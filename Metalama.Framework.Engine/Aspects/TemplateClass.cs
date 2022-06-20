@@ -3,7 +3,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
@@ -37,12 +37,16 @@ namespace Metalama.Framework.Engine.Aspects
             Compilation compilation,
             INamedTypeSymbol typeSymbol,
             IDiagnosticAdder diagnosticAdder,
-            TemplateClass? baseClass )
+            TemplateClass? baseClass,
+            string shortName )
         {
             this.ServiceProvider = serviceProvider;
             this.BaseClass = baseClass;
             this.Members = this.GetMembers( compilation, typeSymbol, diagnosticAdder );
+            this.ShortName = shortName;
         }
+
+        public string ShortName { get; }
 
         /// <summary>
         /// Gets metadata of the base aspect class.

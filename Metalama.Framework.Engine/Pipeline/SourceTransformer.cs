@@ -29,11 +29,7 @@ namespace Metalama.Framework.Engine.Pipeline
     {
         public void Execute( TransformerContext context )
         {
-            var serviceProvider = ServiceProviderFactory.GetServiceProvider();
-
-            // The global backstage service provider, that has been added in ServiceProvider.CreateBaseServiceProvider,
-            // gets replaced here by a project-scoped one.
-            serviceProvider = serviceProvider.WithNextProvider( context.Services );
+            var serviceProvider = ServiceProviderFactory.GetServiceProvider( nextServiceProvider: context.Services );
 
             var applicationInfoProvider = (IApplicationInfoProvider?) context.Services.GetService( typeof(IApplicationInfoProvider) );
 
@@ -45,7 +41,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
             IUsageSample? usageSample = null;
             var compilerUsageSample = (IUsageSample?) context.Services.GetService( typeof(IUsageSample) );
-            var usageReporter = (IUsageReporter) context.Services.GetService( typeof(IUsageReporter) );
+            var usageReporter = (IUsageReporter?) context.Services.GetService( typeof(IUsageReporter) );
 
             // We look for the compiler usage sample instead of calling usageReporter.ShouldReportSession,
             // because the compiler has already decided.

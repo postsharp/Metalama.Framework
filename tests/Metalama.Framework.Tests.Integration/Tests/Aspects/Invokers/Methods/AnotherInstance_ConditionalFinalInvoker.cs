@@ -15,14 +15,26 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AnotherIns
     {
         public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            var voidMethodOverrideBuilder = aspectBuilder.Advice.IntroduceMethod(aspectBuilder.Target, nameof(OverrideMethod), whenExists: OverrideStrategy.Override);
-            voidMethodOverrideBuilder.Name = "VoidMethod";
-            voidMethodOverrideBuilder.ReturnType = TypeFactory.GetType(SpecialType.Void);
+            aspectBuilder.Advice.IntroduceMethod(
+                aspectBuilder.Target,
+                nameof(OverrideMethod),
+                whenExists: OverrideStrategy.Override,
+                buildMethod: m =>
+                {
+                    m.Name = "VoidMethod";
+                    m.ReturnType = TypeFactory.GetType( SpecialType.Void );
+                } );
 
-            var methodOverrideBuilder = aspectBuilder.Advice.IntroduceMethod(aspectBuilder.Target, nameof(OverrideMethod), whenExists: OverrideStrategy.Override);
-            methodOverrideBuilder.Name = "Method";
-            methodOverrideBuilder.ReturnType = TypeFactory.GetType(SpecialType.Int32);
-            methodOverrideBuilder.AddParameter("x", TypeFactory.GetType(SpecialType.Int32));
+            aspectBuilder.Advice.IntroduceMethod(
+                aspectBuilder.Target,
+                nameof(OverrideMethod),
+                whenExists: OverrideStrategy.Override,
+                buildMethod: m =>
+                {
+                    m.Name = "Method";
+                    m.ReturnType = TypeFactory.GetType( SpecialType.Int32 );
+                    m.AddParameter( "x", TypeFactory.GetType( SpecialType.Int32 ) );
+                } );
         }
 
         [Template]
@@ -32,11 +44,11 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AnotherIns
 
             if (meta.Target.Method.Parameters.Count == 0)
             {
-                return meta.Target.Method.Invokers.ConditionalFinal!.Invoke(x);
+                return meta.Target.Method.Invokers.ConditionalFinal!.Invoke( x );
             }
             else
             {
-                return meta.Target.Method.Invokers.ConditionalFinal!.Invoke(x, meta.Target.Method.Parameters[0].Value);
+                return meta.Target.Method.Invokers.ConditionalFinal!.Invoke( x, meta.Target.Method.Parameters[0].Value );
             }
         }
     }
@@ -45,7 +57,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AnotherIns
     {
         public virtual void VoidMethod() { }
 
-        public virtual int Method(int x)
+        public virtual int Method( int x )
         {
             return x;
         }

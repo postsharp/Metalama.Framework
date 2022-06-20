@@ -14,7 +14,14 @@ namespace Metalama.Framework.Engine.Utilities
             logger?.Trace?.Log( $"Acquiring lock '{name}'." );
 
             var mutex = CreateGlobalMutex( name, logger );
-            mutex.WaitOne();
+
+            if ( !mutex.WaitOne( 0 ) )
+            {
+                logger?.Trace?.Log( $"  Another process owns '{name}'. Waiting." );
+                mutex.WaitOne();
+            }
+
+            logger?.Trace?.Log( $"Lock '{name}' acquired." );
 
             return new MutexHandle( mutex, name, logger );
         }

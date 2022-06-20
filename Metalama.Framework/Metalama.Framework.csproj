@@ -7,7 +7,8 @@
             Redistributable components for package 'Metalama.Framework'. This package should only be installed as a dependency.
             (This is not the package you are looking for).
         </PackageDescription>
-
+		<IsPackable>True</IsPackable>
+        <PackMetalamaSystemTypes>True</PackMetalamaSystemTypes>
     </PropertyGroup>
 
     <ItemGroup>
@@ -23,8 +24,5 @@
         <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
     </ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\Metalama.SystemTypes\Metalama.SystemTypes.csproj" Condition="'$(TargetFramework)'=='netstandard2.0'" />
-    </ItemGroup>
 
 </Project>

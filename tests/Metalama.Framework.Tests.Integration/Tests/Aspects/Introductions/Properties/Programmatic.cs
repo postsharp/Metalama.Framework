@@ -8,25 +8,15 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.P
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            {
-                var propertyBuilder = builder.Advice.IntroduceProperty( builder.Target, nameof(AutoProperty) );
-                propertyBuilder.Accessibility = Accessibility.Public;
-            }
+            builder.Advice.IntroduceProperty( builder.Target, nameof(AutoProperty), buildProperty: p => p.Accessibility = Accessibility.Public );
+            builder.Advice.IntroduceProperty( builder.Target, nameof(Property), buildProperty: p => p.Accessibility = Accessibility.Public );
 
-            {
-                var propertyBuilder = builder.Advice.IntroduceProperty( builder.Target, nameof(Property) );
-                propertyBuilder.Accessibility = Accessibility.Public;
-            }
-
-            {
-                var propertyBuilder = builder.Advice.IntroduceProperty(
-                    builder.Target,
-                    "PropertyFromAccessors",
-                    nameof(GetPropertyTemplate),
-                    nameof(SetPropertyTemplate) );
-
-                propertyBuilder.Accessibility = Accessibility.Public;
-            }
+            builder.Advice.IntroduceProperty(
+                builder.Target,
+                "PropertyFromAccessors",
+                nameof(GetPropertyTemplate),
+                nameof(SetPropertyTemplate),
+                buildProperty: p => p.Accessibility = Accessibility.Public );
 
             // TODO: Expression bodied template.
         }

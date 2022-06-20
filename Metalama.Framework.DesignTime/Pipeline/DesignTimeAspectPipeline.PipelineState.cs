@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.Engine;
@@ -199,13 +200,13 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                                     // We require an external build because we don't want to invalidate the pipeline configuration at
                                     // each keystroke.
-                                    Logger.DesignTime.Trace?.Log(
+                                    this._pipeline.Logger.Trace?.Log(
                                         $"Compile-time change detected: {change.FilePath} has changed. Old hash: {change.OldHash}, new hash: {change.NewHash}." );
 
                                     // Generated files may change during the startup sequence, and it is safe to reset the pipeline in this case.
                                     var requiresRebuild = !change.FilePath.EndsWith( ".g.cs", StringComparison.OrdinalIgnoreCase );
 
-                                    OnCompileTimeChange( requiresRebuild );
+                                    OnCompileTimeChange( this._pipeline.Logger, requiresRebuild );
                                 }
 
                                 break;
@@ -215,15 +216,15 @@ namespace Metalama.Framework.DesignTime.Pipeline
                                 // compilation in the first call in the Visual Studio initializations sequence. Roslyn calls us later with
                                 // a complete compilation, but we don't want to bother the user with the need of an external build.
                                 compileTimeSyntaxTreesBuilder[change.FilePath] = change.NewTree.AssertNotNull();
-                                Logger.DesignTime.Trace?.Log( $"Compile-time change detected: {change.FilePath} is a new compile-time syntax tree." );
-                                OnCompileTimeChange( false );
+                                this._pipeline.Logger.Trace?.Log( $"Compile-time change detected: {change.FilePath} is a new compile-time syntax tree." );
+                                OnCompileTimeChange( this._pipeline.Logger, false );
 
                                 break;
 
                             case CompileTimeChangeKind.NoLongerCompileTime:
                                 compileTimeSyntaxTreesBuilder.Remove( change.FilePath );
-                                Logger.DesignTime.Trace?.Log( $"Compile-time change detected: : {change.FilePath} no longer contains compile-time code." );
-                                OnCompileTimeChange( false );
+                                this._pipeline.Logger.Trace?.Log( $"Compile-time change detected: : {change.FilePath} no longer contains compile-time code." );
+                                OnCompileTimeChange( this._pipeline.Logger, false );
 
                                 break;
                         }
@@ -250,20 +251,19 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 return newState;
 
                 // Local method called when a change is detected in compile-time code. Returns a value specifying is logging is required.
-                void OnCompileTimeChange( bool requiresRebuild )
+                void OnCompileTimeChange( ILogger logger, bool requiresRebuild )
                 {
                     invalidateCompilationResult = false;
 
                     if ( newState.Status == DesignTimeAspectPipelineStatus.Ready )
                     {
-                        Logger.DesignTime.Trace?.Log(
-                            $"DesignTimeAspectPipeline.InvalidateCache('{newCompilation.AssemblyName}'): compile-time change detected." );
+                        logger.Trace?.Log( $"DesignTimeAspectPipeline.InvalidateCache('{newCompilation.AssemblyName}'): compile-time change detected." );
 
                         var pipeline = newState._pipeline;
 
                         if ( requiresRebuild )
                         {
-                            Logger.DesignTime.Trace?.Log( "Pausing the pipeline." );
+                            logger.Trace?.Log( "Pausing the pipeline." );
 
                             newStatus = DesignTimeAspectPipelineStatus.Paused;
 
@@ -275,7 +275,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                         }
                         else
                         {
-                            Logger.DesignTime.Trace?.Log( "Requiring an in-process configuration refresh." );
+                            logger.Trace?.Log( "Requiring an in-process configuration refresh." );
 
                             newConfiguration = null;
                             newStatus = DesignTimeAspectPipelineStatus.Default;
@@ -297,7 +297,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     state = new PipelineState( state._pipeline );
                 }
 
-                Logger.DesignTime.Trace?.Log(
+                state._pipeline.Logger.Trace?.Log(
                     $"DesignTimeAspectPipeline.TryGetConfiguration( '{compilation.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation.Compilation )})" );
 
                 if ( state.Configuration == null )
@@ -315,7 +315,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     {
                         // A failure here means an error or a cache miss.
 
-                        Logger.DesignTime.Warning?.Log(
+                        state._pipeline.Logger.Warning?.Log(
                             $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation.Compilation )}) failed: cannot initialize." );
 
                         configuration = null;
@@ -324,7 +324,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     }
                     else
                     {
-                        Logger.DesignTime.Trace?.Log(
+                        state._pipeline.Logger.Trace?.Log(
                             $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation.Compilation )}) succeeded with new configuration {DebuggingHelper.GetObjectId( configuration )}: "
                             +
                             $"the compilation contained {compilation.Compilation.SyntaxTrees.Count()} syntax trees: {string.Join( ", ", compilation.Compilation.SyntaxTrees.Select( t => Path.GetFileName( t.FilePath ) ) )}" );
@@ -338,7 +338,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 {
                     if ( state.Status == DesignTimeAspectPipelineStatus.Paused )
                     {
-                        Logger.DesignTime.Warning?.Log(
+                        state._pipeline.Logger.Warning?.Log(
                             $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation.Compilation )}) failed: the pipeline is paused." );
 
                         configuration = null;
@@ -348,7 +348,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                     // We have a valid configuration and it is not outdated.
 
-                    Logger.DesignTime.Trace?.Log(
+                    state._pipeline.Logger.Trace?.Log(
                         $"DesignTimeAspectPipeline.TryGetConfiguration('{compilation.Compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation.Compilation )}) returned existing configuration {DebuggingHelper.GetObjectId( state.Configuration )}." );
 
                     configuration = state.Configuration;
@@ -375,15 +375,15 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                 if ( !TryGetConfiguration( ref state, compilation, diagnosticList, false, cancellationToken, out var configuration ) )
                 {
-                    if ( Logger.DesignTime.Error != null )
+                    if ( state._pipeline.Logger.Error != null )
                     {
                         var errors = diagnosticList.Where( d => d.Severity == DiagnosticSeverity.Error ).ToList();
 
-                        Logger.DesignTime.Error?.Log( $"TryGetConfiguration('{compilation.Compilation.AssemblyName}') failed: {errors.Count} reported." );
+                        state._pipeline.Logger.Error?.Log( $"TryGetConfiguration('{compilation.Compilation.AssemblyName}') failed: {errors.Count} reported." );
 
                         foreach ( var diagnostic in errors )
                         {
-                            Logger.DesignTime.Error?.Log( diagnostic.ToString() );
+                            state._pipeline.Logger.Error?.Log( diagnostic.ToString() );
                         }
                     }
 

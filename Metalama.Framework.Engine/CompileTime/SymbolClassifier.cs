@@ -41,7 +41,8 @@ namespace Metalama.Framework.Engine.CompileTime
                 (typeof(AppDomain), Scope: TemplatingScope.RunTimeOnly, false),
                 (typeof(MemberInfo), Scope: TemplatingScope.RunTimeOnly, true),
                 (typeof(ParameterInfo), Scope: TemplatingScope.RunTimeOnly, true),
-                (typeof(Debugger), Scope: TemplatingScope.RunTimeOrCompileTime, false)
+                (typeof(Debugger), Scope: TemplatingScope.RunTimeOrCompileTime, false),
+                (typeof(Index), TemplatingScope.RunTimeOrCompileTime, false)
             }.ToImmutableDictionary( t => t.ReflectionType.Name, t => (t.ReflectionType.Namespace, t.Scope, t.MembersOnly) );
 
         private static readonly ImmutableDictionary<string, (TemplatingScope Scope, bool IncludeDescendants)> _wellKnownNamespaces =
@@ -52,12 +53,15 @@ namespace Metalama.Framework.Engine.CompileTime
                 ("System.Text", TemplatingScope.RunTimeOrCompileTime, true),
                 ("System.Collections", TemplatingScope.RunTimeOrCompileTime, true),
                 ("System.Linq", TemplatingScope.RunTimeOrCompileTime, true),
-                ("Microsoft.CodeAnalysis", TemplatingScope.RunTimeOnly, true)
+                ("Microsoft.CodeAnalysis", TemplatingScope.RunTimeOnly, true),
+                ("System.Runtime.CompilerServices", TemplatingScope.RunTimeOrCompileTime, true),
+                ("System.Diagnostics.CodeAnalysis", TemplatingScope.RunTimeOrCompileTime, true)
             }.ToImmutableDictionary( t => t.Namespace, t => (t.Scope, t.IncludeDescendants), StringComparer.Ordinal );
 
         private readonly Compilation? _compilation;
         private readonly INamedTypeSymbol? _templateAttribute;
-        private readonly INamedTypeSymbol? _ignoreUnlessOverriddenAttribute;
+        private readonly INamedTypeSymbol? _declarativeAdviceAttribute;
+        private readonly INamedTypeSymbol? _abstractAttribute;
         private readonly ConcurrentDictionary<ISymbol, TemplatingScope?> _cacheScopeFromAttributes = new( SymbolEqualityComparer.Default );
         private readonly ConcurrentDictionary<ISymbol, TemplatingScope> _cacheResultingScope = new( SymbolEqualityComparer.Default );
         private readonly ConcurrentDictionary<ISymbol, TemplateInfo> _cacheInheritedTemplateInfo = new( SymbolEqualityComparer.Default );
@@ -79,7 +83,8 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 this._compilation = compilation;
                 this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof(TemplateAttribute).FullName ).AssertNotNull();
-                this._ignoreUnlessOverriddenAttribute = this._compilation.GetTypeByMetadataName( typeof(AbstractAttribute).FullName ).AssertNotNull();
+                this._declarativeAdviceAttribute = this._compilation.GetTypeByMetadataName( typeof(DeclarativeAdviceAttribute).FullName ).AssertNotNull();
+                this._abstractAttribute = this._compilation.GetTypeByMetadataName( typeof(AbstractAttribute).FullName ).AssertNotNull();
             }
         }
 
@@ -92,7 +97,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private TemplateInfo GetTemplateInfoCore( ISymbol symbol, bool isInherited )
         {
-            if ( this._templateAttribute == null )
+            if ( this._templateAttribute == null || this._declarativeAdviceAttribute == null )
             {
                 return TemplateInfo.None;
             }
@@ -100,7 +105,7 @@ namespace Metalama.Framework.Engine.CompileTime
             // Look for a [Template] attribute on the symbol.
             var templateAttribute = symbol
                 .GetAttributes()
-                .FirstOrDefault( a => this.IsAttributeOfType( a, this._templateAttribute ) );
+                .FirstOrDefault( a => this.IsAttributeOfType( a, this._templateAttribute ) || this.IsAttributeOfType( a, this._declarativeAdviceAttribute ) );
 
             if ( templateAttribute != null )
             {
@@ -110,7 +115,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     // Ignore any abstract member.
                     if ( !isInherited && (symbol.IsAbstract
-                                          || symbol.GetAttributes().Any( a => this.IsAttributeOfType( a, this._ignoreUnlessOverriddenAttribute! ) )) )
+                                          || symbol.GetAttributes().Any( a => this.IsAttributeOfType( a, this._abstractAttribute! ) )) )
                     {
                         return templateInfo.AsAbstract();
                     }
@@ -151,19 +156,17 @@ namespace Metalama.Framework.Engine.CompileTime
 
             var memberId = SymbolId.Create( declaringSymbol );
 
-            var templateAttribute = (TemplateAttribute?) attributeInstance;
-
             switch ( attributeData.AttributeClass?.Name )
             {
                 case nameof(TemplateAttribute):
                 case "TestTemplateAttribute":
-                    return new TemplateInfo( memberId, TemplateAttributeType.Template, templateAttribute );
+                    return new TemplateInfo( memberId, TemplateAttributeType.Template, (IAdviceAttribute?) attributeInstance );
 
                 case nameof(InterfaceMemberAttribute):
-                    return new TemplateInfo( memberId, TemplateAttributeType.InterfaceMember, templateAttribute );
+                    return new TemplateInfo( memberId, TemplateAttributeType.InterfaceMember, (IAdviceAttribute?) attributeInstance );
 
                 default:
-                    return new TemplateInfo( memberId, TemplateAttributeType.DeclarativeAdvice, templateAttribute );
+                    return new TemplateInfo( memberId, TemplateAttributeType.DeclarativeAdvice, (IAdviceAttribute?) attributeInstance );
             }
         }
 

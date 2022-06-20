@@ -32,7 +32,7 @@ namespace Metalama.Framework.Code
             => kind switch
             {
                 ConversionKind.Implicit => left.SpecialType == right,
-                ConversionKind.ImplicitReference => left.Is( ((ICompilationInternal) left.Compilation).TypeFactory.GetSpecialType( right ), kind ),
+                ConversionKind.ImplicitReference => left.Is( ((ICompilationInternal) left.Compilation).Factory.GetSpecialType( right ), kind ),
                 _ => throw new ArgumentOutOfRangeException( nameof(kind) )
             };
 
@@ -44,7 +44,7 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Generates the <c>default(T)</c> syntax for the type.
         /// </summary>
-        public static dynamic? DefaultValue( this IType type ) => ((ICompilationInternal) type.Compilation).TypeFactory.DefaultValue( type );
+        public static dynamic? DefaultValue( this IType type ) => ((ICompilationInternal) type.Compilation).Factory.DefaultValue( type );
 
         public static AsyncInfo GetAsyncInfo( this IType type ) => ((ICompilationInternal) type.Compilation).Helpers.GetAsyncInfo( type );
     }

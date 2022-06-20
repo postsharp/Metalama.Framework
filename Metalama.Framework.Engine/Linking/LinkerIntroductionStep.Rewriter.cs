@@ -5,6 +5,8 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
@@ -26,28 +28,37 @@ namespace Metalama.Framework.Engine.Linking
         {
             private readonly CompilationModel _compilation;
             private readonly ImmutableDictionary<AspectLayerId, OrderedAspectLayer> _orderedAspectLayers;
+            private readonly SyntaxGenerationContextFactory _syntaxGenerationContextFactory;
             private readonly ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> _diagnosticSuppressions;
             private readonly SyntaxTransformationCollection _introducedMemberCollection;
-            private readonly IReadOnlyDictionary<SyntaxNode, IReadOnlyList<LinkerInsertedStatement>> _symbolInsertedStatements;
-            private readonly IReadOnlyDictionary<IIntroduceMemberTransformation, IReadOnlyList<LinkerInsertedStatement>> _introductionInsertedStatements;
+            private readonly IReadOnlyDictionary<SyntaxNode, MemberLevelTransformations> _symbolMemberLevelTransformations;
+            private readonly IReadOnlyDictionary<IIntroduceMemberTransformation, MemberLevelTransformations> _introductionMemberLevelTransformations;
+            private readonly HashSet<SyntaxNode> _nodesWithModifiedAttributes;
+            private readonly SyntaxTree _syntaxTreeForGlobalAttributes;
 
             // Maps a diagnostic id to the number of times it has been suppressed.
             private ImmutableHashSet<string> _activeSuppressions = ImmutableHashSet.Create<string>( StringComparer.OrdinalIgnoreCase );
 
             public Rewriter(
+                IServiceProvider serviceProvider,
                 SyntaxTransformationCollection introducedMemberCollection,
                 ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> diagnosticSuppressions,
                 CompilationModel compilation,
                 IReadOnlyList<OrderedAspectLayer> inputOrderedAspectLayers,
-                IReadOnlyDictionary<SyntaxNode, IReadOnlyList<LinkerInsertedStatement>> symbolInsertedStatements,
-                IReadOnlyDictionary<IIntroduceMemberTransformation, IReadOnlyList<LinkerInsertedStatement>> introductionInsertedStatements )
+                IReadOnlyDictionary<SyntaxNode, MemberLevelTransformations> symbolMemberLevelTransformations,
+                IReadOnlyDictionary<IIntroduceMemberTransformation, MemberLevelTransformations> introductionMemberLevelTransformations,
+                HashSet<SyntaxNode> nodesWithModifiedAttributes,
+                SyntaxTree syntaxTreeForGlobalAttributes )
             {
+                this._syntaxGenerationContextFactory = new SyntaxGenerationContextFactory( compilation.RoslynCompilation, serviceProvider );
                 this._diagnosticSuppressions = diagnosticSuppressions;
                 this._compilation = compilation;
                 this._orderedAspectLayers = inputOrderedAspectLayers.ToImmutableDictionary( e => e.AspectLayerId, e => e );
                 this._introducedMemberCollection = introducedMemberCollection;
-                this._symbolInsertedStatements = symbolInsertedStatements;
-                this._introductionInsertedStatements = introductionInsertedStatements;
+                this._symbolMemberLevelTransformations = symbolMemberLevelTransformations;
+                this._introductionMemberLevelTransformations = introductionMemberLevelTransformations;
+                this._nodesWithModifiedAttributes = nodesWithModifiedAttributes;
+                this._syntaxTreeForGlobalAttributes = syntaxTreeForGlobalAttributes;
             }
 
             public override bool VisitIntoStructuredTrivia => true;
@@ -139,18 +150,166 @@ namespace Metalama.Framework.Engine.Linking
                 return transformedNode;
             }
 
-            public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
+            private (SyntaxList<AttributeListSyntax> Attributes, SyntaxTriviaList Trivia) RewriteDeclarationAttributeLists(
+                SyntaxNode originalDeclaringNode,
+                SyntaxList<AttributeListSyntax> attributeLists )
             {
+                if ( !this._nodesWithModifiedAttributes.Contains( originalDeclaringNode ) )
+                {
+                    return (attributeLists, default);
+                }
+
+                // Resolve the symbol.
+                var semanticModel = this._compilation.RoslynCompilation.GetSemanticModel( originalDeclaringNode.SyntaxTree );
+                var symbol = semanticModel.GetDeclaredSymbol( originalDeclaringNode );
+
+                if ( symbol == null )
+                {
+                    return (attributeLists, default);
+                }
+
+                var outputLists = new List<AttributeListSyntax>();
+                var outputTrivias = new List<SyntaxTrivia>();
+                SyntaxGenerationContext? syntaxGenerationContext = null;
+
+                this.RewriteAttributeLists(
+                    Ref.FromSymbol( symbol, this._compilation.RoslynCompilation ),
+                    SyntaxKind.None,
+                    originalDeclaringNode,
+                    attributeLists,
+                    ( a, n ) => a.ContainingDeclaration.GetPrimaryDeclarationSyntax() == n,
+                    outputLists,
+                    outputTrivias,
+                    ref syntaxGenerationContext );
+
+                switch ( symbol )
+                {
+                    case IMethodSymbol method:
+                        this.RewriteAttributeLists(
+                            Ref.ReturnParameter( method, this._compilation.RoslynCompilation ),
+                            SyntaxKind.ReturnKeyword,
+                            originalDeclaringNode,
+                            attributeLists,
+                            ( a, n ) => a.ContainingDeclaration.ContainingDeclaration!.GetPrimaryDeclarationSyntax() == n,
+                            outputLists,
+                            outputTrivias,
+                            ref syntaxGenerationContext );
+
+                        break;
+                }
+
+                if ( outputLists.Count == 0 )
+                {
+                    return (default, TriviaList( outputTrivias ));
+                }
+                else
+                {
+                    return (List( outputLists ), TriviaList( outputTrivias ));
+                }
+            }
+
+            private void RewriteAttributeLists(
+                Ref<IDeclaration> target,
+                SyntaxKind targetKind,
+                SyntaxNode originalDeclaringNode,
+                SyntaxList<AttributeListSyntax> inputAttributeLists,
+                Func<AttributeBuilder, SyntaxNode, bool> isPrimaryNode,
+                List<AttributeListSyntax> outputAttributeLists,
+                List<SyntaxTrivia> outputTrivia,
+                ref SyntaxGenerationContext? syntaxGenerationContext )
+            {
+                // Get the final list of attributes.
+                var finalModelAttributes = this._compilation.GetAttributeCollection( target );
+
+                // Remove attributes from the list.
+                foreach ( var list in inputAttributeLists )
+                {
+                    // Skip the different target kinds.
+                    if ( list.Target == null )
+                    {
+                        if ( targetKind != SyntaxKind.None )
+                        {
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        if ( !list.Target.Identifier.IsKind( targetKind ) )
+                        {
+                            continue;
+                        }
+                    }
+
+                    var modifiedList = list;
+
+                    foreach ( var attribute in list.Attributes )
+                    {
+                        if ( !finalModelAttributes.Any( a => a.IsSyntax( attribute ) ) )
+                        {
+                            modifiedList = modifiedList.RemoveNode( attribute, SyntaxRemoveOptions.KeepDirectives )!;
+                        }
+                    }
+
+                    if ( modifiedList.Attributes.Count > 0 )
+                    {
+                        outputAttributeLists.Add( modifiedList );
+                    }
+                    else
+                    {
+                        // If we are removing a custom attribute, keep its trivia.
+                        outputTrivia.AddRange(
+                            list.GetLeadingTrivia()
+                                .Where(
+                                    t => t.Kind() is SyntaxKind.MultiLineCommentTrivia
+                                        or SyntaxKind.MultiLineDocumentationCommentTrivia or
+                                        SyntaxKind.SingleLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia ) );
+                    }
+                }
+
+                // Add new attributes.
+                foreach ( var attribute in finalModelAttributes )
+                {
+                    if ( attribute.Target is AttributeBuilder attributeBuilder && isPrimaryNode( attributeBuilder, originalDeclaringNode ) )
+                    {
+                        syntaxGenerationContext ??= this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( originalDeclaringNode );
+
+                        var newAttribute = syntaxGenerationContext.SyntaxGenerator.Attribute( attributeBuilder )
+                            .AssertNotNull();
+
+                        var newList = AttributeList( SingletonSeparatedList( newAttribute ) )
+                            .WithTrailingTrivia( ElasticCarriageReturn )
+                            .WithAdditionalAnnotations( attributeBuilder.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation );
+
+                        if ( targetKind != SyntaxKind.None )
+                        {
+                            newList = newList.WithTarget( AttributeTargetSpecifier( Token( targetKind ) ) );
+                        }
+
+                        outputAttributeLists.Add( newList );
+                    }
+                }
+            }
+
+            public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+
+            public override SyntaxNode? VisitStructDeclaration( StructDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+
+            public override SyntaxNode? VisitInterfaceDeclaration( InterfaceDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+
+            public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+
+            private SyntaxNode? VisitTypeDeclaration( TypeDeclarationSyntax node )
+            {
+                var originalNode = node;
                 var members = new List<MemberDeclarationSyntax>( node.Members.Count );
-                var additionalBaseList = this._introducedMemberCollection.GetIntroducedInterfacesForTypeDecl( node );
+                var additionalBaseList = this._introducedMemberCollection.GetIntroducedInterfacesForTypeDeclaration( node );
+                var syntaxGenerationContext = this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( node );
 
                 using ( var classSuppressions = this.WithSuppressions( node ) )
                 {
                     foreach ( var member in node.Members )
                     {
-                        var visitedMember = (MemberDeclarationSyntax?) this.Visit( member );
-
-                        if ( visitedMember != null )
+                        foreach ( var visitedMember in this.VisitMember( member ) )
                         {
                             using ( var memberSuppressions = this.WithSuppressions( member ) )
                             {
@@ -188,6 +347,10 @@ namespace Metalama.Framework.Engine.Linking
                         }
                     }
 
+                    // Rewrite attributes.
+                    var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
+                    node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
+
                     return node;
                 }
 
@@ -207,17 +370,22 @@ namespace Metalama.Framework.Engine.Linking
                         // IMPORTANT: This need to be here and cannot be in introducedMember.Syntax, result of TrackNodes is not trackable!
                         var introducedNode = introducedMember.Syntax.TrackNodes( introducedMember.Syntax );
 
-                        introducedNode = introducedNode.NormalizeWhitespace()
+                        introducedNode = introducedNode
                             .WithLeadingTrivia( ElasticLineFeed, ElasticLineFeed )
-                            .WithGeneratedCodeAnnotation( introducedMember.Introduction.Advice.Aspect.AspectClass.GeneratedCodeAnnotation );
+                            .WithGeneratedCodeAnnotation( introducedMember.Introduction.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation );
 
                         // Insert inserted statements into 
                         switch ( introducedNode )
                         {
                             case ConstructorDeclarationSyntax constructorDeclaration:
-                                if ( this._introductionInsertedStatements.TryGetValue( introducedMember.Introduction, out var insertedStatements ) )
+                                if ( this._introductionMemberLevelTransformations.TryGetValue(
+                                        introducedMember.Introduction,
+                                        out var memberLevelTransformations ) )
                                 {
-                                    introducedNode = this.WithInsertedStatements( constructorDeclaration, insertedStatements );
+                                    introducedNode = this.ApplyMemberLevelTransformations(
+                                        constructorDeclaration,
+                                        memberLevelTransformations,
+                                        syntaxGenerationContext );
                                 }
 
                                 break;
@@ -236,11 +404,84 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            private ConstructorDeclarationSyntax WithInsertedStatements(
-                ConstructorDeclarationSyntax constructorDeclaration,
-                IReadOnlyList<LinkerInsertedStatement>? insertedStatements )
+            private IReadOnlyList<MemberDeclarationSyntax> VisitMember( MemberDeclarationSyntax member )
             {
-                if ( insertedStatements == null )
+                static MemberDeclarationSyntax[] Singleton( MemberDeclarationSyntax m ) => new[] { m };
+
+                return member switch
+                {
+                    ConstructorDeclarationSyntax constructor => Singleton( this.VisitConstructorDeclarationCore( constructor ) ),
+                    MethodDeclarationSyntax method => Singleton( this.VisitMethodDeclarationCore( method ) ),
+                    PropertyDeclarationSyntax property => Singleton( this.VisitPropertyDeclarationCore( property ) ),
+                    OperatorDeclarationSyntax @operator => Singleton( this.VisitOperatorDeclarationCore( @operator ) ),
+                    EventDeclarationSyntax @event => Singleton( this.VisitEventDeclarationCore( @event ) ),
+                    FieldDeclarationSyntax field => this.VisitFieldDeclarationCore( field ),
+                    EventFieldDeclarationSyntax @eventField => this.VisitEventFieldDeclarationCore( @eventField ),
+                    _ => Singleton( (MemberDeclarationSyntax) this.Visit( member ) )
+                };
+            }
+
+            private ConstructorDeclarationSyntax ApplyMemberLevelTransformations(
+                ConstructorDeclarationSyntax constructorDeclaration,
+                MemberLevelTransformations memberLevelTransformations,
+                SyntaxGenerationContext syntaxGenerationContext )
+            {
+                constructorDeclaration = this.InsertStatements( constructorDeclaration, memberLevelTransformations.Statements );
+
+                constructorDeclaration = constructorDeclaration.WithParameterList(
+                    AppendParameters( constructorDeclaration.ParameterList, memberLevelTransformations.Parameters, syntaxGenerationContext ) );
+
+                constructorDeclaration = constructorDeclaration.WithInitializer(
+                    AppendInitializerArguments( constructorDeclaration.Initializer, memberLevelTransformations.Arguments ) );
+
+                return constructorDeclaration;
+            }
+
+            private static ParameterListSyntax AppendParameters(
+                ParameterListSyntax existingParameters,
+                ImmutableArray<IntroduceParameterTransformation> newParameters,
+                SyntaxGenerationContext syntaxGenerationContext )
+            {
+                if ( newParameters.IsEmpty )
+                {
+                    return existingParameters;
+                }
+                else
+                {
+                    return existingParameters.WithParameters(
+                        existingParameters.Parameters.AddRange(
+                            newParameters.Select( x => x.ToSyntax( syntaxGenerationContext ).WithTrailingTrivia( ElasticSpace ) ) ) );
+                }
+            }
+
+            private static ConstructorInitializerSyntax? AppendInitializerArguments(
+                ConstructorInitializerSyntax? initializerSyntax,
+                ImmutableArray<IntroduceConstructorInitializerArgumentTransformation> newArguments )
+            {
+                if ( newArguments.IsEmpty )
+                {
+                    return initializerSyntax;
+                }
+
+                var newArgumentsSyntax = newArguments.Select( a => a.ToSyntax().WithTrailingTrivia( ElasticSpace ) );
+
+                if ( initializerSyntax == null )
+                {
+                    return ConstructorInitializer(
+                        SyntaxKind.BaseConstructorInitializer,
+                        ArgumentList( SeparatedList( newArgumentsSyntax ) ) );
+                }
+                else
+                {
+                    return initializerSyntax.WithArgumentList( initializerSyntax.ArgumentList.AddArguments( newArgumentsSyntax.ToArray() ) );
+                }
+            }
+
+            private ConstructorDeclarationSyntax InsertStatements(
+                ConstructorDeclarationSyntax constructorDeclaration,
+                ImmutableArray<LinkerInsertedStatement> insertedStatements )
+            {
+                if ( insertedStatements.IsEmpty )
                 {
                     return constructorDeclaration;
                 }
@@ -334,7 +575,7 @@ namespace Metalama.Framework.Engine.Linking
 
             public override SyntaxNode? VisitVariableDeclaration( VariableDeclarationSyntax node )
             {
-                var remainingVariables = new List<VariableDeclaratorSyntax>();
+                var remainingVariables = new List<VariableDeclaratorSyntax>( node.Variables.Count );
 
                 foreach ( var variable in node.Variables )
                 {
@@ -364,40 +605,159 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            public override SyntaxNode? VisitFieldDeclaration( FieldDeclarationSyntax node )
+            private IReadOnlyList<MemberDeclarationSyntax> VisitFieldDeclarationCore( FieldDeclarationSyntax node )
             {
+                var originalNode = node;
                 var rewrittenDeclaration = (VariableDeclarationSyntax?) this.Visit( node.Declaration );
 
                 if ( rewrittenDeclaration == null )
                 {
-                    return null;
+                    return Array.Empty<MemberDeclarationSyntax>();
                 }
 
-                return node.WithDeclaration( rewrittenDeclaration );
-            }
-
-            public override SyntaxNode? VisitConstructorDeclaration( ConstructorDeclarationSyntax node )
-            {
-                if ( this._symbolInsertedStatements.TryGetValue( node, out var insertedStatements ) )
+                // Rewrite attributes.
+                if ( originalNode.Declaration.Variables.Count > 1
+                     && originalNode.Declaration.Variables.Any( v => this._nodesWithModifiedAttributes.Contains( v ) ) )
                 {
-                    node = this.WithInsertedStatements( node, insertedStatements );
-                }
+                    var members = new List<MemberDeclarationSyntax>( originalNode.Declaration.Variables.Count );
 
-                return base.VisitConstructorDeclaration( node );
+                    // If we have changes in attributes and several members, we have to split them.
+                    foreach ( var variable in originalNode.Declaration.Variables )
+                    {
+                        var declaration = VariableDeclaration( node.Declaration.Type, SingletonSeparatedList( variable ) );
+                        var attributes = this.RewriteDeclarationAttributeLists( variable, originalNode.AttributeLists );
+
+                        var fieldDeclaration = FieldDeclaration( attributes.Attributes, node.Modifiers, declaration, Token( SyntaxKind.SemicolonToken ) )
+                            .WithTrailingTrivia( ElasticLineFeed )
+                            .WithLeadingTrivia( attributes.Trivia );
+
+                        members.Add( fieldDeclaration );
+                    }
+
+                    return members;
+                }
+                else
+                {
+                    var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode.Declaration.Variables[0], originalNode.AttributeLists );
+                    node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
+
+                    return new[] { node.WithDeclaration( rewrittenDeclaration ) };
+                }
             }
 
-            public override SyntaxNode? VisitPropertyDeclaration( PropertyDeclarationSyntax node )
+            private ConstructorDeclarationSyntax VisitConstructorDeclarationCore( ConstructorDeclarationSyntax node )
             {
+                var originalNode = node;
+
+                if ( this._symbolMemberLevelTransformations.TryGetValue( node, out var memberLevelTransformations ) )
+                {
+                    var syntaxGenerationContext = this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( node );
+                    node = this.ApplyMemberLevelTransformations( node, memberLevelTransformations, syntaxGenerationContext );
+                }
+
+                // Rewrite attributes.
+                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
+                node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
+
+                return (ConstructorDeclarationSyntax) this.VisitConstructorDeclaration( node )!;
+            }
+
+            private MethodDeclarationSyntax VisitMethodDeclarationCore( MethodDeclarationSyntax node )
+            {
+                var originalNode = node;
+                node = (MethodDeclarationSyntax) this.VisitMethodDeclaration( node )!;
+
+                // Rewrite attributes.
+                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
+                node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
+
+                return node;
+            }
+
+            private OperatorDeclarationSyntax VisitOperatorDeclarationCore( OperatorDeclarationSyntax node )
+            {
+                var originalNode = node;
+                node = (OperatorDeclarationSyntax) this.VisitOperatorDeclaration( node )!;
+
+                // Rewrite attributes.
+                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
+                node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
+
+                return node;
+            }
+
+            public override SyntaxNode? VisitParameter( ParameterSyntax node )
+            {
+                var originalNode = node;
+                node = (ParameterSyntax) base.VisitParameter( node )!;
+
+                // Rewrite attributes.
+                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
+                node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
+
+                return node;
+            }
+
+            public override SyntaxNode? VisitTypeParameter( TypeParameterSyntax node )
+            {
+                var originalNode = node;
+                node = (TypeParameterSyntax) base.VisitTypeParameter( node )!;
+
+                // Rewrite attributes.
+                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
+                node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
+
+                return node;
+            }
+
+            private PropertyDeclarationSyntax VisitPropertyDeclarationCore( PropertyDeclarationSyntax node )
+            {
+                var originalNode = node;
+
                 if ( this._introducedMemberCollection.IsAutoPropertyWithSynthesizedSetter( node ) )
                 {
                     return node.WithSynthesizedSetter();
                 }
 
-                return base.VisitPropertyDeclaration( node );
+                node = (PropertyDeclarationSyntax) this.VisitPropertyDeclaration( node )!;
+
+                // Rewrite attributes.
+                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
+                node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
+
+                return node;
             }
 
-            public override SyntaxNode? VisitEventFieldDeclaration( EventFieldDeclarationSyntax node )
+            public override SyntaxNode? VisitAccessorDeclaration( AccessorDeclarationSyntax node )
             {
+                var originalNode = node;
+                node = (AccessorDeclarationSyntax) base.VisitAccessorDeclaration( node )!;
+
+                // Rewrite attributes.
+                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
+                node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
+
+                return node;
+            }
+
+            private EventDeclarationSyntax VisitEventDeclarationCore( EventDeclarationSyntax node )
+            {
+                var originalNode = node;
+                node = (EventDeclarationSyntax) this.VisitEventDeclaration( node )!;
+
+                // Rewrite attributes.
+                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
+                node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
+
+                return node;
+            }
+
+            private IReadOnlyList<MemberDeclarationSyntax> VisitEventFieldDeclarationCore( EventFieldDeclarationSyntax node )
+            {
+                var originalNode = node;
+
+                // TODO: If we have several fields in the same declaration, and we have changes in custom attributes, we have to split the fields.
+
                 var rewrittenDeclaration = (VariableDeclarationSyntax?) this.Visit( node.Declaration );
 
                 if ( rewrittenDeclaration == null )
@@ -406,7 +766,58 @@ namespace Metalama.Framework.Engine.Linking
                     throw new AssertionFailedException();
                 }
 
-                return node.WithDeclaration( rewrittenDeclaration );
+                // Rewrite attributes.
+                if ( originalNode.Declaration.Variables.Count > 1
+                     && originalNode.Declaration.Variables.Any( v => this._nodesWithModifiedAttributes.Contains( v ) ) )
+                {
+                    var members = new List<MemberDeclarationSyntax>( originalNode.Declaration.Variables.Count );
+
+                    // If we have changes in attributes and several members, we have to split them.
+                    foreach ( var variable in originalNode.Declaration.Variables )
+                    {
+                        var declaration = VariableDeclaration( node.Declaration.Type, SingletonSeparatedList( variable ) );
+                        var attributes = this.RewriteDeclarationAttributeLists( variable, originalNode.AttributeLists );
+
+                        var eventDeclaration = EventFieldDeclaration(
+                                attributes.Attributes,
+                                node.Modifiers,
+                                Token( SyntaxKind.EventKeyword ),
+                                declaration,
+                                Token( SyntaxKind.SemicolonToken ) )
+                            .WithTrailingTrivia( ElasticLineFeed )
+                            .WithLeadingTrivia( attributes.Trivia );
+
+                        members.Add( eventDeclaration );
+                    }
+
+                    return members;
+                }
+                else
+                {
+                    var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode.Declaration.Variables[0], originalNode.AttributeLists );
+                    node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
+
+                    return new[] { node.WithDeclaration( rewrittenDeclaration ) };
+                }
+            }
+
+            public override SyntaxNode? VisitCompilationUnit( CompilationUnitSyntax node )
+            {
+                SyntaxGenerationContext? syntaxGenerationContext = null;
+                List<AttributeListSyntax> outputLists = new();
+                List<SyntaxTrivia> outputTrivias = new();
+
+                this.RewriteAttributeLists(
+                    this._compilation.ToTypedRef<IDeclaration>(),
+                    SyntaxKind.AssemblyKeyword,
+                    node,
+                    node.AttributeLists,
+                    ( _, n ) => n.SyntaxTree == this._syntaxTreeForGlobalAttributes,
+                    outputLists,
+                    outputTrivias,
+                    ref syntaxGenerationContext );
+
+                return ((CompilationUnitSyntax) base.VisitCompilationUnit( node )!).WithAttributeLists( List( outputLists ) );
             }
 
             public override SyntaxNode? VisitPragmaWarningDirectiveTrivia( PragmaWarningDirectiveTriviaSyntax node )

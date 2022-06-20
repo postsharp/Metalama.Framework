@@ -577,7 +577,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
             }
 
             if ( fieldOrProperty.GetAttributes()
-                .Any( a => a.AttributeClass.AssertNotNull().Is( this._runtimeReflectionMapper.GetTypeSymbol( typeof(TemplateAttribute) ) ) ) )
+                .Any( a => a.AttributeClass.AssertNotNull().Is( this._runtimeReflectionMapper.GetTypeSymbol( typeof(ITemplateAttribute) ) ) ) )
             {
                 // Skip all template symbols.
                 return false;

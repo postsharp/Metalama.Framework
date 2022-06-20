@@ -46,7 +46,7 @@ namespace Metalama.Framework.Engine.Linking
                     this._orderedAspectLayers = orderedAspectLayers;
                 }
 
-                private OrderedAspectLayer GetAspectLayer( LinkerIntroducedMember m ) => this._orderedAspectLayers[m.Introduction.Advice.AspectLayerId];
+                private OrderedAspectLayer GetAspectLayer( LinkerIntroducedMember m ) => this._orderedAspectLayers[m.Introduction.ParentAdvice.AspectLayerId];
 
                 public int Compare( LinkerIntroducedMember x, LinkerIntroducedMember y )
                 {
@@ -150,8 +150,18 @@ namespace Metalama.Framework.Engine.Linking
                         }
                     }
 
-                    // Order by advice.
-                    var adviceOrderComparison = x.Introduction.Advice.Order.CompareTo( y.Introduction.Advice.Order );
+                    // Order by aspect instance in the current type.
+                    var aspectInstanceOrderComparison =
+                        x.Introduction.ParentAdvice.Aspect.OrderWithinTypeAndAspectLayer.CompareTo(
+                            y.Introduction.ParentAdvice.Aspect.OrderWithinTypeAndAspectLayer );
+
+                    if ( aspectInstanceOrderComparison != 0 )
+                    {
+                        return aspectInstanceOrderComparison;
+                    }
+
+                    // Order by adding order within the aspect instance.
+                    var adviceOrderComparison = x.Introduction.OrderWithinAspectInstance.CompareTo( y.Introduction.OrderWithinAspectInstance );
 
                     if ( adviceOrderComparison != 0 )
                     {

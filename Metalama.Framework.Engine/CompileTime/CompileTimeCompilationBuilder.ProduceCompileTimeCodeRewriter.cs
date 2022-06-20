@@ -29,13 +29,13 @@ namespace Metalama.Framework.Engine.CompileTime
 {
     internal partial class CompileTimeCompilationBuilder
     {
-#pragma warning disable CA1001 // Class must be disposable.
-
         /// <summary>
         /// Rewrites a run-time syntax tree into a compile-time syntax tree. Calls <see cref="TemplateCompiler"/> on templates,
         /// and removes run-time-only sub trees.
         /// </summary>
+#pragma warning disable CA1001 // Types that own disposable fields should be disposable
         private sealed partial class ProduceCompileTimeCodeRewriter : CompileTimeBaseRewriter
+#pragma warning restore CA1001 // Types that own disposable fields should be disposable
         {
             private static readonly SyntaxAnnotation _hasCompileTimeCodeAnnotation = new( "Metalama_HasCompileTimeCode" );
             private readonly Compilation _compileTimeCompilation;
@@ -133,6 +133,8 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
                 else
                 {
+                    this.FoundCompileTimeCode = true;
+
                     return base.VisitEnumDeclaration( node )!.WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
                 }
             }
@@ -280,22 +282,15 @@ namespace Metalama.Framework.Engine.CompileTime
 
             private IEnumerable<MemberDeclarationSyntax> VisitTypeDeclaration( TypeDeclarationSyntax node )
             {
-                // Eliminate System.Runtime.CompilerServices.IsExternalInit.
-                if ( node.Identifier.Text == "IsExternalInit" )
-                {
-                    var semanticModel = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree );
-
-                    if ( semanticModel.GetDeclaredSymbol( node ) is { } type
-                         && type.ContainingNamespace.ToDisplayString() == "System.Runtime.CompilerServices" )
-                    {
-                        // We are inserting this type anyway, so skip it if we find it in user code.
-                        return Array.Empty<MemberDeclarationSyntax>();
-                    }
-                }
-
                 this._cancellationToken.ThrowIfCancellationRequested();
 
                 var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
+
+                // Eliminate system types.
+                if ( SystemTypeDetector.IsSystemType( symbol ) )
+                {
+                    return Array.Empty<MemberDeclarationSyntax>();
+                }
 
                 var scope = this.SymbolClassifier.GetTemplatingScope( symbol );
 
@@ -1165,7 +1160,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     return PredefinedType( Token( SyntaxKind.ObjectKeyword ) ).WithTriviaFrom( node );
                 }
-                else if ( node.Identifier.IsKind( SyntaxKind.IdentifierToken ) && !node.IsVar )
+                else if ( node.Identifier.IsKind( SyntaxKind.IdentifierToken ) && !node.IsVar && node.Parent is not QualifiedNameSyntax )
                 {
                     // Fully qualifies simple identifiers.
 

@@ -23,4 +23,28 @@
         <!-- <Optimize>False</Optimize> -->
     </PropertyGroup>
 
+
+
+    
+    <!-- Handles the inclusion of Metalama.SystemTypes in projects. It is included automatically for projects that target frameworks that need it.
+         To disable, use the ReferenceMetalamaSystemTypes property. -->
+    <PropertyGroup>
+        <_RequiresSystemTypes Condition="'$(TargetFramework)'=='netstandard2.0' OR '$(TargetFramework)'=='net472' OR '$(TargetFramework)'=='netframework4.8'">True</_RequiresSystemTypes>
+    </PropertyGroup>
+    
+    <ItemGroup Condition="'$(ReferenceMetalamaSystemTypes)'!='False' AND '$(_RequiresSystemTypes)'=='True'">
+        <ProjectReference Include="$(MSBuildThisFileDirectory)\Metalama.SystemTypes\Metalama.SystemTypes.csproj" ReferenceOutputAssembly="false" />
+        <Reference Include="$(MSBuildThisFileDirectory)\Metalama.SystemTypes\bin\$(Configuration)\netstandard2.0\Metalama.SystemTypes.dll" />
+    </ItemGroup>
+
+	<PropertyGroup  Condition="'$(PackMetalamaSystemTypes)'=='True' AND '$(_RequiresSystemTypes)'=='True'">
+		<TargetsForTfmSpecificBuildOutput>$(TargetsForTfmSpecificBuildOutput);MetalamaFrameworkSetLibAssembliesInPackage</TargetsForTfmSpecificBuildOutput>
+	</PropertyGroup>
+
+	<Target Name="MetalamaFrameworkSetLibAssembliesInPackage" DependsOnTargets="ResolveReferences">
+		<ItemGroup>
+          <TfmSpecificPackageFile Include="$(MSBuildThisFileDirectory)\Metalama.SystemTypes\bin\$(Configuration)\netstandard2.0\Metalama.SystemTypes.dll" PackagePath="lib/netstandard2.0" />
+		</ItemGroup>
+	</Target>
+
 </Project>

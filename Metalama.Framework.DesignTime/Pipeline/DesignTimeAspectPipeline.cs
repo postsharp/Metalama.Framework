@@ -90,7 +90,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 return;
             }
 
-            Logger.DesignTime.Trace?.Log( $"BuildTouchFile={this.ProjectOptions.BuildTouchFile}" );
+            this.Logger.Trace?.Log( $"BuildTouchFile={this.ProjectOptions.BuildTouchFile}" );
 
             var watchedFilter = "*" + Path.GetExtension( this.ProjectOptions.BuildTouchFile );
             var watchedDirectory = Path.GetDirectoryName( this.ProjectOptions.BuildTouchFile );
@@ -118,7 +118,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
 
             // There was an external build. Touch the files to re-run the analyzer.
-            Logger.DesignTime.Trace?.Log( $"Detected an external build for project '{this.ProjectOptions.ProjectId}'." );
+            this.Logger.Trace?.Log( $"Detected an external build for project '{this.ProjectOptions.ProjectId}'." );
 
             this.Resume( true );
         }
@@ -129,8 +129,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             {
                 if ( this.Status != DesignTimeAspectPipelineStatus.Paused )
                 {
-                    Logger.DesignTime.Trace?.Log(
-                        $"A Resume request was requested for project '{this.ProjectOptions.ProjectId}', but the pipeline was not paused." );
+                    this.Logger.Trace?.Log( $"A Resume request was requested for project '{this.ProjectOptions.ProjectId}', but the pipeline was not paused." );
 
                     return;
                 }
@@ -153,7 +152,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                 if ( hasRelevantChange )
                 {
-                    Logger.DesignTime.Trace?.Log(
+                    this.Logger.Trace?.Log(
                         $"Resuming the pipeline for project '{this.ProjectOptions.ProjectId}'. The following files had compile-time changes: {string.Join( ", ", filesToTouch.Select( x => $"'{x}'" ) )} " );
 
                     this.SetState( new PipelineState( this ) );
@@ -164,14 +163,14 @@ namespace Metalama.Framework.DesignTime.Pipeline
                         // Touching the files after having reset the pipeline.
                         foreach ( var file in filesToTouch )
                         {
-                            Logger.DesignTime.Trace?.Log( $"Touching file '{file}'." );
-                            RetryHelper.Retry( () => File.SetLastWriteTimeUtc( file, DateTime.UtcNow ), logger: Logger.DesignTime );
+                            this.Logger.Trace?.Log( $"Touching file '{file}'." );
+                            RetryHelper.Retry( () => File.SetLastWriteTimeUtc( file, DateTime.UtcNow ), logger: this.Logger );
                         }
                     }
                 }
                 else
                 {
-                    Logger.DesignTime.Trace?.Log(
+                    this.Logger.Trace?.Log(
                         $"A Resume request was requested for project '{this.ProjectOptions.ProjectId}', but there was no relevant change." );
                 }
             }
@@ -211,9 +210,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         {
             this.SetState( this._currentState.InvalidateCacheForNewCompilation( compilation, invalidateCompilationResult, cancellationToken ) );
 
-#pragma warning disable CS8603 // Probably a compiler error. Happens only in the release build.
             return this._currentState.UnprocessedChanges.AssertNotNull();
-#pragma warning restore CS8603
         }
 
         public void InvalidateCache()
@@ -268,11 +265,11 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                     compilationToAnalyze = changes.CompilationToAnalyze;
 
-                    if ( Logger.DesignTime.Trace != null )
+                    if ( this.Logger.Trace != null )
                     {
                         if ( compilationToAnalyze != compilation )
                         {
-                            Logger.DesignTime.Trace?.Log(
+                            this.Logger.Trace?.Log(
                                 $"Cache hit: the original compilation is {DebuggingHelper.GetObjectId( compilation )}, but we will analyze the cached compilation {DebuggingHelper.GetObjectId( compilationToAnalyze )}" );
                         }
                     }
@@ -297,7 +294,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                         if ( dirtySyntaxTrees.Count == 0 )
                         {
-                            Logger.DesignTime.Trace?.Log( "There is no dirty tree." );
+                            this.Logger.Trace?.Log( "There is no dirty tree." );
                             partialCompilation = null;
                         }
                         else
@@ -326,7 +323,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 }
                 else
                 {
-                    Logger.DesignTime.Trace?.Log(
+                    this.Logger.Trace?.Log(
                         $"DesignTimeAspectPipelineCache.TryExecute('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): "
                         + $"the pipeline is paused, returning from cache only." );
 
@@ -362,7 +359,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                 if ( pipelineMustReportPausedPipelineAsErrors )
                 {
-                    Logger.DesignTime.Trace?.Log( $"The syntax tree '{syntaxTree.FilePath}' is marked as outdated." );
+                    this.Logger.Trace?.Log( $"The syntax tree '{syntaxTree.FilePath}' is marked as outdated." );
                 }
 
                 TemplatingCodeValidator.Validate(
@@ -469,12 +466,12 @@ namespace Metalama.Framework.DesignTime.Pipeline
         {
             if ( !Monitor.TryEnter( this._sync ) )
             {
-                Logger.DesignTime.Trace?.Log( $"Waiting for lock on '{this.ProjectOptions.ProjectId}'." );
+                this.Logger.Trace?.Log( $"Waiting for lock on '{this.ProjectOptions.ProjectId}'." );
 
                 Monitor.Enter( this._sync );
             }
 
-            Logger.DesignTime.Trace?.Log( $"Lock on '{this.ProjectOptions.ProjectId}' acquired." );
+            this.Logger.Trace?.Log( $"Lock on '{this.ProjectOptions.ProjectId}' acquired." );
 
             return new Lock( this );
         }
@@ -490,7 +487,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             public void Dispose()
             {
-                Logger.DesignTime.Trace?.Log( $"Releasing lock on '{this._parent.ProjectOptions.ProjectId}'." );
+                this._parent.Logger.Trace?.Log( $"Releasing lock on '{this._parent.ProjectOptions.ProjectId}'." );
                 Monitor.Exit( this._parent._sync );
             }
         }

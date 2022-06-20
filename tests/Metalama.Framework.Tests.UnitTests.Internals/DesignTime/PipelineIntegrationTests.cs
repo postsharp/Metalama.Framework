@@ -23,7 +23,8 @@ using Xunit;
 using Xunit.Abstractions;
 using StringExtensions = Metalama.TestFramework.Utilities.StringExtensions;
 
-#pragma warning disable CA1307 // Specify StringComparison for clarity
+#pragma warning disable IDE0079 // Remove unnecesary suppression.
+#pragma warning disable CA1307  // Specify StringComparison for clarity
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {

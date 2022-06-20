@@ -27,13 +27,13 @@ namespace Metalama.Framework.Engine.CodeModel
 
         [Memo]
         public ConstructorInitializerKind InitializerKind
-            => (ConstructorDeclarationSyntax?) this.GetPrimaryDeclaration() switch
+            => (ConstructorDeclarationSyntax?) this.GetPrimaryDeclarationSyntax() switch
             {
-                null => ConstructorInitializerKind.Undetermined,
-                { Initializer: null } => ConstructorInitializerKind.Undetermined,
-                { Initializer: { } initializer } when initializer.Kind() == SyntaxKind.ThisConstructorInitializer =>
+                null => ConstructorInitializerKind.None,
+                { Initializer: null } => ConstructorInitializerKind.None,
+                { Initializer: { } initializer } when initializer.IsKind( SyntaxKind.ThisConstructorInitializer ) =>
                     ConstructorInitializerKind.This,
-                { Initializer: { } initializer } when initializer.Kind() == SyntaxKind.BaseConstructorInitializer =>
+                { Initializer: { } initializer } when initializer.IsKind( SyntaxKind.BaseConstructorInitializer ) =>
                     ConstructorInitializerKind.Base,
                 _ => throw new AssertionFailedException()
             };
@@ -49,6 +49,31 @@ namespace Metalama.Framework.Engine.CodeModel
         public override bool IsImplicit => this.GetSymbol().AssertNotNull().GetPrimarySyntaxReference() == null;
 
         public IMember? OverriddenMember => null;
+
+        public IConstructor? GetBaseConstructor()
+        {
+            var declaration = (ConstructorDeclarationSyntax?) this.GetPrimaryDeclarationSyntax();
+
+            if ( declaration == null || declaration.Initializer == null )
+            {
+                // This is necessarily the default constructor of the base type, if any.
+                return this.DeclaringType.BaseType?.Constructors.SingleOrDefault( c => c.Parameters.Count == 0 );
+            }
+            else
+            {
+                var semanticModel = this.GetCompilationModel().RoslynCompilation.GetSemanticModel( declaration.SyntaxTree );
+                var symbol = (IMethodSymbol?) semanticModel.GetSymbolInfo( declaration.Initializer ).Symbol;
+
+                if ( symbol == null )
+                {
+                    return null;
+                }
+                else
+                {
+                    return this.GetCompilationModel().Factory.GetConstructor( symbol );
+                }
+            }
+        }
 
         public ConstructorInfo ToConstructorInfo() => CompileTimeConstructorInfo.Create( this );
 

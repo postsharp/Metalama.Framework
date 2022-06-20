@@ -3,7 +3,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Templating.Expressions;
@@ -76,7 +76,7 @@ namespace Metalama.Framework.Engine.Transformations
                 Identifier(
                     context.IntroductionNameProvider.GetOverrideName(
                         this.OverriddenDeclaration.DeclaringType,
-                        this.Advice.AspectLayerId,
+                        this.ParentAdvice.AspectLayerId,
                         this.OverriddenDeclaration ) ),
                 context.SyntaxGenerator.TypeParameterList( this.OverriddenDeclaration ),
                 context.SyntaxGenerator.ParameterList( this.OverriddenDeclaration ),
@@ -89,7 +89,7 @@ namespace Metalama.Framework.Engine.Transformations
                 new IntroducedMember(
                     this,
                     introducedMethod,
-                    this.Advice.AspectLayerId,
+                    this.ParentAdvice.AspectLayerId,
                     IntroducedMemberSemantic.Override,
                     this.OverriddenDeclaration )
             };

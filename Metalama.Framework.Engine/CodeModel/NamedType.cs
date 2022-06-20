@@ -151,7 +151,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public IPropertyCollection Properties
             => new PropertyCollection(
                 this,
-                this.Compilation.GetPropertyCollection( this.TypeSymbol, false ) );
+                this.Compilation.GetPropertyCollection( this.TypeSymbol ) );
 
         [Memo]
         public IPropertyCollection AllProperties => new AllPropertiesCollection( this );
@@ -160,7 +160,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public IIndexerCollection Indexers
             => new IndexerCollection(
                 this,
-                this.Compilation.GetIndexerCollection( this.TypeSymbol, false ) );
+                this.Compilation.GetIndexerCollection( this.TypeSymbol ) );
 
         [Memo]
         public IIndexerCollection AllIndexers => new AllIndexersCollection( this );
@@ -169,7 +169,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public IFieldCollection Fields
             => new FieldCollection(
                 this,
-                this.Compilation.GetFieldCollection( this.TypeSymbol, false ) );
+                this.Compilation.GetFieldCollection( this.TypeSymbol ) );
 
         [Memo]
         public IFieldCollection AllFields => new AllFieldsCollection( this );
@@ -183,7 +183,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public IEventCollection Events
             => new EventCollection(
                 this,
-                this.Compilation.GetEventCollection( this.TypeSymbol, false ) );
+                this.Compilation.GetEventCollection( this.TypeSymbol ) );
 
         [Memo]
         public IEventCollection AllEvents => new AllEventsCollection( this );
@@ -192,7 +192,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public IMethodCollection Methods
             => new MethodCollection(
                 this,
-                this.Compilation.GetMethodCollection( this.TypeSymbol, false ) );
+                this.Compilation.GetMethodCollection( this.TypeSymbol ) );
 
         [Memo]
         public IMethodCollection AllMethods => new AllMethodsCollection( this );
@@ -201,7 +201,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public IConstructorCollection Constructors
             => new ConstructorCollection(
                 this,
-                this.Compilation.GetConstructorCollection( this.TypeSymbol, false ) );
+                this.Compilation.GetConstructorCollection( this.TypeSymbol ) );
 
         [Memo]
         public IConstructor StaticConstructor => this.GetStaticConstructorImpl();

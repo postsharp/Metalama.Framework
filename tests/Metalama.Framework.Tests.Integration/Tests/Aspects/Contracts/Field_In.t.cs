@@ -5,6 +5,7 @@ internal class Target
 private global::System.String _q1;
 
 
+[global::Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Field_In.NotNullAttribute]
 private global::System.String q 
 { get
 { 

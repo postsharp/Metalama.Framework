@@ -1,16 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-// ReSharper disable once RedundantBlankLines
-
-#pragma warning disable SA1516 // Elements should be separated by blank line
 using Microsoft.CodeAnalysis;
 using Newtonsoft.Json;
 using System;
 using System.Linq.Expressions;
 using System.Threading;
-
-#pragma warning restore SA1516 // Elements should be separated by blank line
 
 namespace Metalama.Framework.Engine.Utilities
 {

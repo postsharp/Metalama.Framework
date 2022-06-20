@@ -52,9 +52,6 @@ namespace Metalama.Framework.Engine.Aspects
 
         public override string FullName { get; }
 
-        public string ShortName { get; }
-
-        /// <inheritdoc />
         public string DisplayName { get; }
 
         public string? Description { get; }
@@ -83,7 +80,6 @@ namespace Metalama.Framework.Engine.Aspects
 
         public Location? DiagnosticLocation { get; }
 
-        /// <inheritdoc />
         public bool IsAbstract { get; }
 
         public bool IsInherited { get; }
@@ -107,10 +103,16 @@ namespace Metalama.Framework.Engine.Aspects
             Type aspectType,
             IAspect? prototype,
             IDiagnosticAdder diagnosticAdder,
-            Compilation compilation ) : base( serviceProvider, compilation, typeSymbol, diagnosticAdder, baseClass )
+            Compilation compilation ) : base(
+            serviceProvider,
+            compilation,
+            typeSymbol,
+            diagnosticAdder,
+            baseClass,
+            AttributeHelper.GetShortName( typeSymbol.Name ) )
         {
             this.FullName = typeSymbol.GetReflectionName().AssertNotNull();
-            this.DisplayName = this.ShortName = AttributeHelper.GetShortName( typeSymbol.Name );
+            this.DisplayName = this.ShortName;
             this.IsAbstract = typeSymbol.IsAbstract;
             this.Project = project;
             this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();

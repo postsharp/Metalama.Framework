@@ -17,6 +17,8 @@ namespace Metalama.Framework.Engine.CodeModel.References
         /// Gets the target object (typically a symbol or a <see cref="DeclarationBuilder"/>) pointed at by the reference.
         /// </summary>
         object? Target { get; }
+
+        bool IsDefault { get; }
     }
 
     internal interface IRefImpl<out T> : ISdkRef<T>, IRefImpl

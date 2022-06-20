@@ -145,18 +145,6 @@ namespace Metalama.Framework.Engine.Formatting
             {
                 this._isInTemplate = true;
 
-                this.Mark( node.ReturnType, TextSpanClassification.CompileTime );
-                this.Mark( node.Identifier, TextSpanClassification.CompileTime );
-                this.Mark( node.ParameterList, TextSpanClassification.CompileTime );
-                this.Mark( node.Modifiers, TextSpanClassification.CompileTime );
-                this.Mark( node.AttributeLists, TextSpanClassification.CompileTime );
-
-                if ( node.Body != null )
-                {
-                    this.Mark( node.Body.OpenBraceToken, TextSpanClassification.CompileTime );
-                    this.Mark( node.Body.CloseBraceToken, TextSpanClassification.CompileTime );
-                }
-
                 // The code is run-time by default in a template method.
                 this.Mark( node.Body, TextSpanClassification.RunTime );
                 this.Mark( node.ExpressionBody, TextSpanClassification.RunTime );
@@ -190,16 +178,6 @@ namespace Metalama.Framework.Engine.Formatting
             {
                 this._isInTemplate = true;
 
-                this.Mark( node.Type, TextSpanClassification.CompileTime );
-                this.Mark( node.Identifier, TextSpanClassification.CompileTime );
-                this.Mark( node.Modifiers, TextSpanClassification.CompileTime );
-
-                if ( node.AccessorList != null )
-                {
-                    this.Mark( node.AccessorList.OpenBraceToken, TextSpanClassification.CompileTime );
-                    this.Mark( node.AccessorList.CloseBraceToken, TextSpanClassification.CompileTime );
-                }
-
                 // The code is run-time by default in a template method.
                 this.Mark( node.ExpressionBody, TextSpanClassification.RunTime );
 
@@ -217,17 +195,11 @@ namespace Metalama.Framework.Engine.Formatting
         {
             if ( this._isInTemplate )
             {
-                this.Mark( node.Keyword, TextSpanClassification.CompileTime );
                 this.Mark( node.Body, TextSpanClassification.RunTime );
 
                 if ( node.ExpressionBody != null )
                 {
                     this.Mark( node.ExpressionBody.Expression, TextSpanClassification.RunTime );
-                    this.Mark( node.ExpressionBody.ArrowToken, TextSpanClassification.CompileTime );
-                }
-                else if ( node.Body == null )
-                {
-                    this.Mark( node.SemicolonToken, TextSpanClassification.CompileTime );
                 }
             }
 

@@ -3,24 +3,21 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class BuiltMethod : BuiltMember, IMethodImpl, IMemberRef<IMethod>
+    internal class BuiltMethod : BuiltMember, IMethodImpl
     {
-        public BuiltMethod( MethodBuilder builder, CompilationModel compilation ) : base( compilation )
+        public BuiltMethod( MethodBuilder builder, CompilationModel compilation ) : base( compilation, builder )
         {
             this.MethodBuilder = builder;
         }
@@ -35,7 +32,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IParameterList Parameters
             => new ParameterList(
                 this,
-                this.MethodBuilder.Parameters.AsBuilderList.Select( Ref.FromBuilder<IParameter, IParameterBuilder> ).ToList() );
+                this.GetCompilationModel().GetParameterCollection( this.MethodBuilder.ToTypedRef<IHasParameters>() ) );
 
         public MethodKind MethodKind => this.MethodBuilder.MethodKind;
 
@@ -60,7 +57,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IGenericParameterList TypeParameters
             => new TypeParameterList(
                 this,
-                this.MethodBuilder.GenericParameters.AsBuilderList.Select( Ref.FromBuilder<ITypeParameter, TypeParameterBuilder> ).ToList() );
+                this.MethodBuilder.TypeParameters.AsBuilderList.Select( Ref.FromBuilder<ITypeParameter, TypeParameterBuilder> ).ToList() );
 
         public IReadOnlyList<IType> TypeArguments => throw new NotImplementedException();
 
@@ -77,11 +74,5 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 this.OverriddenMethod != null );
 
         public IMethod? OverriddenMethod => this.Compilation.Factory.GetDeclaration( this.MethodBuilder.OverriddenMethod );
-
-        DeclarationSerializableId IRef<IMethod>.ToSerializableId() => throw new NotImplementedException();
-
-        IMethod IRef<IMethod>.GetTarget( ICompilation compilation ) => (IMethod) this.GetForCompilation( compilation );
-
-        ISymbol? ISdkRef<IMethod>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => throw new NotSupportedException();
     }
 }

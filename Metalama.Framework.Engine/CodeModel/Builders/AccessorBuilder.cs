@@ -211,10 +211,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public ITypeParameterBuilder AddTypeParameter( string name ) => throw new NotSupportedException( "Cannot add generic parameters to accessors." );
 
-        public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant defaultValue = default )
+        public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant? defaultValue = null )
             => throw new NotSupportedException( "Cannot directly add parameters to accessors." );
 
-        public IParameterBuilder AddParameter( string name, Type type, RefKind refKind = RefKind.None, object? defaultValue = null )
+        public IParameterBuilder AddParameter( string name, Type type, RefKind refKind = RefKind.None, TypedConstant? defaultValue = null )
             => throw new NotSupportedException( "Cannot directly add parameters to accessors." );
 
         public IGeneric ConstructGenericInstance( params IType[] typeArguments )
@@ -252,6 +252,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override bool CanBeInherited => this.IsVirtual && !this.IsSealed && ((IDeclarationImpl) this.DeclaringType).CanBeInherited;
 
-        public override SyntaxTree? PrimarySyntaxTree => this.ContainingMember.TargetSyntaxTree;
+        public override SyntaxTree? PrimarySyntaxTree => this.ContainingMember.PrimarySyntaxTree;
     }
 }

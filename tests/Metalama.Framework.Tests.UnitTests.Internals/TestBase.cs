@@ -16,6 +16,11 @@ namespace Metalama.Framework.Tests.UnitTests
 {
     public class TestBase
     {
+        static TestBase()
+        {
+            Logger.Initialize();
+        }
+
         /// <summary>
         /// A value indicating whether tests that test the serialization of reflection objects like <see cref="Type"/> should use "dotnet build" to see if the
         /// resulting syntax tree actually compiles and results in valid IL. This is slow but necessary during development, at least, since an incorrect syntax tree

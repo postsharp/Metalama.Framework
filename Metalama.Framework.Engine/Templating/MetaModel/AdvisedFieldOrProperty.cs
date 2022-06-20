@@ -5,7 +5,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Advised;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis.CSharp;
@@ -46,11 +45,12 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         {
             if ( this.Invokers.Base == null )
             {
-                throw new InvalidOperationException(
-                    UserMessageFormatter.Format( $"Cannot get or set the base value of '{this}' because there is no base property or field." ) );
+                return this.Invokers.Final.GetValue( this.This );
             }
-
-            return this.Invokers.Base.GetValue( this.This );
+            else
+            {
+                return this.Invokers.Base.GetValue( this.This );
+            }
         }
 
         public IMethod? GetAccessor( MethodKind methodKind ) => this.Underlying.GetAccessor( methodKind );

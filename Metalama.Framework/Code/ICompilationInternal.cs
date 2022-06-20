@@ -10,6 +10,6 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets a service that allows to create type instances and compare them.
         /// </summary>
-        ITypeFactory TypeFactory { get; }
+        IDeclarationFactory Factory { get; }
     }
 }

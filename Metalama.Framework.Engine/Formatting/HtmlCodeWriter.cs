@@ -34,6 +34,8 @@ namespace Metalama.Framework.Engine.Formatting
 
             await textWriter.WriteAsync( "<pre><code class=\"nohighlight\">" );
 
+            var isTopOfTheFile = true;
+
             foreach ( var classifiedSpan in classifiedTextSpans )
             {
                 // Write the text between the previous span and the current one.
@@ -41,6 +43,12 @@ namespace Metalama.Framework.Engine.Formatting
 
                 var subText = sourceText.GetSubText( textSpan );
                 var spanText = subText.ToString();
+
+                // Ignore blank lines on the top of the file.
+                if ( spanText.Trim().Length == 0 && isTopOfTheFile )
+                {
+                    continue;
+                }
 
                 if ( classifiedSpan.Classification != TextSpanClassification.Excluded )
                 {
@@ -58,6 +66,12 @@ namespace Metalama.Framework.Engine.Formatting
 
                         if ( classifiedSpan.Tags.TryGetValue( CSharpClassTagName, out var csClassification ) )
                         {
+                            // Ignore the header.
+                            if ( csClassification == "header" )
+                            {
+                                continue;
+                            }
+
                             foreach ( var classification in csClassification.Split( ';' ) )
                             {
                                 foreach ( var c in classification.Split( '-' ) )
@@ -66,6 +80,8 @@ namespace Metalama.Framework.Engine.Formatting
                                 }
                             }
                         }
+
+                        isTopOfTheFile = false;
 
                         if ( classifiedSpan.Tags.TryGetValue( DiagnosticTagName, out var diagnosticJson ) )
                         {

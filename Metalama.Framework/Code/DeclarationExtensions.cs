@@ -4,6 +4,7 @@
 using Metalama.Framework.Aspects;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Code
 {
@@ -51,5 +52,22 @@ namespace Metalama.Framework.Code
                 { ContainingDeclaration: { } containingDeclaration } => GetDeclaringType( containingDeclaration ),
                 _ => null
             };
+
+        /// <summary>
+        /// Gets a representation of the current declaration in a different version of the compilation.
+        /// </summary>
+        [return: NotNullIfNotNull( "declaration" )]
+        public static T? ForCompilation<T>( this T? declaration, ICompilation compilation, ReferenceResolutionOptions options = default )
+            where T : class, IDeclaration
+        {
+            if ( declaration == null )
+            {
+                return null;
+            }
+            else
+            {
+                return (T) ((ICompilationInternal) compilation).Factory.Translate( declaration, options );
+            }
+        }
     }
 }

@@ -5,5 +5,8 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal interface IConstructorImpl : IConstructor, IMemberImpl { }
+    internal interface IConstructorImpl : IConstructor, IMemberImpl
+    {
+        IConstructor? GetBaseConstructor();
+    }
 }
