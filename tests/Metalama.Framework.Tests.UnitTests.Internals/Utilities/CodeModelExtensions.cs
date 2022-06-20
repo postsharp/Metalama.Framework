@@ -13,7 +13,7 @@ namespace Metalama.Framework.Tests.UnitTests.Utilities
     {
         public static ImmutableArray<T> OrderBySource<T>( this IEnumerable<T> items )
             where T : IDeclaration
-            => items.Select( item => (Item: item, Declaration: item.GetPrimaryDeclaration()) )
+            => items.Select( item => (Item: item, Declaration: item.GetPrimaryDeclarationSyntax()) )
                 .OrderBy( item => item.Declaration?.SyntaxTree.FilePath )
                 .ThenBy( item => item.Declaration?.SpanStart )
                 .Select( item => item.Item )

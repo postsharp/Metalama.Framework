@@ -89,8 +89,8 @@ namespace Metalama.Framework.Engine.CompileTime
 
             // Add the Metalama.Compiler.Interface" assembly. We cannot get it through typeof because types are directed to Microsoft.CodeAnalysis at compile time.
             // Strangely, there can be many instances of this same assembly.
-            var metalamaCompilerInterfaceAssembly = AppDomain.CurrentDomain.GetAssemblies()
-                .Where( a => a.FullName.StartsWith( "Metalama.Compiler.Interface,", StringComparison.Ordinal ) )
+            var metalamaCompilerInterfaceAssembly = AppDomainUtility
+                .GetLoadedAssemblies( a => a.FullName.StartsWith( "Metalama.Compiler.Interface,", StringComparison.Ordinal ) )
                 .OrderByDescending( a => a.GetName().Version )
                 .FirstOrDefault();
 

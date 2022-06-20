@@ -14,6 +14,7 @@ using System;
 using System.Reflection;
 using System.Text;
 using SpecialType = Metalama.Framework.Code.SpecialType;
+using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.Templating.Expressions;
 
@@ -74,6 +75,9 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
         return new UserStatement( statement );
     }
+
+    public IStatement CreateExpressionStatement( IExpression expression )
+        => new UserStatement( SyntaxFactory.ExpressionStatement( ((UserExpression) expression).ToSyntax( this._syntaxGenerationContext ) ) );
 
     public void AppendLiteral( object? value, StringBuilder stringBuilder, SpecialType specialType, bool stronglyTyped )
     {
@@ -161,4 +165,14 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
 
     public IExpression Cast( IExpression expression, IType targetType )
         => expression.Type.Is( targetType ) ? expression : new CastUserExpression( targetType, expression );
+
+    public object TypedConstant( in TypedConstant typedConstant )
+        => new BuiltUserExpression( this.SyntaxGenerator.TypedConstant( typedConstant ), typedConstant.Type );
+
+    public IExpression ThisExpression( INamedType type ) => new BuiltUserExpression( SyntaxFactory.ThisExpression(), type, false );
+
+    public IExpression ToExpression( IFieldOrProperty fieldOrProperty, IExpression? instance )
+        => new FieldOrPropertyExpression( fieldOrProperty, (UserExpression?) instance );
+
+    public IExpression ToExpression( IParameter parameter ) => new ParameterExpression( parameter );
 }

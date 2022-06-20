@@ -258,6 +258,10 @@ dotnet_diagnostic.SA1309.severity = none
 # SA1633: File should have header
 dotnet_diagnostic.SA1633.severity = none
 
+# SA1636: File header should be correct
+dotnet_diagnostic.SA1636.severity = none
+
+
 # SA1200: Using directives should be placed within namespace
 dotnet_diagnostic.SA1200.severity = none
 

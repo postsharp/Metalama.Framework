@@ -4,14 +4,17 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
-using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Metrics;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
@@ -22,10 +25,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
     /// <see cref="ISdkRef{T}"/> so they can resolve, using <see cref="DeclarationFactory"/>, to the consuming <see cref="CompilationModel"/>.
     /// 
     /// </summary>
-    internal abstract class DeclarationBuilder : IDeclarationBuilder, IDeclarationImpl, ITransformation
+    internal abstract class DeclarationBuilder : BaseTransformation, IDeclarationBuilder, IDeclarationImpl
     {
-        internal Advice ParentAdvice { get; }
-
         public DeclarationOrigin Origin => DeclarationOrigin.Aspect;
 
         public abstract IDeclaration? ContainingDeclaration { get; }
@@ -42,18 +43,38 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public bool IsFrozen { get; private set; }
 
-        Advice ITransformation.Advice => this.ParentAdvice;
-
-        protected DeclarationBuilder( Advice parentAdvice )
+        protected void CheckNotFrozen()
         {
-            this.ParentAdvice = parentAdvice;
+            if ( this.IsFrozen )
+            {
+                throw new InvalidOperationException( $"You can no longer modify '{this.ToDisplayString()}'." );
+            }
         }
+
+        protected DeclarationBuilder( Advice parentAdvice ) : base( parentAdvice ) { }
 
         public abstract string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null );
 
-        public void AddAttribute( AttributeConstruction attribute ) => this.Attributes.Add( new AttributeBuilder( this, attribute ) );
+        public void AddAttribute( AttributeConstruction attribute )
+        {
+            this.CheckNotFrozen();
 
-        public void RemoveAttributes( INamedType type ) => this.Attributes.RemoveAll( a => a.Type.Is( type ) );
+            this.Attributes.Add( new AttributeBuilder( this.ParentAdvice, this, attribute ) );
+        }
+
+        public void AddAttributes( IEnumerable<AttributeConstruction> attributes )
+        {
+            this.CheckNotFrozen();
+
+            this.Attributes.AddRange( attributes.Select( a => new AttributeBuilder( this.ParentAdvice, this, a ) ) );
+        }
+
+        public void RemoveAttributes( INamedType type )
+        {
+            this.CheckNotFrozen();
+
+            this.Attributes.RemoveAll( a => a.Type.Is( type ) );
+        }
 
         public virtual void Freeze() => this.IsFrozen = true;
 
@@ -84,5 +105,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public TExtension GetMetric<TExtension>()
             where TExtension : IMetric
             => this.GetCompilationModel().MetricManager.GetMetric<TExtension>( this );
+
+        protected virtual SyntaxKind AttributeTargetSyntaxKind => SyntaxKind.None;
+
+        public SyntaxList<AttributeListSyntax> GetAttributeLists( in MemberIntroductionContext context )
+            => context.SyntaxGenerator.AttributesForDeclaration( this.ToRef(), context.Compilation, this.AttributeTargetSyntaxKind );
     }
 }

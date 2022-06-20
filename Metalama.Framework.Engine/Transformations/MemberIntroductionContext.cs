@@ -21,7 +21,12 @@ namespace Metalama.Framework.Engine.Transformations
 
         public SyntaxGenerationContext SyntaxGenerationContext { get; }
 
-        public OurSyntaxGenerator SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;
+        public SyntaxGeneratorWithContext SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;
+
+        /// <summary>
+        /// Gets the last compilation model of the linker input.
+        /// </summary>
+        public CompilationModel Compilation { get; }
 
         public MemberIntroductionContext(
             UserDiagnosticSink diagnosticSink,
@@ -29,7 +34,8 @@ namespace Metalama.Framework.Engine.Transformations
             AspectReferenceSyntaxProvider aspectReferenceSyntaxProvider,
             ITemplateLexicalScopeProvider lexicalScopeProvider,
             SyntaxGenerationContext syntaxGenerationContext,
-            IServiceProvider serviceProvider )
+            IServiceProvider serviceProvider,
+            CompilationModel compilation )
         {
             this.DiagnosticSink = diagnosticSink;
             this.LexicalScopeProvider = lexicalScopeProvider;
@@ -37,6 +43,7 @@ namespace Metalama.Framework.Engine.Transformations
             this.ServiceProvider = serviceProvider;
             this.IntroductionNameProvider = introductionNameProvider;
             this.SyntaxGenerationContext = syntaxGenerationContext;
+            this.Compilation = compilation;
         }
     }
 }

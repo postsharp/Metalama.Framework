@@ -3,7 +3,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Templating.Expressions;
@@ -32,7 +32,7 @@ internal abstract class OverridePropertyBaseTransformation : OverrideMemberTrans
     {
         var propertyName = context.IntroductionNameProvider.GetOverrideName(
             this.OverriddenDeclaration.DeclaringType,
-            this.Advice.AspectLayerId,
+            this.ParentAdvice.AspectLayerId,
             this.OverriddenDeclaration );
 
         var setAccessorDeclarationKind = this.OverriddenDeclaration.Writeability == Writeability.InitOnly
@@ -71,7 +71,7 @@ internal abstract class OverridePropertyBaseTransformation : OverrideMemberTrans
                                 .AssertNoneNull() ) ),
                     null,
                     null ),
-                this.Advice.AspectLayerId,
+                this.ParentAdvice.AspectLayerId,
                 IntroducedMemberSemantic.Override,
                 this.OverriddenDeclaration )
         };

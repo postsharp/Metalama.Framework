@@ -3,7 +3,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.SyntaxSerialization;
@@ -65,7 +65,7 @@ namespace Metalama.Framework.Engine.Transformations
 
             var eventName = context.IntroductionNameProvider.GetOverrideName(
                 this.OverriddenDeclaration.DeclaringType,
-                this.Advice.AspectLayerId,
+                this.ParentAdvice.AspectLayerId,
                 this.OverriddenDeclaration );
 
             BoundTemplateMethod GetBoundTemplateMethod( IMethod? templateMethod, BoundTemplateMethod sourceBoundTemplate )
@@ -160,7 +160,7 @@ namespace Metalama.Framework.Engine.Transformations
                                         this.OverriddenDeclaration.RemoveMethod.AssertNotNull().GetSyntaxModifierList(),
                                         removeAccessorBody.AssertNotNull() )
                                 } ) ) ),
-                    this.Advice.AspectLayerId,
+                    this.ParentAdvice.AspectLayerId,
                     IntroducedMemberSemantic.Override,
                     this.OverriddenDeclaration )
             };
@@ -188,27 +188,27 @@ namespace Metalama.Framework.Engine.Transformations
                 this.OverriddenDeclaration,
                 accessor,
                 new MetaApiProperties(
+                    this.ParentAdvice.SourceCompilation,
                     context.DiagnosticSink,
                     accessorTemplate.Template.Cast(),
                     this.Tags,
-                    this.Advice.AspectLayerId,
+                    this.ParentAdvice.AspectLayerId,
                     context.SyntaxGenerationContext,
-                    this.Advice.Aspect,
+                    this.ParentAdvice.Aspect,
                     context.ServiceProvider,
                     MetaApiStaticity.Default ) );
 
             var expansionContext = new TemplateExpansionContext(
-                this.Advice.Aspect.Aspect,
+                this.ParentAdvice.TemplateInstance.Instance,
                 metaApi,
-                (CompilationModel) this.OverriddenDeclaration.Compilation,
                 context.LexicalScopeProvider.GetLexicalScope( accessor ),
                 context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
                 context.SyntaxGenerationContext,
                 default,
                 proceedExpression,
-                this.Advice.AspectLayerId );
+                this.ParentAdvice.AspectLayerId );
 
-            var templateDriver = this.Advice.TemplateInstance.TemplateClass.GetTemplateDriver( accessorTemplate.Template.Declaration! );
+            var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( accessorTemplate.Template.Declaration! );
 
             return templateDriver.TryExpandDeclaration( expansionContext, accessorTemplate.TemplateArguments, out body );
         }

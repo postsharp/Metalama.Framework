@@ -248,23 +248,24 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
                 _ => throw new AssertionFailedException()
             };
 
-        public static MetaApi ForConstructor( IConstructor constructor, MetaApiProperties common ) => new( constructor, common );
+        public static MetaApi ForConstructor( IConstructor constructor, MetaApiProperties common ) => new( common.Translate( constructor ), common );
 
-        public static MetaApi ForMethod( IMethod method, MetaApiProperties common ) => new( method, common );
+        public static MetaApi ForMethod( IMethod method, MetaApiProperties common ) => new( common.Translate( method ), common );
 
         public static MetaApi ForFinalizer( IFinalizer finalizer, MetaApiProperties common ) => new( finalizer, common );
 
         public static MetaApi ForFieldOrProperty( IFieldOrProperty fieldOrProperty, IMethod accessor, MetaApiProperties common )
-            => new( fieldOrProperty, accessor, common );
+            => new( common.Translate( fieldOrProperty ), common.Translate( accessor ), common );
 
         public static MetaApi ForInitializer( IMember initializedDeclaration, MetaApiProperties common )
             => initializedDeclaration switch
             {
-                IFieldOrProperty fieldOrProperty => new MetaApi( fieldOrProperty, common ),
-                IEvent eventField => new MetaApi( eventField, common ),
+                IFieldOrProperty fieldOrProperty => new MetaApi( common.Translate( fieldOrProperty ), common ),
+                IEvent eventField => new MetaApi( common.Translate( eventField ), common ),
                 _ => throw new AssertionFailedException()
             };
 
-        public static MetaApi ForEvent( IEvent @event, IMethod accessor, MetaApiProperties common ) => new( @event, accessor, common );
+        public static MetaApi ForEvent( IEvent @event, IMethod accessor, MetaApiProperties common )
+            => new( common.Translate( @event ), common.Translate( accessor ), common );
     }
 }

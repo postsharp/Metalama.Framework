@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <Import Project="..\Build\RoslynVersion\Latest.imports" />
-
+    
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -9,10 +9,12 @@
         <UseMetalamaCompiler>Private</UseMetalamaCompiler>
         <AssemblyName>Metalama.Framework.Engine.$(ThisRoslynVersion)</AssemblyName>
         <PackageId>Metalama.Framework.Engine</PackageId>
+		<!-- We need to pack Metalama.SystemTypes.dll because the test projects will not include it if they do not target .NET Standard 2.0 themselves. -->
+		<PackMetalamaSystemTypes>True</PackMetalamaSystemTypes>
     </PropertyGroup>
 
-    <ItemGroup>
 
+    <ItemGroup>
 		<ProjectReference Include="..\Metalama.Framework.CompileTime\Metalama.Framework.CompileTime.csproj" ReferenceOutputAssembly="false" />
 
         <!-- We have to embed the compile-time build of Metalama.Framework so we can reference it to create
@@ -31,6 +33,7 @@
 
     <ItemGroup>
         <Compile Include="..\.generated\$(ThisRoslynVersion)\Metalama.Framework.Engine\*.cs" />
+        <Compile Remove="Transformations\IntroduceConstructorParameterTransformation.cs" />
     </ItemGroup>
 
     <ItemGroup>
@@ -94,5 +97,13 @@
         <Exec Command="$(PkgFakeSign)\tools\FakeSign.exe $(MSBuildProjectDirectory)\obj\$(Configuration)\$(TargetFramework)\$(AssemblyName).dll" />
         <Touch Files="$(_FixPublicSigningTouchFile)" AlwaysCreate="True" ContinueOnError="True" />
     </Target>
+    
+    <!-- Include system types as managed resources -->
+    <Import Sdk="PostSharp.Engineering.Sdk" Project="Assets.props" />
+
+    <ItemGroup>
+        <EmbeddedResource Include="$(AssetsDirectory)\system-types\*.cs" Link="(Resources)\%(Filename)" />
+    </ItemGroup>
+
 
 </Project>

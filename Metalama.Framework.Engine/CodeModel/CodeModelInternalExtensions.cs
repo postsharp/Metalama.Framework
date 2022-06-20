@@ -38,17 +38,24 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => false
             };
 
-        public static SyntaxNode? GetPrimaryDeclaration( this IDeclaration declaration )
+        public static SyntaxNode? GetPrimaryDeclarationSyntax( this IDeclaration declaration )
         {
             return declaration.GetSymbol()?.GetPrimaryDeclaration();
         }
+
+        public static SyntaxTree? GetPrimarySyntaxTree( this IDeclaration declaration )
+            => declaration switch
+            {
+                IDeclarationImpl declarationImpl => declarationImpl.PrimarySyntaxTree,
+                _ => throw new AssertionFailedException()
+            };
 
         public static InsertPosition ToInsertPosition( this IDeclaration declaration )
         {
             switch ( declaration )
             {
                 case IReplaceMemberTransformation { ReplacedMember: var replacedMember } when !replacedMember.IsDefault:
-                    return replacedMember.GetTarget( declaration.Compilation, false ).ToInsertPosition();
+                    return replacedMember.GetTarget( declaration.Compilation, ReferenceResolutionOptions.DoNotFollowRedirections ).ToInsertPosition();
 
                 case BuiltDeclaration builtDeclaration:
                     return builtDeclaration.Builder.ToInsertPosition();
@@ -56,7 +63,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 case IMemberOrNamedTypeBuilder { DeclaringType: { } declaringType }:
                     return new InsertPosition(
                         InsertPositionRelation.Within,
-                        (MemberDeclarationSyntax) declaringType.GetPrimaryDeclaration().AssertNotNull() );
+                        (MemberDeclarationSyntax) declaringType.GetPrimaryDeclarationSyntax().AssertNotNull() );
 
                 case SymbolBasedDeclaration baseDeclaration:
                     var symbol = baseDeclaration.Symbol;

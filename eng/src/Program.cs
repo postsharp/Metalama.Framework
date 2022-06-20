@@ -38,7 +38,6 @@ var product = new Product( Dependencies.Metalama )
         new ManyDotNetSolutions( "Tests\\Standalone\\**\\*.sln" ) { IsTestOnly = true }
     },
     PublicArtifacts = Pattern.Create(
-        "Metalama.SystemTypes.$(PackageVersion).nupkg",
         "Metalama.Framework.$(PackageVersion).nupkg",
         "Metalama.TestFramework.$(PackageVersion).nupkg",
         "Metalama.Framework.Redist.$(PackageVersion).nupkg",

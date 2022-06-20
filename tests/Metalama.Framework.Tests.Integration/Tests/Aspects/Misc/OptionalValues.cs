@@ -26,25 +26,37 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues
             }
 
             // Introduce a property in the main type to store the Optional object.
-            var optionalValuesProperty = builder.Advice.IntroduceProperty( builder.Target, nameof(OptionalValues) );
-            optionalValuesProperty.Type = nestedType;
-            optionalValuesProperty.InitializerExpression = ExpressionFactory.Parse( $"new {nestedType.Name}()" );
+            var optionalValuesProperty = builder.Advice.IntroduceProperty(
+                    builder.Target,
+                    nameof(OptionalValues),
+                    buildProperty: p =>
+                    {
+                        p.Type = nestedType;
+                        p.InitializerExpression = ExpressionFactory.Parse( $"new {nestedType.Name}()" );
+                    } )
+                .Declaration;
 
-            var optionalValueType = (INamedType)TypeFactory.GetType( typeof(OptionalValue<>) );
+            var optionalValueType = (INamedType) TypeFactory.GetType( typeof(OptionalValue<>) );
 
             // For all automatic properties of the target type.
             foreach (var property in builder.Target.Properties.Where( p => p.IsAutoPropertyOrField ))
             {
                 // Add a property of the same name, but of type OptionalValue<T>, in the nested type.
-                var propertyBuilder = builder.Advice.IntroduceProperty( nestedType, nameof(OptionalPropertyTemplate) );
-                propertyBuilder.Name = property.Name;
-                propertyBuilder.Type = optionalValueType.ConstructGenericInstance( property.Type );
+                var optionalProperty = builder.Advice.IntroduceProperty(
+                        nestedType,
+                        nameof(OptionalPropertyTemplate),
+                        buildProperty: p =>
+                        {
+                            p.Name = property.Name;
+                            p.Type = optionalValueType.ConstructGenericInstance( property.Type );
+                        } )
+                    .Declaration;
 
                 // Override the property in the target type so that it is forwarded to the nested type.
                 builder.Advice.Override(
                     property,
                     nameof(OverridePropertyTemplate),
-                    tags: new { optionalProperty = propertyBuilder } );
+                    tags: new { optionalProperty = optionalProperty } );
             }
         }
 
@@ -59,14 +71,14 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.OptionalValues
         {
             get
             {
-                var optionalProperty = (IProperty)meta.Tags["optionalProperty"]!;
+                var optionalProperty = (IProperty) meta.Tags["optionalProperty"]!;
 
                 return optionalProperty.Invokers.Final.GetValue( meta.This.OptionalValues ).Value;
             }
 
             set
             {
-                var optionalProperty = (IProperty)meta.Tags["optionalProperty"]!;
+                var optionalProperty = (IProperty) meta.Tags["optionalProperty"]!;
                 var optionalValueBuilder = new ExpressionBuilder();
                 optionalValueBuilder.AppendVerbatim( "new " );
                 optionalValueBuilder.AppendTypeName( optionalProperty.Type );

@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-#pragma warning disable IDE0005
 using Metalama.AspectWorkbench.Model;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Pipeline;
@@ -19,9 +18,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
-using TestProjectOptions = Metalama.Framework.Engine.Testing.TestProjectOptions;
-
-#pragma warning restore IDE0005
 
 namespace Metalama.AspectWorkbench.ViewModels
 {

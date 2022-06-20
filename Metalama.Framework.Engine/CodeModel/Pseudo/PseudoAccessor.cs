@@ -114,18 +114,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public ISymbol? Symbol => null;
 
-        public Ref<IDeclaration> ToRef() => Ref.FromImplicitMember( this.DeclaringMember, m => this.SelectSelf( (IMember) m ) );
-
-        private IDeclaration SelectSelf( IMember newParent )
-            => (newParent, this.MethodKind) switch
-            {
-                (IFieldOrProperty { GetMethod: { } getMethod }, MethodKind.PropertyGet) => getMethod,
-                (IFieldOrProperty { SetMethod: { } setMethod }, MethodKind.PropertySet) => setMethod,
-                (IEvent { AddMethod: { } addMethod }, MethodKind.EventAdd) => addMethod,
-                (IEvent { RemoveMethod: { } removeMethod }, MethodKind.EventRemove) => removeMethod,
-                (IEvent { RaiseMethod: { } raiseMethod }, MethodKind.EventRaise) => raiseMethod,
-                _ => throw new AssertionFailedException()
-            };
+        public Ref<IDeclaration> ToRef() => Ref.PseudoAccessor( this );
 
         public ImmutableArray<SyntaxReference> DeclaringSyntaxReferences => ImmutableArray<SyntaxReference>.Empty;
 

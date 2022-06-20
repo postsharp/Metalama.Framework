@@ -3,7 +3,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Advising;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -20,7 +20,7 @@ internal class FilterPropertyTransformation : OverridePropertyBaseTransformation
 
     public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
     {
-        var advice = (ContractAdvice) this.Advice;
+        var advice = (ContractAdvice) this.ParentAdvice;
         var contextCopy = context;
         BlockSyntax? getterBody, setterBody;
 

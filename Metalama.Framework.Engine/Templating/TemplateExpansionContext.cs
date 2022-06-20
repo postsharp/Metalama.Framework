@@ -2,7 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
@@ -66,7 +66,6 @@ namespace Metalama.Framework.Engine.Templating
         public TemplateExpansionContext(
             object templateInstance, // This is supposed to be an ITemplateProvider, but we may get different objects in tests.
             MetaApi metaApi,
-            CompilationModel compilation,
             TemplateLexicalScope lexicalScope,
             SyntaxSerializationService syntaxSerializationService,
             SyntaxGenerationContext syntaxGenerationContext,
@@ -77,14 +76,14 @@ namespace Metalama.Framework.Engine.Templating
             metaApi.Diagnostics,
             UserCodeMemberInfo.FromSymbol( boundTemplate.Template.Declaration?.GetSymbol() ),
             aspectLayerId,
-            compilation,
+            metaApi.Compilation,
             metaApi.Target.Declaration )
         {
             this._boundTemplate = boundTemplate;
             this.TemplateInstance = templateInstance;
             this.MetaApi = metaApi;
             this.SyntaxSerializationService = syntaxSerializationService;
-            this.SyntaxSerializationContext = new SyntaxSerializationContext( compilation, syntaxGenerationContext );
+            this.SyntaxSerializationContext = new SyntaxSerializationContext( (CompilationModel) metaApi.Compilation, syntaxGenerationContext );
             this.SyntaxGenerationContext = syntaxGenerationContext;
             this.LexicalScope = lexicalScope;
             this._proceedExpression = proceedExpression;

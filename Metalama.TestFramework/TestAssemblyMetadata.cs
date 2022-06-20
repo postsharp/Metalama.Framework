@@ -59,7 +59,7 @@ internal record TestAssemblyMetadata(
             {
                 try
                 {
-                    instances.Add( Activator.CreateInstance( type ) );
+                    instances.Add( Activator.CreateInstance( type )! );
                 }
                 catch ( Exception e )
                 {

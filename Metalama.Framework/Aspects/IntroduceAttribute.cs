@@ -14,8 +14,37 @@ namespace Metalama.Framework.Aspects
     /// </summary>
     /// <seealso href="@introducing-members"/>
     [AttributeUsage( AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Method | AttributeTargets.Event )]
-    public sealed class IntroduceAttribute : DeclarativeAdviceAttribute
+    public sealed class IntroduceAttribute : DeclarativeAdviceAttribute, ITemplateAttribute
     {
+        private TemplateAttributeImpl _impl;
+
+        public string? Name { get => this._impl.Name; set => this._impl.Name = value; }
+
+        public Accessibility Accessibility
+        {
+            get => this._impl.Accessibility;
+            set => this._impl.Accessibility = value;
+        }
+
+        public bool IsVirtual
+        {
+            get => this._impl.IsVirtual;
+
+            set => this._impl.IsVirtual = true;
+        }
+
+        public bool IsSealed
+        {
+            get => this._impl.IsSealed;
+            set => this._impl.IsSealed = true;
+        }
+
+        bool? ITemplateAttribute.IsVirtual => this._impl.GetIsVirtual();
+
+        bool? ITemplateAttribute.IsSealed => this._impl.GetIsSealed();
+
+        Accessibility? ITemplateAttribute.Accessibility => this._impl.GetAccessibility();
+
         public IntroductionScope Scope { get; set; }
 
         /// <summary>
@@ -48,7 +77,7 @@ namespace Metalama.Framework.Aspects
                     _ => $"the aspect contains a declarative introduction and therefore cannot be applied to an interface" ) );
         }
 
-        public override void BuildAspect( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder )
+        public override void BuildAdvice( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder )
         {
             INamedType targetType;
 
@@ -66,7 +95,7 @@ namespace Metalama.Framework.Aspects
 
                 default:
                     builder.Diagnostics.Report(
-                        DeclarativeAdviceDiagnosticDescriptors.CannotUseIntroduceWithoutDeclaringType.WithArguments(
+                        FrameworkDiagnosticDescriptors.CannotUseIntroduceWithoutDeclaringType.WithArguments(
                             (builder.AspectInstance.AspectClass.ShortName, templateMember.DeclarationKind, builder.Target.DeclarationKind) ) );
 
                     builder.SkipAspect();
@@ -74,33 +103,36 @@ namespace Metalama.Framework.Aspects
                     return;
             }
 
-            var adviceFactory = builder.Advice.ForLayer( this.Layer );
+            builder.BuildLayer(
+                this.Layer,
+                layerBuilder =>
+                {
+                    switch ( templateMember.DeclarationKind )
+                    {
+                        case DeclarationKind.Method:
+                            layerBuilder.Advice.IntroduceMethod( targetType, templateMemberId, this.Scope, this.WhenExists );
 
-            switch ( templateMember.DeclarationKind )
-            {
-                case DeclarationKind.Method:
-                    adviceFactory.IntroduceMethod( targetType, templateMemberId, this.Scope, this.WhenExists );
+                            break;
 
-                    break;
+                        case DeclarationKind.Property:
+                            layerBuilder.Advice.IntroduceProperty( targetType, templateMemberId, this.Scope, this.WhenExists );
 
-                case DeclarationKind.Property:
-                    adviceFactory.IntroduceProperty( targetType, templateMemberId, this.Scope, this.WhenExists );
+                            break;
 
-                    break;
+                        case DeclarationKind.Event:
+                            layerBuilder.Advice.IntroduceEvent( targetType, templateMemberId, this.Scope, this.WhenExists );
 
-                case DeclarationKind.Event:
-                    adviceFactory.IntroduceEvent( targetType, templateMemberId, this.Scope, this.WhenExists );
+                            break;
 
-                    break;
+                        case DeclarationKind.Field:
+                            layerBuilder.Advice.IntroduceField( targetType, templateMemberId, this.Scope, this.WhenExists );
 
-                case DeclarationKind.Field:
-                    adviceFactory.IntroduceField( targetType, templateMemberId, this.Scope, this.WhenExists );
+                            break;
 
-                    break;
-
-                default:
-                    throw new InvalidOperationException( $"Don't know how to introduce a {templateMember.DeclarationKind}." );
-            }
+                        default:
+                            throw new InvalidOperationException( $"Don't know how to introduce a {templateMember.DeclarationKind}." );
+                    }
+                } );
         }
     }
 }

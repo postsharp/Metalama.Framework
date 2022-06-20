@@ -3,7 +3,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
@@ -17,10 +17,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal class AttributeBuilder : DeclarationBuilder, IAttribute, IObservableTransformation
     {
-        private readonly AttributeConstruction _attributeConstruction;
+        private readonly IAttributeData _attributeConstruction;
 
-        public AttributeBuilder( DeclarationBuilder containingDeclaration, AttributeConstruction attributeConstruction ) : base(
-            containingDeclaration.ParentAdvice )
+        public AttributeBuilder( Advice advice, IDeclaration containingDeclaration, IAttributeData attributeConstruction ) : base( advice )
         {
             this._attributeConstruction = attributeConstruction;
             this.ContainingDeclaration = containingDeclaration;
@@ -42,7 +41,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Attribute;
 
-        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();
+        public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
+            => this._attributeConstruction.ToString();
 
         public INamedType Type => this.Constructor.DeclaringType;
 
@@ -60,7 +60,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public AttributeSyntax GetSyntax( SyntaxGenerationContext generationContext )
         {
-            return generationContext.SyntaxGenerator.Attribute( this._attributeConstruction, generationContext.ReflectionMapper );
+            return generationContext.SyntaxGenerator.Attribute( this._attributeConstruction );
         }
     }
 }

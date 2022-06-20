@@ -272,6 +272,30 @@ class MyAttribute : Attribute
         }
 
         [Fact]
+        public void AttributeOnReturnValue()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = @"
+using System;
+
+class C 
+{
+   [return: MyAttribute]
+   void M() {}
+}
+
+class MyAttribute : Attribute
+{
+    public MyAttribute() {}
+}
+";
+
+            var compilation = testContext.CreateCompilationModel( code );
+            Assert.Single( compilation.Types.OfName( "C" ).Single().Methods.Single().ReturnParameter.Attributes );
+        }
+
+        [Fact]
         public void Arrays()
         {
             using var testContext = this.CreateTestContext();
@@ -519,18 +543,17 @@ class C
 
             foreach ( var parameter in parametersWithoutDefaults )
             {
-                Assert.False( parameter.DefaultValue.IsAssigned );
-                _ = Assert.Throws<ArgumentNullException>( () => parameter.DefaultValue.Value );
+                Assert.Null( parameter.DefaultValue );
             }
 
             var parametersWithDefaults = method.Parameters.Skip( 1 ).ToList();
 
             foreach ( var parameter in parametersWithDefaults )
             {
-                Assert.True( parameter.DefaultValue.IsAssigned );
+                Assert.NotNull( parameter.DefaultValue );
             }
 
-            Assert.Equal( new object?[] { 42, "forty two", 3.14m, null, null, null }, parametersWithDefaults.Select( p => p.DefaultValue.Value ) );
+            Assert.Equal( new object?[] { 42, "forty two", 3.14m, null, null, null }, parametersWithDefaults.Select( p => p.DefaultValue!.Value.Value ) );
         }
 
         [Fact]

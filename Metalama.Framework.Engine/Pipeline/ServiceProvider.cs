@@ -139,7 +139,7 @@ namespace Metalama.Framework.Engine.Pipeline
         public ServiceProvider WithProjectScopedServices( IEnumerable<MetadataReference> metadataReferences )
             => this.WithProjectScopedServices( metadataReferences, null );
 
-        public ServiceProvider WithProjectScopedServices( Compilation compilation ) => this.WithProjectScopedServices( compilation.References, null );
+        public ServiceProvider WithProjectScopedServices( Compilation compilation ) => this.WithProjectScopedServices( compilation.References, compilation );
 
         private ServiceProvider WithProjectScopedServices(
             IEnumerable<MetadataReference> metadataReferences,
@@ -155,6 +155,7 @@ namespace Metalama.Framework.Engine.Pipeline
             serviceProvider = serviceProvider.WithService( new BuiltInSerializerFactoryProvider( serviceProvider ) );
             serviceProvider = serviceProvider.WithServices( new SyntaxSerializationService( serviceProvider ), new CompileTimeTypeFactory() );
             serviceProvider = serviceProvider.WithServices( new SystemTypeResolver( serviceProvider ) );
+            serviceProvider = serviceProvider.WithSharedLazyInitializedService( sp => new SymbolClassificationService( sp ) );
 
             serviceProvider = serviceProvider.WithService(
                 new SyntaxGenerationContextFactory( compilation ?? SyntaxGenerationContext.EmptyCompilation, serviceProvider ) );

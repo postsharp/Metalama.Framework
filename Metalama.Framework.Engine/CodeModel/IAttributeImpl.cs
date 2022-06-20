@@ -6,6 +6,5 @@ using Metalama.Framework.Engine.Aspects;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    // IAttributeImpl does not implement IDeclarationImpl because it is not backed by an ISymbol.
-    internal interface IAttributeImpl : IAttribute, IDiagnosticLocationImpl, IAspectPredecessorImpl { }
+    internal interface IAttributeImpl : IAttribute, IAspectPredecessorImpl, IDeclarationImpl { }
 }

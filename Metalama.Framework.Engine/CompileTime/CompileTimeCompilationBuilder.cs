@@ -25,6 +25,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -50,12 +51,25 @@ namespace Metalama.Framework.Engine.CompileTime
         private readonly ICompileTimeAssemblyBinaryRewriter? _rewriter;
         private readonly ILogger _logger;
 
-        private static readonly Lazy<SyntaxTree> _predefinedTypesSyntaxTree = new(
-            () =>
-                CSharpSyntaxTree.ParseText(
-                    "namespace System.Runtime.CompilerServices { internal static class IsExternalInit {} }",
-                    path: CompileTimeConstants.PredefinedTypesFileName,
-                    encoding: Encoding.UTF8 ) );
+        private static readonly Lazy<ImmutableDictionary<string, string>> _predefinedTypesSyntaxTree = new( GetPredefinedSyntaxTrees );
+
+        private static ImmutableDictionary<string, string> GetPredefinedSyntaxTrees()
+        {
+            var prefix = "Metalama.Framework.Engine._Resources_.";
+
+            var assembly = typeof(CompileTimeCompilationBuilder).Assembly;
+
+            return assembly.GetManifestResourceNames()
+                .Where( n => n.StartsWith( prefix, StringComparison.Ordinal ) )
+                .ToImmutableDictionary(
+                    name => CompileTimeConstants.GetPrefixedSyntaxTreeName( name.Substring( prefix.Length ) ) + ".cs",
+                    name =>
+                    {
+                        using var reader = new StreamReader( assembly.GetManifestResourceStream( name )! );
+
+                        return reader.ReadToEnd();
+                    } );
+        }
 
         private static readonly Guid _buildId = AssemblyMetadataReader.GetInstance( typeof(CompileTimeCompilationBuilder).Assembly ).ModuleId;
         private readonly ReflectionMapperFactory _reflectionMapperFactory;
@@ -145,7 +159,7 @@ namespace Metalama.Framework.Engine.CompileTime
             IReadOnlyList<SyntaxTree> treesWithCompileTimeCode,
             IEnumerable<CompileTimeProject> referencedProjects,
             ImmutableArray<UsingDirectiveSyntax> globalUsings,
-            ulong hash,
+            OutputPaths outputPaths,
             IDiagnosticAdder diagnosticSink,
             CancellationToken cancellationToken,
             out Compilation? compileTimeCompilation,
@@ -161,8 +175,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 return true;
             }
 
-            var assemblyName = GetCompileTimeAssemblyName( runTimeCompilation.AssemblyName!, hash );
-            compileTimeCompilation = this.CreateEmptyCompileTimeCompilation( assemblyName, referencedProjects );
+            compileTimeCompilation = this.CreateEmptyCompileTimeCompilation( outputPaths.CompileTimeAssemblyName, referencedProjects );
             var serializableTypes = this.GetSerializableTypes( runTimeCompilation, treesWithCompileTimeCode, cancellationToken );
 
             var templateCompiler = new TemplateCompiler( this._serviceProvider, runTimeCompilation );
@@ -184,7 +197,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                   CSharpParseOptions.Default,
                                   t.FilePath,
                                   Encoding.UTF8 )
-                              .WithFilePath( GetTransformedFilePath( t.FilePath ) ),
+                              .WithFilePath( GetTransformedFilePath( outputPaths, t.FilePath ) ),
                           SourceTree: t) )
                 .ToList();
 
@@ -228,28 +241,25 @@ namespace Metalama.Framework.Engine.CompileTime
             return true;
         }
 
-        private static string GetTransformedFilePath( string originalFilePath )
+        private static string GetTransformedFilePath( OutputPaths outputPaths, string originalFilePath )
         {
             // Find a decent and unique name.
             var transformedFileName = !string.IsNullOrWhiteSpace( originalFilePath )
                 ? Path.GetFileNameWithoutExtension( originalFilePath )
                 : "Anonymous";
 
+            // Shorten the path if we may exceed the largest allowed size.
+            var remainingSizeForName = 254 - outputPaths.Directory.Length - 1 /* backslash */ - 4 /* .xxx */ - 1 /* _ */ - 8 /* hash */;
+
+            if ( transformedFileName.Length > remainingSizeForName )
+            {
+                transformedFileName = transformedFileName.Substring( 0, remainingSizeForName );
+            }
+
             transformedFileName += "_" + HashUtilities.HashString( originalFilePath );
             transformedFileName += Path.GetExtension( originalFilePath );
 
             return transformedFileName;
-        }
-
-        private static string GetCompileTimeAssemblyName(
-            string runTimeAssemblyName,
-            IEnumerable<CompileTimeProject> referencedProjects,
-            ulong sourceHash,
-            StringBuilder? log = null )
-        {
-            var projectHash = ComputeProjectHash( referencedProjects, sourceHash, log );
-
-            return GetCompileTimeAssemblyName( runTimeAssemblyName, projectHash );
         }
 
         public static bool TryParseCompileTimeAssemblyName( string assemblyName, [NotNullWhen( true )] out string? runTimeAssemblyName )
@@ -273,27 +283,20 @@ namespace Metalama.Framework.Engine.CompileTime
             }
         }
 
-        private static string GetCompileTimeAssemblyName( string runTimeAssemblyName, ulong projectHash )
-        {
-            if ( runTimeAssemblyName.StartsWith( _compileTimeAssemblyPrefix, StringComparison.Ordinal ) )
-            {
-                throw new ArgumentOutOfRangeException( nameof(runTimeAssemblyName) );
-            }
-
-            return $"{_compileTimeAssemblyPrefix}{runTimeAssemblyName}_{projectHash:x16}";
-        }
-
-        private CSharpCompilation CreateEmptyCompileTimeCompilation(
-            string assemblyName,
-            IEnumerable<CompileTimeProject> referencedProjects )
+        private CSharpCompilation CreateEmptyCompileTimeCompilation( string assemblyName, IEnumerable<CompileTimeProject> referencedProjects )
         {
             var assemblyLocator = this._serviceProvider.GetRequiredService<ReferenceAssemblyLocator>();
 
+            var parseOptions = new CSharpParseOptions( preprocessorSymbols: new[] { "NETSTANDARD_2_0" } );
+
             var standardReferences = assemblyLocator.StandardCompileTimeMetadataReferences;
+
+            var predefinedSyntaxTrees =
+                _predefinedTypesSyntaxTree.Value.Select( x => CSharpSyntaxTree.ParseText( x.Value, parseOptions, x.Key, Encoding.UTF8 ) );
 
             return CSharpCompilation.Create(
                     assemblyName,
-                    new[] { _predefinedTypesSyntaxTree.Value },
+                    predefinedSyntaxTrees,
                     standardReferences,
                     new CSharpCompilationOptions( OutputKind.DynamicallyLinkedLibrary, deterministic: true ) )
                 .AddReferences(
@@ -329,23 +332,30 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 foreach ( var compileTimeSyntaxTree in compileTimeCompilation.SyntaxTrees )
                 {
-                    var transformedFileName = Path.Combine( outputDirectory, compileTimeSyntaxTree.FilePath );
+                    var path = Path.Combine( outputDirectory, compileTimeSyntaxTree.FilePath );
 
-                    var path = Path.Combine( outputDirectory, transformedFileName );
+                    if ( path.Length > 254 )
+                    {
+                        // We should generate, upstream, a path that is short enough. At this stage, it is too late to shorten it.
+                        throw new AssertionFailedException( $"Path too long: '{path}'" );
+                    }
+
                     var text = compileTimeSyntaxTree.GetText();
 
-                    this._logger.Trace?.Log( $"Writing '{path}'." );
+                    this._logger.Trace?.Log( $"Writing code to '{path}'." );
 
                     // Write the file in a retry loop to handle locks. It seems there are still file lock issues
                     // despite the Mutex. 
-                    RetryHelper.Retry(
-                        () =>
+                    RetryHelper.RetryWithLockDetection(
+                        path,
+                        _ =>
                         {
                             using ( var textWriter = new StreamWriter( path, false, Encoding.UTF8 ) )
                             {
                                 text.Write( textWriter, cancellationToken );
                             }
                         },
+                        this._serviceProvider,
                         logger: this._logger );
 
                     // Update the link to the file path.
@@ -358,9 +368,9 @@ namespace Metalama.Framework.Engine.CompileTime
                     compileTimeCompilation = compileTimeCompilation.ReplaceSyntaxTree( compileTimeSyntaxTree, newTree );
                 }
 
-                this._logger.Trace?.Log( $"Writing '{outputPaths.Pe}'." );
+                this._logger.Trace?.Log( $"Writing binary to '{outputPaths.Pe}'." );
 
-                EmitResult emitResult;
+                EmitResult? emitResult = null;
 
                 if ( this._rewriter != null )
                 {
@@ -381,14 +391,21 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
                 else
                 {
-                    using ( var peStream = File.Create( outputPaths.Pe ) )
-                    using ( var pdbStream = File.Create( outputPaths.Pdb ) )
-                    {
-                        emitResult = compileTimeCompilation.Emit( peStream, pdbStream, options: emitOptions, cancellationToken: cancellationToken );
-                    }
+                    RetryHelper.RetryWithLockDetection(
+                        outputPaths.Pe,
+                        _ =>
+                        {
+                            using ( var peStream = File.Create( outputPaths.Pe ) )
+                            using ( var pdbStream = File.Create( outputPaths.Pdb ) )
+                            {
+                                emitResult = compileTimeCompilation.Emit( peStream, pdbStream, options: emitOptions, cancellationToken: cancellationToken );
+                            }
+                        },
+                        this._serviceProvider,
+                        logger: this._logger );
                 }
 
-                this._observer?.OnCompileTimeCompilationEmit( compileTimeCompilation, emitResult.Diagnostics );
+                this._observer?.OnCompileTimeCompilationEmit( compileTimeCompilation, emitResult!.Diagnostics );
 
                 // Reports a diagnostic in the original syntax tree.
                 void ReportDiagnostics( IEnumerable<Diagnostic> diagnostics )
@@ -426,7 +443,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     }
                 }
 
-                if ( !emitResult.Success )
+                if ( !emitResult!.Success )
                 {
                     // When the compile-time assembly is invalid, to enable troubleshooting, we store the source files and the list of diagnostics
                     // to a directory that will not be deleted after the build.
@@ -498,15 +515,32 @@ namespace Metalama.Framework.Engine.CompileTime
 
             void DeleteOutputFiles()
             {
-                RetryHelper.Retry(
-                    () =>
+                this._logger.Warning?.Log( $"Deleting directory '{outputDirectory}'." );
+
+                try
+                {
+                    // Try to delete with lock detection first to get a better error message.
+                    if ( Directory.Exists( outputDirectory ) )
                     {
-                        if ( Directory.Exists( outputDirectory ) )
+                        var files = Directory.GetFiles( outputDirectory );
+                        RetryHelper.RetryWithLockDetection( files, File.Delete, this._serviceProvider );
+                    }
+
+                    // Then delete the directory itself. At this point, we should no longer have locks. 
+                    RetryHelper.Retry(
+                        () =>
                         {
-                            Directory.Delete( outputDirectory, true );
-                        }
-                    },
-                    logger: this._logger );
+                            if ( Directory.Exists( outputDirectory ) )
+                            {
+                                Directory.Delete( outputDirectory, true );
+                            }
+                        },
+                        logger: this._logger );
+                }
+                catch ( Exception e )
+                {
+                    this._logger.Error?.Log( $"Cannot delete directory '{outputDirectory}': {e.Message}" );
+                }
             }
         }
 
@@ -611,7 +645,6 @@ namespace Metalama.Framework.Engine.CompileTime
             Compilation runTimeCompilation,
             IReadOnlyList<CompileTimeProject> referencedProjects,
             OutputPaths outputPaths,
-            string compileTimeAssemblyName,
             ulong projectHash,
             out CompileTimeProject? project )
         {
@@ -626,9 +659,18 @@ namespace Metalama.Framework.Engine.CompileTime
             }
 
             // Look on disk.
-            if ( !File.Exists( outputPaths.Pe ) || !File.Exists( outputPaths.Manifest ) )
+            if ( !File.Exists( outputPaths.Pe ) )
             {
-                this._logger.Trace?.Log( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation.AssemblyName}' ): not found." );
+                this._logger.Trace?.Log( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation.AssemblyName}' ): '{outputPaths.Pe}' not found." );
+
+                project = null;
+
+                return false;
+            }
+
+            if ( !File.Exists( outputPaths.Manifest ) )
+            {
+                this._logger.Trace?.Log( $"TryGetCompileTimeProjectFromCache( '{runTimeCompilation.AssemblyName}' ): '{outputPaths.Manifest}' not found." );
 
                 project = null;
 
@@ -644,7 +686,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 this._serviceProvider,
                 this._domain,
                 runTimeCompilation.Assembly.Identity,
-                new AssemblyIdentity( compileTimeAssemblyName ),
+                new AssemblyIdentity( outputPaths.CompileTimeAssemblyName ),
                 referencedProjects,
                 manifest,
                 outputPaths.Pe,
@@ -667,14 +709,13 @@ namespace Metalama.Framework.Engine.CompileTime
             out CompileTimeProject? project )
         {
             // Check the in-process cache.
-            var (sourceHash, projectHash, compileTimeAssemblyName, outputPaths) =
+            var (sourceHash, projectHash, outputPaths) =
                 this.GetPreCacheProjectInfo( runTimeCompilation, sourceTreesWithCompileTimeCode, referencedProjects );
 
             if ( !this.TryGetCompileTimeProjectFromCache(
                     runTimeCompilation,
                     referencedProjects,
                     outputPaths,
-                    compileTimeAssemblyName,
                     projectHash,
                     out project ) )
             {
@@ -686,14 +727,13 @@ namespace Metalama.Framework.Engine.CompileTime
                     return false;
                 }
 
-                using ( this.WithLock( compileTimeAssemblyName ) )
+                using ( this.WithLock( outputPaths.CompileTimeAssemblyName ) )
                 {
                     // Do a second cache lookup within the lock.
                     if ( this.TryGetCompileTimeProjectFromCache(
                             runTimeCompilation,
                             referencedProjects,
                             outputPaths,
-                            compileTimeAssemblyName,
                             projectHash,
                             out project ) )
                     {
@@ -707,7 +747,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             sourceTreesWithCompileTimeCode,
                             referencedProjects,
                             globalUsings,
-                            projectHash,
+                            outputPaths,
                             diagnosticSink,
                             cancellationToken,
                             out var compileTimeCompilation,
@@ -732,7 +772,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                 this._serviceProvider,
                                 this._domain,
                                 runTimeCompilation.Assembly.Identity,
-                                new AssemblyIdentity( compileTimeAssemblyName ),
+                                new AssemblyIdentity( outputPaths.CompileTimeAssemblyName ),
                                 referencedProjects );
                         }
 
@@ -756,34 +796,29 @@ namespace Metalama.Framework.Engine.CompileTime
                         var transitiveFabricType = compileTimeCompilation.GetTypeByMetadataName( typeof(TransitiveProjectFabric).FullName );
                         var templateProviderType = compileTimeCompilation.GetTypeByMetadataName( typeof(ITemplateProvider).FullName );
 
-                        var aspectTypes = compileTimeCompilation.Assembly
-                            .GetTypes()
+                        var aspectTypes = compileTimeCompilation.Assembly.GetTypes()
                             .Where( t => compileTimeCompilation.HasImplicitConversion( t, aspectType ) )
                             .Select( t => t.GetReflectionName().AssertNotNull() )
                             .ToList();
 
-                        var fabricTypes = compileTimeCompilation.Assembly
-                            .GetTypes()
+                        var fabricTypes = compileTimeCompilation.Assembly.GetTypes()
                             .Where(
                                 t => compileTimeCompilation.HasImplicitConversion( t, fabricType ) &&
                                      !compileTimeCompilation.HasImplicitConversion( t, transitiveFabricType ) )
                             .Select( t => t.GetReflectionName().AssertNotNull() )
                             .ToList();
 
-                        var transitiveFabricTypes = compileTimeCompilation.Assembly
-                            .GetTypes()
+                        var transitiveFabricTypes = compileTimeCompilation.Assembly.GetTypes()
                             .Where( t => compileTimeCompilation.HasImplicitConversion( t, transitiveFabricType ) )
                             .Select( t => t.GetReflectionName().AssertNotNull() )
                             .ToList();
 
-                        var compilerPlugInTypes = compileTimeCompilation.Assembly
-                            .GetTypes()
+                        var compilerPlugInTypes = compileTimeCompilation.Assembly.GetTypes()
                             .Where( t => t.GetAttributes().Any( a => a is { AttributeClass: { Name: nameof(MetalamaPlugInAttribute) } } ) )
                             .Select( t => t.GetReflectionName().AssertNotNull() )
                             .ToList();
 
-                        var otherTemplateTypes = compileTimeCompilation.Assembly
-                            .GetTypes()
+                        var otherTemplateTypes = compileTimeCompilation.Assembly.GetTypes()
                             .Where( t => compileTimeCompilation.HasImplicitConversion( t, templateProviderType ) )
                             .Select( t => t.GetReflectionName().AssertNotNull() )
                             .ToList();
@@ -812,6 +847,8 @@ namespace Metalama.Framework.Engine.CompileTime
                             outputPaths.Directory,
                             name => textMapDirectory.GetByName( name ) );
 
+                        this._logger.Trace?.Log( $"Writing manifest to '{outputPaths.Manifest}'." );
+
                         using ( var manifestStream = File.Create( outputPaths.Manifest ) )
                         {
                             manifest.Serialize( manifestStream );
@@ -825,7 +862,7 @@ namespace Metalama.Framework.Engine.CompileTime
             return true;
         }
 
-        private (ulong SourceHash, ulong ProjectHash, string CompileTimeAssemblyName, OutputPaths OutputPaths) GetPreCacheProjectInfo(
+        private (ulong SourceHash, ulong ProjectHash, OutputPaths OutputPaths) GetPreCacheProjectInfo(
             Compilation runTimeCompilation,
             IReadOnlyList<SyntaxTree> sourceTreesWithCompileTimeCode,
             IReadOnlyList<CompileTimeProject> referencedProjects,
@@ -836,28 +873,110 @@ namespace Metalama.Framework.Engine.CompileTime
             var sourceHash = ComputeSourceHash( targetFramework, sourceTreesWithCompileTimeCode, log );
             var projectHash = ComputeProjectHash( referencedProjects, sourceHash, log );
 
-            var compileTimeAssemblyName = GetCompileTimeAssemblyName( runTimeCompilation.AssemblyName!, projectHash );
-            var outputPaths = this.GetOutputPaths( runTimeCompilation.AssemblyName!, targetFramework, compileTimeAssemblyName );
+            var outputPaths = this.GetOutputPaths( runTimeCompilation.AssemblyName!, targetFramework, projectHash );
 
-            return (sourceHash, projectHash, compileTimeAssemblyName, outputPaths);
+            return (sourceHash, projectHash, outputPaths);
         }
 
-        private record OutputPaths( string? Directory, string Pe, string Pdb, string Manifest );
+        private record OutputPaths( string Directory, string Pe, string Pdb, string Manifest, string CompileTimeAssemblyName );
 
-        private OutputPaths GetOutputPaths( string runTimeAssemblyName, FrameworkName? targetFramework, string compileTimeAssemblyName )
+        private OutputPaths GetOutputPaths( string runTimeAssemblyName, FrameworkName? targetFramework, ulong projectHash )
         {
-            // We cannot include the full assembly name in the path because we're hitting the max path length.
+            if ( runTimeAssemblyName.StartsWith( _compileTimeAssemblyPrefix, StringComparison.Ordinal ) )
+            {
+                throw new ArgumentOutOfRangeException( nameof(runTimeAssemblyName) );
+            }
+
+            // Note: we must generate file paths that are smaller than 256 characters.
+
+            // Get a shorter name for the target framework.
+            string targetFrameworkName;
+
+            if ( targetFramework != null )
+            {
+                targetFrameworkName = "";
+
+                var splitByComma = targetFramework.FullName.Split( ',' );
+
+                for ( var partIndex = 0; partIndex < splitByComma.Length; partIndex++ )
+                {
+                    var namePart = splitByComma[partIndex];
+                    var splitByEqual = namePart.Split( '=' );
+
+                    string part;
+
+                    if ( splitByEqual.Length == 1 )
+                    {
+                        part = splitByEqual[0].ToLowerInvariant();
+                    }
+                    else
+                    {
+                        part = splitByEqual[1].ToLowerInvariant();
+                    }
+
+                    if ( partIndex == 1 )
+                    {
+                        part = part.TrimStart( 'v' );
+                    }
+
+                    if ( partIndex > 1 )
+                    {
+                        targetFrameworkName += "-";
+                    }
+
+                    targetFrameworkName += part;
+                }
+            }
+            else
+            {
+                targetFrameworkName = "unspecified";
+            }
+
+            // Get a shorter assembly name.
+            string shortAssemblyName;
+
+            if ( runTimeAssemblyName.Length > 32 )
+            {
+                // It does not matter if we put several assemblies in the same directory because we include a unique hash of the full name in a subdirectory anyway.
+                shortAssemblyName = runTimeAssemblyName.Substring( 0, 32 );
+            }
+            else
+            {
+                shortAssemblyName = runTimeAssemblyName;
+            }
+
+            // Get the directory name.
+            var hash = projectHash.ToString( "x16", CultureInfo.InvariantCulture );
+
             var directory = Path.Combine(
                 this._pathOptions.CompileTimeProjectCacheDirectory,
-                runTimeAssemblyName,
-                targetFramework?.FullName ?? "unspecified",
-                HashUtilities.HashString( compileTimeAssemblyName ) );
+                shortAssemblyName,
+                targetFrameworkName,
+                hash );
+
+            // Make sure that the base path is short enough. There should be 16 characters left.
+            var remainingPathLength = 256 - directory.Length;
+
+            if ( remainingPathLength < 16 )
+            {
+                throw new InvalidOperationException( $"The temporary path '{this._pathOptions.CompileTimeProjectCacheDirectory}' is too long." );
+            }
+
+            var baseCompileTimeAssemblyName = $"{_compileTimeAssemblyPrefix}{runTimeAssemblyName}";
+            var maxLength = remainingPathLength - 8 /* hash */ - 1 /* _ */ - 4 /* .dll */;
+
+            if ( baseCompileTimeAssemblyName.Length > maxLength )
+            {
+                baseCompileTimeAssemblyName = baseCompileTimeAssemblyName.Substring( 0, maxLength );
+            }
+
+            var compileTimeAssemblyName = baseCompileTimeAssemblyName + "_" + hash;
 
             var pe = Path.Combine( directory, compileTimeAssemblyName + ".dll" );
             var pdb = Path.ChangeExtension( pe, ".pdb" );
-            var manifest = Path.ChangeExtension( pe, ".manifest" );
+            var manifest = Path.Combine( directory, "manifest.json" );
 
-            return new OutputPaths( directory, pe, pdb, manifest );
+            return new OutputPaths( directory, pe, pdb, manifest, compileTimeAssemblyName );
         }
 
         /// <summary>
@@ -875,17 +994,17 @@ namespace Metalama.Framework.Engine.CompileTime
             out string? sourceDirectory )
         {
             this._logger.Trace?.Log( $"TryCompileDeserializedProject( '{runTimeAssemblyName}' )" );
-            var compileTimeAssemblyName = GetCompileTimeAssemblyName( runTimeAssemblyName, referencedProjects, syntaxTreeHash );
+            var compileTimeAssemblyName = ComputeProjectHash( referencedProjects, syntaxTreeHash );
 
             var outputPaths = this.GetOutputPaths( runTimeAssemblyName, targetFramework, compileTimeAssemblyName );
 
-            var compilation = this.CreateEmptyCompileTimeCompilation( compileTimeAssemblyName, referencedProjects )
+            var compilation = this.CreateEmptyCompileTimeCompilation( outputPaths.CompileTimeAssemblyName, referencedProjects )
                 .AddSyntaxTrees( syntaxTrees );
 
             assemblyPath = outputPaths.Pe;
             sourceDirectory = outputPaths.Directory;
 
-            using ( this.WithLock( compileTimeAssemblyName ) )
+            using ( this.WithLock( outputPaths.CompileTimeAssemblyName ) )
             {
                 if ( File.Exists( outputPaths.Pe ) )
                 {

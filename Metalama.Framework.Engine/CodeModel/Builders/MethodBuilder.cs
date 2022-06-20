@@ -6,7 +6,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
-using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
@@ -22,11 +22,22 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal sealed class MethodBuilder : MemberBuilder, IMethodBuilder, IMethodImpl
     {
+        private bool _isReadOnly;
+
         public ParameterBuilderList Parameters { get; } = new();
 
-        public GenericParameterBuilderList GenericParameters { get; } = new();
+        public GenericParameterBuilderList TypeParameters { get; } = new();
 
-        public override string Name { get; set; }
+        public bool IsReadOnly
+        {
+            get => this._isReadOnly;
+            set
+            {
+                this.CheckNotFrozen();
+
+                this._isReadOnly = value;
+            }
+        }
 
         public override bool IsImplicit => false;
 
@@ -46,17 +57,38 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         IMemberWithAccessors? IMethod.DeclaringMember => null;
 
-        public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant defaultValue = default )
+        public override void Freeze()
         {
-            var parameter = new ParameterBuilder( this, this.Parameters.Count, name, type, refKind );
+            base.Freeze();
+
+            foreach ( var parameter in this.Parameters )
+            {
+                parameter.Freeze();
+            }
+
+            foreach ( var typeParameter in this.TypeParameters )
+            {
+                typeParameter.Freeze();
+            }
+
+            this.ReturnParameter.Freeze();
+        }
+
+        public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant? defaultValue = null )
+        {
+            this.CheckNotFrozen();
+
+            var parameter = new ParameterBuilder( this.ParentAdvice, this, this.Parameters.Count, name, type, refKind );
             parameter.DefaultValue = defaultValue;
             this.Parameters.Add( parameter );
 
             return parameter;
         }
 
-        public IParameterBuilder AddParameter( string name, Type type, RefKind refKind = RefKind.None, object? defaultValue = null )
+        public IParameterBuilder AddParameter( string name, Type type, RefKind refKind = RefKind.None, TypedConstant? defaultValue = null )
         {
+            this.CheckNotFrozen();
+
             var iType = this.Compilation.Factory.GetTypeByReflectionType( type );
             var typeConstant = defaultValue != null ? new TypedConstant( iType, defaultValue ) : default;
 
@@ -65,18 +97,25 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public ITypeParameterBuilder AddTypeParameter( string name )
         {
-            var builder = new TypeParameterBuilder( this, this.GenericParameters.Count, name );
-            this.GenericParameters.Add( builder );
+            this.CheckNotFrozen();
+
+            var builder = new TypeParameterBuilder( this, this.TypeParameters.Count, name );
+            this.TypeParameters.Add( builder );
 
             return builder;
         }
 
         IParameterBuilder IMethodBuilder.ReturnParameter => this.ReturnParameter;
 
-        IType IMethodBuilder.ReturnType
+        public IType ReturnType
         {
             get => this.ReturnParameter.Type;
-            set => this.ReturnParameter.Type = value ?? throw new ArgumentNullException( nameof(value) );
+            set
+            {
+                this.CheckNotFrozen();
+
+                this.ReturnParameter.Type = value ?? throw new ArgumentNullException( nameof(value) );
+            }
         }
 
         IType IMethod.ReturnType => this.ReturnParameter.Type;
@@ -87,16 +126,14 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         IParameterList IHasParameters.Parameters => this.Parameters;
 
-        IGenericParameterList IGeneric.TypeParameters => this.GenericParameters;
+        IGenericParameterList IGeneric.TypeParameters => this.TypeParameters;
 
-        public bool IsOpenGeneric => this.GenericParameters.Count > 0 || this.DeclaringType.IsOpenGeneric;
+        public bool IsOpenGeneric => this.TypeParameters.Count > 0 || this.DeclaringType.IsOpenGeneric;
 
-        public bool IsGeneric => this.GenericParameters.Count > 0;
+        public bool IsGeneric => this.TypeParameters.Count > 0;
 
         // We don't currently support adding other methods than default ones.
         public MethodKind MethodKind => MethodKind.Default;
-
-        public bool IsReadOnly { get; set; }
 
         System.Reflection.MethodBase IMethodBase.ToMethodBase() => this.ToMethodInfo();
 
@@ -106,13 +143,14 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations { get; private set; } = Array.Empty<IMethod>();
 
-        public MethodBuilder( Advice parentAdvice, INamedType targetType, string name, IObjectReader tags )
-            : base( parentAdvice, targetType, tags )
+        public MethodBuilder( Advice parentAdvice, INamedType targetType, string name, IObjectReader initializerTags )
+            : base( parentAdvice, targetType, name )
         {
             this.Name = name;
 
             this.ReturnParameter =
                 new ParameterBuilder(
+                    this.ParentAdvice,
                     this,
                     -1,
                     null,
@@ -126,7 +164,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             var method =
                 MethodDeclaration(
-                    this.GetAttributeLists( context.SyntaxGenerationContext ),
+                    this.GetAttributeLists( context )
+                        .AddRange( this.ReturnParameter.GetAttributeLists( context ) ),
                     this.GetSyntaxModifierList(),
                     context.SyntaxGenerator.ReturnType( this ),
                     this.ExplicitInterfaceImplementations.Count > 0

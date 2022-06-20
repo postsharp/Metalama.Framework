@@ -5,7 +5,6 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Utilities;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.SourceGeneration;
-using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
@@ -87,9 +86,8 @@ public class AnalysisProcessProjectHandler : ProjectHandler
             }
         }
 
-#pragma warning disable CS8603 // Possible null reference return -- analyzer bug
-        return this.LastSourceGeneratorResult.AssertNotNull();
-#pragma warning restore CS8603
+        // LastSourceGeneratorResult can still be null here if the pipeline failed.
+        return this.LastSourceGeneratorResult ?? SourceGeneratorResult.Empty;
     }
 
     /// <summary>

@@ -4,6 +4,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -13,7 +14,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 {
     internal abstract class DeclarationCollection<TDeclaration, TRef> : IReadOnlyCollection<TDeclaration>
         where TDeclaration : class, IDeclaration
-        where TRef : IRefImpl<TDeclaration>
+        where TRef : IRefImpl<TDeclaration>, IEquatable<TRef>
     {
         internal IDeclaration? ContainingDeclaration { get; }
 
@@ -38,9 +39,22 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 
         public IEnumerator<TDeclaration> GetEnumerator()
         {
-            foreach ( var sourceItem in this.Source )
+            if ( this.Source is UpdatableDeclarationCollection<TDeclaration, TRef> updatableCollection )
             {
-                yield return this.GetItem( sourceItem );
+                // We don't use the list enumeration pattern because this may lead to infinite recursions
+                // if the loop body adds items during the enumeration.
+
+                foreach ( var reference in updatableCollection )
+                {
+                    yield return this.GetItem( reference );
+                }
+            }
+            else
+            {
+                foreach ( var reference in this.Source )
+                {
+                    yield return this.GetItem( reference );
+                }
             }
         }
 
@@ -48,9 +62,11 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 
         public int Count => this.Source.Count;
 
-        protected TDeclaration GetItem( in TRef reference ) => reference.GetTarget( this.Compilation );
+        // We allow resolving references to missing declarations because the collection may be a child collection of a missing declaration,
+        // for instance the parameters of a method that has been introduced into the current compilation but is not included in the current compilation.
+        protected TDeclaration GetItem( in TRef reference ) => reference.GetTarget( this.Compilation, ReferenceResolutionOptions.CanBeMissing );
 
-        protected IEnumerable<TDeclaration> GetItems( IEnumerable<Ref<TDeclaration>> references ) => references.Select( x => x.GetTarget( this.Compilation ) );
+        protected IEnumerable<TDeclaration> GetItems( IEnumerable<TRef> references ) => references.Select( x => x.GetTarget( this.Compilation ) );
 
         public override string ToString()
         {

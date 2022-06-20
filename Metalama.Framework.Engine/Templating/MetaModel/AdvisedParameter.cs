@@ -18,11 +18,11 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public RefKind RefKind => this.Underlying.RefKind;
 
-        public TypedConstant DefaultValue => this.Underlying.DefaultValue;
+        public TypedConstant? DefaultValue => this.Underlying.DefaultValue;
 
         public bool IsParams => this.Underlying.IsParams;
 
-        public IMember DeclaringMember => this.Underlying.DeclaringMember;
+        public IHasParameters DeclaringMember => this.Underlying.DeclaringMember;
 
         public ParameterInfo ToParameterInfo() => this.Underlying.ToParameterInfo();
 

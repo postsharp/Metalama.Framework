@@ -795,7 +795,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             var introducedMember = this._introductionRegistry.GetIntroducedMemberForSymbol( aspectReference.ContainingSymbol );
 
-            return introducedMember.AssertNotNull().Introduction.Advice.Aspect;
+            return introducedMember.AssertNotNull().Introduction.ParentAdvice.Aspect;
         }
 
         private static string GetOriginalImplMemberName( ISymbol symbol ) => GetSpecialMemberName( symbol, "Source" );

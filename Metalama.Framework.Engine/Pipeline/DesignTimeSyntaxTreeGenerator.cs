@@ -28,19 +28,20 @@ namespace Metalama.Framework.Engine.Pipeline
             IServiceProvider serviceProvider,
             UserDiagnosticSink diagnostics,
             CancellationToken cancellationToken,
-            out IReadOnlyList<IntroducedSyntaxTree> additionalSyntaxTrees )
+            out IReadOnlyCollection<IntroducedSyntaxTree> additionalSyntaxTrees )
         {
-            var additionalSyntaxTreeList = new List<IntroducedSyntaxTree>();
-            additionalSyntaxTrees = additionalSyntaxTreeList;
+            var additionalSyntaxTreeDictionary = new Dictionary<string, IntroducedSyntaxTree>();
+            additionalSyntaxTrees = additionalSyntaxTreeDictionary.Values;
 
             LexicalScopeFactory lexicalScopeFactory = new( compilationModel );
             var introductionNameProvider = new LinkerIntroductionNameProvider();
             var aspectReferenceSyntaxProvider = new LinkerAspectReferenceSyntaxProvider();
 
             // Get all observable transformations except replacements, because replacements are not visible at design time.
-            var observableTransformations = transformations.OfType<IObservableTransformation>().Where( t => t is not IReplaceMemberTransformation );
+            var observableTransformations = transformations.Where( t => t is IObservableTransformation and not IReplaceMemberTransformation );
 
-            foreach ( var transformationGroup in observableTransformations.GroupBy( t => t.ContainingDeclaration ) )
+            foreach ( var transformationGroup in
+                     observableTransformations.GroupBy( t => ((IObservableTransformation) t).ContainingDeclaration ) )
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
@@ -77,7 +78,8 @@ namespace Metalama.Framework.Engine.Pipeline
                             aspectReferenceSyntaxProvider,
                             lexicalScopeFactory,
                             syntaxGenerationContext,
-                            serviceProvider );
+                            serviceProvider,
+                            compilationModel );
 
                         var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext )
                             .Select( m => m.Syntax.NormalizeWhitespace() );
@@ -127,7 +129,12 @@ namespace Metalama.Framework.Engine.Pipeline
                 var generatedSyntaxTree = SyntaxTree( compilationUnit.NormalizeWhitespace(), encoding: Encoding.UTF8 );
                 var syntaxTreeName = declaringType.FullName + ".cs";
 
-                additionalSyntaxTreeList.Add( new IntroducedSyntaxTree( syntaxTreeName, originalSyntaxTree, generatedSyntaxTree ) );
+                for ( var i = 1; additionalSyntaxTreeDictionary.ContainsKey( syntaxTreeName ); i++ )
+                {
+                    syntaxTreeName = $"{declaringType.FullName}_{i}.cs";
+                }
+
+                additionalSyntaxTreeDictionary.Add( syntaxTreeName, new IntroducedSyntaxTree( syntaxTreeName, originalSyntaxTree, generatedSyntaxTree ) );
             }
         }
 

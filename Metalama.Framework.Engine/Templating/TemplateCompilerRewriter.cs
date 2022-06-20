@@ -497,7 +497,8 @@ namespace Metalama.Framework.Engine.Templating
                             return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.TypeOf) ) )
                                 .AddArgumentListArguments(
                                     Argument( SyntaxFactoryEx.LiteralExpression( typeOfAnnotation.Data! ) ),
-                                    Argument( this.CreateTypeParameterSubstitutionDictionary( nameof(TemplateTypeArgument.Syntax) ) ) );
+                                    Argument(
+                                        this.CreateTypeParameterSubstitutionDictionary( nameof(TemplateTypeArgument.SyntaxWithoutNullabilityAnnotations) ) ) );
                         }
 
                         break;

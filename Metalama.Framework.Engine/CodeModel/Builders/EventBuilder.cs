@@ -5,7 +5,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
-using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Transformations;
@@ -22,6 +22,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
     {
+        private readonly IObjectReader _initializerTags;
+
         public bool IsEventField { get; }
 
         public EventBuilder(
@@ -29,15 +31,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             INamedType targetType,
             string name,
             bool isEventField,
-            IObjectReader tags )
-            : base( parentAdvice, targetType, tags )
+            IObjectReader initializerTags )
+            : base( parentAdvice, targetType, name )
         {
-            this.Name = name;
+            this._initializerTags = initializerTags;
             this.IsEventField = isEventField;
             this.Type = (INamedType) targetType.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(EventHandler) );
         }
-
-        public override string Name { get; set; }
 
         public override bool IsImplicit => false;
 
@@ -87,6 +87,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 this.Type,
                 this.InitializerExpression,
                 this.InitializerTemplate,
+                this._initializerTags,
                 out var initializerExpression,
                 out var initializerMethod );
 
@@ -95,7 +96,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             MemberDeclarationSyntax @event =
                 this.IsEventField && this.ExplicitInterfaceImplementations.Count == 0
                     ? EventFieldDeclaration(
-                        this.GetAttributeLists( context.SyntaxGenerationContext ),
+                        this.GetAttributeLists( context ),
                         this.GetSyntaxModifierList(),
                         VariableDeclaration(
                             syntaxGenerator.Type( this.Type.GetSymbol() ),
@@ -110,7 +111,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                                             : null ) // TODO: Initializer.
                                 } ) ) )
                     : EventDeclaration(
-                        this.GetAttributeLists( context.SyntaxGenerationContext ),
+                        this.GetAttributeLists( context ),
                         this.GetSyntaxModifierList(),
                         syntaxGenerator.Type( this.Type.GetSymbol() ),
                         this.ExplicitInterfaceImplementations.Count > 0
@@ -202,5 +203,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         }
 
         IType IHasType.Type => this.Type;
+
+        public override void Freeze()
+        {
+            base.Freeze();
+
+            ((DeclarationBuilder?) this.AddMethod)?.Freeze();
+            ((DeclarationBuilder?) this.RemoveMethod)?.Freeze();
+        }
     }
 }

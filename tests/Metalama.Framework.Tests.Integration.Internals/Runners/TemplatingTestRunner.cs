@@ -3,7 +3,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine;
-using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
@@ -323,6 +323,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             var metaApi = MetaApi.ForMethod(
                 targetMethod,
                 new MetaApiProperties(
+                    compilation,
                     diagnostics,
                     template.Template.Cast(),
                     ObjectReader.GetReader( new { TestKey = "TestValue" } ),
@@ -335,7 +336,6 @@ namespace Metalama.Framework.Tests.Integration.Runners
             return (new TemplateExpansionContext(
                         templateInstance,
                         metaApi,
-                        compilation,
                         lexicalScope,
                         serviceProvider.GetRequiredService<SyntaxSerializationService>(),
                         syntaxGenerationContext,
