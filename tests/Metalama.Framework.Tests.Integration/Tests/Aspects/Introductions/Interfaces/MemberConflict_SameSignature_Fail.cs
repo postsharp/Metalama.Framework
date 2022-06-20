@@ -2,7 +2,7 @@ using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.MemberConflict_SameSignature_Implicit
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.MemberConflict_SameSignature_Fail
 {
     /*
      * Tests that when a member of the same signature already exists in the target class for an implicit interface member, an error is emitted.

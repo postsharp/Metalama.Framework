@@ -35,7 +35,11 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Remove="Tests\Aspects\Misc\UserDeclarativeAdvice - Copy.t.cs" />
+      <Compile Remove="Tests\Aspects\Introductions\Interfaces\MemberConflict_Incompatible_Ignore - Copy.t.cs" />
+      <Compile Remove="Tests\Aspects\Introductions\Interfaces\MemberConflict_SameSignature_Explicit - Copy.t.cs" />
+      <Compile Remove="Tests\Aspects\Introductions\Interfaces\MemberConflict_SameSignature_UseExisting - Copy (2).t.cs" />
+      <Compile Remove="Tests\Aspects\Introductions\Interfaces\MemberConflict_SameSignature_UseExisting - Copy - Copy.t.cs" />
+      <Compile Remove="Tests\Aspects\Introductions\Interfaces\MemberConflict_SameSignature_UseExisting - Copy.t.cs" />
     </ItemGroup>
 
     <ItemGroup>
@@ -48,13 +52,46 @@
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
     </ItemGroup>
 
+    <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets" />
+
     <ItemGroup>
-      <None Include="Tests\Aspects\Misc\UserDeclarativeAdvice_NonTemplate.t.cs">
+      <None Include="Tests\Aspects\Introductions\Interfaces\MemberConflict_Incompatible_Ignore - Copy.t.cs">
         <SubType>Code</SubType>
-        <DependentUpon>UserDeclarativeAdvice_NonTemplate.cs</DependentUpon>
+        <DependentUpon>MemberConflict_Incompatible_Ignore.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Aspects\Introductions\Interfaces\MemberConflict_SameSignature_UseExisting - Copy (2).t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>MemberConflict_SameSignature_UseExisting.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Aspects\Introductions\Interfaces\MemberConflict_SameSignature_UseExisting - Copy - Copy.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>MemberConflict_SameSignature_MakeExplicit.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Aspects\Introductions\Interfaces\MemberConflict_SameSignature_UseExisting - Copy.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>MemberConflict_SameSignature_UseExisting.cs</DependentUpon>
       </None>
     </ItemGroup>
 
-    <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets" />
+    <ItemGroup>
+      <None Update="C:\Dev\Metalama\Tests\Metalama.Framework.Tests.Integration\Tests\Aspects\Introductions\Interfaces\InterfaceConflict_Ignore.t.cs">
+        <DependentUpon>InterfaceConflict_Ignore.cs</DependentUpon>
+      </None>
+      <None Update="C:\Dev\Metalama\Tests\Metalama.Framework.Tests.Integration\Tests\Aspects\Introductions\Interfaces\InterfaceConflict_Fail.t.cs">
+        <DependentUpon>InterfaceConflict_Fail.cs</DependentUpon>
+      </None>
+      <None Update="C:\Dev\Metalama\Tests\Metalama.Framework.Tests.Integration\Tests\Aspects\Introductions\Interfaces\InterfaceConflict_DerivedAfterBase.t.cs">
+        <DependentUpon>InterfaceConflict_DerivedAfterBase.cs</DependentUpon>
+      </None>
+      <None Update="C:\Dev\Metalama\Tests\Metalama.Framework.Tests.Integration\Tests\Aspects\Introductions\Interfaces\InterfaceConflict_BaseAfterDerived_Fail.t.cs">
+        <DependentUpon>InterfaceConflict_BaseAfterDerived_Fail.cs</DependentUpon>
+      </None>
+      <None Update="C:\Dev\Metalama\Tests\Metalama.Framework.Tests.Integration\Tests\Aspects\Introductions\Interfaces\MemberConflict_Incompatible_Ignore.t.cs">
+        <DependentUpon>MemberConflict_Incompatible_Ignore.cs</DependentUpon>
+      </None>
+      <None Update="C:\Dev\Metalama\Tests\Metalama.Framework.Tests.Integration\Tests\Aspects\Introductions\Interfaces\MemberConflict_SameSignature_UseExisting.t.cs">
+        <DependentUpon>MemberConflict_SameSignature_UseExisting.cs</DependentUpon>
+      </None>
+    </ItemGroup>
 
 </Project>

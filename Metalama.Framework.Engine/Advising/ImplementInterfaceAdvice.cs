@@ -15,6 +15,7 @@ using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Accessibility = Metalama.Framework.Code.Accessibility;
@@ -55,6 +56,20 @@ namespace Metalama.Framework.Engine.Advising
 
         public override void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
         {
+            switch ( this.OverrideStrategy )
+            {
+                case OverrideStrategy.Fail:
+                case OverrideStrategy.Ignore:
+                    break;
+
+                default:
+                    diagnosticAdder.Report(
+                        AdviceDiagnosticDescriptors.InterfaceUnsupportedOverrideStrategy.CreateRoslynDiagnostic(
+                            this.GetDiagnosticLocation(),
+                            (this.Aspect.AspectClass.ShortName, this.InterfaceType, this.TargetDeclaration.GetTarget(this.SourceCompilation), this.OverrideStrategy) ) );
+                    break;
+            }
+
             // When initializing, it is not known which types the target type is implementing.
             // Therefore, a specification for all interfaces should be prepared and only diagnostics related advice parameters and aspect class
             // should be reported.            
@@ -62,8 +77,7 @@ namespace Metalama.Framework.Engine.Advising
             var aspectTypeName = this.Aspect.AspectClass.FullName.AssertNotNull();
             var aspectType = this.SourceCompilation.GetCompilationModel().Factory.GetTypeByReflectionName( aspectTypeName );
 
-            // We introduce all interfaces except the base interfaces that were added before. That means that the previous introductions
-            // have precedence.
+            // Prepare all interface types that need to be introduced.
             var interfacesToIntroduce =
                 new[] { (this.InterfaceType, IsTopLevel: true) }
                     .Concat( this.InterfaceType.AllImplementedInterfaces.Select( i => (InterfaceType: i, IsTopLevel: false) ) )
@@ -254,32 +268,31 @@ namespace Metalama.Framework.Engine.Advising
             //      1) Target type already implements the interface.
             //      2) Target type already implements an ancestor of the interface.
 
-            var targetType = this.TargetDeclaration.GetTarget( compilation );
+            var targetType = this.TargetDeclaration.GetTarget( compilation ).AssertNotNull();
+            var diagnostics = new DiagnosticList();
+            var interfacesWithErrors = new HashSet<INamedType>(compilation.InvariantComparer);
+
+            if (this.OverrideStrategy == OverrideStrategy.Fail)
+            {
+                // If override strategy is Fail, run the first iteration to report errors.
+
+                foreach ( var interfaceSpecification in this._interfaceSpecifications )
+                {
+
+                }
+            }
 
             foreach ( var interfaceSpecification in this._interfaceSpecifications )
-            {
+            {                    
                 // Validate that the interface must be introduced to the specific target.
-
-                if ( targetType.AllImplementedInterfaces.Any(
-                        t => compilation.InvariantComparer.Equals( t, interfaceSpecification.InterfaceType ) ) )
+                if ( targetType.AllImplementedInterfaces.Any( t => compilation.InvariantComparer.Equals( t, interfaceSpecification.InterfaceType ) ) )
                 {
-                    // Conflict on the introduced interface itself.
-                    switch ( this.OverrideStrategy )
-                    {
-                        case OverrideStrategy.Fail:
-                            // Report the diagnostic.
-                            return AdviceImplementationResult.Failed(
-                                AdviceDiagnosticDescriptors.InterfaceIsAlreadyImplemented.CreateRoslynDiagnostic(
-                                    targetType.GetDiagnosticLocation(),
-                                    (this.Aspect.AspectClass.ShortName, interfaceSpecification.InterfaceType, targetType) ) );
+                    interfacesWithErrors.Add( interfaceSpecification.InterfaceType );
 
-                        case OverrideStrategy.Ignore:
-                            // Nothing to do.
-                            break;
-
-                        default:
-                            throw new NotImplementedException( $"The OverrideStrategy {this.OverrideStrategy} is not implemented." );
-                    }
+                    diagnostics.Report(
+                        AdviceDiagnosticDescriptors.InterfaceIsAlreadyImplemented.CreateRoslynDiagnostic(
+                            targetType.GetDiagnosticLocation(),
+                            (this.Aspect.AspectClass.ShortName, interfaceSpecification.InterfaceType, targetType) ) );
 
                     continue;
                 }
@@ -305,15 +318,17 @@ namespace Metalama.Framework.Engine.Advising
                                 switch ( memberSpec.OverrideStrategy )
                                 {
                                     case InterfaceMemberOverrideStrategy.Fail:
-                                        return AdviceImplementationResult.Failed(
+                                        diagnostics.Report(
                                             AdviceDiagnosticDescriptors.ImplicitInterfaceMemberAlreadyExists.CreateRoslynDiagnostic(
                                                 targetType.GetDiagnosticLocation(),
                                                 (this.Aspect.AspectClass.ShortName, interfaceMethod, targetType, existingMethod) ) );
 
+                                        continue;
+
                                     case InterfaceMemberOverrideStrategy.UseExisting:
                                         if ( !existingMethod.SemanticEquals( interfaceMethod ) )
                                         {
-                                            return AdviceImplementationResult.Failed(
+                                            diagnostics.Report(
                                                 AdviceDiagnosticDescriptors.ImplicitInterfaceMemberIsNotCompatible.CreateRoslynDiagnostic(
                                                     targetType.GetDiagnosticLocation(),
                                                     (this.Aspect.AspectClass.ShortName, interfaceMethod, targetType, existingMethod) ) );
@@ -326,7 +341,7 @@ namespace Metalama.Framework.Engine.Advising
                                         break;
 
                                     default:
-                                        throw new NotImplementedException( $"The strategy OverrideStrategy.{this.OverrideStrategy} is not implemented." );
+                                        throw new AssertionFailedException();
                                 }
                             }
                             else
@@ -366,16 +381,18 @@ namespace Metalama.Framework.Engine.Advising
                                 switch ( memberSpec.OverrideStrategy )
                                 {
                                     case InterfaceMemberOverrideStrategy.Fail:
-                                        return AdviceImplementationResult.Failed(
+                                        diagnostics.Report(
                                             AdviceDiagnosticDescriptors.ImplicitInterfaceMemberAlreadyExists.CreateRoslynDiagnostic(
                                                 targetType.GetDiagnosticLocation(),
                                                 (this.Aspect.AspectClass.ShortName, interfaceProperty, targetType, existingProperty) ) );
 
+                                        continue;
+
                                     case InterfaceMemberOverrideStrategy.UseExisting:
                                         if ( !existingProperty.SemanticEquals(interfaceProperty))
                                         {
-                                            return AdviceImplementationResult.Failed(
-                                                AdviceDiagnosticDescriptors.ImplicitInterfaceMemberIsNotCompatible.CreateRoslynDiagnostic(
+                                            diagnostics.Report(
+                                                    AdviceDiagnosticDescriptors.ImplicitInterfaceMemberIsNotCompatible.CreateRoslynDiagnostic(
                                                     targetType.GetDiagnosticLocation(),
                                                     (this.Aspect.AspectClass.ShortName, interfaceProperty, targetType, existingProperty) ) );
                                         }
@@ -444,10 +461,12 @@ namespace Metalama.Framework.Engine.Advising
                                 switch ( memberSpec.OverrideStrategy )
                                 {
                                     case InterfaceMemberOverrideStrategy.Fail:
-                                        return AdviceImplementationResult.Failed(
+                                        diagnostics.Report(
                                             AdviceDiagnosticDescriptors.ImplicitInterfaceMemberAlreadyExists.CreateRoslynDiagnostic(
                                                 targetType.GetDiagnosticLocation(),
                                                 (this.Aspect.AspectClass.ShortName, interfaceEvent, targetType, existingEvent) ) );
+
+                                        continue;
 
                                     case InterfaceMemberOverrideStrategy.UseExisting:
                                         if ( !existingEvent.SemanticEquals( interfaceEvent ) )
@@ -517,7 +536,12 @@ namespace Metalama.Framework.Engine.Advising
                 }
             }
 
-            return AdviceImplementationResult.Success( targetType );
+            if (diagnostics.HasErrors())
+            {
+                return AdviceImplementationResult.Failed( diagnostics.ToImmutableArray() );
+            }
+
+            return AdviceImplementationResult.Success( Framework.Advising.AdviceOutcome.Default, this.TargetDeclaration.As<IDeclaration>(), diagnostics.Count > 0 ? diagnostics.ToImmutableArray() : null);
         }
 
         private MemberBuilder GetImplMethodBuilder(

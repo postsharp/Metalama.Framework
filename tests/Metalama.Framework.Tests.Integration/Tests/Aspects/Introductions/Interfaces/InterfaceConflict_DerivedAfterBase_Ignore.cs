@@ -4,10 +4,10 @@ using Metalama.Framework.Code;
 
 #pragma warning disable CS0067
 
-namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.Inheritance_DerivedAfterBase
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.InterfaceConflict_DerivedAfterBase_Ignore
 {
     /*
-     * Tests that when a single aspect introduces a base interface beforethe derived interface, the aspect succeeds.
+     * Tests that when a single aspect introduces a base interface before the derived interface, the remainder of derived interface is implemented.
      */
 
     public interface IBaseInterface

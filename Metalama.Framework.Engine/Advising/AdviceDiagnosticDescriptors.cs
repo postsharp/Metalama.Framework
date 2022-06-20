@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using static Metalama.Framework.Diagnostics.Severity;
@@ -11,7 +12,7 @@ namespace Metalama.Framework.Engine.Advising
 {
     public static class AdviceDiagnosticDescriptors
     {
-        // Reserved range 500-599
+        // Reserved range 500-599.
 
         private const string _category = "Metalama.Advices";
 
@@ -133,7 +134,17 @@ namespace Metalama.Framework.Engine.Advising
                 _category,
                 Error );
 
-        // 520-529: Parameter introduction diagnostics.
+        internal static readonly DiagnosticDefinition<(string AspectType, INamedType InterfaceType, INamedType TargetType, OverrideStrategy Strategy)>
+            InterfaceUnsupportedOverrideStrategy = new(
+                "LAMA0516",
+                "Using unsupported override strategy for interface type.",
+                "The aspect '{0}' cannot introduce interface '{1}' into type '{2}' with 'whenExists={3}' because it is not supported." +
+                "Only Ignore or Fail strategies are supported for interface types. You can use 'whenExists' on individual members.",
+                _category,
+                Error );
+
+        // Subrange 520-529: Parameter introduction diagnostics.
+
         internal static readonly DiagnosticDefinition<(string AspectType, IConstructor Constructor)>
             CannotIntroduceParameterIntoStaticConstructor = new(
                 "LAMA0520",

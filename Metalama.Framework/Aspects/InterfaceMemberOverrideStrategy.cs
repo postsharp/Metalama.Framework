@@ -28,5 +28,10 @@ namespace Metalama.Framework.Aspects
         /// The advice introduces the interface member as explicit even if the interface member was supposed to be introduced as implicit.
         /// </summary>
         MakeExplicit = 2,
+
+        /// <summary>
+        /// The advice overrides the target declaration using the template specified for the interface member. The advice fails with a compilation error if it is not possible.
+        /// </summary>
+        Override = 3,
     }
 }
