@@ -223,7 +223,7 @@ namespace Metalama.Framework.Engine.Advising
             ThrowOnErrors( initializationDiagnostics );
             this.State.Diagnostics.Report( initializationDiagnostics );
 
-            // Implement the aspect. This should report errors for any situation that does depend on the target declaration.
+            // Implement the advice. This should report errors for any situation that does depend on the target declaration.
             // These errors are reported as diagnostics.
             var result = advice.Implement(
                 this.State.ServiceProvider,
