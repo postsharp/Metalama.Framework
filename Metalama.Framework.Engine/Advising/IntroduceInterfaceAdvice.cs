@@ -261,7 +261,7 @@ namespace Metalama.Framework.Engine.Advising
                 // Validate that the interface must be introduced to the specific target.
 
                 if ( targetType.AllImplementedInterfaces.Any(
-                        t => compilation.GetCompilationModel().InvariantComparer.Equals( t, interfaceSpecification.InterfaceType ) ) )
+                        t => compilation.InvariantComparer.Equals( t, interfaceSpecification.InterfaceType ) ) )
                 {
                     // Conflict on the introduced interface itself.
                     switch ( this.OverrideStrategy )
@@ -293,6 +293,8 @@ namespace Metalama.Framework.Engine.Advising
 
                     var mergedTags = ObjectReader.Merge( this.Tags, memberSpec.Tags );
 
+                    bool isExplicit;
+
                     switch ( memberSpec.InterfaceMember )
                     {
                         case IMethod interfaceMethod:
@@ -300,24 +302,40 @@ namespace Metalama.Framework.Engine.Advising
 
                             if ( existingMethod != null && !memberSpec.IsExplicit )
                             {
-                                switch ( this.OverrideStrategy )
+                                switch ( memberSpec.OverrideStrategy )
                                 {
-                                    case OverrideStrategy.Fail:
+                                    case InterfaceMemberOverrideStrategy.Fail:
                                         return AdviceImplementationResult.Failed(
-                                            AdviceDiagnosticDescriptors.ImplicitInterfaceMemberConflict.CreateRoslynDiagnostic(
+                                            AdviceDiagnosticDescriptors.ImplicitInterfaceMemberAlreadyExists.CreateRoslynDiagnostic(
                                                 targetType.GetDiagnosticLocation(),
-                                                (this.Aspect.AspectClass.ShortName, interfaceSpecification.InterfaceType, targetType, existingMethod) ) );
+                                                (this.Aspect.AspectClass.ShortName, interfaceMethod, targetType, existingMethod) ) );
 
-                                    case OverrideStrategy.Ignore:
+                                    case InterfaceMemberOverrideStrategy.UseExisting:
+                                        if ( !existingMethod.SemanticEquals( interfaceMethod ) )
+                                        {
+                                            return AdviceImplementationResult.Failed(
+                                                AdviceDiagnosticDescriptors.ImplicitInterfaceMemberIsNotCompatible.CreateRoslynDiagnostic(
+                                                    targetType.GetDiagnosticLocation(),
+                                                    (this.Aspect.AspectClass.ShortName, interfaceMethod, targetType, existingMethod) ) );
+                                        }
+
                                         continue;
+
+                                    case InterfaceMemberOverrideStrategy.MakeExplicit:
+                                        isExplicit = true;
+                                        break;
 
                                     default:
                                         throw new NotImplementedException( $"The strategy OverrideStrategy.{this.OverrideStrategy} is not implemented." );
                                 }
                             }
+                            else
+                            {
+                                isExplicit = memberSpec.IsExplicit;
+                            }
 
                             var aspectMethod = (IMethod) memberSpec.AspectInterfaceMember!;
-                            memberBuilder = this.GetImplMethodBuilder( targetType, interfaceMethod, memberSpec.IsExplicit, mergedTags );
+                            memberBuilder = this.GetImplMethodBuilder( targetType, interfaceMethod, isExplicit, mergedTags );
                             interfaceMemberMap.Add( interfaceMethod, memberBuilder );
 
                             addTransformation(
@@ -328,7 +346,7 @@ namespace Metalama.Framework.Engine.Advising
                                         TemplateMember.Create(
                                                 aspectMethod,
                                                 memberSpec.TemplateClassMember,
-                                                 (ITemplateAttribute) memberSpec.TemplateClassMember.TemplateInfo.Attribute.AssertNotNull(),
+                                                (ITemplateAttribute) memberSpec.TemplateClassMember.TemplateInfo.Attribute.AssertNotNull(),
                                                 TemplateKind.Introduction )
                                             .ForIntroduction(),
                                         mergedTags )
@@ -345,20 +363,36 @@ namespace Metalama.Framework.Engine.Advising
 
                             if ( existingProperty != null && !memberSpec.IsExplicit )
                             {
-                                switch ( this.OverrideStrategy )
+                                switch ( memberSpec.OverrideStrategy )
                                 {
-                                    case OverrideStrategy.Fail:
+                                    case InterfaceMemberOverrideStrategy.Fail:
                                         return AdviceImplementationResult.Failed(
-                                            AdviceDiagnosticDescriptors.ImplicitInterfaceMemberConflict.CreateRoslynDiagnostic(
+                                            AdviceDiagnosticDescriptors.ImplicitInterfaceMemberAlreadyExists.CreateRoslynDiagnostic(
                                                 targetType.GetDiagnosticLocation(),
-                                                (this.Aspect.AspectClass.ShortName, interfaceSpecification.InterfaceType, targetType, existingProperty) ) );
+                                                (this.Aspect.AspectClass.ShortName, interfaceProperty, targetType, existingProperty) ) );
 
-                                    case OverrideStrategy.Ignore:
+                                    case InterfaceMemberOverrideStrategy.UseExisting:
+                                        if ( !existingProperty.SemanticEquals(interfaceProperty))
+                                        {
+                                            return AdviceImplementationResult.Failed(
+                                                AdviceDiagnosticDescriptors.ImplicitInterfaceMemberIsNotCompatible.CreateRoslynDiagnostic(
+                                                    targetType.GetDiagnosticLocation(),
+                                                    (this.Aspect.AspectClass.ShortName, interfaceProperty, targetType, existingProperty) ) );
+                                        }
+
                                         continue;
+
+                                    case InterfaceMemberOverrideStrategy.MakeExplicit:
+                                        isExplicit = true;
+                                        break;
 
                                     default:
                                         throw new NotImplementedException( $"The strategy OverrideStrategy.{this.OverrideStrategy} is not implemented." );
                                 }
+                            }
+                            else
+                            {
+                                isExplicit = memberSpec.IsExplicit;
                             }
 
                             var aspectProperty = (IProperty?) memberSpec.AspectInterfaceMember;
@@ -369,7 +403,7 @@ namespace Metalama.Framework.Engine.Advising
                                 interfaceProperty,
                                 (IProperty?) memberSpec.TargetMember ?? (IProperty) memberSpec.AspectInterfaceMember.AssertNotNull(),
                                 buildAutoProperty,
-                                memberSpec.IsExplicit,
+                                isExplicit,
                                 aspectProperty?.SetMethod?.IsImplicit ?? false,
                                 mergedTags );
 
@@ -407,26 +441,42 @@ namespace Metalama.Framework.Engine.Advising
 
                             if ( existingEvent != null && !memberSpec.IsExplicit )
                             {
-                                switch ( this.OverrideStrategy )
+                                switch ( memberSpec.OverrideStrategy )
                                 {
-                                    case OverrideStrategy.Fail:
+                                    case InterfaceMemberOverrideStrategy.Fail:
                                         return AdviceImplementationResult.Failed(
-                                            AdviceDiagnosticDescriptors.ImplicitInterfaceMemberConflict.CreateRoslynDiagnostic(
+                                            AdviceDiagnosticDescriptors.ImplicitInterfaceMemberAlreadyExists.CreateRoslynDiagnostic(
                                                 targetType.GetDiagnosticLocation(),
-                                                (this.Aspect.AspectClass.ShortName, interfaceSpecification.InterfaceType, targetType, existingEvent) ) );
+                                                (this.Aspect.AspectClass.ShortName, interfaceEvent, targetType, existingEvent) ) );
 
-                                    case OverrideStrategy.Ignore:
+                                    case InterfaceMemberOverrideStrategy.UseExisting:
+                                        if ( !existingEvent.SemanticEquals( interfaceEvent ) )
+                                        {
+                                            return AdviceImplementationResult.Failed(
+                                                AdviceDiagnosticDescriptors.ImplicitInterfaceMemberIsNotCompatible.CreateRoslynDiagnostic(
+                                                    targetType.GetDiagnosticLocation(),
+                                                    (this.Aspect.AspectClass.ShortName, interfaceEvent, targetType, existingEvent) ) );
+                                        }
+
                                         continue;
+
+                                    case InterfaceMemberOverrideStrategy.MakeExplicit:
+                                        isExplicit = true;
+                                        break;
 
                                     default:
                                         throw new NotImplementedException( $"The strategy OverrideStrategy.{this.OverrideStrategy} is not implemented." );
                                 }
                             }
+                            else
+                            {
+                                isExplicit = memberSpec.IsExplicit;
+                            }
 
                             var aspectEvent = memberSpec.AspectInterfaceMember;
                             var isEventField = aspectEvent != null && ((IEvent) aspectEvent).IsEventField();
 
-                            memberBuilder = this.GetImplEventBuilder( targetType, interfaceEvent, isEventField, memberSpec.IsExplicit );
+                            memberBuilder = this.GetImplEventBuilder( targetType, interfaceEvent, isEventField, isExplicit );
                             interfaceMemberMap.Add( interfaceEvent, memberBuilder );
 
                             if ( !isEventField )

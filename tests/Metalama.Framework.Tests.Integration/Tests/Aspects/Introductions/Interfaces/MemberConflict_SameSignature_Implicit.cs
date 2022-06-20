@@ -17,10 +17,11 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     {
         public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
+            // Should fail even for ignore.
             aspectBuilder.Advice.ImplementInterface(
                 aspectBuilder.Target,
                 typeof(IInterface),
-                whenExists: OverrideStrategy.Fail );
+                whenExists: OverrideStrategy.Ignore );
         }
 
         [InterfaceMember(IsExplicit = false)]

@@ -23,12 +23,14 @@ namespace Metalama.Framework.Engine.Advising
 
             public IObjectReader? Tags { get; }
 
+            public InterfaceMemberOverrideStrategy OverrideStrategy => ((InterfaceMemberAttribute) this.TemplateClassMember.TemplateInfo.Attribute!).WhenExists;
+
             public MemberSpecification(
                 IMember interfaceMember,
                 IMember? targetMember,
                 IMember? aspectInterfaceMember,
                 TemplateClassMember templateClassMember,
-                IObjectReader? tags )
+                IObjectReader? tags)
             {
                 this.InterfaceMember = interfaceMember;
                 this.TargetMember = targetMember;

@@ -12,6 +12,7 @@ namespace Metalama.Framework.Engine.Advising
     {
         public static bool SignatureEquals( this IMethod method, IMethod other )
         {
+            // TODO: Custom modifiers.
             return method.Name == other.Name
                    && method.TypeParameters.Count == other.TypeParameters.Count
                    && method.Parameters.Count == other.Parameters.Count
@@ -35,11 +36,11 @@ namespace Metalama.Framework.Engine.Advising
             return @event.Name == other.Name;
         }
 
-        public static bool SignatureEquals( this IIndexer property, IIndexer other )
+        public static bool SignatureEquals( this IIndexer indexer, IIndexer other )
         {
-            return property.Name == other.Name
-                   && property.Parameters.Count == other.Parameters.Count
-                   && property.Parameters
+            return indexer.Name == other.Name
+                   && indexer.Parameters.Count == other.Parameters.Count
+                   && indexer.Parameters
                        .Select( ( p, i ) => (p, i) )
                        .All(
                            app =>
@@ -47,6 +48,42 @@ namespace Metalama.Framework.Engine.Advising
                                    app.p.Type.GetSymbol().AssertNotNull(),
                                    other.Parameters[app.i].Type.GetSymbol().AssertNotNull() )
                                && app.p.RefKind == other.Parameters[app.i].RefKind );
+        }
+
+        public static bool SemanticEquals( this IMethod method, IMethod other )
+        {
+            // TODO: Type parameter contains, nullability.
+            return SignatureEquals(method, other)
+                   && SignatureTypeSymbolComparer.Instance.Equals(
+                       method.ReturnType.GetSymbol().AssertNotNull(),
+                       other.ReturnType.GetSymbol().AssertNotNull() );
+        }
+
+        public static bool SemanticEquals( this IProperty property, IProperty other )
+        {
+            // TODO: nullability.
+            return SignatureEquals( property, other )
+                   && SignatureTypeSymbolComparer.Instance.Equals(
+                       property.Type.GetSymbol().AssertNotNull(),
+                       other.Type.GetSymbol().AssertNotNull() );
+        }
+
+        public static bool SemanticEquals( this IEvent @event, IEvent other )
+        {
+            // TODO: nullability.
+            return SignatureEquals( @event, other )
+                   && SignatureTypeSymbolComparer.Instance.Equals(
+                       @event.Type.GetSymbol().AssertNotNull(),
+                       other.Type.GetSymbol().AssertNotNull() );
+        }
+
+        public static bool SemanticEquals( this IIndexer indexer, IIndexer other )
+        {
+            // TODO: nullability.
+            return SignatureEquals( indexer, other )
+                   && SignatureTypeSymbolComparer.Instance.Equals(
+                       indexer.Type.GetSymbol().AssertNotNull(),
+                       other.Type.GetSymbol().AssertNotNull() );
         }
     }
 }
