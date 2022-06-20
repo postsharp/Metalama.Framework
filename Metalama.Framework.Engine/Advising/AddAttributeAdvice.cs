@@ -58,10 +58,6 @@ internal class AddAttributeAdvice : Advice
                     case OverrideStrategy.Ignore:
                         return AdviceImplementationResult.Ignored;
 
-                    case OverrideStrategy.New:
-
-                        return AddTransformations( AdviceOutcome.New );
-
                     case OverrideStrategy.Override:
                         var removeTransformation = new RemoveAttributesTransformation(
                             this,

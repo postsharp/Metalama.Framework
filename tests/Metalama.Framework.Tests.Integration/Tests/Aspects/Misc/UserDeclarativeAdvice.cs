@@ -15,7 +15,7 @@ public class MyAdviceAttribute : DeclarativeAdviceAttribute, ITemplateAttribute
 
     Accessibility? ITemplateAttribute.Accessibility { get; }
 
-    public override void BuildAspect( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder )
+    public override void BuildAdvice( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder )
     {
         builder.Advice.IntroduceField( (INamedType) builder.Target, templateMemberId );
     }

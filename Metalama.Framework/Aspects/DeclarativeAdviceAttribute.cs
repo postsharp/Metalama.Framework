@@ -33,5 +33,5 @@ public abstract class DeclarativeAdviceAttribute : Attribute, IAdviceAttribute
     /// <param name="templateMemberId">The a value that represents <paramref name="templateMember"/> and that must be supplied to <see cref="IAdviceFactory"/>.
     ///     It is not actually the name, but a unique identifier of <paramref name="templateMember"/>.</param>
     /// <param name="builder">An <see cref="IAspectBuilder{TAspectTarget}"/>.</param>
-    public abstract void BuildAspect( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder );
+    public abstract void BuildAdvice( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder );
 }

@@ -12,7 +12,7 @@ public interface IIntroductionAdviceResult<out T> : IAdviceResult
     where T : class, ICompilationElement
 {
     /// <summary>
-    /// Gets the introduced declaration.
+    /// Gets the introduced or overridden declaration.
     /// </summary>
     T Declaration { get; }
 }

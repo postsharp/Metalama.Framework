@@ -37,7 +37,6 @@ namespace Metalama.Framework.Advising
         /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template method.</param>
         /// <param name="tags">An optional opaque object of anonymous type passed to the template method and exposed under the <see cref="meta.Tags"/> property
         ///     of the <see cref="meta"/> API.</param>
-        /// <remarks>When an aspect overrides the same declaration in same aspect part multiple, the order of distinct pieces of advice is equal to the inverse of order of calls of this method.</remarks>
         /// <seealso href="@overriding-members"/>
         IOverrideAdviceResult<IMethod> Override( IMethod targetMethod, in MethodTemplateSelector template, object? args = null, object? tags = null );
 
@@ -77,7 +76,6 @@ namespace Metalama.Framework.Advising
         ///     This property must be annotated with <see cref="TemplateAttribute"/>.</param>
         /// <param name="tags">An optional opaque object of anonymous type passed to the template property and exposed under the <see cref="meta.Tags"/> property of the
         ///     <see cref="meta"/> API.</param>
-        /// <remarks>When an aspect overrides the same declaration in same aspect part multiple, the order of distinct pieces of advice is equal to the inverse of order of calls of this method.</remarks>
         /// <seealso href="@overriding-members"/>
         IOverrideAdviceResult<IProperty> Override(
             IFieldOrProperty targetFieldOrProperty,
@@ -100,7 +98,6 @@ namespace Metalama.Framework.Advising
         /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template methods.</param>
         /// <param name="tags">An optional opaque object of anonymous type passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
         ///     <see cref="meta"/> API.</param>
-        /// <remarks>When an aspect overrides the same declaration in same aspect part multiple, the order of distinct pieces of advice is equal to the inverse of order of calls of this method.</remarks>
         /// <seealso href="@overriding-members"/>
         IOverrideAdviceResult<IProperty> OverrideAccessors(
             IFieldOrProperty targetFieldOrProperty,
@@ -296,7 +293,6 @@ namespace Metalama.Framework.Advising
         /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template methods.</param>
         /// <param name="tags">An optional opaque object of anonymous type passed to the template method and exposed under the <see cref="meta.Tags"/> property of the
         ///     <see cref="meta"/> API.</param>
-        /// <remarks>When an aspect overrides the same declaration in same aspect part multiple, the order of distinct pieces of advice is equal to the inverse of order of calls of this method.</remarks>
         /// <seealso href="@overriding-members"/>
         IOverrideAdviceResult<IEvent> OverrideAccessors(
             IEvent targetEvent,
