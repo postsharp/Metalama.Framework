@@ -40,9 +40,8 @@ namespace Metalama.Framework.Engine.CodeModel
                 PartialCompilation baseCompilation,
                 IReadOnlyList<SyntaxTreeModification>? modifiedSyntaxTrees,
                 IReadOnlyList<SyntaxTree>? addedTrees,
-                IReadOnlyList<SyntaxTree>? removedTrees,
                 ImmutableArray<ManagedResource> resources )
-                : base( baseCompilation, modifiedSyntaxTrees, addedTrees, removedTrees, resources )
+                : base( baseCompilation, modifiedSyntaxTrees, addedTrees, resources )
             {
                 this._types = types;
                 this._syntaxTrees = syntaxTrees;
@@ -71,7 +70,6 @@ namespace Metalama.Framework.Engine.CodeModel
             public override PartialCompilation Update(
                 IReadOnlyList<SyntaxTreeModification>? replacedTrees = null,
                 IReadOnlyList<SyntaxTree>? addedTrees = null,
-                IReadOnlyList<SyntaxTree>? removedTrees = null,
                 ImmutableArray<ManagedResource> resources = default )
             {
                 this.Validate( addedTrees, replacedTrees );
@@ -99,16 +97,8 @@ namespace Metalama.Framework.Engine.CodeModel
                     }
                 }
 
-                if ( removedTrees != null )
-                {
-                    foreach ( var removedTree in removedTrees )
-                    {
-                        syntaxTrees.Remove( removedTree.FilePath );
-                    }
-                }
-
                 // TODO: when the compilation is modified, we should update the set of types and derived types.
-                return new PartialImpl( syntaxTrees.ToImmutable(), null, this, replacedTrees, addedTrees, removedTrees, resources );
+                return new PartialImpl( syntaxTrees.ToImmutable(), null, this, replacedTrees, addedTrees, resources );
             }
         }
     }

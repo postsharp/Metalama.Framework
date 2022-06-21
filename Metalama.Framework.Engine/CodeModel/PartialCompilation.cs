@@ -73,7 +73,6 @@ namespace Metalama.Framework.Engine.CodeModel
             PartialCompilation baseCompilation,
             IReadOnlyList<SyntaxTreeModification>? modifiedSyntaxTrees,
             IReadOnlyList<SyntaxTree>? addedSyntaxTrees,
-            IReadOnlyList<SyntaxTree>? removedSyntaxTrees,
             ImmutableArray<ManagedResource> newResources )
         {
             this.InitialCompilation = baseCompilation.InitialCompilation;
@@ -91,13 +90,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
                 modifiedTreeBuilder.AddRange(
                     addedSyntaxTrees.Select( t => new KeyValuePair<string, SyntaxTreeModification>( t.FilePath, new SyntaxTreeModification( t ) ) ) );
-            }
-
-            if ( removedSyntaxTrees != null )
-            {
-                compilation = compilation.RemoveSyntaxTrees( removedSyntaxTrees );
-
-                modifiedTreeBuilder.RemoveRange( removedSyntaxTrees.Select( t => t.FilePath ) );
             }
 
             if ( modifiedSyntaxTrees != null )
@@ -177,7 +169,7 @@ namespace Metalama.Framework.Engine.CodeModel
             => this.Update( modifications, additions );
 
         public IPartialCompilation WithAdditionalResources( params ManagedResource[] resources )
-            => this.Update( null, null, null, this.Resources.AddRange( resources ) );
+            => this.Update( null, null, this.Resources.AddRange( resources ) );
 
         public ImmutableArray<ManagedResource> Resources { get; }
 
@@ -188,7 +180,6 @@ namespace Metalama.Framework.Engine.CodeModel
         public abstract PartialCompilation Update(
             IReadOnlyList<SyntaxTreeModification>? replacedTrees = null,
             IReadOnlyList<SyntaxTree>? addedTrees = null,
-            IReadOnlyList<SyntaxTree>? removedTrees = null,
             ImmutableArray<ManagedResource> resources = default );
 
         /// <summary>
