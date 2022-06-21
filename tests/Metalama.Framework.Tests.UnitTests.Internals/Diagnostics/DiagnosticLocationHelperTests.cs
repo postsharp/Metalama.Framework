@@ -46,7 +46,7 @@ class C<T> : object
 
             // Constructors
             AssertLocation( "C", type.Constructors.Single().GetDiagnosticLocation() );
-            AssertLocation( "C", type.StaticConstructor.GetDiagnosticLocation() );
+            AssertLocation( "C", type.StaticConstructor!.GetDiagnosticLocation() );
 
             // Methods
             AssertLocation( "Method", method.GetDiagnosticLocation() );

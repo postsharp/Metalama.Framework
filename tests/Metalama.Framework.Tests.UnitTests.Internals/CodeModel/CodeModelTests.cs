@@ -695,7 +695,7 @@ class Class<T>
             Assert.Equal( "Action<string>", openType.Events.Single().ForTypeInstance( typeInstance ).Type.ToString() );
             Assert.Equal( "string", openType.Methods.Single().ForTypeInstance( typeInstance ).ReturnType.ToString() );
             Assert.Equal( "string", openType.Constructors.Single().ForTypeInstance( typeInstance ).Parameters.ElementAt( 0 ).Type.ToString() );
-            Assert.Equal( typeInstance, openType.StaticConstructor.ForTypeInstance( typeInstance ).DeclaringType );
+            Assert.Equal( typeInstance, openType.StaticConstructor!.ForTypeInstance( typeInstance ).DeclaringType );
         }
 
         [Fact]
