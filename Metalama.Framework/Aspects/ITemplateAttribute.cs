@@ -5,9 +5,6 @@ using Metalama.Framework.Code;
 
 namespace Metalama.Framework.Aspects;
 
-[RunTimeOrCompileTime]
-public interface IAdviceAttribute { }
-
 public interface ITemplateAttribute : IAdviceAttribute
 {
     string? Name { get; }

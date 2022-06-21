@@ -41,7 +41,7 @@ internal interface ISyntaxBuilderImpl
 
     object TypedConstant( in TypedConstant typedConstant );
 
-    IExpression This( INamedType type );
+    IExpression ThisExpression( INamedType type );
 
     IExpression ToExpression( IFieldOrProperty fieldOrProperty, IExpression? instance );
 

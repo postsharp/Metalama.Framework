@@ -1308,10 +1308,32 @@ namespace Metalama.Framework.Engine.Templating
         #endregion
 
         public override SyntaxNode? VisitAttribute( AttributeSyntax node )
-            =>
+        {
+            var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node.Name );
 
-                // Don't process attributes.
-                node;
+            if ( symbol is IMethodSymbol constructor
+                 && constructor.ContainingNamespace.ToString().StartsWith( "Metalama.Framework", StringComparison.Ordinal ) )
+            {
+                node = node.AddColoringAnnotation( TextSpanClassification.CompileTime );
+            }
+
+            // Otherwise, don't process attributes.
+            return node;
+        }
+
+        public override SyntaxNode? VisitAttributeList( AttributeListSyntax node )
+        {
+            var annotatedList = (AttributeListSyntax) base.VisitAttributeList( node )!;
+
+            if ( annotatedList.Attributes.All( a => a.GetColorFromAnnotation() == TextSpanClassification.CompileTime ) )
+            {
+                return annotatedList.AddColoringAnnotation( TextSpanClassification.CompileTime );
+            }
+            else
+            {
+                return annotatedList;
+            }
+        }
 
         private T? VisitMemberDeclaration<T>( T node, Func<T, T> visitImplementation )
             where T : SyntaxNode
@@ -1348,17 +1370,65 @@ namespace Metalama.Framework.Engine.Templating
         }
 
         public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
-            => this.VisitMemberDeclaration( node, n => node.WithBody( this.Visit( n.Body ) ).WithExpressionBody( this.Visit( n.ExpressionBody ) ) );
+        {
+            return this.VisitMemberDeclaration(
+                node,
+                n => node
+                    .WithBody( this.Visit( n.Body ) )
+                    .WithExpressionBody( this.Visit( n.ExpressionBody ) )
+                    .WithAttributeLists( this.VisitList( node.AttributeLists ) )
+                    .WithParameterList( this.Visit( node.ParameterList ) )
+                    .WithTypeParameterList( this.Visit( node.TypeParameterList ) ) );
+        }
+
+        public override SyntaxNode? VisitParameter( ParameterSyntax node )
+        {
+            var annotatedNode = (ParameterSyntax) base.VisitParameter( node )!;
+
+            if ( this._currentTemplateMember != null )
+            {
+                var symbol = this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node );
+
+                if ( symbol != null && this.GetSymbolScope( symbol ) == TemplatingScope.CompileTimeOnly )
+                {
+                    annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.CompileTime );
+                }
+            }
+
+            return annotatedNode;
+        }
+
+        public override SyntaxNode? VisitTypeParameter( TypeParameterSyntax node )
+        {
+            var annotatedNode = base.VisitTypeParameter( node )!;
+
+            if ( this._currentTemplateMember != null )
+            {
+                var symbol = this._syntaxTreeAnnotationMap.GetDeclaredSymbol( node );
+
+                if ( symbol != null && this.GetSymbolScope( symbol ) == TemplatingScope.CompileTimeOnlyReturningRuntimeOnly )
+                {
+                    annotatedNode = annotatedNode.AddColoringAnnotation( TextSpanClassification.CompileTime );
+                }
+            }
+
+            return annotatedNode;
+        }
 
         public override SyntaxNode? VisitAccessorDeclaration( AccessorDeclarationSyntax node )
-            => this.VisitMemberDeclaration( node, n => node.WithBody( this.Visit( n.Body ) ).WithExpressionBody( this.Visit( n.ExpressionBody ) ) );
+            => this.VisitMemberDeclaration(
+                node,
+                n => node.WithBody( this.Visit( n.Body ) )
+                    .WithExpressionBody( this.Visit( n.ExpressionBody ) )
+                    .WithAttributeLists( this.VisitList( node.AttributeLists ) ) );
 
         public override SyntaxNode? VisitPropertyDeclaration( PropertyDeclarationSyntax node )
             => this.VisitMemberDeclaration(
                 node,
                 n => n.WithAccessorList( this.Visit( n.AccessorList ) )
                     .WithExpressionBody( this.Visit( n.ExpressionBody ) )
-                    .WithInitializer( this.Visit( n.Initializer ) ) );
+                    .WithInitializer( this.Visit( n.Initializer ) )
+                    .WithAttributeLists( this.VisitList( node.AttributeLists ) ) );
 
         public override SyntaxNode? VisitEventDeclaration( EventDeclarationSyntax node )
             => this.VisitMemberDeclaration( node, n => n.WithAccessorList( this.Visit( n.AccessorList ) ) );

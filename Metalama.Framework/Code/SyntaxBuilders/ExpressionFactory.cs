@@ -154,7 +154,7 @@ public static class ExpressionFactory
     /// Gets a <c>this</c> expression for the given type.
     /// </summary>
     /// <param name="type">A type.</param>
-    public static IExpression This( INamedType type ) => SyntaxBuilder.CurrentImplementation.This( type );
+    public static IExpression This( INamedType type ) => SyntaxBuilder.CurrentImplementation.ThisExpression( type );
 
     /// <summary>
     /// Gets an <see cref="IExpression"/> that represents a given field or property.

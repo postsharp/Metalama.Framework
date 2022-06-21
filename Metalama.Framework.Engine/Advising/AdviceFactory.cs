@@ -223,7 +223,7 @@ namespace Metalama.Framework.Engine.Advising
             ThrowOnErrors( initializationDiagnostics );
             this.State.Diagnostics.Report( initializationDiagnostics );
 
-            // Implement the aspect. This should report errors for any situation that does depend on the target declaration.
+            // Implement the advice. This should report errors for any situation that does depend on the target declaration.
             // These errors are reported as diagnostics.
             var result = advice.Implement(
                 this.State.ServiceProvider,
@@ -358,7 +358,7 @@ namespace Metalama.Framework.Engine.Advising
             string defaultTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Action<IMethodBuilder>? buildAction = null,
+            Action<IMethodBuilder>? buildMethod = null,
             object? args = null,
             object? tags = null )
         {
@@ -386,7 +386,7 @@ namespace Metalama.Framework.Engine.Advising
                 template.ForIntroduction( ObjectReader.GetReader( args ) ),
                 scope,
                 whenExists,
-                buildAction,
+                buildMethod,
                 this._layerName,
                 ObjectReader.GetReader( tags ) );
 
@@ -487,7 +487,7 @@ namespace Metalama.Framework.Engine.Advising
             string templateName,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Action<IFieldBuilder>? buildAction = null,
+            Action<IFieldBuilder>? buildField = null,
             object? tags = null )
         {
             if ( this._templateInstance == null )
@@ -509,7 +509,7 @@ namespace Metalama.Framework.Engine.Advising
                 template,
                 scope,
                 whenExists,
-                buildAction,
+                buildField,
                 this._layerName,
                 ObjectReader.GetReader( tags ) );
 
@@ -522,7 +522,7 @@ namespace Metalama.Framework.Engine.Advising
             IType fieldType,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Action<IFieldBuilder>? buildAction = null,
+            Action<IFieldBuilder>? buildField = null,
             object? tags = null )
         {
             if ( this._templateInstance == null )
@@ -544,7 +544,7 @@ namespace Metalama.Framework.Engine.Advising
                 builder =>
                 {
                     builder.Type = fieldType;
-                    buildAction?.Invoke( builder );
+                    buildField?.Invoke( builder );
                 },
                 this._layerName,
                 ObjectReader.GetReader( tags ) );
@@ -558,7 +558,7 @@ namespace Metalama.Framework.Engine.Advising
             Type fieldType,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Action<IFieldBuilder>? buildAction = null,
+            Action<IFieldBuilder>? buildField = null,
             object? tags = null )
             => this.IntroduceField(
                 targetType,
@@ -566,7 +566,7 @@ namespace Metalama.Framework.Engine.Advising
                 this._compilation.Factory.GetTypeByReflectionType( fieldType ),
                 scope,
                 whenExists,
-                buildAction,
+                buildField,
                 tags );
 
         public IIntroductionAdviceResult<IProperty> IntroduceAutomaticProperty(
@@ -575,7 +575,7 @@ namespace Metalama.Framework.Engine.Advising
             IType propertyType,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Action<IPropertyBuilder>? buildAction = null,
+            Action<IPropertyBuilder>? buildProperty = null,
             object? tags = null )
         {
             if ( this._templateInstance == null )
@@ -597,7 +597,7 @@ namespace Metalama.Framework.Engine.Advising
                 default,
                 scope,
                 whenExists,
-                buildAction,
+                buildProperty,
                 this._layerName,
                 ObjectReader.GetReader( tags ) );
 
@@ -610,7 +610,7 @@ namespace Metalama.Framework.Engine.Advising
             Type propertyType,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Action<IPropertyBuilder>? buildAction = null,
+            Action<IPropertyBuilder>? buildProperty = null,
             object? tags = null )
             => this.IntroduceAutomaticProperty(
                 targetType,
@@ -618,7 +618,7 @@ namespace Metalama.Framework.Engine.Advising
                 this._compilation.Factory.GetTypeByReflectionType( propertyType ),
                 scope,
                 whenExists,
-                buildAction,
+                buildProperty,
                 tags );
 
         public IIntroductionAdviceResult<IProperty> IntroduceProperty(
@@ -626,7 +626,7 @@ namespace Metalama.Framework.Engine.Advising
             string defaultTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Action<IPropertyBuilder>? buildAction = null,
+            Action<IPropertyBuilder>? buildProperty = null,
             object? tags = null )
         {
             if ( this._templateInstance == null )
@@ -659,7 +659,7 @@ namespace Metalama.Framework.Engine.Advising
                 accessorTemplates.Set.ForIntroduction(),
                 scope,
                 whenExists,
-                buildAction,
+                buildProperty,
                 this._layerName,
                 ObjectReader.GetReader( tags ) );
 
@@ -673,7 +673,7 @@ namespace Metalama.Framework.Engine.Advising
             string? setTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Action<IPropertyBuilder>? buildAction = null,
+            Action<IPropertyBuilder>? buildProperty = null,
             object? args = null,
             object? tags = null )
         {
@@ -715,7 +715,7 @@ namespace Metalama.Framework.Engine.Advising
                 setTemplateRef.ForIntroduction( parameterReaders ),
                 scope,
                 whenExists,
-                buildAction,
+                buildProperty,
                 this._layerName,
                 ObjectReader.GetReader( tags ) );
 
@@ -779,7 +779,7 @@ namespace Metalama.Framework.Engine.Advising
             string eventTemplate,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Action<IEventBuilder>? buildAction = null,
+            Action<IEventBuilder>? buildEvent = null,
             object? tags = null )
         {
             if ( this._templateInstance == null )
@@ -809,7 +809,7 @@ namespace Metalama.Framework.Engine.Advising
                 default,
                 scope,
                 whenExists,
-                buildAction,
+                buildEvent,
                 this._layerName,
                 ObjectReader.GetReader( tags ),
                 ObjectReader.Empty );
@@ -825,7 +825,7 @@ namespace Metalama.Framework.Engine.Advising
             string? invokeTemplate = null,
             IntroductionScope scope = IntroductionScope.Default,
             OverrideStrategy whenExists = OverrideStrategy.Default,
-            Action<IEventBuilder>? buildAction = null,
+            Action<IEventBuilder>? buildEvent = null,
             object? args = null,
             object? tags = null )
         {
@@ -859,7 +859,7 @@ namespace Metalama.Framework.Engine.Advising
                 removeTemplateRef,
                 scope,
                 whenExists,
-                buildAction,
+                buildEvent,
                 this._layerName,
                 ObjectReader.GetReader( tags ),
                 ObjectReader.GetReader( args ) );
@@ -1191,7 +1191,7 @@ namespace Metalama.Framework.Engine.Advising
             IType parameterType,
             TypedConstant defaultValue,
             Func<IParameter, IConstructor, PullAction>? pullAction = null,
-            Action<IParameterBuilder>? buildAction = null )
+            ImmutableArray<AttributeConstruction> attributes = default )
         {
             if ( this._templateInstance == null )
             {
@@ -1208,7 +1208,7 @@ namespace Metalama.Framework.Engine.Advising
                 this._layerName,
                 parameterName,
                 parameterType,
-                buildAction,
+                attributes.IsDefaultOrEmpty ? null : builder => builder.AddAttributes( attributes ),
                 pullAction,
                 defaultValue );
 
@@ -1221,13 +1221,13 @@ namespace Metalama.Framework.Engine.Advising
             Type parameterType,
             TypedConstant defaultValue,
             Func<IParameter, IConstructor, PullAction>? pullAction = null,
-            Action<IParameterBuilder>? buildAction = null )
+            ImmutableArray<AttributeConstruction> attributes = default )
             => this.IntroduceParameter(
                 constructor,
                 parameterName,
                 this._compilation.Factory.GetTypeByReflectionType( parameterType ),
                 defaultValue,
                 pullAction,
-                buildAction );
+                attributes );
     }
 }

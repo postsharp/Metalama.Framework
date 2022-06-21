@@ -77,7 +77,7 @@ namespace Metalama.Framework.Aspects
                     _ => $"the aspect contains a declarative introduction and therefore cannot be applied to an interface" ) );
         }
 
-        public override void BuildAspect( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder )
+        public override void BuildAdvice( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder )
         {
             INamedType targetType;
 

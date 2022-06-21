@@ -28,10 +28,10 @@ namespace Metalama.Framework.Engine.Pipeline
             IServiceProvider serviceProvider,
             UserDiagnosticSink diagnostics,
             CancellationToken cancellationToken,
-            out IReadOnlyList<IntroducedSyntaxTree> additionalSyntaxTrees )
+            out IReadOnlyCollection<IntroducedSyntaxTree> additionalSyntaxTrees )
         {
-            var additionalSyntaxTreeList = new List<IntroducedSyntaxTree>();
-            additionalSyntaxTrees = additionalSyntaxTreeList;
+            var additionalSyntaxTreeDictionary = new Dictionary<string, IntroducedSyntaxTree>();
+            additionalSyntaxTrees = additionalSyntaxTreeDictionary.Values;
 
             LexicalScopeFactory lexicalScopeFactory = new( compilationModel );
             var introductionNameProvider = new LinkerIntroductionNameProvider();
@@ -127,7 +127,12 @@ namespace Metalama.Framework.Engine.Pipeline
                 var generatedSyntaxTree = SyntaxTree( compilationUnit.NormalizeWhitespace(), encoding: Encoding.UTF8 );
                 var syntaxTreeName = declaringType.FullName + ".cs";
 
-                additionalSyntaxTreeList.Add( new IntroducedSyntaxTree( syntaxTreeName, originalSyntaxTree, generatedSyntaxTree ) );
+                for ( var i = 1; additionalSyntaxTreeDictionary.ContainsKey( syntaxTreeName ); i++ )
+                {
+                    syntaxTreeName = $"{declaringType.FullName}_{i}.cs";
+                }
+
+                additionalSyntaxTreeDictionary.Add( syntaxTreeName, new IntroducedSyntaxTree( syntaxTreeName, originalSyntaxTree, generatedSyntaxTree ) );
             }
         }
 

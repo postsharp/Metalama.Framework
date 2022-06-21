@@ -11,14 +11,14 @@ public class MyAspect : TypeAspect
         builder.Advice.IntroduceAutomaticProperty( builder.Target, "P1", typeof(int) );
 
         // Change property visibility.
-        builder.Advice.IntroduceAutomaticProperty( builder.Target, "P2", typeof(int), buildAction: p => { p.Accessibility = Accessibility.Protected; } );
+        builder.Advice.IntroduceAutomaticProperty( builder.Target, "P2", typeof(int), buildProperty: p => { p.Accessibility = Accessibility.Protected; } );
 
         // Change accessor visibility.
         builder.Advice.IntroduceAutomaticProperty(
             builder.Target,
             "P3",
             typeof(int),
-            buildAction: p =>
+            buildProperty: p =>
             {
                 p.Accessibility = Accessibility.Public;
                 p.SetMethod!.Accessibility = Accessibility.Protected;
