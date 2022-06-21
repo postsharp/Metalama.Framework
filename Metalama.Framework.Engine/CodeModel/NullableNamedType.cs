@@ -142,7 +142,9 @@ internal class NullableNamedType : INamedTypeInternal
 
     IConstructorCollection INamedType.Constructors => this._underlying.Constructors;
 
-    IConstructor INamedType.StaticConstructor => this._underlying.StaticConstructor;
+    IConstructor? INamedType.StaticConstructor => this._underlying.StaticConstructor;
+
+    IMethod? INamedType.Finalizer => this._underlying.Finalizer;
 
     bool INamedType.IsReadOnly => this._underlying.IsReadOnly;
 

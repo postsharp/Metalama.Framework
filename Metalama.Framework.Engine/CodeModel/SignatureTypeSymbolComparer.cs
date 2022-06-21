@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Metalama.Framework.Engine.Advices
+namespace Metalama.Framework.Engine.Advising
 {
     /// <summary>
     /// Compares symbols for purposes of method signature comparison.

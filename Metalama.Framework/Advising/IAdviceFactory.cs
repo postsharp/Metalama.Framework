@@ -69,6 +69,26 @@ namespace Metalama.Framework.Advising
             object? tags = null );
 
         /// <summary>
+        /// Introduces a finalizer or overrides the implementation of the existing one.
+        /// </summary>
+        /// <param name="targetType">The type into which the finalizer must be introduced.</param>
+        /// <param name="template">Name of the method of the aspect class that will be used as a template for the introduced finalizer. This method must be
+        ///     annotated with <see cref="TemplateAttribute"/>. This method can parameters and a return type. The actual parameters and return type
+        ///     of the introduced method can be modified using the <see cref="IMethodBuilder"/> returned by this method.</param>
+        /// <param name="whenExists">Determines the implementation strategy when a finalizer is already declared in the target type.
+        ///     The default strategy is to fail with a compile-time error.</param>
+        /// <param name="args">An object (typically of anonymous type) whose properties map to parameters or type parameters of the template methods.</param>
+        /// <param name="tags">An optional opaque object of anonymous type passed to the template method and exposed under the <see cref="meta.Tags"/> property
+        ///     of the <see cref="meta"/> API.</param>
+        /// <seealso href="@introducing-members"/>
+        IIntroductionAdviceResult<IMethod> IntroduceFinalizer(
+            INamedType targetType,
+            string template,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            object? args = null,
+            object? tags = null );
+
+        /// <summary>
         /// Overrides a field or property by specifying a property template.
         /// </summary>
         /// <param name="targetFieldOrProperty">The field or property to override.</param>

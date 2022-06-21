@@ -3,7 +3,6 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
@@ -550,7 +549,7 @@ namespace Metalama.Framework.Engine.Advising
             bool isExplicit,
             IObjectReader tags )
         {
-            var methodBuilder = new MethodBuilder( this, declaringType, interfaceMethod.Name, tags )
+            var methodBuilder = new MethodBuilder( this, declaringType, interfaceMethod.Name )
             {
                 ReturnParameter = { Type = interfaceMethod.ReturnParameter.Type, RefKind = interfaceMethod.ReturnParameter.RefKind }
             };

@@ -94,4 +94,13 @@
       </None>
     </ItemGroup>
 
+    <ItemGroup>
+      <None Update="C:\Dev\Metalama\Tests\Metalama.Framework.Tests.Integration\Tests\Aspects\Overrides\Finalizers\Introduced_Derived.t.cs">
+        <DependentUpon>Introduced_Derived.cs</DependentUpon>
+      </None>
+      <None Update="C:\Dev\Metalama\Tests\Metalama.Framework.Tests.Integration\Tests\Aspects\Overrides\Finalizers\Introduced.t.cs">
+        <DependentUpon>Introduced.cs</DependentUpon>
+      </None>
+    </ItemGroup>
+
 </Project>

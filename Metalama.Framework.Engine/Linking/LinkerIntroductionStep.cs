@@ -46,6 +46,7 @@ namespace Metalama.Framework.Engine.Linking
             var nameProvider = new LinkerIntroductionNameProvider();
             var syntaxTransformationCollection = new SyntaxTransformationCollection();
             var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
+            var aspectReferenceSyntaxProvider = new LinkerAspectReferenceSyntaxProvider();
 
             // TODO: this sorting can be optimized.
             var allTransformations =
@@ -66,6 +67,7 @@ namespace Metalama.Framework.Engine.Linking
                 diagnostics,
                 lexicalScopeFactory,
                 nameProvider,
+                aspectReferenceSyntaxProvider,
                 buildersWithSynthesizedSetters,
                 syntaxTransformationCollection,
                 replacedTransformations );
@@ -118,7 +120,7 @@ namespace Metalama.Framework.Engine.Linking
 
             intermediateCompilation = intermediateCompilation.Update(
                 syntaxTreeMapping.Select( p => new SyntaxTreeModification( p.Value, p.Key ) ).ToList(),
-                Array.Empty<SyntaxTree>() );
+                new[] { LinkerAspectReferenceSyntaxProvider.LinkerHelperSyntaxTree } );
 
             var introductionRegistry = new LinkerIntroductionRegistry(
                 input.CompilationModel,
@@ -245,6 +247,7 @@ namespace Metalama.Framework.Engine.Linking
             UserDiagnosticSink diagnostics,
             LexicalScopeFactory lexicalScopeFactory,
             LinkerIntroductionNameProvider nameProvider,
+            LinkerAspectReferenceSyntaxProvider aspectReferenceSyntaxProvider,
             IReadOnlyCollection<PropertyBuilder> buildersWithSynthesizedSetters,
             SyntaxTransformationCollection syntaxTransformationCollection,
             HashSet<ITransformation> replacedTransformations )
@@ -273,6 +276,7 @@ namespace Metalama.Framework.Engine.Linking
                         var introductionContext = new MemberIntroductionContext(
                             diagnostics,
                             nameProvider,
+                            aspectReferenceSyntaxProvider,
                             lexicalScopeFactory,
                             syntaxGenerationContext,
                             this._serviceProvider,

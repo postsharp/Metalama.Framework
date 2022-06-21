@@ -92,6 +92,7 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     case MethodKind.Ordinary:
                     case MethodKind.ExplicitInterfaceImplementation:
+                    case MethodKind.Destructor:
                         if ( semantic.Symbol.GetDeclarationFlags().HasFlag( LinkerDeclarationFlags.NotInlineable )
                              || semantic.Kind == IntermediateSymbolSemanticKind.Final )
                         {

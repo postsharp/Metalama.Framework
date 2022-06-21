@@ -35,6 +35,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
             LexicalScopeFactory lexicalScopeFactory = new( compilationModel );
             var introductionNameProvider = new LinkerIntroductionNameProvider();
+            var aspectReferenceSyntaxProvider = new LinkerAspectReferenceSyntaxProvider();
 
             // Get all observable transformations except replacements, because replacements are not visible at design time.
             var observableTransformations = transformations.Where( t => t is IObservableTransformation and not IReplaceMemberTransformation );
@@ -74,6 +75,7 @@ namespace Metalama.Framework.Engine.Pipeline
                         var introductionContext = new MemberIntroductionContext(
                             diagnostics,
                             introductionNameProvider,
+                            aspectReferenceSyntaxProvider,
                             lexicalScopeFactory,
                             syntaxGenerationContext,
                             serviceProvider,

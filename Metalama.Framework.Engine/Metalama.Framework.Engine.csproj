@@ -33,7 +33,6 @@
 
     <ItemGroup>
         <Compile Include="..\.generated\$(ThisRoslynVersion)\Metalama.Framework.Engine\*.cs" />
-        <Compile Remove="Transformations\IntroduceConstructorParameterTransformation.cs" />
     </ItemGroup>
 
     <ItemGroup>
@@ -66,8 +65,6 @@
 
         <!-- The following references handle [Memo] -->
         <ProjectReference Include="..\Build\Metalama.SourceTransformer\Metalama.SourceTransformer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-
-
     </ItemGroup>
 
     <!-- Obfuscation -->

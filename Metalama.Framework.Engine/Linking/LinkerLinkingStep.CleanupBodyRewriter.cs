@@ -54,14 +54,17 @@ namespace Metalama.Framework.Engine.Linking
                             anyRewrittenStatement = true;
                         }
 
-                        newStatements.Add( (StatementSyntax) rewritten.AssertNotNull() );
+                        if ( rewritten != null )
+                        {
+                            newStatements.Add( (StatementSyntax) rewritten.AssertNotNull() );
+                        }
                     }
                 }
 
                 var finalStatements = new List<StatementSyntax>();
                 var overflowingTrivia = SyntaxTriviaList.Empty;
 
-                // Process statements, cleaning empty labeled statements, and trivia empty statements.
+                // Process statements, cleaning empty labeled statements, and trivia empty statements and invocations with empty empty expressions.
                 for ( var i = 0; i < newStatements.Count; i++ )
                 {
                     var statement = newStatements[i];
@@ -189,6 +192,36 @@ namespace Metalama.Framework.Engine.Linking
                         statements[lastStatementIndex] =
                             statements[lastStatementIndex].WithTrailingTrivia( statements[lastStatementIndex].GetTrailingTrivia().AddRange( trailingTrivia ) );
                     }
+                }
+            }
+
+            public override SyntaxNode? VisitInvocationExpression( InvocationExpressionSyntax node )
+            {
+                if ( node.Expression.GetLinkerGeneratedFlags().HasFlag( LinkerGeneratedFlags.NullAspectReferenceExpression ) )
+                {
+                    return IdentifierName( "__LINKER_TO_BE_REMOVED__" )
+                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.NullAspectReferenceExpression );
+                }
+
+                return node;
+            }
+
+            public override SyntaxNode? VisitExpressionStatement( ExpressionStatementSyntax node )
+            {
+                var transformed = (ExpressionSyntax) this.Visit( node.Expression ).AssertNotNull();
+
+                if ( transformed.GetLinkerGeneratedFlags().HasFlag( LinkerGeneratedFlags.NullAspectReferenceExpression ) )
+                {
+                    return null;
+                }
+
+                if ( node.Expression != transformed )
+                {
+                    return node.WithExpression( transformed );
+                }
+                else
+                {
+                    return node;
                 }
             }
         }

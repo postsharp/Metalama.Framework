@@ -457,8 +457,10 @@ class C : IDisposable
             var type = Assert.Single( compilation.Types )!;
 
             Assert.Equal(
-                new[] { Default, Finalizer, ExplicitInterfaceImplementation, ConversionOperator, UserDefinedOperator },
+                new[] { Default, ExplicitInterfaceImplementation, ConversionOperator, UserDefinedOperator },
                 type.Methods.Select( m => m.MethodKind ) );
+
+            Assert.Equal( Finalizer, type.Finalizer!.MethodKind );
 
             Assert.Equal( new[] { PropertyGet, PropertySet }, type.Properties.SelectMany( p => new[] { p.GetMethod!.MethodKind, p.SetMethod!.MethodKind } ) );
             Assert.Equal( new[] { EventAdd, EventRemove }, type.Events.SelectMany( p => new[] { p.AddMethod.MethodKind, p.RemoveMethod.MethodKind } ) );
@@ -693,7 +695,7 @@ class Class<T>
             Assert.Equal( "Action<string>", openType.Events.Single().ForTypeInstance( typeInstance ).Type.ToString() );
             Assert.Equal( "string", openType.Methods.Single().ForTypeInstance( typeInstance ).ReturnType.ToString() );
             Assert.Equal( "string", openType.Constructors.Single().ForTypeInstance( typeInstance ).Parameters.ElementAt( 0 ).Type.ToString() );
-            Assert.Equal( typeInstance, openType.StaticConstructor.ForTypeInstance( typeInstance ).DeclaringType );
+            Assert.Equal( typeInstance, openType.StaticConstructor!.ForTypeInstance( typeInstance ).DeclaringType );
         }
 
         [Fact]

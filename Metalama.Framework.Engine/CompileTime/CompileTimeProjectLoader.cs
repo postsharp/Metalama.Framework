@@ -277,26 +277,40 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
             goto finish;
         }
 
-        if ( !ManagedResourceReader.TryGetCompileTimeResource( assemblyPath, out var resources )
-             || !resources.TryGetValue( CompileTimeConstants.CompileTimeProjectResourceName, out var resourceBytes ) )
+        if ( !MetadataReader.TryGetMetadata( assemblyPath, out var metadataInfo ) )
         {
             goto finish;
         }
 
-        var assemblyName = AssemblyName.GetAssemblyName( assemblyPath );
-
-        if ( !this.TryDeserializeCompileTimeProject(
-                assemblyName.ToAssemblyIdentity(),
-                new MemoryStream( resourceBytes ),
-                diagnosticSink,
-                cancellationToken,
-                out compileTimeProject ) )
+        if ( metadataInfo.Resources.TryGetValue( CompileTimeConstants.CompileTimeProjectResourceName, out var resourceBytes ) )
         {
-            this._logger.Warning?.Log( $"TryDeserializeCompileTimeProject failed." );
+            var assemblyName = AssemblyName.GetAssemblyName( assemblyPath );
 
-            // Coverage: ignore
+            if ( !this.TryDeserializeCompileTimeProject(
+                    assemblyName.ToAssemblyIdentity(),
+                    new MemoryStream( resourceBytes ),
+                    diagnosticSink,
+                    cancellationToken,
+                    out compileTimeProject ) )
+            {
+                this._logger.Warning?.Log( $"TryDeserializeCompileTimeProject failed." );
 
-            return false;
+                // Coverage: ignore
+
+                return false;
+            }
+        }
+        else if ( metadataInfo.HasCompileTimeAttribute )
+        {
+            // We have an assembly that a [assembly: CompileTime] attribute but has no embedded compile-time project.
+            // This is typically the case of public assemblies of weaver-based aspects or services.
+            // These projects need to be included as compile-time projects. They typically have MetalamaRemoveCompileTimeOnlyCode=false.
+            if ( !CompileTimeProject.TryCreateUntransformed( this._serviceProvider, this._domain, assemblyIdentity, assemblyPath, out compileTimeProject ) )
+            {
+                this._logger.Trace?.Log(
+                    $"The assembly '{assemblyIdentity}' will not be included in the compile-time compilation despite having an [assembly: CompileTime] attribute " +
+                    "because it has no compile-time embedded resource and it is not loaded as an analyzer." );
+            }
         }
 
     finish:

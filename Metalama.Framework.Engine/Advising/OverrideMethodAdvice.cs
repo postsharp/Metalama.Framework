@@ -32,7 +32,22 @@ namespace Metalama.Framework.Engine.Advising
             Action<ITransformation> addTransformation )
         {
             // TODO: order should be self if the target is introduced on the same layer.
-            addTransformation( new OverrideMethodTransformation( this, this.TargetDeclaration.GetTarget( compilation ), this.BoundTemplate, this.Tags ) );
+            var targetMethod = this.TargetDeclaration.GetTarget( compilation );
+
+            switch ( targetMethod.MethodKind )
+            {
+                case MethodKind.Finalizer:
+                    addTransformation(
+                        new OverrideFinalizerTransformation( this, this.TargetDeclaration.GetTarget( compilation ), this.BoundTemplate, this.Tags ) );
+
+                    break;
+
+                default:
+                    addTransformation(
+                        new OverrideMethodTransformation( this, this.TargetDeclaration.GetTarget( compilation ), this.BoundTemplate, this.Tags ) );
+
+                    break;
+            }
 
             return AdviceImplementationResult.Success();
         }

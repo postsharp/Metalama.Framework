@@ -123,7 +123,6 @@ namespace Metalama.Framework.Engine.Formatting
 
                 foreach ( var existingSpan in classifiedTextSpans.GetClassifiedSpans( csharpSpan.TextSpan ) )
                 {
-
                     var combinedClassification =
                         existingSpan.Tags != null! && existingSpan.Tags.TryGetValue( CSharpClassTagName, out var existingClassification )
                             ? existingClassification + ";" + classificationType

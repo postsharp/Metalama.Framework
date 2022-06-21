@@ -393,6 +393,42 @@ namespace Metalama.Framework.Engine.Advising
             return this.ExecuteAdvice<IMethod>( advice );
         }
 
+        public IIntroductionAdviceResult<IMethod> IntroduceFinalizer(
+            INamedType targetType,
+            string defaultTemplate,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            object? args = null,
+            object? tags = null )
+        {
+            if ( this._templateInstance == null )
+            {
+                throw new InvalidOperationException();
+            }
+
+            if ( targetType.TypeKind == TypeKind.Interface )
+            {
+                throw new InvalidOperationException(
+                    UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
+            }
+
+            this.ValidateTarget( targetType );
+
+            var template = this.ValidateTemplateName( defaultTemplate, TemplateKind.Default, true )
+                .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
+
+            var advice = new IntroduceFinalizerAdvice(
+                this.State.AspectInstance,
+                this._templateInstance,
+                targetType,
+                this._compilation,
+                template.ForIntroduction( ObjectReader.GetReader( args ) ),
+                whenExists,
+                this._layerName,
+                ObjectReader.GetReader( tags ) );
+
+            return this.ExecuteAdvice<IMethod>( advice );
+        }
+
         public IOverrideAdviceResult<IProperty> Override(
             IFieldOrProperty targetFieldOrProperty,
             string defaultTemplate,

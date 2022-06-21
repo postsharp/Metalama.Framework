@@ -67,11 +67,6 @@ namespace Metalama.Framework.Engine.Utilities
             return declaration.ContainingDeclaration != null && declaration.ContainingDeclaration.IsContainedIn( containingDeclaration );
         }
 
-        public static bool IsImplicitStaticConstructor( this IConstructor ctor )
-        {
-            return ctor.IsStatic && ctor.IsImplicit;
-        }
-
         public static bool IsImplicitInstanceConstructor( this IConstructor ctor )
         {
             return !ctor.IsStatic && ctor.IsImplicit;

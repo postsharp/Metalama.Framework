@@ -141,7 +141,12 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets the static constructor.
         /// </summary>
-        IConstructor StaticConstructor { get; }
+        IConstructor? StaticConstructor { get; }
+
+        /// <summary>
+        /// Gets the finalizer of the type. For value types returns <c>null</c>.
+        /// </summary>
+        IMethod? Finalizer { get; }
 
         /// <summary>
         /// Gets a value indicating whether the type is <c>readonly</c>.

@@ -15,6 +15,8 @@ namespace Metalama.Framework.Engine.Transformations
 
         public IntroductionNameProvider IntroductionNameProvider { get; }
 
+        public AspectReferenceSyntaxProvider AspectReferenceSyntaxProvider { get; }
+
         public ITemplateLexicalScopeProvider LexicalScopeProvider { get; }
 
         public SyntaxGenerationContext SyntaxGenerationContext { get; }
@@ -29,6 +31,7 @@ namespace Metalama.Framework.Engine.Transformations
         public MemberIntroductionContext(
             UserDiagnosticSink diagnosticSink,
             IntroductionNameProvider introductionNameProvider,
+            AspectReferenceSyntaxProvider aspectReferenceSyntaxProvider,
             ITemplateLexicalScopeProvider lexicalScopeProvider,
             SyntaxGenerationContext syntaxGenerationContext,
             IServiceProvider serviceProvider,
@@ -36,6 +39,7 @@ namespace Metalama.Framework.Engine.Transformations
         {
             this.DiagnosticSink = diagnosticSink;
             this.LexicalScopeProvider = lexicalScopeProvider;
+            this.AspectReferenceSyntaxProvider = aspectReferenceSyntaxProvider;
             this.ServiceProvider = serviceProvider;
             this.IntroductionNameProvider = introductionNameProvider;
             this.SyntaxGenerationContext = syntaxGenerationContext;
