@@ -77,7 +77,7 @@ namespace Metalama.Framework.Code
         Constructor,
 
         /// <summary>
-        /// <see cref="IMethod"/> that is a finalizer.
+        /// <see cref="IMethod"/> that is a finalizer (historically referred to as destructors).
         /// </summary>
         Finalizer,
 
