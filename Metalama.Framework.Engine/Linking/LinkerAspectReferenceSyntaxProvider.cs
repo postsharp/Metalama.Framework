@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Text;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking
@@ -52,7 +53,7 @@ internal class __LinkerIntroductionHelpers__
 }
                 ";
 
-                    _linkerHelperSyntaxTree = CSharpSyntaxTree.ParseText( code, path: "__LinkerIntroductionHelpers__.cs" );
+                    _linkerHelperSyntaxTree = CSharpSyntaxTree.ParseText( code, path: "__LinkerIntroductionHelpers__.cs", encoding: Encoding.UTF8 );
                 }
 
                 return _linkerHelperSyntaxTree;
