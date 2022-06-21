@@ -42,8 +42,8 @@ internal abstract class InitializeAdvice : Advice
 
         var staticConstructor =
             this.Kind == InitializerKind.BeforeTypeConstructor
-            ? containingType.StaticConstructor ?? new ConstructorBuilder( this, containingType ) { IsStatic = true }
-            : null;
+                ? containingType.StaticConstructor ?? new ConstructorBuilder( this, containingType ) { IsStatic = true }
+                : null;
 
         var constructors =
             targetDeclaration switch
@@ -69,6 +69,7 @@ internal abstract class InitializeAdvice : Advice
             {
                 addTransformation( staticCtorBuilder );
             }
+
             if ( ctor.IsImplicitInstanceConstructor() )
             {
                 // Missing implicit ctor.

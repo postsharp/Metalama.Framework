@@ -126,8 +126,8 @@ namespace Metalama.Framework.Engine.Advising
                 // Check that there is no other member named the same, otherwise we cannot add a method.
                 var existingOtherMember =
                     this.Builder is { Name: "Finalize", Parameters: { Count: 0 }, TypeParameters: { Count: 0 } }
-                    ? targetDeclaration.Finalizer
-                    : targetDeclaration.FindClosestUniquelyNamedMember( this.Builder.Name );
+                        ? targetDeclaration.Finalizer
+                        : targetDeclaration.FindClosestUniquelyNamedMember( this.Builder.Name );
 
                 if ( existingOtherMember != null )
                 {

@@ -101,7 +101,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
             => new( methodSymbol, compilation, DeclarationRefTargetKind.Return );
 
         internal static Ref<ICompilation> Compilation( Compilation compilation ) => FromSymbol( compilation.Assembly, compilation ).As<ICompilation>();
-            }
+    }
 
     /// <summary>
     /// The base implementation of <see cref="ISdkRef{T}"/>.
@@ -232,7 +232,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
             switch ( this.Target )
             {
                 case null:
-                            throw new AssertionFailedException();
+                    throw new AssertionFailedException();
 
                 case ISymbol symbol:
                     return symbol.Translate( this._compilation, compilation ).AssertNotNull();

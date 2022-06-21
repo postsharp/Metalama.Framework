@@ -87,13 +87,19 @@ namespace Metalama.Framework.Engine.Transformations
                     newMethodBody,
                     null );
 
-            return new[] { new IntroducedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Override, this.OverriddenDeclaration ) };
+            return new[]
+            {
+                new IntroducedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Override, this.OverriddenDeclaration )
+            };
         }
 
         private BuiltUserExpression CreateProceedExpression( in MemberIntroductionContext context, TemplateKind templateKind )
         {
             return new BuiltUserExpression(
-                context.AspectReferenceSyntaxProvider.GetFinalizerReference( this.ParentAdvice.AspectLayerId, this.OverriddenDeclaration, context.SyntaxGenerator ),
+                context.AspectReferenceSyntaxProvider.GetFinalizerReference(
+                    this.ParentAdvice.AspectLayerId,
+                    this.OverriddenDeclaration,
+                    context.SyntaxGenerator ),
                 this.OverriddenDeclaration.GetCompilationModel().Factory.GetSpecialType( SpecialType.Void ) );
         }
     }

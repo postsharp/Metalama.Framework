@@ -37,11 +37,15 @@ namespace Metalama.Framework.Engine.Advising
             switch ( targetMethod.MethodKind )
             {
                 case MethodKind.Finalizer:
-                    addTransformation( new OverrideFinalizerTransformation( this, this.TargetDeclaration.GetTarget( compilation ), this.BoundTemplate, this.Tags ) );
+                    addTransformation(
+                        new OverrideFinalizerTransformation( this, this.TargetDeclaration.GetTarget( compilation ), this.BoundTemplate, this.Tags ) );
+
                     break;
 
                 default:
-                    addTransformation( new OverrideMethodTransformation( this, this.TargetDeclaration.GetTarget( compilation ), this.BoundTemplate, this.Tags ) );
+                    addTransformation(
+                        new OverrideMethodTransformation( this, this.TargetDeclaration.GetTarget( compilation ), this.BoundTemplate, this.Tags ) );
+
                     break;
             }
 

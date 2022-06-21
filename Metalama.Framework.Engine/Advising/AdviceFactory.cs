@@ -1022,7 +1022,7 @@ namespace Metalama.Framework.Engine.Advising
             if ( this._templateInstance == null )
             {
                 throw new InvalidOperationException();
-        }
+            }
 
             this.ValidateTarget( targetType );
 
@@ -1068,7 +1068,7 @@ namespace Metalama.Framework.Engine.Advising
             if ( this._templateInstance == null )
             {
                 throw new InvalidOperationException();
-        }
+            }
 
             this.ValidateTarget( targetConstructor );
 
@@ -1204,7 +1204,7 @@ namespace Metalama.Framework.Engine.Advising
                     attribute,
                     whenExists,
                     this._layerName ) );
-    }
+        }
 
         public IRemoveAttributesAdviceResult RemoveAttributes( IDeclaration targetDeclaration, INamedType attributeType )
         {

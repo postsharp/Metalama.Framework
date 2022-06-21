@@ -11,6 +11,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
+using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
@@ -307,7 +308,7 @@ public partial class CompilationModel
     {
         switch ( declaration )
         {
-            case IMethodBuilder {MethodKind: Code.MethodKind.Finalizer } finalizer:
+            case IMethodBuilder { MethodKind: MethodKind.Finalizer } finalizer:
                 var finalizerDeclaringType = finalizer.DeclaringType.GetSymbol().AssertNotNull();
 
                 if ( this._finalizers.ContainsKey( finalizerDeclaringType ) )

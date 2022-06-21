@@ -333,7 +333,7 @@ namespace Metalama.Framework.Engine.Linking
 
         private static int GetSyntaxTreePosition( InsertPosition insertPosition )
             => insertPosition.Relation switch
-        {
+            {
                 InsertPositionRelation.After => insertPosition.SyntaxNode.Span.End + 1,
                 InsertPositionRelation.Within => ((BaseTypeDeclarationSyntax) insertPosition.SyntaxNode).CloseBraceToken.Span.Start - 1,
                 _ => 0
@@ -409,7 +409,7 @@ namespace Metalama.Framework.Engine.Linking
                 if ( declarationSyntax != null )
                 {
                     if ( !symbolMemberLevelTransformations.TryGetValue( declarationSyntax, out memberLevelTransformations ) )
-                        {
+                    {
                         symbolMemberLevelTransformations[declarationSyntax] = memberLevelTransformations = new MemberLevelTransformations();
                     }
                 }
@@ -512,8 +512,8 @@ namespace Metalama.Framework.Engine.Linking
                         {
                             if ( !block.Statements.All( s => s.HasAnnotations( FormattingAnnotations.GeneratedCodeAnnotationKind ) ) )
                             {
-                        throw new AssertionFailedException();
-                    }
+                                throw new AssertionFailedException();
+                            }
                         }
                         else
                         {

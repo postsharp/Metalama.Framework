@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
@@ -162,7 +161,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
-            if ( this.DeclarationKind == DeclarationKind.Finalizer)
+            if ( this.DeclarationKind == DeclarationKind.Finalizer )
             {
                 var syntax =
                     DestructorDeclaration(
@@ -186,7 +185,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                         this.GetSyntaxModifierList(),
                         context.SyntaxGenerator.ReturnType( this ),
                         this.ExplicitInterfaceImplementations.Count > 0
-                            ? ExplicitInterfaceSpecifier( (NameSyntax) syntaxGenerator.Type( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
+                            ? ExplicitInterfaceSpecifier(
+                                (NameSyntax) syntaxGenerator.Type( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
                             : null,
                         Identifier( this.Name ),
                         context.SyntaxGenerator.TypeParameterList( this ),
@@ -194,13 +194,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                         context.SyntaxGenerator.ConstraintClauses( this ),
                         Block(
                             List(
-                                !this.ReturnParameter.Type.Is( typeof( void ) )
+                                !this.ReturnParameter.Type.Is( typeof(void) )
                                     ? new[]
                                     {
-                                    ReturnStatement(
-                                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Whitespace( " " ) ),
-                                        DefaultExpression( syntaxGenerator.Type( this.ReturnParameter.Type.GetSymbol() ) ),
-                                        Token( SyntaxKind.SemicolonToken ) )
+                                        ReturnStatement(
+                                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Whitespace( " " ) ),
+                                            DefaultExpression( syntaxGenerator.Type( this.ReturnParameter.Type.GetSymbol() ) ),
+                                            Token( SyntaxKind.SemicolonToken ) )
                                     }
                                     : Array.Empty<StatementSyntax>() ) ),
                         null );
