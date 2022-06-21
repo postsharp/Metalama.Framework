@@ -93,7 +93,7 @@ namespace Metalama.Framework.Engine.CodeModel
         internal IAssembly GetAssembly( IAssemblySymbol assemblySymbol )
             => (IAssembly) this._defaultCache.GetOrAdd(
                 assemblySymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
-                l => !SymbolEqualityComparer.Default.Equals( l.GetSymbol( this.Compilation ), this._compilationModel.RoslynCompilation.Assembly )
+                l => ! ((IAssemblySymbol) l.GetSymbol( this.Compilation )).Identity.Equals( this._compilationModel.RoslynCompilation.Assembly.Identity )
                     ? new ReferencedAssembly( (IAssemblySymbol) l.GetSymbol( this.Compilation ), this._compilationModel )
                     : this._compilationModel );
 
@@ -219,7 +219,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal ICompilationElement? GetCompilationElement( ISymbol symbol, DeclarationRefTargetKind kind = DeclarationRefTargetKind.Default )
         {
-            Invariant.Assert( SymbolEqualityComparer.Default.Equals( symbol, symbol.GetSymbolId().Resolve( this._compilationModel.RoslynCompilation ) ) );
+            Invariant.Assert( FixedSymbolComparer.Default.Equals( symbol, symbol.GetSymbolId().Resolve( this._compilationModel.RoslynCompilation ).AssertNotNull() ) );
 
             switch ( symbol.Kind )
             {
