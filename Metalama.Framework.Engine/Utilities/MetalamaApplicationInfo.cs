@@ -17,16 +17,24 @@ namespace Metalama.Framework.Engine.Utilities
 
         public bool IsPrerelease { get; }
 
+
         public DateTime BuildDate { get; }
 
         public ProcessKind ProcessKind { get; }
 
         // In compile time, the long running process is identified
-        // by services comIng from TransformerContext.
+        // by services coming from TransformerContext.
         // See the SourceTransformer.Execute method.
         public bool IsLongRunningProcess => !MetalamaCompilerInfo.IsActive;
 
         public bool IsUnattendedProcess( ILoggerFactory loggerFactory ) => ProcessUtilities.IsCurrentProcessUnattended( loggerFactory );
+
+        public bool IsTelemetryEnabled =>
+#if DEBUG
+            false;
+#else
+            true;
+#endif
 
         public MetalamaApplicationInfo()
         {
