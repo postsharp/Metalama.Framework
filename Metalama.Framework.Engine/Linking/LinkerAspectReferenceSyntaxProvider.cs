@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.Linking
     {
         public LinkerAspectReferenceSyntaxProvider() { }
 
-        public override ExpressionSyntax GetFinalizerReference( AspectLayerId aspectLayer, IFinalizer overriddenFinalizer, OurSyntaxGenerator syntaxGenerator )
+        public override ExpressionSyntax GetFinalizerReference( AspectLayerId aspectLayer, IMethod overriddenFinalizer, OurSyntaxGenerator syntaxGenerator )
         {
             return
                 InvocationExpression(

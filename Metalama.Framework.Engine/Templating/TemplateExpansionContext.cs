@@ -398,7 +398,7 @@ namespace Metalama.Framework.Engine.Templating
             }
             else if ( TypeExtensions.Equals( returnExpression.Type, SpecialType.Void ) )
             {
-                if ( this.MetaApi.Declaration is IFinalizer || TypeExtensions.Equals( this.MetaApi.Method.ReturnType, SpecialType.Void ) )
+                if ( TypeExtensions.Equals( this.MetaApi.Method.ReturnType, SpecialType.Void ) )
                 {
                     return
                         Block(

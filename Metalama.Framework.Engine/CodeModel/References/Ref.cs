@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
             Invariant.Implies(
                 typeof(T) == typeof(IMethod),
-                symbol.GetDeclarationKind() == DeclarationKind.Method );
+                symbol.GetDeclarationKind() is DeclarationKind.Method or DeclarationKind.Finalizer );
 
             return symbol;
         }
@@ -80,16 +80,6 @@ namespace Metalama.Framework.Engine.CodeModel.References
                     MethodKind.PropertySet => DeclarationRefTargetKind.PropertySet,
                     _ => throw new AssertionFailedException()
                 } );
-        }
-
-        public static Ref<IDeclaration> ImplicitStaticConstructor( IConstructor constructor )
-        {
-            Invariant.Assert( constructor.IsImplicitStaticConstructor() );
-
-            return new Ref<IDeclaration>(
-                constructor.DeclaringType.GetSymbol().AssertNotNull(),
-                constructor.DeclaringType.GetCompilationModel().RoslynCompilation,
-                DeclarationRefTargetKind.StaticConstructor );
         }
 
         public static Ref<T> FromSymbolId<T>( SymbolId symbolKey )

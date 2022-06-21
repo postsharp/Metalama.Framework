@@ -203,13 +203,11 @@ namespace Metalama.Framework.Engine.CodeModel
                 this,
                 this.Compilation.GetConstructorCollection( this.TypeSymbol ) );
 
-        [Memo]
-        public IConstructor StaticConstructor => this.GetStaticConstructorImpl();
+        public IConstructor? StaticConstructor => this.GetStaticConstructorImpl();
 
-        [Memo]
-        public IFinalizer? Finalizer => this.GetFinalizerImpl();
+        public IMethod? Finalizer => this.GetFinalizerImpl();
 
-        private IConstructor GetStaticConstructorImpl()
+        private IConstructor? GetStaticConstructorImpl()
         {
             var builder = this.Compilation.GetStaticConstructor( this.TypeSymbol );
 
@@ -225,35 +223,28 @@ namespace Metalama.Framework.Engine.CodeModel
                 return this.Compilation.Factory.GetConstructor( symbol );
             }
 
-            return new ImplicitStaticConstructor( this );
+            return null;
         }
 
-        private IFinalizer? GetFinalizerImpl()
+        private IMethod? GetFinalizerImpl()
         {
-            if ( !this.TypeSymbol.IsValueType )
+            var builder = this.Compilation.GetFinalizer( this.TypeSymbol );
+
+            if ( builder != null )
             {
-                var builder = this.Compilation.GetFinalizer( this.TypeSymbol );
-
-                if ( builder != null )
-                {
-                    return this.Compilation.Factory.GetDeclaration<IFinalizer>( builder );
-                }
-
-                var symbol = this.TypeSymbol.GetMembers()
-                    .OfType<IMethodSymbol>()
-                    .SingleOrDefault( m => m.Name == "Finalize" && m.TypeParameters.Length == 0 && m.Parameters.Length == 0 );
-
-                if ( symbol != null )
-                {
-                    return this.Compilation.Factory.GetFinalizer( symbol );
-                }
-
-                return new ImplicitFinalizer( this );
+                return this.Compilation.Factory.GetDeclaration<IMethod>( builder );
             }
-            else
+
+            var symbol = this.TypeSymbol.GetMembers()
+                .OfType<IMethodSymbol>()
+                .SingleOrDefault( m => m.Name == "Finalize" && m.TypeParameters.Length == 0 && m.Parameters.Length == 0 );
+
+            if ( symbol != null )
             {
-                return null;
+                return this.Compilation.Factory.GetFinalizer( symbol );
             }
+
+            return null;
         }
 
         public bool IsPartial

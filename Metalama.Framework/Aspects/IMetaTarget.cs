@@ -59,11 +59,6 @@ namespace Metalama.Framework.Aspects
         IConstructor Constructor { get; }
 
         /// <summary>
-        /// Gets the target finalizer, or throws an exception if the advice does not target a finalizer.
-        /// </summary>
-        IFinalizer Finalizer { get; }
-
-        /// <summary>
         /// Gets the target field or property, or throws an exception if the advice does not target a field or a property.
         /// </summary>
         IAdvisedProperty Property { get; }

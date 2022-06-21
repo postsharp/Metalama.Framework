@@ -29,8 +29,8 @@ public partial class CompilationModel
     private ImmutableDictionary<INamedTypeSymbol, IConstructorBuilder> _staticConstructors =
         ImmutableDictionary<INamedTypeSymbol, IConstructorBuilder>.Empty.WithComparers( SymbolEqualityComparer.Default );
 
-    private ImmutableDictionary<INamedTypeSymbol, IFinalizerBuilder> _finalizers =
-        ImmutableDictionary<INamedTypeSymbol, IFinalizerBuilder>.Empty.WithComparers( SymbolEqualityComparer.Default );
+    private ImmutableDictionary<INamedTypeSymbol, IMethodBuilder> _finalizers =
+        ImmutableDictionary<INamedTypeSymbol, IMethodBuilder>.Empty.WithComparers( SymbolEqualityComparer.Default );
 
     public bool IsMutable { get; private set; }
 
@@ -212,7 +212,7 @@ public partial class CompilationModel
         return value;
     }
 
-    internal IFinalizerBuilder? GetFinalizer( INamedTypeSymbol declaringType )
+    internal IMethodBuilder? GetFinalizer( INamedTypeSymbol declaringType )
     {
         this._finalizers.TryGetValue( declaringType, out var value );
 
@@ -307,6 +307,19 @@ public partial class CompilationModel
     {
         switch ( declaration )
         {
+            case IMethodBuilder {MethodKind: Code.MethodKind.Finalizer } finalizer:
+                var finalizerDeclaringType = finalizer.DeclaringType.GetSymbol().AssertNotNull();
+
+                if ( this._finalizers.ContainsKey( finalizerDeclaringType ) )
+                {
+                    // Duplicate.
+                    throw new AssertionFailedException();
+                }
+
+                this._finalizers = this._finalizers.SetItem( finalizerDeclaringType, finalizer );
+
+                break;
+
             case IMethod method:
                 var methods = this.GetMethodCollection( method.DeclaringType.GetSymbol().AssertNotNull(), true );
                 methods.Add( method.ToMemberRef() );
@@ -329,19 +342,6 @@ public partial class CompilationModel
                 }
 
                 this._staticConstructors = this._staticConstructors.SetItem( staticCtorDeclaringType, staticConstructorBuilder );
-
-                break;
-
-            case IFinalizerBuilder finalizerBuilder:
-                var finalizerDeclaringType = finalizerBuilder.DeclaringType.GetSymbol().AssertNotNull();
-
-                if ( this._finalizers.ContainsKey( finalizerDeclaringType ) )
-                {
-                    // Duplicate.
-                    throw new AssertionFailedException();
-                }
-
-                this._finalizers = this._finalizers.SetItem( finalizerDeclaringType, finalizerBuilder );
 
                 break;
 

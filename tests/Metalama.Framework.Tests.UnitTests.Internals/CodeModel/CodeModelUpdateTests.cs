@@ -35,7 +35,7 @@ class C
         Assert.Empty( type.Methods );
 
         // Add a method.
-        var methodBuilder = new MethodBuilder( null!, type, "M", ObjectReader.Empty );
+        var methodBuilder = new MethodBuilder( null!, type, "M" );
         compilation.AddTransformation( methodBuilder );
 
         // Assert that the method has been added.
@@ -66,7 +66,7 @@ class C
         Assert.Empty( type.Methods.OfName( "M" ) );
 
         // Add a method.
-        var methodBuilder = new MethodBuilder( null!, type, "M", ObjectReader.Empty );
+        var methodBuilder = new MethodBuilder( null!, type, "M" );
         compilation.AddTransformation( methodBuilder );
 
         // Assert that the method has been added.
@@ -92,7 +92,7 @@ class C
         var type = Assert.Single( compilation.Types )!;
 
         // Add a method.
-        var methodBuilder = new MethodBuilder( null!, type, "M", ObjectReader.Empty );
+        var methodBuilder = new MethodBuilder( null!, type, "M" );
         compilation.AddTransformation( methodBuilder );
 
         // Assert that the method has been added.
@@ -118,7 +118,7 @@ class C
         var type = Assert.Single( compilation.Types )!;
 
         // Add a method.
-        var methodBuilder = new MethodBuilder( null!, type, "M", ObjectReader.Empty );
+        var methodBuilder = new MethodBuilder( null!, type, "M" );
         compilation.AddTransformation( methodBuilder );
 
         // Assert that the method has been added.
@@ -166,7 +166,7 @@ void M(int p){}
         var type = Assert.Single( compilation.Types )!;
 
         // Add a method.
-        var methodBuilder = new MethodBuilder( null!, type, "M", ObjectReader.Empty );
+        var methodBuilder = new MethodBuilder( null!, type, "M" );
         compilation.AddTransformation( methodBuilder );
 
         // Assert that the method has been added.
@@ -193,7 +193,7 @@ void M(int p){}
         Assert.Single( type.Methods.OfName( "M" ) );
 
         // Add a method.
-        var methodBuilder = new MethodBuilder( null!, type, "M", ObjectReader.Empty );
+        var methodBuilder = new MethodBuilder( null!, type, "M" );
         compilation.AddTransformation( methodBuilder );
 
         // Assert that the method has been added.

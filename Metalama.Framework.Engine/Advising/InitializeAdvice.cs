@@ -40,6 +40,11 @@ internal abstract class InitializeAdvice : Advice
 
         var containingType = targetDeclaration.GetDeclaringType().AssertNotNull();
 
+        var staticConstructor =
+            this.Kind == InitializerKind.BeforeTypeConstructor
+            ? containingType.StaticConstructor ?? new ConstructorBuilder( this, containingType ) { IsStatic = true }
+            : null;
+
         var constructors =
             targetDeclaration switch
             {
@@ -47,7 +52,7 @@ internal abstract class InitializeAdvice : Advice
                 INamedType => this.Kind switch
                 {
                     InitializerKind.BeforeTypeConstructor =>
-                        new[] { containingType.StaticConstructor },
+                        new[] { staticConstructor.AssertNotNull() },
                     InitializerKind.BeforeInstanceConstructor =>
                         containingType.Constructors
                             .Where( c => c.InitializerKind != ConstructorInitializerKind.This ),
@@ -60,14 +65,11 @@ internal abstract class InitializeAdvice : Advice
         {
             IConstructor targetCtor;
 
-            if ( ctor.IsImplicitStaticConstructor() )
+            if ( staticConstructor is ConstructorBuilder { IsStatic: true } staticCtorBuilder )
             {
-                // Missing static ctor.
-                var builder = new ConstructorBuilder( this, ctor.DeclaringType ) { IsStatic = true };
-                addTransformation( builder );
-                targetCtor = builder;
+                addTransformation( staticCtorBuilder );
             }
-            else if ( ctor.IsImplicitInstanceConstructor() )
+            if ( ctor.IsImplicitInstanceConstructor() )
             {
                 // Missing implicit ctor.
                 var builder = new ConstructorBuilder( this, ctor.DeclaringType );

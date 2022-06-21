@@ -8,6 +8,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis.CSharp;
@@ -139,14 +140,15 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         IGeneric IGenericInternal.ConstructGenericInstance( params IType[] typeArguments ) => throw new NotImplementedException();
 
-        public override DeclarationKind DeclarationKind => DeclarationKind.Method;
+        public override DeclarationKind DeclarationKind { get; }
 
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations { get; private set; } = Array.Empty<IMethod>();
 
-        public MethodBuilder( Advice parentAdvice, INamedType targetType, string name, IObjectReader initializerTags )
+        public MethodBuilder( Advice parentAdvice, INamedType targetType, string name, DeclarationKind declarationKind = DeclarationKind.Method )
             : base( parentAdvice, targetType, name )
         {
             this.Name = name;
+            this.DeclarationKind = declarationKind;
 
             this.ReturnParameter =
                 new ParameterBuilder(
@@ -160,35 +162,51 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
-            var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
+            if ( this.DeclarationKind == DeclarationKind.Finalizer)
+            {
+                var syntax =
+                    DestructorDeclaration(
+                        List<AttributeListSyntax>(),
+                        TokenList(),
+                        ((TypeDeclarationSyntax) this.DeclaringType.GetPrimaryDeclarationSyntax().AssertNotNull()).Identifier,
+                        ParameterList(),
+                        Block().WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation ),
+                        null );
 
-            var method =
-                MethodDeclaration(
-                    this.GetAttributeLists( context )
-                        .AddRange( this.ReturnParameter.GetAttributeLists( context ) ),
-                    this.GetSyntaxModifierList(),
-                    context.SyntaxGenerator.ReturnType( this ),
-                    this.ExplicitInterfaceImplementations.Count > 0
-                        ? ExplicitInterfaceSpecifier( (NameSyntax) syntaxGenerator.Type( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
-                        : null,
-                    Identifier( this.Name ),
-                    context.SyntaxGenerator.TypeParameterList( this ),
-                    context.SyntaxGenerator.ParameterList( this ),
-                    context.SyntaxGenerator.ConstraintClauses( this ),
-                    Block(
-                        List(
-                            !this.ReturnParameter.Type.Is( typeof(void) )
-                                ? new[]
-                                {
+                return new[] { new IntroducedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
+            }
+            else
+            {
+                var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
+
+                var method =
+                    MethodDeclaration(
+                        this.GetAttributeLists( context )
+                            .AddRange( this.ReturnParameter.GetAttributeLists( context ) ),
+                        this.GetSyntaxModifierList(),
+                        context.SyntaxGenerator.ReturnType( this ),
+                        this.ExplicitInterfaceImplementations.Count > 0
+                            ? ExplicitInterfaceSpecifier( (NameSyntax) syntaxGenerator.Type( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
+                            : null,
+                        Identifier( this.Name ),
+                        context.SyntaxGenerator.TypeParameterList( this ),
+                        context.SyntaxGenerator.ParameterList( this ),
+                        context.SyntaxGenerator.ConstraintClauses( this ),
+                        Block(
+                            List(
+                                !this.ReturnParameter.Type.Is( typeof( void ) )
+                                    ? new[]
+                                    {
                                     ReturnStatement(
                                         Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( Whitespace( " " ) ),
                                         DefaultExpression( syntaxGenerator.Type( this.ReturnParameter.Type.GetSymbol() ) ),
                                         Token( SyntaxKind.SemicolonToken ) )
-                                }
-                                : Array.Empty<StatementSyntax>() ) ),
-                    null );
+                                    }
+                                    : Array.Empty<StatementSyntax>() ) ),
+                        null );
 
-            return new[] { new IntroducedMember( this, method, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
+                return new[] { new IntroducedMember( this, method, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
+            }
         }
 
         public void SetExplicitInterfaceImplementation( IMethod interfaceMethod ) => this.ExplicitInterfaceImplementations = new[] { interfaceMethod };

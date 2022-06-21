@@ -3,7 +3,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.TestFramework;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Finalizers.Derived
+namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Finalizers.Introduced_Derived
 {
     // Tests single OverrideMethod aspect with trivial template on methods with trivial bodies.
 
@@ -11,11 +11,19 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Finalizers.Deriv
     {
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            builder.Advice.Override(builder.Target.Finalizer!, nameof(Template));
+            var introductionResult = builder.Advice.IntroduceFinalizer(builder.Target, nameof(IntroduceTemplate));
+            builder.Advice.Override(introductionResult.Declaration, nameof(OverrideTemplate));
         }
 
         [Template]
-        public dynamic? Template()
+        public dynamic? IntroduceTemplate()
+        {
+            Console.WriteLine("This is the introduction.");
+            return meta.Proceed();
+        }
+
+        [Template]
+        public dynamic? OverrideTemplate()
         {
             Console.WriteLine("This is the override.");
             return meta.Proceed();
@@ -23,7 +31,6 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Finalizers.Deriv
     }
 
     // <target>
-    [Override]
     internal class BaseClass
     {
         ~BaseClass()

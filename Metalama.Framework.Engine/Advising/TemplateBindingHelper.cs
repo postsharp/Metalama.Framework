@@ -157,57 +157,6 @@ namespace Metalama.Framework.Engine.Advising
             return new BoundTemplateMethod( template, targetMethod, templateArguments );
         }
 
-        public static BoundTemplateMethod ForOverride( this in TemplateMember<IMethod> template, IFinalizer? targetFinalizer, IObjectReader? arguments = null )
-        {
-            if ( targetFinalizer == null || template.IsNull )
-            {
-                return default;
-            }
-
-            arguments ??= ObjectReader.Empty;
-
-            // We first check template arguments because it verifies them and we need them in VerifyTemplateType.
-            var templateArguments = GetTemplateArguments( template, arguments );
-
-            var voidType = TypeFactory.GetType( SpecialType.Void );
-
-            // Verity that the template return type matches the target.
-            if ( !VerifyTemplateType( template.Declaration!.ReturnType, voidType, template, arguments ) )
-            {
-                throw new InvalidTemplateSignatureException(
-                    UserMessageFormatter.Format(
-                        $"Cannot use the template '{template.Declaration}' to override the finalizer '{targetFinalizer}': the template return type '{template.Declaration.ReturnType}' is not compatible with the return type of the target finalizer '{voidType}'." ) );
-            }
-
-            // Check that template run-time parameters match the target.
-            foreach ( var templateParameter in template.Declaration.Parameters )
-            {
-                if ( template.TemplateClassMember.Parameters[templateParameter.Index].IsCompileTime )
-                {
-                    continue;
-                }
-
-                throw new InvalidTemplateSignatureException(
-                    UserMessageFormatter.Format(
-                        $"Cannot use the template '{template.Declaration}' to override the finalizer '{targetFinalizer}': finalizers do not have parameters." ) );
-            }
-
-            // Check that template generic parameters match the target.
-            foreach ( var templateParameter in template.Declaration.TypeParameters )
-            {
-                if ( template.TemplateClassMember.TypeParameters[templateParameter.Index].IsCompileTime )
-                {
-                    continue;
-                }
-
-                throw new InvalidTemplateSignatureException(
-                    UserMessageFormatter.Format(
-                        $"Cannot use the template '{template.Declaration}' to override the finalizer '{targetFinalizer}': finalizers do not have generic parameters." ) );
-            }
-
-            return new BoundTemplateMethod( template, targetFinalizer, templateArguments );
-        }
-
         private static bool VerifyTemplateType(
             IReadOnlyList<IType> fromTypes,
             IReadOnlyList<IType> toTypes,

@@ -49,7 +49,7 @@ namespace Metalama.Framework.Engine.Advising
             this.BoundTemplate = boundTemplate;
             Invariant.Assert( !boundTemplate.IsNull );
 
-            this.Builder = new MethodBuilder( this, targetDeclaration, this.MemberName, tags );
+            this.Builder = new MethodBuilder( this, targetDeclaration, this.MemberName );
         }
 
         protected override void InitializeCore( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
@@ -127,7 +127,7 @@ namespace Metalama.Framework.Engine.Advising
                 var existingOtherMember =
                     this.Builder is { Name: "Finalize", Parameters: { Count: 0 }, TypeParameters: { Count: 0 } }
                     ? targetDeclaration.Finalizer
-                    : targetDeclaration.FindClosestUniquelyNamedMember( this.MemberBuilder.Name );
+                    : targetDeclaration.FindClosestUniquelyNamedMember( this.Builder.Name );
 
                 if ( existingOtherMember != null )
                 {

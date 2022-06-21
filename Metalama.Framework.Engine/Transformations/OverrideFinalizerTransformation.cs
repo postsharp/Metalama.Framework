@@ -3,7 +3,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
@@ -25,9 +25,9 @@ namespace Metalama.Framework.Engine.Transformations
     {
         public BoundTemplateMethod BoundTemplate { get; }
 
-        private new IFinalizer OverriddenDeclaration => (IFinalizer) base.OverriddenDeclaration;
+        private new IMethod OverriddenDeclaration => (IMethod) base.OverriddenDeclaration;
 
-        public OverrideFinalizerTransformation( Advice advice, IFinalizer targetFinalizer, BoundTemplateMethod boundTemplate, IObjectReader tags )
+        public OverrideFinalizerTransformation( Advice advice, IMethod targetFinalizer, BoundTemplateMethod boundTemplate, IObjectReader tags )
             : base( advice, targetFinalizer, tags )
         {
             Invariant.Assert( !boundTemplate.IsNull );
@@ -39,30 +39,30 @@ namespace Metalama.Framework.Engine.Transformations
         {
             var proceedExpression = this.CreateProceedExpression( context, this.BoundTemplate.Template.SelectedKind );
 
-            var metaApi = MetaApi.ForFinalizer(
+            var metaApi = MetaApi.ForMethod(
                 this.OverriddenDeclaration,
                 new MetaApiProperties(
+                    this.ParentAdvice.SourceCompilation,
                     context.DiagnosticSink,
                     this.BoundTemplate.Template.Cast(),
                     this.Tags,
-                    this.Advice.AspectLayerId,
+                    this.ParentAdvice.AspectLayerId,
                     context.SyntaxGenerationContext,
-                    this.Advice.Aspect,
+                    this.ParentAdvice.Aspect,
                     context.ServiceProvider,
                     MetaApiStaticity.Default ) );
 
             var expansionContext = new TemplateExpansionContext(
-                this.Advice.TemplateInstance.Instance,
+                this.ParentAdvice.TemplateInstance.Instance,
                 metaApi,
-                (CompilationModel) this.OverriddenDeclaration.Compilation,
                 context.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ),
                 context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
                 context.SyntaxGenerationContext,
                 this.BoundTemplate,
                 proceedExpression,
-                this.Advice.AspectLayerId );
+                this.ParentAdvice.AspectLayerId );
 
-            var templateDriver = this.Advice.TemplateInstance.TemplateClass.GetTemplateDriver( this.BoundTemplate.Template.Declaration! );
+            var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( this.BoundTemplate.Template.Declaration! );
 
             if ( !templateDriver.TryExpandDeclaration( expansionContext, this.BoundTemplate.TemplateArguments, out var newMethodBody ) )
             {
@@ -79,7 +79,7 @@ namespace Metalama.Framework.Engine.Transformations
                     Identifier(
                         context.IntroductionNameProvider.GetOverrideName(
                             this.OverriddenDeclaration.DeclaringType,
-                            this.Advice.AspectLayerId,
+                            this.ParentAdvice.AspectLayerId,
                             this.OverriddenDeclaration ) ),
                     null,
                     ParameterList(),
@@ -87,13 +87,13 @@ namespace Metalama.Framework.Engine.Transformations
                     newMethodBody,
                     null );
 
-            return new[] { new IntroducedMember( this, syntax, this.Advice.AspectLayerId, IntroducedMemberSemantic.Override, this.OverriddenDeclaration ) };
+            return new[] { new IntroducedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Override, this.OverriddenDeclaration ) };
         }
 
         private BuiltUserExpression CreateProceedExpression( in MemberIntroductionContext context, TemplateKind templateKind )
         {
             return new BuiltUserExpression(
-                context.AspectReferenceSyntaxProvider.GetFinalizerReference( this.Advice.AspectLayerId, this.OverriddenDeclaration, context.SyntaxGenerator ),
+                context.AspectReferenceSyntaxProvider.GetFinalizerReference( this.ParentAdvice.AspectLayerId, this.OverriddenDeclaration, context.SyntaxGenerator ),
                 this.OverriddenDeclaration.GetCompilationModel().Factory.GetSpecialType( SpecialType.Void ) );
         }
     }

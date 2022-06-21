@@ -175,10 +175,10 @@ namespace Metalama.Framework.Engine.CodeModel
                 methodSymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
                 ms => new Constructor( (IMethodSymbol) ms.GetSymbol( this.Compilation ), this._compilationModel ) );
 
-        public IFinalizer GetFinalizer( IMethodSymbol finalizerSymbol )
-            => (IFinalizer) this._defaultCache.GetOrAdd(
+        public IMethod GetFinalizer( IMethodSymbol finalizerSymbol )
+            => (IMethod) this._defaultCache.GetOrAdd(
                 finalizerSymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
-                ms => new Finalizer( (IMethodSymbol) ms.GetSymbol( this.Compilation ), this._compilationModel ) );
+                ms => new Method( (IMethodSymbol) ms.GetSymbol( this.Compilation ), this._compilationModel ) );
 
         public IParameter GetParameter( IParameterSymbol parameterSymbol )
             => (IParameter) this._defaultCache.GetOrAdd(

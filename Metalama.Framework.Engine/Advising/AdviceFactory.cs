@@ -354,35 +354,6 @@ namespace Metalama.Framework.Engine.Advising
         }
 
         public IIntroductionAdviceResult<IMethod> IntroduceMethod(
-        public void Override( IFinalizer targetFinalizer, string template, object? args = null, object? tags = null )
-        {
-            if ( this._templateInstance == null )
-            {
-                throw new InvalidOperationException();
-            }
-
-            var diagnosticList = new DiagnosticList();
-
-            var templateMember = this.ValidateTemplateName( template, TemplateKind.Default, true )
-                .GetTemplateMember<IMethod>( this.State.Compilation, this.State.ServiceProvider )
-                .ForOverride( targetFinalizer, ObjectReader.GetReader( args ) );
-
-            var advice = new OverrideFinalizerAdvice(
-                this.State.AspectInstance,
-                this._templateInstance,
-                targetFinalizer,
-                templateMember,
-                this._layerName,
-                ObjectReader.GetReader( tags ) );
-
-            advice.Initialize( diagnosticList );
-            ThrowOnErrors( diagnosticList );
-            this.State.Advices.Add( advice );
-
-            this.State.Diagnostics.Report( diagnosticList );
-        }
-
-        public IMethodBuilder IntroduceMethod(
             INamedType targetType,
             string defaultTemplate,
             IntroductionScope scope = IntroductionScope.Default,
@@ -416,6 +387,42 @@ namespace Metalama.Framework.Engine.Advising
                 scope,
                 whenExists,
                 buildMethod,
+                this._layerName,
+                ObjectReader.GetReader( tags ) );
+
+            return this.ExecuteAdvice<IMethod>( advice );
+        }
+
+        public IIntroductionAdviceResult<IMethod> IntroduceFinalizer(
+            INamedType targetType,
+            string defaultTemplate,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            object? args = null,
+            object? tags = null )
+        {
+            if ( this._templateInstance == null )
+            {
+                throw new InvalidOperationException();
+            }
+
+            if ( targetType.TypeKind == TypeKind.Interface )
+            {
+                throw new InvalidOperationException(
+                    UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
+            }
+
+            this.ValidateTarget( targetType );
+
+            var template = this.ValidateTemplateName( defaultTemplate, TemplateKind.Default, true )
+                .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
+
+            var advice = new IntroduceFinalizerAdvice(
+                this.State.AspectInstance,
+                this._templateInstance,
+                targetType,
+                this._compilation,
+                template.ForIntroduction( ObjectReader.GetReader( args ) ),
+                whenExists,
                 this._layerName,
                 ObjectReader.GetReader( tags ) );
 
