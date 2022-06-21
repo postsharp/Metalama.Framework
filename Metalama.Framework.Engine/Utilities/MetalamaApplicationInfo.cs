@@ -17,7 +17,6 @@ namespace Metalama.Framework.Engine.Utilities
 
         public bool IsPrerelease { get; }
 
-
         public DateTime BuildDate { get; }
 
         public ProcessKind ProcessKind { get; }
@@ -29,12 +28,14 @@ namespace Metalama.Framework.Engine.Utilities
 
         public bool IsUnattendedProcess( ILoggerFactory loggerFactory ) => ProcessUtilities.IsCurrentProcessUnattended( loggerFactory );
 
+#pragma warning disable CA1822 // Mark members as static
         public bool IsTelemetryEnabled =>
 #if DEBUG
             false;
 #else
             true;
 #endif
+#pragma warning restore CA1822 // Mark members as static
 
         public MetalamaApplicationInfo()
         {
