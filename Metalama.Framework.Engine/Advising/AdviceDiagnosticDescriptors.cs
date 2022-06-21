@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using static Metalama.Framework.Diagnostics.Severity;
@@ -69,14 +70,6 @@ namespace Metalama.Framework.Engine.Advising
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<(string AspectType, INamedType AttributeType, IDeclaration TargetDeclaration)>
-            AttributeAlreadyPresent = new(
-                "LAMA0507",
-                "Cannot introduce a custom attribute when the attribute is already present on the target declaration.",
-                "The aspect '{0}' cannot introduce the custom attribute '{1}' into '{2}' because it this attribute is already present on the declaration and WhenExists is set to Fail.",
-                _category,
-                Error );
-
         // Subrange 510-519: Interface implementation diagnostics.
 
         internal static readonly DiagnosticDefinition<(string AspectType, INamedType TargetType, INamedType InterfaceType, IMember InterfaceMember)>
@@ -123,12 +116,28 @@ namespace Metalama.Framework.Engine.Advising
                 _category,
                 Error );
 
-        // 520-529: Parameter introduction diagnostics.
+        // 520-529: Various introduction diagnostics.
         internal static readonly DiagnosticDefinition<(string AspectType, IConstructor Constructor)>
             CannotIntroduceParameterIntoStaticConstructor = new(
                 "LAMA0520",
                 "Cannot introduce a parameter into a static constructor.",
                 "The aspect '{0}' cannot introduce a parameter into '{1}' because it is a static constructor.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<(string AspectType, INamedType AttributeType, IDeclaration TargetDeclaration)>
+            AttributeAlreadyPresent = new(
+                "LAMA0521",
+                "Cannot introduce a custom attribute when the attribute is already present on the target declaration.",
+                "The aspect '{0}' cannot introduce the custom attribute '{1}' into '{2}' because it this attribute is already present on the declaration and WhenExists is set to Fail.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<(string AspectType, IDeclaration TargetType, OverrideStrategy OverrideStrategy)>
+            CannotUseNewOverrideStrategyWithFinalizers = new(
+                "LAMA0522",
+                "Invalid override strategy when introducing a finalizer.",
+                "The aspect '{0}' cannot introduce finalizer into type '{1}' because the specified override strategy '{2}' is not valid.",
                 _category,
                 Error );
     }

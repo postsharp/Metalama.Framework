@@ -32,9 +32,13 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 INamespaceSymbol => DeclarationKind.Namespace,
                 INamedTypeSymbol => DeclarationKind.NamedType,
-                IMethodSymbol method => method.MethodKind == MethodKind.Constructor || method.MethodKind == MethodKind.StaticConstructor
-                    ? DeclarationKind.Constructor
-                    : DeclarationKind.Method,
+                IMethodSymbol method =>
+                    method.MethodKind switch
+                    {
+                        MethodKind.Constructor or MethodKind.StaticConstructor => DeclarationKind.Constructor,
+                        MethodKind.Destructor => DeclarationKind.Finalizer,
+                        _ => DeclarationKind.Method
+                    },
                 IPropertySymbol => DeclarationKind.Property,
                 IFieldSymbol => DeclarationKind.Field,
                 ITypeParameterSymbol => DeclarationKind.TypeParameter,

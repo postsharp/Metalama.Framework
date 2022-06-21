@@ -77,6 +77,11 @@ namespace Metalama.Framework.Code
         Constructor,
 
         /// <summary>
+        /// <see cref="IMethod"/> that is a finalizer (historically referred to as destructors).
+        /// </summary>
+        Finalizer,
+
+        /// <summary>
         /// A reference assembly, implementing <see cref="IAssembly"/>. Note
         /// that the current assembly is represented by <see cref="ICompilation"/> that inherits <see cref="IAssembly"/>, but the
         /// <see cref="DeclarationKind"/> for the current compilation is <see cref="Compilation"/> and not <see cref="AssemblyReference"/>. 

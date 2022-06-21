@@ -175,6 +175,11 @@ namespace Metalama.Framework.Engine.CodeModel
                 methodSymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
                 ms => new Constructor( (IMethodSymbol) ms.GetSymbol( this.Compilation ), this._compilationModel ) );
 
+        public IMethod GetFinalizer( IMethodSymbol finalizerSymbol )
+            => (IMethod) this._defaultCache.GetOrAdd(
+                finalizerSymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
+                ms => new Method( (IMethodSymbol) ms.GetSymbol( this.Compilation ), this._compilationModel ) );
+
         public IParameter GetParameter( IParameterSymbol parameterSymbol )
             => (IParameter) this._defaultCache.GetOrAdd(
                 parameterSymbol.ToTypedRef( this.Compilation ).As<ICompilationElement>(),
@@ -241,8 +246,16 @@ namespace Metalama.Framework.Engine.CodeModel
                     {
                         var method = (IMethodSymbol) symbol;
 
-                        return kind == DeclarationRefTargetKind.Return ? this.GetReturnParameter( method ) :
-                            method.GetDeclarationKind() == DeclarationKind.Method ? this.GetMethod( method ) : this.GetConstructor( method );
+                        return
+                            kind == DeclarationRefTargetKind.Return
+                                ? this.GetReturnParameter( method )
+                                : method.GetDeclarationKind() switch
+                                {
+                                    DeclarationKind.Method => this.GetMethod( method ),
+                                    DeclarationKind.Constructor => this.GetConstructor( method ),
+                                    DeclarationKind.Finalizer => this.GetFinalizer( method ),
+                                    _ => throw new AssertionFailedException()
+                                };
                     }
 
                 case SymbolKind.Property:

@@ -13,12 +13,18 @@ internal sealed class MethodUpdatableCollection : NonUniquelyNamedMemberUpdatabl
     public MethodUpdatableCollection( CompilationModel compilation, INamedTypeSymbol declaringType ) : base( compilation, declaringType ) { }
 
     protected override Func<ISymbol, bool> Predicate
-        => m => m.Kind == SymbolKind.Method &&
-                ((IMethodSymbol) m).MethodKind is not (MethodKind.Constructor
-                or MethodKind.StaticConstructor or MethodKind.PropertyGet
-                or MethodKind.PropertySet
-                or MethodKind.EventAdd
-                or MethodKind.EventRemove
-                or MethodKind.EventRaise) &&
-                m is not { Name: "<Main>$", ContainingType: { Name: "Program" } };
+        => m => m switch
+        {
+            IMethodSymbol method =>
+                method switch
+                {
+                    { Name: "<Main>$", ContainingType: { Name: "Program" } } => false,
+                    { MethodKind: MethodKind.Constructor or MethodKind.StaticConstructor } => false,
+                    { MethodKind: MethodKind.PropertyGet or MethodKind.PropertySet } => false,
+                    { MethodKind: MethodKind.EventAdd or MethodKind.EventRemove or MethodKind.EventRaise } => false,
+                    { MethodKind: MethodKind.Destructor } => false,
+                    _ => true
+                },
+            _ => false
+        };
 }

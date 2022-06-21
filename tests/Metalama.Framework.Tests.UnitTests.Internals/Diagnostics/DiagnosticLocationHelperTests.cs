@@ -46,7 +46,7 @@ class C<T> : object
 
             // Constructors
             AssertLocation( "C", type.Constructors.Single().GetDiagnosticLocation() );
-            AssertLocation( "C", type.StaticConstructor.GetDiagnosticLocation() );
+            AssertLocation( "C", type.StaticConstructor!.GetDiagnosticLocation() );
 
             // Methods
             AssertLocation( "Method", method.GetDiagnosticLocation() );
@@ -59,7 +59,7 @@ class C<T> : object
             AssertLocation( "operator", type.Methods.OfKind( MethodKind.ConversionOperator ).Single().GetDiagnosticLocation() );
 
             // Destructors
-            AssertLocation( "C", type.Methods.OfKind( MethodKind.Finalizer ).Single().GetDiagnosticLocation() );
+            AssertLocation( "C", type.Finalizer!.GetDiagnosticLocation() );
 
             // Properties
             AssertLocation( "AutomaticProperty", type.Properties.OfName( "AutomaticProperty" ).Single().GetDiagnosticLocation() );

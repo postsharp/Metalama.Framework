@@ -67,7 +67,11 @@ namespace Metalama.Framework.Engine.Linking
                 replacedTrees.Add( new SyntaxTreeModification( newSyntaxTree, syntaxTree ) );
             }
 
-            return new AspectLinkerResult( input.IntermediateCompilation.Update( replacedTrees ), input.DiagnosticSink.ToImmutable() );
+            var linkedCompilation =
+                input.IntermediateCompilation
+                    .Update( replacedTrees );
+
+            return new AspectLinkerResult( linkedCompilation, input.DiagnosticSink.ToImmutable() );
         }
     }
 }

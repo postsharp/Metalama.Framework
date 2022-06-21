@@ -10,11 +10,11 @@ using System;
 
 namespace Metalama.Framework.Engine.Advising
 {
-    internal class OverrideMethodAdvice : OverrideMemberAdvice<IMethod>
+    internal class OverrideFinalizerAdvice : OverrideMemberAdvice<IMethod>
     {
         public BoundTemplateMethod BoundTemplate { get; }
 
-        public OverrideMethodAdvice(
+        public OverrideFinalizerAdvice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             IMethod targetDeclaration,
@@ -32,22 +32,7 @@ namespace Metalama.Framework.Engine.Advising
             Action<ITransformation> addTransformation )
         {
             // TODO: order should be self if the target is introduced on the same layer.
-            var targetMethod = this.TargetDeclaration.GetTarget( compilation );
-
-            switch ( targetMethod.MethodKind )
-            {
-                case MethodKind.Finalizer:
-                    addTransformation(
-                        new OverrideFinalizerTransformation( this, this.TargetDeclaration.GetTarget( compilation ), this.BoundTemplate, this.Tags ) );
-
-                    break;
-
-                default:
-                    addTransformation(
-                        new OverrideMethodTransformation( this, this.TargetDeclaration.GetTarget( compilation ), this.BoundTemplate, this.Tags ) );
-
-                    break;
-            }
+            addTransformation( new OverrideFinalizerTransformation( this, this.TargetDeclaration.GetTarget( compilation ), this.BoundTemplate, this.Tags ) );
 
             return AdviceImplementationResult.Success();
         }

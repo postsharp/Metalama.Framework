@@ -302,6 +302,9 @@ namespace Metalama.Framework.Engine.Linking
                     case MethodDeclarationSyntax methodDecl:
                         return (SyntaxNode?) methodDecl.Body ?? methodDecl.ExpressionBody ?? throw new AssertionFailedException();
 
+                    case DestructorDeclarationSyntax dtorDecl:
+                        return (SyntaxNode?) dtorDecl.Body ?? dtorDecl.ExpressionBody ?? throw new AssertionFailedException();
+
                     case AccessorDeclarationSyntax accessorDecl:
                         var body = (SyntaxNode?) accessorDecl.Body ?? accessorDecl.ExpressionBody;
 
@@ -494,8 +497,11 @@ namespace Metalama.Framework.Engine.Linking
         {
             switch ( symbol )
             {
-                case IMethodSymbol methodSymbol:
+                case IMethodSymbol { MethodKind: not MethodKind.Destructor } methodSymbol:
                     return this.RewriteMethod( (MethodDeclarationSyntax) syntax, methodSymbol, generationContext );
+
+                case IMethodSymbol { MethodKind: MethodKind.Destructor } destructorSymbol:
+                    return this.RewriteDestructor( (DestructorDeclarationSyntax) syntax, destructorSymbol, generationContext );
 
                 case IPropertySymbol propertySymbol:
                     return this.RewriteProperty( (PropertyDeclarationSyntax) syntax, propertySymbol );
@@ -651,7 +657,7 @@ namespace Metalama.Framework.Engine.Linking
                     _ => targetSymbol.Name
                 };
 
-            // Presume that all (annotated) aspect references are member access expressions.
+            // Presume that all (annotated) aspect references are member access expressions or invocation expressions.
             switch ( aspectReference.Expression )
             {
                 case MemberAccessExpressionSyntax memberAccessExpression:
@@ -672,9 +678,19 @@ namespace Metalama.Framework.Engine.Linking
                         {
                             // This is the same type, we can just change the identifier in the expression.
                             // TODO: Is the target always accessible?
-                            return memberAccessExpression
-                                .WithName( IdentifierName( targetMemberName ) )
-                                .WithoutTrivia();
+                            if ( targetSymbol is IMethodSymbol { MethodKind: MethodKind.Destructor } )
+                            {
+                                return memberAccessExpression
+                                    .WithExpression( ThisExpression() )
+                                    .WithName( IdentifierName( targetMemberName ) )
+                                    .WithoutTrivia();
+                            }
+                            else
+                            {
+                                return memberAccessExpression
+                                    .WithName( IdentifierName( targetMemberName ) )
+                                    .WithoutTrivia();
+                            }
                         }
                     }
                     else
@@ -707,11 +723,16 @@ namespace Metalama.Framework.Engine.Linking
                             else if ( aspectReference.ContainingSymbol.ContainingType.Is( targetSymbol.ContainingType ) )
                             {
                                 // Resolved symbol is declared in a base class.
-                                switch ( memberAccessExpression.Expression )
+                                switch ( (targetSymbol, memberAccessExpression.Expression) )
                                 {
-                                    case IdentifierNameSyntax:
-                                    case BaseExpressionSyntax:
-                                    case ThisExpressionSyntax:
+                                    case (IMethodSymbol { MethodKind: MethodKind.Destructor }, _):
+                                        return
+                                            IdentifierName( "__LINKER_TO_BE_REMOVED__" )
+                                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.NullAspectReferenceExpression );
+
+                                    case (_, IdentifierNameSyntax):
+                                    case (_, BaseExpressionSyntax):
+                                    case (_, ThisExpressionSyntax):
                                         return
                                             MemberAccessExpression(
                                                 SyntaxKind.SimpleMemberAccessExpression,
