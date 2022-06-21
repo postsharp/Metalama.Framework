@@ -9,7 +9,10 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Validation;
 using System.Collections.Immutable;
+
+#if DEBUG
 using System.Linq;
+#endif
 
 namespace Metalama.Framework.Engine.Pipeline
 {
