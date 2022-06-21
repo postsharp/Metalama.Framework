@@ -5,20 +5,22 @@ using Metalama.Framework.Engine.CompileTime;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 
 namespace Metalama.Framework.Engine.Utilities
 {
-    internal static class ManagedResourceReader
+    internal static class MetadataReader
     {
         private static readonly ConcurrentDictionary<string, CacheEntry> _resourceCache = new();
 
-        private record CacheEntry( DateTime LastFileWrite, ImmutableDictionary<string, byte[]>? Resources );
+        private record CacheEntry( DateTime LastFileWrite, ImmutableDictionary<string, byte[]>? Resources, ImmutableArray<string> AssemblyReferences );
 
-        public static bool TryGetCompileTimeResource( string path, [NotNullWhen( true )] out ImmutableDictionary<string, byte[]>? resources )
+        public static bool TryGetMetadata(
+            string path,
+            [NotNullWhen( true )] out ImmutableDictionary<string, byte[]>? resources,
+            out ImmutableArray<string> assemblyReferences )
         {
             var assemblyName = Path.GetFileNameWithoutExtension( path );
 
@@ -37,18 +39,10 @@ namespace Metalama.Framework.Engine.Utilities
                 _resourceCache.TryAdd( path, result );
             }
 
-            if ( result.Resources != null )
-            {
-                resources = result.Resources;
+            resources = result.Resources ?? ImmutableDictionary<string, byte[]>.Empty;
+            assemblyReferences = result.AssemblyReferences;
 
-                return true;
-            }
-            else
-            {
-                resources = null;
-
-                return false;
-            }
+            return true;
         }
 
         private static CacheEntry GetCompileTimeResourceCore( string path )
@@ -60,7 +54,8 @@ namespace Metalama.Framework.Engine.Utilities
 
             var metadataReader = peReader.GetMetadataReader();
 
-            ImmutableDictionary<string, byte[]>.Builder? dictionaryBuilder = null;
+            // Read resources.
+            ImmutableDictionary<string, byte[]>.Builder? resourcesDictionaryBuilder = null;
 
             foreach ( var resourceHandle in metadataReader.ManifestResources )
             {
@@ -81,7 +76,7 @@ namespace Metalama.Framework.Engine.Utilities
                 {
                     unsafe
                     {
-                        dictionaryBuilder ??= ImmutableDictionary.CreateBuilder<string, byte[]>();
+                        resourcesDictionaryBuilder ??= ImmutableDictionary.CreateBuilder<string, byte[]>();
                         var resourcesSection = peReader.GetSectionData( peReader.PEHeaders.CorHeader!.ResourcesDirectory.RelativeVirtualAddress );
                         var size = *(int*) (resourcesSection.Pointer + resource.Offset);
                         var resourceBytes = new byte[size];
@@ -91,12 +86,22 @@ namespace Metalama.Framework.Engine.Utilities
                             Buffer.MemoryCopy( resourcesSection.Pointer + resource.Offset + 4, fixedResourceBytes, size, size );
                         }
 
-                        dictionaryBuilder.Add( resourceName, resourceBytes );
+                        resourcesDictionaryBuilder.Add( resourceName, resourceBytes );
                     }
                 }
             }
 
-            return new CacheEntry( timestamp, dictionaryBuilder?.ToImmutable() );
+            // Read references.
+            var referenceArrayBuilder = ImmutableArray.CreateBuilder<string>();
+
+            foreach ( var assemblyReferenceHandle in metadataReader.AssemblyReferences )
+            {
+                var reference = metadataReader.GetAssemblyReference( assemblyReferenceHandle );
+                var name = metadataReader.GetString( reference.Name );
+                referenceArrayBuilder.Add( name );
+            }
+
+            return new CacheEntry( timestamp, resourcesDictionaryBuilder?.ToImmutable(), referenceArrayBuilder.ToImmutableArray() );
         }
     }
 }

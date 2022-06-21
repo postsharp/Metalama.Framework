@@ -1,11 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using K4os.Hash.xxHash;
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating.Mapping;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
 using Metalama.Framework.Validation;
@@ -247,6 +249,82 @@ namespace Metalama.Framework.Engine.CompileTime
             AssemblyIdentity compileTimeIdentity,
             IReadOnlyList<CompileTimeProject>? references = null )
             => new( serviceProvider, domain, runTimeIdentity, compileTimeIdentity, references ?? Array.Empty<CompileTimeProject>(), null, null, null, null );
+
+        /// <summary>
+        /// Creates a <see cref="CompileTimeProject"/> for an assembly that contains Metalama compile-time code but has not been transformed. This is the case
+        /// normally for public APIs of SDK-based extensions.
+        /// </summary>
+        public static CompileTimeProject CreateUntransformed(
+            IServiceProvider serviceProvider,
+            CompileTimeDomain domain,
+            AssemblyIdentity assemblyIdentity,
+            string assemblyPath )
+        {
+            var assemblyName = new AssemblyName( assemblyIdentity.ToString() );
+            var assembly = AppDomainUtility.GetLoadedAssemblies( a => AssemblyName.ReferenceMatchesDefinition( assemblyName, a.GetName() ) ).FirstOrDefault();
+
+            if ( assembly == null )
+            {
+                // TODO: Have an error message, not an exception.
+                throw new InvalidOperationException( $"The assembly '{assemblyIdentity}' should be included in the project as an analyzer." );
+            }
+
+            // Find interesting types.
+            var aspectTypes = assembly.GetTypes().Where( t => typeof(IAspect).IsAssignableFrom( t ) ).Select( t => t.FullName ).ToImmutableArray();
+
+            var fabricTypes = assembly.GetTypes()
+                .Where( t => typeof(ProjectFabric).IsAssignableFrom( t ) && !typeof(TransitiveProjectFabric).IsAssignableFrom( t ) )
+                .Select( t => t.FullName )
+                .ToImmutableArray();
+
+            var transitiveFabricTypes = assembly.GetTypes()
+                .Where( t => typeof(TransitiveProjectFabric).IsAssignableFrom( t ) )
+                .Select( t => t.FullName )
+                .ToImmutableArray();
+
+            var templateProviders =
+                assembly.GetTypes().Where( t => typeof(ITemplateProvider).IsAssignableFrom( t ) ).Select( t => t.FullName ).ToImmutableArray();
+
+            // Compute a unique hash based on the binary. 
+            XXH64 hash = new();
+            var buffer = new byte[1024];
+
+            using ( var file = File.OpenRead( assemblyPath ) )
+            {
+                var read = 0;
+
+                while ( (read = file.Read( buffer, 0, 1024 )) > 0 )
+                {
+                    hash.Update( buffer, 0, read );
+                }
+            }
+
+            // Create a manifest.
+            var manifest = new CompileTimeProjectManifest(
+                assemblyIdentity.ToString(),
+                assemblyIdentity.ToString(),
+                "",
+                aspectTypes,
+                Array.Empty<string>(),
+                fabricTypes,
+                transitiveFabricTypes,
+                templateProviders,
+                null,
+                hash.Digest(),
+                Array.Empty<CompileTimeFile>() );
+
+            return new CompileTimeProject(
+                serviceProvider,
+                domain,
+                assemblyIdentity,
+                assemblyIdentity,
+                Array.Empty<CompileTimeProject>(),
+                manifest,
+                assemblyPath,
+                null,
+                null,
+                assembly );
+        }
 
         /// <summary>
         /// Serializes the current project (its manifest and source code) into a stream that can be embedded as a managed resource.

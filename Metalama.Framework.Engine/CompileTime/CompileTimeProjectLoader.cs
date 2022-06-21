@@ -10,7 +10,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -277,26 +276,35 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
             goto finish;
         }
 
-        if ( !ManagedResourceReader.TryGetCompileTimeResource( assemblyPath, out var resources )
-             || !resources.TryGetValue( CompileTimeConstants.CompileTimeProjectResourceName, out var resourceBytes ) )
+        if ( !MetadataReader.TryGetMetadata( assemblyPath, out var resources, out var assemblyReferences ) )
         {
             goto finish;
         }
 
-        var assemblyName = AssemblyName.GetAssemblyName( assemblyPath );
-
-        if ( !this.TryDeserializeCompileTimeProject(
-                assemblyName.ToAssemblyIdentity(),
-                new MemoryStream( resourceBytes ),
-                diagnosticSink,
-                cancellationToken,
-                out compileTimeProject ) )
+        if ( resources.TryGetValue( CompileTimeConstants.CompileTimeProjectResourceName, out var resourceBytes ) )
         {
-            this._logger.Warning?.Log( $"TryDeserializeCompileTimeProject failed." );
+            var assemblyName = AssemblyName.GetAssemblyName( assemblyPath );
 
-            // Coverage: ignore
+            if ( !this.TryDeserializeCompileTimeProject(
+                    assemblyName.ToAssemblyIdentity(),
+                    new MemoryStream( resourceBytes ),
+                    diagnosticSink,
+                    cancellationToken,
+                    out compileTimeProject ) )
+            {
+                this._logger.Warning?.Log( $"TryDeserializeCompileTimeProject failed." );
 
-            return false;
+                // Coverage: ignore
+
+                return false;
+            }
+        }
+        else if ( assemblyReferences.Contains( "Metalama.Framework" ) )
+        {
+            // We have an assembly that references Metalama.Framework but has no embedded compile-time project.
+            // This is typically the case of public assemblies of weaver-based aspects or services.
+            // These projects need to be included as compile-time projects. They typically have MetalamaRemoveCompileTimeOnlyCode=false.
+            compileTimeProject = CompileTimeProject.CreateUntransformed( this._serviceProvider, this._domain, assemblyIdentity, assemblyPath );
         }
 
     finish:
