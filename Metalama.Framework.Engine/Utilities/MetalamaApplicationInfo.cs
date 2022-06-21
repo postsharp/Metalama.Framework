@@ -17,7 +17,6 @@ namespace Metalama.Framework.Engine.Utilities
 
         public bool IsPrerelease { get; }
 
-
         public DateTime BuildDate { get; }
 
         public ProcessKind ProcessKind { get; }
