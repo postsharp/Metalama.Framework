@@ -51,9 +51,9 @@ internal class TransitiveAspectSource : IAspectSource, IValidatorSource
             switch ( reference )
             {
                 case PortableExecutableReference { FilePath: { } filePath }:
-                    if ( MetadataReader.TryGetMetadata( filePath, out var resources, out _ ) )
+                    if ( MetadataReader.TryGetMetadata( filePath, out var metadataInfo ) )
                     {
-                        if ( resources.TryGetValue( CompileTimeConstants.InheritableAspectManifestResourceName, out var bytes ) )
+                        if ( metadataInfo.Resources.TryGetValue( CompileTimeConstants.InheritableAspectManifestResourceName, out var bytes ) )
                         {
                             manifest = TransitiveAspectsManifest.Deserialize( new MemoryStream( bytes ), serviceProvider );
                         }

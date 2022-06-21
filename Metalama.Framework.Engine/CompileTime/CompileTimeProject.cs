@@ -15,6 +15,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -252,21 +253,24 @@ namespace Metalama.Framework.Engine.CompileTime
 
         /// <summary>
         /// Creates a <see cref="CompileTimeProject"/> for an assembly that contains Metalama compile-time code but has not been transformed. This is the case
-        /// normally for public APIs of SDK-based extensions.
+        /// normally for public APIs of SDK-based extensions. Returns <c>false</c> if the assembly is not loaded in the current AppDomain because it means
+        /// it has not been loaded as an analyzer.
         /// </summary>
-        public static CompileTimeProject CreateUntransformed(
+        public static bool TryCreateUntransformed(
             IServiceProvider serviceProvider,
             CompileTimeDomain domain,
             AssemblyIdentity assemblyIdentity,
-            string assemblyPath )
+            string assemblyPath,
+            [NotNullWhen( true )] out CompileTimeProject? compileTimeProject )
         {
             var assemblyName = new AssemblyName( assemblyIdentity.ToString() );
             var assembly = AppDomainUtility.GetLoadedAssemblies( a => AssemblyName.ReferenceMatchesDefinition( assemblyName, a.GetName() ) ).FirstOrDefault();
 
             if ( assembly == null )
             {
-                // TODO: Have an error message, not an exception.
-                throw new InvalidOperationException( $"The assembly '{assemblyIdentity}' should be included in the project as an analyzer." );
+                compileTimeProject = null;
+
+                return false;
             }
 
             // Find interesting types.
@@ -313,7 +317,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 hash.Digest(),
                 Array.Empty<CompileTimeFile>() );
 
-            return new CompileTimeProject(
+            compileTimeProject = new CompileTimeProject(
                 serviceProvider,
                 domain,
                 assemblyIdentity,
@@ -324,6 +328,8 @@ namespace Metalama.Framework.Engine.CompileTime
                 null,
                 null,
                 assembly );
+
+            return true;
         }
 
         /// <summary>

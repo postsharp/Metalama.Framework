@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CompileTime;
 using System;
 using System.Collections.Concurrent;
@@ -14,14 +15,11 @@ namespace Metalama.Framework.Engine.Utilities
 {
     internal static class MetadataReader
     {
-        private static readonly ConcurrentDictionary<string, CacheEntry> _resourceCache = new();
-
-        private record CacheEntry( DateTime LastFileWrite, ImmutableDictionary<string, byte[]>? Resources, ImmutableArray<string> AssemblyReferences );
+        private static readonly ConcurrentDictionary<string, MetadataInfo> _resourceCache = new();
 
         public static bool TryGetMetadata(
             string path,
-            [NotNullWhen( true )] out ImmutableDictionary<string, byte[]>? resources,
-            out ImmutableArray<string> assemblyReferences )
+            [NotNullWhen( true )] out MetadataInfo? metadataInfo )
         {
             var assemblyName = Path.GetFileNameWithoutExtension( path );
 
@@ -29,24 +27,21 @@ namespace Metalama.Framework.Engine.Utilities
                  assemblyName.StartsWith( "System.", StringComparison.OrdinalIgnoreCase ) ||
                  assemblyName.StartsWith( "Microsoft.CodeAnalysis", StringComparison.OrdinalIgnoreCase ) )
             {
-                resources = null;
+                metadataInfo = null;
 
                 return false;
             }
 
-            if ( !(_resourceCache.TryGetValue( path, out var result ) && result.LastFileWrite == File.GetLastWriteTime( path )) )
+            if ( !(_resourceCache.TryGetValue( path, out metadataInfo ) && metadataInfo.LastFileWrite == File.GetLastWriteTime( path )) )
             {
-                result = GetCompileTimeResourceCore( path );
-                _resourceCache.TryAdd( path, result );
+                metadataInfo = GetCompileTimeResourceCore( path );
+                _resourceCache.TryAdd( path, metadataInfo );
             }
-
-            resources = result.Resources ?? ImmutableDictionary<string, byte[]>.Empty;
-            assemblyReferences = result.AssemblyReferences;
 
             return true;
         }
 
-        private static CacheEntry GetCompileTimeResourceCore( string path )
+        private static MetadataInfo GetCompileTimeResourceCore( string path )
         {
             var timestamp = File.GetLastWriteTime( path );
 
@@ -92,17 +87,33 @@ namespace Metalama.Framework.Engine.Utilities
                 }
             }
 
-            // Read references.
-            var referenceArrayBuilder = ImmutableArray.CreateBuilder<string>();
+            // Read assembly custom attributes.
+            var hasCompileTimeAttribute = false;
+            var assemblyDefinition = metadataReader.GetAssemblyDefinition();
 
-            foreach ( var assemblyReferenceHandle in metadataReader.AssemblyReferences )
+            foreach ( var attributeHandle in assemblyDefinition.GetCustomAttributes() )
             {
-                var reference = metadataReader.GetAssemblyReference( assemblyReferenceHandle );
-                var name = metadataReader.GetString( reference.Name );
-                referenceArrayBuilder.Add( name );
+                var attribute = metadataReader.GetCustomAttribute( attributeHandle );
+
+                if ( attribute.Constructor.Kind == HandleKind.MemberReference )
+                {
+                    var constructor = metadataReader.GetMemberReference( (MemberReferenceHandle) (Handle) attribute.Constructor );
+                    var type = metadataReader.GetTypeReference( (TypeReferenceHandle) constructor.Parent );
+                    var typeName = metadataReader.GetString( type.Name );
+
+                    if ( typeName == nameof(CompileTimeAttribute) )
+                    {
+                        hasCompileTimeAttribute = true;
+
+                        break;
+                    }
+                }
             }
 
-            return new CacheEntry( timestamp, resourcesDictionaryBuilder?.ToImmutable(), referenceArrayBuilder.ToImmutableArray() );
+            return new MetadataInfo(
+                timestamp,
+                resourcesDictionaryBuilder?.ToImmutable() ?? ImmutableDictionary<string, byte[]>.Empty,
+                hasCompileTimeAttribute );
         }
     }
 }

@@ -277,12 +277,12 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
             goto finish;
         }
 
-        if ( !MetadataReader.TryGetMetadata( assemblyPath, out var resources, out var assemblyReferences ) )
+        if ( !MetadataReader.TryGetMetadata( assemblyPath, out var metadataInfo ) )
         {
             goto finish;
         }
 
-        if ( resources.TryGetValue( CompileTimeConstants.CompileTimeProjectResourceName, out var resourceBytes ) )
+        if ( metadataInfo.Resources.TryGetValue( CompileTimeConstants.CompileTimeProjectResourceName, out var resourceBytes ) )
         {
             var assemblyName = AssemblyName.GetAssemblyName( assemblyPath );
 
@@ -300,12 +300,17 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
                 return false;
             }
         }
-        else if ( assemblyReferences.Contains( "Metalama.Framework" ) )
+        else if ( metadataInfo.HasCompileTimeAttribute )
         {
-            // We have an assembly that references Metalama.Framework but has no embedded compile-time project.
+            // We have an assembly that a [assembly: CompileTime] attribute but has no embedded compile-time project.
             // This is typically the case of public assemblies of weaver-based aspects or services.
             // These projects need to be included as compile-time projects. They typically have MetalamaRemoveCompileTimeOnlyCode=false.
-            compileTimeProject = CompileTimeProject.CreateUntransformed( this._serviceProvider, this._domain, assemblyIdentity, assemblyPath );
+            if ( !CompileTimeProject.TryCreateUntransformed( this._serviceProvider, this._domain, assemblyIdentity, assemblyPath, out compileTimeProject ) )
+            {
+                this._logger.Trace?.Log(
+                    $"The assembly '{assemblyIdentity}' will not be included in the compile-time compilation despite having an [assembly: CompileTime] attribute " +
+                    "because it has no compile-time embedded resource and it is not loaded as an analyzer." );
+            }
         }
 
     finish:
