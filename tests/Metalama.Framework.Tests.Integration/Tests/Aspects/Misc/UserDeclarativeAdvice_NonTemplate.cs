@@ -2,7 +2,7 @@ using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-#pragma warning disable CS0169
+#pragma warning disable CS0169, CS0414
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.UserDeclarativeAdvice_NonTemplate;
 
