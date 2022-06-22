@@ -5,8 +5,11 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
-using System.Runtime.Versioning;
 using System.Text;
+
+#if DEBUG
+using System.Runtime.Versioning;
+#endif
 
 namespace Metalama.Framework.Engine.CompileTime
 {

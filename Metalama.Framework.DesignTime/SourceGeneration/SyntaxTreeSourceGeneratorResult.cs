@@ -3,11 +3,14 @@
 
 using K4os.Hash.xxHash;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
-using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
+
+#if DEBUG
+using Metalama.Framework.Engine;
+#endif
 
 namespace Metalama.Framework.DesignTime.SourceGeneration;
 
