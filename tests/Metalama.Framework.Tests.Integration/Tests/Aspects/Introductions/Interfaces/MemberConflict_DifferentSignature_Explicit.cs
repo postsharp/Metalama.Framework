@@ -2,10 +2,12 @@ using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.MemberConflict_Incompatible_UseExisting
+#pragma warning disable CS0067
+
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.MemberConflict_DifferentSignature_Explicit
 {
     /*
-     * Tests that when a member of the same name already exists in the target class for an implicit interface member, the compilation succeeds.
+     * Tests that when a member of the same name but different signature already exists in the target class and the interface member is explicit, the compilation succeeds.
      */
 
     public class IntroductionAttribute : TypeAspect
@@ -18,23 +20,24 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
                 whenExists: OverrideStrategy.Ignore );
         }
 
-        [InterfaceMember]
-        public void Method()
+        [InterfaceMember(IsExplicit = true)]
+        public int Method()
         {
-            Console.WriteLine( "This is introduced interface method." );
+            Console.WriteLine("This is introduced interface method.");
+            return 42;
         }
     }
 
     public interface IInterface
     {
-        void Method();
+        int Method();
     }
 
     // <target>
     [Introduction]
     public class TargetClass
-    { 
-        public int Method( int x )
+    {
+        public int Method(int x)
         {
             Console.WriteLine("This is original method.");
             return x;

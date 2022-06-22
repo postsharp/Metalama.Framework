@@ -8,8 +8,9 @@ public class TargetClass : global::Metalama.Framework.Tests.Integration.TestInpu
     }
 
 
-    public void Method()
+    public global::System.Int32 Method()
     {
         global::System.Console.WriteLine("This is introduced interface method.");
+        return (global::System.Int32)42;
     }
 }

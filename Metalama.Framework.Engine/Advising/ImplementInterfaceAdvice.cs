@@ -269,29 +269,19 @@ namespace Metalama.Framework.Engine.Advising
 
             var targetType = this.TargetDeclaration.GetTarget( compilation ).AssertNotNull();
             var diagnostics = new DiagnosticList();
-            var interfacesWithErrors = new HashSet<INamedType>(compilation.InvariantComparer);
-
-            if (this.OverrideStrategy == OverrideStrategy.Fail)
-            {
-                // If override strategy is Fail, run the first iteration to report errors.
-
-                foreach ( var interfaceSpecification in this._interfaceSpecifications )
-                {
-
-                }
-            }
 
             foreach ( var interfaceSpecification in this._interfaceSpecifications )
             {                    
                 // Validate that the interface must be introduced to the specific target.
                 if ( targetType.AllImplementedInterfaces.Any( t => compilation.InvariantComparer.Equals( t, interfaceSpecification.InterfaceType ) ) )
                 {
-                    interfacesWithErrors.Add( interfaceSpecification.InterfaceType );
-
-                    diagnostics.Report(
-                        AdviceDiagnosticDescriptors.InterfaceIsAlreadyImplemented.CreateRoslynDiagnostic(
-                            targetType.GetDiagnosticLocation(),
-                            (this.Aspect.AspectClass.ShortName, interfaceSpecification.InterfaceType, targetType) ) );
+                    if ( this.OverrideStrategy == OverrideStrategy.Fail )
+                    {
+                        diagnostics.Report(
+                            AdviceDiagnosticDescriptors.InterfaceIsAlreadyImplemented.CreateRoslynDiagnostic(
+                                targetType.GetDiagnosticLocation(),
+                                (this.Aspect.AspectClass.ShortName, interfaceSpecification.InterfaceType, targetType) ) );
+                    }
 
                     continue;
                 }
@@ -324,16 +314,16 @@ namespace Metalama.Framework.Engine.Advising
 
                                         continue;
 
-                                    case InterfaceMemberOverrideStrategy.UseExisting:
-                                        if ( !existingMethod.SemanticEquals( interfaceMethod ) )
-                                        {
-                                            diagnostics.Report(
-                                                AdviceDiagnosticDescriptors.ImplicitInterfaceMemberIsNotCompatible.CreateRoslynDiagnostic(
-                                                    targetType.GetDiagnosticLocation(),
-                                                    (this.Aspect.AspectClass.ShortName, interfaceMethod, targetType, existingMethod) ) );
-                                        }
-
-                                        continue;
+                                    // case InterfaceMemberOverrideStrategy.UseExisting:
+                                    // case InterfaceMemberOverrideStrategy.Override:
+                                    //    if ( !existingMethod.SemanticEquals( interfaceMethod ) )
+                                    //    {
+                                    //        diagnostics.Report(
+                                    //            AdviceDiagnosticDescriptors.ImplicitInterfaceMemberIsNotCompatible.CreateRoslynDiagnostic(
+                                    //                targetType.GetDiagnosticLocation(),
+                                    //                (this.Aspect.AspectClass.ShortName, interfaceMethod, targetType, existingMethod) ) );
+                                    //    }
+                                    //    continue;
 
                                     case InterfaceMemberOverrideStrategy.MakeExplicit:
                                         isExplicit = true;
@@ -349,7 +339,7 @@ namespace Metalama.Framework.Engine.Advising
                             }
 
                             var aspectMethod = (IMethod) memberSpec.AspectInterfaceMember!;
-                            memberBuilder = this.GetImplMethodBuilder( targetType, interfaceMethod, isExplicit, mergedTags );
+                            memberBuilder = this.GetImplMethodBuilder( targetType, interfaceMethod, isExplicit );
                             interfaceMemberMap.Add( interfaceMethod, memberBuilder );
 
                             addTransformation(
@@ -387,16 +377,16 @@ namespace Metalama.Framework.Engine.Advising
 
                                         continue;
 
-                                    case InterfaceMemberOverrideStrategy.UseExisting:
-                                        if ( !existingProperty.SemanticEquals(interfaceProperty))
-                                        {
-                                            diagnostics.Report(
-                                                    AdviceDiagnosticDescriptors.ImplicitInterfaceMemberIsNotCompatible.CreateRoslynDiagnostic(
-                                                    targetType.GetDiagnosticLocation(),
-                                                    (this.Aspect.AspectClass.ShortName, interfaceProperty, targetType, existingProperty) ) );
-                                        }
-
-                                        continue;
+                                        // case InterfaceMemberOverrideStrategy.UseExisting:
+                                        // case InterfaceMemberOverrideStrategy.Override:
+                                        //     if ( !existingProperty.SemanticEquals(interfaceProperty))
+                                        //     {
+                                        //        diagnostics.Report(
+                                        //                AdviceDiagnosticDescriptors.ImplicitInterfaceMemberIsNotCompatible.CreateRoslynDiagnostic(
+                                        //                targetType.GetDiagnosticLocation(),
+                                        //                (this.Aspect.AspectClass.ShortName, interfaceProperty, targetType, existingProperty) ) );
+                                        //     }
+                                        //     continue;
 
                                     case InterfaceMemberOverrideStrategy.MakeExplicit:
                                         isExplicit = true;
@@ -467,16 +457,16 @@ namespace Metalama.Framework.Engine.Advising
 
                                         continue;
 
-                                    case InterfaceMemberOverrideStrategy.UseExisting:
-                                        if ( !existingEvent.SemanticEquals( interfaceEvent ) )
-                                        {
-                                            return AdviceImplementationResult.Failed(
-                                                AdviceDiagnosticDescriptors.ImplicitInterfaceMemberIsNotCompatible.CreateRoslynDiagnostic(
-                                                    targetType.GetDiagnosticLocation(),
-                                                    (this.Aspect.AspectClass.ShortName, interfaceEvent, targetType, existingEvent) ) );
-                                        }
-
-                                        continue;
+                                    // case InterfaceMemberOverrideStrategy.UseExisting:
+                                    // case InterfaceMemberOverrideStrategy.Override:
+                                    //    if ( !existingEvent.SemanticEquals( interfaceEvent ) )
+                                    //    {
+                                    //        return AdviceImplementationResult.Failed(
+                                    //            AdviceDiagnosticDescriptors.ImplicitInterfaceMemberIsNotCompatible.CreateRoslynDiagnostic(
+                                    //                targetType.GetDiagnosticLocation(),
+                                    //                (this.Aspect.AspectClass.ShortName, interfaceEvent, targetType, existingEvent) ) );
+                                    //    }
+                                    //    continue;
 
                                     case InterfaceMemberOverrideStrategy.MakeExplicit:
                                         isExplicit = true;
@@ -494,7 +484,7 @@ namespace Metalama.Framework.Engine.Advising
                             var aspectEvent = memberSpec.AspectInterfaceMember;
                             var isEventField = aspectEvent != null && ((IEvent) aspectEvent).IsEventField();
 
-                            memberBuilder = this.GetImplEventBuilder( targetType, interfaceEvent, isEventField, isExplicit );
+                            memberBuilder = this.GetImplEventBuilder( targetType, interfaceEvent, isEventField, isExplicit, mergedTags );
                             interfaceMemberMap.Add( interfaceEvent, memberBuilder );
 
                             if ( !isEventField )
@@ -528,11 +518,7 @@ namespace Metalama.Framework.Engine.Advising
                     addTransformation( memberBuilder );
                 }
 
-                if ( interfaceSpecification.IsTopLevel )
-                {
-                    // We are adding the interface only when 
-                    addTransformation( new IntroduceInterfaceTransformation( this, targetType, interfaceSpecification.InterfaceType, interfaceMemberMap ) );
-                }
+                addTransformation( new IntroduceInterfaceTransformation( this, targetType, interfaceSpecification.InterfaceType, interfaceMemberMap ) );
             }
 
             if (diagnostics.HasErrors())
@@ -546,10 +532,11 @@ namespace Metalama.Framework.Engine.Advising
         private MemberBuilder GetImplMethodBuilder(
             INamedType declaringType,
             IMethod interfaceMethod,
-            bool isExplicit,
-            IObjectReader tags )
+            bool isExplicit )
         {
-            var methodBuilder = new MethodBuilder( this, declaringType, interfaceMethod.Name )
+            var name = GetInterfaceMemberName( interfaceMethod, isExplicit );
+
+            var methodBuilder = new MethodBuilder( this, declaringType, name )
             {
                 ReturnParameter = { Type = interfaceMethod.ReturnParameter.Type, RefKind = interfaceMethod.ReturnParameter.RefKind }
             };
@@ -598,10 +585,12 @@ namespace Metalama.Framework.Engine.Advising
             bool hasImplicitSetter,
             IObjectReader tags )
         {
+            var name = GetInterfaceMemberName( interfaceProperty, isExplicit );
+
             var propertyBuilder = new PropertyBuilder(
                 this,
                 declaringType,
-                interfaceProperty.Name,
+                name,
                 interfaceProperty.GetMethod != null || (!isExplicit && targetProperty.GetMethod != null),
                 interfaceProperty.SetMethod != null || (!isExplicit && targetProperty.SetMethod != null),
                 isAutoProperty,
@@ -651,14 +640,16 @@ namespace Metalama.Framework.Engine.Advising
             return this.TargetDeclaration.GetTarget( this.SourceCompilation ).GetDiagnosticLocation();
         }
 
-        private MemberBuilder GetImplEventBuilder( INamedType declaringType, IEvent interfaceEvent, bool isEventField, bool isExplicit )
+        private MemberBuilder GetImplEventBuilder( INamedType declaringType, IEvent interfaceEvent, bool isEventField, bool isExplicit, IObjectReader tags )
         {
+            var name = GetInterfaceMemberName( interfaceEvent, isExplicit );
+
             var eventBuilder = new EventBuilder(
                 this,
                 declaringType,
-                interfaceEvent.Name,
+                name,
                 isEventField,
-                this.Tags ) { Type = interfaceEvent.Type };
+                tags ) { Type = interfaceEvent.Type };
 
             if ( isExplicit )
             {
@@ -671,5 +662,8 @@ namespace Metalama.Framework.Engine.Advising
 
             return eventBuilder;
         }
+
+        private static string GetInterfaceMemberName( IMember interfaceMember, bool isExplicit )
+            => isExplicit ? $"{interfaceMember.DeclaringType.FullName}.{interfaceMember.Name}" : interfaceMember.Name;
     }
 }

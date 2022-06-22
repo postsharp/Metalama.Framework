@@ -2,36 +2,35 @@ using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
+#pragma warning disable CS0067
+
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.MemberConflict_Incompatible_Fail
 {
     /*
-     * Tests that when a incompatible member of the same signature already exists and whenExists is set to Fail, errors is produced.
+     * Tests that when a incompatible member of the same signature already exists and whenExists is set to Fail, errors are produced.
      */
 
     public class IntroductionAttribute : TypeAspect
     {
         public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advice.ImplementInterface(
-                aspectBuilder.Target,
-                typeof(IInterface),
-                whenExists: OverrideStrategy.Ignore );
+            aspectBuilder.Advice.ImplementInterface(aspectBuilder.Target, typeof(IInterface));
         }
 
         [InterfaceMember(WhenExists = InterfaceMemberOverrideStrategy.Fail)]
-        public object Method()
+        public int Method()
         {
-            Console.WriteLine( "This is introduced interface method." );
-            return new object();
+            Console.WriteLine("This is introduced interface method.");
+            return 42;
         }
 
         [InterfaceMember(WhenExists = InterfaceMemberOverrideStrategy.Fail)]
-        public object Property
+        public int Property
         {
             get
             {
                 Console.WriteLine("This is introduced interface property.");
-                return new object();
+                return 42;
             }
 
             set
@@ -41,7 +40,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
         }
 
         [InterfaceMember(WhenExists = InterfaceMemberOverrideStrategy.Fail)]
-        public event Action Event
+        public event EventHandler Event
         {
             add
             {
@@ -57,9 +56,9 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
 
     public interface IInterface
     {
-        void Method();
+        int Method();
 
-        int Property { get; }
+        int Property { get; set; }
 
         event EventHandler Event;
     }
@@ -67,15 +66,38 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     // <target>
     [Introduction]
     public class TargetClass
-    { 
-        public int Method( int x )
+    {
+        public string Method()
         {
             Console.WriteLine("This is original method.");
-            return x;
+            return "42";
         }
 
-        public int Property { get; set; }
+        public string Property
+        {
+            get
+            {
+                Console.WriteLine("This is original property.");
+                return "42";
+            }
 
-        public event EventHandler? Event;
+            set
+            {
+                Console.WriteLine("This is original property.");
+            }
+        }
+
+        public event Action Event
+        {
+            add
+            {
+                Console.WriteLine("This is original event.");
+            }
+
+            remove
+            {
+                Console.WriteLine("This is original event.");
+            }
+        }
     }
 }

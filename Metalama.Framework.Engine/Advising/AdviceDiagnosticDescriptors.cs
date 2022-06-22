@@ -86,7 +86,7 @@ namespace Metalama.Framework.Engine.Advising
             DeclarativeInterfaceMemberDoesNotMatch = new(
                 "LAMA0511",
                 "Declarative interface member introduction does match interface member return type.",
-                "The aspect '{0}' cannot implicitly introduce interface '{1}' into the  type '{2}' because the introduced member '{3}'" +
+                "The aspect '{0}' cannot implicitly introduce interface '{2}' into the type '{1}' because the introduced member '{3}'" +
                 " does not have the same return type as interface member '{4}'.",
                 _category,
                 Error );

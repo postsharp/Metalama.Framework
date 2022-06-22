@@ -303,9 +303,9 @@ namespace Metalama.Framework.Engine.CodeModel
         [Memo]
         public INamedType? BaseType => this.TypeSymbol.BaseType == null ? null : this.Compilation.Factory.GetNamedType( this.TypeSymbol.BaseType );
 
-        // TODO: the problem of this implementation is that the collection is reconstructed for each compilation version. This could be improved.
         [Memo]
-        public IImplementedInterfaceCollection AllImplementedInterfaces => new AllImplementedInterfacesCollection( this );
+        public IImplementedInterfaceCollection AllImplementedInterfaces
+            => new AllImplementedInterfaceCollection( this, this.Compilation.GetAllInterfaceImplementationCollection( this.TypeSymbol, false ) );
 
         [Memo]
         public IImplementedInterfaceCollection ImplementedInterfaces

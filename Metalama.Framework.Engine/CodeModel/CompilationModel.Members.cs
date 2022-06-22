@@ -24,6 +24,7 @@ public partial class CompilationModel
     private ImmutableDictionary<INamedTypeSymbol, PropertyUpdatableCollection> _properties;
     private ImmutableDictionary<INamedTypeSymbol, IndexerUpdatableCollection> _indexers;
     private ImmutableDictionary<INamedTypeSymbol, InterfaceUpdatableCollection> _interfaceImplementations;
+    private ImmutableDictionary<INamedTypeSymbol, AllInterfaceUpdatableCollection> _allInterfaceImplementations;
     private ImmutableDictionary<Ref<IHasParameters>, ParameterUpdatableCollection> _parameters;
     private ImmutableDictionary<Ref<IDeclaration>, AttributeUpdatableCollection> _attributes;
 
@@ -184,6 +185,15 @@ public partial class CompilationModel
             mutable,
             declaringType,
             ( c, t ) => new InterfaceUpdatableCollection( c, t ) );
+    }
+
+    internal AllInterfaceUpdatableCollection GetAllInterfaceImplementationCollection( INamedTypeSymbol declaringType, bool mutable )
+    {
+        return this.GetMemberCollection<INamedTypeSymbol, INamedType, AllInterfaceUpdatableCollection>(
+            ref this._allInterfaceImplementations,
+            mutable,
+            declaringType,
+            ( c, t ) => new AllInterfaceUpdatableCollection( c, t ) );
     }
 
     internal ParameterUpdatableCollection GetParameterCollection( in Ref<IHasParameters> parent, bool mutable = false )
@@ -385,11 +395,18 @@ public partial class CompilationModel
     {
         var introduceInterface = (IntroduceInterfaceTransformation) transformation;
 
-        var interfaces =
-            this.GetInterfaceImplementationCollection(
-                (INamedTypeSymbol) introduceInterface.ContainingDeclaration.GetSymbol().AssertNotNull(),
-                true );
+        var targetType = (INamedType)introduceInterface.ContainingDeclaration;
+        var targetTypeSymbol = targetType.GetSymbol().AssertNotNull();
+
+        var interfaces = this.GetInterfaceImplementationCollection( targetTypeSymbol, true );
 
         interfaces.Add( introduceInterface );
+
+        foreach ( var type in new[] { targetType }.Concat(this.GetDerivedTypes( targetType, true )) )
+        {
+            var allInterfaces = this.GetAllInterfaceImplementationCollection( type.GetSymbol().AssertNotNull(), true );
+
+            allInterfaces.Add( introduceInterface );
+        }
     }
 }
