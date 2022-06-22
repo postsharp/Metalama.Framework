@@ -9,7 +9,6 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.UserDeclarativ
 [AttributeUsage( AttributeTargets.Field )]
 public class MyAdviceAttribute : DeclarativeAdviceAttribute
 {
- 
     public override void BuildAdvice( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder )
     {
         builder.Advice.IntroduceField( (INamedType) builder.Target, "_field", typeof(string) );
@@ -19,8 +18,10 @@ public class MyAdviceAttribute : DeclarativeAdviceAttribute
 public class MyAspect : TypeAspect
 {
     [MyAdvice]
-    private int f;
+    private RunTimeOnlyClass f = null!;
 }
+
+internal class RunTimeOnlyClass { }
 
 // <target>
 [MyAspect]
