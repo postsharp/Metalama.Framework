@@ -50,9 +50,9 @@ namespace Metalama.Framework.Engine.Aspects
 
         private AspectPredecessor FirstPredecessor => this.Predecessors[0];
 
-        public IAspectState? State { get; set; }
+        public IAspectState? AspectState { get; set; }
 
-        void IAspectInstanceInternal.SetState( IAspectState? value ) => this.State = value;
+        void IAspectInstanceInternal.SetState( IAspectState? value ) => this.AspectState = value;
 
         internal AspectInstance( IAspect aspect, in Ref<IDeclaration> declaration, AspectClass aspectClass, in AspectPredecessor predecessor ) : this(
             aspect,
