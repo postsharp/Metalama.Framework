@@ -5,12 +5,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Engine.Utilities;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Generic;
-using System.Collections.Immutable;
 using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.Linking
@@ -53,13 +47,25 @@ namespace Metalama.Framework.Engine.Linking
 
             var syntaxReference = symbol.GetPrimarySyntaxReference();
 
-            // Event fields have accessors without declaring syntax references.
+            // For implicitly defined symbols, we need to try harder.
             if ( syntaxReference == null )
             {
                 switch ( symbol )
                 {
-                    case IMethodSymbol { MethodKind: RoslynMethodKind.EventAdd or RoslynMethodKind.EventRemove } eventAccessorSymbol:
-                        syntaxReference = eventAccessorSymbol.AssociatedSymbol.AssertNotNull().GetPrimarySyntaxReference();
+                    // For accessors, look at the associated symbol.
+                    case IMethodSymbol { AssociatedSymbol: { } associatedSymbol }:
+                        syntaxReference = associatedSymbol.GetPrimarySyntaxReference();
+
+                        if ( syntaxReference == null )
+                        {
+                            throw new AssertionFailedException();
+                        }
+
+                        break;
+
+                    // Otherwise (e.g. for implicit constructors), take the containing type.
+                    case { ContainingType: { } containingType }:
+                        syntaxReference = containingType.GetPrimarySyntaxReference();
 
                         if ( syntaxReference == null )
                         {

@@ -57,9 +57,9 @@ namespace Metalama.TestFramework
                     return false;
                 }
 
-                var value = launchDebuggerAttribute.GetConstructorArguments().ElementAt( 1 );
+                var value = (string) launchDebuggerAttribute.GetConstructorArguments().ElementAt( 1 );
 
-                return value is string s && s.ToLowerInvariant().Trim() == "true";
+                return !string.IsNullOrEmpty( value ) && value.ToLowerInvariant().Trim() == "true";
             }
 
             string? GetGlobalUsingsFile()

@@ -149,7 +149,7 @@ namespace Metalama.Framework.Engine.Pipeline
             // user assembly. When we need to unload the user assembly, we first need to unload the ReflectionMapperFactory.
             var serviceProvider = this.WithServices(
                 new ReflectionMapperFactory(),
-                new AssemblyLocator( metadataReferences ) );
+                new AssemblyLocator( this, metadataReferences ) );
 
             serviceProvider = serviceProvider.WithService( new UserCodeInvoker( serviceProvider ) );
             serviceProvider = serviceProvider.WithService( new BuiltInSerializerFactoryProvider( serviceProvider ) );
