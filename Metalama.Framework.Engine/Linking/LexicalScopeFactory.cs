@@ -5,6 +5,12 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.Linking
