@@ -37,8 +37,8 @@ var product = new Product( Dependencies.Metalama )
                 "**\\.nuget\\**\\*",
 
                 // Metalama.Framework.Engine and DesignTime use three roslyn types ... TODO: better comment
-                "**\\*Engine?*\\*",
-                "**\\*DesignTime?*\\*"
+                "**\\*Engine?*\\**\\*",
+                "**\\*DesignTime?*\\**\\*"
             }
         },
         new DotNetSolution( "Tests\\Metalama.Framework.TestApp\\Metalama.Framework.TestApp.sln" ) { IsTestOnly = true },
