@@ -16,49 +16,42 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal class LinkerAspectReferenceSyntaxProvider : AspectReferenceSyntaxProvider
     {
-        public LinkerAspectReferenceSyntaxProvider() { }
-
         public override ExpressionSyntax GetFinalizerReference( AspectLayerId aspectLayer, IMethod overriddenFinalizer, OurSyntaxGenerator syntaxGenerator )
-        {
-            return
-                InvocationExpression(
-                    MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            HelperTypeName,
-                            GenericName(
-                                Identifier( "Finalizer" ),
-                                TypeArgumentList(
-                                    SingletonSeparatedList( syntaxGenerator.Type( overriddenFinalizer.DeclaringType.GetSymbol().AssertNotNull() ) ) ) ) )
-                        .WithAspectReferenceAnnotation(
-                            aspectLayer,
-                            AspectReferenceOrder.Base,
-                            AspectReferenceTargetKind.Self,
-                            flags: AspectReferenceFlags.Inlineable ) )
-                ;
-        }
+            => InvocationExpression(
+                MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        HelperTypeName,
+                        GenericName(
+                            Identifier( "Finalizer" ),
+                            TypeArgumentList(
+                                SingletonSeparatedList( syntaxGenerator.Type( overriddenFinalizer.DeclaringType.GetSymbol().AssertNotNull() ) ) ) ) )
+                    .WithAspectReferenceAnnotation(
+                        aspectLayer,
+                        AspectReferenceOrder.Base,
+                        AspectReferenceTargetKind.Self,
+                        flags: AspectReferenceFlags.Inlineable ) );
 
         private static NameSyntax HelperTypeName => IdentifierName( "__LinkerIntroductionHelpers__" );
 
         private static readonly ConcurrentDictionary<LanguageVersion, SyntaxTree> _linkerHelperSyntaxTreeCache = new();
 
         public static SyntaxTree GetLinkerHelperSyntaxTree( LanguageVersion languageVersion )
-            => _linkerHelperSyntaxTreeCache.GetOrAdd(
-                languageVersion,
-                v =>
+            => _linkerHelperSyntaxTreeCache.GetOrAdd( languageVersion, GetLinkerHelperSyntaxTreeCode );
 
-                {
-                    var code = @"
+        private static SyntaxTree GetLinkerHelperSyntaxTreeCode( LanguageVersion v )
+        {
+            var code = @"
 internal class __LinkerIntroductionHelpers__
 {
     public static void Finalizer<T>() {}
 }
                 ";
 
-                    return CSharpSyntaxTree.ParseText(
-                        code,
-                        path: "__LinkerIntroductionHelpers__.cs",
-                        encoding: Encoding.UTF8,
-                        options: CSharpParseOptions.Default.WithLanguageVersion( v ) );
-                } );
+            return CSharpSyntaxTree.ParseText(
+                code,
+                path: "__LinkerIntroductionHelpers__.cs",
+                encoding: Encoding.UTF8,
+                options: CSharpParseOptions.Default.WithLanguageVersion( v ) );
+        }
     }
 }
