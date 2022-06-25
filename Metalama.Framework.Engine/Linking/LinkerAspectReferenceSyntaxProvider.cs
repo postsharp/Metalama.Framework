@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Concurrent;
 using System.Text;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -38,13 +39,13 @@ namespace Metalama.Framework.Engine.Linking
 
         private static NameSyntax HelperTypeName => IdentifierName( "__LinkerIntroductionHelpers__" );
 
-        private static SyntaxTree? _linkerHelperSyntaxTree;
+        private static readonly ConcurrentDictionary<LanguageVersion, SyntaxTree> _linkerHelperSyntaxTreeCache = new();
 
-        public static SyntaxTree LinkerHelperSyntaxTree
-        {
-            get
-            {
-                if ( _linkerHelperSyntaxTree == null )
+        public static SyntaxTree GetLinkerHelperSyntaxTree( LanguageVersion languageVersion )
+            => _linkerHelperSyntaxTreeCache.GetOrAdd(
+                languageVersion,
+                v =>
+
                 {
                     var code = @"
 internal class __LinkerIntroductionHelpers__
@@ -53,11 +54,11 @@ internal class __LinkerIntroductionHelpers__
 }
                 ";
 
-                    _linkerHelperSyntaxTree = CSharpSyntaxTree.ParseText( code, path: "__LinkerIntroductionHelpers__.cs", encoding: Encoding.UTF8 );
-                }
-
-                return _linkerHelperSyntaxTree;
-            }
-        }
+                    return CSharpSyntaxTree.ParseText(
+                        code,
+                        path: "__LinkerIntroductionHelpers__.cs",
+                        encoding: Encoding.UTF8,
+                        options: CSharpParseOptions.Default.WithLanguageVersion( v ) );
+                } );
     }
 }

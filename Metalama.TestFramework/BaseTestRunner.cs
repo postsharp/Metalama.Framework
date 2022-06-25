@@ -134,6 +134,11 @@ namespace Metalama.TestFramework
 
                 var parseOptions = CSharpParseOptions.Default.WithPreprocessorSymbols( preprocessorSymbols );
 
+                if ( testInput.Options.LanguageVersion != null )
+                {
+                    parseOptions = parseOptions.WithLanguageVersion( testInput.Options.LanguageVersion.Value );
+                }
+
                 var emptyProject = this.CreateProject( testInput.Options ).WithParseOptions( parseOptions );
                 var project = emptyProject;
 
