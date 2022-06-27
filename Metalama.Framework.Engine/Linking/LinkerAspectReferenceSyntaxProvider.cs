@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Concurrent;
 using System.Text;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -15,26 +16,20 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal class LinkerAspectReferenceSyntaxProvider : AspectReferenceSyntaxProvider
     {
-        public LinkerAspectReferenceSyntaxProvider() { }
-
         public override ExpressionSyntax GetFinalizerReference( AspectLayerId aspectLayer, IMethod overriddenFinalizer, OurSyntaxGenerator syntaxGenerator )
-        {
-            return
-                InvocationExpression(
-                    MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            HelperTypeName,
-                            GenericName(
-                                Identifier( "Finalizer" ),
-                                TypeArgumentList(
-                                    SingletonSeparatedList( syntaxGenerator.Type( overriddenFinalizer.DeclaringType.GetSymbol().AssertNotNull() ) ) ) ) )
-                        .WithAspectReferenceAnnotation(
-                            aspectLayer,
-                            AspectReferenceOrder.Base,
-                            AspectReferenceTargetKind.Self,
-                            flags: AspectReferenceFlags.Inlineable ) )
-                ;
-        }
+            => InvocationExpression(
+                MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        HelperTypeName,
+                        GenericName(
+                            Identifier( "Finalizer" ),
+                            TypeArgumentList(
+                                SingletonSeparatedList( syntaxGenerator.Type( overriddenFinalizer.DeclaringType.GetSymbol().AssertNotNull() ) ) ) ) )
+                    .WithAspectReferenceAnnotation(
+                        aspectLayer,
+                        AspectReferenceOrder.Base,
+                        AspectReferenceTargetKind.Self,
+                        flags: AspectReferenceFlags.Inlineable ) );
 
         public override ExpressionSyntax GetOperatorReference( AspectLayerId aspectLayer, IMethod overriddenOperator, OurSyntaxGenerator syntaxGenerator )
         {
@@ -58,26 +53,25 @@ namespace Metalama.Framework.Engine.Linking
 
         private static NameSyntax HelperTypeName => IdentifierName( "__LinkerIntroductionHelpers__" );
 
-        private static SyntaxTree? _linkerHelperSyntaxTree;
+        private static readonly ConcurrentDictionary<LanguageVersion, SyntaxTree> _linkerHelperSyntaxTreeCache = new();
 
-        public static SyntaxTree LinkerHelperSyntaxTree
+        public static SyntaxTree GetLinkerHelperSyntaxTree( LanguageVersion languageVersion )
+            => _linkerHelperSyntaxTreeCache.GetOrAdd( languageVersion, GetLinkerHelperSyntaxTreeCode );
+
+        private static SyntaxTree GetLinkerHelperSyntaxTreeCode( LanguageVersion v )
         {
-            get
-            {
-                if ( _linkerHelperSyntaxTree == null )
-                {
-                    var code = @"
+            var code = @"
 internal class __LinkerIntroductionHelpers__
 {
     public static void Finalizer<T>() {}
 }
                 ";
 
-                    _linkerHelperSyntaxTree = CSharpSyntaxTree.ParseText( code, path: "__LinkerIntroductionHelpers__.cs", encoding: Encoding.UTF8 );
-                }
-
-                return _linkerHelperSyntaxTree;
-            }
+            return CSharpSyntaxTree.ParseText(
+                code,
+                path: "__LinkerIntroductionHelpers__.cs",
+                encoding: Encoding.UTF8,
+                options: CSharpParseOptions.Default.WithLanguageVersion( v ) );
         }
     }
 }

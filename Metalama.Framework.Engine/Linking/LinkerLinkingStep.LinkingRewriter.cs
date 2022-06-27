@@ -33,7 +33,22 @@ namespace Metalama.Framework.Engine.Linking
                 this._rewritingDriver = rewritingDriver;
             }
 
+            public override SyntaxNode? VisitStructDeclaration( StructDeclarationSyntax node )
+            {
+                return this.VisitTypeDeclaration( node );
+            }
+
             public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
+            {
+                return this.VisitTypeDeclaration( node );
+            }
+
+            public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node )
+            {
+                return this.VisitTypeDeclaration( node );
+            }
+
+            private SyntaxNode? VisitTypeDeclaration( TypeDeclarationSyntax node )
             {
                 // TODO: Other transformations than method overrides.
                 var newMembers = new List<MemberDeclarationSyntax>();

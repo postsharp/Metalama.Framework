@@ -48,7 +48,7 @@ internal class IntrospectionAspectInstance : IIntrospectionAspectInstance
 
     public ImmutableArray<AspectPredecessor> Predecessors => this.AspectInstance.Predecessors;
 
-    public IAspectState? State => this.AspectInstance.State;
+    public IAspectState? AspectState => this.AspectInstance.AspectState;
 
     [Memo]
     public ImmutableArray<IIntrospectionDiagnostic> Diagnostics
