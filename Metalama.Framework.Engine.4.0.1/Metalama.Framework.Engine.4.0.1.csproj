@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build">
+﻿<Project DefaultTargets="Build">
 
     <Import Project="..\Build\RoslynVersion\Roslyn4.0.1.props"/>
 
@@ -10,7 +10,7 @@
     <Import Project="..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj"/>
 
     <ItemGroup>
-        <Compile Include="..\Metalama.Framework.Engine\**\*.cs" Exclude="..\Metalama.Framework.Engine\obj\**\*.cs" />
+        <Compile Condition="'$(FormatThisProject)'!='False'" Include="..\Metalama.Framework.Engine\**\*.cs" Exclude="..\Metalama.Framework.Engine\obj\**\*.cs" />
     </ItemGroup>
 
 </Project>

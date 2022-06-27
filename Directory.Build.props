@@ -54,4 +54,8 @@
 
     </Target>
 
+	<PropertyGroup>
+		<FormatThisProject>True</FormatThisProject>
+	</PropertyGroup>
+
 </Project>

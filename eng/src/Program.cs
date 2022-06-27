@@ -35,10 +35,6 @@ var product = new Product( Dependencies.Metalama )
                 
                 // Consumed NuGet packages should not be formatted because it breaks the build process (e.g. PostSharp.Engineering.Sdk)
                 "**\\.nuget\\**\\*",
-
-                // Metalama.Framework.Engine and DesignTime use three roslyn types ... TODO: better comment
-                "**\\*Engine.4?*\\**\\*",
-                "**\\*DesignTime.4?*\\**\\*"
             }
         },
         new DotNetSolution( "Tests\\Metalama.Framework.TestApp\\Metalama.Framework.TestApp.sln" ) { IsTestOnly = true },
