@@ -198,6 +198,15 @@ namespace Metalama.Framework.Engine.CodeModel
         public IMethodCollection AllMethods => new AllMethodsCollection( this );
 
         [Memo]
+        public IMethodCollection Operators
+            => new OperatorCollection(
+                this,
+                this.Compilation.GetOperatorCollection( this.TypeSymbol ) );
+
+        [Memo]
+        public IMethodCollection AllOperators => new AllOperatorsCollection( this );
+
+        [Memo]
         public IConstructorCollection Constructors
             => new ConstructorCollection(
                 this,
@@ -305,7 +314,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         [Memo]
         public IImplementedInterfaceCollection AllImplementedInterfaces
-            => new AllImplementedInterfaceCollection( this, this.Compilation.GetAllInterfaceImplementationCollection( this.TypeSymbol, false ) );
+            => new AllImplementedInterfacesCollection( this, this.Compilation.GetAllInterfaceImplementationCollection( this.TypeSymbol, false ) );
 
         [Memo]
         public IImplementedInterfaceCollection ImplementedInterfaces

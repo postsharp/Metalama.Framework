@@ -489,6 +489,51 @@ namespace Metalama.Framework.Engine.Linking
                 return containingSymbol.ContainingType.AssertNotNull().FindImplementationForInterfaceMember( referencedSymbol ).AssertNotNull();
             }
 
+            if ( referencedSymbol is IMethodSymbol { ContainingType: { Name: "__LinkerIntroductionHelpers__" } } )
+            {
+                switch ( referencedSymbol.Name )
+                {
+                    case "Finalizer":
+                        // Referencing type's finalizer.
+                        return containingSymbol.ContainingType.GetMembers( "Finalize" )
+                            .OfType<IMethodSymbol>()
+                            .Single( m => m.Parameters.Length == 0 && m.TypeParameters.Length == 0 );
+
+                    case WellKnownMemberNames.ImplicitConversionName:
+                    case WellKnownMemberNames.ExplicitConversionName:
+                    case WellKnownMemberNames.AdditionOperatorName:
+                    case WellKnownMemberNames.BitwiseAndOperatorName:
+                    case WellKnownMemberNames.BitwiseOrOperatorName:
+                    case WellKnownMemberNames.DecrementOperatorName:
+                    case WellKnownMemberNames.DivisionOperatorName:
+                    case WellKnownMemberNames.EqualityOperatorName:
+                    case WellKnownMemberNames.ExclusiveOrOperatorName:
+                    case WellKnownMemberNames.FalseOperatorName:
+                    case WellKnownMemberNames.GreaterThanOperatorName:
+                    case WellKnownMemberNames.GreaterThanOrEqualOperatorName:
+                    case WellKnownMemberNames.IncrementOperatorName:
+                    case WellKnownMemberNames.InequalityOperatorName:
+                    case WellKnownMemberNames.LeftShiftOperatorName:
+                    case WellKnownMemberNames.LessThanOperatorName:
+                    case WellKnownMemberNames.LessThanOrEqualOperatorName:
+                    case WellKnownMemberNames.LogicalNotOperatorName:
+                    case WellKnownMemberNames.ModulusOperatorName:
+                    case WellKnownMemberNames.MultiplyOperatorName:
+                    case WellKnownMemberNames.OnesComplementOperatorName:
+                    case WellKnownMemberNames.RightShiftOperatorName:
+                    case WellKnownMemberNames.SubtractionOperatorName:
+                    case WellKnownMemberNames.TrueOperatorName:
+                    case WellKnownMemberNames.UnaryNegationOperatorName:
+                    case WellKnownMemberNames.UnaryPlusOperatorName:
+                        return containingSymbol.ContainingType.GetMembers( referencedSymbol.Name )
+                            .OfType<IMethodSymbol>()
+                            .Single( m => m.Parameters.Length == 0 && m.TypeParameters.Length == 0 );
+
+                    default:
+                        throw new AssertionFailedException();
+                }
+            }
+
             if ( referencedSymbol is IMethodSymbol { Name: "Finalizer", ContainingType: { Name: "__LinkerIntroductionHelpers__" } } )
             {
                 // Referencing type's finalizer.
@@ -594,6 +639,7 @@ namespace Metalama.Framework.Engine.Linking
                 case (IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation },
                     IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation }):
                 case (IMethodSymbol { MethodKind: MethodKind.Destructor }, IMethodSymbol { MethodKind: MethodKind.Ordinary }):
+                case (IMethodSymbol { MethodKind: MethodKind.Conversion or MethodKind.UserDefinedOperator }, IMethodSymbol { MethodKind: MethodKind.Ordinary } ):
                 case (IPropertySymbol, IPropertySymbol):
                 case (IEventSymbol, IEventSymbol):
                 case (IFieldSymbol, IFieldSymbol):

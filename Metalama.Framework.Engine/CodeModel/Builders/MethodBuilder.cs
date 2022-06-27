@@ -141,13 +141,28 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override DeclarationKind DeclarationKind { get; }
 
+        public OperatorKind OperatorKind { get; }
+
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations { get; private set; } = Array.Empty<IMethod>();
 
-        public MethodBuilder( Advice parentAdvice, INamedType targetType, string name, DeclarationKind declarationKind = DeclarationKind.Method )
+        public MethodBuilder( Advice parentAdvice, INamedType targetType, string name, DeclarationKind declarationKind = DeclarationKind.Method, OperatorKind operatorKind = OperatorKind.None )
             : base( parentAdvice, targetType, name )
         {
+            Invariant.Assert(
+                declarationKind == DeclarationKind.ConversionOperator
+                ==
+                (operatorKind == OperatorKind.ImplicitConversion || operatorKind == OperatorKind.ExplicitConversion) );
+
+            Invariant.Assert(
+                declarationKind == DeclarationKind.UserDefinedOperator
+                ==
+                !(operatorKind == OperatorKind.ImplicitConversion
+                || operatorKind == OperatorKind.ExplicitConversion
+                || operatorKind == OperatorKind.None) );
+
             this.Name = name;
             this.DeclarationKind = declarationKind;
+            this.OperatorKind = operatorKind;
 
             this.ReturnParameter =
                 new ParameterBuilder(
@@ -174,6 +189,40 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
                 return new[] { new IntroducedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
             }
+            else if (this.DeclarationKind == DeclarationKind.ConversionOperator)
+            {
+                Invariant.Assert( this.Parameters.Count == 2 );
+
+                var syntax =
+                    ConversionOperatorDeclaration(
+                        this.GetAttributeLists( context )
+                            .AddRange( this.ReturnParameter.GetAttributeLists( context ) ),
+                        TokenList( Token( SyntaxKind.PublicKeyword ), Token( SyntaxKind.StaticKeyword ) ),
+                        this.OperatorKind.ToOperatorKeyword(),
+                        context.SyntaxGenerator.Type( this.Parameters[1].Type.GetSymbol().AssertNotNull() ),
+                        context.SyntaxGenerator.ConversionOperatorParameterList( this ),
+                        null,
+                        ArrowExpressionClause( context.SyntaxGenerator.DefaultExpression( this.ReturnType.GetSymbol().AssertNotNull() ) ) );
+
+                return new[] { new IntroducedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
+            }
+            else if ( this.DeclarationKind == DeclarationKind.UserDefinedOperator )
+            {
+                Invariant.Assert( this.Parameters.Count == 2 );
+
+                var syntax =
+                    OperatorDeclaration(
+                        this.GetAttributeLists( context )
+                            .AddRange( this.ReturnParameter.GetAttributeLists( context ) ),
+                        TokenList( Token( SyntaxKind.PublicKeyword ), Token( SyntaxKind.StaticKeyword ) ),
+                        context.SyntaxGenerator.Type( this.Parameters[0].Type.GetSymbol().AssertNotNull() ),
+                        this.OperatorKind.ToOperatorKeyword(),
+                        context.SyntaxGenerator.ParameterList( this ),
+                        null,
+                        ArrowExpressionClause( context.SyntaxGenerator.DefaultExpression( this.ReturnType.GetSymbol().AssertNotNull() ) ) );
+
+                return new[] { new IntroducedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
+            }
             else
             {
                 var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
@@ -185,8 +234,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                         this.GetSyntaxModifierList(),
                         context.SyntaxGenerator.ReturnType( this ),
                         this.ExplicitInterfaceImplementations.Count > 0
-                            ? ExplicitInterfaceSpecifier(
-                                (NameSyntax) syntaxGenerator.Type( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
+                            ? ExplicitInterfaceSpecifier( (NameSyntax) syntaxGenerator.Type( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
                             : null,
                         this.GetCleanName(),
                         context.SyntaxGenerator.TypeParameterList( this ),

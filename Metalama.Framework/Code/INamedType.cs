@@ -124,7 +124,7 @@ namespace Metalama.Framework.Code
 
         /// <summary>
         /// Gets the list of methods defined in the current type, but not those inherited from the base
-        /// type, and not constructors.
+        /// type, and not constructors, finalizer or operators.
         /// </summary>
         IMethodCollection Methods { get; }
 
@@ -132,6 +132,17 @@ namespace Metalama.Framework.Code
         /// Gets the list of methods defined in the current type or inherited from the base type.
         /// </summary>
         IMethodCollection AllMethods { get; }
+
+        /// <summary>
+        /// Gets the list of operators defined in the current type, but not those inherited from the base
+        /// type, and not constructors, finalizer or operators.
+        /// </summary>
+        IMethodCollection Operators { get; }
+
+        /// <summary>
+        /// Gets the list of operators defined in the current type or inherited from the base type.
+        /// </summary>
+        IMethodCollection AllOperators { get; }
 
         /// <summary>
         /// Gets the list of constructors, including the implicit default constructor if any, but not the static constructor. 

@@ -49,5 +49,10 @@ namespace Metalama.Framework.Code
         /// Gets a value indicating whether the method is <c>readonly</c>.
         /// </summary>
         bool IsReadOnly { get; }
+
+        /// <summary>
+        /// Gets a value indiciting the type of operator the methods represents.
+        /// </summary>
+        OperatorKind OperatorKind { get; }
     }
 }

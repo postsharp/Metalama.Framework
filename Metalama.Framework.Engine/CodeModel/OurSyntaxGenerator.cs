@@ -235,10 +235,35 @@ namespace Metalama.Framework.Engine.CodeModel
         public ParameterListSyntax ParameterList( IMethodBase method )
             =>
 
-                // TODO: generics
+                // TODO: generics?, attributes
                 SyntaxFactory.ParameterList(
                     SeparatedList(
                         method.Parameters.Select(
+                            p => Parameter(
+                                List<AttributeListSyntax>(),
+                                p.GetSyntaxModifierList(),
+                                this.Type( p.Type.GetSymbol() ),
+                                Identifier( p.Name ),
+                                null ) ) ) );
+
+#pragma warning disable CA1822 // Can be made static
+        public ArgumentListSyntax ArgumentList( IMethodBase method, Func<IParameter, ExpressionSyntax?> expressionFunc )
+            =>
+
+                // TODO: optional parameters.
+                SyntaxFactory.ArgumentList(
+                    SeparatedList(
+                        method.Parameters.Select( p =>
+                            Argument( expressionFunc( p ).AssertNotNull() ) ) ) );
+#pragma warning restore CA1822 // Can be made static
+
+        public ParameterListSyntax ConversionOperatorParameterList( IMethodBase method )
+            =>
+
+                // TODO: attributes
+                SyntaxFactory.ParameterList(
+                    SeparatedList(
+                        method.Parameters.Skip(1).Select(
                             p => Parameter(
                                 List<AttributeListSyntax>(),
                                 p.GetSyntaxModifierList(),

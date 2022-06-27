@@ -63,6 +63,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public MethodKind MethodKind => this.AccessorBuilder.MethodKind;
 
+        public OperatorKind OperatorKind => this.AccessorBuilder.OperatorKind;
+
         [Memo]
         public IParameter ReturnParameter => new BuiltParameter( this.AccessorBuilder.ReturnParameter, this.Compilation );
 

@@ -44,7 +44,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 this,
                 this.GetCompilationModel().GetParameterCollection( this.ToTypedRef<IHasParameters>() ) );
 
-        MethodKind IMethodBase.MethodKind
+        public MethodKind MethodKind
             => this.MethodSymbol.MethodKind switch
             {
                 SymbolMethodKind.Ordinary => MethodKind.Default,

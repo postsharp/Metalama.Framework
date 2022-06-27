@@ -64,6 +64,8 @@ namespace Metalama.Framework.Engine.Advising
                     break;
             }
 
+            // TODO: The base implementation may take more than needed from the template. Most would be ignored by the transformation, but
+            //       the user may see it in the code model.
             base.InitializeCore( serviceProvider, diagnosticAdder );
         }
 

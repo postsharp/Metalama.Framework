@@ -36,6 +36,26 @@ namespace Metalama.Framework.Engine.Linking
                 ;
         }
 
+        public override ExpressionSyntax GetOperatorReference( AspectLayerId aspectLayer, IMethod overriddenOperator, OurSyntaxGenerator syntaxGenerator )
+        {
+            return
+                InvocationExpression(
+                    MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            HelperTypeName,
+                            GenericName(
+                                Identifier( overriddenOperator.OperatorKind.ToOperatorMethodName() ),
+                                TypeArgumentList(
+                                    SingletonSeparatedList( syntaxGenerator.Type( overriddenOperator.DeclaringType.GetSymbol().AssertNotNull() ) ) ) ) )
+                        .WithAspectReferenceAnnotation(
+                            aspectLayer,
+                            AspectReferenceOrder.Base,
+                            AspectReferenceTargetKind.Self,
+                            flags: AspectReferenceFlags.Inlineable ),
+                    syntaxGenerator.ArgumentList(overriddenOperator, p => IdentifierName(p.Name)))
+                ;
+        }
+
         private static NameSyntax HelperTypeName => IdentifierName( "__LinkerIntroductionHelpers__" );
 
         private static SyntaxTree? _linkerHelperSyntaxTree;

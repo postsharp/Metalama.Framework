@@ -88,6 +88,40 @@ namespace Metalama.Framework.Advising
             object? args = null,
             object? tags = null );
 
+        IIntroductionAdviceResult<IMethod> IntroduceUnaryOperator(
+            INamedType targetType,
+            string template,
+            IType inputType,
+            IType resultType,
+            OperatorKind kind,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IMethodBuilder>? buildAction = null,
+            object? args = null,
+            object? tags = null );
+
+        IIntroductionAdviceResult<IMethod> IntroduceBinaryOperator(
+            INamedType targetType,
+            string template,
+            IType leftType,
+            IType rightType,
+            IType resultType,
+            OperatorKind kind,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IMethodBuilder>? buildAction = null,
+            object? args = null,
+            object? tags = null );
+
+        IIntroductionAdviceResult<IMethod> IntroduceConversionOperator(
+            INamedType targetType,
+            string template,
+            IType fromType,
+            IType toType,
+            bool isImplicit = false,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IMethodBuilder>? buildAction = null,
+            object? args = null,
+            object? tags = null );
+
         /// <summary>
         /// Overrides a field or property by specifying a property template.
         /// </summary>

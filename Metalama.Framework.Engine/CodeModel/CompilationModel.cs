@@ -85,6 +85,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             InitializeDictionary( out this._fields );
             InitializeDictionary( out this._methods );
+            InitializeDictionary( out this._operators );
             InitializeDictionary( out this._constructors );
             InitializeDictionary( out this._events );
             InitializeDictionary( out this._properties );
@@ -160,6 +161,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this.ReflectionMapper = prototype.ReflectionMapper;
             this.InvariantComparer = prototype.InvariantComparer;
             this._methods = prototype._methods;
+            this._operators = prototype._operators;
             this._constructors = prototype._constructors;
             this._fields = prototype._fields;
             this._properties = prototype._properties;

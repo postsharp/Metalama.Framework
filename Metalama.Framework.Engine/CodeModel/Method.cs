@@ -17,7 +17,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using MethodKind = Microsoft.CodeAnalysis.MethodKind;
+using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         public Method( IMethodSymbol symbol, CompilationModel compilation ) : base( symbol, compilation )
         {
-            if ( symbol.MethodKind == MethodKind.Constructor || symbol.MethodKind == MethodKind.StaticConstructor )
+            if ( symbol.MethodKind == RoslynMethodKind.Constructor || symbol.MethodKind == RoslynMethodKind.StaticConstructor )
             {
                 throw new ArgumentOutOfRangeException( nameof(symbol), "Cannot use the Method class with constructors." );
             }
@@ -47,6 +47,43 @@ namespace Metalama.Framework.Engine.CodeModel
         public IReadOnlyList<IType> TypeArguments => this.MethodSymbol.TypeArguments.Select( t => this.Compilation.Factory.GetIType( t ) ).ToImmutableArray();
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Method;
+
+        public OperatorKind OperatorKind =>
+            this.MethodKind switch
+            {
+                Code.MethodKind.UserDefinedOperator or Code.MethodKind.ConversionOperator =>
+                    this.Name switch
+                    {
+                        WellKnownMemberNames.ImplicitConversionName => OperatorKind.ImplicitConversion,
+                        WellKnownMemberNames.ExplicitConversionName => OperatorKind.ExplicitConversion,
+                        WellKnownMemberNames.AdditionOperatorName => OperatorKind.Addition,
+                        WellKnownMemberNames.BitwiseAndOperatorName => OperatorKind.BitwiseAnd,
+                        WellKnownMemberNames.BitwiseOrOperatorName => OperatorKind.BitwiseOr,
+                        WellKnownMemberNames.DecrementOperatorName => OperatorKind.Decrement,
+                        WellKnownMemberNames.DivisionOperatorName => OperatorKind.Division,
+                        WellKnownMemberNames.EqualityOperatorName => OperatorKind.Equality,
+                        WellKnownMemberNames.ExclusiveOrOperatorName => OperatorKind.ExclusiveOr,
+                        WellKnownMemberNames.FalseOperatorName => OperatorKind.False,
+                        WellKnownMemberNames.GreaterThanOperatorName => OperatorKind.GreaterThan,
+                        WellKnownMemberNames.GreaterThanOrEqualOperatorName => OperatorKind.GreaterThanOrEqual,
+                        WellKnownMemberNames.IncrementOperatorName => OperatorKind.Increment,
+                        WellKnownMemberNames.InequalityOperatorName => OperatorKind.Inequality,
+                        WellKnownMemberNames.LeftShiftOperatorName => OperatorKind.LeftShift,
+                        WellKnownMemberNames.LessThanOperatorName => OperatorKind.LessThan,
+                        WellKnownMemberNames.LessThanOrEqualOperatorName => OperatorKind.LessThanOrEqual,
+                        WellKnownMemberNames.LogicalNotOperatorName => OperatorKind.LogicalNot,
+                        WellKnownMemberNames.ModulusOperatorName => OperatorKind.Modulus,
+                        WellKnownMemberNames.MultiplyOperatorName => OperatorKind.Multiply,
+                        WellKnownMemberNames.OnesComplementOperatorName => OperatorKind.OnesComplement,
+                        WellKnownMemberNames.RightShiftOperatorName => OperatorKind.RightShift,
+                        WellKnownMemberNames.SubtractionOperatorName => OperatorKind.Subtraction,
+                        WellKnownMemberNames.TrueOperatorName => OperatorKind.True,
+                        WellKnownMemberNames.UnaryNegationOperatorName => OperatorKind.UnaryNegation,
+                        WellKnownMemberNames.UnaryPlusOperatorName => OperatorKind.UnaryPlus,
+                        _ => throw new AssertionFailedException(),
+                    },
+                _ => OperatorKind.None,
+            };
 
         public override bool IsImplicit => false;
 

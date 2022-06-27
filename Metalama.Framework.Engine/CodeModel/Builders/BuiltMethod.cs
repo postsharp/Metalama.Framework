@@ -36,6 +36,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public MethodKind MethodKind => this.MethodBuilder.MethodKind;
 
+        public OperatorKind OperatorKind => this.MethodBuilder.OperatorKind;
+
         public bool IsReadOnly => this.MethodBuilder.IsReadOnly;
 
         // TODO: When an interface is introduced, explicit implementation should appear here.
