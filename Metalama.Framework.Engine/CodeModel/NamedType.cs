@@ -305,11 +305,11 @@ namespace Metalama.Framework.Engine.CodeModel
 
         [Memo]
         public IImplementedInterfaceCollection AllImplementedInterfaces
-            => new AllImplementedInterfaceCollection( this, this.Compilation.GetAllInterfaceImplementationCollection( this.TypeSymbol, false ) );
+            => new AllImplementedInterfacesCollection( this, this.Compilation.GetAllInterfaceImplementationCollection( this.TypeSymbol, false ) );
 
         [Memo]
         public IImplementedInterfaceCollection ImplementedInterfaces
-            => new ImplementedInterfaceCollection( this, this.Compilation.GetInterfaceImplementationCollection( this.TypeSymbol, false ) );
+            => new ImplementedInterfacesCollection( this, this.Compilation.GetInterfaceImplementationCollection( this.TypeSymbol, false ) );
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 

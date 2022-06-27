@@ -26,6 +26,7 @@ namespace Metalama.Framework.Aspects
 
         // TODO: Support.
         //       The problem is that these are not really useful when the other declaration is not compatible.
+        //       If the existing declaration has a different return type, it's not usable, leading to an error. User can solve this only programatically.
         //       The name of this enum however implies that we can override.
 
         // /// <summary>

@@ -314,17 +314,6 @@ namespace Metalama.Framework.Engine.Advising
 
                                         continue;
 
-                                    // case InterfaceMemberOverrideStrategy.UseExisting:
-                                    // case InterfaceMemberOverrideStrategy.Override:
-                                    //    if ( !existingMethod.SemanticEquals( interfaceMethod ) )
-                                    //    {
-                                    //        diagnostics.Report(
-                                    //            AdviceDiagnosticDescriptors.ImplicitInterfaceMemberIsNotCompatible.CreateRoslynDiagnostic(
-                                    //                targetType.GetDiagnosticLocation(),
-                                    //                (this.Aspect.AspectClass.ShortName, interfaceMethod, targetType, existingMethod) ) );
-                                    //    }
-                                    //    continue;
-
                                     case InterfaceMemberOverrideStrategy.MakeExplicit:
                                         isExplicit = true;
                                         break;
@@ -376,17 +365,6 @@ namespace Metalama.Framework.Engine.Advising
                                                 (this.Aspect.AspectClass.ShortName, interfaceProperty, targetType, existingProperty) ) );
 
                                         continue;
-
-                                        // case InterfaceMemberOverrideStrategy.UseExisting:
-                                        // case InterfaceMemberOverrideStrategy.Override:
-                                        //     if ( !existingProperty.SemanticEquals(interfaceProperty))
-                                        //     {
-                                        //        diagnostics.Report(
-                                        //                AdviceDiagnosticDescriptors.ImplicitInterfaceMemberIsNotCompatible.CreateRoslynDiagnostic(
-                                        //                targetType.GetDiagnosticLocation(),
-                                        //                (this.Aspect.AspectClass.ShortName, interfaceProperty, targetType, existingProperty) ) );
-                                        //     }
-                                        //     continue;
 
                                     case InterfaceMemberOverrideStrategy.MakeExplicit:
                                         isExplicit = true;
@@ -456,17 +434,6 @@ namespace Metalama.Framework.Engine.Advising
                                                 (this.Aspect.AspectClass.ShortName, interfaceEvent, targetType, existingEvent) ) );
 
                                         continue;
-
-                                    // case InterfaceMemberOverrideStrategy.UseExisting:
-                                    // case InterfaceMemberOverrideStrategy.Override:
-                                    //    if ( !existingEvent.SemanticEquals( interfaceEvent ) )
-                                    //    {
-                                    //        return AdviceImplementationResult.Failed(
-                                    //            AdviceDiagnosticDescriptors.ImplicitInterfaceMemberIsNotCompatible.CreateRoslynDiagnostic(
-                                    //                targetType.GetDiagnosticLocation(),
-                                    //                (this.Aspect.AspectClass.ShortName, interfaceEvent, targetType, existingEvent) ) );
-                                    //    }
-                                    //    continue;
 
                                     case InterfaceMemberOverrideStrategy.MakeExplicit:
                                         isExplicit = true;
