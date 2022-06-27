@@ -44,7 +44,6 @@ namespace Metalama.Framework.Engine.Advising
             return @event.Name == other.Name;
         }
 
-
         /// <summary>
         /// Determines whether the indexer's signature is equal to the signature of the given indexer.
         /// </summary>
