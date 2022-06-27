@@ -96,7 +96,7 @@ namespace Metalama.Framework.Engine.Aspects
 
         public IAspectState? AspectState
         {
-            get => this.AspectInstance.State;
+            get => this.AspectInstance.AspectState;
             set => ((IAspectInstanceInternal) this.AspectInstance).SetState( value );
         }
 

@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Microsoft.CodeAnalysis.CSharp;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
@@ -188,6 +190,12 @@ namespace Metalama.TestFramework
         /// To set this option in a test, add this comment to your test file: <c>// @OutputAllSyntaxTrees</c>.
         /// </summary>
         public bool? OutputAllSyntaxTrees { get; set; }
+
+        /// <summary>
+        /// Gets or sets the version of the C# language that the test should be compiled with.
+        /// To set this option in a test, add this comment to your test file: <c>// @LanguageVersion(version)</c>.
+        /// </summary>
+        public LanguageVersion? LanguageVersion { get; set; }
 
         /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
@@ -379,6 +387,18 @@ namespace Metalama.TestFramework
 
                     case "AssemblyReference":
                         this.References.Add( new TestAssemblyReference { Name = optionArg } );
+
+                        break;
+
+                    case "LanguageVersion":
+                        if ( LanguageVersionFacts.TryParse( optionArg, out var result ) )
+                        {
+                            this.LanguageVersion = result;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException( $"'{optionArg} is not a valid language version." );
+                        }
 
                         break;
 

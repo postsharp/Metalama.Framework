@@ -5,6 +5,7 @@ using Metalama.Compiler;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -58,6 +59,9 @@ namespace Metalama.Framework.Engine.CodeModel
         public abstract bool IsPartial { get; }
 
         public bool IsEmpty => this.SyntaxTrees.Count == 0;
+
+        public LanguageVersion LanguageVersion
+            => this.SyntaxTrees.Count > 0 ? ((CSharpParseOptions) this.SyntaxTrees.Values.First().Options).LanguageVersion : LanguageVersion.Default;
 
         // Initial constructor.
         private PartialCompilation( Compilation compilation, DerivedTypeIndex derivedTypeIndex, ImmutableArray<ManagedResource> resources )
