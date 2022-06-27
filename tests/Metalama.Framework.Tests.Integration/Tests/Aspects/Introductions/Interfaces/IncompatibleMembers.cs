@@ -4,10 +4,10 @@ using Metalama.Framework.Code;
 
 #pragma warning disable CS0067
 
-namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.IncorrectMemberReturnTypes
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.IncompatibleMembers
 {
     /*
-     * Case with missing interface members.
+     * Tests that when aspect members marked with [InterfaceMember] are not compatible with interface members of the same signature
      */
 
     public interface IInterface

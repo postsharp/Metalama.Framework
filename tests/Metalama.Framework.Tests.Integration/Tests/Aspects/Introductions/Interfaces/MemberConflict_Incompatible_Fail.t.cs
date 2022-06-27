@@ -1,0 +1,4 @@
+// CompileTimeAspectPipeline.ExecuteAsync failed. 
+// Error LAMA0514 on `TargetClass`: `The aspect 'Introduction' cannot introduce interface member 'IInterface.Event' into type 'TargetClass' because the type already contains 'TargetClass.Event' which has the same signature and WhenExists of the interface member is set to Fail.`
+// Error LAMA0514 on `TargetClass`: `The aspect 'Introduction' cannot introduce interface member 'IInterface.Method()' into type 'TargetClass' because the type already contains 'TargetClass.Method()' which has the same signature and WhenExists of the interface member is set to Fail.`
+// Error LAMA0514 on `TargetClass`: `The aspect 'Introduction' cannot introduce interface member 'IInterface.Property' into type 'TargetClass' because the type already contains 'TargetClass.Property' which has the same signature and WhenExists of the interface member is set to Fail.`

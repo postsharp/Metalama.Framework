@@ -35,10 +35,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Remove="Tests\Aspects\Misc\UserDeclarativeAdvice - Copy.t.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
         <ProjectReference Include="..\..\Metalama.TestFramework\Metalama.TestFramework.csproj" />
@@ -48,22 +44,6 @@
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
     </ItemGroup>
 
-    <ItemGroup>
-      <None Include="Tests\Aspects\Misc\UserDeclarativeAdvice_NonTemplate.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>UserDeclarativeAdvice_NonTemplate.cs</DependentUpon>
-      </None>
-    </ItemGroup>
-
     <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets" />
-
-    <ItemGroup>
-      <None Update="C:\Dev\Metalama\Tests\Metalama.Framework.Tests.Integration\Tests\Aspects\Overrides\Finalizers\Introduced_Derived.t.cs">
-        <DependentUpon>Introduced_Derived.cs</DependentUpon>
-      </None>
-      <None Update="C:\Dev\Metalama\Tests\Metalama.Framework.Tests.Integration\Tests\Aspects\Overrides\Finalizers\Introduced.t.cs">
-        <DependentUpon>Introduced.cs</DependentUpon>
-      </None>
-    </ItemGroup>
 
 </Project>

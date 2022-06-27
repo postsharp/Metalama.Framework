@@ -4,10 +4,10 @@ using Metalama.Framework.Code;
 
 #pragma warning disable CS0067
 
-namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.MemberConflict_DifferentSignature
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.MemberConflict_DifferentSignature_Explicit
 {
     /*
-     * Tests that when a member of the same name but different signature already exists in the target class, the compilation succeeds.
+     * Tests that when a member of the same name but different signature already exists in the target class and the interface member is explicit, the compilation succeeds.
      */
 
     public class IntroductionAttribute : TypeAspect
@@ -20,7 +20,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
                 whenExists: OverrideStrategy.Ignore );
         }
 
-        [InterfaceMember]
+        [InterfaceMember(IsExplicit = true)]
         public int Method()
         {
             Console.WriteLine("This is introduced interface method.");

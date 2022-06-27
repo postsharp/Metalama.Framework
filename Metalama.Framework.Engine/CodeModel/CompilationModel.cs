@@ -89,6 +89,7 @@ namespace Metalama.Framework.Engine.CodeModel
             InitializeDictionary( out this._events );
             InitializeDictionary( out this._properties );
             InitializeDictionary( out this._indexers );
+            InitializeDictionary( out this._allInterfaceImplementations );
             InitializeDictionary( out this._interfaceImplementations );
 
             this._parameters = ImmutableDictionary.Create<Ref<IHasParameters>, ParameterUpdatableCollection>()
@@ -165,6 +166,7 @@ namespace Metalama.Framework.Engine.CodeModel
             this._indexers = prototype._indexers;
             this._events = prototype._events;
             this._interfaceImplementations = prototype._interfaceImplementations;
+            this._allInterfaceImplementations = prototype._allInterfaceImplementations;
             this._staticConstructors = prototype._staticConstructors;
             this._finalizers = prototype._finalizers;
             this._parameters = prototype._parameters;

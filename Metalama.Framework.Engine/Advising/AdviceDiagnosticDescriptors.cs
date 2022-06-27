@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.Advising
 {
     public static class AdviceDiagnosticDescriptors
     {
-        // Reserved range 500-599
+        // Reserved range 500-599.
 
         private const string _category = "Metalama.Advices";
 
@@ -86,7 +86,7 @@ namespace Metalama.Framework.Engine.Advising
             DeclarativeInterfaceMemberDoesNotMatch = new(
                 "LAMA0511",
                 "Declarative interface member introduction does match interface member return type.",
-                "The aspect '{0}' cannot implicitly introduce interface '{1}' into the  type '{2}' because the introduced member '{3}'" +
+                "The aspect '{0}' cannot implicitly introduce interface '{2}' into the type '{1}' because the introduced member '{3}'" +
                 " does not have the same return type as interface member '{4}'.",
                 _category,
                 Error );
@@ -108,15 +108,34 @@ namespace Metalama.Framework.Engine.Advising
                 _category,
                 Error );
 
-        internal static readonly DiagnosticDefinition<(string AspectType, INamedType InterfaceType, INamedType TargetType, IMember InterfaceMember)>
-            ImplicitInterfaceMemberConflict = new(
+        internal static readonly DiagnosticDefinition<(string AspectType, IMember InterfaceMember, INamedType TargetType, IMember ExistingDeclaration)>
+            ImplicitInterfaceMemberAlreadyExists = new(
                 "LAMA0514",
                 "Cannot introduce an implicit interface member when the target type already contains a declaration with the same signature.",
-                "The aspect '{0}' cannot introduce interface '{1}' into type '{2}' because the type already contains '{3}' and WhenExists is set to Fail.",
+                "The aspect '{0}' cannot introduce interface member '{1}' into type '{2}' because the type already contains '{3}' which has the same signature " +
+                "and WhenExists of the interface member is set to Fail.",
                 _category,
                 Error );
 
-        // 520-529: Various introduction diagnostics.
+        internal static readonly DiagnosticDefinition<(string AspectType, IMember InterfaceMember, INamedType TargetType, IMember ExistingDeclaration)>
+            ImplicitInterfaceMemberIsNotCompatible = new(
+                "LAMA0515",
+                "Cannot introduce an implicit interface member when the target type already contains a declaration that is not compatible with the interface member.",
+                "The aspect '{0}' cannot introduce interface member '{1}' into type '{2}' because the type already contains '{3}' which has the same signature " +
+                "but is incompatible with the interface member and WhenExists of the interface member is set to UseExisting.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<(string AspectType, INamedType InterfaceType, INamedType TargetType, OverrideStrategy Strategy)>
+            InterfaceUnsupportedOverrideStrategy = new(
+                "LAMA0516",
+                "Using unsupported override strategy for interface type.",
+                "The aspect '{0}' cannot introduce interface '{1}' into type '{2}' with 'whenExists={3}' because it is not supported." +
+                "Only Ignore or Fail strategies are supported for interface types. You can use 'whenExists' on individual members.",
+                _category,
+                Error );
+
+        // Subrange 520-529: Various introduction diagnostics.
         internal static readonly DiagnosticDefinition<(string AspectType, IConstructor Constructor)>
             CannotIntroduceParameterIntoStaticConstructor = new(
                 "LAMA0520",

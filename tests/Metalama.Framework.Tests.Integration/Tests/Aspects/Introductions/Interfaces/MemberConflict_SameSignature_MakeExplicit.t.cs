@@ -1,5 +1,5 @@
 [Introduction]
-public class TargetClass : global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.MemberConflict_SameSignature_Explicit.IInterface
+public class TargetClass : global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.MemberConflict_SameSignature_MakeExplicit.IInterface
 {
     public int Method()
     {
@@ -35,7 +35,7 @@ public class TargetClass : global::Metalama.Framework.Tests.Integration.TestInpu
     }
 
 
-    global::System.Int32 global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.MemberConflict_SameSignature_Explicit.IInterface.Property
+    global::System.Int32 global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.MemberConflict_SameSignature_MakeExplicit.IInterface.Property
     {
         get
         {
@@ -49,13 +49,13 @@ public class TargetClass : global::Metalama.Framework.Tests.Integration.TestInpu
         }
     }
 
-    global::System.Int32 global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.MemberConflict_SameSignature_Explicit.IInterface.Method()
+    global::System.Int32 global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.MemberConflict_SameSignature_MakeExplicit.IInterface.Method()
     {
         global::System.Console.WriteLine("This is introduced interface method.");
         return (global::System.Int32)42;
     }
 
-    event global::System.EventHandler global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.MemberConflict_SameSignature_Explicit.IInterface.Event
+    event global::System.EventHandler global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.MemberConflict_SameSignature_MakeExplicit.IInterface.Event
     {
         add
         {

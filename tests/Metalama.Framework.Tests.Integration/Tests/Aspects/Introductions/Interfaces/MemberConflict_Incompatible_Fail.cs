@@ -2,30 +2,29 @@ using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.MemberConflict_SameSignature_Explicit
+#pragma warning disable CS0067
+
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.MemberConflict_Incompatible_Fail
 {
     /*
-     * Tests that when a member of the same signature already exists in the target class for an explicit interface member, the compilation succeeds.
+     * Tests that when a incompatible member of the same signature already exists and whenExists is set to Fail, errors are produced.
      */
 
     public class IntroductionAttribute : TypeAspect
     {
         public override void BuildAspect( IAspectBuilder<INamedType> aspectBuilder )
         {
-            aspectBuilder.Advice.ImplementInterface(
-                aspectBuilder.Target,
-                typeof(IInterface),
-                whenExists: OverrideStrategy.Ignore );
+            aspectBuilder.Advice.ImplementInterface(aspectBuilder.Target, typeof(IInterface));
         }
 
-        [InterfaceMember(IsExplicit = true)]
+        [InterfaceMember(WhenExists = InterfaceMemberOverrideStrategy.Fail)]
         public int Method()
         {
             Console.WriteLine("This is introduced interface method.");
             return 42;
         }
 
-        [InterfaceMember(IsExplicit = true)]
+        [InterfaceMember(WhenExists = InterfaceMemberOverrideStrategy.Fail)]
         public int Property
         {
             get
@@ -40,7 +39,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             }
         }
 
-        [InterfaceMember(IsExplicit = true)]
+        [InterfaceMember(WhenExists = InterfaceMemberOverrideStrategy.Fail)]
         public event EventHandler Event
         {
             add
@@ -68,18 +67,18 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     [Introduction]
     public class TargetClass
     {
-        public int Method()
+        public string Method()
         {
             Console.WriteLine("This is original method.");
-            return 0;
+            return "42";
         }
 
-        public int Property
+        public string Property
         {
             get
             {
                 Console.WriteLine("This is original property.");
-                return 0;
+                return "42";
             }
 
             set
@@ -88,7 +87,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             }
         }
 
-        public event EventHandler Event
+        public event Action Event
         {
             add
             {

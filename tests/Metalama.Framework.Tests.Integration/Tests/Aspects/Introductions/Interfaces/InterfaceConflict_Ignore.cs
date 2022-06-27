@@ -1,16 +1,16 @@
-using System;
+﻿using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.MemberConflict_SameSignature_Implicit
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.InterfaceConflict_Ignore
 {
     /*
-     * Tests that when a member of the same signature already exists in the target class for an implicit interface member, an error is emitted.
+     * Simple case with implicit interface members.
      */
 
     public interface IInterface
     {
-        void Method();
+        int InterfaceMethod();
     }
 
     public class IntroductionAttribute : TypeAspect
@@ -20,23 +20,27 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
             aspectBuilder.Advice.ImplementInterface(
                 aspectBuilder.Target,
                 typeof(IInterface),
-                whenExists: OverrideStrategy.Fail );
+                whenExists: OverrideStrategy.Ignore );
         }
 
-        [InterfaceMember(IsExplicit = false)]
-        public void Method()
+        [InterfaceMember]
+        public int InterfaceMethod()
         {
             Console.WriteLine( "This is introduced interface method." );
+
+            return meta.Proceed();
         }
     }
 
     // <target>
     [Introduction]
-    public class TargetClass
-    { 
-        public void Method()
+    public class TargetClass : IInterface
+    {
+        int IInterface.InterfaceMethod()
         {
-            Console.WriteLine("This is original method.");
+            Console.WriteLine( "This is the original implementation." );
+
+            return 42;
         }
     }
 }

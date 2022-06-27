@@ -177,7 +177,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     this.ExplicitInterfaceImplementations.Count > 0
                         ? ExplicitInterfaceSpecifier( (NameSyntax) syntaxGenerator.Type( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
                         : null,
-                    Identifier( this.Name ),
+                    this.GetCleanName(),
                     GenerateAccessorList(),
                     null,
                     initializerExpression != null
