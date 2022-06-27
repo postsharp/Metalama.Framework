@@ -27,7 +27,7 @@ public readonly struct ValidatorImplementation
     private ValidatorImplementation( IAspectInstance aspectInstance )
     {
         this.Implementation = aspectInstance.Aspect;
-        this.State = aspectInstance.State;
+        this.State = aspectInstance.AspectState;
     }
 
     private ValidatorImplementation( Fabric fabric )

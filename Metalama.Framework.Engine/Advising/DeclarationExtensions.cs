@@ -9,6 +9,9 @@ namespace Metalama.Framework.Engine.Advising
 {
     internal static class DeclarationExtensions
     {
+        /// <summary>
+        /// Determines whether the method's signature is equal to the signature of the given method.
+        /// </summary>
         public static bool SignatureEquals( this IMethod method, IMethod other )
         {
             // TODO: Custom modifiers.
@@ -25,16 +28,25 @@ namespace Metalama.Framework.Engine.Advising
                                && amp.p.RefKind == other.Parameters[amp.i].RefKind );
         }
 
+        /// <summary>
+        /// Determines whether the property's signature is equal to the signature of the given property.
+        /// </summary>
         public static bool SignatureEquals( this IProperty property, IProperty other )
         {
             return property.Name == other.Name;
         }
 
+        /// <summary>
+        /// Determines whether the event's signature is equal to the signature of the given event.
+        /// </summary>
         public static bool SignatureEquals( this IEvent @event, IEvent other )
         {
             return @event.Name == other.Name;
         }
 
+        /// <summary>
+        /// Determines whether the indexer's signature is equal to the signature of the given indexer.
+        /// </summary>
         public static bool SignatureEquals( this IIndexer indexer, IIndexer other )
         {
             return indexer.Name == other.Name
@@ -49,6 +61,9 @@ namespace Metalama.Framework.Engine.Advising
                                && app.p.RefKind == other.Parameters[app.i].RefKind );
         }
 
+        /// <summary>
+        /// Determines whether the method is semantically equal to the given method, i.e. has equal signature, return type and type parameter constraints.
+        /// </summary>
         public static bool SemanticEquals( this IMethod method, IMethod other )
         {
             // TODO: Type parameter contains, nullability.
@@ -58,6 +73,9 @@ namespace Metalama.Framework.Engine.Advising
                        other.ReturnType.GetSymbol().AssertNotNull() );
         }
 
+        /// <summary>
+        /// Determines whether the property is semantically equal to the given property, i.e. has equal name and type.
+        /// </summary>
         public static bool SemanticEquals( this IProperty property, IProperty other )
         {
             // TODO: nullability.
@@ -67,6 +85,9 @@ namespace Metalama.Framework.Engine.Advising
                        other.Type.GetSymbol().AssertNotNull() );
         }
 
+        /// <summary>
+        /// Determines whether the event is semantically equal to the given event, i.e. has equal name and type.
+        /// </summary>
         public static bool SemanticEquals( this IEvent @event, IEvent other )
         {
             // TODO: nullability.
@@ -76,6 +97,9 @@ namespace Metalama.Framework.Engine.Advising
                        other.Type.GetSymbol().AssertNotNull() );
         }
 
+        /// <summary>
+        /// Determines whether the indexer is semantically equal to the given indexer, i.e. has equal signature and type.
+        /// </summary>
         public static bool SemanticEquals( this IIndexer indexer, IIndexer other )
         {
             // TODO: nullability.

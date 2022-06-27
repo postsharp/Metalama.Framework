@@ -560,7 +560,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
                 }
             }
 
-            foreach ( var member in serializableType.Type.GetMembers().Where( x => this.RequiresConstructorInitialization( x ) ) )
+            foreach ( var member in serializableType.Type.GetMembers().Where( this.RequiresConstructorInitialization ) )
             {
                 if ( !constructorDeserializedMembers.Contains( member ) )
                 {
@@ -577,13 +577,13 @@ namespace Metalama.Framework.Engine.LamaSerialization
             }
 
             if ( fieldOrProperty.GetAttributes()
-                .Any( a => a.AttributeClass.AssertNotNull().Is( this._runtimeReflectionMapper.GetTypeSymbol( typeof(ITemplateAttribute) ) ) ) )
+                .Any( a => a.AttributeClass.AssertNotNull().Is( this._runtimeReflectionMapper.GetTypeSymbol( typeof(IAdviceAttribute) ) ) ) )
             {
                 // Skip all template symbols.
                 return false;
             }
 
-            if ( fieldOrProperty is IFieldSymbol f && !f.IsImplicitlyDeclared )
+            if ( fieldOrProperty is IFieldSymbol { IsImplicitlyDeclared: false } )
             {
                 return true;
             }

@@ -23,12 +23,19 @@ namespace Metalama.Framework.Code.SyntaxBuilders
         {
             _currentImpl.Value = current;
 
-            return new ImplementationCookie();
+            return new ImplementationCookie( _currentImpl.Value );
         }
 
         internal class ImplementationCookie : IDisposable
         {
-            public void Dispose() => _currentImpl.Value = null;
+            private readonly ISyntaxBuilderImpl? _previousValue;
+
+            public ImplementationCookie( ISyntaxBuilderImpl? previousValue )
+            {
+                this._previousValue = previousValue;
+            }
+
+            public void Dispose() => _currentImpl.Value = this._previousValue;
         }
 
         /// <summary>
