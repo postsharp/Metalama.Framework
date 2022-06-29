@@ -1,4 +1,4 @@
-﻿using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Issue30621.Dependency;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,25 +7,7 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Issue30621
 {
-    public class ClassA
+    internal class ClassC : ClassB
     {
-        [Log]
-        public void Foo()
-        {
-            Console.WriteLine( "Bar" );
-        }
-    }
-
-    public class ClassB : ClassA
-    {
-    }
-
-    public class LogAttribute : OverrideMethodAspect
-    {
-        public override dynamic? OverrideMethod()
-        {
-            Console.WriteLine( "Simple log" );
-            return meta.Proceed();
-        }
     }
 }
