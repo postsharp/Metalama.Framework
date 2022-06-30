@@ -1,4 +1,4 @@
-// --- PartialType_SyntaxTrees.cs ---
+// --- Target_PartialStruct_SyntaxTrees.cs ---
 
 [Override]
 internal partial struct TargetStruct
@@ -11,7 +11,7 @@ internal partial struct TargetStruct
     }
 }
 
-// --- PartialType_SyntaxTrees.1.cs ---
+// --- Target_PartialStruct_SyntaxTrees.1.cs ---
 
 internal partial struct TargetStruct
 {
@@ -23,7 +23,7 @@ internal partial struct TargetStruct
     }
 }
 
-// --- PartialType_SyntaxTrees.2.cs ---
+// --- Target_PartialStruct_SyntaxTrees.2.cs ---
 
 internal partial struct TargetStruct
 {
