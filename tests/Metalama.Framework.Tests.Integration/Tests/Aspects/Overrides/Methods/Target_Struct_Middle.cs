@@ -2,7 +2,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.TestFramework;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.Target_Struct
+namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.Target_Struct_Middle
 {
     // Tests single OverrideMethod aspect with trivial template on methods with trivial bodies.
 
@@ -11,7 +11,9 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.Target_S
         public override dynamic? OverrideMethod()
         {
             Console.WriteLine("This is the overriding method.");
-            return meta.Proceed();
+            var x = meta.Proceed();
+            Console.WriteLine("This is the overriding method.");
+            return x;
         }
     }
 
