@@ -2,7 +2,7 @@
 using Metalama.TestFramework;
 using System;
 
-namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Record_ImplicitProperties
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Target_RecordClass_Simple
 {
     /*
      * Tests that a basic case of override property with property template works.
@@ -27,18 +27,38 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
     }
 
     // <target>
-    internal record TargetRecord
+    internal record class TargetRecordClass
     {
-        [Override]
-        public int Property;
+        private int _field;
 
         [Override]
-        public static int StaticProperty;
-
-        public TargetRecord( int property, int staticProperty)
+        public int Property
         {
-            Property = property;
-            StaticProperty = staticProperty;
+            get
+            {
+                return this._field;
+            }
+
+            set
+            {
+                this._field = value;
+            }
+        }
+
+        private static int _staticField;
+
+        [Override]
+        public static int StaticProperty
+        {
+            get
+            {
+                return _staticField;
+            }
+
+            set
+            {
+                _staticField = value;
+            }
         }
     }
 }

@@ -22,3 +22,39 @@ internal class Output
 
     internal class D : C { }
 }
+
+// <target>
+internal struct TargetStruct
+{
+    [MyAspect]
+    internal class C { }
+
+    internal class D : C { }
+}
+
+// <target>
+internal record TargetRecord
+{
+    [MyAspect]
+    internal class C { }
+
+    internal class D : C { }
+}
+
+// <target>
+internal record struct TargetRecordStruct
+{
+    [MyAspect]
+    internal class C { }
+
+    internal class D : C { }
+}
+
+// <target>
+internal record class TargetRecordClass
+{
+    [MyAspect]
+    internal class C { }
+
+    internal class D : C { }
+}

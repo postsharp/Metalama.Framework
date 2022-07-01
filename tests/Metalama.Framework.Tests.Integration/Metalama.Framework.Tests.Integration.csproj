@@ -35,12 +35,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Remove="Tests\Aspects\Initialization\InstanceConstructing_Implicit - Copy.t.cs" />
-      <Compile Remove="Tests\Aspects\Overrides\Methods\Simple - Copy.t.cs" />
-      <Compile Remove="Tests\Fabrics\TypeFabricAddAdvice - Copy.t.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
         <ProjectReference Include="..\..\Metalama.TestFramework\Metalama.TestFramework.csproj" />
@@ -50,47 +44,6 @@
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
     </ItemGroup>
 
-    <ItemGroup>
-      <None Include="Tests\Aspects\Initialization\Target_Record_InstanceConstructing_Implicit.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>Target_Record_InstanceConstructing_Implicit.cs</DependentUpon>
-      </None>
-      <None Include="Tests\Aspects\Initialization\Target_RecordClass_InstanceConstructing_Implicit.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>Target_RecordClass_InstanceConstructing_Implicit.cs</DependentUpon>
-      </None>
-      <None Include="Tests\Aspects\Initialization\Target_RecordStruct_InstanceConstructing_Implicit.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>Target_RecordStruct_InstanceConstructing_Implicit.cs</DependentUpon>
-      </None>
-      <None Include="Tests\Aspects\Initialization\Target_Struct_InstanceConstructing_Implicit.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>Target_Struct_InstanceConstructing_Implicit.cs</DependentUpon>
-      </None>
-      <None Include="Tests\Aspects\Overrides\Methods\Target_RecordClass_Simple.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>Target_RecordClass_Simple.cs</DependentUpon>
-      </None>
-      <None Include="Tests\Aspects\Overrides\Methods\Target_RecordStruct_Simple.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>Target_RecordStruct_Simple.cs</DependentUpon>
-      </None>
-      <None Include="Tests\Aspects\Overrides\Methods\Target_Record_Simple.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>Target_Record_Simple.cs</DependentUpon>
-      </None>
-      <None Include="Tests\Fabrics\Struct_TypeFabricAddAdvice.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>Struct_TypeFabricAddAdvice.cs</DependentUpon>
-      </None>
-    </ItemGroup>
-
     <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets" />
-
-    <ItemGroup>
-      <None Update="C:\src\Metalama\Tests\Metalama.Framework.Tests.Integration\Tests\Aspects\Overrides\Methods\Target_Struct_Simple.t.cs">
-        <DependentUpon>Target_Struct_Simple.cs</DependentUpon>
-      </None>
-    </ItemGroup>
 
 </Project>

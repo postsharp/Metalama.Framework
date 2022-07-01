@@ -2,7 +2,7 @@
 using Metalama.TestFramework;
 using System;
 
-namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Target_RecordClass
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Target_RecordStruct_Simple
 {
     /*
      * Tests that a basic case of override property with property template works.
@@ -27,7 +27,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
     }
 
     // <target>
-    internal record class TargetRecordClass
+    internal record struct TargetRecordStruct
     {
         private int _field;
 
