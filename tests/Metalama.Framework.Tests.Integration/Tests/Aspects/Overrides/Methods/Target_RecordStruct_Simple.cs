@@ -2,7 +2,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.TestFramework;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.Target_Struct
+namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.Target_RecordStruct_Simple
 {
     // Tests single OverrideMethod aspect with trivial template on methods with trivial bodies.
 
@@ -16,7 +16,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Methods.Target_S
     }
 
     // <target>
-    internal struct TargetStruct
+    internal record struct TargetRecordStruct
     {
         [Override]
         public void TargetMethod_Void()

@@ -35,6 +35,11 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Compile Remove="Tests\Aspects\Initialization\InstanceConstructing_Implicit - Copy.t.cs" />
+      <Compile Remove="Tests\Fabrics\TypeFabricAddAdvice - Copy.t.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
         <ProjectReference Include="..\..\Metalama.TestFramework\Metalama.TestFramework.csproj" />
@@ -42,6 +47,17 @@
 
     <ItemGroup>
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="Tests\Aspects\Initialization\Target_Struct_InstanceConstructing_Implicit.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>Target_Struct_InstanceConstructing_Implicit.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Fabrics\Struct_TypeFabricAddAdvice.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>Struct_TypeFabricAddAdvice.cs</DependentUpon>
+      </None>
     </ItemGroup>
 
     <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets" />
