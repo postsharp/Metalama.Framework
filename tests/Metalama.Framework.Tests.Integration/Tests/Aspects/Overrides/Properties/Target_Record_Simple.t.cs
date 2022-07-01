@@ -1,44 +1,38 @@
 internal record TargetRecord
 {
-    private global::System.Int32 _property;
+    private int _field;
 
-    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Record_ImplicitProperties.OverrideAttribute]
-    public global::System.Int32 Property
+    [Override]
+    public int Property
     {
         get
         {
             global::System.Console.WriteLine("This is the overridden getter.");
-            return this._property;
+            return this._field;
         }
 
         set
         {
             global::System.Console.WriteLine("This is the overridden setter.");
-            this._property = value;
+            this._field = value;
         }
     }
 
-    private static global::System.Int32 _staticProperty;
+    private static int _staticField;
 
-    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Record_ImplicitProperties.OverrideAttribute]
-    public static global::System.Int32 StaticProperty
+    [Override]
+    public static int StaticProperty
     {
         get
         {
             global::System.Console.WriteLine("This is the overridden getter.");
-            return global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Record_ImplicitProperties.TargetRecord._staticProperty;
+            return _staticField;
         }
 
         set
         {
             global::System.Console.WriteLine("This is the overridden setter.");
-            global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Record_ImplicitProperties.TargetRecord._staticProperty = value;
+            _staticField = value;
         }
-    }
-
-    public TargetRecord(int property, int staticProperty)
-    {
-        Property = property;
-        StaticProperty = staticProperty;
     }
 }

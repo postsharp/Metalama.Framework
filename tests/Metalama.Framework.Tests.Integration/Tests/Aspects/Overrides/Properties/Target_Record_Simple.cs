@@ -2,7 +2,7 @@
 using Metalama.TestFramework;
 using System;
 
-namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Target_Record_simple
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Target_Record_Simple
 {
     /*
      * Tests that a basic case of override property with property template works.

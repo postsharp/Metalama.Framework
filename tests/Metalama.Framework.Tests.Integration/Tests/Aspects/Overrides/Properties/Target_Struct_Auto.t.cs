@@ -27,12 +27,12 @@ internal struct TargetStruct
         get
         {
             global::System.Console.WriteLine("This is the overridden getter.");
-            return global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto.TargetClass._staticProperty;
+            return global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Target_Struct_Auto.TargetStruct._staticProperty;
         }
         set
         {
             global::System.Console.WriteLine($"This is the overridden setter.");
-            global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto.TargetClass._staticProperty = value;
+            global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Target_Struct_Auto.TargetStruct._staticProperty = value;
         }
     }
 
