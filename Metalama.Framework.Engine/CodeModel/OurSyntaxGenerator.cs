@@ -259,7 +259,6 @@ namespace Metalama.Framework.Engine.CodeModel
                             Argument( expressionFunc( p ).AssertNotNull() ) ) ) );
 #pragma warning restore CA1822 // Can be made static
 
-
         public SyntaxList<TypeParameterConstraintClauseSyntax> ConstraintClauses( IMethod method )
         {
             List<TypeParameterConstraintClauseSyntax>? clauses = null;

@@ -18,11 +18,6 @@ namespace Metalama.Framework.Engine.Advising
 {
     internal class IntroduceOperatorAdvice : IntroduceMemberAdvice<IMethod, MethodBuilder>
     {
-        private readonly OperatorKind _operatorKind;
-        private readonly IType _leftOperandType;
-        private readonly IType? _rightOperandType;
-        private readonly IType _resultType;
-
         public BoundTemplateMethod BoundTemplate { get; }
 
         public new Ref<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
@@ -56,11 +51,6 @@ namespace Metalama.Framework.Engine.Advising
         {
             this.BoundTemplate = boundTemplate;
             Invariant.Assert( !boundTemplate.IsNull );
-
-            this._operatorKind = operatorKind;
-            this._leftOperandType = leftOperandType;
-            this._rightOperandType = rightOperandType;
-            this._resultType = resultType;
 
             this.Builder = new MethodBuilder( this, targetDeclaration, operatorKind.ToOperatorMethodName(), operatorKind.ToDeclarationKind(), operatorKind );
 
