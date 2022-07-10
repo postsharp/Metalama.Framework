@@ -76,6 +76,8 @@ namespace Metalama.Framework.Engine.Linking
                         {
                             ConstructorDeclarationSyntax ctorDecl => new ISymbol?[] { semanticModel.GetDeclaredSymbol( ctorDecl ) },
                             DestructorDeclarationSyntax dtorDecl => new ISymbol?[] { semanticModel.GetDeclaredSymbol( dtorDecl ) },
+                            OperatorDeclarationSyntax operatorDecl => new ISymbol?[] { semanticModel.GetDeclaredSymbol( operatorDecl ) },
+                            ConversionOperatorDeclarationSyntax dtorDecl => new ISymbol?[] { semanticModel.GetDeclaredSymbol( dtorDecl ) },
                             MethodDeclarationSyntax methodDecl => new ISymbol?[] { semanticModel.GetDeclaredSymbol( methodDecl ) },
                             BasePropertyDeclarationSyntax basePropertyDecl => new[] { semanticModel.GetDeclaredSymbol( basePropertyDecl ) },
                             FieldDeclarationSyntax fieldDecl =>

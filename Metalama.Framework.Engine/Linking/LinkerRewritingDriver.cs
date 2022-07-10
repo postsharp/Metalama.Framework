@@ -305,6 +305,12 @@ namespace Metalama.Framework.Engine.Linking
                     case DestructorDeclarationSyntax dtorDecl:
                         return (SyntaxNode?) dtorDecl.Body ?? dtorDecl.ExpressionBody ?? throw new AssertionFailedException();
 
+                    case OperatorDeclarationSyntax operatorDecl:
+                        return (SyntaxNode?) operatorDecl.Body ?? operatorDecl.ExpressionBody ?? throw new AssertionFailedException();
+
+                    case ConversionOperatorDeclarationSyntax operatorDecl:
+                        return (SyntaxNode?) operatorDecl.Body ?? operatorDecl.ExpressionBody ?? throw new AssertionFailedException();
+
                     case AccessorDeclarationSyntax accessorDecl:
                         var body = (SyntaxNode?) accessorDecl.Body ?? accessorDecl.ExpressionBody;
 
@@ -497,11 +503,17 @@ namespace Metalama.Framework.Engine.Linking
         {
             switch ( symbol )
             {
-                case IMethodSymbol { MethodKind: not MethodKind.Destructor } methodSymbol:
+                case IMethodSymbol { MethodKind: MethodKind.Ordinary or MethodKind.ExplicitInterfaceImplementation } methodSymbol:
                     return this.RewriteMethod( (MethodDeclarationSyntax) syntax, methodSymbol, generationContext );
 
                 case IMethodSymbol { MethodKind: MethodKind.Destructor } destructorSymbol:
                     return this.RewriteDestructor( (DestructorDeclarationSyntax) syntax, destructorSymbol, generationContext );
+
+                case IMethodSymbol { MethodKind: MethodKind.Conversion } operatorSymbol:
+                    return this.RewriteConversionOperator( (ConversionOperatorDeclarationSyntax) syntax, operatorSymbol, generationContext );
+
+                case IMethodSymbol { MethodKind: MethodKind.UserDefinedOperator } operatorSymbol:
+                    return this.RewriteOperator( (OperatorDeclarationSyntax) syntax, operatorSymbol, generationContext );
 
                 case IPropertySymbol propertySymbol:
                     return this.RewriteProperty( (PropertyDeclarationSyntax) syntax, propertySymbol );

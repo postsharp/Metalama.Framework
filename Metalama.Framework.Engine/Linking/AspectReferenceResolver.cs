@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
@@ -489,45 +490,36 @@ namespace Metalama.Framework.Engine.Linking
                 return containingSymbol.ContainingType.AssertNotNull().FindImplementationForInterfaceMember( referencedSymbol ).AssertNotNull();
             }
 
-            if ( referencedSymbol is IMethodSymbol { ContainingType: { Name: "__LinkerIntroductionHelpers__" } } )
+            if ( referencedSymbol is IMethodSymbol { ContainingType: { Name: "__LinkerIntroductionHelpers__" } } helperMethod )
             {
-                switch ( referencedSymbol.Name )
+                switch ( helperMethod )
                 {
-                    case "Finalizer":
+                    case { Name: "Finalizer" }:
                         // Referencing type's finalizer.
                         return containingSymbol.ContainingType.GetMembers( "Finalize" )
                             .OfType<IMethodSymbol>()
                             .Single( m => m.Parameters.Length == 0 && m.TypeParameters.Length == 0 );
 
-                    case WellKnownMemberNames.ImplicitConversionName:
-                    case WellKnownMemberNames.ExplicitConversionName:
-                    case WellKnownMemberNames.AdditionOperatorName:
-                    case WellKnownMemberNames.BitwiseAndOperatorName:
-                    case WellKnownMemberNames.BitwiseOrOperatorName:
-                    case WellKnownMemberNames.DecrementOperatorName:
-                    case WellKnownMemberNames.DivisionOperatorName:
-                    case WellKnownMemberNames.EqualityOperatorName:
-                    case WellKnownMemberNames.ExclusiveOrOperatorName:
-                    case WellKnownMemberNames.FalseOperatorName:
-                    case WellKnownMemberNames.GreaterThanOperatorName:
-                    case WellKnownMemberNames.GreaterThanOrEqualOperatorName:
-                    case WellKnownMemberNames.IncrementOperatorName:
-                    case WellKnownMemberNames.InequalityOperatorName:
-                    case WellKnownMemberNames.LeftShiftOperatorName:
-                    case WellKnownMemberNames.LessThanOperatorName:
-                    case WellKnownMemberNames.LessThanOrEqualOperatorName:
-                    case WellKnownMemberNames.LogicalNotOperatorName:
-                    case WellKnownMemberNames.ModulusOperatorName:
-                    case WellKnownMemberNames.MultiplyOperatorName:
-                    case WellKnownMemberNames.OnesComplementOperatorName:
-                    case WellKnownMemberNames.RightShiftOperatorName:
-                    case WellKnownMemberNames.SubtractionOperatorName:
-                    case WellKnownMemberNames.TrueOperatorName:
-                    case WellKnownMemberNames.UnaryNegationOperatorName:
-                    case WellKnownMemberNames.UnaryPlusOperatorName:
-                        return containingSymbol.ContainingType.GetMembers( referencedSymbol.Name )
-                            .OfType<IMethodSymbol>()
-                            .Single( m => m.Parameters.Length == 0 && m.TypeParameters.Length == 0 );
+                    case { } when SymbolHelpers.GetOperatorKindFromName(helperMethod.Name) is not OperatorKind.None and var operatorKind:
+                        if ( operatorKind.IsBinaryOperator() )
+                        {
+                            return containingSymbol.ContainingType.GetMembers( referencedSymbol.Name )
+                                .OfType<IMethodSymbol>()
+                                .Single( m => 
+                                    m.Parameters.Length == 2 
+                                    && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[0].Type, helperMethod.Parameters[0].Type )
+                                    && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[1].Type, helperMethod.Parameters[1].Type )
+                                    && SignatureTypeSymbolComparer.Instance.Equals( m.ReturnType, helperMethod.ReturnType ) );
+                        }
+                        else
+                        {
+                            return containingSymbol.ContainingType.GetMembers( referencedSymbol.Name )
+                                .OfType<IMethodSymbol>()
+                                .Single( m =>
+                                    m.Parameters.Length == 1
+                                    && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[0].Type, helperMethod.Parameters[0].Type )
+                                    && SignatureTypeSymbolComparer.Instance.Equals( m.ReturnType, helperMethod.ReturnType ) );
+                        }
 
                     default:
                         throw new AssertionFailedException();

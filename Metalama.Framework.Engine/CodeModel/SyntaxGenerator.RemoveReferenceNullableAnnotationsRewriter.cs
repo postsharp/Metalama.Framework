@@ -65,7 +65,5 @@ namespace Metalama.Framework.Engine.CodeModel
                 }
             }
         }
-
-        public bool IsNullAware { get; }
     }
 }

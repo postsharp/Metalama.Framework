@@ -48,42 +48,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Method;
 
-        public OperatorKind OperatorKind =>
-            this.MethodKind switch
-            {
-                Code.MethodKind.UserDefinedOperator or Code.MethodKind.ConversionOperator =>
-                    this.Name switch
-                    {
-                        WellKnownMemberNames.ImplicitConversionName => OperatorKind.ImplicitConversion,
-                        WellKnownMemberNames.ExplicitConversionName => OperatorKind.ExplicitConversion,
-                        WellKnownMemberNames.AdditionOperatorName => OperatorKind.Addition,
-                        WellKnownMemberNames.BitwiseAndOperatorName => OperatorKind.BitwiseAnd,
-                        WellKnownMemberNames.BitwiseOrOperatorName => OperatorKind.BitwiseOr,
-                        WellKnownMemberNames.DecrementOperatorName => OperatorKind.Decrement,
-                        WellKnownMemberNames.DivisionOperatorName => OperatorKind.Division,
-                        WellKnownMemberNames.EqualityOperatorName => OperatorKind.Equality,
-                        WellKnownMemberNames.ExclusiveOrOperatorName => OperatorKind.ExclusiveOr,
-                        WellKnownMemberNames.FalseOperatorName => OperatorKind.False,
-                        WellKnownMemberNames.GreaterThanOperatorName => OperatorKind.GreaterThan,
-                        WellKnownMemberNames.GreaterThanOrEqualOperatorName => OperatorKind.GreaterThanOrEqual,
-                        WellKnownMemberNames.IncrementOperatorName => OperatorKind.Increment,
-                        WellKnownMemberNames.InequalityOperatorName => OperatorKind.Inequality,
-                        WellKnownMemberNames.LeftShiftOperatorName => OperatorKind.LeftShift,
-                        WellKnownMemberNames.LessThanOperatorName => OperatorKind.LessThan,
-                        WellKnownMemberNames.LessThanOrEqualOperatorName => OperatorKind.LessThanOrEqual,
-                        WellKnownMemberNames.LogicalNotOperatorName => OperatorKind.LogicalNot,
-                        WellKnownMemberNames.ModulusOperatorName => OperatorKind.Modulus,
-                        WellKnownMemberNames.MultiplyOperatorName => OperatorKind.Multiply,
-                        WellKnownMemberNames.OnesComplementOperatorName => OperatorKind.OnesComplement,
-                        WellKnownMemberNames.RightShiftOperatorName => OperatorKind.RightShift,
-                        WellKnownMemberNames.SubtractionOperatorName => OperatorKind.Subtraction,
-                        WellKnownMemberNames.TrueOperatorName => OperatorKind.True,
-                        WellKnownMemberNames.UnaryNegationOperatorName => OperatorKind.UnaryNegation,
-                        WellKnownMemberNames.UnaryPlusOperatorName => OperatorKind.UnaryPlus,
-                        _ => throw new AssertionFailedException(),
-                    },
-                _ => OperatorKind.None,
-            };
+        public OperatorKind OperatorKind => this.MethodSymbol.GetOperatorKind();
 
         public override bool IsImplicit => false;
 

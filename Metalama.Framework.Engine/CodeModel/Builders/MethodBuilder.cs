@@ -133,7 +133,15 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public bool IsGeneric => this.TypeParameters.Count > 0;
 
         // We don't currently support adding other methods than default ones.
-        public MethodKind MethodKind => MethodKind.Default;
+        public MethodKind MethodKind =>
+            this.DeclarationKind switch 
+            {
+                DeclarationKind.Method => MethodKind.Default,
+                DeclarationKind.ConversionOperator => MethodKind.ConversionOperator,
+                DeclarationKind.UserDefinedOperator => MethodKind.UserDefinedOperator,
+                DeclarationKind.Finalizer => MethodKind.Finalizer,
+                _ => throw new AssertionFailedException(),
+            };
 
         System.Reflection.MethodBase IMethodBase.ToMethodBase() => this.ToMethodInfo();
 
@@ -191,7 +199,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
             else if (this.DeclarationKind == DeclarationKind.ConversionOperator)
             {
-                Invariant.Assert( this.Parameters.Count == 2 );
+                Invariant.Assert( this.Parameters.Count == 1 );
 
                 var syntax =
                     ConversionOperatorDeclaration(
@@ -199,8 +207,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                             .AddRange( this.ReturnParameter.GetAttributeLists( context ) ),
                         TokenList( Token( SyntaxKind.PublicKeyword ), Token( SyntaxKind.StaticKeyword ) ),
                         this.OperatorKind.ToOperatorKeyword(),
-                        context.SyntaxGenerator.Type( this.Parameters[1].Type.GetSymbol().AssertNotNull() ),
-                        context.SyntaxGenerator.ConversionOperatorParameterList( this ),
+                        context.SyntaxGenerator.Type( this.ReturnType.GetSymbol().AssertNotNull() ),
+                        context.SyntaxGenerator.ParameterList( this ),
                         null,
                         ArrowExpressionClause( context.SyntaxGenerator.DefaultExpression( this.ReturnType.GetSymbol().AssertNotNull() ) ) );
 
@@ -208,14 +216,14 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
             else if ( this.DeclarationKind == DeclarationKind.UserDefinedOperator )
             {
-                Invariant.Assert( this.Parameters.Count == 2 );
+                Invariant.Assert( this.Parameters.Count is 1 or 2 );
 
                 var syntax =
                     OperatorDeclaration(
                         this.GetAttributeLists( context )
                             .AddRange( this.ReturnParameter.GetAttributeLists( context ) ),
                         TokenList( Token( SyntaxKind.PublicKeyword ), Token( SyntaxKind.StaticKeyword ) ),
-                        context.SyntaxGenerator.Type( this.Parameters[0].Type.GetSymbol().AssertNotNull() ),
+                        context.SyntaxGenerator.Type( this.ReturnType.GetSymbol().AssertNotNull() ),
                         this.OperatorKind.ToOperatorKeyword(),
                         context.SyntaxGenerator.ParameterList( this ),
                         null,

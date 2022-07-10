@@ -3,10 +3,10 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.TestFramework;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.Simple
+namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.Target_MultipleSignatures
 {
     /*
-     * Tests that simple cases of operator overriding work correctly.
+     * Tests that overrides of multiple signatures of the same operator are transformed correct.
      */
 
     public class OverrideAttribute : TypeAspect
@@ -22,7 +22,15 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.Simple
         [Template]
         public dynamic? Template()
         {
-            Console.WriteLine("This is the override.");
+            if (meta.Target.Method.Parameters.Count == 2)
+            {
+                Console.WriteLine($"This is the override of ({meta.Target.Method.Parameters[0].Type}, {meta.Target.Method.Parameters[1].Type}) -> {meta.Target.Method.ReturnParameter.Type}.");
+            }
+            else
+            {
+                Console.WriteLine($"This is the override of ({meta.Target.Method.Parameters[0].Type}) -> {meta.Target.Method.ReturnParameter.Type}.");
+            }
+
             return meta.Proceed();
         }
     }
@@ -38,7 +46,14 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.Simple
             return new TargetClass();
         }
 
-        public static TargetClass operator -(TargetClass a)
+        public static TargetClass operator +(int a, TargetClass b)
+        {
+            Console.WriteLine($"This is the original operator.");
+
+            return new TargetClass();
+        }
+
+        public static TargetClass operator +(TargetClass a, int b)
         {
             Console.WriteLine($"This is the original operator.");
 
@@ -50,6 +65,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.Simple
             Console.WriteLine($"This is the original operator.");
 
             return new TargetClass();
+        }
+
+        public static explicit operator int(TargetClass x)
+        {
+            Console.WriteLine($"This is the original operator.");
+
+            return 42;
         }
     }
 }

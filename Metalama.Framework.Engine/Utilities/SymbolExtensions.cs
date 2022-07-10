@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Code;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -11,6 +12,9 @@ using System.Runtime.CompilerServices;
 using System.Runtime.Versioning;
 using RoslynSpecialType = Microsoft.CodeAnalysis.SpecialType;
 using SpecialType = Metalama.Framework.Code.SpecialType;
+using MethodKind = Microsoft.CodeAnalysis.MethodKind;
+using TypeKind = Microsoft.CodeAnalysis.TypeKind;
+using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 namespace Metalama.Framework.Engine.Utilities
 {
@@ -311,5 +315,11 @@ namespace Metalama.Framework.Engine.Utilities
         {
             return declaration.GetAttributes().Any( a => a.AttributeConstructor?.ContainingType.Name == nameof(CompilerGeneratedAttribute) ) == true;
         }
+
+        /// <summary>
+        /// Gets the kind of operator based represented by the method.
+        /// </summary>
+        public static OperatorKind GetOperatorKind( this IMethodSymbol method )
+            => SymbolHelpers.GetOperatorKindFromName( method.Name );
     }
 }

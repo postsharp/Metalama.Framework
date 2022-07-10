@@ -8,7 +8,9 @@ using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Concurrent;
+using System.Linq;
 using System.Text;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
@@ -16,15 +18,23 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal class LinkerAspectReferenceSyntaxProvider : AspectReferenceSyntaxProvider
     {
+        private static NameSyntax HelperTypeName => IdentifierName( "__LinkerIntroductionHelpers__" );
+
+        private static readonly ConcurrentDictionary<LanguageVersion, SyntaxTree> _linkerHelperSyntaxTreeCache = new();
+
+        private readonly bool _useNullability;
+
+        public LinkerAspectReferenceSyntaxProvider( bool useNullability )
+        {
+            this._useNullability = useNullability;
+        }
+
         public override ExpressionSyntax GetFinalizerReference( AspectLayerId aspectLayer, IMethod overriddenFinalizer, OurSyntaxGenerator syntaxGenerator )
             => InvocationExpression(
                 MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
                         HelperTypeName,
-                        GenericName(
-                            Identifier( "Finalizer" ),
-                            TypeArgumentList(
-                                SingletonSeparatedList( syntaxGenerator.Type( overriddenFinalizer.DeclaringType.GetSymbol().AssertNotNull() ) ) ) ) )
+                        IdentifierName( "Finalizer" ) )
                     .WithAspectReferenceAnnotation(
                         aspectLayer,
                         AspectReferenceOrder.Base,
@@ -41,30 +51,52 @@ namespace Metalama.Framework.Engine.Linking
                             GenericName(
                                 Identifier( overriddenOperator.OperatorKind.ToOperatorMethodName() ),
                                 TypeArgumentList(
-                                    SingletonSeparatedList( syntaxGenerator.Type( overriddenOperator.DeclaringType.GetSymbol().AssertNotNull() ) ) ) ) )
+                                    SeparatedList(
+                                        overriddenOperator.Parameters.Select( p => syntaxGenerator.Type( p.Type.GetSymbol().AssertNotNull() ) )
+                                        .Append( syntaxGenerator.Type( overriddenOperator.ReturnType.GetSymbol().AssertNotNull() ) ) ) ) ) )
                         .WithAspectReferenceAnnotation(
                             aspectLayer,
                             AspectReferenceOrder.Base,
                             AspectReferenceTargetKind.Self,
                             flags: AspectReferenceFlags.Inlineable ),
-                    syntaxGenerator.ArgumentList(overriddenOperator, p => IdentifierName(p.Name)))
-                ;
+                    syntaxGenerator.ArgumentList( overriddenOperator, p => IdentifierName( p.Name ) ) );
         }
 
-        private static NameSyntax HelperTypeName => IdentifierName( "__LinkerIntroductionHelpers__" );
+        public SyntaxTree? GetLinkerHelperSyntaxTree( LanguageVersion languageVersion )
+            => _linkerHelperSyntaxTreeCache.GetOrAdd( languageVersion, this.GetLinkerHelperSyntaxTreeCode );
 
-        private static readonly ConcurrentDictionary<LanguageVersion, SyntaxTree> _linkerHelperSyntaxTreeCache = new();
-
-        public static SyntaxTree GetLinkerHelperSyntaxTree( LanguageVersion languageVersion )
-            => _linkerHelperSyntaxTreeCache.GetOrAdd( languageVersion, GetLinkerHelperSyntaxTreeCode );
-
-        private static SyntaxTree GetLinkerHelperSyntaxTreeCode( LanguageVersion v )
+        private SyntaxTree? GetLinkerHelperSyntaxTreeCode( LanguageVersion v )
         {
-            var code = @"
+            var useNullability = this._useNullability && v is LanguageVersion.CSharp9 or LanguageVersion.CSharp10;
+            var suffix = useNullability ? "?" : "";
+
+            var binaryOperators = 
+                Enum.GetValues( typeof( OperatorKind ) )
+                .Cast<OperatorKind>()
+                .Where( op => op.IsBinaryOperator() )
+                .Select( op => $"public static R{suffix} {op.ToOperatorMethodName()}<A,B,R>(A{suffix} a, B{suffix} b) => default(R{suffix});" );
+
+            var unaryOperators =
+                Enum.GetValues( typeof( OperatorKind ) )
+                .Cast<OperatorKind>()
+                .Where( op => op.IsUnaryOperator() )
+                .Select( op => $"public static R{suffix} {op.ToOperatorMethodName()}<A,R>(A{suffix} a) => default(R{suffix});" );
+
+            var conversionOperators =
+                Enum.GetValues( typeof( OperatorKind ) )
+                .Cast<OperatorKind>()
+                .Where( op => op.IsConversionOperator() )
+                .Select( op => $"public static R{suffix} {op.ToOperatorMethodName()}<A,R>(A{suffix} a) => default(R{suffix});" );
+
+            var code = @$"
+{(useNullability ? "#nullable enable" : "")}
 internal class __LinkerIntroductionHelpers__
-{
-    public static void Finalizer<T>() {}
-}
+{{
+    public static void Finalizer() {{}}
+    {string.Join( "\n    ", binaryOperators )}
+    {string.Join( "\n    ", unaryOperators )}
+    {string.Join( "\n    ", conversionOperators )}
+}}
                 ";
 
             return CSharpSyntaxTree.ParseText(

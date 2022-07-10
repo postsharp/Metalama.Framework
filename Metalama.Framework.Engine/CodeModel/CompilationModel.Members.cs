@@ -42,7 +42,13 @@ public partial class CompilationModel
            || this.TryGetRedirectedDeclaration( fieldBuilder.ToRef(), out _ );
 
     internal bool Contains( MethodBuilder methodBuilder )
-        => this._methods.TryGetValue( methodBuilder.DeclaringType.GetSymbol(), out var methods ) && methods.Contains( methodBuilder.ToTypedRef<IMethod>() );
+        => methodBuilder switch
+        {
+            { MethodKind: MethodKind.ConversionOperator or MethodKind.UserDefinedOperator } =>
+                this._operators.TryGetValue( methodBuilder.DeclaringType.GetSymbol(), out var operators ) && operators.Contains( methodBuilder.ToTypedRef<IMethod>() ),
+            _ =>
+                this._methods.TryGetValue( methodBuilder.DeclaringType.GetSymbol(), out var methods ) && methods.Contains( methodBuilder.ToTypedRef<IMethod>() ),
+        };
 
     internal bool Contains( ConstructorBuilder constructorBuilder )
         => this._constructors.TryGetValue( constructorBuilder.DeclaringType.GetSymbol(), out var constructors )
@@ -336,6 +342,12 @@ public partial class CompilationModel
                 }
 
                 this._finalizers = this._finalizers.SetItem( finalizerDeclaringType, finalizer );
+
+                break;
+
+            case IMethod { MethodKind: MethodKind.ConversionOperator or MethodKind.UserDefinedOperator } @operator:
+                var operators = this.GetOperatorCollection( @operator.DeclaringType.GetSymbol().AssertNotNull(), true );
+                operators.Add( @operator.ToMemberRef() );
 
                 break;
 

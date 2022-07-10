@@ -28,6 +28,20 @@ namespace Metalama.Framework.Engine.Linking
                         .WithBody( this.RewriteBodyBlock( node.Body ) );
             }
 
+            public override SyntaxNode? VisitOperatorDeclaration( OperatorDeclarationSyntax node )
+            {
+                return
+                    node
+                        .WithBody( this.RewriteBodyBlock( node.Body ) );
+            }
+
+            public override SyntaxNode? VisitConversionOperatorDeclaration( ConversionOperatorDeclarationSyntax node )
+            {
+                return
+                    node
+                        .WithBody( this.RewriteBodyBlock( node.Body ) );
+            }
+
             public override SyntaxNode? VisitConstructorDeclaration( ConstructorDeclarationSyntax node )
             {
                 return

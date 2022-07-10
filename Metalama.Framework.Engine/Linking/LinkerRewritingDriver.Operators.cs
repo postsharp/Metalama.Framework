@@ -18,8 +18,8 @@ namespace Metalama.Framework.Engine.Linking
     {
         // Destructors/finalizers are only override targets, overrides are always represented as methods.
 
-        public IReadOnlyList<MemberDeclarationSyntax> RewriteDestructor(
-            DestructorDeclarationSyntax dtorDeclaration,
+        public IReadOnlyList<MemberDeclarationSyntax> RewriteOperator(
+            OperatorDeclarationSyntax operatorDeclaration,
             IMethodSymbol symbol,
             SyntaxGenerationContext generationContext )
         {
@@ -34,19 +34,19 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    members.Add( GetTrampolineDestructor( dtorDeclaration, lastOverride ) );
+                    members.Add( GetTrampolineOperator( operatorDeclaration, lastOverride ) );
                 }
 
                 if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
                      && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
-                    members.Add( GetOriginalImplDestructor( dtorDeclaration, symbol, generationContext ) );
+                    members.Add( GetOriginalImplOperator( operatorDeclaration, symbol, generationContext ) );
                 }
 
                 if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ) )
                      && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ), out _ ) )
                 {
-                    members.Add( GetEmptyImplDestructor( dtorDeclaration, symbol, generationContext ) );
+                    members.Add( GetEmptyImplOperator( operatorDeclaration, symbol, generationContext ) );
                 }
 
                 return members;
@@ -56,13 +56,13 @@ namespace Metalama.Framework.Engine.Linking
                 throw new AssertionFailedException();
             }
 
-            DestructorDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind, bool isAsync )
+            OperatorDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind, bool isAsync )
             {
                 var linkedBody = this.GetLinkedBody(
                     symbol.ToSemantic( semanticKind ),
                     InliningContext.Create( this, symbol, generationContext ) );
 
-                var modifiers = dtorDeclaration.Modifiers;
+                var modifiers = operatorDeclaration.Modifiers;
 
                 if ( isAsync && !symbol.IsAsync )
                 {
@@ -80,7 +80,7 @@ namespace Metalama.Framework.Engine.Linking
                 //       int Foo() <trivia_leading_equals_value> { <trivia_trailing_equals_value> <linked_body> <trivia_leading_semicolon> } <trivia_trailing_semicolon>
 
                 var (openBraceLeadingTrivia, openBraceTrailingTrivia, closeBraceLeadingTrivia, closeBraceTrailingTrivia) =
-                    dtorDeclaration switch
+                    operatorDeclaration switch
                     {
                         { Body: { OpenBraceToken: var openBraceToken, CloseBraceToken: var closeBraceToken } } =>
                             (openBraceToken.LeadingTrivia, openBraceToken.TrailingTrivia, closeBraceToken.LeadingTrivia, closeBraceToken.TrailingTrivia),
@@ -90,7 +90,7 @@ namespace Metalama.Framework.Engine.Linking
                         _ => throw new AssertionFailedException()
                     };
 
-                var ret = dtorDeclaration
+                var ret = operatorDeclaration
                     .WithExpressionBody( null )
                     .WithModifiers( modifiers )
                     .WithBody(
@@ -105,30 +105,30 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private static MemberDeclarationSyntax GetOriginalImplDestructor(
-            DestructorDeclarationSyntax dtor,
+        private static MemberDeclarationSyntax GetOriginalImplOperator(
+            OperatorDeclarationSyntax @operator,
             IMethodSymbol symbol,
             SyntaxGenerationContext generationContext )
-            => GetSpecialImplDestructor(
-                dtor,
-                dtor.Body.WithSourceCodeAnnotation(),
-                dtor.ExpressionBody.WithSourceCodeAnnotation(),
+            => GetSpecialImplOperator(
+                @operator,
+                @operator.Body.WithSourceCodeAnnotation(),
+                @operator.ExpressionBody.WithSourceCodeAnnotation(),
                 symbol,
                 GetOriginalImplMemberName( symbol ),
                 generationContext );
 
-        private static MemberDeclarationSyntax GetEmptyImplDestructor(
-            DestructorDeclarationSyntax dtor,
+        private static MemberDeclarationSyntax GetEmptyImplOperator(
+            OperatorDeclarationSyntax @operator,
             IMethodSymbol symbol,
             SyntaxGenerationContext generationContext )
         {
             var emptyBody = Block().NormalizeWhitespace();
 
-            return GetSpecialImplDestructor( dtor, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ), generationContext );
+            return GetSpecialImplOperator( @operator, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ), generationContext );
         }
 
-        private static MemberDeclarationSyntax GetSpecialImplDestructor(
-            DestructorDeclarationSyntax dtor,
+        private static MemberDeclarationSyntax GetSpecialImplOperator(
+            OperatorDeclarationSyntax @operator,
             BlockSyntax? body,
             ArrowExpressionClauseSyntax? expressionBody,
             IMethodSymbol symbol,
@@ -143,11 +143,11 @@ namespace Metalama.Framework.Engine.Linking
                 MethodDeclaration(
                         List<AttributeListSyntax>(),
                         modifiers,
-                        PredefinedType( Token( SyntaxKind.VoidKeyword ) ),
+                        @operator.ReturnType,
                         null,
                         Identifier( name ),
                         null,
-                        dtor.ParameterList,
+                        @operator.ParameterList,
                         List<TypeParameterConstraintClauseSyntax>(),
                         null,
                         null )

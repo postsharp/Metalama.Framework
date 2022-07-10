@@ -64,6 +64,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private readonly SyntaxGenerator _syntaxGenerator;
 
+        public bool IsNullAware { get; }
+
         protected OurSyntaxGenerator( SyntaxGenerator syntaxGenerator, bool nullAware )
         {
             this._syntaxGenerator = syntaxGenerator;
@@ -257,19 +259,6 @@ namespace Metalama.Framework.Engine.CodeModel
                             Argument( expressionFunc( p ).AssertNotNull() ) ) ) );
 #pragma warning restore CA1822 // Can be made static
 
-        public ParameterListSyntax ConversionOperatorParameterList( IMethodBase method )
-            =>
-
-                // TODO: attributes
-                SyntaxFactory.ParameterList(
-                    SeparatedList(
-                        method.Parameters.Skip(1).Select(
-                            p => Parameter(
-                                List<AttributeListSyntax>(),
-                                p.GetSyntaxModifierList(),
-                                this.Type( p.Type.GetSymbol() ),
-                                Identifier( p.Name ),
-                                null ) ) ) );
 
         public SyntaxList<TypeParameterConstraintClauseSyntax> ConstraintClauses( IMethod method )
         {
@@ -426,6 +415,11 @@ namespace Metalama.Framework.Engine.CodeModel
 
                 foreach ( var attribute in attributes )
                 {
+                    if (attribute.GetTarget(compilation).Constructor.DeclaringType.FullName == "System.Runtime.CompilerServices.NullableContextAttribute" )
+                    {
+                        continue;
+                    }
+
                     var attributeList = AttributeList( SingletonSeparatedList( this.Attribute( attribute.GetTarget( compilation ) ) ) );
 
                     if ( attributeTargetKind != SyntaxKind.None )

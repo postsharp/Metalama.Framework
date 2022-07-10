@@ -364,8 +364,8 @@ namespace Metalama.Framework.Engine.CodeModel
                 Code.OperatorKind.RightShift => SyntaxFactory.Token( SyntaxKind.GreaterThanGreaterThanToken ),
                 Code.OperatorKind.Subtraction => SyntaxFactory.Token( SyntaxKind.MinusToken ),
                 Code.OperatorKind.True => SyntaxFactory.Token( SyntaxKind.TrueKeyword ),
-                Code.OperatorKind.UnaryNegation => SyntaxFactory.Token( SyntaxKind.UnaryMinusExpression ),
-                Code.OperatorKind.UnaryPlus => SyntaxFactory.Token( SyntaxKind.UnaryPlusExpression ),
+                Code.OperatorKind.UnaryNegation => SyntaxFactory.Token( SyntaxKind.MinusToken ),
+                Code.OperatorKind.UnaryPlus => SyntaxFactory.Token( SyntaxKind.PlusToken ),
                 _ => throw new AssertionFailedException(),
             };
 
@@ -409,6 +409,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public static bool IsBinaryOperator( this Code.OperatorKind operatorKind )
             => operatorKind switch
             {
+                Code.OperatorKind.None => false,
                 Code.OperatorKind.ImplicitConversion => false,
                 Code.OperatorKind.ExplicitConversion => false,
                 Code.OperatorKind.Addition => true,
@@ -441,6 +442,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public static bool IsUnaryOperator( this Code.OperatorKind operatorKind )
             => operatorKind switch
             {
+                Code.OperatorKind.None => false,
                 Code.OperatorKind.ImplicitConversion => false,
                 Code.OperatorKind.ExplicitConversion => false,
                 Code.OperatorKind.Addition => false,
@@ -473,6 +475,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public static bool IsConversionOperator( this Code.OperatorKind operatorKind )
             => operatorKind switch
             {
+                Code.OperatorKind.None => false,
                 Code.OperatorKind.ImplicitConversion => true,
                 Code.OperatorKind.ExplicitConversion => true,
                 Code.OperatorKind.Addition => false,
