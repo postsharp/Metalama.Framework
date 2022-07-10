@@ -101,7 +101,7 @@ namespace Metalama.Framework.Code.DeclarationBuilders
 
             for ( var i = 0; i < constructor.Parameters.Count; i++ )
             {
-                typedConstructorArguments[i] = new TypedConstant( constructor.Parameters[i].Type, constructorArguments[0] );
+                typedConstructorArguments.Add( new TypedConstant( constructor.Parameters[i].Type, constructorArguments[i] ) );
             }
 
             // Map named arguments.
