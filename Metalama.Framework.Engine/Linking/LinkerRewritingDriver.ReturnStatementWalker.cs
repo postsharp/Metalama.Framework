@@ -29,6 +29,21 @@ namespace Metalama.Framework.Engine.Linking
             {
                 // Never visit local functions.
             }
+
+            public override void VisitSimpleLambdaExpression( SimpleLambdaExpressionSyntax node )
+            {
+                // Never visit lambdas.
+            }
+
+            public override void VisitParenthesizedLambdaExpression( ParenthesizedLambdaExpressionSyntax node )
+            {
+                // Never visit lambdas.
+            }
+
+            public override void VisitAnonymousMethodExpression( AnonymousMethodExpressionSyntax node )
+            {
+                // Never visit anonymous methods.
+            }
         }
     }
 }
