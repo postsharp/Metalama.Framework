@@ -230,22 +230,6 @@ namespace Metalama.Framework.Engine.Utilities
 
                 case IMethodSymbol { IsPartialDefinition: true, PartialImplementationPart: { } partialDefinitionSymbol }:
                     return GetReferenceOfShortestPath( partialDefinitionSymbol );
-                    //// Skip all declarations using partial keyword and having no body.
-                    //var partialDeclarationWithBody = GetReferenceOfShortestPath(
-                    //    symbol,
-                    //    sr =>
-                    //        !(sr.GetSyntax() is MethodDeclarationSyntax { Modifiers: { } modifiers, Body: null, ExpressionBody: null }
-                    //            && modifiers.Contains( SyntaxFactory.Token( SyntaxKind.PartialKeyword ) )) );
-
-                    //if (partialDeclarationWithBody != null)
-                    //{
-                    //    return partialDeclarationWithBody;
-                    //}
-                    //else
-                    //{
-                    //    // If there is no declaration with body, take the first declaration without body.
-                    //    return GetReferenceOfShortestPath( symbol );
-                    //}
 
                 case IMethodSymbol { IsPartialDefinition: true, PartialImplementationPart: null }:
                     return GetReferenceOfShortestPath( symbol );
