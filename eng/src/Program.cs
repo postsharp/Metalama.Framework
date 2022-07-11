@@ -31,10 +31,7 @@ var product = new Product( Dependencies.Metalama )
                 "**\\*.csproj",
                 "**\\*.md",
                 "**\\*.xml",
-                "**\\*.config",
-                
-                // Consumed NuGet packages should not be formatted because it breaks the build process (e.g. PostSharp.Engineering.Sdk)
-                "**\\.nuget\\**\\*",
+                "**\\*.config"
             }
         },
         new DotNetSolution( "Tests\\Metalama.Framework.TestApp\\Metalama.Framework.TestApp.sln" ) { IsTestOnly = true },
