@@ -35,6 +35,10 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Compile Remove="Tests\Aspects\Introductions\Finalizers\ExistingConflict_Fail - Copy.t.cs" />
+      <Compile Remove="Tests\Aspects\Introductions\Finalizers\ExistingConflict_Ignore - Copy.t.cs" />
+      <Compile Remove="Tests\Aspects\Introductions\Finalizers\ExistingConflict_Override - Copy.t.cs" />
+      <Compile Remove="Tests\Aspects\Overrides\Finalizers\Introduced - Copy.t.cs" />
       <Compile Remove="Tests\Aspects\Overrides\Operators\Simple.t.cs" />
     </ItemGroup>
 
@@ -49,6 +53,14 @@
     </ItemGroup>
 
     <ItemGroup>
+      <None Include="Tests\Aspects\Introductions\Finalizers\ExistingConflict_Override.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>ExistingConflict_Override.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Aspects\Introductions\Finalizers\ExistingConflict_Fail.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>ExistingConflict_Fail.cs</DependentUpon>
+      </None>
       <None Include="Tests\Aspects\Overrides\Operators\Simple.t.cs">
         <SubType>Code</SubType>
         <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.t','')).cs</DependentUpon>

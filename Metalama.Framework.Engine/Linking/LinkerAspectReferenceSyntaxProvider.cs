@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.Linking
     internal class LinkerAspectReferenceSyntaxProvider : AspectReferenceSyntaxProvider
     {
         public const string HelperTypeName = "__LinkerIntroductionHelpers__";
-        public const string FinalizeMemberName = "Finalize";
+        public const string FinalizeMemberName = "__Finalize";
 
         private static readonly ConcurrentDictionary<LanguageVersion, SyntaxTree> _linkerHelperSyntaxTreeCache = new();
 

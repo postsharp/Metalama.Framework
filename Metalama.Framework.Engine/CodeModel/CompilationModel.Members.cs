@@ -47,6 +47,9 @@ public partial class CompilationModel
             { MethodKind: MethodKind.ConversionOperator or MethodKind.UserDefinedOperator } =>
                 this._operators.TryGetValue( methodBuilder.DeclaringType.GetSymbol(), out var operators )
                 && operators.Contains( methodBuilder.ToTypedRef<IMethod>() ),
+            { MethodKind: MethodKind.Finalizer } =>
+                this._finalizers.TryGetValue( methodBuilder.DeclaringType.GetSymbol(), out var finalizer )
+                && finalizer == methodBuilder,
             _ =>
                 this._methods.TryGetValue( methodBuilder.DeclaringType.GetSymbol(), out var methods ) && methods.Contains( methodBuilder.ToTypedRef<IMethod>() )
         };
