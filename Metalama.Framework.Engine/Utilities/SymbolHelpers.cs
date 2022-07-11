@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.Utilities
                 WellKnownMemberNames.TrueOperatorName => OperatorKind.True,
                 WellKnownMemberNames.UnaryNegationOperatorName => OperatorKind.UnaryNegation,
                 WellKnownMemberNames.UnaryPlusOperatorName => OperatorKind.UnaryPlus,
-                _ => OperatorKind.None,
+                _ => OperatorKind.None
             };
     }
 }

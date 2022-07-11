@@ -20,6 +20,7 @@ using Accessibility = Metalama.Framework.Code.Accessibility;
 using DeclarationKind = Metalama.Framework.Code.DeclarationKind;
 using EnumerableExtensions = Metalama.Framework.Engine.Collections.EnumerableExtensions;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
+using OperatorKind = Metalama.Framework.Code.OperatorKind;
 using RefKind = Metalama.Framework.Code.RefKind;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
@@ -337,172 +338,172 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => kind.ToString().ToLowerInvariant()
             };
 
-        public static SyntaxToken ToOperatorKeyword( this Code.OperatorKind operatorKind )
+        public static SyntaxToken ToOperatorKeyword( this OperatorKind operatorKind )
             => operatorKind switch
             {
-                Code.OperatorKind.ImplicitConversion => SyntaxFactory.Token( SyntaxKind.ImplicitKeyword ),
-                Code.OperatorKind.ExplicitConversion => SyntaxFactory.Token( SyntaxKind.ExplicitKeyword ),
-                Code.OperatorKind.Addition => SyntaxFactory.Token( SyntaxKind.PlusToken ),
-                Code.OperatorKind.BitwiseAnd => SyntaxFactory.Token( SyntaxKind.AmpersandToken ),
-                Code.OperatorKind.BitwiseOr => SyntaxFactory.Token( SyntaxKind.BarToken ),
-                Code.OperatorKind.Decrement => SyntaxFactory.Token( SyntaxKind.MinusMinusToken ),
-                Code.OperatorKind.Division => SyntaxFactory.Token( SyntaxKind.SlashToken ),
-                Code.OperatorKind.Equality => SyntaxFactory.Token( SyntaxKind.EqualsEqualsToken ),
-                Code.OperatorKind.ExclusiveOr => SyntaxFactory.Token( SyntaxKind.CaretToken ),
-                Code.OperatorKind.False => SyntaxFactory.Token( SyntaxKind.FalseKeyword ),
-                Code.OperatorKind.GreaterThan => SyntaxFactory.Token( SyntaxKind.GreaterThanToken ),
-                Code.OperatorKind.GreaterThanOrEqual => SyntaxFactory.Token( SyntaxKind.GreaterThanEqualsToken ),
-                Code.OperatorKind.Increment => SyntaxFactory.Token( SyntaxKind.PlusPlusToken ),
-                Code.OperatorKind.Inequality => SyntaxFactory.Token( SyntaxKind.ExclamationEqualsToken ),
-                Code.OperatorKind.LeftShift => SyntaxFactory.Token( SyntaxKind.LessThanLessThanToken ),
-                Code.OperatorKind.LessThan => SyntaxFactory.Token( SyntaxKind.LessThanToken ),
-                Code.OperatorKind.LessThanOrEqual => SyntaxFactory.Token( SyntaxKind.LessThanEqualsToken ),
-                Code.OperatorKind.LogicalNot => SyntaxFactory.Token( SyntaxKind.ExclamationToken ),
-                Code.OperatorKind.Modulus => SyntaxFactory.Token( SyntaxKind.PercentToken ),
-                Code.OperatorKind.Multiply => SyntaxFactory.Token( SyntaxKind.AsteriskToken ),
-                Code.OperatorKind.OnesComplement => SyntaxFactory.Token( SyntaxKind.TildeToken ),
-                Code.OperatorKind.RightShift => SyntaxFactory.Token( SyntaxKind.GreaterThanGreaterThanToken ),
-                Code.OperatorKind.Subtraction => SyntaxFactory.Token( SyntaxKind.MinusToken ),
-                Code.OperatorKind.True => SyntaxFactory.Token( SyntaxKind.TrueKeyword ),
-                Code.OperatorKind.UnaryNegation => SyntaxFactory.Token( SyntaxKind.MinusToken ),
-                Code.OperatorKind.UnaryPlus => SyntaxFactory.Token( SyntaxKind.PlusToken ),
-                _ => throw new AssertionFailedException(),
+                OperatorKind.ImplicitConversion => SyntaxFactory.Token( SyntaxKind.ImplicitKeyword ),
+                OperatorKind.ExplicitConversion => SyntaxFactory.Token( SyntaxKind.ExplicitKeyword ),
+                OperatorKind.Addition => SyntaxFactory.Token( SyntaxKind.PlusToken ),
+                OperatorKind.BitwiseAnd => SyntaxFactory.Token( SyntaxKind.AmpersandToken ),
+                OperatorKind.BitwiseOr => SyntaxFactory.Token( SyntaxKind.BarToken ),
+                OperatorKind.Decrement => SyntaxFactory.Token( SyntaxKind.MinusMinusToken ),
+                OperatorKind.Division => SyntaxFactory.Token( SyntaxKind.SlashToken ),
+                OperatorKind.Equality => SyntaxFactory.Token( SyntaxKind.EqualsEqualsToken ),
+                OperatorKind.ExclusiveOr => SyntaxFactory.Token( SyntaxKind.CaretToken ),
+                OperatorKind.False => SyntaxFactory.Token( SyntaxKind.FalseKeyword ),
+                OperatorKind.GreaterThan => SyntaxFactory.Token( SyntaxKind.GreaterThanToken ),
+                OperatorKind.GreaterThanOrEqual => SyntaxFactory.Token( SyntaxKind.GreaterThanEqualsToken ),
+                OperatorKind.Increment => SyntaxFactory.Token( SyntaxKind.PlusPlusToken ),
+                OperatorKind.Inequality => SyntaxFactory.Token( SyntaxKind.ExclamationEqualsToken ),
+                OperatorKind.LeftShift => SyntaxFactory.Token( SyntaxKind.LessThanLessThanToken ),
+                OperatorKind.LessThan => SyntaxFactory.Token( SyntaxKind.LessThanToken ),
+                OperatorKind.LessThanOrEqual => SyntaxFactory.Token( SyntaxKind.LessThanEqualsToken ),
+                OperatorKind.LogicalNot => SyntaxFactory.Token( SyntaxKind.ExclamationToken ),
+                OperatorKind.Modulus => SyntaxFactory.Token( SyntaxKind.PercentToken ),
+                OperatorKind.Multiply => SyntaxFactory.Token( SyntaxKind.AsteriskToken ),
+                OperatorKind.OnesComplement => SyntaxFactory.Token( SyntaxKind.TildeToken ),
+                OperatorKind.RightShift => SyntaxFactory.Token( SyntaxKind.GreaterThanGreaterThanToken ),
+                OperatorKind.Subtraction => SyntaxFactory.Token( SyntaxKind.MinusToken ),
+                OperatorKind.True => SyntaxFactory.Token( SyntaxKind.TrueKeyword ),
+                OperatorKind.UnaryNegation => SyntaxFactory.Token( SyntaxKind.MinusToken ),
+                OperatorKind.UnaryPlus => SyntaxFactory.Token( SyntaxKind.PlusToken ),
+                _ => throw new AssertionFailedException()
             };
 
-        public static string ToOperatorMethodName( this Code.OperatorKind operatorKind )
+        public static string ToOperatorMethodName( this OperatorKind operatorKind )
             => operatorKind switch
             {
-                Code.OperatorKind.ImplicitConversion => WellKnownMemberNames.ImplicitConversionName,
-                Code.OperatorKind.ExplicitConversion => WellKnownMemberNames.ExplicitConversionName,
-                Code.OperatorKind.Addition => WellKnownMemberNames.AdditionOperatorName,
-                Code.OperatorKind.BitwiseAnd => WellKnownMemberNames.BitwiseAndOperatorName,
-                Code.OperatorKind.BitwiseOr => WellKnownMemberNames.BitwiseOrOperatorName,
-                Code.OperatorKind.Decrement => WellKnownMemberNames.DecrementOperatorName,
-                Code.OperatorKind.Division => WellKnownMemberNames.DivisionOperatorName,
-                Code.OperatorKind.Equality => WellKnownMemberNames.EqualityOperatorName,
-                Code.OperatorKind.ExclusiveOr => WellKnownMemberNames.ExclusiveOrOperatorName,
-                Code.OperatorKind.False => WellKnownMemberNames.FalseOperatorName,
-                Code.OperatorKind.GreaterThan => WellKnownMemberNames.GreaterThanOperatorName,
-                Code.OperatorKind.GreaterThanOrEqual => WellKnownMemberNames.GreaterThanOrEqualOperatorName,
-                Code.OperatorKind.Increment => WellKnownMemberNames.IncrementOperatorName,
-                Code.OperatorKind.Inequality => WellKnownMemberNames.InequalityOperatorName,
-                Code.OperatorKind.LeftShift => WellKnownMemberNames.LeftShiftOperatorName,
-                Code.OperatorKind.LessThan => WellKnownMemberNames.LessThanOperatorName,
-                Code.OperatorKind.LessThanOrEqual => WellKnownMemberNames.LessThanOrEqualOperatorName,
-                Code.OperatorKind.LogicalNot => WellKnownMemberNames.LogicalNotOperatorName,
-                Code.OperatorKind.Modulus => WellKnownMemberNames.ModulusOperatorName,
-                Code.OperatorKind.Multiply => WellKnownMemberNames.MultiplyOperatorName,
-                Code.OperatorKind.OnesComplement => WellKnownMemberNames.OnesComplementOperatorName,
-                Code.OperatorKind.RightShift => WellKnownMemberNames.RightShiftOperatorName,
-                Code.OperatorKind.Subtraction => WellKnownMemberNames.SubtractionOperatorName,
-                Code.OperatorKind.True => WellKnownMemberNames.TrueOperatorName,
-                Code.OperatorKind.UnaryNegation => WellKnownMemberNames.UnaryNegationOperatorName,
-                Code.OperatorKind.UnaryPlus => WellKnownMemberNames.UnaryPlusOperatorName,
-                _ => throw new AssertionFailedException(),
+                OperatorKind.ImplicitConversion => WellKnownMemberNames.ImplicitConversionName,
+                OperatorKind.ExplicitConversion => WellKnownMemberNames.ExplicitConversionName,
+                OperatorKind.Addition => WellKnownMemberNames.AdditionOperatorName,
+                OperatorKind.BitwiseAnd => WellKnownMemberNames.BitwiseAndOperatorName,
+                OperatorKind.BitwiseOr => WellKnownMemberNames.BitwiseOrOperatorName,
+                OperatorKind.Decrement => WellKnownMemberNames.DecrementOperatorName,
+                OperatorKind.Division => WellKnownMemberNames.DivisionOperatorName,
+                OperatorKind.Equality => WellKnownMemberNames.EqualityOperatorName,
+                OperatorKind.ExclusiveOr => WellKnownMemberNames.ExclusiveOrOperatorName,
+                OperatorKind.False => WellKnownMemberNames.FalseOperatorName,
+                OperatorKind.GreaterThan => WellKnownMemberNames.GreaterThanOperatorName,
+                OperatorKind.GreaterThanOrEqual => WellKnownMemberNames.GreaterThanOrEqualOperatorName,
+                OperatorKind.Increment => WellKnownMemberNames.IncrementOperatorName,
+                OperatorKind.Inequality => WellKnownMemberNames.InequalityOperatorName,
+                OperatorKind.LeftShift => WellKnownMemberNames.LeftShiftOperatorName,
+                OperatorKind.LessThan => WellKnownMemberNames.LessThanOperatorName,
+                OperatorKind.LessThanOrEqual => WellKnownMemberNames.LessThanOrEqualOperatorName,
+                OperatorKind.LogicalNot => WellKnownMemberNames.LogicalNotOperatorName,
+                OperatorKind.Modulus => WellKnownMemberNames.ModulusOperatorName,
+                OperatorKind.Multiply => WellKnownMemberNames.MultiplyOperatorName,
+                OperatorKind.OnesComplement => WellKnownMemberNames.OnesComplementOperatorName,
+                OperatorKind.RightShift => WellKnownMemberNames.RightShiftOperatorName,
+                OperatorKind.Subtraction => WellKnownMemberNames.SubtractionOperatorName,
+                OperatorKind.True => WellKnownMemberNames.TrueOperatorName,
+                OperatorKind.UnaryNegation => WellKnownMemberNames.UnaryNegationOperatorName,
+                OperatorKind.UnaryPlus => WellKnownMemberNames.UnaryPlusOperatorName,
+                _ => throw new AssertionFailedException()
             };
 
-        public static DeclarationKind ToDeclarationKind( this Code.OperatorKind operatorKind )
+        public static DeclarationKind ToDeclarationKind( this OperatorKind operatorKind )
             => operatorKind.IsConversionOperator()
-            ? DeclarationKind.ConversionOperator
-            : DeclarationKind.UserDefinedOperator;
+                ? DeclarationKind.ConversionOperator
+                : DeclarationKind.UserDefinedOperator;
 
-        public static bool IsBinaryOperator( this Code.OperatorKind operatorKind )
+        public static bool IsBinaryOperator( this OperatorKind operatorKind )
             => operatorKind switch
             {
-                Code.OperatorKind.None => false,
-                Code.OperatorKind.ImplicitConversion => false,
-                Code.OperatorKind.ExplicitConversion => false,
-                Code.OperatorKind.Addition => true,
-                Code.OperatorKind.BitwiseAnd => true,
-                Code.OperatorKind.BitwiseOr => true,
-                Code.OperatorKind.Decrement => false,
-                Code.OperatorKind.Division => true,
-                Code.OperatorKind.Equality => true,
-                Code.OperatorKind.ExclusiveOr => true,
-                Code.OperatorKind.False => false,
-                Code.OperatorKind.GreaterThan => true,
-                Code.OperatorKind.GreaterThanOrEqual => true,
-                Code.OperatorKind.Increment => false,
-                Code.OperatorKind.Inequality => true,
-                Code.OperatorKind.LeftShift => true,
-                Code.OperatorKind.LessThan => true,
-                Code.OperatorKind.LessThanOrEqual => true,
-                Code.OperatorKind.LogicalNot => false,
-                Code.OperatorKind.Modulus => true,
-                Code.OperatorKind.Multiply => true,
-                Code.OperatorKind.OnesComplement => false,
-                Code.OperatorKind.RightShift => true,
-                Code.OperatorKind.Subtraction => true,
-                Code.OperatorKind.True => false,
-                Code.OperatorKind.UnaryNegation => false,
-                Code.OperatorKind.UnaryPlus => false,
-                _ => throw new AssertionFailedException(),
+                OperatorKind.None => false,
+                OperatorKind.ImplicitConversion => false,
+                OperatorKind.ExplicitConversion => false,
+                OperatorKind.Addition => true,
+                OperatorKind.BitwiseAnd => true,
+                OperatorKind.BitwiseOr => true,
+                OperatorKind.Decrement => false,
+                OperatorKind.Division => true,
+                OperatorKind.Equality => true,
+                OperatorKind.ExclusiveOr => true,
+                OperatorKind.False => false,
+                OperatorKind.GreaterThan => true,
+                OperatorKind.GreaterThanOrEqual => true,
+                OperatorKind.Increment => false,
+                OperatorKind.Inequality => true,
+                OperatorKind.LeftShift => true,
+                OperatorKind.LessThan => true,
+                OperatorKind.LessThanOrEqual => true,
+                OperatorKind.LogicalNot => false,
+                OperatorKind.Modulus => true,
+                OperatorKind.Multiply => true,
+                OperatorKind.OnesComplement => false,
+                OperatorKind.RightShift => true,
+                OperatorKind.Subtraction => true,
+                OperatorKind.True => false,
+                OperatorKind.UnaryNegation => false,
+                OperatorKind.UnaryPlus => false,
+                _ => throw new AssertionFailedException()
             };
 
-        public static bool IsUnaryOperator( this Code.OperatorKind operatorKind )
+        public static bool IsUnaryOperator( this OperatorKind operatorKind )
             => operatorKind switch
             {
-                Code.OperatorKind.None => false,
-                Code.OperatorKind.ImplicitConversion => false,
-                Code.OperatorKind.ExplicitConversion => false,
-                Code.OperatorKind.Addition => false,
-                Code.OperatorKind.BitwiseAnd => false,
-                Code.OperatorKind.BitwiseOr => false,
-                Code.OperatorKind.Decrement => true,
-                Code.OperatorKind.Division => false,
-                Code.OperatorKind.Equality => false,
-                Code.OperatorKind.ExclusiveOr => false,
-                Code.OperatorKind.False => true,
-                Code.OperatorKind.GreaterThan => false,
-                Code.OperatorKind.GreaterThanOrEqual => false,
-                Code.OperatorKind.Increment => true,
-                Code.OperatorKind.Inequality => false,
-                Code.OperatorKind.LeftShift => false,
-                Code.OperatorKind.LessThan => false,
-                Code.OperatorKind.LessThanOrEqual => false,
-                Code.OperatorKind.LogicalNot => true,
-                Code.OperatorKind.Modulus => false,
-                Code.OperatorKind.Multiply => false,
-                Code.OperatorKind.OnesComplement => true,
-                Code.OperatorKind.RightShift => false,
-                Code.OperatorKind.Subtraction => false,
-                Code.OperatorKind.True => true,
-                Code.OperatorKind.UnaryNegation => true,
-                Code.OperatorKind.UnaryPlus => true,
-                _ => throw new AssertionFailedException(),
+                OperatorKind.None => false,
+                OperatorKind.ImplicitConversion => false,
+                OperatorKind.ExplicitConversion => false,
+                OperatorKind.Addition => false,
+                OperatorKind.BitwiseAnd => false,
+                OperatorKind.BitwiseOr => false,
+                OperatorKind.Decrement => true,
+                OperatorKind.Division => false,
+                OperatorKind.Equality => false,
+                OperatorKind.ExclusiveOr => false,
+                OperatorKind.False => true,
+                OperatorKind.GreaterThan => false,
+                OperatorKind.GreaterThanOrEqual => false,
+                OperatorKind.Increment => true,
+                OperatorKind.Inequality => false,
+                OperatorKind.LeftShift => false,
+                OperatorKind.LessThan => false,
+                OperatorKind.LessThanOrEqual => false,
+                OperatorKind.LogicalNot => true,
+                OperatorKind.Modulus => false,
+                OperatorKind.Multiply => false,
+                OperatorKind.OnesComplement => true,
+                OperatorKind.RightShift => false,
+                OperatorKind.Subtraction => false,
+                OperatorKind.True => true,
+                OperatorKind.UnaryNegation => true,
+                OperatorKind.UnaryPlus => true,
+                _ => throw new AssertionFailedException()
             };
 
-        public static bool IsConversionOperator( this Code.OperatorKind operatorKind )
+        public static bool IsConversionOperator( this OperatorKind operatorKind )
             => operatorKind switch
             {
-                Code.OperatorKind.None => false,
-                Code.OperatorKind.ImplicitConversion => true,
-                Code.OperatorKind.ExplicitConversion => true,
-                Code.OperatorKind.Addition => false,
-                Code.OperatorKind.BitwiseAnd => false,
-                Code.OperatorKind.BitwiseOr => false,
-                Code.OperatorKind.Decrement => false,
-                Code.OperatorKind.Division => false,
-                Code.OperatorKind.Equality => false,
-                Code.OperatorKind.ExclusiveOr => false,
-                Code.OperatorKind.False => false,
-                Code.OperatorKind.GreaterThan => false,
-                Code.OperatorKind.GreaterThanOrEqual => false,
-                Code.OperatorKind.Increment => false,
-                Code.OperatorKind.Inequality => false,
-                Code.OperatorKind.LeftShift => false,
-                Code.OperatorKind.LessThan => false,
-                Code.OperatorKind.LessThanOrEqual => false,
-                Code.OperatorKind.LogicalNot => false,
-                Code.OperatorKind.Modulus => false,
-                Code.OperatorKind.Multiply => false,
-                Code.OperatorKind.OnesComplement => false,
-                Code.OperatorKind.RightShift => false,
-                Code.OperatorKind.Subtraction => false,
-                Code.OperatorKind.True => false,
-                Code.OperatorKind.UnaryNegation => false,
-                Code.OperatorKind.UnaryPlus => false,
-                _ => throw new AssertionFailedException(),
+                OperatorKind.None => false,
+                OperatorKind.ImplicitConversion => true,
+                OperatorKind.ExplicitConversion => true,
+                OperatorKind.Addition => false,
+                OperatorKind.BitwiseAnd => false,
+                OperatorKind.BitwiseOr => false,
+                OperatorKind.Decrement => false,
+                OperatorKind.Division => false,
+                OperatorKind.Equality => false,
+                OperatorKind.ExclusiveOr => false,
+                OperatorKind.False => false,
+                OperatorKind.GreaterThan => false,
+                OperatorKind.GreaterThanOrEqual => false,
+                OperatorKind.Increment => false,
+                OperatorKind.Inequality => false,
+                OperatorKind.LeftShift => false,
+                OperatorKind.LessThan => false,
+                OperatorKind.LessThanOrEqual => false,
+                OperatorKind.LogicalNot => false,
+                OperatorKind.Modulus => false,
+                OperatorKind.Multiply => false,
+                OperatorKind.OnesComplement => false,
+                OperatorKind.RightShift => false,
+                OperatorKind.Subtraction => false,
+                OperatorKind.True => false,
+                OperatorKind.UnaryNegation => false,
+                OperatorKind.UnaryPlus => false,
+                _ => throw new AssertionFailedException()
             };
 
         internal static bool IsAutoProperty( this IPropertySymbol symbol )
@@ -551,11 +552,12 @@ namespace Metalama.Framework.Engine.CodeModel
         /// <param name="signatureTemplate">Method that acts as a template for the signature.</param>
         /// <returns>A method of the given signature that is visible from the given type or <c>null</c> if no such method exists.</returns>
         public static IMethod? FindClosestVisibleMethod( this INamedType namedType, IMethod signatureTemplate )
-            =>
-            signatureTemplate switch
+            => signatureTemplate switch
             {
-                { MethodKind: Code.MethodKind.UserDefinedOperator or Code.MethodKind.ConversionOperator } => namedType.AllOperators.OfExactSignature( signatureTemplate, matchIsStatic: false ),
-                _ => namedType.AllMethods.OfExactSignature( signatureTemplate, matchIsStatic: false ),
+                { MethodKind: Code.MethodKind.UserDefinedOperator or Code.MethodKind.ConversionOperator } => namedType.AllOperators.OfExactSignature(
+                    signatureTemplate,
+                    matchIsStatic: false ),
+                _ => namedType.AllMethods.OfExactSignature( signatureTemplate, matchIsStatic: false )
             };
 
         /// <summary>

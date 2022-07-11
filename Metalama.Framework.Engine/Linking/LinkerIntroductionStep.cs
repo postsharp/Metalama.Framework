@@ -13,11 +13,11 @@ using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.CodeAnalysis.CSharp;
 #if DEBUG
 using Metalama.Framework.Engine.Formatting;
 #endif
@@ -49,8 +49,7 @@ namespace Metalama.Framework.Engine.Linking
             var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
 
             var effectiveLanguageVersion =
-                LanguageVersionFacts.MapSpecifiedToEffectiveVersion(
-                    ((CSharpCompilation) input.InitialCompilation.InitialCompilation).LanguageVersion );
+                LanguageVersionFacts.MapSpecifiedToEffectiveVersion( ((CSharpCompilation) input.InitialCompilation.InitialCompilation).LanguageVersion );
 
             var supportsNullability = input.InitialCompilation.InitialCompilation.Options.NullableContextOptions != NullableContextOptions.Disable;
 
@@ -130,8 +129,10 @@ namespace Metalama.Framework.Engine.Linking
 
             intermediateCompilation =
                 helperSyntaxTree != null
-                ? intermediateCompilation.Update( syntaxTreeMapping.Select( p => new SyntaxTreeModification( p.Value, p.Key ) ).ToList(), new[] { helperSyntaxTree } )
-                : intermediateCompilation;
+                    ? intermediateCompilation.Update(
+                        syntaxTreeMapping.Select( p => new SyntaxTreeModification( p.Value, p.Key ) ).ToList(),
+                        new[] { helperSyntaxTree } )
+                    : intermediateCompilation;
 
             var introductionRegistry = new LinkerIntroductionRegistry(
                 input.CompilationModel,

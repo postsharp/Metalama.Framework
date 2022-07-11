@@ -133,14 +133,14 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public bool IsGeneric => this.TypeParameters.Count > 0;
 
         // We don't currently support adding other methods than default ones.
-        public MethodKind MethodKind =>
-            this.DeclarationKind switch 
+        public MethodKind MethodKind
+            => this.DeclarationKind switch
             {
                 DeclarationKind.Method => MethodKind.Default,
                 DeclarationKind.ConversionOperator => MethodKind.ConversionOperator,
                 DeclarationKind.UserDefinedOperator => MethodKind.UserDefinedOperator,
                 DeclarationKind.Finalizer => MethodKind.Finalizer,
-                _ => throw new AssertionFailedException(),
+                _ => throw new AssertionFailedException()
             };
 
         System.Reflection.MethodBase IMethodBase.ToMethodBase() => this.ToMethodInfo();
@@ -153,20 +153,25 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations { get; private set; } = Array.Empty<IMethod>();
 
-        public MethodBuilder( Advice parentAdvice, INamedType targetType, string name, DeclarationKind declarationKind = DeclarationKind.Method, OperatorKind operatorKind = OperatorKind.None )
+        public MethodBuilder(
+            Advice parentAdvice,
+            INamedType targetType,
+            string name,
+            DeclarationKind declarationKind = DeclarationKind.Method,
+            OperatorKind operatorKind = OperatorKind.None )
             : base( parentAdvice, targetType, name )
         {
             Invariant.Assert(
                 declarationKind == DeclarationKind.ConversionOperator
-                ==
-                (operatorKind == OperatorKind.ImplicitConversion || operatorKind == OperatorKind.ExplicitConversion) );
+                                ==
+                                (operatorKind == OperatorKind.ImplicitConversion || operatorKind == OperatorKind.ExplicitConversion) );
 
             Invariant.Assert(
                 declarationKind == DeclarationKind.UserDefinedOperator
-                ==
-                !(operatorKind == OperatorKind.ImplicitConversion
-                || operatorKind == OperatorKind.ExplicitConversion
-                || operatorKind == OperatorKind.None) );
+                                ==
+                                !(operatorKind == OperatorKind.ImplicitConversion
+                                  || operatorKind == OperatorKind.ExplicitConversion
+                                  || operatorKind == OperatorKind.None) );
 
             this.Name = name;
             this.DeclarationKind = declarationKind;
@@ -197,7 +202,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
                 return new[] { new IntroducedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
             }
-            else if (this.DeclarationKind == DeclarationKind.ConversionOperator)
+            else if ( this.DeclarationKind == DeclarationKind.ConversionOperator )
             {
                 Invariant.Assert( this.Parameters.Count == 1 );
 
@@ -242,7 +247,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                         this.GetSyntaxModifierList(),
                         context.SyntaxGenerator.ReturnType( this ),
                         this.ExplicitInterfaceImplementations.Count > 0
-                            ? ExplicitInterfaceSpecifier( (NameSyntax) syntaxGenerator.Type( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
+                            ? ExplicitInterfaceSpecifier(
+                                (NameSyntax) syntaxGenerator.Type( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
                             : null,
                         this.GetCleanName(),
                         context.SyntaxGenerator.TypeParameterList( this ),

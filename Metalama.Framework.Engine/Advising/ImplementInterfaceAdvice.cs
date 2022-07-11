@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
@@ -65,7 +66,9 @@ namespace Metalama.Framework.Engine.Advising
                     diagnosticAdder.Report(
                         AdviceDiagnosticDescriptors.InterfaceUnsupportedOverrideStrategy.CreateRoslynDiagnostic(
                             this.GetDiagnosticLocation(),
-                            (this.Aspect.AspectClass.ShortName, this.InterfaceType, this.TargetDeclaration.GetTarget(this.SourceCompilation), this.OverrideStrategy) ) );
+                            (this.Aspect.AspectClass.ShortName, this.InterfaceType, this.TargetDeclaration.GetTarget( this.SourceCompilation ),
+                             this.OverrideStrategy) ) );
+
                     break;
             }
 
@@ -271,7 +274,7 @@ namespace Metalama.Framework.Engine.Advising
             var diagnostics = new DiagnosticList();
 
             foreach ( var interfaceSpecification in this._interfaceSpecifications )
-            {                    
+            {
                 // Validate that the interface must be introduced to the specific target.
                 if ( targetType.AllImplementedInterfaces.Any( t => compilation.InvariantComparer.Equals( t, interfaceSpecification.InterfaceType ) ) )
                 {
@@ -316,6 +319,7 @@ namespace Metalama.Framework.Engine.Advising
 
                                     case InterfaceMemberOverrideStrategy.MakeExplicit:
                                         isExplicit = true;
+
                                         break;
 
                                     default:
@@ -368,6 +372,7 @@ namespace Metalama.Framework.Engine.Advising
 
                                     case InterfaceMemberOverrideStrategy.MakeExplicit:
                                         isExplicit = true;
+
                                         break;
 
                                     default:
@@ -437,6 +442,7 @@ namespace Metalama.Framework.Engine.Advising
 
                                     case InterfaceMemberOverrideStrategy.MakeExplicit:
                                         isExplicit = true;
+
                                         break;
 
                                     default:
@@ -488,12 +494,15 @@ namespace Metalama.Framework.Engine.Advising
                 addTransformation( new IntroduceInterfaceTransformation( this, targetType, interfaceSpecification.InterfaceType, interfaceMemberMap ) );
             }
 
-            if (diagnostics.HasErrors())
+            if ( diagnostics.HasErrors() )
             {
                 return AdviceImplementationResult.Failed( diagnostics.ToImmutableArray() );
             }
 
-            return AdviceImplementationResult.Success( Framework.Advising.AdviceOutcome.Default, this.TargetDeclaration.As<IDeclaration>(), diagnostics.Count > 0 ? diagnostics.ToImmutableArray() : null);
+            return AdviceImplementationResult.Success(
+                AdviceOutcome.Default,
+                this.TargetDeclaration.As<IDeclaration>(),
+                diagnostics.Count > 0 ? diagnostics.ToImmutableArray() : null );
         }
 
         private MemberBuilder GetImplMethodBuilder(

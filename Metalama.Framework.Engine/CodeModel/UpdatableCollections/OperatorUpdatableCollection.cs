@@ -19,7 +19,7 @@ internal sealed class OperatorUpdatableCollection : NonUniquelyNamedMemberUpdata
                 method switch
                 {
                     { MethodKind: MethodKind.UserDefinedOperator or MethodKind.Conversion } => true,
-                    _ => false,
+                    _ => false
                 },
             _ => false
         };

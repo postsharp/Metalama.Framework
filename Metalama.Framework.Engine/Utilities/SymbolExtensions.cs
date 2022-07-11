@@ -10,11 +10,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.Versioning;
+using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using RoslynSpecialType = Microsoft.CodeAnalysis.SpecialType;
 using SpecialType = Metalama.Framework.Code.SpecialType;
-using MethodKind = Microsoft.CodeAnalysis.MethodKind;
-using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
+using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Metalama.Framework.Engine.Utilities
 {
@@ -319,7 +319,6 @@ namespace Metalama.Framework.Engine.Utilities
         /// <summary>
         /// Gets the kind of operator based represented by the method.
         /// </summary>
-        public static OperatorKind GetOperatorKind( this IMethodSymbol method )
-            => SymbolHelpers.GetOperatorKindFromName( method.Name );
+        public static OperatorKind GetOperatorKind( this IMethodSymbol method ) => SymbolHelpers.GetOperatorKindFromName( method.Name );
     }
 }

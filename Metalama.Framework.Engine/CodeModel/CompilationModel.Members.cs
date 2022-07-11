@@ -45,9 +45,10 @@ public partial class CompilationModel
         => methodBuilder switch
         {
             { MethodKind: MethodKind.ConversionOperator or MethodKind.UserDefinedOperator } =>
-                this._operators.TryGetValue( methodBuilder.DeclaringType.GetSymbol(), out var operators ) && operators.Contains( methodBuilder.ToTypedRef<IMethod>() ),
+                this._operators.TryGetValue( methodBuilder.DeclaringType.GetSymbol(), out var operators )
+                && operators.Contains( methodBuilder.ToTypedRef<IMethod>() ),
             _ =>
-                this._methods.TryGetValue( methodBuilder.DeclaringType.GetSymbol(), out var methods ) && methods.Contains( methodBuilder.ToTypedRef<IMethod>() ),
+                this._methods.TryGetValue( methodBuilder.DeclaringType.GetSymbol(), out var methods ) && methods.Contains( methodBuilder.ToTypedRef<IMethod>() )
         };
 
     internal bool Contains( ConstructorBuilder constructorBuilder )
@@ -415,14 +416,14 @@ public partial class CompilationModel
     {
         var introduceInterface = (IntroduceInterfaceTransformation) transformation;
 
-        var targetType = (INamedType)introduceInterface.ContainingDeclaration;
+        var targetType = (INamedType) introduceInterface.ContainingDeclaration;
         var targetTypeSymbol = targetType.GetSymbol().AssertNotNull();
 
         var interfaces = this.GetInterfaceImplementationCollection( targetTypeSymbol, true );
 
         interfaces.Add( introduceInterface );
 
-        foreach ( var type in new[] { targetType }.Concat(this.GetDerivedTypes( targetType, true )) )
+        foreach ( var type in new[] { targetType }.Concat( this.GetDerivedTypes( targetType, true ) ) )
         {
             var allInterfaces = this.GetAllInterfaceImplementationCollection( type.GetSymbol().AssertNotNull(), true );
 

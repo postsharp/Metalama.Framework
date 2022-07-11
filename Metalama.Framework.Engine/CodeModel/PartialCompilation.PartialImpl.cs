@@ -61,7 +61,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 {
                     throw new AssertionFailedException( "A syntax tree has no name." );
                 }
-        }
+            }
 #endif
 
             public override ImmutableDictionary<string, SyntaxTree> SyntaxTrees => this._syntaxTrees;

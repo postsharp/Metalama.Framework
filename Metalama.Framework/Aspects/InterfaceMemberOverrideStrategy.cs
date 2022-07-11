@@ -22,7 +22,7 @@ namespace Metalama.Framework.Aspects
         /// <summary>
         /// The advice introduces the interface member as explicit even if the interface member was supposed to be introduced as implicit.
         /// </summary>
-        MakeExplicit = 1,
+        MakeExplicit = 1
 
         // TODO: Support.
         //       The problem is that these are not really useful when the other declaration is not compatible.

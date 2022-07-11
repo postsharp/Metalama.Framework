@@ -72,7 +72,7 @@ namespace Metalama.Framework.Engine.Transformations
             var syntax =
                 MethodDeclaration(
                     List<AttributeListSyntax>(),
-                    TokenList( Token(SyntaxKind.PrivateKeyword), Token(SyntaxKind.StaticKeyword) ),
+                    TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) ),
                     context.SyntaxGenerator.ReturnType( this.OverriddenDeclaration ),
                     null,
                     Identifier(

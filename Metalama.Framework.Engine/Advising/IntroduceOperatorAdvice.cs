@@ -65,12 +65,15 @@ namespace Metalama.Framework.Engine.Advising
             this.Builder.ReturnType = resultType;
         }
 
-        public override AdviceImplementationResult Implement( IServiceProvider serviceProvider, CompilationModel compilation, Action<ITransformation> addTransformation )
+        public override AdviceImplementationResult Implement(
+            IServiceProvider serviceProvider,
+            CompilationModel compilation,
+            Action<ITransformation> addTransformation )
         {
             var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
             var existingOperator = targetDeclaration.FindClosestVisibleMethod( this.Builder );
 
-            if (existingOperator == null)
+            if ( existingOperator == null )
             {
                 var overriddenOperator = new OverrideOperatorTransformation( this, this.Builder, this.BoundTemplate, this.Tags );
 

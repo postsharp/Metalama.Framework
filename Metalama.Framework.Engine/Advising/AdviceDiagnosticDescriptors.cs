@@ -112,7 +112,8 @@ namespace Metalama.Framework.Engine.Advising
             ImplicitInterfaceMemberAlreadyExists = new(
                 "LAMA0514",
                 "Cannot introduce an implicit interface member when the target type already contains a declaration with the same signature.",
-                "The aspect '{0}' cannot introduce interface member '{1}' into type '{2}' because the type already contains '{3}' which has the same signature " +
+                "The aspect '{0}' cannot introduce interface member '{1}' into type '{2}' because the type already contains '{3}' which has the same signature "
+                +
                 "and WhenExists of the interface member is set to Fail.",
                 _category,
                 Error );
@@ -121,7 +122,8 @@ namespace Metalama.Framework.Engine.Advising
             ImplicitInterfaceMemberIsNotCompatible = new(
                 "LAMA0515",
                 "Cannot introduce an implicit interface member when the target type already contains a declaration that is not compatible with the interface member.",
-                "The aspect '{0}' cannot introduce interface member '{1}' into type '{2}' because the type already contains '{3}' which has the same signature " +
+                "The aspect '{0}' cannot introduce interface member '{1}' into type '{2}' because the type already contains '{3}' which has the same signature "
+                +
                 "but is incompatible with the interface member and WhenExists of the interface member is set to UseExisting.",
                 _category,
                 Error );

@@ -24,7 +24,7 @@ internal sealed class MethodUpdatableCollection : NonUniquelyNamedMemberUpdatabl
                     { MethodKind: MethodKind.EventAdd or MethodKind.EventRemove or MethodKind.EventRaise } => false,
                     { MethodKind: MethodKind.Destructor } => false,
                     { MethodKind: MethodKind.UserDefinedOperator or MethodKind.Conversion } => false,
-                    _ => true,
+                    _ => true
                 },
             _ => false
         };

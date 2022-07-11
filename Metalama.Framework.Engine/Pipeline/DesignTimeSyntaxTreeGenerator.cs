@@ -35,7 +35,8 @@ namespace Metalama.Framework.Engine.Pipeline
 
             LexicalScopeFactory lexicalScopeFactory = new( compilationModel );
             var introductionNameProvider = new LinkerIntroductionNameProvider();
-            var aspectReferenceSyntaxProvider = 
+
+            var aspectReferenceSyntaxProvider =
                 new LinkerAspectReferenceSyntaxProvider(
                     partialCompilation.InitialCompilation.Options.NullableContextOptions != NullableContextOptions.Disable );
 

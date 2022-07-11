@@ -53,7 +53,7 @@ namespace Metalama.Framework.Engine.Linking
                                 TypeArgumentList(
                                     SeparatedList(
                                         overriddenOperator.Parameters.Select( p => syntaxGenerator.Type( p.Type.GetSymbol().AssertNotNull() ) )
-                                        .Append( syntaxGenerator.Type( overriddenOperator.ReturnType.GetSymbol().AssertNotNull() ) ) ) ) ) )
+                                            .Append( syntaxGenerator.Type( overriddenOperator.ReturnType.GetSymbol().AssertNotNull() ) ) ) ) ) )
                         .WithAspectReferenceAnnotation(
                             aspectLayer,
                             AspectReferenceOrder.Base,
@@ -70,23 +70,23 @@ namespace Metalama.Framework.Engine.Linking
             var useNullability = this._useNullability && v is LanguageVersion.CSharp9 or LanguageVersion.CSharp10;
             var suffix = useNullability ? "?" : "";
 
-            var binaryOperators = 
-                Enum.GetValues( typeof( OperatorKind ) )
-                .Cast<OperatorKind>()
-                .Where( op => op.IsBinaryOperator() )
-                .Select( op => $"public static R{suffix} {op.ToOperatorMethodName()}<A,B,R>(A{suffix} a, B{suffix} b) => default(R{suffix});" );
+            var binaryOperators =
+                Enum.GetValues( typeof(OperatorKind) )
+                    .Cast<OperatorKind>()
+                    .Where( op => op.IsBinaryOperator() )
+                    .Select( op => $"public static R{suffix} {op.ToOperatorMethodName()}<A,B,R>(A{suffix} a, B{suffix} b) => default(R{suffix});" );
 
             var unaryOperators =
-                Enum.GetValues( typeof( OperatorKind ) )
-                .Cast<OperatorKind>()
-                .Where( op => op.IsUnaryOperator() )
-                .Select( op => $"public static R{suffix} {op.ToOperatorMethodName()}<A,R>(A{suffix} a) => default(R{suffix});" );
+                Enum.GetValues( typeof(OperatorKind) )
+                    .Cast<OperatorKind>()
+                    .Where( op => op.IsUnaryOperator() )
+                    .Select( op => $"public static R{suffix} {op.ToOperatorMethodName()}<A,R>(A{suffix} a) => default(R{suffix});" );
 
             var conversionOperators =
-                Enum.GetValues( typeof( OperatorKind ) )
-                .Cast<OperatorKind>()
-                .Where( op => op.IsConversionOperator() )
-                .Select( op => $"public static R{suffix} {op.ToOperatorMethodName()}<A,R>(A{suffix} a) => default(R{suffix});" );
+                Enum.GetValues( typeof(OperatorKind) )
+                    .Cast<OperatorKind>()
+                    .Where( op => op.IsConversionOperator() )
+                    .Select( op => $"public static R{suffix} {op.ToOperatorMethodName()}<A,R>(A{suffix} a) => default(R{suffix});" );
 
             var code = @$"
 {(useNullability ? "#nullable enable" : "")}

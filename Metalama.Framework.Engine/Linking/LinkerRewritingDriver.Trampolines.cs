@@ -84,7 +84,9 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private static ConversionOperatorDeclarationSyntax GetTrampolineConversionOperator( ConversionOperatorDeclarationSyntax @operator, IMethodSymbol targetSymbol )
+        private static ConversionOperatorDeclarationSyntax GetTrampolineConversionOperator(
+            ConversionOperatorDeclarationSyntax @operator,
+            IMethodSymbol targetSymbol )
         {
             // TODO: First override not being inlineable probably does not happen outside of specifically written linker tests, i.e. trampolines may not be needed.
 

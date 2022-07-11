@@ -500,25 +500,27 @@ namespace Metalama.Framework.Engine.Linking
                             .OfType<IMethodSymbol>()
                             .Single( m => m.Parameters.Length == 0 && m.TypeParameters.Length == 0 );
 
-                    case { } when SymbolHelpers.GetOperatorKindFromName(helperMethod.Name) is not OperatorKind.None and var operatorKind:
+                    case { } when SymbolHelpers.GetOperatorKindFromName( helperMethod.Name ) is not OperatorKind.None and var operatorKind:
                         if ( operatorKind.IsBinaryOperator() )
                         {
                             return containingSymbol.ContainingType.GetMembers( referencedSymbol.Name )
                                 .OfType<IMethodSymbol>()
-                                .Single( m => 
-                                    m.Parameters.Length == 2 
-                                    && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[0].Type, helperMethod.Parameters[0].Type )
-                                    && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[1].Type, helperMethod.Parameters[1].Type )
-                                    && SignatureTypeSymbolComparer.Instance.Equals( m.ReturnType, helperMethod.ReturnType ) );
+                                .Single(
+                                    m =>
+                                        m.Parameters.Length == 2
+                                        && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[0].Type, helperMethod.Parameters[0].Type )
+                                        && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[1].Type, helperMethod.Parameters[1].Type )
+                                        && SignatureTypeSymbolComparer.Instance.Equals( m.ReturnType, helperMethod.ReturnType ) );
                         }
                         else
                         {
                             return containingSymbol.ContainingType.GetMembers( referencedSymbol.Name )
                                 .OfType<IMethodSymbol>()
-                                .Single( m =>
-                                    m.Parameters.Length == 1
-                                    && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[0].Type, helperMethod.Parameters[0].Type )
-                                    && SignatureTypeSymbolComparer.Instance.Equals( m.ReturnType, helperMethod.ReturnType ) );
+                                .Single(
+                                    m =>
+                                        m.Parameters.Length == 1
+                                        && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[0].Type, helperMethod.Parameters[0].Type )
+                                        && SignatureTypeSymbolComparer.Instance.Equals( m.ReturnType, helperMethod.ReturnType ) );
                         }
 
                     default:
@@ -631,7 +633,7 @@ namespace Metalama.Framework.Engine.Linking
                 case (IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation },
                     IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation }):
                 case (IMethodSymbol { MethodKind: MethodKind.Destructor }, IMethodSymbol { MethodKind: MethodKind.Ordinary }):
-                case (IMethodSymbol { MethodKind: MethodKind.Conversion or MethodKind.UserDefinedOperator }, IMethodSymbol { MethodKind: MethodKind.Ordinary } ):
+                case (IMethodSymbol { MethodKind: MethodKind.Conversion or MethodKind.UserDefinedOperator }, IMethodSymbol { MethodKind: MethodKind.Ordinary }):
                 case (IPropertySymbol, IPropertySymbol):
                 case (IEventSymbol, IEventSymbol):
                 case (IFieldSymbol, IFieldSymbol):

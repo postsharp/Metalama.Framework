@@ -144,6 +144,6 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// UnaryPlus operator.
         /// </summary>
-        UnaryPlus,
+        UnaryPlus
     }
 }

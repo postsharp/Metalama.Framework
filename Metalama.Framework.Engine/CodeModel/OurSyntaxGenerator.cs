@@ -255,8 +255,9 @@ namespace Metalama.Framework.Engine.CodeModel
                 // TODO: optional parameters.
                 SyntaxFactory.ArgumentList(
                     SeparatedList(
-                        method.Parameters.Select( p =>
-                            Argument( expressionFunc( p ).AssertNotNull() ) ) ) );
+                        method.Parameters.Select(
+                            p =>
+                                Argument( expressionFunc( p ).AssertNotNull() ) ) ) );
 #pragma warning restore CA1822 // Can be made static
 
         public SyntaxList<TypeParameterConstraintClauseSyntax> ConstraintClauses( IMethod method )
@@ -414,7 +415,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
                 foreach ( var attribute in attributes )
                 {
-                    if (attribute.GetTarget(compilation).Constructor.DeclaringType.FullName == "System.Runtime.CompilerServices.NullableContextAttribute" )
+                    if ( attribute.GetTarget( compilation ).Constructor.DeclaringType.FullName == "System.Runtime.CompilerServices.NullableContextAttribute" )
                     {
                         continue;
                     }
