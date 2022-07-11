@@ -199,8 +199,6 @@ namespace Metalama.Framework.Engine.Utilities
                 r => r.GetSyntax() is MemberDeclarationSyntax member && member.Modifiers.Any( m => m.IsKind( kind ) ) );
         }
 
-        // TODO: Partial methods etc.
-
         public static SyntaxReference? GetPrimarySyntaxReference( this ISymbol? symbol )
         {
             if ( symbol == null )
@@ -208,7 +206,7 @@ namespace Metalama.Framework.Engine.Utilities
                 return null;
             }
 
-            static SyntaxReference? GetReferenceOfShortestPath( ISymbol s )
+            static SyntaxReference? GetReferenceOfShortestPath( ISymbol s, Func<SyntaxReference, bool>? filter = null )
             {
                 if ( s.DeclaringSyntaxReferences.IsDefaultOrEmpty )
                 {
@@ -216,7 +214,12 @@ namespace Metalama.Framework.Engine.Utilities
                 }
                 else
                 {
-                    return s.DeclaringSyntaxReferences.OrderBy( x => x.SyntaxTree.FilePath.Length ).First();
+                    var references =
+                        filter != null
+                        ? s.DeclaringSyntaxReferences.Where( filter )
+                        : s.DeclaringSyntaxReferences;
+
+                    return references.OrderBy( x => x.SyntaxTree.FilePath.Length ).First();
                 }
             }
 
@@ -224,6 +227,28 @@ namespace Metalama.Framework.Engine.Utilities
             {
                 case IMethodSymbol { AssociatedSymbol: not null } methodSymbol:
                     return GetReferenceOfShortestPath( symbol ) ?? GetReferenceOfShortestPath( methodSymbol.AssociatedSymbol );
+
+                case IMethodSymbol { IsPartialDefinition: true, PartialImplementationPart: { } partialDefinitionSymbol }:
+                    return GetReferenceOfShortestPath( partialDefinitionSymbol );
+                    //// Skip all declarations using partial keyword and having no body.
+                    //var partialDeclarationWithBody = GetReferenceOfShortestPath(
+                    //    symbol,
+                    //    sr =>
+                    //        !(sr.GetSyntax() is MethodDeclarationSyntax { Modifiers: { } modifiers, Body: null, ExpressionBody: null }
+                    //            && modifiers.Contains( SyntaxFactory.Token( SyntaxKind.PartialKeyword ) )) );
+
+                    //if (partialDeclarationWithBody != null)
+                    //{
+                    //    return partialDeclarationWithBody;
+                    //}
+                    //else
+                    //{
+                    //    // If there is no declaration with body, take the first declaration without body.
+                    //    return GetReferenceOfShortestPath( symbol );
+                    //}
+
+                case IMethodSymbol { IsPartialDefinition: true, PartialImplementationPart: null }:
+                    return GetReferenceOfShortestPath( symbol );
 
                 default:
                     return GetReferenceOfShortestPath( symbol );
