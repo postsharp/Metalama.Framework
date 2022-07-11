@@ -490,11 +490,11 @@ namespace Metalama.Framework.Engine.Linking
                 return containingSymbol.ContainingType.AssertNotNull().FindImplementationForInterfaceMember( referencedSymbol ).AssertNotNull();
             }
 
-            if ( referencedSymbol is IMethodSymbol { ContainingType: { Name: "__LinkerIntroductionHelpers__" } } helperMethod )
+            if ( referencedSymbol is IMethodSymbol { ContainingType: { Name: LinkerAspectReferenceSyntaxProvider.HelperTypeName } } helperMethod )
             {
                 switch ( helperMethod )
                 {
-                    case { Name: "Finalizer" }:
+                    case { Name: LinkerAspectReferenceSyntaxProvider.FinalizeMemberName }:
                         // Referencing type's finalizer.
                         return containingSymbol.ContainingType.GetMembers( "Finalize" )
                             .OfType<IMethodSymbol>()
@@ -528,7 +528,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            if ( referencedSymbol is IMethodSymbol { Name: "Finalizer", ContainingType: { Name: "__LinkerIntroductionHelpers__" } } )
+            if ( referencedSymbol is IMethodSymbol { Name: LinkerAspectReferenceSyntaxProvider.FinalizeMemberName, ContainingType: { Name: LinkerAspectReferenceSyntaxProvider.HelperTypeName } } )
             {
                 // Referencing type's finalizer.
                 return containingSymbol.ContainingType.GetMembers( "Finalize" )

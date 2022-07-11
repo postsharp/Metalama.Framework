@@ -18,7 +18,8 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal class LinkerAspectReferenceSyntaxProvider : AspectReferenceSyntaxProvider
     {
-        private static NameSyntax HelperTypeName => IdentifierName( "__LinkerIntroductionHelpers__" );
+        public const string HelperTypeName = "__LinkerIntroductionHelpers__";
+        public const string FinalizeMemberName = "Finalize";
 
         private static readonly ConcurrentDictionary<LanguageVersion, SyntaxTree> _linkerHelperSyntaxTreeCache = new();
 
@@ -26,6 +27,7 @@ namespace Metalama.Framework.Engine.Linking
 
         public LinkerAspectReferenceSyntaxProvider( bool useNullability )
         {
+            // TODO: Usage of nullability should be determined from context (design time).
             this._useNullability = useNullability;
         }
 
@@ -33,8 +35,8 @@ namespace Metalama.Framework.Engine.Linking
             => InvocationExpression(
                 MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
-                        HelperTypeName,
-                        IdentifierName( "Finalizer" ) )
+                        IdentifierName( HelperTypeName ),
+                        IdentifierName( FinalizeMemberName ) )
                     .WithAspectReferenceAnnotation(
                         aspectLayer,
                         AspectReferenceOrder.Base,
@@ -47,7 +49,7 @@ namespace Metalama.Framework.Engine.Linking
                 InvocationExpression(
                     MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
-                            HelperTypeName,
+                            IdentifierName( HelperTypeName ),
                             GenericName(
                                 Identifier( overriddenOperator.OperatorKind.ToOperatorMethodName() ),
                                 TypeArgumentList(
@@ -62,10 +64,10 @@ namespace Metalama.Framework.Engine.Linking
                     syntaxGenerator.ArgumentList( overriddenOperator, p => IdentifierName( p.Name ) ) );
         }
 
-        public SyntaxTree? GetLinkerHelperSyntaxTree( LanguageVersion languageVersion )
+        public SyntaxTree GetLinkerHelperSyntaxTree( LanguageVersion languageVersion )
             => _linkerHelperSyntaxTreeCache.GetOrAdd( languageVersion, this.GetLinkerHelperSyntaxTreeCode );
 
-        private SyntaxTree? GetLinkerHelperSyntaxTreeCode( LanguageVersion v )
+        private SyntaxTree GetLinkerHelperSyntaxTreeCode( LanguageVersion v )
         {
             var useNullability = this._useNullability && v is LanguageVersion.CSharp9 or LanguageVersion.CSharp10;
             var suffix = useNullability ? "?" : "";
@@ -90,9 +92,9 @@ namespace Metalama.Framework.Engine.Linking
 
             var code = @$"
 {(useNullability ? "#nullable enable" : "")}
-internal class __LinkerIntroductionHelpers__
+internal class {HelperTypeName}
 {{
-    public static void Finalizer() {{}}
+    public static void {FinalizeMemberName}() {{}}
     {string.Join( "\n    ", binaryOperators )}
     {string.Join( "\n    ", unaryOperators )}
     {string.Join( "\n    ", conversionOperators )}
