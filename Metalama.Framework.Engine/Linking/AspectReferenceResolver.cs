@@ -107,6 +107,18 @@ namespace Metalama.Framework.Engine.Linking
             // E.g. explicit interface implementation must be referenced as interface member reference.
             referencedSymbol = GetLocalReferencedSymbol( containingSymbol, referencedSymbol );
 
+            //if ( !SymbolEqualityComparer.Default.Equals( containingSymbol.ContainingType, referencedSymbol.ContainingType ))
+            //{
+            //    // References to all types from different types are always resolved as final.
+            //    return
+            //        new ResolvedAspectReference(
+            //            containingSymbol,
+            //            referencedSymbol,
+            //            new IntermediateSymbolSemantic( referencedSymbol, IntermediateSymbolSemanticKind.Final ),
+            //            expression,
+            //            referenceSpecification );
+            //}
+
             var annotationLayerIndex = this.GetAnnotationLayerIndex( containingSymbol, referencedSymbol, referenceSpecification );
 
             // If the override target was introduced, determine the index.
@@ -230,7 +242,7 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     if ( referencedSymbol.IsOverride )
                     {
-                        // Introduction is an override, resolve to symbol in the base class.
+                        // Introduction is an override, resolve to the symbol in the base class.
                         return new ResolvedAspectReference(
                             containingSymbol,
                             referencedSymbol,
