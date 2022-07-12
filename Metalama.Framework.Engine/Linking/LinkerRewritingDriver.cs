@@ -300,7 +300,8 @@ namespace Metalama.Framework.Engine.Linking
                 switch ( declaration )
                 {
                     case MethodDeclarationSyntax methodDecl:
-                        return (SyntaxNode?) methodDecl.Body ?? methodDecl.ExpressionBody ?? throw new AssertionFailedException();
+                        // Partial methods without declared body have empty implicit body.
+                        return methodDecl.Body ?? (SyntaxNode?) methodDecl.ExpressionBody ?? Block();
 
                     case DestructorDeclarationSyntax dtorDecl:
                         return (SyntaxNode?) dtorDecl.Body ?? dtorDecl.ExpressionBody ?? throw new AssertionFailedException();
