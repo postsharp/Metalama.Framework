@@ -33,12 +33,12 @@ namespace Metalama.Framework.Engine.Linking
 
         private static NameSyntax HelperTypeName => IdentifierName( "__LinkerIntroductionHelpers__" );
 
-        private static readonly ConcurrentDictionary<LanguageVersion, SyntaxTree> _linkerHelperSyntaxTreeCache = new();
+        private static readonly ConcurrentDictionary<LanguageOptions, SyntaxTree> _linkerHelperSyntaxTreeCache = new();
 
-        public static SyntaxTree GetLinkerHelperSyntaxTree( LanguageVersion languageVersion )
-            => _linkerHelperSyntaxTreeCache.GetOrAdd( languageVersion, GetLinkerHelperSyntaxTreeCode );
+        public static SyntaxTree GetLinkerHelperSyntaxTree( LanguageOptions options )
+            => _linkerHelperSyntaxTreeCache.GetOrAdd( options, GetLinkerHelperSyntaxTreeCode );
 
-        private static SyntaxTree GetLinkerHelperSyntaxTreeCode( LanguageVersion v )
+        private static SyntaxTree GetLinkerHelperSyntaxTreeCode( LanguageOptions options )
         {
             var code = @"
 internal class __LinkerIntroductionHelpers__
@@ -51,7 +51,7 @@ internal class __LinkerIntroductionHelpers__
                 code,
                 path: "__LinkerIntroductionHelpers__.cs",
                 encoding: Encoding.UTF8,
-                options: CSharpParseOptions.Default.WithLanguageVersion( v ) );
+                options: options.ToParseOptions() );
         }
     }
 }

@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.Advising
 
         private const string _category = "Metalama.Advices";
 
-        // Subrange 500-509: General introduction diagnostics.
+        // Sub-range 500-509: General introduction diagnostics.
 
         internal static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType, IDeclaration DeclaringType)>
             CannotIntroduceMemberAlreadyExists = new(
@@ -70,7 +70,7 @@ namespace Metalama.Framework.Engine.Advising
                 _category,
                 Error );
 
-        // Subrange 510-519: Interface implementation diagnostics.
+        // Sub-range 510-519: Interface implementation diagnostics.
 
         internal static readonly DiagnosticDefinition<(string AspectType, INamedType TargetType, INamedType InterfaceType, IMember InterfaceMember)>
             MissingDeclarativeInterfaceMember = new(
@@ -135,7 +135,7 @@ namespace Metalama.Framework.Engine.Advising
                 _category,
                 Error );
 
-        // Subrange 520-529: Various introduction diagnostics.
+        // Sub-range 520-529: Various introduction diagnostics.
         internal static readonly DiagnosticDefinition<(string AspectType, IConstructor Constructor)>
             CannotIntroduceParameterIntoStaticConstructor = new(
                 "LAMA0520",

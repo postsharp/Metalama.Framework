@@ -67,7 +67,7 @@ namespace Metalama.Framework.Engine.Advising
         public static bool SemanticEquals( this IMethod method, IMethod other )
         {
             // TODO: Type parameter contains, nullability.
-            return SignatureEquals(method, other)
+            return SignatureEquals( method, other )
                    && SignatureTypeSymbolComparer.Instance.Equals(
                        method.ReturnType.GetSymbol().AssertNotNull(),
                        other.ReturnType.GetSymbol().AssertNotNull() );

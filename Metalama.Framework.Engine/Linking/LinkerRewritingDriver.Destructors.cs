@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.Linking
         // Destructors/finalizers are only override targets, overrides are always represented as methods.
 
         public IReadOnlyList<MemberDeclarationSyntax> RewriteDestructor(
-            DestructorDeclarationSyntax dtorDeclaration,
+            DestructorDeclarationSyntax destructorDeclaration,
             IMethodSymbol symbol,
             SyntaxGenerationContext generationContext )
         {
@@ -34,19 +34,19 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    members.Add( GetTrampolineDestructor( dtorDeclaration, lastOverride ) );
+                    members.Add( GetTrampolineDestructor( destructorDeclaration, lastOverride ) );
                 }
 
                 if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
                      && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
-                    members.Add( GetOriginalImplDestructor( dtorDeclaration, symbol, generationContext ) );
+                    members.Add( GetOriginalImplDestructor( destructorDeclaration, symbol ) );
                 }
 
                 if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ) )
                      && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ), out _ ) )
                 {
-                    members.Add( GetEmptyImplDestructor( dtorDeclaration, symbol, generationContext ) );
+                    members.Add( GetEmptyImplDestructor( destructorDeclaration, symbol ) );
                 }
 
                 return members;
@@ -62,7 +62,7 @@ namespace Metalama.Framework.Engine.Linking
                     symbol.ToSemantic( semanticKind ),
                     InliningContext.Create( this, symbol, generationContext ) );
 
-                var modifiers = dtorDeclaration.Modifiers;
+                var modifiers = destructorDeclaration.Modifiers;
 
                 if ( isAsync && !symbol.IsAsync )
                 {
@@ -80,7 +80,7 @@ namespace Metalama.Framework.Engine.Linking
                 //       int Foo() <trivia_leading_equals_value> { <trivia_trailing_equals_value> <linked_body> <trivia_leading_semicolon> } <trivia_trailing_semicolon>
 
                 var (openBraceLeadingTrivia, openBraceTrailingTrivia, closeBraceLeadingTrivia, closeBraceTrailingTrivia) =
-                    dtorDeclaration switch
+                    destructorDeclaration switch
                     {
                         { Body: { OpenBraceToken: var openBraceToken, CloseBraceToken: var closeBraceToken } } =>
                             (openBraceToken.LeadingTrivia, openBraceToken.TrailingTrivia, closeBraceToken.LeadingTrivia, closeBraceToken.TrailingTrivia),
@@ -90,7 +90,7 @@ namespace Metalama.Framework.Engine.Linking
                         _ => throw new AssertionFailedException()
                     };
 
-                var ret = dtorDeclaration
+                var ret = destructorDeclaration
                     .WithExpressionBody( null )
                     .WithModifiers( modifiers )
                     .WithBody(
@@ -106,34 +106,30 @@ namespace Metalama.Framework.Engine.Linking
         }
 
         private static MemberDeclarationSyntax GetOriginalImplDestructor(
-            DestructorDeclarationSyntax dtor,
-            IMethodSymbol symbol,
-            SyntaxGenerationContext generationContext )
-            => GetSpecialImplDesctructor(
-                dtor,
-                dtor.Body.WithSourceCodeAnnotation(),
-                dtor.ExpressionBody.WithSourceCodeAnnotation(),
+            DestructorDeclarationSyntax destructor,
+            IMethodSymbol symbol )
+            => GetSpecialImplDestructor(
+                destructor,
+                destructor.Body.WithSourceCodeAnnotation(),
+                destructor.ExpressionBody.WithSourceCodeAnnotation(),
                 symbol,
-                GetOriginalImplMemberName( symbol ),
-                generationContext );
+                GetOriginalImplMemberName( symbol ) );
 
         private static MemberDeclarationSyntax GetEmptyImplDestructor(
-            DestructorDeclarationSyntax dtor,
-            IMethodSymbol symbol,
-            SyntaxGenerationContext generationContext )
+            DestructorDeclarationSyntax destructor,
+            IMethodSymbol symbol )
         {
             var emptyBody = Block().NormalizeWhitespace();
 
-            return GetSpecialImplDesctructor( dtor, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ), generationContext );
+            return GetSpecialImplDestructor( destructor, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ) );
         }
 
-        private static MemberDeclarationSyntax GetSpecialImplDesctructor(
-            DestructorDeclarationSyntax dtor,
+        private static MemberDeclarationSyntax GetSpecialImplDestructor(
+            DestructorDeclarationSyntax destructor,
             BlockSyntax? body,
             ArrowExpressionClauseSyntax? expressionBody,
             IMethodSymbol symbol,
-            string name,
-            SyntaxGenerationContext generationContext )
+            string name )
         {
             var modifiers = symbol
                 .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Unsafe | ModifierCategories.Async )
@@ -147,7 +143,7 @@ namespace Metalama.Framework.Engine.Linking
                         null,
                         Identifier( name ),
                         null,
-                        dtor.ParameterList,
+                        destructor.ParameterList,
                         List<TypeParameterConstraintClauseSyntax>(),
                         null,
                         null )
