@@ -1,4 +1,4 @@
-<Project DefaultTargets="Build">
+﻿<Project DefaultTargets="Build">
 
     <Import Project="..\Build\RoslynVersion\Roslyn4.0.1.props"/>
 
@@ -9,7 +9,7 @@
     <Import Project="..\Metalama.Framework.DesignTime\Metalama.Framework.DesignTime.csproj"/>
 
     <ItemGroup>
-        <Compile Condition="'$(FormatThisProject)'!='False'" Include="..\Metalama.Framework.DesignTime\**\*.cs" Exclude="..\Metalama.Framework.DesignTime\obj\**\*.cs"/>
+        <Compile Condition="'$(FormattingCode)'!='True'" Include="..\Metalama.Framework.DesignTime\**\*.cs" Exclude="..\Metalama.Framework.DesignTime\obj\**\*.cs"/>
     </ItemGroup>
 
 </Project>

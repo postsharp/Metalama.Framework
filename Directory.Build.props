@@ -55,7 +55,7 @@
     </Target>
 
 	<PropertyGroup>
-		<FormatThisProject>True</FormatThisProject>
+		<FormattingCode>False</FormattingCode>
 	</PropertyGroup>
 
 </Project>

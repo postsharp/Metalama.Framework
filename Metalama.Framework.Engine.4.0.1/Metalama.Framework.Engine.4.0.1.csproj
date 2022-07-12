@@ -10,7 +10,7 @@
     <Import Project="..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj"/>
 
     <ItemGroup>
-        <Compile Condition="'$(FormatThisProject)'!='False'" Include="..\Metalama.Framework.Engine\**\*.cs" Exclude="..\Metalama.Framework.Engine\obj\**\*.cs" />
+        <Compile Condition="'$(FormattingCode)'!='True'" Include="..\Metalama.Framework.Engine\**\*.cs" Exclude="..\Metalama.Framework.Engine\obj\**\*.cs" />
     </ItemGroup>
 
 </Project>
