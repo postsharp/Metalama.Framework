@@ -11,7 +11,7 @@
 
     <!-- Versions of dependencies -->
     <PropertyGroup>
-        <PostSharpEngineeringVersion>1.0.70-preview</PostSharpEngineeringVersion>
+        <PostSharpEngineeringVersion>1.0.78-preview</PostSharpEngineeringVersion>
         <MetalamaCompilerVersion>branch:master</MetalamaCompilerVersion>
         <MicrosoftCSharpVersion>4.7.0</MicrosoftCSharpVersion>
         <!-- This is the minimal version of the Roslyn AI we support. -->
