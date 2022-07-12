@@ -60,8 +60,22 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public bool IsEmpty => this.SyntaxTrees.Count == 0;
 
-        public LanguageVersion LanguageVersion
-            => this.SyntaxTrees.Count > 0 ? ((CSharpParseOptions) this.SyntaxTrees.Values.First().Options).LanguageVersion : LanguageVersion.Default;
+        internal LanguageOptions LanguageOptions
+        {
+            get
+            {
+                if ( this.SyntaxTrees.Count > 0 )
+                {
+                    var parseOptions = (CSharpParseOptions) this.SyntaxTrees.Values.First().Options;
+
+                    return new LanguageOptions( parseOptions );
+                }
+                else
+                {
+                    return LanguageOptions.Default;
+                }
+            }
+        }
 
         // Initial constructor.
         private PartialCompilation( Compilation compilation, DerivedTypeIndex derivedTypeIndex, ImmutableArray<ManagedResource> resources )
