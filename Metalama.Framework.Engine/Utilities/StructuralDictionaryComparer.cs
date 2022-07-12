@@ -40,7 +40,7 @@ internal class StructuralDictionaryComparer<TKey, TValue> : IEqualityComparer<IR
 
     public int GetHashCode( IReadOnlyDictionary<TKey, TValue> obj )
     {
-        var hashCode = new HashCode();
+        var hashCode = default(HashCode);
 
         foreach ( var item in obj )
         {

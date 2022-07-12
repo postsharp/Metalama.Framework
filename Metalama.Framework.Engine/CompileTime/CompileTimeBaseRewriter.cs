@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.CompileTime
             where T : SyntaxNode
             => node;
 
-        private static T WithSupressedDiagnostics<T>( T member, params string[] suppressedDiagnostics )
+        private static T WithSuppressedDiagnostics<T>( T member, params string[] suppressedDiagnostics )
             where T : MemberDeclarationSyntax
         {
             if ( suppressedDiagnostics.Length == 0 )
@@ -117,7 +117,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             return
                 this.RewriteThrowNotSupported(
-                    WithSupressedDiagnostics(
+                    WithSuppressedDiagnostics(
                         method
                             .WithBody(
                                 isIterator

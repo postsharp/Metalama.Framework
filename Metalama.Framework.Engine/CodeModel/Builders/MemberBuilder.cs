@@ -184,8 +184,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             return
                 Identifier(
                     this.IsExplicitInterfaceImplementation
-                    ? this.Name.Split( '.' ).Last()
-                    : this.Name);
+                        ? this.Name.Split( '.' ).Last()
+                        : this.Name );
         }
 
         private bool TryExpandInitializerTemplate<T>(

@@ -375,7 +375,7 @@ public partial class CompilationModel
                 break;
 
             case IParameterBuilder parameter:
-                var parameters = this.GetParameterCollection( parameter.DeclaringMember!.ToTypedRef(), true );
+                var parameters = this.GetParameterCollection( parameter.DeclaringMember.ToTypedRef(), true );
                 parameters.Add( parameter );
 
                 break;
@@ -395,14 +395,14 @@ public partial class CompilationModel
     {
         var introduceInterface = (IntroduceInterfaceTransformation) transformation;
 
-        var targetType = (INamedType)introduceInterface.ContainingDeclaration;
+        var targetType = (INamedType) introduceInterface.ContainingDeclaration;
         var targetTypeSymbol = targetType.GetSymbol().AssertNotNull();
 
         var interfaces = this.GetInterfaceImplementationCollection( targetTypeSymbol, true );
 
         interfaces.Add( introduceInterface );
 
-        foreach ( var type in new[] { targetType }.Concat(this.GetDerivedTypes( targetType, true )) )
+        foreach ( var type in new[] { targetType }.Concat( this.GetDerivedTypes( targetType, true ) ) )
         {
             var allInterfaces = this.GetAllInterfaceImplementationCollection( type.GetSymbol().AssertNotNull(), true );
 

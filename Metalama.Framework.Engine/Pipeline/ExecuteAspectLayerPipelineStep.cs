@@ -48,14 +48,13 @@ internal class ExecuteAspectLayerPipelineStep : PipelineStep
         // The processing order of types is arbitrary. Different types can be processed in parallel.
         foreach ( var typeGroup in instancesByType )
         {
-            this.ProcessType( typeGroup.Key, typeGroup, compilation, observableTransformations.Enqueue, cancellationToken );
+            this.ProcessType( typeGroup, compilation, observableTransformations.Enqueue, cancellationToken );
         }
 
         return compilation.WithTransformations( observableTransformations );
     }
 
     private void ProcessType(
-        INamedType? namedType,
         IEnumerable<(IDeclaration TargetDeclaration, IAspectInstanceInternal AspectInstance)> aspects,
         CompilationModel compilation,
         Action<IObservableTransformation> addTransformation,

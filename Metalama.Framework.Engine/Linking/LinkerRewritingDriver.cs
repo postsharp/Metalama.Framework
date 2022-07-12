@@ -303,8 +303,8 @@ namespace Metalama.Framework.Engine.Linking
                         // Partial methods without declared body have empty implicit body.
                         return methodDecl.Body ?? (SyntaxNode?) methodDecl.ExpressionBody ?? Block();
 
-                    case DestructorDeclarationSyntax dtorDecl:
-                        return (SyntaxNode?) dtorDecl.Body ?? dtorDecl.ExpressionBody ?? throw new AssertionFailedException();
+                    case DestructorDeclarationSyntax destructorDecl:
+                        return (SyntaxNode?) destructorDecl.Body ?? destructorDecl.ExpressionBody ?? throw new AssertionFailedException();
 
                     case AccessorDeclarationSyntax accessorDecl:
                         var body = (SyntaxNode?) accessorDecl.Body ?? accessorDecl.ExpressionBody;
@@ -724,7 +724,7 @@ namespace Metalama.Framework.Engine.Linking
                             else if ( aspectReference.ContainingSymbol.ContainingType.Is( targetSymbol.ContainingType ) )
                             {
                                 // Resolved symbol is declared in a base class.
-                                switch ( (targetSymbol, memberAccessExpression.Expression) )
+                                switch (targetSymbol, memberAccessExpression.Expression)
                                 {
                                     case (IMethodSymbol { MethodKind: MethodKind.Destructor }, _):
                                         return

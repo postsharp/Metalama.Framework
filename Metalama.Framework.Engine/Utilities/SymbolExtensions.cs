@@ -216,8 +216,8 @@ namespace Metalama.Framework.Engine.Utilities
                 {
                     var references =
                         filter != null
-                        ? s.DeclaringSyntaxReferences.Where( filter )
-                        : s.DeclaringSyntaxReferences;
+                            ? s.DeclaringSyntaxReferences.Where( filter )
+                            : s.DeclaringSyntaxReferences;
 
                     return references.OrderBy( x => x.SyntaxTree.FilePath.Length ).First();
                 }
@@ -318,7 +318,7 @@ namespace Metalama.Framework.Engine.Utilities
 
         public static bool IsCompilerGenerated( this ISymbol declaration )
         {
-            return declaration.GetAttributes().Any( a => a.AttributeConstructor?.ContainingType.Name == nameof(CompilerGeneratedAttribute) ) == true;
+            return declaration.GetAttributes().Any( a => a.AttributeConstructor?.ContainingType.Name == nameof(CompilerGeneratedAttribute) );
         }
     }
 }

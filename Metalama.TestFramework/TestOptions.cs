@@ -148,7 +148,7 @@ namespace Metalama.TestFramework
         public bool? ExecuteProgram { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indiciating which type of the output assembly should be used for the test. Currently valid values are <c>Dll</c> <c>Exe</c> (default).
+        /// Gets or sets a value indicating which type of the output assembly should be used for the test. Currently valid values are <c>Dll</c> <c>Exe</c> (default).
         /// </summary>
         public string? OutputAssemblyType { get; set; }
 
@@ -200,7 +200,7 @@ namespace Metalama.TestFramework
 
         /// <summary>
         /// Gets or sets the list of C# language features that the test should be compiled with.
-        /// To set this option in a test, add this comment to your test file: <c>// @LanguageFeature(feature)</c> or <c>// @LanguageFeature(feature=value)</c>
+        /// To set this option in a test, add this comment to your test file: <c>// @LanguageFeature(feature)</c> or <c>// @LanguageFeature(feature=value)</c>.
         /// </summary>
         public ImmutableDictionary<string, string> LanguageFeatures { get; set; } = ImmutableDictionary<string, string>.Empty;
 

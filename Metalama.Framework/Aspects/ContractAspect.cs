@@ -55,7 +55,7 @@ namespace Metalama.Framework.Aspects
         private static readonly Func<ContractDirection, IEligibilityRule<IParameter>> _returnValueEligibilityInvalidDirection =
             direction =>
                 EligibilityRuleFactory.CreateRule<IParameter>(
-                    builder => builder.MustSatisfy( x => false, x => $"Contract with \"{direction}\" direction is not valid on return parameter." ) );
+                    builder => builder.MustSatisfy( _ => false, _ => $"Contract with \"{direction}\" direction is not valid on return parameter." ) );
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ContractAspect"/> class.
@@ -79,7 +79,7 @@ namespace Metalama.Framework.Aspects
         private static IEligibilityRule<IParameter> GetParameterEligibilityRule( ContractDirection direction )
             => direction switch
             {
-                ContractDirection.Default => EligibilityRuleFactory.CreateRule<IParameter>( builder => { } ),
+                ContractDirection.Default => EligibilityRuleFactory.CreateRule<IParameter>( _ => { } ),
                 ContractDirection.Both => _parameterEligibilityBoth,
                 ContractDirection.Input => _parameterEligibilityInput,
                 ContractDirection.Output => _parameterEligibilityOutput,
@@ -99,7 +99,7 @@ namespace Metalama.Framework.Aspects
         private static IEligibilityRule<IFieldOrPropertyOrIndexer> GetPropertyEligibilityRule( ContractDirection direction )
             => direction switch
             {
-                ContractDirection.Default => EligibilityRuleFactory.CreateRule<IFieldOrPropertyOrIndexer>( builder => { } ),
+                ContractDirection.Default => EligibilityRuleFactory.CreateRule<IFieldOrPropertyOrIndexer>( _ => { } ),
                 ContractDirection.Both => _propertyOrIndexerEligibilityBoth,
                 ContractDirection.Input => _propertyOrIndexerEligibilityInput,
                 ContractDirection.Output => _propertyOrIndexerEligibilityOutput,

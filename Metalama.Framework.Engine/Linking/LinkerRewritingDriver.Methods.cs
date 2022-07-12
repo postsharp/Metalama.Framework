@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             if ( this._introductionRegistry.IsOverrideTarget( symbol ) )
             {
-                if (symbol.IsPartialDefinition && symbol.PartialImplementationPart != null)
+                if ( symbol.IsPartialDefinition && symbol.PartialImplementationPart != null )
                 {
                     // This is a partial method declaration that is not to be transformed.
                     return new[] { methodDeclaration };

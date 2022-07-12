@@ -25,7 +25,7 @@ using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal sealed partial class NamedType : MemberOrNamedType, INamedTypeInternal
+    internal sealed class NamedType : MemberOrNamedType, INamedTypeInternal
     {
         private SpecialType? _specialType;
 

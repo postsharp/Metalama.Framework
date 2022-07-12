@@ -14,6 +14,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Simplification;
 using System.Linq;
 using System.Threading;
+using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Transformations
 {
@@ -77,13 +78,14 @@ namespace Metalama.Framework.Engine.Transformations
                         var taskResultType = asyncInfo.ResultType;
 
                         ExpressionSyntax expression =
-                            overriddenMethod.Compilation.GetCompilationModel().InvariantComparer.Equals(
-                                overriddenMethod.ReturnType,
-                                overriddenMethod.Compilation.GetCompilationModel().Factory.GetSpecialType( Code.SpecialType.Void ) )
-                            ? SyntaxFactory.AwaitExpression( invocationExpression )
-                            : SyntaxFactory.ParenthesizedExpression( SyntaxFactory.AwaitExpression( invocationExpression ) );
+                            overriddenMethod.Compilation.GetCompilationModel()
+                                .InvariantComparer.Equals(
+                                    overriddenMethod.ReturnType,
+                                    overriddenMethod.Compilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.Void ) )
+                                ? SyntaxFactory.AwaitExpression( invocationExpression )
+                                : SyntaxFactory.ParenthesizedExpression( SyntaxFactory.AwaitExpression( invocationExpression ) );
 
-                        return 
+                        return
                             new BuiltUserExpression(
                                 expression.WithAdditionalAnnotations( Simplifier.Annotation ),
                                 taskResultType );
