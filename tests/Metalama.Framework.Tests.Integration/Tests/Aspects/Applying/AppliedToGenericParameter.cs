@@ -17,4 +17,16 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Applying.AppliedToGenericP
     {
         private void M<[MyAspect] T>( int a ) { }
     }
+
+    // <target>
+    internal record TargetRecord
+    {
+        private void M<[MyAspect] T>(int a) { }
+    }
+
+    // <target>
+    internal struct TargetStrict
+    {
+        private void M<[MyAspect] T>(int a) { }
+    }
 }

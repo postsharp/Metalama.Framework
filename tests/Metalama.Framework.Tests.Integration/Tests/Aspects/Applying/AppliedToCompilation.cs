@@ -17,4 +17,10 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Applying.AppliedToCompilat
 
     // <target>
     internal class TargetClass { }
+
+    // <target>
+    internal record TargetRecord { }
+
+    // <target>
+    internal struct TargetStruct { }
 }

@@ -24,4 +24,22 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Parameter
             m = "";
         }
     }
+
+    // <target>
+    internal record TargetRecord
+    {
+        private void M([NotNull] out string m)
+        {
+            m = "";
+        }
+    }
+
+    // <target>
+    internal struct TargetStruct
+    {
+        private void M([NotNull] out string m)
+        {
+            m = "";
+        }
+    }
 }
