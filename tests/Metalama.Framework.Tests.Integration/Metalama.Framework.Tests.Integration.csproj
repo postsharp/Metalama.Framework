@@ -36,17 +36,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Remove="Tests\Aspects\Contracts\Field_Both - Copy.t.cs" />
-      <Compile Remove="Tests\Aspects\Eligibility\NoStruct - Copy.t.cs" />
-      <Compile Remove="Tests\Aspects\Inheritance\ImplementedGenericInterfaceMethod - Copy.t.cs" />
-      <Compile Remove="Tests\Aspects\Inheritance\ImplementedInterface - Copy.t.cs" />
-      <Compile Remove="Tests\Aspects\Inheritance\ImplementedInterfaceMethod - Copy.t.cs" />
-      <Compile Remove="Tests\Aspects\Inheritance\OverriddenProperty - Copy.t.cs" />
-      <Compile Remove="Tests\Aspects\Introductions\Fields\Declarative - Copy.t.cs" />
-      <Compile Remove="Tests\Aspects\Introductions\Fields\Target_Struct_Declarative - Copy.t.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
         <ProjectReference Include="..\..\Metalama.TestFramework\Metalama.TestFramework.csproj" />

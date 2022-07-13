@@ -17,16 +17,4 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Applying.AppliedToParamete
     {
         private void M( [MyAspect] int a ) { }
     }
-
-    // <target>
-    internal record TargetRecord
-    {
-        private void M([MyAspect] int a) { }
-    }
-
-    // <target>
-    internal struct TargetStruct
-    {
-        private void M([MyAspect] int a) { }
-    }
 }

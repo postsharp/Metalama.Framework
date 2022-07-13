@@ -18,18 +18,4 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Applying.AppliedToConstruc
         [MyAspect]
         private TargetClass() { }
     }
-
-    // <target>
-    internal record TargetRecord
-    {
-        [MyAspect]
-        private TargetRecord() { }
-    }
-
-    // <target>
-    internal struct TargetStruct
-    {
-        [MyAspect]
-        public TargetStruct() { }
-    }
 }
