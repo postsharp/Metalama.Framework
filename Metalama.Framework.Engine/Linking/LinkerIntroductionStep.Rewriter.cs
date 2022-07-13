@@ -434,6 +434,12 @@ namespace Metalama.Framework.Engine.Linking
                 constructorDeclaration = constructorDeclaration.WithInitializer(
                     AppendInitializerArguments( constructorDeclaration.Initializer, memberLevelTransformations.Arguments ) );
 
+                if ( memberLevelTransformations.HasCallDefaultConstructorTransformation && constructorDeclaration.Initializer == null )
+                {
+                    constructorDeclaration =
+                        constructorDeclaration.WithInitializer( ConstructorInitializer( SyntaxKind.ThisConstructorInitializer ) );
+                }
+
                 return constructorDeclaration;
             }
 
