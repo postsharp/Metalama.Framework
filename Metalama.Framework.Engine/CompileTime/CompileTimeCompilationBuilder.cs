@@ -789,7 +789,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             return false;
                         }
 
-                        textMapDirectory.Write( outputPaths.Directory! );
+                        textMapDirectory.Write( outputPaths.Directory );
 
                         var aspectType = compileTimeCompilation.GetTypeByMetadataName( typeof(IAspect).FullName );
                         var fabricType = compileTimeCompilation.GetTypeByMetadataName( typeof(Fabric).FullName );

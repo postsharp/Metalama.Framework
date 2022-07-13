@@ -7,6 +7,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 
 namespace Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 
@@ -69,7 +70,7 @@ internal abstract class UpdatableDeclarationCollection<TDeclaration, TRef> : ILa
     {
         if ( this.IsComplete )
         {
-            this._removeOperationsCount++;
+            Interlocked.Increment( ref this._removeOperationsCount );
             this._allItems!.Remove( item );
         }
     }

@@ -4,6 +4,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Text.RegularExpressions;
 
@@ -147,7 +148,7 @@ namespace Metalama.TestFramework
         public bool? ExecuteProgram { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indiciating which type of the output assembly should be used for the test. Currently valid values are <c>Dll</c> <c>Exe</c> (default).
+        /// Gets or sets a value indicating which type of the output assembly should be used for the test. Currently valid values are <c>Dll</c> <c>Exe</c> (default).
         /// </summary>
         public string? OutputAssemblyType { get; set; }
 
@@ -196,6 +197,12 @@ namespace Metalama.TestFramework
         /// To set this option in a test, add this comment to your test file: <c>// @LanguageVersion(version)</c>.
         /// </summary>
         public LanguageVersion? LanguageVersion { get; set; }
+
+        /// <summary>
+        /// Gets or sets the list of C# language features that the test should be compiled with.
+        /// To set this option in a test, add this comment to your test file: <c>// @LanguageFeature(feature)</c> or <c>// @LanguageFeature(feature=value)</c>.
+        /// </summary>
+        public ImmutableDictionary<string, string> LanguageFeatures { get; set; } = ImmutableDictionary<string, string>.Empty;
 
         /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
@@ -398,6 +405,22 @@ namespace Metalama.TestFramework
                         else
                         {
                             throw new InvalidOperationException( $"'{optionArg} is not a valid language version." );
+                        }
+
+                        break;
+
+                    case "LanguageFeature":
+                        {
+                            var parts = optionArg.Split( '=' );
+
+                            if ( parts.Length == 1 )
+                            {
+                                this.LanguageFeatures = this.LanguageFeatures.SetItem( parts[0], "" );
+                            }
+                            else
+                            {
+                                this.LanguageFeatures = this.LanguageFeatures.SetItem( parts[0], parts[1] );
+                            }
                         }
 
                         break;

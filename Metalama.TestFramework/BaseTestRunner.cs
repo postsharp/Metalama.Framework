@@ -139,6 +139,11 @@ namespace Metalama.TestFramework
                     parseOptions = parseOptions.WithLanguageVersion( testInput.Options.LanguageVersion.Value );
                 }
 
+                if ( testInput.Options.LanguageFeatures.Count > 0 )
+                {
+                    parseOptions = parseOptions.WithFeatures( testInput.Options.LanguageFeatures );
+                }
+
                 var emptyProject = this.CreateProject( testInput.Options ).WithParseOptions( parseOptions );
                 var project = emptyProject;
 

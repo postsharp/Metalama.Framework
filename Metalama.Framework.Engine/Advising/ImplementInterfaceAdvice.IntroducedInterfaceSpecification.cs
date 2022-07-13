@@ -12,21 +12,17 @@ namespace Metalama.Framework.Engine.Advising
         {
             public INamedType InterfaceType { get; }
 
-            public bool IsTopLevel { get; }
-
             public IReadOnlyList<MemberSpecification> MemberSpecifications { get; }
 
             public InterfaceSpecification(
                 INamedType interfaceType,
-                bool isTopLevel,
                 IReadOnlyList<MemberSpecification> memberSpecification )
             {
                 this.InterfaceType = interfaceType;
-                this.IsTopLevel = isTopLevel;
                 this.MemberSpecifications = memberSpecification;
             }
 
-            public override string ToString() => $"{this.InterfaceType} (IsTopLevel={this.IsTopLevel})";
+            public override string ToString() => $"{this.InterfaceType}";
         }
     }
 }

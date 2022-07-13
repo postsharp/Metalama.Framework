@@ -30,7 +30,7 @@ namespace Metalama.Framework.Engine.Advising
                 IMember? targetMember,
                 IMember? aspectInterfaceMember,
                 TemplateClassMember templateClassMember,
-                IObjectReader? tags)
+                IObjectReader? tags )
             {
                 this.InterfaceMember = interfaceMember;
                 this.TargetMember = targetMember;

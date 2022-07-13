@@ -295,7 +295,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             using ( var file = File.OpenRead( assemblyPath ) )
             {
-                var read = 0;
+                int read;
 
                 while ( (read = file.Read( buffer, 0, 1024 )) > 0 )
                 {

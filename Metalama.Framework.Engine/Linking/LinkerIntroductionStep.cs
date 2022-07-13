@@ -120,7 +120,7 @@ namespace Metalama.Framework.Engine.Linking
 
             intermediateCompilation = intermediateCompilation.Update(
                 syntaxTreeMapping.Select( p => new SyntaxTreeModification( p.Value, p.Key ) ).ToList(),
-                new[] { LinkerAspectReferenceSyntaxProvider.GetLinkerHelperSyntaxTree( intermediateCompilation.LanguageVersion ) } );
+                new[] { LinkerAspectReferenceSyntaxProvider.GetLinkerHelperSyntaxTree( intermediateCompilation.LanguageOptions ) } );
 
             var introductionRegistry = new LinkerIntroductionRegistry(
                 input.CompilationModel,

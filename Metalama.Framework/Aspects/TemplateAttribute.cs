@@ -28,13 +28,13 @@ namespace Metalama.Framework.Aspects
         {
             get => this._impl.IsVirtual;
 
-            set => this._impl.IsVirtual = true;
+            set => this._impl.IsVirtual = value;
         }
 
         public bool IsSealed
         {
             get => this._impl.IsSealed;
-            set => this._impl.IsSealed = true;
+            set => this._impl.IsSealed = value;
         }
 
         bool? ITemplateAttribute.IsVirtual => this._impl.GetIsVirtual();

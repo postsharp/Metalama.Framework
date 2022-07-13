@@ -230,7 +230,7 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     if ( referencedSymbol.IsOverride )
                     {
-                        // Introduction is an override, resolve to symbol in the base class.
+                        // Introduction is an override, resolve to the symbol in the base class.
                         return new ResolvedAspectReference(
                             containingSymbol,
                             referencedSymbol,

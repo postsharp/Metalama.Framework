@@ -118,6 +118,12 @@ namespace Metalama.Framework.Engine.Linking
                             // Edges representing resolved aspect references.
                             foreach ( var aspectReference in analysisResult.AspectReferences )
                             {
+                                if ( !SymbolEqualityComparer.Default.Equals( current.Symbol.ContainingType, aspectReference.ResolvedSemantic.Symbol.ContainingType ) )
+                                {
+                                    // Symbols declared in other types are not reachable.
+                                    continue;
+                                }
+
                                 DepthFirstSearch( aspectReference.ResolvedSemantic );
                             }
                         }

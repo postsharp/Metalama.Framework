@@ -169,7 +169,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
     public object TypedConstant( in TypedConstant typedConstant )
         => new BuiltUserExpression( this.SyntaxGenerator.TypedConstant( typedConstant ), typedConstant.Type );
 
-    public IExpression ThisExpression( INamedType type ) => new BuiltUserExpression( SyntaxFactory.ThisExpression(), type, false );
+    public IExpression ThisExpression( INamedType type ) => new BuiltUserExpression( SyntaxFactory.ThisExpression(), type );
 
     public IExpression ToExpression( IFieldOrProperty fieldOrProperty, IExpression? instance )
         => new FieldOrPropertyExpression( fieldOrProperty, (UserExpression?) instance );
