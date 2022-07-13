@@ -76,13 +76,13 @@ namespace Metalama.Framework.Aspects
                     },
                     _ => $"the aspect contains a declarative introduction and therefore cannot be applied to an interface" ) );
 
-            if ( adviceMember is IField field )
+            if ( adviceMember is IField )
             {
                 builder.Convert()
                     .To<IMemberOrNamedType>()
                     .MustSatisfy(
                         t => (t as INamedType ?? t.DeclaringType!).TypeKind is TypeKind.Class or TypeKind.RecordClass,
-                        t => $"the aspect introduces a field and therefore cannot be applied to a struct" );
+                        _ => $"the aspect introduces a field and cannot be applied to a struct in the current version" );
             }
         }
 

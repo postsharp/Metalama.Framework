@@ -54,9 +54,9 @@ namespace Metalama.Framework.Engine.Aspects
                 {
                     var eligibilityBuilder = new EligibilityBuilder<IDeclaration>();
 
-                    (((DeclarativeAdviceAttribute) declarativeAdvice.AdviceAttribute)).BuildAspectEligibility(
+                    ((DeclarativeAdviceAttribute) declarativeAdvice.AdviceAttribute!).BuildAspectEligibility(
                         eligibilityBuilder,
-                        declarativeAdvice.Declaration );
+                        declarativeAdvice.Declaration! );
 
                     this.EligibilityRule = eligibilityBuilder.Build();
                 }
