@@ -5,6 +5,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
 using System;
 
@@ -33,6 +34,14 @@ namespace Metalama.Framework.Engine.Advising
         {
             // TODO: order should be self if the target is introduced on the same layer.
             var targetMethod = this.TargetDeclaration.GetTarget( compilation );
+
+            if ( targetMethod.IsImplicit )
+            {
+                return AdviceImplementationResult.Failed(
+                    AdviceDiagnosticDescriptors.CannotOverrideImplicitMethod.CreateRoslynDiagnostic(
+                        targetMethod.GetDiagnosticLocation(),
+                        (this.Aspect.AspectClass.ShortName, targetMethod) ) );
+            }
 
             switch ( targetMethod.MethodKind )
             {

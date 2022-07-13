@@ -68,10 +68,6 @@
         <SubType>Code</SubType>
         <DependentUpon>Target_Struct_ImplementedInterface.cs</DependentUpon>
       </None>
-      <None Include="Tests\Aspects\Introductions\Fields\Target_Struct_Declarative_NoConstructor.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>Target_Struct_Declarative_NoConstructor.cs</DependentUpon>
-      </None>
       <None Include="Tests\Aspects\Introductions\Fields\Target_Struct_Declarative.t.cs">
         <SubType>Code</SubType>
         <DependentUpon>Target_Struct_Declarative.cs</DependentUpon>

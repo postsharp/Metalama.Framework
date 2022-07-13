@@ -21,11 +21,11 @@ namespace Metalama.Framework.Eligibility
         /// Gets an <see cref="IEligibilityBuilder"/> for the declaring type of the member validated by the current <see cref="IEligibilityBuilder"/>.
         /// </summary>
         public static IEligibilityBuilder<INamedType> DeclaringType<T>( this IEligibilityBuilder<T> eligibilityBuilder )
-            where T : IMember
+            where T : IMemberOrNamedType
         {
             return new ChildEligibilityBuilder<T, INamedType>(
                 eligibilityBuilder,
-                declaration => declaration.DeclaringType,
+                declaration => declaration as INamedType ?? declaration.DeclaringType!,
                 declarationDescription => $"the declaring type '{declarationDescription.Object.DeclaringType}'" );
         }
 

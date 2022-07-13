@@ -61,7 +61,7 @@ namespace Metalama.Framework.Aspects
         [Obsolete( "Not implemented." )]
         public OverrideStrategy WhenInherited { get; set; }
 
-        public override void BuildAspectEligibility( IEligibilityBuilder<IDeclaration> builder )
+        public override void BuildAspectEligibility( IEligibilityBuilder<IDeclaration> builder, IMemberOrNamedType adviceMember )
         {
             builder.MustBe<IMemberOrNamedType>();
 
@@ -75,6 +75,15 @@ namespace Metalama.Framework.Aspects
                         return t != null && t.TypeKind != TypeKind.Interface;
                     },
                     _ => $"the aspect contains a declarative introduction and therefore cannot be applied to an interface" ) );
+
+            if ( adviceMember is IField field )
+            {
+                builder.Convert()
+                    .To<IMemberOrNamedType>()
+                    .MustSatisfy(
+                        t => (t as INamedType ?? t.DeclaringType!).TypeKind is TypeKind.Class or TypeKind.RecordClass,
+                        t => $"the aspect introduces a field and therefore cannot be applied to a struct" );
+            }
         }
 
         public override void BuildAdvice( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder )

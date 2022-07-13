@@ -1,10 +1,2 @@
-    [Introduction]
-        internal struct TargetStruct { 
-    
-    public global::System.Int32 IntroducedField;
-    
-    public global::System.Int32 IntroducedField_Initializer = (global::System.Int32)42;
-    
-    public static global::System.Int32 IntroducedField_Static;
-    
-    public static global::System.Int32 IntroducedField_Static_Initializer = (global::System.Int32)42;}
+// CompileTimeAspectPipeline.ExecuteAsync failed. 
+// Error LAMA0037 on `Introduction`: `The aspect 'Introduction' cannot be applied to 'TargetStruct' because the aspect introduces a field and therefore cannot be applied to a struct.`

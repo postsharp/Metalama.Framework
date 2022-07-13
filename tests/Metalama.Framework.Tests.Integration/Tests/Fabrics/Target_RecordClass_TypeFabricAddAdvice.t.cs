@@ -1,4 +1,4 @@
-    internal record class TargetRecordClass
+    internal record TargetRecordClass
 {
         private int Method1( int a ) 
 { 

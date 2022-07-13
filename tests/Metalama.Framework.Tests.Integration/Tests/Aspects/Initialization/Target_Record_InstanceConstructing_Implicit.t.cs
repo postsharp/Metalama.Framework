@@ -1,14 +1,2 @@
-[Aspect]
-public record TargetRecord
-{
-    private int Method(int a)
-    {
-        return a;
-    }
-
-
-    public TargetRecord()
-    {
-        global::System.Console.WriteLine($"TargetRecord: Aspect");
-    }
-}
+// CompileTimeAspectPipeline.ExecuteAsync failed. 
+// Error LAMA0524 on `TargetRecord`: `The aspect 'Aspect' cannot add an initializer to 'TargetRecord' because it is a record.`

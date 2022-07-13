@@ -46,7 +46,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override bool IsAsync => false;
 
-        public override bool IsImplicit => this.GetSymbol().AssertNotNull().GetPrimarySyntaxReference() == null;
+        public override bool IsImplicit => this.Symbol.IsImplicitlyDeclared;
 
         public IMember? OverriddenMember => null;
 

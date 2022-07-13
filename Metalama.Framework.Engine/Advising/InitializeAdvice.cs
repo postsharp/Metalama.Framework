@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using System;
@@ -39,6 +40,14 @@ internal abstract class InitializeAdvice : Advice
         var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
 
         var containingType = targetDeclaration.GetDeclaringType().AssertNotNull();
+
+        if ( containingType.TypeKind is TypeKind.RecordClass or TypeKind.RecordStruct )
+        {
+            return AdviceImplementationResult.Failed(
+                AdviceDiagnosticDescriptors.CannotAddInitializerToRecord.CreateRoslynDiagnostic(
+                    containingType.GetDiagnosticLocation(),
+                    (this.Aspect.AspectClass.ShortName, containingType) ) );
+        }
 
         var staticConstructor =
             this.Kind == InitializerKind.BeforeTypeConstructor
