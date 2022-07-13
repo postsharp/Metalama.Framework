@@ -128,6 +128,8 @@ namespace Metalama.Framework.Engine.Advising
             else
             {
                 addTransformation( this.Builder );
+                
+                OverrideHelper.AddTransformationsForStructConstructors( targetDeclaration, this, addTransformation );
 
                 return AdviceImplementationResult.Success( AdviceOutcome.Default, this.Builder );
             }

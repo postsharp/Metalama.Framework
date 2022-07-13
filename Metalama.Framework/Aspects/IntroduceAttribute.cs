@@ -75,15 +75,6 @@ namespace Metalama.Framework.Aspects
                         return t != null && t.TypeKind != TypeKind.Interface;
                     },
                     _ => $"the aspect contains a declarative introduction and therefore cannot be applied to an interface" ) );
-
-            if ( adviceMember is IField )
-            {
-                builder.Convert()
-                    .To<IMemberOrNamedType>()
-                    .MustSatisfy(
-                        t => (t as INamedType ?? t.DeclaringType!).TypeKind is TypeKind.Class or TypeKind.RecordClass,
-                        _ => $"the aspect introduces a field and cannot be applied to a struct in the current version" );
-            }
         }
 
         public override void BuildAdvice( IMemberOrNamedType templateMember, string templateMemberId, IAspectBuilder<IDeclaration> builder )

@@ -488,6 +488,11 @@ namespace Metalama.Framework.Engine.Linking
                         memberLevelTransformations.Add( appendArgumentTransformation );
 
                         break;
+                    
+                    case (CallDefaultConstructorTransformation, _):
+                        memberLevelTransformations.HasCallDefaultConstructorTransformation = true;
+                        
+                        break;
 
                     default:
                         throw new AssertionFailedException();

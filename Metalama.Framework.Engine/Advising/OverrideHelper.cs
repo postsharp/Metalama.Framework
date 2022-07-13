@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.Advising
 {
     internal static class OverrideHelper
     {
-        public static IPropertyOrIndexer OverrideProperty(
+        public static IProperty OverrideProperty(
             IServiceProvider serviceProvider,
             Advice advice,
             IFieldOrPropertyOrIndexer targetDeclaration,
@@ -20,11 +20,15 @@ namespace Metalama.Framework.Engine.Advising
             IObjectReader tags,
             Action<ITransformation> addTransformation )
         {
+      
+
             if ( targetDeclaration is IField field )
             {
                 var promotedField = new PromotedField( serviceProvider, advice, field, tags );
                 addTransformation( promotedField );
                 addTransformation( new OverridePropertyTransformation( advice, promotedField, getTemplate, setTemplate, tags ) );
+                
+                AddTransformationsForStructConstructors(targetDeclaration.DeclaringType, advice, addTransformation);
 
                 return promotedField;
             }
@@ -32,11 +36,32 @@ namespace Metalama.Framework.Engine.Advising
             {
                 addTransformation( new OverridePropertyTransformation( advice, property, getTemplate, setTemplate, tags ) );
 
+                if ( property.IsAutoPropertyOrField )
+                {
+                    AddTransformationsForStructConstructors(targetDeclaration.DeclaringType, advice, addTransformation);
+                }
+
                 return property;
             }
             else
             {
                 throw new AssertionFailedException();
+            }
+        }
+        
+        public static void AddTransformationsForStructConstructors( INamedType type, Advice advice, Action<ITransformation> addTransformation )
+        {
+            if (type.TypeKind == TypeKind.Struct)
+            {
+                // If we are in a struct, make sure that all existing constructors call `this()`.
+
+                foreach (var constructor in type.Constructors)
+                {
+                    if (!constructor.IsImplicit && constructor.InitializerKind == ConstructorInitializerKind.None)
+                    {
+                        addTransformation( new CallDefaultConstructorTransformation( advice, constructor ) );
+                    }
+                }
             }
         }
     }

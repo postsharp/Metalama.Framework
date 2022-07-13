@@ -10,7 +10,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Advising
 {
-    internal class OverrideFieldOrPropertyAdvice : OverrideMemberAdvice<IFieldOrPropertyOrIndexer>
+    internal class OverrideFieldOrPropertyAdvice : OverrideMemberAdvice<IFieldOrProperty>
     {
         public TemplateMember<IProperty> PropertyTemplate { get; }
 
@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Advising
         public OverrideFieldOrPropertyAdvice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
-            IFieldOrPropertyOrIndexer targetDeclaration,
+            IFieldOrProperty targetDeclaration,
             ICompilation sourceCompilation,
             TemplateMember<IProperty> propertyTemplate,
             BoundTemplateMethod getTemplate,
@@ -53,6 +53,8 @@ namespace Metalama.Framework.Engine.Advising
                 this.Tags,
                 addTransformation );
 
+       
+            
             return AdviceImplementationResult.Success( promotedField );
         }
     }

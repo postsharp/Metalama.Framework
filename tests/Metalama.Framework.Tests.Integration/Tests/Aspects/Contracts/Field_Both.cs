@@ -33,5 +33,10 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Field_Bot
     {
         [NotNull]
         private string q;
+
+        public TargetStruct( string q )
+        {
+            this.q = q;
+        }
     }
 }
