@@ -2,22 +2,18 @@ using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Fabrics;
 
-namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.Target_RecordClass_TypeFabricAddAdvice
+namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.Target_Record_TypeFabricAddAdvice_Implicit
 {
     // <target>
-    internal record TargetRecordClass
+    internal record TargetRecord
     {
-        private int Method1( int a ) => a;
-
-        private string Method2( string s ) => s;
-
         private class Fabric : TypeFabric
         {
             public override void AmendType( ITypeAmender amender )
             {
                 foreach (var method in amender.Type.Methods)
                 {
-                    if (!method.IsImplicit)
+                    if (method.IsImplicit)
                     {
                         amender.Advices.Override( method, nameof(Template) );
                     }

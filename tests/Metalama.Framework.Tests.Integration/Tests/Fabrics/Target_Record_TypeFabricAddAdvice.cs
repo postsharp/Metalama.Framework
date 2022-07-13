@@ -2,7 +2,7 @@ using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Fabrics;
 
-namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.TypeFabricAddAdvice
+namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.Target_Record_TypeFabricAddAdvice
 {
     // <target>
     internal record TargetRecord
