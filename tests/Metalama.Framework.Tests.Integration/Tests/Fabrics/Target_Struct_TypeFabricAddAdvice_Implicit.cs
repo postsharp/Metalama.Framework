@@ -2,7 +2,7 @@ using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Fabrics;
 
-namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.Target_Struct__TypeFabricAddAdvice
+namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.Target_Struct__TypeFabricAddAdvice_Implicit
 {
     // <target>
     internal struct TargetStruct
@@ -17,7 +17,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.Target_Struct_
             {
                 foreach (var method in amender.Type.Methods)
                 {
-                    if (!method.IsImplicit)
+                    if (method.IsImplicit)
                     {
                         amender.Advices.Override(method, nameof(Template));
                     }

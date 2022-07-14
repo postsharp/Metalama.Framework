@@ -45,25 +45,6 @@
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
     </ItemGroup>
 
-    <ItemGroup>
-      <None Include="Tests\Aspects\Inheritance\Target_Struct_ImplementedGenericInterfaceMethod.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>Target_Struct_ImplementedGenericInterfaceMethod.cs</DependentUpon>
-      </None>
-      <None Include="Tests\Aspects\Inheritance\Target_Struct_ImplementedInterfaceMethod.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>Target_Struct_ImplementedInterfaceMethod.cs</DependentUpon>
-      </None>
-      <None Include="Tests\Aspects\Inheritance\Target_Struct_ImplementedInterface.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>Target_Struct_ImplementedInterface.cs</DependentUpon>
-      </None>
-      <None Include="Tests\Aspects\Introductions\Fields\Target_Struct_Declarative.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>Target_Struct_Declarative.cs</DependentUpon>
-      </None>
-    </ItemGroup>
-
     <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets" />
 
 </Project>
