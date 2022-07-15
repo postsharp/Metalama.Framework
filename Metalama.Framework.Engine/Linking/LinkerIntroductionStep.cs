@@ -54,6 +54,7 @@ namespace Metalama.Framework.Engine.Linking
                     .OrderBy( x => x.ParentAdvice.AspectLayerId, new AspectLayerIdComparer( input.OrderedAspectLayers ) )
                     .ToList();
 
+            // TODO: this series of calls to Index* methods can be optimized to avoid repeated type checks of the transformations.
             IndexReplaceTransformations( input, allTransformations, syntaxTransformationCollection, out var replacedTransformations );
 
             IndexOverrideTransformations(
@@ -80,6 +81,8 @@ namespace Metalama.Framework.Engine.Linking
                 out var syntaxMemberLevelTransformations,
                 out var introductionMemberLevelTransformations );
 
+            this.IndexTypeLevelTransformations( allTransformations, out var typeLevelTransformations );
+
             IndexNodesWithModifiedAttributes( allTransformations, out var nodesWithModifiedAttributes );
 
             FindPrimarySyntaxTreeForGlobalAttributes( input.CompilationModel, out var syntaxTreeForGlobalAttributes );
@@ -98,7 +101,8 @@ namespace Metalama.Framework.Engine.Linking
                 syntaxMemberLevelTransformations,
                 introductionMemberLevelTransformations,
                 nodesWithModifiedAttributes,
-                syntaxTreeForGlobalAttributes );
+                syntaxTreeForGlobalAttributes,
+                typeLevelTransformations );
 
             var syntaxTreeMapping = new Dictionary<SyntaxTree, SyntaxTree>();
 
@@ -380,6 +384,42 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
+        private void IndexTypeLevelTransformations(
+            List<ITransformation> allTransformations,
+            out Dictionary<TypeDeclarationSyntax, TypeLevelTransformations> typeLevelTransformations )
+        {
+            typeLevelTransformations = new Dictionary<TypeDeclarationSyntax, TypeLevelTransformations>();
+
+            foreach ( var transformation in allTransformations.OfType<ITypeLevelTransformation>() )
+            {
+                TypeLevelTransformations? theseTypeLevelTransformations;
+                var declarationSyntax = (TypeDeclarationSyntax?) transformation.TargetType.GetPrimaryDeclarationSyntax();
+
+                if ( declarationSyntax != null )
+                {
+                    if ( !typeLevelTransformations.TryGetValue( declarationSyntax, out theseTypeLevelTransformations ) )
+                    {
+                        typeLevelTransformations[declarationSyntax] = theseTypeLevelTransformations = new TypeLevelTransformations();
+                    }
+                }
+                else
+                {
+                    continue;
+                }
+
+                switch ( transformation )
+                {
+                    case AddExplicitDefaultConstructorTransformation:
+                        theseTypeLevelTransformations.AddExplicitDefaultConstructor = true;
+
+                        break;
+
+                    default:
+                        throw new AssertionFailedException();
+                }
+            }
+        }
+
         private void IndexMemberLevelTransformations(
             AspectLinkerInput input,
             UserDiagnosticSink diagnostics,
@@ -488,10 +528,10 @@ namespace Metalama.Framework.Engine.Linking
                         memberLevelTransformations.Add( appendArgumentTransformation );
 
                         break;
-                    
+
                     case (CallDefaultConstructorTransformation, _):
                         memberLevelTransformations.HasCallDefaultConstructorTransformation = true;
-                        
+
                         break;
 
                     default:

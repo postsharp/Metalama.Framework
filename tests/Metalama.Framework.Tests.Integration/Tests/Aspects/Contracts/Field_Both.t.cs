@@ -32,9 +32,11 @@ set
 
 internal struct TargetStruct
     {
+public TargetStruct()
+{
+}
 
-
-private global::System.String _q1;
+private global::System.String _q1 = default;
 
 
 [global::Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Field_Both.NotNullAttribute]
@@ -60,7 +62,7 @@ set
 
         this._q1=value;
 }
-}
+} 
         public TargetStruct( string q )
 :this()        {
             this.q = q;

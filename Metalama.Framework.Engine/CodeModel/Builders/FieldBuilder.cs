@@ -7,6 +7,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
@@ -69,6 +70,12 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 this._initializerTags,
                 out var initializerExpression,
                 out var initializerMethod );
+
+            // If we are introducing a field into a struct, it must have an explicit default value.
+            if ( initializerExpression == null && this.DeclaringType.TypeKind is TypeKind.Struct or TypeKind.RecordStruct )
+            {
+                initializerExpression = SyntaxFactoryEx.Default;
+            }
 
             var field =
                 FieldDeclaration(

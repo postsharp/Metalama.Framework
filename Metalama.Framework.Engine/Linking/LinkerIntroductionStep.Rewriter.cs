@@ -10,7 +10,9 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -35,6 +37,7 @@ namespace Metalama.Framework.Engine.Linking
             private readonly IReadOnlyDictionary<IIntroduceMemberTransformation, MemberLevelTransformations> _introductionMemberLevelTransformations;
             private readonly HashSet<SyntaxNode> _nodesWithModifiedAttributes;
             private readonly SyntaxTree _syntaxTreeForGlobalAttributes;
+            private readonly Dictionary<TypeDeclarationSyntax, TypeLevelTransformations> _typeLevelTransformations;
 
             // Maps a diagnostic id to the number of times it has been suppressed.
             private ImmutableHashSet<string> _activeSuppressions = ImmutableHashSet.Create<string>( StringComparer.OrdinalIgnoreCase );
@@ -48,7 +51,8 @@ namespace Metalama.Framework.Engine.Linking
                 IReadOnlyDictionary<SyntaxNode, MemberLevelTransformations> symbolMemberLevelTransformations,
                 IReadOnlyDictionary<IIntroduceMemberTransformation, MemberLevelTransformations> introductionMemberLevelTransformations,
                 HashSet<SyntaxNode> nodesWithModifiedAttributes,
-                SyntaxTree syntaxTreeForGlobalAttributes )
+                SyntaxTree syntaxTreeForGlobalAttributes,
+                Dictionary<TypeDeclarationSyntax, TypeLevelTransformations> typeLevelTransformations )
             {
                 this._syntaxGenerationContextFactory = new SyntaxGenerationContextFactory( compilation.RoslynCompilation, serviceProvider );
                 this._diagnosticSuppressions = diagnosticSuppressions;
@@ -59,6 +63,7 @@ namespace Metalama.Framework.Engine.Linking
                 this._introductionMemberLevelTransformations = introductionMemberLevelTransformations;
                 this._nodesWithModifiedAttributes = nodesWithModifiedAttributes;
                 this._syntaxTreeForGlobalAttributes = syntaxTreeForGlobalAttributes;
+                this._typeLevelTransformations = typeLevelTransformations;
             }
 
             public override bool VisitIntoStructuredTrivia => true;
@@ -296,17 +301,96 @@ namespace Metalama.Framework.Engine.Linking
 
             public override SyntaxNode? VisitInterfaceDeclaration( InterfaceDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
 
-            public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+            public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node )
+                => this.VisitTypeDeclaration(
+                    node,
+                    ( syntax, members ) =>
+                    {
+                        // If the record has no braces, add them.
+                        if ( syntax.OpenBraceToken.IsKind( SyntaxKind.None ) && members.Count > 0 )
+                        {
+                            // TODO: trivias.
+                            syntax = syntax
+                                .WithOpenBraceToken( Token( SyntaxKind.OpenBraceToken ).AddColoringAnnotation( TextSpanClassification.GeneratedCode ) )
+                                .WithCloseBraceToken( Token( SyntaxKind.CloseBraceToken ).AddColoringAnnotation( TextSpanClassification.GeneratedCode ) )
+                                .WithSemicolonToken( default );
+                        }
 
-            private SyntaxNode? VisitTypeDeclaration( TypeDeclarationSyntax node )
+                        return syntax.WithMembers( List( members ) );
+                    } );
+
+            private SyntaxNode? VisitTypeDeclaration<T>( T node, Func<T, List<MemberDeclarationSyntax>, T>? withMembers = null )
+                where T : TypeDeclarationSyntax
             {
                 var originalNode = node;
                 var members = new List<MemberDeclarationSyntax>( node.Members.Count );
                 var additionalBaseList = this._introducedMemberCollection.GetIntroducedInterfacesForTypeDeclaration( node );
                 var syntaxGenerationContext = this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( node );
 
-                using ( var classSuppressions = this.WithSuppressions( node ) )
+                if ( this._typeLevelTransformations.TryGetValue( node, out var typeLevelTransformations ) )
                 {
+                    if ( typeLevelTransformations.AddExplicitDefaultConstructor )
+                    {
+                        // Initialize fields to their default value in the new initializer.
+                        var constructorStatements = new List<StatementSyntax>();
+
+                        void AddInitialization( SyntaxToken identifier )
+                        {
+                            constructorStatements.Add(
+                                ExpressionStatement(
+                                    AssignmentExpression( SyntaxKind.SimpleAssignmentExpression, IdentifierName( identifier ), SyntaxFactoryEx.Default ) ) );
+                        }
+
+                        var typeSymbol = this._compilation.RoslynCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node );
+
+                        if ( typeSymbol != null )
+                        {
+                            foreach ( var member in typeSymbol.GetMembers() )
+                            {
+                                if ( member.GetDeclarationKind() is DeclarationKind.Field or DeclarationKind.Property )
+                                {
+                                    var memberSyntax = member.GetPrimaryDeclaration();
+
+                                    switch ( memberSyntax )
+                                    {
+                                        case PropertyDeclarationSyntax property:
+                                            if ( property.Initializer == null && ((IPropertySymbol) member).IsAutoProperty() )
+                                            {
+                                                AddInitialization( property.Identifier );
+                                            }
+
+                                            break;
+
+                                        case VariableDeclaratorSyntax field:
+                                            if ( field.Initializer == null && !this._introducedMemberCollection.IsRemovedSyntax( field ) )
+                                            {
+                                                AddInitialization( field.Identifier );
+                                            }
+
+                                            break;
+
+                                        default:
+                                            throw new AssertionFailedException();
+                                    }
+                                }
+                            }
+                        }
+
+                        var constructorBody = Block( constructorStatements );
+
+                        var constructor = ConstructorDeclaration( node.Identifier )
+                            .WithModifiers( TokenList( Token( SyntaxKind.PublicKeyword ) ) )
+                            .WithBody( constructorBody )
+                            .NormalizeWhitespace()
+                            .AddColoringAnnotation( TextSpanClassification.GeneratedCode );
+
+                        members.Add( constructor );
+                    }
+                }
+
+                using ( var suppressionContext = this.WithSuppressions( node ) )
+                {
+                    // Process the type members.
                     foreach ( var member in node.Members )
                     {
                         foreach ( var visitedMember in this.VisitMember( member ) )
@@ -324,13 +408,23 @@ namespace Metalama.Framework.Engine.Linking
 
                     AddIntroductionsOnPosition( new InsertPosition( InsertPositionRelation.Within, node ) );
 
-                    node = this.AddSuppression( node, classSuppressions.NewSuppressions ).WithMembers( List( members ) );
+                    node = this.AddSuppression( node, suppressionContext.NewSuppressions );
 
+                    if ( withMembers != null )
+                    {
+                        node = withMembers( node, members );
+                    }
+                    else
+                    {
+                        node = (T) node.WithMembers( List( members ) );
+                    }
+
+                    // Process the type bases.
                     if ( additionalBaseList.Any() )
                     {
                         if ( node.BaseList == null )
                         {
-                            node = node
+                            node = (T) node
                                 .WithIdentifier( node.Identifier.WithTrailingTrivia() )
                                 .WithBaseList(
                                     BaseList( SeparatedList( additionalBaseList ) )
@@ -339,7 +433,7 @@ namespace Metalama.Framework.Engine.Linking
                         }
                         else
                         {
-                            node = node.WithBaseList(
+                            node = (T) node.WithBaseList(
                                 BaseList(
                                     node.BaseList.Types.AddRange(
                                         additionalBaseList.Select(
@@ -349,7 +443,7 @@ namespace Metalama.Framework.Engine.Linking
 
                     // Rewrite attributes.
                     var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
-                    node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
+                    node = (T) node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
 
                     return node;
                 }

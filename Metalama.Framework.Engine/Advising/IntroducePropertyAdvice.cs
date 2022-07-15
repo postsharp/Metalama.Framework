@@ -131,8 +131,8 @@ namespace Metalama.Framework.Engine.Advising
                 {
                     // Introduced auto property.
                     addTransformation( this.Builder );
-                    
-                    OverrideHelper.AddTransformationsForStructConstructors( targetDeclaration, this, addTransformation );
+
+                    OverrideHelper.AddTransformationsForStructField( targetDeclaration, this, addTransformation );
 
                     return AdviceImplementationResult.Success( this.Builder );
                 }

@@ -1,8 +1,10 @@
 internal record struct TargetRecordStruct
 {
+    public TargetRecordStruct()
+    {
+    }
 
-
-    private global::System.Int32 _field;
+    private global::System.Int32 _field = default;
 
 
     [global::Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.Target_RecordStruct_Simple.TestAttribute]
@@ -20,7 +22,7 @@ internal record struct TargetRecordStruct
         }
     }
 
-    private static global::System.Int32 _staticField;
+    private static global::System.Int32 _staticField = default;
 
 
     [global::Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.Target_RecordStruct_Simple.TestAttribute]

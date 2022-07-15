@@ -1,24 +1,8 @@
-    internal record struct TargetRecordStruct
-    {
-        private int Method1( int a ) 
-{ 
-    return a;
-}
-
-        private string Method2( string s ) 
-{ 
-    return s;
-}
-#pragma warning disable CS0067
-
-        private class Fabric : TypeFabric
-        {
-            public override void AmendType(ITypeAmender amender) => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
-
-
-            [Template]
-private dynamic? Template() => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
-
-        }
-#pragma warning restore CS0067
-    }
+// CompileTimeAspectPipeline.ExecuteAsync failed. 
+// Error LAMA0517 on `TargetRecordStruct`: `The aspect '<Fabric>' cannot override 'TargetRecordStruct.Equals(TargetRecordStruct)' because it is implicitly declared.`
+// Error LAMA0517 on `TargetRecordStruct`: `The aspect '<Fabric>' cannot override 'TargetRecordStruct.Equals(object)' because it is implicitly declared.`
+// Error LAMA0517 on `TargetRecordStruct`: `The aspect '<Fabric>' cannot override 'TargetRecordStruct.GetHashCode()' because it is implicitly declared.`
+// Error LAMA0517 on `TargetRecordStruct`: `The aspect '<Fabric>' cannot override 'TargetRecordStruct.PrintMembers(StringBuilder)' because it is implicitly declared.`
+// Error LAMA0517 on `TargetRecordStruct`: `The aspect '<Fabric>' cannot override 'TargetRecordStruct.ToString()' because it is implicitly declared.`
+// Error LAMA0517 on `TargetRecordStruct`: `The aspect '<Fabric>' cannot override 'TargetRecordStruct.operator !=(TargetRecordStruct, TargetRecordStruct)' because it is implicitly declared.`
+// Error LAMA0517 on `TargetRecordStruct`: `The aspect '<Fabric>' cannot override 'TargetRecordStruct.operator ==(TargetRecordStruct, TargetRecordStruct)' because it is implicitly declared.`

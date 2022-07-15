@@ -1,8 +1,10 @@
 internal struct TargetStruct
 {
+    public TargetStruct()
+    {
+    }
 
-
-    private global::System.Int32 _field;
+    private global::System.Int32 _field = default;
 
 
     [global::Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.Target_Struct_Simple.TestAttribute]
@@ -20,7 +22,7 @@ internal struct TargetStruct
         }
     }
 
-    private static global::System.Int32 _staticField;
+    private static global::System.Int32 _staticField = default;
 
 
     [global::Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.Target_Struct_Simple.TestAttribute]

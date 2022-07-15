@@ -66,7 +66,7 @@ namespace Metalama.Framework.Engine.Advising
                 case IField field:
                     var promotedField = new PromotedField( serviceProvider, this, field, ObjectReader.Empty );
                     addTransformation( promotedField );
-                    OverrideHelper.AddTransformationsForStructConstructors( field.DeclaringType, this, addTransformation );
+                    OverrideHelper.AddTransformationsForStructField( field.DeclaringType, this, addTransformation );
                     addTransformation( new FilterPropertyTransformation( this, promotedField ) );
 
                     return AdviceImplementationResult.Success( promotedField );

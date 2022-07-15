@@ -26,12 +26,4 @@ namespace Metalama.Framework.Engine.Transformations
         // TODO: There is currently no notion of order of inserted statements, they are just inserted in transformation order.
         //       This is fine for initialization, which is currently the only use case.
     }
-
-    internal interface IMemberLevelTransformation : ITransformation
-    {
-        /// <summary>
-        /// Gets a target method base of this code transformation.
-        /// </summary>
-        IMember TargetMember { get; }
-    }
 }

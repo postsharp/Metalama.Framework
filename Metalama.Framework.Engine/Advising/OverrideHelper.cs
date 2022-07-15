@@ -6,6 +6,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Transformations;
 using System;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.Advising
 {
@@ -20,15 +21,13 @@ namespace Metalama.Framework.Engine.Advising
             IObjectReader tags,
             Action<ITransformation> addTransformation )
         {
-      
-
             if ( targetDeclaration is IField field )
             {
                 var promotedField = new PromotedField( serviceProvider, advice, field, tags );
                 addTransformation( promotedField );
                 addTransformation( new OverridePropertyTransformation( advice, promotedField, getTemplate, setTemplate, tags ) );
-                
-                AddTransformationsForStructConstructors(targetDeclaration.DeclaringType, advice, addTransformation);
+
+                AddTransformationsForStructField( targetDeclaration.DeclaringType, advice, addTransformation );
 
                 return promotedField;
             }
@@ -38,7 +37,7 @@ namespace Metalama.Framework.Engine.Advising
 
                 if ( property.IsAutoPropertyOrField )
                 {
-                    AddTransformationsForStructConstructors(targetDeclaration.DeclaringType, advice, addTransformation);
+                    AddTransformationsForStructField( targetDeclaration.DeclaringType, advice, addTransformation );
                 }
 
                 return property;
@@ -48,19 +47,25 @@ namespace Metalama.Framework.Engine.Advising
                 throw new AssertionFailedException();
             }
         }
-        
-        public static void AddTransformationsForStructConstructors( INamedType type, Advice advice, Action<ITransformation> addTransformation )
+
+        public static void AddTransformationsForStructField( INamedType type, Advice advice, Action<ITransformation> addTransformation )
         {
-            if (type.TypeKind == TypeKind.Struct)
+            if ( type.TypeKind is TypeKind.Struct or TypeKind.RecordStruct )
             {
                 // If we are in a struct, make sure that all existing constructors call `this()`.
 
-                foreach (var constructor in type.Constructors)
+                foreach ( var constructor in type.Constructors )
                 {
-                    if (!constructor.IsImplicit && constructor.InitializerKind == ConstructorInitializerKind.None)
+                    if ( !constructor.IsImplicit && constructor.InitializerKind == ConstructorInitializerKind.None )
                     {
                         addTransformation( new CallDefaultConstructorTransformation( advice, constructor ) );
                     }
+                }
+
+                // If there is no 'this()' constructor, add one.
+                if ( !type.Constructors.Any( c => !c.IsImplicit && c.Parameters.Count == 0 ) )
+                {
+                    addTransformation( new AddExplicitDefaultConstructorTransformation( advice, type ) );
                 }
             }
         }
