@@ -1,19 +1,15 @@
-using Metalama.Framework.Aspects;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Constructor_Parameter
 {
     internal class NotNullAttribute : ContractAspect
     {
-        public override void Validate(dynamic? value)
+        public override void Validate( dynamic? value )
         {
             if (value == null)
             {
-                throw new ArgumentNullException(meta.Target.Parameter.Name);
+                throw new ArgumentNullException( meta.Target.Parameter.Name );
             }
         }
     }
@@ -21,9 +17,6 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Construct
     // <target>
     internal class Target
     {
-        public Target([NotNull] string m) {
-
-Console.WriteLine("Jelen");
- }
+        public Target( [NotNull] string m ) { }
     }
 }

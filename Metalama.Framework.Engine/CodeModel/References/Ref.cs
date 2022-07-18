@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Reflection;
 using MethodKind = Metalama.Framework.Code.MethodKind;
 
@@ -93,9 +94,9 @@ namespace Metalama.Framework.Engine.CodeModel.References
         /// <summary>
         /// Creates a <see cref="Ref{T}"/> from a Roslyn symbol.
         /// </summary>
-        public static Ref<T> FromSymbol<T>( ISymbol symbol, Compilation compilation )
+        public static Ref<T> FromSymbol<T>( ISymbol symbol, Compilation compilation, DeclarationRefTargetKind targetKind = DeclarationRefTargetKind.Default )
             where T : class, ICompilationElement
-            => new( symbol, compilation );
+            => new( symbol, compilation, targetKind );
 
         public static Ref<IDeclaration> ReturnParameter( IMethodSymbol methodSymbol, Compilation compilation )
             => new( methodSymbol, compilation, DeclarationRefTargetKind.Return );
@@ -293,6 +294,9 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
                 case DeclarationRefTargetKind.Parameter when symbol is IMethodSymbol method:
                     return method.Parameters[0];
+
+                case DeclarationRefTargetKind.Property when symbol is IParameterSymbol parameter:
+                    return parameter.ContainingType.GetMembers( symbol.Name ).OfType<IPropertySymbol>().Single();
 
                 default:
                     throw new AssertionFailedException( $"Don't know how to get the symbol kind {this.TargetKind} for a {symbol.Kind}." );

@@ -4,6 +4,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Eligibility;
 using System;
+using System.Linq;
 
 namespace Metalama.Framework.Aspects
 {
@@ -152,14 +153,27 @@ namespace Metalama.Framework.Aspects
                     ? GetReturnParameterEligibilityRule( this.Direction )
                     : GetParameterEligibilityRule( this.Direction );
 
-            if ( eligibilityRule != null && !builder.VerifyEligibility( eligibilityRule ) )
+            if ( !builder.VerifyEligibility( eligibilityRule ) )
             {
                 // The aspect cannot be applied, but errors have been reported by the CheckEligibility method.
 
                 return;
             }
 
-            builder.Advice.AddContract( builder.Target, nameof(this.Validate), this.Direction );
+            // If the aspect is applied to a record positional parameter, add the contract to the corresponding property.
+            var parameter = builder.Target;
+
+            IProperty? property;
+
+            if ( parameter.DeclaringMember is IConstructor constructor && constructor.DeclaringType.TypeKind is TypeKind.RecordClass or TypeKind.RecordStruct &&
+                 ((property = constructor.DeclaringType.Properties.OfName( builder.Target.Name ).SingleOrDefault()) != null) )
+            {
+                builder.Advice.AddContract( property, nameof(this.Validate), this.Direction );
+            }
+            else
+            {
+                builder.Advice.AddContract( parameter, nameof(this.Validate), this.Direction );
+            }
         }
 
         public virtual void BuildEligibility( IEligibilityBuilder<IFieldOrPropertyOrIndexer> builder ) { }

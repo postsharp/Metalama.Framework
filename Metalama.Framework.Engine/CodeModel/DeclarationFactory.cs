@@ -268,6 +268,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
                         // The property itself.
                         DeclarationRefTargetKind.Default => propertyOrIndexer,
+                        DeclarationRefTargetKind.Property => propertyOrIndexer,
                         _ => throw new AssertionFailedException()
                     };
 
