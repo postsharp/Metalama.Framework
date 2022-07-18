@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Advising;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -14,9 +15,39 @@ using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.Transformations
 {
-    internal class FilterMethodTransformation : OverrideMethodBaseTransformation
+    internal class ContractConstructorTransformation : BaseTransformation, IInsertStatementTransformation
     {
-        public FilterMethodTransformation( ContractAdvice advice, IMethod overriddenDeclaration ) :
+        public ContractConstructorTransformation( Advice advice, IConstructor constructor ) : base( advice )
+        {
+            this.TargetMember = constructor;
+        }
+
+        public IMember TargetMember { get; set; }
+
+        public IMemberOrNamedType ContextDeclaration => this.TargetMember;
+
+        public IEnumerable<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
+        {
+            var advice = (ContractAdvice) this.ParentAdvice;
+
+            // Execute the templates.
+
+            _ = advice.TryExecuteTemplates( this.TargetMember, context, ContractDirection.Input, null, out var inputFilterBodies );
+
+            if ( inputFilterBodies == null )
+            {
+                return Array.Empty<InsertedStatement>();
+            }
+            else
+            {
+                return inputFilterBodies.Select( x => new InsertedStatement( x, this.TargetMember ) );
+            }
+        }
+    }
+
+    internal class ContractMethodTransformation : OverrideMethodBaseTransformation
+    {
+        public ContractMethodTransformation( ContractAdvice advice, IMethod overriddenDeclaration ) :
             base( advice, overriddenDeclaration, ObjectReader.Empty ) { }
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )

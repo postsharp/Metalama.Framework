@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
+using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Transformations
 {
@@ -21,7 +22,7 @@ namespace Metalama.Framework.Engine.Transformations
         /// </summary>
         /// <param name="context"></param>
         /// <returns>Inserted statement or <c>null</c> if an error has occured.</returns>
-        InsertedStatement? GetInsertedStatement( InsertStatementTransformationContext context );
+        IEnumerable<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context );
 
         // TODO: There is currently no notion of order of inserted statements, they are just inserted in transformation order.
         //       This is fine for initialization, which is currently the only use case.

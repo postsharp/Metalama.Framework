@@ -476,16 +476,14 @@ namespace Metalama.Framework.Engine.Linking
                                 input.InitialCompilation.Compilation,
                                 primaryDeclaration );
 
-                            var insertedStatement = GetInsertedStatement( insertStatementTransformation, syntaxGenerationContext );
-
-                            if ( insertedStatement != null )
+                            foreach ( var insertedStatement in GetInsertedStatements( insertStatementTransformation, syntaxGenerationContext ) )
                             {
                                 memberLevelTransformations.Add(
                                     new LinkerInsertedStatement(
                                         transformation,
                                         primaryDeclaration,
-                                        insertedStatement.Value.Statement,
-                                        insertedStatement.Value.ContextDeclaration ) );
+                                        insertedStatement.Statement,
+                                        insertedStatement.ContextDeclaration ) );
                             }
 
                             break;
@@ -504,16 +502,14 @@ namespace Metalama.Framework.Engine.Linking
                                 constructorBuilder.PrimarySyntaxTree.AssertNotNull(),
                                 positionInSyntaxTree );
 
-                            var insertedStatement = GetInsertedStatement( insertStatementTransformation, syntaxGenerationContext );
-
-                            if ( insertedStatement != null )
+                            foreach ( var insertedStatement in GetInsertedStatements( insertStatementTransformation, syntaxGenerationContext ) )
                             {
                                 memberLevelTransformations.Add(
                                     new LinkerInsertedStatement(
                                         transformation,
                                         constructorBuilder,
-                                        insertedStatement.Value.Statement,
-                                        insertedStatement.Value.ContextDeclaration ) );
+                                        insertedStatement.Statement,
+                                        insertedStatement.ContextDeclaration ) );
                             }
 
                             break;
@@ -538,7 +534,7 @@ namespace Metalama.Framework.Engine.Linking
                         throw new AssertionFailedException();
                 }
 
-                InsertedStatement? GetInsertedStatement(
+                IEnumerable<InsertedStatement> GetInsertedStatements(
                     IInsertStatementTransformation insertStatementTransformation,
                     SyntaxGenerationContext syntaxGenerationContext )
                 {
@@ -546,14 +542,16 @@ namespace Metalama.Framework.Engine.Linking
                         diagnostics,
                         lexicalScopeFactory,
                         syntaxGenerationContext,
-                        this._serviceProvider );
+                        this._serviceProvider,
+                        input.CompilationModel );
 
-                    var statement = insertStatementTransformation.GetInsertedStatement( context );
-
+                    var statements = insertStatementTransformation.GetInsertedStatements( context );
 #if DEBUG
-                    if ( statement != null )
+                    statements = statements.ToList();
+
+                    foreach ( var statement in statements )
                     {
-                        if ( statement.Value.Statement is BlockSyntax block )
+                        if ( statement.Statement is BlockSyntax block )
                         {
                             if ( !block.Statements.All( s => s.HasAnnotations( FormattingAnnotations.GeneratedCodeAnnotationKind ) ) )
                             {
@@ -562,7 +560,7 @@ namespace Metalama.Framework.Engine.Linking
                         }
                         else
                         {
-                            if ( !statement.Value.Statement.HasAnnotations( FormattingAnnotations.GeneratedCodeAnnotationKind ) )
+                            if ( !statement.Statement.HasAnnotations( FormattingAnnotations.GeneratedCodeAnnotationKind ) )
                             {
                                 throw new AssertionFailedException();
                             }
@@ -570,7 +568,7 @@ namespace Metalama.Framework.Engine.Linking
                     }
 #endif
 
-                    return statement;
+                    return statements;
                 }
             }
         }

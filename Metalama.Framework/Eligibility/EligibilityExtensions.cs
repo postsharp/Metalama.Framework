@@ -83,6 +83,14 @@ namespace Metalama.Framework.Eligibility
                 _ => $"" );
         }
 
+        public static IEligibilityBuilder<INamedType> DeclaringType( this IEligibilityBuilder<IMember> eligibilityBuilder )
+            => new ChildEligibilityBuilder<IMember, INamedType>(
+                eligibilityBuilder,
+                d => d.DeclaringType,
+                d => $"{d.Object.DeclaringType}",
+                _ => true,
+                _ => $"" );
+
         /// <summary>
         /// Gets an <see cref="IEligibilityBuilder"/> for the same declaration as the current <see cref="IEligibilityBuilder"/>
         /// but that is applicable only to specified <see cref="EligibleScenarios"/>.

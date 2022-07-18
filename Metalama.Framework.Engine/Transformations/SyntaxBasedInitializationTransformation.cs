@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Transformations;
 
@@ -31,12 +32,15 @@ internal class SyntaxBasedInitializationTransformation : BaseTransformation, IIn
         this._initializationStatement = initializationStatement;
     }
 
-    public InsertedStatement? GetInsertedStatement( InsertStatementTransformationContext context )
+    public IEnumerable<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
     {
-        return new InsertedStatement(
-            this._initializationStatement( context.SyntaxGenerationContext )
-                .WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation )
-                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
-            this.ContextDeclaration );
+        return new[]
+        {
+            new InsertedStatement(
+                this._initializationStatement( context.SyntaxGenerationContext )
+                    .WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation )
+                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
+                this.ContextDeclaration )
+        };
     }
 }
