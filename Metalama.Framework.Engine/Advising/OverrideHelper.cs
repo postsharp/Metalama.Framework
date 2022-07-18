@@ -56,14 +56,14 @@ namespace Metalama.Framework.Engine.Advising
 
                 foreach ( var constructor in type.Constructors )
                 {
-                    if ( !constructor.IsImplicit && constructor.InitializerKind == ConstructorInitializerKind.None )
+                    if ( !constructor.IsImplicitlyDeclared && constructor.InitializerKind == ConstructorInitializerKind.None )
                     {
                         addTransformation( new CallDefaultConstructorTransformation( advice, constructor ) );
                     }
                 }
 
                 // If there is no 'this()' constructor, add one.
-                if ( !type.Constructors.Any( c => !c.IsImplicit && c.Parameters.Count == 0 ) )
+                if ( !type.Constructors.Any( c => !c.IsImplicitlyDeclared && c.Parameters.Count == 0 ) )
                 {
                     addTransformation( new AddExplicitDefaultConstructorTransformation( advice, type ) );
                 }

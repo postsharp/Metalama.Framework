@@ -88,7 +88,7 @@ namespace Metalama.Framework.Engine.Linking
                 return Array.Empty<LinkerIntroducedMember>();
             }
 
-            var memberDeclaration = GetContainingMemberDeclaration( declaringSyntax );
+            var memberDeclaration = GetMemberDeclaration( declaringSyntax );
 
             var annotation = memberDeclaration.GetAnnotations( IntroducedNodeIdAnnotationId ).SingleOrDefault();
 
@@ -126,12 +126,13 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private static MemberDeclarationSyntax GetContainingMemberDeclaration( SyntaxNode declaringSyntax )
+        private static SyntaxNode GetMemberDeclaration( SyntaxNode declaringSyntax )
         {
             return declaringSyntax switch
             {
                 VariableDeclaratorSyntax { Parent: { Parent: MemberDeclarationSyntax memberDeclaration } } => memberDeclaration,
                 MemberDeclarationSyntax memberDeclaration => memberDeclaration,
+                ParameterSyntax { Parent: { Parent: RecordDeclarationSyntax record } } => declaringSyntax,
                 _ => throw new AssertionFailedException()
             };
         }

@@ -64,7 +64,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public static Ref<IDeclaration> PseudoAccessor( IMethod accessor )
         {
-            Invariant.Assert( accessor.IsImplicit );
+            Invariant.Assert( accessor.IsImplicitlyDeclared );
 
             if ( accessor.ContainingDeclaration is not IMemberWithAccessors declaringMember )
             {

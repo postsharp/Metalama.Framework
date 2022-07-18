@@ -323,6 +323,7 @@ namespace Metalama.Framework.Engine.Linking
                         return arrowExpressionClause;
 
                     case VariableDeclaratorSyntax { Parent: VariableDeclarationSyntax { Parent: EventFieldDeclarationSyntax } }:
+                    case ParameterSyntax: // Record positional property.
                         return GetImplicitAccessorBody( symbol, generationContext );
 
                     default:
@@ -505,7 +506,7 @@ namespace Metalama.Framework.Engine.Linking
                     return this.RewriteDestructor( (DestructorDeclarationSyntax) syntax, destructorSymbol, generationContext );
 
                 case IPropertySymbol propertySymbol:
-                    return this.RewriteProperty( (PropertyDeclarationSyntax) syntax, propertySymbol );
+                    return this.RewriteProperty( (PropertyDeclarationSyntax) syntax, propertySymbol, generationContext );
 
                 case IEventSymbol eventSymbol:
                     return syntax switch

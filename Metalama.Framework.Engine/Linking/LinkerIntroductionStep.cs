@@ -355,7 +355,7 @@ namespace Metalama.Framework.Engine.Linking
 #pragma warning disable SA1513
                 if ( transformation.OverriddenDeclaration is IProperty
                     {
-                        IsAutoPropertyOrField: true, Writeability: Writeability.ConstructorOnly, SetMethod: { IsImplicit: true }
+                        IsAutoPropertyOrField: true, Writeability: Writeability.ConstructorOnly, SetMethod: { IsImplicitlyDeclared: true }
                     } overriddenAutoProperty )
 #pragma warning restore SA1513
                 {

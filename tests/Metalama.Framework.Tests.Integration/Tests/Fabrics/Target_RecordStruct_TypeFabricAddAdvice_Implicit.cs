@@ -17,7 +17,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.Target_RecordS
             {
                 foreach (var method in amender.Type.Methods)
                 {
-                    if (method.IsImplicit)
+                    if (method.IsImplicitlyDeclared)
                     {
                         amender.Advices.Override( method, nameof(Template) );
                     }

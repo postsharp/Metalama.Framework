@@ -7,19 +7,19 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.Target_Struct_
     // <target>
     internal struct TargetStruct
     {
-        private int Method1(int a) => a;
+        private int Method1( int a ) => a;
 
-        private string Method2(string s) => s;
+        private string Method2( string s ) => s;
 
         private class Fabric : TypeFabric
         {
-            public override void AmendType(ITypeAmender amender)
+            public override void AmendType( ITypeAmender amender )
             {
                 foreach (var method in amender.Type.Methods)
                 {
-                    if (!method.IsImplicit)
+                    if (!method.IsImplicitlyDeclared)
                     {
-                        amender.Advices.Override(method, nameof(Template));
+                        amender.Advices.Override( method, nameof(Template) );
                     }
                 }
             }
@@ -27,7 +27,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.Target_Struct_
             [Template]
             private dynamic? Template()
             {
-                Console.WriteLine("overridden");
+                Console.WriteLine( "overridden" );
 
                 return meta.Proceed();
             }

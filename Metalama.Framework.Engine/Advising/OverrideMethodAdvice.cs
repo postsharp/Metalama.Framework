@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.Advising
             // TODO: order should be self if the target is introduced on the same layer.
             var targetMethod = this.TargetDeclaration.GetTarget( compilation );
 
-            if ( targetMethod.IsImplicit )
+            if ( targetMethod.IsImplicitlyDeclared )
             {
                 return AdviceImplementationResult.Failed(
                     AdviceDiagnosticDescriptors.CannotOverrideImplicitMethod.CreateRoslynDiagnostic(

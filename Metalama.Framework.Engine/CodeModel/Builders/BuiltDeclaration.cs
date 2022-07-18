@@ -74,5 +74,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         object? IRefImpl.Target => this;
 
         bool IRefImpl.IsDefault => false;
+
+        public sealed override bool IsImplicitlyDeclared => false;
     }
 }

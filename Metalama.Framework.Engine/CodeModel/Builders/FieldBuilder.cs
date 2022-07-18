@@ -26,8 +26,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IType Type { get; set; }
 
-        public override bool IsImplicit => false;
-
         [Memo]
         public IMethod? GetMethod => new AccessorBuilder( this, MethodKind.PropertyGet, true );
 

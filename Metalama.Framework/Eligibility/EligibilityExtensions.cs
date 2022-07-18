@@ -256,6 +256,16 @@ namespace Metalama.Framework.Eligibility
                 member => $"{member} must not have type 'void'" );
         }
 
+        /// <summary>
+        /// Requires the declaration to be explicitly declared in source coce.
+        /// </summary>
+        public static void MustBeExplicitlyDeclared( this IEligibilityBuilder<IDeclaration> eligibilityBuilder )
+        {
+            eligibilityBuilder.MustSatisfy(
+                m => !m.IsImplicitlyDeclared,
+                m => $"{m} must be explicitly declared" );
+        }
+
         private static string GetInterfaceName<T>() => GetInterfaceName( typeof(T) );
 
         private static string GetInterfaceName( Type type )

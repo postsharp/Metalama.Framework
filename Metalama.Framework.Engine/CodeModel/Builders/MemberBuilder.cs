@@ -29,8 +29,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         protected MemberBuilder( Advice parentAdvice, INamedType declaringType, string name ) : base( parentAdvice, declaringType, name ) { }
 
-        public abstract bool IsImplicit { get; }
-
         public new INamedType DeclaringType => base.DeclaringType.AssertNotNull();
 
         public override string ToString() => this.DeclaringType + "." + this.Name;
