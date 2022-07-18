@@ -802,9 +802,9 @@ public record R( int A, int B );
 
             var compilation = testContext.CreateCompilationModel( code );
             var type = compilation.Types.OfName( "R" ).Single();
-            var property = type.Properties.First();
+            _ = type.Properties.First();
             var constructor = type.Constructors.First();
-            var constructorParameter = constructor.Parameters[0];
+            _ = constructor.Parameters[0];
         }
 
         [Fact]

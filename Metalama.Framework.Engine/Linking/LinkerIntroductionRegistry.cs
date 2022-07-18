@@ -132,7 +132,7 @@ namespace Metalama.Framework.Engine.Linking
             {
                 VariableDeclaratorSyntax { Parent: { Parent: MemberDeclarationSyntax memberDeclaration } } => memberDeclaration,
                 MemberDeclarationSyntax memberDeclaration => memberDeclaration,
-                ParameterSyntax { Parent: { Parent: RecordDeclarationSyntax record } } => declaringSyntax,
+                ParameterSyntax { Parent: { Parent: RecordDeclarationSyntax } } => declaringSyntax,
                 _ => throw new AssertionFailedException()
             };
         }

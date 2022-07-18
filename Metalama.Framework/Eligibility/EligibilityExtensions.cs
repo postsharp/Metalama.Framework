@@ -265,7 +265,7 @@ namespace Metalama.Framework.Eligibility
         }
 
         /// <summary>
-        /// Requires the declaration to be explicitly declared in source coce.
+        /// Requires the declaration to be explicitly declared in source code.
         /// </summary>
         public static void MustBeExplicitlyDeclared( this IEligibilityBuilder<IDeclaration> eligibilityBuilder )
         {

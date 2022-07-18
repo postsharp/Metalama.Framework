@@ -50,7 +50,7 @@ namespace Metalama.Framework.Aspects
                 parameter =>
                 {
                     parameter.MustBeWritable();
-                    parameter.MustSatisfy( p => p.DeclaringMember is not IConstructor, p => $"output contracts on constructors are not supported" );
+                    parameter.MustSatisfy( p => p.DeclaringMember is not IConstructor, _ => $"output contracts on constructors are not supported" );
                 } );
 
         private static readonly IEligibilityRule<IParameter> _parameterEligibilityBoth =
@@ -58,7 +58,7 @@ namespace Metalama.Framework.Aspects
                 parameter =>
                 {
                     parameter.MustBeRef();
-                    parameter.MustSatisfy( p => p.DeclaringMember is not IConstructor, p => $"output contracts on constructors are not supported" );
+                    parameter.MustSatisfy( p => p.DeclaringMember is not IConstructor, _ => $"output contracts on constructors are not supported" );
                 } );
 
         private static readonly IEligibilityRule<IParameter> _parameterEligibilityDefault =
@@ -67,7 +67,7 @@ namespace Metalama.Framework.Aspects
                 {
                     parameter.MustSatisfy(
                         p => !(p.RefKind == RefKind.Out && p.DeclaringMember is IConstructor),
-                        p => $"output contracts on constructors are not supported" );
+                        _ => $"output contracts on constructors are not supported" );
                 } );
 
         // Eligibility rules for return parameters.
@@ -166,7 +166,7 @@ namespace Metalama.Framework.Aspects
             IProperty? property;
 
             if ( parameter.DeclaringMember is IConstructor constructor && constructor.DeclaringType.TypeKind is TypeKind.RecordClass or TypeKind.RecordStruct &&
-                 ((property = constructor.DeclaringType.Properties.OfName( builder.Target.Name ).SingleOrDefault()) != null) )
+                 (property = constructor.DeclaringType.Properties.OfName( builder.Target.Name ).SingleOrDefault()) != null )
             {
                 builder.Advice.AddContract( property, nameof(this.Validate), this.Direction );
             }
