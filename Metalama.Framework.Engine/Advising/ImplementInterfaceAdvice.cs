@@ -394,7 +394,7 @@ namespace Metalama.Framework.Engine.Advising
                                 (IProperty?) memberSpec.TargetMember ?? (IProperty) memberSpec.AspectInterfaceMember.AssertNotNull(),
                                 buildAutoProperty,
                                 isExplicit,
-                                aspectProperty?.SetMethod?.IsImplicit ?? false,
+                                aspectProperty?.SetMethod?.IsImplicitlyDeclared ?? false,
                                 mergedTags );
 
                             memberBuilder = propertyBuilder;

@@ -35,9 +35,9 @@ namespace Metalama.Framework.Engine.Aspects
 
         public IEligibilityRule<IDeclaration>? EligibilityRule { get; }
 
-        public AspectDriver( IServiceProvider serviceProvider, IAspectClassImpl aspectClass, Compilation compilation )
+        public AspectDriver( IServiceProvider serviceProvider, IAspectClassImpl aspectClass, CompilationModel compilation )
         {
-            this._reflectionMapper = serviceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( compilation );
+            this._reflectionMapper = serviceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( compilation.RoslynCompilation );
             this._aspectClass = aspectClass;
 
             // We don't store the IServiceProvider because the AspectDriver is created during the pipeline initialization but used
@@ -46,14 +46,20 @@ namespace Metalama.Framework.Engine.Aspects
             // Introductions must have a deterministic order because of testing.
             var declarativeAdviceAttributes = aspectClass
                 .TemplateClasses.SelectMany( c => c.GetDeclarativeAdvices( serviceProvider, compilation ) )
-                .ToImmutableArray();
+                .ToList();
 
-            // If we have any declarative introduction, the aspect cannot be added to an interface.
-            foreach ( var declarativeAdvice in declarativeAdviceAttributes )
+            if ( declarativeAdviceAttributes.Count > 0 )
             {
-                var eligibilityBuilder = new EligibilityBuilder<IDeclaration>();
-                declarativeAdvice.Attribute.BuildAspectEligibility( eligibilityBuilder );
-                this.EligibilityRule = eligibilityBuilder.Build();
+                foreach ( var declarativeAdvice in declarativeAdviceAttributes )
+                {
+                    var eligibilityBuilder = new EligibilityBuilder<IDeclaration>();
+
+                    ((DeclarativeAdviceAttribute) declarativeAdvice.AdviceAttribute!).BuildAspectEligibility(
+                        eligibilityBuilder,
+                        declarativeAdvice.Declaration! );
+
+                    this.EligibilityRule = eligibilityBuilder.Build();
+                }
             }
         }
 

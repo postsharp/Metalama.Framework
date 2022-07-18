@@ -5,11 +5,13 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
@@ -87,6 +89,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 if ( fieldDeclaration.Initializer != null )
                 {
                     initializerExpression = fieldDeclaration.Initializer.Value;
+                }
+                else if ( this.DeclaringType.TypeKind is TypeKind.Struct or TypeKind.RecordStruct )
+                {
+                    // In structs, we have to initialize all introduced fields.
+                    initializerExpression = SyntaxFactoryEx.Default;
                 }
                 else
                 {

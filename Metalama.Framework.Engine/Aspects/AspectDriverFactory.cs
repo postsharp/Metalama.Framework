@@ -2,7 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Engine.AspectWeavers;
-using Microsoft.CodeAnalysis;
+using Metalama.Framework.Engine.CodeModel;
 using System;
 using System.Collections.Immutable;
 
@@ -13,11 +13,11 @@ namespace Metalama.Framework.Engine.Aspects
     /// </summary>
     internal class AspectDriverFactory
     {
-        private readonly Compilation _compilation;
+        private readonly CompilationModel _compilation;
         private readonly IServiceProvider _serviceProvider;
         private readonly ImmutableDictionary<string, IAspectDriver> _weaverTypes;
 
-        public AspectDriverFactory( Compilation compilation, ImmutableArray<object> plugins, IServiceProvider serviceProvider )
+        public AspectDriverFactory( CompilationModel compilation, ImmutableArray<object> plugins, IServiceProvider serviceProvider )
         {
             this._compilation = compilation;
             this._serviceProvider = serviceProvider;

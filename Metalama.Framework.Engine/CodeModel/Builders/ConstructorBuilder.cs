@@ -41,8 +41,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             set => throw new NotSupportedException();
         }
 
-        public override bool IsImplicit => false;
-
         public override DeclarationKind DeclarationKind => DeclarationKind.Constructor;
 
         public MemberRef<IMember> ReplacedMember { get; }

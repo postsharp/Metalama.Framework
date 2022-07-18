@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             this.ContainingMember = containingDeclaration;
             this._accessibility = null;
             this.MethodKind = methodKind;
-            this.IsImplicit = isImplicit;
+            this.IsImplicitlyDeclared = isImplicit;
         }
 
         [Memo]
@@ -59,7 +59,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IReadOnlyList<IType> TypeArguments => ImmutableArray<IType>.Empty;
 
-        public bool IsImplicit { get; }
+        public override bool IsImplicitlyDeclared { get; }
 
         public bool IsOpenGeneric => false;
 

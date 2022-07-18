@@ -75,8 +75,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override bool IsExplicitInterfaceImplementation => !this._symbol.ExplicitInterfaceImplementations.IsEmpty;
 
-        public override bool IsImplicit => false;
-
         public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 
         public IEnumerable<IMethod> Accessors

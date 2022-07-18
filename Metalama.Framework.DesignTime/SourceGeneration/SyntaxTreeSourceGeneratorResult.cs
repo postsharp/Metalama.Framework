@@ -7,7 +7,6 @@ using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
-
 #if DEBUG
 using Metalama.Framework.Engine;
 #endif

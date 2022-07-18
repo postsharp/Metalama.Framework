@@ -110,8 +110,9 @@ namespace Metalama.Framework.Engine.Linking
                         { ExpressionBody: { ArrowToken: var arrowToken }, SemicolonToken: var semicolonToken } =>
                             (arrowToken.LeadingTrivia.Add( ElasticLineFeed ), arrowToken.TrailingTrivia.Add( ElasticLineFeed ),
                              semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia),
-                        { Body: null, ExpressionBody: null, SemicolonToken: var semicolonToken } => 
-                            (semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), TriviaList( ElasticLineFeed ), TriviaList( ElasticLineFeed ), semicolonToken.TrailingTrivia),
+                        { Body: null, ExpressionBody: null, SemicolonToken: var semicolonToken } =>
+                            (semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), TriviaList( ElasticLineFeed ), TriviaList( ElasticLineFeed ),
+                             semicolonToken.TrailingTrivia),
                         _ => throw new AssertionFailedException()
                     };
 

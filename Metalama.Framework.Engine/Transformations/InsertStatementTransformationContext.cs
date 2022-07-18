@@ -10,26 +10,13 @@ namespace Metalama.Framework.Engine.Transformations
     /// <summary>
     /// Context for code transformation's syntax node evaluation.
     /// </summary>
-    internal readonly struct InsertStatementTransformationContext
+    internal class InsertStatementTransformationContext : TransformationContext
     {
-        public IServiceProvider ServiceProvider { get; }
-
-        public UserDiagnosticSink DiagnosticSink { get; }
-
-        public SyntaxGenerationContext SyntaxGenerationContext { get; }
-
-        public ITemplateLexicalScopeProvider LexicalScopeProvider { get; }
-
         public InsertStatementTransformationContext(
             UserDiagnosticSink diagnosticSink,
             ITemplateLexicalScopeProvider lexicalScopeProvider,
             SyntaxGenerationContext syntaxGenerationContext,
-            IServiceProvider serviceProvider )
-        {
-            this.DiagnosticSink = diagnosticSink;
-            this.LexicalScopeProvider = lexicalScopeProvider;
-            this.SyntaxGenerationContext = syntaxGenerationContext;
-            this.ServiceProvider = serviceProvider;
-        }
+            IServiceProvider serviceProvider,
+            CompilationModel compilation ) : base( serviceProvider, diagnosticSink, syntaxGenerationContext, compilation, lexicalScopeProvider ) { }
     }
 }

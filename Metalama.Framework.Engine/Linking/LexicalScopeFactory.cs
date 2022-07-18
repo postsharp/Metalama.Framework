@@ -107,6 +107,7 @@ namespace Metalama.Framework.Engine.Linking
                     LocalFunctionStatementSyntax localFunction => (SyntaxNode?) localFunction.Body ?? localFunction.ExpressionBody,
                     ConstructorDeclarationSyntax constructor => (SyntaxNode?) constructor.Body ?? constructor.ExpressionBody,
                     DestructorDeclarationSyntax destructor => (SyntaxNode?) destructor.Body ?? destructor.ExpressionBody,
+                    ParameterSyntax _ => null,
                     _ => throw new AssertionFailedException( $"Don't know how to get the body of a {syntaxReference.GetSyntax().Kind()}" )
                 };
 

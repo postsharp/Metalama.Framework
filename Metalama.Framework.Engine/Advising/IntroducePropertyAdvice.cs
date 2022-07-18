@@ -121,16 +121,18 @@ namespace Metalama.Framework.Engine.Advising
 
             var existingDeclaration = targetDeclaration.FindClosestUniquelyNamedMember( this.Builder.Name );
 
-            var hasNoOverrideSemantics = this.Template.Declaration != null && this.Template.Declaration.IsAutoPropertyOrField;
+            var isAutoProperty = this.Template.Declaration is { IsAutoPropertyOrField: true };
 
             // TODO: Introduce attributes that are added not present on the existing member?
             if ( existingDeclaration == null )
             {
                 // There is no existing declaration.
-                if ( hasNoOverrideSemantics )
+                if ( isAutoProperty )
                 {
                     // Introduced auto property.
                     addTransformation( this.Builder );
+
+                    OverrideHelper.AddTransformationsForStructField( targetDeclaration, this, addTransformation );
 
                     return AdviceImplementationResult.Success( this.Builder );
                 }

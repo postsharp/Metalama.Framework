@@ -39,7 +39,7 @@ namespace Metalama.Framework.Tests.UnitTests
 
             var aspectTypeFactory = new AspectClassFactory(
                 testContext.ServiceProvider,
-                new AspectDriverFactory( compilation.RoslynCompilation, ImmutableArray<object>.Empty, testContext.ServiceProvider ) );
+                new AspectDriverFactory( compilation, ImmutableArray<object>.Empty, testContext.ServiceProvider ) );
 
             var aspectNamedTypes = aspectNames.Select( name => compilation.Types.OfName( name ).Single().GetSymbol() ).ToReadOnlyList();
             var aspectTypes = aspectTypeFactory.GetClasses( aspectNamedTypes, compileTimeProject!, diagnostics ).ToImmutableArray();

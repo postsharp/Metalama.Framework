@@ -308,7 +308,8 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
             if ( !CompileTimeProject.TryCreateUntransformed( this._serviceProvider, this._domain, assemblyIdentity, assemblyPath, out compileTimeProject ) )
             {
                 this._logger.Trace?.Log(
-                    $"The assembly '{assemblyIdentity}' will not be included in the compile-time compilation despite having an [assembly: CompileTime] attribute " +
+                    $"The assembly '{assemblyIdentity}' will not be included in the compile-time compilation despite having an [assembly: CompileTime] attribute "
+                    +
                     "because it has no compile-time embedded resource and it is not loaded as an analyzer." );
             }
         }

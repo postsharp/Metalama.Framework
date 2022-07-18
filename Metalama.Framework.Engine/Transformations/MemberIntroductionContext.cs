@@ -7,26 +7,11 @@ using System;
 
 namespace Metalama.Framework.Engine.Transformations
 {
-    internal sealed class MemberIntroductionContext
+    internal sealed class MemberIntroductionContext : TransformationContext
     {
-        public IServiceProvider ServiceProvider { get; }
-
-        public UserDiagnosticSink DiagnosticSink { get; }
-
         public IntroductionNameProvider IntroductionNameProvider { get; }
 
         public AspectReferenceSyntaxProvider AspectReferenceSyntaxProvider { get; }
-
-        public ITemplateLexicalScopeProvider LexicalScopeProvider { get; }
-
-        public SyntaxGenerationContext SyntaxGenerationContext { get; }
-
-        public SyntaxGeneratorWithContext SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;
-
-        /// <summary>
-        /// Gets the last compilation model of the linker input.
-        /// </summary>
-        public CompilationModel Compilation { get; }
 
         public MemberIntroductionContext(
             UserDiagnosticSink diagnosticSink,
@@ -35,15 +20,10 @@ namespace Metalama.Framework.Engine.Transformations
             ITemplateLexicalScopeProvider lexicalScopeProvider,
             SyntaxGenerationContext syntaxGenerationContext,
             IServiceProvider serviceProvider,
-            CompilationModel compilation )
+            CompilationModel compilation ) : base( serviceProvider, diagnosticSink, syntaxGenerationContext, compilation, lexicalScopeProvider )
         {
-            this.DiagnosticSink = diagnosticSink;
-            this.LexicalScopeProvider = lexicalScopeProvider;
             this.AspectReferenceSyntaxProvider = aspectReferenceSyntaxProvider;
-            this.ServiceProvider = serviceProvider;
             this.IntroductionNameProvider = introductionNameProvider;
-            this.SyntaxGenerationContext = syntaxGenerationContext;
-            this.Compilation = compilation;
         }
     }
 }

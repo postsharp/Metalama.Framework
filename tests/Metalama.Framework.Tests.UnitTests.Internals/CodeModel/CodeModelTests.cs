@@ -787,6 +787,27 @@ public sealed class C
         }
 
         [Fact]
+        public void Record()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = @"
+public record R( int A, int B );
+";
+
+#if NETFRAMEWORK
+            code +=
+                "namespace System.Runtime.CompilerServices { internal static class IsExternalInit {}}";
+#endif
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var type = compilation.Types.OfName( "R" ).Single();
+            _ = type.Properties.First();
+            var constructor = type.Constructors.First();
+            _ = constructor.Parameters[0];
+        }
+
+        [Fact]
         public void Depth()
         {
             using var testContext = this.CreateTestContext();

@@ -65,6 +65,15 @@ internal class AppendConstructorParameterAdvice : Advice
                     (this.Aspect.AspectClass.ShortName, constructor) ) );
         }
 
+        // Introducing parameters into anything else than a class is not allowed.
+        if ( constructor.DeclaringType.TypeKind != TypeKind.Class )
+        {
+            return AdviceImplementationResult.Failed(
+                AdviceDiagnosticDescriptors.CannotIntroduceParameterIntoNonClassConstructor.CreateRoslynDiagnostic(
+                    constructor.GetDiagnosticLocation(),
+                    (this.Aspect.AspectClass.ShortName, constructor) ) );
+        }
+
         // If we have an implicit constructor, make it explicit.
         if ( constructor.IsImplicitInstanceConstructor() )
         {

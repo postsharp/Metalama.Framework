@@ -112,7 +112,8 @@ namespace Metalama.Framework.Engine.Advising
             ImplicitInterfaceMemberAlreadyExists = new(
                 "LAMA0514",
                 "Cannot introduce an implicit interface member when the target type already contains a declaration with the same signature.",
-                "The aspect '{0}' cannot introduce interface member '{1}' into type '{2}' because the type already contains '{3}' which has the same signature " +
+                "The aspect '{0}' cannot introduce interface member '{1}' into type '{2}' because the type already contains '{3}' which has the same signature "
+                +
                 "and WhenExists of the interface member is set to Fail.",
                 _category,
                 Error );
@@ -121,7 +122,8 @@ namespace Metalama.Framework.Engine.Advising
             ImplicitInterfaceMemberIsNotCompatible = new(
                 "LAMA0515",
                 "Cannot introduce an implicit interface member when the target type already contains a declaration that is not compatible with the interface member.",
-                "The aspect '{0}' cannot introduce interface member '{1}' into type '{2}' because the type already contains '{3}' which has the same signature " +
+                "The aspect '{0}' cannot introduce interface member '{1}' into type '{2}' because the type already contains '{3}' which has the same signature "
+                +
                 "but is incompatible with the interface member and WhenExists of the interface member is set to UseExisting.",
                 _category,
                 Error );
@@ -132,6 +134,14 @@ namespace Metalama.Framework.Engine.Advising
                 "Using unsupported override strategy for interface type.",
                 "The aspect '{0}' cannot introduce interface '{1}' into type '{2}' with 'whenExists={3}' because it is not supported." +
                 "Only Ignore or Fail strategies are supported for interface types. You can use 'whenExists' on individual members.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<(string AspectType, IMember Member)>
+            CannotOverrideImplicitMethod = new(
+                "LAMA0517",
+                "Cannot override an implicit member.",
+                "The aspect '{0}' cannot override '{1}' because it is implicitly declared.",
                 _category,
                 Error );
 
@@ -157,6 +167,22 @@ namespace Metalama.Framework.Engine.Advising
                 "LAMA0522",
                 "Invalid override strategy when introducing a finalizer.",
                 "The aspect '{0}' cannot introduce finalizer into type '{1}' because the specified override strategy '{2}' is not valid.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<(string AspectType, IConstructor Constructor)>
+            CannotIntroduceParameterIntoNonClassConstructor = new(
+                "LAMA0523",
+                "Cannot introduce a parameter into a constructor of a type that is not a class.",
+                "The aspect '{0}' cannot introduce a parameter into '{1}' because the target type is not a class.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<(string AspectType, INamedType Constructor)>
+            CannotAddInitializerToRecord = new(
+                "LAMA0524",
+                "Cannot add an initializer to a record.",
+                "The aspect '{0}' cannot add an initializer to '{1}' because it is a record.",
                 _category,
                 Error );
     }

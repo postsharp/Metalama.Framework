@@ -69,7 +69,7 @@ namespace Metalama.Framework.Engine.Utilities
 
         public static bool IsImplicitInstanceConstructor( this IConstructor ctor )
         {
-            return !ctor.IsStatic && ctor.IsImplicit;
+            return !ctor.IsStatic && ctor.IsImplicitlyDeclared && ctor.DeclaringType.TypeKind is TypeKind.Class or TypeKind.Struct;
         }
     }
 }

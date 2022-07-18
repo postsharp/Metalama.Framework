@@ -23,7 +23,7 @@ public abstract class DeclarativeAdviceAttribute : Attribute, IAdviceAttribute
     /// <summary>
     /// Builds the eligibility of an aspect that contains the current declarative advice.
     /// </summary>
-    public virtual void BuildAspectEligibility( IEligibilityBuilder<IDeclaration> builder ) { }
+    public virtual void BuildAspectEligibility( IEligibilityBuilder<IDeclaration> builder, IMemberOrNamedType adviceMember ) { }
 
     /// <summary>
     /// Builds the aspect, i.e. translates the current declarative advice into a programmatic advice or possibly diagnostics

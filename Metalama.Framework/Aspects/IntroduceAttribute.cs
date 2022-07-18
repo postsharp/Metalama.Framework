@@ -61,7 +61,7 @@ namespace Metalama.Framework.Aspects
         [Obsolete( "Not implemented." )]
         public OverrideStrategy WhenInherited { get; set; }
 
-        public override void BuildAspectEligibility( IEligibilityBuilder<IDeclaration> builder )
+        public override void BuildAspectEligibility( IEligibilityBuilder<IDeclaration> builder, IMemberOrNamedType adviceMember )
         {
             builder.MustBe<IMemberOrNamedType>();
 

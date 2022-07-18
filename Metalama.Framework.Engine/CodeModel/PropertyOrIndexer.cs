@@ -27,8 +27,6 @@ internal abstract class PropertyOrIndexer : Member, IPropertyOrIndexer
 
     public RefKind RefKind => this.PropertySymbol.RefKind.ToOurRefKind();
 
-    public override bool IsImplicit => false;
-
     public override bool IsExplicitInterfaceImplementation => !this.PropertySymbol.ExplicitInterfaceImplementations.IsEmpty;
 
     [Memo]

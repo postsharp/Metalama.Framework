@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Backstage.Extensibility;
-using Metalama.Backstage.Telemetry;
 using Metalama.Compiler;
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.Diagnostics;
@@ -34,85 +33,75 @@ namespace Metalama.Framework.Engine.Pipeline
             var applicationInfoProvider = (IApplicationInfoProvider?) context.Services.GetService( typeof(IApplicationInfoProvider) );
 
             // Try.Metalama doesn't provide any backstage services.
+            IApplicationInfo? previousApplication = null;
+
             if ( applicationInfoProvider != null )
             {
+                previousApplication = applicationInfoProvider.CurrentApplication;
                 applicationInfoProvider.CurrentApplication = new MetalamaApplicationInfo();
             }
 
-            IUsageSample? usageSample = null;
-            var compilerUsageSample = (IUsageSample?) context.Services.GetService( typeof(IUsageSample) );
-            var usageReporter = (IUsageReporter?) context.Services.GetService( typeof(IUsageReporter) );
-
-            // We look for the compiler usage sample instead of calling usageReporter.ShouldReportSession,
-            // because the compiler has already decided.
-            if ( usageReporter != null && compilerUsageSample != null )
-            {
-                usageSample = usageReporter.CreateSample( "CompilerUsage" );
-                serviceProvider = serviceProvider.WithUntypedService( typeof(IUsageSample), usageSample );
-            }
-
-            // Try.Metalama ships its own handler. Having the default ICompileTimeExceptionHandler added earlier
-            // is not possible, because it needs access to IExceptionReporter service, which comes from the TransformerContext.
-            if ( serviceProvider.GetService<ICompileTimeExceptionHandler>() == null )
-            {
-                serviceProvider = serviceProvider.WithService( new CompileTimeExceptionHandler( serviceProvider ) );
-            }
-
-            // Try.Metalama ships its own project options using the async-local service provider.
-            var projectOptions = serviceProvider.GetService<IProjectOptions>();
-
-            if ( projectOptions == null )
-            {
-                projectOptions = new MSBuildProjectOptions( context.GlobalOptions, context.Plugins );
-                serviceProvider = serviceProvider.WithService( projectOptions );
-            }
-
-            serviceProvider = serviceProvider.WithProjectScopedServices( context.Compilation );
-
             try
             {
-                using CompileTimeAspectPipeline pipeline = new( serviceProvider, false );
-
-                // ReSharper disable once AccessToDisposedClosure
-                var pipelineResult =
-                    Task.Run(
-                            () => pipeline.ExecuteAsync(
-                                new DiagnosticAdderAdapter( context.ReportDiagnostic ),
-                                context.Compilation,
-                                context.Resources.ToImmutableArray(),
-                                CancellationToken.None ) )
-                        .Result;
-
-                if ( pipelineResult != null )
+                // Try.Metalama ships its own handler. Having the default ICompileTimeExceptionHandler added earlier
+                // is not possible, because it needs access to IExceptionReporter service, which comes from the TransformerContext.
+                if ( serviceProvider.GetService<ICompileTimeExceptionHandler>() == null )
                 {
-                    context.AddResources( pipelineResult.AdditionalResources );
-                    context.AddSyntaxTreeTransformations( pipelineResult.SyntaxTreeTransformations );
+                    serviceProvider = serviceProvider.WithService( new CompileTimeExceptionHandler( serviceProvider ) );
                 }
 
-                HandleAdditionalCompilationOutputFiles( projectOptions, pipelineResult );
-            }
-            catch ( Exception e )
-            {
-                var isHandled = false;
+                // Try.Metalama ships its own project options using the async-local service provider.
+                var projectOptions = serviceProvider.GetService<IProjectOptions>();
 
-                serviceProvider
-                    .GetService<ICompileTimeExceptionHandler>()
-                    ?.ReportException( e, context.ReportDiagnostic, false, out isHandled );
-
-                if ( !isHandled )
+                if ( projectOptions == null )
                 {
-                    throw;
+                    projectOptions = new MSBuildProjectOptions( context.GlobalOptions, context.Plugins );
+                    serviceProvider = serviceProvider.WithService( projectOptions );
+                }
+
+                serviceProvider = serviceProvider.WithProjectScopedServices( context.Compilation );
+
+                try
+                {
+                    using CompileTimeAspectPipeline pipeline = new( serviceProvider, false );
+
+                    // ReSharper disable once AccessToDisposedClosure
+                    var pipelineResult =
+                        Task.Run(
+                                () => pipeline.ExecuteAsync(
+                                    new DiagnosticAdderAdapter( context.ReportDiagnostic ),
+                                    context.Compilation,
+                                    context.Resources.ToImmutableArray(),
+                                    CancellationToken.None ) )
+                            .Result;
+
+                    if ( pipelineResult != null )
+                    {
+                        context.AddResources( pipelineResult.AdditionalResources );
+                        context.AddSyntaxTreeTransformations( pipelineResult.SyntaxTreeTransformations );
+                    }
+
+                    HandleAdditionalCompilationOutputFiles( projectOptions, pipelineResult );
+                }
+                catch ( Exception e )
+                {
+                    var isHandled = false;
+
+                    serviceProvider
+                        .GetService<ICompileTimeExceptionHandler>()
+                        ?.ReportException( e, context.ReportDiagnostic, false, out isHandled );
+
+                    if ( !isHandled )
+                    {
+                        throw;
+                    }
                 }
             }
             finally
             {
-                try
+                if ( applicationInfoProvider != null )
                 {
-                    usageSample?.Flush();
-                }
-                catch
-                {
-                    // We don't want telemetry to affect user experience.
+                    applicationInfoProvider.CurrentApplication = previousApplication!;
                 }
             }
         }

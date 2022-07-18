@@ -32,7 +32,10 @@ namespace Metalama.Framework.Engine.Advising
 
         public static AdviceImplementationResult Success( IDeclaration newDeclaration ) => Success( AdviceOutcome.Default, newDeclaration.ToTypedRef() );
 
-        public static AdviceImplementationResult Success( AdviceOutcome outcome = AdviceOutcome.Default, Ref<IDeclaration> newDeclaration = default, ImmutableArray<Diagnostic>? diagnostics = null )
+        public static AdviceImplementationResult Success(
+            AdviceOutcome outcome = AdviceOutcome.Default,
+            Ref<IDeclaration> newDeclaration = default,
+            ImmutableArray<Diagnostic>? diagnostics = null )
             => new( outcome, newDeclaration, diagnostics ?? ImmutableArray<Diagnostic>.Empty );
 
         public static AdviceImplementationResult Success( AdviceOutcome outcome, IDeclaration newDeclaration )
