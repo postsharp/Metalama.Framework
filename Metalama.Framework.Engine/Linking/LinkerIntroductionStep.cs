@@ -81,7 +81,7 @@ namespace Metalama.Framework.Engine.Linking
                 out var syntaxMemberLevelTransformations,
                 out var introductionMemberLevelTransformations );
 
-            this.IndexTypeLevelTransformations( allTransformations, out var typeLevelTransformations );
+            IndexTypeLevelTransformations( allTransformations, out var typeLevelTransformations );
 
             IndexNodesWithModifiedAttributes( allTransformations, out var nodesWithModifiedAttributes );
 
@@ -384,7 +384,7 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private void IndexTypeLevelTransformations(
+        private static void IndexTypeLevelTransformations(
             List<ITransformation> allTransformations,
             out Dictionary<TypeDeclarationSyntax, TypeLevelTransformations> typeLevelTransformations )
         {

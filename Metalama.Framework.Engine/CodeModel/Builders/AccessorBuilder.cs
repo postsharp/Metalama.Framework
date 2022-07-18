@@ -61,7 +61,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override bool IsImplicitlyDeclared { get; }
 
-
         public bool IsOpenGeneric => false;
 
         public bool IsGeneric => false;

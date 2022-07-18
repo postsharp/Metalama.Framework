@@ -796,8 +796,8 @@ public record R( int A, int B );
 ";
 
 #if NETFRAMEWORK
-                code +=
-                    "namespace System.Runtime.CompilerServices { internal static class IsExternalInit {}}";
+            code +=
+                "namespace System.Runtime.CompilerServices { internal static class IsExternalInit {}}";
 #endif
 
             var compilation = testContext.CreateCompilationModel( code );

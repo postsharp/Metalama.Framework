@@ -53,8 +53,6 @@ namespace Metalama.Framework.Engine.Advising
                 this.Tags,
                 addTransformation );
 
-       
-            
             return AdviceImplementationResult.Success( promotedField );
         }
     }
