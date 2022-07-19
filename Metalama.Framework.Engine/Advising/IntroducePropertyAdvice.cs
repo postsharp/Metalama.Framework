@@ -17,8 +17,8 @@ namespace Metalama.Framework.Engine.Advising
 {
     internal class IntroducePropertyAdvice : IntroduceMemberAdvice<IProperty, PropertyBuilder>
     {
-        private readonly BoundTemplateMethod _getTemplate;
-        private readonly BoundTemplateMethod _setTemplate;
+        private readonly BoundTemplateMethod? _getTemplate;
+        private readonly BoundTemplateMethod? _setTemplate;
         private readonly bool _isProgrammaticAutoProperty;
 
         public IntroducePropertyAdvice(
@@ -28,9 +28,9 @@ namespace Metalama.Framework.Engine.Advising
             ICompilation sourceCompilation,
             string? explicitName,
             IType? explicitType,
-            TemplateMember<IProperty> propertyTemplate,
-            BoundTemplateMethod getTemplate,
-            BoundTemplateMethod setTemplate,
+            TemplateMember<IProperty>? propertyTemplate,
+            BoundTemplateMethod? getTemplate,
+            BoundTemplateMethod? setTemplate,
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             Action<IPropertyBuilder>? buildAction,
@@ -51,16 +51,16 @@ namespace Metalama.Framework.Engine.Advising
         {
             this._getTemplate = getTemplate;
             this._setTemplate = setTemplate;
-            this._isProgrammaticAutoProperty = propertyTemplate.IsNull && getTemplate.IsNull && setTemplate.IsNull;
+            this._isProgrammaticAutoProperty = propertyTemplate == null && getTemplate == null && setTemplate == null;
 
-            var templatePropertyDeclaration = propertyTemplate.Declaration;
+            var templatePropertyDeclaration = propertyTemplate?.Declaration;
             var name = this.MemberName;
 
             var hasGet = this._isProgrammaticAutoProperty
-                         || (templatePropertyDeclaration != null ? templatePropertyDeclaration.GetMethod != null : getTemplate.IsNotNull);
+                         || (templatePropertyDeclaration != null ? templatePropertyDeclaration.GetMethod != null : getTemplate != null);
 
             var hasSet = this._isProgrammaticAutoProperty
-                         || (templatePropertyDeclaration != null ? templatePropertyDeclaration.SetMethod != null : setTemplate.IsNotNull);
+                         || (templatePropertyDeclaration != null ? templatePropertyDeclaration.SetMethod != null : setTemplate != null);
 
             this.Builder = new PropertyBuilder(
                 this,
@@ -68,10 +68,10 @@ namespace Metalama.Framework.Engine.Advising
                 name,
                 hasGet,
                 hasSet,
-                this._isProgrammaticAutoProperty || this.Template.Declaration is { IsAutoPropertyOrField: true },
-                this.Template.Declaration is { Writeability: Writeability.InitOnly },
+                this._isProgrammaticAutoProperty || templatePropertyDeclaration is { IsAutoPropertyOrField: true },
+                templatePropertyDeclaration is { Writeability: Writeability.InitOnly },
                 false,
-                this.Template.Declaration is { Writeability: Writeability.ConstructorOnly } && this.Template.Declaration.IsAutoPropertyOrField,
+                templatePropertyDeclaration is { Writeability: Writeability.ConstructorOnly, IsAutoPropertyOrField: true },
                 this.Tags );
 
             if ( explicitType != null )
@@ -79,7 +79,7 @@ namespace Metalama.Framework.Engine.Advising
                 this.Builder.Type = explicitType;
             }
 
-            this.Builder.InitializerTemplate = propertyTemplate.GetInitializerTemplate();
+            this.Builder.InitializerTemplate = propertyTemplate?.GetInitializerTemplate();
         }
 
         protected override void InitializeCore( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
@@ -88,22 +88,23 @@ namespace Metalama.Framework.Engine.Advising
 
             if ( !this._isProgrammaticAutoProperty )
             {
-                this.Builder.Type = (this.Template.Declaration?.Type ?? this._getTemplate.Template.Declaration?.ReturnType).AssertNotNull();
+                this.Builder.Type = (this.Template?.Declaration.Type ?? this._getTemplate?.Template.Declaration.ReturnType).AssertNotNull();
 
                 this.Builder.Accessibility =
-                    (this.Template.Declaration?.Accessibility
-                     ?? this._getTemplate.Template.Declaration?.Accessibility ?? this._setTemplate.Template.Declaration?.Accessibility).AssertNotNull();
+                    this.Template?.Accessibility ?? (this._getTemplate != null
+                        ? this._getTemplate.Template.Accessibility
+                        : this._setTemplate?.Template.Accessibility).AssertNotNull();
 
-                if ( this.Template.IsNotNull )
+                if ( this.Template != null )
                 {
                     if ( this.Template.Declaration.AssertNotNull().GetMethod != null )
                     {
-                        this.Builder.GetMethod.AssertNotNull().Accessibility = this.Template.Declaration!.GetMethod!.Accessibility;
+                        this.Builder.GetMethod.AssertNotNull().Accessibility = this.Template.GetAccessorAccessibility;
                     }
 
                     if ( this.Template.Declaration.AssertNotNull().SetMethod != null )
                     {
-                        this.Builder.SetMethod.AssertNotNull().Accessibility = this.Template.Declaration!.SetMethod!.Accessibility;
+                        this.Builder.SetMethod.AssertNotNull().Accessibility = this.Template.SetAccessorAccessibility;
                     }
                 }
             }
@@ -121,7 +122,7 @@ namespace Metalama.Framework.Engine.Advising
 
             var existingDeclaration = targetDeclaration.FindClosestUniquelyNamedMember( this.Builder.Name );
 
-            var isAutoProperty = this.Template.Declaration is { IsAutoPropertyOrField: true };
+            var isAutoProperty = this.Template?.Declaration is { IsAutoPropertyOrField: true };
 
             // TODO: Introduce attributes that are added not present on the existing member?
             if ( existingDeclaration == null )

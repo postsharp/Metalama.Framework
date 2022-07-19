@@ -20,13 +20,13 @@ namespace Metalama.Framework.Engine.Advising
     [Obfuscation( Exclude = true )] // Not obfuscated to have a decent call stack in case of user exception.
     internal static class TemplateBindingHelper
     {
-        public static BoundTemplateMethod ForIntroduction( this in TemplateMember<IMethod> template, IObjectReader? arguments = null )
+        public static BoundTemplateMethod ForIntroduction( this TemplateMember<IMethod> template, IObjectReader? arguments = null )
         {
             return new BoundTemplateMethod( template, null, GetTemplateArguments( template, arguments ) );
         }
 
         public static BoundTemplateMethod ForOperatorIntroduction(
-            this in TemplateMember<IMethod> template,
+            this TemplateMember<IMethod> template,
             OperatorKind operatorKind,
             IObjectReader? arguments = null )
         {
@@ -52,10 +52,10 @@ namespace Metalama.Framework.Engine.Advising
             return new BoundTemplateMethod( template, null, GetTemplateArguments( template, arguments ) );
         }
 
-        public static BoundTemplateMethod ForInitializer( this in TemplateMember<IMethod> template, IObjectReader? arguments = null )
+        public static BoundTemplateMethod ForInitializer( this TemplateMember<IMethod> template, IObjectReader? arguments = null )
         {
             // The template must be void.
-            if ( !template.Declaration!.ReturnType.Is( SpecialType.Void ) )
+            if ( !template.Declaration.ReturnType.Is( SpecialType.Void ) )
             {
                 throw new InvalidTemplateSignatureException(
                     UserMessageFormatter.Format(
@@ -73,10 +73,10 @@ namespace Metalama.Framework.Engine.Advising
             return new BoundTemplateMethod( template, null, GetTemplateArguments( template, arguments ) );
         }
 
-        public static BoundTemplateMethod ForContract( this in TemplateMember<IMethod> template, string parameterName, IObjectReader? arguments = null )
+        public static BoundTemplateMethod ForContract( this TemplateMember<IMethod> template, string parameterName, IObjectReader? arguments = null )
         {
             // The template must be void.
-            if ( !template.Declaration!.ReturnType.Is( SpecialType.Void ) )
+            if ( !template.Declaration.ReturnType.Is( SpecialType.Void ) )
             {
                 throw new InvalidTemplateSignatureException(
                     UserMessageFormatter.Format(
@@ -109,20 +109,15 @@ namespace Metalama.Framework.Engine.Advising
             return new BoundTemplateMethod( template, null, GetTemplateArguments( template, arguments, parameterMapping ) );
         }
 
-        public static BoundTemplateMethod ForOverride( this in TemplateMember<IMethod> template, IMethod? targetMethod, IObjectReader? arguments = null )
+        public static BoundTemplateMethod ForOverride( this TemplateMember<IMethod> template, IMethod targetMethod, IObjectReader? arguments = null )
         {
-            if ( targetMethod == null || template.IsNull )
-            {
-                return default;
-            }
-
             arguments ??= ObjectReader.Empty;
 
             // We first check template arguments because it verifies them and we need them in VerifyTemplateType.
             var templateArguments = GetTemplateArguments( template, arguments );
 
             // Verity that the template return type matches the target.
-            if ( !VerifyTemplateType( template.Declaration!.ReturnType, targetMethod.ReturnType, template, arguments ) )
+            if ( !VerifyTemplateType( template.Declaration.ReturnType, targetMethod.ReturnType, template, arguments ) )
             {
                 throw new InvalidTemplateSignatureException(
                     UserMessageFormatter.Format(
@@ -302,11 +297,11 @@ namespace Metalama.Framework.Engine.Advising
         }
 
         private static object?[] GetTemplateArguments(
-            in TemplateMember<IMethod> template,
+            TemplateMember<IMethod>? template,
             IObjectReader? compileTimeParameters,
             ImmutableDictionary<string, ExpressionSyntax>? runTimeParameterMapping = null )
         {
-            if ( template.IsNull )
+            if ( template == null )
             {
                 return Array.Empty<object?>();
             }

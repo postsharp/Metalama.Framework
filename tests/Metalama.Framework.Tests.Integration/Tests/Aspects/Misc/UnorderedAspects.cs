@@ -23,9 +23,10 @@ public class Aspect2 : OverrideMethodAspect
     }
 }
 
-
+// <target>
 public class T
 {
-    [Aspect1, Aspect2]
+    [Aspect1]
+    [Aspect2]
     public void M() { }
 }

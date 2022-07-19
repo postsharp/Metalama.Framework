@@ -18,15 +18,15 @@ namespace Metalama.Framework.Engine.Transformations
 {
     internal sealed class OverridePropertyTransformation : OverridePropertyBaseTransformation
     {
-        public BoundTemplateMethod GetTemplate { get; }
+        public BoundTemplateMethod? GetTemplate { get; }
 
-        public BoundTemplateMethod SetTemplate { get; }
+        public BoundTemplateMethod? SetTemplate { get; }
 
         public OverridePropertyTransformation(
             Advice advice,
             IProperty overriddenDeclaration,
-            BoundTemplateMethod getTemplate,
-            BoundTemplateMethod setTemplate,
+            BoundTemplateMethod? getTemplate,
+            BoundTemplateMethod? setTemplate,
             IObjectReader tags )
             : base( advice, overriddenDeclaration, tags )
         {
@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.Transformations
 
             if ( this.OverriddenDeclaration.GetMethod != null )
             {
-                if ( getTemplate.IsNotNull )
+                if ( getTemplate != null )
                 {
                     templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate(
                         context,
@@ -69,7 +69,7 @@ namespace Metalama.Framework.Engine.Transformations
 
             if ( this.OverriddenDeclaration.SetMethod != null )
             {
-                if ( setTemplate.IsNotNull )
+                if ( setTemplate != null )
                 {
                     templateExpansionError = templateExpansionError || !this.TryExpandAccessorTemplate(
                         context,
@@ -125,11 +125,11 @@ namespace Metalama.Framework.Engine.Transformations
                 context.LexicalScopeProvider.GetLexicalScope( accessor ),
                 context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
                 context.SyntaxGenerationContext,
-                default,
+                accessorTemplate.Template,
                 proceedExpression,
                 this.ParentAdvice.AspectLayerId );
 
-            var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( accessorTemplate.Template.Declaration! );
+            var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( accessorTemplate.Template.Declaration );
 
             return templateDriver.TryExpandDeclaration( expansionContext, accessorTemplate.TemplateArguments, out body );
         }

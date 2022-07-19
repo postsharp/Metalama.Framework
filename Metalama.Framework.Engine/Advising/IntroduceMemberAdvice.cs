@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.Advising
 
         public TBuilder Builder { get; protected init; }
 
-        protected TemplateMember<TMember> Template { get; }
+        protected TemplateMember<TMember>? Template { get; }
 
         protected string MemberName { get; }
 
@@ -40,17 +40,17 @@ namespace Metalama.Framework.Engine.Advising
             INamedType targetDeclaration,
             ICompilation sourceCompilation,
             string? explicitName,
-            TemplateMember<TMember> template,
+            TemplateMember<TMember>? template,
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             Action<TBuilder>? buildAction,
             string? layerName,
             IObjectReader tags ) : base( aspect, templateInstance, targetDeclaration, sourceCompilation, layerName )
         {
-            var templateAttribute = (ITemplateAttribute?) template.AdviceAttribute;
+            var templateAttribute = (ITemplateAttribute?) template?.AdviceAttribute;
 
             this.MemberName = explicitName ?? templateAttribute?.Name
-                ?? template.Declaration?.Name ?? throw new ArgumentNullException( nameof(explicitName) );
+                ?? template?.Declaration.Name ?? throw new ArgumentNullException( nameof(explicitName) );
 
             this.Template = template;
 
@@ -76,11 +76,11 @@ namespace Metalama.Framework.Engine.Advising
 
         public sealed override void Initialize( IServiceProvider serviceProvider, IDiagnosticAdder diagnosticAdder )
         {
-            var templateAttribute = (ITemplateAttribute?) this.Template.AdviceAttribute;
+            var templateAttribute = (ITemplateAttribute?) this.Template?.AdviceAttribute;
 
-            this.Builder.Accessibility = templateAttribute?.Accessibility ?? this.Template.Declaration?.Accessibility ?? Accessibility.Private;
-            this.Builder.IsSealed = templateAttribute?.IsSealed ?? this.Template.Declaration?.IsSealed ?? false;
-            this.Builder.IsVirtual = templateAttribute?.IsVirtual ?? this.Template.Declaration?.IsVirtual ?? false;
+            this.Builder.Accessibility = this.Template?.Accessibility ?? Accessibility.Private;
+            this.Builder.IsSealed = templateAttribute?.IsSealed ?? this.Template?.Declaration.IsSealed ?? false;
+            this.Builder.IsVirtual = templateAttribute?.IsVirtual ?? this.Template?.Declaration.IsVirtual ?? false;
 
             // Handle the introduction scope.
             var targetDeclaration = this.TargetDeclaration.GetTarget( this.SourceCompilation );
@@ -88,7 +88,7 @@ namespace Metalama.Framework.Engine.Advising
             switch ( this.Scope )
             {
                 case IntroductionScope.Default:
-                    if ( this.Template.Declaration is { IsStatic: true } || targetDeclaration.IsStatic )
+                    if ( this.Template?.Declaration is { IsStatic: true } || targetDeclaration.IsStatic )
                     {
                         this.Builder.IsStatic = true;
                     }
@@ -126,9 +126,9 @@ namespace Metalama.Framework.Engine.Advising
                     throw new AssertionFailedException();
             }
 
-            if ( this.Template.Declaration != null )
+            if ( this.Template != null )
             {
-                CopyTemplateAttributes( this.Template.Declaration, this.Builder, serviceProvider );
+                CopyTemplateAttributes( this.Template.Declaration!, this.Builder, serviceProvider );
             }
 
             this.InitializeCore( serviceProvider, diagnosticAdder );

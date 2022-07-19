@@ -36,7 +36,7 @@ namespace Metalama.Framework.Engine.Advising
         {
             if ( this.IsNull )
             {
-                return default;
+                throw new InvalidOperationException();
             }
 
             var classifier = serviceProvider.GetRequiredService<SymbolClassificationService>().GetClassifier( compilation.RoslynCompilation );
@@ -76,7 +76,9 @@ namespace Metalama.Framework.Engine.Advising
             }
             else
             {
-                return default;
+                throw new AssertionFailedException();
+
+                //return default;
             }
         }
 

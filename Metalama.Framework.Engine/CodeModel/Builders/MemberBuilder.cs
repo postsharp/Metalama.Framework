@@ -81,7 +81,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             in MemberIntroductionContext context,
             IType targetType,
             IExpression? initializerExpression,
-            TemplateMember<T> initializerTemplate,
+            TemplateMember<T>? initializerTemplate,
             IObjectReader tags,
             out ExpressionSyntax? initializerExpressionSyntax,
             out MethodDeclarationSyntax? initializerMethodSyntax )
@@ -97,7 +97,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 throw new ArgumentNullException( nameof(targetType) );
             }
 
-            if ( context.SyntaxGenerationContext.IsPartial && (initializerExpression != null || initializerTemplate.IsNotNull) )
+            if ( context.SyntaxGenerationContext.IsPartial && (initializerExpression != null || initializerTemplate != null) )
             {
                 // At design time when generating the partial code for source generators, we do not expand templates.
                 // This may cause warnings in the constructor (because some fields will not be initialized)
@@ -117,7 +117,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
                 return true;
             }
-            else if ( initializerTemplate.IsNotNull )
+            else if ( initializerTemplate != null )
             {
                 initializerExpressionSyntax = null;
 
@@ -216,7 +216,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 null,
                 this.ParentAdvice.AspectLayerId );
 
-            var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( initializerTemplate.Declaration! );
+            var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( initializerTemplate.Declaration );
 
             return templateDriver.TryExpandDeclaration( expansionContext, Array.Empty<object>(), out expression );
         }

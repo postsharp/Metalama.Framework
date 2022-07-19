@@ -47,7 +47,6 @@ namespace Metalama.Framework.Engine.Advising
                 tags )
         {
             this.BoundTemplate = boundTemplate;
-            Invariant.Assert( !boundTemplate.IsNull );
 
             this.Builder = new MethodBuilder( this, targetDeclaration, this.MemberName );
         }
@@ -56,7 +55,7 @@ namespace Metalama.Framework.Engine.Advising
         {
             base.InitializeCore( serviceProvider, diagnosticAdder );
 
-            this.Builder.IsAsync = this.Template.Declaration!.IsAsync;
+            this.Builder.IsAsync = this.Template!.Declaration.IsAsync;
             var typeRewriter = TemplateTypeRewriter.Get( this.BoundTemplate );
 
             // Handle return type.

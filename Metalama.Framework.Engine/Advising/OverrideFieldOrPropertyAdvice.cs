@@ -12,20 +12,20 @@ namespace Metalama.Framework.Engine.Advising
 {
     internal class OverrideFieldOrPropertyAdvice : OverrideMemberAdvice<IFieldOrProperty>
     {
-        public TemplateMember<IProperty> PropertyTemplate { get; }
+        public TemplateMember<IProperty>? PropertyTemplate { get; }
 
-        public BoundTemplateMethod GetTemplate { get; }
+        public BoundTemplateMethod? GetTemplate { get; }
 
-        public BoundTemplateMethod SetTemplate { get; }
+        public BoundTemplateMethod? SetTemplate { get; }
 
         public OverrideFieldOrPropertyAdvice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             IFieldOrProperty targetDeclaration,
             ICompilation sourceCompilation,
-            TemplateMember<IProperty> propertyTemplate,
-            BoundTemplateMethod getTemplate,
-            BoundTemplateMethod setTemplate,
+            TemplateMember<IProperty>? propertyTemplate,
+            BoundTemplateMethod? getTemplate,
+            BoundTemplateMethod? setTemplate,
             string? layerName,
             IObjectReader tags )
             : base( aspect, templateInstance, targetDeclaration, sourceCompilation, layerName, tags )
