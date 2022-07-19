@@ -36,7 +36,7 @@ namespace Metalama.Framework.Engine.Transformations
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
-            var proceedExpression = this.CreateProceedExpression( context, this.BoundTemplate.Template.SelectedKind );
+            var proceedExpression = this.CreateProceedExpression( context );
 
             var metaApi = MetaApi.ForMethod(
                 this.OverriddenDeclaration,
@@ -95,7 +95,7 @@ namespace Metalama.Framework.Engine.Transformations
             };
         }
 
-        private BuiltUserExpression CreateProceedExpression( in MemberIntroductionContext context, TemplateKind templateKind )
+        private BuiltUserExpression CreateProceedExpression( in MemberIntroductionContext context )
         {
             return new BuiltUserExpression(
                 context.AspectReferenceSyntaxProvider.GetOperatorReference(

@@ -31,13 +31,6 @@ internal readonly struct BoundTemplateMethod
 #endif
     }
 
-    private BoundTemplateMethod( Ref<IMethodBase> overriddenMethodBase, TemplateMember<IMethod> template, object?[] templateArguments )
-    {
-        this.OverriddenMethodBase = overriddenMethodBase;
-        this.Template = template;
-        this.TemplateArguments = templateArguments;
-    }
-
     public bool IsNull => this.Template.IsNull;
 
     public bool IsNotNull => this.Template.IsNotNull;

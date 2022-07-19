@@ -104,7 +104,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 if ( this._logger.Trace != null )
                 {
-                    foreach ( var assembly in AppDomainUtility.GetLoadedAssemblies( a => true ).OrderBy( a => a.ToString() ) )
+                    foreach ( var assembly in AppDomainUtility.GetLoadedAssemblies( _ => true ).OrderBy( a => a.ToString() ) )
                     {
                         this._logger.Trace.Log( "Loaded: " + assembly );
                     }

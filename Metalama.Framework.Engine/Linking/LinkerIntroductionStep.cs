@@ -13,7 +13,6 @@ using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -47,9 +46,6 @@ namespace Metalama.Framework.Engine.Linking
             var nameProvider = new LinkerIntroductionNameProvider();
             var syntaxTransformationCollection = new SyntaxTransformationCollection();
             var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
-
-            var effectiveLanguageVersion =
-                LanguageVersionFacts.MapSpecifiedToEffectiveVersion( ((CSharpCompilation) input.InitialCompilation.InitialCompilation).LanguageVersion );
 
             var supportsNullability = input.InitialCompilation.InitialCompilation.Options.NullableContextOptions != NullableContextOptions.Disable;
 

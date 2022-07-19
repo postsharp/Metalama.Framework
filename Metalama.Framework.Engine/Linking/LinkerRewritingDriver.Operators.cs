@@ -40,13 +40,13 @@ namespace Metalama.Framework.Engine.Linking
                 if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
                      && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
                 {
-                    members.Add( GetOriginalImplOperator( operatorDeclaration, symbol, generationContext ) );
+                    members.Add( GetOriginalImplOperator( operatorDeclaration, symbol ) );
                 }
 
                 if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ) )
                      && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ), out _ ) )
                 {
-                    members.Add( GetEmptyImplOperator( operatorDeclaration, symbol, generationContext ) );
+                    members.Add( GetEmptyImplOperator( operatorDeclaration, symbol ) );
                 }
 
                 return members;
@@ -107,24 +107,21 @@ namespace Metalama.Framework.Engine.Linking
 
         private static MemberDeclarationSyntax GetOriginalImplOperator(
             OperatorDeclarationSyntax @operator,
-            IMethodSymbol symbol,
-            SyntaxGenerationContext generationContext )
+            IMethodSymbol symbol )
             => GetSpecialImplOperator(
                 @operator,
                 @operator.Body.WithSourceCodeAnnotation(),
                 @operator.ExpressionBody.WithSourceCodeAnnotation(),
                 symbol,
-                GetOriginalImplMemberName( symbol ),
-                generationContext );
+                GetOriginalImplMemberName( symbol ) );
 
         private static MemberDeclarationSyntax GetEmptyImplOperator(
             OperatorDeclarationSyntax @operator,
-            IMethodSymbol symbol,
-            SyntaxGenerationContext generationContext )
+            IMethodSymbol symbol )
         {
             var emptyBody = Block().NormalizeWhitespace();
 
-            return GetSpecialImplOperator( @operator, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ), generationContext );
+            return GetSpecialImplOperator( @operator, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ) );
         }
 
         private static MemberDeclarationSyntax GetSpecialImplOperator(
@@ -132,8 +129,7 @@ namespace Metalama.Framework.Engine.Linking
             BlockSyntax? body,
             ArrowExpressionClauseSyntax? expressionBody,
             IMethodSymbol symbol,
-            string name,
-            SyntaxGenerationContext generationContext )
+            string name )
         {
             var modifiers = symbol
                 .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Unsafe | ModifierCategories.Async )
