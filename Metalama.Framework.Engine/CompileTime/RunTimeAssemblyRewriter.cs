@@ -164,7 +164,7 @@ namespace Metalama.Compiler
                 transformedNode = this.MakePublicMember( transformedNode, node, firstTemplateSymbol );
             }
 
-            return node;
+            return transformedNode;
         }
 
         public override SyntaxNode VisitMethodDeclaration( MethodDeclarationSyntax node )

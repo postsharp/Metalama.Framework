@@ -9,8 +9,6 @@ namespace Metalama.Framework.Engine.CodeModel;
 
 internal class SyntaxGenerationContextFactory : IService
 {
-    private readonly IServiceProvider _serviceProvider;
-
     public Compilation Compilation { get; }
 
     public SyntaxGenerationContext Default { get; }
@@ -19,7 +17,6 @@ internal class SyntaxGenerationContextFactory : IService
 
     public SyntaxGenerationContextFactory( Compilation compilation, IServiceProvider serviceProvider )
     {
-        this._serviceProvider = serviceProvider;
         this.Compilation = compilation;
         this.Default = SyntaxGenerationContext.Create( serviceProvider, compilation );
         this.NullOblivious = SyntaxGenerationContext.Create( serviceProvider, compilation, isNullOblivious: true );

@@ -414,7 +414,7 @@ namespace Metalama.Framework.Engine.Templating
             }
             else if ( awaitResult && TypeExtensions.Equals( returnExpression.Type.GetAsyncInfo().ResultType, SpecialType.Void ) )
             {
-                Invariant.Assert( this._template.MustInterpretAsAsyncTemplate() );
+                Invariant.Assert( this._template != null && this._template.MustInterpretAsAsyncTemplate() );
 
                 if ( TypeExtensions.Equals( this.MetaApi.Method.ReturnType, SpecialType.Void )
                      || TypeExtensions.Equals( this.MetaApi.Method.ReturnType.GetAsyncInfo().ResultType, SpecialType.Void ) )
