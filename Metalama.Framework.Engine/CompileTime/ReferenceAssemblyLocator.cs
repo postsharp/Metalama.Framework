@@ -4,6 +4,7 @@
 using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Utilities;
+using Metalama.Compiler;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Options;
@@ -86,6 +87,9 @@ namespace Metalama.Framework.Engine.CompileTime
                 new[] { typeof(IAspectWeaver), typeof(TemplateSyntaxFactory) }.ToDictionary(
                     x => x.Assembly.GetName().Name,
                     x => x.Assembly.Location );
+            
+            // Force Metalama.Compiler.Interface to be loaded.
+            _ = typeof(ISourceTransformer);
 
             // Add the Metalama.Compiler.Interface" assembly. We cannot get it through typeof because types are directed to Microsoft.CodeAnalysis at compile time.
             // Strangely, there can be many instances of this same assembly.
@@ -96,6 +100,16 @@ namespace Metalama.Framework.Engine.CompileTime
 
             if ( metalamaCompilerInterfaceAssembly == null )
             {
+                this._logger.Error?.Log( "Cannot find the Metalama.Compiler.Interface assembly in the AppDomain." );
+
+                if ( this._logger.Trace != null )
+                {
+                    foreach ( var assembly in AppDomainUtility.GetLoadedAssemblies( a => true ).OrderBy( a => a.ToString() ) )
+                    {
+                        this._logger.Trace.Log( "Loaded: " + assembly );
+                    }
+                }
+                
                 throw new AssertionFailedException( "Cannot find the Metalama.Compiler.Interface assembly." );
             }
 

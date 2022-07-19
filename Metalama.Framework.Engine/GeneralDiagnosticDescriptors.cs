@@ -295,7 +295,7 @@ namespace Metalama.Framework.Engine
                 "LAMA00051",
                 Error,
                 "Metalama does not support the 'preview' language version. Change the LangVersion property of your csproj file to 'latest'.",
-                "Metalama does not support the  'preview' C# language version",
+                "Metalama does not support the 'preview' C# language version",
                 _category );
 
         // TODO: Use formattable string (C# does not seem to find extension methods).
