@@ -74,7 +74,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IExpression? InitializerExpression { get; set; }
 
-        public TemplateMember<IEvent> InitializerTemplate { get; set; }
+        public TemplateMember<IEvent>? InitializerTemplate { get; set; }
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {

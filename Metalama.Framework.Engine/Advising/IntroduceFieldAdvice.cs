@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.Advising
             INamedType targetDeclaration,
             ICompilation sourceCompilation,
             string? explicitName,
-            TemplateMember<IField> fieldTemplate,
+            TemplateMember<IField>? fieldTemplate,
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             Action<IFieldBuilder>? buildAction,
@@ -52,18 +52,14 @@ namespace Metalama.Framework.Engine.Advising
         {
             base.InitializeCore( serviceProvider, diagnosticAdder );
 
-            if ( !this.Template.IsNull )
+            if ( this.Template != null )
             {
-                this.Builder.Type = this.Template.Declaration!.Type;
-                this.Builder.Accessibility = this.Template.Declaration!.Accessibility;
-                this.Builder.IsStatic = this.Template.Declaration!.IsStatic;
-                this.Builder.Writeability = this.Template.Declaration!.Writeability;
+                this.Builder.Type = this.Template.Declaration.Type;
+                this.Builder.Writeability = this.Template.Declaration.Writeability;
             }
             else
             {
                 this.Builder.Type = this.SourceCompilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.Object );
-                this.Builder.Accessibility = Accessibility.Private;
-                this.Builder.IsStatic = false;
                 this.Builder.Writeability = Writeability.All;
             }
         }

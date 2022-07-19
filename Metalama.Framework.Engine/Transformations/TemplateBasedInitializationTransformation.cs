@@ -58,11 +58,11 @@ namespace Metalama.Framework.Engine.Transformations
                 context.LexicalScopeProvider.GetLexicalScope( this.ContextDeclaration ),
                 context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
                 context.SyntaxGenerationContext,
-                this._boundTemplate,
+                this._boundTemplate.Template,
                 null,
                 this.ParentAdvice.AspectLayerId );
 
-            var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( this._boundTemplate.Template.Declaration! );
+            var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( this._boundTemplate.Template.Declaration );
 
             if ( !templateDriver.TryExpandDeclaration( expansionContext, this._boundTemplate.TemplateArguments, out var expandedBody ) )
             {

@@ -56,7 +56,10 @@ namespace Metalama.Framework.Engine.Advising
                 new TemplateClassInstance( templateProvider, this.State.PipelineConfiguration.OtherTemplateClasses[templateProvider.GetType().FullName] ) );
         }
 
-        private TemplateMemberRef ValidateTemplateName( string? templateName, TemplateKind templateKind, bool required = false )
+        private TemplateMemberRef ValidateRequiredTemplateName( string? templateName, TemplateKind templateKind )
+            => this.ValidateTemplateName( templateName, templateKind, true )!.Value;
+
+        private TemplateMemberRef? ValidateTemplateName( string? templateName, TemplateKind templateKind, bool required = false )
         {
             if ( this._templateInstance == null )
             {
@@ -107,9 +110,9 @@ namespace Metalama.Framework.Engine.Advising
             }
         }
 
-        private TemplateMemberRef SelectTemplate( IMethod targetMethod, in MethodTemplateSelector templateSelector )
+        private TemplateMemberRef SelectMethodTemplate( IMethod targetMethod, in MethodTemplateSelector templateSelector )
         {
-            var defaultTemplate = this.ValidateTemplateName( templateSelector.DefaultTemplate, TemplateKind.Default, true );
+            var defaultTemplate = this.ValidateRequiredTemplateName( templateSelector.DefaultTemplate, TemplateKind.Default );
             var asyncTemplate = this.ValidateTemplateName( templateSelector.AsyncTemplate, TemplateKind.Async );
 
             var enumerableTemplate = this.ValidateTemplateName( templateSelector.EnumerableTemplate, TemplateKind.IEnumerable );
@@ -137,9 +140,9 @@ namespace Metalama.Framework.Engine.Advising
             {
                 interpretedKind = TemplateKind.Async;
 
-                if ( !asyncTemplate.IsNull )
+                if ( asyncTemplate.HasValue )
                 {
-                    selectedTemplate = asyncTemplate;
+                    selectedTemplate = asyncTemplate.Value;
 
                     // We don't return because the result can still be overwritten by async iterators.
                 }
@@ -155,9 +158,9 @@ namespace Metalama.Framework.Engine.Advising
 
                 case EnumerableKind.UntypedIEnumerable:
                 case EnumerableKind.IEnumerable:
-                    if ( useIteratorTemplate && !enumerableTemplate.IsNull )
+                    if ( useIteratorTemplate && enumerableTemplate.HasValue )
                     {
-                        return enumerableTemplate;
+                        return enumerableTemplate.Value;
                     }
                     else
                     {
@@ -168,9 +171,9 @@ namespace Metalama.Framework.Engine.Advising
 
                 case EnumerableKind.UntypedIEnumerator:
                 case EnumerableKind.IEnumerator:
-                    if ( useIteratorTemplate && !enumeratorTemplate.IsNull )
+                    if ( useIteratorTemplate && enumeratorTemplate.HasValue )
                     {
-                        return enumeratorTemplate;
+                        return enumeratorTemplate.Value;
                     }
                     else
                     {
@@ -180,9 +183,9 @@ namespace Metalama.Framework.Engine.Advising
                     break;
 
                 case EnumerableKind.IAsyncEnumerable:
-                    if ( useIteratorTemplate && !asyncEnumerableTemplate.IsNull )
+                    if ( useIteratorTemplate && asyncEnumerableTemplate.HasValue )
                     {
-                        return asyncEnumerableTemplate;
+                        return asyncEnumerableTemplate.Value;
                     }
                     else
                     {
@@ -192,9 +195,9 @@ namespace Metalama.Framework.Engine.Advising
                     break;
 
                 case EnumerableKind.IAsyncEnumerator:
-                    if ( useIteratorTemplate && !asyncEnumeratorTemplate.IsNull )
+                    if ( useIteratorTemplate && asyncEnumeratorTemplate.HasValue )
                     {
-                        return asyncEnumeratorTemplate;
+                        return asyncEnumeratorTemplate.Value;
                     }
                     else
                     {
@@ -283,13 +286,16 @@ namespace Metalama.Framework.Engine.Advising
             }
         }
 
-        private TemplateMemberRef SelectTemplate( IFieldOrPropertyOrIndexer targetFieldOrProperty, in GetterTemplateSelector templateSelector, bool required )
+        private TemplateMemberRef? SelectGetterTemplate(
+            IFieldOrPropertyOrIndexer targetFieldOrProperty,
+            in GetterTemplateSelector templateSelector,
+            bool required )
         {
             var getter = targetFieldOrProperty.GetMethod;
 
             if ( getter == null )
             {
-                return default;
+                throw new InvalidOperationException();
             }
 
             var defaultTemplate = this.ValidateTemplateName( templateSelector.DefaultTemplate, TemplateKind.Default, required );
@@ -302,12 +308,12 @@ namespace Metalama.Framework.Engine.Advising
             {
                 var iteratorInfo = getter.GetIteratorInfoImpl();
 
-                if ( !enumerableTemplate.IsNull && iteratorInfo.IsIterator )
+                if ( enumerableTemplate.HasValue && iteratorInfo.IsIterator )
                 {
                     selectedTemplate = enumerableTemplate;
                 }
 
-                if ( !enumeratorTemplate.IsNull && iteratorInfo.EnumerableKind is EnumerableKind.IEnumerator or EnumerableKind.UntypedIEnumerator )
+                if ( enumeratorTemplate.HasValue && iteratorInfo.EnumerableKind is EnumerableKind.IEnumerator or EnumerableKind.UntypedIEnumerator )
                 {
                     return enumeratorTemplate;
                 }
@@ -337,9 +343,10 @@ namespace Metalama.Framework.Engine.Advising
 
             this.ValidateTarget( targetMethod );
 
-            var template = this.SelectTemplate( targetMethod, templateSelector )
+            var template = this.SelectMethodTemplate( targetMethod, templateSelector )
                 .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider )
-                .ForOverride( targetMethod, ObjectReader.GetReader( args ) );
+                .ForOverride( targetMethod, ObjectReader.GetReader( args ) )
+                .AssertNotNull();
 
             var advice = new OverrideMethodAdvice(
                 this.State.AspectInstance,
@@ -376,6 +383,7 @@ namespace Metalama.Framework.Engine.Advising
             this.ValidateTarget( targetType );
 
             var template = this.ValidateTemplateName( defaultTemplate, TemplateKind.Default, true )
+                !.Value
                 .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
 
             var advice = new IntroduceMethodAdvice(
@@ -413,7 +421,7 @@ namespace Metalama.Framework.Engine.Advising
 
             this.ValidateTarget( targetType );
 
-            var template = this.ValidateTemplateName( defaultTemplate, TemplateKind.Default, true )
+            var template = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
                 .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
 
             var advice = new IntroduceFinalizerAdvice(
@@ -453,7 +461,7 @@ namespace Metalama.Framework.Engine.Advising
 
             this.ValidateTarget( targetType );
 
-            var template = this.ValidateTemplateName( defaultTemplate, TemplateKind.Default, true )
+            var template = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
                 .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
 
             var advice = new IntroduceOperatorAdvice(
@@ -499,7 +507,7 @@ namespace Metalama.Framework.Engine.Advising
 
             this.ValidateTarget( targetType );
 
-            var template = this.ValidateTemplateName( defaultTemplate, TemplateKind.Default, true )
+            var template = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
                 .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
 
             var advice = new IntroduceOperatorAdvice(
@@ -538,7 +546,7 @@ namespace Metalama.Framework.Engine.Advising
 
             this.ValidateTarget( targetType );
 
-            var template = this.ValidateTemplateName( defaultTemplate, TemplateKind.Default, true )
+            var template = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
                 .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
 
             var operatorKind = isImplicit ? OperatorKind.ImplicitConversion : OperatorKind.ExplicitConversion;
@@ -580,12 +588,12 @@ namespace Metalama.Framework.Engine.Advising
             this.ValidateTarget( targetFieldOrProperty );
 
             // Set template represents both set and init accessors.
-            var propertyTemplate = this.ValidateTemplateName( defaultTemplate, TemplateKind.Default, true )
+            var propertyTemplate = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
                 .GetTemplateMember<IProperty>( this._compilation, this.State.ServiceProvider );
 
             var accessorTemplates = propertyTemplate.GetAccessorTemplates();
-            var getTemplate = accessorTemplates.Get;
-            var setTemplate = accessorTemplates.Set;
+            var getTemplate = accessorTemplates.Get?.ForIntroduction();
+            var setTemplate = accessorTemplates.Set?.ForIntroduction();
 
             var advice = new OverrideFieldOrPropertyAdvice(
                 this.State.AspectInstance,
@@ -593,8 +601,8 @@ namespace Metalama.Framework.Engine.Advising
                 targetFieldOrProperty,
                 this._compilation,
                 propertyTemplate,
-                getTemplate.ForIntroduction(),
-                setTemplate.ForIntroduction(),
+                getTemplate,
+                setTemplate,
                 this._layerName,
                 ObjectReader.GetReader( tags ) );
 
@@ -623,15 +631,19 @@ namespace Metalama.Framework.Engine.Advising
             this.ValidateTarget( targetFieldOrProperty );
 
             // Set template represents both set and init accessors.
-            var getTemplateRef = this.SelectTemplate( targetFieldOrProperty, getTemplateSelector, setTemplate == null )
-                .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider )
-                .ForOverride( targetFieldOrProperty.GetMethod, ObjectReader.GetReader( args ) );
+            var getTemplateRef = targetFieldOrProperty.GetMethod != null
+                ? this.SelectGetterTemplate( targetFieldOrProperty, getTemplateSelector, setTemplate == null )
+                    ?.GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider )
+                    .ForOverride( targetFieldOrProperty.GetMethod, ObjectReader.GetReader( args ) )
+                : null;
 
-            var setTemplateRef = this.ValidateTemplateName( setTemplate, TemplateKind.Default, getTemplateSelector.IsNull )
-                .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider )
-                .ForOverride( targetFieldOrProperty.SetMethod, ObjectReader.GetReader( args ) );
+            var setTemplateRef = targetFieldOrProperty.SetMethod != null
+                ? this.ValidateTemplateName( setTemplate, TemplateKind.Default, getTemplateSelector.IsNull )
+                    ?.GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider )
+                    .ForOverride( targetFieldOrProperty.SetMethod, ObjectReader.GetReader( args ) )
+                : null;
 
-            if ( getTemplateRef.IsNull && setTemplateRef.IsNull )
+            if ( getTemplateRef == null && setTemplateRef == null )
             {
                 throw new InvalidOperationException( "There is no accessor to override." );
             }
@@ -665,7 +677,7 @@ namespace Metalama.Framework.Engine.Advising
 
             this.ValidateTarget( targetType );
 
-            var template = this.ValidateTemplateName( templateName, TemplateKind.Default, true )
+            var template = this.ValidateRequiredTemplateName( templateName, TemplateKind.Default )
                 .GetTemplateMember<IField>( this._compilation, this.State.ServiceProvider );
 
             var advice = new IntroduceFieldAdvice(
@@ -810,7 +822,7 @@ namespace Metalama.Framework.Engine.Advising
 
             this.ValidateTarget( targetType );
 
-            var propertyTemplate = this.ValidateTemplateName( defaultTemplate, TemplateKind.Default, true )
+            var propertyTemplate = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
                 .GetTemplateMember<IProperty>( this._compilation, this.State.ServiceProvider );
 
             var accessorTemplates = propertyTemplate.GetAccessorTemplates();
@@ -823,8 +835,8 @@ namespace Metalama.Framework.Engine.Advising
                 null,
                 null,
                 propertyTemplate,
-                accessorTemplates.Get.ForIntroduction(),
-                accessorTemplates.Set.ForIntroduction(),
+                accessorTemplates.Get?.ForIntroduction(),
+                accessorTemplates.Set?.ForIntroduction(),
                 scope,
                 whenExists,
                 buildProperty,
@@ -864,10 +876,10 @@ namespace Metalama.Framework.Engine.Advising
             this.ValidateTarget( targetType );
 
             var getTemplateRef = this.ValidateTemplateName( getTemplate, TemplateKind.Default )
-                .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
+                ?.GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
 
             var setTemplateRef = this.ValidateTemplateName( setTemplate, TemplateKind.Default )
-                .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
+                ?.GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
 
             var parameterReaders = ObjectReader.GetReader( args );
 
@@ -879,8 +891,8 @@ namespace Metalama.Framework.Engine.Advising
                 name,
                 null,
                 default,
-                getTemplateRef.ForIntroduction( parameterReaders ),
-                setTemplateRef.ForIntroduction( parameterReaders ),
+                getTemplateRef?.ForIntroduction( parameterReaders ),
+                setTemplateRef?.ForIntroduction( parameterReaders ),
                 scope,
                 whenExists,
                 buildProperty,
@@ -916,10 +928,10 @@ namespace Metalama.Framework.Engine.Advising
 
             this.ValidateTarget( targetEvent );
 
-            var addTemplateRef = this.ValidateTemplateName( addTemplate, TemplateKind.Default, true )
+            var addTemplateRef = this.ValidateRequiredTemplateName( addTemplate, TemplateKind.Default )
                 .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
 
-            var removeTemplateRef = this.ValidateTemplateName( removeTemplate, TemplateKind.Default, true )
+            var removeTemplateRef = this.ValidateRequiredTemplateName( removeTemplate, TemplateKind.Default )
                 .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
 
             if ( invokeTemplate != null )
@@ -963,7 +975,7 @@ namespace Metalama.Framework.Engine.Advising
 
             this.ValidateTarget( targetType );
 
-            var template = this.ValidateTemplateName( eventTemplate, TemplateKind.Default, true )
+            var template = this.ValidateRequiredTemplateName( eventTemplate, TemplateKind.Default )
                 .GetTemplateMember<IEvent>( this._compilation, this.State.ServiceProvider );
 
             var advice = new IntroduceEventAdvice(
@@ -1010,10 +1022,10 @@ namespace Metalama.Framework.Engine.Advising
 
             this.ValidateTarget( targetType );
 
-            var addTemplateRef = this.ValidateTemplateName( addTemplate, TemplateKind.Default, true )
+            var addTemplateRef = this.ValidateRequiredTemplateName( addTemplate, TemplateKind.Default )
                 .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
 
-            var removeTemplateRef = this.ValidateTemplateName( removeTemplate, TemplateKind.Default, true )
+            var removeTemplateRef = this.ValidateRequiredTemplateName( removeTemplate, TemplateKind.Default )
                 .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
 
             var advice = new IntroduceEventAdvice(
@@ -1130,7 +1142,7 @@ namespace Metalama.Framework.Engine.Advising
 
             this.ValidateTarget( targetType );
 
-            var templateRef = this.ValidateTemplateName( template, TemplateKind.Default, true )
+            var templateRef = this.ValidateRequiredTemplateName( template, TemplateKind.Default )
                 .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
 
             var advice = new TemplateBasedInitializeAdvice(
@@ -1179,7 +1191,7 @@ namespace Metalama.Framework.Engine.Advising
 
             this.ValidateTarget( targetConstructor );
 
-            var templateRef = this.ValidateTemplateName( template, TemplateKind.Default, true )
+            var templateRef = this.ValidateRequiredTemplateName( template, TemplateKind.Default )
                 .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
 
             var advice = new TemplateBasedInitializeAdvice(
@@ -1293,7 +1305,7 @@ namespace Metalama.Framework.Engine.Advising
 
             this.ValidateTarget( targetDeclaration, targetMember );
 
-            var templateRef = this.ValidateTemplateName( template, TemplateKind.Default, true )
+            var templateRef = this.ValidateRequiredTemplateName( template, TemplateKind.Default )
                 .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
 
             if ( !this.State.ContractAdvices.TryGetValue( targetMember, out var advice ) )

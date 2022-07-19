@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         private Exception CreateInvalidOperationException( string memberName, string? description = null )
             => TemplatingDiagnosticDescriptors.MemberMemberNotAvailable.CreateException(
-                (this._common.Template.Declaration!, "meta." + memberName, this.Declaration, this.Declaration.DeclarationKind,
+                (this._common.Template.Declaration, "meta." + memberName, this.Declaration, this.Declaration.DeclarationKind,
                  description ?? "I" + memberName) );
 
         public IConstructor Constructor => this._constructor ?? throw this.CreateInvalidOperationException( nameof(this.Constructor) );
@@ -76,7 +76,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
                 (MetaApiStaticity.AlwaysStatic, _, _)
                     => throw TemplatingDiagnosticDescriptors.CannotUseThisInStaticContext.CreateException(
-                        (this._common.Template.Declaration!, expressionName, this.Declaration, this.Declaration.DeclarationKind) ),
+                        (this._common.Template.Declaration, expressionName, this.Declaration, this.Declaration.DeclarationKind) ),
 
                 (MetaApiStaticity.Default, { IsStatic: false }, IMemberOrNamedType { IsStatic: false })
                     => new ThisInstanceUserReceiver(
@@ -84,7 +84,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
                         linkerAnnotation ),
 
                 _ => throw TemplatingDiagnosticDescriptors.CannotUseThisInStaticContext.CreateException(
-                    (this._common.Template.Declaration!, expressionName, this.Declaration, this.Declaration.DeclarationKind) )
+                    (this._common.Template.Declaration, expressionName, this.Declaration, this.Declaration.DeclarationKind) )
             };
 
         public IMetaTarget Target => this;

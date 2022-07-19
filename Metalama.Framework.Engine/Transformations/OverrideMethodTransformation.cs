@@ -23,8 +23,6 @@ namespace Metalama.Framework.Engine.Transformations
         public OverrideMethodTransformation( Advice advice, IMethod targetMethod, BoundTemplateMethod boundTemplate, IObjectReader tags )
             : base( advice, targetMethod, tags )
         {
-            Invariant.Assert( !boundTemplate.IsNull );
-
             this.BoundTemplate = boundTemplate;
         }
 
@@ -51,11 +49,11 @@ namespace Metalama.Framework.Engine.Transformations
                 context.LexicalScopeProvider.GetLexicalScope( this.OverriddenDeclaration ),
                 context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
                 context.SyntaxGenerationContext,
-                this.BoundTemplate,
+                this.BoundTemplate.Template,
                 proceedExpression,
                 this.ParentAdvice.AspectLayerId );
 
-            var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( this.BoundTemplate.Template.Declaration! );
+            var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( this.BoundTemplate.Template.Declaration );
 
             if ( !templateDriver.TryExpandDeclaration( expansionContext, this.BoundTemplate.TemplateArguments, out var newMethodBody ) )
             {

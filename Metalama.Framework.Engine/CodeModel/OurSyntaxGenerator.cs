@@ -347,7 +347,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public ExpressionSyntax EnumValueExpression( INamedTypeSymbol type, object value )
         {
-            var member = type.GetMembers().OfType<IFieldSymbol>().FirstOrDefault( f => f.IsConst && f.ConstantValue == value );
+            var member = type.GetMembers()
+                .OfType<IFieldSymbol>()
+                .FirstOrDefault( f => f.IsConst && f.ConstantValue != null && f.ConstantValue.Equals( value ) );
 
             if ( member == null )
             {

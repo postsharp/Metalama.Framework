@@ -9,17 +9,19 @@ using Metalama.Framework.TestApp.Aspects;
 
 namespace Metalama.Framework.TestApp
 {
-    internal class PrintDebugInfoAspect : OverrideMethodAspect
+    public class PrintDebugInfoAspect : MethodAspect
     {
         static DiagnosticDefinition<IDeclaration> myWarning = new( "MY001", Severity.Warning, "Hello, {0} v24." );
 
         public override void BuildAspect(IAspectBuilder<IMethod> aspectBuilder )
         {
-            base.BuildAspect( aspectBuilder );
+            aspectBuilder.Advice.Override(aspectBuilder.Target, nameof(OverrideMethod));
             aspectBuilder.Diagnostics.Report( myWarning.WithArguments(aspectBuilder.Target) );
         }
 
-        public override dynamic? OverrideMethod()
+        // The template is intentionally private to reproduce #30575.
+        [Template]
+        private dynamic? OverrideMethod()
         {
             Console.WriteLine( DebugInfo.GetInfo() );
             return meta.Proceed();

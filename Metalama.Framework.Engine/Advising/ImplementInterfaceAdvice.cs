@@ -341,7 +341,7 @@ namespace Metalama.Framework.Engine.Advising
                                     ? new OverrideMethodTransformation(
                                         this,
                                         (IMethod) memberBuilder,
-                                        TemplateMember.Create(
+                                        TemplateMemberFactory.Create(
                                                 aspectMethod,
                                                 memberSpec.TemplateClassMember,
                                                 (ITemplateAttribute) memberSpec.TemplateClassMember.TemplateInfo.Attribute.AssertNotNull(),
@@ -401,9 +401,9 @@ namespace Metalama.Framework.Engine.Advising
 
                             interfaceMemberMap.Add( interfaceProperty, memberBuilder );
 
-                            if ( aspectProperty?.IsAutoPropertyOrField != true )
+                            if ( aspectProperty != null && aspectProperty.IsAutoPropertyOrField != true )
                             {
-                                var propertyTemplate = TemplateMember.Create( aspectProperty, memberSpec.TemplateClassMember, TemplateKind.Introduction );
+                                var propertyTemplate = TemplateMemberFactory.Create( aspectProperty, memberSpec.TemplateClassMember, TemplateKind.Introduction );
                                 var accessorTemplates = propertyTemplate.GetAccessorTemplates();
 
                                 addTransformation(
@@ -411,8 +411,8 @@ namespace Metalama.Framework.Engine.Advising
                                         ? new OverridePropertyTransformation(
                                             this,
                                             (IProperty) memberBuilder,
-                                            accessorTemplates.Get.ForOverride( propertyBuilder.GetMethod ),
-                                            accessorTemplates.Set.ForOverride( propertyBuilder.SetMethod ),
+                                            propertyBuilder.GetMethod != null ? accessorTemplates.Get?.ForOverride( propertyBuilder.GetMethod ) : null,
+                                            propertyBuilder.SetMethod != null ? accessorTemplates.Set?.ForOverride( propertyBuilder.SetMethod ) : null,
                                             mergedTags )
                                         : new RedirectPropertyTransformation(
                                             this,
@@ -468,7 +468,7 @@ namespace Metalama.Framework.Engine.Advising
                                         ? new OverrideEventTransformation(
                                             this,
                                             (IEvent) memberBuilder,
-                                            TemplateMember.Create(
+                                            TemplateMemberFactory.Create(
                                                 (IEvent) memberSpec.AspectInterfaceMember,
                                                 memberSpec.TemplateClassMember,
                                                 TemplateKind.Introduction ),

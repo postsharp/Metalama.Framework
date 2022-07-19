@@ -19,8 +19,8 @@ namespace Metalama.Framework.Engine.Advising
 {
     internal class IntroduceEventAdvice : IntroduceMemberAdvice<IEvent, EventBuilder>
     {
-        private readonly TemplateMember<IMethod> _addTemplate;
-        private readonly TemplateMember<IMethod> _removeTemplate;
+        private readonly TemplateMember<IMethod>? _addTemplate;
+        private readonly TemplateMember<IMethod>? _removeTemplate;
         private readonly IObjectReader _parameters;
 
         // ReSharper disable once MemberCanBePrivate.Global
@@ -31,9 +31,9 @@ namespace Metalama.Framework.Engine.Advising
             INamedType targetDeclaration,
             ICompilation sourceCompilation,
             string? explicitName,
-            TemplateMember<IEvent> eventTemplate,
-            TemplateMember<IMethod> addTemplate,
-            TemplateMember<IMethod> removeTemplate,
+            TemplateMember<IEvent>? eventTemplate,
+            TemplateMember<IMethod>? addTemplate,
+            TemplateMember<IMethod>? removeTemplate,
             IntroductionScope scope,
             OverrideStrategy overrideStrategy,
             Action<IEventBuilder>? buildAction,
@@ -61,7 +61,7 @@ namespace Metalama.Framework.Engine.Advising
                 this,
                 targetDeclaration,
                 this.MemberName,
-                eventTemplate.Declaration != null && eventTemplate.Declaration.IsEventField(),
+                eventTemplate?.Declaration != null && eventTemplate.Declaration.IsEventField(),
                 tags );
 
             this.Builder.InitializerTemplate = eventTemplate.GetInitializerTemplate();
@@ -72,10 +72,8 @@ namespace Metalama.Framework.Engine.Advising
             base.InitializeCore( serviceProvider, diagnosticAdder );
 
             this.Builder.Type =
-                (this.Template.Declaration?.Type ?? (INamedType?) this._addTemplate.Declaration?.Parameters.FirstOrDefault().AssertNotNull().Type)
+                (this.Template?.Declaration.Type ?? (INamedType?) this._addTemplate?.Declaration.Parameters.FirstOrDefault().AssertNotNull().Type)
                 .AssertNotNull();
-
-            this.Builder.Accessibility = (this.Template.Declaration?.Accessibility ?? this._addTemplate.Declaration?.Accessibility).AssertNotNull();
         }
 
         public override AdviceImplementationResult Implement(
@@ -87,7 +85,7 @@ namespace Metalama.Framework.Engine.Advising
             var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
 
             var existingDeclaration = targetDeclaration.FindClosestUniquelyNamedMember( this.Builder.Name );
-            var hasNoOverrideSemantics = this.Template.Declaration != null && this.Template.Declaration.IsEventField();
+            var hasNoOverrideSemantics = this.Template?.Declaration != null && this.Template.Declaration.IsEventField();
 
             if ( existingDeclaration == null )
             {

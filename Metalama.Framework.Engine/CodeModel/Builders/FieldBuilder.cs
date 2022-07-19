@@ -46,7 +46,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IExpression? InitializerExpression { get; set; }
 
-        public TemplateMember<IField> InitializerTemplate { get; set; }
+        public TemplateMember<IField>? InitializerTemplate { get; set; }
 
         public FieldBuilder( Advice parentAdvice, INamedType targetType, string name, IObjectReader initializerTags )
             : base( parentAdvice, targetType, name )

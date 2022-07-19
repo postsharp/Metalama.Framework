@@ -1,4 +1,4 @@
-    internal record struct TargetRecordStruct
+internal record struct TargetRecordStruct
     {
         private int Method1( int a ) 
 { 
@@ -19,8 +19,10 @@
 
 
             [Template]
-private dynamic? Template() => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
+[global::Metalama.Framework.Aspects.AccessibilityAttribute(global::Metalama.Framework.Code.Accessibility.Private)
+]public dynamic? Template() => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
 
         }
+
 #pragma warning restore CS0067
     }

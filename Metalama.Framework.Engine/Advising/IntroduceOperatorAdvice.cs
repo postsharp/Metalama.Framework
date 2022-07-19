@@ -50,7 +50,6 @@ namespace Metalama.Framework.Engine.Advising
                 tags )
         {
             this.BoundTemplate = boundTemplate;
-            Invariant.Assert( !boundTemplate.IsNull );
 
             this.Builder = new MethodBuilder( this, targetDeclaration, operatorKind.ToOperatorMethodName(), DeclarationKind.Operator, operatorKind );
 

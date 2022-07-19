@@ -25,6 +25,14 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
         public IEnumerable<IAttribute> OfAttributeType( INamedType type ) => this.GetItems( this.Source ).Where( a => a.Type.Is( type ) );
 
         public IEnumerable<IAttribute> OfAttributeType( Type type )
-            => this.OfAttributeType( (INamedType) this.ContainingDeclaration!.GetCompilationModel().Factory.GetTypeByReflectionType( type ) );
+        {
+            if ( this.ContainingDeclaration == null )
+            {
+                // The collection is empty.
+                return Enumerable.Empty<IAttribute>();
+            }
+
+            return this.OfAttributeType( (INamedType) this.ContainingDeclaration!.GetCompilationModel().Factory.GetTypeByReflectionType( type ) );
+        }
     }
 }

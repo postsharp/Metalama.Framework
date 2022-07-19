@@ -16,8 +16,8 @@ namespace Metalama.Framework.Engine.Advising
             IServiceProvider serviceProvider,
             Advice advice,
             IFieldOrPropertyOrIndexer targetDeclaration,
-            BoundTemplateMethod getTemplate,
-            BoundTemplateMethod setTemplate,
+            BoundTemplateMethod? getTemplate,
+            BoundTemplateMethod? setTemplate,
             IObjectReader tags,
             Action<ITransformation> addTransformation )
         {

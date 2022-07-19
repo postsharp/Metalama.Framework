@@ -27,7 +27,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         private readonly bool _hasInitOnlySetter;
         private IType _type;
         private IExpression? _initializerExpression;
-        private TemplateMember<IProperty> _initializerTemplate;
+        private TemplateMember<IProperty>? _initializerTemplate;
 
         public RefKind RefKind { get; set; }
 
@@ -94,7 +94,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
         }
 
-        public TemplateMember<IProperty> InitializerTemplate
+        public TemplateMember<IProperty>? InitializerTemplate
         {
             get => this._initializerTemplate;
             set

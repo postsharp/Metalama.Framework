@@ -14,20 +14,20 @@ namespace Metalama.Framework.Engine.Advising
     {
         private readonly IObjectReader _parameters;
 
-        public TemplateMember<IEvent> EventTemplate { get; }
+        public TemplateMember<IEvent>? EventTemplate { get; }
 
-        public TemplateMember<IMethod> AddTemplate { get; }
+        public TemplateMember<IMethod>? AddTemplate { get; }
 
-        public TemplateMember<IMethod> RemoveTemplate { get; }
+        public TemplateMember<IMethod>? RemoveTemplate { get; }
 
         public OverrideEventAdvice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
             IEvent targetDeclaration,
             ICompilation sourceCompilation,
-            TemplateMember<IEvent> eventTemplate,
-            TemplateMember<IMethod> addTemplate,
-            TemplateMember<IMethod> removeTemplate,
+            TemplateMember<IEvent>? eventTemplate,
+            TemplateMember<IMethod>? addTemplate,
+            TemplateMember<IMethod>? removeTemplate,
             string? layerName,
             IObjectReader tags,
             IObjectReader parameters )
@@ -36,8 +36,8 @@ namespace Metalama.Framework.Engine.Advising
             this._parameters = parameters;
 
             // We need either property template or both accessor templates, but never both.
-            Invariant.Assert( eventTemplate.IsNotNull || (addTemplate.IsNotNull && removeTemplate.IsNotNull) );
-            Invariant.Assert( !(eventTemplate.IsNotNull && (addTemplate.IsNotNull || removeTemplate.IsNotNull)) );
+            Invariant.Assert( eventTemplate != null || (addTemplate != null && removeTemplate != null) );
+            Invariant.Assert( !(eventTemplate != null && (addTemplate != null || removeTemplate != null)) );
 
             this.EventTemplate = eventTemplate;
             this.AddTemplate = addTemplate;

@@ -36,7 +36,7 @@ namespace Metalama.Framework.Engine.Advising
         {
             if ( this.IsNull )
             {
-                return default;
+                throw new InvalidOperationException();
             }
 
             var classifier = serviceProvider.GetRequiredService<SymbolClassificationService>().GetClassifier( compilation.RoslynCompilation );
@@ -72,11 +72,11 @@ namespace Metalama.Framework.Engine.Advising
 
             if ( attribute is ITemplateAttribute templateAttribute )
             {
-                return Advising.TemplateMember.Create( typedSymbol, this.TemplateMember, templateAttribute, this.SelectedKind, this.InterpretedKind );
+                return TemplateMemberFactory.Create( typedSymbol, this.TemplateMember, templateAttribute, this.SelectedKind, this.InterpretedKind );
             }
             else
             {
-                return default;
+                throw new AssertionFailedException();
             }
         }
 

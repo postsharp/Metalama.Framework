@@ -10,28 +10,28 @@ namespace Metalama.Framework.Engine.Advising
 {
     internal static class TemplateExtensions
     {
-        public static (TemplateMember<IMethod> Get, TemplateMember<IMethod> Set) GetAccessorTemplates( this TemplateMember<IProperty> propertyTemplate )
+        public static (TemplateMember<IMethod>? Get, TemplateMember<IMethod>? Set) GetAccessorTemplates( this TemplateMember<IProperty>? propertyTemplate )
         {
-            if ( propertyTemplate.IsNotNull )
+            if ( propertyTemplate != null )
             {
-                if ( !propertyTemplate.Declaration!.IsAutoPropertyOrField )
+                if ( !propertyTemplate.Declaration.IsAutoPropertyOrField )
                 {
-                    TemplateMember<IMethod> GetAccessorTemplate( IMethod? accessor )
+                    TemplateMember<IMethod>? GetAccessorTemplate( IMethod? accessor )
                     {
                         if ( accessor != null && propertyTemplate.TemplateClassMember.Accessors.TryGetValue(
                                 accessor.GetSymbol()!.MethodKind,
                                 out var template ) )
                         {
-                            return TemplateMember.Create( accessor, template );
+                            return TemplateMemberFactory.Create( accessor, template );
                         }
                         else
                         {
-                            return default;
+                            return null;
                         }
                     }
 
-                    return (GetAccessorTemplate( propertyTemplate.Declaration!.GetMethod ),
-                            GetAccessorTemplate( propertyTemplate.Declaration!.SetMethod ));
+                    return (GetAccessorTemplate( propertyTemplate.Declaration.GetMethod ),
+                            GetAccessorTemplate( propertyTemplate.Declaration.SetMethod ));
                 }
             }
 
@@ -55,24 +55,24 @@ namespace Metalama.Framework.Engine.Advising
                 _ => false
             };
 
-        public static bool MustInterpretAsAsyncTemplate( this in TemplateMember<IMethod> template )
+        public static bool MustInterpretAsAsyncTemplate( this TemplateMember<IMethod> template )
             => template.Declaration is { IsAsync: true }
                || (template.SelectedKind == TemplateKind.Default && template.InterpretedKind.IsAsyncTemplate());
 
-        public static bool MustInterpretAsAsyncIteratorTemplate( this in TemplateMember<IMethod> template )
-            => template.InterpretedKind.IsAsyncIteratorTemplate() && (template.Declaration!.IsAsync || template.SelectedKind == TemplateKind.Default);
+        public static bool MustInterpretAsAsyncIteratorTemplate( this TemplateMember<IMethod> template )
+            => template.InterpretedKind.IsAsyncIteratorTemplate() && (template.Declaration.IsAsync || template.SelectedKind == TemplateKind.Default);
 
-        public static TemplateMember<IField> GetInitializerTemplate( this in TemplateMember<IField> fieldTemplate )
+        public static TemplateMember<IField>? GetInitializerTemplate( this TemplateMember<IField>? fieldTemplate )
         {
             // TODO 30576 - do not rely on syntax for templates.
 
-            if ( fieldTemplate.IsNotNull )
+            if ( fieldTemplate != null )
             {
                 var templateName = TemplateNameHelper.GetCompiledTemplateName( fieldTemplate.Declaration.AssertNotNull().GetSymbol().AssertNotNull() );
 
                 if ( fieldTemplate.TemplateClassMember.TemplateClass.Type.GetMethod( templateName ) != null )
                 {
-                    return TemplateMember.Create(
+                    return TemplateMemberFactory.Create(
                         fieldTemplate.Declaration,
                         fieldTemplate.TemplateClassMember,
                         fieldTemplate.AdviceAttribute.AssertNotNull(),
@@ -89,18 +89,18 @@ namespace Metalama.Framework.Engine.Advising
             }
         }
 
-        public static TemplateMember<IEvent> GetInitializerTemplate( this in TemplateMember<IEvent> eventFieldTemplate )
+        public static TemplateMember<IEvent>? GetInitializerTemplate( this TemplateMember<IEvent>? eventFieldTemplate )
         {
             // TODO 30576 - do not rely on syntax for templates.
 
-            if ( eventFieldTemplate.IsNotNull )
+            if ( eventFieldTemplate != null )
             {
                 // Initializer template is compiled into a template for event.
                 var templateName = TemplateNameHelper.GetCompiledTemplateName( eventFieldTemplate.Declaration.AssertNotNull().GetSymbol().AssertNotNull() );
 
                 if ( eventFieldTemplate.TemplateClassMember.TemplateClass.Type.GetMethod( templateName ) != null )
                 {
-                    return TemplateMember.Create( eventFieldTemplate.Declaration, eventFieldTemplate.TemplateClassMember, TemplateKind.InitializerExpression );
+                    return TemplateMemberFactory.Create( eventFieldTemplate.Declaration, eventFieldTemplate.TemplateClassMember, TemplateKind.InitializerExpression );
                 }
                 else
                 {
@@ -113,16 +113,16 @@ namespace Metalama.Framework.Engine.Advising
             }
         }
 
-        public static TemplateMember<IProperty> GetInitializerTemplate( this in TemplateMember<IProperty> propertyTemplate )
+        public static TemplateMember<IProperty>? GetInitializerTemplate( this TemplateMember<IProperty>? propertyTemplate )
         {
-            if ( propertyTemplate.IsNotNull )
+            if ( propertyTemplate != null )
             {
                 // Initializer template is compiled into a template for property.
                 var templateName = TemplateNameHelper.GetCompiledTemplateName( propertyTemplate.Declaration.AssertNotNull().GetSymbol().AssertNotNull() );
 
                 if ( propertyTemplate.TemplateClassMember.TemplateClass.Type.GetMethod( templateName ) != null )
                 {
-                    return TemplateMember.Create( propertyTemplate.Declaration, propertyTemplate.TemplateClassMember, TemplateKind.InitializerExpression );
+                    return TemplateMemberFactory.Create( propertyTemplate.Declaration, propertyTemplate.TemplateClassMember, TemplateKind.InitializerExpression );
                 }
                 else
                 {

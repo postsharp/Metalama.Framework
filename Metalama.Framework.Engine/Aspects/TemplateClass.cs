@@ -258,7 +258,7 @@ namespace Metalama.Framework.Engine.Aspects
         internal IEnumerable<TemplateMember<IMemberOrNamedType>> GetDeclarativeAdvices( IServiceProvider serviceProvider, CompilationModel compilation )
             => this.GetDeclarativeAdvices( serviceProvider, compilation.RoslynCompilation )
                 .Select(
-                    x => TemplateMember.Create(
+                    x => TemplateMemberFactory.Create(
                         (IMemberOrNamedType) compilation.Factory.GetDeclaration( x.Symbol ),
                         x.TemplateClassMember,
                         x.Attribute ) );

@@ -136,11 +136,11 @@ namespace Metalama.Framework.Engine.Advising
                     context.LexicalScopeProvider.GetLexicalScope( targetMember ),
                     context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
                     context.SyntaxGenerationContext,
-                    boundTemplate,
+                    boundTemplate.Template,
                     null,
                     this.AspectLayerId );
 
-                var templateDriver = this.TemplateInstance.TemplateClass.GetTemplateDriver( filter.Template.Declaration! );
+                var templateDriver = this.TemplateInstance.TemplateClass.GetTemplateDriver( filter.Template.Declaration );
 
                 if ( !templateDriver.TryExpandDeclaration( expansionContext, boundTemplate.TemplateArguments, out var filterBody ) )
                 {

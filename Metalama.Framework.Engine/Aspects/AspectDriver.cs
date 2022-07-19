@@ -56,7 +56,7 @@ namespace Metalama.Framework.Engine.Aspects
 
                     ((DeclarativeAdviceAttribute) declarativeAdvice.AdviceAttribute!).BuildAspectEligibility(
                         eligibilityBuilder,
-                        declarativeAdvice.Declaration! );
+                        declarativeAdvice.Declaration );
 
                     this.EligibilityRule = eligibilityBuilder.Build();
                 }
@@ -242,7 +242,7 @@ namespace Metalama.Framework.Engine.Aspects
                                 foreach ( var advice in declarativeAdvice )
                                 {
                                     ((DeclarativeAdviceAttribute) advice.AdviceAttribute.AssertNotNull()).BuildAdvice(
-                                        advice.Declaration!,
+                                        advice.Declaration,
                                         advice.TemplateClassMember.Key,
                                         aspectBuilder );
                                 }
