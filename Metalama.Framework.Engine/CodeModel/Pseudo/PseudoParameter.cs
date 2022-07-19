@@ -51,6 +51,8 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
 
+        public override bool IsImplicitlyDeclared => true;
+
         public override CompilationModel Compilation => this.DeclaringAccessor.GetCompilationModel();
 
         public PseudoParameter( IMethod declaringAccessor, int index, IType type, string? name )

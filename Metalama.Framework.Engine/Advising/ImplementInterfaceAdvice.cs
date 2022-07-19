@@ -96,7 +96,6 @@ namespace Metalama.Framework.Engine.Advising
             foreach ( var pair in interfacesToIntroduce )
             {
                 var introducedInterface = pair.Key;
-                var isTopLevel = pair.Value;
                 List<MemberSpecification> memberSpecifications = new();
 
                 foreach ( var interfaceMethod in introducedInterface.Methods )
@@ -130,6 +129,8 @@ namespace Metalama.Framework.Engine.Advising
 
                 foreach ( var interfaceIndexer in introducedInterface.Indexers )
                 {
+                    _ = interfaceIndexer;
+
                     throw new NotImplementedException();
                 }
 
@@ -185,7 +186,7 @@ namespace Metalama.Framework.Engine.Advising
                     }
                 }
 
-                this._interfaceSpecifications.Add( new InterfaceSpecification( introducedInterface, isTopLevel, memberSpecifications ) );
+                this._interfaceSpecifications.Add( new InterfaceSpecification( introducedInterface, memberSpecifications ) );
             }
 
             bool TryGetAspectInterfaceMethod(
@@ -393,7 +394,7 @@ namespace Metalama.Framework.Engine.Advising
                                 (IProperty?) memberSpec.TargetMember ?? (IProperty) memberSpec.AspectInterfaceMember.AssertNotNull(),
                                 buildAutoProperty,
                                 isExplicit,
-                                aspectProperty?.SetMethod?.IsImplicit ?? false,
+                                aspectProperty?.SetMethod?.IsImplicitlyDeclared ?? false,
                                 mergedTags );
 
                             memberBuilder = propertyBuilder;

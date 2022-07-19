@@ -54,19 +54,25 @@ namespace Metalama.Framework.Engine.Advising
             switch ( targetDeclaration )
             {
                 case IMethod method:
-                    addTransformation( new FilterMethodTransformation( this, method ) );
+                    addTransformation( new ContractMethodTransformation( this, method ) );
 
                     return AdviceImplementationResult.Success( method );
 
+                case IConstructor constructor:
+                    addTransformation( new ContractConstructorTransformation( this, constructor ) );
+
+                    return AdviceImplementationResult.Success( constructor );
+
                 case IProperty property:
-                    addTransformation( new FilterPropertyTransformation( this, property ) );
+                    addTransformation( new ContractPropertyTransformation( this, property ) );
 
                     return AdviceImplementationResult.Success( property );
 
                 case IField field:
                     var promotedField = new PromotedField( serviceProvider, this, field, ObjectReader.Empty );
                     addTransformation( promotedField );
-                    addTransformation( new FilterPropertyTransformation( this, promotedField ) );
+                    OverrideHelper.AddTransformationsForStructField( field.DeclaringType, this, addTransformation );
+                    addTransformation( new ContractPropertyTransformation( this, promotedField ) );
 
                     return AdviceImplementationResult.Success( promotedField );
 
@@ -79,7 +85,7 @@ namespace Metalama.Framework.Engine.Advising
 
         public bool TryExecuteTemplates(
             IDeclaration targetMember,
-            in MemberIntroductionContext context,
+            TransformationContext context,
             ContractDirection direction,
             string? returnValueLocalName,
             [NotNullWhen( true )] out List<StatementSyntax>? statements )

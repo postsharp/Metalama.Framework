@@ -6,12 +6,13 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Transformations;
 using System;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.Advising
 {
     internal static class OverrideHelper
     {
-        public static IPropertyOrIndexer OverrideProperty(
+        public static IProperty OverrideProperty(
             IServiceProvider serviceProvider,
             Advice advice,
             IFieldOrPropertyOrIndexer targetDeclaration,
@@ -26,17 +27,46 @@ namespace Metalama.Framework.Engine.Advising
                 addTransformation( promotedField );
                 addTransformation( new OverridePropertyTransformation( advice, promotedField, getTemplate, setTemplate, tags ) );
 
+                AddTransformationsForStructField( targetDeclaration.DeclaringType, advice, addTransformation );
+
                 return promotedField;
             }
             else if ( targetDeclaration is IProperty property )
             {
                 addTransformation( new OverridePropertyTransformation( advice, property, getTemplate, setTemplate, tags ) );
 
+                if ( property.IsAutoPropertyOrField )
+                {
+                    AddTransformationsForStructField( targetDeclaration.DeclaringType, advice, addTransformation );
+                }
+
                 return property;
             }
             else
             {
                 throw new AssertionFailedException();
+            }
+        }
+
+        public static void AddTransformationsForStructField( INamedType type, Advice advice, Action<ITransformation> addTransformation )
+        {
+            if ( type.TypeKind is TypeKind.Struct or TypeKind.RecordStruct )
+            {
+                // If we are in a struct, make sure that all existing constructors call `this()`.
+
+                foreach ( var constructor in type.Constructors )
+                {
+                    if ( !constructor.IsImplicitlyDeclared && constructor.InitializerKind == ConstructorInitializerKind.None )
+                    {
+                        addTransformation( new CallDefaultConstructorTransformation( advice, constructor ) );
+                    }
+                }
+
+                // If there is no 'this()' constructor, add one.
+                if ( !type.Constructors.Any( c => !c.IsImplicitlyDeclared && c.Parameters.Count == 0 ) )
+                {
+                    addTransformation( new AddExplicitDefaultConstructorTransformation( advice, type ) );
+                }
             }
         }
     }

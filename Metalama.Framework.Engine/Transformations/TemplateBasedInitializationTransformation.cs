@@ -10,6 +10,8 @@ using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.MetaModel;
 using Metalama.Framework.Project;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.Transformations
 {
@@ -35,7 +37,7 @@ namespace Metalama.Framework.Engine.Transformations
             this.Tags = tags;
         }
 
-        public InsertedStatement? GetInsertedStatement( InsertStatementTransformationContext context )
+        public IEnumerable<InsertedStatement> GetInsertedStatements( InsertStatementTransformationContext context )
         {
             var metaApi = MetaApi.ForConstructor(
                 this._targetConstructor,
@@ -65,15 +67,18 @@ namespace Metalama.Framework.Engine.Transformations
             if ( !templateDriver.TryExpandDeclaration( expansionContext, this._boundTemplate.TemplateArguments, out var expandedBody ) )
             {
                 // Template expansion error.
-                return default;
+                return Enumerable.Empty<InsertedStatement>();
             }
 
-            return new InsertedStatement(
-                expandedBody
-                    .WithGeneratedCodeAnnotation(
-                        metaApi.AspectInstance?.AspectClass.GeneratedCodeAnnotation ?? FormattingAnnotations.SystemGeneratedCodeAnnotation )
-                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
-                this.ContextDeclaration );
+            return new[]
+            {
+                new InsertedStatement(
+                    expandedBody
+                        .WithGeneratedCodeAnnotation(
+                            metaApi.AspectInstance?.AspectClass.GeneratedCodeAnnotation ?? FormattingAnnotations.SystemGeneratedCodeAnnotation )
+                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock ),
+                    this.ContextDeclaration )
+            };
         }
 
         public IObjectReader Tags { get; }

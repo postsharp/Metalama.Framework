@@ -67,7 +67,12 @@ namespace Metalama.Framework.Engine.Linking
         public SyntaxTree GetLinkerHelperSyntaxTree( LanguageVersion languageVersion )
             => _linkerHelperSyntaxTreeCache.GetOrAdd( languageVersion, this.GetLinkerHelperSyntaxTreeCode );
 
-        private SyntaxTree GetLinkerHelperSyntaxTreeCode( LanguageVersion v )
+        private static readonly ConcurrentDictionary<LanguageOptions, SyntaxTree> _linkerHelperSyntaxTreeCache = new();
+
+        public static SyntaxTree GetLinkerHelperSyntaxTree( LanguageOptions options )
+            => _linkerHelperSyntaxTreeCache.GetOrAdd( options, GetLinkerHelperSyntaxTreeCode );
+
+        private SyntaxTree GetLinkerHelperSyntaxTreeCore( LanguageOptions languageOptions )
         {
             var useNullability = this._useNullability && v is LanguageVersion.CSharp9 or LanguageVersion.CSharp10;
             var suffix = useNullability ? "?" : "";
@@ -105,7 +110,7 @@ internal class {HelperTypeName}
                 code,
                 path: "__LinkerIntroductionHelpers__.cs",
                 encoding: Encoding.UTF8,
-                options: CSharpParseOptions.Default.WithLanguageVersion( v ) );
+                options: options.ToParseOptions() );
         }
     }
 }

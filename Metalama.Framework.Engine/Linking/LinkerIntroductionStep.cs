@@ -61,6 +61,7 @@ namespace Metalama.Framework.Engine.Linking
                     .OrderBy( x => x.ParentAdvice.AspectLayerId, new AspectLayerIdComparer( input.OrderedAspectLayers ) )
                     .ToList();
 
+            // TODO: this series of calls to Index* methods can be optimized to avoid repeated type checks of the transformations.
             IndexReplaceTransformations( input, allTransformations, syntaxTransformationCollection, out var replacedTransformations );
 
             IndexOverrideTransformations(
@@ -87,6 +88,8 @@ namespace Metalama.Framework.Engine.Linking
                 out var syntaxMemberLevelTransformations,
                 out var introductionMemberLevelTransformations );
 
+            IndexTypeLevelTransformations( allTransformations, out var typeLevelTransformations );
+
             IndexNodesWithModifiedAttributes( allTransformations, out var nodesWithModifiedAttributes );
 
             FindPrimarySyntaxTreeForGlobalAttributes( input.CompilationModel, out var syntaxTreeForGlobalAttributes );
@@ -105,7 +108,8 @@ namespace Metalama.Framework.Engine.Linking
                 syntaxMemberLevelTransformations,
                 introductionMemberLevelTransformations,
                 nodesWithModifiedAttributes,
-                syntaxTreeForGlobalAttributes );
+                syntaxTreeForGlobalAttributes,
+                typeLevelTransformations );
 
             var syntaxTreeMapping = new Dictionary<SyntaxTree, SyntaxTree>();
 
@@ -125,7 +129,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            var helperSyntaxTree = aspectReferenceSyntaxProvider.GetLinkerHelperSyntaxTree( intermediateCompilation.LanguageVersion );
+            var helperSyntaxTree = aspectReferenceSyntaxProvider.GetLinkerHelperSyntaxTree( intermediateCompilation.LanguageOptions );
 
             intermediateCompilation =
                 helperSyntaxTree != null
@@ -363,7 +367,7 @@ namespace Metalama.Framework.Engine.Linking
 #pragma warning disable SA1513
                 if ( transformation.OverriddenDeclaration is IProperty
                     {
-                        IsAutoPropertyOrField: true, Writeability: Writeability.ConstructorOnly, SetMethod: { IsImplicit: true }
+                        IsAutoPropertyOrField: true, Writeability: Writeability.ConstructorOnly, SetMethod: { IsImplicitlyDeclared: true }
                     } overriddenAutoProperty )
 #pragma warning restore SA1513
                 {
@@ -388,6 +392,42 @@ namespace Metalama.Framework.Engine.Linking
                         default:
                             throw new AssertionFailedException();
                     }
+                }
+            }
+        }
+
+        private static void IndexTypeLevelTransformations(
+            List<ITransformation> allTransformations,
+            out Dictionary<TypeDeclarationSyntax, TypeLevelTransformations> typeLevelTransformations )
+        {
+            typeLevelTransformations = new Dictionary<TypeDeclarationSyntax, TypeLevelTransformations>();
+
+            foreach ( var transformation in allTransformations.OfType<ITypeLevelTransformation>() )
+            {
+                TypeLevelTransformations? theseTypeLevelTransformations;
+                var declarationSyntax = (TypeDeclarationSyntax?) transformation.TargetType.GetPrimaryDeclarationSyntax();
+
+                if ( declarationSyntax != null )
+                {
+                    if ( !typeLevelTransformations.TryGetValue( declarationSyntax, out theseTypeLevelTransformations ) )
+                    {
+                        typeLevelTransformations[declarationSyntax] = theseTypeLevelTransformations = new TypeLevelTransformations();
+                    }
+                }
+                else
+                {
+                    continue;
+                }
+
+                switch ( transformation )
+                {
+                    case AddExplicitDefaultConstructorTransformation:
+                        theseTypeLevelTransformations.AddExplicitDefaultConstructor = true;
+
+                        break;
+
+                    default:
+                        throw new AssertionFailedException();
                 }
             }
         }
@@ -448,16 +488,14 @@ namespace Metalama.Framework.Engine.Linking
                                 input.InitialCompilation.Compilation,
                                 primaryDeclaration );
 
-                            var insertedStatement = GetInsertedStatement( insertStatementTransformation, syntaxGenerationContext );
-
-                            if ( insertedStatement != null )
+                            foreach ( var insertedStatement in GetInsertedStatements( insertStatementTransformation, syntaxGenerationContext ) )
                             {
                                 memberLevelTransformations.Add(
                                     new LinkerInsertedStatement(
                                         transformation,
                                         primaryDeclaration,
-                                        insertedStatement.Value.Statement,
-                                        insertedStatement.Value.ContextDeclaration ) );
+                                        insertedStatement.Statement,
+                                        insertedStatement.ContextDeclaration ) );
                             }
 
                             break;
@@ -476,16 +514,14 @@ namespace Metalama.Framework.Engine.Linking
                                 constructorBuilder.PrimarySyntaxTree.AssertNotNull(),
                                 positionInSyntaxTree );
 
-                            var insertedStatement = GetInsertedStatement( insertStatementTransformation, syntaxGenerationContext );
-
-                            if ( insertedStatement != null )
+                            foreach ( var insertedStatement in GetInsertedStatements( insertStatementTransformation, syntaxGenerationContext ) )
                             {
                                 memberLevelTransformations.Add(
                                     new LinkerInsertedStatement(
                                         transformation,
                                         constructorBuilder,
-                                        insertedStatement.Value.Statement,
-                                        insertedStatement.Value.ContextDeclaration ) );
+                                        insertedStatement.Statement,
+                                        insertedStatement.ContextDeclaration ) );
                             }
 
                             break;
@@ -501,11 +537,16 @@ namespace Metalama.Framework.Engine.Linking
 
                         break;
 
+                    case (CallDefaultConstructorTransformation, _):
+                        memberLevelTransformations.HasCallDefaultConstructorTransformation = true;
+
+                        break;
+
                     default:
                         throw new AssertionFailedException();
                 }
 
-                InsertedStatement? GetInsertedStatement(
+                IEnumerable<InsertedStatement> GetInsertedStatements(
                     IInsertStatementTransformation insertStatementTransformation,
                     SyntaxGenerationContext syntaxGenerationContext )
                 {
@@ -513,14 +554,16 @@ namespace Metalama.Framework.Engine.Linking
                         diagnostics,
                         lexicalScopeFactory,
                         syntaxGenerationContext,
-                        this._serviceProvider );
+                        this._serviceProvider,
+                        input.CompilationModel );
 
-                    var statement = insertStatementTransformation.GetInsertedStatement( context );
-
+                    var statements = insertStatementTransformation.GetInsertedStatements( context );
 #if DEBUG
-                    if ( statement != null )
+                    statements = statements.ToList();
+
+                    foreach ( var statement in statements )
                     {
-                        if ( statement.Value.Statement is BlockSyntax block )
+                        if ( statement.Statement is BlockSyntax block )
                         {
                             if ( !block.Statements.All( s => s.HasAnnotations( FormattingAnnotations.GeneratedCodeAnnotationKind ) ) )
                             {
@@ -529,7 +572,7 @@ namespace Metalama.Framework.Engine.Linking
                         }
                         else
                         {
-                            if ( !statement.Value.Statement.HasAnnotations( FormattingAnnotations.GeneratedCodeAnnotationKind ) )
+                            if ( !statement.Statement.HasAnnotations( FormattingAnnotations.GeneratedCodeAnnotationKind ) )
                             {
                                 throw new AssertionFailedException();
                             }
@@ -537,7 +580,7 @@ namespace Metalama.Framework.Engine.Linking
                     }
 #endif
 
-                    return statement;
+                    return statements;
                 }
             }
         }

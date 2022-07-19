@@ -8,7 +8,7 @@ namespace Metalama.Framework.Code
     /// <summary>
     /// Represents a method or a constructor.
     /// </summary>
-    public interface IMethodBase : IMember, IHasParameters
+    public interface IMethodBase : IHasParameters
     {
         /// <summary>
         /// Gets the kind of method (such as <see cref="Code.MethodKind.Default"/> or <see cref="Code.MethodKind.PropertyGet"/>.

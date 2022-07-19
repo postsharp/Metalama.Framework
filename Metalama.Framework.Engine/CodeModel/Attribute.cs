@@ -44,6 +44,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public DeclarationKind DeclarationKind => DeclarationKind.Attribute;
 
+        bool IDeclaration.IsImplicitlyDeclared => false;
+
         public ICompilation Compilation => this.Constructor.Compilation;
 
         [Memo]

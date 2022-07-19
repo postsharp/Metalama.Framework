@@ -22,8 +22,10 @@
         <None Include="build\Metalama.Framework.Sdk.props" Pack="true" PackagePath="buildTransitive"/>
 
 
+<!--
         <InternalsVisibleTo Include="Metalama.Framework.Engine.4.2.0"/>
         <InternalsVisibleTo Include="Metalama.Framework.Engine.4.1.0"/>
+-->        
         <InternalsVisibleTo Include="Metalama.Framework.Engine.4.0.1"/>
         <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals"/>
         <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.Internals"/>

@@ -25,10 +25,11 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal partial class LinkerRewritingDriver
     {
-        private IReadOnlyList<MemberDeclarationSyntax> RewriteProperty( PropertyDeclarationSyntax propertyDeclaration, IPropertySymbol symbol )
+        private IReadOnlyList<MemberDeclarationSyntax> RewriteProperty(
+            PropertyDeclarationSyntax propertyDeclaration,
+            IPropertySymbol symbol,
+            SyntaxGenerationContext generationContext )
         {
-            var generationContext = SyntaxGenerationContext.Create( this._serviceProvider, this._intermediateCompilation, propertyDeclaration );
-
             if ( this._introductionRegistry.IsOverrideTarget( symbol ) )
             {
                 var members = new List<MemberDeclarationSyntax>();
@@ -86,36 +87,35 @@ namespace Metalama.Framework.Engine.Linking
 
                 if ( symbol.GetMethod != null )
                 {
-                    switch ( symbol.GetMethod.GetPrimaryDeclaration().AssertNotNull() )
+                    if ( propertyDeclaration.AccessorList != null
+                         && propertyDeclaration.AccessorList.Accessors.SingleOrDefault( a => a.IsKind( SyntaxKind.GetAccessorDeclaration ) ) is
+                             { } getAccessorDeclaration )
                     {
-                        case AccessorDeclarationSyntax getAccessorDeclaration:
-                            transformedAccessors.Add( GetLinkedAccessor( semanticKind, getAccessorDeclaration, symbol.GetMethod ) );
-
-                            break;
-
-                        case ArrowExpressionClauseSyntax:
-                            transformedAccessors.Add(
-                                AccessorDeclaration(
-                                        SyntaxKind.GetAccessorDeclaration,
-                                        List<AttributeListSyntax>(),
-                                        TokenList(),
-                                        Block(
-                                                this.GetLinkedBody(
-                                                    symbol.GetMethod.ToSemantic( semanticKind ),
-                                                    InliningContext.Create( this, symbol.GetMethod, generationContext ) ) )
-                                            .WithOpenBraceToken(
-                                                Token( TriviaList( ElasticLineFeed ), SyntaxKind.OpenBraceToken, TriviaList( ElasticLineFeed ) ) )
-                                            .WithCloseBraceToken(
-                                                Token( TriviaList( ElasticLineFeed ), SyntaxKind.CloseBraceToken, TriviaList( ElasticMarker ) ) ) )
-                                    .WithKeyword( Token( TriviaList( ElasticMarker ), SyntaxKind.GetKeyword, TriviaList( ElasticMarker ) ) ) );
-
-                            break;
+                        transformedAccessors.Add( GetLinkedAccessor( semanticKind, getAccessorDeclaration, symbol.GetMethod ) );
+                    }
+                    else if ( propertyDeclaration.ExpressionBody != null )
+                    {
+                        transformedAccessors.Add(
+                            AccessorDeclaration(
+                                    SyntaxKind.GetAccessorDeclaration,
+                                    List<AttributeListSyntax>(),
+                                    TokenList(),
+                                    Block(
+                                            this.GetLinkedBody(
+                                                symbol.GetMethod.ToSemantic( semanticKind ),
+                                                InliningContext.Create( this, symbol.GetMethod, generationContext ) ) )
+                                        .WithOpenBraceToken( Token( TriviaList( ElasticLineFeed ), SyntaxKind.OpenBraceToken, TriviaList( ElasticLineFeed ) ) )
+                                        .WithCloseBraceToken(
+                                            Token( TriviaList( ElasticLineFeed ), SyntaxKind.CloseBraceToken, TriviaList( ElasticMarker ) ) ) )
+                                .WithKeyword( Token( TriviaList( ElasticMarker ), SyntaxKind.GetKeyword, TriviaList( ElasticMarker ) ) ) );
                     }
                 }
 
                 if ( symbol.SetMethod != null )
                 {
-                    var setAccessorDeclaration = (AccessorDeclarationSyntax) symbol.SetMethod.GetPrimaryDeclaration().AssertNotNull();
+                    var setAccessorDeclaration = propertyDeclaration.AccessorList!.Accessors.Single(
+                        a => a.IsKind( SyntaxKind.SetAccessorDeclaration ) || a.IsKind( SyntaxKind.InitAccessorDeclaration ) );
+
                     transformedAccessors.Add( GetLinkedAccessor( semanticKind, setAccessorDeclaration, symbol.SetMethod ) );
                 }
 

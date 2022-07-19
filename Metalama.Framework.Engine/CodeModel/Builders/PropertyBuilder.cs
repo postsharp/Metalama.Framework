@@ -35,12 +35,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             => this switch
             {
                 { SetMethod: null } => Writeability.None,
-                { SetMethod: { IsImplicit: true }, IsAutoPropertyOrField: true } => Writeability.ConstructorOnly,
+                { SetMethod: { IsImplicitlyDeclared: true }, IsAutoPropertyOrField: true } => Writeability.ConstructorOnly,
                 { _hasInitOnlySetter: true } => Writeability.InitOnly,
                 _ => Writeability.All
             };
-
-        public override bool IsImplicit => false;
 
         public bool IsAutoPropertyOrField { get; }
 
@@ -210,15 +208,15 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     // Properties with both accessors.
                     case (false, _, not null, not null):
                     // Writeable fields.
-                    case (true, Writeability.All, { IsImplicit: true }, { IsImplicit: true }):
+                    case (true, Writeability.All, { IsImplicitlyDeclared: true }, { IsImplicitlyDeclared: true }):
                     // Auto-properties with both accessors.
-                    case (true, Writeability.All or Writeability.InitOnly, { IsImplicit: false }, { IsImplicit: false }):
+                    case (true, Writeability.All or Writeability.InitOnly, { IsImplicitlyDeclared: false }, { IsImplicitlyDeclared: false }):
                         return AccessorList( List( new[] { GenerateGetAccessor(), GenerateSetAccessor() } ) );
 
                     // Properties with only get accessor.
                     case (false, _, not null, null):
                     // Read only fields or get-only auto properties.
-                    case (true, Writeability.ConstructorOnly, { }, { IsImplicit: true }):
+                    case (true, Writeability.ConstructorOnly, { }, { IsImplicitlyDeclared: true }):
                         return AccessorList( List( new[] { GenerateGetAccessor() } ) );
 
                     // Properties with only set accessor.

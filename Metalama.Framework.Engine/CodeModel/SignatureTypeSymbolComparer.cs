@@ -6,7 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Metalama.Framework.Engine.Advising
+namespace Metalama.Framework.Engine.CodeModel
 {
     /// <summary>
     /// Compares symbols for purposes of method signature comparison.
@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.Advising
 
         public bool Equals( ISymbol? left, ISymbol? right )
         {
-            switch ( (left, right) )
+            switch (left, right)
             {
                 case (IArrayTypeSymbol leftArray, IArrayTypeSymbol rightArray):
                     return leftArray.Rank == rightArray.Rank

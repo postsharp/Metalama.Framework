@@ -300,10 +300,11 @@ namespace Metalama.Framework.Engine.Linking
                 switch ( declaration )
                 {
                     case MethodDeclarationSyntax methodDecl:
-                        return (SyntaxNode?) methodDecl.Body ?? methodDecl.ExpressionBody ?? throw new AssertionFailedException();
+                        // Partial methods without declared body have empty implicit body.
+                        return methodDecl.Body ?? (SyntaxNode?) methodDecl.ExpressionBody ?? Block();
 
-                    case DestructorDeclarationSyntax dtorDecl:
-                        return (SyntaxNode?) dtorDecl.Body ?? dtorDecl.ExpressionBody ?? throw new AssertionFailedException();
+                    case DestructorDeclarationSyntax destructorDecl:
+                        return (SyntaxNode?) destructorDecl.Body ?? destructorDecl.ExpressionBody ?? throw new AssertionFailedException();
 
                     case OperatorDeclarationSyntax operatorDecl:
                         return (SyntaxNode?) operatorDecl.Body ?? operatorDecl.ExpressionBody ?? throw new AssertionFailedException();
@@ -328,6 +329,7 @@ namespace Metalama.Framework.Engine.Linking
                         return arrowExpressionClause;
 
                     case VariableDeclaratorSyntax { Parent: VariableDeclarationSyntax { Parent: EventFieldDeclarationSyntax } }:
+                    case ParameterSyntax: // Record positional property.
                         return GetImplicitAccessorBody( symbol, generationContext );
 
                     default:
@@ -516,7 +518,7 @@ namespace Metalama.Framework.Engine.Linking
                     return this.RewriteOperator( (OperatorDeclarationSyntax) syntax, operatorSymbol, generationContext );
 
                 case IPropertySymbol propertySymbol:
-                    return this.RewriteProperty( (PropertyDeclarationSyntax) syntax, propertySymbol );
+                    return this.RewriteProperty( (PropertyDeclarationSyntax) syntax, propertySymbol, generationContext );
 
                 case IEventSymbol eventSymbol:
                     return syntax switch
@@ -735,7 +737,7 @@ namespace Metalama.Framework.Engine.Linking
                             else if ( aspectReference.ContainingSymbol.ContainingType.Is( targetSymbol.ContainingType ) )
                             {
                                 // Resolved symbol is declared in a base class.
-                                switch ( (targetSymbol, memberAccessExpression.Expression) )
+                                switch (targetSymbol, memberAccessExpression.Expression)
                                 {
                                     case (IMethodSymbol { MethodKind: MethodKind.Destructor }, _):
                                         return

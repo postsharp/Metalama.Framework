@@ -30,13 +30,13 @@ namespace Metalama.Framework.Aspects
         {
             get => this._impl.IsVirtual;
 
-            set => this._impl.IsVirtual = true;
+            set => this._impl.IsVirtual = value;
         }
 
         public bool IsSealed
         {
             get => this._impl.IsSealed;
-            set => this._impl.IsSealed = true;
+            set => this._impl.IsSealed = value;
         }
 
         bool? ITemplateAttribute.IsVirtual => this._impl.GetIsVirtual();
@@ -61,7 +61,7 @@ namespace Metalama.Framework.Aspects
         [Obsolete( "Not implemented." )]
         public OverrideStrategy WhenInherited { get; set; }
 
-        public override void BuildAspectEligibility( IEligibilityBuilder<IDeclaration> builder )
+        public override void BuildAspectEligibility( IEligibilityBuilder<IDeclaration> builder, IMemberOrNamedType adviceMember )
         {
             builder.MustBe<IMemberOrNamedType>();
 

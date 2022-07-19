@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.Advising
 
         private const string _category = "Metalama.Advices";
 
-        // Subrange 500-509: General introduction diagnostics.
+        // Sub-range 500-509: General introduction diagnostics.
 
         internal static readonly DiagnosticDefinition<(string AspectType, IDeclaration Member, IDeclaration TargetType, IDeclaration DeclaringType)>
             CannotIntroduceMemberAlreadyExists = new(
@@ -70,7 +70,7 @@ namespace Metalama.Framework.Engine.Advising
                 _category,
                 Error );
 
-        // Subrange 510-519: Interface implementation diagnostics.
+        // Sub-range 510-519: Interface implementation diagnostics.
 
         internal static readonly DiagnosticDefinition<(string AspectType, INamedType TargetType, INamedType InterfaceType, IMember InterfaceMember)>
             MissingDeclarativeInterfaceMember = new(
@@ -137,7 +137,15 @@ namespace Metalama.Framework.Engine.Advising
                 _category,
                 Error );
 
-        // Subrange 520-529: Various introduction diagnostics.
+        internal static readonly DiagnosticDefinition<(string AspectType, IMember Member)>
+            CannotOverrideImplicitMethod = new(
+                "LAMA0517",
+                "Cannot override an implicit member.",
+                "The aspect '{0}' cannot override '{1}' because it is implicitly declared.",
+                _category,
+                Error );
+
+        // Sub-range 520-529: Various introduction diagnostics.
         internal static readonly DiagnosticDefinition<(string AspectType, IConstructor Constructor)>
             CannotIntroduceParameterIntoStaticConstructor = new(
                 "LAMA0520",
@@ -159,6 +167,22 @@ namespace Metalama.Framework.Engine.Advising
                 "LAMA0522",
                 "Invalid override strategy when introducing a finalizer.",
                 "The aspect '{0}' cannot introduce finalizer into type '{1}' because the specified override strategy '{2}' is not valid.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<(string AspectType, IConstructor Constructor)>
+            CannotIntroduceParameterIntoNonClassConstructor = new(
+                "LAMA0523",
+                "Cannot introduce a parameter into a constructor of a type that is not a class.",
+                "The aspect '{0}' cannot introduce a parameter into '{1}' because the target type is not a class.",
+                _category,
+                Error );
+
+        internal static readonly DiagnosticDefinition<(string AspectType, INamedType Constructor)>
+            CannotAddInitializerToRecord = new(
+                "LAMA0524",
+                "Cannot add an initializer to a record.",
+                "The aspect '{0}' cannot add an initializer to '{1}' because it is a record.",
                 _category,
                 Error );
     }

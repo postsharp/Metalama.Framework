@@ -21,11 +21,11 @@ namespace Metalama.Framework.Eligibility
         /// Gets an <see cref="IEligibilityBuilder"/> for the declaring type of the member validated by the current <see cref="IEligibilityBuilder"/>.
         /// </summary>
         public static IEligibilityBuilder<INamedType> DeclaringType<T>( this IEligibilityBuilder<T> eligibilityBuilder )
-            where T : IMember
+            where T : IMemberOrNamedType
         {
             return new ChildEligibilityBuilder<T, INamedType>(
                 eligibilityBuilder,
-                declaration => declaration.DeclaringType,
+                declaration => declaration as INamedType ?? declaration.DeclaringType!,
                 declarationDescription => $"the declaring type '{declarationDescription.Object.DeclaringType}'" );
         }
 
@@ -82,6 +82,14 @@ namespace Metalama.Framework.Eligibility
                 _ => true,
                 _ => $"" );
         }
+
+        public static IEligibilityBuilder<INamedType> DeclaringType( this IEligibilityBuilder<IMember> eligibilityBuilder )
+            => new ChildEligibilityBuilder<IMember, INamedType>(
+                eligibilityBuilder,
+                d => d.DeclaringType,
+                d => $"{d.Object.DeclaringType}",
+                _ => true,
+                _ => $"" );
 
         /// <summary>
         /// Gets an <see cref="IEligibilityBuilder"/> for the same declaration as the current <see cref="IEligibilityBuilder"/>
@@ -254,6 +262,16 @@ namespace Metalama.Framework.Eligibility
             eligibilityBuilder.MustSatisfy(
                 p => !p.Type.Is( SpecialType.Void ),
                 member => $"{member} must not have type 'void'" );
+        }
+
+        /// <summary>
+        /// Requires the declaration to be explicitly declared in source code.
+        /// </summary>
+        public static void MustBeExplicitlyDeclared( this IEligibilityBuilder<IDeclaration> eligibilityBuilder )
+        {
+            eligibilityBuilder.MustSatisfy(
+                m => !m.IsImplicitlyDeclared,
+                m => $"{m} must be explicitly declared" );
         }
 
         private static string GetInterfaceName<T>() => GetInterfaceName( typeof(T) );

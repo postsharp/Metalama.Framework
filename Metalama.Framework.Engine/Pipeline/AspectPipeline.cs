@@ -20,6 +20,7 @@ using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using MoreLinq;
 using System;
 using System.Collections.Generic;
@@ -94,6 +95,15 @@ namespace Metalama.Framework.Engine.Pipeline
             this.PipelineInitializationCount++;
 
             var roslynCompilation = compilation.Compilation;
+            
+            // Check language version.
+            if ( compilation.SyntaxTrees.Count > 0 && ((CSharpParseOptions) compilation.SyntaxTrees.First().Value.Options).LanguageVersion == LanguageVersion.Preview )
+            {
+                diagnosticAdder.Report( GeneralDiagnosticDescriptors.PreviewCSharpVersionNotSupported.CreateRoslynDiagnostic( null, default ) );
+                configuration = null;
+
+                return false;
+            }
 
             // Create dependencies.
 
@@ -189,13 +199,16 @@ namespace Metalama.Framework.Engine.Pipeline
             // Creates a project model that includes the final service provider.
             var projectModel = new ProjectModel( compilation.Compilation, projectServiceProviderWithProject );
 
+            // Create a compilation model for the aspect initialization.
+            var compilationModel = CompilationModel.CreateInitialInstance( projectModel, compilation );
+
             // Create aspect types.
             // We create a TemplateAttributeFactory for this purpose but we cannot add it to the ServiceProvider that will flow out because
             // we don't want to leak the compilation for the design-time scenario.
             var serviceProviderForAspectClassFactory =
                 projectServiceProviderWithProject.WithService( new TemplateAttributeFactory( projectServiceProviderWithProject, roslynCompilation ) );
 
-            var driverFactory = new AspectDriverFactory( compilation.Compilation, compilerPlugIns, serviceProviderForAspectClassFactory );
+            var driverFactory = new AspectDriverFactory( compilationModel, compilerPlugIns, serviceProviderForAspectClassFactory );
             var aspectTypeFactory = new AspectClassFactory( serviceProviderForAspectClassFactory, driverFactory );
 
             var aspectClasses = aspectTypeFactory.GetClasses( compilation.Compilation, compileTimeProject, diagnosticAdder ).ToImmutableArray();
@@ -236,7 +249,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
             if ( compileTimeProject != null )
             {
-                var fabricTopLevelAspectClass = new FabricTopLevelAspectClass( projectServiceProviderWithProject, roslynCompilation, compileTimeProject );
+                var fabricTopLevelAspectClass = new FabricTopLevelAspectClass( projectServiceProviderWithProject, compilationModel, compileTimeProject );
                 var fabricAspectLayer = new OrderedAspectLayer( -1, fabricTopLevelAspectClass.Layer );
 
                 allOrderedAspectLayers = orderedAspectLayers.Insert( 0, fabricAspectLayer );

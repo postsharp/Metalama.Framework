@@ -27,7 +27,11 @@ namespace Metalama.Framework.Aspects
         }
 
         /// <inheritdoc />
-        public override void BuildEligibility( IEligibilityBuilder<IFieldOrProperty> builder ) => builder.ExceptForInheritance().MustBeNonAbstract();
+        public override void BuildEligibility( IEligibilityBuilder<IFieldOrProperty> builder )
+        {
+            builder.ExceptForInheritance().MustBeNonAbstract();
+            builder.MustBeExplicitlyDeclared();
+        }
 
         [Template]
         public abstract dynamic? OverrideProperty

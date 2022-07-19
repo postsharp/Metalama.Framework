@@ -2,6 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -45,7 +47,110 @@ namespace Metalama.Framework.Engine.Linking
 
             public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node )
             {
-                return this.VisitTypeDeclaration( node );
+                var recordWithTransformedMembers = (RecordDeclarationSyntax) this.VisitTypeDeclaration( node )!;
+
+                if ( node.ParameterList != null )
+                {
+                    var semanticModel = this._intermediateCompilation.GetSemanticModel( node.SyntaxTree );
+                    SyntaxGenerationContext? generationContext = null;
+
+                    List<MemberDeclarationSyntax>? newMembers = null;
+
+                    var transformedParametersAndCommas = new List<SyntaxNodeOrToken>( node.ParameterList.Parameters.Count * 2 );
+
+                    for ( var i = 0; i < node.ParameterList.Parameters.Count; i++ )
+                    {
+                        var parameter = node.ParameterList.Parameters[i];
+                        newMembers ??= new List<MemberDeclarationSyntax>();
+
+                        var parameterSymbol = semanticModel.GetDeclaredSymbol( parameter );
+
+                        if ( parameterSymbol == null )
+                        {
+                            continue;
+                        }
+
+                        var propertySymbol = parameterSymbol.ContainingType.GetMembers( parameterSymbol.Name ).OfType<IPropertySymbol>().FirstOrDefault();
+
+                        if ( propertySymbol != null && this._rewritingDriver.IsRewriteTarget( propertySymbol ) )
+                        {
+                            SyntaxGenerationContext GetSyntaxGenerationContext()
+                                => generationContext ??= SyntaxGenerationContext.Create(
+                                    this._serviceProvider,
+                                    this._intermediateCompilation,
+                                    node.SyntaxTree,
+                                    node.SpanStart );
+
+                            var setAccessor =
+                                node.ClassOrStructKeyword.IsKind( SyntaxKind.StructKeyword )
+                                    ? node.Modifiers.Any( m => m.IsKind( SyntaxKind.ReadOnlyKeyword ) )
+                                        ? AccessorDeclaration( SyntaxKind.InitAccessorDeclaration )
+                                        : AccessorDeclaration( SyntaxKind.SetAccessorDeclaration )
+                                    : AccessorDeclaration( SyntaxKind.InitAccessorDeclaration );
+
+                            // We need to create a "fake" syntax for the property, so we can use normal logic to process
+                            // properties with almost no change.
+                            var property = PropertyDeclaration(
+                                    default,
+                                    TokenList( Token( SyntaxKind.PublicKeyword ) ),
+                                    parameter.Type.AssertNotNull(),
+                                    default,
+                                    parameter.Identifier,
+                                    AccessorList(
+                                        List(
+                                            new[]
+                                            {
+                                                AccessorDeclaration( SyntaxKind.GetAccessorDeclaration )
+                                                    .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) ),
+                                                setAccessor.WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) )
+                                            } ) ),
+                                    null,
+                                    EqualsValueClause( IdentifierName( parameter.Identifier ) ) )
+                                .NormalizeWhitespace()
+                                .AddColoringAnnotation( TextSpanClassification.GeneratedCode );
+
+                            // Property-level custom attributes must be moved from the parameter to the new property.
+                            foreach ( var attributeList in parameter.AttributeLists )
+                            {
+                                if ( attributeList.Target != null )
+                                {
+                                    var propertyLevelAttributeList = attributeList;
+
+                                    if ( attributeList.Target.Identifier.IsKind( SyntaxKind.PropertyKeyword ) )
+                                    {
+                                        propertyLevelAttributeList = attributeList.WithTarget( default );
+                                    }
+
+                                    property = property.WithAttributeLists( property.AttributeLists.Add( propertyLevelAttributeList ) );
+                                }
+                            }
+
+                            var transformedParameter = parameter.WithAttributeLists( List( parameter.AttributeLists.Where( l => l.Target == null ) ) );
+                            transformedParametersAndCommas.Add( transformedParameter );
+
+                            newMembers.AddRange( this._rewritingDriver.RewriteMember( property, propertySymbol, GetSyntaxGenerationContext() ) );
+                        }
+                        else
+                        {
+                            transformedParametersAndCommas.Add( parameter );
+                        }
+
+                        if ( i < node.ParameterList.Parameters.SeparatorCount )
+                        {
+                            transformedParametersAndCommas.Add( node.ParameterList.Parameters.GetSeparator( i ) );
+                        }
+                    }
+
+                    if ( newMembers != null )
+                    {
+                        recordWithTransformedMembers = recordWithTransformedMembers.WithMembers( recordWithTransformedMembers.Members.AddRange( newMembers ) );
+                    }
+
+                    recordWithTransformedMembers =
+                        recordWithTransformedMembers.WithParameterList( ParameterList( SeparatedList<ParameterSyntax>( transformedParametersAndCommas ) ) );
+                }
+
+                return recordWithTransformedMembers;
             }
 
             private SyntaxNode? VisitTypeDeclaration( TypeDeclarationSyntax node )
@@ -65,19 +170,13 @@ namespace Metalama.Framework.Engine.Linking
 
                     var semanticModel = this._intermediateCompilation.GetSemanticModel( node.SyntaxTree );
 
-                    var generationContext = SyntaxGenerationContext.Create(
-                        this._serviceProvider,
-                        this._intermediateCompilation,
-                        node.SyntaxTree,
-                        member.SpanStart );
-
                     var symbols =
                         member switch
                         {
                             ConstructorDeclarationSyntax ctorDecl => new ISymbol?[] { semanticModel.GetDeclaredSymbol( ctorDecl ) },
-                            DestructorDeclarationSyntax dtorDecl => new ISymbol?[] { semanticModel.GetDeclaredSymbol( dtorDecl ) },
                             OperatorDeclarationSyntax operatorDecl => new ISymbol?[] { semanticModel.GetDeclaredSymbol( operatorDecl ) },
                             ConversionOperatorDeclarationSyntax dtorDecl => new ISymbol?[] { semanticModel.GetDeclaredSymbol( dtorDecl ) },
+                            DestructorDeclarationSyntax destructorDecl => new ISymbol?[] { semanticModel.GetDeclaredSymbol( destructorDecl ) },
                             MethodDeclarationSyntax methodDecl => new ISymbol?[] { semanticModel.GetDeclaredSymbol( methodDecl ) },
                             BasePropertyDeclarationSyntax basePropertyDecl => new[] { semanticModel.GetDeclaredSymbol( basePropertyDecl ) },
                             FieldDeclarationSyntax fieldDecl =>
@@ -95,13 +194,22 @@ namespace Metalama.Framework.Engine.Linking
                         continue;
                     }
 
+                    SyntaxGenerationContext? generationContext = null;
+
+                    SyntaxGenerationContext GetSyntaxGenerationContext()
+                        => generationContext ??= SyntaxGenerationContext.Create(
+                            this._serviceProvider,
+                            this._intermediateCompilation,
+                            node.SyntaxTree,
+                            member.SpanStart );
+
                     if ( symbols.Length == 1 )
                     {
                         // Simple case where the declaration declares a single symbol.
                         if ( this._rewritingDriver.IsRewriteTarget( symbols[0].AssertNotNull() ) )
                         {
                             // Add rewritten member and it's induced members (or nothing if the member is discarded).
-                            newMembers.AddRange( this._rewritingDriver.RewriteMember( member, symbols[0].AssertNotNull(), generationContext ) );
+                            newMembers.AddRange( this._rewritingDriver.RewriteMember( member, symbols[0].AssertNotNull(), GetSyntaxGenerationContext() ) );
                         }
                         else
                         {
@@ -117,7 +225,7 @@ namespace Metalama.Framework.Engine.Linking
                         {
                             if ( this._rewritingDriver.IsRewriteTarget( symbol.AssertNotNull() ) )
                             {
-                                newMembers.AddRange( this._rewritingDriver.RewriteMember( member, symbol.AssertNotNull(), generationContext ) );
+                                newMembers.AddRange( this._rewritingDriver.RewriteMember( member, symbol.AssertNotNull(), GetSyntaxGenerationContext() ) );
                             }
                             else
                             {

@@ -58,16 +58,16 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private static DestructorDeclarationSyntax GetTrampolineDestructor( DestructorDeclarationSyntax dtor, IMethodSymbol targetSymbol )
+        private static DestructorDeclarationSyntax GetTrampolineDestructor( DestructorDeclarationSyntax destructor, IMethodSymbol targetSymbol )
         {
             // TODO: First override not being inlineable probably does not happen outside of specifically written linker tests, i.e. trampolines may not be needed.
 
             return
-                dtor
+                destructor
                     .WithBody( GetBody() )
                     .NormalizeWhitespace()
-                    .WithLeadingTrivia( dtor.GetLeadingTrivia() )
-                    .WithTrailingTrivia( dtor.GetTrailingTrivia() );
+                    .WithLeadingTrivia( destructor.GetLeadingTrivia() )
+                    .WithTrailingTrivia( destructor.GetTrailingTrivia() );
 
             BlockSyntax GetBody()
             {

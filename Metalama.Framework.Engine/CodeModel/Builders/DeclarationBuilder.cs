@@ -37,6 +37,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public abstract DeclarationKind DeclarationKind { get; }
 
+        public virtual bool IsImplicitlyDeclared => false;
+
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
         public CompilationModel Compilation => (CompilationModel?) this.ContainingDeclaration?.Compilation ?? throw new AssertionFailedException();

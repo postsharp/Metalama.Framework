@@ -35,8 +35,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public string Name => this.AccessorBuilder.Name;
 
-        public bool IsImplicit => this.AccessorBuilder.IsImplicit;
-
         public bool IsAbstract => this.AccessorBuilder.IsAbstract;
 
         public bool IsStatic => this.AccessorBuilder.IsStatic;

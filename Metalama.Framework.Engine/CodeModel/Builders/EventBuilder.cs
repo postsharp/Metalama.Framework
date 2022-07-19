@@ -39,8 +39,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             this.Type = (INamedType) targetType.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(EventHandler) );
         }
 
-        public override bool IsImplicit => false;
-
         public INamedType Type { get; set; }
 
         public IMethod Signature => this.Type.Methods.OfName( "Invoke" ).Single();

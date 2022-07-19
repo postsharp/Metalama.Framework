@@ -161,16 +161,6 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
                     this._method = new AdvisedMethod( method );
 
                     break;
-
-                case IField field:
-                    this._fieldOrProperty = new AdvisedField( field );
-
-                    break;
-
-                case IProperty property:
-                    this._fieldOrProperty = new AdvisedProperty( property );
-
-                    break;
             }
 
             this._type = parameter.DeclaringMember.DeclaringType;

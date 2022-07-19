@@ -21,12 +21,6 @@ using SpecialType = Metalama.Framework.Code.SpecialType;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal enum InternalSpecialType
-    {
-        ITemplateAttribute,
-        Count
-    }
-
     /// <summary>
     /// Creates instances of <see cref="IDeclaration"/> for a given <see cref="CompilationModel"/>.
     /// </summary>
@@ -274,6 +268,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
                         // The property itself.
                         DeclarationRefTargetKind.Default => propertyOrIndexer,
+                        DeclarationRefTargetKind.Property => propertyOrIndexer,
                         _ => throw new AssertionFailedException()
                     };
 

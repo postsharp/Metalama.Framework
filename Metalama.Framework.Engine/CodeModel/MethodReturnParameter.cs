@@ -32,6 +32,8 @@ namespace Metalama.Framework.Engine.CodeModel
             => other is MethodReturnParameter methodReturnParameter &&
                SymbolEqualityComparer.Default.Equals( this.DeclaringMethod.Symbol, methodReturnParameter.DeclaringMethod.Symbol );
 
+        public override bool IsImplicitlyDeclared => this.DeclaringMethod.IsImplicitlyDeclared;
+
         public override ISymbol? Symbol => null;
 
         internal override Ref<IDeclaration> ToRef() => Ref.ReturnParameter( this.DeclaringMethod.MethodSymbol, this.GetCompilationModel().RoslynCompilation );
