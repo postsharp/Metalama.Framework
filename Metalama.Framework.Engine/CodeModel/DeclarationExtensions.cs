@@ -402,7 +402,6 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => throw new AssertionFailedException()
             };
 
-        
         internal static bool IsAutoProperty( this IPropertySymbol symbol )
             => symbol switch
             {

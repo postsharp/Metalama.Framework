@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
@@ -528,7 +527,11 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            if ( referencedSymbol is IMethodSymbol { Name: LinkerAspectReferenceSyntaxProvider.FinalizeMemberName, ContainingType: { Name: LinkerAspectReferenceSyntaxProvider.HelperTypeName } } )
+            if ( referencedSymbol is IMethodSymbol
+                {
+                    Name: LinkerAspectReferenceSyntaxProvider.FinalizeMemberName,
+                    ContainingType: { Name: LinkerAspectReferenceSyntaxProvider.HelperTypeName }
+                } )
             {
                 // Referencing type's finalizer.
                 return containingSymbol.ContainingType.GetMembers( "Finalize" )

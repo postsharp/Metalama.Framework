@@ -11,10 +11,8 @@ using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.Advising
 {
@@ -64,7 +62,7 @@ namespace Metalama.Framework.Engine.Advising
 
             if ( rightOperandType != null )
             {
-                var secondParameterName = !parameters.IsEmpty  ? parameters[1].Name : "a";
+                var secondParameterName = !parameters.IsEmpty ? parameters[1].Name : "a";
                 this.Builder.AddParameter( secondParameterName, rightOperandType );
             }
 

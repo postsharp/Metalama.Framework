@@ -14,6 +14,7 @@ namespace Metalama.Framework.Code.Collections
     public interface IMethodCollection : IMemberCollection<IMethod>
     {
         IEnumerable<IMethod> OfKind( MethodKind kind );
+
         IEnumerable<IMethod> OfKind( OperatorKind kind );
     }
 }

@@ -64,9 +64,8 @@ namespace Metalama.Framework.Engine.Linking
                     syntaxGenerator.ArgumentList( overriddenOperator, p => IdentifierName( p.Name ) ) );
         }
 
-        public SyntaxTree GetLinkerHelperSyntaxTree( LanguageOptions options)
+        public SyntaxTree GetLinkerHelperSyntaxTree( LanguageOptions options )
             => _linkerHelperSyntaxTreeCache.GetOrAdd( options, this.GetLinkerHelperSyntaxTreeCore );
-
 
         private SyntaxTree GetLinkerHelperSyntaxTreeCore( LanguageOptions options )
         {

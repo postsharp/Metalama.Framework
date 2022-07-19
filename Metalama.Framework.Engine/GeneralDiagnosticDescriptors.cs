@@ -289,7 +289,7 @@ namespace Metalama.Framework.Engine
                 "The weaver type '{0}' required to weave aspect '{1}' is not found in the project. The weaver assembly must be included as an analyzer.",
                 Error,
                 "Cannot find an aspect weaver." );
-        
+
         internal static readonly DiagnosticDefinition PreviewCSharpVersionNotSupported =
             new(
                 "LAMA00051",

@@ -46,9 +46,9 @@ namespace Metalama.Framework.Engine.Advising
                     UserMessageFormatter.Format(
                         $"Cannot use the method '{template.Declaration}' as a template for the {operatorKind} operator: this operator expects {expectedParameterCount} parameter(s) but got {runTimeParameters.Length}." ) );
             }
-            
+
             // TODO: verify the types.
-            
+
             return new BoundTemplateMethod( template, null, GetTemplateArguments( template, arguments ) );
         }
 
@@ -158,7 +158,6 @@ namespace Metalama.Framework.Engine.Advising
                                 $"Cannot use the template '{template.Declaration}' to override the method '{targetMethod}': the type of the template parameter '{templateParameter.Name}' is not compatible with the type of the target method parameter '{methodParameter.Name}'." ) );
                     }
                 }
-
 
                 // Check that template generic parameters match the target.
                 foreach ( var templateParameter in template.Declaration.TypeParameters )

@@ -5,8 +5,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Microsoft.CodeAnalysis.CSharp;
-using System;
-using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Advising;
 
@@ -48,8 +46,9 @@ internal readonly struct BoundTemplateMethod
 
     public object?[] GetTemplateArgumentsForMethod( IHasParameters signature )
     {
-        Invariant.Assert( this.Template.TemplateClassMember.RunTimeParameters.Length == 0 ||
-                          this.Template.TemplateClassMember.RunTimeParameters.Length == signature.Parameters.Count );
+        Invariant.Assert(
+            this.Template.TemplateClassMember.RunTimeParameters.Length == 0 ||
+            this.Template.TemplateClassMember.RunTimeParameters.Length == signature.Parameters.Count );
 
         var newArguments = (object?[]) this.TemplateArguments.Clone();
 

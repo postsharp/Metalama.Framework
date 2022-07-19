@@ -87,7 +87,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 new[] { typeof(IAspectWeaver), typeof(TemplateSyntaxFactory) }.ToDictionary(
                     x => x.Assembly.GetName().Name,
                     x => x.Assembly.Location );
-            
+
             // Force Metalama.Compiler.Interface to be loaded.
             _ = typeof(ISourceTransformer);
 
@@ -109,7 +109,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         this._logger.Trace.Log( "Loaded: " + assembly );
                     }
                 }
-                
+
                 throw new AssertionFailedException( "Cannot find the Metalama.Compiler.Interface assembly." );
             }
 

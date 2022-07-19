@@ -542,6 +542,7 @@ namespace Metalama.Framework.Engine.Advising
                 .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
 
             var operatorKind = isImplicit ? OperatorKind.ImplicitConversion : OperatorKind.ExplicitConversion;
+
             var advice = new IntroduceOperatorAdvice(
                 this.State.AspectInstance,
                 this._templateInstance,
