@@ -16,7 +16,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.Partia
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
-            foreach (var method in builder.Target.Operators)
+            foreach (var method in builder.Target.Methods.OfKind( MethodKind.Operator ))
             {
                 builder.Advice.Override( method, nameof(Template), tags: new { name = method.Name } );
             }

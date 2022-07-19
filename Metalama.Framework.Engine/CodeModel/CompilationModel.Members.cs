@@ -19,7 +19,6 @@ public partial class CompilationModel
 {
     private ImmutableDictionary<INamedTypeSymbol, FieldUpdatableCollection> _fields;
     private ImmutableDictionary<INamedTypeSymbol, MethodUpdatableCollection> _methods;
-    private ImmutableDictionary<INamedTypeSymbol, OperatorUpdatableCollection> _operators;
     private ImmutableDictionary<INamedTypeSymbol, ConstructorUpdatableCollection> _constructors;
     private ImmutableDictionary<INamedTypeSymbol, EventUpdatableCollection> _events;
     private ImmutableDictionary<INamedTypeSymbol, PropertyUpdatableCollection> _properties;
@@ -44,9 +43,6 @@ public partial class CompilationModel
     internal bool Contains( MethodBuilder methodBuilder )
         => methodBuilder switch
         {
-            { MethodKind: MethodKind.Operator } =>
-                this._operators.TryGetValue( methodBuilder.DeclaringType.GetSymbol(), out var operators )
-                && operators.Contains( methodBuilder.ToTypedRef<IMethod>() ),
             { MethodKind: MethodKind.Finalizer } =>
                 this._finalizers.TryGetValue( methodBuilder.DeclaringType.GetSymbol(), out var finalizer )
                 && finalizer == methodBuilder,
@@ -160,13 +156,6 @@ public partial class CompilationModel
             mutable,
             declaringType,
             ( c, t ) => new MethodUpdatableCollection( c, t ) );
-
-    internal OperatorUpdatableCollection GetOperatorCollection( INamedTypeSymbol declaringType, bool mutable = false )
-        => this.GetMemberCollection<INamedTypeSymbol, IMethod, OperatorUpdatableCollection>(
-            ref this._operators,
-            mutable,
-            declaringType,
-            ( c, t ) => new OperatorUpdatableCollection( c, t ) );
 
     internal ConstructorUpdatableCollection GetConstructorCollection( INamedTypeSymbol declaringType, bool mutable = false )
         => this.GetMemberCollection<INamedTypeSymbol, IConstructor, ConstructorUpdatableCollection>(
@@ -346,12 +335,6 @@ public partial class CompilationModel
                 }
 
                 this._finalizers = this._finalizers.SetItem( finalizerDeclaringType, finalizer );
-
-                break;
-
-            case IMethod { MethodKind: MethodKind.Operator } @operator:
-                var operators = this.GetOperatorCollection( @operator.DeclaringType.GetSymbol().AssertNotNull(), true );
-                operators.Add( @operator.ToMemberRef() );
 
                 break;
 

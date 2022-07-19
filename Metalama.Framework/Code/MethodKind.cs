@@ -17,16 +17,6 @@ namespace Metalama.Framework.Code
         Default,
 
         /// <summary>
-        /// Instance constructor.
-        /// </summary>
-        Constructor,
-
-        /// <summary>
-        /// Static constructor.
-        /// </summary>
-        StaticConstructor,
-
-        /// <summary>
         /// Finalizer (destructor).
         /// </summary>
         Finalizer,

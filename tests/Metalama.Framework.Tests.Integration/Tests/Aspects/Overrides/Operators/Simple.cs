@@ -13,7 +13,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Operators.Simple
     {
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            foreach (var o in builder.Target.Operators)
+            foreach (var o in builder.Target.Methods.OfKind( MethodKind.Operator ))
             {
                 builder.Advice.Override(o, nameof(Template));
             }

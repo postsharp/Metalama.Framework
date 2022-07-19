@@ -449,13 +449,7 @@ namespace Metalama.Framework.Engine.CodeModel
         /// <param name="signatureTemplate">Method that acts as a template for the signature.</param>
         /// <returns>A method of the given signature that is visible from the given type or <c>null</c> if no such method exists.</returns>
         public static IMethod? FindClosestVisibleMethod( this INamedType namedType, IMethod signatureTemplate )
-            => signatureTemplate switch
-            {
-                { MethodKind: Code.MethodKind.Operator } => namedType.AllOperators.OfExactSignature(
-                    signatureTemplate,
-                    matchIsStatic: false ),
-                _ => namedType.AllMethods.OfExactSignature( signatureTemplate, matchIsStatic: false )
-            };
+            => namedType.AllMethods.OfExactSignature( signatureTemplate, false );
 
         /// <summary>
         /// Finds a parameterless member in the given type and parent type, taking into account member hiding.

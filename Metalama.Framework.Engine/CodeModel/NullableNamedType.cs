@@ -142,10 +142,6 @@ internal class NullableNamedType : INamedTypeInternal
 
     IMethodCollection INamedType.AllMethods => this._underlying.AllMethods;
 
-    IMethodCollection INamedType.Operators => this._underlying.Operators;
-
-    IMethodCollection INamedType.AllOperators => this._underlying.AllOperators;
-
     IConstructorCollection INamedType.Constructors => this._underlying.Constructors;
 
     IConstructor? INamedType.StaticConstructor => this._underlying.StaticConstructor;

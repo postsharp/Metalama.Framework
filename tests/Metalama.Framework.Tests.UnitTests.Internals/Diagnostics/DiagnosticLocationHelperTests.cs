@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
 using System.Linq;
@@ -55,8 +54,8 @@ class C<T> : object
             AssertLocation( "Method", method.ReturnParameter.GetDiagnosticLocation() );
 
             // Operators
-            AssertLocation( "operator", type.Operators.OfKind( MethodKind.Operator ).ElementAt(0).GetDiagnosticLocation() );
-            AssertLocation( "operator", type.Operators.OfKind( MethodKind.Operator ).ElementAt(1).GetDiagnosticLocation() );
+            AssertLocation( "operator", type.Methods.OfKind( MethodKind.Operator ).ElementAt(0).GetDiagnosticLocation() );
+            AssertLocation( "operator", type.Methods.OfKind( MethodKind.Operator ).ElementAt(1).GetDiagnosticLocation() );
 
             // Destructors
             AssertLocation( "C", type.Finalizer!.GetDiagnosticLocation() );

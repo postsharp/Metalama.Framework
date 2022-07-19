@@ -48,8 +48,6 @@ namespace Metalama.Framework.Engine.CodeModel
             => this.MethodSymbol.MethodKind switch
             {
                 SymbolMethodKind.Ordinary => MethodKind.Default,
-                SymbolMethodKind.Constructor => MethodKind.Constructor,
-                SymbolMethodKind.StaticConstructor => MethodKind.StaticConstructor,
                 SymbolMethodKind.Destructor => MethodKind.Finalizer,
                 SymbolMethodKind.PropertyGet => MethodKind.PropertyGet,
                 SymbolMethodKind.PropertySet => MethodKind.PropertySet,
