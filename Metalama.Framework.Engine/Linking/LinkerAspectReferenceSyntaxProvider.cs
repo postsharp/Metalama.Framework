@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Linking
         public const string HelperTypeName = "__LinkerIntroductionHelpers__";
         public const string FinalizeMemberName = "__Finalize";
 
-        private static readonly ConcurrentDictionary<LanguageVersion, SyntaxTree> _linkerHelperSyntaxTreeCache = new();
+        private static readonly ConcurrentDictionary<LanguageOptions, SyntaxTree> _linkerHelperSyntaxTreeCache = new();
 
         private readonly bool _useNullability;
 
@@ -64,17 +64,13 @@ namespace Metalama.Framework.Engine.Linking
                     syntaxGenerator.ArgumentList( overriddenOperator, p => IdentifierName( p.Name ) ) );
         }
 
-        public SyntaxTree GetLinkerHelperSyntaxTree( LanguageVersion languageVersion )
-            => _linkerHelperSyntaxTreeCache.GetOrAdd( languageVersion, this.GetLinkerHelperSyntaxTreeCode );
+        public SyntaxTree GetLinkerHelperSyntaxTree( LanguageOptions options)
+            => _linkerHelperSyntaxTreeCache.GetOrAdd( options, this.GetLinkerHelperSyntaxTreeCore );
 
-        private static readonly ConcurrentDictionary<LanguageOptions, SyntaxTree> _linkerHelperSyntaxTreeCache = new();
 
-        public static SyntaxTree GetLinkerHelperSyntaxTree( LanguageOptions options )
-            => _linkerHelperSyntaxTreeCache.GetOrAdd( options, GetLinkerHelperSyntaxTreeCode );
-
-        private SyntaxTree GetLinkerHelperSyntaxTreeCore( LanguageOptions languageOptions )
+        private SyntaxTree GetLinkerHelperSyntaxTreeCore( LanguageOptions options )
         {
-            var useNullability = this._useNullability && v is LanguageVersion.CSharp9 or LanguageVersion.CSharp10;
+            var useNullability = this._useNullability && options.Version is LanguageVersion.CSharp9 or LanguageVersion.CSharp10;
             var suffix = useNullability ? "?" : "";
 
             var binaryOperators =

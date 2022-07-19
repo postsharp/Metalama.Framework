@@ -51,7 +51,7 @@ namespace Metalama.Framework.Code
         bool IsReadOnly { get; }
 
         /// <summary>
-        /// Gets a value indiciting the type of operator the methods represents.
+        /// Gets a value indicating the type of operator the methods represents.
         /// </summary>
         OperatorKind OperatorKind { get; }
     }
