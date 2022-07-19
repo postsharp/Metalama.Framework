@@ -20,6 +20,7 @@ using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using MoreLinq;
 using System;
 using System.Collections.Generic;
@@ -94,6 +95,15 @@ namespace Metalama.Framework.Engine.Pipeline
             this.PipelineInitializationCount++;
 
             var roslynCompilation = compilation.Compilation;
+            
+            // Check language version.
+            if ( compilation.SyntaxTrees.Count > 0 && ((CSharpParseOptions) compilation.SyntaxTrees.First().Value.Options).LanguageVersion == LanguageVersion.Preview )
+            {
+                diagnosticAdder.Report( GeneralDiagnosticDescriptors.PreviewCSharpVersionNotSupported.CreateRoslynDiagnostic( null, default ) );
+                configuration = null;
+
+                return false;
+            }
 
             // Create dependencies.
 

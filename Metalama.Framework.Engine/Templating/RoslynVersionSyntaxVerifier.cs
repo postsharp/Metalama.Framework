@@ -7,6 +7,8 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace Metalama.Framework.Engine.Templating;
 
+#pragma warning disable IDE0051
+
 internal partial class RoslynVersionSyntaxVerifier : CSharpSyntaxWalker
 {
     private readonly IDiagnosticAdder _diagnostics;

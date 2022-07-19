@@ -261,6 +261,9 @@ namespace Metalama.Framework.CompilerExtensions
 
         private static string GetRoslynVersion()
         {
+            return "4.0.1";
+
+            /*
             var assembly = typeof(SyntaxNode).Assembly;
             var version = assembly.GetName().Version;
 
@@ -289,10 +292,12 @@ namespace Metalama.Framework.CompilerExtensions
             {
                 return "4.1.0";
             }
-            else
+            else 
             {
                 return "4.0.1";
             }
+
+            */
         }
     }
 }
