@@ -11,8 +11,10 @@ using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.Advising
 {
@@ -52,14 +54,18 @@ namespace Metalama.Framework.Engine.Advising
             this.BoundTemplate = boundTemplate;
             Invariant.Assert( !boundTemplate.IsNull );
 
-            this.Builder = new MethodBuilder( this, targetDeclaration, operatorKind.ToOperatorMethodName(), operatorKind.ToDeclarationKind(), operatorKind );
+            this.Builder = new MethodBuilder( this, targetDeclaration, operatorKind.ToOperatorMethodName(), DeclarationKind.Operator, operatorKind );
+
+            var parameters = boundTemplate.Template.TemplateClassMember.RunTimeParameters;
 
             // Add predefined parameters of correct types.
-            this.Builder.AddParameter( "a", leftOperandType );
+            var firstParameterName = !parameters.IsEmpty ? parameters[0].Name : "a";
+            this.Builder.AddParameter( firstParameterName, leftOperandType );
 
             if ( rightOperandType != null )
             {
-                this.Builder.AddParameter( "b", rightOperandType );
+                var secondParameterName = !parameters.IsEmpty  ? parameters[1].Name : "a";
+                this.Builder.AddParameter( secondParameterName, rightOperandType );
             }
 
             this.Builder.ReturnType = resultType;

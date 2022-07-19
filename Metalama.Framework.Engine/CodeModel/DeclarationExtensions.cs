@@ -402,110 +402,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => throw new AssertionFailedException()
             };
 
-        public static DeclarationKind ToDeclarationKind( this OperatorKind operatorKind )
-            => operatorKind.IsConversionOperator()
-                ? DeclarationKind.ConversionOperator
-                : DeclarationKind.UserDefinedOperator;
-
-        public static bool IsBinaryOperator( this OperatorKind operatorKind )
-            => operatorKind switch
-            {
-                OperatorKind.None => false,
-                OperatorKind.ImplicitConversion => false,
-                OperatorKind.ExplicitConversion => false,
-                OperatorKind.Addition => true,
-                OperatorKind.BitwiseAnd => true,
-                OperatorKind.BitwiseOr => true,
-                OperatorKind.Decrement => false,
-                OperatorKind.Division => true,
-                OperatorKind.Equality => true,
-                OperatorKind.ExclusiveOr => true,
-                OperatorKind.False => false,
-                OperatorKind.GreaterThan => true,
-                OperatorKind.GreaterThanOrEqual => true,
-                OperatorKind.Increment => false,
-                OperatorKind.Inequality => true,
-                OperatorKind.LeftShift => true,
-                OperatorKind.LessThan => true,
-                OperatorKind.LessThanOrEqual => true,
-                OperatorKind.LogicalNot => false,
-                OperatorKind.Modulus => true,
-                OperatorKind.Multiply => true,
-                OperatorKind.OnesComplement => false,
-                OperatorKind.RightShift => true,
-                OperatorKind.Subtraction => true,
-                OperatorKind.True => false,
-                OperatorKind.UnaryNegation => false,
-                OperatorKind.UnaryPlus => false,
-                _ => throw new AssertionFailedException()
-            };
-
-        public static bool IsUnaryOperator( this OperatorKind operatorKind )
-            => operatorKind switch
-            {
-                OperatorKind.None => false,
-                OperatorKind.ImplicitConversion => false,
-                OperatorKind.ExplicitConversion => false,
-                OperatorKind.Addition => false,
-                OperatorKind.BitwiseAnd => false,
-                OperatorKind.BitwiseOr => false,
-                OperatorKind.Decrement => true,
-                OperatorKind.Division => false,
-                OperatorKind.Equality => false,
-                OperatorKind.ExclusiveOr => false,
-                OperatorKind.False => true,
-                OperatorKind.GreaterThan => false,
-                OperatorKind.GreaterThanOrEqual => false,
-                OperatorKind.Increment => true,
-                OperatorKind.Inequality => false,
-                OperatorKind.LeftShift => false,
-                OperatorKind.LessThan => false,
-                OperatorKind.LessThanOrEqual => false,
-                OperatorKind.LogicalNot => true,
-                OperatorKind.Modulus => false,
-                OperatorKind.Multiply => false,
-                OperatorKind.OnesComplement => true,
-                OperatorKind.RightShift => false,
-                OperatorKind.Subtraction => false,
-                OperatorKind.True => true,
-                OperatorKind.UnaryNegation => true,
-                OperatorKind.UnaryPlus => true,
-                _ => throw new AssertionFailedException()
-            };
-
-        public static bool IsConversionOperator( this OperatorKind operatorKind )
-            => operatorKind switch
-            {
-                OperatorKind.None => false,
-                OperatorKind.ImplicitConversion => true,
-                OperatorKind.ExplicitConversion => true,
-                OperatorKind.Addition => false,
-                OperatorKind.BitwiseAnd => false,
-                OperatorKind.BitwiseOr => false,
-                OperatorKind.Decrement => false,
-                OperatorKind.Division => false,
-                OperatorKind.Equality => false,
-                OperatorKind.ExclusiveOr => false,
-                OperatorKind.False => false,
-                OperatorKind.GreaterThan => false,
-                OperatorKind.GreaterThanOrEqual => false,
-                OperatorKind.Increment => false,
-                OperatorKind.Inequality => false,
-                OperatorKind.LeftShift => false,
-                OperatorKind.LessThan => false,
-                OperatorKind.LessThanOrEqual => false,
-                OperatorKind.LogicalNot => false,
-                OperatorKind.Modulus => false,
-                OperatorKind.Multiply => false,
-                OperatorKind.OnesComplement => false,
-                OperatorKind.RightShift => false,
-                OperatorKind.Subtraction => false,
-                OperatorKind.True => false,
-                OperatorKind.UnaryNegation => false,
-                OperatorKind.UnaryPlus => false,
-                _ => throw new AssertionFailedException()
-            };
-
+        
         internal static bool IsAutoProperty( this IPropertySymbol symbol )
             => symbol switch
             {
@@ -554,7 +451,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public static IMethod? FindClosestVisibleMethod( this INamedType namedType, IMethod signatureTemplate )
             => signatureTemplate switch
             {
-                { MethodKind: Code.MethodKind.UserDefinedOperator or Code.MethodKind.ConversionOperator } => namedType.AllOperators.OfExactSignature(
+                { MethodKind: Code.MethodKind.Operator } => namedType.AllOperators.OfExactSignature(
                     signatureTemplate,
                     matchIsStatic: false ),
                 _ => namedType.AllMethods.OfExactSignature( signatureTemplate, matchIsStatic: false )

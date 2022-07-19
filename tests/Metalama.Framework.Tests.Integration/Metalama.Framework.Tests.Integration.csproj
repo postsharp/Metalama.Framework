@@ -32,6 +32,10 @@
         <!-- Exclude files that intentionally do not compile -->
         <Compile Remove="Tests\**\__*.cs" />
         <None Include="Tests\**\__*.cs" />
+        <None Include="Tests\Aspects\Introductions\Operators\Programmatic_BadSignature.t.cs">
+          <SubType>Code</SubType>
+          <DependentUpon>Programmatic_BadSignature.cs</DependentUpon>
+        </None>
         <None Include="Tests\Aspects\Misc\LanguageFeature.t.cs" />
     </ItemGroup>
 
@@ -39,6 +43,7 @@
       <Compile Remove="Tests\Aspects\Introductions\Finalizers\ExistingConflict_Fail - Copy.t.cs" />
       <Compile Remove="Tests\Aspects\Introductions\Finalizers\ExistingConflict_Ignore - Copy.t.cs" />
       <Compile Remove="Tests\Aspects\Introductions\Finalizers\ExistingConflict_Override - Copy.t.cs" />
+      <Compile Remove="Tests\Aspects\Introductions\Operators\Programmatic - Copy.t.cs" />
       <Compile Remove="Tests\Aspects\Overrides\Finalizers\Introduced - Copy.t.cs" />
       <Compile Remove="Tests\Aspects\Overrides\Operators\Simple.t.cs" />
     </ItemGroup>
@@ -62,9 +67,9 @@
         <SubType>Code</SubType>
         <DependentUpon>ExistingConflict_Fail.cs</DependentUpon>
       </None>
-      <None Include="Tests\Aspects\Overrides\Operators\Simple.t.cs">
+      <None Include="Tests\Aspects\Overrides\Operators\WithParameters.t.cs">
         <SubType>Code</SubType>
-        <DependentUpon>$([System.String]::Copy('%(Filename)').Replace('.t','')).cs</DependentUpon>
+        <DependentUpon>WithParameters.cs</DependentUpon>
       </None>
     </ItemGroup>
 

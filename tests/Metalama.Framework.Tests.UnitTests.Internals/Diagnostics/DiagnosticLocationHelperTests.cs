@@ -55,8 +55,8 @@ class C<T> : object
             AssertLocation( "Method", method.ReturnParameter.GetDiagnosticLocation() );
 
             // Operators
-            AssertLocation( "operator", type.Operators.OfKind( MethodKind.UserDefinedOperator ).Single().GetDiagnosticLocation() );
-            AssertLocation( "operator", type.Operators.OfKind( MethodKind.ConversionOperator ).Single().GetDiagnosticLocation() );
+            AssertLocation( "operator", type.Operators.OfKind( MethodKind.Operator ).ElementAt(0).GetDiagnosticLocation() );
+            AssertLocation( "operator", type.Operators.OfKind( MethodKind.Operator ).ElementAt(1).GetDiagnosticLocation() );
 
             // Destructors
             AssertLocation( "C", type.Finalizer!.GetDiagnosticLocation() );

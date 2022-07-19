@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
@@ -19,6 +20,10 @@ namespace Metalama.Framework.Engine.CompileTime
         ImmutableArray<TemplateClassMemberParameter> TypeParameters,
         ImmutableDictionary<MethodKind, TemplateClassMember> Accessors )
     {
+        public ImmutableArray<TemplateClassMemberParameter> RunTimeParameters { get; } = Parameters.Where( p => !p.IsCompileTime ).ToImmutableArray();
+        
+        public ImmutableArray<TemplateClassMemberParameter> CompileTimeParameters { get; } = Parameters.Where( p => p.IsCompileTime ).ToImmutableArray();
+        
         public ImmutableDictionary<string, TemplateClassMemberParameter> IndexedParameters { get; } =
             Parameters.Concat( TypeParameters ).ToImmutableDictionary( x => x.Name, x => x );
     }

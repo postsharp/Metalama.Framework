@@ -57,8 +57,8 @@ namespace Metalama.Framework.Engine.CodeModel
                 SymbolMethodKind.EventRemove => MethodKind.EventRemove,
                 SymbolMethodKind.EventRaise => MethodKind.EventRaise,
                 SymbolMethodKind.ExplicitInterfaceImplementation => MethodKind.ExplicitInterfaceImplementation,
-                SymbolMethodKind.Conversion => MethodKind.ConversionOperator,
-                SymbolMethodKind.UserDefinedOperator => MethodKind.UserDefinedOperator,
+                SymbolMethodKind.Conversion => MethodKind.Operator,
+                SymbolMethodKind.UserDefinedOperator => MethodKind.Operator,
                 SymbolMethodKind.LocalFunction => MethodKind.LocalFunction,
                 SymbolMethodKind.AnonymousFunction or
                     SymbolMethodKind.BuiltinOperator or

@@ -445,7 +445,7 @@ namespace Metalama.Framework.Engine.Advising
                 throw new InvalidOperationException();
             }
 
-            if ( !kind.IsUnaryOperator() )
+            if ( kind.GetCategory() != OperatorCategory.Unary )
             {
                 throw new InvalidOperationException(
                     UserMessageFormatter.Format( $"Cannot add an IntroduceUnaryOperator advice with {kind} as it is not an unary operator." ) );
@@ -465,7 +465,7 @@ namespace Metalama.Framework.Engine.Advising
                 inputType,
                 null,
                 resultType,
-                template.ForIntroduction( ObjectReader.GetReader( args ) ),
+                template.ForOperatorIntroduction( kind, ObjectReader.GetReader( args ) ),
                 whenExists,
                 buildAction,
                 this._layerName,
@@ -491,7 +491,7 @@ namespace Metalama.Framework.Engine.Advising
                 throw new InvalidOperationException();
             }
 
-            if ( !kind.IsBinaryOperator() )
+            if ( kind.GetCategory() != OperatorCategory.Binary )
             {
                 throw new InvalidOperationException(
                     UserMessageFormatter.Format( $"Cannot add an IntroduceBinaryOperator advice with {kind} as it is not a binary operator." ) );
@@ -511,7 +511,7 @@ namespace Metalama.Framework.Engine.Advising
                 leftType,
                 rightType,
                 resultType,
-                template.ForIntroduction( ObjectReader.GetReader( args ) ),
+                template.ForOperatorIntroduction( kind, ObjectReader.GetReader( args ) ),
                 whenExists,
                 buildAction,
                 this._layerName,
@@ -541,16 +541,17 @@ namespace Metalama.Framework.Engine.Advising
             var template = this.ValidateTemplateName( defaultTemplate, TemplateKind.Default, true )
                 .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
 
+            var operatorKind = isImplicit ? OperatorKind.ImplicitConversion : OperatorKind.ExplicitConversion;
             var advice = new IntroduceOperatorAdvice(
                 this.State.AspectInstance,
                 this._templateInstance,
                 targetType,
                 this._compilation,
-                isImplicit ? OperatorKind.ImplicitConversion : OperatorKind.ExplicitConversion,
+                operatorKind,
                 fromType,
                 null,
                 toType,
-                template.ForIntroduction( ObjectReader.GetReader( args ) ),
+                template.ForOperatorIntroduction( operatorKind, ObjectReader.GetReader( args ) ),
                 whenExists,
                 buildAction,
                 this._layerName,

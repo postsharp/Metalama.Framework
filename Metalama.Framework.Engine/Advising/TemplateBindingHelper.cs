@@ -25,6 +25,33 @@ namespace Metalama.Framework.Engine.Advising
             return new BoundTemplateMethod( template, null, GetTemplateArguments( template, arguments ) );
         }
 
+        public static BoundTemplateMethod ForOperatorIntroduction(
+            this in TemplateMember<IMethod> template,
+            OperatorKind operatorKind,
+            IObjectReader? arguments = null )
+        {
+            var runTimeParameters = template.TemplateClassMember.RunTimeParameters;
+
+            var expectedParameterCount = operatorKind.GetCategory() switch
+            {
+                OperatorCategory.Binary => 2,
+                OperatorCategory.Conversion => 1,
+                OperatorCategory.Unary => 1,
+                _ => throw new AssertionFailedException()
+            };
+
+            if ( runTimeParameters.Length != expectedParameterCount )
+            {
+                throw new InvalidTemplateSignatureException(
+                    UserMessageFormatter.Format(
+                        $"Cannot use the method '{template.Declaration}' as a template for the {operatorKind} operator: this operator expects {expectedParameterCount} parameter(s) but got {runTimeParameters.Length}." ) );
+            }
+            
+            // TODO: verify the types.
+            
+            return new BoundTemplateMethod( template, null, GetTemplateArguments( template, arguments ) );
+        }
+
         public static BoundTemplateMethod ForInitializer( this in TemplateMember<IMethod> template, IObjectReader? arguments = null )
         {
             // The template must be void.
@@ -36,7 +63,7 @@ namespace Metalama.Framework.Engine.Advising
             }
 
             // The template must not have run-time parameters.
-            if ( template.TemplateClassMember.Parameters.Any( p => !p.IsCompileTime ) )
+            if ( !template.TemplateClassMember.RunTimeParameters.IsEmpty )
             {
                 throw new InvalidTemplateSignatureException(
                     UserMessageFormatter.Format(
@@ -57,7 +84,7 @@ namespace Metalama.Framework.Engine.Advising
             }
 
             // The template must not have run-time parameters.
-            if ( template.TemplateClassMember.Parameters.Any( p => !p.IsCompileTime && p.Name != "value" ) )
+            if ( template.TemplateClassMember.RunTimeParameters.Any( p => p.Name != "value" ) )
             {
                 throw new InvalidTemplateSignatureException(
                     UserMessageFormatter.Format(
@@ -103,54 +130,94 @@ namespace Metalama.Framework.Engine.Advising
             }
 
             // Check that template run-time parameters match the target.
-            foreach ( var templateParameter in template.Declaration.Parameters )
+            if ( targetMethod.OperatorKind == OperatorKind.None )
             {
-                if ( template.TemplateClassMember.Parameters[templateParameter.Index].IsCompileTime )
+                // For non-operator methods, we match parameters by name.
+                foreach ( var templateParameter in template.Declaration.Parameters )
                 {
-                    continue;
+                    if ( template.TemplateClassMember.Parameters[templateParameter.Index].IsCompileTime )
+                    {
+                        continue;
+                    }
+
+                    var methodParameter = targetMethod.Parameters.OfName( templateParameter.Name );
+
+                    if ( methodParameter == null )
+                    {
+                        var parameterNames = string.Join( ", ", targetMethod.Parameters.Select( p => "'" + p.Name + "'" ) );
+
+                        throw new InvalidTemplateSignatureException(
+                            UserMessageFormatter.Format(
+                                $"Cannot use the template '{template.Declaration}' to override the method '{targetMethod}': the target method does not contain a parameter '{templateParameter.Name}'. Available parameters are: {parameterNames}." ) );
+                    }
+
+                    if ( !VerifyTemplateType( templateParameter.Type, methodParameter.Type, template, arguments ) )
+                    {
+                        throw new InvalidTemplateSignatureException(
+                            UserMessageFormatter.Format(
+                                $"Cannot use the template '{template.Declaration}' to override the method '{targetMethod}': the type of the template parameter '{templateParameter.Name}' is not compatible with the type of the target method parameter '{methodParameter.Name}'." ) );
+                    }
                 }
 
-                var methodParameter = targetMethod.Parameters.OfName( templateParameter.Name );
 
-                if ( methodParameter == null )
+                // Check that template generic parameters match the target.
+                foreach ( var templateParameter in template.Declaration.TypeParameters )
                 {
-                    var parameterNames = string.Join( ", ", targetMethod.Parameters.Select( p => "'" + p.Name + "'" ) );
+                    if ( template.TemplateClassMember.TypeParameters[templateParameter.Index].IsCompileTime )
+                    {
+                        continue;
+                    }
 
-                    throw new InvalidTemplateSignatureException(
-                        UserMessageFormatter.Format(
-                            $"Cannot use the template '{template.Declaration}' to override the method '{targetMethod}': the target method does not contain a parameter '{templateParameter.Name}'. Available parameters are: {parameterNames}." ) );
-                }
+                    var methodParameter = targetMethod.TypeParameters.SingleOrDefault( p => p.Name == templateParameter.Name );
 
-                if ( !VerifyTemplateType( templateParameter.Type, methodParameter.Type, template, arguments ) )
-                {
-                    throw new InvalidTemplateSignatureException(
-                        UserMessageFormatter.Format(
-                            $"Cannot use the template '{template.Declaration}' to override the method '{targetMethod}': the type of the template parameter '{templateParameter.Name}' is not compatible with the type of the target method parameter '{methodParameter.Name}'." ) );
+                    if ( methodParameter == null )
+                    {
+                        throw new InvalidTemplateSignatureException(
+                            UserMessageFormatter.Format(
+                                $"Cannot use the template '{template.Declaration}' to override the method '{targetMethod}': the target method does not contain a generic parameter '{templateParameter.Name}'." ) );
+                    }
+
+                    if ( !templateParameter.IsCompatibleWith( methodParameter ) )
+                    {
+                        throw new InvalidTemplateSignatureException(
+                            UserMessageFormatter.Format(
+                                $"Cannot use the template '{template.Declaration}' to override the method '{targetMethod}': the constraints on the template parameter '{templateParameter.Name}' are not compatible with the constraints on the target method parameter '{methodParameter.Name}'." ) );
+                    }
                 }
             }
-
-            // Check that template generic parameters match the target.
-            foreach ( var templateParameter in template.Declaration.TypeParameters )
+            else
             {
-                if ( template.TemplateClassMember.TypeParameters[templateParameter.Index].IsCompileTime )
-                {
-                    continue;
-                }
+                // For operators, if the template has any run-time parameter, then we match parameters by index and their number must be exact.
 
-                var methodParameter = targetMethod.TypeParameters.SingleOrDefault( p => p.Name == templateParameter.Name );
-
-                if ( methodParameter == null )
+                if ( template.TemplateClassMember.RunTimeParameters.Length > 0 )
                 {
-                    throw new InvalidTemplateSignatureException(
-                        UserMessageFormatter.Format(
-                            $"Cannot use the template '{template.Declaration}' to override the method '{targetMethod}': the target method does not contain a generic parameter '{templateParameter.Name}'." ) );
-                }
+                    var expectedParameterCount = targetMethod.OperatorKind.GetCategory() switch
+                    {
+                        OperatorCategory.Binary => 2,
+                        OperatorCategory.Conversion => 1,
+                        OperatorCategory.Unary => 1,
+                        _ => throw new AssertionFailedException()
+                    };
 
-                if ( !templateParameter.IsCompatibleWith( methodParameter ) )
-                {
-                    throw new InvalidTemplateSignatureException(
-                        UserMessageFormatter.Format(
-                            $"Cannot use the template '{template.Declaration}' to override the method '{targetMethod}': the constraints on the template parameter '{templateParameter.Name}' are not compatible with the constraints on the target method parameter '{methodParameter.Name}'." ) );
+                    if ( template.TemplateClassMember.RunTimeParameters.Length != expectedParameterCount )
+                    {
+                        throw new InvalidTemplateSignatureException(
+                            UserMessageFormatter.Format(
+                                $"Cannot use the method '{template.Declaration}' as a template for the operator '{targetMethod}': this  operator expects {expectedParameterCount} parameter(s) but got {template.TemplateClassMember.RunTimeParameters.Length} were provided." ) );
+                    }
+
+                    for ( var i = 0; i < template.TemplateClassMember.RunTimeParameters.Length; i++ )
+                    {
+                        var templateParameter = template.Declaration.Parameters[template.TemplateClassMember.RunTimeParameters[i].SourceIndex];
+                        var methodParameter = targetMethod.Parameters[i];
+
+                        if ( !VerifyTemplateType( templateParameter.Type, methodParameter.Type, template, arguments ) )
+                        {
+                            throw new InvalidTemplateSignatureException(
+                                UserMessageFormatter.Format(
+                                    $"Cannot use the template '{template.Declaration}' to override the operator '{targetMethod}': the type of the template parameter '{templateParameter.Name}' is not compatible with the type of the target operator parameter '{methodParameter.Name}'." ) );
+                        }
+                    }
                 }
             }
 

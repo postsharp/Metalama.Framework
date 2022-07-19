@@ -501,7 +501,7 @@ namespace Metalama.Framework.Engine.Linking
                             .Single( m => m.Parameters.Length == 0 && m.TypeParameters.Length == 0 );
 
                     case { } when SymbolHelpers.GetOperatorKindFromName( helperMethod.Name ) is not OperatorKind.None and var operatorKind:
-                        if ( operatorKind.IsBinaryOperator() )
+                        if ( operatorKind.GetCategory() == OperatorCategory.Binary )
                         {
                             return containingSymbol.ContainingType.GetMembers( referencedSymbol.Name )
                                 .OfType<IMethodSymbol>()

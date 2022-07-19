@@ -82,14 +82,9 @@ namespace Metalama.Framework.Code
         Finalizer,
 
         /// <summary>
-        /// <see cref="IMethod"/> that is a conversion operator.
+        /// <see cref="IMethod"/> that is an operator.
         /// </summary>
-        ConversionOperator,
-
-        /// <summary>
-        /// <see cref="IMethod"/> that is a user defined operator.
-        /// </summary>
-        UserDefinedOperator,
+        Operator,
 
         /// <summary>
         /// A reference assembly, implementing <see cref="IAssembly"/>. Note

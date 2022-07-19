@@ -76,19 +76,19 @@ namespace Metalama.Framework.Engine.Linking
             var binaryOperators =
                 Enum.GetValues( typeof(OperatorKind) )
                     .Cast<OperatorKind>()
-                    .Where( op => op.IsBinaryOperator() )
+                    .Where( op => op.GetCategory() == OperatorCategory.Binary )
                     .Select( op => $"public static R{suffix} {op.ToOperatorMethodName()}<A,B,R>(A{suffix} a, B{suffix} b) => default(R{suffix});" );
 
             var unaryOperators =
                 Enum.GetValues( typeof(OperatorKind) )
                     .Cast<OperatorKind>()
-                    .Where( op => op.IsUnaryOperator() )
+                    .Where( op => op.GetCategory() == OperatorCategory.Unary )
                     .Select( op => $"public static R{suffix} {op.ToOperatorMethodName()}<A,R>(A{suffix} a) => default(R{suffix});" );
 
             var conversionOperators =
                 Enum.GetValues( typeof(OperatorKind) )
                     .Cast<OperatorKind>()
-                    .Where( op => op.IsConversionOperator() )
+                    .Where( op => op.GetCategory() == OperatorCategory.Conversion )
                     .Select( op => $"public static R{suffix} {op.ToOperatorMethodName()}<A,R>(A{suffix} a) => default(R{suffix});" );
 
             var code = @$"

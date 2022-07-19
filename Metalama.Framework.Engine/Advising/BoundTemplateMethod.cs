@@ -4,6 +4,9 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
+using Microsoft.CodeAnalysis.CSharp;
+using System;
+using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Advising;
 
@@ -18,7 +21,7 @@ internal readonly struct BoundTemplateMethod
 
     public BoundTemplateMethod( TemplateMember<IMethod> template, IMethodBase? overriddenMethodBase, object?[] templateArguments )
     {
-        this.OverriddenMethodBase = overriddenMethodBase != null ? overriddenMethodBase.ToTypedRef() : default;
+        this.OverriddenMethodBase = overriddenMethodBase?.ToTypedRef() ?? default;
         this.Template = template;
         this.TemplateArguments = templateArguments;
 
@@ -30,9 +33,32 @@ internal readonly struct BoundTemplateMethod
 #endif
     }
 
+    private BoundTemplateMethod( Ref<IMethodBase> overriddenMethodBase, TemplateMember<IMethod> template, object?[] templateArguments )
+    {
+        this.OverriddenMethodBase = overriddenMethodBase;
+        this.Template = template;
+        this.TemplateArguments = templateArguments;
+    }
+
     public bool IsNull => this.Template.IsNull;
 
     public bool IsNotNull => this.Template.IsNotNull;
 
     public object?[] TemplateArguments { get; }
+
+    public object?[] GetTemplateArgumentsForMethod( IHasParameters signature )
+    {
+        Invariant.Assert( this.Template.TemplateClassMember.RunTimeParameters.Length == 0 ||
+                          this.Template.TemplateClassMember.RunTimeParameters.Length == signature.Parameters.Count );
+
+        var newArguments = (object?[]) this.TemplateArguments.Clone();
+
+        for ( var index = 0; index < this.Template.TemplateClassMember.RunTimeParameters.Length; index++ )
+        {
+            var runTimeParameter = this.Template.TemplateClassMember.RunTimeParameters[index];
+            newArguments[runTimeParameter.SourceIndex] = SyntaxFactory.IdentifierName( signature.Parameters[index].Name );
+        }
+
+        return newArguments;
+    }
 }

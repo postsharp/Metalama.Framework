@@ -44,7 +44,7 @@ public partial class CompilationModel
     internal bool Contains( MethodBuilder methodBuilder )
         => methodBuilder switch
         {
-            { MethodKind: MethodKind.ConversionOperator or MethodKind.UserDefinedOperator } =>
+            { MethodKind: MethodKind.Operator } =>
                 this._operators.TryGetValue( methodBuilder.DeclaringType.GetSymbol(), out var operators )
                 && operators.Contains( methodBuilder.ToTypedRef<IMethod>() ),
             { MethodKind: MethodKind.Finalizer } =>
@@ -349,7 +349,7 @@ public partial class CompilationModel
 
                 break;
 
-            case IMethod { MethodKind: MethodKind.ConversionOperator or MethodKind.UserDefinedOperator } @operator:
+            case IMethod { MethodKind: MethodKind.Operator } @operator:
                 var operators = this.GetOperatorCollection( @operator.DeclaringType.GetSymbol().AssertNotNull(), true );
                 operators.Add( @operator.ToMemberRef() );
 

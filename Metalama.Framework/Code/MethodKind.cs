@@ -65,14 +65,9 @@ namespace Metalama.Framework.Code
         ExplicitInterfaceImplementation,
 
         /// <summary>
-        /// Conversion operator.
+        /// Operator.
         /// </summary>
-        ConversionOperator,
-
-        /// <summary>
-        /// Other operator.
-        /// </summary>
-        UserDefinedOperator,
+        Operator,
 
         /// <summary>
         /// Local function.

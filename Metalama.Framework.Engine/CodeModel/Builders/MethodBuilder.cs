@@ -135,8 +135,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             => this.DeclarationKind switch
             {
                 DeclarationKind.Method => MethodKind.Default,
-                DeclarationKind.ConversionOperator => MethodKind.ConversionOperator,
-                DeclarationKind.UserDefinedOperator => MethodKind.UserDefinedOperator,
+                DeclarationKind.Operator => MethodKind.Operator,
                 DeclarationKind.Finalizer => MethodKind.Finalizer,
                 _ => throw new AssertionFailedException()
             };
@@ -160,16 +159,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             : base( parentAdvice, targetType, name )
         {
             Invariant.Assert(
-                declarationKind == DeclarationKind.ConversionOperator
+                declarationKind == DeclarationKind.Operator
                                 ==
-                                (operatorKind == OperatorKind.ImplicitConversion || operatorKind == OperatorKind.ExplicitConversion) );
-
-            Invariant.Assert(
-                declarationKind == DeclarationKind.UserDefinedOperator
-                                ==
-                                !(operatorKind == OperatorKind.ImplicitConversion
-                                  || operatorKind == OperatorKind.ExplicitConversion
-                                  || operatorKind == OperatorKind.None) );
+                                (operatorKind != OperatorKind.None) );
 
             this.Name = name;
             this.DeclarationKind = declarationKind;
@@ -200,39 +192,42 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
                 return new[] { new IntroducedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
             }
-            else if ( this.DeclarationKind == DeclarationKind.ConversionOperator )
+            else if ( this.DeclarationKind == DeclarationKind.Operator )
             {
-                Invariant.Assert( this.Parameters.Count == 1 );
+                if ( this.OperatorKind.GetCategory() == OperatorCategory.Conversion )
+                {
+                    Invariant.Assert( this.Parameters.Count == 1 );
 
-                var syntax =
-                    ConversionOperatorDeclaration(
-                        this.GetAttributeLists( context )
-                            .AddRange( this.ReturnParameter.GetAttributeLists( context ) ),
-                        TokenList( Token( SyntaxKind.PublicKeyword ), Token( SyntaxKind.StaticKeyword ) ),
-                        this.OperatorKind.ToOperatorKeyword(),
-                        context.SyntaxGenerator.Type( this.ReturnType.GetSymbol().AssertNotNull() ),
-                        context.SyntaxGenerator.ParameterList( this ),
-                        null,
-                        ArrowExpressionClause( context.SyntaxGenerator.DefaultExpression( this.ReturnType.GetSymbol().AssertNotNull() ) ) );
+                    var syntax =
+                        ConversionOperatorDeclaration(
+                            this.GetAttributeLists( context )
+                                .AddRange( this.ReturnParameter.GetAttributeLists( context ) ),
+                            TokenList( Token( SyntaxKind.PublicKeyword ), Token( SyntaxKind.StaticKeyword ) ),
+                            this.OperatorKind.ToOperatorKeyword(),
+                            context.SyntaxGenerator.Type( this.ReturnType.GetSymbol().AssertNotNull() ),
+                            context.SyntaxGenerator.ParameterList( this ),
+                            null,
+                            ArrowExpressionClause( context.SyntaxGenerator.DefaultExpression( this.ReturnType.GetSymbol().AssertNotNull() ) ) );
 
-                return new[] { new IntroducedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
-            }
-            else if ( this.DeclarationKind == DeclarationKind.UserDefinedOperator )
-            {
-                Invariant.Assert( this.Parameters.Count is 1 or 2 );
+                    return new[] { new IntroducedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
+                }
+                else
+                {
+                    Invariant.Assert( this.Parameters.Count is 1 or 2 );
 
-                var syntax =
-                    OperatorDeclaration(
-                        this.GetAttributeLists( context )
-                            .AddRange( this.ReturnParameter.GetAttributeLists( context ) ),
-                        TokenList( Token( SyntaxKind.PublicKeyword ), Token( SyntaxKind.StaticKeyword ) ),
-                        context.SyntaxGenerator.Type( this.ReturnType.GetSymbol().AssertNotNull() ),
-                        this.OperatorKind.ToOperatorKeyword(),
-                        context.SyntaxGenerator.ParameterList( this ),
-                        null,
-                        ArrowExpressionClause( context.SyntaxGenerator.DefaultExpression( this.ReturnType.GetSymbol().AssertNotNull() ) ) );
+                    var syntax =
+                        OperatorDeclaration(
+                            this.GetAttributeLists( context )
+                                .AddRange( this.ReturnParameter.GetAttributeLists( context ) ),
+                            TokenList( Token( SyntaxKind.PublicKeyword ), Token( SyntaxKind.StaticKeyword ) ),
+                            context.SyntaxGenerator.Type( this.ReturnType.GetSymbol().AssertNotNull() ),
+                            this.OperatorKind.ToOperatorKeyword(),
+                            context.SyntaxGenerator.ParameterList( this ),
+                            null,
+                            ArrowExpressionClause( context.SyntaxGenerator.DefaultExpression( this.ReturnType.GetSymbol().AssertNotNull() ) ) );
 
-                return new[] { new IntroducedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
+                    return new[] { new IntroducedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
+                }
             }
             else
             {
