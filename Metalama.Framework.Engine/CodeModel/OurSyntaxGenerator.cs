@@ -64,6 +64,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private readonly SyntaxGenerator _syntaxGenerator;
 
+        public bool IsNullAware { get; }
+
         protected OurSyntaxGenerator( SyntaxGenerator syntaxGenerator, bool nullAware )
         {
             this._syntaxGenerator = syntaxGenerator;
@@ -235,7 +237,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public ParameterListSyntax ParameterList( IMethodBase method )
             =>
 
-                // TODO: generics
+                // TODO: generics?, attributes
                 SyntaxFactory.ParameterList(
                     SeparatedList(
                         method.Parameters.Select(
@@ -245,6 +247,18 @@ namespace Metalama.Framework.Engine.CodeModel
                                 this.Type( p.Type.GetSymbol() ),
                                 Identifier( p.Name ),
                                 null ) ) ) );
+
+#pragma warning disable CA1822 // Can be made static
+        public ArgumentListSyntax ArgumentList( IMethodBase method, Func<IParameter, ExpressionSyntax?> expressionFunc )
+            =>
+
+                // TODO: optional parameters.
+                SyntaxFactory.ArgumentList(
+                    SeparatedList(
+                        method.Parameters.Select(
+                            p =>
+                                Argument( expressionFunc( p ).AssertNotNull() ) ) ) );
+#pragma warning restore CA1822 // Can be made static
 
         public SyntaxList<TypeParameterConstraintClauseSyntax> ConstraintClauses( IMethod method )
         {
@@ -401,6 +415,11 @@ namespace Metalama.Framework.Engine.CodeModel
 
                 foreach ( var attribute in attributes )
                 {
+                    if ( attribute.GetTarget( compilation ).Constructor.DeclaringType.FullName == "System.Runtime.CompilerServices.NullableContextAttribute" )
+                    {
+                        continue;
+                    }
+
                     var attributeList = AttributeList( SingletonSeparatedList( this.Attribute( attribute.GetTarget( compilation ) ) ) );
 
                     if ( attributeTargetKind != SyntaxKind.None )

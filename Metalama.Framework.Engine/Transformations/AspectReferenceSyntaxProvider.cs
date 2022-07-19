@@ -13,5 +13,7 @@ namespace Metalama.Framework.Engine.Transformations
         // TODO: other kinds of aspect references.
 
         public abstract ExpressionSyntax GetFinalizerReference( AspectLayerId aspectLayer, IMethod overriddenFinalizer, OurSyntaxGenerator syntaxGenerator );
+
+        public abstract ExpressionSyntax GetOperatorReference( AspectLayerId aspectLayer, IMethod overriddenOperator, OurSyntaxGenerator syntaxGenerator );
     }
 }

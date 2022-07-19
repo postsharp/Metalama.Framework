@@ -5,7 +5,9 @@ using Metalama.TestFramework;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Finalizers.Introduced
 {
-    // Tests single OverrideMethod aspect with trivial template on methods with trivial bodies.
+    /*
+     * Tests overriding an introduced finalizer works properly.
+     */
 
     public class OverrideAttribute : TypeAspect
     {

@@ -4,11 +4,17 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections
 {
     internal class MethodCollection : MethodBaseCollection<IMethod>, IMethodCollection
     {
         public MethodCollection( INamedType declaringType, MethodUpdatableCollection sourceItems ) : base( declaringType, sourceItems ) { }
+
+        public IEnumerable<IMethod> OfKind( MethodKind kind ) => this.Where( m => m.MethodKind == kind );
+
+        public IEnumerable<IMethod> OfKind( OperatorKind kind ) => this.Where( m => m.OperatorKind == kind );
     }
 }

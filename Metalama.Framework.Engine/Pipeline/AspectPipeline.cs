@@ -95,9 +95,10 @@ namespace Metalama.Framework.Engine.Pipeline
             this.PipelineInitializationCount++;
 
             var roslynCompilation = compilation.Compilation;
-            
+
             // Check language version.
-            if ( compilation.SyntaxTrees.Count > 0 && ((CSharpParseOptions) compilation.SyntaxTrees.First().Value.Options).LanguageVersion == LanguageVersion.Preview )
+            if ( compilation.SyntaxTrees.Count > 0
+                 && ((CSharpParseOptions) compilation.SyntaxTrees.First().Value.Options).LanguageVersion == LanguageVersion.Preview )
             {
                 diagnosticAdder.Report( GeneralDiagnosticDescriptors.PreviewCSharpVersionNotSupported.CreateRoslynDiagnostic( null, default ) );
                 configuration = null;

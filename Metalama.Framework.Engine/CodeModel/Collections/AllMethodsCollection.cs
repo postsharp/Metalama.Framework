@@ -31,4 +31,6 @@ internal class AllMethodsCollection : AllMembersCollection<IMethod>, IMethodColl
     public IMethod? OfExactSignature( IMethod signatureTemplate, bool matchIsStatic = true ) => throw new NotImplementedException();
 
     public IEnumerable<IMethod> OfKind( MethodKind kind ) => this.Where( m => m.MethodKind == kind );
+
+    public IEnumerable<IMethod> OfKind( OperatorKind kind ) => this.Where( m => m.OperatorKind == kind );
 }

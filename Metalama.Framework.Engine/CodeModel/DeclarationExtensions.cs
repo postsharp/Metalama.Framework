@@ -20,6 +20,7 @@ using Accessibility = Metalama.Framework.Code.Accessibility;
 using DeclarationKind = Metalama.Framework.Code.DeclarationKind;
 using EnumerableExtensions = Metalama.Framework.Engine.Collections.EnumerableExtensions;
 using MethodKind = Microsoft.CodeAnalysis.MethodKind;
+using OperatorKind = Metalama.Framework.Code.OperatorKind;
 using RefKind = Metalama.Framework.Code.RefKind;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
@@ -337,6 +338,70 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => kind.ToString().ToLowerInvariant()
             };
 
+        public static SyntaxToken ToOperatorKeyword( this OperatorKind operatorKind )
+            => operatorKind switch
+            {
+                OperatorKind.ImplicitConversion => SyntaxFactory.Token( SyntaxKind.ImplicitKeyword ),
+                OperatorKind.ExplicitConversion => SyntaxFactory.Token( SyntaxKind.ExplicitKeyword ),
+                OperatorKind.Addition => SyntaxFactory.Token( SyntaxKind.PlusToken ),
+                OperatorKind.BitwiseAnd => SyntaxFactory.Token( SyntaxKind.AmpersandToken ),
+                OperatorKind.BitwiseOr => SyntaxFactory.Token( SyntaxKind.BarToken ),
+                OperatorKind.Decrement => SyntaxFactory.Token( SyntaxKind.MinusMinusToken ),
+                OperatorKind.Division => SyntaxFactory.Token( SyntaxKind.SlashToken ),
+                OperatorKind.Equality => SyntaxFactory.Token( SyntaxKind.EqualsEqualsToken ),
+                OperatorKind.ExclusiveOr => SyntaxFactory.Token( SyntaxKind.CaretToken ),
+                OperatorKind.False => SyntaxFactory.Token( SyntaxKind.FalseKeyword ),
+                OperatorKind.GreaterThan => SyntaxFactory.Token( SyntaxKind.GreaterThanToken ),
+                OperatorKind.GreaterThanOrEqual => SyntaxFactory.Token( SyntaxKind.GreaterThanEqualsToken ),
+                OperatorKind.Increment => SyntaxFactory.Token( SyntaxKind.PlusPlusToken ),
+                OperatorKind.Inequality => SyntaxFactory.Token( SyntaxKind.ExclamationEqualsToken ),
+                OperatorKind.LeftShift => SyntaxFactory.Token( SyntaxKind.LessThanLessThanToken ),
+                OperatorKind.LessThan => SyntaxFactory.Token( SyntaxKind.LessThanToken ),
+                OperatorKind.LessThanOrEqual => SyntaxFactory.Token( SyntaxKind.LessThanEqualsToken ),
+                OperatorKind.LogicalNot => SyntaxFactory.Token( SyntaxKind.ExclamationToken ),
+                OperatorKind.Modulus => SyntaxFactory.Token( SyntaxKind.PercentToken ),
+                OperatorKind.Multiply => SyntaxFactory.Token( SyntaxKind.AsteriskToken ),
+                OperatorKind.OnesComplement => SyntaxFactory.Token( SyntaxKind.TildeToken ),
+                OperatorKind.RightShift => SyntaxFactory.Token( SyntaxKind.GreaterThanGreaterThanToken ),
+                OperatorKind.Subtraction => SyntaxFactory.Token( SyntaxKind.MinusToken ),
+                OperatorKind.True => SyntaxFactory.Token( SyntaxKind.TrueKeyword ),
+                OperatorKind.UnaryNegation => SyntaxFactory.Token( SyntaxKind.MinusToken ),
+                OperatorKind.UnaryPlus => SyntaxFactory.Token( SyntaxKind.PlusToken ),
+                _ => throw new AssertionFailedException()
+            };
+
+        public static string ToOperatorMethodName( this OperatorKind operatorKind )
+            => operatorKind switch
+            {
+                OperatorKind.ImplicitConversion => WellKnownMemberNames.ImplicitConversionName,
+                OperatorKind.ExplicitConversion => WellKnownMemberNames.ExplicitConversionName,
+                OperatorKind.Addition => WellKnownMemberNames.AdditionOperatorName,
+                OperatorKind.BitwiseAnd => WellKnownMemberNames.BitwiseAndOperatorName,
+                OperatorKind.BitwiseOr => WellKnownMemberNames.BitwiseOrOperatorName,
+                OperatorKind.Decrement => WellKnownMemberNames.DecrementOperatorName,
+                OperatorKind.Division => WellKnownMemberNames.DivisionOperatorName,
+                OperatorKind.Equality => WellKnownMemberNames.EqualityOperatorName,
+                OperatorKind.ExclusiveOr => WellKnownMemberNames.ExclusiveOrOperatorName,
+                OperatorKind.False => WellKnownMemberNames.FalseOperatorName,
+                OperatorKind.GreaterThan => WellKnownMemberNames.GreaterThanOperatorName,
+                OperatorKind.GreaterThanOrEqual => WellKnownMemberNames.GreaterThanOrEqualOperatorName,
+                OperatorKind.Increment => WellKnownMemberNames.IncrementOperatorName,
+                OperatorKind.Inequality => WellKnownMemberNames.InequalityOperatorName,
+                OperatorKind.LeftShift => WellKnownMemberNames.LeftShiftOperatorName,
+                OperatorKind.LessThan => WellKnownMemberNames.LessThanOperatorName,
+                OperatorKind.LessThanOrEqual => WellKnownMemberNames.LessThanOrEqualOperatorName,
+                OperatorKind.LogicalNot => WellKnownMemberNames.LogicalNotOperatorName,
+                OperatorKind.Modulus => WellKnownMemberNames.ModulusOperatorName,
+                OperatorKind.Multiply => WellKnownMemberNames.MultiplyOperatorName,
+                OperatorKind.OnesComplement => WellKnownMemberNames.OnesComplementOperatorName,
+                OperatorKind.RightShift => WellKnownMemberNames.RightShiftOperatorName,
+                OperatorKind.Subtraction => WellKnownMemberNames.SubtractionOperatorName,
+                OperatorKind.True => WellKnownMemberNames.TrueOperatorName,
+                OperatorKind.UnaryNegation => WellKnownMemberNames.UnaryNegationOperatorName,
+                OperatorKind.UnaryPlus => WellKnownMemberNames.UnaryPlusOperatorName,
+                _ => throw new AssertionFailedException()
+            };
+
         internal static bool IsAutoProperty( this IPropertySymbol symbol )
             => symbol switch
             {
@@ -383,7 +448,7 @@ namespace Metalama.Framework.Engine.CodeModel
         /// <param name="signatureTemplate">Method that acts as a template for the signature.</param>
         /// <returns>A method of the given signature that is visible from the given type or <c>null</c> if no such method exists.</returns>
         public static IMethod? FindClosestVisibleMethod( this INamedType namedType, IMethod signatureTemplate )
-            => namedType.AllMethods.OfExactSignature( signatureTemplate, matchIsStatic: false );
+            => namedType.AllMethods.OfExactSignature( signatureTemplate, false );
 
         /// <summary>
         /// Finds a parameterless member in the given type and parent type, taking into account member hiding.

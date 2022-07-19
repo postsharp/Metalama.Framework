@@ -429,6 +429,138 @@ namespace Metalama.Framework.Engine.Advising
             return this.ExecuteAdvice<IMethod>( advice );
         }
 
+        public IIntroductionAdviceResult<IMethod> IntroduceUnaryOperator(
+            INamedType targetType,
+            string defaultTemplate,
+            IType inputType,
+            IType resultType,
+            OperatorKind kind,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IMethodBuilder>? buildAction = null,
+            object? args = null,
+            object? tags = null )
+        {
+            if ( this._templateInstance == null )
+            {
+                throw new InvalidOperationException();
+            }
+
+            if ( kind.GetCategory() != OperatorCategory.Unary )
+            {
+                throw new InvalidOperationException(
+                    UserMessageFormatter.Format( $"Cannot add an IntroduceUnaryOperator advice with {kind} as it is not an unary operator." ) );
+            }
+
+            this.ValidateTarget( targetType );
+
+            var template = this.ValidateTemplateName( defaultTemplate, TemplateKind.Default, true )
+                .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
+
+            var advice = new IntroduceOperatorAdvice(
+                this.State.AspectInstance,
+                this._templateInstance,
+                targetType,
+                this._compilation,
+                kind,
+                inputType,
+                null,
+                resultType,
+                template.ForOperatorIntroduction( kind, ObjectReader.GetReader( args ) ),
+                whenExists,
+                buildAction,
+                this._layerName,
+                ObjectReader.GetReader( tags ) );
+
+            return this.ExecuteAdvice<IMethod>( advice );
+        }
+
+        public IIntroductionAdviceResult<IMethod> IntroduceBinaryOperator(
+            INamedType targetType,
+            string defaultTemplate,
+            IType leftType,
+            IType rightType,
+            IType resultType,
+            OperatorKind kind,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IMethodBuilder>? buildAction = null,
+            object? args = null,
+            object? tags = null )
+        {
+            if ( this._templateInstance == null )
+            {
+                throw new InvalidOperationException();
+            }
+
+            if ( kind.GetCategory() != OperatorCategory.Binary )
+            {
+                throw new InvalidOperationException(
+                    UserMessageFormatter.Format( $"Cannot add an IntroduceBinaryOperator advice with {kind} as it is not a binary operator." ) );
+            }
+
+            this.ValidateTarget( targetType );
+
+            var template = this.ValidateTemplateName( defaultTemplate, TemplateKind.Default, true )
+                .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
+
+            var advice = new IntroduceOperatorAdvice(
+                this.State.AspectInstance,
+                this._templateInstance,
+                targetType,
+                this._compilation,
+                kind,
+                leftType,
+                rightType,
+                resultType,
+                template.ForOperatorIntroduction( kind, ObjectReader.GetReader( args ) ),
+                whenExists,
+                buildAction,
+                this._layerName,
+                ObjectReader.GetReader( tags ) );
+
+            return this.ExecuteAdvice<IMethod>( advice );
+        }
+
+        public IIntroductionAdviceResult<IMethod> IntroduceConversionOperator(
+            INamedType targetType,
+            string defaultTemplate,
+            IType fromType,
+            IType toType,
+            bool isImplicit = false,
+            OverrideStrategy whenExists = OverrideStrategy.Default,
+            Action<IMethodBuilder>? buildAction = null,
+            object? args = null,
+            object? tags = null )
+        {
+            if ( this._templateInstance == null )
+            {
+                throw new InvalidOperationException();
+            }
+
+            this.ValidateTarget( targetType );
+
+            var template = this.ValidateTemplateName( defaultTemplate, TemplateKind.Default, true )
+                .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
+
+            var operatorKind = isImplicit ? OperatorKind.ImplicitConversion : OperatorKind.ExplicitConversion;
+
+            var advice = new IntroduceOperatorAdvice(
+                this.State.AspectInstance,
+                this._templateInstance,
+                targetType,
+                this._compilation,
+                operatorKind,
+                fromType,
+                null,
+                toType,
+                template.ForOperatorIntroduction( operatorKind, ObjectReader.GetReader( args ) ),
+                whenExists,
+                buildAction,
+                this._layerName,
+                ObjectReader.GetReader( tags ) );
+
+            return this.ExecuteAdvice<IMethod>( advice );
+        }
+
         public IOverrideAdviceResult<IProperty> Override(
             IFieldOrProperty targetFieldOrProperty,
             string defaultTemplate,

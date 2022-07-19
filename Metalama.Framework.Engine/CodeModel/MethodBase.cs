@@ -44,12 +44,10 @@ namespace Metalama.Framework.Engine.CodeModel
                 this,
                 this.GetCompilationModel().GetParameterCollection( this.ToTypedRef<IHasParameters>() ) );
 
-        MethodKind IMethodBase.MethodKind
+        public MethodKind MethodKind
             => this.MethodSymbol.MethodKind switch
             {
                 SymbolMethodKind.Ordinary => MethodKind.Default,
-                SymbolMethodKind.Constructor => MethodKind.Constructor,
-                SymbolMethodKind.StaticConstructor => MethodKind.StaticConstructor,
                 SymbolMethodKind.Destructor => MethodKind.Finalizer,
                 SymbolMethodKind.PropertyGet => MethodKind.PropertyGet,
                 SymbolMethodKind.PropertySet => MethodKind.PropertySet,
@@ -57,8 +55,8 @@ namespace Metalama.Framework.Engine.CodeModel
                 SymbolMethodKind.EventRemove => MethodKind.EventRemove,
                 SymbolMethodKind.EventRaise => MethodKind.EventRaise,
                 SymbolMethodKind.ExplicitInterfaceImplementation => MethodKind.ExplicitInterfaceImplementation,
-                SymbolMethodKind.Conversion => MethodKind.ConversionOperator,
-                SymbolMethodKind.UserDefinedOperator => MethodKind.UserDefinedOperator,
+                SymbolMethodKind.Conversion => MethodKind.Operator,
+                SymbolMethodKind.UserDefinedOperator => MethodKind.Operator,
                 SymbolMethodKind.LocalFunction => MethodKind.LocalFunction,
                 SymbolMethodKind.AnonymousFunction or
                     SymbolMethodKind.BuiltinOperator or

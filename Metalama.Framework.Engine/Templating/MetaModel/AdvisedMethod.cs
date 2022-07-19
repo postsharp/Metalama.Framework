@@ -45,6 +45,8 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public MethodKind MethodKind => this.Underlying.MethodKind;
 
+        public OperatorKind OperatorKind => this.Underlying.OperatorKind;
+
         public bool IsReadOnly => this.Underlying.IsReadOnly;
 
         public MethodBase ToMethodBase() => this.Underlying.ToMethodBase();

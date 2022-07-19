@@ -14,7 +14,7 @@ using System;
 
 namespace Metalama.Framework.Engine.Advising
 {
-    internal abstract class IntroduceMemberAdvice<TMember, TBuilder> : Advice, IIntroductionAdvice
+    internal abstract class IntroduceMemberAdvice<TMember, TBuilder> : Advice
         where TMember : class, IMember
         where TBuilder : MemberBuilder
     {
@@ -27,8 +27,6 @@ namespace Metalama.Framework.Engine.Advising
         public new Ref<INamedType> TargetDeclaration => base.TargetDeclaration.As<INamedType>();
 
         public TBuilder Builder { get; protected init; }
-
-        IDeclarationBuilder IIntroductionAdvice.Builder => this.Builder;
 
         protected TemplateMember<TMember> Template { get; }
 

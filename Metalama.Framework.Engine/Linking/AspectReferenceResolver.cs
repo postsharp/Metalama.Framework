@@ -489,7 +489,49 @@ namespace Metalama.Framework.Engine.Linking
                 return containingSymbol.ContainingType.AssertNotNull().FindImplementationForInterfaceMember( referencedSymbol ).AssertNotNull();
             }
 
-            if ( referencedSymbol is IMethodSymbol { Name: "Finalizer", ContainingType: { Name: "__LinkerIntroductionHelpers__" } } )
+            if ( referencedSymbol is IMethodSymbol { ContainingType: { Name: LinkerAspectReferenceSyntaxProvider.HelperTypeName } } helperMethod )
+            {
+                switch ( helperMethod )
+                {
+                    case { Name: LinkerAspectReferenceSyntaxProvider.FinalizeMemberName }:
+                        // Referencing type's finalizer.
+                        return containingSymbol.ContainingType.GetMembers( "Finalize" )
+                            .OfType<IMethodSymbol>()
+                            .Single( m => m.Parameters.Length == 0 && m.TypeParameters.Length == 0 );
+
+                    case { } when SymbolHelpers.GetOperatorKindFromName( helperMethod.Name ) is not OperatorKind.None and var operatorKind:
+                        if ( operatorKind.GetCategory() == OperatorCategory.Binary )
+                        {
+                            return containingSymbol.ContainingType.GetMembers( referencedSymbol.Name )
+                                .OfType<IMethodSymbol>()
+                                .Single(
+                                    m =>
+                                        m.Parameters.Length == 2
+                                        && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[0].Type, helperMethod.Parameters[0].Type )
+                                        && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[1].Type, helperMethod.Parameters[1].Type )
+                                        && SignatureTypeSymbolComparer.Instance.Equals( m.ReturnType, helperMethod.ReturnType ) );
+                        }
+                        else
+                        {
+                            return containingSymbol.ContainingType.GetMembers( referencedSymbol.Name )
+                                .OfType<IMethodSymbol>()
+                                .Single(
+                                    m =>
+                                        m.Parameters.Length == 1
+                                        && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[0].Type, helperMethod.Parameters[0].Type )
+                                        && SignatureTypeSymbolComparer.Instance.Equals( m.ReturnType, helperMethod.ReturnType ) );
+                        }
+
+                    default:
+                        throw new AssertionFailedException();
+                }
+            }
+
+            if ( referencedSymbol is IMethodSymbol
+                {
+                    Name: LinkerAspectReferenceSyntaxProvider.FinalizeMemberName,
+                    ContainingType: { Name: LinkerAspectReferenceSyntaxProvider.HelperTypeName }
+                } )
             {
                 // Referencing type's finalizer.
                 return containingSymbol.ContainingType.GetMembers( "Finalize" )
@@ -594,6 +636,7 @@ namespace Metalama.Framework.Engine.Linking
                 case (IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation },
                     IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation }):
                 case (IMethodSymbol { MethodKind: MethodKind.Destructor }, IMethodSymbol { MethodKind: MethodKind.Ordinary }):
+                case (IMethodSymbol { MethodKind: MethodKind.Conversion or MethodKind.UserDefinedOperator }, IMethodSymbol { MethodKind: MethodKind.Ordinary }):
                 case (IPropertySymbol, IPropertySymbol):
                 case (IEventSymbol, IEventSymbol):
                 case (IFieldSymbol, IFieldSymbol):

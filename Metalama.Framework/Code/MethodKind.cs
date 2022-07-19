@@ -17,16 +17,6 @@ namespace Metalama.Framework.Code
         Default,
 
         /// <summary>
-        /// Instance constructor.
-        /// </summary>
-        Constructor,
-
-        /// <summary>
-        /// Static constructor.
-        /// </summary>
-        StaticConstructor,
-
-        /// <summary>
         /// Finalizer (destructor).
         /// </summary>
         Finalizer,
@@ -65,14 +55,9 @@ namespace Metalama.Framework.Code
         ExplicitInterfaceImplementation,
 
         /// <summary>
-        /// Conversion operator.
+        /// Operator.
         /// </summary>
-        ConversionOperator,
-
-        /// <summary>
-        /// Other operator.
-        /// </summary>
-        UserDefinedOperator,
+        Operator,
 
         /// <summary>
         /// Local function.

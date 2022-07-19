@@ -46,7 +46,10 @@ namespace Metalama.Framework.Engine.Linking
             var nameProvider = new LinkerIntroductionNameProvider();
             var syntaxTransformationCollection = new SyntaxTransformationCollection();
             var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
-            var aspectReferenceSyntaxProvider = new LinkerAspectReferenceSyntaxProvider();
+
+            var supportsNullability = input.InitialCompilation.InitialCompilation.Options.NullableContextOptions != NullableContextOptions.Disable;
+
+            var aspectReferenceSyntaxProvider = new LinkerAspectReferenceSyntaxProvider( supportsNullability );
 
             // TODO: this sorting can be optimized.
             var allTransformations =
@@ -122,9 +125,14 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            intermediateCompilation = intermediateCompilation.Update(
-                syntaxTreeMapping.Select( p => new SyntaxTreeModification( p.Value, p.Key ) ).ToList(),
-                new[] { LinkerAspectReferenceSyntaxProvider.GetLinkerHelperSyntaxTree( intermediateCompilation.LanguageOptions ) } );
+            var helperSyntaxTree = aspectReferenceSyntaxProvider.GetLinkerHelperSyntaxTree( intermediateCompilation.LanguageOptions );
+
+            intermediateCompilation =
+                helperSyntaxTree != null
+                    ? intermediateCompilation.Update(
+                        syntaxTreeMapping.Select( p => new SyntaxTreeModification( p.Value, p.Key ) ).ToList(),
+                        new[] { helperSyntaxTree } )
+                    : intermediateCompilation;
 
             var introductionRegistry = new LinkerIntroductionRegistry(
                 input.CompilationModel,

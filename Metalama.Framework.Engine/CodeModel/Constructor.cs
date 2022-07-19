@@ -11,7 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using MethodKind = Microsoft.CodeAnalysis.MethodKind;
+using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         public Constructor( IMethodSymbol symbol, CompilationModel compilation ) : base( symbol, compilation )
         {
-            if ( symbol.MethodKind != MethodKind.Constructor && symbol.MethodKind != MethodKind.StaticConstructor )
+            if ( symbol.MethodKind != RoslynMethodKind.Constructor && symbol.MethodKind != RoslynMethodKind.StaticConstructor )
             {
                 throw new ArgumentOutOfRangeException( nameof(symbol), "The Constructor class must be used only with constructors." );
             }

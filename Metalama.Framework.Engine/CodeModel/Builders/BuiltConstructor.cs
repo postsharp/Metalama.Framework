@@ -25,8 +25,6 @@ internal class BuiltConstructor : BuiltMember, IConstructorImpl
 
     public IParameterList Parameters => ParameterList.Empty;
 
-    public MethodKind MethodKind => this.ConstructorBuilder.MethodKind;
-
     public System.Reflection.MethodBase ToMethodBase() => throw new NotImplementedException();
 
     public ConstructorInitializerKind InitializerKind => this.ConstructorBuilder.InitializerKind;

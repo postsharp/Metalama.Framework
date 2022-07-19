@@ -65,6 +65,7 @@ internal partial class RoslynVersionSyntaxVerifier : CSharpSyntaxWalker
         }
     }
 
+    // ReSharper disable once UnusedMember.Local
     private void VisitVersionSpecificFieldKind( in SyntaxNodeOrToken nodeOrToken, RoslynApiVersion version )
     {
         if ( version > this.MaximalAcceptableApiVersion )

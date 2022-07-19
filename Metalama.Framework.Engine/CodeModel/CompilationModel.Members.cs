@@ -41,7 +41,14 @@ public partial class CompilationModel
            || this.TryGetRedirectedDeclaration( fieldBuilder.ToRef(), out _ );
 
     internal bool Contains( MethodBuilder methodBuilder )
-        => this._methods.TryGetValue( methodBuilder.DeclaringType.GetSymbol(), out var methods ) && methods.Contains( methodBuilder.ToTypedRef<IMethod>() );
+        => methodBuilder switch
+        {
+            { MethodKind: MethodKind.Finalizer } =>
+                this._finalizers.TryGetValue( methodBuilder.DeclaringType.GetSymbol(), out var finalizer )
+                && finalizer == methodBuilder,
+            _ =>
+                this._methods.TryGetValue( methodBuilder.DeclaringType.GetSymbol(), out var methods ) && methods.Contains( methodBuilder.ToTypedRef<IMethod>() )
+        };
 
     internal bool Contains( ConstructorBuilder constructorBuilder )
         => this._constructors.TryGetValue( constructorBuilder.DeclaringType.GetSymbol(), out var constructors )

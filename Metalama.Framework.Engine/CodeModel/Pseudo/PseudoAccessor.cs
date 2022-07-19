@@ -98,6 +98,8 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public DeclarationKind DeclarationKind => DeclarationKind.Method;
 
+        public OperatorKind OperatorKind => OperatorKind.None;
+
         public ICompilation Compilation => this.DeclaringMember.Compilation;
 
         public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => throw new NotImplementedException();

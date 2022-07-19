@@ -51,6 +51,12 @@ namespace Metalama.Framework.Engine.Advising
 
                     break;
 
+                case MethodKind.Operator:
+                    addTransformation(
+                        new OverrideOperatorTransformation( this, this.TargetDeclaration.GetTarget( compilation ), this.BoundTemplate, this.Tags ) );
+
+                    break;
+
                 default:
                     addTransformation(
                         new OverrideMethodTransformation( this, this.TargetDeclaration.GetTarget( compilation ), this.BoundTemplate, this.Tags ) );

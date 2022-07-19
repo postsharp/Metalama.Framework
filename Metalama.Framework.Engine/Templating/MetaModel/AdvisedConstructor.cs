@@ -27,8 +27,6 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         IParameterList IHasParameters.Parameters => this.Underlying.Parameters;
 
-        public MethodKind MethodKind => this.Underlying.MethodKind;
-
         public ConstructorInitializerKind InitializerKind => this.Underlying.InitializerKind;
 
         public IMember? OverriddenMember => null;

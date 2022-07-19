@@ -11,11 +11,6 @@ namespace Metalama.Framework.Code
     public interface IMethodBase : IHasParameters
     {
         /// <summary>
-        /// Gets the kind of method (such as <see cref="Code.MethodKind.Default"/> or <see cref="Code.MethodKind.PropertyGet"/>.
-        /// </summary>
-        MethodKind MethodKind { get; }
-
-        /// <summary>
         /// Gets a <see cref="MethodBase"/> that represents the current method or constructor at run time.
         /// </summary>
         /// <returns>A <see cref="MethodBase"/> that can be used only in run-time code.</returns>

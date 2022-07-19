@@ -131,7 +131,14 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public bool IsGeneric => this.TypeParameters.Count > 0;
 
         // We don't currently support adding other methods than default ones.
-        public MethodKind MethodKind => MethodKind.Default;
+        public MethodKind MethodKind
+            => this.DeclarationKind switch
+            {
+                DeclarationKind.Method => MethodKind.Default,
+                DeclarationKind.Operator => MethodKind.Operator,
+                DeclarationKind.Finalizer => MethodKind.Finalizer,
+                _ => throw new AssertionFailedException()
+            };
 
         System.Reflection.MethodBase IMethodBase.ToMethodBase() => this.ToMethodInfo();
 
@@ -139,13 +146,26 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override DeclarationKind DeclarationKind { get; }
 
+        public OperatorKind OperatorKind { get; }
+
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations { get; private set; } = Array.Empty<IMethod>();
 
-        public MethodBuilder( Advice parentAdvice, INamedType targetType, string name, DeclarationKind declarationKind = DeclarationKind.Method )
+        public MethodBuilder(
+            Advice parentAdvice,
+            INamedType targetType,
+            string name,
+            DeclarationKind declarationKind = DeclarationKind.Method,
+            OperatorKind operatorKind = OperatorKind.None )
             : base( parentAdvice, targetType, name )
         {
+            Invariant.Assert(
+                declarationKind == DeclarationKind.Operator
+                                ==
+                                (operatorKind != OperatorKind.None) );
+
             this.Name = name;
             this.DeclarationKind = declarationKind;
+            this.OperatorKind = operatorKind;
 
             this.ReturnParameter =
                 new ParameterBuilder(
@@ -171,6 +191,43 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                         null );
 
                 return new[] { new IntroducedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
+            }
+            else if ( this.DeclarationKind == DeclarationKind.Operator )
+            {
+                if ( this.OperatorKind.GetCategory() == OperatorCategory.Conversion )
+                {
+                    Invariant.Assert( this.Parameters.Count == 1 );
+
+                    var syntax =
+                        ConversionOperatorDeclaration(
+                            this.GetAttributeLists( context )
+                                .AddRange( this.ReturnParameter.GetAttributeLists( context ) ),
+                            TokenList( Token( SyntaxKind.PublicKeyword ), Token( SyntaxKind.StaticKeyword ) ),
+                            this.OperatorKind.ToOperatorKeyword(),
+                            context.SyntaxGenerator.Type( this.ReturnType.GetSymbol().AssertNotNull() ),
+                            context.SyntaxGenerator.ParameterList( this ),
+                            null,
+                            ArrowExpressionClause( context.SyntaxGenerator.DefaultExpression( this.ReturnType.GetSymbol().AssertNotNull() ) ) );
+
+                    return new[] { new IntroducedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
+                }
+                else
+                {
+                    Invariant.Assert( this.Parameters.Count is 1 or 2 );
+
+                    var syntax =
+                        OperatorDeclaration(
+                            this.GetAttributeLists( context )
+                                .AddRange( this.ReturnParameter.GetAttributeLists( context ) ),
+                            TokenList( Token( SyntaxKind.PublicKeyword ), Token( SyntaxKind.StaticKeyword ) ),
+                            context.SyntaxGenerator.Type( this.ReturnType.GetSymbol().AssertNotNull() ),
+                            this.OperatorKind.ToOperatorKeyword(),
+                            context.SyntaxGenerator.ParameterList( this ),
+                            null,
+                            ArrowExpressionClause( context.SyntaxGenerator.DefaultExpression( this.ReturnType.GetSymbol().AssertNotNull() ) ) );
+
+                    return new[] { new IntroducedMember( this, syntax, this.ParentAdvice.AspectLayerId, IntroducedMemberSemantic.Introduction, this ) };
+                }
             }
             else
             {

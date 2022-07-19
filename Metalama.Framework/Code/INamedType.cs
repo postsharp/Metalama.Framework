@@ -124,7 +124,7 @@ namespace Metalama.Framework.Code
 
         /// <summary>
         /// Gets the list of methods defined in the current type, but not those inherited from the base
-        /// type, and not constructors.
+        /// type, and not constructors, finalizer or operators.
         /// </summary>
         IMethodCollection Methods { get; }
 

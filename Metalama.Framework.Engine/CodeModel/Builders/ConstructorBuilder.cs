@@ -24,8 +24,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
     {
         public ConstructorInitializerKind InitializerKind => ConstructorInitializerKind.None;
 
-        public MethodKind MethodKind => this.IsStatic ? MethodKind.StaticConstructor : MethodKind.Constructor;
-
         public IParameterList Parameters => ParameterList.Empty;
 
         public override bool IsExplicitInterfaceImplementation => false;

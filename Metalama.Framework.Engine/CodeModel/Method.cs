@@ -17,7 +17,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using MethodKind = Microsoft.CodeAnalysis.MethodKind;
+using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         public Method( IMethodSymbol symbol, CompilationModel compilation ) : base( symbol, compilation )
         {
-            if ( symbol.MethodKind == MethodKind.Constructor || symbol.MethodKind == MethodKind.StaticConstructor )
+            if ( symbol.MethodKind == RoslynMethodKind.Constructor || symbol.MethodKind == RoslynMethodKind.StaticConstructor )
             {
                 throw new ArgumentOutOfRangeException( nameof(symbol), "Cannot use the Method class with constructors." );
             }
@@ -47,6 +47,8 @@ namespace Metalama.Framework.Engine.CodeModel
         public IReadOnlyList<IType> TypeArguments => this.MethodSymbol.TypeArguments.Select( t => this.Compilation.Factory.GetIType( t ) ).ToImmutableArray();
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Method;
+
+        public OperatorKind OperatorKind => this.MethodSymbol.GetOperatorKind();
 
         public bool IsOpenGeneric => this.MethodSymbol.TypeArguments.Any( ga => ga is ITypeParameterSymbol ) || this.DeclaringType.IsOpenGeneric;
 
