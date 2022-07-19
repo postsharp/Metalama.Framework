@@ -81,7 +81,7 @@ namespace Metalama.Framework.Engine.Transformations
                     }
                     else
                     {
-                        return TemplateMember.Create( templateMethod, this.EventTemplate.TemplateClassMember.Accessors[templateMethod.GetSymbol()!.MethodKind] )
+                        return TemplateMemberFactory.Create( templateMethod, this.EventTemplate.TemplateClassMember.Accessors[templateMethod.GetSymbol()!.MethodKind] )
                             .ForIntroduction( this._parameters );
                     }
                 }

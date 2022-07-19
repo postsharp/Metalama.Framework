@@ -72,13 +72,11 @@ namespace Metalama.Framework.Engine.Advising
 
             if ( attribute is ITemplateAttribute templateAttribute )
             {
-                return Advising.TemplateMember.Create( typedSymbol, this.TemplateMember, templateAttribute, this.SelectedKind, this.InterpretedKind );
+                return TemplateMemberFactory.Create( typedSymbol, this.TemplateMember, templateAttribute, this.SelectedKind, this.InterpretedKind );
             }
             else
             {
                 throw new AssertionFailedException();
-
-                //return default;
             }
         }
 

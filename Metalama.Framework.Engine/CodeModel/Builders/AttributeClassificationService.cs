@@ -42,7 +42,7 @@ internal class AttributeClassificationService : IService
 
     public bool MustCopyTemplateAttribute( IAttribute attribute )
     {
-        if ( attribute.Type.FullName.StartsWith( "Metalama.Framework" ) )
+        if ( attribute.Type.FullName.StartsWith( "Metalama.Framework", StringComparison.Ordinal ) )
         {
             return false;
         }

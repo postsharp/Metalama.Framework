@@ -341,7 +341,7 @@ namespace Metalama.Framework.Engine.Advising
                                     ? new OverrideMethodTransformation(
                                         this,
                                         (IMethod) memberBuilder,
-                                        TemplateMember.Create(
+                                        TemplateMemberFactory.Create(
                                                 aspectMethod,
                                                 memberSpec.TemplateClassMember,
                                                 (ITemplateAttribute) memberSpec.TemplateClassMember.TemplateInfo.Attribute.AssertNotNull(),
@@ -403,7 +403,7 @@ namespace Metalama.Framework.Engine.Advising
 
                             if ( aspectProperty != null && aspectProperty.IsAutoPropertyOrField != true )
                             {
-                                var propertyTemplate = TemplateMember.Create( aspectProperty, memberSpec.TemplateClassMember, TemplateKind.Introduction );
+                                var propertyTemplate = TemplateMemberFactory.Create( aspectProperty, memberSpec.TemplateClassMember, TemplateKind.Introduction );
                                 var accessorTemplates = propertyTemplate.GetAccessorTemplates();
 
                                 addTransformation(
@@ -468,7 +468,7 @@ namespace Metalama.Framework.Engine.Advising
                                         ? new OverrideEventTransformation(
                                             this,
                                             (IEvent) memberBuilder,
-                                            TemplateMember.Create(
+                                            TemplateMemberFactory.Create(
                                                 (IEvent) memberSpec.AspectInterfaceMember,
                                                 memberSpec.TemplateClassMember,
                                                 TemplateKind.Introduction ),

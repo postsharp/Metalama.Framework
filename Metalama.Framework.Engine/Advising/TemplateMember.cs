@@ -1,137 +1,106 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
-
-using Metalama.Framework.Aspects;
+﻿using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CompileTime;
 using System.Linq;
 
-namespace Metalama.Framework.Engine.Advising
+namespace Metalama.Framework.Engine.Advising;
+
+internal class TemplateMember<T>
+    where T : class, IMemberOrNamedType
 {
-    internal static class TemplateMember
+    public T Declaration { get; }
+
+    public TemplateClassMember TemplateClassMember { get; }
+
+    // Can be null in the default instance.
+    public IAdviceAttribute? AdviceAttribute { get; }
+
+    public TemplateKind SelectedKind { get; }
+
+    public TemplateKind InterpretedKind { get; }
+
+    public Accessibility Accessibility { get; }
+
+    public Accessibility GetAccessorAccessibility { get; }
+
+    public Accessibility SetAccessorAccessibility { get; }
+
+    public TemplateMember(
+        T implementation,
+        TemplateClassMember templateClassMember,
+        IAdviceAttribute adviceAttribute,
+        TemplateKind selectedKind = TemplateKind.Default ) : this(
+        implementation,
+        templateClassMember,
+        adviceAttribute,
+        selectedKind,
+        selectedKind ) { }
+
+    public TemplateMember(
+        T implementation,
+        TemplateClassMember templateClassMember,
+        IAdviceAttribute adviceAttribute,
+        TemplateKind selectedKind,
+        TemplateKind interpretedKind )
     {
-        public static TemplateMember<T> Create<T>(
-            T implementation,
-            TemplateClassMember templateClassMember,
-            IAdviceAttribute adviceAttribute,
-            TemplateKind selectedKind,
-            TemplateKind interpretedKind )
-            where T : class, IMemberOrNamedType
-            => new( implementation, templateClassMember, adviceAttribute, selectedKind, interpretedKind );
+        this.Declaration = implementation;
+        this.TemplateClassMember = templateClassMember;
+        this.AdviceAttribute = adviceAttribute.AssertNotNull();
 
-        public static TemplateMember<T> Create<T>(
-            T implementation,
-            TemplateClassMember templateClassMember,
-            IAdviceAttribute adviceAttribute,
-            TemplateKind selectedKind = TemplateKind.Default )
-            where T : class, IMemberOrNamedType
-            => new( implementation, templateClassMember, adviceAttribute, selectedKind );
-
-        public static TemplateMember<T> Create<T>(
-            T implementation,
-            TemplateClassMember templateClassMember,
-            TemplateKind selectedKind = TemplateKind.Default )
-            where T : class, IMemberOrNamedType
-            => new( implementation, templateClassMember, (ITemplateAttribute) templateClassMember.TemplateInfo.Attribute.AssertNotNull(), selectedKind );
-    }
-
-    internal class TemplateMember<T>
-        where T : class, IMemberOrNamedType
-    {
-        public T Declaration { get; }
-
-        public TemplateClassMember TemplateClassMember { get; }
-
-        // Can be null in the default instance.
-        public IAdviceAttribute? AdviceAttribute { get; }
-
-        public TemplateKind SelectedKind { get; }
-
-        public TemplateKind InterpretedKind { get; }
-
-        public Accessibility Accessibility { get; }
-
-        public Accessibility GetAccessorAccessibility { get; }
-
-        public Accessibility SetAccessorAccessibility { get; }
-
-        public TemplateMember(
-            T implementation,
-            TemplateClassMember templateClassMember,
-            IAdviceAttribute adviceAttribute,
-            TemplateKind selectedKind = TemplateKind.Default ) : this(
-            implementation,
-            templateClassMember,
-            adviceAttribute,
-            selectedKind,
-            selectedKind ) { }
-
-        public TemplateMember(
-            T implementation,
-            TemplateClassMember templateClassMember,
-            IAdviceAttribute adviceAttribute,
-            TemplateKind selectedKind,
-            TemplateKind interpretedKind )
+        if ( implementation is IMethod { MethodKind: MethodKind.PropertySet or MethodKind.EventAdd or MethodKind.EventRemove }
+             && templateClassMember.Parameters.Length != 1 )
         {
-            this.Declaration = implementation;
-            this.TemplateClassMember = templateClassMember;
-            this.AdviceAttribute = adviceAttribute.AssertNotNull();
-
-            if ( implementation is IMethod { MethodKind: MethodKind.PropertySet or MethodKind.EventAdd or MethodKind.EventRemove }
-                 && templateClassMember.Parameters.Length != 1 )
-            {
-                throw new AssertionFailedException();
-            }
-
-            this.SelectedKind = selectedKind;
-            this.InterpretedKind = interpretedKind != TemplateKind.None ? interpretedKind : selectedKind;
-
-            // Get the template accessibility. The one defined on the [Template] attribute has priority, then on [Accessibility],
-            // the the accessibility of the template itself. The [Accessibility] attribute is added during compilation and the original
-            // declaration is changed to 'public' so that it is not removed in reference assemblies.
-            if ( adviceAttribute is ITemplateAttribute { Accessibility: { } templateAccessibility } )
-            {
-                this.Accessibility = templateAccessibility;
-            }
-            else
-            {
-                this.Accessibility = GetAccessibility( implementation );
-            }
-
-            if ( implementation is IProperty property )
-            {
-                this.GetAccessorAccessibility = GetAccessibility( property.GetMethod );
-                this.SetAccessorAccessibility = GetAccessibility( property.SetMethod );
-            }
+            throw new AssertionFailedException();
         }
 
-        private static Accessibility GetAccessibility( IMemberOrNamedType? declaration )
+        this.SelectedKind = selectedKind;
+        this.InterpretedKind = interpretedKind != TemplateKind.None ? interpretedKind : selectedKind;
+
+        // Get the template accessibility. The one defined on the [Template] attribute has priority, then on [Accessibility],
+        // the the accessibility of the template itself. The [Accessibility] attribute is added during compilation and the original
+        // declaration is changed to 'public' so that it is not removed in reference assemblies.
+        if ( adviceAttribute is ITemplateAttribute { Accessibility: { } templateAccessibility } )
         {
-            if ( declaration == null )
-            {
-                return Accessibility.Private;
-            }
-
-            var accessibilityAttribute = declaration.Attributes.OfAttributeType( typeof(AccessibilityAttribute) ).SingleOrDefault();
-
-            if ( accessibilityAttribute != null )
-            {
-                return (Accessibility) accessibilityAttribute.ConstructorArguments[0].Value!;
-            }
-            else
-            {
-                return declaration.Accessibility;
-            }
+            this.Accessibility = templateAccessibility;
+        }
+        else
+        {
+            this.Accessibility = GetAccessibility( implementation );
         }
 
-        public TemplateMember<IMemberOrNamedType> Cast()
-            => TemplateMember.Create<IMemberOrNamedType>(
-                this.Declaration,
-                this.TemplateClassMember,
-                this.AdviceAttribute.AssertNotNull(),
-                this.SelectedKind,
-                this.InterpretedKind );
-
-        public override string ToString() => $"{this.Declaration.Name}:{this.SelectedKind}";
+        if ( implementation is IProperty property )
+        {
+            this.GetAccessorAccessibility = GetAccessibility( property.GetMethod );
+            this.SetAccessorAccessibility = GetAccessibility( property.SetMethod );
+        }
     }
+
+    private static Accessibility GetAccessibility( IMemberOrNamedType? declaration )
+    {
+        if ( declaration == null )
+        {
+            return Accessibility.Private;
+        }
+
+        var accessibilityAttribute = declaration.Attributes.OfAttributeType( typeof(AccessibilityAttribute) ).SingleOrDefault();
+
+        if ( accessibilityAttribute != null )
+        {
+            return (Accessibility) accessibilityAttribute.ConstructorArguments[0].Value!;
+        }
+        else
+        {
+            return declaration.Accessibility;
+        }
+    }
+
+    public TemplateMember<IMemberOrNamedType> Cast()
+        => TemplateMemberFactory.Create<IMemberOrNamedType>(
+            this.Declaration,
+            this.TemplateClassMember,
+            this.AdviceAttribute.AssertNotNull(),
+            this.SelectedKind,
+            this.InterpretedKind );
+
+    public override string ToString() => $"{this.Declaration.Name}:{this.SelectedKind}";
 }

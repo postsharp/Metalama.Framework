@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.Advising
                                 accessor.GetSymbol()!.MethodKind,
                                 out var template ) )
                         {
-                            return TemplateMember.Create( accessor, template );
+                            return TemplateMemberFactory.Create( accessor, template );
                         }
                         else
                         {
@@ -72,7 +72,7 @@ namespace Metalama.Framework.Engine.Advising
 
                 if ( fieldTemplate.TemplateClassMember.TemplateClass.Type.GetMethod( templateName ) != null )
                 {
-                    return TemplateMember.Create(
+                    return TemplateMemberFactory.Create(
                         fieldTemplate.Declaration,
                         fieldTemplate.TemplateClassMember,
                         fieldTemplate.AdviceAttribute.AssertNotNull(),
@@ -100,7 +100,7 @@ namespace Metalama.Framework.Engine.Advising
 
                 if ( eventFieldTemplate.TemplateClassMember.TemplateClass.Type.GetMethod( templateName ) != null )
                 {
-                    return TemplateMember.Create( eventFieldTemplate.Declaration, eventFieldTemplate.TemplateClassMember, TemplateKind.InitializerExpression );
+                    return TemplateMemberFactory.Create( eventFieldTemplate.Declaration, eventFieldTemplate.TemplateClassMember, TemplateKind.InitializerExpression );
                 }
                 else
                 {
@@ -122,7 +122,7 @@ namespace Metalama.Framework.Engine.Advising
 
                 if ( propertyTemplate.TemplateClassMember.TemplateClass.Type.GetMethod( templateName ) != null )
                 {
-                    return TemplateMember.Create( propertyTemplate.Declaration, propertyTemplate.TemplateClassMember, TemplateKind.InitializerExpression );
+                    return TemplateMemberFactory.Create( propertyTemplate.Declaration, propertyTemplate.TemplateClassMember, TemplateKind.InitializerExpression );
                 }
                 else
                 {

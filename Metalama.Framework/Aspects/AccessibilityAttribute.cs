@@ -12,12 +12,11 @@ namespace Metalama.Framework.Aspects;
 /// actual accessibility is changed to <c>public</c>.
 /// </summary>
 [CompileTime]
+[AttributeUsage( AttributeTargets.Event | AttributeTargets.Field | AttributeTargets.Method | AttributeTargets.Property )]
 public class AccessibilityAttribute : Attribute
 {
-    public Accessibility Accessibility { get; }
-
     public AccessibilityAttribute( Accessibility accessibility )
     {
-        this.Accessibility = accessibility;
+        _ = accessibility;
     }
 }
