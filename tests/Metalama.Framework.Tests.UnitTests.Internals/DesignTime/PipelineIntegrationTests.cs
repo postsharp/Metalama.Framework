@@ -28,7 +28,7 @@ using StringExtensions = Metalama.TestFramework.Utilities.StringExtensions;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
-    public class PipelineIntegrationTests
+    public class PipelineIntegrationTests : TestBase
     {
         public PipelineIntegrationTests( ITestOutputHelper logger )
         {
@@ -405,6 +405,28 @@ partial class C
             TestWithTargetCode( "[MyAspect] partial class C { void }" );
             TestWithTargetCode( "[MyAspect] partial class C { void NewMethod() {} }" );
             TestWithTargetCode( "[MyAspect] partial class C { void NewMethod() { ; } }" );
+        }
+
+        [Fact]
+        public void ProjectDependencyWithNoMetalamaReferenceButSystemCompileTimeType()
+        {
+            var context = this.CreateTestContext();
+
+            // Disposing the domain crashes the CLR in this test.
+            var domain = new UnloadableCompileTimeDomain();
+
+            using var pipelineFactory = new DesignTimeAspectPipelineFactory( context.ServiceProvider, domain, true );
+
+            // The dependency cannot have a reference to Metalama.
+            // It needs to define a system type that is considered as compile-time.
+            var dependency = CreateCSharpCompilation( "namespace System; struct Index {}", addMetalamaReferences: false );
+
+            // The main compilation must have a compile-time syntax tree.
+            var compilation = context.CreateCompilationModel(
+                "using Metalama.Framework.Aspects; class A : TypeAspect {}",
+                additionalReferences: new[] { dependency.ToMetadataReference() } );
+
+            Assert.True( pipelineFactory.TryExecute( context.ProjectOptions, compilation.RoslynCompilation, CancellationToken.None, out var result ) );
         }
     }
 }
