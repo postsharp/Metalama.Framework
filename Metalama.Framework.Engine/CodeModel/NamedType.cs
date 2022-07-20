@@ -126,6 +126,8 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
+        public bool Equals( SpecialType specialType ) => this.SpecialType == specialType;
+
         public override MemberInfo ToMemberInfo() => this.ToType();
 
         public bool IsReadOnly => this.TypeSymbol.IsReadOnly;

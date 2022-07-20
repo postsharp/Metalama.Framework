@@ -146,7 +146,7 @@ namespace Metalama.Framework.Engine.Templating
                     }
                 }
 
-                if ( TypeExtensions.Equals( returnType, SpecialType.Void ) )
+                if ( returnType.Equals( SpecialType.Void ) )
                 {
                     return CreateReturnStatementVoid( returnExpression );
                 }
@@ -366,6 +366,13 @@ namespace Metalama.Framework.Engine.Templating
                     // care about the value.
                     return ReturnStatement().WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation );
 
+                case AwaitExpressionSyntax awaitExpression:
+                    // We have to await in a statement, then return in another statement.
+                    return Block(
+                            ExpressionStatement( awaitExpression ),
+                            ReturnStatement().WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation ) )
+                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+
                 default:
                     // Anything else should use discard.
                     return
@@ -396,9 +403,9 @@ namespace Metalama.Framework.Engine.Templating
             {
                 return ReturnStatement().WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation );
             }
-            else if ( TypeExtensions.Equals( returnExpression.Type, SpecialType.Void ) )
+            else if ( returnExpression.Type.Equals( SpecialType.Void ) )
             {
-                if ( TypeExtensions.Equals( this.MetaApi.Method.ReturnType, SpecialType.Void ) )
+                if ( this.MetaApi.Method.ReturnType.Equals( SpecialType.Void ) )
                 {
                     return
                         Block(
@@ -412,12 +419,12 @@ namespace Metalama.Framework.Engine.Templating
                     throw new AssertionFailedException();
                 }
             }
-            else if ( awaitResult && TypeExtensions.Equals( returnExpression.Type.GetAsyncInfo().ResultType, SpecialType.Void ) )
+            else if ( awaitResult && returnExpression.Type.GetAsyncInfo().ResultType.Equals( SpecialType.Void ) )
             {
                 Invariant.Assert( this._template != null && this._template.MustInterpretAsAsyncTemplate() );
 
-                if ( TypeExtensions.Equals( this.MetaApi.Method.ReturnType, SpecialType.Void )
-                     || TypeExtensions.Equals( this.MetaApi.Method.ReturnType.GetAsyncInfo().ResultType, SpecialType.Void ) )
+                if ( this.MetaApi.Method.ReturnType.Equals( SpecialType.Void )
+                     || this.MetaApi.Method.ReturnType.GetAsyncInfo().ResultType.Equals( SpecialType.Void ) )
                 {
                     return
                         Block(

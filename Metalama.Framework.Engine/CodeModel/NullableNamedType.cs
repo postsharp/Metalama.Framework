@@ -49,6 +49,8 @@ internal class NullableNamedType : INamedTypeInternal
 
     bool? IType.IsNullable => true;
 
+    public bool Equals( SpecialType specialType ) => this._underlying.Equals( specialType );
+
     IRef<IDeclaration> IDeclaration.ToRef() => this.ToRef();
 
     ImmutableArray<SyntaxReference> IDeclarationImpl.DeclaringSyntaxReferences => this._underlying.DeclaringSyntaxReferences;

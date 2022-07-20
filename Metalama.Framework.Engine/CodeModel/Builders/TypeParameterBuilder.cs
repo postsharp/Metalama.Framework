@@ -46,6 +46,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public bool? IsNullable => this.IsNullableImpl();
 
+        bool IType.Equals( SpecialType specialType ) => false;
+
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
         public override IDeclaration ContainingDeclaration { get; }

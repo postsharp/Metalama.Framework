@@ -28,6 +28,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public bool? IsNullable => this.TypeParameterBuilder.IsNullable;
 
+        bool IType.Equals( SpecialType specialType ) => false;
+
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
         public string Name => this.TypeParameterBuilder.Name;

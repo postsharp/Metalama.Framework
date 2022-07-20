@@ -44,5 +44,7 @@ namespace Metalama.Framework.Code
         /// as <c>Nullable&lt;T&gt;</c>.
         /// </summary>
         bool? IsNullable { get; }
+
+        bool Equals( SpecialType specialType );
     }
 }
