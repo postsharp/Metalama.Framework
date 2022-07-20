@@ -628,6 +628,18 @@ namespace Metalama.Framework.Engine.CompileTime
             CancellationToken cancellationToken,
             out CompileTimeProject? project )
         {
+            // If the compilation does not reference Metalama.Framework, do not create a compile-time project.
+            if ( !runTimeCompilation.References.OfType<PortableExecutableReference>()
+                    .Any(
+                        p => p.FilePath != null && Path.GetFileNameWithoutExtension( p.FilePath )
+                            .Equals( "Metalama.Framework", StringComparison.OrdinalIgnoreCase ) ) )
+            {
+                this._logger.Trace?.Log( $"TryGetCompileTimeProject( '{runTimeCompilation.AssemblyName}' ) : no reference to Metalama.Framework" );
+                project = null;
+
+                return true;
+            }
+
             var compileTimeArtifacts = this.GetCompileTimeArtifacts( runTimeCompilation, compileTimeTreesHint, cancellationToken );
 
             return this.TryGetCompileTimeProjectImpl(
