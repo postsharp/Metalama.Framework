@@ -44,6 +44,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 this,
                 this.GetCompilationModel().GetParameterCollection( this.ToTypedRef<IHasParameters>() ) );
 
+        [Obfuscation( Exclude = true )]
         public MethodKind MethodKind
             => this.MethodSymbol.MethodKind switch
             {
