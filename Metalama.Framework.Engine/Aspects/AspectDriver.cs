@@ -169,6 +169,18 @@ namespace Metalama.Framework.Engine.Aspects
             CancellationToken cancellationToken )
             where T : class, IDeclaration
         {
+            if ( aspectInstance.IsSkipped )
+            {
+                // The aspect instance was skipped from a previous layer.
+                return new AspectInstanceResult(
+                    aspectInstance,
+                    AdviceOutcome.Ignored,
+                    ImmutableUserDiagnosticList.Empty,
+                    ImmutableArray<ITransformation>.Empty,
+                    ImmutableArray<IAspectSource>.Empty,
+                    ImmutableArray<IValidatorSource>.Empty );
+            }
+            
             AspectInstanceResult CreateResultForError( Diagnostic diagnostic )
             {
                 return new AspectInstanceResult(
