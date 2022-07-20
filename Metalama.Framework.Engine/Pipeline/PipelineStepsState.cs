@@ -213,26 +213,29 @@ namespace Metalama.Framework.Engine.Pipeline
         {
             foreach ( var aspectInstance in aspectInstances )
             {
-                var aspectTargetDeclaration = (IDeclaration) aspectInstance.TargetDeclaration;
-                var aspectTargetTypeDeclaration = aspectTargetDeclaration.GetDeclaringType() ?? aspectTargetDeclaration;
-
-                var stepId = new PipelineStepId(
-                    new AspectLayerId( aspectInstance.AspectInstance.AspectClass ),
-                    this.LastCompilation.GetDepth( aspectTargetTypeDeclaration ),
-                    this.LastCompilation.GetDepth( aspectTargetDeclaration ),
-                    PipelineStepPhase.Initialize,
-                    -1 );
-
-                if ( !this.TryGetOrAddStep(
-                        stepId,
-                        true,
-                        out var step ) )
+                foreach ( var layer in aspectInstance.AspectInstance.AspectClass.Layers )
                 {
-                    // This should not happen here. The source should not have been added.
-                    throw new AssertionFailedException();
-                }
+                    var aspectTargetDeclaration = (IDeclaration) aspectInstance.TargetDeclaration;
+                    var aspectTargetTypeDeclaration = aspectTargetDeclaration.GetDeclaringType() ?? aspectTargetDeclaration;
 
-                ((ExecuteAspectLayerPipelineStep) step).AddAspectInstance( aspectInstance );
+                    var stepId = new PipelineStepId(
+                        new AspectLayerId( aspectInstance.AspectInstance.AspectClass, layer.LayerName ),
+                        this.LastCompilation.GetDepth( aspectTargetTypeDeclaration ),
+                        this.LastCompilation.GetDepth( aspectTargetDeclaration ),
+                        PipelineStepPhase.Initialize,
+                        -1 );
+
+                    if ( !this.TryGetOrAddStep(
+                            stepId,
+                            true,
+                            out var step ) )
+                    {
+                        // This should not happen here. The source should not have been added.
+                        throw new AssertionFailedException();
+                    }
+
+                    ((ExecuteAspectLayerPipelineStep) step).AddAspectInstance( aspectInstance );
+                }
             }
         }
 

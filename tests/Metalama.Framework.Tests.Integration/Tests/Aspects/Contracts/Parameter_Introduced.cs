@@ -1,5 +1,3 @@
-// @Skipped(#30612 - ctor parameter)
-
 using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -12,23 +10,20 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Parameter
 
     internal class TestAttribute : TypeAspect
     {
-        public override void BuildAspect(IAspectBuilder<INamedType> builder)
+        public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
             foreach (var constructor in builder.Target.Constructors)
             {
-                builder.Advice.IntroduceParameter(
-                    constructor,
-                    "dependency",
-                    typeof(int),
-                    TypedConstant.Create(0));
+                var parameter = builder.Advice.IntroduceParameter(
+                        constructor,
+                        "dependency",
+                        typeof(int),
+                        TypedConstant.Create( 0 ) )
+                    .Declaration;
 
-                foreach (var parameter in constructor.ForCompilation(builder.Advice.MutableCompilation).Parameters)
-                {
-                    builder.Advice.AddContract(parameter, nameof(Validate));
-                }
+                builder.Advice.AddContract( parameter, nameof(Validate) );
             }
         }
-
 
         [Template]
         public void Validate( int value )
@@ -44,12 +39,8 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Contracts.Parameter
     [Test]
     internal class Target
     {
-        public Target()
-        {
-        }
+        public Target() { }
 
-        public Target(int x)
-        {
-        }
+        public Target( int x ) { }
     }
 }

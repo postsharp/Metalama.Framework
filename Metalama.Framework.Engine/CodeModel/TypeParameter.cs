@@ -107,6 +107,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public bool Equals( IType other ) => SymbolEqualityComparer.Default.Equals( this._typeSymbol, ((ITypeInternal) other).TypeSymbol );
 
+        bool IType.Equals( SpecialType specialType ) => false;
+
         public override string ToString() => this.ContainingDeclaration + "/" + this.Name;
 
         public ITypeInternal Accept( TypeRewriter visitor ) => visitor.Visit( this );

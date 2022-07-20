@@ -197,11 +197,11 @@ namespace Metalama.Framework.Engine.Templating
             {
                 return SyntaxFactoryEx.EmptyStatement;
             }
-            else if ( TypeExtensions.Equals( expression.Type, SpecialType.Void ) )
+            else if ( expression.Type.Equals( SpecialType.Void ) )
             {
                 return SyntaxFactory.ExpressionStatement( expression.ToRunTimeTemplateExpression( TemplateExpansionContext.CurrentSyntaxGenerationContext ) );
             }
-            else if ( awaitResult && TypeExtensions.Equals( expression.Type.GetAsyncInfo().ResultType, SpecialType.Void ) )
+            else if ( awaitResult && expression.Type.GetAsyncInfo().ResultType.Equals( SpecialType.Void ) )
             {
                 return
                     SyntaxFactory.ExpressionStatement(
@@ -234,8 +234,8 @@ namespace Metalama.Framework.Engine.Templating
 
             var runtimeExpression = value.ToRunTimeTemplateExpression( TemplateExpansionContext.CurrentSyntaxGenerationContext );
 
-            if ( TypeExtensions.Equals( value.Type, SpecialType.Void )
-                 || (awaitResult && TypeExtensions.Equals( value.Type.GetAsyncInfo().ResultType, SpecialType.Void )) )
+            if ( value.Type.Equals( SpecialType.Void )
+                 || (awaitResult && value.Type.GetAsyncInfo().ResultType.Equals( SpecialType.Void )) )
             {
                 // If the method is void, we invoke the method as a statement (so we don't loose the side effect) and we define a local that
                 // we assign to the default value. The local is necessary because it may be referenced later.

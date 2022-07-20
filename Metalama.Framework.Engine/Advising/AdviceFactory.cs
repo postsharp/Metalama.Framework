@@ -32,6 +32,7 @@ namespace Metalama.Framework.Engine.Advising
         private readonly TemplateClassInstance? _templateInstance;
         private readonly CompilationModel _compilation;
         private readonly IDeclaration _aspectTarget;
+        private readonly INamedType? _aspectTargetType;
 
         public AdviceFactoryState State { get; }
 
@@ -44,7 +45,8 @@ namespace Metalama.Framework.Engine.Advising
             // The AdviceFactory is now always working on the initial compilation.
             // In the future, AdviceFactory could work on a compilation snapshot, however we have no use case for this feature yet.
             this._compilation = state.InitialCompilation;
-            this._aspectTarget = state.AspectInstance.TargetDeclaration.GetTarget( this._compilation );
+            this._aspectTarget = state.AspectInstance.TargetDeclaration.GetTarget( this.MutableCompilation );
+            this._aspectTargetType = this._aspectTarget.GetDeclaringType();
         }
 
         public AdviceFactory WithTemplateClassInstance( TemplateClassInstance templateClassInstance )
@@ -274,9 +276,10 @@ namespace Metalama.Framework.Engine.Advising
             }
 
             // Check that the advised target is under the current the aspect target.
-            if ( !target.IsContainedIn( this._aspectTarget.GetDeclaringType() ?? this._aspectTarget ) )
+            if ( !target.ForCompilation( this.MutableCompilation ).IsContainedIn( this._aspectTargetType ?? this._aspectTarget ) )
             {
-                throw new InvalidOperationException( $"The advised target '{target}' is not contained in the target of the aspect '{this._aspectTarget}'." );
+                throw new InvalidOperationException(
+                    $"The advised target '{target}' is not contained in the target of the aspect '{this._aspectTargetType ?? this._aspectTarget}'." );
             }
 
             // Check other targets.

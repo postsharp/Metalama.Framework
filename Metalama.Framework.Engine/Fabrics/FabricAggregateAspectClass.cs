@@ -51,7 +51,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
         public SyntaxAnnotation GeneratedCodeAnnotation { get; }
 
-        public ImmutableArray<AspectLayer> Layers => ImmutableArray<AspectLayer>.Empty;
+        public ImmutableArray<AspectLayer> Layers { get; } = ImmutableArray.Create( new AspectLayer( "<Fabric>", null ) );
 
         public EligibleScenarios GetEligibility( IDeclaration obj ) => EligibleScenarios.Aspect;
 

@@ -72,6 +72,8 @@ namespace Metalama.Framework.Engine.Aspects
 
         public T Target { get; }
 
+        IDeclaration IAspectBuilder.Target => this.Target;
+
         private AspectReceiverSelector<T> GetAspectReceiverSelector()
             => this._declarationSelector ??= new AspectReceiverSelector<T>( this.Target.ToTypedRef(), this, CompilationModelVersion.Current );
 
@@ -86,8 +88,6 @@ namespace Metalama.Framework.Engine.Aspects
 
         IValidatorReceiver<TMember> IValidatorReceiverSelector<T>.With<TMember>( Func<T, IEnumerable<TMember>> selector ) => this.With( selector );
 
-        IDeclaration IAspectLayerBuilder.Target => this.Target;
-
         public IAdviceFactory Advice => this.AdviceFactory;
 
         public void SkipAspect() => this._aspectBuilderState.AdviceFactoryState.SkipAspect();
@@ -101,18 +101,6 @@ namespace Metalama.Framework.Engine.Aspects
         }
 
         public CancellationToken CancellationToken => this._aspectBuilderState.CancellationToken;
-
-        public void BuildLayer( string? layerName, Action<IAspectLayerBuilder<T>> buildAction )
-        {
-            if ( layerName == null )
-            {
-                buildAction( this );
-            }
-            else
-            {
-                throw new NotImplementedException();
-            }
-        }
 
         public bool VerifyEligibility( IEligibilityRule<T> rule )
         {
@@ -144,6 +132,8 @@ namespace Metalama.Framework.Engine.Aspects
                 return true;
             }
         }
+
+        public string? Layer => this._aspectBuilderState.Layer;
 
         public IAspectBuilder<TNewTarget> WithTarget<TNewTarget>( TNewTarget newTarget )
             where TNewTarget : class, IDeclaration

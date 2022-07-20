@@ -43,6 +43,8 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => null
             };
 
+        public bool Equals( SpecialType specialType ) => this.SpecialType == specialType;
+
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
         ITypeSymbol? ISdkType.TypeSymbol => this.Symbol;

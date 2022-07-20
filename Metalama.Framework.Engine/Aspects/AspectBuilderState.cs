@@ -34,12 +34,15 @@ internal class AspectBuilderState
 
     public bool IsAspectSkipped => this.AdviceFactoryState.IsAspectSkipped;
 
+    public string? Layer { get; }
+
     public AspectBuilderState(
         IServiceProvider serviceProvider,
         UserDiagnosticSink diagnostics,
         AspectPipelineConfiguration configuration,
         IAspectInstance aspectInstance,
         AdviceFactoryState adviceFactoryState,
+        string? layer,
         CancellationToken cancellationToken )
     {
         this.ServiceProvider = serviceProvider;
@@ -49,6 +52,7 @@ internal class AspectBuilderState
         this.AspectInstance = aspectInstance;
         this.CancellationToken = cancellationToken;
         this.AdviceFactoryState = adviceFactoryState;
+        this.Layer = layer;
     }
 
     internal AspectInstanceResult ToResult()
