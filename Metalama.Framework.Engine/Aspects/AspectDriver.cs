@@ -65,6 +65,7 @@ namespace Metalama.Framework.Engine.Aspects
 
         public AspectInstanceResult ExecuteAspect(
             IAspectInstanceInternal aspectInstance,
+            string? layer,
             CompilationModel initialCompilationRevision,
             CompilationModel currentCompilationRevision,
             AspectPipelineConfiguration pipelineConfiguration,
@@ -76,6 +77,7 @@ namespace Metalama.Framework.Engine.Aspects
             {
                 ICompilation compilation => this.EvaluateAspect(
                     compilation,
+                    layer,
                     aspectInstance,
                     initialCompilationRevision,
                     currentCompilationRevision,
@@ -83,6 +85,7 @@ namespace Metalama.Framework.Engine.Aspects
                     cancellationToken ),
                 INamedType type => this.EvaluateAspect(
                     type,
+                    layer,
                     aspectInstance,
                     initialCompilationRevision,
                     currentCompilationRevision,
@@ -90,6 +93,7 @@ namespace Metalama.Framework.Engine.Aspects
                     cancellationToken ),
                 IMethod method => this.EvaluateAspect(
                     method,
+                    layer,
                     aspectInstance,
                     initialCompilationRevision,
                     currentCompilationRevision,
@@ -97,6 +101,7 @@ namespace Metalama.Framework.Engine.Aspects
                     cancellationToken ),
                 IField field => this.EvaluateAspect(
                     field,
+                    layer,
                     aspectInstance,
                     initialCompilationRevision,
                     currentCompilationRevision,
@@ -104,6 +109,7 @@ namespace Metalama.Framework.Engine.Aspects
                     cancellationToken ),
                 IProperty property => this.EvaluateAspect(
                     property,
+                    layer,
                     aspectInstance,
                     initialCompilationRevision,
                     currentCompilationRevision,
@@ -111,6 +117,7 @@ namespace Metalama.Framework.Engine.Aspects
                     cancellationToken ),
                 IConstructor constructor => this.EvaluateAspect(
                     constructor,
+                    layer,
                     aspectInstance,
                     initialCompilationRevision,
                     currentCompilationRevision,
@@ -118,6 +125,7 @@ namespace Metalama.Framework.Engine.Aspects
                     cancellationToken ),
                 IParameter parameter => this.EvaluateAspect(
                     parameter,
+                    layer,
                     aspectInstance,
                     initialCompilationRevision,
                     currentCompilationRevision,
@@ -125,6 +133,7 @@ namespace Metalama.Framework.Engine.Aspects
                     cancellationToken ),
                 ITypeParameter genericParameter => this.EvaluateAspect(
                     genericParameter,
+                    layer,
                     aspectInstance,
                     initialCompilationRevision,
                     currentCompilationRevision,
@@ -132,6 +141,7 @@ namespace Metalama.Framework.Engine.Aspects
                     cancellationToken ),
                 IEvent @event => this.EvaluateAspect(
                     @event,
+                    layer,
                     aspectInstance,
                     initialCompilationRevision,
                     currentCompilationRevision,
@@ -139,6 +149,7 @@ namespace Metalama.Framework.Engine.Aspects
                     cancellationToken ),
                 INamespace ns => this.EvaluateAspect(
                     ns,
+                    layer,
                     aspectInstance,
                     initialCompilationRevision,
                     currentCompilationRevision,
@@ -150,6 +161,7 @@ namespace Metalama.Framework.Engine.Aspects
 
         private AspectInstanceResult EvaluateAspect<T>(
             T targetDeclaration,
+            string? layer,
             IAspectInstanceInternal aspectInstance,
             CompilationModel initialCompilationRevision,
             CompilationModel currentCompilationRevision,
@@ -204,7 +216,7 @@ namespace Metalama.Framework.Engine.Aspects
             var adviceFactory = new AdviceFactory(
                 adviceFactoryState,
                 aspectInstance.TemplateInstances.Count == 1 ? aspectInstance.TemplateInstances.Values.Single() : null,
-                null );
+                layer );
 
             // Prepare declarative advice.
             var declarativeAdvice = this._aspectClass.TemplateClasses
@@ -218,6 +230,7 @@ namespace Metalama.Framework.Engine.Aspects
                 pipelineConfiguration,
                 aspectInstance,
                 adviceFactoryState,
+                layer,
                 cancellationToken );
 
             var aspectBuilder = new AspectBuilder<T>( targetDeclaration, aspectBuilderState, adviceFactory );

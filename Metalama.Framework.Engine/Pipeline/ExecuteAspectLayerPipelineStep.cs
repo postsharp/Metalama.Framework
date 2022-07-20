@@ -78,6 +78,7 @@ internal class ExecuteAspectLayerPipelineStep : PipelineStep
             // Execute the aspect.
             var aspectResult = aspectDriver.ExecuteAspect(
                 aspect.AspectInstance,
+                this.Id.AspectLayerId.LayerName,
                 currentCompilation,
                 mutableCompilationForThisAspect,
                 this.Parent.PipelineConfiguration,

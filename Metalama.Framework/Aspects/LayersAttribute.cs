@@ -7,7 +7,9 @@ namespace Metalama.Framework.Aspects;
 
 /// <summary>
 /// Custom attribute that, when applied to an aspect class, means that this aspect class uses several
-/// layers, and defines the name and the order of execution of these layers.
+/// layers, and defines the name and the order of execution of these layers. In multi-aspect layers,
+/// the <see cref="IAspect{T}.BuildAspect"/> method is called several times, once for each layer.
+/// The current layer is exposed in the <see cref="IAspectBuilder.Layer"/> property.
 /// </summary>
 [AttributeUsage( AttributeTargets.Class )]
 public sealed class LayersAttribute : Attribute

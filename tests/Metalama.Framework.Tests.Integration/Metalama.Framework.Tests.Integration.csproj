@@ -36,6 +36,10 @@
           <SubType>Code</SubType>
           <DependentUpon>Programmatic_BadSignature.cs</DependentUpon>
         </None>
+        <None Include="Tests\Aspects\Layers\AspectState.t.cs">
+          <SubType>Code</SubType>
+          <DependentUpon>AspectState.cs</DependentUpon>
+        </None>
         <None Include="Tests\Aspects\Misc\LanguageFeature.t.cs" />
     </ItemGroup>
 
@@ -44,6 +48,7 @@
       <Compile Remove="Tests\Aspects\Introductions\Finalizers\ExistingConflict_Ignore - Copy.t.cs" />
       <Compile Remove="Tests\Aspects\Introductions\Finalizers\ExistingConflict_Override - Copy.t.cs" />
       <Compile Remove="Tests\Aspects\Introductions\Operators\Programmatic - Copy.t.cs" />
+      <Compile Remove="Tests\Aspects\Layers\Simple - Copy.t.cs" />
       <Compile Remove="Tests\Aspects\Overrides\Finalizers\Introduced - Copy.t.cs" />
       <Compile Remove="Tests\Aspects\Overrides\Operators\Simple.t.cs" />
     </ItemGroup>

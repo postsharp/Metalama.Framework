@@ -1,9 +1,13 @@
-internal class Target
+[Test]
+    internal class Target
     {
-        private void M( [NotNull] string m ) {     if (m == null)
+        public Target(global::System.Int32 dependency = 0 ) {    if (dependency == 0)
     {
-        throw new global::System.ArgumentNullException("m");
+        throw new global::System.ArgumentOutOfRangeException("dependency");
     }
-
+ }
+        public Target( int x ,global::System.Int32 dependency = 0 ) {    if (dependency == 0)
+    {
+        throw new global::System.ArgumentOutOfRangeException("dependency");
     }
-    }
+ }    }
