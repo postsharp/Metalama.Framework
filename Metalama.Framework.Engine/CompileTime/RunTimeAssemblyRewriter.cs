@@ -101,7 +101,27 @@ namespace Metalama.Compiler
 
             if ( symbol.GetMembers().Any( this.MustReplaceByThrow ) )
             {
-                var errorCodes = SingletonSeparatedList<ExpressionSyntax>( IdentifierName( "CS0067" ) );
+                var errorCodes = SeparatedList<ExpressionSyntax>(
+                    new[]
+                    {
+                        // An event was declared but never used in the class in which it was declared.
+                        IdentifierName( "CS0067" ),
+
+                        // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+                        IdentifierName( "CS8618" ),
+
+                        // Can be made static.
+                        IdentifierName( "CA1822" ),
+
+                        // The compiler detected code that will never be executed.
+                        IdentifierName( "CS0162" ),
+
+                        // The private field is never used.
+                        IdentifierName( "CS0169" ),
+
+                        // The private field 'field' is assigned but its value is never used.
+                        IdentifierName( "CS0414" )
+                    } );
 
                 leadingTrivia = leadingTrivia.Insert(
                     0,
