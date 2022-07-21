@@ -455,7 +455,7 @@ namespace Metalama.Framework.Engine.Templating
             => this.CreateRunTimeExpression( expression );
 
         /// <summary>
-        /// Transforms an <see cref="ExpressionSyntax"/> that instantiates a <see cref="RunTimeTemplateExpression"/>
+        /// Transforms an <see cref="ExpressionSyntax"/> that instantiates a <see cref="TypedExpressionSyntax"/>
         /// that represents the input.
         /// </summary>
         private ExpressionSyntax CreateRunTimeExpression( ExpressionSyntax expression )

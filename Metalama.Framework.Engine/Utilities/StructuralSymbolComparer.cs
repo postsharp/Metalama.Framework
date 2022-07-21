@@ -242,6 +242,11 @@ namespace Metalama.Framework.Engine.Utilities
 
         private static bool TypeEquals( ITypeSymbol typeX, ITypeSymbol typeY )
         {
+            if ( ReferenceEquals( typeX, typeY ) )
+            {
+                return true;
+            }
+
             if ( typeX.Kind != typeY.Kind )
             {
                 // Unequal kinds.
@@ -260,6 +265,15 @@ namespace Metalama.Framework.Engine.Utilities
                 case (IArrayTypeSymbol arrayTypeX, IArrayTypeSymbol arrayTypeY):
                     return arrayTypeX.Rank == arrayTypeY.Rank
                            && TypeEquals( arrayTypeX.ElementType, arrayTypeY.ElementType );
+
+                case (IDynamicTypeSymbol, IDynamicTypeSymbol):
+                    return true;
+
+                case (IPointerTypeSymbol xPointerType, IPointerTypeSymbol yPointerType):
+                    return TypeEquals( xPointerType.PointedAtType, yPointerType.PointedAtType );
+
+                case (IFunctionPointerTypeSymbol xFunctionPointerType, IFunctionPointerTypeSymbol yFunctionPointerType):
+                    return MethodEquals( xFunctionPointerType.Signature, yFunctionPointerType.Signature, StructuralSymbolComparerOptions.FunctionPointer );
 
                 default:
                     throw new NotImplementedException( $"{typeX.Kind}" );

@@ -83,7 +83,8 @@ namespace Metalama.Framework.Engine.Transformations
                                     overriddenMethod.ReturnType,
                                     overriddenMethod.Compilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.Void ) )
                                 ? SyntaxFactory.AwaitExpression( invocationExpression )
-                                : SyntaxFactory.ParenthesizedExpression( SyntaxFactory.AwaitExpression( invocationExpression ) );
+                                : SyntaxFactory.ParenthesizedExpression( SyntaxFactory.AwaitExpression( invocationExpression ) )
+                                    .WithAdditionalAnnotations( Simplifier.Annotation );
 
                         return
                             new BuiltUserExpression(

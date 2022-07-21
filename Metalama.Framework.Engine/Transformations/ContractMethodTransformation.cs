@@ -4,6 +4,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -50,7 +51,7 @@ namespace Metalama.Framework.Engine.Transformations
             }
 
             // Rewrite the method body.
-            var proceedExpression = this.CreateProceedExpression( context, TemplateKind.Default ).ToSyntax( context.SyntaxGenerationContext );
+            var proceedExpression = this.CreateProceedExpression( context, TemplateKind.Default ).ToExpressionSyntax( context.SyntaxGenerationContext );
 
             var statements = new List<StatementSyntax>();
 

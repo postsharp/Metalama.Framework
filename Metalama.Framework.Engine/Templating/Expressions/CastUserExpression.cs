@@ -20,13 +20,13 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this._value = value;
         }
 
-        public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
+        protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
         {
             var valueSyntax = this._value switch
             {
                 ExpressionSyntax e => e,
-                RunTimeTemplateExpression runtimeExpression => runtimeExpression.Syntax,
-                IUserExpression ue => ue.ToSyntax( syntaxGenerationContext ),
+                TypedExpressionSyntax runtimeExpression => runtimeExpression.Syntax,
+                IUserExpression ue => ue.ToExpressionSyntax( syntaxGenerationContext ),
                 _ => throw new AssertionFailedException()
             };
 

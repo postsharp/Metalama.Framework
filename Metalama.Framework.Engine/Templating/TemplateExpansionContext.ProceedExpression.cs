@@ -24,18 +24,11 @@ namespace Metalama.Framework.Engine.Templating
                 this._parent = parent;
             }
 
-            public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
+            protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
             {
                 this.Validate();
 
-                return this._parent._proceedExpression!.ToSyntax( syntaxGenerationContext );
-            }
-
-            public override RunTimeTemplateExpression ToRunTimeTemplateExpression( SyntaxGenerationContext syntaxGenerationContext )
-            {
-                this.Validate();
-
-                return this._parent._proceedExpression!.ToRunTimeTemplateExpression( syntaxGenerationContext );
+                return this._parent._proceedExpression!.ToTypedExpressionSyntax( syntaxGenerationContext ).Syntax;
             }
 
             private void Validate()
