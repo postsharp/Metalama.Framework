@@ -13,6 +13,7 @@ public class MyAspect : ConstructorAspect
     }
 }
 
+// <target>
 public class C
 {
     [MyAspect]
@@ -21,6 +22,7 @@ public class C
     public C(string s) : this() { }
 }
 
+// <target>
 public class D : C
 {
 

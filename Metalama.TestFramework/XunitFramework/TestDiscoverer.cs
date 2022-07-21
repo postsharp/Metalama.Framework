@@ -29,8 +29,11 @@ namespace Metalama.TestFramework.XunitFramework
         public TestDiscoverer( IAssemblyInfo assembly, IMessageSink? messageSink = null )
         {
             this._assembly = assembly;
-            this._messageSink = messageSink;
-
+            
+            // We don't use the messageSink normally because it creates large logs.
+            _ = messageSink;
+            this._messageSink = null;
+            
             var attrib = assembly.GetCustomAttributes( typeof(TargetFrameworkAttribute) ).FirstOrDefault();
 
             if ( attrib != null )

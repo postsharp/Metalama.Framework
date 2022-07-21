@@ -4,6 +4,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
@@ -342,7 +343,8 @@ namespace Metalama.Compiler
                         SingletonSeparatedList(
                             AttributeArgument( syntaxFactory.SyntaxGenerator.EnumValueExpression( accessibilityType, (int) accessibility ) ) ) ) );
 
-            var attributeList = AttributeList( SingletonSeparatedList( attribute ) );
+            var attributeList = AttributeList( SingletonSeparatedList( attribute ) )
+                .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
             return attributeList;
         }
