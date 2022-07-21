@@ -4,6 +4,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
@@ -101,7 +102,27 @@ namespace Metalama.Compiler
 
             if ( symbol.GetMembers().Any( this.MustReplaceByThrow ) )
             {
-                var errorCodes = SingletonSeparatedList<ExpressionSyntax>( IdentifierName( "CS0067" ) );
+                var errorCodes = SeparatedList<ExpressionSyntax>(
+                    new[]
+                    {
+                        // An event was declared but never used in the class in which it was declared.
+                        IdentifierName( "CS0067" ),
+
+                        // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+                        IdentifierName( "CS8618" ),
+
+                        // Can be made static.
+                        IdentifierName( "CA1822" ),
+
+                        // The compiler detected code that will never be executed.
+                        IdentifierName( "CS0162" ),
+
+                        // The private field is never used.
+                        IdentifierName( "CS0169" ),
+
+                        // The private field 'field' is assigned but its value is never used.
+                        IdentifierName( "CS0414" )
+                    } );
 
                 leadingTrivia = leadingTrivia.Insert(
                     0,
@@ -322,7 +343,8 @@ namespace Metalama.Compiler
                         SingletonSeparatedList(
                             AttributeArgument( syntaxFactory.SyntaxGenerator.EnumValueExpression( accessibilityType, (int) accessibility ) ) ) ) );
 
-            var attributeList = AttributeList( SingletonSeparatedList( attribute ) );
+            var attributeList = AttributeList( SingletonSeparatedList( attribute ) )
+                .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
             return attributeList;
         }

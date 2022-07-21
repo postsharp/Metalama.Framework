@@ -24,11 +24,11 @@ using Metalama.Framework.Validation;
 
 namespace Metalama.Framework.Tests.Integration.Validation.TypeFabric_
 {
-#pragma warning disable CS0067
+#pragma warning disable CS0067, CS8618, CA1822, CS0162, CS0169, CS0414
     internal class ValidatedClass
     {
         public static void Method( object o ) { }
-#pragma warning disable CS0067
+#pragma warning disable CS0067, CS8618, CA1822, CS0162, CS0169, CS0414
 
         private class Fabric : TypeFabric
         {
@@ -41,9 +41,11 @@ namespace Metalama.Framework.Tests.Integration.Validation.TypeFabric_
             private static void Validate(in ReferenceValidationContext context) => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
 
         }
-#pragma warning restore CS0067
+
+#pragma warning restore CS0067, CS8618, CA1822, CS0162, CS0169, CS0414
     }
-#pragma warning restore CS0067
+
+#pragma warning restore CS0067, CS8618, CA1822, CS0162, CS0169, CS0414
 
     internal class DerivedClass : ValidatedClass
     {

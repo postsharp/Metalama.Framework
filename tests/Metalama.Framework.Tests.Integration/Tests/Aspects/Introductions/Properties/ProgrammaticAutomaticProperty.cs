@@ -26,5 +26,6 @@ public class MyAspect : TypeAspect
     }
 }
 
+// <target>
 [MyAspect]
 public class C { }
