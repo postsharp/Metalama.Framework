@@ -13,12 +13,12 @@ namespace Metalama.Framework.Engine.Templating.Expressions
     /// </summary>
     internal abstract class UserExpression : IUserExpression
     {
-        public abstract ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext );
+        protected abstract ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext );
 
         /// <summary>
-        /// Creates a <see cref="RunTimeTemplateExpression"/> for the given <see cref="SyntaxGenerationContext"/>.
+        /// Creates a <see cref="TypedExpressionSyntax"/> for the given <see cref="SyntaxGenerationContext"/>.
         /// </summary>
-        public virtual RunTimeTemplateExpression ToRunTimeTemplateExpression( SyntaxGenerationContext syntaxGenerationContext )
+        public TypedExpressionSyntax ToTypedExpressionSyntax( SyntaxGenerationContext syntaxGenerationContext )
             => new( this.ToSyntax( syntaxGenerationContext ), this.Type, syntaxGenerationContext );
 
         public abstract IType Type { get; }

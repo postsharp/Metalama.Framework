@@ -139,7 +139,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => null
             };
 
-        internal static void CheckArguments( this IDeclaration declaration, IReadOnlyList<IParameter> parameters, RunTimeTemplateExpression[]? arguments )
+        internal static void CheckArguments( this IDeclaration declaration, IReadOnlyList<IParameter> parameters, TypedExpressionSyntax[]? arguments )
         {
             // TODO: somehow provide locations for the diagnostics?
             var argumentsLength = arguments?.Length ?? 0;
@@ -166,7 +166,8 @@ namespace Metalama.Framework.Engine.CodeModel
         internal static ArgumentSyntax[] GetArguments(
             this IDeclaration declaration,
             IReadOnlyList<IParameter> parameters,
-            RunTimeTemplateExpression[]? args )
+            TypedExpressionSyntax[]? args,
+            SyntaxGenerationContext syntaxGenerationContext )
         {
             CheckArguments( declaration, parameters, args );
 
@@ -212,7 +213,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     }
                     else
                     {
-                        argument = SyntaxFactory.Argument( arg.ToTypedExpression( parameter.Type ) );
+                        argument = SyntaxFactory.Argument( arg.Convert( parameter.Type, syntaxGenerationContext ).Syntax.RemoveParenthesis() );
                     }
                 }
 
@@ -224,7 +225,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal static ExpressionSyntax GetReceiverSyntax<T>(
             this T declaration,
-            RunTimeTemplateExpression instance,
+            TypedExpressionSyntax instance,
             SyntaxGenerationContext generationContext )
             where T : IMember
         {
@@ -238,7 +239,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 throw GeneralDiagnosticDescriptors.MustProvideInstanceForInstanceMember.CreateException( declaration );
             }
 
-            return instance.ToTypedExpression( declaration.DeclaringType, true );
+            return instance.Convert( declaration.DeclaringType, generationContext );
         }
 
         internal static RefKind ToOurRefKind( this Microsoft.CodeAnalysis.RefKind roslynRefKind )

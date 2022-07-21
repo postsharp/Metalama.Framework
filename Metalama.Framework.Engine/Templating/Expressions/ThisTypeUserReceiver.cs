@@ -25,14 +25,11 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this._linkerAnnotation = linkerAnnotation;
         }
 
-        public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext ) => throw new NotSupportedException();
-
-        public override RunTimeTemplateExpression ToRunTimeTemplateExpression( SyntaxGenerationContext syntaxGenerationContext )
-            => throw new NotSupportedException();
+        protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext ) => throw new NotSupportedException();
 
         public override IType Type => this._type;
 
-        public override RunTimeTemplateExpression CreateMemberAccessExpression( string member )
+        public override TypedExpressionSyntax CreateMemberAccessExpression( string member )
             => new(
                 SyntaxFactory.MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,

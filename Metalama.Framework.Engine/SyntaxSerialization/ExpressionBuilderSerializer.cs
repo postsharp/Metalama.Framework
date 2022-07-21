@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
         public ExpressionBuilderSerializer( SyntaxSerializationService service ) : base( service ) { }
 
         public override ExpressionSyntax Serialize( IExpressionBuilder obj, SyntaxSerializationContext serializationContext )
-            => ((IUserExpression) obj.ToExpression()).ToRunTimeTemplateExpression( serializationContext.SyntaxGenerationContext );
+            => ((IUserExpression) obj.ToExpression()).ToExpressionSyntax( serializationContext.SyntaxGenerationContext );
 
         public override Type? OutputType => null;
     }

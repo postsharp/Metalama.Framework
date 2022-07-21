@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this.Type = compilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.String );
         }
 
-        public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
+        protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
         {
             List<InterpolatedStringContentSyntax> contents = new( this._builder.Items.Count );
 
@@ -61,7 +61,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
 
                         FlushTextToken();
 
-                        var tokenSyntax = RunTimeTemplateExpression.FromValue( token.Expression, this.Type.Compilation, syntaxGenerationContext ).Syntax;
+                        var tokenSyntax = TypedExpressionSyntax.FromValue( token.Expression, this.Type.Compilation, syntaxGenerationContext ).Syntax;
 
                         if ( tokenSyntax is LiteralExpressionSyntax literal && literal.Token.IsKind( SyntaxKind.StringLiteralToken ) )
                         {

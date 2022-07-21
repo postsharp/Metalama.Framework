@@ -16,20 +16,20 @@ namespace Metalama.Framework.Tests.UnitTests
         public static void DynamicEquals( object expression, string expected )
         {
             var meta = (IUserExpression) expression;
-            var actual = meta.ToSyntax( TemplateExpansionContext.CurrentSyntaxGenerationContext ).NormalizeWhitespace().ToString();
+            var actual = meta.ToExpressionSyntax( TemplateExpansionContext.CurrentSyntaxGenerationContext ).NormalizeWhitespace().ToString();
 
             Assert.Equal( expected, actual );
         }
 
         public static void DynamicThrows<T>( Func<object?> func )
             where T : Exception
-            => Assert.Throws<T>( () => ((IUserExpression) func()!).ToSyntax( TemplateExpansionContext.CurrentSyntaxGenerationContext ) );
+            => Assert.Throws<T>( () => ((IUserExpression) func()!).ToExpressionSyntax( TemplateExpansionContext.CurrentSyntaxGenerationContext ) );
 
         public static void DynamicThrows<T>( object expression )
             where T : Exception
         {
             var meta = (IUserExpression) expression;
-            Assert.Throws<T>( () => meta.ToSyntax( TemplateExpansionContext.CurrentSyntaxGenerationContext ) );
+            Assert.Throws<T>( () => meta.ToExpressionSyntax( TemplateExpansionContext.CurrentSyntaxGenerationContext ) );
         }
 
         internal static void ThrowsWithDiagnostic( IDiagnosticDefinition diagnosticDefinition, Func<object?> testCode )
@@ -37,7 +37,7 @@ namespace Metalama.Framework.Tests.UnitTests
             try
             {
                 var runtimeExpression = (IUserExpression) testCode()!;
-                _ = runtimeExpression.ToSyntax( TemplateExpansionContext.CurrentSyntaxGenerationContext );
+                _ = runtimeExpression.ToExpressionSyntax( TemplateExpansionContext.CurrentSyntaxGenerationContext );
 
                 Assert.False( true, "Exception InvalidUserCodeException was not received." );
             }

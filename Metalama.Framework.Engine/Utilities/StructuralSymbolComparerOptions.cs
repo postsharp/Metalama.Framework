@@ -18,6 +18,7 @@ namespace Metalama.Framework.Engine.Utilities
         FieldPromotions = 1 << 7,
 
         MethodSignature = Name | GenericParameterCount | GenericArguments | ParameterTypes | ParameterModifiers,
+        FunctionPointer = GenericParameterCount | GenericArguments | ParameterTypes | ParameterModifiers,
         Type = Name | GenericParameterCount | GenericArguments
     }
 }
