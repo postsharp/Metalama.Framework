@@ -20,25 +20,30 @@ namespace Metalama.TestFramework
 
         public AspectTestFramework( IMessageSink messageSink )
         {
+            // We disable logging by default because it creates too many log records.
+            var messageSinkOrNull = string.IsNullOrEmpty( Environment.GetEnvironmentVariable( "LogMetalamaTestFramework" ) )
+                ? null
+                : messageSink;
+            
             const string debugEnvironmentVariable = "DebugMetalamaTestFramework";
 
             if ( !string.IsNullOrEmpty( Environment.GetEnvironmentVariable( debugEnvironmentVariable ) ) )
             {
-                messageSink.Trace( $"Environment variable '{debugEnvironmentVariable}' detected. Attaching debugger." );
+                messageSink?.Trace( $"Environment variable '{debugEnvironmentVariable}' detected. Attaching debugger." );
                 Debugger.Launch();
             }
 
             if ( Process.GetCurrentProcess().ProcessName.StartsWith( "ResharperTestRunner", StringComparison.OrdinalIgnoreCase ) )
             {
-                messageSink.Trace( $"Resharper detected. Using the legacy test runner." );
+                messageSink?.Trace( $"Resharper detected. Using the legacy test runner." );
 
-                this._implementation = new XunitTestFramework( messageSink );
+                this._implementation = new XunitTestFramework( messageSinkOrNull );
             }
             else
             {
-                messageSink.Trace( $"Resharper NOT detected. Using the customized test runner." );
+                messageSink?.Trace( $"Resharper NOT detected. Using the customized test runner." );
 
-                this._implementation = new AspectTestFrameworkVsImpl( messageSink );
+                this._implementation = new AspectTestFrameworkVsImpl( messageSinkOrNull );
             }
         }
 
