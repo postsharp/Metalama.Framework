@@ -30,9 +30,7 @@ namespace Metalama.TestFramework.XunitFramework
         {
             this._assembly = assembly;
             
-            // We don't use the messageSink normally because it creates large logs.
-            _ = messageSink;
-            this._messageSink = null;
+            this._messageSink = messageSink;
             
             var attrib = assembly.GetCustomAttributes( typeof(TargetFrameworkAttribute) ).FirstOrDefault();
 
