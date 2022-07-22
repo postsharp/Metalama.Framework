@@ -1,9 +1,7 @@
 [MyAspect]
-internal class C
+    internal class C { 
+
+internal void M((global::System.Int32[] A, (global::System.String C, global::System.String[] D, global::System.Int32? [] E) B) x)
 {
-
-
-    internal void M((global::System.Int32[] A, (global::System.String, global::System.String[], global::System.Int32?[]) B) c)
-    {
-    }
-}
+    global::System.Console.WriteLine($"{x.A}, {x.B.C}");
+}}
