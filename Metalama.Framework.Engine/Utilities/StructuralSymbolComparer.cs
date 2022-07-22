@@ -476,6 +476,9 @@ namespace Metalama.Framework.Engine.Utilities
                 case IAssemblySymbol assembly:
                     return assembly.Identity.GetHashCode();
 
+                case IFunctionPointerTypeSymbol functionPointerType:
+                    return GetHashCode( functionPointerType.Signature, StructuralSymbolComparerOptions.FunctionPointer );
+
                 default:
                     throw new NotImplementedException( $"{symbol.Kind}" );
             }

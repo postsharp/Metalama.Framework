@@ -30,7 +30,8 @@ namespace Metalama.Framework.Engine.CodeModel
                 IPointerTypeSymbol pointerType => new PointerType( pointerType, compilation ),
                 ITypeParameterSymbol typeParameter => new TypeParameter( typeParameter, compilation ),
                 IDynamicTypeSymbol dynamicType => new DynamicType( dynamicType, compilation ),
-                _ => throw new NotImplementedException()
+                IFunctionPointerTypeSymbol functionPointerType => new FunctionPointerType( functionPointerType, compilation ),
+                _ => throw new NotImplementedException( $"Types of kind {typeSymbol.Kind} are not implemented." )
             };
     }
 }
