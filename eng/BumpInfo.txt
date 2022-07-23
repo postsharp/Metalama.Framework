@@ -1,1 +1,1 @@
-Metalama.Compiler=4.2.1004-preview;PostSharp.Engineering=1.0.78-preview
+Metalama.Compiler=4.2.1005-preview;PostSharp.Engineering=1.0.78-preview
