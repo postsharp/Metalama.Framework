@@ -12,15 +12,5 @@ namespace Metalama.Framework.Engine.Utilities
         public static bool IsNameOf( this InvocationExpressionSyntax node )
             => node.Expression.Kind() == SyntaxKind.NameOfKeyword ||
                (node.Expression is IdentifierNameSyntax identifierName && string.Equals( identifierName.Identifier.Text, "nameof", StringComparison.Ordinal ));
-
-        public static string GetNameOfValue( this InvocationExpressionSyntax node )
-            => node.ArgumentList.Arguments[0].Expression switch
-            {
-                // TODO: This may be incorrect when using with 'using alias = xxx'.
-
-                SimpleNameSyntax simpleName => simpleName.Identifier.Text,
-                QualifiedNameSyntax qualifiedName => qualifiedName.Right.Identifier.Text,
-                _ => throw new NotImplementedException()
-            };
     }
 }

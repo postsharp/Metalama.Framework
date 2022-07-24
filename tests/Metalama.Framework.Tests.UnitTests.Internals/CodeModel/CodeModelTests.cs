@@ -948,5 +948,19 @@ class T2 {}
             Assert.True( externalType.IsExternal );
             Assert.Throws<InvalidOperationException>( () => externalType.Namespace );
         }
+
+        [Theory]
+        [InlineData( SpecialType.Int32, SpecialType.Double, true )]
+        [InlineData( SpecialType.Double, SpecialType.Int32, false )]
+        public void TypeIs( SpecialType @from, SpecialType to, bool expectedResult )
+        {
+            using var testContext = this.CreateTestContext();
+            var compilation = testContext.CreateCompilationModel( "" );
+            var fromType = compilation.Factory.GetSpecialType( @from );
+            var toType = compilation.Factory.GetSpecialType( to );
+            var result = fromType.Is( toType );
+
+            Assert.Equal( expectedResult, result );
+        }
     }
 }
