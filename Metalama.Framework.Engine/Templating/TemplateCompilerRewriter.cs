@@ -889,7 +889,7 @@ namespace Metalama.Framework.Engine.Templating
 
                             var addCommentsStatement = this.DeepIndent(
                                 addCommentsMetaStatement.WithLeadingTrivia(
-                                    TriviaList( Comment( "// " + node.Parent!.WithoutTrivia().ToFullString() ) )
+                                    TriviaList( Comment( "// " + node.Parent!.WithoutTrivia().ToFullString() ), ElasticCarriageReturnLineFeed )
                                         .AddRange( addCommentsMetaStatement.GetLeadingTrivia() ) ) );
 
                             this._currentMetaContext.Statements.Add( addCommentsStatement );
@@ -912,7 +912,7 @@ namespace Metalama.Framework.Engine.Templating
 
                             var addStatementStatement = this.DeepIndent(
                                 addStatementMetaStatement.WithLeadingTrivia(
-                                    TriviaList( Comment( "// " + node.Parent!.WithoutTrivia().ToFullString() ) )
+                                    TriviaList( Comment( "// " + node.Parent!.WithoutTrivia().ToFullString() ), ElasticCarriageReturnLineFeed )
                                         .AddRange( addStatementMetaStatement.GetLeadingTrivia() ) ) );
 
                             this._currentMetaContext.Statements.Add( addStatementStatement );

@@ -968,8 +968,8 @@ namespace Metalama.Framework.Engine.Templating
             {
                 // Statements of a compile-time control block must have an explicitly-set scope otherwise the template compiler
                 // will look at the scope in the parent node, which is here incorrect.
-                annotatedStatement = this.Visit( node.Statement ).AddRunTimeOnlyAnnotationIfUndetermined();
-                annotatedElseStatement = this.Visit( node.Else?.Statement )?.AddRunTimeOnlyAnnotationIfUndetermined();
+                annotatedStatement = ToBlock( this.Visit( node.Statement ) ).AddRunTimeOnlyAnnotationIfUndetermined();
+                annotatedElseStatement = ToBlock( this.Visit( node.Else?.Statement ) )?.AddRunTimeOnlyAnnotationIfUndetermined();
             }
 
             return node.Update(
@@ -982,6 +982,13 @@ namespace Metalama.Framework.Engine.Templating
                     node.Else?.Update( node.Else.ElseKeyword, annotatedElseStatement! ).AddScopeAnnotation( ifScope ) )
                 .AddScopeAnnotation( ifScope );
         }
+
+        /// <summary>
+        /// Wraps a statement into a block. This is required because templates do not support single statements under run-time `if` or `foreach`. 
+        /// </summary>
+        [return: NotNullIfNotNull( "statement" )]
+        private static BlockSyntax? ToBlock( StatementSyntax? statement )
+            => statement == null ? null : statement is BlockSyntax block ? block : Block( statement );
 
         public override SyntaxNode? VisitBreakStatement( BreakStatementSyntax node )
             => node.AddScopeAnnotation( this._currentScopeContext.CurrentBreakOrContinueScope );
@@ -1019,7 +1026,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 // Statements of a compile-time control block must have an explicitly-set scope otherwise the template compiler
                 // will look at the scope in the parent node, which is here incorrect.
-                annotatedStatement = this.Visit( node.Statement ).AddRunTimeOnlyAnnotationIfUndetermined();
+                annotatedStatement = ToBlock( this.Visit( node.Statement ) ).AddRunTimeOnlyAnnotationIfUndetermined();
             }
 
             var identifierClassification = forEachScope == TemplatingScope.CompileTimeOnly ? TextSpanClassification.CompileTimeVariable : default;
