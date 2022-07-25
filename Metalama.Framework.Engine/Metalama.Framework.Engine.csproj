@@ -54,7 +54,6 @@
         <PackageReference Include="K4os.Hash.xxHash" Version="$(K4osHashxxHashVersion)" />
         <PackageReference Include="Microsoft.CSharp" Version="$(MicrosoftCSharpVersion)" />
         <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonVersion)" />
-        <PackageReference Include="System.Runtime.Caching" Version="6.0.0" />
         <PackageReference Include="System.Runtime.Serialization.Formatters" Version="4.3.0" />
         <ProjectReference Include="..\Metalama.Framework.Introspection\Metalama.Framework.Introspection.csproj" />
         <ProjectReference Include="..\Metalama.Framework\Metalama.Framework.csproj" />

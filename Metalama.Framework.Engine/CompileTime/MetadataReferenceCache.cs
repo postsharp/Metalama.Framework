@@ -9,9 +9,11 @@ namespace Metalama.Framework.Engine.CompileTime
 {
     internal static class MetadataReferenceCache
     {
-        public static MetadataReference GetMetadataReference( string path )
-            => CacheByFile<MetadataReference>.Get( path, p => MetadataReference.CreateFromFile( p ) );
+        private static readonly FileBasedCache<MetadataReference> _metadataReferences = new();
+        private static readonly FileBasedCache<AssemblyName> _assemblyNames = new();
 
-        public static AssemblyName GetAssemblyName( string path ) => CacheByFile<AssemblyName>.Get( path, AssemblyName.GetAssemblyName );
+        public static MetadataReference GetMetadataReference( string path ) => _metadataReferences.Get( path, p => MetadataReference.CreateFromFile( p ) );
+
+        public static AssemblyName GetAssemblyName( string path ) => _assemblyNames.Get( path, AssemblyName.GetAssemblyName );
     }
 }
