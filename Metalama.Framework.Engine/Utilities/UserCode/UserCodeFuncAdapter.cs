@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Metalama.Framework.Engine.Utilities;
+namespace Metalama.Framework.Engine.Utilities.UserCode;
 
 /// <summary>
 /// Wraps a <see cref="Func{TResult}"/> into a <see cref="UserCodeFunc{TResult,TPayload}"/>.

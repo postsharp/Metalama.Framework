@@ -12,6 +12,8 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Comparers;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.TestFramework;
 using Metalama.TestFramework.Utilities;
 using Microsoft.CodeAnalysis;

@@ -5,7 +5,7 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Utilities;
 using System;
 
-namespace Metalama.Framework.Engine.Utilities
+namespace Metalama.Framework.Engine.Utilities.Diagnostics
 {
     public static class Logger
     {

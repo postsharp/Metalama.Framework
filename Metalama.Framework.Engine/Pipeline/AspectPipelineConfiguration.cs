@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Project;
 using System.Collections.Generic;
 using System.Collections.Immutable;

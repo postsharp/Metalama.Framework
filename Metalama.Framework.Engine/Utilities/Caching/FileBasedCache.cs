@@ -4,7 +4,7 @@
 using System;
 using System.IO;
 
-namespace Metalama.Framework.Engine.Utilities;
+namespace Metalama.Framework.Engine.Utilities.Caching;
 
 internal class FileBasedCache<T>
 {

@@ -4,7 +4,7 @@
 using Metalama.Framework.Code;
 using Microsoft.CodeAnalysis;
 
-namespace Metalama.Framework.Engine.Utilities
+namespace Metalama.Framework.Engine.Utilities.Roslyn
 {
     internal static class SymbolHelpers
     {

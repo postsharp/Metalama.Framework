@@ -4,6 +4,7 @@
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Linq;

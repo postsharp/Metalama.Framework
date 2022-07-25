@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.LamaSerialization;
 using Metalama.Framework.Engine.Metrics;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;

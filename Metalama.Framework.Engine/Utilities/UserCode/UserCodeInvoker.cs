@@ -17,7 +17,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace Metalama.Framework.Engine.Utilities
+namespace Metalama.Framework.Engine.Utilities.UserCode
 {
     /// <summary>
     /// Invokes some user code, handles exceptions, switches the <see cref="UserCodeExecutionContext"/>,

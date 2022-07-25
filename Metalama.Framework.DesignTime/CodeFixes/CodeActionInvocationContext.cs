@@ -3,6 +3,7 @@
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.CodeFixes;

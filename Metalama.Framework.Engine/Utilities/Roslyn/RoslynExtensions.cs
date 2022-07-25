@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Engine.Utilities
+namespace Metalama.Framework.Engine.Utilities.Roslyn
 {
     /// <summary>
     /// Provides extension methods that are useful when writing code using Metalama SDK.

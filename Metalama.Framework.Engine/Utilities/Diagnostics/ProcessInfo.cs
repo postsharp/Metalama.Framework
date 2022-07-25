@@ -3,7 +3,7 @@
 
 using System.IO;
 
-namespace Metalama.Framework.Engine.Utilities
+namespace Metalama.Framework.Engine.Utilities.Diagnostics
 {
     public sealed class ProcessInfo
     {

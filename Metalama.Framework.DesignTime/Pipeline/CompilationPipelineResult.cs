@@ -8,6 +8,8 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Diagnostics;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Validation;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;

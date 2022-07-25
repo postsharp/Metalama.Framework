@@ -3,7 +3,7 @@
 
 using System;
 
-namespace Metalama.Framework.Engine.Utilities
+namespace Metalama.Framework.Engine.Utilities.Diagnostics
 {
     internal static class ExceptionExtensions
     {

@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 
 namespace Metalama.Framework.Engine.CompileTime
 {

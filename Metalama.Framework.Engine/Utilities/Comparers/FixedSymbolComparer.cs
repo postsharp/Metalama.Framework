@@ -4,7 +4,7 @@
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Engine.Utilities;
+namespace Metalama.Framework.Engine.Utilities.Comparers;
 
 /// <summary>
 /// An implementation of <see cref="IEqualityComparer{T}"/> for <see cref="ISymbol"/> that considers equal two <see cref="IAssemblySymbol"/>

@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Utilities.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 #if NET5_0_OR_GREATER
 using Metalama.Backstage.Utilities;

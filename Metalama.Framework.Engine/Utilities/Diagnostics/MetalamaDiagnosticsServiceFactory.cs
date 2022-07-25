@@ -3,7 +3,7 @@
 
 using Metalama.Backstage.Diagnostics;
 
-namespace Metalama.Framework.Engine.Utilities
+namespace Metalama.Framework.Engine.Utilities.Diagnostics
 {
     public static class MetalamaDiagnosticsServiceFactory
     {

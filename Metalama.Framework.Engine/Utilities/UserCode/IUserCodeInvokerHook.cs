@@ -5,7 +5,7 @@ using Metalama.Framework.Project;
 using System;
 using System.Threading.Tasks;
 
-namespace Metalama.Framework.Engine.Utilities
+namespace Metalama.Framework.Engine.Utilities.UserCode
 {
     /// <summary>
     /// Defines a method <see cref="Invoke{TResult,TPayload}"/> that is invoked when user-written code must be invoked.

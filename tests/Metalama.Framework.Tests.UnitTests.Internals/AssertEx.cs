@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine;
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis;

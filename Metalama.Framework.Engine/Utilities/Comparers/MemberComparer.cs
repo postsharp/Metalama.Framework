@@ -7,7 +7,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Engine.Utilities
+namespace Metalama.Framework.Engine.Utilities.Comparers
 {
     internal class MemberComparer<T> : IEqualityComparer<T>
         where T : IMember

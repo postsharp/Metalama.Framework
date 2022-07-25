@@ -5,7 +5,7 @@ using Metalama.Framework.Engine.ReflectionMocks;
 using System;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Engine.Utilities
+namespace Metalama.Framework.Engine.Utilities.Comparers
 {
     internal class ReflectionTypeComparer : IEqualityComparer<Type>
     {

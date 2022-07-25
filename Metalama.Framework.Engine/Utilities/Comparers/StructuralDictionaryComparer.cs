@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Engine.Utilities;
+namespace Metalama.Framework.Engine.Utilities.Comparers;
 
 internal class StructuralDictionaryComparer<TKey, TValue> : IEqualityComparer<IReadOnlyDictionary<TKey, TValue>>
 {

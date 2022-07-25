@@ -5,7 +5,7 @@ using System;
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace Metalama.Framework.Engine.Utilities;
+namespace Metalama.Framework.Engine.Utilities.Diagnostics;
 
 public static class MiniDumper
 {

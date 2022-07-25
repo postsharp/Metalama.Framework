@@ -4,6 +4,7 @@
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.LamaSerialization;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using System;
 using System.Collections;
 using System.IO;

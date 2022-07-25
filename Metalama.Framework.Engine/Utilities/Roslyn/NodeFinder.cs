@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Metalama.Framework.Engine.Utilities
+namespace Metalama.Framework.Engine.Utilities.Roslyn
 {
     public static class NodeFinder
     {

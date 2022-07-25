@@ -8,7 +8,7 @@ using System;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace Metalama.Framework.Engine.Utilities
+namespace Metalama.Framework.Engine.Utilities.UserCode
 {
     /// <summary>
     /// Encapsulates an executable member of user code, which can be given as a reflection <see cref="MemberInfo"/>,

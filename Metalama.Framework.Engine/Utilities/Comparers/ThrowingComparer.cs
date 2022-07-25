@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Engine.Utilities
+namespace Metalama.Framework.Engine.Utilities.Comparers
 {
     /// <summary>
     /// An implementation of <see cref="IComparer{T}"/> that throws an exception if the two members of the equality

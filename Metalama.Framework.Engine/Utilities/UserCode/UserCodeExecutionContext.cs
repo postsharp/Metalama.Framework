@@ -10,7 +10,7 @@ using Metalama.Framework.Project;
 using System;
 using System.Globalization;
 
-namespace Metalama.Framework.Engine.Utilities
+namespace Metalama.Framework.Engine.Utilities.UserCode
 {
     /// <summary>
     /// Represents the context of execution of compile-time user code, when this code does not have another

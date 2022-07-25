@@ -2,10 +2,11 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using K4os.Hash.xxHash;
+using Metalama.Framework.Engine.Utilities.Comparers;
 using Microsoft.CodeAnalysis;
 using System;
 
-namespace Metalama.Framework.Engine.Utilities;
+namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
 /// <summary>
 /// Represents a dictionary key for an <see cref="ISymbol"/>. When created using the <see cref="CreatePersistentKey"/> method, the key

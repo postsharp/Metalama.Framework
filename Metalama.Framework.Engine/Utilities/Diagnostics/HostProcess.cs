@@ -4,7 +4,7 @@
 using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Utilities;
 
-namespace Metalama.Framework.Engine.Utilities
+namespace Metalama.Framework.Engine.Utilities.Diagnostics
 {
     public class HostProcess
     {

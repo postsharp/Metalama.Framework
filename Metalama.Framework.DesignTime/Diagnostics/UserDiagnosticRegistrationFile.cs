@@ -3,6 +3,7 @@
 
 using Metalama.Backstage.Utilities;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Newtonsoft.Json;
 using System.Reflection;
 

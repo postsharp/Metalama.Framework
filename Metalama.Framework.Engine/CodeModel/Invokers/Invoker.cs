@@ -6,6 +6,7 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using Microsoft.CodeAnalysis;
 using System;
 

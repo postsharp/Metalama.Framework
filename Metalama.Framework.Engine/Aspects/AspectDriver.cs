@@ -15,6 +15,7 @@ using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;

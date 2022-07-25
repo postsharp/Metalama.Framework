@@ -9,6 +9,7 @@ using Metalama.Framework.DesignTime.VisualStudio.Remoting;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Diagnostics;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.VisualStudio;

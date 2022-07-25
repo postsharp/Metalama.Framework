@@ -16,7 +16,7 @@ using SpecialType = Metalama.Framework.Code.SpecialType;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
-namespace Metalama.Framework.Engine.Utilities
+namespace Metalama.Framework.Engine.Utilities.Roslyn
 {
     public static class SymbolExtensions
     {

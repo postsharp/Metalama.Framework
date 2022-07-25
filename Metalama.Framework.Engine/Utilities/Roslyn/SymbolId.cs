@@ -7,7 +7,7 @@ using System;
 using System.Linq.Expressions;
 using System.Threading;
 
-namespace Metalama.Framework.Engine.Utilities
+namespace Metalama.Framework.Engine.Utilities.Roslyn
 {
     /// <summary>
     /// An identifier of an <see cref="ISymbol"/> that works across compilations, but not across different versions of Roslyn.  

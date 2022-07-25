@@ -5,6 +5,7 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Project;
 using System;
 using System.Diagnostics.CodeAnalysis;

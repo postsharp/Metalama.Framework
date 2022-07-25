@@ -4,6 +4,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;
 using SyntaxReference = Metalama.Framework.Code.SyntaxReference;
