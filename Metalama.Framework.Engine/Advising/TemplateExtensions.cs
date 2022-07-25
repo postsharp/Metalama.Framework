@@ -100,7 +100,10 @@ namespace Metalama.Framework.Engine.Advising
 
                 if ( eventFieldTemplate.TemplateClassMember.TemplateClass.Type.GetMethod( templateName ) != null )
                 {
-                    return TemplateMemberFactory.Create( eventFieldTemplate.Declaration, eventFieldTemplate.TemplateClassMember, TemplateKind.InitializerExpression );
+                    return TemplateMemberFactory.Create(
+                        eventFieldTemplate.Declaration,
+                        eventFieldTemplate.TemplateClassMember,
+                        TemplateKind.InitializerExpression );
                 }
                 else
                 {
@@ -122,7 +125,10 @@ namespace Metalama.Framework.Engine.Advising
 
                 if ( propertyTemplate.TemplateClassMember.TemplateClass.Type.GetMethod( templateName ) != null )
                 {
-                    return TemplateMemberFactory.Create( propertyTemplate.Declaration, propertyTemplate.TemplateClassMember, TemplateKind.InitializerExpression );
+                    return TemplateMemberFactory.Create(
+                        propertyTemplate.Declaration,
+                        propertyTemplate.TemplateClassMember,
+                        TemplateKind.InitializerExpression );
                 }
                 else
                 {

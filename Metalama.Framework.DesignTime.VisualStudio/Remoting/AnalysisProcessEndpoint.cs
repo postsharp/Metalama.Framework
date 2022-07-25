@@ -5,6 +5,7 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Utilities;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Project;
 using StreamJsonRpc;
 using System.Collections.Concurrent;

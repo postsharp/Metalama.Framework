@@ -10,7 +10,6 @@ using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -81,7 +80,9 @@ namespace Metalama.Framework.Engine.Transformations
                     }
                     else
                     {
-                        return TemplateMemberFactory.Create( templateMethod, this.EventTemplate.TemplateClassMember.Accessors[templateMethod.GetSymbol()!.MethodKind] )
+                        return TemplateMemberFactory.Create(
+                                templateMethod,
+                                this.EventTemplate.TemplateClassMember.Accessors[templateMethod.GetSymbol()!.MethodKind] )
                             .ForIntroduction( this._parameters );
                     }
                 }

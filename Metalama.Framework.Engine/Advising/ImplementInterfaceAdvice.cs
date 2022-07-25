@@ -11,7 +11,6 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -403,7 +402,11 @@ namespace Metalama.Framework.Engine.Advising
 
                             if ( aspectProperty != null && aspectProperty.IsAutoPropertyOrField != true )
                             {
-                                var propertyTemplate = TemplateMemberFactory.Create( aspectProperty, memberSpec.TemplateClassMember, TemplateKind.Introduction );
+                                var propertyTemplate = TemplateMemberFactory.Create(
+                                    aspectProperty,
+                                    memberSpec.TemplateClassMember,
+                                    TemplateKind.Introduction );
+
                                 var accessorTemplates = propertyTemplate.GetAccessorTemplates();
 
                                 addTransformation(
