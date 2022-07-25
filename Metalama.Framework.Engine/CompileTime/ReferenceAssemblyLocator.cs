@@ -146,7 +146,7 @@ namespace Metalama.Framework.Engine.CompileTime
             this.StandardCompileTimeMetadataReferences =
                 this.SystemAssemblyPaths
                     .Concat( metalamaImplementationPaths )
-                    .Select( MetadataReferenceCache.GetFromFile )
+                    .Select( MetadataReferenceCache.GetMetadataReference )
                     .Concat( embeddedAssemblies )
                     .ToImmutableArray();
         }

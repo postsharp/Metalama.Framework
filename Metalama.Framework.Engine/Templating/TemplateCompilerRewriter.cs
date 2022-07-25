@@ -451,6 +451,13 @@ namespace Metalama.Framework.Engine.Templating
             }
         }
 
+        protected override ExpressionSyntax TransformStatement( StatementSyntax statement )
+        {
+            // We can get here when the parent node is a run-time `if` or `foreach` and the current node a compile-time statement
+            // that is not a block. The easiest approach is to wrap the statement into a block.
+            return (ExpressionSyntax) this.BuildRunTimeBlock( Block( statement ), true );
+        }
+
         protected override ExpressionSyntax TransformExpression( ExpressionSyntax expression, ExpressionSyntax originalExpression )
             => this.CreateRunTimeExpression( expression );
 
@@ -782,18 +789,37 @@ namespace Metalama.Framework.Engine.Templating
 
             if ( node.IsNameOf() )
             {
-                // nameof is always transformed into a literal.
-                var name = node.GetNameOfValue();
+                // nameof is always transformed into a literal except when it is a template parameter.
+
+                var expression = node.ArgumentList.Arguments[0].Expression;
+                var symbol = this._syntaxTreeAnnotationMap.GetSymbol( expression );
+
+                if ( symbol is IParameterSymbol parameter && this._templateMemberClassifier.IsRunTimeTemplateParameter( parameter ) )
+                {
+                    return this.MetaSyntaxFactory.InvocationExpression(
+                        this.MetaSyntaxFactory.IdentifierName(
+                            this.MetaSyntaxFactory.Identifier(
+                                SyntaxFactoryEx.Default,
+                                this.MetaSyntaxFactory.Kind( SyntaxKind.NameOfKeyword ),
+                                SyntaxFactoryEx.LiteralExpression( "nameof" ),
+                                SyntaxFactoryEx.LiteralExpression( "nameof" ),
+                                SyntaxFactoryEx.Default ) ),
+                        this.MetaSyntaxFactory.ArgumentList(
+                            this.MetaSyntaxFactory.SingletonSeparatedList<ArgumentSyntax>(
+                                this.MetaSyntaxFactory.Argument( SyntaxFactoryEx.Default, SyntaxFactoryEx.Default, expression ) ) ) );
+                }
+
+                var symbolName = symbol?.Name ?? "<error>";
 
                 if ( transformationKind == TransformationKind.Transform )
                 {
                     return this.MetaSyntaxFactory.LiteralExpression(
                         this.MetaSyntaxFactory.Kind( SyntaxKind.StringLiteralExpression ),
-                        this.MetaSyntaxFactory.Literal( name ) );
+                        this.MetaSyntaxFactory.Literal( symbolName ) );
                 }
                 else
                 {
-                    return SyntaxFactoryEx.LiteralExpression( name );
+                    return SyntaxFactoryEx.LiteralExpression( symbolName );
                 }
             }
             else if ( this._compileTimeOnlyRewriter.TryRewriteProceedInvocation( node, out var proceedNode ) )
@@ -854,7 +880,9 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     case MetaMemberKind.InsertComment:
                         {
-                            var arguments = node.ArgumentList.Arguments.Insert(
+                            var transformedArgumentList = (ArgumentListSyntax) this.Visit( node.ArgumentList )!;
+
+                            var arguments = transformedArgumentList.Arguments.Insert(
                                 0,
                                 Argument( IdentifierName( this._currentMetaContext!.StatementListVariableName ) ) );
 
@@ -868,7 +896,7 @@ namespace Metalama.Framework.Engine.Templating
 
                             var addCommentsStatement = this.DeepIndent(
                                 addCommentsMetaStatement.WithLeadingTrivia(
-                                    TriviaList( Comment( "// " + node.Parent!.WithoutTrivia().ToFullString() ) )
+                                    TriviaList( Comment( "// " + node.Parent!.WithoutTrivia().ToFullString() ), ElasticCarriageReturnLineFeed )
                                         .AddRange( addCommentsMetaStatement.GetLeadingTrivia() ) ) );
 
                             this._currentMetaContext.Statements.Add( addCommentsStatement );
@@ -891,7 +919,7 @@ namespace Metalama.Framework.Engine.Templating
 
                             var addStatementStatement = this.DeepIndent(
                                 addStatementMetaStatement.WithLeadingTrivia(
-                                    TriviaList( Comment( "// " + node.Parent!.WithoutTrivia().ToFullString() ) )
+                                    TriviaList( Comment( "// " + node.Parent!.WithoutTrivia().ToFullString() ), ElasticCarriageReturnLineFeed )
                                         .AddRange( addStatementMetaStatement.GetLeadingTrivia() ) ) );
 
                             this._currentMetaContext.Statements.Add( addStatementStatement );

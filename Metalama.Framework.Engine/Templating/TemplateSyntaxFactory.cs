@@ -60,13 +60,15 @@ namespace Metalama.Framework.Engine.Templating
             {
                 if ( comment.Contains( '\n' ) || comment.Contains( '\r' ) )
                 {
-                    yield return SyntaxFactory.ElasticLineFeed;
+                    yield return SyntaxFactory.ElasticCarriageReturnLineFeed;
                     yield return SyntaxFactory.Comment( "/* " + comment + " */" );
+                    yield return SyntaxFactory.ElasticCarriageReturnLineFeed;
                 }
                 else
                 {
-                    yield return SyntaxFactory.ElasticLineFeed;
+                    yield return SyntaxFactory.ElasticCarriageReturnLineFeed;
                     yield return SyntaxFactory.Comment( "// " + comment );
+                    yield return SyntaxFactory.ElasticCarriageReturnLineFeed;
                 }
             }
 
