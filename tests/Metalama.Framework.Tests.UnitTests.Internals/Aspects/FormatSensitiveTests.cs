@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.Aspects;
@@ -17,7 +18,7 @@ namespace Metalama.Framework.Tests.UnitTests.Aspects;
 public class FormatSensitiveTests : TestBase
 {
     [Fact]
-    public async void CompileTimeSingleStatementUnderRunTimeIf()
+    public async Task CompileTimeSingleStatementUnderRunTimeIf()
     {
         var code = @"
 using System;
@@ -70,8 +71,8 @@ public class TestClass
         var diagnostics = new DiagnosticList();
         var result = await pipeline.ExecuteAsync( diagnostics, compilation, ImmutableArray<ManagedResource>.Empty, CancellationToken.None );
 
-        var transformedSyntaxRoot = (await result!.ResultingCompilation.SyntaxTrees.Single( t => t.Key == compilation.SyntaxTrees.Single().FilePath )
-            .Value.GetRootAsync());
+        var transformedSyntaxRoot = await result!.ResultingCompilation.SyntaxTrees.Single( t => t.Key == compilation.SyntaxTrees.Single().FilePath )
+            .Value.GetRootAsync();
 
         var transformedProperty = transformedSyntaxRoot
             .DescendantNodes()
