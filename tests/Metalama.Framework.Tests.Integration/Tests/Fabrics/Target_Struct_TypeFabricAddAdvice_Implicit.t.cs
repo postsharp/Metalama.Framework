@@ -3,7 +3,7 @@ internal struct TargetStruct
         private int Method1( int a ) => a;
 
         private string Method2( string s ) => s;
-#pragma warning disable CS0067
+#pragma warning disable CS0067, CS8618, CA1822, CS0162, CS0169, CS0414
 
         private class Fabric : TypeFabric
         {
@@ -11,10 +11,10 @@ internal struct TargetStruct
 
 
             [Template]
-[global::Metalama.Framework.Aspects.AccessibilityAttribute(global::Metalama.Framework.Code.Accessibility.Private)
-]public dynamic? Template() => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
+[global::Metalama.Framework.Aspects.AccessibilityAttribute(global::Metalama.Framework.Code.Accessibility.Private)]
+public dynamic? Template() => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
 
         }
 
-#pragma warning restore CS0067
+#pragma warning restore CS0067, CS8618, CA1822, CS0162, CS0169, CS0414
     }

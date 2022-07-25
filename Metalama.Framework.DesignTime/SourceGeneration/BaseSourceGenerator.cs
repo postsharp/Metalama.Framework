@@ -12,8 +12,6 @@ using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using AnalyzerConfigOptions = Microsoft.CodeAnalysis.Diagnostics.AnalyzerConfigOptions;
 
-#pragma warning disable SA1414 // Tuple items must have names.
-
 namespace Metalama.Framework.DesignTime.SourceGeneration
 {
     /// <summary>

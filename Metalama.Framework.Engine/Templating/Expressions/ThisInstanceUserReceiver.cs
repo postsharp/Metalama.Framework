@@ -24,13 +24,13 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this._linkerAnnotation = linkerAnnotation;
         }
 
-        public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext ) => ThisExpression();
+        protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext ) => ThisExpression();
 
         public override bool IsAssignable => this._type.TypeKind == TypeKind.Struct;
 
         public override IType Type => this._type;
 
-        public override RunTimeTemplateExpression CreateMemberAccessExpression( string member )
+        public override TypedExpressionSyntax CreateMemberAccessExpression( string member )
             => new(
                 MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( Identifier( member ) ) )
                     .WithAspectReferenceAnnotation( this._linkerAnnotation ),

@@ -161,7 +161,8 @@ internal class AppendConstructorParameterAdvice : Advice
                         continue;
 
                     case PullActionKind.UseExpression:
-                        parameterValue = ((IUserExpression) pullParameterAction.Expression.AssertNotNull()).ToSyntax( chainedSyntaxGenerationContext );
+                        parameterValue =
+                            ((IUserExpression) pullParameterAction.Expression.AssertNotNull()).ToExpressionSyntax( chainedSyntaxGenerationContext );
 
                         break;
 

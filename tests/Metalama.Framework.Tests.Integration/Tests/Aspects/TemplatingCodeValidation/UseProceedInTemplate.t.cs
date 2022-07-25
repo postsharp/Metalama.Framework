@@ -2,7 +2,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplatingCodeValid
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-#pragma warning disable CS0067
+#pragma warning disable CS0067, CS8618, CA1822, CS0162, CS0169, CS0414
 
 
 internal class RetryAttribute : OverrideMethodAspect
@@ -15,5 +15,5 @@ internal class RetryAttribute : OverrideMethodAspect
 public void Method() => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
 
 }
-#pragma warning restore CS0067
 
+#pragma warning restore CS0067, CS8618, CA1822, CS0162, CS0169, CS0414

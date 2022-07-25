@@ -19,7 +19,7 @@ internal class FieldOrPropertyExpression : UserExpression
         this._instance = instance;
     }
 
-    public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
+    protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
     {
         if ( this._fieldOrProperty.IsStatic )
         {
@@ -32,7 +32,7 @@ internal class FieldOrPropertyExpression : UserExpression
         {
             return SyntaxFactory.MemberAccessExpression(
                 SyntaxKind.SimpleMemberAccessExpression,
-                this._instance.ToSyntax( syntaxGenerationContext ),
+                this._instance.ToExpressionSyntax( syntaxGenerationContext ),
                 SyntaxFactory.IdentifierName( this._fieldOrProperty.Name ) );
         }
         else

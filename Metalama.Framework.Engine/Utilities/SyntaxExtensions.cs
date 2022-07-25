@@ -45,5 +45,12 @@ namespace Metalama.Framework.Engine.Utilities
                 SyntaxKind.PublicKeyword => true,
                 _ => false
             };
+
+        public static ExpressionSyntax RemoveParenthesis( this ExpressionSyntax node )
+            => node switch
+            {
+                ParenthesizedExpressionSyntax parenthesized => parenthesized.Expression.RemoveParenthesis(),
+                _ => node
+            };
     }
 }

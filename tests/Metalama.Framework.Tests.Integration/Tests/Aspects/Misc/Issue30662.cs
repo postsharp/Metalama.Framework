@@ -29,10 +29,13 @@ public interface IInstanceRegistry
     void Register( object instance );
 }
 
+// <target>
+
 internal class Foo
 {
     [RegisterInstance]
     public Foo() { }
 }
 
+// <target>
 internal class Bar : Foo { }
