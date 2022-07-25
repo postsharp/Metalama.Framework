@@ -1,10 +1,13 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Text;
 
 namespace Metalama.TestFramework
@@ -15,7 +18,7 @@ namespace Metalama.TestFramework
         /// Checks for "hidden" problems in a <see cref="SyntaxTree"/>, i.e. problems where the _text_
         /// of the source code is valid, but the semantic syntax tree is not.
         /// </summary>
-        public static bool Verify( Compilation compilation, IServiceProvider serviceProvider )
+        public static bool VerifyMetaSyntax( Compilation compilation, IServiceProvider serviceProvider )
         {
             foreach ( var syntaxTree in compilation.SyntaxTrees )
             {
@@ -32,6 +35,38 @@ namespace Metalama.TestFramework
             }
 
             return true;
+        }        
+        
+        /// <summary>
+        /// Checks for "hidden" problems in a <see cref="SyntaxTree"/>, i.e. problems where the _text_
+        /// of the source code is valid, but the semantic syntax tree is not.
+        /// </summary>
+        public static bool Verify( Compilation compilation, [NotNullWhen(false)] out DiagnosticList? diagnostics )
+        {
+            diagnostics = null;
+
+            foreach ( var syntaxTree in compilation.SyntaxTrees )
+            {
+                var parsedFromText = CSharpSyntaxTree.ParseText( syntaxTree.GetRoot().ToString(), path: syntaxTree.FilePath, encoding: Encoding.UTF8, options: (CSharpParseOptions)syntaxTree.Options )
+                    .GetRoot();
+
+                foreach (var diagnostic in parsedFromText.GetDiagnostics())
+                {
+                    if ( diagnostic.Severity == DiagnosticSeverity.Error )
+                    {
+                        (diagnostics ??= new DiagnosticList()).Report( diagnostic );
+                    }
+                }
+            }
+
+            if (diagnostics == null)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }

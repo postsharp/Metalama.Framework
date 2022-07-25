@@ -21,8 +21,12 @@
     <ItemGroup>
         <!-- Exclude files that intentionally do not compile -->
         <Compile Remove="Tests\**\__*.cs" />
+        <Compile Remove="Tests\Linker\Properties\Overrides\Body\AutoProperty - Copy.t.cs" />
+        <Compile Remove="Tests\Linker\Properties\Overrides\Body\ExpressionBodies - Copy.t.cs" />
+        <Compile Remove="Tests\Linker\Properties\Overrides\Inlining\ReturnsVoid_FJ_NJ_FJ.t.cs" />
+        <Compile Remove="Tests\Linker\Properties\Overrides\Inlining\ReturnsVoid_NI_I_NI.t.cs" />
         <Compile Remove="Tests\Templating\Syntax\IfTests\IfStatement - Copy.t.cs" />
-        <None Include="Tests\**\__*.cs"/>
+        <None Include="Tests\**\__*.cs" />
     </ItemGroup>
   
     <ItemGroup>
@@ -81,6 +85,18 @@
         <Compile Remove="**\*" />
     </ItemGroup>
     <ItemGroup>
+      <None Include="Tests\Linker\Properties\Overrides\Body\AutoProperty_GetOnly.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>AutoProperty_GetOnly.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Linker\Properties\Overrides\Body\ExpressionBody.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>ExpressionBody.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Linker\Properties\Overrides\Inlining\ExpressionBody_NI.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>ExpressionBody_NI.cs</DependentUpon>
+      </None>
       <None Include="Tests\Templating\Syntax\IfTests\IfStatement - Copy.t.cs">
         <SubType>Code</SubType>
         <DependentUpon>IfExpressionStatement.cs</DependentUpon>

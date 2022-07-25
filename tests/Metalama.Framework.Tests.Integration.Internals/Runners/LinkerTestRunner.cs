@@ -86,6 +86,12 @@ namespace Metalama.Framework.Tests.Integration.Runners
             {
                 testResult.SetFailed( "Final Compilation.Emit failed." );
             }
+
+            if ( !SyntaxTreeStructureVerifier.Verify( cleanCompilation, out var diagnostics ) )
+            {
+                testResult.SetFailed( "Syntax tree verification failed." );
+                testResult.OutputCompilationDiagnostics.Report( diagnostics );
+            }
         }
 
         protected override void ExecuteAssertions( TestInput testInput, TestResult testResult, Dictionary<string, object?> state )

@@ -10,16 +10,16 @@ internal class BuildInfo
     private class Fabric : TypeFabric
     {
         [Introduce]
-        public string? TargetFramework { get; } ;
-
+        public string? TargetFramework { get; }
         [Introduce]
-        public string? Configuration { get; } ;
+        public string? Configuration { get; }
     }
 
 #pragma warning restore CS0067
 
 
-public global::System.String? Configuration { get; } = "Debug";
+    public global::System.String? Configuration { get; } = "Debug";
 
-public global::System.String? TargetFramework { get; } = "net6.0";}
+    public global::System.String? TargetFramework { get; } = "net6.0";
+}
 #pragma warning restore CS0067

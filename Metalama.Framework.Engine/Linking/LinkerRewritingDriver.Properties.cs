@@ -289,6 +289,7 @@ namespace Metalama.Framework.Engine.Linking
                                         : null
                                 }.Where( a => a != null )
                                 .AssertNoneNull() ) )
+                        .NormalizeWhitespace()
                     : property.AccessorList?.WithSourceCodeAnnotation();
 
             var expressionBody =
@@ -321,8 +322,11 @@ namespace Metalama.Framework.Engine.Linking
                                         ? AccessorDeclaration(
                                             SyntaxKind.GetAccessorDeclaration,
                                             List<AttributeListSyntax>(),
-                                            TokenList(),
-                                            ArrowExpressionClause( DefaultExpression( property.Type ) ) )
+                                            TokenList(), 
+                                            Token( SyntaxKind.GetKeyword ),  
+                                            null,
+                                            ArrowExpressionClause( DefaultExpression( property.Type ) ),
+                                            Token(SyntaxKind.SemicolonToken))
                                         : null,
                                     symbol.SetMethod != null
                                         ? AccessorDeclaration(
@@ -331,6 +335,7 @@ namespace Metalama.Framework.Engine.Linking
                                         : null
                                 }.Where( a => a != null )
                                 .AssertNoneNull() ) )
+                        .NormalizeWhitespace()
                     : property.AccessorList.AssertNotNull();
 
             return GetSpecialImplProperty( property.Type, accessorList, null, null, symbol, GetEmptyImplMemberName( symbol ) );
@@ -356,12 +361,13 @@ namespace Metalama.Framework.Engine.Linking
                         null,
                         null,
                         null )
-                    .WithAccessorList( accessorList )
-                    .WithExpressionBody( expressionBody )
                     .NormalizeWhitespace()
-                    .WithInitializer( initializer.WithSourceCodeAnnotation() )
                     .WithLeadingTrivia( ElasticLineFeed )
                     .WithTrailingTrivia( ElasticLineFeed )
+                    .WithAccessorList( accessorList )
+                    .WithExpressionBody( expressionBody )
+                    .WithInitializer( initializer.WithSourceCodeAnnotation() )
+                    .WithSemicolonToken( expressionBody != null || initializer != null ? Token( SyntaxKind.SemicolonToken ) : default )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
     }
