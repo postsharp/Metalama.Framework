@@ -3,7 +3,6 @@
 
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Xunit;
 

@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Engine.Utilities.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 #if NET5_0_OR_GREATER
 using Metalama.Backstage.Utilities;
@@ -92,8 +91,7 @@ namespace Metalama.TestFramework
                          *  - To know where sos.dll is and how to load it in WinDbg, type `dotnet sos install`.
                          *  - Follow instructions in https://docs.microsoft.com/en-us/dotnet/standard/assembly/unloadability
                          */
-                        MiniDumper.Write();
-
+                        
                         throw new InvalidOperationException(
                             "The domain could not be unloaded. There are probably dangling references. " +
                             "The following assemblies are still loaded: " + assemblies + "." );

@@ -3,7 +3,6 @@
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Telemetry;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 
 namespace Metalama.Framework.DesignTime

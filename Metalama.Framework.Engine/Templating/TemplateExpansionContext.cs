@@ -11,7 +11,6 @@ using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Microsoft.CodeAnalysis;

@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Caching;
 using System.IO;
 using System.Threading;
@@ -61,7 +60,7 @@ public class CacheTests : TestBase
 
         // Cache hit.
         Assert.Equal( "1", cache.Get( fileName, p => "X" ) );
-        
+
         // Wait more than the filesystem time resolution.
         Thread.Sleep( 1 );
 

@@ -3,7 +3,6 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Formatting;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;

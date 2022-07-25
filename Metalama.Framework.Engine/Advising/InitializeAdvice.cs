@@ -9,7 +9,6 @@ using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Linq;
 

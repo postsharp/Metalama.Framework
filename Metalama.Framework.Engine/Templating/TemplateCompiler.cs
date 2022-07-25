@@ -5,7 +5,6 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Observers;
 using Metalama.Framework.Engine.SyntaxSerialization;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;

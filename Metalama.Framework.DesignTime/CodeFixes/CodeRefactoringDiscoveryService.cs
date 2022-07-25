@@ -3,7 +3,6 @@
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.Pipeline;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;

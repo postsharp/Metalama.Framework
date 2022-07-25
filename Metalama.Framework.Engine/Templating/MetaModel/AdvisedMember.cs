@@ -5,7 +5,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Templating.Expressions;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using System.Reflection;
 

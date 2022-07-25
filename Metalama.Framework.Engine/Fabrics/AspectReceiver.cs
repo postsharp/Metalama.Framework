@@ -10,7 +10,6 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
@@ -35,7 +34,7 @@ namespace Metalama.Framework.Engine.Fabrics
         private readonly ISdkRef<IDeclaration> _containingDeclaration;
         private readonly IAspectReceiverParent _parent;
         private readonly CompilationModelVersion _compilationModelVersion;
-        private readonly Func<CompilationModel, IDiagnosticAdder, IEnumerable<T>> _selector;
+        private readonly System.Func<CompilationModel, IDiagnosticAdder, IEnumerable<T>> _selector;
 
         public AspectReceiver(
             ISdkRef<IDeclaration> containingDeclaration,

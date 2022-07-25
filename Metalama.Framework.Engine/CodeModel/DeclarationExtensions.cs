@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating.Expressions;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -467,8 +466,8 @@ namespace Metalama.Framework.Engine.CodeModel
             => namedType.AllProperties.OfName( name ).FirstOrDefault() ??
                (IMember?) namedType.AllFields.OfName( name ).FirstOrDefault() ??
                namedType.AllEvents.OfName( name ).FirstOrDefault();
-        
-           public static bool IsEventField( this IEvent @event )
+
+        public static bool IsEventField( this IEvent @event )
         {
             if ( @event is Event codeEvent )
             {

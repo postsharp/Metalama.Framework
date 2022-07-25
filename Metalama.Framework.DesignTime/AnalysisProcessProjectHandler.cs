@@ -6,7 +6,6 @@ using Metalama.Backstage.Utilities;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.SourceGeneration;
 using Metalama.Framework.Engine.Options;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
