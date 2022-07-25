@@ -60,12 +60,12 @@ public class CacheTests : TestBase
 
         // Cache hit.
         Assert.Equal( "1", cache.Get( fileName, p => "X" ) );
+        
+        // Wait more than the filesystem time resolution.
+        Thread.Sleep( 1 );
 
         // Update the file.
         File.WriteAllText( fileName, "2" );
-
-        // Wait more than the filesystem time resolution.
-        Thread.Sleep( 1 );
 
         // Cache miss. Re-read the file.
         Assert.Equal( "2", cache.Get( fileName, File.ReadAllText ) );
