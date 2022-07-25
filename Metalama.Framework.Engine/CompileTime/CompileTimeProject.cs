@@ -135,7 +135,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// Gets a <see cref="MetadataReference"/> corresponding to the current project.
         /// </summary>
         /// <returns></returns>
-        public MetadataReference ToMetadataReference() => MetadataReferenceCache.GetFromFile( this.AssertNotEmpty()._compiledAssemblyPath! );
+        public MetadataReference ToMetadataReference() => MetadataReferenceCache.GetMetadataReference( this.AssertNotEmpty()._compiledAssemblyPath! );
 
         /// <summary>
         /// Gets the unique hash of the project, computed from the source code.

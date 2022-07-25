@@ -1,15 +1,12 @@
-// Warning CS8602 on `meta.Proceed()`: `Dereference of a possibly null reference.`
-using Metalama.Framework.Aspects;
-using Metalama.Framework.Fabrics;
-using Metalama.Framework.Code;
 using System;
 using System.Linq;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Fabrics;
 #pragma warning disable CS0067, CS8618, CA1822, CS0162, CS0169, CS0414
-
 
 internal class Fabric : ProjectFabric
 {
-
     public override void AmendProject(IProjectAmender amender) => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
 
 
@@ -22,7 +19,6 @@ internal class Fabric : ProjectFabric
     {
         return true;
     }
-
 }
 
 #pragma warning restore CS0067, CS8618, CA1822, CS0162, CS0169, CS0414
@@ -36,44 +32,40 @@ public class PropOverride : OverrideFieldOrPropertyAspect
 
 #pragma warning restore CS0067, CS8618, CA1822, CS0162, CS0169, CS0414
 
-
 public class TestClass
 {
-    public string Prop132 
+    public string Prop132
     {
         get
-{
+        {
+            return (global::System.String)this.Prop132_Source?.ToUpper();
 
-        return (global::System.String)this.Prop132_Source.ToUpper();
-
-}
+        }
         set
-{
-
-        if (1 == 1)
         {
-            this.Prop132_Source = value;
-        }
+            if (1 == 1)
+            {
+                this.Prop132_Source = value;
+            }
 
-        if (1 == 1)
-        {
-            this.Prop132_Source = value;
-        }
+            if (1 == 1)
+            {
+                this.Prop132_Source = value;
+            }
 
-        if (1 == 1)
-        {
-        // x
-        }
+            if (1 == 1)
+            {
+                // x
+            }
 
-        if (1 == 1)
-        {
-            this.Prop132_Source = value;
-        }
+            if (1 == 1)
+            {
+                this.Prop132_Source = value;
+            }
 
-}
+        }
     }
-
-private string Prop132_Source { get; set; }
+    private string Prop132_Source { get; set; } = ""
 }
 
 internal class Program
@@ -86,5 +78,4 @@ internal class Program
 
         Console.WriteLine(widget.Prop132);
     }
-
 }

@@ -451,6 +451,13 @@ namespace Metalama.Framework.Engine.Templating
             }
         }
 
+        protected override ExpressionSyntax TransformStatement( StatementSyntax statement )
+        {
+            // We can get here when the parent node is a run-time `if` or `foreach` and the current node a compile-time statement
+            // that is not a block. The easiest approach is to wrap the statement into a block.
+            return (ExpressionSyntax) this.BuildRunTimeBlock( Block( statement ), true );
+        }
+
         protected override ExpressionSyntax TransformExpression( ExpressionSyntax expression, ExpressionSyntax originalExpression )
             => this.CreateRunTimeExpression( expression );
 

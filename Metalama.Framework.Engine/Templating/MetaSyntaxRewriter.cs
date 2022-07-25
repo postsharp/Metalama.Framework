@@ -95,6 +95,8 @@ namespace Metalama.Framework.Engine.Templating
 
         protected virtual ExpressionSyntax TransformExpression( ExpressionSyntax expression, ExpressionSyntax originalExpression ) => expression;
 
+        protected virtual ExpressionSyntax TransformStatement( StatementSyntax statement ) => throw new NotSupportedException();
+
         /// <summary>
         /// Transforms an put <see cref="SyntaxNode"/> into an output <see cref="ExpressionSyntax"/> instantiating the input <see cref="SyntaxNode"/>,
         /// irrespective of the <see cref="TransformationKind"/> returned by <see cref="GetTransformationKind"/>.
@@ -120,6 +122,9 @@ namespace Metalama.Framework.Engine.Templating
 
                     case ArgumentSyntax argument:
                         return this.TransformArgument( argument );
+
+                    case StatementSyntax statement:
+                        return this.TransformStatement( statement );
 
                     default:
                         throw new AssertionFailedException( $"Unexpected node kind: {node.Kind()}." );

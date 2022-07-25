@@ -38,7 +38,7 @@ public class PropOverride : OverrideFieldOrPropertyAspect
     {
         get
         {
-            return meta.Proceed().ToUpper();
+            return meta.Proceed()?.ToUpper();
         }
         set
         {
@@ -71,7 +71,7 @@ public class PropOverride : OverrideFieldOrPropertyAspect
 
 public class TestClass
 {
-    public string Prop132 { get; set; }
+    public string Prop132 { get; set; } = "";
 }
 
 internal class Program

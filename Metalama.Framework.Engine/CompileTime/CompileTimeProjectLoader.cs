@@ -255,7 +255,7 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
             return false;
         }
 
-        var assemblyIdentity = AssemblyName.GetAssemblyName( assemblyPath ).ToAssemblyIdentity();
+        var assemblyIdentity = MetadataReferenceCache.GetAssemblyName( assemblyPath ).ToAssemblyIdentity();
 
         // If the assembly is a standard one, there is no need to analyze.
         if ( this._serviceProvider.GetRequiredService<ReferenceAssemblyLocator>().StandardAssemblyNames.Contains( assemblyIdentity.Name ) )
@@ -284,7 +284,7 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
 
         if ( metadataInfo.Resources.TryGetValue( CompileTimeConstants.CompileTimeProjectResourceName, out var resourceBytes ) )
         {
-            var assemblyName = AssemblyName.GetAssemblyName( assemblyPath );
+            var assemblyName = MetadataReferenceCache.GetAssemblyName( assemblyPath );
 
             if ( !this.TryDeserializeCompileTimeProject(
                     assemblyName.ToAssemblyIdentity(),
