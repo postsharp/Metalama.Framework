@@ -18,7 +18,7 @@ namespace Metalama.Framework.Tests.UnitTests.Aspects;
 public class FormatSensitiveTests : TestBase
 {
     [Fact]
-    public async Task CompileTimeSingleStatementUnderRunTimeIf()
+    public async Task CompileTimeSingleStatementUnderRunTimeIfAsync()
     {
         var code = @"
 using System;
