@@ -1,8 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal partial class LinkerRewritingDriver
     {
-        internal class BodyRewriter : CSharpSyntaxRewriter
+        internal class BodyRewriter : SafeSyntaxRewriter
         {
             private readonly Dictionary<SyntaxNode, SyntaxNode?> _replacements;
 
@@ -40,7 +40,7 @@ namespace Metalama.Framework.Engine.Linking
                 this._replacements = replacements;
             }
 
-            public override SyntaxNode? Visit( SyntaxNode? node )
+            protected override SyntaxNode? VisitCore( SyntaxNode? node )
             {
                 if ( node == null )
                 {
@@ -56,7 +56,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    return base.Visit( node );
+                    return base.VisitCore( node );;
                 }
             }
         }

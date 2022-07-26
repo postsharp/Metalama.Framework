@@ -4,6 +4,7 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -19,7 +20,7 @@ namespace Metalama.Framework.Engine.Linking
         /// <summary>
         /// Rewriter which rewrites classes and methods producing the linked and inlined syntax tree.
         /// </summary>
-        private class LinkingRewriter : CSharpSyntaxRewriter
+        private class LinkingRewriter : SafeSyntaxRewriter
         {
             private readonly IServiceProvider _serviceProvider;
             private readonly Compilation _intermediateCompilation;

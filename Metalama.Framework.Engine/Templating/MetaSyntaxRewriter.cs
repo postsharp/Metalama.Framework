@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -22,7 +23,7 @@ namespace Metalama.Framework.Engine.Templating
     /// Most of this class is machine-generated. This class is meant to be inherited. See the only
     /// inheritor: <see cref="TemplateCompilerRewriter"/>.
     /// </remarks>
-    internal partial class MetaSyntaxRewriter : CSharpSyntaxRewriter
+    internal partial class MetaSyntaxRewriter : SafeSyntaxRewriter
     {
         private readonly Stack<string> _indentTriviaStack = new();
         private readonly IndentRewriter _indentRewriter;

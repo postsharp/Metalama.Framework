@@ -5,6 +5,7 @@ using Metalama.Backstage.Telemetry;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
 using System.IO;
@@ -24,6 +25,13 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
 
         public void ReportException( Exception exception, Action<Diagnostic> reportDiagnostic, bool canIgnoreException, out bool isHandled )
         {
+            Location? location = null;
+
+            if ( exception is SyntaxProcessingException syntaxProcessingException )
+            {
+                location = syntaxProcessingException.Location;
+            }
+
             var reportFile = DefaultPathOptions.Instance.GetNewCrashReportPath();
 
             if ( reportFile != null )
@@ -55,7 +63,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             var diagnosticDefinition =
                 canIgnoreException ? GeneralDiagnosticDescriptors.IgnorableUnhandledException : GeneralDiagnosticDescriptors.UnhandledException;
 
-            reportDiagnostic( diagnosticDefinition.CreateRoslynDiagnostic( null, (exception.Message, reportFile ?? "(none)") ) );
+            reportDiagnostic( diagnosticDefinition.CreateRoslynDiagnostic( location, (exception.Message, reportFile ?? "(none)") ) );
 
             this._exceptionReporter?.ReportException( exception );
 

@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.Templating
     /// A <see cref="CSharpSyntaxRewriter"/> that adds annotation that distinguish compile-time from
     /// run-time syntax nodes. The input should be a syntax tree annotated with a <see cref="SyntaxTreeAnnotationMap"/>.
     /// </summary>
-    internal partial class TemplateAnnotator : CSharpSyntaxRewriter
+    internal partial class TemplateAnnotator : SafeSyntaxRewriter
     {
         private readonly SyntaxTreeAnnotationMap _syntaxTreeAnnotationMap;
         private readonly IDiagnosticAdder _diagnosticAdder;
@@ -398,7 +398,7 @@ namespace Metalama.Framework.Engine.Templating
         /// </summary>
         /// <param name="node"></param>
         /// <returns></returns>
-        public override SyntaxNode? Visit( SyntaxNode? node ) => this.DefaultVisitImpl( node );
+        protected override SyntaxNode? VisitCore( SyntaxNode? node ) => this.DefaultVisitImpl( node );
 
         [return: NotNullIfNotNull( "node" )]
         private SyntaxNode? DefaultVisitImpl( SyntaxNode? node )
@@ -411,7 +411,7 @@ namespace Metalama.Framework.Engine.Templating
             this._cancellationToken.ThrowIfCancellationRequested();
 
             // Adds annotations to the children node.
-            var transformedNode = base.Visit( node );
+            var transformedNode = base.VisitCore( node );
 
             return this.AddScopeAnnotationToVisitedNode( node, transformedNode );
         }

@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -16,7 +17,7 @@ namespace Metalama.Framework.Engine.Templating
         /// <summary>
         /// A <see cref="CSharpSyntaxRewriter"/> that adds annotations.
         /// </summary>
-        private class AnnotatingRewriter : CSharpSyntaxRewriter
+        private class AnnotatingRewriter : SafeSyntaxRewriter
         {
             private readonly SemanticModel? _semanticModel;
             private readonly SyntaxTreeAnnotationMap _map;
@@ -39,7 +40,7 @@ namespace Metalama.Framework.Engine.Templating
                 return this._map.AddLocationAnnotation( token );
             }
 
-            public override SyntaxNode? Visit( SyntaxNode? node )
+            protected override SyntaxNode? VisitCore( SyntaxNode? node )
             {
                 if ( node == null )
                 {
@@ -47,7 +48,7 @@ namespace Metalama.Framework.Engine.Templating
                 }
 
                 var originalNode = node;
-                var transformedNode = base.Visit( node );
+                var transformedNode = base.VisitCore( node );
 
                 // Don't run twice.
                 if ( transformedNode.HasAnnotations( AnnotationKinds ) )

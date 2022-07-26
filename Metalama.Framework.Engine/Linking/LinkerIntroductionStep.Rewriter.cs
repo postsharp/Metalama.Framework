@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal partial class LinkerIntroductionStep
     {
-        private partial class Rewriter : CSharpSyntaxRewriter
+        private partial class Rewriter : SafeSyntaxRewriter
         {
             private readonly CompilationModel _compilation;
             private readonly ImmutableDictionary<AspectLayerId, OrderedAspectLayer> _orderedAspectLayers;

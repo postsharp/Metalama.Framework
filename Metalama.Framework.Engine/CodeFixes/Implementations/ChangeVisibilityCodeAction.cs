@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -51,7 +52,7 @@ internal class ChangeVisibilityCodeAction : ICodeAction
         return Task.CompletedTask;
     }
 
-    private class Rewriter : CSharpSyntaxRewriter
+    private class Rewriter : SafeSyntaxRewriter
     {
         private readonly IReadOnlyList<SyntaxNode> _nodes;
         private readonly ChangeVisibilityCodeAction _parent;

@@ -1095,7 +1095,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             // The default implementation of Visit(SyntaxNode) and Visit(SyntaxToken) adds the location annotations.
 
-            public override SyntaxNode? Visit( SyntaxNode? node ) => this.AddLocationAnnotation( node, base.Visit( node ) );
+            protected override SyntaxNode? VisitCore( SyntaxNode? node ) => this.AddLocationAnnotation( node, base.VisitCore( node ) );
 
             public override SyntaxToken VisitToken( SyntaxToken token ) => this._templateCompiler.LocationAnnotationMap.AddLocationAnnotation( token );
 

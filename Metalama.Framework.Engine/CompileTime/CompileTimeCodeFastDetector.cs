@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -31,7 +32,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         public static bool HasCompileTimeCode( SyntaxNode node ) => DetectCompileTimeVisitor.Instance.Visit( node );
 
-        private class DetectCompileTimeVisitor : CSharpSyntaxVisitor<bool>
+        private class DetectCompileTimeVisitor : SafeSyntaxVisitor<bool>
         {
             public static readonly DetectCompileTimeVisitor Instance = new();
 

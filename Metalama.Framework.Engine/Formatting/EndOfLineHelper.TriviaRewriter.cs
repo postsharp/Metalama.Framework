@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ namespace Metalama.Framework.Engine.Formatting
 {
     internal partial class EndOfLineHelper
     {
-        private class TriviaRewriter : CSharpSyntaxRewriter
+        private class TriviaRewriter : SafeSyntaxRewriter
         {
             private readonly ReusableTextWriter _sourceWriter = new();
             private readonly ReusableTextWriter _destWriter = new();
@@ -22,7 +23,7 @@ namespace Metalama.Framework.Engine.Formatting
                 this._targetEndOfLineStyle = targetEndOfLineStyle;
             }
 
-            public override SyntaxNode? Visit( SyntaxNode? node )
+            protected override SyntaxNode? VisitCore( SyntaxNode? node )
             {
                 if ( node == null || !node.ContainsAnnotations )
                 {
@@ -38,7 +39,7 @@ namespace Metalama.Framework.Engine.Formatting
                         {
                             this._nodeAnnotationStack.Push( NodeKind.GeneratedCode );
 
-                            return base.Visit( node );
+                            return base.VisitCore( node );
                         }
                         finally
                         {
@@ -51,7 +52,7 @@ namespace Metalama.Framework.Engine.Formatting
                         {
                             this._nodeAnnotationStack.Push( NodeKind.SourceCode );
 
-                            return base.Visit( node );
+                            return base.VisitCore( node );
                         }
                         finally
                         {
@@ -60,7 +61,7 @@ namespace Metalama.Framework.Engine.Formatting
                     }
                     else
                     {
-                        return base.Visit( node );
+                        return base.VisitCore( node );
                     }
                 }
             }
