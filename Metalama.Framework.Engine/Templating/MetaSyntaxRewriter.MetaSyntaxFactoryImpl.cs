@@ -220,6 +220,29 @@ namespace Metalama.Framework.Engine.Templating
                 return result;
             }
 
+            public ExpressionSyntax Identifier(
+                ExpressionSyntax leadingTrivia,
+                ExpressionSyntax syntaxKind,
+                ExpressionSyntax text,
+                ExpressionSyntax valueText,
+                ExpressionSyntax trailingTrivia )
+            {
+                var result = SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( nameof(SyntaxFactory.Identifier) ) )
+                    .WithArgumentList(
+                        SyntaxFactory.ArgumentList(
+                            SyntaxFactory.SeparatedList(
+                                new[]
+                                {
+                                    SyntaxFactory.Argument( leadingTrivia ),
+                                    SyntaxFactory.Argument( syntaxKind ),
+                                    SyntaxFactory.Argument( text ),
+                                    SyntaxFactory.Argument( valueText ),
+                                    SyntaxFactory.Argument( trailingTrivia )
+                                } ) ) );
+
+                return result;
+            }
+
             public ExpressionSyntax Token( ExpressionSyntax kind )
             {
                 var result = SyntaxFactory.InvocationExpression( this.SyntaxFactoryMethod( nameof(SyntaxFactory.Token) ) )

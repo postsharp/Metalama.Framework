@@ -7,7 +7,7 @@ using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Pipeline;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Diagnostics;
 
 namespace Metalama.Framework.DesignTime;
 

@@ -73,7 +73,7 @@ namespace Metalama.Framework.Aspects
         IAspectState? AspectState { get; set; }
 
         /// <summary>
-        /// Gets the name of the layer being built, or <c>null</c> if this is the current layer.
+        /// Gets the name of the layer being built, or <c>null</c> if this is the default (initial) layer.
         /// When an aspect has several layers, the <see cref="IAspect{T}.BuildAspect"/> method is called several times. To register
         /// aspect layers, add the <see cref="LayersAttribute"/> custom attribute to the aspect class.
         /// </summary>

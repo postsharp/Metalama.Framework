@@ -24,7 +24,7 @@ namespace Metalama.TestFramework
             var messageSinkOrNull = string.IsNullOrEmpty( Environment.GetEnvironmentVariable( "LogMetalamaTestFramework" ) )
                 ? null
                 : messageSink;
-            
+
             const string debugEnvironmentVariable = "DebugMetalamaTestFramework";
 
             if ( !string.IsNullOrEmpty( Environment.GetEnvironmentVariable( debugEnvironmentVariable ) ) )

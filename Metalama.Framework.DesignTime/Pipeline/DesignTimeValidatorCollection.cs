@@ -3,7 +3,7 @@
 
 using K4os.Hash.xxHash;
 using Metalama.Framework.Engine.Collections;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 

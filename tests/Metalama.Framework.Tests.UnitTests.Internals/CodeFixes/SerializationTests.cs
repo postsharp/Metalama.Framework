@@ -3,7 +3,7 @@
 
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.CodeFixes;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Formatting;

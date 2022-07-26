@@ -9,7 +9,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -60,13 +60,15 @@ namespace Metalama.Framework.Engine.Templating
             {
                 if ( comment.Contains( '\n' ) || comment.Contains( '\r' ) )
                 {
-                    yield return SyntaxFactory.ElasticLineFeed;
+                    yield return SyntaxFactory.ElasticCarriageReturnLineFeed;
                     yield return SyntaxFactory.Comment( "/* " + comment + " */" );
+                    yield return SyntaxFactory.ElasticCarriageReturnLineFeed;
                 }
                 else
                 {
-                    yield return SyntaxFactory.ElasticLineFeed;
+                    yield return SyntaxFactory.ElasticCarriageReturnLineFeed;
                     yield return SyntaxFactory.Comment( "// " + comment );
+                    yield return SyntaxFactory.ElasticCarriageReturnLineFeed;
                 }
             }
 
