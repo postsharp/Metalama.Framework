@@ -1,7 +1,7 @@
 public interface InterfaceB : InterfaceA
 {
     [Override]
-    event EventHandler InterfaceA.EventA
+    event EventHandler? InterfaceA.EventA
     {
         add
         {
@@ -17,7 +17,7 @@ public interface InterfaceB : InterfaceA
     }
 
     [Override]
-    event EventHandler EventB
+    event EventHandler? EventB
     {
         add
         {
