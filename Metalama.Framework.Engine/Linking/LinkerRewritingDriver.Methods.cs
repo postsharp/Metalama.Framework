@@ -187,6 +187,7 @@ namespace Metalama.Framework.Engine.Linking
                     .WithTrailingTrivia( ElasticLineFeed )
                     .WithBody( body )
                     .WithExpressionBody( expressionBody )
+                    .WithSemicolonToken( expressionBody != null ? Token( SyntaxKind.SemicolonToken ) : default )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
     }

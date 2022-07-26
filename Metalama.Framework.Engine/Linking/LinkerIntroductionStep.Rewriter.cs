@@ -138,13 +138,17 @@ namespace Metalama.Framework.Engine.Linking
                     var disable = Trivia(
                         PragmaWarningDirectiveTrivia( Token( SyntaxKind.DisableKeyword ), true )
                             .WithErrorCodes( errorCodes )
-                            .NormalizeWhitespace() );
+                            .NormalizeWhitespace()
+                            .WithLeadingTrivia( ElasticLineFeed )
+                            .WithTrailingTrivia( ElasticLineFeed ) );
 
                     var restore =
                         Trivia(
                             PragmaWarningDirectiveTrivia( Token( SyntaxKind.RestoreKeyword ), true )
                                 .WithErrorCodes( errorCodes )
-                                .NormalizeWhitespace() );
+                                .NormalizeWhitespace()
+                                .WithLeadingTrivia( ElasticLineFeed )
+                                .WithTrailingTrivia( ElasticLineFeed ) );
 
                     transformedNode =
                         transformedNode
@@ -262,12 +266,20 @@ namespace Metalama.Framework.Engine.Linking
                     else
                     {
                         // If we are removing a custom attribute, keep its trivia.
-                        outputTrivia.AddRange(
-                            list.GetLeadingTrivia()
-                                .Where(
-                                    t => t.Kind() is SyntaxKind.MultiLineCommentTrivia
-                                        or SyntaxKind.MultiLineDocumentationCommentTrivia or
-                                        SyntaxKind.SingleLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia ) );
+                        foreach ( var trivia in list.GetLeadingTrivia() )
+                        {
+                            switch ( trivia.Kind() )
+                            {
+                                case SyntaxKind.MultiLineCommentTrivia or SyntaxKind.MultiLineDocumentationCommentTrivia:
+                                    outputTrivia.Add( trivia );
+                                    break;
+
+                                case SyntaxKind.SingleLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia:
+                                    outputTrivia.Add( trivia );
+                                    outputTrivia.Add( ElasticLineFeed );
+                                    break;
+                            }
+                        }
                     }
                 }
 
@@ -282,7 +294,7 @@ namespace Metalama.Framework.Engine.Linking
                             .AssertNotNull();
 
                         var newList = AttributeList( SingletonSeparatedList( newAttribute ) )
-                            .WithTrailingTrivia( ElasticCarriageReturn )
+                            .WithTrailingTrivia( ElasticLineFeed )
                             .WithAdditionalAnnotations( attributeBuilder.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation );
 
                         if ( targetKind != SyntaxKind.None )
@@ -881,7 +893,7 @@ namespace Metalama.Framework.Engine.Linking
                         var eventDeclaration = EventFieldDeclaration(
                                 attributes.Attributes,
                                 node.Modifiers,
-                                Token( SyntaxKind.EventKeyword ),
+                                Token( TriviaList(), SyntaxKind.EventKeyword, TriviaList( ElasticSpace ) ),
                                 declaration,
                                 Token( SyntaxKind.SemicolonToken ) )
                             .WithTrailingTrivia( ElasticLineFeed )

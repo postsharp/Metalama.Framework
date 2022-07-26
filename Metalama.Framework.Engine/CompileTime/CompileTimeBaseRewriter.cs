@@ -79,9 +79,11 @@ namespace Metalama.Framework.Engine.CompileTime
             StructuredTriviaSyntax GetPragmaTrivia( bool disable )
                 => PragmaWarningDirectiveTrivia(
                     Token( SyntaxKind.HashToken ).WithLeadingTrivia( ElasticLineFeed ),
-                    Token( SyntaxKind.PragmaKeyword ),
-                    Token( SyntaxKind.WarningKeyword ),
-                    disable ? Token( SyntaxKind.DisableKeyword ) : Token( SyntaxKind.RestoreKeyword ),
+                    Token( SyntaxKind.PragmaKeyword ).WithTrailingTrivia( ElasticSpace ),
+                    Token( SyntaxKind.WarningKeyword ).WithTrailingTrivia( ElasticSpace ),
+                    disable 
+                    ? Token( SyntaxKind.DisableKeyword ).WithTrailingTrivia( ElasticSpace ) 
+                    : Token( SyntaxKind.RestoreKeyword ).WithTrailingTrivia( ElasticSpace ),
                     SeparatedList<ExpressionSyntax>( suppressedDiagnostics.Select( diagnosticCode => IdentifierName( diagnosticCode ) ) ),
                     Token( SyntaxKind.EndOfDirectiveToken ).WithTrailingTrivia( ElasticLineFeed ),
                     true );
@@ -129,7 +131,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                 isIterator
                                     ? null
                                     : ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
-                            .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) )
+                            .WithSemicolonToken( isIterator ? default : Token( SyntaxKind.SemicolonToken ) )
                             .NormalizeWhitespace()
                             .WithLeadingTrivia( method.GetLeadingTrivia() )
                             .WithTrailingTrivia( LineFeed, LineFeed ),

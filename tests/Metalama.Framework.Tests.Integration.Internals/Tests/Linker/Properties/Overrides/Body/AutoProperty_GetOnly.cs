@@ -1,17 +1,12 @@
 ﻿using System;
 using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Linker.Properties.Overrides.ExpressionBodies
+namespace Metalama.Framework.Tests.Integration.Tests.Linker.Properties.Overrides.Body.AutoProperty_GetOnly
 {
     // <target>
     class Target
     {
-        int _foo;
-        int Foo
-        {
-            get => this._foo;
-            set => this._foo = value;
-        }
+        int Foo { get; }
 
         [PseudoOverride( nameof(Foo),"TestAspect")]
         int Foo_Override

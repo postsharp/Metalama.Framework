@@ -169,6 +169,13 @@ namespace Metalama.TestFramework
                        && !testInput.Options.IgnoredDiagnostics.Contains( d.Id );
             }
 
+            if ( !SyntaxTreeStructureVerifier.Verify( resultCompilation, out var diagnostics ) )
+            {
+                testResult.SetFailed( "Syntax tree verification failed." );
+                testResult.OutputCompilationDiagnostics.Report( diagnostics );
+                return false;
+            }
+
             if ( !testInput.Options.OutputCompilationDisabled.GetValueOrDefault() )
             {
                 // We don't build the PDB because the syntax trees were not written to disk anyway.

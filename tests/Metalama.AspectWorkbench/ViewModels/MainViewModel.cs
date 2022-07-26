@@ -165,7 +165,7 @@ namespace Metalama.AspectWorkbench.ViewModels
 
                     if ( testResult.CompileTimeCompilation != null )
                     {
-                        if ( !SyntaxTreeStructureVerifier.Verify( testResult.CompileTimeCompilation, serviceProvider ) )
+                        if ( !SyntaxTreeStructureVerifier.VerifyMetaSyntax( testResult.CompileTimeCompilation, serviceProvider ) )
                         {
                             testResult.SetFailed(
                                 "The compiled template syntax tree object model is incorrect: roundloop parsing verification failed. Add a breakpoint in SyntaxTreeStructureVerifier.Verify and diff manually." );

@@ -1,7 +1,7 @@
 ﻿using System;
 using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Linker.Properties.Overrides.BlockBodies
+namespace Metalama.Framework.Tests.Integration.Tests.Linker.Properties.Overrides.Body.BlockBodies
 {
     // <target>
     class Target
