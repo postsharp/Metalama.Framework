@@ -597,7 +597,6 @@ namespace Metalama.Framework.Engine.CompileTime
             IReadOnlyList<SyntaxTree> compileTimeSyntaxTrees,
             CancellationToken cancellationToken )
         {
-            // TODO: Check that the mapper is not already registered.
             var allSerializableTypes = new Dictionary<ISymbol, SerializableTypeInfo>( SymbolEqualityComparer.Default );
             var reflectionMapper = this._reflectionMapperFactory.GetInstance( runTimeCompilation );
             var classifier = this._classifierFactory.GetClassifier( runTimeCompilation );
