@@ -5,6 +5,7 @@ using K4os.Hash.xxHash;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Validation;
 using Microsoft.CodeAnalysis;

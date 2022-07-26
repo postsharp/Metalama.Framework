@@ -324,7 +324,11 @@ namespace Metalama.Framework.Engine.CodeModel
 
                 if ( replacedTrees.Any( t => t.NewTree.Encoding == null ) && HasInitialCompilationEncoding() )
                 {
-                    throw new ArgumentOutOfRangeException( nameof(addedTrees), "The SyntaxTree.Encoding property of the new SyntaxTree cannot be null." );
+                    var invalidTrees = replacedTrees.Where( t => t.NewTree.Encoding == null ).Select( x => $"'{x.FilePath}'" );
+
+                    throw new ArgumentOutOfRangeException(
+                        nameof(addedTrees),
+                        $"The SyntaxTree.Encoding property of these SyntaxTrees cannot be null: {string.Join( ", ", invalidTrees )}" );
                 }
             }
         }

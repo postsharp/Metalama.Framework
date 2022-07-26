@@ -113,7 +113,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             {
                 // TODO: Error about the expression type?
                 initializerMethodSyntax = null;
-                initializerExpressionSyntax = ((IUserExpression) initializerExpression).ToSyntax( context.SyntaxGenerationContext );
+                initializerExpressionSyntax = ((IUserExpression) initializerExpression).ToExpressionSyntax( context.SyntaxGenerationContext );
 
                 return true;
             }

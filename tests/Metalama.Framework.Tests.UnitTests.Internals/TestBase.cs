@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;

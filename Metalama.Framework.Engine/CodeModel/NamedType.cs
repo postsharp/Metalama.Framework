@@ -8,6 +8,8 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Comparers;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;

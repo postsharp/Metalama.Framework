@@ -5,6 +5,7 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating.Mapping;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -255,7 +256,7 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
             return false;
         }
 
-        var assemblyIdentity = AssemblyName.GetAssemblyName( assemblyPath ).ToAssemblyIdentity();
+        var assemblyIdentity = MetadataReferenceCache.GetAssemblyName( assemblyPath ).ToAssemblyIdentity();
 
         // If the assembly is a standard one, there is no need to analyze.
         if ( this._serviceProvider.GetRequiredService<ReferenceAssemblyLocator>().StandardAssemblyNames.Contains( assemblyIdentity.Name ) )
@@ -284,7 +285,7 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
 
         if ( metadataInfo.Resources.TryGetValue( CompileTimeConstants.CompileTimeProjectResourceName, out var resourceBytes ) )
         {
-            var assemblyName = AssemblyName.GetAssemblyName( assemblyPath );
+            var assemblyName = MetadataReferenceCache.GetAssemblyName( assemblyPath );
 
             if ( !this.TryDeserializeCompileTimeProject(
                     assemblyName.ToAssemblyIdentity(),

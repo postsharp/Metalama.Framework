@@ -1,29 +1,19 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Engine.Utilities.Caching;
 using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Concurrent;
-using System.IO;
+using System.Reflection;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
     internal static class MetadataReferenceCache
     {
-        private static readonly ConcurrentDictionary<string, (MetadataReference Reference, DateTime LastWriteTime)> _cache =
-            new( StringComparer.Ordinal );
+        private static readonly FileBasedCache<MetadataReference> _metadataReferences = new();
+        private static readonly FileBasedCache<AssemblyName> _assemblyNames = new();
 
-        public static MetadataReference GetFromFile( string path )
-        {
-            var lastWriteTime = File.GetLastWriteTime( path );
+        public static MetadataReference GetMetadataReference( string path ) => _metadataReferences.Get( path, p => MetadataReference.CreateFromFile( p ) );
 
-            if ( !_cache.TryGetValue( path, out var cached ) || lastWriteTime > cached.LastWriteTime )
-            {
-                cached = (MetadataReference.CreateFromFile( path ), lastWriteTime);
-                _cache[path] = cached;
-            }
-
-            return cached.Reference;
-        }
+        public static AssemblyName GetAssemblyName( string path ) => _assemblyNames.Get( path, AssemblyName.GetAssemblyName );
     }
 }

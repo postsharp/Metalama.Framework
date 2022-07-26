@@ -21,10 +21,8 @@ namespace Metalama.TestFramework.XunitFramework
     {
         private readonly TestFactory _factory;
 
-        public TestExecutor( AssemblyName assemblyName, IMessageSink messageSink )
+        public TestExecutor( AssemblyName assemblyName )
         {
-            _ = messageSink;
-
             var assembly = Assembly.Load( assemblyName );
             var assemblyInfo = new ReflectionAssemblyInfo( assembly );
             TestDiscoverer discoverer = new( assemblyInfo );

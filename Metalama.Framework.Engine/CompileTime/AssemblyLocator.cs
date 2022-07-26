@@ -9,7 +9,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
@@ -45,7 +44,7 @@ namespace Metalama.Framework.Engine.CompileTime
         private static AssemblyIdentity? GetAssemblyIdentity( MetadataReference r )
             => r switch
             {
-                PortableExecutableReference { FilePath: { } } pe => AssemblyName.GetAssemblyName( pe.FilePath ).ToAssemblyIdentity(),
+                PortableExecutableReference { FilePath: { } } pe => MetadataReferenceCache.GetAssemblyName( pe.FilePath ).ToAssemblyIdentity(),
                 CompilationReference c => c.Compilation.Assembly.Identity,
                 _ => null
             };

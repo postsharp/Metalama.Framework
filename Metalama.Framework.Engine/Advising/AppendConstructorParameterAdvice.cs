@@ -10,7 +10,6 @@ using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -161,7 +160,8 @@ internal class AppendConstructorParameterAdvice : Advice
                         continue;
 
                     case PullActionKind.UseExpression:
-                        parameterValue = ((IUserExpression) pullParameterAction.Expression.AssertNotNull()).ToSyntax( chainedSyntaxGenerationContext );
+                        parameterValue =
+                            ((IUserExpression) pullParameterAction.Expression.AssertNotNull()).ToExpressionSyntax( chainedSyntaxGenerationContext );
 
                         break;
 

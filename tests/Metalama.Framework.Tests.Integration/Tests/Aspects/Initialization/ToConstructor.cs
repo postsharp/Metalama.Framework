@@ -1,9 +1,9 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
-#pragma warning disable CS0414
-
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Initialization.ToConstructor;
+
+#pragma warning disable CS0414
 
 public class MyAspect : ConstructorAspect
 {
@@ -21,6 +21,9 @@ public class MyAspect : ConstructorAspect
         _f = 5;
     }
 }
+
+// CS0414 is restored when the aspect is transformed, so we need to suppress it again.
+#pragma warning disable CS0414
 
 // <target>
 public class C

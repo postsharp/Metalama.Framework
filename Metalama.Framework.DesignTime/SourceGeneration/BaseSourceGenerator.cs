@@ -5,14 +5,12 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Compiler;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using AnalyzerConfigOptions = Microsoft.CodeAnalysis.Diagnostics.AnalyzerConfigOptions;
-
-#pragma warning disable SA1414 // Tuple items must have names.
 
 namespace Metalama.Framework.DesignTime.SourceGeneration
 {

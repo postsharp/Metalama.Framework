@@ -4,6 +4,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
@@ -20,35 +21,68 @@ namespace Metalama.Framework.Engine.CodeModel
 
             public override SyntaxNode? VisitGenericName( GenericNameSyntax node )
             {
-                var oldType = (INamedTypeSymbol) this._type;
+                var type = (INamedTypeSymbol) this._type;
 
                 var argumentsCount = node.TypeArgumentList.Arguments.Count;
                 var typeArguments = new TypeSyntax[argumentsCount];
 
                 for ( var i = 0; i < argumentsCount; i++ )
                 {
-                    this._type = oldType.TypeArguments[i];
-                    typeArguments[i] = (TypeSyntax) this.Visit( node.TypeArgumentList.Arguments[i] );
+                    using ( this.WithType( type.TypeArguments[i] ) )
+                    {
+                        typeArguments[i] = (TypeSyntax) this.Visit( node.TypeArgumentList.Arguments[i] );
+                    }
                 }
-
-                this._type = oldType;
 
                 return node.WithTypeArgumentList( SyntaxFactory.TypeArgumentList( SyntaxFactory.SeparatedList( typeArguments ) ) );
             }
 
             public override SyntaxNode? VisitArrayType( ArrayTypeSyntax node )
             {
-                var oldType = (IArrayTypeSymbol) this._type;
-                this._type = oldType.ElementType;
+                var type = (IArrayTypeSymbol) this._type;
 
-                try
+                using ( this.WithType( type.ElementType ) )
                 {
                     return base.VisitArrayType( node );
                 }
-                finally
+            }
+
+            public override SyntaxNode? VisitTupleType( TupleTypeSyntax node )
+            {
+                var type = (INamedTypeSymbol) this._type;
+
+                var elements = new TupleElementSyntax[node.Elements.Count];
+
+                for ( var i = 0; i < node.Elements.Count; i++ )
                 {
-                    this._type = oldType;
+                    using ( this.WithType( type.TupleElements[i].Type ) )
+                    {
+                        elements[i] = (TupleElementSyntax) this.VisitTupleElement( node.Elements[i] )!;
+                    }
                 }
+
+                return node.WithElements( SyntaxFactory.SeparatedList( elements ) );
+            }
+
+            public override SyntaxNode? VisitFunctionPointerType( FunctionPointerTypeSyntax node )
+            {
+                var type = (IFunctionPointerTypeSymbol) this._type;
+
+                var parameters = new FunctionPointerParameterSyntax[node.ParameterList.Parameters.Count];
+
+                var lastParameterIndex = node.ParameterList.Parameters.Count - 1;
+
+                for ( var i = 0; i < node.ParameterList.Parameters.Count; i++ )
+                {
+                    var parameterType = i == lastParameterIndex ? type.Signature.ReturnType : type.Signature.Parameters[i].Type;
+
+                    using ( this.WithType( parameterType ) )
+                    {
+                        parameters[i] = (FunctionPointerParameterSyntax) this.VisitFunctionPointerParameter( node.ParameterList.Parameters[i] )!;
+                    }
+                }
+
+                return node.WithParameterList( SyntaxFactory.FunctionPointerParameterList( SyntaxFactory.SeparatedList( parameters ) ) );
             }
 
             public override SyntaxNode? VisitNullableType( NullableTypeSyntax node )
@@ -62,6 +96,31 @@ namespace Metalama.Framework.Engine.CodeModel
                 {
                     // Keep it.
                     return base.VisitNullableType( node );
+                }
+            }
+
+            private WithTypeCookie WithType( ITypeSymbol type )
+            {
+                var cookie = new WithTypeCookie( this, this._type );
+                this._type = type;
+
+                return cookie;
+            }
+
+            private struct WithTypeCookie : IDisposable
+            {
+                private readonly RemoveReferenceNullableAnnotationsRewriter _parent;
+                private readonly ITypeSymbol _oldType;
+
+                public WithTypeCookie( RemoveReferenceNullableAnnotationsRewriter parent, ITypeSymbol oldType )
+                {
+                    this._parent = parent;
+                    this._oldType = oldType;
+                }
+
+                public void Dispose()
+                {
+                    this._parent._type = this._oldType;
                 }
             }
         }

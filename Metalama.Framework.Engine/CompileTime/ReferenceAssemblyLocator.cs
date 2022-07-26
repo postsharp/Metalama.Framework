@@ -88,8 +88,8 @@ namespace Metalama.Framework.Engine.CompileTime
                     x => x.Assembly.GetName().Name,
                     x => x.Assembly.Location );
 
-            // Force Metalama.Compiler.Interface to be loaded.
-            _ = typeof(ISourceTransformer);
+            // Force Metalama.Compiler.Interface to be loaded in the AppDomain.
+            MetalamaCompilerInfo.EnsureInitialized();
 
             // Add the Metalama.Compiler.Interface" assembly. We cannot get it through typeof because types are directed to Microsoft.CodeAnalysis at compile time.
             // Strangely, there can be many instances of this same assembly.
@@ -146,7 +146,7 @@ namespace Metalama.Framework.Engine.CompileTime
             this.StandardCompileTimeMetadataReferences =
                 this.SystemAssemblyPaths
                     .Concat( metalamaImplementationPaths )
-                    .Select( MetadataReferenceCache.GetFromFile )
+                    .Select( MetadataReferenceCache.GetMetadataReference )
                     .Concat( embeddedAssemblies )
                     .ToImmutableArray();
         }

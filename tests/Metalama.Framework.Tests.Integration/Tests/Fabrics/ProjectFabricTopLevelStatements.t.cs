@@ -1,3 +1,4 @@
+
 // --- ProjectFabricTopLevelStatements.cs ---
 
 using System;
@@ -8,7 +9,7 @@ using Metalama.TestFramework;
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Fabrics.ProjectFabricTopLevelStatements
 {
-#pragma warning disable CS0067
+#pragma warning disable CS0067, CS8618, CA1822, CS0162, CS0169, CS0414
     /*
      * Tests that applying an override on all methods does not target the Main method containing top-level statements.
      */
@@ -19,8 +20,8 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Fabrics.ProjectFabricTopLe
 
     }
 
-#pragma warning restore CS0067
-#pragma warning disable CS0067
+#pragma warning restore CS0067, CS8618, CA1822, CS0162, CS0169, CS0414
+#pragma warning disable CS0067, CS8618, CA1822, CS0162, CS0169, CS0414
 
     public class MyProjectFabric : ProjectFabric
     {
@@ -28,11 +29,11 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Fabrics.ProjectFabricTopLe
 
     }
 
-#pragma warning restore CS0067
+#pragma warning restore CS0067, CS8618, CA1822, CS0162, CS0169, CS0414
 }
-    
-    // --- __TopLevelStatements.cs ---
-    
-    using System;
-    
-    Console.WriteLine("TopLevelStatement");
+
+// --- __TopLevelStatements.cs ---
+
+using System;
+
+Console.WriteLine("TopLevelStatement");

@@ -1,17 +1,19 @@
+// Warning CS0414 on `_a`: `The field 'C._a' is assigned but its value is never used`
+// Warning CS0414 on `_b`: `The field 'C._b' is assigned but its value is never used`
 internal class C
 {
     [KeepIt]
     private C() { }
 
     [KeepIt]
-    private void M(int p) { }
-    [KeepIt]
+    private void M( int p ) { }
+[KeepIt]
     private int _a = 5;
-    [KeepIt]
+[KeepIt]
     private int _b = 3;
-    [KeepIt]
+[KeepIt]
     private event Action MyEvent1;
-    [KeepIt]
+[KeepIt]
     private event Action MyEvent2;
     [KeepIt]
     private event Action MyEvent3;
