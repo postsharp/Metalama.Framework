@@ -10,6 +10,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
+#pragma warning disable CS0067
+
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Events.InterfaceDefaultMember
 {
     /*
@@ -33,7 +35,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Events.In
 
     public interface InterfaceA
     {
-        event EventHandler EventA;
+        event EventHandler? EventA;
     }
 
     // <target>
@@ -41,7 +43,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Events.In
     {
 #if NET5_0_OR_GREATER
         [Override]
-        event EventHandler InterfaceA.EventA
+        event EventHandler? InterfaceA.EventA
         {
             add
             {
@@ -55,7 +57,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Events.In
         }
 
         [Override]
-        event EventHandler EventB
+        event EventHandler? EventB
         {
             add
             {
@@ -74,7 +76,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Events.In
     public class TargetClass : InterfaceB
     {
 #if !NET5_0_OR_GREATER
-        public event EventHandler EventA;
+        public event EventHandler? EventA;
 #endif
     }
 }
