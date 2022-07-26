@@ -1,3 +1,4 @@
+using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
@@ -7,16 +8,57 @@ public class MyAspect : TypeAspect
 {
     public override void BuildAspect( IAspectBuilder<INamedType> builder )
     {
-        builder.Advice.WithTemplateProvider( new TemplateProvider() ).IntroduceProperty( builder.Target, "MyProperty" );
+        var templateProvider = new TemplateProvider();
+
+        builder.Advice.WithTemplateProvider( templateProvider ).IntroduceProperty( builder.Target, nameof(TemplateProvider.IntroducedProperty) );
+
+        foreach (var property in builder.Target.Properties)
+        {
+            builder.Advice.WithTemplateProvider( templateProvider ).Override( property, nameof(TemplateProvider.OverrideTemplate) );
+        }
     }
 }
 
 internal class TemplateProvider : ITemplateProvider
 {
     [Template]
-    public string MyProperty => meta.Target.Type.Name;
+    public string OverrideTemplate
+    {
+        get
+        {
+            Console.WriteLine( $"Getting {meta.Target.Type.Name}." );
+
+            return meta.Proceed();
+        }
+
+        set
+        {
+            Console.WriteLine( $"Setting {meta.Target.Type.Name} to '{value}'." );
+            meta.Proceed();
+        }
+    }
+
+    [Template]
+    public string IntroducedProperty
+    {
+        get
+        {
+            Console.WriteLine( $"Getting {meta.Target.Type.Name}." );
+
+            return meta.Proceed();
+        }
+
+        set
+        {
+            Console.WriteLine( $"Setting {meta.Target.Type.Name} to '{value}'." );
+            meta.Proceed();
+        }
+    }
 }
 
 // <target>
 [MyAspect]
-public class C { }
+public class C
+{
+    private int P { get; set; }
+}
