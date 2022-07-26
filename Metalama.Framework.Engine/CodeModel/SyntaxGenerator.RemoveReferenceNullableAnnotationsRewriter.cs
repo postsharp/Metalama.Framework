@@ -51,6 +51,11 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 var type = (INamedTypeSymbol) this._type;
 
+                if ( type.NullableAnnotation == NullableAnnotation.Annotated )
+                {
+                    type = (INamedTypeSymbol) type.TypeArguments[0];
+                }
+
                 var elements = new TupleElementSyntax[node.Elements.Count];
 
                 for ( var i = 0; i < node.Elements.Count; i++ )

@@ -437,7 +437,8 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
 
                 // Add serialization logic if the type is serializable and this is the primary declaration.
-                if ( this._serializableTypes.TryGetValue( symbol, out var serializableType ) )
+                if ( this._serializableTypes.TryGetValue( symbol, out var serializableType )
+                     && symbol.GetPrimaryDeclaration() == node )
                 {
                     var serializedTypeName = this.CreateNameExpression( serializableType.Type );
 

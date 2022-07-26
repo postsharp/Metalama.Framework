@@ -28,7 +28,6 @@ namespace Metalama.Framework.Engine.Utilities
 
         public bool IsUnattendedProcess( ILoggerFactory loggerFactory ) => ProcessUtilities.IsCurrentProcessUnattended( loggerFactory );
 
-#pragma warning disable CA1822 // Mark members as static
         public bool IsTelemetryEnabled
             =>
 #if DEBUG
@@ -36,7 +35,6 @@ namespace Metalama.Framework.Engine.Utilities
 #else
             true;
 #endif
-#pragma warning restore CA1822 // Mark members as static
 
         public MetalamaApplicationInfo()
         {

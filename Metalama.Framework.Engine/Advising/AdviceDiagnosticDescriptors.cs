@@ -76,7 +76,7 @@ namespace Metalama.Framework.Engine.Advising
             MissingDeclarativeInterfaceMember = new(
                 "LAMA0510",
                 "Declarative interface member introduction is missing.",
-                "The aspect '{0}' cannot implicitly introduce interface '{1}' into the type '{2}' because it" +
+                "The aspect '{0}' cannot implicitly introduce interface '{2}' into the type '{1}' because it" +
                 " does not contain a declarative introduction (using [InterfaceMember]) for the interface member '{3}'.",
                 _category,
                 Error );
