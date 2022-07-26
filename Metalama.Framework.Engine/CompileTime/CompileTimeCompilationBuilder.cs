@@ -598,9 +598,21 @@ namespace Metalama.Framework.Engine.CompileTime
             CancellationToken cancellationToken )
         {
             // TODO: Check that the mapper is not already registered.
-            var allSerializableTypes = new List<SerializableTypeInfo>();
+            var allSerializableTypes = new Dictionary<ISymbol, SerializableTypeInfo>( SymbolEqualityComparer.Default );
             var reflectionMapper = this._reflectionMapperFactory.GetInstance( runTimeCompilation );
             var classifier = this._classifierFactory.GetClassifier( runTimeCompilation );
+
+            void OnSerializableTypeDiscovered( SerializableTypeInfo type )
+            {
+                if ( allSerializableTypes.TryGetValue( type.Type, out var existingType ) )
+                {
+                    existingType.SerializedMembers.AddRange( type.SerializedMembers );
+                }
+                else
+                {
+                    allSerializableTypes[type.Type] = type;
+                }
+            }
 
             foreach ( var tree in compileTimeSyntaxTrees )
             {
@@ -608,14 +620,13 @@ namespace Metalama.Framework.Engine.CompileTime
                     runTimeCompilation.GetSemanticModel( tree, true ),
                     reflectionMapper,
                     classifier,
+                    OnSerializableTypeDiscovered,
                     cancellationToken );
 
                 visitor.Visit( tree.GetRoot() );
-
-                allSerializableTypes.AddRange( visitor.SerializableTypes );
             }
 
-            return allSerializableTypes;
+            return allSerializableTypes.Values.ToList();
         }
 
         /// <summary>
