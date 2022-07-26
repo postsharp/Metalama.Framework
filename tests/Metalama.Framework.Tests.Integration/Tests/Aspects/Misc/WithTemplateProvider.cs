@@ -22,7 +22,7 @@ public class MyAspect : TypeAspect
 internal class TemplateProvider : ITemplateProvider
 {
     [Template]
-    public string OverrideTemplate
+    public string? OverrideTemplate
     {
         get
         {
@@ -45,13 +45,12 @@ internal class TemplateProvider : ITemplateProvider
         {
             Console.WriteLine( $"Getting {meta.Target.Type.Name}." );
 
-            return meta.Proceed();
+            return "IntroducedProperty";
         }
 
         set
         {
             Console.WriteLine( $"Setting {meta.Target.Type.Name} to '{value}'." );
-            meta.Proceed();
         }
     }
 }
