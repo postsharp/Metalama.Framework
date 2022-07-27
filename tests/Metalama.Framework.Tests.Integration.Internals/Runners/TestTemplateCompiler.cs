@@ -137,7 +137,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                     return transformedNodes[this._item];
                 }
 
-                return this.Visit( node );
+                return base.VisitCore( node );
             }
         }
     }
