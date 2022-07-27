@@ -15,8 +15,6 @@ namespace Metalama.Framework.Engine.Linking
     {
         private class CleanupRewriter : SafeSyntaxRewriter
         {
-            public override SyntaxNode? VisitIdentifierName( IdentifierNameSyntax node ) => throw new Exception();
-
             private readonly IProjectOptions? _projectOptions;
 
             public CleanupRewriter( IProjectOptions? projectOptions )
