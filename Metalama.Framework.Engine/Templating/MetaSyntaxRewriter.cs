@@ -119,7 +119,7 @@ namespace Metalama.Framework.Engine.Templating
                 switch ( node )
                 {
                     case ExpressionSyntax expression:
-                        return this.TransformExpression( (ExpressionSyntax) this.Visit( expression ), expression );
+                        return this.TransformExpression( (ExpressionSyntax) this.Visit( expression )!, expression );
 
                     case ArgumentSyntax argument:
                         return this.TransformArgument( argument );
@@ -133,7 +133,7 @@ namespace Metalama.Framework.Engine.Templating
             }
             else
             {
-                return (ExpressionSyntax) this.Visit( node );
+                return (ExpressionSyntax) this.Visit( node )!;
             }
         }
 

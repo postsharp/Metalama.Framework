@@ -56,7 +56,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    return base.VisitCore( node );;
+                    return base.VisitCore( node );
                 }
             }
         }

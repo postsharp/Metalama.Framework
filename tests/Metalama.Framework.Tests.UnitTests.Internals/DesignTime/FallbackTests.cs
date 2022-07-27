@@ -144,7 +144,7 @@ public class TargetClass
             {
                 inputCompilation = inputCompilation.ReplaceSyntaxTree(
                     inputSyntaxTree,
-                    inputSyntaxTree.WithRootAndOptions( RemovingRewriter.Instance.Visit( await inputSyntaxTree.GetRootAsync() ), inputSyntaxTree.Options ) );
+                    inputSyntaxTree.WithRootAndOptions( RemovingRewriter.Instance.Visit( await inputSyntaxTree.GetRootAsync() )!, inputSyntaxTree.Options ) );
             }
 
             // Replace the project options to enable design time fallback.

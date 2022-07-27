@@ -21,9 +21,9 @@ public abstract class SafeSyntaxWalker : CSharpSyntaxWalker
         {
             this.VisitCore( node );
         }
-        catch ( Exception e ) when ( node != null )
+        catch ( Exception e ) when ( SyntaxProcessingException.ShouldWrapException( e, node ) )
         {
-            throw new SyntaxProcessingException( node, e );
+            throw new SyntaxProcessingException( e, node );
         }
     }
 

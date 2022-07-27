@@ -19,7 +19,7 @@ public static partial class SyntaxFactoryDebugHelper
         try
         {
             var normalized = NormalizeRewriter.Instance.Visit( node );
-            var transformedNode = rewriter.Visit( normalized );
+            var transformedNode = rewriter.Visit( normalized )!;
 
             return transformedNode.ToFullString();
         }

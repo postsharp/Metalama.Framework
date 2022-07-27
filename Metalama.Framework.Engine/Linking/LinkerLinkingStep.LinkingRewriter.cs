@@ -190,7 +190,7 @@ namespace Metalama.Framework.Engine.Linking
                     if ( symbols.Length == 0 || (symbols.Length == 1 && symbols[0] == null) )
                     {
                         // TODO: Comment when this happens.
-                        newMembers.Add( (MemberDeclarationSyntax) this.Visit( member ) );
+                        newMembers.Add( (MemberDeclarationSyntax) this.Visit( member )! );
 
                         continue;
                     }
@@ -215,7 +215,7 @@ namespace Metalama.Framework.Engine.Linking
                         else
                         {
                             // Normal member without any transformations.
-                            newMembers.Add( (MemberDeclarationSyntax) this.Visit( member ) );
+                            newMembers.Add( (MemberDeclarationSyntax) this.Visit( member )! );
                         }
                     }
                     else

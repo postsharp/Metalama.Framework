@@ -792,7 +792,7 @@ namespace Metalama.Framework.Engine.Linking
                             return
                                 (ExpressionSyntax) rewriter.Visit(
                                     conditionalAccessExpression
-                                        .WithoutTrivia() );
+                                        .WithoutTrivia() )!;
                         }
                     }
                     else

@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.Templating
 
                 var errorCountAfter = templateExpansionContext.DiagnosticSink.ErrorCount;
 
-                block = (BlockSyntax) new FlattenBlocksRewriter().Visit( output! );
+                block = (BlockSyntax) new FlattenBlocksRewriter().Visit( output! )!;
 
                 block = block.NormalizeWhitespace();
 

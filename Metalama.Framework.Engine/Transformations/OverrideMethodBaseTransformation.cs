@@ -58,7 +58,7 @@ namespace Metalama.Framework.Engine.Transformations
                 // If the template is async and the target declaration is `async void`, and regardless of the async flag the template, we have to change the type to ValueTask, otherwise
                 // it is not awaitable
 
-                if ( TypeExtensions.Equals__( this.OverriddenDeclaration.ReturnType, SpecialType.Void ) )
+                if ( this.OverriddenDeclaration.ReturnType.Equals( SpecialType.Void ) )
                 {
                     returnType = context.SyntaxGenerator.Type(
                         this.OverriddenDeclaration.GetCompilationModel().Factory.GetSpecialType( SpecialType.ValueTask ).GetSymbol() );

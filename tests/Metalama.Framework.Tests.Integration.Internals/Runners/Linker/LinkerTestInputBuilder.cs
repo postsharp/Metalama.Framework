@@ -70,7 +70,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
         internal SyntaxNode ProcessSyntaxRoot( SyntaxNode syntaxRoot )
         {
-            return this._rewriter.Visit( syntaxRoot );
+            return this._rewriter.Visit( syntaxRoot )!;
         }
 
         public AspectLinkerInput ToAspectLinkerInput( PartialCompilation inputCompilation )

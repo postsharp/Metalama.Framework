@@ -25,11 +25,17 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
 
         public void ReportException( Exception exception, Action<Diagnostic> reportDiagnostic, bool canIgnoreException, out bool isHandled )
         {
-            Location? location = null;
+            // Unwrap AggregateException.
+            if ( exception is AggregateException { InnerExceptions: { Count: 1 } innerExceptions } )
+            {
+                exception = innerExceptions[0];
+            }
+
+            SyntaxNode? node = null;
 
             if ( exception is SyntaxProcessingException syntaxProcessingException )
             {
-                location = syntaxProcessingException.Location;
+                node = syntaxProcessingException.SyntaxNode;
             }
 
             var reportFile = DefaultPathOptions.Instance.GetNewCrashReportPath();
@@ -50,8 +56,14 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 {
                     // The next line may fail.
                     var exceptionToString = exception.ToString();
-                    exceptionText.AppendLine( "-------" );
+                    exceptionText.AppendLine( "===== Exception ===== " );
                     exceptionText.AppendLine( exceptionToString );
+
+                    if ( node != null )
+                    {
+                        exceptionText.AppendLine( "===== Syntax Tree ===== " );
+                        exceptionText.AppendLine( node.SyntaxTree.GetText().ToString() );
+                    }
                 }
 
                 // ReSharper disable once EmptyGeneralCatchClause
@@ -63,7 +75,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             var diagnosticDefinition =
                 canIgnoreException ? GeneralDiagnosticDescriptors.IgnorableUnhandledException : GeneralDiagnosticDescriptors.UnhandledException;
 
-            reportDiagnostic( diagnosticDefinition.CreateRoslynDiagnostic( location, (exception.Message, reportFile ?? "(none)") ) );
+            reportDiagnostic( diagnosticDefinition.CreateRoslynDiagnostic( node?.GetLocation(), (exception.Message, reportFile ?? "(none)") ) );
 
             this._exceptionReporter?.ReportException( exception );
 

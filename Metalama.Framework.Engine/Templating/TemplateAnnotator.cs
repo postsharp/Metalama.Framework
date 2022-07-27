@@ -411,7 +411,7 @@ namespace Metalama.Framework.Engine.Templating
             this._cancellationToken.ThrowIfCancellationRequested();
 
             // Adds annotations to the children node.
-            var transformedNode = base.VisitCore( node );
+            var transformedNode = base.VisitCore( node )!;
 
             return this.AddScopeAnnotationToVisitedNode( node, transformedNode );
         }

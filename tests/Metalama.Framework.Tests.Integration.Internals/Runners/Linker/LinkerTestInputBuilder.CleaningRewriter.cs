@@ -3,7 +3,6 @@
 
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
-using System;
 
 namespace Metalama.Framework.Tests.Integration.Runners.Linker
 {

@@ -44,7 +44,7 @@ public static partial class SyntaxFactoryDebugHelper
             {
                 return SyntaxFactory.MemberAccessExpression(
                     SyntaxKind.SimpleMemberAccessExpression,
-                    (ExpressionSyntax) this.Visit( node.Left ),
+                    (ExpressionSyntax) this.Visit( node.Left )!,
                     node.DotToken,
                     node.Right );
             }

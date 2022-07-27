@@ -45,7 +45,7 @@ internal class ChangeVisibilityCodeAction : ICodeAction
             var syntaxTree = referenceGroup.Key;
 
             var rewriter = new Rewriter( referenceGroup.Select( x => x.GetSyntax( context.CancellationToken ) ).ToList(), this );
-            var newRoot = rewriter.Visit( syntaxTree.GetRoot( context.CancellationToken ) );
+            var newRoot = rewriter.Visit( syntaxTree.GetRoot( context.CancellationToken ) )!;
             context.UpdateTree( newRoot, syntaxTree );
         }
 

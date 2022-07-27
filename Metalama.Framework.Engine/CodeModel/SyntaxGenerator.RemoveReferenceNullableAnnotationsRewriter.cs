@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 {
                     using ( this.WithType( type.TypeArguments[i] ) )
                     {
-                        typeArguments[i] = (TypeSyntax) this.Visit( node.TypeArgumentList.Arguments[i] );
+                        typeArguments[i] = (TypeSyntax) this.Visit( node.TypeArgumentList.Arguments[i] )!;
                     }
                 }
 
@@ -113,7 +113,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 return cookie;
             }
 
-            private struct WithTypeCookie : IDisposable
+            private readonly struct WithTypeCookie : IDisposable
             {
                 private readonly RemoveReferenceNullableAnnotationsRewriter _parent;
                 private readonly ITypeSymbol _oldType;

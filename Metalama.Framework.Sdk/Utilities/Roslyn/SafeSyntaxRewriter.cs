@@ -13,10 +13,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn;
 /// </summary>
 public abstract class SafeSyntaxRewriter : CSharpSyntaxRewriter
 {
-    protected SafeSyntaxRewriter( bool visitIntoStructuredTrivia = false ) : base( visitIntoStructuredTrivia )
-    {
-        
-    }
+    protected SafeSyntaxRewriter( bool visitIntoStructuredTrivia = false ) : base( visitIntoStructuredTrivia ) { }
 
     public sealed override SyntaxNode? Visit( SyntaxNode? node )
     {
@@ -24,9 +21,9 @@ public abstract class SafeSyntaxRewriter : CSharpSyntaxRewriter
         {
             return this.VisitCore( node );
         }
-        catch ( Exception e ) when ( node != null )
+        catch ( Exception e ) when ( SyntaxProcessingException.ShouldWrapException( e, node ) )
         {
-            throw new SyntaxProcessingException( node, e );
+            throw new SyntaxProcessingException( e, node );
         }
     }
 

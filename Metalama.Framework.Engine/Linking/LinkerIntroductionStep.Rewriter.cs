@@ -511,7 +511,7 @@ namespace Metalama.Framework.Engine.Linking
                     EventDeclarationSyntax @event => Singleton( this.VisitEventDeclarationCore( @event ) ),
                     FieldDeclarationSyntax field => this.VisitFieldDeclarationCore( field ),
                     EventFieldDeclarationSyntax @eventField => this.VisitEventFieldDeclarationCore( @eventField ),
-                    _ => Singleton( (MemberDeclarationSyntax) this.Visit( member ) )
+                    _ => Singleton( (MemberDeclarationSyntax) this.Visit( member )! )
                 };
             }
 

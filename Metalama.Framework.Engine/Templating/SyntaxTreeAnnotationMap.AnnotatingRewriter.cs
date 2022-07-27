@@ -48,7 +48,7 @@ namespace Metalama.Framework.Engine.Templating
                 }
 
                 var originalNode = node;
-                var transformedNode = base.VisitCore( node );
+                var transformedNode = base.VisitCore( node )!;
 
                 // Don't run twice.
                 if ( transformedNode.HasAnnotations( AnnotationKinds ) )

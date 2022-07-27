@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             public static T Rewrite<T>( T node )
                 where T : SyntaxNode
-                => (T) _instance.Visit( node );
+                => (T) _instance.Visit( node )!;
 
             public override SyntaxNode? VisitIdentifierName( IdentifierNameSyntax node )
             {

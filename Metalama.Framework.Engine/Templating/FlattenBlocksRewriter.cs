@@ -27,7 +27,7 @@ namespace Metalama.Framework.Engine.Templating
 
             foreach ( var statement in node.Statements )
             {
-                var processedStatement = (StatementSyntax) this.Visit( statement );
+                var processedStatement = (StatementSyntax) this.Visit( statement )!;
 
                 switch ( processedStatement )
                 {

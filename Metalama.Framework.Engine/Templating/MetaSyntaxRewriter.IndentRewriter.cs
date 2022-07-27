@@ -79,7 +79,7 @@ namespace Metalama.Framework.Engine.Templating
                     return node;
                 }
 
-                return  base.VisitCore( node );;
+                return base.VisitCore( node );
             }
         }
     }

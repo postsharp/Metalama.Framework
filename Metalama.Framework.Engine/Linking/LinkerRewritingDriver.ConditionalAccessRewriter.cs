@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     this._context = node;
 
-                    var result = node.WithWhenNotNull( (ExpressionSyntax) this.Visit( node.WhenNotNull ) );
+                    var result = node.WithWhenNotNull( (ExpressionSyntax) this.Visit( node.WhenNotNull )! );
 
                     this._context = null;
 

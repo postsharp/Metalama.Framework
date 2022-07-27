@@ -27,7 +27,7 @@ namespace Metalama.Framework.Engine.AspectWeavers
                 switch ( node )
                 {
                     case CompilationUnitSyntax:
-                        return  base.VisitCore( node );
+                        return base.VisitCore( node );
 
                     case MemberDeclarationSyntax or AccessorDeclarationSyntax:
                         {
@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.AspectWeavers
                             {
                                 // Visit types and namespaces.
 
-                                return  base.VisitCore( node );
+                                return base.VisitCore( node );
                             }
 
                             break;
