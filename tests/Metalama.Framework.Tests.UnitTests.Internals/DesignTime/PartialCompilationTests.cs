@@ -162,7 +162,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
         private class Rewriter : SafeSyntaxRewriter
         {
             // Apply some arbitrary transformation.
-            protected override SyntaxNode? VisitCore( SyntaxNode? node ) => this.Visit( node )!.WithTrailingTrivia( SyntaxFactory.Space );
+            protected override SyntaxNode? VisitCore( SyntaxNode? node ) => base.VisitCore( node )!.WithTrailingTrivia( SyntaxFactory.Space );
         }
     }
 }
