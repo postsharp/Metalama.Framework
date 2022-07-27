@@ -193,7 +193,7 @@ namespace Metalama.AspectWorkbench.ViewModels
             {
                 var intermediateSyntaxTree = testResult.IntermediateLinkerCompilation.Compilation.SyntaxTrees.First();
                 var linkerProject = testRunner.CreateProject( testInput.Options );
-                var linkerDocument = linkerProject.AddDocument( "IntermediateLinkerCode.cs", await intermediateSyntaxTree.GetRootAsync() );
+                var linkerDocument = linkerProject.AddDocument( "IntermediateLinkerCode.cs", RenderAspectReferences(await intermediateSyntaxTree.GetRootAsync()) );
                 this.IntermediateLinkerCodeCodeDocument = await syntaxColorizer.WriteSyntaxColoringAsync( linkerDocument );
             }
 
@@ -249,6 +249,11 @@ namespace Metalama.AspectWorkbench.ViewModels
             {
                 errorsDocument.Blocks.Add( new Paragraph( new Run( "The program output code is different than expectations." ) { Foreground = Brushes.Red } ) );
             }
+        }
+
+        private SyntaxNode RenderAspectReferences(SyntaxNode rootNode)
+        {
+            return new AspectReferenceRenderingRewriter().Visit( rootNode )!;
         }
 
         public void NewTest( string path )
