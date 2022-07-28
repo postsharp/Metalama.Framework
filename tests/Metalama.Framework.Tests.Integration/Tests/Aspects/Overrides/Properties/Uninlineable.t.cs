@@ -78,10 +78,10 @@ internal class TargetClass
         }
     }
 
-    private int ExpressionBodiedProperty_Source => 42
-
-            [Override]
-        public int AutoProperty
+    private int ExpressionBodiedProperty_Source
+    => 42;
+    [Override]
+    public int AutoProperty
     {
         get
         {
@@ -99,8 +99,8 @@ internal class TargetClass
         }
     }
 
-    private int AutoProperty_Source { get; set; }
-
+    private int AutoProperty_Source
+    { get; set; }
     [Override]
     public int AutoGetOnlyProperty
     {
@@ -120,5 +120,6 @@ internal class TargetClass
         }
     }
 
-    private int AutoGetOnlyProperty_Source { get; set; }
+    private int AutoGetOnlyProperty_Source
+    { get; set; }
 }

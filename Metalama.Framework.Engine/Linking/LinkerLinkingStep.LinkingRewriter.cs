@@ -46,6 +46,11 @@ namespace Metalama.Framework.Engine.Linking
                 return this.VisitTypeDeclaration( node );
             }
 
+            public override SyntaxNode? VisitInterfaceDeclaration( InterfaceDeclarationSyntax node )
+            {
+                return this.VisitTypeDeclaration( node );
+            }
+
             public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node )
             {
                 var recordWithTransformedMembers = (RecordDeclarationSyntax) this.VisitTypeDeclaration( node )!;

@@ -131,7 +131,9 @@ namespace Metalama.Compiler
                                 Token( SyntaxKind.DisableKeyword ),
                                 true )
                             .WithErrorCodes( errorCodes )
-                            .NormalizeWhitespace() ) );
+                            .NormalizeWhitespace()
+                            .WithLeadingTrivia( ElasticLineFeed )
+                            .WithTrailingTrivia( ElasticLineFeed ) ) );
 
                 trailingTrivia = trailingTrivia.Add( ElasticLineFeed )
                     .Add(
@@ -140,7 +142,9 @@ namespace Metalama.Compiler
                                     Token( SyntaxKind.RestoreKeyword ),
                                     true )
                                 .WithErrorCodes( errorCodes )
-                                .NormalizeWhitespace() ) );
+                                .NormalizeWhitespace()
+                            .WithLeadingTrivia( ElasticLineFeed )
+                            .WithTrailingTrivia( ElasticLineFeed ) ) );
             }
 
             return base.VisitClassDeclaration( node )!
@@ -244,7 +248,10 @@ namespace Metalama.Compiler
             {
                 if ( node.Initializer != null )
                 {
-                    transformedNode = transformedNode.WithInitializer( null );
+                    transformedNode = 
+                        transformedNode
+                        .WithInitializer( null )
+                        .WithSemicolonToken( default );
                 }
 
                 transformedNode = this.MakePublicMember( transformedNode, node, symbol );
