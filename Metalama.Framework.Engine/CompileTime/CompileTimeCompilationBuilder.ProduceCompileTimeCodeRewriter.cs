@@ -6,6 +6,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.LamaSerialization;
 using Metalama.Framework.Engine.Templating;
@@ -1035,9 +1036,15 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 if ( transformedMembers.Any( m => m.HasAnnotation( _hasCompileTimeCodeAnnotation ) ) )
                 {
+                    var currentUsings = node.Usings.Select( n => n.ToString() ).ToHashSet();
+
                     return node.WithMembers( transformedMembers )
                         .WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation )
-                        .WithUsings( node.Usings.AddRange( this._globalUsings ) )
+                        .WithUsings(
+                            List(
+                                this._globalUsings.Where( u => !currentUsings.Contains( u.ToString() ) )
+                                    .Select( u => u.WithGlobalKeyword( default ) )
+                                    .Concat( node.Usings ) ) )
                         .WithAttributeLists(
                             List( node.AttributeLists.Select( x => (AttributeListSyntax?) this.Visit( x ) ).Where( x => x != null ).AssertNoneNull() ) );
                 }

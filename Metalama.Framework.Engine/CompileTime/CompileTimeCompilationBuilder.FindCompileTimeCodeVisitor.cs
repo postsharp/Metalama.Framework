@@ -20,11 +20,11 @@ namespace Metalama.Framework.Engine.CompileTime
             private readonly SemanticModel _semanticModel;
             private readonly ISymbolClassifier _classifier;
             private readonly CancellationToken _cancellationToken;
-            private readonly ImmutableArray<NameSyntax>.Builder _globalUsings = ImmutableArray.CreateBuilder<NameSyntax>();
+            private readonly ImmutableArray<UsingDirectiveSyntax>.Builder _globalUsings = ImmutableArray.CreateBuilder<UsingDirectiveSyntax>();
 
             public bool HasCompileTimeCode { get; private set; }
 
-            public ImmutableArray<NameSyntax> GlobalUsings => this._globalUsings.ToImmutable();
+            public ImmutableArray<UsingDirectiveSyntax> GlobalUsings => this._globalUsings.ToImmutable();
 
             public FindCompileTimeCodeVisitor( SemanticModel semanticModel, ISymbolClassifier classifier, CancellationToken cancellationToken )
             {
@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 if ( node.GlobalKeyword.IsKind( SyntaxKind.GlobalKeyword ) )
                 {
-                    this._globalUsings.Add( node.Name );
+                    this._globalUsings.Add( node );
                 }
             }
 
