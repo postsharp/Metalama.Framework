@@ -36,8 +36,6 @@ namespace Metalama.Framework.Code
                 _ => throw new ArgumentOutOfRangeException( nameof(kind) )
             };
 
-        public static bool Equals__( this IType left, SpecialType right ) => left.SpecialType == right;
-
         /// <summary>
         /// Generates the <c>default(T)</c> syntax for the type.
         /// </summary>

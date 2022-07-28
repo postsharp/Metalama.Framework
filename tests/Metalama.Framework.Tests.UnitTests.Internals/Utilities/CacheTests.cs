@@ -17,13 +17,13 @@ public class CacheTests : TestBase
         var cache = new FixedCapacityCache<int>( 5 );
 
         // Cache miss because of non-existent item.
-        Assert.Equal( 0, cache.GetOrAdd( "item", b => true, b => 0 ) );
+        Assert.Equal( 0, cache.GetOrAdd( "item", _ => true, _ => 0 ) );
 
         // Cache miss because of invalid predicate.
-        Assert.Equal( 1, cache.GetOrAdd( "item", b => false, b => 1 ) );
+        Assert.Equal( 1, cache.GetOrAdd( "item", _ => false, _ => 1 ) );
 
         // Cache hit.
-        Assert.Equal( 1, cache.GetOrAdd( "item", b => true, b => 2 ) );
+        Assert.Equal( 1, cache.GetOrAdd( "item", _ => true, _ => 2 ) );
     }
 
     [Fact]
@@ -34,7 +34,7 @@ public class CacheTests : TestBase
 
         for ( var i = 0; i < capacity * 10; i++ )
         {
-            cache.GetOrAdd( $"item{i}", i => false, i => i );
+            cache.GetOrAdd( $"item{i}", _ => false, s => s );
         }
 
         Assert.NotNull( cache.CleanUpTask );
@@ -59,7 +59,7 @@ public class CacheTests : TestBase
         Assert.Equal( "1", cache.Get( fileName, File.ReadAllText ) );
 
         // Cache hit.
-        Assert.Equal( "1", cache.Get( fileName, p => "X" ) );
+        Assert.Equal( "1", cache.Get( fileName, _ => "X" ) );
 
         // Wait more than the filesystem time resolution.
         Thread.Sleep( 1 );

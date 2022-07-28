@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -10,7 +11,7 @@ namespace Metalama.Framework.Engine.CodeModel
 {
     internal partial class OurSyntaxGenerator
     {
-        private class RemoveReferenceNullableAnnotationsRewriter : CSharpSyntaxRewriter
+        private class RemoveReferenceNullableAnnotationsRewriter : SafeSyntaxRewriter
         {
             private ITypeSymbol _type;
 
@@ -30,7 +31,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 {
                     using ( this.WithType( type.TypeArguments[i] ) )
                     {
-                        typeArguments[i] = (TypeSyntax) this.Visit( node.TypeArgumentList.Arguments[i] );
+                        typeArguments[i] = (TypeSyntax) this.Visit( node.TypeArgumentList.Arguments[i] )!;
                     }
                 }
 
@@ -112,7 +113,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 return cookie;
             }
 
-            private struct WithTypeCookie : IDisposable
+            private readonly struct WithTypeCookie : IDisposable
             {
                 private readonly RemoveReferenceNullableAnnotationsRewriter _parent;
                 private readonly ITypeSymbol _oldType;

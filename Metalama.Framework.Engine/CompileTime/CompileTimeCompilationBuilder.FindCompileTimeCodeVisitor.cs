@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -14,16 +15,16 @@ namespace Metalama.Framework.Engine.CompileTime
         /// <summary>
         /// Determines if a syntax tree has compile-time code. The result is exposed in the <see cref="HasCompileTimeCode"/> property.
         /// </summary>
-        private class FindCompileTimeCodeVisitor : CSharpSyntaxWalker
+        private class FindCompileTimeCodeVisitor : SafeSyntaxWalker
         {
             private readonly SemanticModel _semanticModel;
             private readonly ISymbolClassifier _classifier;
             private readonly CancellationToken _cancellationToken;
-            private readonly ImmutableArray<NameSyntax>.Builder _globalUsings = ImmutableArray.CreateBuilder<NameSyntax>();
+            private readonly ImmutableArray<UsingDirectiveSyntax>.Builder _globalUsings = ImmutableArray.CreateBuilder<UsingDirectiveSyntax>();
 
             public bool HasCompileTimeCode { get; private set; }
 
-            public ImmutableArray<NameSyntax> GlobalUsings => this._globalUsings.ToImmutable();
+            public ImmutableArray<UsingDirectiveSyntax> GlobalUsings => this._globalUsings.ToImmutable();
 
             public FindCompileTimeCodeVisitor( SemanticModel semanticModel, ISymbolClassifier classifier, CancellationToken cancellationToken )
             {
@@ -36,7 +37,7 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 if ( node.GlobalKeyword.IsKind( SyntaxKind.GlobalKeyword ) )
                 {
-                    this._globalUsings.Add( node.Name );
+                    this._globalUsings.Add( node );
                 }
             }
 

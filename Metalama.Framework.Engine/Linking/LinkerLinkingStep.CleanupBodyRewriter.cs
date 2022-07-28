@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -12,7 +13,7 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal partial class LinkerLinkingStep
     {
-        private class CleanupBodyRewriter : CSharpSyntaxRewriter
+        private class CleanupBodyRewriter : SafeSyntaxRewriter
         {
             // TODO: Optimize (this reallocates multiple times).
 

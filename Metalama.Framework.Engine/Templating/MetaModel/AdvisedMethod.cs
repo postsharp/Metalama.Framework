@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             {
                 return this.Invokers.Base.Invoke( this.IsStatic ? null : this.This, args );
             }
-            else if ( TypeExtensions.Equals__( this.ReturnType, SpecialType.Void ) )
+            else if ( this.ReturnType.Equals( SpecialType.Void ) )
             {
                 return null;
             }

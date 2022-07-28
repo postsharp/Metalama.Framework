@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -10,7 +11,7 @@ namespace Metalama.Framework.Engine.Templating
 {
     internal partial class MetaSyntaxRewriter
     {
-        private class IndentRewriter : CSharpSyntaxRewriter
+        private class IndentRewriter : SafeSyntaxRewriter
         {
             private const int _limit = 80;
             private readonly MetaSyntaxRewriter _parent;
@@ -71,14 +72,14 @@ namespace Metalama.Framework.Engine.Templating
                 return base.VisitInitializerExpression( node );
             }
 
-            public override SyntaxNode? Visit( SyntaxNode? node )
+            protected override SyntaxNode? VisitCore( SyntaxNode? node )
             {
                 if ( node == null || node.Span.Length < _limit || node.HasNoDeepIndentAnnotation() )
                 {
                     return node;
                 }
 
-                return base.Visit( node );
+                return base.VisitCore( node );
             }
         }
     }

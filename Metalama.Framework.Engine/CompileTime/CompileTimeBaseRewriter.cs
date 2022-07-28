@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -16,7 +17,7 @@ namespace Metalama.Framework.Engine.CompileTime
     /// <summary>
     /// A base <see cref="CSharpSyntaxRewriter"/> that stores the <see cref="RunTimeCompilation"/> and the <see cref="SymbolClassifier"/>.
     /// </summary>
-    internal abstract partial class CompileTimeBaseRewriter : CSharpSyntaxRewriter
+    internal abstract partial class CompileTimeBaseRewriter : SafeSyntaxRewriter
     {
         protected ISymbolClassifier SymbolClassifier { get; }
 

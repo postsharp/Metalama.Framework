@@ -426,7 +426,7 @@ partial class C
                 "using Metalama.Framework.Aspects; class A : TypeAspect {}",
                 additionalReferences: new[] { dependency.ToMetadataReference() } );
 
-            Assert.True( pipelineFactory.TryExecute( context.ProjectOptions, compilation.RoslynCompilation, CancellationToken.None, out var result ) );
+            Assert.True( pipelineFactory.TryExecute( context.ProjectOptions, compilation.RoslynCompilation, CancellationToken.None, out _ ) );
         }
     }
 }

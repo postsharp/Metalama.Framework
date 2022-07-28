@@ -59,8 +59,8 @@ namespace Metalama.Framework.Engine.Linking
                 var syntaxTree = modifiedSyntaxTree.Value.NewTree;
 
                 // Run the linking rewriter for this tree.
-                var linkedRoot = linkingRewriter.Visit( syntaxTree.GetRoot() );
-                var cleanRoot = cleanupRewriter.Visit( linkedRoot );
+                var linkedRoot = linkingRewriter.Visit( syntaxTree.GetRoot() )!;
+                var cleanRoot = cleanupRewriter.Visit( linkedRoot )!;
 
                 var newSyntaxTree = syntaxTree.WithRootAndOptions( cleanRoot, syntaxTree.Options );
 
