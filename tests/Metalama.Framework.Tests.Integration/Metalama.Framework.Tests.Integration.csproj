@@ -35,6 +35,13 @@
     </ItemGroup>
 
     <ItemGroup>
+      <Compile Remove="Tests\Aspects\Overrides\Fields\ReadOnly - Copy.t.cs" />
+      <Compile Remove="Tests\Aspects\Overrides\Fields\Target_Struct_Simple - Copy.t.cs" />
+      <Compile Remove="Tests\Aspects\Overrides\Properties\Auto - Copy.t.cs" />
+      <Compile Remove="Tests\Aspects\Overrides\Properties\ReadOnlyStruct_Auto - Copy.t.cs" />
+    </ItemGroup>
+
+    <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
         <ProjectReference Include="..\..\Metalama.TestFramework\Metalama.TestFramework.csproj" />
@@ -44,6 +51,27 @@
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
     </ItemGroup>
 
+    <ItemGroup>
+      <None Include="Tests\Aspects\Overrides\Fields\Target_ReadOnlyStruct_Simple.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>Target_ReadOnlyStruct_Simple.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Aspects\Overrides\Properties\ReadOnlyStruct_Auto - Copy.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>Struct_ReadOnly_Auto.cs</DependentUpon>
+      </None>
+      <None Include="Tests\Aspects\Overrides\Properties\Struct_ReadOnly_Auto.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>Struct_ReadOnly_Auto.cs</DependentUpon>
+      </None>
+    </ItemGroup>
+
     <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets" />
+
+    <ItemGroup>
+      <None Update="C:\Dev\Metalama\Tests\Metalama.Framework.Tests.Integration\Tests\Aspects\Overrides\Properties\Record_Positional_Attribute.t.cs">
+        <DependentUpon>Record_Positional_Attribute.cs</DependentUpon>
+      </None>
+    </ItemGroup>
 
 </Project>

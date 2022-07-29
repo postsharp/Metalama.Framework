@@ -203,11 +203,24 @@ namespace Metalama.Framework.Engine.Linking
         }
 
         private static FieldDeclarationSyntax GetPropertyBackingField( PropertyDeclarationSyntax propertyDeclaration, IPropertySymbol symbol )
-            => FieldDeclaration(
+        {
+            var modifiers = new List<SyntaxToken>();
+
+            modifiers.Add( Token( SyntaxKind.PrivateKeyword ) );
+
+            if ( symbol.SetMethod == null || symbol.SetMethod.IsInitOnly)
+            {
+                modifiers.Add( Token( SyntaxKind.ReadOnlyKeyword ) );
+            }
+
+            if (symbol.IsStatic)
+            {
+                modifiers.Add( Token( SyntaxKind.StaticKeyword ) );
+            }
+
+            return FieldDeclaration(
                     List<AttributeListSyntax>(),
-                    symbol.IsStatic
-                        ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
-                        : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
+                    TokenList( modifiers ),
                     VariableDeclaration(
                         propertyDeclaration.Type,
                         SingletonSeparatedList(
@@ -219,6 +232,7 @@ namespace Metalama.Framework.Engine.Linking
                 .WithLeadingTrivia( LineFeed, LineFeed )
                 .WithTrailingTrivia( LineFeed )
                 .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
+        }
 
         private static BlockSyntax GetImplicitGetterBody( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
             => Block(

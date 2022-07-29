@@ -5,10 +5,10 @@ using System;
 #pragma warning disable CS0169
 #pragma warning disable CS0414
 
-namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto
+namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Struct_Auto
 {
     /*
-     * Tests a single OverrideProperty aspect on auto properties.
+     * Tests a single OverrideProperty aspect on auto properties in a struct.
      */
 
     public class OverrideAttribute : OverrideFieldOrPropertyAspect
@@ -30,7 +30,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
     }
 
     // <target>
-    internal class TargetClass
+    internal struct TargetStruct
     {
         [Override]
         public int Property { get; set; }
@@ -41,13 +41,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         [Override]
         public int PropertyInitOnly { get; init; }
 
-        public int __Init
-        {
-            init
-            {
-                // Init-only setter should be accessible from other init-only setters.
-                this.PropertyInitOnly = 42;
-            }
-        }
+        [Override]
+        public int StaticPropertyInitOnly { get; init; }
     }
 }

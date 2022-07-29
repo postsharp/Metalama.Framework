@@ -671,6 +671,14 @@ namespace Metalama.Framework.Engine.Linking
                     _ => targetSymbol.Name
                 };
 
+            SimpleNameSyntax GetRewrittenName(SimpleNameSyntax name) =>
+                name switch
+                {
+                    GenericNameSyntax genericName => genericName.WithIdentifier( Identifier( targetMemberName.AssertNotNull() ) ),
+                    IdentifierNameSyntax identifierName => name.WithIdentifier( Identifier( targetMemberName.AssertNotNull() ) ),
+                    _ => throw new AssertionFailedException(),
+                };
+
             // Presume that all (annotated) aspect references are member access expressions or invocation expressions.
             switch ( aspectReference.Expression )
             {
@@ -685,7 +693,7 @@ namespace Metalama.Framework.Engine.Linking
                         {
                             return memberAccessExpression
                                 .WithExpression( ThisExpression() )
-                                .WithName( IdentifierName( targetMemberName ) )
+                                .WithName( GetRewrittenName(memberAccessExpression.Name) )
                                 .WithoutTrivia();
                         }
                         else
@@ -696,13 +704,13 @@ namespace Metalama.Framework.Engine.Linking
                             {
                                 return memberAccessExpression
                                     .WithExpression( ThisExpression() )
-                                    .WithName( IdentifierName( targetMemberName ) )
+                                    .WithName( GetRewrittenName( memberAccessExpression.Name ) )
                                     .WithoutTrivia();
                             }
                             else
                             {
                                 return memberAccessExpression
-                                    .WithName( IdentifierName( targetMemberName ) )
+                                    .WithName( GetRewrittenName( memberAccessExpression.Name ) )
                                     .WithoutTrivia();
                             }
                         }
@@ -726,7 +734,7 @@ namespace Metalama.Framework.Engine.Linking
                                 MemberAccessExpression(
                                     SyntaxKind.SimpleMemberAccessExpression,
                                     syntaxGenerationContext.SyntaxGenerator.Type( targetSymbol.ContainingType ),
-                                    IdentifierName( targetMemberName ) );
+                                    GetRewrittenName( memberAccessExpression.Name ) );
                         }
                         else
                         {
@@ -751,7 +759,7 @@ namespace Metalama.Framework.Engine.Linking
                                             MemberAccessExpression(
                                                 SyntaxKind.SimpleMemberAccessExpression,
                                                 BaseExpression(),
-                                                IdentifierName( targetMemberName ) );
+                                                GetRewrittenName( memberAccessExpression.Name ) );
 
                                     default:
                                         var aspectInstance = this.ResolveAspectInstance( aspectReference );
@@ -770,7 +778,7 @@ namespace Metalama.Framework.Engine.Linking
                             {
                                 // Resolved symbol is unrelated to the containing symbol.
                                 return memberAccessExpression
-                                    .WithName( IdentifierName( targetMemberName ) )
+                                    .WithName( GetRewrittenName( memberAccessExpression.Name ) )
                                     .WithoutTrivia();
                             }
                         }

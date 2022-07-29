@@ -357,7 +357,7 @@ namespace Metalama.Framework.Engine.Linking
 
                         if ( typeSymbol != null )
                         {
-                            foreach ( var member in typeSymbol.GetMembers() )
+                            foreach ( var member in typeSymbol.GetMembers().Where( m => !m.IsImplicitlyDeclared ) )
                             {
                                 if ( member.GetDeclarationKind() is DeclarationKind.Field or DeclarationKind.Property )
                                 {

@@ -25,7 +25,7 @@ namespace Metalama.Framework.Tests.Integration.Templating.Aspects.Async.NormalTe
     internal class TargetCode
     {
         [Aspect]
-        public Task<int> TaskReturningNonAsync( int a )
+        public Task<int> TaskReturningNonAsync(int a)
         {
             return Task.FromResult(a);
         }
