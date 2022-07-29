@@ -3,8 +3,8 @@
 
 using K4os.Hash.xxHash;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using System.Text;
 
 namespace Metalama.Framework.DesignTime.Pipeline.Diff;
@@ -13,7 +13,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff;
 /// Base for the auto-generated <see cref="RunTimeCodeHasher"/> and <see cref="CompileTimeCodeHasher"/>.
 /// Generates a hash that is unique enough under the desired invariants.
 /// </summary>
-public abstract class BaseCodeHasher : CSharpSyntaxWalker
+public abstract class BaseCodeHasher : SafeSyntaxWalker
 {
     private readonly XXH64 _hasher;
 

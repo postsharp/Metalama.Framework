@@ -88,7 +88,7 @@ namespace Metalama.Framework.Engine.CodeModel
             }
 
             // In any typeof, we must remove ? annotations of nullable types.
-            typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( type ).Visit( typeSyntax );
+            typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( type ).Visit( typeSyntax )!;
 
             // In any typeof, we must change dynamic to object.
             typeSyntax = (TypeSyntax) DynamicToVarRewriter.Instance.Visit( typeSyntax );
@@ -118,7 +118,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             if ( !this.IsNullAware )
             {
-                typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( symbol ).Visit( typeSyntax );
+                typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( symbol ).Visit( typeSyntax )!;
             }
 
             return typeSyntax;

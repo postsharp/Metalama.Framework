@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -16,7 +17,7 @@ namespace Metalama.Framework.Engine.Formatting
     /// Produces a <see cref="ClassifiedTextSpanCollection"/> with compile-time code given
     /// a syntax tree annotated with <see cref="TemplateAnnotator"/>.
     /// </summary>
-    public sealed partial class TextSpanClassifier : CSharpSyntaxWalker
+    public sealed partial class TextSpanClassifier : SafeSyntaxWalker
     {
 #if !DEBUG
 #pragma warning disable IDE0052 // Remove unread private members
@@ -56,7 +57,7 @@ namespace Metalama.Framework.Engine.Formatting
                 _ => false
             };
 
-        public override void Visit( SyntaxNode? node )
+        protected override void VisitCore( SyntaxNode? node )
         {
             if ( node == null )
             {
@@ -69,7 +70,7 @@ namespace Metalama.Framework.Engine.Formatting
 
             try
             {
-                base.Visit( node );
+                base.VisitCore( node );
             }
             finally
             {

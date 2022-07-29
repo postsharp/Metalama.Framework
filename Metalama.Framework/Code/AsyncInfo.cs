@@ -26,7 +26,7 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets a value indicating whether the return type of the method is either awaitable (see <see cref="IsAwaitable"/>) either <c>void</c>.
         /// </summary>
-        public bool IsAwaitableOrVoid => this.IsAwaitable || TypeExtensions.Equals__( this.ResultType, SpecialType.Void );
+        public bool IsAwaitableOrVoid => this.IsAwaitable || this.ResultType.Equals( SpecialType.Void );
 
         /// <summary>
         /// Gets the type of the result of the async method, i.e. the type of the <c>await</c> expression.

@@ -3,9 +3,9 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.LamaSerialization;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Serialization;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Linq;
@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// <summary>
         /// Determines if a syntax tree has compile-time code.
         /// </summary>
-        private class CollectSerializableTypesVisitor : CSharpSyntaxWalker
+        private class CollectSerializableTypesVisitor : SafeSyntaxWalker
         {
             private readonly SemanticModel _semanticModel;
             private readonly ReflectionMapper _reflectionMapper;

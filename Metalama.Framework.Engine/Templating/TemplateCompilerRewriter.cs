@@ -201,9 +201,9 @@ namespace Metalama.Framework.Engine.Templating
 
         private T TransformCompileTimeCode<T>( T node )
             where T : SyntaxNode
-            => (T) this._compileTimeOnlyRewriter.Visit( node );
+            => (T) this._compileTimeOnlyRewriter.Visit( node )!;
 
-        public override SyntaxNode? Visit( SyntaxNode? node )
+        protected override SyntaxNode? VisitCore( SyntaxNode? node )
         {
             if ( node == null )
             {
@@ -237,7 +237,7 @@ namespace Metalama.Framework.Engine.Templating
             }
             else
             {
-                return base.Visit( node );
+                return base.VisitCore( node );
             }
         }
 

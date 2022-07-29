@@ -51,7 +51,7 @@ namespace Foo
 
             var rewriter = new CompileTimeCompilationBuilder.RemoveInvalidUsingRewriter( compilation );
 
-            var actual = rewriter.Visit( compilation.SyntaxTrees.Single().GetRoot() ).ToFullString();
+            var actual = rewriter.Visit( compilation.SyntaxTrees.Single().GetRoot() )!.ToFullString();
 
             Assert.Equal( expected, actual );
         }

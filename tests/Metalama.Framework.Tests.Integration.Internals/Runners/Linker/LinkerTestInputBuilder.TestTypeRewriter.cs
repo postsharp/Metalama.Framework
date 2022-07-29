@@ -13,6 +13,7 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -29,7 +30,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 {
     internal partial class LinkerTestInputBuilder
     {
-        private class TestTypeRewriter : CSharpSyntaxRewriter
+        private class TestTypeRewriter : SafeSyntaxRewriter
         {
             private readonly List<IObservableTransformation> _observableTransformations;
             private readonly List<IObservableTransformation> _replacedTransformations;

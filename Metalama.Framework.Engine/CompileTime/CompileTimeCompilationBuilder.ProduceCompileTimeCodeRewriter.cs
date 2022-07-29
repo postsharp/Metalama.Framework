@@ -6,6 +6,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.LamaSerialization;
 using Metalama.Framework.Engine.Templating;
@@ -1035,9 +1036,15 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 if ( transformedMembers.Any( m => m.HasAnnotation( _hasCompileTimeCodeAnnotation ) ) )
                 {
+                    var currentUsings = node.Usings.Select( n => n.ToString() ).ToHashSet();
+
                     return node.WithMembers( transformedMembers )
                         .WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation )
-                        .WithUsings( node.Usings.AddRange( this._globalUsings ) )
+                        .WithUsings(
+                            List(
+                                this._globalUsings.Where( u => !currentUsings.Contains( u.ToString() ) )
+                                    .Select( u => u.WithGlobalKeyword( default ) )
+                                    .Concat( node.Usings ) ) )
                         .WithAttributeLists(
                             List( node.AttributeLists.Select( x => (AttributeListSyntax?) this.Visit( x ) ).Where( x => x != null ).AssertNoneNull() ) );
                 }
@@ -1095,7 +1102,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             // The default implementation of Visit(SyntaxNode) and Visit(SyntaxToken) adds the location annotations.
 
-            public override SyntaxNode? Visit( SyntaxNode? node ) => this.AddLocationAnnotation( node, base.Visit( node ) );
+            protected override SyntaxNode? VisitCore( SyntaxNode? node ) => this.AddLocationAnnotation( node, base.VisitCore( node ) );
 
             public override SyntaxToken VisitToken( SyntaxToken token ) => this._templateCompiler.LocationAnnotationMap.AddLocationAnnotation( token );
 

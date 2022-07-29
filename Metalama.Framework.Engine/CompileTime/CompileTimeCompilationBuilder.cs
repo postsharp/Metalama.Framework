@@ -586,7 +586,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     compileTimeTrees.Add( tree );
                 }
 
-                globalUsings.AddRange( visitor.GlobalUsings.Select( syntax => SyntaxFactory.UsingDirective( syntax ).NormalizeWhitespace() ) );
+                globalUsings.AddRange( visitor.GlobalUsings );
             }
 
             return (compileTimeTrees, globalUsings.ToImmutableArray());

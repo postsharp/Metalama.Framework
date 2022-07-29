@@ -5,6 +5,7 @@ using Metalama.Backstage.Telemetry;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
 using System.IO;
@@ -24,6 +25,19 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
 
         public void ReportException( Exception exception, Action<Diagnostic> reportDiagnostic, bool canIgnoreException, out bool isHandled )
         {
+            // Unwrap AggregateException.
+            if ( exception is AggregateException { InnerExceptions: { Count: 1 } innerExceptions } )
+            {
+                exception = innerExceptions[0];
+            }
+
+            SyntaxNode? node = null;
+
+            if ( exception is SyntaxProcessingException syntaxProcessingException )
+            {
+                node = syntaxProcessingException.SyntaxNode;
+            }
+
             var reportFile = DefaultPathOptions.Instance.GetNewCrashReportPath();
 
             if ( reportFile != null )
@@ -42,8 +56,14 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 {
                     // The next line may fail.
                     var exceptionToString = exception.ToString();
-                    exceptionText.AppendLine( "-------" );
+                    exceptionText.AppendLine( "===== Exception ===== " );
                     exceptionText.AppendLine( exceptionToString );
+
+                    if ( node != null )
+                    {
+                        exceptionText.AppendLine( "===== Syntax Tree ===== " );
+                        exceptionText.AppendLine( node.SyntaxTree.GetText().ToString() );
+                    }
                 }
 
                 // ReSharper disable once EmptyGeneralCatchClause
@@ -55,7 +75,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             var diagnosticDefinition =
                 canIgnoreException ? GeneralDiagnosticDescriptors.IgnorableUnhandledException : GeneralDiagnosticDescriptors.UnhandledException;
 
-            reportDiagnostic( diagnosticDefinition.CreateRoslynDiagnostic( null, (exception.Message, reportFile ?? "(none)") ) );
+            reportDiagnostic( diagnosticDefinition.CreateRoslynDiagnostic( node?.GetLocation(), (exception.Message, reportFile ?? "(none)") ) );
 
             this._exceptionReporter?.ReportException( exception );
 

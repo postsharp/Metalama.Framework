@@ -6,6 +6,7 @@ using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Project;
 using Metalama.Framework.Validation;
@@ -18,7 +19,7 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.Validation;
 
-public class ReferenceValidationVisitor : CSharpSyntaxWalker, IDisposable
+public class ReferenceValidationVisitor : SafeSyntaxWalker, IDisposable
 {
     private const int _initialStackSize = 8;
     private readonly IDiagnosticSink _diagnosticAdder;

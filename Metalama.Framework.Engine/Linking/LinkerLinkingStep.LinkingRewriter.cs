@@ -4,6 +4,7 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -19,7 +20,7 @@ namespace Metalama.Framework.Engine.Linking
         /// <summary>
         /// Rewriter which rewrites classes and methods producing the linked and inlined syntax tree.
         /// </summary>
-        private class LinkingRewriter : CSharpSyntaxRewriter
+        private class LinkingRewriter : SafeSyntaxRewriter
         {
             private readonly IServiceProvider _serviceProvider;
             private readonly Compilation _intermediateCompilation;
@@ -194,7 +195,7 @@ namespace Metalama.Framework.Engine.Linking
                     if ( symbols.Length == 0 || (symbols.Length == 1 && symbols[0] == null) )
                     {
                         // TODO: Comment when this happens.
-                        newMembers.Add( (MemberDeclarationSyntax) this.Visit( member ) );
+                        newMembers.Add( (MemberDeclarationSyntax) this.Visit( member )! );
 
                         continue;
                     }
@@ -219,7 +220,7 @@ namespace Metalama.Framework.Engine.Linking
                         else
                         {
                             // Normal member without any transformations.
-                            newMembers.Add( (MemberDeclarationSyntax) this.Visit( member ) );
+                            newMembers.Add( (MemberDeclarationSyntax) this.Visit( member )! );
                         }
                     }
                     else
