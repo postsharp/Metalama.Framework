@@ -173,6 +173,7 @@ namespace Metalama.TestFramework
             {
                 testResult.SetFailed( "Syntax tree verification failed." );
                 testResult.OutputCompilationDiagnostics.Report( diagnostics );
+
                 return false;
             }
 

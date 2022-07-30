@@ -5,7 +5,6 @@ using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
-using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
@@ -2267,7 +2266,7 @@ namespace Metalama.Framework.Engine.Templating
                 return node.WithType( this.Visit( node.Type ) ).AddScopeAnnotation( TemplatingScope.RunTimeOnly );
             }
             */
-            
+
             TypeSyntax annotatedType;
 
             using ( this.WithScopeContext( ScopeContext.CreateRunTimeOrCompileTimeScope( this._currentScopeContext, "typeof" ) ) )
@@ -2286,7 +2285,9 @@ namespace Metalama.Framework.Engine.Templating
 
         public override SyntaxNode? VisitArrayRankSpecifier( ArrayRankSpecifierSyntax node )
         {
-            var transformedSizes = node.Sizes.Select( this.Visit ).ToList();
+            // ReSharper disable once RedundantSuppressNullableWarningExpression
+            var transformedSizes = node.Sizes.Select( syntax => this.Visit( syntax )! ).ToList();
+            
             var sizeScope = this.GetExpressionScope( transformedSizes );
 
             var arrayRankScope = sizeScope.GetExpressionValueScope() switch
@@ -2318,7 +2319,7 @@ namespace Metalama.Framework.Engine.Templating
         public override SyntaxNode? VisitTupleExpression( TupleExpressionSyntax node )
         {
             var transformedElements = node.Arguments.Select( a => this.Visit( a.Expression ) ).ToList();
-            var tupleScope = this.GetExpressionScope( transformedElements, node );
+            var tupleScope = this.GetExpressionScope( transformedElements, node ).GetExpressionValueScope( true );
             var transformedArguments = new ArgumentSyntax[transformedElements.Count];
 
             for ( var i = 0; i < transformedElements.Count; i++ )

@@ -237,16 +237,19 @@ namespace Metalama.Framework.Engine.Formatting
                 {
                     case SyntaxKind.EndOfLineTrivia:
                         this._isAfterEndOfLine = true;
+
                         break;
-                    
+
                     case SyntaxKind.WhitespaceTrivia when this._isAfterEndOfLine:
                     case SyntaxKind.MultiLineCommentTrivia:
                     case SyntaxKind.SingleLineCommentTrivia:
                         this.Mark( trivia.Span, TextSpanClassification.NeutralTrivia );
+
                         break;
                 }
             }
         }
+
         public override void VisitTrailingTrivia( SyntaxToken token )
         {
             this._isAfterEndOfLine = false;
@@ -258,8 +261,7 @@ namespace Metalama.Framework.Engine.Formatting
         {
             this.VisitTriviaList( token.LeadingTrivia );
         }
-        
-        
+
         public override void DefaultVisit( SyntaxNode node )
         {
             if ( this._isInTemplate )
@@ -382,7 +384,7 @@ namespace Metalama.Framework.Engine.Formatting
         public override void VisitIfStatement( IfStatementSyntax node )
         {
             this.VisitToken( node.IfKeyword );
-            
+
             if ( this._isInTemplate && node.GetScopeFromAnnotation() == TemplatingScope.CompileTimeOnly )
             {
                 this.Mark( TextSpan.FromBounds( node.IfKeyword.SpanStart, node.CloseParenToken.Span.End ), TextSpanClassification.CompileTime );
@@ -407,7 +409,7 @@ namespace Metalama.Framework.Engine.Formatting
             if ( this._isInTemplate && node.GetScopeFromAnnotation() == TemplatingScope.CompileTimeOnly )
             {
                 this.VisitToken( node.ForEachKeyword );
-                
+
                 this.Mark( TextSpan.FromBounds( node.ForEachKeyword.SpanStart, node.CloseParenToken.Span.End ), TextSpanClassification.CompileTime );
                 this.Mark( node.Identifier, TextSpanClassification.CompileTimeVariable );
                 this.Visit( node.Expression );
@@ -433,5 +435,5 @@ namespace Metalama.Framework.Engine.Formatting
 
             this.Visit( statement );
         }
-   }
+    }
 }

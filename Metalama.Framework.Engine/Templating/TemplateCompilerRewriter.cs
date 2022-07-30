@@ -251,6 +251,7 @@ namespace Metalama.Framework.Engine.Templating
             if ( tupleType == null )
             {
                 // We may fail to get the tuple type if it has an element with the `default` keyword, i.e. `(default, "")`.
+                throw new AssertionFailedException( $"Cannot get the type of tuple '{node}'." );
             }
             
             var transformedArguments = new ArgumentSyntax[node.Arguments.Count];

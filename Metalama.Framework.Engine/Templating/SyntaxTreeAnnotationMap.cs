@@ -231,24 +231,25 @@ namespace Metalama.Framework.Engine.Templating
             {
                 return this._annotationToTypeMap[annotation];
             }
-            
+
             // If we don't have a type annotation, we can try to find the type from the parent node.
-            
+
             switch ( node.Parent )
             {
                 case ReturnStatementSyntax:
-                    var declaration = node.FirstAncestorOrSelf<MemberDeclarationSyntax>( ) ?? (SyntaxNode?) node.FirstAncestorOrSelf<AccessorDeclarationSyntax>();
+                    var declaration = node.FirstAncestorOrSelf<MemberDeclarationSyntax>()
+                                      ?? (SyntaxNode?) node.FirstAncestorOrSelf<AccessorDeclarationSyntax>();
 
                     if ( declaration != null && this.GetDeclaredSymbol( declaration ) is IMethodSymbol declarationSymbol )
                     {
                         return declarationSymbol.ReturnType;
                     }
-                    
+
                     break;
-                
+
                 case AssignmentExpressionSyntax assignment when node == assignment.Right:
                     return this.GetExpressionType( assignment.Left );
-                
+
                 case ArgumentSyntax argument:
                     var invocation = node.FirstAncestorOrSelf<InvocationExpressionSyntax>();
 
@@ -273,6 +274,7 @@ namespace Metalama.Framework.Engine.Templating
                             }
                         }
                     }
+
                     break;
             }
 

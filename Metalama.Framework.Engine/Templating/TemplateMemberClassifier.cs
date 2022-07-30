@@ -92,7 +92,7 @@ namespace Metalama.Framework.Engine.Templating
             => this._syntaxTreeAnnotationMap.GetSymbol( node ) is IMethodSymbol symbol && this.IsRunTimeMethod( symbol );
 
         public bool IsNodeOfDynamicType( SyntaxNode originalNode ) => originalNode is ExpressionSyntax expression && this.IsNodeOfDynamicType( expression );
-        
+
         /// <summary>
         /// Determines if a node is of <c>dynamic</c> type.
         /// </summary>
@@ -194,7 +194,6 @@ namespace Metalama.Framework.Engine.Templating
                 IArrayTypeSymbol arrayType => this.ReferencesCompileTemplateTypeParameter( arrayType.ElementType ),
                 INamedTypeSymbol namedType => namedType.TypeArguments.Any( this.ReferencesCompileTemplateTypeParameter ),
                 _ => false
-
             };
     }
 }

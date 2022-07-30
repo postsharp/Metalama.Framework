@@ -1,1 +1,4 @@
-// TODO: Replace this file with the correct transformed code. See the test output for the actual transformed code.
+(int,Type) Method(int a)
+{
+    return ((global::System.Int32, global::System.Type))(1, typeof(global::System.Int32));
+}
