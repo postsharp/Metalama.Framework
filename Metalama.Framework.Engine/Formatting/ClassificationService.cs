@@ -35,6 +35,7 @@ namespace Metalama.Framework.Engine.Formatting
             var text = model.SyntaxTree.GetText();
             var classifier = new TextSpanClassifier( text );
             classifier.Visit( annotatedSyntaxRoot );
+            classifier.ClassifiedTextSpans.Polish();
 
             return classifier.ClassifiedTextSpans;
         }

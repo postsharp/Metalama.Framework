@@ -160,7 +160,8 @@ namespace Metalama.Framework.Engine.Formatting
             }
         }
 
-        private void VisitMember<T>( T node, Action<T> callBase ) where T : SyntaxNode
+        private void VisitMember<T>( T node, Action<T> callBase ) 
+            where T : SyntaxNode
         {
             if ( this._isInCompileTimeType )
             {

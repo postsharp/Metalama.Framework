@@ -1294,7 +1294,10 @@ namespace Metalama.Framework.Engine.Templating
                         string.Join( ",", node.Variables.Select( v => "'" + v.Identifier.Text + "'" ) ) );
                 }
 
-                return node.Update( transformedType, SeparatedList( transformedVariables ) ).AddScopeAnnotation( variableScopes.Single() );
+                var variableScope = variableScopes.Single();
+
+                // We don't use transformedType because we want to replace the type annotation to strictly RunTime and not, for instance, CompileTimeReturningRunTime.
+                return node.Update( node.Type.AddScopeAnnotation( variableScope ), SeparatedList( transformedVariables ) ).AddScopeAnnotation( variableScope );
             }
         }
 

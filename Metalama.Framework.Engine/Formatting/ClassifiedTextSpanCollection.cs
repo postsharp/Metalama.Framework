@@ -15,13 +15,16 @@ namespace Metalama.Framework.Engine.Formatting
     /// </summary>
     public sealed class ClassifiedTextSpanCollection : IReadOnlyCollection<ClassifiedTextSpan>
     {
+        private readonly SourceText? _sourceText;
         private readonly SkipListDictionary<int, MarkedTextSpan> _spans = new();
         private readonly int _length;
 
         // For test only.
         internal ClassifiedTextSpanCollection() : this( int.MaxValue ) { }
 
-        public ClassifiedTextSpanCollection( SourceText sourceText ) : this( sourceText.Length ) { }
+        public ClassifiedTextSpanCollection( SourceText sourceText ) : this( sourceText.Length ) {
+            this._sourceText = sourceText;
+        }
 
         private ClassifiedTextSpanCollection( int length )
         {
@@ -229,5 +232,49 @@ namespace Metalama.Framework.Engine.Formatting
         IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
         public int Count => this._spans.Count;
+
+        internal void Polish()
+        {
+            if ( this._sourceText == null )
+            {
+                throw new InvalidOperationException();
+            }
+            
+            using var enumerator = this._spans.GetEnumerator();
+            using var nextEnumerator = this._spans.GetEnumerator();
+
+            // `nextEnumerator` must always be one node further than `enumerator`.
+            if ( !nextEnumerator.MoveNext() )
+            {
+                return;
+            }
+
+            while ( enumerator.MoveNext() )
+            {
+                if ( !nextEnumerator.MoveNext() )
+                {
+                    return;
+                }
+                
+                if ( enumerator.Current.Value.Classification is not ( TextSpanClassification.Default or TextSpanClassification.NeutralTrivia)
+                    && nextEnumerator.Current.Value.Classification is ( TextSpanClassification.Default or TextSpanClassification.NeutralTrivia) )
+                {
+                    var span = enumerator.Current.Value.Span;
+                    var rawSpanLength = span.Length;
+
+                    while ( rawSpanLength > 0 && this._sourceText[span.Start + rawSpanLength - 1] == ' ' )
+                    {
+                        rawSpanLength--;
+                    }
+
+                    if ( rawSpanLength < span.Length )
+                    {
+                        this.Add( TextSpan.FromBounds( span.Start + rawSpanLength, span.Start + span.Length ), TextSpanClassification.NeutralTrivia  );
+                    }
+                }
+            }
+            
+
+        }
     }
 }
