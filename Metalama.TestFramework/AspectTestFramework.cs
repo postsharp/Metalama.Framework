@@ -37,7 +37,7 @@ namespace Metalama.TestFramework
             {
                 messageSinkOrNull?.Trace( $"Resharper detected. Using the legacy test runner." );
 
-                this._implementation = new XunitTestFramework( messageSinkOrNull );
+                this._implementation = new XunitTestFramework( messageSink );
             }
             else
             {

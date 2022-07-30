@@ -5,6 +5,7 @@ using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
@@ -284,7 +285,7 @@ namespace Metalama.Framework.Engine.Templating
 
         // ReSharper disable once UnusedMember.Local
 
-        private TemplatingScope GetExpressionTypeScope( SyntaxNode? node )
+        private TemplatingScope GetExpressionTypeScope( ExpressionSyntax? node )
         {
             if ( node != null && this._syntaxTreeAnnotationMap.GetExpressionType( node ) is { } parentExpressionType )
             {
@@ -296,7 +297,7 @@ namespace Metalama.Framework.Engine.Templating
             }
         }
 
-        private TemplatingScope GetExpressionScope( IEnumerable<SyntaxNode?>? annotatedChildren, SyntaxNode? originalParent = null )
+        private TemplatingScope GetExpressionScope( IEnumerable<SyntaxNode?>? annotatedChildren, ExpressionSyntax? originalParent = null )
             => this.GetExpressionScope( annotatedChildren?.Select( this.GetNodeScope ), originalParent );
 
         /// <summary>
@@ -305,7 +306,7 @@ namespace Metalama.Framework.Engine.Templating
         /// <param name="childrenScopes"></param>
         /// <param name="originalParent"></param>
         /// <returns></returns>
-        private TemplatingScope GetExpressionScope( IEnumerable<TemplatingScope>? childrenScopes, SyntaxNode? originalParent = null )
+        private TemplatingScope GetExpressionScope( IEnumerable<TemplatingScope>? childrenScopes, ExpressionSyntax? originalParent = null )
         {
             // Get the scope of type of the parent node.
 
@@ -455,7 +456,7 @@ namespace Metalama.Framework.Engine.Templating
             // Here is the default implementation for expressions. The scope of the parent is the combined scope of the children.
             var childNodes = visitedNode.ChildNodes().Where( c => c is ExpressionSyntax );
 
-            return visitedNode.AddScopeAnnotation( this.GetExpressionScope( childNodes, node ) );
+            return visitedNode.AddScopeAnnotation( this.GetExpressionScope( childNodes, node as ExpressionSyntax ) );
         }
 
         #region Anonymous objects
@@ -1378,6 +1379,7 @@ namespace Metalama.Framework.Engine.Templating
                     .WithExpressionBody( this.Visit( n.ExpressionBody ) )
                     .WithAttributeLists( this.VisitList( node.AttributeLists ) )
                     .WithParameterList( this.Visit( node.ParameterList ) )
+                    .WithReturnType( this.Visit( node.ReturnType ) )
                     .WithTypeParameterList( this.Visit( node.TypeParameterList ) ) );
         }
 
@@ -1570,7 +1572,7 @@ namespace Metalama.Framework.Engine.Templating
             return this.AddScopeAnnotationToVisitedNode( node, visitedNode );
         }
 
-        private SyntaxNode? AnnotateCastExpression( SyntaxNode transformedCastNode, TypeSyntax annotatedType, ExpressionSyntax annotatedExpression )
+        private SyntaxNode? AnnotateCastExpression( ExpressionSyntax transformedCastNode, TypeSyntax annotatedType, ExpressionSyntax annotatedExpression )
         {
             var combinedScope = this.GetNodeScope( annotatedType ) == TemplatingScope.RunTimeOrCompileTime
                 ? this.GetNodeScope( annotatedExpression ).GetExpressionValueScope()
@@ -2252,9 +2254,20 @@ namespace Metalama.Framework.Engine.Templating
 
         public override SyntaxNode? VisitTypeOfExpression( TypeOfExpressionSyntax node )
         {
-            // The processing of typeof(.) is very specific. It is always represented as a compile-time expression even if the type itself is run-time only.
+            // The processing of typeof(.) is very specific. It is always represented as a compile-time expression.
             // There is then compile-time-to-run-time conversion logic in the rewriter.
             // The value of typeof is scope-neutral except if the type is run-time only.
+
+            /*
+
+            var symbol = (ITypeSymbol?) this._syntaxTreeAnnotationMap.GetSymbol( node.Type );
+
+            if ( symbol != null && this._templateMemberClassifier.ReferencesCompileTemplateTypeParameter( symbol ) )
+            {
+                return node.WithType( this.Visit( node.Type ) ).AddScopeAnnotation( TemplatingScope.RunTimeOnly );
+            }
+            */
+            
             TypeSyntax annotatedType;
 
             using ( this.WithScopeContext( ScopeContext.CreateRunTimeOrCompileTimeScope( this._currentScopeContext, "typeof" ) ) )
@@ -2273,8 +2286,8 @@ namespace Metalama.Framework.Engine.Templating
 
         public override SyntaxNode? VisitArrayRankSpecifier( ArrayRankSpecifierSyntax node )
         {
-            var transformedSizes = node.Sizes.Select( syntax => this.Visit( syntax ) ).ToList();
-            var sizeScope = this.GetExpressionScope( transformedSizes, node );
+            var transformedSizes = node.Sizes.Select( this.Visit ).ToList();
+            var sizeScope = this.GetExpressionScope( transformedSizes );
 
             var arrayRankScope = sizeScope.GetExpressionValueScope() switch
             {

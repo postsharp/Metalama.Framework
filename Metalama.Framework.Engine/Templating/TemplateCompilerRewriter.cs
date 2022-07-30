@@ -246,17 +246,23 @@ namespace Metalama.Framework.Engine.Templating
             // tuple can be initialize from variables and then items take names from variable name
             // but variable name is not safe and could be renamed because of target variables 
             // in this case we initialize tuple with explicit names
-            var symbol = (INamedTypeSymbol) this._syntaxTreeAnnotationMap.GetExpressionType( node )!;
+            var tupleType = (INamedTypeSymbol?) this._syntaxTreeAnnotationMap.GetExpressionType( node );
+
+            if ( tupleType == null )
+            {
+                // We may fail to get the tuple type if it has an element with the `default` keyword, i.e. `(default, "")`.
+            }
+            
             var transformedArguments = new ArgumentSyntax[node.Arguments.Count];
 
-            for ( var i = 0; i < symbol.TupleElements.Length; i++ )
+            for ( var i = 0; i < tupleType.TupleElements.Length; i++ )
             {
-                var tupleElement = symbol.TupleElements[i];
+                var tupleElement = tupleType.TupleElements[i];
                 ArgumentSyntax arg;
 
                 if ( !tupleElement.Name.Equals( tupleElement.CorrespondingTupleField!.Name, StringComparison.Ordinal ) )
                 {
-                    var name = symbol.TupleElements[i].Name;
+                    var name = tupleType.TupleElements[i].Name;
                     arg = node.Arguments[i].WithNameColon( NameColon( name ) );
                 }
                 else

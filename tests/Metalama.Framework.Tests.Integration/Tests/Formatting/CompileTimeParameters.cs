@@ -1,4 +1,5 @@
-﻿using Metalama.Framework.Aspects;
+﻿using System;
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 
 #pragma warning disable CS8603
@@ -8,9 +9,9 @@ namespace Metalama.Framework.Tests.Integration.Tests.Formatting.CompileTimeParam
     internal class MyAspect : TypeAspect
     {
         [Template]
-        public T Template<[CompileTime] T>( IDeclaration d )
+        public (T, Type) Template<[CompileTime] T>( IDeclaration d, T t, int i )
         {
-            return default;
+            return (default, typeof(T));
         }
     }
 }
