@@ -31,6 +31,11 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 background-color: rgba(50,50,90,0.1);
             }
 
+            .cr-NeutralTrivia
+            {
+                background-color: rgba(0,255,0,0.1);
+            }
+
             .cr-TemplateKeyword
             {
                 color: rgb(250, 0, 250) !important;

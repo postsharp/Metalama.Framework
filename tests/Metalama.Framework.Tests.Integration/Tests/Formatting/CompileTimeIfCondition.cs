@@ -29,7 +29,10 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Highlighting.IfStateme
 
             int compileTimeVariable = meta.CompileTime(0);
 
-            if (compileTimeVariable == 0)
+            if (compileTimeVariable == 0
+                // Intentionally on three lines
+                || compileTimeVariable == 1
+                || compileTimeVariable == 2 )
             {
                 runTimeObject.RunTimeMethod();
                 compileTimeObject.CompileTimeMethod();

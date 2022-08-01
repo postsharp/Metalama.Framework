@@ -34,22 +34,26 @@ namespace Metalama.TestFramework
             }
 
             return true;
-        }        
-        
+        }
+
         /// <summary>
         /// Checks for "hidden" problems in a <see cref="SyntaxTree"/>, i.e. problems where the _text_
         /// of the source code is valid, but the semantic syntax tree is not.
         /// </summary>
-        public static bool Verify( Compilation compilation, [NotNullWhen(false)] out DiagnosticList? diagnostics )
+        public static bool Verify( Compilation compilation, [NotNullWhen( false )] out DiagnosticList? diagnostics )
         {
             diagnostics = null;
 
             foreach ( var syntaxTree in compilation.SyntaxTrees )
             {
-                var parsedFromText = CSharpSyntaxTree.ParseText( syntaxTree.GetRoot().ToString(), path: syntaxTree.FilePath, encoding: Encoding.UTF8, options: (CSharpParseOptions)syntaxTree.Options )
+                var parsedFromText = CSharpSyntaxTree.ParseText(
+                        syntaxTree.GetRoot().ToString(),
+                        path: syntaxTree.FilePath,
+                        encoding: Encoding.UTF8,
+                        options: (CSharpParseOptions) syntaxTree.Options )
                     .GetRoot();
 
-                foreach (var diagnostic in parsedFromText.GetDiagnostics())
+                foreach ( var diagnostic in parsedFromText.GetDiagnostics() )
                 {
                     if ( diagnostic.Severity == DiagnosticSeverity.Error )
                     {
@@ -58,7 +62,7 @@ namespace Metalama.TestFramework
                 }
             }
 
-            if (diagnostics == null)
+            if ( diagnostics == null )
             {
                 return true;
             }
