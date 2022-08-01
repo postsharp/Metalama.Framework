@@ -50,5 +50,7 @@ public abstract class ProjectOptionsWrapper : IProjectOptions
 
     public virtual bool TryGetProperty( string name, out string? value ) => this.Wrapped.TryGetProperty( name, out value );
 
-    public bool RemoveCompileTimeOnlyCode => this.Wrapped.RemoveCompileTimeOnlyCode;
+    public virtual bool RemoveCompileTimeOnlyCode => this.Wrapped.RemoveCompileTimeOnlyCode;
+
+    public virtual bool RequiresCodeCoverageAnnotations => this.Wrapped.RequiresCodeCoverageAnnotations;
 }
