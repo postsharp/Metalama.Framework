@@ -22,7 +22,8 @@ namespace Metalama.Framework.Engine.Formatting
         // For test only.
         internal ClassifiedTextSpanCollection() : this( int.MaxValue ) { }
 
-        public ClassifiedTextSpanCollection( SourceText sourceText ) : this( sourceText.Length ) {
+        public ClassifiedTextSpanCollection( SourceText sourceText ) : this( sourceText.Length )
+        {
             this._sourceText = sourceText;
         }
 
@@ -233,13 +234,16 @@ namespace Metalama.Framework.Engine.Formatting
 
         public int Count => this._spans.Count;
 
+        /// <summary>
+        /// Post-processes the spans and fixes the classification of trailing trivia in spans that are immediately before non-colored spans.
+        /// </summary>
         internal void Polish()
         {
             if ( this._sourceText == null )
             {
                 throw new InvalidOperationException();
             }
-            
+
             using var enumerator = this._spans.GetEnumerator();
             using var nextEnumerator = this._spans.GetEnumerator();
 
@@ -255,9 +259,9 @@ namespace Metalama.Framework.Engine.Formatting
                 {
                     return;
                 }
-                
-                if ( enumerator.Current.Value.Classification is not ( TextSpanClassification.Default or TextSpanClassification.NeutralTrivia)
-                    && nextEnumerator.Current.Value.Classification is ( TextSpanClassification.Default or TextSpanClassification.NeutralTrivia) )
+
+                if ( enumerator.Current.Value.Classification is not (TextSpanClassification.Default or TextSpanClassification.NeutralTrivia)
+                     && nextEnumerator.Current.Value.Classification is (TextSpanClassification.Default or TextSpanClassification.NeutralTrivia) )
                 {
                     var span = enumerator.Current.Value.Span;
                     var rawSpanLength = span.Length;
@@ -269,12 +273,10 @@ namespace Metalama.Framework.Engine.Formatting
 
                     if ( rawSpanLength < span.Length )
                     {
-                        this.Add( TextSpan.FromBounds( span.Start + rawSpanLength, span.Start + span.Length ), TextSpanClassification.NeutralTrivia  );
+                        this.Add( TextSpan.FromBounds( span.Start + rawSpanLength, span.Start + span.Length ), TextSpanClassification.NeutralTrivia );
                     }
                 }
             }
-            
-
         }
     }
 }
