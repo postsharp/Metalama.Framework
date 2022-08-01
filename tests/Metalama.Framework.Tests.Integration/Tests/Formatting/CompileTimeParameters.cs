@@ -9,7 +9,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Formatting.CompileTimeParam
     internal class MyAspect : TypeAspect
     {
         [Template]
-        public (T, Type) Template<[CompileTime] T>( IDeclaration d, T t, int i )
+        public (T?, Type) Template<[CompileTime] T>( IDeclaration d, T t, int i )
         {
             return (default, typeof(T));
         }
