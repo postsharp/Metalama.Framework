@@ -261,7 +261,7 @@ namespace Metalama.Framework.Engine.Formatting
                 }
 
                 if ( enumerator.Current.Value.Classification is not (TextSpanClassification.Default or TextSpanClassification.NeutralTrivia)
-                     && nextEnumerator.Current.Value.Classification is (TextSpanClassification.Default or TextSpanClassification.NeutralTrivia) )
+                     && nextEnumerator.Current.Value.Classification is TextSpanClassification.Default or TextSpanClassification.NeutralTrivia )
                 {
                     var span = enumerator.Current.Value.Span;
                     var rawSpanLength = span.Length;
