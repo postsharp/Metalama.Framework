@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
     internal abstract class MethodBaseCollection<T> : MemberCollection<T>
         where T : class, IMethodBase
     {
-        protected MethodBaseCollection( INamedType declaringType, UpdatableMemberCollection<T> sourceItems ) : base(
+        protected MethodBaseCollection( NamedType declaringType, UpdatableMemberCollection<T> sourceItems ) : base(
             declaringType,
             sourceItems ) { }
     }

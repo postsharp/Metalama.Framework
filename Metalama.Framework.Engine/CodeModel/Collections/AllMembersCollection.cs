@@ -14,7 +14,7 @@ internal abstract class AllMembersCollection<T> : IMemberCollection<T>
 {
     private volatile Dictionary<T, T>? _members;
 
-    protected AllMembersCollection( INamedType declaringType )
+    protected AllMembersCollection( NamedType declaringType )
     {
         this.DeclaringType = declaringType;
     }

@@ -18,12 +18,24 @@ namespace Metalama.Framework.Engine.CodeModel
             this.Compilation = compilation;
         }
 
+        protected virtual void OnUsingDeclaration() { }
+
         public override CompilationModel Compilation { get; }
 
         public override DeclarationOrigin Origin => DeclarationOrigin.Source;
 
-        [Memo]
         public override IAttributeCollection Attributes
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.AttributesImpl;
+            }
+        }
+
+        [Memo]
+        private IAttributeCollection AttributesImpl
             => new AttributeCollection(
                 this,
                 this.Compilation.GetAttributeCollection( this.ToTypedRef<IDeclaration>() ) );
@@ -31,12 +43,22 @@ namespace Metalama.Framework.Engine.CodeModel
         [Memo]
         public override IAssembly DeclaringAssembly => this.Compilation.Factory.GetAssembly( this.Symbol.ContainingAssembly );
 
-        internal override Ref<IDeclaration> ToRef() => Ref.FromSymbol( this.Symbol, this.Compilation.RoslynCompilation );
+        internal override Ref<IDeclaration> ToRef()
+        {
+            this.OnUsingDeclaration();
+
+            return Ref.FromSymbol( this.Symbol, this.Compilation.RoslynCompilation );
+        }
 
         [Memo]
         public override IDeclaration OriginalDefinition => this.Compilation.Factory.GetDeclaration( this.Symbol.OriginalDefinition );
 
-        public override string ToString() => this.Symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat );
+        public override string ToString()
+        {
+            this.OnUsingDeclaration();
+
+            return this.Symbol.ToDisplayString( SymbolDisplayFormat.CSharpShortErrorMessageFormat );
+        }
 
         public TExtension GetExtension<TExtension>()
             where TExtension : IMetric

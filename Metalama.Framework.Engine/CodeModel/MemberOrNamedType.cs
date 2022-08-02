@@ -22,6 +22,8 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             get
             {
+                this.OnUsingDeclaration();
+
                 var syntaxReference = this.Symbol.GetPrimarySyntaxReference();
 
                 if ( syntaxReference == null )
@@ -54,33 +56,83 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        public bool IsAbstract => this.Symbol.IsAbstract;
+        public bool IsAbstract
+        {
+            get
+            {
+                this.OnUsingDeclaration();
 
-        public bool IsStatic => this.Symbol.IsStatic;
+                return this.Symbol.IsAbstract;
+            }
+        }
+
+        public bool IsStatic
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Symbol.IsStatic;
+            }
+        }
+
+        public INamedType? DeclaringType
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.DeclaringTypeImpl;
+            }
+        }
 
         [Memo]
-        public INamedType? DeclaringType => this.Symbol.ContainingType != null ? this.Compilation.Factory.GetNamedType( this.Symbol.ContainingType ) : null;
+        private INamedType? DeclaringTypeImpl
+            => this.Symbol.ContainingType != null ? this.Compilation.Factory.GetNamedType( this.Symbol.ContainingType ) : null;
 
         public abstract MemberInfo ToMemberInfo();
 
         protected MemberOrNamedType( CompilationModel compilation ) : base( compilation ) { }
 
         public Accessibility Accessibility
-            => this.Symbol.DeclaredAccessibility switch
+        {
+            get
             {
-                Microsoft.CodeAnalysis.Accessibility.NotApplicable => Accessibility.Private,
-                Microsoft.CodeAnalysis.Accessibility.Private => Accessibility.Private,
-                Microsoft.CodeAnalysis.Accessibility.ProtectedAndInternal => Accessibility.PrivateProtected,
-                Microsoft.CodeAnalysis.Accessibility.Protected => Accessibility.Protected,
-                Microsoft.CodeAnalysis.Accessibility.Internal => Accessibility.Internal,
-                Microsoft.CodeAnalysis.Accessibility.ProtectedOrInternal => Accessibility.ProtectedInternal,
-                Microsoft.CodeAnalysis.Accessibility.Public => Accessibility.Public,
-                _ => throw new ArgumentOutOfRangeException()
-            };
+                this.OnUsingDeclaration();
 
-        public string Name => this.Symbol.Name;
+                return this.Symbol.DeclaredAccessibility switch
+                {
+                    Microsoft.CodeAnalysis.Accessibility.NotApplicable => Accessibility.Private,
+                    Microsoft.CodeAnalysis.Accessibility.Private => Accessibility.Private,
+                    Microsoft.CodeAnalysis.Accessibility.ProtectedAndInternal => Accessibility.PrivateProtected,
+                    Microsoft.CodeAnalysis.Accessibility.Protected => Accessibility.Protected,
+                    Microsoft.CodeAnalysis.Accessibility.Internal => Accessibility.Internal,
+                    Microsoft.CodeAnalysis.Accessibility.ProtectedOrInternal => Accessibility.ProtectedInternal,
+                    Microsoft.CodeAnalysis.Accessibility.Public => Accessibility.Public,
+                    _ => throw new ArgumentOutOfRangeException()
+                };
+            }
+        }
 
-        INamedType? IMemberOrNamedType.DeclaringType => this.DeclaringType;
+        public string Name
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Symbol.Name;
+            }
+        }
+
+        INamedType? IMemberOrNamedType.DeclaringType
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.DeclaringType;
+            }
+        }
 
         public override SyntaxTree? PrimarySyntaxTree => this.Symbol.GetPrimarySyntaxReference()?.SyntaxTree;
     }

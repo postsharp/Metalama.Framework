@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections;
 
 internal class AllIndexersCollection : AllMembersCollection<IIndexer>, IIndexerCollection
 {
-    public AllIndexersCollection( INamedType declaringType ) : base( declaringType ) { }
+    public AllIndexersCollection( NamedType declaringType ) : base( declaringType ) { }
 
     protected override IMemberCollection<IIndexer> GetMembers( INamedType namedType ) => namedType.Indexers;
 

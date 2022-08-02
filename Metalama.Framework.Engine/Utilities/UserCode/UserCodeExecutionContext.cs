@@ -6,7 +6,9 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Project;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Globalization;
 
@@ -23,7 +25,9 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
 
         private UserCodeMemberInfo? _invokedMember;
 
-        private IExecutionScenario? _executionScenario;
+        private readonly IDependencyCollector? _dependencyCollector;
+
+        private readonly ISymbol? _targetType;
 
         public static UserCodeExecutionContext Current => (UserCodeExecutionContext) MetalamaExecutionContext.Current ?? throw new InvalidOperationException();
 
@@ -63,6 +67,8 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             this.AspectLayerId = aspectAspectLayerId;
             this.Compilation = compilationModel;
             this.TargetDeclaration = targetDeclaration;
+            this._dependencyCollector = serviceProvider.GetService<IDependencyCollector>();
+            this._targetType = targetDeclaration?.GetSymbol();
         }
 
         /// <summary>
@@ -83,6 +89,8 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             this._diagnosticAdder = diagnostics;
             this.InvokedMember = invokedMember;
             this.TargetDeclaration = targetDeclaration;
+            this._dependencyCollector = serviceProvider.GetService<IDependencyCollector>();
+            this._targetType = targetDeclaration?.GetSymbol();
         }
 
         public IDiagnosticAdder Diagnostics
@@ -106,8 +114,8 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
 
         public ICompilation? Compilation { get; }
 
-        public IExecutionScenario ExecutionScenario
-            => this._executionScenario ??= this.ServiceProvider.GetRequiredService<AspectPipelineDescription>().ExecutionScenario;
+        [Memo]
+        public IExecutionScenario ExecutionScenario => this.ServiceProvider.GetRequiredService<AspectPipelineDescription>().ExecutionScenario;
 
         ICompilation IExecutionContext.Compilation
             => this.Compilation ?? throw new InvalidOperationException( "There is no compilation in the current execution context" );
@@ -129,5 +137,18 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
                 this.AspectLayerId,
                 this.Compilation,
                 this.TargetDeclaration );
+
+        public void AddDependency( IDeclaration declaration )
+        {
+            if ( this._dependencyCollector != null && this._targetType != null )
+            {
+                var declaringType = declaration.GetDeclaringType()?.GetSymbol();
+
+                if ( declaringType != null )
+                {
+                    this._dependencyCollector.AddDependency( declaringType, this._targetType );
+                }
+            }
+        }
     }
 }
