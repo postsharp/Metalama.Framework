@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Compiler;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System;
@@ -20,21 +21,29 @@ namespace Metalama.Framework.Engine.Options
     {
         private readonly string _defaultProjectId = Guid.NewGuid().ToString();
         private readonly IProjectOptionsSource _source;
+        private readonly TransformerOptions _transformerOptions;
 
-        public MSBuildProjectOptions( IProjectOptionsSource source, ImmutableArray<object>? plugIns )
+        public MSBuildProjectOptions( IProjectOptionsSource source, ImmutableArray<object>? plugIns, TransformerOptions? transformerOptions = null )
         {
             this._source = source;
+            this._transformerOptions = transformerOptions ?? TransformerOptions.Default;
             this.PlugIns = plugIns ?? ImmutableArray<object>.Empty;
         }
 
-        public MSBuildProjectOptions( Microsoft.CodeAnalysis.Project project, ImmutableArray<object>? plugIns = null ) :
-            this( new OptionsAdapter( project.AnalyzerOptions.AnalyzerConfigOptionsProvider ), plugIns ) { }
+        public MSBuildProjectOptions(
+            Microsoft.CodeAnalysis.Project project,
+            ImmutableArray<object>? plugIns = null,
+            TransformerOptions? transformerOptions = null ) :
+            this( new OptionsAdapter( project.AnalyzerOptions.AnalyzerConfigOptionsProvider ), plugIns, transformerOptions ) { }
 
-        public MSBuildProjectOptions( AnalyzerConfigOptionsProvider options, ImmutableArray<object>? plugIns = null ) :
-            this( new OptionsAdapter( options ), plugIns ) { }
+        public MSBuildProjectOptions(
+            AnalyzerConfigOptionsProvider options,
+            ImmutableArray<object>? plugIns = null,
+            TransformerOptions? transformerOptions = null ) :
+            this( new OptionsAdapter( options ), plugIns, transformerOptions ) { }
 
-        public MSBuildProjectOptions( AnalyzerConfigOptions options, ImmutableArray<object>? plugIns = null ) :
-            this( new OptionsAdapter( options ), plugIns ) { }
+        public MSBuildProjectOptions( AnalyzerConfigOptions options, ImmutableArray<object>? plugIns = null, TransformerOptions? transformerOptions = null ) :
+            this( new OptionsAdapter( options ), plugIns, transformerOptions ) { }
 
         [Memo]
         public override string ProjectId => this.GetStringOption( "MetalamaProjectId" ) ?? this._defaultProjectId;
@@ -79,6 +88,8 @@ namespace Metalama.Framework.Engine.Options
 
         [Memo]
         public override bool RemoveCompileTimeOnlyCode => this.GetBooleanOption( "MetalamaRemoveCompileTimeOnlyCode", true );
+
+        public override bool RequiresCodeCoverageAnnotations => this._transformerOptions.RequiresCodeCoverageAnnotations;
 
         public override bool TryGetProperty( string name, [NotNullWhen( true )] out string? value )
         {
