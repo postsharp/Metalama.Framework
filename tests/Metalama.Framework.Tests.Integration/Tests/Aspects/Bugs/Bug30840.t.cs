@@ -1,1 +1,19 @@
-// TODO: Replace this file with the correct transformed code. See the test output for the actual transformed code.
+[TrackedObject]
+public struct TrackedClass
+{
+
+
+    private int _i1;
+    public int i
+    {
+        get
+        {
+            return this._i1;
+        }
+        set
+        {
+            this._i1 = value; return;
+
+        }
+    }
+}

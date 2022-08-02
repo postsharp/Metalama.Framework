@@ -102,7 +102,7 @@ namespace Metalama.Framework.Engine.Linking
             ISymbol containingSymbol,
             ISymbol referencedSymbol,
             ExpressionSyntax expression,
-            AspectReferenceSpecification referenceSpecification )
+            AspectReferenceSpecification referenceSpecification )        
         {
             // Get the local symbol that is referenced.
             // E.g. explicit interface implementation must be referenced as interface member reference.
@@ -604,7 +604,7 @@ namespace Metalama.Framework.Engine.Linking
             {
                 var matchingSymbol = currentType.GetMembers()
                     .SingleOrDefault(
-                        member => member.IsVisibleTo( this._intermediateCompilation, symbol ) && StructuralSymbolComparer.Signature.Equals( symbol, member ) );
+                        member => member.IsVisibleTo( this._intermediateCompilation, symbol ) && SignatureTypeSymbolComparer.Instance.Equals( symbol, member ) );
 
                 if ( matchingSymbol != null )
                 {

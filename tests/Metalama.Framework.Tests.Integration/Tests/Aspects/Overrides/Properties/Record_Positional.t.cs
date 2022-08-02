@@ -1,7 +1,7 @@
 internal record MyRecord(int A, int B)
 {
 
-    private int _a = A;
+    private readonly int _a = A;
     public int A
     {
         get
@@ -14,7 +14,7 @@ internal record MyRecord(int A, int B)
         }
     }
 
-    private int _b = B;
+    private readonly int _b = B;
     public int B
     {
         get

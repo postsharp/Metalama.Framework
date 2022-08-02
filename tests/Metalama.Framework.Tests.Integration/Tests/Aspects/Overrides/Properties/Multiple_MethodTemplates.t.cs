@@ -169,7 +169,7 @@ internal class TargetClass
 
 
         }
-        private set
+        private init
         {
             global::System.Console.WriteLine("This is the overridden setter.");
             global::System.Console.WriteLine("This is the overridden setter.");

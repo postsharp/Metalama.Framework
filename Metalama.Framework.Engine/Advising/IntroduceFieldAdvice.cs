@@ -19,6 +19,7 @@ namespace Metalama.Framework.Engine.Advising
 
     internal class IntroduceFieldAdvice : IntroduceMemberAdvice<IField, FieldBuilder>
     {
+
         public IntroduceFieldAdvice(
             IAspectInstanceInternal aspect,
             TemplateClassInstance templateInstance,
@@ -61,6 +62,13 @@ namespace Metalama.Framework.Engine.Advising
             {
                 this.Builder.Type = this.SourceCompilation.GetCompilationModel().Factory.GetSpecialType( SpecialType.Object );
                 this.Builder.Writeability = Writeability.All;
+            }
+
+            var targetType = this.TargetDeclaration.GetTarget(this.SourceCompilation);
+
+            if ( targetType.TypeKind is TypeKind.Struct or TypeKind.RecordStruct && targetType.GetSymbol().IsReadOnly )
+            {
+                this.Builder.Writeability = Writeability.ConstructorOnly;
             }
         }
 

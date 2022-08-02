@@ -56,7 +56,7 @@ namespace Metalama.Framework.Engine.Advising
 
                 foreach ( var constructor in type.Constructors )
                 {
-                    if ( !constructor.IsImplicitlyDeclared && constructor.InitializerKind == ConstructorInitializerKind.None )
+                    if ( constructor.Parameters.Count != 0 && !constructor.IsImplicitlyDeclared && constructor.InitializerKind == ConstructorInitializerKind.None )
                     {
                         addTransformation( new CallDefaultConstructorTransformation( advice, constructor ) );
                     }

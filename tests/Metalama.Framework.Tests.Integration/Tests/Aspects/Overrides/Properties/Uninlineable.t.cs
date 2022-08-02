@@ -111,7 +111,7 @@ internal class TargetClass
             return this.AutoGetOnlyProperty_Source;
 
         }
-        private set
+        private init
         {
             global::System.Console.WriteLine("Override.");
             this.AutoGetOnlyProperty_Source = value;

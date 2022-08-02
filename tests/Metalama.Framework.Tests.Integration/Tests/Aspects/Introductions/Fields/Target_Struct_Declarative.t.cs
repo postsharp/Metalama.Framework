@@ -1,10 +1,6 @@
 [Introduction]
 internal struct TargetStruct
 {
-    public TargetStruct()
-    {
-        _introducedField = default;
-    }
     private int _introducedField;
 
     public TargetStruct(int introducedField)

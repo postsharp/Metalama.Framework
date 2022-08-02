@@ -4,7 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.TestFramework;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.Target_ReadOnlyStruct_Simple
+namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.Struct_ReadOnly_Simple
 {
     public class TestAttribute : OverrideFieldOrPropertyAspect
     {

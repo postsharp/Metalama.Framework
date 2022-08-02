@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Linking
 
         public bool Equals( AspectReferenceTarget other )
         {
-            return SignatureTypeSymbolComparer.Instance.Equals( this.Symbol, other.Symbol )
+            return StructuralSymbolComparer.Default.Equals( this.Symbol, other.Symbol )
                    && other.Semantic == this.Semantic
                    && other.TargetKind == this.TargetKind;
         }

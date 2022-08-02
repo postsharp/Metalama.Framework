@@ -57,7 +57,7 @@ internal class TargetClass
     }
 
 
-    private int _autoGetOnlyProperty;
+    private readonly int _autoGetOnlyProperty;
 
     [Test]
     public int AutoGetOnlyProperty
@@ -66,7 +66,7 @@ internal class TargetClass
         {
             return this._autoGetOnlyProperty;
         }
-        private set
+        private init
         {
             global::System.Console.WriteLine($"This is the overridden setter.");
             this._autoGetOnlyProperty = value;

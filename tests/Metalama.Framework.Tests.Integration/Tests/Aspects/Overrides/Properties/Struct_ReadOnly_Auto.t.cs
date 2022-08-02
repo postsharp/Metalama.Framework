@@ -1,8 +1,8 @@
-internal class TargetClass
+internal readonly struct TargetStruct
 {
 
 
-    private int _property;
+    private readonly int _property;
     [Override]
     public int Property
     {
@@ -11,7 +11,7 @@ internal class TargetClass
             global::System.Console.WriteLine("This is the overridden getter.");
             return this._property;
         }
-        set
+        private init
         {
             global::System.Console.WriteLine($"This is the overridden setter.");
             this._property = value;
@@ -27,17 +27,17 @@ internal class TargetClass
         get
         {
             global::System.Console.WriteLine("This is the overridden getter.");
-            return global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto.TargetClass._staticProperty;
+            return global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Struct_ReadOnly_Auto.TargetStruct._staticProperty;
         }
         set
         {
             global::System.Console.WriteLine($"This is the overridden setter.");
-            global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto.TargetClass._staticProperty = value;
+            global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Struct_ReadOnly_Auto.TargetStruct._staticProperty = value;
         }
     }
 
 
-    private int _propertyInitOnly;
+    private readonly int _propertyInitOnly;
 
     [Override]
     public int PropertyInitOnly
@@ -55,7 +55,7 @@ internal class TargetClass
     }
 
 
-    private int _staticPropertyInitOnly;
+    private readonly int _staticPropertyInitOnly;
 
     [Override]
     public int StaticPropertyInitOnly

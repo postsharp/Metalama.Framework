@@ -65,6 +65,21 @@ namespace Metalama.Framework.Engine.CodeModel
                                 l.RefKind == r.RefKind
                                 && this.Equals( l, r ) );
 
+                case (IEventSymbol leftEvent, IEventSymbol rightEvent ):
+                    return
+                        StringComparer.Ordinal.Equals( leftEvent.Name, rightEvent.Name )
+                        && this.Equals( leftEvent.Type, rightEvent.Type );
+
+                case (IPropertySymbol leftProperty, IPropertySymbol rightProperty ):
+                    return
+                        StringComparer.Ordinal.Equals( leftProperty.Name, rightProperty.Name )
+                        && this.Equals( leftProperty.Type, rightProperty.Type )
+                        && leftProperty.Parameters.SequenceEqual(
+                            rightProperty.Parameters,
+                            ( l, r ) =>
+                                l.RefKind == r.RefKind
+                                && this.Equals( l, r ) );
+
                 case (INamedTypeSymbol leftNamedType, INamedTypeSymbol rightNamedType):
                     return
                         this._inner.Equals( leftNamedType.OriginalDefinition, rightNamedType.OriginalDefinition )

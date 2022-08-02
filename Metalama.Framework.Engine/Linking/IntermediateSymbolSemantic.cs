@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Utilities.Comparers;
 using Microsoft.CodeAnalysis;
 using System;
 
@@ -21,14 +22,14 @@ namespace Metalama.Framework.Engine.Linking
 
         public bool Equals( IntermediateSymbolSemantic other )
         {
-            return SignatureTypeSymbolComparer.Instance.Equals( this.Symbol, other.Symbol )
+            return StructuralSymbolComparer.Default.Equals( this.Symbol, other.Symbol )
                    && other.Kind == this.Kind;
         }
 
         public override int GetHashCode()
         {
             return HashCode.Combine(
-                SignatureTypeSymbolComparer.Instance.GetHashCode( this.Symbol ),
+                StructuralSymbolComparer.Default.GetHashCode( this.Symbol ),
                 this.Kind );
         }
 

@@ -339,66 +339,66 @@ namespace Metalama.Framework.Engine.Linking
                 var additionalBaseList = this._introducedMemberCollection.GetIntroducedInterfacesForTypeDeclaration( node );
                 var syntaxGenerationContext = this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( node );
 
-                if ( this._typeLevelTransformations.TryGetValue( node, out var typeLevelTransformations ) )
-                {
-                    if ( typeLevelTransformations.AddExplicitDefaultConstructor )
-                    {
-                        // Initialize fields to their default value in the new initializer.
-                        var constructorStatements = new List<StatementSyntax>();
+                //if ( this._typeLevelTransformations.TryGetValue( node, out var typeLevelTransformations ) )
+                //{
+                //    if ( typeLevelTransformations.AddExplicitDefaultConstructor )
+                //    {
+                //        // Initialize fields to their default value in the new initializer.
+                //        var constructorStatements = new List<StatementSyntax>();
 
-                        void AddInitialization( SyntaxToken identifier )
-                        {
-                            constructorStatements.Add(
-                                ExpressionStatement(
-                                    AssignmentExpression( SyntaxKind.SimpleAssignmentExpression, IdentifierName( identifier ), SyntaxFactoryEx.Default ) ) );
-                        }
+                //        void AddInitialization( SyntaxToken identifier )
+                //        {
+                //            constructorStatements.Add(
+                //                ExpressionStatement(
+                //                    AssignmentExpression( SyntaxKind.SimpleAssignmentExpression, IdentifierName( identifier ), SyntaxFactoryEx.Default ) ) );
+                //        }
 
-                        var typeSymbol = this._compilation.RoslynCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node );
+                //        var typeSymbol = this._compilation.RoslynCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node );
 
-                        if ( typeSymbol != null )
-                        {
-                            foreach ( var member in typeSymbol.GetMembers().Where( m => !m.IsImplicitlyDeclared ) )
-                            {
-                                if ( member.GetDeclarationKind() is DeclarationKind.Field or DeclarationKind.Property )
-                                {
-                                    var memberSyntax = member.GetPrimaryDeclaration();
+                //        if ( typeSymbol != null )
+                //        {
+                //            foreach ( var member in typeSymbol.GetMembers().Where( m => !m.IsImplicitlyDeclared ) )
+                //            {
+                //                if ( member.GetDeclarationKind() is DeclarationKind.Field or DeclarationKind.Property )
+                //                {
+                //                    var memberSyntax = member.GetPrimaryDeclaration();
 
-                                    switch ( memberSyntax )
-                                    {
-                                        case PropertyDeclarationSyntax property:
-                                            if ( property.Initializer == null && ((IPropertySymbol) member).IsAutoProperty() )
-                                            {
-                                                AddInitialization( property.Identifier );
-                                            }
+                //                    switch ( memberSyntax )
+                //                    {
+                //                        case PropertyDeclarationSyntax property:
+                //                            if ( property.Initializer == null && ((IPropertySymbol) member).IsAutoProperty() )
+                //                            {
+                //                                AddInitialization( property.Identifier );
+                //                            }
 
-                                            break;
+                //                            break;
 
-                                        case VariableDeclaratorSyntax field:
-                                            if ( field.Initializer == null && !this._introducedMemberCollection.IsRemovedSyntax( field ) )
-                                            {
-                                                AddInitialization( field.Identifier );
-                                            }
+                //                        case VariableDeclaratorSyntax field:
+                //                            if ( field.Initializer == null && !this._introducedMemberCollection.IsRemovedSyntax( field ) )
+                //                            {
+                //                                AddInitialization( field.Identifier );
+                //                            }
 
-                                            break;
+                //                            break;
 
-                                        default:
-                                            throw new AssertionFailedException();
-                                    }
-                                }
-                            }
-                        }
+                //                        default:
+                //                            throw new AssertionFailedException();
+                //                    }
+                //                }
+                //            }
+                //        }
 
-                        var constructorBody = Block( constructorStatements );
+                //        var constructorBody = Block( constructorStatements );
 
-                        var constructor = ConstructorDeclaration( node.Identifier )
-                            .WithModifiers( TokenList( Token( SyntaxKind.PublicKeyword ) ) )
-                            .WithBody( constructorBody )
-                            .NormalizeWhitespace()
-                            .AddColoringAnnotation( TextSpanClassification.GeneratedCode );
+                //        var constructor = ConstructorDeclaration( node.Identifier )
+                //            .WithModifiers( TokenList( Token( SyntaxKind.PublicKeyword ) ) )
+                //            .WithBody( constructorBody )
+                //            .NormalizeWhitespace()
+                //            .AddColoringAnnotation( TextSpanClassification.GeneratedCode );
 
-                        members.Add( constructor );
-                    }
-                }
+                //        members.Add( constructor );
+                //    }
+                //}
 
                 using ( var suppressionContext = this.WithSuppressions( node ) )
                 {

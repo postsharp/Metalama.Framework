@@ -26,6 +26,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug30840
         }
     }
 
+    // <target>
     [TrackedObject]
     public struct TrackedClass
     {
