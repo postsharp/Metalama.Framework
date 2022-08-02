@@ -16,7 +16,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
     /// </summary>
     internal readonly struct CompilationChangeTracker
     {
-        private readonly ImmutableDictionary<string, (SyntaxTree Tree, bool HasCompileTimeCode, ulong Hash)>? _lastTrees;
+        private readonly ImmutableDictionary<string, SyntaxTreeVersion>? _lastTrees;
 
         /// <summary>
         /// Gets the last <see cref="Compilation"/>, or <c>null</c> if the <see cref="Update"/> method
@@ -27,7 +27,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         public CompilationChanges? UnprocessedChanges { get; }
 
         private CompilationChangeTracker(
-            ImmutableDictionary<string, (SyntaxTree Tree, bool HasCompileTimeCode, ulong Hash)>? lastTrees,
+            ImmutableDictionary<string, SyntaxTreeVersion>? lastTrees,
             Compilation? lastCompilation,
             CompilationChanges? unprocessedChanges )
         {
@@ -134,7 +134,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
 
             var areMetadataReferencesEqual = this.AreMetadataReferencesEqual( newCompilation );
 
-            var newTrees = ImmutableDictionary.CreateBuilder<string, (SyntaxTree Tree, bool HasCompileTimeCode, ulong Hash)>( StringComparer.Ordinal );
+            var newTrees = ImmutableDictionary.CreateBuilder<string, SyntaxTreeVersion>( StringComparer.Ordinal );
             var generatedTrees = new List<SyntaxTree>();
 
             var syntaxTreeChanges = new List<SyntaxTreeChange>();
@@ -217,7 +217,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                     hasCompileTimeChange |= newHasCompileTimeCode;
                 }
 
-                newTrees.Add( newSyntaxTree.FilePath, (newSyntaxTree, newHasCompileTimeCode, newSyntaxTreeHash) );
+                newTrees.Add( newSyntaxTree.FilePath, new SyntaxTreeVersion( newSyntaxTree, newHasCompileTimeCode, newSyntaxTreeHash ) );
                 lastTrees = lastTrees?.Remove( newSyntaxTree.FilePath );
             }
 

@@ -35,13 +35,7 @@ namespace Metalama.Framework.Engine.CodeModel
             ImmutableArray<ManagedResource> resources = default )
             => new( project, PartialCompilation.CreateComplete( compilation, resources ) );
 
-        public static CompilationModel CreateInitialInstance(
-            IProject project,
-            Compilation compilation,
-            SyntaxTree syntaxTree,
-            ImmutableArray<ManagedResource> resources = default )
-            => new( project, PartialCompilation.CreatePartial( compilation, syntaxTree, resources ) );
-
+ 
         // This collection index all attributes on types and members, but not attributes on the assembly and the module.
         private readonly ImmutableDictionaryOfArray<string, AttributeRef> _allMemberAttributesByTypeName;
 

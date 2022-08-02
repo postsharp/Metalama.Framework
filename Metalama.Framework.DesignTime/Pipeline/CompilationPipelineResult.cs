@@ -33,10 +33,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         private static long _nextId;
         private readonly long _id = Interlocked.Increment( ref _nextId );
-
+        
         internal DesignTimeValidatorCollection Validators { get; } = DesignTimeValidatorCollection.Empty;
-
-        public bool IsDirty { get; } = true;
 
         public ImmutableDictionary<string, IntroducedSyntaxTree> IntroducedSyntaxTrees { get; } = _emptyIntroducedSyntaxTrees;
 
@@ -57,15 +55,13 @@ namespace Metalama.Framework.DesignTime.Pipeline
             ImmutableDictionary<string, SyntaxTreePipelineResult> invalidSyntaxTreeResults,
             ImmutableDictionary<string, IntroducedSyntaxTree> introducedSyntaxTrees,
             ImmutableDictionaryOfHashSet<string, InheritableAspectInstance> inheritableAspects,
-            DesignTimeValidatorCollection validators,
-            bool isDirty )
+            DesignTimeValidatorCollection validators )
         {
             this.SyntaxTreeResults = syntaxTreeResults;
             this._invalidSyntaxTreeResults = invalidSyntaxTreeResults;
             this.IntroducedSyntaxTrees = introducedSyntaxTrees;
             this._inheritableAspects = inheritableAspects;
             this.Validators = validators;
-            this.IsDirty = isDirty;
 
             Logger.DesignTime.Trace?.Log(
                 $"CompilationPipelineResult {this._id} created with {this.SyntaxTreeResults.Count} syntax trees and {this._invalidSyntaxTreeResults.Count} introduced syntax trees." );
@@ -184,8 +180,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 ImmutableDictionary<string, SyntaxTreePipelineResult>.Empty,
                 introducedTrees,
                 inheritableAspects,
-                validators,
-                false );
+                validators );
         }
 
         /// <summary>
@@ -350,13 +345,12 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     invalidSyntaxTreeBuilders.ToImmutable(),
                     this.IntroducedSyntaxTrees,
                     this._inheritableAspects,
-                    this.Validators,
-                    true );
+                    this.Validators );
             }
         }
 
 #pragma warning disable CA1822
-        public CompilationPipelineResult Clear()
+        private CompilationPipelineResult Clear()
 #pragma warning restore CA1822
         {
             Logger.DesignTime.Trace?.Log( $"DesignTimeSyntaxTreeResultCache.Clear()." );

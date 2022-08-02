@@ -3,6 +3,7 @@
 
 using Metalama.Compiler;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -197,10 +198,11 @@ namespace Metalama.Framework.Engine.CodeModel
         public static PartialCompilation CreatePartial(
             Compilation compilation,
             SyntaxTree syntaxTree,
-            ImmutableArray<ManagedResource> resources = default )
+            ImmutableArray<ManagedResource> resources = default,
+            IDependencyCollector? dependencyCollector = null )
         {
             var syntaxTrees = new[] { syntaxTree };
-            var closure = GetClosure( compilation, syntaxTrees );
+            var closure = GetClosure( compilation, syntaxTrees, dependencyCollector );
 
             return new PartialImpl(
                 compilation,
@@ -216,9 +218,10 @@ namespace Metalama.Framework.Engine.CodeModel
         public static PartialCompilation CreatePartial(
             Compilation compilation,
             IReadOnlyList<SyntaxTree> syntaxTrees,
-            ImmutableArray<ManagedResource> resources = default )
+            ImmutableArray<ManagedResource> resources = default,
+            IDependencyCollector? dependencyCollector = null  )
         {
-            var closure = GetClosure( compilation, syntaxTrees );
+            var closure = GetClosure( compilation, syntaxTrees, dependencyCollector );
 
             return new PartialImpl(
                 compilation,
@@ -246,9 +249,8 @@ namespace Metalama.Framework.Engine.CodeModel
         /// <summary>
         /// Gets a closure of the syntax trees declaring all base types and interfaces of all types declared in input syntax trees.
         /// </summary>
-        private static (ImmutableHashSet<INamedTypeSymbol> Types, ImmutableHashSet<SyntaxTree> Trees,
-            DerivedTypeIndex DerivedTypes)
-            GetClosure( Compilation compilation, IReadOnlyList<SyntaxTree> syntaxTrees )
+        private static (ImmutableHashSet<INamedTypeSymbol> Types, ImmutableHashSet<SyntaxTree> Trees, DerivedTypeIndex DerivedTypes)
+            GetClosure( Compilation compilation, IReadOnlyList<SyntaxTree> syntaxTrees, IDependencyCollector? dependencyCollector )
         {
             var assembly = compilation.Assembly;
 
@@ -269,7 +271,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 {
                     // If the type is not defined in the current assembly, analyze it using the DerivedTypeIndexBuilder so that
                     // it does not get included in the set of types in the current partial compilation.
-                    derivedTypesBuilder.AnalyzeType( type );
+                    derivedTypesBuilder.AnalyzeType( type, dependencyCollector );
                 }
                 else if ( types.Add( type ) )
                 {
@@ -282,14 +284,18 @@ namespace Metalama.Framework.Engine.CodeModel
                     // Add base types recursively.
                     if ( type.BaseType != null )
                     {
-                        derivedTypesBuilder.AddDerivedType( type.BaseType.OriginalDefinition, type );
-                        AddTypeRecursive( type.BaseType.OriginalDefinition );
+                        var baseType = type.BaseType.OriginalDefinition;
+                        dependencyCollector?.AddDependency( baseType, type );
+                        derivedTypesBuilder.AddDerivedType( baseType, type );
+                        AddTypeRecursive( baseType );
                     }
 
                     foreach ( var interfaceImpl in type.Interfaces )
                     {
-                        derivedTypesBuilder.AddDerivedType( interfaceImpl.OriginalDefinition, type );
-                        AddTypeRecursive( interfaceImpl.OriginalDefinition );
+                        var interfaceType = interfaceImpl.OriginalDefinition;
+                        dependencyCollector?.AddDependency( interfaceType, type );
+                        derivedTypesBuilder.AddDerivedType( interfaceType, type );
+                        AddTypeRecursive( interfaceType );
                     }
                 }
                 else

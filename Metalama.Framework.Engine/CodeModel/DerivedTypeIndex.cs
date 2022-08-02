@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
@@ -14,25 +15,23 @@ namespace Metalama.Framework.Engine.CodeModel
     internal class DerivedTypeIndex
     {
         private readonly Compilation _compilation;
-
-        public ImmutableDictionaryOfArray<INamedTypeSymbol, INamedTypeSymbol> Relationships { get; }
-
-        public ImmutableHashSet<INamedTypeSymbol> ExternalBaseTypes { get; }
+        private readonly ImmutableDictionaryOfArray<INamedTypeSymbol, INamedTypeSymbol> _relationships;
+        private readonly ImmutableHashSet<INamedTypeSymbol> _externalBaseTypes;
 
         private DerivedTypeIndex(
             Compilation compilation,
             ImmutableDictionaryOfArray<INamedTypeSymbol, INamedTypeSymbol> relationships,
             ImmutableHashSet<INamedTypeSymbol> externalBaseTypes )
         {
-            this.Relationships = relationships;
-            this.ExternalBaseTypes = externalBaseTypes;
+            this._relationships = relationships;
+            this._externalBaseTypes = externalBaseTypes;
             this._compilation = compilation;
         }
 
         public ImmutableArray<INamedTypeSymbol> GetDerivedTypes( INamedTypeSymbol baseType, bool deep )
             => deep
-                ? this.Relationships[baseType].SelectManyRecursive( t => this.Relationships[t] ).ToImmutableArray()
-                : this.Relationships[baseType];
+                ? this._relationships[baseType].SelectManyRecursive( t => this._relationships[t] ).ToImmutableArray()
+                : this._relationships[baseType];
 
         public DerivedTypeIndex WithIntroducedInterfaces( IEnumerable<IIntroduceInterfaceTransformation> introducedInterfaces )
         {
@@ -40,7 +39,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             foreach ( var introducedInterface in introducedInterfaces )
             {
-                builder ??= new Builder( this._compilation, this.Relationships.ToBuilder(), this.ExternalBaseTypes.ToBuilder() );
+                builder ??= new Builder( this._compilation, this._relationships.ToBuilder(), this._externalBaseTypes.ToBuilder() );
 
                 var introducedInterfaceSymbol = introducedInterface.InterfaceType.GetSymbol().AssertNotNull();
 
@@ -87,7 +86,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 this._processedTypes = processedTypes;
             }
 
-            public void AnalyzeType( INamedTypeSymbol type )
+            public void AnalyzeType( INamedTypeSymbol type, IDependencyCollector? dependencyCollector = null )
             {
                 if ( !this._processedTypes.Add( type ) )
                 {
@@ -98,19 +97,21 @@ namespace Metalama.Framework.Engine.CodeModel
                 {
                     var baseType = type.BaseType.OriginalDefinition;
                     this._relationships.Add( baseType, type );
-                    this.AnalyzeType( baseType );
+                    dependencyCollector?.AddDependency( baseType, type );
+                    this.AnalyzeType( baseType, dependencyCollector );
                 }
 
                 foreach ( var interfaceImpl in type.Interfaces )
                 {
                     var interfaceType = interfaceImpl.OriginalDefinition;
                     this._relationships.Add( interfaceType, type );
-                    this.AnalyzeType( interfaceType );
+                    dependencyCollector?.AddDependency( interfaceType, type );
+                    this.AnalyzeType( interfaceType, dependencyCollector );
                 }
 
                 foreach ( var nestedType in type.GetTypeMembers() )
                 {
-                    this.AnalyzeType( nestedType );
+                    this.AnalyzeType( nestedType, dependencyCollector );
                 }
             }
 
