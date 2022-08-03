@@ -49,8 +49,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
                 case (IParameterSymbol leftParameter, IParameterSymbol rightParameter):
                     return
-                        leftParameter.Ordinal == rightParameter.Ordinal
-                        && this.Equals( leftParameter.Type, rightParameter.Type )
+                        this.Equals( leftParameter.Type, rightParameter.Type )
                         && leftParameter.RefKind == rightParameter.RefKind;
 
                 case (IMethodSymbol leftMethod, IMethodSymbol rightMethod):
@@ -59,11 +58,7 @@ namespace Metalama.Framework.Engine.CodeModel
                         StringComparer.Ordinal.Equals( leftMethod.Name, rightMethod.Name )
                         && leftMethod.TypeParameters.Length == rightMethod.TypeParameters.Length
                         && this.Equals( leftMethod.ReturnType, rightMethod.ReturnType )
-                        && leftMethod.Parameters.SequenceEqual(
-                            rightMethod.Parameters,
-                            ( l, r ) =>
-                                l.RefKind == r.RefKind
-                                && this.Equals( l, r ) );
+                        && leftMethod.Parameters.SequenceEqual( rightMethod.Parameters, ( l, r ) => this.Equals( l, r ) );
 
                 case (IEventSymbol leftEvent, IEventSymbol rightEvent):
                     return
@@ -74,11 +69,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     return
                         StringComparer.Ordinal.Equals( leftProperty.Name, rightProperty.Name )
                         && this.Equals( leftProperty.Type, rightProperty.Type )
-                        && leftProperty.Parameters.SequenceEqual(
-                            rightProperty.Parameters,
-                            ( l, r ) =>
-                                l.RefKind == r.RefKind
-                                && this.Equals( l, r ) );
+                        && leftProperty.Parameters.SequenceEqual( rightProperty.Parameters, ( l, r ) => this.Equals( l, r ) );
 
                 case (INamedTypeSymbol leftNamedType, INamedTypeSymbol rightNamedType):
                     return

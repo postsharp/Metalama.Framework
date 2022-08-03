@@ -43,7 +43,6 @@
     <ItemGroup>
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
     </ItemGroup>
-    </ItemGroup>
 
     <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets" />
 
