@@ -38,7 +38,7 @@ internal abstract class InitializeAdvice : Advice
     {
         var targetDeclaration = this.TargetDeclaration.GetTarget( compilation );
 
-        var containingType = targetDeclaration.GetDeclaringType().AssertNotNull();
+        var containingType = targetDeclaration.GetNamedType().AssertNotNull();
 
         if ( containingType.TypeKind is TypeKind.RecordClass or TypeKind.RecordStruct )
         {

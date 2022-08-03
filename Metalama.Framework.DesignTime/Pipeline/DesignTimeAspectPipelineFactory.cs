@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -185,7 +186,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             CancellationToken cancellationToken,
             out CompilationResult? compilationResult )
         {
-            compilationResult = this.ExecuteAsync( options, compilation, cancellationToken ).Result;
+            compilationResult = TaskHelper.RunAndWait( () => this.ExecuteAsync( options, compilation, cancellationToken ), cancellationToken );
 
             return compilationResult != null;
         }
@@ -230,8 +231,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                         return null;
                     }
 
-                    compilationReferences.Add(
-                        new DesignTimeCompilationReference( referenceResult.TransformationResult, referenceResult.CompilationVersion ) );
+                    compilationReferences.Add( new DesignTimeCompilationReference( referenceResult.TransformationResult, referenceResult.CompilationVersion ) );
                 }
                 else
                 {

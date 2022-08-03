@@ -4,6 +4,7 @@
 using Metalama.Compiler;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
@@ -109,7 +110,7 @@ namespace Metalama.Framework.Engine.Formatting
         }
 
         public static Compilation FormatAll( Compilation compilation, CancellationToken cancellationToken = default )
-            => Task.Run( () => FormatAllAsync( compilation, cancellationToken ), cancellationToken ).Result;
+            => TaskHelper.RunAndWait( () => FormatAllAsync( compilation, cancellationToken ), cancellationToken );
 
         private static async Task<Compilation> FormatAllAsync( Compilation compilation, CancellationToken cancellationToken = default )
         {

@@ -17,6 +17,7 @@ using Metalama.Framework.Engine.Pipeline.LiveTemplates;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
@@ -263,7 +264,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
         // This method is for testing only.
         public bool TryExecute( Compilation compilation, CancellationToken cancellationToken, [NotNullWhen( true )] out CompilationResult? compilationResult )
         {
-            compilationResult = this.ExecuteAsync( compilation, DesignTimeCompilationReferenceCollection.Empty, cancellationToken ).Result;
+            compilationResult = TaskHelper.RunAndWait(
+                () => this.ExecuteAsync( compilation, DesignTimeCompilationReferenceCollection.Empty, cancellationToken ),
+                cancellationToken );
 
             return compilationResult != null;
         }

@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
@@ -153,29 +154,30 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private IEnumerable<string> GetSystemAssemblyPaths()
         {
-            using var mutex = MutexHelper.WithGlobalLock( this._cacheDirectory, this._logger );
-            var referenceAssemblyListFile = Path.Combine( this._cacheDirectory, "assemblies.txt" );
-
-            if ( File.Exists( referenceAssemblyListFile ) )
+            using ( MutexHelper.WithGlobalLock( this._cacheDirectory, this._logger ) )
             {
-                var referenceAssemblies = File.ReadAllLines( referenceAssemblyListFile );
+                var referenceAssemblyListFile = Path.Combine( this._cacheDirectory, "assemblies.txt" );
 
-                if ( referenceAssemblies.All( File.Exists ) )
+                if ( File.Exists( referenceAssemblyListFile ) )
                 {
-                    return referenceAssemblies;
+                    var referenceAssemblies = File.ReadAllLines( referenceAssemblyListFile );
+
+                    if ( referenceAssemblies.All( File.Exists ) )
+                    {
+                        return referenceAssemblies;
+                    }
                 }
-            }
 
-            Directory.CreateDirectory( this._cacheDirectory );
+                Directory.CreateDirectory( this._cacheDirectory );
 
-            GlobalJsonWriter.TryWriteCurrentVersion( this._cacheDirectory );
+                GlobalJsonWriter.TryWriteCurrentVersion( this._cacheDirectory );
 
-            var metadataReader = AssemblyMetadataReader.GetInstance( typeof(ReferenceAssemblyLocator).Assembly );
+                var metadataReader = AssemblyMetadataReader.GetInstance( typeof(ReferenceAssemblyLocator).Assembly );
 
-            // We don't add a reference to Microsoft.CSharp because this package is used to support dynamic code, and we don't want
-            // dynamic code at compile time. We prefer compilation errors.
-            var projectText =
-                $@"
+                // We don't add a reference to Microsoft.CSharp because this package is used to support dynamic code, and we don't want
+                // dynamic code at compile time. We prefer compilation errors.
+                var projectText =
+                    $@"
 <Project Sdk='Microsoft.NET.Sdk'>
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -189,41 +191,42 @@ namespace Metalama.Framework.Engine.CompileTime
   </Target>
 </Project>";
 
-            File.WriteAllText( Path.Combine( this._cacheDirectory, "TempProject.csproj" ), projectText );
+                File.WriteAllText( Path.Combine( this._cacheDirectory, "TempProject.csproj" ), projectText );
 
-            var dotnetPath = PlatformUtilities.GetDotNetPath( this._logger, this._dotNetSdkDirectory );
+                var dotnetPath = PlatformUtilities.GetDotNetPath( this._logger, this._dotNetSdkDirectory );
 
-            // We may consider executing msbuild.exe instead of dotnet.exe when the build itself runs using msbuild.exe.
-            // This way we wouldn't need to require a .NET SDK to be installed. Also, it seems that Rider requires the full path.
-            const string arguments = "build -t:WriteReferenceAssemblies";
+                // We may consider executing msbuild.exe instead of dotnet.exe when the build itself runs using msbuild.exe.
+                // This way we wouldn't need to require a .NET SDK to be installed. Also, it seems that Rider requires the full path.
+                const string arguments = "build -t:WriteReferenceAssemblies";
 
-            var psi = new ProcessStartInfo( dotnetPath, arguments )
-            {
-                // We cannot call dotnet.exe with a \\?\-prefixed path because MSBuild would fail.
-                WorkingDirectory = this._cacheDirectory,
-                UseShellExecute = false,
-                CreateNoWindow = true,
-                RedirectStandardOutput = true,
-                RedirectStandardError = true
-            };
+                var psi = new ProcessStartInfo( dotnetPath, arguments )
+                {
+                    // We cannot call dotnet.exe with a \\?\-prefixed path because MSBuild would fail.
+                    WorkingDirectory = this._cacheDirectory,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
+                };
 
-            var process = Process.Start( psi ).AssertNotNull();
+                var process = Process.Start( psi ).AssertNotNull();
 
-            var lines = new List<string>();
-            process.OutputDataReceived += ( _, e ) => lines.Add( e.Data );
-            process.ErrorDataReceived += ( _, e ) => lines.Add( e.Data );
+                var lines = new List<string>();
+                process.OutputDataReceived += ( _, e ) => lines.Add( e.Data );
+                process.ErrorDataReceived += ( _, e ) => lines.Add( e.Data );
 
-            process.BeginOutputReadLine();
-            process.WaitForExit();
+                process.BeginOutputReadLine();
+                process.WaitForExit();
 
-            if ( process.ExitCode != 0 )
-            {
-                throw new InvalidOperationException(
-                    $"Error while building temporary project to locate reference assemblies: `{dotnetPath} {arguments}` returned {process.ExitCode}"
-                    + Environment.NewLine + string.Join( Environment.NewLine, lines ) );
+                if ( process.ExitCode != 0 )
+                {
+                    throw new InvalidOperationException(
+                        $"Error while building temporary project to locate reference assemblies: `{dotnetPath} {arguments}` returned {process.ExitCode}"
+                        + Environment.NewLine + string.Join( Environment.NewLine, lines ) );
+                }
+
+                return File.ReadAllLines( referenceAssemblyListFile );
             }
-
-            return File.ReadAllLines( referenceAssemblyListFile );
         }
     }
 }

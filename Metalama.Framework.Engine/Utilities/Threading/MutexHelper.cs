@@ -3,9 +3,10 @@
 
 using Metalama.Backstage.Diagnostics;
 using System;
+using System.Diagnostics;
 using System.Threading;
 
-namespace Metalama.Framework.Engine.Utilities
+namespace Metalama.Framework.Engine.Utilities.Threading
 {
     public static class MutexHelper
     {
@@ -41,6 +42,10 @@ namespace Metalama.Framework.Engine.Utilities
             private readonly string _name;
             private readonly ILogger? _logger;
 
+#if DEBUG
+            private readonly StackTrace _stackTrace = new();
+#endif
+
             public MutexHandle( Mutex mutex, string name, ILogger? logger )
             {
                 this._mutex = mutex;
@@ -54,7 +59,18 @@ namespace Metalama.Framework.Engine.Utilities
 
                 this._mutex.ReleaseMutex();
                 this._mutex.Dispose();
+
+#if DEBUG
+                GC.SuppressFinalize( this );
+#endif
             }
+
+#if DEBUG
+            ~MutexHandle()
+            {
+                throw new Exception( "The mutex was not disposed. It was acquired here: " + Environment.NewLine + this._stackTrace );
+            }
+#endif
         }
     }
 }

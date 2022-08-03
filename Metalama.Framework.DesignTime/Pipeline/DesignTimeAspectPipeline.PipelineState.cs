@@ -12,8 +12,8 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -271,8 +271,13 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                             if ( pipeline.ProjectOptions.BuildTouchFile != null && File.Exists( pipeline.ProjectOptions.BuildTouchFile ) )
                             {
-                                using var mutex = MutexHelper.WithGlobalLock( pipeline.ProjectOptions.BuildTouchFile );
-                                File.Delete( pipeline.ProjectOptions.BuildTouchFile );
+                                using ( MutexHelper.WithGlobalLock( pipeline.ProjectOptions.BuildTouchFile ) )
+                                {
+                                    if ( File.Exists( pipeline.ProjectOptions.BuildTouchFile ) )
+                                    {
+                                        File.Delete( pipeline.ProjectOptions.BuildTouchFile );
+                                    }
+                                }
                             }
                         }
                         else

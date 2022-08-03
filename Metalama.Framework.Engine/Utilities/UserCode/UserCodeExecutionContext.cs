@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Project;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Globalization;
 
@@ -27,11 +26,28 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
 
         private readonly IDependencyCollector? _dependencyCollector;
 
-        private readonly ISymbol? _targetType;
+        private readonly INamedType? _targetType;
+
+        private bool _collectDependencyDisabled;
 
         public static UserCodeExecutionContext Current => (UserCodeExecutionContext) MetalamaExecutionContext.Current ?? throw new InvalidOperationException();
 
         public static UserCodeExecutionContext? CurrentInternal => (UserCodeExecutionContext?) MetalamaExecutionContext.CurrentOrNull;
+
+        internal DisposeAction WithoutDependencyCollection()
+        {
+            if ( this._dependencyCollector == null )
+            {
+                return default;
+            }
+            else
+            {
+                var previousValue = this._collectDependencyDisabled;
+                this._collectDependencyDisabled = true;
+
+                return new DisposeAction( () => this._collectDependencyDisabled = previousValue );
+            }
+        }
 
         internal static DisposeAction WithContext( UserCodeExecutionContext? context )
         {
@@ -68,7 +84,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             this.Compilation = compilationModel;
             this.TargetDeclaration = targetDeclaration;
             this._dependencyCollector = serviceProvider.GetService<IDependencyCollector>();
-            this._targetType = targetDeclaration?.GetSymbol();
+            this._targetType = targetDeclaration?.GetTopNamedType();
         }
 
         /// <summary>
@@ -90,7 +106,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             this.InvokedMember = invokedMember;
             this.TargetDeclaration = targetDeclaration;
             this._dependencyCollector = serviceProvider.GetService<IDependencyCollector>();
-            this._targetType = targetDeclaration?.GetSymbol();
+            this._targetType = targetDeclaration?.GetTopNamedType();
         }
 
         public IDiagnosticAdder Diagnostics
@@ -140,14 +156,33 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
 
         public void AddDependency( IDeclaration declaration )
         {
-            if ( this._dependencyCollector != null && this._targetType != null )
-            {
-                var declaringType = declaration.GetDeclaringType()?.GetSymbol();
+            // Prevent infinite recursion while getting the declaring type.
+            // We assume that there is one instance of this class per execution context and that it is single-threaded.
 
-                if ( declaringType != null )
+            if ( this._collectDependencyDisabled )
+            {
+                return;
+            }
+
+            this._collectDependencyDisabled = true;
+
+            try
+            {
+                if ( this._dependencyCollector != null && this._targetType != null )
                 {
-                    this._dependencyCollector.AddDependency( declaringType, this._targetType );
+                    var declaringType = declaration.GetTopNamedType();
+
+                    if ( declaringType != null && declaringType != this._targetType && this._targetType.IsSubclassOf( declaringType ) )
+                    {
+                        throw new DeclarationOutOfScopeException(
+                            UserMessageFormatter.Format(
+                                $"The current code cannot access '{declaration}'. It can only access '{this._targetType}' and its parent classes, including all nested classes." ) );
+                    }
                 }
+            }
+            finally
+            {
+                this._collectDependencyDisabled = false;
             }
         }
     }

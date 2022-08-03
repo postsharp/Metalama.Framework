@@ -216,6 +216,14 @@ namespace Metalama.Framework.Engine.Aspects
 
             var diagnosticSink = new UserDiagnosticSink( this._aspectClass.Project, pipelineConfiguration.CodeFixFilter );
 
+            var executionContext = new UserCodeExecutionContext(
+                serviceProvider,
+                diagnosticSink,
+                UserCodeMemberInfo.FromDelegate( new Action<IAspectBuilder<T>>( aspectOfT.BuildAspect ) ),
+                new AspectLayerId( this._aspectClass ),
+                initialCompilationRevision,
+                targetDeclaration );
+
             // Create the AdviceFactory.
             var adviceFactoryState = new AdviceFactoryState(
                 serviceProvider,
@@ -223,7 +231,8 @@ namespace Metalama.Framework.Engine.Aspects
                 currentCompilationRevision,
                 aspectInstance,
                 diagnosticSink,
-                pipelineConfiguration );
+                pipelineConfiguration,
+                executionContext );
 
             var adviceFactory = new AdviceFactory(
                 adviceFactoryState,
@@ -251,14 +260,6 @@ namespace Metalama.Framework.Engine.Aspects
 
             using ( SyntaxBuilder.WithImplementation( new SyntaxBuilderImpl( initialCompilationRevision, serviceProvider ) ) )
             {
-                var executionContext = new UserCodeExecutionContext(
-                    serviceProvider,
-                    diagnosticSink,
-                    UserCodeMemberInfo.FromDelegate( new Action<IAspectBuilder<T>>( aspectOfT.BuildAspect ) ),
-                    new AspectLayerId( this._aspectClass ),
-                    initialCompilationRevision,
-                    targetDeclaration );
-
                 if ( !serviceProvider.GetRequiredService<UserCodeInvoker>()
                         .TryInvoke(
                             () =>

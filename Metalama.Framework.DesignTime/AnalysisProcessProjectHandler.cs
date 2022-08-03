@@ -7,6 +7,7 @@ using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.SourceGeneration;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 
@@ -86,7 +87,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
 
             this._logger.Trace?.Log( $"No generated sources in the cache for project '{this.ProjectOptions.ProjectId}'. Need to generate them synchronously." );
 
-            if ( this.ComputeAsync( compilation, cancellationToken ).Result )
+            if ( TaskHelper.RunAndWait( () => this.ComputeAsync( compilation, cancellationToken ), cancellationToken ) )
             {
                 // Publish the changes asynchronously.
                 // We need to take the CancellationToken synchronously because the source may be disposed after the task is scheduled. 

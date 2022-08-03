@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Metrics;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -33,7 +34,7 @@ namespace Metalama.Framework.Workspaces
         /// </summary>
         /// <param name="paths">A list of project or solution paths.</param>
         /// <returns>A <see cref="Workspace"/> where all specified project or solutions, and their dependencies, have been loaded.</returns>
-        public Workspace Load( params string[] paths ) => this.LoadAsync( paths.ToImmutableArray() ).Result;
+        public Workspace Load( params string[] paths ) => TaskHelper.RunAndWait( () => this.LoadAsync( paths.ToImmutableArray() ) );
 
         /// <summary>
         /// Asynchronously loads a set of projects of solutions into a <see cref="Workspace"/>, or returns an existing workspace

@@ -216,7 +216,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 foreach ( var layer in aspectInstance.AspectInstance.AspectClass.Layers )
                 {
                     var aspectTargetDeclaration = (IDeclaration) aspectInstance.TargetDeclaration;
-                    var aspectTargetTypeDeclaration = aspectTargetDeclaration.GetDeclaringType() ?? aspectTargetDeclaration;
+                    var aspectTargetTypeDeclaration = aspectTargetDeclaration.GetNamedType() ?? aspectTargetDeclaration;
 
                     var stepId = new PipelineStepId(
                         new AspectLayerId( aspectInstance.AspectInstance.AspectClass, layer.LayerName ),
