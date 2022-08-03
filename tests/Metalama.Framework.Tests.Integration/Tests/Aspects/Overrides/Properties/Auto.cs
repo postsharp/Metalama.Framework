@@ -41,7 +41,13 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         [Override]
         public int PropertyInitOnly { get; init; }
 
-        [Override]
-        public int StaticPropertyInitOnly { get; init; }
+        public int __Init
+        {
+            init
+            {
+                // Init-only setter should be accessible from other init-only setters.
+                this.PropertyInitOnly = 42;
+            }
+        }
     }
 }

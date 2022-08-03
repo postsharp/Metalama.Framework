@@ -63,7 +63,7 @@ namespace Metalama.Framework.Engine.Formatting
         /// Used to classify the output code and marks the source code.
         /// </summary>
         SourceCode,
-        
+
         /// <summary>
         /// The white space at the beginning of a line.
         /// </summary>

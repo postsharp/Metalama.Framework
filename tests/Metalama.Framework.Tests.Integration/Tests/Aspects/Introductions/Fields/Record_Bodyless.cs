@@ -1,6 +1,6 @@
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Field.Target_Struct_EmptyBody
+namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Field.Record_Bodyless
 {
     public class IntroductionAttribute : TypeAspect
     {
@@ -19,5 +19,5 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Field.Target
 
     // <target>
     [Introduction]
-    internal struct TargetStruct { }
+    internal record TargetRecord;
 }

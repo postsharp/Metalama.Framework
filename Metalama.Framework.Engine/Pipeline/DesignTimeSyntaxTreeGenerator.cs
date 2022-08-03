@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.Pipeline
             additionalSyntaxTrees = additionalSyntaxTreeDictionary.Values;
 
             LexicalScopeFactory lexicalScopeFactory = new( compilationModel );
-            var introductionNameProvider = new LinkerIntroductionNameProvider();
+            var introductionNameProvider = new LinkerIntroductionNameProvider( compilationModel );
 
             var aspectReferenceSyntaxProvider =
                 new LinkerAspectReferenceSyntaxProvider(

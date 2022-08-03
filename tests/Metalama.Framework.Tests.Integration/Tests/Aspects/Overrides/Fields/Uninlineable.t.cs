@@ -75,7 +75,7 @@ internal class TargetClass
             return this.ReadOnlyField_Source;
 
         }
-        private set
+        private init
         {
             global::System.Console.WriteLine("Override.");
             this.ReadOnlyField_Source = value;

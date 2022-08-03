@@ -2290,7 +2290,7 @@ namespace Metalama.Framework.Engine.Templating
         {
             // ReSharper disable once RedundantSuppressNullableWarningExpression
             var transformedSizes = node.Sizes.Select( syntax => this.Visit( syntax )! ).ToList();
-            
+
             var sizeScope = this.GetExpressionScope( transformedSizes );
 
             var arrayRankScope = sizeScope.GetExpressionValueScope() switch

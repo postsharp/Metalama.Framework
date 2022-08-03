@@ -180,7 +180,7 @@ internal class TargetClass
             return this.AutoGetOnlyProperty_SecondOverride;
 
         }
-        private set
+        private init
         {
             global::System.Console.WriteLine("First override.");
             this.AutoGetOnlyProperty_SecondOverride = value;

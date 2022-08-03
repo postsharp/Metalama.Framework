@@ -25,16 +25,16 @@ internal class TargetClass
         }
     }
 
-    private global::System.Int32 _staticField;
+    private static global::System.Int32 _staticField;
 
 
-    public global::System.Int32 StaticField
+    public static global::System.Int32 StaticField
     {
         get
         {
             global::System.Console.WriteLine("First override.");
             global::System.Console.WriteLine("Second override.");
-            return this._staticField;
+            return global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Multiple.TargetClass._staticField;
 
 
         }
@@ -42,7 +42,7 @@ internal class TargetClass
         {
             global::System.Console.WriteLine("First override.");
             global::System.Console.WriteLine("Second override.");
-            this._staticField = value;
+            global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Multiple.TargetClass._staticField = value;
 
         }
     }
@@ -69,7 +69,7 @@ internal class TargetClass
         }
     }
 
-    private global::System.Int32 _readOnlyField;
+    private readonly global::System.Int32 _readOnlyField;
 
 
     public global::System.Int32 ReadOnlyField
@@ -82,7 +82,7 @@ internal class TargetClass
 
 
         }
-        private set
+        private init
         {
             global::System.Console.WriteLine("First override.");
             global::System.Console.WriteLine("Second override.");
@@ -118,7 +118,7 @@ internal class TargetClass
         }
     }
 
-    private global::System.Int32 _introducedReadOnlyField;
+    private readonly global::System.Int32 _introducedReadOnlyField;
 
 
     public global::System.Int32 IntroducedReadOnlyField
@@ -131,7 +131,7 @@ internal class TargetClass
 
 
         }
-        private set
+        private init
         {
             global::System.Console.WriteLine("First override.");
             global::System.Console.WriteLine("Second override.");

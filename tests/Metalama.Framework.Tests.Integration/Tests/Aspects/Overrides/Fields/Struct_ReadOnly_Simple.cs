@@ -4,7 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.TestFramework;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.Target_RecordStruct_Simple
+namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.Struct_ReadOnly_Simple
 {
     public class TestAttribute : OverrideFieldOrPropertyAspect
     {
@@ -24,12 +24,15 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.Target_Re
     }
 
     // <target>
-    internal record struct TargetRecordStruct
+    internal readonly struct TargetStruct
     {
         [Test]
-        public int Field;
+        public readonly int Field;
 
         [Test]
         public static int StaticField;
+
+        [Test]
+        public static readonly int StaticReadOnlyField;
     }
 }

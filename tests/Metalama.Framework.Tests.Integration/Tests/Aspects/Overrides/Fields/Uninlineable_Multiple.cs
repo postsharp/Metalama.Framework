@@ -1,8 +1,4 @@
-﻿#if TEST_OPTIONS
-// @Skipped(#30307)
-# endif
-
-using System;
+﻿using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Uninlineable_Multiple;

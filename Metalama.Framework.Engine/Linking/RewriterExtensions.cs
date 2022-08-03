@@ -64,14 +64,18 @@ namespace Metalama.Framework.Engine.Linking
                     propertyDeclaration.AccessorList.AssertNotNull()
                         .AddAccessors(
                             AccessorDeclaration(
-                                SyntaxKind.SetAccessorDeclaration,
+                                SyntaxKind.InitAccessorDeclaration,
                                 List<AttributeListSyntax>(),
                                 propertyDeclaration.Modifiers.Any( t => t.IsKind( SyntaxKind.PrivateKeyword ) )
                                 || propertyDeclaration.Modifiers.All( t => !t.IsAccessModifierKeyword() )
                                     ? TokenList()
                                     : TokenList( Token( SyntaxKind.PrivateKeyword ).WithTrailingTrivia( ElasticSpace ) ),
+                                propertyDeclaration.Modifiers.Any( m => m.IsKind( SyntaxKind.StaticKeyword ) )
+                                    ? Token( SyntaxKind.SetKeyword )
+                                    : Token( SyntaxKind.InitKeyword ),
                                 null,
-                                null ) ) );
+                                null,
+                                Token( SyntaxKind.SemicolonToken ) ) ) );
         }
     }
 }

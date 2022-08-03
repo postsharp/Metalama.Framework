@@ -8,7 +8,6 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -604,7 +603,8 @@ namespace Metalama.Framework.Engine.Linking
             {
                 var matchingSymbol = currentType.GetMembers()
                     .SingleOrDefault(
-                        member => member.IsVisibleTo( this._intermediateCompilation, symbol ) && StructuralSymbolComparer.Signature.Equals( symbol, member ) );
+                        member => member.IsVisibleTo( this._intermediateCompilation, symbol )
+                                  && SignatureTypeSymbolComparer.Instance.Equals( symbol, member ) );
 
                 if ( matchingSymbol != null )
                 {

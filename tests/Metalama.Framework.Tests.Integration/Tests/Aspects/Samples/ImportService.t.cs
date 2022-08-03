@@ -10,7 +10,7 @@ class TargetClass
             return (global::System.IFormatProvider?)this._serviceProvider.GetService(typeof(global::System.IFormatProvider));
 
         }
-        set
+        init
         {
             throw new global::System.NotSupportedException();
 
