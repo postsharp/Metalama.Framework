@@ -143,8 +143,8 @@ namespace Metalama.Compiler
                                     true )
                                 .WithErrorCodes( errorCodes )
                                 .NormalizeWhitespace()
-                            .WithLeadingTrivia( ElasticLineFeed )
-                            .WithTrailingTrivia( ElasticLineFeed ) ) );
+                                .WithLeadingTrivia( ElasticLineFeed )
+                                .WithTrailingTrivia( ElasticLineFeed ) ) );
             }
 
             return base.VisitClassDeclaration( node )!
@@ -248,10 +248,10 @@ namespace Metalama.Compiler
             {
                 if ( node.Initializer != null )
                 {
-                    transformedNode = 
+                    transformedNode =
                         transformedNode
-                        .WithInitializer( null )
-                        .WithSemicolonToken( default );
+                            .WithInitializer( null )
+                            .WithSemicolonToken( default );
                 }
 
                 transformedNode = this.MakePublicMember( transformedNode, node, symbol );

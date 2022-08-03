@@ -46,6 +46,8 @@ public abstract class DefaultProjectOptions : IProjectOptions
 
     public virtual bool RemoveCompileTimeOnlyCode => true;
 
+    public virtual bool RequiresCodeCoverageAnnotations => false;
+
     public virtual bool IsDesignTimeEnabled => true;
 
     public virtual string? AdditionalCompilationOutputDirectory => null;

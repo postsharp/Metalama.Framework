@@ -82,9 +82,9 @@ namespace Metalama.Framework.Engine.CompileTime
                     Token( SyntaxKind.HashToken ).WithLeadingTrivia( ElasticLineFeed ),
                     Token( SyntaxKind.PragmaKeyword ).WithTrailingTrivia( ElasticSpace ),
                     Token( SyntaxKind.WarningKeyword ).WithTrailingTrivia( ElasticSpace ),
-                    disable 
-                    ? Token( SyntaxKind.DisableKeyword ).WithTrailingTrivia( ElasticSpace ) 
-                    : Token( SyntaxKind.RestoreKeyword ).WithTrailingTrivia( ElasticSpace ),
+                    disable
+                        ? Token( SyntaxKind.DisableKeyword ).WithTrailingTrivia( ElasticSpace )
+                        : Token( SyntaxKind.RestoreKeyword ).WithTrailingTrivia( ElasticSpace ),
                     SeparatedList<ExpressionSyntax>( suppressedDiagnostics.Select( diagnosticCode => IdentifierName( diagnosticCode ) ) ),
                     Token( SyntaxKind.EndOfDirectiveToken ).WithTrailingTrivia( ElasticLineFeed ),
                     true );

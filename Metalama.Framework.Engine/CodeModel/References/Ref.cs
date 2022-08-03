@@ -338,7 +338,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                         $"Cannot convert '{compilationElement}' into a {typeof(T).Name} within the compilation '{compilation.Identity}'." );
                 }
 
-                return safeCast!;
+                return safeCast;
             }
 
             switch ( reference )

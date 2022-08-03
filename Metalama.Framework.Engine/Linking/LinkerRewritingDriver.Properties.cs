@@ -270,39 +270,39 @@ namespace Metalama.Framework.Engine.Linking
             var accessorList =
                 property.IsAutoPropertyDeclaration()
                     ? AccessorList(
-                        List(
-                            new[]
-                                {
-                                    symbol.GetMethod != null
-                                        ? autoProperty
-                                            ? AccessorDeclaration(
-                                                SyntaxKind.GetAccessorDeclaration,
-                                                List<AttributeListSyntax>(),
-                                                TokenList(),
-                                                Token( SyntaxKind.GetKeyword ),
-                                                null,
-                                                null,
-                                                Token( SyntaxKind.SemicolonToken ) )
-                                            : AccessorDeclaration(
-                                                SyntaxKind.GetAccessorDeclaration,
-                                                GetImplicitGetterBody( symbol.GetMethod, generationContext ) )
-                                        : null,
-                                    symbol.SetMethod != null
-                                        ? autoProperty
-                                            ? AccessorDeclaration(
-                                                SyntaxKind.SetAccessorDeclaration,
-                                                List<AttributeListSyntax>(),
-                                                TokenList(),
-                                                Token( SyntaxKind.SetKeyword ),
-                                                null,
-                                                null,
-                                                Token( SyntaxKind.SemicolonToken ) )
-                                            : AccessorDeclaration(
-                                                SyntaxKind.SetAccessorDeclaration,
-                                                GetImplicitSetterBody( symbol.SetMethod, generationContext ) )
-                                        : null
-                                }.Where( a => a != null )
-                                .AssertNoneNull() ) )
+                            List(
+                                new[]
+                                    {
+                                        symbol.GetMethod != null
+                                            ? autoProperty
+                                                ? AccessorDeclaration(
+                                                    SyntaxKind.GetAccessorDeclaration,
+                                                    List<AttributeListSyntax>(),
+                                                    TokenList(),
+                                                    Token( SyntaxKind.GetKeyword ),
+                                                    null,
+                                                    null,
+                                                    Token( SyntaxKind.SemicolonToken ) )
+                                                : AccessorDeclaration(
+                                                    SyntaxKind.GetAccessorDeclaration,
+                                                    GetImplicitGetterBody( symbol.GetMethod, generationContext ) )
+                                            : null,
+                                        symbol.SetMethod != null
+                                            ? autoProperty
+                                                ? AccessorDeclaration(
+                                                    SyntaxKind.SetAccessorDeclaration,
+                                                    List<AttributeListSyntax>(),
+                                                    TokenList(),
+                                                    Token( SyntaxKind.SetKeyword ),
+                                                    null,
+                                                    null,
+                                                    Token( SyntaxKind.SemicolonToken ) )
+                                                : AccessorDeclaration(
+                                                    SyntaxKind.SetAccessorDeclaration,
+                                                    GetImplicitSetterBody( symbol.SetMethod, generationContext ) )
+                                            : null
+                                    }.Where( a => a != null )
+                                    .AssertNoneNull() ) )
                         .NormalizeWhitespace()
                     : property.AccessorList?.WithSourceCodeAnnotation();
 
@@ -329,26 +329,26 @@ namespace Metalama.Framework.Engine.Linking
             var accessorList =
                 property.IsAutoPropertyDeclaration()
                     ? AccessorList(
-                        List(
-                            new[]
-                                {
-                                    symbol.GetMethod != null
-                                        ? AccessorDeclaration(
-                                            SyntaxKind.GetAccessorDeclaration,
-                                            List<AttributeListSyntax>(),
-                                            TokenList(), 
-                                            Token( SyntaxKind.GetKeyword ),  
-                                            null,
-                                            ArrowExpressionClause( DefaultExpression( property.Type ) ),
-                                            Token(SyntaxKind.SemicolonToken))
-                                        : null,
-                                    symbol.SetMethod != null
-                                        ? AccessorDeclaration(
-                                            SyntaxKind.SetAccessorDeclaration,
-                                            Block() )
-                                        : null
-                                }.Where( a => a != null )
-                                .AssertNoneNull() ) )
+                            List(
+                                new[]
+                                    {
+                                        symbol.GetMethod != null
+                                            ? AccessorDeclaration(
+                                                SyntaxKind.GetAccessorDeclaration,
+                                                List<AttributeListSyntax>(),
+                                                TokenList(),
+                                                Token( SyntaxKind.GetKeyword ),
+                                                null,
+                                                ArrowExpressionClause( DefaultExpression( property.Type ) ),
+                                                Token( SyntaxKind.SemicolonToken ) )
+                                            : null,
+                                        symbol.SetMethod != null
+                                            ? AccessorDeclaration(
+                                                SyntaxKind.SetAccessorDeclaration,
+                                                Block() )
+                                            : null
+                                    }.Where( a => a != null )
+                                    .AssertNoneNull() ) )
                         .NormalizeWhitespace()
                     : property.AccessorList.AssertNotNull();
 

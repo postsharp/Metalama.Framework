@@ -74,5 +74,10 @@ namespace Metalama.Framework.Engine.Options
         /// Gets a value indicating whether the compile-time-only code should be removed from the main compiled assembly.
         /// </summary>
         bool RemoveCompileTimeOnlyCode { get; }
+        
+        /// <summary>
+        /// Gets a value indicating whether the linker should annotate the code for code coverage.
+        /// </summary>
+        bool RequiresCodeCoverageAnnotations { get; }
     }
 }

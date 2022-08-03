@@ -272,11 +272,13 @@ namespace Metalama.Framework.Engine.Linking
                             {
                                 case SyntaxKind.MultiLineCommentTrivia or SyntaxKind.MultiLineDocumentationCommentTrivia:
                                     outputTrivia.Add( trivia );
+
                                     break;
 
                                 case SyntaxKind.SingleLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia:
                                     outputTrivia.Add( trivia );
                                     outputTrivia.Add( ElasticLineFeed );
+
                                     break;
                             }
                         }
