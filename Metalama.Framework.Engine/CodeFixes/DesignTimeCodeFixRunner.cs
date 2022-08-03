@@ -7,8 +7,8 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Project;
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.CodeFixes;
 
@@ -21,26 +21,21 @@ public class DesignTimeCodeFixRunner : CodeFixRunner
         this._configurationProvider = serviceProvider.GetRequiredService<IAspectPipelineConfigurationProvider>();
     }
 
-    private protected override bool TryGetConfiguration(
-        PartialCompilation compilation,
-        CancellationToken cancellationToken,
-        out AspectPipelineConfiguration? configuration,
-        [NotNullWhen( true )] out ServiceProvider? serviceProvider,
-        [NotNullWhen( true )] out CompileTimeDomain? domain )
+    private protected override
+        async ValueTask<(bool Success, AspectPipelineConfiguration? Configuration, ServiceProvider? ServiceProvider, CompileTimeDomain? Domain)>
+        GetConfigurationAsync(
+            PartialCompilation compilation,
+            CancellationToken cancellationToken )
     {
-        if ( this._configurationProvider.TryGetConfiguration( compilation, NullDiagnosticAdder.Instance, cancellationToken, out configuration ) )
-        {
-            serviceProvider = configuration.ServiceProvider;
-            domain = configuration.Domain;
+        var configuration = await this._configurationProvider.GetConfigurationAsync( compilation, NullDiagnosticAdder.Instance, cancellationToken );
 
-            return true;
+        if ( configuration != null )
+        {
+            return (true, configuration, configuration.ServiceProvider, configuration.Domain);
         }
         else
         {
-            serviceProvider = null;
-            domain = null;
-
-            return false;
+            return default;
         }
     }
 }

@@ -11,7 +11,6 @@ using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -32,12 +31,11 @@ namespace Metalama.Framework.Engine.CodeFixes
             this._userCodeInvoker = serviceProvider.GetRequiredService<UserCodeInvoker>();
         }
 
-        private protected abstract bool TryGetConfiguration(
-            PartialCompilation compilation,
-            CancellationToken cancellationToken,
-            out AspectPipelineConfiguration? configuration,
-            [NotNullWhen( true )] out ServiceProvider? serviceProvider,
-            [NotNullWhen( true )] out CompileTimeDomain? domain );
+        private protected abstract
+            ValueTask<(bool Success, AspectPipelineConfiguration? Configuration, ServiceProvider? ServiceProvider, CompileTimeDomain? Domain)>
+            GetConfigurationAsync(
+                PartialCompilation compilation,
+                CancellationToken cancellationToken );
 
         public async Task<CodeActionResult> ExecuteCodeFixAsync(
             Document document,
@@ -78,7 +76,9 @@ namespace Metalama.Framework.Engine.CodeFixes
             var partialCompilation = PartialCompilation.CreatePartial( sourceCompilation, syntaxTree );
 
             // Get the pipeline configuration.
-            if ( !this.TryGetConfiguration( partialCompilation, cancellationToken, out var designTimeConfiguration, out var serviceProvider, out var domain ) )
+            var configuration = await this.GetConfigurationAsync( partialCompilation, cancellationToken );
+
+            if ( !configuration.Success )
             {
                 // We cannot get the pipeline configuration.
 
@@ -87,12 +87,14 @@ namespace Metalama.Framework.Engine.CodeFixes
 
             // Execute the compile-time pipeline with the design-time project configuration.
             var codeFixPipeline = new CodeFixPipeline(
-                serviceProvider,
+                configuration.ServiceProvider!,
                 false,
-                domain,
+                configuration.Domain!,
                 diagnosticId,
                 syntaxTree.FilePath,
                 diagnosticSpan );
+
+            var designTimeConfiguration = configuration.Configuration;
 
             if ( !codeFixPipeline.TryExecute(
                     partialCompilation,
@@ -127,7 +129,7 @@ namespace Metalama.Framework.Engine.CodeFixes
             var codeFixBuilder = new CodeActionBuilder( context );
 
             var userCodeExecutionContext = new UserCodeExecutionContext(
-                serviceProvider,
+                configuration.ServiceProvider!,
                 NullDiagnosticAdder.Instance,
                 UserCodeMemberInfo.FromDelegate( codeFix.CodeFix.CodeAction ) );
 

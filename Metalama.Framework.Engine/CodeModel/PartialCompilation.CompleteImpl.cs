@@ -18,8 +18,8 @@ namespace Metalama.Framework.Engine.CodeModel
         /// </summary>
         private class CompleteImpl : PartialCompilation
         {
-            public CompleteImpl( Compilation compilation, ImmutableArray<ManagedResource> resources )
-                : base( compilation, GetDerivedTypeIndex( compilation ), resources ) { }
+            public CompleteImpl( Compilation compilation, DerivedTypeIndex derivedTypeIndex, ImmutableArray<ManagedResource> resources )
+                : base( compilation, derivedTypeIndex, resources ) { }
 
             private CompleteImpl(
                 PartialCompilation baseCompilation,
@@ -30,18 +30,6 @@ namespace Metalama.Framework.Engine.CodeModel
             [Memo]
             public override ImmutableDictionary<string, SyntaxTree> SyntaxTrees
                 => this.Compilation.SyntaxTrees.ToImmutableDictionary( s => s.FilePath, s => s );
-
-            private static DerivedTypeIndex GetDerivedTypeIndex( Compilation compilation )
-            {
-                DerivedTypeIndex.Builder builder = new( compilation );
-
-                foreach ( var type in compilation.Assembly.GetTypes() )
-                {
-                    builder.AnalyzeType( type );
-                }
-
-                return builder.ToImmutable();
-            }
 
             [Memo]
             public override ImmutableHashSet<INamedTypeSymbol> Types => this.Compilation.Assembly.GetTypes().ToImmutableHashSet();

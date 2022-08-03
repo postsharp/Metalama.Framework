@@ -4,7 +4,6 @@
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Options;
 using Microsoft.CodeAnalysis;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.Pipeline
 {
@@ -22,11 +21,13 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         protected override string GetProjectId( IProjectOptions projectOptions, Compilation compilation ) => compilation.AssemblyName!;
 
-        public override bool TryGetPipeline( Compilation compilation, [NotNullWhen( true )] out DesignTimeAspectPipeline? pipeline )
+        protected override ValueTask<DesignTimeAspectPipeline?> GetPipelineAndWaitAsync( Compilation compilation, CancellationToken cancellationToken )
         {
-            pipeline = this.GetOrCreatePipeline( this._projectOptions, compilation, CancellationToken.None );
-
-            return pipeline != null;
+            return new ValueTask<DesignTimeAspectPipeline?>( this.GetOrCreatePipeline( this._projectOptions, compilation, CancellationToken.None ) );
         }
+
+        protected override bool HasMetalamaReference( Compilation compilation )
+            => compilation.References.OfType<PortableExecutableReference>()
+                .Any( x => Path.GetFileNameWithoutExtension( x.FilePath )!.Equals( "Metalama.Framework", StringComparison.OrdinalIgnoreCase ) );
     }
 }

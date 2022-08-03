@@ -86,7 +86,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
 
             this._logger.Trace?.Log( $"No generated sources in the cache for project '{this.ProjectOptions.ProjectId}'. Need to generate them synchronously." );
 
-            if ( this.Compute( compilation, cancellationToken ) )
+            if ( this.ComputeAsync( compilation, cancellationToken ).Result )
             {
                 // Publish the changes asynchronously.
                 // We need to take the CancellationToken synchronously because the source may be disposed after the task is scheduled. 
@@ -105,14 +105,16 @@ public class AnalysisProcessProjectHandler : ProjectHandler
     /// <summary>
     /// Executes the pipeline.
     /// </summary>
-    private bool Compute( Compilation compilation, CancellationToken cancellationToken )
+    private async Task<bool> ComputeAsync( Compilation compilation, CancellationToken cancellationToken )
     {
         // Execute the pipeline.
-        if ( !this._pipelineFactory.TryExecute(
+        var compilationResult = await
+            this._pipelineFactory.ExecuteAsync(
                 this.ProjectOptions,
                 compilation,
-                cancellationToken,
-                out var compilationResult ) )
+                cancellationToken );
+
+        if ( compilationResult == null )
         {
             this._logger.Warning?.Log(
                 $"{this.GetType().Name}.Execute('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): the pipeline failed." );
@@ -149,7 +151,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
     /// </summary>
     private async Task ComputeAndPublishAsync( Compilation compilation, CancellationToken cancellationToken )
     {
-        if ( this.Compute( compilation, cancellationToken ) )
+        if ( await this.ComputeAsync( compilation, cancellationToken ) )
         {
             await this.PublishAsync( cancellationToken );
         }

@@ -3,8 +3,8 @@
 
 using Metalama.Compiler;
 using Metalama.Framework.Code.Collections;
-using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.CodeModel
     /// </summary>
     public abstract partial class PartialCompilation : IPartialCompilationInternal
     {
-        internal DerivedTypeIndex DerivedTypes { get; }
+        public DerivedTypeIndex DerivedTypes { get; }
 
         /// <summary>
         /// Gets the set of modifications present in the current compilation compared to the <see cref="InitialCompilation"/>.
@@ -190,7 +190,7 @@ namespace Metalama.Framework.Engine.CodeModel
         /// Creates a <see cref="PartialCompilation"/> that represents a complete compilation.
         /// </summary>
         public static PartialCompilation CreateComplete( Compilation compilation, ImmutableArray<ManagedResource> resources = default )
-            => new CompleteImpl( compilation, resources );
+            => new CompleteImpl( compilation, GetDerivedTypeIndex( compilation ), resources );
 
         /// <summary>
         /// Creates a <see cref="PartialCompilation"/> for a single syntax tree and its closure.
@@ -198,11 +198,10 @@ namespace Metalama.Framework.Engine.CodeModel
         public static PartialCompilation CreatePartial(
             Compilation compilation,
             SyntaxTree syntaxTree,
-            ImmutableArray<ManagedResource> resources = default,
-            IDependencyCollector? dependencyCollector = null )
+            ImmutableArray<ManagedResource> resources = default )
         {
             var syntaxTrees = new[] { syntaxTree };
-            var closure = GetClosure( compilation, syntaxTrees, dependencyCollector );
+            var closure = GetClosure( compilation, syntaxTrees );
 
             return new PartialImpl(
                 compilation,
@@ -218,10 +217,9 @@ namespace Metalama.Framework.Engine.CodeModel
         public static PartialCompilation CreatePartial(
             Compilation compilation,
             IReadOnlyList<SyntaxTree> syntaxTrees,
-            ImmutableArray<ManagedResource> resources = default,
-            IDependencyCollector? dependencyCollector = null  )
+            ImmutableArray<ManagedResource> resources = default )
         {
-            var closure = GetClosure( compilation, syntaxTrees, dependencyCollector );
+            var closure = GetClosure( compilation, syntaxTrees );
 
             return new PartialImpl(
                 compilation,
@@ -250,7 +248,7 @@ namespace Metalama.Framework.Engine.CodeModel
         /// Gets a closure of the syntax trees declaring all base types and interfaces of all types declared in input syntax trees.
         /// </summary>
         private static (ImmutableHashSet<INamedTypeSymbol> Types, ImmutableHashSet<SyntaxTree> Trees, DerivedTypeIndex DerivedTypes)
-            GetClosure( Compilation compilation, IReadOnlyList<SyntaxTree> syntaxTrees, IDependencyCollector? dependencyCollector )
+            GetClosure( Compilation compilation, IReadOnlyList<SyntaxTree> syntaxTrees )
         {
             var assembly = compilation.Assembly;
 
@@ -271,7 +269,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 {
                     // If the type is not defined in the current assembly, analyze it using the DerivedTypeIndexBuilder so that
                     // it does not get included in the set of types in the current partial compilation.
-                    derivedTypesBuilder.AnalyzeType( type, dependencyCollector );
+                    derivedTypesBuilder.AnalyzeType( type );
                 }
                 else if ( types.Add( type ) )
                 {
@@ -285,7 +283,6 @@ namespace Metalama.Framework.Engine.CodeModel
                     if ( type.BaseType != null )
                     {
                         var baseType = type.BaseType.OriginalDefinition;
-                        dependencyCollector?.AddDependency( baseType, type );
                         derivedTypesBuilder.AddDerivedType( baseType, type );
                         AddTypeRecursive( baseType );
                     }
@@ -293,7 +290,6 @@ namespace Metalama.Framework.Engine.CodeModel
                     foreach ( var interfaceImpl in type.Interfaces )
                     {
                         var interfaceType = interfaceImpl.OriginalDefinition;
-                        dependencyCollector?.AddDependency( interfaceType, type );
                         derivedTypesBuilder.AddDerivedType( interfaceType, type );
                         AddTypeRecursive( interfaceType );
                     }
@@ -326,6 +322,18 @@ namespace Metalama.Framework.Engine.CodeModel
             }
 
             return (types.ToImmutable(), trees.ToImmutable(), derivedTypesBuilder.ToImmutable());
+        }
+
+        private static DerivedTypeIndex GetDerivedTypeIndex( Compilation compilation )
+        {
+            DerivedTypeIndex.Builder builder = new( compilation );
+
+            foreach ( var type in compilation.Assembly.GetTypes() )
+            {
+                builder.AnalyzeType( type );
+            }
+
+            return builder.ToImmutable();
         }
 
         public ImmutableArray<SyntaxTreeTransformation> ToTransformations() => this.ModifiedSyntaxTrees.Values.ToImmutableArray();

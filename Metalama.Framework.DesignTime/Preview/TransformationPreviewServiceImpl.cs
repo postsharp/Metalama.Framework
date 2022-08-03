@@ -56,7 +56,9 @@ public class TransformationPreviewServiceImpl : ITransformationPreviewServiceImp
         DiagnosticList diagnostics = new();
 
         // Get the pipeline configuration from the design-time pipeline.
-        if ( !pipeline.TryGetConfiguration( partialCompilation, diagnostics, true, cancellationToken, out var designTimeConfiguration ) )
+        var designTimeConfiguration = await pipeline.GetConfigurationAsync( partialCompilation, diagnostics, true, cancellationToken );
+
+        if ( designTimeConfiguration == null )
         {
             return PreviewTransformationResult.Failure(
                 diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ).Select( d => d.ToString() ).ToArray() );

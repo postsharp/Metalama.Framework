@@ -321,7 +321,7 @@ Target.cs:
             Assert.NotNull( pipelineResult );
 
             // Simulate an external build event. This is normally triggered by the build touch file or by a UI signal.
-            pipeline.Resume( false );
+            await pipeline.ResumeAsync( false, CancellationToken.None );
 
             // A new evaluation of the design-time pipeline should now give the new results.
             Assert.True( factory.TryExecute( projectOptions, compilation5, CancellationToken.None, out var results6 ) );
@@ -415,7 +415,7 @@ partial class C
             // Disposing the domain crashes the CLR in this test.
             var domain = new UnloadableCompileTimeDomain();
 
-            using var pipelineFactory = new DesignTimeAspectPipelineFactory( context.ServiceProvider, domain, true );
+            using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( domain, context.ProjectOptions );
 
             // The dependency cannot have a reference to Metalama.
             // It needs to define a system type that is considered as compile-time.

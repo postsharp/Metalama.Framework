@@ -34,7 +34,8 @@ public class DependencyCollectorTests : TestBase
 
         var dependencyCollector = new DependencyCollector( testContext.ServiceProvider, compilation, Enumerable.Empty<CompilationVersion>() );
 
-        _ = PartialCompilation.CreatePartial( compilation, compilation.SyntaxTrees, dependencyCollector: dependencyCollector );
+        var partialCompilation = PartialCompilation.CreatePartial( compilation, compilation.SyntaxTrees );
+        partialCompilation.DerivedTypes.PopulateDependencies( dependencyCollector );
 
         var actualDependencies = string.Join(
             Environment.NewLine,
@@ -83,7 +84,8 @@ public class DependencyCollectorTests : TestBase
                     compilation1.SyntaxTrees.ToImmutableDictionary( x => x.FilePath, x => new SyntaxTreeVersion( x, false, 5 ) ) )
             } );
 
-        _ = PartialCompilation.CreatePartial( compilation2, compilation2.SyntaxTrees, dependencyCollector: dependencyCollector );
+        var partialCompilation = PartialCompilation.CreatePartial( compilation2, compilation2.SyntaxTrees );
+        partialCompilation.DerivedTypes.PopulateDependencies( dependencyCollector );
 
         var actualDependencies = string.Join(
             Environment.NewLine,

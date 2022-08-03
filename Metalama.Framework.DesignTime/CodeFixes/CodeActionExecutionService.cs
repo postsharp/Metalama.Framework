@@ -41,12 +41,13 @@ public class CodeActionExecutionService : ICodeActionExecutionService
 
         var partialCompilation = PartialCompilation.CreateComplete( compilation );
 
-        if ( !pipeline.TryGetConfiguration(
-                partialCompilation,
-                NullDiagnosticAdder.Instance,
-                true,
-                cancellationToken,
-                out var configuration ) )
+        var configuration = await pipeline.GetConfigurationAsync(
+            partialCompilation,
+            NullDiagnosticAdder.Instance,
+            true,
+            cancellationToken );
+
+        if ( configuration == null )
         {
             this._logger.Error?.Log( "Cannot initialize the pipeline." );
 

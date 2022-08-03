@@ -77,7 +77,9 @@ namespace Ns { class C {} }
 
             this._domain = new UnloadableCompileTimeDomain();
             this._pipeline = new DesignTimeAspectPipeline( testContext.ServiceProvider, this._domain, this._compilation.RoslynCompilation.References, true );
-            this._pipeline.TryGetConfiguration( this._compilation.PartialCompilation, NullDiagnosticAdder.Instance, true, CancellationToken.None, out _ );
+
+            // Force the pipeline configuration to execute so the tests can do queries over it.
+            _ = this._pipeline.GetConfigurationAsync( this._compilation.PartialCompilation, NullDiagnosticAdder.Instance, true, CancellationToken.None ).Result;
         }
 
 #if NET5_0_OR_GREATER

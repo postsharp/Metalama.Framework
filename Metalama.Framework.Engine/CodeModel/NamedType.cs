@@ -60,15 +60,8 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        public override ISymbol Symbol
-        {
-            get
-            {
-                this.OnUsingDeclaration();
-
-                return this.Implementation.Symbol;
-            }
-        }
+        // Calling OnUsingDeclaration creates an infinite recursion.
+        public override ISymbol Symbol => this.Implementation.Symbol;
 
         public override MemberInfo ToMemberInfo()
         {

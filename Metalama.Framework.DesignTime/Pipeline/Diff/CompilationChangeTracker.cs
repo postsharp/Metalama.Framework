@@ -26,6 +26,9 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
 
         public CompilationChanges? UnprocessedChanges { get; }
 
+        public CompilationVersion? LastCompilationVersion
+            => this.LastCompilation != null ? new CompilationVersion( this.LastCompilation, this._lastTrees.AssertNotNull() ) : null;
+
         private CompilationChangeTracker(
             ImmutableDictionary<string, SyntaxTreeVersion>? lastTrees,
             Compilation? lastCompilation,

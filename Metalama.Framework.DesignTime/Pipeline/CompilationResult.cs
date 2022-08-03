@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Engine.Aspects;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
@@ -12,10 +13,15 @@ internal sealed class CompilationResult
 
     public CompilationPipelineResult PipelineResult { get; }
 
-    internal CompilationResult( CompilationPipelineResult pipelineResult, CompilationValidationResult validationResult )
+    public ITransitiveAspectsManifest TransitiveAspectManifest { get; }
+
+    public CompilationVersion CompilationVersion { get; }
+
+    internal CompilationResult( CompilationVersion compilationVersion, CompilationPipelineResult pipelineResult, CompilationValidationResult validationResult )
     {
         this.ValidationResult = validationResult;
         this.PipelineResult = pipelineResult;
+        this.CompilationVersion = compilationVersion;
     }
 
     internal IEnumerable<Diagnostic> GetAllDiagnostics( string path )

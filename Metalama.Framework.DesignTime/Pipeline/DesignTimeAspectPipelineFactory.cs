@@ -12,6 +12,7 @@ using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 
 // ReSharper disable InconsistentlySynchronizedField
@@ -23,11 +24,13 @@ namespace Metalama.Framework.DesignTime.Pipeline
     /// returns produced by <see cref="DesignTimeAspectPipeline"/>. This class is also responsible for invoking
     /// cache invalidation methods as appropriate.
     /// </summary>
-    internal class DesignTimeAspectPipelineFactory : IDisposable, ITransitiveAspectManifestProvider, IAspectPipelineConfigurationProvider,
+    internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineConfigurationProvider,
                                                      ICompileTimeCodeEditingStatusService
     {
         private readonly ConcurrentDictionary<string, DesignTimeAspectPipeline> _pipelinesByProjectId = new();
         private readonly ILogger _logger;
+        private readonly ConcurrentQueue<TaskCompletionSource<DesignTimeAspectPipeline>> _newPipelineListeners = new();
+        private readonly CancellationToken _globalCancellationToken = CancellationToken.None;
 
         public IServiceProvider ServiceProvider { get; }
 
@@ -90,6 +93,11 @@ namespace Metalama.Framework.DesignTime.Pipeline
                         throw new AssertionFailedException();
                     }
 
+                    foreach ( var listener in this._newPipelineListeners )
+                    {
+                        listener.TrySetResult( pipeline );
+                    }
+
                     return pipeline;
                 }
             }
@@ -101,14 +109,18 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         public event Action<bool>? IsEditingCompileTimeCodeChanged;
 
-        void ICompileTimeCodeEditingStatusService.OnEditingCompileTimeCodeCompleted()
+        Task ICompileTimeCodeEditingStatusService.OnEditingCompileTimeCodeCompletedAsync()
         {
             Logger.DesignTime.Trace?.Log( "Received ICompileTimeCodeEditingStatusService.OnEditingCompileTimeCodeCompleted." );
 
+            var tasks = new List<Task>( this._pipelinesByProjectId.Values.Count );
+
             foreach ( var pipeline in this._pipelinesByProjectId.Values )
             {
-                pipeline.Resume( true );
+                tasks.Add( pipeline.ResumeAsync( true, this._globalCancellationToken ).AsTask() );
             }
+
+            return Task.WhenAll( tasks );
         }
 
         public bool IsUserInterfaceAttached { get; private set; }
@@ -147,7 +159,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             // our cache to become inconsistent when we started to have an outdated pipeline configuration.
             foreach ( var pipeline in this._pipelinesByProjectId.Values )
             {
-                pipeline.InvalidateCache();
+                _ = pipeline.InvalidateCacheAsync( this._globalCancellationToken );
             }
         }
 
@@ -168,21 +180,80 @@ namespace Metalama.Framework.DesignTime.Pipeline
         }
 
         public bool TryExecute(
-            IProjectOptions projectOptions,
+            IProjectOptions options,
             Compilation compilation,
             CancellationToken cancellationToken,
-            [NotNullWhen( true )] out CompilationResult? compilationResult )
+            out CompilationResult? compilationResult )
         {
+            compilationResult = this.ExecuteAsync( options, compilation, cancellationToken ).Result;
+
+            return compilationResult != null;
+        }
+
+        public Task<CompilationResult?> ExecuteAsync(
+            IProjectOptions projectOptions,
+            Compilation compilation,
+            CancellationToken cancellationToken )
+        {
+            // Force to create the pipeline.
             var designTimePipeline = this.GetOrCreatePipeline( projectOptions, compilation, cancellationToken );
 
             if ( designTimePipeline == null )
             {
-                compilationResult = null;
-
-                return false;
+                return Task.FromResult<CompilationResult?>( null );
             }
 
-            return designTimePipeline.TryExecute( compilation, cancellationToken, out compilationResult );
+            // Call the execution method that assumes that the pipeline exists or waits for it.
+            return this.ExecuteAsync( compilation, cancellationToken );
+        }
+
+        protected virtual bool HasMetalamaReference( Compilation compilation ) => ProjectIdHelper.TryGetProjectId( compilation, out _ );
+
+        private async Task<CompilationResult?> ExecuteAsync( Compilation compilation, CancellationToken cancellationToken )
+        {
+            if ( !this.HasMetalamaReference( compilation ) )
+            {
+                return null;
+            }
+
+            List<DesignTimeCompilationReference> compilationReferences = new();
+
+            foreach ( var reference in compilation.References.OfType<CompilationReference>() )
+            {
+                if ( this.HasMetalamaReference( reference.Compilation ) )
+                {
+                    // This is a Metalama reference. We need to compile the dependency.
+                    var referenceResult = await this.ExecuteAsync( reference.Compilation, cancellationToken );
+
+                    if ( referenceResult == null )
+                    {
+                        return null;
+                    }
+
+                    compilationReferences.Add(
+                        new DesignTimeCompilationReference( referenceResult.TransitiveAspectManifest, referenceResult.CompilationVersion ) );
+                }
+                else
+                {
+                    // It is a non-Metalama reference. 
+                    // TODO: We also need to track changes on non-Metalama projects -- at least to hash the syntax trees.
+                    compilationReferences.Add(
+                        new DesignTimeCompilationReference(
+                            null,
+                            new CompilationVersion( reference.Compilation, ImmutableDictionary<string, SyntaxTreeVersion>.Empty ) ) );
+                }
+            }
+
+            var referenceCollection = new DesignTimeCompilationReferenceCollection( compilationReferences );
+
+            var pipeline = await this.GetPipelineAndWaitAsync( compilation, cancellationToken );
+
+            if ( pipeline == null )
+            {
+                return null;
+            }
+
+            return await pipeline.ExecuteAsync( compilation, referenceCollection, cancellationToken );
         }
 
         public void Dispose()
@@ -196,24 +267,31 @@ namespace Metalama.Framework.DesignTime.Pipeline
             this.Domain.Dispose();
         }
 
-        public virtual bool TryGetPipeline( Compilation compilation, [NotNullWhen( true )] out DesignTimeAspectPipeline? pipeline )
+        protected virtual async ValueTask<DesignTimeAspectPipeline?> GetPipelineAndWaitAsync( Compilation compilation, CancellationToken cancellationToken )
         {
             if ( !ProjectIdHelper.TryGetProjectId( compilation, out var projectId ) )
             {
                 // The compilation does not reference our package.
-                pipeline = null;
-
-                return false;
+                return null;
             }
 
-            if ( !this._pipelinesByProjectId.TryGetValue( projectId, out pipeline ) )
+            DesignTimeAspectPipeline? pipeline;
+
+            while ( !this._pipelinesByProjectId.TryGetValue( projectId, out pipeline ) )
             {
-                this._logger.Trace?.Log( $"Cannot get the pipeline for project '{projectId}': it has not been created yet." );
+                this._logger.Trace?.Log( $"Awaiting for the pipeline '{projectId}'." );
 
-                return false;
+                var taskCompletionSource = new TaskCompletionSource<DesignTimeAspectPipeline>();
+
+                using ( cancellationToken.Register( () => taskCompletionSource.SetCanceled() ) )
+                {
+                    this._newPipelineListeners.Enqueue( taskCompletionSource );
+                }
+
+                await taskCompletionSource.Task;
             }
 
-            return true;
+            return pipeline;
         }
 
         public bool TryGetPipeline( string projectId, [NotNullWhen( true )] out DesignTimeAspectPipeline? pipeline )
@@ -228,38 +306,19 @@ namespace Metalama.Framework.DesignTime.Pipeline
             return true;
         }
 
-        public ITransitiveAspectsManifest? GetTransitiveAspectsManifest( Compilation compilation, CancellationToken cancellationToken )
-        {
-            if ( !this.TryGetPipeline( compilation, out var pipeline ) )
-            {
-                // We cannot create the pipeline because we don't have all options.
-                // If this is a problem, we will need to pass all options as AssemblyMetadataAttribute.
-
-                return null;
-            }
-
-            if ( !pipeline.TryExecute( compilation, cancellationToken, out var compilationResult ) )
-            {
-                return null;
-            }
-
-            return compilationResult.PipelineResult;
-        }
-
-        bool IAspectPipelineConfigurationProvider.TryGetConfiguration(
+        async ValueTask<AspectPipelineConfiguration?> IAspectPipelineConfigurationProvider.GetConfigurationAsync(
             PartialCompilation compilation,
             IDiagnosticAdder diagnosticAdder,
-            CancellationToken cancellationToken,
-            [NotNullWhen( true )] out AspectPipelineConfiguration? configuration )
+            CancellationToken cancellationToken )
         {
-            if ( !this.TryGetPipeline( compilation.Compilation, out var pipeline ) )
-            {
-                configuration = null;
+            var pipeline = await this.GetPipelineAndWaitAsync( compilation.Compilation, cancellationToken );
 
-                return false;
+            if ( pipeline == null )
+            {
+                return null;
             }
 
-            return pipeline.TryGetConfiguration( compilation, diagnosticAdder, true, cancellationToken, out configuration );
+            return await pipeline.GetConfigurationAsync( compilation, diagnosticAdder, true, cancellationToken );
         }
     }
 }

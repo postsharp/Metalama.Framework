@@ -51,12 +51,10 @@ internal partial class AnalysisProcessEndpoint
             return implementation.PreviewTransformationAsync( projectId, syntaxTreeName, cancellationToken );
         }
 
-        public Task OnCompileTimeCodeEditingCompletedAsync( CancellationToken cancellationToken = default )
+        public async Task OnCompileTimeCodeEditingCompletedAsync( CancellationToken cancellationToken = default )
         {
             var service = this._parent._serviceProvider.GetRequiredService<ICompileTimeCodeEditingStatusService>();
-            service.OnEditingCompileTimeCodeCompleted();
-
-            return Task.CompletedTask;
+            await service.OnEditingCompileTimeCodeCompletedAsync();
         }
 
         public Task OnUserInterfaceAttachedAsync( CancellationToken cancellationToken = default )

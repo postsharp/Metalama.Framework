@@ -3,6 +3,7 @@
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.Diagnostics;
+using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Aspects;
@@ -43,6 +44,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
             internal DesignTimeAspectPipelineStatus Status { get; }
 
             public CompilationChanges? UnprocessedChanges => this._compilationChangeTracker.UnprocessedChanges;
+
+            public CompilationVersion? CompilationVersion => this._compilationChangeTracker.LastCompilationVersion;
 
             public CompilationPipelineResult PipelineResult { get; }
 
@@ -107,8 +110,6 @@ namespace Metalama.Framework.DesignTime.Pipeline
             {
                 this.ValidationResult = validationResult;
             }
-
-            public Compilation? LastCompilation => this._compilationChangeTracker.LastCompilation;
 
             private static IReadOnlyList<SyntaxTree> GetCompileTimeSyntaxTrees(
                 ref PipelineState state,
@@ -364,6 +365,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             public static bool TryExecute(
                 ref PipelineState state,
                 PartialCompilation compilation,
+                DesignTimeCompilationReferenceCollection references,
                 CancellationToken cancellationToken,
                 [NotNullWhen( true )] out CompilationResult? compilationResult )
             {
@@ -394,7 +396,20 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 }
 
                 // Execute the pipeline.
-                var success = state._pipeline.TryExecute( compilation, diagnosticList, configuration, cancellationToken, out var pipelineResult );
+                var dependencyCollector = new DependencyCollector(
+                    configuration.ServiceProvider.WithService( references ),
+                    compilation.Compilation,
+                    references.References.Values.Select( x => x.CompilationVersion ) );
+
+                compilation.DerivedTypes.PopulateDependencies( dependencyCollector );
+                var serviceProvider = configuration.ServiceProvider.WithService( dependencyCollector );
+
+                var success = state._pipeline.TryExecute(
+                    compilation,
+                    diagnosticList,
+                    configuration.WithServiceProvider( serviceProvider ),
+                    cancellationToken,
+                    out var pipelineResult );
 
                 var additionalSyntaxTrees = pipelineResult switch
                 {
@@ -424,7 +439,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 // Execute the validators. We have to run them even if we have no user validator because this also runs system validators.
                 ExecuteValidators( ref state, compilation, configuration, cancellationToken );
 
-                compilationResult = new CompilationResult( state.PipelineResult, state.ValidationResult );
+                compilationResult = new CompilationResult( state.CompilationVersion.AssertNotNull(), state.PipelineResult, state.ValidationResult );
 
                 return true;
             }
