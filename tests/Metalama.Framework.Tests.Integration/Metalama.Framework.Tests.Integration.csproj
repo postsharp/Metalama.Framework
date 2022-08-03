@@ -43,12 +43,6 @@
     <ItemGroup>
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
     </ItemGroup>
-
-    <ItemGroup>
-      <None Include="Tests\Aspects\Overrides\Properties\Struct_ReadOnly_Auto.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>Struct_ReadOnly_Auto.cs</DependentUpon>
-      </None>
     </ItemGroup>
 
     <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets" />
