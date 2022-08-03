@@ -1,8 +1,10 @@
 internal readonly struct TargetStruct
 {
+    public TargetStruct()
+    {
+    }
 
-
-    private readonly int _property;
+    private readonly int _property = default;
     [Override]
     public int Property
     {
@@ -19,7 +21,7 @@ internal readonly struct TargetStruct
     }
 
 
-    private static int _staticProperty;
+    private static int _staticProperty = default;
 
     [Override]
     public static int StaticProperty
@@ -37,7 +39,7 @@ internal readonly struct TargetStruct
     }
 
 
-    private readonly int _propertyInitOnly;
+    private readonly int _propertyInitOnly = default;
 
     [Override]
     public int PropertyInitOnly
@@ -55,7 +57,7 @@ internal readonly struct TargetStruct
     }
 
 
-    private readonly int _staticPropertyInitOnly;
+    private readonly int _staticPropertyInitOnly = default;
 
     [Override]
     public int StaticPropertyInitOnly

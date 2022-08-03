@@ -1,6 +1,10 @@
 [Introduction]
 internal readonly struct TargetStruct
 {
+    public TargetStruct()
+    {
+    }
+    public readonly int _existingField = default;
 
 
     public readonly global::System.Int32 IntroducedField = default;

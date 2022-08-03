@@ -1,6 +1,9 @@
 [Introduction]
 internal struct TargetStruct
 {
+    public TargetStruct()
+    {
+    }
 
     public global::System.Int32 IntroducedField = default;
 

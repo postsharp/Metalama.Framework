@@ -1,9 +1,11 @@
 [TrackedObject]
 public struct TrackedClass
 {
+    public TrackedClass()
+    {
+    }
 
-
-    private int _i1;
+    private int _i1 = default;
     public int i
     {
         get
@@ -12,7 +14,8 @@ public struct TrackedClass
         }
         set
         {
-            this._i1 = value; return;
+            this._i1 = value; global::System.Console.WriteLine("Overridden setter");
+            return;
 
         }
     }

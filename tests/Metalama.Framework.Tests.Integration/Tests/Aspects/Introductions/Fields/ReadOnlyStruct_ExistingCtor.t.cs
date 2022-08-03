@@ -1,12 +1,8 @@
 [Introduction]
 internal readonly struct TargetStruct
 {
-    private readonly int _existingField;
-
-    public TargetStruct(int existingField)
-: this()
+    public TargetStruct()
     {
-        this._existingField = existingField;
     }
 
 

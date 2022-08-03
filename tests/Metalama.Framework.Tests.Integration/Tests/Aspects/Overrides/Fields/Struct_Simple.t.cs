@@ -1,6 +1,8 @@
 internal struct TargetStruct
 {
-
+    public TargetStruct()
+    {
+    }
 
     private global::System.Int32 _field = default;
 

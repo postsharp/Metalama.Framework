@@ -1,6 +1,6 @@
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Fields.Target_ReadOnlyStruct_Simple
+namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Fields.Target_ReadOnlyStruct_ExistingCtor
 {
     public class IntroductionAttribute : TypeAspect
     {
@@ -21,11 +21,8 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Fields.Targe
     [Introduction]
     internal readonly struct TargetStruct
     {
-        private readonly int _existingField;
-
-        public TargetStruct(int existingField)
+        public TargetStruct()
         {
-            this._existingField = existingField;
         }
     }
 }

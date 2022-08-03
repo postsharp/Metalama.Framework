@@ -22,6 +22,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Bugs.Bug30840
         private dynamic OverrideSetter(dynamic value)
         {
             meta.Proceed();
+            Console.WriteLine("Overridden setter");
             return value;
         }
     }

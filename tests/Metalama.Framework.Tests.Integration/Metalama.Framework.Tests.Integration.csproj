@@ -52,14 +52,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Include="Tests\Aspects\Overrides\Fields\Target_ReadOnlyStruct_Simple.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>Target_ReadOnlyStruct_Simple.cs</DependentUpon>
-      </None>
-      <None Include="Tests\Aspects\Overrides\Properties\ReadOnlyStruct_Auto - Copy.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>Struct_ReadOnly_Auto.cs</DependentUpon>
-      </None>
       <None Include="Tests\Aspects\Overrides\Properties\Struct_ReadOnly_Auto.t.cs">
         <SubType>Code</SubType>
         <DependentUpon>Struct_ReadOnly_Auto.cs</DependentUpon>
@@ -69,6 +61,33 @@
     <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets" />
 
     <ItemGroup>
+      <None Update="C:\Dev\Metalama\Tests\Metalama.Framework.Tests.Integration\Tests\Aspects\Introductions\Fields\ReadOnlyStruct_ExistingCtor.t.cs">
+        <DependentUpon>ReadOnlyStruct_ExistingCtor.cs</DependentUpon>
+      </None>
+      <None Update="C:\Dev\Metalama\Tests\Metalama.Framework.Tests.Integration\Tests\Aspects\Introductions\Fields\ReadOnlyStruct_ExistingCtorWithParameter.t.cs">
+        <DependentUpon>ReadOnlyStruct_ExistingCtorWithParameter.cs</DependentUpon>
+      </None>
+      <None Update="C:\Dev\Metalama\Tests\Metalama.Framework.Tests.Integration\Tests\Aspects\Introductions\Fields\ReadOnlyStruct_ExistingField.t.cs">
+        <DependentUpon>ReadOnlyStruct_ExistingField.cs</DependentUpon>
+      </None>
+      <None Update="C:\Dev\Metalama\Tests\Metalama.Framework.Tests.Integration\Tests\Aspects\Introductions\Fields\ReadOnlyStruct_Empty.t.cs">
+        <DependentUpon>ReadOnlyStruct_Empty.cs</DependentUpon>
+      </None>
+      <None Update="C:\Dev\Metalama\Tests\Metalama.Framework.Tests.Integration\Tests\Aspects\Introductions\Fields\ReadOnlyStruct_ExistingInitializedField.t.cs">
+        <DependentUpon>ReadOnlyStruct_ExistingInitializedField.cs</DependentUpon>
+      </None>
+      <None Update="C:\Dev\Metalama\Tests\Metalama.Framework.Tests.Integration\Tests\Aspects\Introductions\Fields\Record_Bodyless.t.cs">
+        <DependentUpon>Record_Bodyless.cs</DependentUpon>
+      </None>
+      <None Update="C:\Dev\Metalama\Tests\Metalama.Framework.Tests.Integration\Tests\Aspects\Introductions\Fields\RecordStruct_Bodyless.t.cs">
+        <DependentUpon>RecordStruct_Bodyless.cs</DependentUpon>
+      </None>
+      <None Update="C:\Dev\Metalama\Tests\Metalama.Framework.Tests.Integration\Tests\Aspects\Introductions\Fields\Struct_Declarative.t.cs">
+        <DependentUpon>Struct_Declarative.cs</DependentUpon>
+      </None>
+      <None Update="C:\Dev\Metalama\Tests\Metalama.Framework.Tests.Integration\Tests\Aspects\Introductions\Fields\Struct_NoCtor.t.cs">
+        <DependentUpon>Struct_NoCtor.cs</DependentUpon>
+      </None>
       <None Update="C:\Dev\Metalama\Tests\Metalama.Framework.Tests.Integration\Tests\Aspects\Overrides\Properties\Record_Positional_Attribute.t.cs">
         <DependentUpon>Record_Positional_Attribute.cs</DependentUpon>
       </None>

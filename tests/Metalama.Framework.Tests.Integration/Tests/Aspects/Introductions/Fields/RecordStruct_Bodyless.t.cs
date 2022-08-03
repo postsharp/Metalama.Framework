@@ -1,14 +1,9 @@
 [Introduction]
-internal struct TargetStruct
+internal record struct TargetRecordStruct
 {
-    private int _introducedField;
-
-    public TargetStruct(int introducedField)
-: this()
+    public TargetRecordStruct()
     {
-        this._introducedField = introducedField;
     }
-
 
     public global::System.Int32 IntroducedField = default;
 

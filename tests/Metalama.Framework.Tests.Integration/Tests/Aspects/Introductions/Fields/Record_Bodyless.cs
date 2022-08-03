@@ -1,6 +1,6 @@
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Fields.Target_ReadOnlyStruct_NoCtor
+namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Field.Record_Bodyless
 {
     public class IntroductionAttribute : TypeAspect
     {
@@ -19,7 +19,5 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Fields.Targe
 
     // <target>
     [Introduction]
-    internal readonly struct TargetStruct
-    {
-    }
+    internal record TargetRecord;
 }

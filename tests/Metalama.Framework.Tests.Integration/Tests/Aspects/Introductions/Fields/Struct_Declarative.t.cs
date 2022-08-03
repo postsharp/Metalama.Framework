@@ -1,6 +1,13 @@
 [Introduction]
-internal record struct TargetRecordStruct
+internal struct TargetStruct
 {
+    private int _existingField;
+
+    public TargetStruct(int x)
+    {
+        this._existingField = x;
+    }
+
 
     public global::System.Int32 IntroducedField = default;
 

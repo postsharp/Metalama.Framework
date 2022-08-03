@@ -1,6 +1,8 @@
 internal record struct TargetRecordStruct
 {
-
+    public TargetRecordStruct()
+    {
+    }
 
     private global::System.Int32 _field = default;
 

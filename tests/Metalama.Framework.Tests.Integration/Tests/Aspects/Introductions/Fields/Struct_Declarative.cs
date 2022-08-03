@@ -1,6 +1,6 @@
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Field.Target_Struct_Declarative
+namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Field.Struct_Declarative
 {
     public class IntroductionAttribute : TypeAspect
     {
@@ -21,11 +21,11 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Field.Target
     [Introduction]
     internal struct TargetStruct
     {
-        private int _introducedField;
+        private int _existingField;
 
-        public TargetStruct(int introducedField)
+        public TargetStruct(int x)
         {
-            this._introducedField = introducedField;
+            this._existingField = x;
         }
     }
 }

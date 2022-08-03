@@ -65,7 +65,6 @@ internal struct TargetStruct
         }
     }
     public TargetStruct(string q)
-: this()
     {
         this.q = q;
     }

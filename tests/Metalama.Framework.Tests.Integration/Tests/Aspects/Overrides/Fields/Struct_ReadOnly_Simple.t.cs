@@ -1,6 +1,8 @@
 internal readonly struct TargetStruct
 {
-
+    public TargetStruct()
+    {
+    }
 
     private readonly global::System.Int32 _field = default;
 

@@ -339,66 +339,21 @@ namespace Metalama.Framework.Engine.Linking
                 var additionalBaseList = this._introducedMemberCollection.GetIntroducedInterfacesForTypeDeclaration( node );
                 var syntaxGenerationContext = this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( node );
 
-                //if ( this._typeLevelTransformations.TryGetValue( node, out var typeLevelTransformations ) )
-                //{
-                //    if ( typeLevelTransformations.AddExplicitDefaultConstructor )
-                //    {
-                //        // Initialize fields to their default value in the new initializer.
-                //        var constructorStatements = new List<StatementSyntax>();
+                if ( this._typeLevelTransformations.TryGetValue( node, out var typeLevelTransformations ) )
+                {
+                    if ( typeLevelTransformations.AddExplicitDefaultConstructor )
+                    {
+                        var constructorBody = Block();
 
-                //        void AddInitialization( SyntaxToken identifier )
-                //        {
-                //            constructorStatements.Add(
-                //                ExpressionStatement(
-                //                    AssignmentExpression( SyntaxKind.SimpleAssignmentExpression, IdentifierName( identifier ), SyntaxFactoryEx.Default ) ) );
-                //        }
+                        var constructor = ConstructorDeclaration( node.Identifier )
+                            .WithModifiers( TokenList( Token( SyntaxKind.PublicKeyword ) ) )
+                            .WithBody( constructorBody )
+                            .NormalizeWhitespace()
+                            .AddColoringAnnotation( TextSpanClassification.GeneratedCode );
 
-                //        var typeSymbol = this._compilation.RoslynCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node );
-
-                //        if ( typeSymbol != null )
-                //        {
-                //            foreach ( var member in typeSymbol.GetMembers().Where( m => !m.IsImplicitlyDeclared ) )
-                //            {
-                //                if ( member.GetDeclarationKind() is DeclarationKind.Field or DeclarationKind.Property )
-                //                {
-                //                    var memberSyntax = member.GetPrimaryDeclaration();
-
-                //                    switch ( memberSyntax )
-                //                    {
-                //                        case PropertyDeclarationSyntax property:
-                //                            if ( property.Initializer == null && ((IPropertySymbol) member).IsAutoProperty() )
-                //                            {
-                //                                AddInitialization( property.Identifier );
-                //                            }
-
-                //                            break;
-
-                //                        case VariableDeclaratorSyntax field:
-                //                            if ( field.Initializer == null && !this._introducedMemberCollection.IsRemovedSyntax( field ) )
-                //                            {
-                //                                AddInitialization( field.Identifier );
-                //                            }
-
-                //                            break;
-
-                //                        default:
-                //                            throw new AssertionFailedException();
-                //                    }
-                //                }
-                //            }
-                //        }
-
-                //        var constructorBody = Block( constructorStatements );
-
-                //        var constructor = ConstructorDeclaration( node.Identifier )
-                //            .WithModifiers( TokenList( Token( SyntaxKind.PublicKeyword ) ) )
-                //            .WithBody( constructorBody )
-                //            .NormalizeWhitespace()
-                //            .AddColoringAnnotation( TextSpanClassification.GeneratedCode );
-
-                //        members.Add( constructor );
-                //    }
-                //}
+                        members.Add( constructor );
+                    }
+                }
 
                 using ( var suppressionContext = this.WithSuppressions( node ) )
                 {
@@ -540,12 +495,6 @@ namespace Metalama.Framework.Engine.Linking
                 constructorDeclaration = constructorDeclaration.WithInitializer(
                     AppendInitializerArguments( constructorDeclaration.Initializer, memberLevelTransformations.Arguments ) );
 
-                if ( memberLevelTransformations.HasCallDefaultConstructorTransformation && constructorDeclaration.Initializer == null )
-                {
-                    constructorDeclaration =
-                        constructorDeclaration.WithInitializer( ConstructorInitializer( SyntaxKind.ThisConstructorInitializer ) );
-                }
-
                 return constructorDeclaration;
             }
 
@@ -675,68 +624,39 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            public override SyntaxNode? VisitVariableDeclarator( VariableDeclaratorSyntax node )
-            {
-                if ( this._introducedMemberCollection.IsRemovedSyntax( node ) )
-                {
-                    return null;
-                }
-
-                return base.VisitVariableDeclarator( node );
-            }
-
-            public override SyntaxNode? VisitVariableDeclaration( VariableDeclarationSyntax node )
-            {
-                var remainingVariables = new List<VariableDeclaratorSyntax>( node.Variables.Count );
-
-                foreach ( var variable in node.Variables )
-                {
-                    var rewrittenVariable = (VariableDeclaratorSyntax?) this.Visit( variable );
-
-                    if ( rewrittenVariable != null )
-                    {
-                        remainingVariables.Add( rewrittenVariable );
-                    }
-                }
-
-                if ( node.Variables.SequenceEqual( remainingVariables ) )
-                {
-                    return base.VisitVariableDeclaration( node );
-                }
-                else if ( remainingVariables.Count > 0 )
-                {
-                    return node
-                        .WithType( (TypeSyntax) this.Visit( node.Type ).AssertNotNull() )
-                        .WithVariables( SeparatedList( remainingVariables ) )
-                        .WithLeadingTrivia( this.VisitTriviaList( node.GetLeadingTrivia() ) )
-                        .WithTrailingTrivia( this.VisitTriviaList( node.GetTrailingTrivia() ) );
-                }
-                else
-                {
-                    return null;
-                }
-            }
-
             private IReadOnlyList<MemberDeclarationSyntax> VisitFieldDeclarationCore( FieldDeclarationSyntax node )
             {
                 var originalNode = node;
-                var rewrittenDeclaration = (VariableDeclarationSyntax?) this.Visit( node.Declaration );
-
-                if ( rewrittenDeclaration == null )
-                {
-                    return Array.Empty<MemberDeclarationSyntax>();
-                }
 
                 // Rewrite attributes.
                 if ( originalNode.Declaration.Variables.Count > 1
                      && originalNode.Declaration.Variables.Any( v => this._nodesWithModifiedAttributes.Contains( v ) ) )
                 {
+                    // TODO: This needs to use rewritten variable declaration or do removal in place.
                     var members = new List<MemberDeclarationSyntax>( originalNode.Declaration.Variables.Count );
 
                     // If we have changes in attributes and several members, we have to split them.
                     foreach ( var variable in originalNode.Declaration.Variables )
                     {
-                        var declaration = VariableDeclaration( node.Declaration.Type, SingletonSeparatedList( variable ) );
+                        if ( this._introducedMemberCollection.IsRemovedSyntax( variable ) )
+                        {
+                            continue;
+                        }
+
+                        var finalVariable = variable;
+
+                        if ( this._symbolMemberLevelTransformations.TryGetValue( variable, out var transformations )
+                            && transformations.AddDefaultInitializer )
+                        {
+                            finalVariable =
+                                finalVariable.WithInitializer(
+                                    EqualsValueClause(
+                                        LiteralExpression(
+                                            SyntaxKind.DefaultLiteralExpression,
+                                            Token( SyntaxKind.DefaultKeyword ) ) ) );
+                        }
+
+                        var declaration = VariableDeclaration( node.Declaration.Type, SingletonSeparatedList( finalVariable ) );
                         var attributes = this.RewriteDeclarationAttributeLists( variable, originalNode.AttributeLists );
 
                         var fieldDeclaration = FieldDeclaration( attributes.Attributes, node.Modifiers, declaration, Token( SyntaxKind.SemicolonToken ) )
@@ -753,7 +673,48 @@ namespace Metalama.Framework.Engine.Linking
                     var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode.Declaration.Variables[0], originalNode.AttributeLists );
                     node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
 
-                    return new[] { node.WithDeclaration( rewrittenDeclaration ) };
+                    var anyChangeToVariables = false;
+                    var rewrittenVariables = new List<VariableDeclaratorSyntax>();
+
+                    foreach ( var variable in originalNode.Declaration.Variables )
+                    {
+                        if ( this._introducedMemberCollection.IsRemovedSyntax( variable ) )
+                        {
+                            anyChangeToVariables = true;
+                            continue;
+                        }
+
+                        if ( this._symbolMemberLevelTransformations.TryGetValue( variable, out var transformations ) && transformations.AddDefaultInitializer )
+                        {
+                            anyChangeToVariables = true;
+                            rewrittenVariables.Add(
+                                variable.WithInitializer(
+                                    EqualsValueClause(
+                                        LiteralExpression(
+                                            SyntaxKind.DefaultLiteralExpression,
+                                            Token( SyntaxKind.DefaultKeyword ) ) ) ) );
+                        }
+                        else
+                        {
+                            rewrittenVariables.Add( variable );
+                        }
+                    }
+
+                    if ( anyChangeToVariables )
+                    {
+                        if ( rewrittenVariables.Count > 0 )
+                        {
+                            return new[] { node.WithDeclaration( node.Declaration.WithVariables( SeparatedList( rewrittenVariables ) ) ) };
+                        }
+                        else
+                        {
+                            return Array.Empty<MemberDeclarationSyntax>();
+                        }
+                    }
+                    else
+                    {
+                        return new[] { node };
+                    }
                 }
             }
 
@@ -826,12 +787,23 @@ namespace Metalama.Framework.Engine.Linking
             {
                 var originalNode = node;
 
-                if ( this._introducedMemberCollection.IsAutoPropertyWithSynthesizedSetter( node ) )
+                node = (PropertyDeclarationSyntax) this.VisitPropertyDeclaration( node )!;
+
+                if ( this._introducedMemberCollection.IsAutoPropertyWithSynthesizedSetter( originalNode ) )
                 {
-                    return node.WithSynthesizedSetter();
+                    node = node.WithSynthesizedSetter();
                 }
 
-                node = (PropertyDeclarationSyntax) this.VisitPropertyDeclaration( node )!;
+                if ( this._symbolMemberLevelTransformations.TryGetValue( originalNode, out var transformations ) 
+                    && transformations.AddDefaultInitializer )
+                {
+                    node =
+                        node.WithInitializer(
+                            EqualsValueClause(
+                                LiteralExpression(
+                                    SyntaxKind.DefaultLiteralExpression,
+                                    Token( SyntaxKind.DefaultKeyword ) ) ) );
+                }
 
                 // Rewrite attributes.
                 var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
@@ -868,16 +840,6 @@ namespace Metalama.Framework.Engine.Linking
             {
                 var originalNode = node;
 
-                // TODO: If we have several fields in the same declaration, and we have changes in custom attributes, we have to split the fields.
-
-                var rewrittenDeclaration = (VariableDeclarationSyntax?) this.Visit( node.Declaration );
-
-                if ( rewrittenDeclaration == null )
-                {
-                    // We are not supporting removal of event fields during introduction step.
-                    throw new AssertionFailedException();
-                }
-
                 // Rewrite attributes.
                 if ( originalNode.Declaration.Variables.Count > 1
                      && originalNode.Declaration.Variables.Any( v => this._nodesWithModifiedAttributes.Contains( v ) ) )
@@ -887,7 +849,21 @@ namespace Metalama.Framework.Engine.Linking
                     // If we have changes in attributes and several members, we have to split them.
                     foreach ( var variable in originalNode.Declaration.Variables )
                     {
-                        var declaration = VariableDeclaration( node.Declaration.Type, SingletonSeparatedList( variable ) );
+                        var finalVariable = variable;
+
+                        if ( this._symbolMemberLevelTransformations.TryGetValue( variable, out var transformations ) 
+                            && transformations.AddDefaultInitializer )
+                        {
+                            finalVariable =
+                                finalVariable.WithInitializer(
+                                    EqualsValueClause(
+                                        LiteralExpression(
+                                            SyntaxKind.DefaultLiteralExpression,
+                                            Token( SyntaxKind.DefaultKeyword ) ) ) );
+                        }
+
+                        var declaration = VariableDeclaration( node.Declaration.Type, SingletonSeparatedList( finalVariable ) );
+
                         var attributes = this.RewriteDeclarationAttributeLists( variable, originalNode.AttributeLists );
 
                         var eventDeclaration = EventFieldDeclaration(
@@ -909,7 +885,40 @@ namespace Metalama.Framework.Engine.Linking
                     var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode.Declaration.Variables[0], originalNode.AttributeLists );
                     node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
 
-                    return new[] { node.WithDeclaration( rewrittenDeclaration ) };
+                    var anyChange = false;
+                    var rewrittenVariables = new List<VariableDeclaratorSyntax>();
+
+                    foreach (var variable in originalNode.Declaration.Variables)
+                    {
+                        if ( this._symbolMemberLevelTransformations.TryGetValue( variable, out var transformations ) && transformations.AddDefaultInitializer )
+                        {
+                            anyChange = true;
+                            rewrittenVariables.Add(
+                                variable.WithInitializer(
+                                    EqualsValueClause(
+                                        LiteralExpression(
+                                            SyntaxKind.DefaultLiteralExpression,
+                                            Token( SyntaxKind.DefaultKeyword ) ) ) ) );
+                        }
+                        else
+                        {
+                            rewrittenVariables.Add( variable );
+                        }
+                    }
+
+                    if ( anyChange )
+                    {
+                        return new[]
+                        {
+                            node.WithDeclaration(
+                                node.Declaration.WithVariables(
+                                    SeparatedList( rewrittenVariables ) ) )
+                        };
+                    }
+                    else
+                    {
+                        return new[] { node };
+                    }
                 }
             }
 
