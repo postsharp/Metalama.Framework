@@ -47,8 +47,8 @@ public class C {}
 
             Assert.True( pipeline.TryExecute( compilation1.RoslynCompilation, CancellationToken.None, out var compilationResult1 ) );
 
-            Assert.False( compilationResult1!.PipelineResult.Validators.IsEmpty );
-            Assert.Single( compilationResult1.PipelineResult.Validators.GetValidatorsForSymbol( compilation1.Types.OfName( "C" ).Single().GetSymbol() ) );
+            Assert.False( compilationResult1!.TransformationResult.Validators.IsEmpty );
+            Assert.Single( compilationResult1.TransformationResult.Validators.GetValidatorsForSymbol( compilation1.Types.OfName( "C" ).Single().GetSymbol() ) );
         }
 
         [Fact]
@@ -95,11 +95,11 @@ public class Aspect2 : TypeAspect
             var pipeline = new DesignTimeAspectPipeline( testContext.ServiceProvider, domain, compilation1.RoslynCompilation.References, true );
             Assert.True( pipeline.TryExecute( compilation1.RoslynCompilation, CancellationToken.None, out var compilationResult1 ) );
 
-            Assert.False( compilationResult1!.PipelineResult.Validators.IsEmpty );
+            Assert.False( compilationResult1!.TransformationResult.Validators.IsEmpty );
 
             Assert.Equal(
                 new[] { "Aspect1" },
-                compilationResult1.PipelineResult.Validators.GetValidatorsForSymbol( classC )
+                compilationResult1.TransformationResult.Validators.GetValidatorsForSymbol( classC )
                     .Select( v => v.Implementation.Implementation.GetType().Name )
                     .ToArray() );
 
@@ -108,11 +108,11 @@ public class Aspect2 : TypeAspect
 
             var compilation2 = testContext.CreateCompilationModel( compilation1.RoslynCompilation.ReplaceSyntaxTree( targetTree1, targetTree2 ) );
             Assert.True( pipeline.TryExecute( compilation2.RoslynCompilation, CancellationToken.None, out var compilationResult2 ) );
-            Assert.False( compilationResult2!.PipelineResult.Validators.IsEmpty );
+            Assert.False( compilationResult2!.TransformationResult.Validators.IsEmpty );
 
             Assert.Equal(
                 new[] { "Aspect1", "Aspect2" },
-                compilationResult2.PipelineResult.Validators.GetValidatorsForSymbol( classC )
+                compilationResult2.TransformationResult.Validators.GetValidatorsForSymbol( classC )
                     .Select( v => v.Implementation.Implementation.GetType().Name )
                     .OrderBy( n => n )
                     .ToArray() );
@@ -121,11 +121,11 @@ public class Aspect2 : TypeAspect
             var targetTree3 = CSharpSyntaxTree.ParseText( "[Aspect2] class C {}", path: "target.cs" );
             var compilation3 = testContext.CreateCompilationModel( compilation2.RoslynCompilation.ReplaceSyntaxTree( targetTree2, targetTree3 ) );
             Assert.True( pipeline.TryExecute( compilation3.RoslynCompilation, CancellationToken.None, out var compilationResult3 ) );
-            Assert.False( compilationResult3!.PipelineResult.Validators.IsEmpty );
+            Assert.False( compilationResult3!.TransformationResult.Validators.IsEmpty );
 
             Assert.Equal(
                 new[] { "Aspect2" },
-                compilationResult3.PipelineResult.Validators.GetValidatorsForSymbol( classC )
+                compilationResult3.TransformationResult.Validators.GetValidatorsForSymbol( classC )
                     .Select( v => v.Implementation.Implementation.GetType().Name )
                     .ToArray() );
         }

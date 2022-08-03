@@ -402,7 +402,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     references.References.Values.Select( x => x.CompilationVersion ) );
 
                 compilation.DerivedTypes.PopulateDependencies( dependencyCollector );
-                var serviceProvider = configuration.ServiceProvider.WithService( dependencyCollector );
+                var serviceProvider = configuration.ServiceProvider.WithServices( dependencyCollector, references );
 
                 var success = state._pipeline.TryExecute(
                     compilation,

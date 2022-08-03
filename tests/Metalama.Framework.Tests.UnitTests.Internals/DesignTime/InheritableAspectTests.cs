@@ -37,11 +37,11 @@ public interface I {}
 
             Assert.True( pipeline.TryExecute( compilation1.RoslynCompilation, CancellationToken.None, out var compilationResult1 ) );
 
-            Assert.Equal( new[] { "Aspect" }, compilationResult1!.PipelineResult.InheritableAspectTypes.ToArray() );
+            Assert.Equal( new[] { "Aspect" }, compilationResult1!.TransformationResult.InheritableAspectTypes.ToArray() );
 
             Assert.Equal(
                 new[] { "T:I" },
-                compilationResult1.PipelineResult.GetInheritedAspects( "Aspect" ).Select( i => i.TargetDeclaration.ToSerializableId().Id ).ToArray() );
+                compilationResult1.TransformationResult.GetInheritedAspects( "Aspect" ).Select( i => i.TargetDeclaration.ToSerializableId().Id ).ToArray() );
         }
 
         [Fact]
@@ -69,7 +69,7 @@ public class Aspect : TypeAspect { }
 
             Assert.Equal(
                 new[] { "T:I" },
-                compilationResult1!.PipelineResult.GetInheritedAspects( "Aspect" ).Select( i => i.TargetDeclaration.ToSerializableId().Id ).ToArray() );
+                compilationResult1!.TransformationResult.GetInheritedAspects( "Aspect" ).Select( i => i.TargetDeclaration.ToSerializableId().Id ).ToArray() );
 
             // Add a target class.
             var targetTree2 = CSharpSyntaxTree.ParseText( "[Aspect] interface I {} [Aspect] class C {}", path: "target.cs" );
@@ -79,7 +79,7 @@ public class Aspect : TypeAspect { }
 
             Assert.Equal(
                 new[] { "T:C", "T:I" },
-                compilationResult2!.PipelineResult.GetInheritedAspects( "Aspect" )
+                compilationResult2!.TransformationResult.GetInheritedAspects( "Aspect" )
                     .Select( i => i.TargetDeclaration.ToSerializableId().Id )
                     .OrderBy( a => a )
                     .ToArray() );
@@ -91,7 +91,7 @@ public class Aspect : TypeAspect { }
 
             Assert.Equal(
                 new[] { "T:C" },
-                compilationResult3!.PipelineResult.GetInheritedAspects( "Aspect" )
+                compilationResult3!.TransformationResult.GetInheritedAspects( "Aspect" )
                     .Select( i => i.TargetDeclaration.ToSerializableId().Id )
                     .OrderBy( a => a )
                     .ToArray() );
@@ -138,7 +138,7 @@ public interface I {}
             Assert.True( factory.TryExecute( testContext1.ProjectOptions, compilation1, CancellationToken.None, out _ ) );
             Assert.True( factory.TryExecute( testContext2.ProjectOptions, compilation2, CancellationToken.None, out var compilationResult2 ) );
 
-            Assert.Single( compilationResult2!.PipelineResult.IntroducedSyntaxTrees );
+            Assert.Single( compilationResult2!.TransformationResult.IntroducedSyntaxTrees );
         }
     }
 }

@@ -11,22 +11,20 @@ internal sealed class CompilationResult
 {
     public CompilationValidationResult ValidationResult { get; }
 
-    public CompilationPipelineResult PipelineResult { get; }
-
-    public ITransitiveAspectsManifest TransitiveAspectManifest { get; }
+    public CompilationPipelineResult TransformationResult { get; }
 
     public CompilationVersion CompilationVersion { get; }
 
-    internal CompilationResult( CompilationVersion compilationVersion, CompilationPipelineResult pipelineResult, CompilationValidationResult validationResult )
+    internal CompilationResult( CompilationVersion compilationVersion, CompilationPipelineResult transformationResult, CompilationValidationResult validationResult )
     {
         this.ValidationResult = validationResult;
-        this.PipelineResult = pipelineResult;
+        this.TransformationResult = transformationResult;
         this.CompilationVersion = compilationVersion;
     }
 
     internal IEnumerable<Diagnostic> GetAllDiagnostics( string path )
     {
-        if ( this.PipelineResult.SyntaxTreeResults.TryGetValue( path, out var syntaxTreeResults ) )
+        if ( this.TransformationResult.SyntaxTreeResults.TryGetValue( path, out var syntaxTreeResults ) )
         {
             foreach ( var diagnostic in syntaxTreeResults.Diagnostics )
             {
@@ -45,7 +43,7 @@ internal sealed class CompilationResult
 
     internal IEnumerable<Diagnostic> GetAllDiagnostics()
     {
-        foreach ( var syntaxTree in this.PipelineResult.SyntaxTreeResults.Values )
+        foreach ( var syntaxTree in this.TransformationResult.SyntaxTreeResults.Values )
         {
             foreach ( var diagnostic in syntaxTree.Diagnostics )
             {
@@ -64,7 +62,7 @@ internal sealed class CompilationResult
 
     internal IEnumerable<CacheableScopedSuppression> GetAllSuppressions()
     {
-        foreach ( var syntaxTree in this.PipelineResult.SyntaxTreeResults )
+        foreach ( var syntaxTree in this.TransformationResult.SyntaxTreeResults )
         {
             foreach ( var diagnostic in syntaxTree.Value.Suppressions )
             {
@@ -83,7 +81,7 @@ internal sealed class CompilationResult
 
     internal IEnumerable<CacheableScopedSuppression> GetAllSuppressions( string path )
     {
-        if ( this.PipelineResult.SyntaxTreeResults.TryGetValue( path, out var syntaxTreeResults ) )
+        if ( this.TransformationResult.SyntaxTreeResults.TryGetValue( path, out var syntaxTreeResults ) )
         {
             foreach ( var diagnostic in syntaxTreeResults.Suppressions )
             {
@@ -102,7 +100,7 @@ internal sealed class CompilationResult
 
     internal (ImmutableArray<Diagnostic> Diagnostics, ImmutableArray<CacheableScopedSuppression> Suppressions) GetDiagnosticsOnSyntaxTree( string path )
     {
-        var fromPipeline = this.PipelineResult.GetDiagnosticsOnSyntaxTree( path );
+        var fromPipeline = this.TransformationResult.GetDiagnosticsOnSyntaxTree( path );
         var fromValidation = this.ValidationResult.GetDiagnosticsOnSyntaxTree( path );
 
         return (fromPipeline.Diagnostics.AddRange( fromValidation.Diagnostics ), fromPipeline.Suppressions.AddRange( fromValidation.Suppressions ));

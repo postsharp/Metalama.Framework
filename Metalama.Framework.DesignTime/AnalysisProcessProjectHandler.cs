@@ -127,7 +127,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
             return false;
         }
 
-        var newSourceGeneratorResult = new SyntaxTreeSourceGeneratorResult( compilationResult.PipelineResult.IntroducedSyntaxTrees );
+        var newSourceGeneratorResult = new SyntaxTreeSourceGeneratorResult( compilationResult.TransformationResult.IntroducedSyntaxTrees );
 
         // Check if the pipeline returned any difference. If not, do not update our cache.
         if ( this.LastSourceGeneratorResult != null && this.LastSourceGeneratorResult.Equals( newSourceGeneratorResult ) )

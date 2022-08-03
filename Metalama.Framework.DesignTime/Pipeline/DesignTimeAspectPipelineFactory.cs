@@ -231,7 +231,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     }
 
                     compilationReferences.Add(
-                        new DesignTimeCompilationReference( referenceResult.TransitiveAspectManifest, referenceResult.CompilationVersion ) );
+                        new DesignTimeCompilationReference( referenceResult.TransformationResult, referenceResult.CompilationVersion ) );
                 }
                 else
                 {
