@@ -421,9 +421,9 @@ namespace Metalama.Framework.Engine.Linking
                     case AddExplicitDefaultConstructorTransformation:
                         thisTypeLevelTransformations.AddExplicitDefaultConstructor = true;
 
-                        foreach ( var syntaxReference in transformation.TargetType.GetSymbol().DeclaringSyntaxReferences)
+                        foreach ( var syntaxReference in transformation.TargetType.GetSymbol().DeclaringSyntaxReferences )
                         {
-                            foreach (var member in ((TypeDeclarationSyntax)syntaxReference.GetSyntax()).Members)
+                            foreach ( var member in ((TypeDeclarationSyntax) syntaxReference.GetSyntax()).Members )
                             {
                                 switch ( member )
                                 {

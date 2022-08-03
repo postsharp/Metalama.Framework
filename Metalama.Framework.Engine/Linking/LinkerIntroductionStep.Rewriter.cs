@@ -648,7 +648,7 @@ namespace Metalama.Framework.Engine.Linking
                         var finalVariable = variable;
 
                         if ( this._symbolMemberLevelTransformations.TryGetValue( variable, out var transformations )
-                            && transformations.AddDefaultInitializer )
+                             && transformations.AddDefaultInitializer )
                         {
                             finalVariable =
                                 finalVariable.WithInitializer(
@@ -683,12 +683,14 @@ namespace Metalama.Framework.Engine.Linking
                         if ( this._introducedMemberCollection.IsRemovedSyntax( variable ) )
                         {
                             anyChangeToVariables = true;
+
                             continue;
                         }
 
                         if ( this._symbolMemberLevelTransformations.TryGetValue( variable, out var transformations ) && transformations.AddDefaultInitializer )
                         {
                             anyChangeToVariables = true;
+
                             rewrittenVariables.Add(
                                 variable.WithInitializer(
                                     EqualsValueClause(
@@ -796,8 +798,8 @@ namespace Metalama.Framework.Engine.Linking
                     node = node.WithSynthesizedSetter();
                 }
 
-                if ( this._symbolMemberLevelTransformations.TryGetValue( originalNode, out var transformations ) 
-                    && transformations.AddDefaultInitializer )
+                if ( this._symbolMemberLevelTransformations.TryGetValue( originalNode, out var transformations )
+                     && transformations.AddDefaultInitializer )
                 {
                     node =
                         node.WithInitializer(
@@ -853,8 +855,8 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         var finalVariable = variable;
 
-                        if ( this._symbolMemberLevelTransformations.TryGetValue( variable, out var transformations ) 
-                            && transformations.AddDefaultInitializer )
+                        if ( this._symbolMemberLevelTransformations.TryGetValue( variable, out var transformations )
+                             && transformations.AddDefaultInitializer )
                         {
                             finalVariable =
                                 finalVariable.WithInitializer(
@@ -890,11 +892,12 @@ namespace Metalama.Framework.Engine.Linking
                     var anyChange = false;
                     var rewrittenVariables = new List<VariableDeclaratorSyntax>();
 
-                    foreach (var variable in originalNode.Declaration.Variables)
+                    foreach ( var variable in originalNode.Declaration.Variables )
                     {
                         if ( this._symbolMemberLevelTransformations.TryGetValue( variable, out var transformations ) && transformations.AddDefaultInitializer )
                         {
                             anyChange = true;
+
                             rewrittenVariables.Add(
                                 variable.WithInitializer(
                                     EqualsValueClause(
@@ -910,12 +913,7 @@ namespace Metalama.Framework.Engine.Linking
 
                     if ( anyChange )
                     {
-                        return new[]
-                        {
-                            node.WithDeclaration(
-                                node.Declaration.WithVariables(
-                                    SeparatedList( rewrittenVariables ) ) )
-                        };
+                        return new[] { node.WithDeclaration( node.Declaration.WithVariables( SeparatedList( rewrittenVariables ) ) ) };
                     }
                     else
                     {

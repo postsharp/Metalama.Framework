@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.Linking
     {
         private readonly Dictionary<INamedType, HashSet<string>> _introducedMemberNames;
 
-        public LinkerIntroductionNameProvider( CompilationModel finalCompilationModel)
+        public LinkerIntroductionNameProvider( CompilationModel finalCompilationModel )
         {
             this._introducedMemberNames = new Dictionary<INamedType, HashSet<string>>( finalCompilationModel.InvariantComparer );
         }

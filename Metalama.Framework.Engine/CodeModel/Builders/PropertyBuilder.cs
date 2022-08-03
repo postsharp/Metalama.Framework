@@ -213,11 +213,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                         return AccessorList( List( new[] { GenerateGetAccessor(), GenerateSetAccessor() } ) );
 
                     // Init only fields.
-                    case (true, Writeability.InitOnly, { IsImplicitlyDeclared: true }, { IsImplicitlyDeclared: true } ):
+                    case (true, Writeability.InitOnly, { IsImplicitlyDeclared: true }, { IsImplicitlyDeclared: true }):
                         return AccessorList( List( new[] { GenerateGetAccessor(), GenerateSetAccessor() } ) );
 
                     // Properties with only get accessor.
-                    case (false, _, not null, null ):
+                    case (false, _, not null, null):
                     // Read only fields or get-only auto properties.
                     case (true, Writeability.ConstructorOnly, { }, { IsImplicitlyDeclared: true }):
                         return AccessorList( List( new[] { GenerateGetAccessor() } ) );

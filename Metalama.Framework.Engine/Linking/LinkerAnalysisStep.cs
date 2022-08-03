@@ -44,7 +44,7 @@ namespace Metalama.Framework.Engine.Linking
                         aspectReference.ResolvedSemantic.Symbol,
                         aspectReference.ResolvedSemantic.Kind,
                         aspectReference.Specification.TargetKind );
-                    
+
                     if ( !aspectReferenceIndexBuilder.TryGetValue( key, out var list ) )
                     {
                         aspectReferenceIndexBuilder[key] = list = new List<ResolvedAspectReference>();

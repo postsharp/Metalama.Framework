@@ -11,6 +11,7 @@ using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using Accessibility = Metalama.Framework.Code.Accessibility;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
@@ -21,13 +22,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public MemberRef<IMember> ReplacedMember => this._field.ToMemberRef<IMember>();
 
-        public override Writeability Writeability => 
-            this._field.Writeability switch
+        public override Writeability Writeability
+            => this._field.Writeability switch
             {
                 Writeability.None => Writeability.None,
                 Writeability.ConstructorOnly => Writeability.InitOnly, // Read-only fields are promoted to init-only properties.
                 Writeability.All => Writeability.All,
-                _ => throw new AssertionFailedException(),
+                _ => throw new AssertionFailedException()
             };
 
         public PromotedField( IServiceProvider serviceProvider, Advice advice, IField field, IObjectReader initializerTags ) : base(
@@ -49,11 +50,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             this.GetMethod.AssertNotNull().Accessibility = this._field.Accessibility;
 
-            this.SetMethod.AssertNotNull().Accessibility =                 
+            this.SetMethod.AssertNotNull().Accessibility =
                 this._field switch
                 {
-                    { Writeability: Writeability.ConstructorOnly } => Code.Accessibility.Private,
-                    _ => this._field.Accessibility,
+                    { Writeability: Writeability.ConstructorOnly } => Accessibility.Private,
+                    _ => this._field.Accessibility
                 };
 
             if ( field.Attributes.Count > 0 )

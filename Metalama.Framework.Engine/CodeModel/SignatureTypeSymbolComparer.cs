@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     return
                         this.Equals( leftFunctionPointerType.Signature, rightFunctionPointerType.Signature );
 
-                case (IParameterSymbol leftParameter, IParameterSymbol rightParameter ):
+                case (IParameterSymbol leftParameter, IParameterSymbol rightParameter):
                     return
                         leftParameter.Ordinal == rightParameter.Ordinal
                         && this.Equals( leftParameter.Type, rightParameter.Type )
@@ -65,12 +65,12 @@ namespace Metalama.Framework.Engine.CodeModel
                                 l.RefKind == r.RefKind
                                 && this.Equals( l, r ) );
 
-                case (IEventSymbol leftEvent, IEventSymbol rightEvent ):
+                case (IEventSymbol leftEvent, IEventSymbol rightEvent):
                     return
                         StringComparer.Ordinal.Equals( leftEvent.Name, rightEvent.Name )
                         && this.Equals( leftEvent.Type, rightEvent.Type );
 
-                case (IPropertySymbol leftProperty, IPropertySymbol rightProperty ):
+                case (IPropertySymbol leftProperty, IPropertySymbol rightProperty):
                     return
                         StringComparer.Ordinal.Equals( leftProperty.Name, rightProperty.Name )
                         && this.Equals( leftProperty.Type, rightProperty.Type )

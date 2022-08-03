@@ -204,16 +204,17 @@ namespace Metalama.Framework.Engine.Linking
 
         private static FieldDeclarationSyntax GetPropertyBackingField( PropertyDeclarationSyntax propertyDeclaration, IPropertySymbol symbol )
         {
-            var modifiers = new List<SyntaxToken>();
+            var modifiers = new List<SyntaxToken>
+            {
+                Token( SyntaxKind.PrivateKeyword )
+            };
 
-            modifiers.Add( Token( SyntaxKind.PrivateKeyword ) );
-
-            if ( symbol.SetMethod == null || symbol.SetMethod.IsInitOnly)
+            if ( symbol.SetMethod == null || symbol.SetMethod.IsInitOnly )
             {
                 modifiers.Add( Token( SyntaxKind.ReadOnlyKeyword ) );
             }
 
-            if (symbol.IsStatic)
+            if ( symbol.IsStatic )
             {
                 modifiers.Add( Token( SyntaxKind.StaticKeyword ) );
             }

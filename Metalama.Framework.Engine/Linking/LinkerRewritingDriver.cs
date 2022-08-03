@@ -671,12 +671,12 @@ namespace Metalama.Framework.Engine.Linking
                     _ => targetSymbol.Name
                 };
 
-            SimpleNameSyntax GetRewrittenName(SimpleNameSyntax name) =>
-                name switch
+            SimpleNameSyntax GetRewrittenName( SimpleNameSyntax name )
+                => name switch
                 {
                     GenericNameSyntax genericName => genericName.WithIdentifier( Identifier( targetMemberName.AssertNotNull() ) ),
-                    IdentifierNameSyntax identifierName => name.WithIdentifier( Identifier( targetMemberName.AssertNotNull() ) ),
-                    _ => throw new AssertionFailedException(),
+                    IdentifierNameSyntax _ => name.WithIdentifier( Identifier( targetMemberName.AssertNotNull() ) ),
+                    _ => throw new AssertionFailedException()
                 };
 
             // Presume that all (annotated) aspect references are member access expressions or invocation expressions.
@@ -693,7 +693,7 @@ namespace Metalama.Framework.Engine.Linking
                         {
                             return memberAccessExpression
                                 .WithExpression( ThisExpression() )
-                                .WithName( GetRewrittenName(memberAccessExpression.Name) )
+                                .WithName( GetRewrittenName( memberAccessExpression.Name ) )
                                 .WithoutTrivia();
                         }
                         else
