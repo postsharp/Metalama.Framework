@@ -21,13 +21,9 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
     internal class UserCodeExecutionContext : IExecutionContext
     {
         private readonly IDiagnosticAdder? _diagnosticAdder;
-
-        private UserCodeMemberInfo? _invokedMember;
-
         private readonly IDependencyCollector? _dependencyCollector;
-
         private readonly INamedType? _targetType;
-
+        private UserCodeMemberInfo? _invokedMember;
         private bool _collectDependencyDisabled;
 
         public static UserCodeExecutionContext Current => (UserCodeExecutionContext) MetalamaExecutionContext.Current ?? throw new InvalidOperationException();

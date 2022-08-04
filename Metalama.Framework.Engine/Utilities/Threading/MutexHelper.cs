@@ -68,7 +68,7 @@ namespace Metalama.Framework.Engine.Utilities.Threading
 #if DEBUG
             ~MutexHandle()
             {
-                throw new Exception( "The mutex was not disposed. It was acquired here: " + Environment.NewLine + this._stackTrace );
+                throw new AssertionFailedException( "The mutex was not disposed. It was acquired here: " + Environment.NewLine + this._stackTrace );
             }
 #endif
         }

@@ -8,6 +8,7 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using SpecialType = Metalama.Framework.Code.SpecialType;
 using TypeKind = Metalama.Framework.Code.TypeKind;
@@ -428,7 +429,7 @@ namespace Metalama.Framework.Engine.CodeModel
             return this.Implementation.IsSubclassOf( type );
         }
 
-        public bool TryFindImplementationForInterfaceMember( IMember interfaceMember, out IMember? implementationMember )
+        public bool TryFindImplementationForInterfaceMember( IMember interfaceMember, [NotNullWhen( true )] out IMember? implementationMember )
         {
             this.OnUsingDeclaration();
 

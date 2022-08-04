@@ -35,8 +35,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         private readonly ConcurrentQueue<TaskCompletionSource<DesignTimeAspectPipeline>> _newPipelineListeners = new();
         private readonly CancellationToken _globalCancellationToken = CancellationToken.None;
         private readonly ConditionalWeakTable<SyntaxTree, StrongBox<ulong>> _syntaxTreeHashes = new();
-
-        private readonly IServiceProvider _serviceProvider;
+        private readonly ServiceProvider _serviceProvider;
 
         private readonly bool _isTest;
 
@@ -44,7 +43,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         public CompileTimeDomain Domain { get; }
 
-        public DesignTimeAspectPipelineFactory( IServiceProvider serviceProvider, CompileTimeDomain domain, bool isTest = false )
+        public DesignTimeAspectPipelineFactory( ServiceProvider serviceProvider, CompileTimeDomain domain, bool isTest = false )
         {
             this.Domain = domain;
             this._serviceProvider = serviceProvider;
@@ -87,7 +86,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                         return pipeline;
                     }
 
-                    var serviceProvider = ServiceProviderFactory.GetServiceProvider().WithServices( projectOptions, this );
+                    var serviceProvider = this._serviceProvider.WithServices( projectOptions, this );
                     pipeline = new DesignTimeAspectPipeline( serviceProvider, this.Domain, compilation.References, this._isTest );
                     pipeline.PipelineResumed += this.OnPipelineResumed;
                     pipeline.StatusChanged += this.OnPipelineStatusChanged;
@@ -171,7 +170,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             IProjectOptions options,
             Compilation compilation,
             CancellationToken cancellationToken,
-            out CompilationResult? compilationResult )
+            [NotNullWhen( true )] out CompilationResult? compilationResult )
         {
             compilationResult = TaskHelper.RunAndWait( () => this.ExecuteAsync( options, compilation, cancellationToken ), cancellationToken );
 

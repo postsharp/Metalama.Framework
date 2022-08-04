@@ -55,17 +55,17 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             // Tests for Class1.
             var syntaxTree1 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class1.cs" );
-            var compilationModel1 = CompilationModel.CreateInitialInstance( nullProject, PartialCompilation.CreatePartial( compilation, syntaxTree1 ));
+            var compilationModel1 = CompilationModel.CreateInitialInstance( nullProject, PartialCompilation.CreatePartial( compilation, syntaxTree1 ) );
             Assert.Single( compilationModel1.Types.Select( t => t.Name ), "Class1" );
 
             // Tests for Class3. The Types collection must contain the base class.
             var syntaxTree3 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class3.cs" );
-            var compilationModel3 = CompilationModel.CreateInitialInstance( nullProject, PartialCompilation.CreatePartial(compilation, syntaxTree3 ));
+            var compilationModel3 = CompilationModel.CreateInitialInstance( nullProject, PartialCompilation.CreatePartial( compilation, syntaxTree3 ) );
             Assert.Equal( new[] { "Class2", "Class3" }, compilationModel3.Types.Select( t => t.Name ).OrderBy( t => t ) );
 
             // Tests for Class4: the Types collection must contain the base class and the interfaces.
             var semanticModel4 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class4.cs" );
-            var compilationModel4 = CompilationModel.CreateInitialInstance( nullProject,PartialCompilation.CreatePartial( compilation, semanticModel4) );
+            var compilationModel4 = CompilationModel.CreateInitialInstance( nullProject, PartialCompilation.CreatePartial( compilation, semanticModel4 ) );
 
             Assert.Equal(
                 new[] { "Class2", "Class3", "Class4", "Interface1", "Interface2", "Interface3" },
@@ -89,7 +89,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
             var nullProject = new NullProject( testContext.ServiceProvider );
 
             var syntaxTree1 = compilation.SyntaxTrees.Single( t => t.FilePath == "Class2.cs" );
-            var compilationModel1 = CompilationModel.CreateInitialInstance( nullProject, PartialCompilation.CreatePartial(compilation, syntaxTree1) );
+            var compilationModel1 = CompilationModel.CreateInitialInstance( nullProject, PartialCompilation.CreatePartial( compilation, syntaxTree1 ) );
 
             var ns1 = compilationModel1.GlobalNamespace.Namespaces.Single();
 

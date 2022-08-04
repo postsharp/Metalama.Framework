@@ -20,12 +20,12 @@ public class StandaloneCodeFixRunner : CodeFixRunner
         this._serviceProvider = serviceProvider;
     }
 
-    private protected override async
+    private protected override 
         ValueTask<(bool Success, AspectPipelineConfiguration? Configuration, ServiceProvider? ServiceProvider, CompileTimeDomain? Domain)>
         GetConfigurationAsync(
             PartialCompilation compilation,
             CancellationToken cancellationToken )
     {
-        return (true, null, this._serviceProvider, this._domain);
+        return new( (true, null, this._serviceProvider, this._domain) );
     }
 }
