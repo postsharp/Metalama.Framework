@@ -297,6 +297,7 @@ namespace Metalama.Framework.Engine.CodeModel
             // In production scenario, we need weavers to provide SyntaxTree instances with a valid Encoding value.
             // However, we don't need that in test scenarios, and tests currently don't set Encoding properly.
             // The way this test is implemented is to test Encoding in increments only if it is set properly in the initial compilation.
+            // It also happens, at design time, that Roslyn does not set the encoding. We also need to be tolerant to this situation.
 
             bool HasInitialCompilationEncoding() => this.InitialCompilation.SyntaxTrees.All( t => t.Encoding != null );
 
@@ -322,12 +323,12 @@ namespace Metalama.Framework.Engine.CodeModel
                         "The SyntaxTree.FilePath property of the new SyntaxTree must be set to a non-empty value." );
                 }
 
-                if ( replacedTrees.Any( t => t.NewTree.Encoding == null ) && HasInitialCompilationEncoding() )
+                if ( replacedTrees.Any( t => t.NewTree.Encoding == null && t.OldTree?.Encoding != null ) && HasInitialCompilationEncoding() )
                 {
                     var invalidTrees = replacedTrees.Where( t => t.NewTree.Encoding == null ).Select( x => $"'{x.FilePath}'" );
 
                     throw new ArgumentOutOfRangeException(
-                        nameof(addedTrees),
+                        nameof(replacedTrees),
                         $"The SyntaxTree.Encoding property of these SyntaxTrees cannot be null: {string.Join( ", ", invalidTrees )}" );
                 }
             }

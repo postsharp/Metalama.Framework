@@ -48,6 +48,8 @@ public abstract class DefaultProjectOptions : IProjectOptions
 
     public virtual bool RequiresCodeCoverageAnnotations => false;
 
+    public virtual bool AllowPreviewLanguageFeatures => false;
+
     public virtual bool IsDesignTimeEnabled => true;
 
     public virtual string? AdditionalCompilationOutputDirectory => null;
