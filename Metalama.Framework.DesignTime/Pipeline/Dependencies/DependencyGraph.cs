@@ -6,13 +6,13 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 
-internal readonly struct CompilationDependencyCollection
+internal readonly struct DependencyGraph
 {
-    public static CompilationDependencyCollection Empty { get; } = new( ImmutableDictionary<AssemblyIdentity, CompilationDependency>.Empty );
+    public static DependencyGraph Empty { get; } = new( ImmutableDictionary<AssemblyIdentity, DependencyGraphByDependentCompilation>.Empty );
 
-    public ImmutableDictionary<AssemblyIdentity, CompilationDependency> Compilations { get; }
+    public ImmutableDictionary<AssemblyIdentity, DependencyGraphByDependentCompilation> Compilations { get; }
 
-    public CompilationDependencyCollection Update(
+    public DependencyGraph Update(
         IEnumerable<string> syntaxTrees,
         DependencyCollector dependencies,
         DesignTimeCompilationReferenceCollection references )
@@ -33,7 +33,7 @@ internal readonly struct CompilationDependencyCollection
                 if ( !compilationsBuilder.TryGetValue( compilation, out var currentDependenciesOfCompilation ) )
                 {
                     var hashCode = references.References.TryGetValue( compilation, out var reference ) ? reference.CompileTimeProjectHash : 0;
-                    currentDependenciesOfCompilation = new CompilationDependency( compilation, hashCode );
+                    currentDependenciesOfCompilation = new DependencyGraphByDependentCompilation( compilation, hashCode );
                 }
 
                 if ( currentDependenciesOfCompilation.TryUpdateDependency(
@@ -66,10 +66,10 @@ internal readonly struct CompilationDependencyCollection
             }
         }
 
-        return new CompilationDependencyCollection( compilationsBuilder.ToImmutable() );
+        return new DependencyGraph( compilationsBuilder.ToImmutable() );
     }
 
-    private CompilationDependencyCollection( ImmutableDictionary<AssemblyIdentity, CompilationDependency> compilations )
+    private DependencyGraph( ImmutableDictionary<AssemblyIdentity, DependencyGraphByDependentCompilation> compilations )
     {
         this.Compilations = compilations;
     }

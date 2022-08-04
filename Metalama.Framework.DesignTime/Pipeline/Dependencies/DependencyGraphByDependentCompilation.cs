@@ -9,10 +9,10 @@ namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 /// <summary>
 /// Represents a dependency of a compilation to another compilation.
 /// </summary>
-internal readonly struct CompilationDependency
+internal readonly struct DependencyGraphByDependentCompilation
 {
-    private static readonly ImmutableDictionary<string, SyntaxTreeDependencyCollection> _emptyDependenciesByMasterFilePath =
-        ImmutableDictionary<string, SyntaxTreeDependencyCollection>.Empty.WithComparers( StringComparer.Ordinal );
+    private static readonly ImmutableDictionary<string, DependencyGraphByDependentSyntaxTree> _emptyDependenciesByMasterFilePath =
+        ImmutableDictionary<string, DependencyGraphByDependentSyntaxTree>.Empty.WithComparers( StringComparer.Ordinal );
 
     private static readonly ImmutableDictionary<string, SyntaxTreeDependencyInCompilationCollector> _emptyDependenciesByDependentFilePath =
         ImmutableDictionary<string, SyntaxTreeDependencyInCompilationCollector>.Empty.WithComparers( StringComparer.Ordinal );
@@ -24,20 +24,20 @@ internal readonly struct CompilationDependency
     /// <summary>
     /// Gets the list of dependencies on syntax trees within the master compilation, indexed by file path.
     /// </summary>
-    public ImmutableDictionary<string, SyntaxTreeDependencyCollection> DependenciesByMasterFilePath { get; }
+    public ImmutableDictionary<string, DependencyGraphByDependentSyntaxTree> DependenciesByMasterFilePath { get; }
 
     private readonly ImmutableDictionary<string, SyntaxTreeDependencyInCompilationCollector> _dependenciesByDependentFilePath;
 
-    public CompilationDependency( AssemblyIdentity assemblyIdentity, ulong compileTimeProjectHash ) : this(
+    public DependencyGraphByDependentCompilation( AssemblyIdentity assemblyIdentity, ulong compileTimeProjectHash ) : this(
         assemblyIdentity,
         compileTimeProjectHash,
         _emptyDependenciesByMasterFilePath,
         _emptyDependenciesByDependentFilePath ) { }
 
-    private CompilationDependency(
+    private DependencyGraphByDependentCompilation(
         AssemblyIdentity assemblyIdentity,
         ulong compileTimeProjectHash,
-        ImmutableDictionary<string, SyntaxTreeDependencyCollection> dependenciesByMasterFilePath,
+        ImmutableDictionary<string, DependencyGraphByDependentSyntaxTree> dependenciesByMasterFilePath,
         ImmutableDictionary<string, SyntaxTreeDependencyInCompilationCollector> dependenciesByDependentFilePath )
     {
         this.AssemblyIdentity = assemblyIdentity;
@@ -46,12 +46,12 @@ internal readonly struct CompilationDependency
         this._dependenciesByDependentFilePath = dependenciesByDependentFilePath;
     }
 
-    public bool TryRemoveDependency( string dependentFilePath, out CompilationDependency newDependencies )
+    public bool TryRemoveDependency( string dependentFilePath, out DependencyGraphByDependentCompilation newDependenciesGraph )
     {
         if ( !this._dependenciesByDependentFilePath.TryGetValue( dependentFilePath, out var oldDependencies ) )
         {
             // There is nothing to do because the dependency was not present.
-            newDependencies = this;
+            newDependenciesGraph = this;
 
             return false;
         }
@@ -77,7 +77,7 @@ internal readonly struct CompilationDependency
             }
         }
 
-        newDependencies = new CompilationDependency(
+        newDependenciesGraph = new DependencyGraphByDependentCompilation(
             this.AssemblyIdentity,
             this.CompileTimeProjectHash,
             dependenciesByMasterFilePathBuilder.ToImmutable(),
@@ -89,13 +89,13 @@ internal readonly struct CompilationDependency
     public bool TryUpdateDependency(
         string dependentFilePath,
         SyntaxTreeDependencyInCompilationCollector dependencies,
-        out CompilationDependency newDependencies )
+        out DependencyGraphByDependentCompilation newDependenciesGraph )
     {
         // Check if there is any change.
         if ( this._dependenciesByDependentFilePath.TryGetValue( dependentFilePath, out var oldDependencies )
              && dependencies.IsStructurallyEqual( oldDependencies ) )
         {
-            newDependencies = this;
+            newDependenciesGraph = this;
 
             return false;
         }
@@ -107,7 +107,7 @@ internal readonly struct CompilationDependency
         {
             if ( !dependenciesByMasterFilePathBuilder.TryGetValue( masterFilePathAndHash.Key, out var syntaxTreeDependencies ) )
             {
-                syntaxTreeDependencies = new SyntaxTreeDependencyCollection( masterFilePathAndHash.Key, masterFilePathAndHash.Value );
+                syntaxTreeDependencies = new DependencyGraphByDependentSyntaxTree( masterFilePathAndHash.Key, masterFilePathAndHash.Value );
                 dependenciesByMasterFilePathBuilder.Add( masterFilePathAndHash.Key, syntaxTreeDependencies );
             }
 
@@ -140,7 +140,7 @@ internal readonly struct CompilationDependency
             }
         }
 
-        newDependencies = new CompilationDependency(
+        newDependenciesGraph = new DependencyGraphByDependentCompilation(
             this.AssemblyIdentity,
             this.CompileTimeProjectHash,
             dependenciesByMasterFilePathBuilder.ToImmutable(),

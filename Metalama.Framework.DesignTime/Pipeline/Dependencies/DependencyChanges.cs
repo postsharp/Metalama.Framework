@@ -22,7 +22,7 @@ internal readonly struct DependencyChanges
     public ImmutableHashSet<string> InvalidatedSyntaxTrees { get; }
 
     public static DependencyChanges Create(
-        CompilationDependencyCollection dependencies,
+        DependencyGraph dependencies,
         DesignTimeCompilationReferenceCollection references,
         CancellationToken cancellationToken )
     {

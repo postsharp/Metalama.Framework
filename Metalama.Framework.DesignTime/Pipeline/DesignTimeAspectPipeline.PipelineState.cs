@@ -51,14 +51,14 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             public CompilationValidationResult ValidationResult { get; }
 
-            public CompilationDependencyCollection Dependencies { get; }
+            public DependencyGraph Dependencies { get; }
 
             internal PipelineState( DesignTimeAspectPipeline pipeline ) : this()
             {
                 this._pipeline = pipeline;
                 this.PipelineResult = new CompilationPipelineResult();
                 this.ValidationResult = CompilationValidationResult.Empty;
-                this.Dependencies = CompilationDependencyCollection.Empty;
+                this.Dependencies = DependencyGraph.Empty;
             }
 
             private PipelineState( PipelineState prototype )
@@ -108,7 +108,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 PipelineState prototype,
                 CompilationChangeTracker compilationChangeTracker,
                 CompilationPipelineResult pipelineResult,
-                CompilationDependencyCollection dependencies ) : this( prototype )
+                DependencyGraph dependencies ) : this( prototype )
             {
                 this.PipelineResult = pipelineResult;
                 this._compilationChangeTracker = compilationChangeTracker;
@@ -455,7 +455,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 UserDiagnosticRegistrationService.GetInstance( directoryOptions ).RegisterDescriptors( result );
 
                 // Update the dependency graph with results of the pipeline.
-                CompilationDependencyCollection newDependencies;
+                DependencyGraph newDependencies;
 
                 if ( success )
                 {
@@ -551,7 +551,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             private PipelineState SetPipelineResult(
                 PartialCompilation compilation,
                 DesignTimePipelineExecutionResult pipelineResult,
-                CompilationDependencyCollection dependencies )
+                DependencyGraph dependencies )
             {
                 var compilationResult = this.PipelineResult.Update( compilation, pipelineResult );
 
