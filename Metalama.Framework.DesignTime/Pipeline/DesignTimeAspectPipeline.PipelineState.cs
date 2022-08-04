@@ -51,11 +51,14 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             public CompilationValidationResult ValidationResult { get; }
 
+            public CompilationDependencyCollection Dependencies { get; }
+
             internal PipelineState( DesignTimeAspectPipeline pipeline ) : this()
             {
                 this._pipeline = pipeline;
                 this.PipelineResult = new CompilationPipelineResult();
                 this.ValidationResult = CompilationValidationResult.Empty;
+                this.Dependencies = CompilationDependencyCollection.Empty;
             }
 
             private PipelineState( PipelineState prototype )
@@ -67,6 +70,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 this.Status = prototype.Status;
                 this.PipelineResult = prototype.PipelineResult;
                 this.ValidationResult = prototype.ValidationResult;
+                this.Dependencies = prototype.Dependencies;
             }
 
             private PipelineState(
@@ -82,14 +86,14 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 PipelineState prototype,
                 ImmutableDictionary<string, SyntaxTree?> compileTimeSyntaxTrees,
                 DesignTimeAspectPipelineStatus status,
-                CompilationChangeTracker tracker,
+                CompilationChangeTracker compilationChangeTracker,
                 CompilationPipelineResult pipelineResult,
                 AspectPipelineConfiguration? configuration )
                 : this( prototype )
             {
                 this.CompileTimeSyntaxTrees = compileTimeSyntaxTrees;
                 this.Status = status;
-                this._compilationChangeTracker = tracker;
+                this._compilationChangeTracker = compilationChangeTracker;
                 this.PipelineResult = pipelineResult;
                 this.Configuration = configuration;
             }
@@ -100,10 +104,15 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 this.CompileTimeSyntaxTrees = compileTimeSyntaxTrees;
             }
 
-            private PipelineState( PipelineState prototype, CompilationChangeTracker tracker, CompilationPipelineResult pipelineResult ) : this( prototype )
+            private PipelineState(
+                PipelineState prototype,
+                CompilationChangeTracker compilationChangeTracker,
+                CompilationPipelineResult pipelineResult,
+                CompilationDependencyCollection dependencies ) : this( prototype )
             {
                 this.PipelineResult = pipelineResult;
-                this._compilationChangeTracker = tracker;
+                this._compilationChangeTracker = compilationChangeTracker;
+                this.Dependencies = dependencies;
             }
 
             private PipelineState( PipelineState prototype, CompilationValidationResult validationResult ) : this( prototype )
@@ -165,6 +174,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             /// </summary>
             internal PipelineState InvalidateCacheForNewCompilation(
                 Compilation newCompilation,
+                DesignTimeCompilationReferenceCollection references,
                 bool invalidateCompilationResult,
                 CancellationToken cancellationToken )
             {
@@ -172,8 +182,11 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 var newState = this;
                 var newConfiguration = this.Configuration;
 
+                // Detect changes from dependencies.
+                var dependenciesChanges = DependencyChanges.Create( this.Dependencies, references, cancellationToken );
+
                 // Detect changes in compile-time syntax trees.
-                var newTracker = this._compilationChangeTracker.Update( newCompilation, cancellationToken );
+                var newTracker = this._compilationChangeTracker.Update( newCompilation, dependenciesChanges, cancellationToken );
                 var newChanges = newTracker.UnprocessedChanges.AssertNotNull();
 
                 ImmutableDictionary<string, SyntaxTree?> newCompileTimeSyntaxTrees;
@@ -437,14 +450,21 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 var directoryOptions = state._pipeline.ServiceProvider.GetRequiredService<IPathOptions>();
                 UserDiagnosticRegistrationService.GetInstance( directoryOptions ).RegisterDescriptors( result );
 
+                // Update the dependency graph with results of the pipeline.
+                var newDependencies = state.Dependencies.Update( pipelineResult, dependencyCollector.GetDependencies() );
+
                 // We intentionally commit the pipeline state here so that the caller, not us, can decide what part of the work should be committed
                 // in case of cancellation. From our point of view, this is a safe place to commit.
-                state = state.SetPipelineResult( compilation, result );
+                state = state.SetPipelineResult( compilation, result, newDependencies );
 
                 // Execute the validators. We have to run them even if we have no user validator because this also runs system validators.
                 ExecuteValidators( ref state, compilation, configuration, cancellationToken );
 
-                compilationResult = new CompilationResult( state.CompilationVersion.AssertNotNull(), state.PipelineResult, state.ValidationResult );
+                compilationResult = new CompilationResult(
+                    state.CompilationVersion.AssertNotNull(),
+                    state.PipelineResult,
+                    state.ValidationResult,
+                    configuration.CompileTimeProject );
 
                 return true;
             }
@@ -515,11 +535,14 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 return new PipelineState( this, validationResult );
             }
 
-            private PipelineState SetPipelineResult( PartialCompilation compilation, DesignTimePipelineExecutionResult pipelineResult )
+            private PipelineState SetPipelineResult(
+                PartialCompilation compilation,
+                DesignTimePipelineExecutionResult pipelineResult,
+                CompilationDependencyCollection dependencies )
             {
                 var compilationResult = this.PipelineResult.Update( compilation, pipelineResult );
 
-                return new PipelineState( this, this._compilationChangeTracker.ResetUnprocessedChanges(), compilationResult );
+                return new PipelineState( this, this._compilationChangeTracker.ResetUnprocessedChanges(), compilationResult, dependencies );
             }
         }
     }

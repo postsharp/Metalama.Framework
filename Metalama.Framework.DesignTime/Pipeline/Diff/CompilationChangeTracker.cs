@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using K4os.Hash.xxHash;
+using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Utilities;
@@ -30,8 +31,8 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             => this.LastCompilation != null ? new CompilationVersion( this.LastCompilation, this._lastTrees.AssertNotNull() ) : null;
 
         private CompilationChangeTracker(
-            ImmutableDictionary<string, SyntaxTreeVersion>? lastTrees,
             Compilation? lastCompilation,
+            ImmutableDictionary<string, SyntaxTreeVersion>? lastTrees,
             CompilationChanges? unprocessedChanges )
         {
             this._lastTrees = lastTrees;
@@ -46,7 +47,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                 throw new InvalidOperationException();
             }
 
-            return new CompilationChangeTracker( this._lastTrees, this.LastCompilation, CompilationChanges.Empty( this.LastCompilation ) );
+            return new CompilationChangeTracker( this.LastCompilation, this._lastTrees, CompilationChanges.Empty( this.LastCompilation ) );
         }
 
         private bool AreMetadataReferencesEqual( Compilation newCompilation )
@@ -128,20 +129,19 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         /// Updates the <see cref="LastCompilation"/> property and returns the set of changes between the
         /// old value of <see cref="LastCompilation"/> and the newly provided <see cref="Compilation"/>.
         /// </summary>
-        public CompilationChangeTracker Update( Compilation newCompilation, CancellationToken cancellationToken )
+        public CompilationChangeTracker Update( Compilation newCompilation, in DependencyChanges dependencyChanges, CancellationToken cancellationToken )
         {
             if ( newCompilation == this.LastCompilation )
             {
                 return this;
             }
 
-            var areMetadataReferencesEqual = this.AreMetadataReferencesEqual( newCompilation );
-
             var newTrees = ImmutableDictionary.CreateBuilder<string, SyntaxTreeVersion>( StringComparer.Ordinal );
             var generatedTrees = new List<SyntaxTree>();
 
-            var syntaxTreeChanges = new List<SyntaxTreeChange>();
-            var hasCompileTimeChange = !areMetadataReferencesEqual;
+            var syntaxTreeChanges = ImmutableDictionary.CreateBuilder<string, SyntaxTreeChange>( StringComparer.Ordinal );
+
+            var hasCompileTimeChange = dependencyChanges.HasCompileTimeChange || !this.AreMetadataReferencesEqual( newCompilation );
 
             // Process new trees.
             var lastTrees = this._lastTrees;
@@ -188,6 +188,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                         compileTimeChangeKind = GetCompileTimeChangeKind( oldEntry.HasCompileTimeCode, newHasCompileTimeCode );
 
                         syntaxTreeChanges.Add(
+                            newSyntaxTree.FilePath,
                             new SyntaxTreeChange(
                                 newSyntaxTree.FilePath,
                                 SyntaxTreeChangeKind.Changed,
@@ -208,6 +209,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                     compileTimeChangeKind = GetCompileTimeChangeKind( false, newHasCompileTimeCode );
 
                     syntaxTreeChanges.Add(
+                        newSyntaxTree.FilePath,
                         new SyntaxTreeChange(
                             newSyntaxTree.FilePath,
                             SyntaxTreeChangeKind.Added,
@@ -230,6 +232,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                 foreach ( var oldSyntaxTree in lastTrees )
                 {
                     syntaxTreeChanges.Add(
+                        oldSyntaxTree.Key,
                         new SyntaxTreeChange(
                             oldSyntaxTree.Key,
                             SyntaxTreeChangeKind.Deleted,
@@ -238,6 +241,29 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                             null,
                             oldSyntaxTree.Value.Hash,
                             0 ) );
+                }
+            }
+
+            // Process dependencies.
+            foreach ( var dependency in dependencyChanges.InvalidatedSyntaxTrees )
+            {
+                if ( !syntaxTreeChanges.TryGetValue( dependency, out var change ) || change.SyntaxTreeChangeKind == SyntaxTreeChangeKind.None )
+                {
+                    // The tree in itself has not changed, but a dependency has.
+
+                    if ( lastTrees == null || !lastTrees.TryGetValue( dependency, out var lastTree ) )
+                    {
+                        continue;
+                    }
+
+                    syntaxTreeChanges[dependency] = new SyntaxTreeChange(
+                        dependency,
+                        SyntaxTreeChangeKind.ChangedDependency,
+                        false,
+                        CompileTimeChangeKind.None,
+                        null,
+                        lastTree.Hash,
+                        lastTree.Hash );
                 }
             }
 
@@ -256,7 +282,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                 var compilationToAnalyze = newCompilation.RemoveSyntaxTrees( generatedTrees );
 
                 compilationChanges = new CompilationChanges(
-                    syntaxTreeChanges,
+                    syntaxTreeChanges.ToImmutable(),
                     hasCompileTimeChange,
                     compilationToAnalyze,
                     this.LastCompilation != null );
@@ -267,7 +293,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                 compilationChanges = this.UnprocessedChanges.Merge( compilationChanges );
             }
 
-            return new CompilationChangeTracker( newTrees.ToImmutable(), compilationChanges.CompilationToAnalyze, compilationChanges );
+            return new CompilationChangeTracker( compilationChanges.CompilationToAnalyze, newTrees.ToImmutable(), compilationChanges );
         }
 
         private static CompileTimeChangeKind GetCompileTimeChangeKind( bool oldValue, bool newValue )

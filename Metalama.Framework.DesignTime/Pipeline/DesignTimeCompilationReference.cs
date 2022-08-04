@@ -9,11 +9,17 @@ internal class DesignTimeCompilationReference
 {
     public ITransitiveAspectsManifest? TransitiveAspectsManifest { get; }
 
-    public CompilationVersion CompilationVersion { get; }
+    public ICompilationVersion CompilationVersion { get; }
 
-    public DesignTimeCompilationReference( ITransitiveAspectsManifest? transitiveAspectsManifest, CompilationVersion compilationVersion )
+    public ulong CompileTimeProjectHash { get; }
+
+    public DesignTimeCompilationReference(
+        ITransitiveAspectsManifest? transitiveAspectsManifest,
+        ICompilationVersion compilationVersion,
+        ulong compileTimeProjectHash )
     {
         this.TransitiveAspectsManifest = transitiveAspectsManifest;
         this.CompilationVersion = compilationVersion;
+        this.CompileTimeProjectHash = compileTimeProjectHash;
     }
 }

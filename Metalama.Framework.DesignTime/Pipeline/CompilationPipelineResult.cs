@@ -33,7 +33,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         private static long _nextId;
         private readonly long _id = Interlocked.Increment( ref _nextId );
-        
+
         internal DesignTimeValidatorCollection Validators { get; } = DesignTimeValidatorCollection.Empty;
 
         public ImmutableDictionary<string, IntroducedSyntaxTree> IntroducedSyntaxTrees { get; } = _emptyIntroducedSyntaxTrees;
@@ -193,7 +193,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         {
             var resultBuilders = pipelineResults
                 .InputSyntaxTrees
-                .ToDictionary( r => r.Key, syntaxTree => new SyntaxTreePipelineResultBuilder( syntaxTree.Value ) );
+                .ToDictionary( r => r.Key, syntaxTree => new SyntaxTreePipelineResult.Builder( syntaxTree.Value ) );
 
             // Split diagnostic by syntax tree.
             foreach ( var diagnostic in pipelineResults.Diagnostics.ReportedDiagnostics )
@@ -296,7 +296,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             foreach ( var empty in inputTreesWithoutOutput )
             {
-                resultBuilders.Add( empty.Key, new SyntaxTreePipelineResultBuilder( empty.Value ) );
+                resultBuilders.Add( empty.Key, new SyntaxTreePipelineResult.Builder( empty.Value ) );
             }
 
             // Return an immutable copy.

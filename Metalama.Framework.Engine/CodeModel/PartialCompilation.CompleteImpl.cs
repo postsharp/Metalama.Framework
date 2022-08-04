@@ -28,8 +28,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 : base( baseCompilation, modifications, resources ) { }
 
             [Memo]
-            public override ImmutableDictionary<string, SyntaxTree> SyntaxTrees
-                => this.Compilation.SyntaxTrees.ToImmutableDictionary( s => s.FilePath, s => s );
+            public override ImmutableDictionary<string, SyntaxTree> SyntaxTrees => this.Compilation.GetIndexedSyntaxTrees();
 
             [Memo]
             public override ImmutableHashSet<INamedTypeSymbol> Types => this.Compilation.Assembly.GetTypes().ToImmutableHashSet();

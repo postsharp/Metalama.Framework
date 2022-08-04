@@ -1,7 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CompileTime;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
@@ -15,9 +15,16 @@ internal sealed class CompilationResult
 
     public CompilationVersion CompilationVersion { get; }
 
-    internal CompilationResult( CompilationVersion compilationVersion, CompilationPipelineResult transformationResult, CompilationValidationResult validationResult )
+    public CompileTimeProject? CompileTimeProject { get; }
+
+    internal CompilationResult(
+        CompilationVersion compilationVersion,
+        CompilationPipelineResult transformationResult,
+        CompilationValidationResult validationResult,
+        CompileTimeProject? compileTimeProject )
     {
         this.ValidationResult = validationResult;
+        this.CompileTimeProject = compileTimeProject;
         this.TransformationResult = transformationResult;
         this.CompilationVersion = compilationVersion;
     }

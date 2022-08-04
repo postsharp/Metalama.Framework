@@ -13,20 +13,20 @@ namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 internal class DependencyCollector : IDependencyCollector
 {
     private readonly Compilation _currentCompilation;
-    private readonly IReadOnlyDictionary<AssemblyIdentity, CompilationVersion> _compilationReferences;
+    private readonly IReadOnlyDictionary<AssemblyIdentity, ICompilationVersion> _compilationReferences;
     private readonly ILogger _logger;
 
     private readonly HashSet<(ISymbol, ISymbol)> _processedDependencies = new();
     private readonly HashSet<DependencyEdge> _dependencies = new();
 
-    public DependencyCollector( IServiceProvider serviceProvider, Compilation compilation, IEnumerable<CompilationVersion> compilationReferences )
+    public DependencyCollector( IServiceProvider serviceProvider, Compilation compilation, IEnumerable<ICompilationVersion> compilationReferences )
     {
         this._currentCompilation = compilation;
         this._compilationReferences = compilationReferences.ToDictionary( x => x.Compilation.Assembly.Identity, x => x );
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DependencyCollector" );
     }
 
-    public IEnumerable<DependencyEdge> GetDependencies() => this._dependencies;
+    public IReadOnlyCollection<DependencyEdge> GetDependencies() => this._dependencies;
 
     public void AddDependency( ISymbol masterSymbol, ISymbol dependentSymbol )
     {
@@ -72,7 +72,7 @@ internal class DependencyCollector : IDependencyCollector
 
             foreach ( var masterSyntaxReference in masterSymbol.DeclaringSyntaxReferences )
             {
-                if ( compilationReference.SyntaxTrees.TryGetValue( masterSyntaxReference.SyntaxTree.FilePath, out var masterSyntaxTree ) )
+                if ( compilationReference.TryGetSyntaxTreeHash( masterSyntaxReference.SyntaxTree.FilePath, out var masterSyntaxTreeHash ) )
                 {
                     foreach ( var dependentSyntaxReference in dependentSymbol.DeclaringSyntaxReferences )
                     {
@@ -80,7 +80,7 @@ internal class DependencyCollector : IDependencyCollector
                             new DependencyEdge(
                                 compilationReference.Compilation,
                                 masterSyntaxReference.SyntaxTree.FilePath,
-                                masterSyntaxTree.Hash,
+                                masterSyntaxTreeHash,
                                 dependentSyntaxReference.SyntaxTree.FilePath ) );
                     }
                 }

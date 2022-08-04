@@ -23,20 +23,10 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         /// </summary>
         public bool HasCompileTimeCodeChange { get; }
 
-        public CompilationChanges(
-            IEnumerable<SyntaxTreeChange> syntaxTreeChanges,
-            bool hasCompileTimeCodeChange,
-            Compilation compilationToAnalyze,
-            bool isIncremental ) : this(
-            syntaxTreeChanges.ToImmutableDictionary( t => t.FilePath, t => t, StringComparer.Ordinal ),
-            hasCompileTimeCodeChange,
-            compilationToAnalyze,
-            isIncremental ) { }
-
         /// <summary>
         /// Initializes a new instance of the <see cref="CompilationChanges"/> class.
         /// </summary>
-        private CompilationChanges(
+        public CompilationChanges(
             ImmutableDictionary<string, SyntaxTreeChange> syntaxTreeChanges,
             bool hasCompileTimeCodeChange,
             Compilation compilationToAnalyze,
@@ -48,7 +38,8 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             this.IsIncremental = isIncremental;
         }
 
-        public static CompilationChanges Empty( Compilation compilation ) => new( Enumerable.Empty<SyntaxTreeChange>(), false, compilation, true );
+        public static CompilationChanges Empty( Compilation compilation )
+            => new( ImmutableDictionary<string, SyntaxTreeChange>.Empty, false, compilation, true );
 
         public bool HasChange => this._syntaxTreeChanges.Count > 0 || this.HasCompileTimeCodeChange;
 

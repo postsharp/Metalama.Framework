@@ -222,9 +222,13 @@ namespace Metalama.Framework.DesignTime.Pipeline
             this._sync.Dispose();
         }
 
-        private CompilationChanges InvalidateCache( Compilation compilation, bool invalidateCompilationResult, CancellationToken cancellationToken )
+        private CompilationChanges InvalidateCache(
+            Compilation compilation,
+            DesignTimeCompilationReferenceCollection references,
+            bool invalidateCompilationResult,
+            CancellationToken cancellationToken )
         {
-            this.SetState( this._currentState.InvalidateCacheForNewCompilation( compilation, invalidateCompilationResult, cancellationToken ) );
+            this.SetState( this._currentState.InvalidateCacheForNewCompilation( compilation, references, invalidateCompilationResult, cancellationToken ) );
 
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable CS8603  // Analyzer error in Release build only.
@@ -295,7 +299,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                 if ( this.Status != DesignTimeAspectPipelineStatus.Paused )
                 {
-                    var changes = this.InvalidateCache( compilation, this.Status != DesignTimeAspectPipelineStatus.Paused, cancellationToken );
+                    var changes = this.InvalidateCache( compilation, references, this.Status != DesignTimeAspectPipelineStatus.Paused, cancellationToken );
 
                     compilationToAnalyze = changes.CompilationToAnalyze;
 
@@ -352,7 +356,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     compilationResult = new CompilationResult(
                         this._currentState.CompilationVersion.AssertNotNull(),
                         this._currentState.PipelineResult,
-                        this._currentState.ValidationResult );
+                        this._currentState.ValidationResult,
+                        this._currentState.Configuration?.CompileTimeProject );
 
                     this._compilationResultCache.Add( compilation, compilationResult );
 
@@ -374,7 +379,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     compilationResult = new CompilationResult(
                         this._currentState.CompilationVersion.AssertNotNull(),
                         this._currentState.PipelineResult,
-                        validationResult );
+                        validationResult,
+                        this._currentState.Configuration!.CompileTimeProject );
 
                     return compilationResult;
                 }
