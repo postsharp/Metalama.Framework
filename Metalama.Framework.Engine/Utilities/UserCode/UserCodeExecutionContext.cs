@@ -34,6 +34,8 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
 
         public static UserCodeExecutionContext? CurrentInternal => (UserCodeExecutionContext?) MetalamaExecutionContext.CurrentOrNull;
 
+        IDisposable IExecutionContext.WithoutDependencyCollection() => this.WithoutDependencyCollection();
+
         internal DisposeAction WithoutDependencyCollection()
         {
             if ( this._dependencyCollector == null )

@@ -8,6 +8,7 @@ namespace Metalama.Framework.Project;
 /// <summary>
 /// Exception thrown when some aspect code tries to access a part of the code model that is is not allowed to access.
 /// </summary>
+/// <seealso cref="IExecutionContext.WithoutDependencyCollection"/>
 public sealed class DeclarationOutOfScopeException : Exception
 {
     public DeclarationOutOfScopeException( string message ) : base( message ) { }

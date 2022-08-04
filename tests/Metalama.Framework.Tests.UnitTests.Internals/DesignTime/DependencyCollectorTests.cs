@@ -4,6 +4,7 @@
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.Engine.CodeModel;
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -14,6 +15,47 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
 public class DependencyCollectorTests : TestBase
 {
+    [Fact]
+    public void AddOne()
+    {
+        var dependencies = new BaseDependencyCollector();
+        var assemblyIdentity = new AssemblyIdentity( "DependentAssembly" );
+        const ulong hash = 54;
+
+        const string dependentFilePath = "dependent.cs";
+        const string masterFilePath = "master.cs";
+        dependencies.AddDependency( dependentFilePath, assemblyIdentity, masterFilePath, hash );
+
+        Assert.Equal( dependentFilePath, dependencies.DependenciesByDependentFilePath[dependentFilePath].DependentFilePath );
+
+        Assert.Equal(
+            hash,
+            dependencies.DependenciesByDependentFilePath[dependentFilePath]
+                .DependenciesByCompilation.Values.Single()
+                .MasterFilePathsAndHashes[masterFilePath] );
+    }
+
+    [Fact]
+    public void AddDuplicate()
+    {
+        var dependencies = new BaseDependencyCollector();
+        var assemblyIdentity = new AssemblyIdentity( "DependentAssembly" );
+        const ulong hash = 54;
+
+        const string dependentFilePath = "dependent.cs";
+        const string masterFilePath = "master.cs";
+        dependencies.AddDependency( dependentFilePath, assemblyIdentity, masterFilePath, hash );
+        dependencies.AddDependency( dependentFilePath, assemblyIdentity, masterFilePath, hash );
+
+        Assert.Equal( dependentFilePath, dependencies.DependenciesByDependentFilePath[dependentFilePath].DependentFilePath );
+
+        Assert.Equal(
+            hash,
+            dependencies.DependenciesByDependentFilePath[dependentFilePath]
+                .DependenciesByCompilation.Values.Single()
+                .MasterFilePathsAndHashes[masterFilePath] );
+    }
+
     [Fact]
     public void WithinProject()
     {

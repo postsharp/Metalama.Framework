@@ -11,6 +11,8 @@ internal record struct SyntaxTreeVersion( SyntaxTree Tree, bool HasCompileTimeCo
 
 internal record class CompilationVersion( Compilation Compilation, ImmutableDictionary<string, SyntaxTreeVersion> SyntaxTrees ) : ICompilationVersion
 {
+    AssemblyIdentity ICompilationVersion.AssemblyIdentity => this.Compilation.Assembly.Identity;
+
     public bool TryGetSyntaxTreeHash( string path, out ulong hash )
     {
         if ( this.SyntaxTrees.TryGetValue( path, out var syntaxTreeVersion ) )
@@ -33,11 +35,11 @@ internal class NonMetalamaCompilationVersion : ICompilationVersion
     private readonly ImmutableDictionary<string, SyntaxTree> _syntaxTrees;
     private readonly Func<SyntaxTree, ulong> _computeHashFunc;
 
-    public Compilation Compilation { get; }
+    public AssemblyIdentity AssemblyIdentity { get; }
 
     public NonMetalamaCompilationVersion( Compilation compilation, Func<SyntaxTree, ulong> computeHashFunc )
     {
-        this.Compilation = compilation;
+        this.AssemblyIdentity = compilation.Assembly.Identity;
         this._computeHashFunc = computeHashFunc;
         this._syntaxTrees = compilation.GetIndexedSyntaxTrees();
     }
@@ -61,7 +63,7 @@ internal class NonMetalamaCompilationVersion : ICompilationVersion
 
 internal interface ICompilationVersion
 {
-    Compilation Compilation { get; }
+    AssemblyIdentity AssemblyIdentity { get; }
 
     bool TryGetSyntaxTreeHash( string path, out ulong hash );
 }

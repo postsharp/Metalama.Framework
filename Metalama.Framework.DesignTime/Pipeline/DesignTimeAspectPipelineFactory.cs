@@ -220,8 +220,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                     compilationReferences.Add(
                         new DesignTimeCompilationReference(
-                            referenceResult.TransformationResult,
                             referenceResult.CompilationVersion,
+                            referenceResult.TransformationResult,
                             referenceResult.CompileTimeProject?.Hash ?? 0 ) );
                 }
                 else
@@ -229,8 +229,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     // It is a non-Metalama reference. 
                     compilationReferences.Add(
                         new DesignTimeCompilationReference(
-                            null,
                             new NonMetalamaCompilationVersion( reference.Compilation, this.ComputeSyntaxTreeHash ),
+                            null,
                             0 ) );
                 }
             }

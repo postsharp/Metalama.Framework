@@ -14,8 +14,8 @@ internal readonly struct DependencyGraphByDependentCompilation
     private static readonly ImmutableDictionary<string, DependencyGraphByDependentSyntaxTree> _emptyDependenciesByMasterFilePath =
         ImmutableDictionary<string, DependencyGraphByDependentSyntaxTree>.Empty.WithComparers( StringComparer.Ordinal );
 
-    private static readonly ImmutableDictionary<string, SyntaxTreeDependencyInCompilationCollector> _emptyDependenciesByDependentFilePath =
-        ImmutableDictionary<string, SyntaxTreeDependencyInCompilationCollector>.Empty.WithComparers( StringComparer.Ordinal );
+    private static readonly ImmutableDictionary<string, DependencyCollectorByDependentSyntaxTreeAndMasterCompilation> _emptyDependenciesByDependentFilePath =
+        ImmutableDictionary<string, DependencyCollectorByDependentSyntaxTreeAndMasterCompilation>.Empty.WithComparers( StringComparer.Ordinal );
 
     public AssemblyIdentity AssemblyIdentity { get; }
 
@@ -26,7 +26,7 @@ internal readonly struct DependencyGraphByDependentCompilation
     /// </summary>
     public ImmutableDictionary<string, DependencyGraphByDependentSyntaxTree> DependenciesByMasterFilePath { get; }
 
-    private readonly ImmutableDictionary<string, SyntaxTreeDependencyInCompilationCollector> _dependenciesByDependentFilePath;
+    private readonly ImmutableDictionary<string, DependencyCollectorByDependentSyntaxTreeAndMasterCompilation> _dependenciesByDependentFilePath;
 
     public DependencyGraphByDependentCompilation( AssemblyIdentity assemblyIdentity, ulong compileTimeProjectHash ) : this(
         assemblyIdentity,
@@ -38,7 +38,7 @@ internal readonly struct DependencyGraphByDependentCompilation
         AssemblyIdentity assemblyIdentity,
         ulong compileTimeProjectHash,
         ImmutableDictionary<string, DependencyGraphByDependentSyntaxTree> dependenciesByMasterFilePath,
-        ImmutableDictionary<string, SyntaxTreeDependencyInCompilationCollector> dependenciesByDependentFilePath )
+        ImmutableDictionary<string, DependencyCollectorByDependentSyntaxTreeAndMasterCompilation> dependenciesByDependentFilePath )
     {
         this.AssemblyIdentity = assemblyIdentity;
         this.CompileTimeProjectHash = compileTimeProjectHash;
@@ -88,7 +88,7 @@ internal readonly struct DependencyGraphByDependentCompilation
 
     public bool TryUpdateDependency(
         string dependentFilePath,
-        SyntaxTreeDependencyInCompilationCollector dependencies,
+        DependencyCollectorByDependentSyntaxTreeAndMasterCompilation dependencies,
         out DependencyGraphByDependentCompilation newDependenciesGraph )
     {
         // Check if there is any change.

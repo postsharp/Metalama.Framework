@@ -14,9 +14,9 @@ internal class DesignTimeCompilationReference
     public ulong CompileTimeProjectHash { get; }
 
     public DesignTimeCompilationReference(
-        ITransitiveAspectsManifest? transitiveAspectsManifest,
         ICompilationVersion compilationVersion,
-        ulong compileTimeProjectHash )
+        ITransitiveAspectsManifest? transitiveAspectsManifest = null,
+        ulong compileTimeProjectHash = 0 )
     {
         this.TransitiveAspectsManifest = transitiveAspectsManifest;
         this.CompilationVersion = compilationVersion;

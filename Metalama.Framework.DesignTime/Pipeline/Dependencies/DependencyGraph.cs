@@ -14,7 +14,7 @@ internal readonly struct DependencyGraph
 
     public DependencyGraph Update(
         IEnumerable<string> syntaxTrees,
-        DependencyCollector dependencies,
+        BaseDependencyCollector dependencies,
         DesignTimeCompilationReferenceCollection references )
     {
         var compilationsBuilder = this.Compilations.ToBuilder();
@@ -56,7 +56,7 @@ internal readonly struct DependencyGraph
             if ( !dependencies.DependenciesByDependentFilePath.ContainsKey( dependentFilePath ) )
             {
                 // The syntax tree does not have any dependency in any compilation.
-                foreach ( var compilationDependencies in compilationsBuilder )
+                foreach ( var compilationDependencies in this.Compilations )
                 {
                     if ( compilationDependencies.Value.TryRemoveDependency( dependentFilePath, out var newDependencies ) )
                     {

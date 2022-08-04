@@ -10,47 +10,18 @@ namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 /// <summary>
 /// Implements the <see cref="IDependencyCollector"/> interface.
 /// </summary>
-internal class DependencyCollector : IDependencyCollector
+internal class DependencyCollector : BaseDependencyCollector, IDependencyCollector
 {
     private readonly Compilation _currentCompilation;
-    private readonly IReadOnlyDictionary<AssemblyIdentity, ICompilationVersion> _compilationReferences;
     private readonly ILogger _logger;
 
     private readonly HashSet<(ISymbol, ISymbol)> _processedDependencies = new();
-    private readonly Dictionary<string, SyntaxTreeDependencyCollector> _dependenciesByDependentFilePath = new();
 
-    public DependencyCollector( IServiceProvider serviceProvider, Compilation compilation, IEnumerable<ICompilationVersion> compilationReferences )
+    public DependencyCollector( IServiceProvider serviceProvider, Compilation compilation, IEnumerable<ICompilationVersion> compilationReferences ) : base(
+        compilationReferences )
     {
         this._currentCompilation = compilation;
-        this._compilationReferences = compilationReferences.ToDictionary( x => x.Compilation.Assembly.Identity, x => x );
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DependencyCollector" );
-    }
-
-    public IReadOnlyDictionary<string, SyntaxTreeDependencyCollector> DependenciesByDependentFilePath => this._dependenciesByDependentFilePath;
-
-    public IEnumerable<DependencyEdge> EnumerateDependencies()
-    {
-        foreach ( var dependenciesByDependentSyntaxTree in this._dependenciesByDependentFilePath )
-        {
-            foreach ( var dependenciesInCompilation in dependenciesByDependentSyntaxTree.Value.DependenciesByCompilation )
-            {
-                foreach ( var dependency in dependenciesInCompilation.Value.MasterFilePathsAndHashes )
-                {
-                    yield return new DependencyEdge( dependenciesInCompilation.Key, dependency.Key, dependency.Value, dependenciesByDependentSyntaxTree.Key );
-                }
-            }
-        }
-    }
-
-    private void AddDependency( string dependentFilePath, Compilation masterCompilation, string masterFilePath, ulong masterHash )
-    {
-        if ( !this._dependenciesByDependentFilePath.TryGetValue( dependentFilePath, out var dependencies ) )
-        {
-            dependencies = new SyntaxTreeDependencyCollector( dependentFilePath );
-            this._dependenciesByDependentFilePath.Add( dependentFilePath, dependencies );
-        }
-
-        dependencies.AddDependency( masterCompilation, masterFilePath, masterHash );
     }
 
     public void AddDependency( ISymbol masterSymbol, ISymbol dependentSymbol )
@@ -90,14 +61,14 @@ internal class DependencyCollector : IDependencyCollector
                     {
                         this.AddDependency(
                             dependentSyntaxReference.SyntaxTree.FilePath,
-                            this._currentCompilation,
+                            currentCompilationAssembly.Identity,
                             masterSyntaxReference.SyntaxTree.FilePath,
                             0 );
                     }
                 }
             }
         }
-        else if ( this._compilationReferences.TryGetValue( masterSymbol.ContainingAssembly.Identity, out var compilationReference ) )
+        else if ( this.CompilationReferences.TryGetValue( masterSymbol.ContainingAssembly.Identity, out var compilationReference ) )
         {
             // We have a dependency to a different compilation.
 
@@ -109,30 +80,16 @@ internal class DependencyCollector : IDependencyCollector
                     {
                         this.AddDependency(
                             dependentSyntaxReference.SyntaxTree.FilePath,
-                            compilationReference.Compilation,
+                            compilationReference.AssemblyIdentity,
                             masterSyntaxReference.SyntaxTree.FilePath,
                             masterSyntaxTreeHash );
                     }
                 }
                 else
                 {
-                    this._logger.Warning?.Log( $"Cannot find '{masterSyntaxReference.SyntaxTree.FilePath}' in '{compilationReference.Compilation.Assembly}'." );
+                    this._logger.Warning?.Log( $"Cannot find '{masterSyntaxReference.SyntaxTree.FilePath}' in '{compilationReference.AssemblyIdentity}'." );
                 }
             }
         }
     }
-
-#if DEBUG
-    public bool IsReadOnly { get; private set; }
-
-    public void Freeze()
-    {
-        this.IsReadOnly = true;
-
-        foreach ( var child in this._dependenciesByDependentFilePath.Values )
-        {
-            child.Freeze();
-        }
-    }
-#endif
 }

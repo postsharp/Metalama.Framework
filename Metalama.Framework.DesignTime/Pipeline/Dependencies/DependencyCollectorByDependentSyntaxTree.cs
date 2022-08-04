@@ -8,20 +8,21 @@ namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 /// <summary>
 /// Collects the dependencies of a given dependent syntax tree.
 /// </summary>
-internal class SyntaxTreeDependencyCollector
+internal class DependencyCollectorByDependentSyntaxTree
 {
-    private readonly Dictionary<AssemblyIdentity, SyntaxTreeDependencyInCompilationCollector> _dependenciesByCompilation = new();
+    private readonly Dictionary<AssemblyIdentity, DependencyCollectorByDependentSyntaxTreeAndMasterCompilation> _dependenciesByCompilation = new();
 
     public string DependentFilePath { get; }
 
-    public IReadOnlyDictionary<AssemblyIdentity, SyntaxTreeDependencyInCompilationCollector> DependenciesByCompilation => this._dependenciesByCompilation;
+    public IReadOnlyDictionary<AssemblyIdentity, DependencyCollectorByDependentSyntaxTreeAndMasterCompilation> DependenciesByCompilation
+        => this._dependenciesByCompilation;
 
-    public SyntaxTreeDependencyCollector( string dependentFilePath )
+    public DependencyCollectorByDependentSyntaxTree( string dependentFilePath )
     {
         this.DependentFilePath = dependentFilePath;
     }
 
-    public void AddDependency( Compilation masterCompilation, string masterFilePath, ulong masterHash )
+    public void AddDependency( AssemblyIdentity masterCompilation, string masterFilePath, ulong masterHash )
     {
 #if DEBUG
         if ( this.IsReadOnly )
@@ -30,11 +31,10 @@ internal class SyntaxTreeDependencyCollector
         }
 #endif
 
-        var assemblyIdentity = masterCompilation.Assembly.Identity;
-
-        if ( !this._dependenciesByCompilation.TryGetValue( assemblyIdentity, out var compilationCollector ) )
+        if ( !this._dependenciesByCompilation.TryGetValue( masterCompilation, out var compilationCollector ) )
         {
-            compilationCollector = new SyntaxTreeDependencyInCompilationCollector( this.DependentFilePath, assemblyIdentity );
+            compilationCollector = new DependencyCollectorByDependentSyntaxTreeAndMasterCompilation( this.DependentFilePath, masterCompilation );
+            this._dependenciesByCompilation.Add( masterCompilation, compilationCollector );
         }
 
         compilationCollector.AddDependency( masterFilePath, masterHash );

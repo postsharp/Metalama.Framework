@@ -9,7 +9,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 /// <summary>
 /// Collects the dependencies of a given dependent syntax tree in a given compilation.
 /// </summary>
-internal class SyntaxTreeDependencyInCompilationCollector
+internal class DependencyCollectorByDependentSyntaxTreeAndMasterCompilation
 {
     private readonly Dictionary<string, ulong> _masterFilePathsAndHashes = new( StringComparer.Ordinal );
     private int _hashCode;
@@ -18,11 +18,9 @@ internal class SyntaxTreeDependencyInCompilationCollector
 
     public AssemblyIdentity AssemblyIdentity { get; }
 
-    public int HashCode => this._hashCode;
-
     public IReadOnlyDictionary<string, ulong> MasterFilePathsAndHashes => this._masterFilePathsAndHashes;
 
-    public SyntaxTreeDependencyInCompilationCollector( string dependentFilePath, AssemblyIdentity assemblyIdentity )
+    public DependencyCollectorByDependentSyntaxTreeAndMasterCompilation( string dependentFilePath, AssemblyIdentity assemblyIdentity )
     {
         this.DependentFilePath = dependentFilePath;
         this.AssemblyIdentity = assemblyIdentity;
@@ -40,7 +38,7 @@ internal class SyntaxTreeDependencyInCompilationCollector
         if ( !this._masterFilePathsAndHashes.TryGetValue( masterFilePath, out var existingHash ) )
         {
             this._masterFilePathsAndHashes.Add( masterFilePath, masterHash );
-            this._hashCode ^= System.HashCode.Combine( masterFilePath, masterHash );
+            this._hashCode ^= HashCode.Combine( masterFilePath, masterHash );
         }
         else if ( existingHash != masterHash )
         {
@@ -57,8 +55,13 @@ internal class SyntaxTreeDependencyInCompilationCollector
     }
 #endif
 
-    public bool IsStructurallyEqual( SyntaxTreeDependencyInCompilationCollector other )
+    public bool IsStructurallyEqual( DependencyCollectorByDependentSyntaxTreeAndMasterCompilation other )
     {
+        if ( ReferenceEquals( this, other ) )
+        {
+            return true;
+        }
+
         if ( this._hashCode != other._hashCode || this._masterFilePathsAndHashes.Count != other._masterFilePathsAndHashes.Count )
         {
             return false;
