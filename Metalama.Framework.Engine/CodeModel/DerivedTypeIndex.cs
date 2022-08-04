@@ -14,6 +14,8 @@ namespace Metalama.Framework.Engine.CodeModel
     public sealed partial class DerivedTypeIndex
     {
         private readonly Compilation _compilation;
+
+        // Maps a base type to direct derived types.
         private readonly ImmutableDictionaryOfArray<INamedTypeSymbol, INamedTypeSymbol> _relationships;
         private readonly ImmutableHashSet<INamedTypeSymbol> _externalBaseTypes;
 
@@ -63,12 +65,21 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public void PopulateDependencies( IDependencyCollector collector )
         {
-            foreach ( var baseType in this._relationships )
+            foreach ( var baseType in this._relationships.Keys )
             {
-                foreach ( var derivedType in baseType )
+                if ( !baseType.OriginalDefinition.DeclaringSyntaxReferences.IsDefaultOrEmpty )
                 {
-                    collector.AddDependency( baseType.Key, derivedType );
+                    this.PopulateDependenciesCore( collector, baseType, baseType );
                 }
+            }
+        }
+
+        private void PopulateDependenciesCore( IDependencyCollector collector, INamedTypeSymbol rootType, INamedTypeSymbol baseType )
+        {
+            foreach ( var derivedType in this._relationships[baseType] )
+            {
+                collector.AddDependency( rootType, derivedType );
+                this.PopulateDependenciesCore( collector, rootType, derivedType );
             }
         }
     }

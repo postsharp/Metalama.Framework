@@ -10,7 +10,6 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Validation;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -29,7 +28,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             ServiceProvider serviceProvider,
             bool isTest,
             CompileTimeDomain? domain = null,
-            IExecutionScenario? executionScenario = null ) : base(
+            ExecutionScenario? executionScenario = null ) : base(
             serviceProvider,
             executionScenario ?? ExecutionScenario.CompileTime,
             isTest,

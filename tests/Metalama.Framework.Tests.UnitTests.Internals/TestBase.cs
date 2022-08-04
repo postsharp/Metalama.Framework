@@ -164,6 +164,9 @@ class Expression
                     .WithProjectScopedServices( TestCompilationFactory.GetMetadataReferences() )
                     .WithMark( ServiceProviderMark.Test );
 
+                // We add a default AspectPipelineDescription because some tests need this marker, however it can be replaced by the pipeline.
+                this.ServiceProvider = this.ServiceProvider.WithService( new TestMarkerService() );
+
                 this.ServiceProvider = parent._addServices( this.ServiceProvider );
 
                 if ( addServices != null )

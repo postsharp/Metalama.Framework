@@ -11,25 +11,34 @@ namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 internal readonly struct TypeDependencyKey : IEquatable<TypeDependencyKey>
 {
     private readonly int _hashCode;
+    private readonly string? _text;
 
-#if DEBUG
-    private readonly string _text;
-#endif
-
-    public TypeDependencyKey( ITypeSymbol type )
+    public TypeDependencyKey( ITypeSymbol type, bool storeTypeName )
     {
         var hashCode = new HashCode();
 
-        for ( var d = (ISymbol) type; d != null && d is not IAssemblySymbol and not IModuleSymbol; d = d.ContainingSymbol )
+        for ( var d = (ISymbol) type; d is { } and not IAssemblySymbol and not IModuleSymbol; d = d.ContainingSymbol )
         {
             hashCode.Add( d.Name );
         }
 
         this._hashCode = hashCode.ToHashCode();
 
-#if DEBUG
-        this._text = type.ToString();
-#endif
+        if ( storeTypeName )
+        {
+            this._text = type.ToString();
+        }
+        else
+        {
+            this._text = null;
+        }
+    }
+
+    // For test only.
+    public TypeDependencyKey( string name )
+    {
+        this._hashCode = name.GetHashCode();
+        this._text = name;
     }
 
     public bool Equals( TypeDependencyKey other ) => this._hashCode == other._hashCode;
@@ -42,7 +51,5 @@ internal readonly struct TypeDependencyKey : IEquatable<TypeDependencyKey>
 
     public static bool operator !=( TypeDependencyKey left, TypeDependencyKey right ) => !left.Equals( right );
 
-#if DEBUG
-    public override string ToString() => this._text;
-#endif
+    public override string ToString() => this._text ?? this._hashCode.ToString();
 }

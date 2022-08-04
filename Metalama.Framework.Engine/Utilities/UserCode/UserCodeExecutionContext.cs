@@ -5,7 +5,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Project;
 using System;
@@ -129,7 +128,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
         public ICompilation? Compilation { get; }
 
         [Memo]
-        public IExecutionScenario ExecutionScenario => this.ServiceProvider.GetRequiredService<AspectPipelineDescription>().ExecutionScenario;
+        public IExecutionScenario ExecutionScenario => this.ServiceProvider.GetRequiredService<ExecutionScenario>();
 
         ICompilation IExecutionContext.Compilation
             => this.Compilation ?? throw new InvalidOperationException( "There is no compilation in the current execution context" );

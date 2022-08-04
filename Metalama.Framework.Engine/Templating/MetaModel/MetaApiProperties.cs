@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IServiceProvider ServiceProvider { get; }
 
-        public AspectPipelineDescription PipelineDescription => this.ServiceProvider.GetRequiredService<AspectPipelineDescription>();
+        public ExecutionScenario ExecutionScenario => this.ServiceProvider.GetRequiredService<ExecutionScenario>();
 
         public MetaApiStaticity Staticity { get; }
 

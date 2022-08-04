@@ -45,5 +45,7 @@ namespace Metalama.Framework.Project
         /// <see cref="CapturesCodeFixImplementations"/>.
         /// </summary>
         bool CapturesCodeFixTitles { get; }
+
+        bool IsTest { get; }
     }
 }

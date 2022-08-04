@@ -50,6 +50,23 @@ internal class BaseDependencyCollector
         }
     }
 
+    /// <summary>
+    /// Enumerates partial type dependencies. This method is used in tests only.
+    /// </summary>
+    public IEnumerable<PartialTypeDependency> EnumeratePartialTypeDependencies()
+    {
+        foreach ( var dependenciesByDependentSyntaxTree in this._dependenciesByDependentFilePath )
+        {
+            foreach ( var dependenciesInCompilation in dependenciesByDependentSyntaxTree.Value.DependenciesByCompilation )
+            {
+                foreach ( var masterType in dependenciesInCompilation.Value.MasterPartialTypes )
+                {
+                    yield return new PartialTypeDependency( masterType, dependenciesInCompilation.Value.DependentFilePath );
+                }
+            }
+        }
+    }
+
     public void AddPartialTypeDependency( string dependentFilePath, AssemblyIdentity masterCompilationIdentity, TypeDependencyKey masterPartialType )
     {
 #if DEBUG

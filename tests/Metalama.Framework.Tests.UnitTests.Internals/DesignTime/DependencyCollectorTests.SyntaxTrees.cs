@@ -13,10 +13,10 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
-public class DependencyCollectorTests : TestBase
+public partial class DependencyCollectorTests
 {
     [Fact]
-    public void AddOne()
+    public void AddOneSyntaxTreeDependency()
     {
         var assemblyIdentity = new AssemblyIdentity( "DependentAssembly" );
         var dependencies = new BaseDependencyCollector( new TestCompilationVersion( assemblyIdentity ) );
@@ -36,7 +36,7 @@ public class DependencyCollectorTests : TestBase
     }
 
     [Fact]
-    public void AddDuplicate()
+    public void AddDuplicateSyntaxTreeDependency()
     {
         var assemblyIdentity = new AssemblyIdentity( "DependentAssembly" );
         var dependencies = new BaseDependencyCollector( new TestCompilationVersion( assemblyIdentity ) );
@@ -58,7 +58,7 @@ public class DependencyCollectorTests : TestBase
     }
 
     [Fact]
-    public void WithinProject()
+    public void CollectSyntaxTreeDependenciesWithinProject()
     {
         using var testContext = this.CreateTestContext();
 
@@ -85,8 +85,12 @@ public class DependencyCollectorTests : TestBase
             dependencyCollector.EnumerateSyntaxTreeDependencies().Select( x => $"'{x.MasterFilePath}'->'{x.DependentFilePath}'" ).OrderBy( x => x ) );
 
         var expectedDependencies = @"'Class2.cs'->'Class3.cs'
+'Class2.cs'->'Class4.cs'
 'Class3.cs'->'Class4.cs'
+'Interface1.cs'->'Class4.cs'
 'Interface1.cs'->'Interface2.cs'
+'Interface1.cs'->'Interface3.cs'
+'Interface2.cs'->'Class4.cs'
 'Interface2.cs'->'Interface3.cs'
 'Interface3.cs'->'Class4.cs'";
 
@@ -94,7 +98,7 @@ public class DependencyCollectorTests : TestBase
     }
 
     [Fact]
-    public void CrossProject()
+    public void CollectSyntaxTreeDependenciesAcrossProject()
     {
         using var testContext = this.CreateTestContext();
 
@@ -136,7 +140,10 @@ public class DependencyCollectorTests : TestBase
             dependencyCollector.EnumerateSyntaxTreeDependencies().Select( x => $"'{x.MasterFilePath}'->'{x.DependentFilePath}'" ).OrderBy( x => x ) );
 
         var expectedDependencies = @"'Class2.cs'->'Class3.cs'
+'Class2.cs'->'Class4.cs'
 'Class3.cs'->'Class4.cs'
+'Interface1.cs'->'Class4.cs'
+'Interface2.cs'->'Class4.cs'
 'Interface3.cs'->'Class4.cs'";
 
         Assert.Equal( expectedDependencies, actualDependencies );

@@ -124,7 +124,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             }
         }
 
-        public IExecutionScenario ExecutionScenario => this._common.PipelineDescription.ExecutionScenario;
+        public IExecutionScenario ExecutionScenario => this._common.ExecutionScenario;
 
         public UserDiagnosticSink Diagnostics => this._common.Diagnostics;
 

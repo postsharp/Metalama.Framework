@@ -16,6 +16,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
@@ -64,7 +65,7 @@ namespace Metalama.Framework.Engine.Pipeline
         /// <param name="domain">If <c>null</c>, the instance is created from the <see cref="ICompileTimeDomainFactory"/> service.</param>
         protected AspectPipeline(
             ServiceProvider serviceProvider,
-            IExecutionScenario executionScenario,
+            ExecutionScenario executionScenario,
             bool isTest,
             CompileTimeDomain? domain )
         {
@@ -74,8 +75,14 @@ namespace Metalama.Framework.Engine.Pipeline
 
             this.ServiceProvider = serviceProvider
                 .WithServices( this.ProjectOptions.PlugIns.OfType<IService>() )
-                .WithServices( new AspectPipelineDescription( executionScenario, isTest ) )
-                .WithMark( ServiceProviderMark.Pipeline );
+                .WithServices( isTest ? executionScenario.WithTest() : executionScenario );
+
+            if ( isTest )
+            {
+                this.ServiceProvider = this.ServiceProvider.WithService( new TestMarkerService() );
+            }
+
+            this.ServiceProvider = this.ServiceProvider.WithMark( ServiceProviderMark.Pipeline );
 
             if ( domain != null )
             {

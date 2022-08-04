@@ -3,7 +3,9 @@
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
+using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -17,6 +19,7 @@ internal class DependencyCollector : BaseDependencyCollector, IDependencyCollect
 {
     private readonly Compilation _currentCompilation;
     private readonly ILogger _logger;
+    private readonly bool _storeTypeName;
 
     private readonly HashSet<(ISymbol, ISymbol)> _processedDependencies = new();
 
@@ -25,6 +28,7 @@ internal class DependencyCollector : BaseDependencyCollector, IDependencyCollect
     {
         this._currentCompilation = compilation;
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DependencyCollector" );
+        this._storeTypeName = serviceProvider.GetService<TestMarkerService>() != null;
     }
 
     public void AddDependency( INamedTypeSymbol masterSymbol, INamedTypeSymbol dependentSymbol )
@@ -39,14 +43,25 @@ internal class DependencyCollector : BaseDependencyCollector, IDependencyCollect
         masterSymbol = masterSymbol.OriginalDefinition.GetTopContainingType();
         dependentSymbol = dependentSymbol.OriginalDefinition.GetTopContainingType();
 
+        // If there is no syntax reference, it means it is not defined from source code but from a PE file.
+        // PE references are tracked separately, and a change there invalidate the whole pipeline configuration,
+        // so there is no need to track it.
+        if ( masterSymbol.DeclaringSyntaxReferences.IsDefaultOrEmpty )
+        {
+            return;
+        }
+
+        // No need to consider self-references because we always include all partial files for all types included in a partial compilation.
+        if ( SymbolEqualityComparer.Default.Equals( masterSymbol, dependentSymbol ) )
+        {
+            return;
+        }
+
         // Avoid spending time processing the same call twice.
         if ( !this._processedDependencies.Add( (masterSymbol, dependentSymbol) ) )
         {
             return;
         }
-
-        var masterIsPartial = masterSymbol.DeclaringSyntaxReferences[0].GetSyntax() is BaseTypeDeclarationSyntax type
-                              && type.Modifiers.Any( m => m.IsKind( SyntaxKind.PartialKeyword ) );
 
         var currentCompilationAssembly = this._currentCompilation.Assembly;
 
@@ -55,6 +70,9 @@ internal class DependencyCollector : BaseDependencyCollector, IDependencyCollect
             // We only collect dependencies in the current assembly.
             return;
         }
+
+        var masterIsPartial = masterSymbol.DeclaringSyntaxReferences[0].GetSyntax() is BaseTypeDeclarationSyntax type
+                              && type.Modifiers.Any( m => m.IsKind( SyntaxKind.PartialKeyword ) );
 
         if ( SymbolEqualityComparer.Default.Equals( masterSymbol.ContainingAssembly, currentCompilationAssembly ) )
         {
@@ -78,7 +96,7 @@ internal class DependencyCollector : BaseDependencyCollector, IDependencyCollect
                     this.AddPartialTypeDependency(
                         dependentSyntaxReference.SyntaxTree.FilePath,
                         currentCompilationAssembly.Identity,
-                        new TypeDependencyKey( masterSymbol ) );
+                        new TypeDependencyKey( masterSymbol, this._storeTypeName ) );
                 }
             }
         }
@@ -111,7 +129,7 @@ internal class DependencyCollector : BaseDependencyCollector, IDependencyCollect
                         this.AddPartialTypeDependency(
                             dependentSyntaxReference.SyntaxTree.FilePath,
                             currentCompilationAssembly.Identity,
-                            new TypeDependencyKey( masterSymbol ) );
+                            new TypeDependencyKey( masterSymbol, this._storeTypeName ) );
                     }
                 }
             }
