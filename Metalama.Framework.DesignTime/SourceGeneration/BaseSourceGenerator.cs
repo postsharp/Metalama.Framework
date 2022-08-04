@@ -46,7 +46,7 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
 
                 var source =
                     context.AnalyzerConfigOptionsProvider.Select(
-                            ( x, _ ) => (AnalyzerOptions: x.GlobalOptions, PipelineOptions: new MSBuildProjectOptions( x.GlobalOptions )) )
+                            ( x, _ ) => (AnalyzerOptions: x.GlobalOptions, PipelineOptions: MSBuildProjectOptions.GetInstance( x )) )
                         .Combine( context.CompilationProvider )
                         .Combine( context.AdditionalTextsProvider.Select( ( text, _ ) => text ).Collect() )
                         .Select( ( x, _ ) => (Compilation: x.Left.Right, x.Left.Left.AnalyzerOptions, x.Left.Left.PipelineOptions, AdditionalTexts: x.Right) )

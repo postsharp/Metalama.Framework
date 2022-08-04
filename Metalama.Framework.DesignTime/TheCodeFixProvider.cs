@@ -63,7 +63,7 @@ namespace Metalama.Framework.DesignTime
             this._logger.Trace?.Log(
                 $"DesignTimeCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}'): input diagnostics = {context.Diagnostics.Select( x => x.Id ).Distinct()}" );
 
-            var projectOptions = new MSBuildProjectOptions( context.Document.Project );
+            var projectOptions = MSBuildProjectOptions.GetInstance( context.Document.Project );
 
             if ( string.IsNullOrEmpty( projectOptions.ProjectId ) )
             {
