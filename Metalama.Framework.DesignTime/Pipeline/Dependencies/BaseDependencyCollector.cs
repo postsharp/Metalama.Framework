@@ -26,16 +26,11 @@ internal class BaseDependencyCollector
 
     public IReadOnlyDictionary<string, DependencyCollectorByDependentSyntaxTree> DependenciesByDependentFilePath => this._dependenciesByDependentFilePath;
 
-    public BaseDependencyCollector( IEnumerable<ICompilationVersion>? compilationReferences = null )
+    public BaseDependencyCollector( params ICompilationVersion[] compilationReferences ) : this( (IEnumerable<ICompilationVersion>) compilationReferences ) { }
+
+    public BaseDependencyCollector( IEnumerable<ICompilationVersion> compilationReferences )
     {
-        if ( compilationReferences != null )
-        {
-            this.CompilationReferences = compilationReferences.ToImmutableDictionary( x => x.AssemblyIdentity, x => x );
-        }
-        else
-        {
-            this.CompilationReferences = ImmutableDictionary<AssemblyIdentity, ICompilationVersion>.Empty;
-        }
+        this.CompilationReferences = compilationReferences.ToImmutableDictionary( x => x.AssemblyIdentity, x => x );
     }
 
     public IEnumerable<DependencyEdge> EnumerateDependencies()
@@ -52,7 +47,7 @@ internal class BaseDependencyCollector
         }
     }
 
-    public void AddDependency( string dependentFilePath, AssemblyIdentity masterCompilation, string masterFilePath, ulong masterHash )
+    public void AddDependency( string dependentFilePath, AssemblyIdentity masterCompilationIdentity, string masterFilePath, ulong masterHash )
     {
 #if DEBUG
         if ( this.IsReadOnly )
@@ -67,7 +62,7 @@ internal class BaseDependencyCollector
             this._dependenciesByDependentFilePath.Add( dependentFilePath, dependencies );
         }
 
-        dependencies.AddDependency( masterCompilation, masterFilePath, masterHash );
+        dependencies.AddDependency( masterCompilationIdentity, masterFilePath, masterHash );
     }
 
 #if DEBUG

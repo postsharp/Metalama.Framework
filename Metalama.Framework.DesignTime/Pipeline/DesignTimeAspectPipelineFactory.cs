@@ -220,17 +220,13 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     compilationReferences.Add(
                         new DesignTimeCompilationReference(
                             referenceResult.CompilationVersion,
-                            referenceResult.TransformationResult,
-                            referenceResult.CompileTimeProject?.Hash ?? 0 ) );
+                            referenceResult.TransformationResult ) );
                 }
                 else
                 {
                     // It is a non-Metalama reference. 
                     compilationReferences.Add(
-                        new DesignTimeCompilationReference(
-                            new NonMetalamaCompilationVersion( reference.Compilation, this.ComputeSyntaxTreeHash ),
-                            null,
-                            0 ) );
+                        new DesignTimeCompilationReference( new NonMetalamaCompilationVersion( reference.Compilation, this.ComputeSyntaxTreeHash ) ) );
                 }
             }
 

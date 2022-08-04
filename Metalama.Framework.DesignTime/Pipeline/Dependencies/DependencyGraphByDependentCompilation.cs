@@ -86,6 +86,26 @@ internal readonly struct DependencyGraphByDependentCompilation
         return true;
     }
 
+    public bool TryUpdateCompileTimeProjectHash( ulong hash, out DependencyGraphByDependentCompilation newDependenciesGraph )
+    {
+        if ( this.CompileTimeProjectHash == hash )
+        {
+            newDependenciesGraph = this;
+
+            return false;
+        }
+        else
+        {
+            newDependenciesGraph = new DependencyGraphByDependentCompilation(
+                this.AssemblyIdentity,
+                hash,
+                this.DependenciesByMasterFilePath,
+                this._dependenciesByDependentFilePath );
+
+            return true;
+        }
+    }
+
     public bool TryUpdateDependency(
         string dependentFilePath,
         DependencyCollectorByDependentSyntaxTreeAndMasterCompilation dependencies,

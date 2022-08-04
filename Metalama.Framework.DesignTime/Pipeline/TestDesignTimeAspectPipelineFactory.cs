@@ -3,6 +3,8 @@
 
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.Pipeline
@@ -11,12 +13,12 @@ namespace Metalama.Framework.DesignTime.Pipeline
     {
         private readonly IProjectOptions _projectOptions;
 
-        public TestDesignTimeAspectPipelineFactory( CompileTimeDomain domain, IProjectOptions projectOptions ) : base(
-            Engine.Pipeline.ServiceProvider.Empty,
+        public TestDesignTimeAspectPipelineFactory( CompileTimeDomain domain, ServiceProvider serviceProvider ) : base(
+            serviceProvider,
             domain,
             true )
         {
-            this._projectOptions = projectOptions;
+            this._projectOptions = serviceProvider.GetRequiredService<IProjectOptions>();
         }
 
         protected override string GetProjectId( IProjectOptions projectOptions, Compilation compilation ) => compilation.AssemblyName!;

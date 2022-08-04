@@ -17,7 +17,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
     /// </summary>
     internal readonly struct CompilationChangeTracker
     {
-        private readonly ImmutableDictionary<string, SyntaxTreeVersion>? _lastTrees;
+        public ImmutableDictionary<string, SyntaxTreeVersion>? LastTrees { get; }
 
         /// <summary>
         /// Gets the last <see cref="Compilation"/>, or <c>null</c> if the <see cref="Update"/> method
@@ -27,15 +27,12 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
 
         public CompilationChanges? UnprocessedChanges { get; }
 
-        public CompilationVersion? LastCompilationVersion
-            => this.LastCompilation != null ? new CompilationVersion( this.LastCompilation, this._lastTrees.AssertNotNull() ) : null;
-
         private CompilationChangeTracker(
             Compilation? lastCompilation,
             ImmutableDictionary<string, SyntaxTreeVersion>? lastTrees,
             CompilationChanges? unprocessedChanges )
         {
-            this._lastTrees = lastTrees;
+            this.LastTrees = lastTrees;
             this.LastCompilation = lastCompilation;
             this.UnprocessedChanges = unprocessedChanges;
         }
@@ -47,7 +44,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                 throw new InvalidOperationException();
             }
 
-            return new CompilationChangeTracker( this.LastCompilation, this._lastTrees, CompilationChanges.Empty( this.LastCompilation ) );
+            return new CompilationChangeTracker( this.LastCompilation, this.LastTrees, CompilationChanges.Empty( this.LastCompilation ) );
         }
 
         private bool AreMetadataReferencesEqual( Compilation newCompilation )
@@ -144,7 +141,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             var hasCompileTimeChange = dependencyChanges.HasCompileTimeChange || !this.AreMetadataReferencesEqual( newCompilation );
 
             // Process new trees.
-            var lastTrees = this._lastTrees;
+            var lastTrees = this.LastTrees;
 
             foreach ( var newSyntaxTree in newCompilation.SyntaxTrees )
             {

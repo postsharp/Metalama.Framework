@@ -14,9 +14,9 @@ public class DependencyGraphTests
     [Fact]
     public void AddOneTree()
     {
-        var dependencies = new BaseDependencyCollector();
         var masterCompilation = new AssemblyIdentity( "MasterAssembly" );
-        var references = new DesignTimeCompilationReferenceCollection( new DesignTimeCompilationReference( new TestCompilationVersion( masterCompilation ) ) );
+        var dependencies = new BaseDependencyCollector( new TestCompilationVersion( masterCompilation ) );
+
         const ulong hash = 54;
 
         const string masterFilePath = "master.cs";
@@ -24,7 +24,7 @@ public class DependencyGraphTests
 
         dependencies.AddDependency( dependentFilePath, masterCompilation, masterFilePath, hash );
 
-        var graph = DependencyGraph.Empty.Update( new[] { dependentFilePath }, dependencies, references );
+        var graph = DependencyGraph.Empty.Update( new[] { dependentFilePath }, dependencies );
 
         var dependenciesByCompilation = graph.Compilations.Values.Single();
         Assert.Equal( masterCompilation, dependenciesByCompilation.AssemblyIdentity );
@@ -36,9 +36,8 @@ public class DependencyGraphTests
     [Fact]
     public void AddTwoDependentTreesInSameCompilation()
     {
-        var dependencies = new BaseDependencyCollector();
         var masterCompilation = new AssemblyIdentity( "MasterAssembly" );
-        var references = new DesignTimeCompilationReferenceCollection( new DesignTimeCompilationReference( new TestCompilationVersion( masterCompilation ) ) );
+        var dependencies = new BaseDependencyCollector( new TestCompilationVersion( masterCompilation ) );
         const ulong hash = 54;
 
         const string masterFilePath = "master.cs";
@@ -48,7 +47,7 @@ public class DependencyGraphTests
         dependencies.AddDependency( dependentFilePath1, masterCompilation, masterFilePath, hash );
         dependencies.AddDependency( dependentFilePath2, masterCompilation, masterFilePath, hash );
 
-        var graph = DependencyGraph.Empty.Update( new[] { dependentFilePath1, dependentFilePath2 }, dependencies, references );
+        var graph = DependencyGraph.Empty.Update( new[] { dependentFilePath1, dependentFilePath2 }, dependencies );
 
         var dependenciesByCompilation = graph.Compilations.Values.Single();
         Assert.Equal( masterCompilation, dependenciesByCompilation.AssemblyIdentity );
@@ -59,13 +58,10 @@ public class DependencyGraphTests
     [Fact]
     public void AddTwoDependentTreesInDifferentCompilation()
     {
-        var dependencies = new BaseDependencyCollector();
         var masterCompilation1 = new AssemblyIdentity( "MasterAssembly1" );
         var masterCompilation2 = new AssemblyIdentity( "MasterAssembly2" );
 
-        var references = new DesignTimeCompilationReferenceCollection(
-            new DesignTimeCompilationReference( new TestCompilationVersion( masterCompilation1 ) ),
-            new DesignTimeCompilationReference( new TestCompilationVersion( masterCompilation2 ) ) );
+        var dependencies = new BaseDependencyCollector( new TestCompilationVersion( masterCompilation1 ), new TestCompilationVersion( masterCompilation2 ) );
 
         const ulong hash = 54;
 
@@ -76,7 +72,7 @@ public class DependencyGraphTests
         dependencies.AddDependency( dependentFilePath1, masterCompilation1, masterFilePath, hash );
         dependencies.AddDependency( dependentFilePath2, masterCompilation2, masterFilePath, hash );
 
-        var graph = DependencyGraph.Empty.Update( new[] { dependentFilePath1, dependentFilePath2 }, dependencies, references );
+        var graph = DependencyGraph.Empty.Update( new[] { dependentFilePath1, dependentFilePath2 }, dependencies );
 
         Assert.Contains( dependentFilePath1, graph.Compilations[masterCompilation1].DependenciesByMasterFilePath[masterFilePath].DependentFilePaths );
         Assert.Contains( dependentFilePath2, graph.Compilations[masterCompilation2].DependenciesByMasterFilePath[masterFilePath].DependentFilePaths );
@@ -85,9 +81,8 @@ public class DependencyGraphTests
     [Fact]
     public void AddOneTreeThenRemove()
     {
-        var dependencies = new BaseDependencyCollector();
         var masterCompilation = new AssemblyIdentity( "MasterAssembly" );
-        var references = new DesignTimeCompilationReferenceCollection( new DesignTimeCompilationReference( new TestCompilationVersion( masterCompilation ) ) );
+        var dependencies = new BaseDependencyCollector( new TestCompilationVersion( masterCompilation ) );
         const ulong hash = 54;
 
         const string masterFilePath = "master.cs";
@@ -96,8 +91,8 @@ public class DependencyGraphTests
         dependencies.AddDependency( dependentFilePath, masterCompilation, masterFilePath, hash );
 
         var graph = DependencyGraph.Empty
-            .Update( new[] { dependentFilePath }, dependencies, references )
-            .Update( new[] { dependentFilePath }, BaseDependencyCollector.Empty, references );
+            .Update( new[] { dependentFilePath }, dependencies )
+            .Update( new[] { dependentFilePath }, BaseDependencyCollector.Empty );
 
         Assert.Empty( graph.Compilations[masterCompilation].DependenciesByMasterFilePath );
     }
@@ -118,8 +113,8 @@ public class DependencyGraphTests
         dependencies.AddDependency( dependentFilePath2, masterCompilation, masterFilePath, hash );
 
         var graph = DependencyGraph.Empty
-            .Update( new[] { dependentFilePath1, dependentFilePath2 }, dependencies, references )
-            .Update( new[] { dependentFilePath2 }, BaseDependencyCollector.Empty, references );
+            .Update( new[] { dependentFilePath1, dependentFilePath2 }, dependencies )
+            .Update( new[] { dependentFilePath2 }, BaseDependencyCollector.Empty );
 
         var dependenciesByCompilation = graph.Compilations.Values.Single();
         Assert.Equal( masterCompilation, dependenciesByCompilation.AssemblyIdentity );
@@ -141,12 +136,12 @@ public class DependencyGraphTests
         var dependencies1 = new BaseDependencyCollector();
         dependencies1.AddDependency( dependentFilePath, masterCompilation, masterFilePath, hash1 );
 
-        var graph1 = DependencyGraph.Empty.Update( new[] { dependentFilePath }, dependencies1, references );
+        var graph1 = DependencyGraph.Empty.Update( new[] { dependentFilePath }, dependencies1 );
 
         var dependencies2 = new BaseDependencyCollector();
         dependencies2.AddDependency( dependentFilePath, masterCompilation, masterFilePath, hash2 );
 
-        var graph2 = graph1.Update( new[] { dependentFilePath }, dependencies2, references );
+        var graph2 = graph1.Update( new[] { dependentFilePath }, dependencies2 );
 
         Assert.Equal( hash2, graph2.Compilations[masterCompilation].DependenciesByMasterFilePath[masterFilePath].Hash );
     }

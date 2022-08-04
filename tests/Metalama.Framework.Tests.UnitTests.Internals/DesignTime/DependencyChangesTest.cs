@@ -1,0 +1,96 @@
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using Metalama.Framework.DesignTime.Pipeline;
+using Metalama.Framework.DesignTime.Pipeline.Dependencies;
+using Microsoft.CodeAnalysis;
+using System.Collections.Generic;
+using Xunit;
+
+namespace Metalama.Framework.Tests.UnitTests.DesignTime;
+
+public class DependencyChangesTest
+{
+    [Fact]
+    public void NoChange()
+    {
+        const ulong hash = 54;
+
+        const string masterFilePath = "master.cs";
+        const string dependentFilePath = "dependent.cs";
+
+        var masterCompilation = new AssemblyIdentity( "MasterAssembly" );
+        var masterCompilationVersion = new TestCompilationVersion( masterCompilation, hashes: new Dictionary<string, ulong> { [masterFilePath] = hash } );
+        var dependencies = new BaseDependencyCollector( masterCompilationVersion );
+
+        dependencies.AddDependency( dependentFilePath, masterCompilation, masterFilePath, hash );
+
+        var graph = DependencyGraph.Empty.Update( new[] { dependentFilePath }, dependencies );
+
+        var changes = DependencyChanges.Create(
+            graph,
+            new DesignTimeCompilationReferenceCollection( new DesignTimeCompilationReference( masterCompilationVersion ) ) );
+
+        Assert.True( changes.IsEmpty );
+    }
+
+    [Fact]
+    public void FileHashChanged()
+    {
+        const ulong hash1 = 1;
+        const ulong hash2 = 2;
+
+        const string masterFilePath = "master.cs";
+        const string dependentFilePath = "dependent.cs";
+
+        var masterCompilation = new AssemblyIdentity( "MasterAssembly" );
+        var masterCompilationVersion1 = new TestCompilationVersion( masterCompilation, hashes: new Dictionary<string, ulong> { [masterFilePath] = hash1 } );
+        var dependencyCollector = new BaseDependencyCollector( masterCompilationVersion1 );
+
+        dependencyCollector.AddDependency( dependentFilePath, masterCompilation, masterFilePath, hash1 );
+
+        var dependencyGraph = DependencyGraph.Empty.Update( new[] { dependentFilePath }, dependencyCollector );
+
+        // Create a second version of the master compilation with a different hash.
+        var masterCompilationVersion2 = new TestCompilationVersion( masterCompilation, hashes: new Dictionary<string, ulong> { [masterFilePath] = hash2 } );
+
+        var changes = DependencyChanges.Create(
+            dependencyGraph,
+            new DesignTimeCompilationReferenceCollection( new DesignTimeCompilationReference( masterCompilationVersion2 ) ) );
+
+        Assert.False( changes.IsEmpty );
+        Assert.Contains( dependentFilePath, changes.InvalidatedSyntaxTrees );
+    }
+
+    [Fact]
+    public void FileHashBeenRemoved()
+    {
+        const ulong hash1 = 1;
+
+        const string masterFilePath = "master.cs";
+        const string dependentFilePath = "dependent.cs";
+
+        var masterCompilation = new AssemblyIdentity( "MasterAssembly" );
+        var masterCompilationVersion1 = new TestCompilationVersion( masterCompilation, hashes: new Dictionary<string, ulong> { [masterFilePath] = hash1 } );
+        var dependencyCollector = new BaseDependencyCollector( masterCompilationVersion1 );
+
+        dependencyCollector.AddDependency( dependentFilePath, masterCompilation, masterFilePath, hash1 );
+
+        var dependencyGraph = DependencyGraph.Empty.Update( new[] { dependentFilePath }, dependencyCollector );
+
+        // Create a second version of the master compilation with a different hash.
+        var masterCompilationVersion2 = new TestCompilationVersion(
+            masterCompilation,
+            hashes: new Dictionary<string, ulong>
+            {
+                /* Intentionally empty. */
+            } );
+
+        var changes = DependencyChanges.Create(
+            dependencyGraph,
+            new DesignTimeCompilationReferenceCollection( new DesignTimeCompilationReference( masterCompilationVersion2 ) ) );
+
+        Assert.False( changes.IsEmpty );
+        Assert.Contains( dependentFilePath, changes.InvalidatedSyntaxTrees );
+    }
+}

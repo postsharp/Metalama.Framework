@@ -18,8 +18,8 @@ public class DependencyCollectorTests : TestBase
     [Fact]
     public void AddOne()
     {
-        var dependencies = new BaseDependencyCollector();
         var assemblyIdentity = new AssemblyIdentity( "DependentAssembly" );
+        var dependencies = new BaseDependencyCollector( new TestCompilationVersion( assemblyIdentity ) );
         const ulong hash = 54;
 
         const string dependentFilePath = "dependent.cs";
@@ -38,8 +38,9 @@ public class DependencyCollectorTests : TestBase
     [Fact]
     public void AddDuplicate()
     {
-        var dependencies = new BaseDependencyCollector();
         var assemblyIdentity = new AssemblyIdentity( "DependentAssembly" );
+        var dependencies = new BaseDependencyCollector( new TestCompilationVersion( assemblyIdentity ) );
+
         const ulong hash = 54;
 
         const string dependentFilePath = "dependent.cs";
@@ -123,6 +124,7 @@ public class DependencyCollectorTests : TestBase
             {
                 new CompilationVersion(
                     compilation1,
+                    0,
                     compilation1.SyntaxTrees.ToImmutableDictionary( x => x.FilePath, x => new SyntaxTreeVersion( x, false, 5 ) ) )
             } );
 

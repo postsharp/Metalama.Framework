@@ -19,22 +19,24 @@ internal readonly struct DependencyChanges
 
     public bool HasCompileTimeChange { get; }
 
+    public bool IsEmpty => !this.HasCompileTimeChange && this.InvalidatedSyntaxTrees.IsEmpty;
+
     public ImmutableHashSet<string> InvalidatedSyntaxTrees { get; }
 
     public static DependencyChanges Create(
         DependencyGraph dependencies,
-        DesignTimeCompilationReferenceCollection references,
-        CancellationToken cancellationToken )
+        DesignTimeCompilationReferenceCollection currentReferences,
+        CancellationToken cancellationToken = default )
     {
         var invalidatedFiles = ImmutableHashSet.CreateBuilder<string>( StringComparer.Ordinal );
 
-        foreach ( var compilationReference in references.References )
+        foreach ( var compilationReference in currentReferences.References )
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             if ( dependencies.Compilations.TryGetValue( compilationReference.Key, out var dependenciesOfReference ) )
             {
-                if ( dependenciesOfReference.CompileTimeProjectHash != compilationReference.Value.CompileTimeProjectHash )
+                if ( dependenciesOfReference.CompileTimeProjectHash != compilationReference.Value.CompilationVersion.CompileTimeProjectHash )
                 {
                     // If we have a compile-time change, there is no need to do anything.
                     return new DependencyChanges( true, ImmutableHashSet<string>.Empty );

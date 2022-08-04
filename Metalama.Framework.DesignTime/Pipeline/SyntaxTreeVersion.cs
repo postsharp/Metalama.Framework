@@ -9,7 +9,10 @@ namespace Metalama.Framework.DesignTime.Pipeline;
 
 internal record struct SyntaxTreeVersion( SyntaxTree Tree, bool HasCompileTimeCode, ulong Hash );
 
-internal record class CompilationVersion( Compilation Compilation, ImmutableDictionary<string, SyntaxTreeVersion> SyntaxTrees ) : ICompilationVersion
+internal record class CompilationVersion(
+    Compilation Compilation,
+    ulong CompileTimeProjectHash,
+    ImmutableDictionary<string, SyntaxTreeVersion> SyntaxTrees ) : ICompilationVersion
 {
     AssemblyIdentity ICompilationVersion.AssemblyIdentity => this.Compilation.Assembly.Identity;
 
@@ -36,6 +39,8 @@ internal class NonMetalamaCompilationVersion : ICompilationVersion
     private readonly Func<SyntaxTree, ulong> _computeHashFunc;
 
     public AssemblyIdentity AssemblyIdentity { get; }
+
+    public ulong CompileTimeProjectHash => 0;
 
     public NonMetalamaCompilationVersion( Compilation compilation, Func<SyntaxTree, ulong> computeHashFunc )
     {
@@ -64,6 +69,8 @@ internal class NonMetalamaCompilationVersion : ICompilationVersion
 internal interface ICompilationVersion
 {
     AssemblyIdentity AssemblyIdentity { get; }
+
+    ulong CompileTimeProjectHash { get; }
 
     bool TryGetSyntaxTreeHash( string path, out ulong hash );
 }

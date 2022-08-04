@@ -45,7 +45,13 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             public CompilationChanges? UnprocessedChanges => this._compilationChangeTracker.UnprocessedChanges;
 
-            public CompilationVersion? CompilationVersion => this._compilationChangeTracker.LastCompilationVersion;
+            public CompilationVersion? CompilationVersion
+                => this._compilationChangeTracker.LastCompilation != null && this.Configuration != null
+                    ? new CompilationVersion(
+                        this._compilationChangeTracker.LastCompilation,
+                        this.Configuration.CompileTimeProject?.Hash ?? 0,
+                        this._compilationChangeTracker.LastTrees! )
+                    : null;
 
             public CompilationPipelineResult PipelineResult { get; }
 
@@ -459,7 +465,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                 if ( success )
                 {
-                    newDependencies = state.Dependencies.Update( compilation.SyntaxTrees.Keys, dependencyCollector, references );
+                    newDependencies = state.Dependencies.Update( compilation.SyntaxTrees.Keys, dependencyCollector );
                 }
                 else
                 {

@@ -3,18 +3,34 @@
 
 using Metalama.Framework.DesignTime.Pipeline;
 using Microsoft.CodeAnalysis;
-using System;
+using System.Collections.Generic;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
 internal class TestCompilationVersion : ICompilationVersion
 {
-    public TestCompilationVersion( AssemblyIdentity assemblyIdentity )
+    private readonly Dictionary<string, ulong>? _hashes;
+
+    public TestCompilationVersion( AssemblyIdentity assemblyIdentity, ulong compileTimeProjectHash = 0, Dictionary<string, ulong>? hashes = null )
     {
+        this._hashes = hashes;
         this.AssemblyIdentity = assemblyIdentity;
+        this.CompileTimeProjectHash = compileTimeProjectHash;
     }
 
     public AssemblyIdentity AssemblyIdentity { get; }
 
-    public bool TryGetSyntaxTreeHash( string path, out ulong hash ) => throw new NotSupportedException();
+    public ulong CompileTimeProjectHash { get; }
+
+    public bool TryGetSyntaxTreeHash( string path, out ulong hash )
+    {
+        if ( this._hashes == null )
+        {
+            hash = 0;
+
+            return false;
+        }
+
+        return this._hashes.TryGetValue( path, out hash );
+    }
 }

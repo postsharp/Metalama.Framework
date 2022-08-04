@@ -14,10 +14,29 @@ internal readonly struct DependencyGraph
 
     public DependencyGraph Update(
         IEnumerable<string> syntaxTrees,
-        BaseDependencyCollector dependencies,
-        DesignTimeCompilationReferenceCollection references )
+        BaseDependencyCollector dependencies )
     {
         var compilationsBuilder = this.Compilations.ToBuilder();
+
+        // Updating compilation references.
+        foreach ( var compilationReference in dependencies.CompilationReferences )
+        {
+            if ( this.Compilations.TryGetValue( compilationReference.Key, out var currentDependencyGraphByDependentCompilation ) )
+            {
+                if ( currentDependencyGraphByDependentCompilation.TryUpdateCompileTimeProjectHash(
+                        compilationReference.Value.CompileTimeProjectHash,
+                        out var newValue ) )
+                {
+                    compilationsBuilder[compilationReference.Key] = newValue;
+                }
+            }
+            else
+            {
+                compilationsBuilder[compilationReference.Key] = new DependencyGraphByDependentCompilation(
+                    compilationReference.Key,
+                    compilationReference.Value.CompileTimeProjectHash );
+            }
+        }
 
         // Add or update dependencies.
         foreach ( var dependenciesByDependentFilePath in dependencies.DependenciesByDependentFilePath )
@@ -32,7 +51,7 @@ internal readonly struct DependencyGraph
 
                 if ( !compilationsBuilder.TryGetValue( compilation, out var currentDependenciesOfCompilation ) )
                 {
-                    var hashCode = references.References.TryGetValue( compilation, out var reference ) ? reference.CompileTimeProjectHash : 0;
+                    var hashCode = dependencies.CompilationReferences.TryGetValue( compilation, out var reference ) ? reference.CompileTimeProjectHash : 0;
                     currentDependenciesOfCompilation = new DependencyGraphByDependentCompilation( compilation, hashCode );
                 }
 

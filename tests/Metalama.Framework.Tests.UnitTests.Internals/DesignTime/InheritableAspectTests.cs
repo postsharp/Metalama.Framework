@@ -2,7 +2,6 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.DesignTime.Pipeline;
-using Metalama.Framework.Engine.Testing;
 using Metalama.TestFramework;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
@@ -105,8 +104,8 @@ public class Aspect : TypeAspect { }
         public void CrossProjectIntegration()
         {
             using var domain = new UnloadableCompileTimeDomain();
-            using var options = new TestProjectOptions();
-            using var factory = new TestDesignTimeAspectPipelineFactory( domain, options );
+            using var testContext = this.CreateTestContext();
+            using var factory = new TestDesignTimeAspectPipelineFactory( domain, testContext.ServiceProvider );
 
             var code1 = @"
 using Metalama.Framework.Aspects;
