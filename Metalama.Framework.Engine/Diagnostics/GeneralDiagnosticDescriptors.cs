@@ -294,7 +294,8 @@ namespace Metalama.Framework.Engine.Diagnostics
             new(
                 "LAMA00051",
                 Error,
-                "Metalama does not support the 'preview' language version. Change the LangVersion property of your csproj file to 'latest'.",
+                "Metalama does not support the 'preview' language version. Change the LangVersion property of your csproj file to 'latest'. "
+                + "If you want to use preview features at your own risks, set the MSBuild property 'MetalamaAllowPreviewLanguageFeatures' to 'true'. It may work if you don't use preview features in templates.",
                 "Metalama does not support the 'preview' C# language version",
                 _category );
 
