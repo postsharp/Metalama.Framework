@@ -33,21 +33,24 @@ internal class BaseDependencyCollector
         this.CompilationReferences = compilationReferences.ToImmutableDictionary( x => x.AssemblyIdentity, x => x );
     }
 
-    public IEnumerable<DependencyEdge> EnumerateDependencies()
+    /// <summary>
+    /// Enumerates the syntax tree dependencies. This method is used in tests only.
+    /// </summary>
+    public IEnumerable<SyntaxTreeDependency> EnumerateSyntaxTreeDependencies()
     {
         foreach ( var dependenciesByDependentSyntaxTree in this._dependenciesByDependentFilePath )
         {
             foreach ( var dependenciesInCompilation in dependenciesByDependentSyntaxTree.Value.DependenciesByCompilation )
             {
-                foreach ( var dependency in dependenciesInCompilation.Value.MasterFilePathsAndHashes )
+                foreach ( var masterFilePath in dependenciesInCompilation.Value.MasterFilePathsAndHashes.Keys )
                 {
-                    yield return new DependencyEdge( dependenciesInCompilation.Key, dependency.Key, dependency.Value, dependenciesByDependentSyntaxTree.Key );
+                    yield return new SyntaxTreeDependency( masterFilePath, dependenciesInCompilation.Value.DependentFilePath );
                 }
             }
         }
     }
 
-    public void AddDependency( string dependentFilePath, AssemblyIdentity masterCompilationIdentity, string masterFilePath, ulong masterHash )
+    public void AddPartialTypeDependency( string dependentFilePath, AssemblyIdentity masterCompilationIdentity, TypeDependencyKey masterPartialType )
     {
 #if DEBUG
         if ( this.IsReadOnly )
@@ -62,7 +65,25 @@ internal class BaseDependencyCollector
             this._dependenciesByDependentFilePath.Add( dependentFilePath, dependencies );
         }
 
-        dependencies.AddDependency( masterCompilationIdentity, masterFilePath, masterHash );
+        dependencies.AddPartialTypeDependency( masterCompilationIdentity, masterPartialType );
+    }
+
+    public void AddSyntaxTreeDependency( string dependentFilePath, AssemblyIdentity masterCompilationIdentity, string masterFilePath, ulong masterHash )
+    {
+#if DEBUG
+        if ( this.IsReadOnly )
+        {
+            throw new InvalidOperationException();
+        }
+#endif
+
+        if ( !this._dependenciesByDependentFilePath.TryGetValue( dependentFilePath, out var dependencies ) )
+        {
+            dependencies = new DependencyCollectorByDependentSyntaxTree( dependentFilePath );
+            this._dependenciesByDependentFilePath.Add( dependentFilePath, dependencies );
+        }
+
+        dependencies.AddSyntaxTreeDependency( masterCompilationIdentity, masterFilePath, masterHash );
     }
 
 #if DEBUG

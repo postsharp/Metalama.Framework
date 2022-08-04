@@ -23,7 +23,7 @@ public class DependencyChangesTest
         var masterCompilationVersion = new TestCompilationVersion( masterCompilation, hashes: new Dictionary<string, ulong> { [masterFilePath] = hash } );
         var dependencies = new BaseDependencyCollector( masterCompilationVersion );
 
-        dependencies.AddDependency( dependentFilePath, masterCompilation, masterFilePath, hash );
+        dependencies.AddSyntaxTreeDependency( dependentFilePath, masterCompilation, masterFilePath, hash );
 
         var graph = DependencyGraph.Empty.Update( new[] { dependentFilePath }, dependencies );
 
@@ -47,7 +47,7 @@ public class DependencyChangesTest
         var masterCompilationVersion1 = new TestCompilationVersion( masterCompilation, hashes: new Dictionary<string, ulong> { [masterFilePath] = hash1 } );
         var dependencyCollector = new BaseDependencyCollector( masterCompilationVersion1 );
 
-        dependencyCollector.AddDependency( dependentFilePath, masterCompilation, masterFilePath, hash1 );
+        dependencyCollector.AddSyntaxTreeDependency( dependentFilePath, masterCompilation, masterFilePath, hash1 );
 
         var dependencyGraph = DependencyGraph.Empty.Update( new[] { dependentFilePath }, dependencyCollector );
 
@@ -74,7 +74,7 @@ public class DependencyChangesTest
         var masterCompilationVersion1 = new TestCompilationVersion( masterCompilation, hashes: new Dictionary<string, ulong> { [masterFilePath] = hash1 } );
         var dependencyCollector = new BaseDependencyCollector( masterCompilationVersion1 );
 
-        dependencyCollector.AddDependency( dependentFilePath, masterCompilation, masterFilePath, hash1 );
+        dependencyCollector.AddSyntaxTreeDependency( dependentFilePath, masterCompilation, masterFilePath, hash1 );
 
         var dependencyGraph = DependencyGraph.Empty.Update( new[] { dependentFilePath }, dependencyCollector );
 

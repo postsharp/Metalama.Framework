@@ -22,7 +22,7 @@ public class DependencyGraphTests
         const string masterFilePath = "master.cs";
         const string dependentFilePath = "dependent.cs";
 
-        dependencies.AddDependency( dependentFilePath, masterCompilation, masterFilePath, hash );
+        dependencies.AddSyntaxTreeDependency( dependentFilePath, masterCompilation, masterFilePath, hash );
 
         var graph = DependencyGraph.Empty.Update( new[] { dependentFilePath }, dependencies );
 
@@ -44,8 +44,8 @@ public class DependencyGraphTests
         const string dependentFilePath1 = "dependent1.cs";
         const string dependentFilePath2 = "dependent2.cs";
 
-        dependencies.AddDependency( dependentFilePath1, masterCompilation, masterFilePath, hash );
-        dependencies.AddDependency( dependentFilePath2, masterCompilation, masterFilePath, hash );
+        dependencies.AddSyntaxTreeDependency( dependentFilePath1, masterCompilation, masterFilePath, hash );
+        dependencies.AddSyntaxTreeDependency( dependentFilePath2, masterCompilation, masterFilePath, hash );
 
         var graph = DependencyGraph.Empty.Update( new[] { dependentFilePath1, dependentFilePath2 }, dependencies );
 
@@ -69,8 +69,8 @@ public class DependencyGraphTests
         const string dependentFilePath1 = "dependent1.cs";
         const string dependentFilePath2 = "dependent2.cs";
 
-        dependencies.AddDependency( dependentFilePath1, masterCompilation1, masterFilePath, hash );
-        dependencies.AddDependency( dependentFilePath2, masterCompilation2, masterFilePath, hash );
+        dependencies.AddSyntaxTreeDependency( dependentFilePath1, masterCompilation1, masterFilePath, hash );
+        dependencies.AddSyntaxTreeDependency( dependentFilePath2, masterCompilation2, masterFilePath, hash );
 
         var graph = DependencyGraph.Empty.Update( new[] { dependentFilePath1, dependentFilePath2 }, dependencies );
 
@@ -88,7 +88,7 @@ public class DependencyGraphTests
         const string masterFilePath = "master.cs";
         const string dependentFilePath = "dependent.cs";
 
-        dependencies.AddDependency( dependentFilePath, masterCompilation, masterFilePath, hash );
+        dependencies.AddSyntaxTreeDependency( dependentFilePath, masterCompilation, masterFilePath, hash );
 
         var graph = DependencyGraph.Empty
             .Update( new[] { dependentFilePath }, dependencies )
@@ -109,8 +109,8 @@ public class DependencyGraphTests
         const string dependentFilePath1 = "dependent1.cs";
         const string dependentFilePath2 = "dependent2.cs";
 
-        dependencies.AddDependency( dependentFilePath1, masterCompilation, masterFilePath, hash );
-        dependencies.AddDependency( dependentFilePath2, masterCompilation, masterFilePath, hash );
+        dependencies.AddSyntaxTreeDependency( dependentFilePath1, masterCompilation, masterFilePath, hash );
+        dependencies.AddSyntaxTreeDependency( dependentFilePath2, masterCompilation, masterFilePath, hash );
 
         var graph = DependencyGraph.Empty
             .Update( new[] { dependentFilePath1, dependentFilePath2 }, dependencies )
@@ -134,12 +134,12 @@ public class DependencyGraphTests
         const string dependentFilePath = "dependent.cs";
 
         var dependencies1 = new BaseDependencyCollector();
-        dependencies1.AddDependency( dependentFilePath, masterCompilation, masterFilePath, hash1 );
+        dependencies1.AddSyntaxTreeDependency( dependentFilePath, masterCompilation, masterFilePath, hash1 );
 
         var graph1 = DependencyGraph.Empty.Update( new[] { dependentFilePath }, dependencies1 );
 
         var dependencies2 = new BaseDependencyCollector();
-        dependencies2.AddDependency( dependentFilePath, masterCompilation, masterFilePath, hash2 );
+        dependencies2.AddSyntaxTreeDependency( dependentFilePath, masterCompilation, masterFilePath, hash2 );
 
         var graph2 = graph1.Update( new[] { dependentFilePath }, dependencies2 );
 

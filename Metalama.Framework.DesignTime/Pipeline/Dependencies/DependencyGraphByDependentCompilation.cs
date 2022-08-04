@@ -11,8 +11,8 @@ namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 /// </summary>
 internal readonly struct DependencyGraphByDependentCompilation
 {
-    private static readonly ImmutableDictionary<string, DependencyGraphByDependentSyntaxTree> _emptyDependenciesByMasterFilePath =
-        ImmutableDictionary<string, DependencyGraphByDependentSyntaxTree>.Empty.WithComparers( StringComparer.Ordinal );
+    private static readonly ImmutableDictionary<string, DependencyGraphByMasterSyntaxTree> _emptyDependenciesByMasterFilePath =
+        ImmutableDictionary<string, DependencyGraphByMasterSyntaxTree>.Empty.WithComparers( StringComparer.Ordinal );
 
     private static readonly ImmutableDictionary<string, DependencyCollectorByDependentSyntaxTreeAndMasterCompilation> _emptyDependenciesByDependentFilePath =
         ImmutableDictionary<string, DependencyCollectorByDependentSyntaxTreeAndMasterCompilation>.Empty.WithComparers( StringComparer.Ordinal );
@@ -24,7 +24,9 @@ internal readonly struct DependencyGraphByDependentCompilation
     /// <summary>
     /// Gets the list of dependencies on syntax trees within the master compilation, indexed by file path.
     /// </summary>
-    public ImmutableDictionary<string, DependencyGraphByDependentSyntaxTree> DependenciesByMasterFilePath { get; }
+    public ImmutableDictionary<string, DependencyGraphByMasterSyntaxTree> DependenciesByMasterFilePath { get; }
+
+    public ImmutableDictionary<TypeDependencyKey, DependencyGraphByMasterPartialType> DependenciesByMasterPartialType { get; }
 
     private readonly ImmutableDictionary<string, DependencyCollectorByDependentSyntaxTreeAndMasterCompilation> _dependenciesByDependentFilePath;
 
@@ -32,21 +34,24 @@ internal readonly struct DependencyGraphByDependentCompilation
         assemblyIdentity,
         compileTimeProjectHash,
         _emptyDependenciesByMasterFilePath,
+        ImmutableDictionary<TypeDependencyKey, DependencyGraphByMasterPartialType>.Empty,
         _emptyDependenciesByDependentFilePath ) { }
 
     private DependencyGraphByDependentCompilation(
         AssemblyIdentity assemblyIdentity,
         ulong compileTimeProjectHash,
-        ImmutableDictionary<string, DependencyGraphByDependentSyntaxTree> dependenciesByMasterFilePath,
+        ImmutableDictionary<string, DependencyGraphByMasterSyntaxTree> dependenciesByMasterFilePath,
+        ImmutableDictionary<TypeDependencyKey, DependencyGraphByMasterPartialType> dependenciesByMasterPartialType,
         ImmutableDictionary<string, DependencyCollectorByDependentSyntaxTreeAndMasterCompilation> dependenciesByDependentFilePath )
     {
         this.AssemblyIdentity = assemblyIdentity;
         this.CompileTimeProjectHash = compileTimeProjectHash;
         this.DependenciesByMasterFilePath = dependenciesByMasterFilePath;
+        this.DependenciesByMasterPartialType = dependenciesByMasterPartialType;
         this._dependenciesByDependentFilePath = dependenciesByDependentFilePath;
     }
 
-    public bool TryRemoveDependency( string dependentFilePath, out DependencyGraphByDependentCompilation newDependenciesGraph )
+    public bool TryRemoveDependentSyntaxTree( string dependentFilePath, out DependencyGraphByDependentCompilation newDependenciesGraph )
     {
         if ( !this._dependenciesByDependentFilePath.TryGetValue( dependentFilePath, out var oldDependencies ) )
         {
@@ -56,6 +61,7 @@ internal readonly struct DependencyGraphByDependentCompilation
             return false;
         }
 
+        // Update syntax tree dependencies.
         var dependenciesByMasterFilePathBuilder = this.DependenciesByMasterFilePath.ToBuilder();
 
         foreach ( var oldMasterFilePathAndHash in oldDependencies.MasterFilePathsAndHashes )
@@ -77,10 +83,31 @@ internal readonly struct DependencyGraphByDependentCompilation
             }
         }
 
+        // Update partial type dependencies.
+        var dependenciesByMasterPartialTypesBuilder = this.DependenciesByMasterPartialType.ToBuilder();
+
+        foreach ( var type in oldDependencies.MasterPartialTypes )
+        {
+            if ( dependenciesByMasterPartialTypesBuilder.TryGetValue( type, out var typeDependencies ) )
+            {
+                var newTypeDependencies = typeDependencies.RemoveDependency( dependentFilePath );
+
+                if ( newTypeDependencies.DependentFilePaths.IsEmpty )
+                {
+                    dependenciesByMasterPartialTypesBuilder.Remove( type );
+                }
+                else
+                {
+                    dependenciesByMasterPartialTypesBuilder[type] = newTypeDependencies;
+                }
+            }
+        }
+
         newDependenciesGraph = new DependencyGraphByDependentCompilation(
             this.AssemblyIdentity,
             this.CompileTimeProjectHash,
             dependenciesByMasterFilePathBuilder.ToImmutable(),
+            dependenciesByMasterPartialTypesBuilder.ToImmutable(),
             this._dependenciesByDependentFilePath.Remove( dependentFilePath ) );
 
         return true;
@@ -100,13 +127,14 @@ internal readonly struct DependencyGraphByDependentCompilation
                 this.AssemblyIdentity,
                 hash,
                 this.DependenciesByMasterFilePath,
+                this.DependenciesByMasterPartialType,
                 this._dependenciesByDependentFilePath );
 
             return true;
         }
     }
 
-    public bool TryUpdateDependency(
+    public bool TryUpdateDependencies(
         string dependentFilePath,
         DependencyCollectorByDependentSyntaxTreeAndMasterCompilation dependencies,
         out DependencyGraphByDependentCompilation newDependenciesGraph )
@@ -121,22 +149,33 @@ internal readonly struct DependencyGraphByDependentCompilation
         }
 
         var dependenciesByMasterFilePathBuilder = this.DependenciesByMasterFilePath.ToBuilder();
+        var dependenciesByMasterPartialTypeBuilder = this.DependenciesByMasterPartialType.ToBuilder();
 
-        // Add dependencies.
+        // Add syntax tree dependencies.
         foreach ( var masterFilePathAndHash in dependencies.MasterFilePathsAndHashes )
         {
             if ( !dependenciesByMasterFilePathBuilder.TryGetValue( masterFilePathAndHash.Key, out var syntaxTreeDependencies ) )
             {
-                syntaxTreeDependencies = new DependencyGraphByDependentSyntaxTree( masterFilePathAndHash.Key, masterFilePathAndHash.Value );
-                dependenciesByMasterFilePathBuilder.Add( masterFilePathAndHash.Key, syntaxTreeDependencies );
+                syntaxTreeDependencies = new DependencyGraphByMasterSyntaxTree( masterFilePathAndHash.Key, masterFilePathAndHash.Value );
             }
 
-            dependenciesByMasterFilePathBuilder[masterFilePathAndHash.Key] = syntaxTreeDependencies.AddDependency( dependentFilePath );
+            dependenciesByMasterFilePathBuilder[masterFilePathAndHash.Key] = syntaxTreeDependencies.AddSyntaxTreeDependency( dependentFilePath );
         }
 
-        // Remove dependencies.
+        // Add partial type dependencies.
+        foreach ( var masterPartialType in dependencies.MasterPartialTypes )
+        {
+            if ( !dependenciesByMasterPartialTypeBuilder.TryGetValue( masterPartialType, out var partialTypeDependencies ) )
+            {
+                partialTypeDependencies = new DependencyGraphByMasterPartialType( masterPartialType );
+            }
+
+            dependenciesByMasterPartialTypeBuilder[masterPartialType] = partialTypeDependencies.AddPartialTypeDependency( dependentFilePath );
+        }
+
         if ( oldDependencies != null )
         {
+            // Remove syntax tree dependencies.
             foreach ( var oldMasterFilePathAndHash in oldDependencies.MasterFilePathsAndHashes )
             {
                 var masterFilePath = oldMasterFilePathAndHash.Key;
@@ -158,12 +197,35 @@ internal readonly struct DependencyGraphByDependentCompilation
                     }
                 }
             }
+
+            // Remove partial types dependencies.
+
+            foreach ( var type in oldDependencies.MasterPartialTypes )
+            {
+                if ( !dependencies.Contains( type ) )
+                {
+                    if ( dependenciesByMasterPartialTypeBuilder.TryGetValue( type, out var partialTypeDependencies ) )
+                    {
+                        var newPartialTypeDependencies = partialTypeDependencies.RemoveDependency( dependentFilePath );
+
+                        if ( newPartialTypeDependencies.DependentFilePaths.IsEmpty )
+                        {
+                            dependenciesByMasterPartialTypeBuilder.Remove( type );
+                        }
+                        else
+                        {
+                            dependenciesByMasterPartialTypeBuilder[type] = newPartialTypeDependencies;
+                        }
+                    }
+                }
+            }
         }
 
         newDependenciesGraph = new DependencyGraphByDependentCompilation(
             this.AssemblyIdentity,
             this.CompileTimeProjectHash,
             dependenciesByMasterFilePathBuilder.ToImmutable(),
+            dependenciesByMasterPartialTypeBuilder.ToImmutable(),
             this._dependenciesByDependentFilePath.SetItem( dependentFilePath, dependencies ) );
 
         return true;

@@ -22,7 +22,7 @@ internal class DependencyCollectorByDependentSyntaxTree
         this.DependentFilePath = dependentFilePath;
     }
 
-    public void AddDependency( AssemblyIdentity masterCompilation, string masterFilePath, ulong masterHash )
+    public void AddSyntaxTreeDependency( AssemblyIdentity masterCompilation, string masterFilePath, ulong masterHash )
     {
 #if DEBUG
         if ( this.IsReadOnly )
@@ -37,7 +37,25 @@ internal class DependencyCollectorByDependentSyntaxTree
             this._dependenciesByCompilation.Add( masterCompilation, compilationCollector );
         }
 
-        compilationCollector.AddDependency( masterFilePath, masterHash );
+        compilationCollector.AddSyntaxTreeDependency( masterFilePath, masterHash );
+    }
+
+    public void AddPartialTypeDependency( AssemblyIdentity masterCompilation, TypeDependencyKey masterPartialType )
+    {
+#if DEBUG
+        if ( this.IsReadOnly )
+        {
+            throw new InvalidOperationException();
+        }
+#endif
+
+        if ( !this._dependenciesByCompilation.TryGetValue( masterCompilation, out var compilationCollector ) )
+        {
+            compilationCollector = new DependencyCollectorByDependentSyntaxTreeAndMasterCompilation( this.DependentFilePath, masterCompilation );
+            this._dependenciesByCompilation.Add( masterCompilation, compilationCollector );
+        }
+
+        compilationCollector.AddPartialTypeDependency( masterPartialType );
     }
 
 #if DEBUG

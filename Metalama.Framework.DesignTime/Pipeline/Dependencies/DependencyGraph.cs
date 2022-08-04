@@ -55,7 +55,7 @@ internal readonly struct DependencyGraph
                     currentDependenciesOfCompilation = new DependencyGraphByDependentCompilation( compilation, hashCode );
                 }
 
-                if ( currentDependenciesOfCompilation.TryUpdateDependency(
+                if ( currentDependenciesOfCompilation.TryUpdateDependencies(
                         dependentFilePath,
                         dependenciesByCompilation.Value,
                         out var newDependenciesOfCompilation ) )
@@ -77,7 +77,7 @@ internal readonly struct DependencyGraph
                 // The syntax tree does not have any dependency in any compilation.
                 foreach ( var compilationDependencies in this.Compilations )
                 {
-                    if ( compilationDependencies.Value.TryRemoveDependency( dependentFilePath, out var newDependencies ) )
+                    if ( compilationDependencies.Value.TryRemoveDependentSyntaxTree( dependentFilePath, out var newDependencies ) )
                     {
                         compilationsBuilder[compilationDependencies.Key] = newDependencies;
                     }

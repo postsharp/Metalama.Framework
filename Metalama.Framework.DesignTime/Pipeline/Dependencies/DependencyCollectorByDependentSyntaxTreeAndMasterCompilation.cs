@@ -12,6 +12,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 internal class DependencyCollectorByDependentSyntaxTreeAndMasterCompilation
 {
     private readonly Dictionary<string, ulong> _masterFilePathsAndHashes = new( StringComparer.Ordinal );
+    private readonly HashSet<TypeDependencyKey> _masterPartialTypes = new();
     private int _hashCode;
 
     public string DependentFilePath { get; }
@@ -20,13 +21,17 @@ internal class DependencyCollectorByDependentSyntaxTreeAndMasterCompilation
 
     public IReadOnlyDictionary<string, ulong> MasterFilePathsAndHashes => this._masterFilePathsAndHashes;
 
+    public IReadOnlyCollection<TypeDependencyKey> MasterPartialTypes => this._masterPartialTypes;
+
+    public bool Contains( TypeDependencyKey type ) => this._masterPartialTypes.Contains( type );
+
     public DependencyCollectorByDependentSyntaxTreeAndMasterCompilation( string dependentFilePath, AssemblyIdentity assemblyIdentity )
     {
         this.DependentFilePath = dependentFilePath;
         this.AssemblyIdentity = assemblyIdentity;
     }
 
-    public void AddDependency( string masterFilePath, ulong masterHash )
+    public void AddSyntaxTreeDependency( string masterFilePath, ulong masterHash )
     {
 #if DEBUG
         if ( this.IsReadOnly )
@@ -46,6 +51,21 @@ internal class DependencyCollectorByDependentSyntaxTreeAndMasterCompilation
         }
     }
 
+    public void AddPartialTypeDependency( TypeDependencyKey masterPartialType )
+    {
+#if DEBUG
+        if ( this.IsReadOnly )
+        {
+            throw new InvalidOperationException();
+        }
+#endif
+
+        if ( this._masterPartialTypes.Add( masterPartialType ) )
+        {
+            this._hashCode ^= masterPartialType.GetHashCode();
+        }
+    }
+
 #if DEBUG
     public bool IsReadOnly { get; private set; }
 
@@ -62,7 +82,9 @@ internal class DependencyCollectorByDependentSyntaxTreeAndMasterCompilation
             return true;
         }
 
-        if ( this._hashCode != other._hashCode || this._masterFilePathsAndHashes.Count != other._masterFilePathsAndHashes.Count )
+        if ( this._hashCode != other._hashCode
+             || this._masterFilePathsAndHashes.Count != other._masterFilePathsAndHashes.Count
+             || this._masterPartialTypes.Count != other._masterPartialTypes.Count )
         {
             return false;
         }
@@ -70,6 +92,15 @@ internal class DependencyCollectorByDependentSyntaxTreeAndMasterCompilation
         foreach ( var dependency in this._masterFilePathsAndHashes )
         {
             if ( !other._masterFilePathsAndHashes.TryGetValue( dependency.Key, out var otherHash ) || otherHash != dependency.Value )
+            {
+                return false;
+            }
+        }
+
+        foreach ( var dependency in this._masterPartialTypes )
+        {
+            if ( !other._masterPartialTypes.Contains( dependency ) )
+
             {
                 return false;
             }

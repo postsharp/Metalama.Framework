@@ -3,7 +3,10 @@
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 
@@ -24,7 +27,7 @@ internal class DependencyCollector : BaseDependencyCollector, IDependencyCollect
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DependencyCollector" );
     }
 
-    public void AddDependency( ISymbol masterSymbol, ISymbol dependentSymbol )
+    public void AddDependency( INamedTypeSymbol masterSymbol, INamedTypeSymbol dependentSymbol )
     {
 #if DEBUG
         if ( this.IsReadOnly )
@@ -33,14 +36,17 @@ internal class DependencyCollector : BaseDependencyCollector, IDependencyCollect
         }
 #endif
 
-        masterSymbol = masterSymbol.OriginalDefinition;
-        dependentSymbol = dependentSymbol.OriginalDefinition;
+        masterSymbol = masterSymbol.OriginalDefinition.GetTopContainingType();
+        dependentSymbol = dependentSymbol.OriginalDefinition.GetTopContainingType();
 
         // Avoid spending time processing the same call twice.
         if ( !this._processedDependencies.Add( (masterSymbol, dependentSymbol) ) )
         {
             return;
         }
+
+        var masterIsPartial = masterSymbol.DeclaringSyntaxReferences[0].GetSyntax() is BaseTypeDeclarationSyntax type
+                              && type.Modifiers.Any( m => m.IsKind( SyntaxKind.PartialKeyword ) );
 
         var currentCompilationAssembly = this._currentCompilation.Assembly;
 
@@ -59,12 +65,20 @@ internal class DependencyCollector : BaseDependencyCollector, IDependencyCollect
                 {
                     if ( dependentSyntaxReference.SyntaxTree != masterSyntaxReference.SyntaxTree )
                     {
-                        this.AddDependency(
+                        this.AddSyntaxTreeDependency(
                             dependentSyntaxReference.SyntaxTree.FilePath,
                             currentCompilationAssembly.Identity,
                             masterSyntaxReference.SyntaxTree.FilePath,
                             0 );
                     }
+                }
+
+                if ( masterIsPartial )
+                {
+                    this.AddPartialTypeDependency(
+                        dependentSyntaxReference.SyntaxTree.FilePath,
+                        currentCompilationAssembly.Identity,
+                        new TypeDependencyKey( masterSymbol ) );
                 }
             }
         }
@@ -78,7 +92,7 @@ internal class DependencyCollector : BaseDependencyCollector, IDependencyCollect
                 {
                     foreach ( var dependentSyntaxReference in dependentSymbol.DeclaringSyntaxReferences )
                     {
-                        this.AddDependency(
+                        this.AddSyntaxTreeDependency(
                             dependentSyntaxReference.SyntaxTree.FilePath,
                             compilationReference.AssemblyIdentity,
                             masterSyntaxReference.SyntaxTree.FilePath,
@@ -88,6 +102,17 @@ internal class DependencyCollector : BaseDependencyCollector, IDependencyCollect
                 else
                 {
                     this._logger.Warning?.Log( $"Cannot find '{masterSyntaxReference.SyntaxTree.FilePath}' in '{compilationReference.AssemblyIdentity}'." );
+                }
+
+                if ( masterIsPartial )
+                {
+                    foreach ( var dependentSyntaxReference in dependentSymbol.DeclaringSyntaxReferences )
+                    {
+                        this.AddPartialTypeDependency(
+                            dependentSyntaxReference.SyntaxTree.FilePath,
+                            currentCompilationAssembly.Identity,
+                            new TypeDependencyKey( masterSymbol ) );
+                    }
                 }
             }
         }

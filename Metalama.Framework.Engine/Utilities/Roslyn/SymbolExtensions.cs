@@ -329,5 +329,8 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         /// Gets the kind of operator based represented by the method.
         /// </summary>
         public static OperatorKind GetOperatorKind( this IMethodSymbol method ) => SymbolHelpers.GetOperatorKindFromName( method.Name );
+
+        public static INamedTypeSymbol GetTopContainingType( this INamedTypeSymbol type )
+            => type.ContainingType == null ? type : type.ContainingType.GetTopContainingType();
     }
 }

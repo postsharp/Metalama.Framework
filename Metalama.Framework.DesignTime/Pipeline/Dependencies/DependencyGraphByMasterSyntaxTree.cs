@@ -5,7 +5,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 
-internal readonly struct DependencyGraphByDependentSyntaxTree
+internal readonly struct DependencyGraphByMasterSyntaxTree
 {
     private static readonly ImmutableHashSet<string> _emptyDependencies = ImmutableHashSet.Create<string>().WithComparer( StringComparer.Ordinal );
 
@@ -24,18 +24,18 @@ internal readonly struct DependencyGraphByDependentSyntaxTree
     /// </summary>
     public ImmutableHashSet<string> DependentFilePaths { get; }
 
-    public DependencyGraphByDependentSyntaxTree( string filePath, ulong hash ) : this( filePath, hash, _emptyDependencies ) { }
+    public DependencyGraphByMasterSyntaxTree( string filePath, ulong hash ) : this( filePath, hash, _emptyDependencies ) { }
 
-    private DependencyGraphByDependentSyntaxTree( string filePath, ulong hash, ImmutableHashSet<string> dependentFilePaths )
+    private DependencyGraphByMasterSyntaxTree( string filePath, ulong hash, ImmutableHashSet<string> dependentFilePaths )
     {
         this.FilePath = filePath;
         this.Hash = hash;
         this.DependentFilePaths = dependentFilePaths;
     }
 
-    public DependencyGraphByDependentSyntaxTree AddDependency( string dependentFilePath )
+    public DependencyGraphByMasterSyntaxTree AddSyntaxTreeDependency( string dependentFilePath )
         => new( this.FilePath, this.Hash, this.DependentFilePaths.Add( dependentFilePath ) );
 
-    public DependencyGraphByDependentSyntaxTree RemoveDependency( string dependentFilePath )
+    public DependencyGraphByMasterSyntaxTree RemoveDependency( string dependentFilePath )
         => new( this.FilePath, this.Hash, this.DependentFilePaths.Remove( dependentFilePath ) );
 }

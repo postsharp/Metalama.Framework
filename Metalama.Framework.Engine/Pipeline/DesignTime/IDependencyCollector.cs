@@ -8,5 +8,5 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime;
 
 public interface IDependencyCollector : IService
 {
-    void AddDependency( ISymbol masterSymbol, ISymbol dependentSymbol );
+    void AddDependency( INamedTypeSymbol masterSymbol, INamedTypeSymbol dependentSymbol );
 }
