@@ -39,7 +39,7 @@ public class DependencyCollectorTests : TestBase
 
         var actualDependencies = string.Join(
             Environment.NewLine,
-            dependencyCollector.GetDependencies().Select( x => $"'{x.MasterFilePath}'->'{x.DependentFilePath}'" ).OrderBy( x => x ) );
+            dependencyCollector.EnumerateDependencies().Select( x => $"'{x.MasterFilePath}'->'{x.DependentFilePath}'" ).OrderBy( x => x ) );
 
         var expectedDependencies = @"'Class2.cs'->'Class3.cs'
 'Class3.cs'->'Class4.cs'
@@ -89,7 +89,7 @@ public class DependencyCollectorTests : TestBase
 
         var actualDependencies = string.Join(
             Environment.NewLine,
-            dependencyCollector.GetDependencies().Select( x => $"'{x.MasterFilePath}'->'{x.DependentFilePath}'" ).OrderBy( x => x ) );
+            dependencyCollector.EnumerateDependencies().Select( x => $"'{x.MasterFilePath}'->'{x.DependentFilePath}'" ).OrderBy( x => x ) );
 
         var expectedDependencies = @"'Class2.cs'->'Class3.cs'
 'Class3.cs'->'Class4.cs'

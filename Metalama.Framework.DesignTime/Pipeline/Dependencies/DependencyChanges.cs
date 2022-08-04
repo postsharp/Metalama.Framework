@@ -32,7 +32,7 @@ internal readonly struct DependencyChanges
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if ( dependencies.Compilations.TryGetValue( compilationReference.Key.Assembly.Identity, out var dependenciesOfReference ) )
+            if ( dependencies.Compilations.TryGetValue( compilationReference.Key, out var dependenciesOfReference ) )
             {
                 if ( dependenciesOfReference.CompileTimeProjectHash != compilationReference.Value.CompileTimeProjectHash )
                 {
@@ -40,7 +40,7 @@ internal readonly struct DependencyChanges
                     return new DependencyChanges( true, ImmutableHashSet<string>.Empty );
                 }
 
-                foreach ( var syntaxTreeDependencyCollection in dependenciesOfReference.SyntaxTreeDependencies )
+                foreach ( var syntaxTreeDependencyCollection in dependenciesOfReference.DependenciesByMasterFilePath )
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
@@ -48,7 +48,7 @@ internal readonly struct DependencyChanges
                          || actualHash != syntaxTreeDependencyCollection.Value.Hash )
                     {
                         // The file was changed or removed.
-                        invalidatedFiles.UnionWith( syntaxTreeDependencyCollection.Value.Dependencies );
+                        invalidatedFiles.UnionWith( syntaxTreeDependencyCollection.Value.DependentFilePaths );
                     }
                 }
             }

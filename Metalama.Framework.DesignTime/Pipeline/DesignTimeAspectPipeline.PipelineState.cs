@@ -429,6 +429,10 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     cancellationToken,
                     out var pipelineResult );
 
+#if DEBUG
+                dependencyCollector.Freeze();
+#endif
+
                 var additionalSyntaxTrees = pipelineResult switch
                 {
                     null => ImmutableArray<IntroducedSyntaxTree>.Empty,
@@ -451,7 +455,16 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 UserDiagnosticRegistrationService.GetInstance( directoryOptions ).RegisterDescriptors( result );
 
                 // Update the dependency graph with results of the pipeline.
-                var newDependencies = state.Dependencies.Update( pipelineResult, dependencyCollector.GetDependencies() );
+                CompilationDependencyCollection newDependencies;
+
+                if ( success )
+                {
+                    newDependencies = state.Dependencies.Update( compilation.SyntaxTrees.Keys, dependencyCollector, references );
+                }
+                else
+                {
+                    newDependencies = state.Dependencies;
+                }
 
                 // We intentionally commit the pipeline state here so that the caller, not us, can decide what part of the work should be committed
                 // in case of cancellation. From our point of view, this is a safe place to commit.

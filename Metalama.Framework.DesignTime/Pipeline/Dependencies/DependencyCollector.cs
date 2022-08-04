@@ -17,7 +17,7 @@ internal class DependencyCollector : IDependencyCollector
     private readonly ILogger _logger;
 
     private readonly HashSet<(ISymbol, ISymbol)> _processedDependencies = new();
-    private readonly HashSet<DependencyEdge> _dependencies = new();
+    private readonly Dictionary<string, SyntaxTreeDependencyCollector> _dependenciesByDependentFilePath = new();
 
     public DependencyCollector( IServiceProvider serviceProvider, Compilation compilation, IEnumerable<ICompilationVersion> compilationReferences )
     {
@@ -26,10 +26,42 @@ internal class DependencyCollector : IDependencyCollector
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DependencyCollector" );
     }
 
-    public IReadOnlyCollection<DependencyEdge> GetDependencies() => this._dependencies;
+    public IReadOnlyDictionary<string, SyntaxTreeDependencyCollector> DependenciesByDependentFilePath => this._dependenciesByDependentFilePath;
+
+    public IEnumerable<DependencyEdge> EnumerateDependencies()
+    {
+        foreach ( var dependenciesByDependentSyntaxTree in this._dependenciesByDependentFilePath )
+        {
+            foreach ( var dependenciesInCompilation in dependenciesByDependentSyntaxTree.Value.DependenciesByCompilation )
+            {
+                foreach ( var dependency in dependenciesInCompilation.Value.MasterFilePathsAndHashes )
+                {
+                    yield return new DependencyEdge( dependenciesInCompilation.Key, dependency.Key, dependency.Value, dependenciesByDependentSyntaxTree.Key );
+                }
+            }
+        }
+    }
+
+    private void AddDependency( string dependentFilePath, Compilation masterCompilation, string masterFilePath, ulong masterHash )
+    {
+        if ( !this._dependenciesByDependentFilePath.TryGetValue( dependentFilePath, out var dependencies ) )
+        {
+            dependencies = new SyntaxTreeDependencyCollector( dependentFilePath );
+            this._dependenciesByDependentFilePath.Add( dependentFilePath, dependencies );
+        }
+
+        dependencies.AddDependency( masterCompilation, masterFilePath, masterHash );
+    }
 
     public void AddDependency( ISymbol masterSymbol, ISymbol dependentSymbol )
     {
+#if DEBUG
+        if ( this.IsReadOnly )
+        {
+            throw new InvalidOperationException();
+        }
+#endif
+
         masterSymbol = masterSymbol.OriginalDefinition;
         dependentSymbol = dependentSymbol.OriginalDefinition;
 
@@ -56,12 +88,11 @@ internal class DependencyCollector : IDependencyCollector
                 {
                     if ( dependentSyntaxReference.SyntaxTree != masterSyntaxReference.SyntaxTree )
                     {
-                        this._dependencies.Add(
-                            new DependencyEdge(
-                                this._currentCompilation,
-                                masterSyntaxReference.SyntaxTree.FilePath,
-                                0,
-                                dependentSyntaxReference.SyntaxTree.FilePath ) );
+                        this.AddDependency(
+                            dependentSyntaxReference.SyntaxTree.FilePath,
+                            this._currentCompilation,
+                            masterSyntaxReference.SyntaxTree.FilePath,
+                            0 );
                     }
                 }
             }
@@ -76,12 +107,11 @@ internal class DependencyCollector : IDependencyCollector
                 {
                     foreach ( var dependentSyntaxReference in dependentSymbol.DeclaringSyntaxReferences )
                     {
-                        this._dependencies.Add(
-                            new DependencyEdge(
-                                compilationReference.Compilation,
-                                masterSyntaxReference.SyntaxTree.FilePath,
-                                masterSyntaxTreeHash,
-                                dependentSyntaxReference.SyntaxTree.FilePath ) );
+                        this.AddDependency(
+                            dependentSyntaxReference.SyntaxTree.FilePath,
+                            compilationReference.Compilation,
+                            masterSyntaxReference.SyntaxTree.FilePath,
+                            masterSyntaxTreeHash );
                     }
                 }
                 else
@@ -91,4 +121,18 @@ internal class DependencyCollector : IDependencyCollector
             }
         }
     }
+
+#if DEBUG
+    public bool IsReadOnly { get; private set; }
+
+    public void Freeze()
+    {
+        this.IsReadOnly = true;
+
+        foreach ( var child in this._dependenciesByDependentFilePath.Values )
+        {
+            child.Freeze();
+        }
+    }
+#endif
 }

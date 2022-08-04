@@ -11,16 +11,16 @@ internal class DesignTimeCompilationReferenceCollection : ITransitiveAspectManif
 {
     public static DesignTimeCompilationReferenceCollection Empty { get; } = new( Enumerable.Empty<DesignTimeCompilationReference>() );
 
-    public ImmutableDictionary<Compilation, DesignTimeCompilationReference> References { get; }
+    public ImmutableDictionary<AssemblyIdentity, DesignTimeCompilationReference> References { get; }
 
     public DesignTimeCompilationReferenceCollection( IEnumerable<DesignTimeCompilationReference> references )
     {
-        this.References = references.ToImmutableDictionary( x => x.CompilationVersion.Compilation, x => x );
+        this.References = references.ToImmutableDictionary( x => x.CompilationVersion.Compilation.Assembly.Identity, x => x );
     }
 
     public ITransitiveAspectsManifest? GetTransitiveAspectsManifest( Compilation compilation, CancellationToken cancellationToken )
     {
-        if ( this.References.TryGetValue( compilation, out var reference ) )
+        if ( this.References.TryGetValue( compilation.Assembly.Identity, out var reference ) )
         {
             return reference.TransitiveAspectsManifest;
         }
