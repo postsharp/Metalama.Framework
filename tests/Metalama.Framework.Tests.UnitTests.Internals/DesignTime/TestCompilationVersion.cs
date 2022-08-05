@@ -3,6 +3,7 @@
 
 using Metalama.Framework.DesignTime.Pipeline;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;
@@ -22,7 +23,7 @@ internal class TestCompilationVersion : ICompilationVersion
 
     public ulong CompileTimeProjectHash { get; }
 
-    public bool TryGetSyntaxTreeHash( string path, out ulong hash )
+    public bool TryGetSyntaxTreeDeclarationHash( string path, out ulong hash )
     {
         if ( this._hashes == null )
         {
@@ -33,4 +34,6 @@ internal class TestCompilationVersion : ICompilationVersion
 
         return this._hashes.TryGetValue( path, out hash );
     }
+
+    public bool TryGetSyntaxTreePartialTypesHash( string path, out ulong hash ) => throw new NotSupportedException();
 }

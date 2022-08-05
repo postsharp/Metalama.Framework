@@ -65,6 +65,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 this.PipelineResult = new CompilationPipelineResult();
                 this.ValidationResult = CompilationValidationResult.Empty;
                 this.Dependencies = DependencyGraph.Empty;
+                this._compilationChangeTracker = new CompilationChangeTracker( new CompilationChangeTrackerStrategy( pipeline.ServiceProvider, true, true) );
             }
 
             private PipelineState( PipelineState prototype )

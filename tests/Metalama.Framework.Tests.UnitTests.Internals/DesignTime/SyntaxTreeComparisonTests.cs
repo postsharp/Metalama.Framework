@@ -2,6 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.DesignTime.Pipeline.Diff;
+using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Testing;
 using Microsoft.CodeAnalysis.CSharp;
 using Xunit;
 
@@ -9,12 +11,14 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
     public class SyntaxTreeComparisonTests
     {
+        private readonly CompilationChangeTrackerStrategy _strategy = new CompilationChangeTrackerStrategy( ServiceProvider.Empty.WithService( new TestMarkerService() ), true, false );
+        
         [Fact]
         public void SameTrees()
         {
             var syntaxTree = CSharpSyntaxTree.ParseText( @"class C {}" );
 
-            Assert.False( CompilationChangeTracker.IsDifferent( syntaxTree, syntaxTree ) );
+            Assert.False( this._strategy.IsDifferent( syntaxTree, syntaxTree ) );
         }
 
         [Fact]
@@ -23,7 +27,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
             var syntaxTree1 = CSharpSyntaxTree.ParseText( @"class C {}" );
             var syntaxTree2 = CSharpSyntaxTree.ParseText( @"class C {}" );
 
-            Assert.False( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( this._strategy.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -33,7 +37,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "// Comment 2\nclass C {}" );
 
-            Assert.False( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( this._strategy.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -43,7 +47,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "/* Comment 2222222222 */ class C {}" );
 
-            Assert.False( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( this._strategy.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -53,7 +57,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "/* Comment */ class C {} " );
 
-            Assert.False( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( this._strategy.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -63,7 +67,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "// class C {}" );
 
-            Assert.True( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.True( this._strategy.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -73,7 +77,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C {}" );
 
-            Assert.True( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.True( this._strategy.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -83,7 +87,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C {  }" );
 
-            Assert.False( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( this._strategy.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -93,7 +97,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C { }" );
 
-            Assert.False( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( this._strategy.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -103,7 +107,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C {}" );
 
-            Assert.False( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( this._strategy.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -113,7 +117,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "classC {}" );
 
-            Assert.True( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.True( this._strategy.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -123,7 +127,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C { int M() { return 2; } }" );
 
-            Assert.False( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( this._strategy.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -133,7 +137,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C { int M() => 2; } }" );
 
-            Assert.False( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( this._strategy.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -143,7 +147,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C { long M() => 1; } }" );
 
-            Assert.True( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.True( this._strategy.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -153,7 +157,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C { int M { get { return 2; } } }" );
 
-            Assert.False( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( this._strategy.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -163,7 +167,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C { int M { get => 2; } }" );
 
-            Assert.False( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( this._strategy.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -173,7 +177,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C { int M => 2; }" );
 
-            Assert.False( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( this._strategy.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -183,7 +187,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C { int M { get; } = 2; }" );
 
-            Assert.False( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( this._strategy.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -193,7 +197,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C { int M = 2; }" );
 
-            Assert.False( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( this._strategy.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact( Skip = "Adding aspects to local functions is not yet supported." )]
@@ -203,7 +207,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C { int M() { void N() {] } }" );
 
-            Assert.True( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.True( this._strategy.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -213,7 +217,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "using Metalama.Framework.Aspects; class C { int M { get => 2; } }" );
 
-            Assert.True( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.True( this._strategy.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -223,7 +227,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "partial class C {}" );
 
-            Assert.True( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.True( this._strategy.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
@@ -233,7 +237,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C {}" );
 
-            Assert.True( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.True( this._strategy.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
     }
 }

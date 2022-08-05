@@ -46,7 +46,9 @@ internal readonly struct DependencyChanges
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    if ( !compilationReference.Value.CompilationVersion.TryGetSyntaxTreeHash( syntaxTreeDependencyCollection.Key, out var actualHash )
+                    if ( !compilationReference.Value.CompilationVersion.TryGetSyntaxTreeDeclarationHash(
+                             syntaxTreeDependencyCollection.Key,
+                             out var actualHash )
                          || actualHash != syntaxTreeDependencyCollection.Value.Hash )
                     {
                         // The file was changed or removed.

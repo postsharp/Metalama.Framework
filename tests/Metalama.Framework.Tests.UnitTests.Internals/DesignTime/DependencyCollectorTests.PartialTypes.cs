@@ -121,7 +121,7 @@ public partial class DependencyCollectorTests : TestBase
                 new CompilationVersion(
                     compilation1,
                     0,
-                    compilation1.SyntaxTrees.ToImmutableDictionary( x => x.FilePath, x => new SyntaxTreeVersion( x, false, 5 ) ) )
+                    compilation1.SyntaxTrees.ToImmutableDictionary( x => x.FilePath, x => new SyntaxTreeVersion( x ) ) )
             } );
 
         var partialCompilation = PartialCompilation.CreatePartial( compilation2, compilation2.SyntaxTrees );

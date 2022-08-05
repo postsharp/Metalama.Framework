@@ -106,7 +106,7 @@ internal class DependencyCollector : BaseDependencyCollector, IDependencyCollect
 
             foreach ( var masterSyntaxReference in masterSymbol.DeclaringSyntaxReferences )
             {
-                if ( compilationReference.TryGetSyntaxTreeHash( masterSyntaxReference.SyntaxTree.FilePath, out var masterSyntaxTreeHash ) )
+                if ( compilationReference.TryGetSyntaxTreeDeclarationHash( masterSyntaxReference.SyntaxTree.FilePath, out var masterSyntaxTreeHash ) )
                 {
                     foreach ( var dependentSyntaxReference in dependentSymbol.DeclaringSyntaxReferences )
                     {

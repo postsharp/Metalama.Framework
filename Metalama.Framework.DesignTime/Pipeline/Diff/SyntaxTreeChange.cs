@@ -17,11 +17,6 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         public SyntaxTreeChangeKind SyntaxTreeChangeKind { get; }
 
         /// <summary>
-        /// Gets a value indicating whether the new syntax tree contain compile-time code.
-        /// </summary>
-        public bool HasCompileTimeCode { get; }
-
-        /// <summary>
         /// Gets a value indicating how the <see cref="HasCompileTimeCode"/> value has changed between the old
         /// and the new syntax tree.
         /// </summary>
@@ -31,32 +26,45 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         /// Gets the path of the syntax tree.
         /// </summary>
         public string FilePath { get; }
+        
+        // ReSharper disable once MemberCanBePrivate.Global
+        public readonly SyntaxTreeVersion OldSyntaxTreeVersion;
+        
+        // ReSharper disable once MemberCanBePrivate.Global
+        public readonly SyntaxTreeVersion NewSyntaxTreeVersion;
+
 
         /// <summary>
         /// Gets the new syntax tree, unless the current item represents a deleted tree.
         /// </summary>
-        public SyntaxTree? NewTree { get; }
+        public SyntaxTree? NewTree => this.NewSyntaxTreeVersion.SyntaxTree;
 
-        public ulong OldHash { get; }
+        public ulong OldHash => this.OldSyntaxTreeVersion.DeclarationHash;
 
-        public ulong NewHash { get; }
+        public ulong NewHash => this.NewSyntaxTreeVersion.DeclarationHash;
+        
+        /// <summary>
+        /// Gets a value indicating whether the new syntax tree contain compile-time code.
+        /// </summary>
+        public bool HasCompileTimeCode => this.NewSyntaxTreeVersion.HasCompileTimeCode;
+
+
+        
 
         public SyntaxTreeChange(
             string filePath,
             SyntaxTreeChangeKind syntaxTreeChangeKind,
-            bool hasCompileTimeCode,
             CompileTimeChangeKind compileTimeChangeKind,
-            SyntaxTree? newTree,
-            ulong oldHash,
-            ulong newHash )
+            in SyntaxTreeVersion oldSyntaxTreeVersion,
+            in SyntaxTreeVersion newSyntaxTreeVersion
+             )
         {
             this.SyntaxTreeChangeKind = syntaxTreeChangeKind;
-            this.HasCompileTimeCode = hasCompileTimeCode;
             this.CompileTimeChangeKind = compileTimeChangeKind;
             this.FilePath = filePath;
-            this.NewTree = newTree;
-            this.OldHash = oldHash;
-            this.NewHash = newHash;
+            this.NewSyntaxTreeVersion = newSyntaxTreeVersion;
+            this.OldSyntaxTreeVersion = oldSyntaxTreeVersion;
+
         }
 
         public override string ToString() => $"{this.FilePath}, ChangeKind={this.SyntaxTreeChangeKind}, CompileTimeChangeKind={this.CompileTimeChangeKind}";
@@ -90,11 +98,9 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             return new SyntaxTreeChange(
                 this.FilePath,
                 newSyntaxTreeChangeKind,
-                newChange.HasCompileTimeCode,
                 newCompileTimeChangeKind,
-                newChange.NewTree,
-                this.OldHash,
-                newChange.NewHash );
+                this.OldSyntaxTreeVersion,
+                newChange.NewSyntaxTreeVersion );
         }
     }
 }

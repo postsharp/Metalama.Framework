@@ -7,5 +7,3 @@ namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 /// Represents a single dependency edge between a master syntax tree and a dependent syntax tree. This object is used for test only.
 /// </summary>
 internal record struct SyntaxTreeDependency( string MasterFilePath, string DependentFilePath );
-
-internal record struct PartialTypeDependency( TypeDependencyKey MasterType, string DependentFilePath );
