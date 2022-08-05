@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -22,6 +21,54 @@ namespace Metalama.Framework.Engine.Testing
     public static class TestCompilationFactory
     {
         private static readonly ConcurrentDictionary<Assembly, PortableExecutableReference> _metadataReferenceCache = new();
+
+        /// <summary>
+        /// List of system assemblies that can be added as references to compilation if they are present in the AppDomain.
+        /// </summary>
+        private static readonly ImmutableHashSet<string> _allowedSystemAssemblies = ImmutableHashSet.Create(
+            "System.Private.CoreLib",
+            "System.Runtime",
+            "System.Console",
+            "System.Threading",
+            "System.Text.Encoding.Extensions",
+            "System.Linq",
+            "System.Collections",
+            "System.Text.RegularExpressions",
+            "System.ComponentModel.TypeConverter",
+            "System.Runtime.Extensions",
+            "System.Runtime.InteropServices.RuntimeInformation",
+            "System.Private.Uri",
+            "System.Threading.Thread",
+            "System.Memory",
+            "System.Diagnostics.Process",
+            "System.ComponentModel.Primitives",
+            "System.Threading.ThreadPool",
+            "System.Runtime.InteropServices",
+            "System.Diagnostics.Debug",
+            "System.Diagnostics.TraceSource",
+            "System.ComponentModel",
+            "System.Collections.Concurrent",
+            "System.Linq.Expressions",
+            "System.Reflection.Emit.ILGeneration",
+            "System.Reflection.Emit.Lightweight",
+            "System.Reflection.Primitives",
+            "System.Runtime.Loader",
+            "System.Net.Primitives",
+            "System.Reflection.Emit",
+            "System.Net.Sockets",
+            "System.Diagnostics.Tracing",
+            "System.ObjectModel",
+            "System.Collections.NonGeneric",
+            "System.Threading.Tasks",
+            "System.Runtime.Serialization.Formatters",
+            "System.IO.FileSystem",
+            "System.IO",
+            "System.Globalization",
+            "System.Reflection",
+            "System.IO.FileSystem.Watcher",
+            "System.Reflection.Extensions",
+            "System.Collections.Immutable",
+            "System.Reflection.Metadata" );
 
         public static CSharpCompilation CreateEmptyCSharpCompilation(
             string? name,
@@ -71,8 +118,8 @@ namespace Metalama.Framework.Engine.Testing
             var metalamaLibraries = addMetalamaReferences ? new[] { typeof(IAspect).Assembly, typeof(IAspectWeaver).Assembly } : null;
 
             var systemLibraries = AppDomainUtility.GetLoadedAssemblies(
-                    a => !a.IsDynamic && a.FullName != null && a.FullName.StartsWith( "System", StringComparison.Ordinal )
-                         && !string.IsNullOrEmpty( a.Location ) )
+                    a => !a.IsDynamic && _allowedSystemAssemblies.Contains( a.GetName().Name )
+                                      && !string.IsNullOrEmpty( a.Location ) )
                 .Concat( metalamaLibraries ?? Enumerable.Empty<Assembly>() )
                 .Concat( additionalAssemblies ?? Enumerable.Empty<Assembly>() )
                 .Distinct()

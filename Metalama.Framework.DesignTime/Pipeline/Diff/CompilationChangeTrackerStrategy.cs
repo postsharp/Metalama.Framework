@@ -6,7 +6,6 @@ using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Testing;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
@@ -21,10 +20,13 @@ internal class CompilationChangeTrackerStrategy
     private readonly bool _detectPartialTypes;
 
     public CompilationChangeTrackerStrategy( IServiceProvider serviceProvider, bool detectCompileTimeCode, bool detectPartialTypes )
+        : this( serviceProvider.GetService<TestMarkerService>() != null, detectCompileTimeCode, detectPartialTypes ) { }
+
+    public CompilationChangeTrackerStrategy( bool isTest, bool detectCompileTimeCode, bool detectPartialTypes )
     {
         this._detectCompileTimeCode = detectCompileTimeCode;
         this._detectPartialTypes = detectPartialTypes;
-        this._isTest = serviceProvider.GetService<TestMarkerService>() != null;
+        this._isTest = isTest;
     }
 
     public CompileTimeChangeKind GetCompileTimeChangeKind( bool oldValue, bool newValue )
@@ -106,7 +108,7 @@ internal class CompilationChangeTrackerStrategy
 
         var syntaxRoot = syntaxTree.GetRoot();
         var partialTypesHash = PartialTypesHasher.Instance.Visit( syntaxRoot );
-        
+
         ImmutableArray<TypeDependencyKey> partialTypeKeys;
 
         if ( partialTypesHash.HasValue )
@@ -120,7 +122,7 @@ internal class CompilationChangeTrackerStrategy
             else
             {
                 // We need to get the symbol of partial types from the semantic model.
-                
+
                 // Get the syntax nodes declaring the partial types.
                 var partialTypes = PartialTypesVisitor.Instance.Visit( syntaxRoot );
 
@@ -133,7 +135,7 @@ internal class CompilationChangeTrackerStrategy
                     var symbol = (INamedTypeSymbol) semanticModel.GetDeclaredSymbol( partialType ).AssertNotNull();
                     partialTypeKeysBuilder.Add( new TypeDependencyKey( symbol, this._isTest ) );
                 }
-                
+
                 partialTypeKeys = partialTypeKeysBuilder.MoveToImmutable();
             }
         }

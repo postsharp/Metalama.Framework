@@ -34,7 +34,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
 
         // ReSharper disable once MemberCanBePrivate.Global
         public readonly SyntaxTreeVersion NewSyntaxTreeVersion;
-        
+
         /// <summary>
         /// Gets the list of partial types that have been added between the old version and the new version.
         /// </summary>
@@ -43,7 +43,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         /// <summary>
         /// Gets the new syntax tree, unless the current item represents a deleted tree.
         /// </summary>
-        public SyntaxTree? NewTree => this.NewSyntaxTreeVersion.SyntaxTree;
+        public SyntaxTree NewTree => this.NewSyntaxTreeVersion.SyntaxTree;
 
         public ulong OldHash => this.OldSyntaxTreeVersion.DeclarationHash;
 
@@ -69,16 +69,25 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
 
             // Detecting changes in partial types.
             this.AddedPartialTypes = ImmutableArray<TypeDependencyKey>.Empty;
-            
-            if ( syntaxTreeChangeKind == SyntaxTreeChangeKind.Changed && newSyntaxTreeVersion.PartialTypesHash != oldSyntaxTreeVersion.PartialTypesHash )
+
+            switch ( syntaxTreeChangeKind )
             {
-                foreach ( var partialType in newSyntaxTreeVersion.PartialTypes )
-                {
-                    if ( !oldSyntaxTreeVersion.PartialTypes.Contains( partialType ) )
+                case SyntaxTreeChangeKind.Changed when newSyntaxTreeVersion.PartialTypesHash != oldSyntaxTreeVersion.PartialTypesHash:
+                    foreach ( var partialType in newSyntaxTreeVersion.PartialTypes )
                     {
-                        this.AddedPartialTypes = this.AddedPartialTypes.Add( partialType );
+                        if ( !oldSyntaxTreeVersion.PartialTypes.Contains( partialType ) )
+                        {
+                            this.AddedPartialTypes = this.AddedPartialTypes.Add( partialType );
+                        }
                     }
-                }
+
+                    break;
+
+                case SyntaxTreeChangeKind.Added:
+
+                    this.AddedPartialTypes = newSyntaxTreeVersion.PartialTypes;
+
+                    break;
             }
         }
 

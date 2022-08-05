@@ -65,7 +65,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 this.PipelineResult = new CompilationPipelineResult();
                 this.ValidationResult = CompilationValidationResult.Empty;
                 this.Dependencies = DependencyGraph.Empty;
-                this._compilationChangeTracker = new CompilationChangeTracker( new CompilationChangeTrackerStrategy( pipeline.ServiceProvider, true, true) );
+                this._compilationChangeTracker = new CompilationChangeTracker( new CompilationChangeTrackerStrategy( pipeline.ServiceProvider, true, true ) );
             }
 
             private PipelineState( PipelineState prototype )
@@ -237,7 +237,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                                 // We don't require an external rebuild when a new syntax tree is added because Roslyn does not give us a complete
                                 // compilation in the first call in the Visual Studio initializations sequence. Roslyn calls us later with
                                 // a complete compilation, but we don't want to bother the user with the need of an external build.
-                                compileTimeSyntaxTreesBuilder[change.FilePath] = change.NewTree.AssertNotNull();
+                                compileTimeSyntaxTreesBuilder[change.FilePath] = change.NewTree;
                                 this._pipeline.Logger.Trace?.Log( $"Compile-time change detected: {change.FilePath} is a new compile-time syntax tree." );
                                 OnCompileTimeChange( this._pipeline.Logger, false );
 

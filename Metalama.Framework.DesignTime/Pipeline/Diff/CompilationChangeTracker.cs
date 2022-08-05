@@ -132,11 +132,17 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             }
         }
 
+        // Used for tests.
+        internal CompilationChangeTracker Update( Compilation newCompilation ) => this.Update( newCompilation, DependencyChanges.Empty );
+
         /// <summary>
         /// Updates the <see cref="LastCompilation"/> property and returns the set of changes between the
         /// old value of <see cref="LastCompilation"/> and the newly provided <see cref="Compilation"/>.
         /// </summary>
-        public CompilationChangeTracker Update( Compilation newCompilation, in DependencyChanges dependencyChanges, CancellationToken cancellationToken )
+        public CompilationChangeTracker Update(
+            Compilation newCompilation,
+            in DependencyChanges dependencyChanges,
+            CancellationToken cancellationToken = default )
         {
             if ( newCompilation == this.LastCompilation )
             {
@@ -147,6 +153,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             var generatedTrees = new List<SyntaxTree>();
 
             var syntaxTreeChanges = ImmutableDictionary.CreateBuilder<string, SyntaxTreeChange>( StringComparer.Ordinal );
+            var addedPartialTypes = ImmutableHashSet<TypeDependencyKey>.Empty;
 
             var hasCompileTimeChange = dependencyChanges.HasCompileTimeChange || !this.AreMetadataReferencesEqual( newCompilation );
 
@@ -188,17 +195,20 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                             newCompilation,
                             out newSyntaxTreeVersion ) )
                     {
-                        compileTimeChangeKind = this._strategy.GetCompileTimeChangeKind( oldSyntaxTreeVersion.HasCompileTimeCode, newSyntaxTreeVersion.HasCompileTimeCode );
+                        compileTimeChangeKind = this._strategy.GetCompileTimeChangeKind(
+                            oldSyntaxTreeVersion.HasCompileTimeCode,
+                            newSyntaxTreeVersion.HasCompileTimeCode );
 
-                        syntaxTreeChanges.Add(
+                        var change = new SyntaxTreeChange(
                             newSyntaxTree.FilePath,
-                            new SyntaxTreeChange(
-                                newSyntaxTree.FilePath,
-                                SyntaxTreeChangeKind.Changed,
-                                compileTimeChangeKind,
-                                newSyntaxTreeVersion,
-                                oldSyntaxTreeVersion ) );
+                            SyntaxTreeChangeKind.Changed,
+                            compileTimeChangeKind,
+                            oldSyntaxTreeVersion,
+                            newSyntaxTreeVersion );
 
+                        syntaxTreeChanges.Add( newSyntaxTree.FilePath, change );
+
+                        addedPartialTypes = addedPartialTypes.Union( change.AddedPartialTypes );
                         hasCompileTimeChange |= newSyntaxTreeVersion.HasCompileTimeCode || oldSyntaxTreeVersion.HasCompileTimeCode;
                     }
                 }
@@ -209,15 +219,16 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
 
                     compileTimeChangeKind = this._strategy.GetCompileTimeChangeKind( false, newSyntaxTreeVersion.HasCompileTimeCode );
 
-                    syntaxTreeChanges.Add(
+                    var change = new SyntaxTreeChange(
                         newSyntaxTree.FilePath,
-                        new SyntaxTreeChange(
-                            newSyntaxTree.FilePath,
-                            SyntaxTreeChangeKind.Added,
-                            compileTimeChangeKind,
-                            default,
-                            newSyntaxTreeVersion ) );
+                        SyntaxTreeChangeKind.Added,
+                        compileTimeChangeKind,
+                        default,
+                        newSyntaxTreeVersion );
 
+                    syntaxTreeChanges.Add( newSyntaxTree.FilePath, change );
+
+                    addedPartialTypes = addedPartialTypes.Union( change.AddedPartialTypes );
                     hasCompileTimeChange |= newSyntaxTreeVersion.HasCompileTimeCode;
                 }
 
@@ -278,6 +289,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
 
                 compilationChanges = new CompilationChanges(
                     syntaxTreeChanges.ToImmutable(),
+                    addedPartialTypes,
                     hasCompileTimeChange,
                     compilationToAnalyze,
                     this.LastCompilation != null );

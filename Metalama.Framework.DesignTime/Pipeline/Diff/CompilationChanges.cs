@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
@@ -18,6 +19,8 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         /// </summary>
         public IEnumerable<SyntaxTreeChange> SyntaxTreeChanges => this._syntaxTreeChanges.Values;
 
+        public ImmutableHashSet<TypeDependencyKey> AddedPartialTypes { get; }
+
         /// <summary>
         /// Gets a value indicating whether the changes affects the compile-time subproject.
         /// </summary>
@@ -28,18 +31,20 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         /// </summary>
         public CompilationChanges(
             ImmutableDictionary<string, SyntaxTreeChange> syntaxTreeChanges,
+            ImmutableHashSet<TypeDependencyKey> addedPartialTypes,
             bool hasCompileTimeCodeChange,
             Compilation compilationToAnalyze,
             bool isIncremental )
         {
             this._syntaxTreeChanges = syntaxTreeChanges;
+            this.AddedPartialTypes = addedPartialTypes;
             this.HasCompileTimeCodeChange = hasCompileTimeCodeChange;
             this.CompilationToAnalyze = compilationToAnalyze;
             this.IsIncremental = isIncremental;
         }
 
         public static CompilationChanges Empty( Compilation compilation )
-            => new( ImmutableDictionary<string, SyntaxTreeChange>.Empty, false, compilation, true );
+            => new( ImmutableDictionary<string, SyntaxTreeChange>.Empty, ImmutableHashSet<TypeDependencyKey>.Empty, false, compilation, true );
 
         public bool HasChange => this._syntaxTreeChanges.Count > 0 || this.HasCompileTimeCodeChange;
 
@@ -88,6 +93,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
 
                 return new CompilationChanges(
                     mergedSyntaxTreeBuilder.ToImmutable(),
+                    this.AddedPartialTypes.Union( newChanges.AddedPartialTypes ),
                     this.HasCompileTimeCodeChange | newChanges.HasCompileTimeCodeChange,
                     newChanges.CompilationToAnalyze,
                     this.IsIncremental );
