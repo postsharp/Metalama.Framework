@@ -30,7 +30,7 @@ public class DependencyGraphTests
         Assert.Equal( masterCompilation, dependenciesByCompilation.AssemblyIdentity );
         var dependenciesByMasterFile = graph.Compilations[masterCompilation].DependenciesByMasterFilePath.Values.Single();
         Assert.Equal( masterFilePath, dependenciesByMasterFile.FilePath );
-        Assert.Equal( hash, dependenciesByMasterFile.Hash );
+        Assert.Equal( hash, dependenciesByMasterFile.DeclarationHash );
     }
 
     [Fact]
@@ -143,6 +143,6 @@ public class DependencyGraphTests
 
         var graph2 = graph1.Update( new[] { dependentFilePath }, dependencies2 );
 
-        Assert.Equal( hash2, graph2.Compilations[masterCompilation].DependenciesByMasterFilePath[masterFilePath].Hash );
+        Assert.Equal( hash2, graph2.Compilations[masterCompilation].DependenciesByMasterFilePath[masterFilePath].DeclarationHash );
     }
 }

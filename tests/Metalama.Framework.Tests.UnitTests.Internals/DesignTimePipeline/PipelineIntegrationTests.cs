@@ -24,7 +24,7 @@ using StringExtensions = Metalama.TestFramework.Utilities.StringExtensions;
 #pragma warning disable IDE0079 // Remove unnecessary suppression.
 #pragma warning disable CA1307  // Specify StringComparison for clarity
 
-namespace Metalama.Framework.Tests.UnitTests.DesignTime
+namespace Metalama.Framework.Tests.UnitTests.DesignTimePipeline
 {
     public class PipelineIntegrationTests : TestBase
     {

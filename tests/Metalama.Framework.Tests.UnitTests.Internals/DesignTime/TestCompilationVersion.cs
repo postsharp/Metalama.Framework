@@ -23,17 +23,26 @@ internal class TestCompilationVersion : ICompilationVersion
 
     public ulong CompileTimeProjectHash { get; }
 
-    public bool TryGetSyntaxTreeDeclarationHash( string path, out ulong hash )
+    public bool TryGetSyntaxTreeVersion( string path, out SyntaxTreeVersion syntaxTreeVersion )
     {
         if ( this._hashes == null )
         {
-            hash = 0;
+            syntaxTreeVersion = default;
 
             return false;
         }
 
-        return this._hashes.TryGetValue( path, out hash );
+        if ( this._hashes.TryGetValue( path, out var hash ) )
+        {
+            syntaxTreeVersion = new SyntaxTreeVersion( null!, false, hash );
+
+            return true;
+        }
+        else
+        {
+            syntaxTreeVersion = default;
+            return false;
+        }
     }
 
-    public bool TryGetSyntaxTreePartialTypesHash( string path, out ulong hash ) => throw new NotSupportedException();
 }

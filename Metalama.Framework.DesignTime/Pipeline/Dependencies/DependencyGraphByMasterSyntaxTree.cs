@@ -17,25 +17,25 @@ internal readonly struct DependencyGraphByMasterSyntaxTree
     /// <summary>
     /// Gets the hash of of the master syntax tree.
     /// </summary>
-    public ulong Hash { get; }
+    public ulong DeclarationHash { get; }
 
     /// <summary>
     /// Gets the list of dependent syntax trees, by their file path.
     /// </summary>
     public ImmutableHashSet<string> DependentFilePaths { get; }
 
-    public DependencyGraphByMasterSyntaxTree( string filePath, ulong hash ) : this( filePath, hash, _emptyDependencies ) { }
+    public DependencyGraphByMasterSyntaxTree( string filePath, ulong declarationHash ) : this( filePath, declarationHash, _emptyDependencies ) { }
 
-    private DependencyGraphByMasterSyntaxTree( string filePath, ulong hash, ImmutableHashSet<string> dependentFilePaths )
+    private DependencyGraphByMasterSyntaxTree( string filePath, ulong declarationHash, ImmutableHashSet<string> dependentFilePaths )
     {
         this.FilePath = filePath;
-        this.Hash = hash;
+        this.DeclarationHash = declarationHash;
         this.DependentFilePaths = dependentFilePaths;
     }
 
     public DependencyGraphByMasterSyntaxTree AddSyntaxTreeDependency( string dependentFilePath )
-        => new( this.FilePath, this.Hash, this.DependentFilePaths.Add( dependentFilePath ) );
+        => new( this.FilePath, this.DeclarationHash, this.DependentFilePaths.Add( dependentFilePath ) );
 
     public DependencyGraphByMasterSyntaxTree RemoveDependency( string dependentFilePath )
-        => new( this.FilePath, this.Hash, this.DependentFilePaths.Remove( dependentFilePath ) );
+        => new( this.FilePath, this.DeclarationHash, this.DependentFilePaths.Remove( dependentFilePath ) );
 }

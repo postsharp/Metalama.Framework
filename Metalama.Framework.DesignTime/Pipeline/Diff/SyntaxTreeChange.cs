@@ -1,8 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.Engine;
 using Microsoft.CodeAnalysis;
+using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Pipeline.Diff
 {
@@ -26,13 +28,17 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         /// Gets the path of the syntax tree.
         /// </summary>
         public string FilePath { get; }
-        
+
         // ReSharper disable once MemberCanBePrivate.Global
         public readonly SyntaxTreeVersion OldSyntaxTreeVersion;
-        
+
         // ReSharper disable once MemberCanBePrivate.Global
         public readonly SyntaxTreeVersion NewSyntaxTreeVersion;
-
+        
+        /// <summary>
+        /// Gets the list of partial types that have been added between the old version and the new version.
+        /// </summary>
+        public ImmutableArray<TypeDependencyKey> AddedPartialTypes { get; }
 
         /// <summary>
         /// Gets the new syntax tree, unless the current item represents a deleted tree.
@@ -42,22 +48,18 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         public ulong OldHash => this.OldSyntaxTreeVersion.DeclarationHash;
 
         public ulong NewHash => this.NewSyntaxTreeVersion.DeclarationHash;
-        
+
         /// <summary>
         /// Gets a value indicating whether the new syntax tree contain compile-time code.
         /// </summary>
         public bool HasCompileTimeCode => this.NewSyntaxTreeVersion.HasCompileTimeCode;
-
-
-        
 
         public SyntaxTreeChange(
             string filePath,
             SyntaxTreeChangeKind syntaxTreeChangeKind,
             CompileTimeChangeKind compileTimeChangeKind,
             in SyntaxTreeVersion oldSyntaxTreeVersion,
-            in SyntaxTreeVersion newSyntaxTreeVersion
-             )
+            in SyntaxTreeVersion newSyntaxTreeVersion )
         {
             this.SyntaxTreeChangeKind = syntaxTreeChangeKind;
             this.CompileTimeChangeKind = compileTimeChangeKind;
@@ -65,11 +67,24 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             this.NewSyntaxTreeVersion = newSyntaxTreeVersion;
             this.OldSyntaxTreeVersion = oldSyntaxTreeVersion;
 
+            // Detecting changes in partial types.
+            this.AddedPartialTypes = ImmutableArray<TypeDependencyKey>.Empty;
+            
+            if ( syntaxTreeChangeKind == SyntaxTreeChangeKind.Changed && newSyntaxTreeVersion.PartialTypesHash != oldSyntaxTreeVersion.PartialTypesHash )
+            {
+                foreach ( var partialType in newSyntaxTreeVersion.PartialTypes )
+                {
+                    if ( !oldSyntaxTreeVersion.PartialTypes.Contains( partialType ) )
+                    {
+                        this.AddedPartialTypes = this.AddedPartialTypes.Add( partialType );
+                    }
+                }
+            }
         }
 
         public override string ToString() => $"{this.FilePath}, ChangeKind={this.SyntaxTreeChangeKind}, CompileTimeChangeKind={this.CompileTimeChangeKind}";
 
-        public SyntaxTreeChange Merge( SyntaxTreeChange newChange )
+        public SyntaxTreeChange Merge( in SyntaxTreeChange newChange )
         {
             var newSyntaxTreeChangeKind = (this.SyntaxTreeChangeKind, newChange.SyntaxTreeChangeKind) switch
             {

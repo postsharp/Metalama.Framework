@@ -106,7 +106,7 @@ internal class DependencyCollector : BaseDependencyCollector, IDependencyCollect
 
             foreach ( var masterSyntaxReference in masterSymbol.DeclaringSyntaxReferences )
             {
-                if ( compilationReference.TryGetSyntaxTreeDeclarationHash( masterSyntaxReference.SyntaxTree.FilePath, out var masterSyntaxTreeHash ) )
+                if ( compilationReference.TryGetSyntaxTreeVersion( masterSyntaxReference.SyntaxTree.FilePath, out var masterSyntaxTreeVersion ) )
                 {
                     foreach ( var dependentSyntaxReference in dependentSymbol.DeclaringSyntaxReferences )
                     {
@@ -114,7 +114,7 @@ internal class DependencyCollector : BaseDependencyCollector, IDependencyCollect
                             dependentSyntaxReference.SyntaxTree.FilePath,
                             compilationReference.AssemblyIdentity,
                             masterSyntaxReference.SyntaxTree.FilePath,
-                            masterSyntaxTreeHash );
+                            masterSyntaxTreeVersion.DeclarationHash );
                     }
                 }
                 else

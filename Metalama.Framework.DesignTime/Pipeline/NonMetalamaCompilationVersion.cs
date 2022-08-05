@@ -16,6 +16,22 @@ internal class NonMetalamaCompilationVersion : ICompilationVersion
 
     public ulong CompileTimeProjectHash => 0;
 
+    public bool TryGetSyntaxTreeVersion( string path, out SyntaxTreeVersion syntaxTreeVersion )
+    {
+        if ( this._syntaxTrees.TryGetValue( path, out var syntaxTree ) )
+        {
+            syntaxTreeVersion = new SyntaxTreeVersion( syntaxTree, false, this._computeHashFunc( syntaxTree ) );
+
+            return true;
+        }
+        else
+        {
+            syntaxTreeVersion = default;
+            
+            return false;
+        }
+    }
+
     public NonMetalamaCompilationVersion( Compilation compilation, Func<SyntaxTree, ulong> computeHashFunc )
     {
         this.AssemblyIdentity = compilation.Assembly.Identity;
@@ -23,21 +39,4 @@ internal class NonMetalamaCompilationVersion : ICompilationVersion
         this._syntaxTrees = compilation.GetIndexedSyntaxTrees();
     }
 
-    public bool TryGetSyntaxTreeDeclarationHash( string path, out ulong hash )
-    {
-        if ( this._syntaxTrees.TryGetValue( path, out var syntaxTree ) )
-        {
-            hash = this._computeHashFunc( syntaxTree );
-
-            return true;
-        }
-        else
-        {
-            hash = 0;
-
-            return false;
-        }
-    }
-
-    public bool TryGetSyntaxTreePartialTypesHash( string path, out ulong hash ) => throw new NotImplementedException();
 }

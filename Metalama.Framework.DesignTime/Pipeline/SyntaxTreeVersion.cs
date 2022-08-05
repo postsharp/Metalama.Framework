@@ -13,7 +13,7 @@ internal readonly record struct SyntaxTreeVersion(
     bool HasCompileTimeCode = false,
     ulong DeclarationHash = 0,
     ImmutableArray<TypeDependencyKey> PartialTypes = default,
-    ulong PartialTypesHash = 0 )
+    int PartialTypesHash = 0 )
 {
     private readonly SyntaxTree? _syntaxTree = SyntaxTree;
 

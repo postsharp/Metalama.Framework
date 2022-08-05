@@ -1,4 +1,7 @@
-﻿using K4os.Hash.xxHash;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using K4os.Hash.xxHash;
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CompileTime;
@@ -6,7 +9,6 @@ using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Pipeline.Diff;
@@ -43,6 +45,7 @@ internal class CompilationChangeTrackerStrategy
         {
             throw new InvalidOperationException();
         }
+
         var oldSyntaxTreeVersion = this.GetSyntaxTreeVersion( oldSyntaxTree, null );
 
         return this.IsDifferent( oldSyntaxTreeVersion, newSyntaxTree, null, out _ );
@@ -73,12 +76,12 @@ internal class CompilationChangeTrackerStrategy
             if ( newSyntaxTreeHash == oldSyntaxTreeVersion.DeclarationHash )
             {
                 newSyntaxTreeVersion = oldSyntaxTreeVersion;
-                    
+
                 return false;
             }
             else
             {
-                var (partialTypes, partialTypesHash) = this.FindPartialTypes( newSyntaxTree, newCompilation, hhx64 );
+                var (partialTypes, partialTypesHash) = this.FindPartialTypes( oldSyntaxTreeVersion, newSyntaxTree, newCompilation );
 
                 newSyntaxTreeVersion = new SyntaxTreeVersion( newSyntaxTree, newHasCompileTimeCode, newSyntaxTreeHash, partialTypes, partialTypesHash );
 
@@ -87,7 +90,10 @@ internal class CompilationChangeTrackerStrategy
         }
     }
 
-    private (ImmutableArray<TypeDependencyKey> partialTypes, ulong partialTypesHash) FindPartialTypes( SyntaxTree syntaxTree, Compilation? compilation, XXH64 hhx64 )
+    private (ImmutableArray<TypeDependencyKey> partialTypes, int partialTypesHash) FindPartialTypes(
+        in SyntaxTreeVersion oldVersion,
+        SyntaxTree syntaxTree,
+        Compilation? compilation )
     {
         if ( !this._detectPartialTypes )
         {
@@ -97,34 +103,46 @@ internal class CompilationChangeTrackerStrategy
         {
             throw new ArgumentNullException( nameof(compilation) );
         }
-        var syntaxRoot = syntaxTree.GetRoot();
-        var partialTypes = PartialTypesVisitor.Instance.Visit( syntaxRoot );
-        var partialTypesHash = 0ul;
 
+        var syntaxRoot = syntaxTree.GetRoot();
+        var partialTypesHash = PartialTypesHasher.Instance.Visit( syntaxRoot );
+        
         ImmutableArray<TypeDependencyKey> partialTypeKeys;
 
-        if (!partialTypes.IsDefaultOrEmpty)
+        if ( partialTypesHash.HasValue )
         {
-            var semanticModel = compilation.GetSemanticModel( syntaxTree );
-            var partialTypeKeysBuilder = ImmutableArray.CreateBuilder<TypeDependencyKey>( partialTypes.Length );
-            
-            hhx64.Reset();
-
-            foreach (var partialType in partialTypes)
+            // See if we can reuse the old TypeDependencyKey without going to the semantic model. This should be the case
+            // most of the time when the user is editing the body of the type.
+            if ( !oldVersion.IsDefault && oldVersion.PartialTypesHash == partialTypesHash.Value )
             {
-                var symbol = (INamedTypeSymbol) semanticModel.GetDeclaredSymbol( partialType ).AssertNotNull(  );
-                partialTypeKeysBuilder.Add( new TypeDependencyKey( symbol, this._isTest ) );
+                partialTypeKeys = oldVersion.PartialTypes;
             }
+            else
+            {
+                // We need to get the symbol of partial types from the semantic model.
+                
+                // Get the syntax nodes declaring the partial types.
+                var partialTypes = PartialTypesVisitor.Instance.Visit( syntaxRoot );
 
-            partialTypesHash = hhx64.Digest();
-            partialTypeKeys = partialTypeKeysBuilder.MoveToImmutable();
+                // Map these nodes to a symbol and get the TypeDependencyKey.
+                var semanticModel = compilation.GetSemanticModel( syntaxTree );
+                var partialTypeKeysBuilder = ImmutableArray.CreateBuilder<TypeDependencyKey>( partialTypes.Length );
+
+                foreach ( var partialType in partialTypes )
+                {
+                    var symbol = (INamedTypeSymbol) semanticModel.GetDeclaredSymbol( partialType ).AssertNotNull();
+                    partialTypeKeysBuilder.Add( new TypeDependencyKey( symbol, this._isTest ) );
+                }
+                
+                partialTypeKeys = partialTypeKeysBuilder.MoveToImmutable();
+            }
         }
         else
         {
             partialTypeKeys = ImmutableArray<TypeDependencyKey>.Empty;
         }
 
-        return ( partialTypeKeys, partialTypesHash );
+        return (partialTypeKeys, partialTypesHash ?? 0);
     }
 
     public SyntaxTreeVersion GetSyntaxTreeVersion( SyntaxTree syntaxTree, Compilation? compilation )
@@ -135,10 +153,9 @@ internal class CompilationChangeTrackerStrategy
         BaseCodeHasher hasher = hasCompileTimeCode ? new CompileTimeCodeHasher( hhx64 ) : new RunTimeCodeHasher( hhx64 );
         hasher.Visit( syntaxRoot );
         var declarationHash = hhx64.Digest();
-        
-        var (partialTypes, partialTypesHash) = this.FindPartialTypes( syntaxTree, compilation, hhx64 );
 
-        
+        var (partialTypes, partialTypesHash) = this.FindPartialTypes( default, syntaxTree, compilation );
+
         return new SyntaxTreeVersion( syntaxTree, hasCompileTimeCode, declarationHash, partialTypes, partialTypesHash );
     }
 }

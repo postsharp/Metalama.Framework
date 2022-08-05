@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Xunit;
 
-namespace Metalama.Framework.Tests.UnitTests.DesignTime
+namespace Metalama.Framework.Tests.UnitTests.DesignTimePipeline
 {
     public class PipelineTests : TestBase
     {

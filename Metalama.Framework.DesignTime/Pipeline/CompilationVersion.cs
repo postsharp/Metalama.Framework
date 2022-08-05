@@ -6,42 +6,14 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Pipeline;
 
-internal record class CompilationVersion(
+internal record CompilationVersion(
     Compilation Compilation,
     ulong CompileTimeProjectHash,
     ImmutableDictionary<string, SyntaxTreeVersion> SyntaxTrees ) : ICompilationVersion
 {
     AssemblyIdentity ICompilationVersion.AssemblyIdentity => this.Compilation.Assembly.Identity;
 
-    public bool TryGetSyntaxTreeDeclarationHash( string path, out ulong hash )
-    {
-        if ( this.SyntaxTrees.TryGetValue( path, out var syntaxTreeVersion ) )
-        {
-            hash = syntaxTreeVersion.DeclarationHash;
-
-            return true;
-        }
-        else
-        {
-            hash = 0;
-
-            return false;
-        }
-    }
-
-    public bool TryGetSyntaxTreePartialTypesHash( string path, out ulong hash )
-    {
-        if ( this.SyntaxTrees.TryGetValue( path, out var syntaxTreeVersion ) )
-        {
-            hash = syntaxTreeVersion.PartialTypesHash;
-
-            return true;
-        }
-        else
-        {
-            hash = 0;
-
-            return false;
-        }
-    }
+    public bool TryGetSyntaxTreeVersion( string path, out SyntaxTreeVersion syntaxTreeVersion ) 
+        => this.SyntaxTrees.TryGetValue( path, out  syntaxTreeVersion );
+    
 }
