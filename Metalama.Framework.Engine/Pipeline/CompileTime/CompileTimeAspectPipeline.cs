@@ -51,6 +51,14 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                     partialCompilation,
                     ImmutableArray<AdditionalCompilationOutputFile>.Empty );
             }
+            
+            // Report error if the compilation does not have the METALAMA preprocessor symbol.
+            if ( !(compilation.SyntaxTrees.FirstOrDefault()?.Options.PreprocessorSymbolNames.Contains( "METALAMA" ) ?? false) )
+            {
+                diagnosticAdder.Report( GeneralDiagnosticDescriptors.MissingMetalamaPreprocessorSymbol.CreateRoslynDiagnosticImpl( null, null ) );
+
+                return null;
+            }
 
             // Validate the code (some validations are not done by the template compiler).
             var isTemplatingCodeValidatorSuccessful = true;

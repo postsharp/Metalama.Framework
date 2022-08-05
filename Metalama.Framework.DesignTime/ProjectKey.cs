@@ -31,10 +31,6 @@ public sealed class ProjectKey : IEquatable<ProjectKey>
 
     public ulong PreprocessorSymbolHashCode { get; }
 
-    public bool HasMetalama { get; }
-
-    private string? _asString;
-
     private ProjectKey( Compilation compilation )
     {
         this.AssemblyName = compilation.AssemblyName.AssertNotNull();
@@ -59,11 +55,6 @@ public sealed class ProjectKey : IEquatable<ProjectKey>
                 foreach ( var symbol in immutableArray )
                 {
                     hasher.Update( symbol );
-
-                    if ( symbol == "METALAMA" )
-                    {
-                        this.HasMetalama = true;
-                    }
                 }
             }
             else
@@ -73,11 +64,6 @@ public sealed class ProjectKey : IEquatable<ProjectKey>
                 foreach ( var symbol in immutableArray )
                 {
                     hasher.Update( symbol );
-
-                    if ( symbol == "METALAMA" )
-                    {
-                        this.HasMetalama = true;
-                    }
                 }
             }
 
@@ -86,18 +72,17 @@ public sealed class ProjectKey : IEquatable<ProjectKey>
     }
 
     [JsonConstructor]
-    private ProjectKey( string assemblyName, ulong preprocessorSymbolHashCode, bool hasMetalama )
+    private ProjectKey( string assemblyName, ulong preprocessorSymbolHashCode )
     {
         this.AssemblyName = assemblyName;
         this.PreprocessorSymbolHashCode = preprocessorSymbolHashCode;
-        this.HasMetalama = hasMetalama;
     }
 
     public static ProjectKey FromCompilation( Compilation compilation ) => _cache.GetOrAdd( compilation, c => new ProjectKey( c ) );
 
     internal static ProjectKey CreateTest( string id )
     {
-        return new ProjectKey( id, 0, true );
+        return new ProjectKey( id, 0 );
     }
 
     public bool Equals( ProjectKey? other )
@@ -154,5 +139,5 @@ public sealed class ProjectKey : IEquatable<ProjectKey>
 
     public static bool operator !=( ProjectKey? left, ProjectKey? right ) => !Equals( left, right );
 
-    public override string ToString() => this._asString ??= $"{this.AssemblyName},{this.PreprocessorSymbolHashCode:x},{this.HasMetalama}";
+    public override string ToString() => $"{this.AssemblyName}, {this.PreprocessorSymbolHashCode:x}";
 }

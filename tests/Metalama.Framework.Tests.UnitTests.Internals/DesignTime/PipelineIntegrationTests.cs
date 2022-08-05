@@ -61,7 +61,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             var compilation = CreateEmptyCompilation();
 
-            compilation = compilation.AddSyntaxTrees( code.Select( c => SyntaxFactory.ParseSyntaxTree( c.Value, path: c.Key ) ) );
+            compilation = compilation.AddSyntaxTrees( code.Select( c => SyntaxFactory.ParseSyntaxTree( c.Value, path: c.Key, options: CSharpParseOptions.Default.WithPreprocessorSymbols( "METALAMA" ) ) ) );
 
             if ( !acceptErrors )
             {

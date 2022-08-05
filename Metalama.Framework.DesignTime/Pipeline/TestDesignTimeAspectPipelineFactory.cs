@@ -26,7 +26,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             return new ValueTask<DesignTimeAspectPipeline?>( this.GetOrCreatePipeline( this._projectOptions, compilation, CancellationToken.None ) );
         }
 
-        protected override bool HasMetalamaReference( Compilation compilation )
+        protected override bool IsMetalamaEnabled( Compilation compilation )
             => compilation.References.OfType<PortableExecutableReference>()
                 .Any( x => Path.GetFileNameWithoutExtension( x.FilePath )!.Equals( "Metalama.Framework", StringComparison.OrdinalIgnoreCase ) );
     }

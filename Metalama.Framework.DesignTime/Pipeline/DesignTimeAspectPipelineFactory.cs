@@ -192,11 +192,12 @@ namespace Metalama.Framework.DesignTime.Pipeline
             return this.ExecuteAsync( compilation, cancellationToken );
         }
 
-        protected virtual bool HasMetalamaReference( Compilation compilation ) => ProjectKey.FromCompilation( compilation ).HasMetalama;
+        protected virtual bool IsMetalamaEnabled( Compilation compilation )
+            => compilation.SyntaxTrees.FirstOrDefault()?.Options.PreprocessorSymbolNames.Contains( "METALAMA" ) ?? false;
 
         private async Task<CompilationResult?> ExecuteAsync( Compilation compilation, CancellationToken cancellationToken )
         {
-            if ( !this.HasMetalamaReference( compilation ) )
+            if ( !this.IsMetalamaEnabled( compilation ) )
             {
                 return null;
             }
@@ -205,7 +206,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             foreach ( var reference in compilation.References.OfType<CompilationReference>() )
             {
-                if ( this.HasMetalamaReference( reference.Compilation ) )
+                if ( this.IsMetalamaEnabled( reference.Compilation ) )
                 {
                     // This is a Metalama reference. We need to compile the dependency.
                     var referenceResult = await this.ExecuteAsync( reference.Compilation, cancellationToken );
