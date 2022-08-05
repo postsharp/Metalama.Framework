@@ -14,8 +14,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff;
 
 internal class CompilationChangeTrackerStrategy
 {
-    private bool _isTest;
-
+    private readonly bool _isTest;
     private readonly bool _detectCompileTimeCode;
     private readonly bool _detectPartialTypes;
 

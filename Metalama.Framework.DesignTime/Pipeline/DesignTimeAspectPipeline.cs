@@ -288,6 +288,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             Compilation compilation,
             DesignTimeCompilationReferenceCollection references,
             CancellationToken cancellationToken )
+        
         {
             if ( this._compilationResultCache.TryGetValue( compilation, out var compilationResult ) )
             {

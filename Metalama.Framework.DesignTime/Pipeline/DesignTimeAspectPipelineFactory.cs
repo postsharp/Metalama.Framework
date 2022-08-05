@@ -1,22 +1,18 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using K4os.Hash.xxHash;
 using Metalama.Backstage.Diagnostics;
-using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
-using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 
 // ReSharper disable InconsistentlySynchronizedField
 
@@ -31,10 +27,10 @@ namespace Metalama.Framework.DesignTime.Pipeline
                                                      ICompileTimeCodeEditingStatusService
     {
         private readonly ConcurrentDictionary<ProjectKey, DesignTimeAspectPipeline> _pipelinesByProjectKey = new();
+        private readonly ConcurrentDictionary<ProjectKey, NonMetalamaProjectTracker> _nonMetalamaProjectTrackers = new();
         private readonly ILogger _logger;
         private readonly ConcurrentQueue<TaskCompletionSource<DesignTimeAspectPipeline>> _newPipelineListeners = new();
         private readonly CancellationToken _globalCancellationToken = CancellationToken.None;
-        private readonly ConditionalWeakTable<SyntaxTree, StrongBox<ulong>> _syntaxTreeHashes = new();
         private readonly ServiceProvider _serviceProvider;
 
         private readonly bool _isTest;
@@ -197,7 +193,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         private async Task<CompilationResult?> ExecuteAsync( Compilation compilation, CancellationToken cancellationToken )
         {
-            if ( !this.IsMetalamaEnabled( compilation ) )
+            var pipeline = await this.GetPipelineAndWaitAsync( compilation, cancellationToken );
+
+            if ( pipeline == null )
             {
                 return null;
             }
@@ -218,38 +216,23 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                     compilationReferences.Add(
                         new DesignTimeCompilationReference(
+                            reference.Compilation,
                             referenceResult.CompilationVersion,
+                            null, // TODO
                             referenceResult.TransformationResult ) );
                 }
                 else
                 {
-                    // It is a non-Metalama reference. 
-                    compilationReferences.Add(
-                        new DesignTimeCompilationReference( new NonMetalamaCompilationVersion( reference.Compilation, this.ComputeSyntaxTreeHash ) ) );
+                    // It is a non-Metalama reference.
+                    var projectTracker = this.GetNonMetalamaProjectTracker( ProjectKey.FromCompilation( reference.Compilation ) );
+                    var compilationReference = await projectTracker.GetCompilationReferenceAsync( reference.Compilation, cancellationToken );
+                    compilationReferences.Add( compilationReference );
                 }
             }
 
             var referenceCollection = new DesignTimeCompilationReferenceCollection( compilationReferences );
 
-            var pipeline = await this.GetPipelineAndWaitAsync( compilation, cancellationToken );
-
-            if ( pipeline == null )
-            {
-                return null;
-            }
-
             return await pipeline.ExecuteAsync( compilation, referenceCollection, cancellationToken );
-        }
-
-        private ulong ComputeSyntaxTreeHash( SyntaxTree syntaxTree ) => this._syntaxTreeHashes.GetOrAdd( syntaxTree, this.ComputeSyntaxTreeHashCore ).Value;
-
-        private StrongBox<ulong> ComputeSyntaxTreeHashCore( SyntaxTree syntaxTree )
-        {
-            XXH64 hash = new();
-            var hasher = new RunTimeCodeHasher( hash );
-            hasher.Visit( syntaxTree.GetRoot() );
-
-            return new StrongBox<ulong>( hash.Digest() );
         }
 
         public void Dispose()
@@ -263,6 +246,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
             this.Domain.Dispose();
         }
 
+        private NonMetalamaProjectTracker GetNonMetalamaProjectTracker( ProjectKey projectKey )
+            => this._nonMetalamaProjectTrackers.GetOrAdd( projectKey, k => new NonMetalamaProjectTracker( k, this._serviceProvider ) );
+
         protected virtual async ValueTask<DesignTimeAspectPipeline?> GetPipelineAndWaitAsync( Compilation compilation, CancellationToken cancellationToken )
         {
             var projectKey = ProjectKey.FromCompilation( compilation );
@@ -271,6 +257,13 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             while ( !this._pipelinesByProjectKey.TryGetValue( projectKey, out pipeline ) )
             {
+                if ( !this.IsMetalamaEnabled( compilation ) )
+                {
+                    this._logger.Trace?.Log( "Metalama is not enabled for this project." );
+
+                    return null;
+                }
+
                 this._logger.Trace?.Log( $"Awaiting for the pipeline '{projectKey}'." );
 
                 var taskCompletionSource = new TaskCompletionSource<DesignTimeAspectPipeline>();

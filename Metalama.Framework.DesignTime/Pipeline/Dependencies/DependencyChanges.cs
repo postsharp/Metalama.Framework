@@ -9,13 +9,13 @@ internal readonly struct DependencyChanges
 {
     private static readonly ImmutableHashSet<string> _emptyHashSet = ImmutableHashSet<string>.Empty.WithComparer( StringComparer.Ordinal );
 
-    public DependencyChanges( bool hasCompileTimeChange, ImmutableHashSet<string> invalidatedSyntaxTrees )
+    private DependencyChanges( bool hasCompileTimeChange, ImmutableHashSet<string> invalidatedSyntaxTrees )
     {
         this.HasCompileTimeChange = hasCompileTimeChange;
         this.InvalidatedSyntaxTrees = invalidatedSyntaxTrees;
     }
 
-    public static DependencyChanges Empty { get; } = new( false, _emptyHashSet );
+    public static readonly DependencyChanges Empty = new( false, _emptyHashSet );
 
     public bool HasCompileTimeChange { get; }
 
