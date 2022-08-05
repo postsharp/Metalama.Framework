@@ -25,30 +25,30 @@ internal partial class AnalysisProcessEndpoint
             this._parent = parent;
         }
 
-        public async Task OnProjectHandlerReadyAsync( string projectId, CancellationToken cancellationToken )
+        public async Task OnProjectHandlerReadyAsync( ProjectKey projectKey, CancellationToken cancellationToken )
         {
-            this._parent._logger.Trace?.Log( $"The client '{projectId}' has connected." );
+            this._parent._logger.Trace?.Log( $"The client '{projectKey}' has connected." );
 
-            this._parent._connectedClients[projectId] = projectId;
+            this._parent._connectedClients[projectKey] = projectKey;
 
             Thread.MemoryBarrier();
 
             // If we received source before the client connected, publish it for the client now.
-            if ( this._parent._sourcesForUnconnectedClients.TryRemove( projectId, out var sources ) )
+            if ( this._parent._sourcesForUnconnectedClients.TryRemove( projectKey, out var sources ) )
             {
-                this._parent._logger.Trace?.Log( $"Publishing source for the client '{projectId}'." );
+                this._parent._logger.Trace?.Log( $"Publishing source for the client '{projectKey}'." );
 
-                await this._parent._client!.PublishGeneratedCodeAsync( projectId, sources, cancellationToken );
+                await this._parent._client!.PublishGeneratedCodeAsync( projectKey, sources, cancellationToken );
             }
 
-            this._parent.ClientConnected?.Invoke( this._parent, new ClientConnectedEventArgs( projectId ) );
+            this._parent.ClientConnected?.Invoke( this._parent, new ClientConnectedEventArgs( projectKey ) );
         }
 
-        public Task<PreviewTransformationResult> PreviewTransformationAsync( string projectId, string syntaxTreeName, CancellationToken cancellationToken )
+        public Task<PreviewTransformationResult> PreviewTransformationAsync( ProjectKey projectKey, string syntaxTreeName, CancellationToken cancellationToken )
         {
             var implementation = this._parent._serviceProvider.GetRequiredService<ITransformationPreviewServiceImpl>();
 
-            return implementation.PreviewTransformationAsync( projectId, syntaxTreeName, cancellationToken );
+            return implementation.PreviewTransformationAsync( projectKey, syntaxTreeName, cancellationToken );
         }
 
         public async Task OnCompileTimeCodeEditingCompletedAsync( CancellationToken cancellationToken = default )
@@ -67,21 +67,21 @@ internal partial class AnalysisProcessEndpoint
         }
 
         public Task<ComputeRefactoringResult> ComputeRefactoringsAsync(
-            string projectId,
+            ProjectKey projectKey,
             string syntaxTreePath,
             TextSpan span,
             CancellationToken cancellationToken )
         {
             var service = this._parent._serviceProvider.GetRequiredService<CodeRefactoringDiscoveryService>();
 
-            return service.ComputeRefactoringsAsync( projectId, syntaxTreePath, span, cancellationToken );
+            return service.ComputeRefactoringsAsync( projectKey, syntaxTreePath, span, cancellationToken );
         }
 
-        public Task<CodeActionResult> ExecuteCodeActionAsync( string projectId, CodeActionModel codeActionModel, CancellationToken cancellationToken )
+        public Task<CodeActionResult> ExecuteCodeActionAsync( ProjectKey projectKey, CodeActionModel codeActionModel, CancellationToken cancellationToken )
         {
             var service = this._parent._serviceProvider.GetRequiredService<CodeActionExecutionService>();
 
-            return service.ExecuteCodeActionAsync( projectId, codeActionModel, cancellationToken );
+            return service.ExecuteCodeActionAsync( projectKey, codeActionModel, cancellationToken );
         }
     }
 }

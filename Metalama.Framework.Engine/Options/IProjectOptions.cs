@@ -12,8 +12,6 @@ namespace Metalama.Framework.Engine.Options
     /// </summary>
     public interface IProjectOptions : IService
     {
-        string ProjectId { get; }
-
         /// <summary>
         /// Gets the path to a file that gets touched when the project is built.
         /// </summary>

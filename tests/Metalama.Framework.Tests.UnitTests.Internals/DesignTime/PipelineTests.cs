@@ -21,7 +21,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
             var compilation = CreateCSharpCompilation( code );
 
             using var domain = new UnloadableCompileTimeDomain();
-            using DesignTimeAspectPipeline pipeline = new( testContext.ServiceProvider, domain, compilation.References, true );
+            using DesignTimeAspectPipeline pipeline = new( testContext.ServiceProvider, domain, compilation, true );
             Assert.True( pipeline.TryExecute( compilation, CancellationToken.None, out _ ) );
         }
 
@@ -43,7 +43,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
             var compilation = CreateCSharpCompilation( code );
 
             using var domain = new UnloadableCompileTimeDomain();
-            using DesignTimeAspectPipeline pipeline = new( testContext.ServiceProvider, domain, compilation.References, true );
+            using DesignTimeAspectPipeline pipeline = new( testContext.ServiceProvider, domain, compilation, true );
             Assert.True( pipeline.TryExecute( compilation, CancellationToken.None, out _ ) );
         }
     }

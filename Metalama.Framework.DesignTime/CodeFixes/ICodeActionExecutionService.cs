@@ -11,5 +11,5 @@ namespace Metalama.Framework.DesignTime.CodeFixes;
 /// </summary>
 public interface ICodeActionExecutionService : IService
 {
-    Task<CodeActionResult> ExecuteCodeActionAsync( string projectId, CodeActionModel codeActionModel, CancellationToken cancellationToken );
+    Task<CodeActionResult> ExecuteCodeActionAsync( ProjectKey projectKey, CodeActionModel codeActionModel, CancellationToken cancellationToken );
 }

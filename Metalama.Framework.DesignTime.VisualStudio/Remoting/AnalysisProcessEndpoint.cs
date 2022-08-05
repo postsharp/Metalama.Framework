@@ -27,8 +27,8 @@ internal partial class AnalysisProcessEndpoint : ServiceEndpoint, IService, IDis
     private readonly string _pipeName;
     private readonly ApiImplementation _service;
     private readonly CancellationTokenSource _startCancellationSource = new();
-    private readonly ConcurrentDictionary<string, string> _connectedClients = new();
-    private readonly ConcurrentDictionary<string, ImmutableDictionary<string, string>> _sourcesForUnconnectedClients = new();
+    private readonly ConcurrentDictionary<ProjectKey, ProjectKey> _connectedClients = new();
+    private readonly ConcurrentDictionary<ProjectKey, ImmutableDictionary<string, string>> _sourcesForUnconnectedClients = new();
     private readonly TaskCompletionSource<bool> _startTask = new();
     private readonly IServiceProvider _serviceProvider;
 
@@ -156,21 +156,21 @@ internal partial class AnalysisProcessEndpoint : ServiceEndpoint, IService, IDis
     public event EventHandler<ClientConnectedEventArgs>? ClientConnected;
 
     public async Task PublishGeneratedSourcesAsync(
-        string projectId,
+        ProjectKey projectKey,
         ImmutableDictionary<string, string> generatedSources,
         CancellationToken cancellationToken = default )
     {
-        if ( this._startTask.Task.IsCompleted && this._connectedClients.ContainsKey( projectId ) )
+        if ( this._startTask.Task.IsCompleted && this._connectedClients.ContainsKey( projectKey ) )
         {
-            this._logger.Trace?.Log( $"Publishing source for the client '{projectId}'." );
-            await this._client!.PublishGeneratedCodeAsync( projectId, generatedSources, cancellationToken );
+            this._logger.Trace?.Log( $"Publishing source for the client '{projectKey}'." );
+            await this._client!.PublishGeneratedCodeAsync( projectKey, generatedSources, cancellationToken );
         }
         else
         {
             Thread.MemoryBarrier();
 
-            this._logger.Trace?.Log( $"Cannot publish source for the client '{projectId}' because it has not connected yet." );
-            this._sourcesForUnconnectedClients[projectId] = generatedSources;
+            this._logger.Trace?.Log( $"Cannot publish source for the client '{projectKey}' because it has not connected yet." );
+            this._sourcesForUnconnectedClients[projectKey] = generatedSources;
         }
     }
 }

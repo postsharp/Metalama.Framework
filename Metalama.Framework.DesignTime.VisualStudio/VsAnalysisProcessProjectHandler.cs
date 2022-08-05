@@ -16,7 +16,10 @@ internal class VsAnalysisProcessProjectHandler : AnalysisProcessProjectHandler
 {
     private readonly AnalysisProcessEndpoint? _serviceHost;
 
-    public VsAnalysisProcessProjectHandler( IServiceProvider serviceProvider, IProjectOptions projectOptions ) : base( serviceProvider, projectOptions )
+    public VsAnalysisProcessProjectHandler( IServiceProvider serviceProvider, IProjectOptions projectOptions, ProjectKey projectKey ) : base(
+        serviceProvider,
+        projectOptions,
+        projectKey )
     {
         this._serviceHost = serviceProvider.GetService<AnalysisProcessEndpoint>();
 
@@ -28,14 +31,14 @@ internal class VsAnalysisProcessProjectHandler : AnalysisProcessProjectHandler
 
     private void OnClientConnected( object? sender, ClientConnectedEventArgs e )
     {
-        if ( e.ProjectId == this.ProjectOptions.ProjectId )
+        if ( e.ProjectKey == this.ProjectKey )
         {
             // When a client connects, we update the touch file to force that client to request the info again.
             this.UpdateTouchFile();
         }
     }
 
-    protected override Task PublishGeneratedSourcesAsync( string projectId, CancellationToken cancellationToken )
+    protected override Task PublishGeneratedSourcesAsync( ProjectKey projectKey, CancellationToken cancellationToken )
     {
         if ( this._serviceHost != null && this.LastSourceGeneratorResult != null )
         {
@@ -43,7 +46,7 @@ internal class VsAnalysisProcessProjectHandler : AnalysisProcessProjectHandler
                 .ToImmutableDictionary( x => x.Key, x => x.Value.GeneratedSyntaxTree.ToString() );
 
             return this._serviceHost.PublishGeneratedSourcesAsync(
-                projectId,
+                projectKey,
                 generatedSources,
                 cancellationToken );
         }

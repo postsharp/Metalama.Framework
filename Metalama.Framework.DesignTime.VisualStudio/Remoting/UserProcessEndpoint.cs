@@ -22,8 +22,8 @@ internal partial class UserProcessEndpoint : ServiceEndpoint, IDisposable, ICode
     private readonly ILogger _logger;
     private readonly string? _pipeName;
     private readonly ApiImplementation _apiImplementation;
-    private readonly ConcurrentDictionary<string, ImmutableDictionary<string, string>> _unhandledSources = new();
-    private readonly ConcurrentDictionary<string, IProjectHandlerCallback> _projectHandlers = new();
+    private readonly ConcurrentDictionary<ProjectKey, ImmutableDictionary<string, string>> _unhandledSources = new();
+    private readonly ConcurrentDictionary<ProjectKey, IProjectHandlerCallback> _projectHandlers = new();
     private readonly TaskCompletionSource<bool> _connectTask = new();
 
     private NamedPipeClientStream? _pipeStream;
@@ -66,11 +66,11 @@ internal partial class UserProcessEndpoint : ServiceEndpoint, IDisposable, ICode
         }
     }
 
-    public async Task RegisterProjectHandlerAsync( string projectId, IProjectHandlerCallback callback, CancellationToken cancellationToken = default )
+    public async Task RegisterProjectHandlerAsync( ProjectKey projectKey, IProjectHandlerCallback callback, CancellationToken cancellationToken = default )
     {
         await this._connectTask.Task.WithCancellation( cancellationToken );
-        this._projectHandlers[projectId] = callback;
-        await (await this.GetServerApiAsync( cancellationToken )).OnProjectHandlerReadyAsync( projectId, cancellationToken );
+        this._projectHandlers[projectKey] = callback;
+        await (await this.GetServerApiAsync( cancellationToken )).OnProjectHandlerReadyAsync( projectKey, cancellationToken );
     }
 
     public async ValueTask<IAnalysisProcessApi> GetServerApiAsync( CancellationToken cancellationToken = default )
@@ -82,8 +82,8 @@ internal partial class UserProcessEndpoint : ServiceEndpoint, IDisposable, ICode
 
     private static string GetPipeName() => AnalysisProcessEndpoint.GetPipeName( Process.GetCurrentProcess().Id );
 
-    public bool TryGetUnhandledSources( string projectId, out ImmutableDictionary<string, string>? sources )
-        => this._unhandledSources.TryRemove( projectId, out sources );
+    public bool TryGetUnhandledSources( ProjectKey projectKey, out ImmutableDictionary<string, string>? sources )
+        => this._unhandledSources.TryRemove( projectKey, out sources );
 
     public void Dispose()
     {
@@ -94,7 +94,7 @@ internal partial class UserProcessEndpoint : ServiceEndpoint, IDisposable, ICode
     public event Action<bool>? IsEditingCompileTimeCodeChanged;
 
     async Task<ComputeRefactoringResult> ICodeRefactoringDiscoveryService.ComputeRefactoringsAsync(
-        string projectId,
+        ProjectKey projectKey,
         string syntaxTreePath,
         TextSpan span,
         CancellationToken cancellationToken )
@@ -102,19 +102,19 @@ internal partial class UserProcessEndpoint : ServiceEndpoint, IDisposable, ICode
         var peer = await this.GetServerApiAsync( cancellationToken );
 
         return await peer.ComputeRefactoringsAsync(
-            projectId,
+            projectKey,
             syntaxTreePath,
             span,
             cancellationToken );
     }
 
     async Task<CodeActionResult> ICodeActionExecutionService.ExecuteCodeActionAsync(
-        string projectId,
+        ProjectKey projectKey,
         CodeActionModel codeActionModel,
         CancellationToken cancellationToken )
     {
         var peer = await this.GetServerApiAsync( cancellationToken );
 
-        return await peer.ExecuteCodeActionAsync( projectId, codeActionModel, cancellationToken );
+        return await peer.ExecuteCodeActionAsync( projectKey, codeActionModel, cancellationToken );
     }
 }

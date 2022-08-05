@@ -4,7 +4,6 @@
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Options;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -37,8 +36,6 @@ namespace Metalama.Framework.Workspaces
             this.TargetFramework = targetFramework;
             this.Configuration = msbuildProject.Properties.FirstOrDefault( p => p.Name == "Configuration" )?.EvaluatedValue;
         }
-
-        public override string ProjectId { get; } = Guid.NewGuid().ToString();
 
         public override string? AssemblyName => this._compilation.AssemblyName;
 

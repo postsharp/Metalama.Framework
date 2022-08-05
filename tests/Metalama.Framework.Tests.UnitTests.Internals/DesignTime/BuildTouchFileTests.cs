@@ -90,7 +90,7 @@ using Metalama.Framework.Code;
             using DesignTimeAspectPipeline pipeline = new(
                 serviceProvider,
                 domain,
-                compilation1.References,
+                compilation1,
                 true );
 
             pipeline.PipelineResumed += ( _, _ ) =>

@@ -77,7 +77,7 @@ namespace Ns { class C {} }
                 .ToDictionary( GetName, d => d );
 
             this._domain = new UnloadableCompileTimeDomain();
-            this._pipeline = new DesignTimeAspectPipeline( testContext.ServiceProvider, this._domain, this._compilation.RoslynCompilation.References, true );
+            this._pipeline = new DesignTimeAspectPipeline( testContext.ServiceProvider, this._domain, this._compilation.RoslynCompilation, true );
 
             // Force the pipeline configuration to execute so the tests can do queries over it.
             TaskHelper.RunAndWait(

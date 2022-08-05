@@ -47,6 +47,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
         /// </summary>
         public int PipelineExecutionCount => this._pipelineExecutionCount;
 
+        public ProjectKey ProjectKey { get; }
+
         /// <summary>
         /// Gets an object that can be locked to get exclusive access to
         /// the current instance.
@@ -76,10 +78,18 @@ namespace Metalama.Framework.DesignTime.Pipeline
         public DesignTimeAspectPipeline(
             ServiceProvider serviceProvider,
             CompileTimeDomain domain,
+            Compilation compilation,
+            bool isTest ) : this( serviceProvider, domain, ProjectKey.FromCompilation( compilation ), compilation.References, isTest ) { }
+
+        public DesignTimeAspectPipeline(
+            ServiceProvider serviceProvider,
+            CompileTimeDomain domain,
+            ProjectKey projectKey,
             IEnumerable<MetadataReference> metadataReferences,
             bool isTest )
             : base( serviceProvider.WithProjectScopedServices( metadataReferences ), isTest, domain )
         {
+            this.ProjectKey = projectKey;
             this.Factory = this.ServiceProvider.GetService<DesignTimeAspectPipelineFactory>();
 
             this._currentState = new PipelineState( this );
@@ -120,7 +130,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
 
             // There was an external build. Touch the files to re-run the analyzer.
-            this.Logger.Trace?.Log( $"Detected an external build for project '{this.ProjectOptions.ProjectId}'." );
+            this.Logger.Trace?.Log( $"Detected an external build for project '{this.ProjectKey}'." );
 
             _ = this.ResumeAsync( true, CancellationToken.None );
         }
@@ -131,7 +141,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             {
                 if ( this.Status != DesignTimeAspectPipelineStatus.Paused )
                 {
-                    this.Logger.Trace?.Log( $"A Resume request was requested for project '{this.ProjectOptions.ProjectId}', but the pipeline was not paused." );
+                    this.Logger.Trace?.Log( $"A Resume request was requested for project '{this.ProjectKey}', but the pipeline was not paused." );
 
                     return;
                 }
@@ -155,7 +165,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 if ( hasRelevantChange )
                 {
                     this.Logger.Trace?.Log(
-                        $"Resuming the pipeline for project '{this.ProjectOptions.ProjectId}'. The following files had compile-time changes: {string.Join( ", ", filesToTouch.Select( x => $"'{x}'" ) )} " );
+                        $"Resuming the pipeline for project '{this.ProjectKey}'. The following files had compile-time changes: {string.Join( ", ", filesToTouch.Select( x => $"'{x}'" ) )} " );
 
                     this.SetState( new PipelineState( this ) );
                     this.PipelineResumed?.Invoke( this, EventArgs.Empty );
@@ -172,8 +182,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 }
                 else
                 {
-                    this.Logger.Trace?.Log(
-                        $"A Resume request was requested for project '{this.ProjectOptions.ProjectId}', but there was no relevant change." );
+                    this.Logger.Trace?.Log( $"A Resume request was requested for project '{this.ProjectKey}', but there was no relevant change." );
                 }
             }
         }
@@ -513,12 +522,12 @@ namespace Metalama.Framework.DesignTime.Pipeline
         {
             if ( this._sync.CurrentCount < 1 )
             {
-                this.Logger.Trace?.Log( $"Waiting for lock on '{this.ProjectOptions.ProjectId}'." );
+                this.Logger.Trace?.Log( $"Waiting for lock on '{this.ProjectKey}'." );
             }
 
             await this._sync.WaitAsync( cancellationToken );
 
-            this.Logger.Trace?.Log( $"Lock on '{this.ProjectOptions.ProjectId}' acquired." );
+            this.Logger.Trace?.Log( $"Lock on '{this.ProjectKey}' acquired." );
 
             return new Lock( this );
         }
@@ -534,7 +543,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             public void Dispose()
             {
-                this._parent.Logger.Trace?.Log( $"Releasing lock on '{this._parent.ProjectOptions.ProjectId}'." );
+                this._parent.Logger.Trace?.Log( $"Releasing lock on '{this._parent.ProjectKey}'." );
                 this._parent._sync.Release();
             }
         }

@@ -43,7 +43,7 @@ public class C {}
 
             var compilation1 = testContext.CreateCompilationModel( code1 );
 
-            var pipeline = new DesignTimeAspectPipeline( testContext.ServiceProvider, domain, compilation1.RoslynCompilation.References, true );
+            var pipeline = new DesignTimeAspectPipeline( testContext.ServiceProvider, domain, compilation1.RoslynCompilation, true );
 
             Assert.True( pipeline.TryExecute( compilation1.RoslynCompilation, CancellationToken.None, out var compilationResult1 ) );
 
@@ -92,7 +92,7 @@ public class Aspect2 : TypeAspect
 
             var targetTree1 = compilation1.RoslynCompilation.SyntaxTrees.Single( t => t.FilePath == "target.cs" );
 
-            var pipeline = new DesignTimeAspectPipeline( testContext.ServiceProvider, domain, compilation1.RoslynCompilation.References, true );
+            var pipeline = new DesignTimeAspectPipeline( testContext.ServiceProvider, domain, compilation1.RoslynCompilation, true );
             Assert.True( pipeline.TryExecute( compilation1.RoslynCompilation, CancellationToken.None, out var compilationResult1 ) );
 
             Assert.False( compilationResult1!.TransformationResult.Validators.IsEmpty );

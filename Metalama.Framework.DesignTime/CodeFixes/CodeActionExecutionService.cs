@@ -21,9 +21,9 @@ public class CodeActionExecutionService : ICodeActionExecutionService
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "CodeAction" );
     }
 
-    public async Task<CodeActionResult> ExecuteCodeActionAsync( string projectId, CodeActionModel codeActionModel, CancellationToken cancellationToken )
+    public async Task<CodeActionResult> ExecuteCodeActionAsync( ProjectKey projectKey, CodeActionModel codeActionModel, CancellationToken cancellationToken )
     {
-        if ( !this._pipelineFactory.TryGetPipeline( projectId, out var pipeline ) )
+        if ( !this._pipelineFactory.TryGetPipeline( projectKey, out var pipeline ) )
         {
             this._logger.Error?.Log( "Cannot get the pipeline." );
 
@@ -56,7 +56,7 @@ public class CodeActionExecutionService : ICodeActionExecutionService
 
         var compilationModel = CompilationModel.CreateInitialInstance( configuration.ProjectModel, partialCompilation );
 
-        var executionContext = new CodeActionExecutionContext( configuration.ServiceProvider, compilationModel, this._logger, projectId );
+        var executionContext = new CodeActionExecutionContext( configuration.ServiceProvider, compilationModel, this._logger, projectKey );
 
         return await codeActionModel.ExecuteAsync( executionContext, cancellationToken );
     }

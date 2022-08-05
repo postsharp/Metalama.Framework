@@ -32,7 +32,10 @@ public class AnalysisProcessProjectHandler : ProjectHandler
 
     public SyntaxTreeSourceGeneratorResult? LastSourceGeneratorResult { get; private set; }
 
-    public AnalysisProcessProjectHandler( IServiceProvider serviceProvider, IProjectOptions projectOptions ) : base( serviceProvider, projectOptions )
+    public AnalysisProcessProjectHandler( IServiceProvider serviceProvider, IProjectOptions projectOptions, ProjectKey projectKey ) : base(
+        serviceProvider,
+        projectOptions,
+        projectKey )
     {
         this._pipelineFactory = this.ServiceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
         this._logger = this.ServiceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
@@ -85,7 +88,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
         {
             // We don't have sources in the cache.
 
-            this._logger.Trace?.Log( $"No generated sources in the cache for project '{this.ProjectOptions.ProjectId}'. Need to generate them synchronously." );
+            this._logger.Trace?.Log( $"No generated sources in the cache for project '{this.ProjectKey}'. Need to generate them synchronously." );
 
             if ( TaskHelper.RunAndWait( () => this.ComputeAsync( compilation, cancellationToken ), cancellationToken ) )
             {
@@ -164,12 +167,12 @@ public class AnalysisProcessProjectHandler : ProjectHandler
     /// </summary>
     private async Task PublishAsync( CancellationToken cancellationToken )
     {
-        this._logger.Trace?.Log( $"{this.GetType().Name}.Publish('{this.ProjectOptions.ProjectId}'" );
+        this._logger.Trace?.Log( $"{this.GetType().Name}.Publish('{this.ProjectKey}'" );
 
         cancellationToken.ThrowIfCancellationRequested();
 
         // Publish to the interactive process. We need to await before we change the touch file.
-        await this.PublishGeneratedSourcesAsync( this.ProjectOptions.ProjectId, cancellationToken );
+        await this.PublishGeneratedSourcesAsync( this.ProjectKey, cancellationToken );
 
         // Notify Roslyn that we have changes.
         if ( this.ProjectOptions.SourceGeneratorTouchFile == null )
@@ -193,7 +196,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
     /// <summary>
     /// When implemented by a derived class, publishes the generated source code to the client.
     /// </summary>
-    protected virtual Task PublishGeneratedSourcesAsync( string projectId, CancellationToken cancellationToken ) => Task.CompletedTask;
+    protected virtual Task PublishGeneratedSourcesAsync( ProjectKey projectKey, CancellationToken cancellationToken ) => Task.CompletedTask;
 
     protected override void Dispose( bool disposing )
     {

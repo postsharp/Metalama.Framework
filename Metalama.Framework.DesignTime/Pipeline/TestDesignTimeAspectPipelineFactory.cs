@@ -21,8 +21,6 @@ namespace Metalama.Framework.DesignTime.Pipeline
             this._projectOptions = serviceProvider.GetRequiredService<IProjectOptions>();
         }
 
-        protected override string GetProjectId( IProjectOptions projectOptions, Compilation compilation ) => compilation.AssemblyName!;
-
         protected override ValueTask<DesignTimeAspectPipeline?> GetPipelineAndWaitAsync( Compilation compilation, CancellationToken cancellationToken )
         {
             return new ValueTask<DesignTimeAspectPipeline?>( this.GetOrCreatePipeline( this._projectOptions, compilation, CancellationToken.None ) );

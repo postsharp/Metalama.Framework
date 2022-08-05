@@ -67,9 +67,6 @@ namespace Metalama.Framework.Engine.Options
             this( new OptionsAdapter( options ), plugIns, transformerOptions ) { }
 
         [Memo]
-        public override string ProjectId => this.GetStringOption( "MetalamaProjectId" ) ?? this._defaultProjectId;
-
-        [Memo]
         public override string? BuildTouchFile => this.GetStringOption( "MetalamaBuildTouchFile" );
 
         [Memo]

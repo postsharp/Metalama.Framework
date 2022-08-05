@@ -30,7 +30,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
     internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineConfigurationProvider,
                                                      ICompileTimeCodeEditingStatusService
     {
-        private readonly ConcurrentDictionary<string, DesignTimeAspectPipeline> _pipelinesByProjectId = new();
+        private readonly ConcurrentDictionary<ProjectKey, DesignTimeAspectPipeline> _pipelinesByProjectKey = new();
         private readonly ILogger _logger;
         private readonly ConcurrentQueue<TaskCompletionSource<DesignTimeAspectPipeline>> _newPipelineListeners = new();
         private readonly CancellationToken _globalCancellationToken = CancellationToken.None;
@@ -51,8 +51,6 @@ namespace Metalama.Framework.DesignTime.Pipeline
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
         }
 
-        protected virtual string GetProjectId( IProjectOptions projectOptions, Compilation compilation ) => projectOptions.ProjectId;
-
         /// <summary>
         /// Gets the pipeline for a given project, and creates it if necessary.
         /// </summary>
@@ -68,18 +66,18 @@ namespace Metalama.Framework.DesignTime.Pipeline
             // We lock the dictionary because the ConcurrentDictionary does not guarantee that the creation delegate
             // is called only once, and we prefer a single instance for the simplicity of debugging. 
 
-            var projectId = this.GetProjectId( projectOptions, compilation );
+            var compilationId = ProjectKey.FromCompilation( compilation );
 
-            if ( this._pipelinesByProjectId.TryGetValue( projectId, out var pipeline ) )
+            if ( this._pipelinesByProjectKey.TryGetValue( compilationId, out var pipeline ) )
             {
                 // TODO: we must validate that the project options and metadata references are still identical to those cached, otherwise we should create a new pipeline.
                 return pipeline;
             }
             else
             {
-                lock ( this._pipelinesByProjectId )
+                lock ( this._pipelinesByProjectKey )
                 {
-                    if ( this._pipelinesByProjectId.TryGetValue( projectId, out pipeline ) )
+                    if ( this._pipelinesByProjectKey.TryGetValue( compilationId, out pipeline ) )
                     {
                         cancellationToken.ThrowIfCancellationRequested();
 
@@ -87,11 +85,11 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     }
 
                     var serviceProvider = this._serviceProvider.WithServices( projectOptions, this );
-                    pipeline = new DesignTimeAspectPipeline( serviceProvider, this.Domain, compilation.References, this._isTest );
+                    pipeline = new DesignTimeAspectPipeline( serviceProvider, this.Domain, compilationId, compilation.References, this._isTest );
                     pipeline.PipelineResumed += this.OnPipelineResumed;
                     pipeline.StatusChanged += this.OnPipelineStatusChanged;
 
-                    if ( !this._pipelinesByProjectId.TryAdd( projectId, pipeline ) )
+                    if ( !this._pipelinesByProjectKey.TryAdd( compilationId, pipeline ) )
                     {
                         throw new AssertionFailedException();
                     }
@@ -116,9 +114,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
         {
             Logger.DesignTime.Trace?.Log( "Received ICompileTimeCodeEditingStatusService.OnEditingCompileTimeCodeCompleted." );
 
-            var tasks = new List<Task>( this._pipelinesByProjectId.Values.Count );
+            var tasks = new List<Task>( this._pipelinesByProjectKey.Values.Count );
 
-            foreach ( var pipeline in this._pipelinesByProjectId.Values )
+            foreach ( var pipeline in this._pipelinesByProjectKey.Values )
             {
                 tasks.Add( pipeline.ResumeAsync( true, this._globalCancellationToken ).AsTask() );
             }
@@ -160,7 +158,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         {
             // If a build has started, we have to invalidate the whole cache because we have allowed
             // our cache to become inconsistent when we started to have an outdated pipeline configuration.
-            foreach ( var pipeline in this._pipelinesByProjectId.Values )
+            foreach ( var pipeline in this._pipelinesByProjectKey.Values )
             {
                 _ = pipeline.InvalidateCacheAsync( this._globalCancellationToken );
             }
@@ -194,7 +192,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             return this.ExecuteAsync( compilation, cancellationToken );
         }
 
-        protected virtual bool HasMetalamaReference( Compilation compilation ) => ProjectIdHelper.TryGetProjectId( compilation, out _ );
+        protected virtual bool HasMetalamaReference( Compilation compilation ) => ProjectKey.FromCompilation( compilation ).HasMetalama;
 
         private async Task<CompilationResult?> ExecuteAsync( Compilation compilation, CancellationToken cancellationToken )
         {
@@ -255,28 +253,24 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         public void Dispose()
         {
-            foreach ( var designTimeAspectPipeline in this._pipelinesByProjectId.Values )
+            foreach ( var designTimeAspectPipeline in this._pipelinesByProjectKey.Values )
             {
                 designTimeAspectPipeline.Dispose();
             }
 
-            this._pipelinesByProjectId.Clear();
+            this._pipelinesByProjectKey.Clear();
             this.Domain.Dispose();
         }
 
         protected virtual async ValueTask<DesignTimeAspectPipeline?> GetPipelineAndWaitAsync( Compilation compilation, CancellationToken cancellationToken )
         {
-            if ( !ProjectIdHelper.TryGetProjectId( compilation, out var projectId ) )
-            {
-                // The compilation does not reference our package.
-                return null;
-            }
+            var projectKey = ProjectKey.FromCompilation( compilation );
 
             DesignTimeAspectPipeline? pipeline;
 
-            while ( !this._pipelinesByProjectId.TryGetValue( projectId, out pipeline ) )
+            while ( !this._pipelinesByProjectKey.TryGetValue( projectKey, out pipeline ) )
             {
-                this._logger.Trace?.Log( $"Awaiting for the pipeline '{projectId}'." );
+                this._logger.Trace?.Log( $"Awaiting for the pipeline '{projectKey}'." );
 
                 var taskCompletionSource = new TaskCompletionSource<DesignTimeAspectPipeline>();
 
@@ -291,11 +285,11 @@ namespace Metalama.Framework.DesignTime.Pipeline
             return pipeline;
         }
 
-        public bool TryGetPipeline( string projectId, [NotNullWhen( true )] out DesignTimeAspectPipeline? pipeline )
+        public bool TryGetPipeline( ProjectKey projectKey, [NotNullWhen( true )] out DesignTimeAspectPipeline? pipeline )
         {
-            if ( !this._pipelinesByProjectId.TryGetValue( projectId, out pipeline ) )
+            if ( !this._pipelinesByProjectKey.TryGetValue( projectKey, out pipeline ) )
             {
-                this._logger.Trace?.Log( $"Cannot get the pipeline for project '{projectId}': it has not been created yet." );
+                this._logger.Trace?.Log( $"Cannot get the pipeline for project '{projectKey}': it has not been created yet." );
 
                 return false;
             }

@@ -46,8 +46,6 @@ namespace Metalama.Framework.Engine.Testing
             this.FormatCompileTimeCode = formatCompileTimeCode;
         }
 
-        public override string ProjectId { get; } = Guid.NewGuid().ToString();
-
         public TestPathOptions PathOptions { get; }
 
         private static Lazy<string> CreateDirectoryLazy( string path )

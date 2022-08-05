@@ -56,7 +56,7 @@ namespace Metalama.Framework.DesignTime
             this._logger.Trace?.Log( $"Registered {fixableDiagnosticIds.Length} fixable diagnostic ids." );
         }
 
-        public override Task RegisterCodeFixesAsync( CodeFixContext context )
+        public override async Task RegisterCodeFixesAsync( CodeFixContext context )
         {
             this._logger.Trace?.Log( $"DesignTimeCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}')" );
 
@@ -65,12 +65,12 @@ namespace Metalama.Framework.DesignTime
 
             var projectOptions = MSBuildProjectOptions.GetInstance( context.Document.Project );
 
-            if ( string.IsNullOrEmpty( projectOptions.ProjectId ) )
+            if ( !projectOptions.IsFrameworkEnabled )
             {
                 this._logger.Trace?.Log(
                     "DesignTimeCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}'): not a Metalama project." );
 
-                return Task.CompletedTask;
+                return;
             }
 
             if ( context.Diagnostics.Any( d => d.Id == GeneralDiagnosticDescriptors.TypeNotPartial.Id ) )
@@ -103,14 +103,21 @@ namespace Metalama.Framework.DesignTime
                 if ( codeFixes.IsDefault )
                 {
                     // This means the call was not successful.
-                    return Task.CompletedTask;
+                    return;
+                }
+
+                var compilation = await context.Document.Project.GetCompilationAsync( context.CancellationToken );
+
+                if ( compilation == null )
+                {
+                    return;
                 }
 
                 var invocationContext = new CodeActionInvocationContext(
                     this._codeActionExecutionService,
                     context.Document,
                     this._logger,
-                    projectOptions.ProjectId );
+                    ProjectKey.FromCompilation( compilation ) );
 
                 foreach ( var fix in codeFixes )
                 {
@@ -128,8 +135,6 @@ namespace Metalama.Framework.DesignTime
                 this._logger.Trace?.Log(
                     "DesignTimeCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}'): no relevant diagnostic ID detected" );
             }
-
-            return Task.CompletedTask;
         }
 
         // See https://github.com/dotnet/roslyn/blob/master/docs/analyzers/FixAllProvider.md for more information on Fix All Providers

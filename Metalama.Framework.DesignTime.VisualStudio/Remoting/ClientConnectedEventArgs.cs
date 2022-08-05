@@ -5,10 +5,10 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
 
 internal class ClientConnectedEventArgs : EventArgs
 {
-    public string ProjectId { get; }
+    public ProjectKey ProjectKey { get; }
 
-    public ClientConnectedEventArgs( string projectId )
+    public ClientConnectedEventArgs( ProjectKey projectKey )
     {
-        this.ProjectId = projectId;
+        this.ProjectKey = projectKey;
     }
 }

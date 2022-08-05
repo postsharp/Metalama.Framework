@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.Contracts;
 using Metalama.Framework.DesignTime.Preview;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting;
@@ -19,7 +20,7 @@ public class RemotingTests
     [Fact]
     public async Task PublishGeneratedSourceAfterHelloAsync()
     {
-        const string projectId = "myProjectIdId";
+        var projectKey = ProjectKey.CreateTest( "myProjectId" );
         const string sourceTreeName = "mySource";
 
         var pipeName = $"Metalama_Test_{Guid.NewGuid()}";
@@ -30,18 +31,18 @@ public class RemotingTests
         server.Start();
         await client.ConnectAsync();
 
-        await client.RegisterProjectHandlerAsync( projectId, projectHandler );
+        await client.RegisterProjectHandlerAsync( projectKey, projectHandler );
 
-        await server.PublishGeneratedSourcesAsync( projectId, ImmutableDictionary.Create<string, string>().Add( sourceTreeName, "content" ) );
+        await server.PublishGeneratedSourcesAsync( projectKey, ImmutableDictionary.Create<string, string>().Add( sourceTreeName, "content" ) );
 
-        Assert.Single( projectHandler.GeneratedCodeEvents, x => x.ProjectId == projectId );
+        Assert.Single( projectHandler.GeneratedCodeEvents, x => x.ProjectKey == projectKey );
         Assert.Single( projectHandler.GeneratedCodeEvents[0].Sources, x => x.Key == sourceTreeName );
     }
 
     [Fact]
     public async Task PublishGeneratedSourceBeforeHelloAsync()
     {
-        const string projectId = "myProjectIdId";
+        var projectKey = ProjectKey.CreateTest( "myProjectId" );
         const string sourceTreeName = "mySource";
 
         // Start the server.
@@ -55,20 +56,20 @@ public class RemotingTests
         await client.ConnectAsync();
 
         // Publish from the server.
-        await server.PublishGeneratedSourcesAsync( projectId, ImmutableDictionary.Create<string, string>().Add( sourceTreeName, "content" ) );
+        await server.PublishGeneratedSourcesAsync( projectKey, ImmutableDictionary.Create<string, string>().Add( sourceTreeName, "content" ) );
 
         // Finish the connection from the client. We should receive the message that were sent before saying hello.
-        await client.RegisterProjectHandlerAsync( projectId, projectHandler );
+        await client.RegisterProjectHandlerAsync( projectKey, projectHandler );
 
         // Asserts.
-        Assert.Single( projectHandler.GeneratedCodeEvents, x => x.ProjectId == projectId );
+        Assert.Single( projectHandler.GeneratedCodeEvents, x => x.ProjectKey == projectKey );
         Assert.Single( projectHandler.GeneratedCodeEvents[0].Sources, x => x.Key == sourceTreeName );
     }
 
     [Fact]
     public async Task PublishGeneratedSourceBeforeConnectAsync()
     {
-        const string projectId = "myProjectIdId";
+        var projectKey = ProjectKey.CreateTest( "myProjectId" );
         const string sourceTreeName = "mySource";
 
         // Start the server.
@@ -77,16 +78,16 @@ public class RemotingTests
         server.Start();
 
         // Publish from the server.
-        await server.PublishGeneratedSourcesAsync( projectId, ImmutableDictionary.Create<string, string>().Add( sourceTreeName, "content" ) );
+        await server.PublishGeneratedSourcesAsync( projectKey, ImmutableDictionary.Create<string, string>().Add( sourceTreeName, "content" ) );
 
         // Start the client.
         using var client = new UserProcessEndpoint( ServiceProvider.Empty, pipeName );
         var projectHandler = new TestProjectHandler();
         await client.ConnectAsync();
-        await client.RegisterProjectHandlerAsync( projectId, projectHandler );
+        await client.RegisterProjectHandlerAsync( projectKey, projectHandler );
 
         // Asserts.
-        Assert.Single( projectHandler.GeneratedCodeEvents, x => x.ProjectId == projectId );
+        Assert.Single( projectHandler.GeneratedCodeEvents, x => x.ProjectKey == projectKey );
         Assert.Single( projectHandler.GeneratedCodeEvents[0].Sources, x => x.Key == sourceTreeName );
     }
 
@@ -101,14 +102,18 @@ public class RemotingTests
         using var client = new UserProcessEndpoint( ServiceProvider.Empty, pipeName );
         await client.ConnectAsync();
 
-        var result = await (await client.GetServerApiAsync()).PreviewTransformationAsync( "projectId", "syntaxTreeName", CancellationToken.None );
+        var result = await (await client.GetServerApiAsync()).PreviewTransformationAsync(
+            ProjectKey.CreateTest( "myProjectId" ),
+            "syntaxTreeName",
+            CancellationToken.None );
+
         Assert.True( result.IsSuccessful );
         Assert.Equal( "Transformed code", result.TransformedSourceText );
     }
 
     private class PreviewImpl : ITransformationPreviewServiceImpl
     {
-        public Task<PreviewTransformationResult> PreviewTransformationAsync( string projectId, string syntaxTreeName, CancellationToken cancellationToken )
+        public Task<PreviewTransformationResult> PreviewTransformationAsync( ProjectKey projectKey, string syntaxTreeName, CancellationToken cancellationToken )
         {
             return Task.FromResult( new PreviewTransformationResult( true, "Transformed code", null ) );
         }
@@ -116,11 +121,14 @@ public class RemotingTests
 
     private class TestProjectHandler : IProjectHandlerCallback
     {
-        public List<(string ProjectId, ImmutableDictionary<string, string> Sources)> GeneratedCodeEvents { get; } = new();
+        public List<(ProjectKey ProjectKey, ImmutableDictionary<string, string> Sources)> GeneratedCodeEvents { get; } = new();
 
-        public Task PublishGeneratedCodeAsync( string projectId, ImmutableDictionary<string, string> sources, CancellationToken cancellationToken = default )
+        public Task PublishGeneratedCodeAsync(
+            ProjectKey projectKey,
+            ImmutableDictionary<string, string> sources,
+            CancellationToken cancellationToken = default )
         {
-            this.GeneratedCodeEvents.Add( (projectId, sources) );
+            this.GeneratedCodeEvents.Add( (projectKey, sources) );
 
             return Task.CompletedTask;
         }

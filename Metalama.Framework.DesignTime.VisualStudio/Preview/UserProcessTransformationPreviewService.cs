@@ -22,14 +22,11 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Preview
             SyntaxTree syntaxTree,
             CancellationToken cancellationToken )
         {
-            if ( !ProjectIdHelper.TryGetProjectId( compilation, out var projectId ) )
-            {
-                return PreviewTransformationResult.Failure( "This is not a Metalama project." );
-            }
+            var projectKey = ProjectKey.FromCompilation( compilation );
 
             var transformationResult =
                 await (await this._userProcessEndpoint.GetServerApiAsync( cancellationToken )).PreviewTransformationAsync(
-                    projectId,
+                    projectKey,
                     syntaxTree.FilePath,
                     cancellationToken );
 

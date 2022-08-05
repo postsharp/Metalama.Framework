@@ -35,7 +35,7 @@ internal class ApplyLiveTemplateCodeActionModel : CodeActionModel
         var compilation = executionContext.Compilation.RoslynCompilation;
         var pipelineFactory = executionContext.ServiceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
 
-        if ( !pipelineFactory.TryGetPipeline( executionContext.ProjectId, out var pipeline ) )
+        if ( !pipelineFactory.TryGetPipeline( executionContext.ProjectKey, out var pipeline ) )
         {
             return CodeActionResult.Empty;
         }
