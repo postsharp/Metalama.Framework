@@ -303,7 +303,7 @@ namespace Metalama.Framework.Engine.Diagnostics
             new(
                 "LAMA00052",
                 Error,
-                "The C# language '{0}' version is not supported. Change the <LangVersion> property of your project file to one of the following supported values: {1}.",
+                "The C# language version '{0}' is not supported. Change the <LangVersion> property of your project file to one of the following supported values: {1}.",
                 "The selected C# language version is not supported",
                 _category );
 
