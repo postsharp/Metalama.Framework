@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.TransformTemplateAccessibility
 {
+
 #pragma warning disable CS0067, CS8618, CA1822, CS0162, CS0169, CS0414
     /*
      
@@ -24,17 +25,17 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.TransformTempl
 
 
         [Template]
-[global::Metalama.Framework.Aspects.AccessibilityAttribute(global::Metalama.Framework.Code.Accessibility.Private)]
+[global::Metalama.Framework.Aspects.CompiledTemplateAttribute(Accessibility=global::Metalama.Framework.Code.Accessibility.Private)]
 public void MethodTemplate() => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
 
 
         [Template]
-[global::Metalama.Framework.Aspects.AccessibilityAttribute(global::Metalama.Framework.Code.Accessibility.Internal)]
-public int AutomaticPropertyTemplate { [global::Metalama.Framework.Aspects.AccessibilityAttribute(global::Metalama.Framework.Code.Accessibility.Internal)] get; [global::Metalama.Framework.Aspects.AccessibilityAttribute(global::Metalama.Framework.Code.Accessibility.Private)] set; }
+[global::Metalama.Framework.Aspects.CompiledTemplateAttribute(Accessibility=global::Metalama.Framework.Code.Accessibility.Internal)]
+public int AutomaticPropertyTemplate { [global::Metalama.Framework.Aspects.CompiledTemplateAttribute(Accessibility=global::Metalama.Framework.Code.Accessibility.Internal)] get; [global::Metalama.Framework.Aspects.CompiledTemplateAttribute(Accessibility=global::Metalama.Framework.Code.Accessibility.Private)] set; }
 
         [Template]
-[global::Metalama.Framework.Aspects.AccessibilityAttribute(global::Metalama.Framework.Code.Accessibility.Internal)]
-public int ExplicitPropertyTemplate { [global::Metalama.Framework.Aspects.AccessibilityAttribute(global::Metalama.Framework.Code.Accessibility.Internal)] get => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time."); [global::Metalama.Framework.Aspects.AccessibilityAttribute(global::Metalama.Framework.Code.Accessibility.Private)] set => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time."); }
+[global::Metalama.Framework.Aspects.CompiledTemplateAttribute(Accessibility=global::Metalama.Framework.Code.Accessibility.Internal)]
+public int ExplicitPropertyTemplate { [global::Metalama.Framework.Aspects.CompiledTemplateAttribute(Accessibility=global::Metalama.Framework.Code.Accessibility.Internal)] get => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time."); [global::Metalama.Framework.Aspects.CompiledTemplateAttribute(Accessibility=global::Metalama.Framework.Code.Accessibility.Private)] set => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time."); }
 
 
         [Template]
@@ -43,6 +44,7 @@ public int ExplicitPropertyTemplate { [global::Metalama.Framework.Aspects.Access
         [Template]
         internal event EventHandler? EventTemplate;
     }
+
 
 #pragma warning restore CS0067, CS8618, CA1822, CS0162, CS0169, CS0414
 }
