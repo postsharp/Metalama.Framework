@@ -17,7 +17,9 @@ namespace Metalama.SourceTransformer
     {
         public void Execute( TransformerContext context )
         {
-            var changeDynamicToObject = context.AnalyzerConfigOptionsProvider.GlobalOptions.TryGetValue( "build_property.ChangeDynamicToObject", out var changeDynamicToObjectStr )
+            var changeDynamicToObject = context.AnalyzerConfigOptionsProvider.GlobalOptions.TryGetValue(
+                                            "build_property.ChangeDynamicToObject",
+                                            out var changeDynamicToObjectStr )
                                         && bool.Parse( changeDynamicToObjectStr );
 
             var rewriter = new Rewriter( changeDynamicToObject, context.Compilation );

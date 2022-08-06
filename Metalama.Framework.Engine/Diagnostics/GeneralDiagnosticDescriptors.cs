@@ -299,6 +299,14 @@ namespace Metalama.Framework.Engine.Diagnostics
                 "Metalama does not support the 'preview' C# language version",
                 _category );
 
+        internal static readonly DiagnosticDefinition<(string SelectedVersion, string[] SupportedVersions)> CSharpVersionNotSupported =
+            new(
+                "LAMA00052",
+                Error,
+                "The C# language version '{0}' is not supported. Change the <LangVersion> property of your project file to one of the following supported values: {1}.",
+                "The selected C# language version is not supported",
+                _category );
+
         // TODO: Use formattable string (C# does not seem to find extension methods).
         public static readonly DiagnosticDefinition<string>
             UnsupportedFeature = new(
