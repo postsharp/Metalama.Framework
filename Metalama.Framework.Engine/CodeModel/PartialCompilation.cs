@@ -137,15 +137,16 @@ namespace Metalama.Framework.Engine.CodeModel
                             break;
 
                         case SyntaxTreeTransformationKind.Replace:
-                            compilation = compilation.ReplaceSyntaxTree( transformation.OldTree.AssertNotNull(), transformation.NewTree );
+                            var newTree = transformation.NewTree.AssertNotNull();
+                            compilation = compilation.ReplaceSyntaxTree( transformation.OldTree.AssertNotNull(), newTree );
 
                             if ( initialTree != null )
                             {
-                                transformationFromInitialCompilation = SyntaxTreeTransformation.ReplaceTree( initialTree, transformation.NewTree );
+                                transformationFromInitialCompilation = SyntaxTreeTransformation.ReplaceTree( initialTree, newTree );
                             }
                             else
                             {
-                                transformationFromInitialCompilation = SyntaxTreeTransformation.AddTree( transformation.NewTree );
+                                transformationFromInitialCompilation = SyntaxTreeTransformation.AddTree( newTree );
                             }
 
                             break;
