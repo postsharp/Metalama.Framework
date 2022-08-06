@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
@@ -76,7 +77,8 @@ namespace Metalama.Compiler
                     instrinsicsSyntaxTree = instrinsicsSyntaxTree.WithRootAndOptions( instrinsicsSyntaxTree.GetRoot(), options );
                 }
 
-                transformedCompilation = transformedCompilation.WithSyntaxTreeModifications( null, new[] { instrinsicsSyntaxTree } );
+                transformedCompilation =
+                    transformedCompilation.WithSyntaxTreeTransformations( new[] { SyntaxTreeTransformation.AddTree( instrinsicsSyntaxTree ) } );
             }
 
             return transformedCompilation;

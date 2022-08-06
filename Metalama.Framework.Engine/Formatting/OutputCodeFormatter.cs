@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Compiler;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
@@ -8,7 +9,6 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
 using Microsoft.CodeAnalysis.Formatting;
 using Microsoft.CodeAnalysis.Simplification;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -79,7 +79,7 @@ namespace Metalama.Framework.Engine.Formatting
         {
             var (project, syntaxTreeMap) = await CreateProjectFromCompilationAsync( compilation.Compilation, cancellationToken );
 
-            List<SyntaxTreeModification> syntaxTreeReplacements = new( compilation.ModifiedSyntaxTrees.Count );
+            List<SyntaxTreeTransformation> syntaxTreeReplacements = new( compilation.ModifiedSyntaxTrees.Count );
 
             foreach ( var modifiedSyntaxTree in compilation.ModifiedSyntaxTrees.Values )
             {
@@ -96,10 +96,10 @@ namespace Metalama.Framework.Engine.Formatting
                 var formattedSyntaxRoot = await FormatToSyntaxAsync( document, null, false, cancellationToken );
 
                 syntaxTreeReplacements.Add(
-                    new SyntaxTreeModification( syntaxTree.WithRootAndOptions( formattedSyntaxRoot, syntaxTree.Options ), syntaxTree ) );
+                    SyntaxTreeTransformation.ReplaceTree( syntaxTree, syntaxTree.WithRootAndOptions( formattedSyntaxRoot, syntaxTree.Options ) ) );
             }
 
-            return compilation.Update( syntaxTreeReplacements, Array.Empty<SyntaxTree>() );
+            return compilation.Update( syntaxTreeReplacements );
         }
 
         public static Compilation FormatAll( Compilation compilation, CancellationToken cancellationToken = default )

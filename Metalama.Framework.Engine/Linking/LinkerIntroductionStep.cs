@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Compiler;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
@@ -126,13 +127,10 @@ namespace Metalama.Framework.Engine.Linking
             }
 
             var helperSyntaxTree = aspectReferenceSyntaxProvider.GetLinkerHelperSyntaxTree( intermediateCompilation.LanguageOptions );
+            var transformations = syntaxTreeMapping.Select( p => SyntaxTreeTransformation.ReplaceTree( p.Key, p.Value ) ).ToList();
+            transformations.Add( SyntaxTreeTransformation.AddTree( helperSyntaxTree ) );
 
-            intermediateCompilation =
-                helperSyntaxTree != null
-                    ? intermediateCompilation.Update(
-                        syntaxTreeMapping.Select( p => new SyntaxTreeModification( p.Value, p.Key ) ).ToList(),
-                        new[] { helperSyntaxTree } )
-                    : intermediateCompilation;
+            intermediateCompilation = intermediateCompilation.Update( transformations );
 
             var introductionRegistry = new LinkerIntroductionRegistry(
                 input.CompilationModel,
