@@ -343,14 +343,15 @@ namespace Metalama.Compiler
         private AttributeListSyntax CreateAccessibilityAttribute( SyntaxNode node, Accessibility accessibility )
         {
             var syntaxFactory = this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( node );
-            var accessibilityAttributeType = (INamedTypeSymbol) syntaxFactory.ReflectionMapper.GetTypeSymbol( typeof(AccessibilityAttribute) );
+            var compiledTemplateAttributeType = (INamedTypeSymbol) syntaxFactory.ReflectionMapper.GetTypeSymbol( typeof(CompiledTemplateAttribute) );
             var accessibilityType = (INamedTypeSymbol) syntaxFactory.ReflectionMapper.GetTypeSymbol( typeof(Accessibility) );
 
-            var attribute = Attribute( (NameSyntax) syntaxFactory.SyntaxGenerator.Type( accessibilityAttributeType ) )
+            var attribute = Attribute( (NameSyntax) syntaxFactory.SyntaxGenerator.Type( compiledTemplateAttributeType ) )
                 .WithArgumentList(
                     AttributeArgumentList(
                         SingletonSeparatedList(
-                            AttributeArgument( syntaxFactory.SyntaxGenerator.EnumValueExpression( accessibilityType, (int) accessibility ) ) ) ) );
+                            AttributeArgument( syntaxFactory.SyntaxGenerator.EnumValueExpression( accessibilityType, (int) accessibility ) )
+                                .WithNameEquals( NameEquals( nameof(CompiledTemplateAttribute.Accessibility) ) ) ) ) );
 
             var attributeList = AttributeList( SingletonSeparatedList( attribute ) )
                 .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
