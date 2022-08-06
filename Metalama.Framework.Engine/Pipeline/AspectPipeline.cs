@@ -123,7 +123,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 diagnosticAdder.Report(
                     GeneralDiagnosticDescriptors.CSharpVersionNotSupported.CreateRoslynDiagnostic(
                         null,
-                        (languageVersion.ToString(), _supportedVersions.Select( x => x.ToString() ).ToArray()) ) );
+                        (languageVersion.ToString(), _supportedVersions.Select( x => x.ToDisplayString() ).ToArray()) ) );
 
                 configuration = null;
 
