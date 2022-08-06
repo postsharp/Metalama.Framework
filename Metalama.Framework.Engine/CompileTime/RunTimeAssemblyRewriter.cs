@@ -309,7 +309,7 @@ namespace Metalama.Compiler
                 return transformedNode;
             }
 
-            var attributeList = this.CreateAccessibilityAttribute( originalNode, accessibility ).WithTrailingTrivia( ElasticLineFeed );
+            var attributeList = this.CreateCompiledTemplateAttribute( originalNode, accessibility ).WithTrailingTrivia( ElasticLineFeed );
 
             var newModifiers = transformedNode.Modifiers.Where( n => !n.IsAccessModifierKeyword() ).ToList();
 
@@ -333,14 +333,14 @@ namespace Metalama.Compiler
                 return transformedNode;
             }
 
-            var attributeList = this.CreateAccessibilityAttribute( originalNode, accessibility ).WithTrailingTrivia( ElasticSpace );
+            var attributeList = this.CreateCompiledTemplateAttribute( originalNode, accessibility ).WithTrailingTrivia( ElasticSpace );
 
             return transformedNode.WithModifiers( default )
                 .WithAttributeLists( transformedNode.AttributeLists.Add( attributeList ) )
                 .WithLeadingTrivia( transformedNode.GetLeadingTrivia() );
         }
 
-        private AttributeListSyntax CreateAccessibilityAttribute( SyntaxNode node, Accessibility accessibility )
+        private AttributeListSyntax CreateCompiledTemplateAttribute( SyntaxNode node, Accessibility accessibility )
         {
             var syntaxFactory = this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( node );
             var compiledTemplateAttributeType = (INamedTypeSymbol) syntaxFactory.ReflectionMapper.GetTypeSymbol( typeof(CompiledTemplateAttribute) );
