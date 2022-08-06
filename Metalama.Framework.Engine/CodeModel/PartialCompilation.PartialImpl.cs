@@ -88,13 +88,24 @@ namespace Metalama.Framework.Engine.CodeModel
                             throw new KeyNotFoundException();
                         }
 
-                        if ( transformation.NewTree != null )
+                        switch ( transformation.Kind )
                         {
-                            syntaxTrees[transformation.FilePath] = transformation.NewTree;
-                        }
-                        else
-                        {
-                            syntaxTrees.Remove( transformation.FilePath );
+                            case SyntaxTreeTransformationKind.None:
+                                continue;
+
+                            case SyntaxTreeTransformationKind.Add:
+                            case SyntaxTreeTransformationKind.Replace:
+                                syntaxTrees[transformation.FilePath] = transformation.NewTree.AssertNotNull();
+
+                                break;
+
+                            case SyntaxTreeTransformationKind.Remove:
+                                syntaxTrees.Remove( transformation.FilePath );
+
+                                break;
+
+                            default:
+                                throw new AssertionFailedException();
                         }
                     }
                 }

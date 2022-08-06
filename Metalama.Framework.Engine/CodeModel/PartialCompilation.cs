@@ -105,6 +105,11 @@ namespace Metalama.Framework.Engine.CodeModel
             {
                 foreach ( var transformation in modifications )
                 {
+                    if ( transformation.Kind == SyntaxTreeTransformationKind.None )
+                    {
+                        continue;
+                    }
+
                     // Find the tree in InitialCompilation.
                     SyntaxTree? initialTree;
 
@@ -123,36 +128,44 @@ namespace Metalama.Framework.Engine.CodeModel
 
                     SyntaxTreeTransformation? transformationFromInitialCompilation;
 
-                    if ( transformation.OldTree == null )
+                    switch ( transformation.Kind )
                     {
-                        compilation = compilation.AddSyntaxTrees( transformation.NewTree! );
-                        transformationFromInitialCompilation = transformation;
-                    }
-                    else if ( transformation.NewTree != null )
-                    {
-                        compilation = compilation.ReplaceSyntaxTree( transformation.OldTree.AssertNotNull(), transformation.NewTree );
+                        case SyntaxTreeTransformationKind.Add:
+                            compilation = compilation.AddSyntaxTrees( transformation.NewTree! );
+                            transformationFromInitialCompilation = transformation;
 
-                        if ( initialTree != null )
-                        {
-                            transformationFromInitialCompilation = SyntaxTreeTransformation.ReplaceTree( initialTree, transformation.NewTree );
-                        }
-                        else
-                        {
-                            transformationFromInitialCompilation = SyntaxTreeTransformation.AddTree( transformation.NewTree );
-                        }
-                    }
-                    else
-                    {
-                        compilation = compilation.RemoveSyntaxTrees( transformation.OldTree.AssertNotNull() );
+                            break;
 
-                        if ( initialTree != null )
-                        {
-                            transformationFromInitialCompilation = SyntaxTreeTransformation.RemoveTree( initialTree );
-                        }
-                        else
-                        {
-                            transformationFromInitialCompilation = null;
-                        }
+                        case SyntaxTreeTransformationKind.Replace:
+                            compilation = compilation.ReplaceSyntaxTree( transformation.OldTree.AssertNotNull(), transformation.NewTree );
+
+                            if ( initialTree != null )
+                            {
+                                transformationFromInitialCompilation = SyntaxTreeTransformation.ReplaceTree( initialTree, transformation.NewTree );
+                            }
+                            else
+                            {
+                                transformationFromInitialCompilation = SyntaxTreeTransformation.AddTree( transformation.NewTree );
+                            }
+
+                            break;
+
+                        case SyntaxTreeTransformationKind.Remove:
+                            compilation = compilation.RemoveSyntaxTrees( transformation.OldTree.AssertNotNull() );
+
+                            if ( initialTree != null )
+                            {
+                                transformationFromInitialCompilation = SyntaxTreeTransformation.RemoveTree( initialTree );
+                            }
+                            else
+                            {
+                                transformationFromInitialCompilation = null;
+                            }
+
+                            break;
+
+                        default:
+                            throw new AssertionFailedException();
                     }
 
                     if ( transformationFromInitialCompilation != null )

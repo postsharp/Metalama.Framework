@@ -56,7 +56,7 @@ namespace Metalama.Framework.Engine.Linking
 
             foreach ( var modifiedSyntaxTree in input.IntermediateCompilation.ModifiedSyntaxTrees )
             {
-                if ( modifiedSyntaxTree.Value.OldTree == null )
+                if ( modifiedSyntaxTree.Value.Kind == SyntaxTreeTransformationKind.Add )
                 {
                     // This is an intermediate tree we added and we don't need it in the final compilation.
                     transformations.Add( SyntaxTreeTransformation.RemoveTree( modifiedSyntaxTree.Value.NewTree.AssertNotNull() ) );

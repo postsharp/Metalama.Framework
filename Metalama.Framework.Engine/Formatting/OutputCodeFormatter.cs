@@ -84,6 +84,12 @@ namespace Metalama.Framework.Engine.Formatting
             foreach ( var modifiedSyntaxTree in compilation.ModifiedSyntaxTrees.Values )
             {
                 var syntaxTree = modifiedSyntaxTree.NewTree;
+
+                if ( syntaxTree == null )
+                {
+                    continue;
+                }
+
                 var documentId = syntaxTreeMap[syntaxTree];
 
                 var document = project.GetDocument( documentId )!;
