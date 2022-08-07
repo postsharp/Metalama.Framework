@@ -102,7 +102,6 @@ public class DependencyGraphTests
     {
         var dependencies = new BaseDependencyCollector();
         var masterCompilation = new AssemblyIdentity( "MasterAssembly" );
-        var references = new DesignTimeCompilationReferenceCollection( new DesignTimeCompilationReference( new TestCompilationVersion( masterCompilation ) ) );
         const ulong hash = 54;
 
         const string masterFilePath = "master.cs";

@@ -38,5 +38,4 @@ internal class NonMetalamaCompilationVersion : ICompilationVersion
         this._computeHashFunc = computeHashFunc;
         this._syntaxTrees = compilation.GetIndexedSyntaxTrees();
     }
-
 }

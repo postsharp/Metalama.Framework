@@ -216,9 +216,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                     compilationReferences.Add(
                         new DesignTimeCompilationReference(
-                            reference.Compilation,
                             referenceResult.CompilationVersion,
-                            null, // TODO
+                            reference.Compilation, // TODO
+                            null,
                             referenceResult.TransformationResult ) );
                 }
                 else

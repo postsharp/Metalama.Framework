@@ -39,7 +39,7 @@ internal class NullableNamedType : INamedTypeInternal
     public string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
         => this.TypeSymbol.ToDisplayString( format.ToRoslyn() );
 
-    TypeKind IType.TypeKind => ((IType) this._underlying).TypeKind;
+    TypeKind IType.TypeKind => this._underlying.TypeKind;
 
     SpecialType IType.SpecialType => this._underlying.SpecialType;
 
@@ -100,7 +100,7 @@ internal class NullableNamedType : INamedTypeInternal
     bool IGeneric.IsGeneric => this._underlying.IsGeneric;
 
     IGeneric IGenericInternal.ConstructGenericInstance( params IType[] typeArguments )
-        => ((IGenericInternal) this._underlying).ConstructGenericInstance( typeArguments );
+        => this._underlying.ConstructGenericInstance( typeArguments );
 
     bool INamedType.IsPartial => this._underlying.IsPartial;
 

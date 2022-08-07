@@ -41,7 +41,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
             }
         }
 
-        public static SerializationIntrinsicType GetIntrinsicType( Type type, bool useObjRef = false )
+        public static SerializationIntrinsicType GetIntrinsicType( Type? type, bool useObjRef = false )
         {
             if ( type == null )
             {

@@ -5,7 +5,6 @@ using Metalama.Compiler;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Caching;
 using Microsoft.CodeAnalysis.Diagnostics;
-using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -23,7 +22,6 @@ namespace Metalama.Framework.Engine.Options
     {
         private static readonly ConditionalWeakTable<AnalyzerConfigOptions, MSBuildProjectOptions> _cache = new();
 
-        private readonly string _defaultProjectId = Guid.NewGuid().ToString();
         private readonly IProjectOptionsSource _source;
         private readonly TransformerOptions _transformerOptions;
 
@@ -108,7 +106,7 @@ namespace Metalama.Framework.Engine.Options
         public override bool RemoveCompileTimeOnlyCode => this.GetBooleanOption( "MetalamaRemoveCompileTimeOnlyCode", true );
 
         [Memo]
-        public override bool AllowPreviewLanguageFeatures => this.GetBooleanOption( "MetalamaAllowPreviewLanguageFeatures", false );
+        public override bool AllowPreviewLanguageFeatures => this.GetBooleanOption( "MetalamaAllowPreviewLanguageFeatures" );
 
         public override bool RequiresCodeCoverageAnnotations => this._transformerOptions.RequiresCodeCoverageAnnotations;
 

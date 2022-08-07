@@ -14,7 +14,6 @@ namespace Metalama.Framework.Tests.UnitTests.Aspects;
 
 public class AspectTestBase : TestBase
 {
-    
     public async Task<CompileTimeAspectPipelineResult?> CompileAsync( string code, bool throwOnError = true )
     {
         using var domain = new UnloadableCompileTimeDomain();
@@ -34,7 +33,7 @@ public class AspectTestBase : TestBase
         return result;
     }
 
-    public async Task<CompileTimeAspectPipelineResult> CompileAsync( IReadOnlyDictionary<string, string> code, bool throwOnError = true )
+    public async Task<CompileTimeAspectPipelineResult?> CompileAsync( IReadOnlyDictionary<string, string> code, bool throwOnError = true )
     {
         using var domain = new UnloadableCompileTimeDomain();
         var testContext = this.CreateTestContext();

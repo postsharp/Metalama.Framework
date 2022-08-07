@@ -65,7 +65,7 @@ namespace Metalama.Framework.Tests.UnitTests
         {
             var additionalAssemblies = new[] { typeof(TestBase).Assembly };
 
-            var parseOptions = new CSharpParseOptions( preprocessorSymbols: preprocessorSymbols ?? new [] { "METALAMA"} );
+            var parseOptions = new CSharpParseOptions( preprocessorSymbols: preprocessorSymbols ?? new[] { "METALAMA" } );
 
             var mainRoslynCompilation = TestCompilationFactory
                 .CreateEmptyCSharpCompilation( name, additionalAssemblies, addMetalamaReferences, outputKind )

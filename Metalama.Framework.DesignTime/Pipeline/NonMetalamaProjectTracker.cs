@@ -55,8 +55,8 @@ internal class NonMetalamaProjectTracker
         }
 
         return new DesignTimeCompilationReference(
-            newCompilation,
             new CompilationVersion( newCompilation, 0, tracker.LastTrees.AssertNotNull() ),
+            newCompilation,
             ( fromCompilation, toCompilation, ct )
                 => this._incrementalChangeTracker.FindIncrementalChanges( fromCompilation, toCompilation, ct ) );
     }

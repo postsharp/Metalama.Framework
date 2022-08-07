@@ -8,7 +8,7 @@ internal class IncrementalChangeTracker
 {
     private readonly ConditionalWeakTable<Compilation, IncrementalChange> _incrementalChanges = new();
 
-    public void Add( Compilation oldCompilation, Compilation newCompilation, CompilationChanges changes)
+    public void Add( Compilation oldCompilation, Compilation newCompilation, CompilationChanges changes )
     {
         if ( !changes.IsIncremental )
         {

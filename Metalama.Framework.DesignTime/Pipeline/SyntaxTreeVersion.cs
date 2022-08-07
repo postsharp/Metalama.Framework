@@ -3,7 +3,6 @@
 
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Pipeline;

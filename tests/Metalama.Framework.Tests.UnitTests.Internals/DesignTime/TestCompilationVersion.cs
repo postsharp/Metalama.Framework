@@ -3,7 +3,6 @@
 
 using Metalama.Framework.DesignTime.Pipeline;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;
@@ -41,8 +40,8 @@ internal class TestCompilationVersion : ICompilationVersion
         else
         {
             syntaxTreeVersion = default;
+
             return false;
         }
     }
-
 }

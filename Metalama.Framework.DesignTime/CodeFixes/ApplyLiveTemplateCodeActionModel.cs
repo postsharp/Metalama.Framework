@@ -55,7 +55,7 @@ internal class ApplyLiveTemplateCodeActionModel : CodeActionModel
 
         if ( result.Success )
         {
-            return new CodeActionResult( result.Compilation!.ModifiedSyntaxTrees.Values.Select( x => x.NewTree ) );
+            return new CodeActionResult( result.Compilation!.ModifiedSyntaxTrees.Values.Select( x => x.NewTree.AssertNotNull() ) );
         }
         else
         {

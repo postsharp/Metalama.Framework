@@ -14,6 +14,5 @@ internal record CompilationVersion(
     AssemblyIdentity ICompilationVersion.AssemblyIdentity => this.Compilation.Assembly.Identity;
 
     public bool TryGetSyntaxTreeVersion( string path, out SyntaxTreeVersion syntaxTreeVersion ) 
-        => this.SyntaxTrees.TryGetValue( path, out  syntaxTreeVersion );
-    
+        => this.SyntaxTrees.TryGetValue( path, out syntaxTreeVersion );
 }

@@ -596,7 +596,7 @@ namespace Metalama.Framework.Engine.Templating
             }
 
             // ReSharper disable once ConstantConditionalAccessQualifier
-            switch ( expressionType?.Name )
+            switch ( expressionType.Name )
             {
                 case "dynamic":
                 case "Task" when expressionType is INamedTypeSymbol { IsGenericType: true } namedType && namedType.TypeArguments[0] is IDynamicTypeSymbol &&
