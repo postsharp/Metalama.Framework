@@ -20,7 +20,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         public ImmutableDictionary<string, SyntaxTreeVersion>? LastTrees { get; }
 
         /// <summary>
-        /// Gets the last <see cref="Compilation"/>, or <c>null</c> if the <see cref="Update"/> method
+        /// Gets the last <see cref="Compilation"/>, or <c>null</c> if the <see cref="Update(Microsoft.CodeAnalysis.Compilation)"/> method
         /// has not been invoked yet.
         /// </summary>
         public Compilation? LastCompilation { get; }
@@ -195,7 +195,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                             newCompilation,
                             out newSyntaxTreeVersion ) )
                     {
-                        compileTimeChangeKind = this._strategy.GetCompileTimeChangeKind(
+                        compileTimeChangeKind = CompilationChangeTrackerStrategy.GetCompileTimeChangeKind(
                             oldSyntaxTreeVersion.HasCompileTimeCode,
                             newSyntaxTreeVersion.HasCompileTimeCode );
 
@@ -217,7 +217,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                     // This is a new tree.
                     newSyntaxTreeVersion = this._strategy.GetSyntaxTreeVersion( newSyntaxTree, newCompilation );
 
-                    compileTimeChangeKind = this._strategy.GetCompileTimeChangeKind( false, newSyntaxTreeVersion.HasCompileTimeCode );
+                    compileTimeChangeKind = CompilationChangeTrackerStrategy.GetCompileTimeChangeKind( false, newSyntaxTreeVersion.HasCompileTimeCode );
 
                     var change = new SyntaxTreeChange(
                         newSyntaxTree.FilePath,
@@ -246,7 +246,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                         new SyntaxTreeChange(
                             oldSyntaxTree.Key,
                             SyntaxTreeChangeKind.Deleted,
-                            this._strategy.GetCompileTimeChangeKind( oldSyntaxTree.Value.HasCompileTimeCode, false ),
+                            CompilationChangeTrackerStrategy.GetCompileTimeChangeKind( oldSyntaxTree.Value.HasCompileTimeCode, false ),
                             oldSyntaxTree.Value,
                             default ) );
                 }

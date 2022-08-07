@@ -39,11 +39,11 @@ internal class PartialTypesHasher : CSharpSyntaxVisitor<int?>
         return hasAnyPartialType ? combinedHash : null;
     }
 
-    public override int? VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitBaseTypeDeclaration( node );
+    public override int? VisitClassDeclaration( ClassDeclarationSyntax node ) => VisitBaseTypeDeclaration( node );
 
-    public override int? VisitStructDeclaration( StructDeclarationSyntax node ) => this.VisitBaseTypeDeclaration( node );
+    public override int? VisitStructDeclaration( StructDeclarationSyntax node ) => VisitBaseTypeDeclaration( node );
 
-    public override int? VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitBaseTypeDeclaration( node );
+    public override int? VisitRecordDeclaration( RecordDeclarationSyntax node ) => VisitBaseTypeDeclaration( node );
 
     public override int? VisitGlobalStatement( GlobalStatementSyntax node ) => null;
 
@@ -55,7 +55,7 @@ internal class PartialTypesHasher : CSharpSyntaxVisitor<int?>
 
     public override int? VisitMethodDeclaration( MethodDeclarationSyntax node ) => null;
 
-    private int? VisitBaseTypeDeclaration( BaseTypeDeclarationSyntax type )
+    private static int? VisitBaseTypeDeclaration( BaseTypeDeclarationSyntax type )
     {
         foreach ( var modifier in type.Modifiers )
         {

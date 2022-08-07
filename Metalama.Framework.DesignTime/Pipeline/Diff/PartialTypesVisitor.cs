@@ -1,4 +1,7 @@
-﻿using Microsoft.CodeAnalysis;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
@@ -31,11 +34,11 @@ internal class PartialTypesVisitor : CSharpSyntaxVisitor<ImmutableArray<BaseType
         return partialTypes;
     }
 
-    public override ImmutableArray<BaseTypeDeclarationSyntax> VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitBaseTypeDeclaration( node );
+    public override ImmutableArray<BaseTypeDeclarationSyntax> VisitClassDeclaration( ClassDeclarationSyntax node ) => VisitBaseTypeDeclaration( node );
 
-    public override ImmutableArray<BaseTypeDeclarationSyntax> VisitStructDeclaration( StructDeclarationSyntax node ) => this.VisitBaseTypeDeclaration( node );
+    public override ImmutableArray<BaseTypeDeclarationSyntax> VisitStructDeclaration( StructDeclarationSyntax node ) => VisitBaseTypeDeclaration( node );
 
-    public override ImmutableArray<BaseTypeDeclarationSyntax> VisitRecordDeclaration( RecordDeclarationSyntax node ) => this.VisitBaseTypeDeclaration( node );
+    public override ImmutableArray<BaseTypeDeclarationSyntax> VisitRecordDeclaration( RecordDeclarationSyntax node ) => VisitBaseTypeDeclaration( node );
 
     public override ImmutableArray<BaseTypeDeclarationSyntax> VisitGlobalStatement( GlobalStatementSyntax node ) => ImmutableArray<BaseTypeDeclarationSyntax>.Empty;
 
@@ -47,7 +50,7 @@ internal class PartialTypesVisitor : CSharpSyntaxVisitor<ImmutableArray<BaseType
 
     public override ImmutableArray<BaseTypeDeclarationSyntax> VisitMethodDeclaration( MethodDeclarationSyntax node ) => ImmutableArray<BaseTypeDeclarationSyntax>.Empty;
 
-    private ImmutableArray<BaseTypeDeclarationSyntax> VisitBaseTypeDeclaration( BaseTypeDeclarationSyntax type )
+    private static ImmutableArray<BaseTypeDeclarationSyntax> VisitBaseTypeDeclaration( BaseTypeDeclarationSyntax type )
     {
         foreach ( var modifier in type.Modifiers )
         {

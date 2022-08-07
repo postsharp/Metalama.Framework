@@ -1,4 +1,7 @@
-﻿using Metalama.Framework.DesignTime.Pipeline.Diff;
+﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+
+using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Microsoft.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
@@ -31,7 +34,7 @@ internal class IncrementalChangeTracker
     {
         if ( this._incrementalChanges.TryGetValue( oldCompilation, out var node ) )
         {
-            for ( ; node != null; node = node.Next )
+            for ( /* Intentionally empty */; node != null; node = node.Next )
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 

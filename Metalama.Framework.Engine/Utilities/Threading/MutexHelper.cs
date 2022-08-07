@@ -65,12 +65,14 @@ namespace Metalama.Framework.Engine.Utilities.Threading
 #endif
             }
 
+#pragma warning disable CA1821
 #if DEBUG
             ~MutexHandle()
             {
                 throw new AssertionFailedException( "The mutex was not disposed. It was acquired here: " + Environment.NewLine + this._stackTrace );
             }
 #endif
+#pragma warning restore CA1821
         }
     }
 }

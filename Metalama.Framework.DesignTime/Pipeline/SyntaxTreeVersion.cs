@@ -16,7 +16,7 @@ internal readonly record struct SyntaxTreeVersion(
 {
     private readonly SyntaxTree? _syntaxTree = SyntaxTree;
 
-    public SyntaxTree SyntaxTree => this._syntaxTree ?? throw new NullReferenceException();
+    public SyntaxTree SyntaxTree => this._syntaxTree ?? throw new ArgumentNullException();
 
     public bool IsDefault => this._syntaxTree == null;
 }

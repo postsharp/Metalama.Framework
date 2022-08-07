@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Microsoft.CodeAnalysis;
 using System.Linq;
@@ -125,7 +124,6 @@ public class DependencyGraphTests
     public void UpdateSyntaxTreeHash()
     {
         var masterCompilation = new AssemblyIdentity( "MasterAssembly" );
-        var references = new DesignTimeCompilationReferenceCollection( new DesignTimeCompilationReference( new TestCompilationVersion( masterCompilation ) ) );
         const ulong hash1 = 54;
         const ulong hash2 = 54;
 

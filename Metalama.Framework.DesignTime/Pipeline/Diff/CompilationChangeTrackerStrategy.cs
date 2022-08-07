@@ -28,7 +28,7 @@ internal class CompilationChangeTrackerStrategy
         this._isTest = isTest;
     }
 
-    public CompileTimeChangeKind GetCompileTimeChangeKind( bool oldValue, bool newValue )
+    public static CompileTimeChangeKind GetCompileTimeChangeKind( bool oldValue, bool newValue )
         => (oldValue, newValue) switch
         {
             (true, true) => CompileTimeChangeKind.None,
@@ -91,7 +91,7 @@ internal class CompilationChangeTrackerStrategy
         }
     }
 
-    private (ImmutableArray<TypeDependencyKey> partialTypes, int partialTypesHash) FindPartialTypes(
+    private (ImmutableArray<TypeDependencyKey> PartialTypes, int PartialTypesHash) FindPartialTypes(
         in SyntaxTreeVersion oldVersion,
         SyntaxTree syntaxTree,
         Compilation? compilation )

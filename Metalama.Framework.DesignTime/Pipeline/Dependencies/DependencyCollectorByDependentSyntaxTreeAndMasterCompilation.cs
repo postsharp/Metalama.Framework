@@ -100,7 +100,6 @@ internal class DependencyCollectorByDependentSyntaxTreeAndMasterCompilation
         foreach ( var dependency in this._masterPartialTypes )
         {
             if ( !other._masterPartialTypes.Contains( dependency ) )
-
             {
                 return false;
             }

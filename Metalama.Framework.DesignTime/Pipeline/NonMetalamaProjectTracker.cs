@@ -10,9 +10,9 @@ namespace Metalama.Framework.DesignTime.Pipeline;
 
 internal class NonMetalamaProjectTracker
 {
-    private CompilationChangeTracker _tracker;
     private readonly SemaphoreSlim _semaphore = new( 1 );
     private readonly IncrementalChangeTracker _incrementalChangeTracker = new();
+    private CompilationChangeTracker _tracker;
 
     public NonMetalamaProjectTracker( ProjectKey projectKey, IServiceProvider serviceProvider )
     {
