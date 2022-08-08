@@ -87,7 +87,9 @@ internal class TemplateMember<T>
 
         var compiledTemplateAttribute = declaration.Attributes.OfAttributeType( typeof(CompiledTemplateAttribute) ).SingleOrDefault();
 
-        if ( compiledTemplateAttribute != null && compiledTemplateAttribute.TryGetNamedArgument( nameof(CompiledTemplateAttribute.Accessibility), out var accessibility ) )
+        if ( compiledTemplateAttribute != null && compiledTemplateAttribute.TryGetNamedArgument(
+                nameof(CompiledTemplateAttribute.Accessibility),
+                out var accessibility ) )
         {
             return (Accessibility) accessibility.Value!;
         }

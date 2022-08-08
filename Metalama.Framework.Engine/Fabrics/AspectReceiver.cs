@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.Fabrics
         private readonly ISdkRef<IDeclaration> _containingDeclaration;
         private readonly IAspectReceiverParent _parent;
         private readonly CompilationModelVersion _compilationModelVersion;
-        private readonly Func<CompilationModel, IDiagnosticAdder, IEnumerable<T>> _selector;
+        private readonly System.Func<CompilationModel, IDiagnosticAdder, IEnumerable<T>> _selector;
 
         public AspectReceiver(
             ISdkRef<IDeclaration> containingDeclaration,

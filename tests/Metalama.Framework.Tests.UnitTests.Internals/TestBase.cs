@@ -1,15 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 
@@ -19,7 +18,7 @@ namespace Metalama.Framework.Tests.UnitTests
     {
         static TestBase()
         {
-            Logger.Initialize();
+            TestingServices.Initialize();
         }
 
         /// <summary>
@@ -105,15 +104,17 @@ namespace Metalama.Framework.Tests.UnitTests
             }
         }
 
-        protected static object? ExecuteExpression( string context, string expression )
+        protected object? ExecuteExpression( string context, string expression )
         {
+            using var testContext = this.CreateTestContext();
+
             var expressionContainer = $@"
 class Expression
 {{
     public static object Execute() => {expression};
 }}";
 
-            var assemblyPath = MetalamaCompilerUtility.CompileAssembly( context, expressionContainer );
+            var assemblyPath = MetalamaCompilerUtility.CompileAssembly( testContext.ProjectOptions.BaseDirectory, context, expressionContainer );
 
             var assembly = Assembly.LoadFile( assemblyPath );
 
@@ -128,7 +129,7 @@ class Expression
         /// <param name="context">Additional C# code.</param>
         /// <param name="expression">A C# expression of type <typeparamref name="T"/>.</param>
         /// <param name="withResult">Code to run on the result of the expression.</param>
-        protected static void TestExpression<T>( string context, string expression, Action<T> withResult )
+        protected void TestExpression<T>( string context, string expression, Action<T> withResult )
         {
 #pragma warning disable CS0162 // Unreachable code detected
 
@@ -136,7 +137,7 @@ class Expression
 
             if ( _doCodeExecutionTests )
             {
-                var t = (T) ExecuteExpression( context, expression )!;
+                var t = (T) this.ExecuteExpression( context, expression )!;
                 withResult( t );
             }
 #pragma warning restore CS0162 // Unreachable code detected
@@ -145,72 +146,18 @@ class Expression
         protected TestContext CreateTestContext( TestProjectOptions? projectOptions = null ) => this.CreateTestContext( null, projectOptions );
 
         protected TestContext CreateTestContext( Func<ServiceProvider, ServiceProvider>? addServices, TestProjectOptions? projectOptions = null )
-            => new( this, projectOptions, addServices );
-
-        protected virtual IEnumerable<Assembly> GetTestAssemblies() => new[] { this.GetType().Assembly };
-
-        protected class TestContext : IDisposable
-        {
-            public TestProjectOptions ProjectOptions { get; }
-
-            public ServiceProvider ServiceProvider { get; }
-
-            public TestContext( TestBase parent, TestProjectOptions? projectOptions = null, Func<ServiceProvider, ServiceProvider>? addServices = null )
-            {
-                this.ProjectOptions = projectOptions ?? new TestProjectOptions();
-
-                this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( this.ProjectOptions.PathOptions )
-                    .WithService( this.ProjectOptions )
-                    .WithProjectScopedServices( TestCompilationFactory.GetMetadataReferences() )
-                    .WithMark( ServiceProviderMark.Test );
-
-                this.ServiceProvider = parent._addServices( this.ServiceProvider );
-
-                if ( addServices != null )
+            => new(
+                projectOptions ?? new TestProjectOptions( additionalAssemblies: ImmutableArray.Create( this.GetType().Assembly ) ),
+                provider =>
                 {
-                    this.ServiceProvider = addServices( this.ServiceProvider );
-                }
-            }
+                    provider = this._addServices( provider );
 
-            internal CompilationModel CreateCompilationModel(
-                string code,
-                string? dependentCode = null,
-                bool ignoreErrors = false,
-                IEnumerable<MetadataReference>? additionalReferences = null,
-                string? name = null,
-                bool addMetalamaReferences = true )
-                => this.CreateCompilationModel(
-                    new Dictionary<string, string> { { "test.cs", code } },
-                    dependentCode,
-                    ignoreErrors,
-                    additionalReferences,
-                    name,
-                    addMetalamaReferences );
+                    if ( addServices != null )
+                    {
+                        provider = addServices( provider );
+                    }
 
-            internal CompilationModel CreateCompilationModel(
-                IReadOnlyDictionary<string, string> code,
-                string? dependentCode = null,
-                bool ignoreErrors = false,
-                IEnumerable<MetadataReference>? additionalReferences = null,
-                string? name = null,
-                bool addMetalamaReferences = true )
-            {
-                var roslynCompilation = CreateCSharpCompilation( code, dependentCode, ignoreErrors, additionalReferences, name, addMetalamaReferences );
-
-                return CompilationModel.CreateInitialInstance(
-                    new ProjectModel( roslynCompilation, this.ServiceProvider ),
-                    roslynCompilation );
-            }
-
-            internal CompilationModel CreateCompilationModel( Compilation compilation )
-                => CompilationModel.CreateInitialInstance(
-                    new ProjectModel( compilation, this.ServiceProvider ),
-                    compilation );
-
-            public void Dispose()
-            {
-                this.ProjectOptions.Dispose();
-            }
-        }
+                    return provider;
+                } );
     }
 }

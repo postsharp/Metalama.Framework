@@ -21,7 +21,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeType( code );
             this.AssertEqual( @"typeof(global::Target)", serialized );
 
-            TestExpression<Type>( code, serialized, info => Assert.Equal( "Target", info.Name ) );
+            this.TestExpression<Type>( code, serialized, info => Assert.Equal( "Target", info.Name ) );
         }
 
         [Fact]
@@ -31,7 +31,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeType( code );
             this.AssertEqual( @"typeof(global::Target<,>)", serialized );
 
-            TestExpression<Type>(
+            this.TestExpression<Type>(
                 code,
                 serialized,
                 info =>
@@ -51,7 +51,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                 @"typeof(global::System.Int32[])",
                 serialized );
 
-            TestExpression<Type>(
+            this.TestExpression<Type>(
                 code,
                 serialized,
                 info =>
@@ -71,7 +71,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                 @"typeof(global::System.Int32[,])",
                 serialized );
 
-            TestExpression<Type>(
+            this.TestExpression<Type>(
                 code,
                 serialized,
                 info =>

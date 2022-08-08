@@ -31,6 +31,11 @@ namespace Metalama.Framework.DesignTime
     [ExcludeFromCodeCoverage]
     public class TheCodeFixProvider : CodeFixProvider
     {
+        static TheCodeFixProvider()
+        {
+            DesignTimeServices.Initialize();
+        }
+
         private const string _makePartialKey = "Metalama.MakePartial";
         private readonly DesignTimeDiagnosticDefinitions _designTimeDiagnosticDefinitions = DesignTimeDiagnosticDefinitions.GetInstance();
 

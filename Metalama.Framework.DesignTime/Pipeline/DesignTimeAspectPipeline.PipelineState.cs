@@ -9,12 +9,10 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Engine.Validation;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
@@ -414,8 +412,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     ?? ImmutableArray<InheritableAspectInstance>.Empty,
                     pipelineResult?.ExternallyVisibleValidators ?? ImmutableArray<ReferenceValidatorInstance>.Empty );
 
-                var directoryOptions = state._pipeline.ServiceProvider.GetRequiredService<IPathOptions>();
-                UserDiagnosticRegistrationService.GetInstance( directoryOptions ).RegisterDescriptors( result );
+                UserDiagnosticRegistrationService.GetInstance( configuration.ServiceProvider ).RegisterDescriptors( result );
 
                 // We intentionally commit the pipeline state here so that the caller, not us, can decide what part of the work should be committed
                 // in case of cancellation. From our point of view, this is a safe place to commit.

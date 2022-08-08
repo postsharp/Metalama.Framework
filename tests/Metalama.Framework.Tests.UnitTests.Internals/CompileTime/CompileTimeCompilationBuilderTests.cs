@@ -539,7 +539,7 @@ class ReferencingClass
 
             var testContext2 = this.CreateTestContext();
 
-            var referencedPath = Path.Combine( testContext2.ProjectOptions.PathOptions.CompileTimeProjectCacheDirectory, "referenced.dll" );
+            var referencedPath = Path.Combine( testContext2.ProjectOptions.BaseDirectory, "referenced.dll" );
 
             using ( var testContext = this.CreateTestContext() )
             {
@@ -604,7 +604,7 @@ public class ReferencedClass
 
             // Emit the referenced assembly.
             var referencedCompilation = CreateCSharpCompilation( referencedCode );
-            var referencedPath = Path.Combine( testContext.ProjectOptions.PathOptions.CompileTimeProjectCacheDirectory, "referenced.dll" );
+            var referencedPath = Path.Combine( testContext.ProjectOptions.BaseDirectory, "referenced.dll" );
 
             DiagnosticList diagnosticList = new();
 

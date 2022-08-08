@@ -37,7 +37,7 @@ namespace Metalama.Framework.DesignTime
 
         static TheDiagnosticAnalyzer()
         {
-            MetalamaDiagnosticsServiceFactory.Initialize( nameof(TheDiagnosticAnalyzer) );
+            DesignTimeServices.Initialize();
         }
 
         public TheDiagnosticAnalyzer() : this( DesignTimeServiceProviderFactory.GetServiceProvider() ) { }

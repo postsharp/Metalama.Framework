@@ -1,13 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Backstage.Extensibility;
 using Metalama.Compiler;
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
-using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
@@ -28,19 +26,8 @@ namespace Metalama.Framework.Engine.Pipeline
     {
         public void Execute( TransformerContext context )
         {
-            var serviceProvider = ServiceProviderFactory.GetServiceProvider( nextServiceProvider: context.Services );
-
-            var applicationInfoProvider = (IApplicationInfoProvider?) context.Services.GetService( typeof(IApplicationInfoProvider) );
-
-            // Try.Metalama doesn't provide any backstage services.
-            IApplicationInfo? previousApplication = null;
-
-            if ( applicationInfoProvider != null )
-            {
-                previousApplication = applicationInfoProvider.CurrentApplication;
-                applicationInfoProvider.CurrentApplication = new MetalamaApplicationInfo();
-            }
-
+            var serviceProvider = ServiceProviderFactory.GetServiceProvider( context.Services );
+            
             try
             {
                 // Try.Metalama ships its own handler. Having the default ICompileTimeExceptionHandler added earlier
@@ -61,47 +48,37 @@ namespace Metalama.Framework.Engine.Pipeline
 
                 serviceProvider = serviceProvider.WithProjectScopedServices( context.Compilation );
 
-                try
+                using CompileTimeAspectPipeline pipeline = new( serviceProvider, false );
+
+                // ReSharper disable once AccessToDisposedClosure
+                var pipelineResult =
+                    Task.Run(
+                            () => pipeline.ExecuteAsync(
+                                new DiagnosticAdderAdapter( context.ReportDiagnostic ),
+                                context.Compilation,
+                                context.Resources.ToImmutableArray(),
+                                CancellationToken.None ) )
+                        .Result;
+
+                if ( pipelineResult != null )
                 {
-                    using CompileTimeAspectPipeline pipeline = new( serviceProvider, false );
-
-                    // ReSharper disable once AccessToDisposedClosure
-                    var pipelineResult =
-                        Task.Run(
-                                () => pipeline.ExecuteAsync(
-                                    new DiagnosticAdderAdapter( context.ReportDiagnostic ),
-                                    context.Compilation,
-                                    context.Resources.ToImmutableArray(),
-                                    CancellationToken.None ) )
-                            .Result;
-
-                    if ( pipelineResult != null )
-                    {
-                        context.AddResources( pipelineResult.AdditionalResources );
-                        context.AddSyntaxTreeTransformations( pipelineResult.SyntaxTreeTransformations );
-                    }
-
-                    HandleAdditionalCompilationOutputFiles( projectOptions, pipelineResult );
+                    context.AddResources( pipelineResult.AdditionalResources );
+                    context.AddSyntaxTreeTransformations( pipelineResult.SyntaxTreeTransformations );
                 }
-                catch ( Exception e )
-                {
-                    var isHandled = false;
 
-                    serviceProvider
-                        .GetService<ICompileTimeExceptionHandler>()
-                        ?.ReportException( e, context.ReportDiagnostic, false, out isHandled );
-
-                    if ( !isHandled )
-                    {
-                        throw;
-                    }
-                }
+                HandleAdditionalCompilationOutputFiles( projectOptions, pipelineResult );
             }
-            finally
+            catch ( Exception e )
             {
-                if ( applicationInfoProvider != null )
+                var isHandled = false;
+
+                serviceProvider
+                    .GetService<ICompileTimeExceptionHandler>()
+                    ?.ReportException( e, context.ReportDiagnostic, false, out isHandled );
+
+                if ( !isHandled )
                 {
-                    applicationInfoProvider.CurrentApplication = previousApplication!;
+                    throw;
                 }
             }
         }

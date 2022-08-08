@@ -15,9 +15,6 @@ namespace Metalama.Framework.Project
     [CompileTime]
     public static class ServiceProviderExtensions
     {
-        /// <summary>
-        /// Gets a service or throws an <see cref="InvalidOperationException"/> if the requested service has not been registered.
-        /// </summary>
         public static T GetRequiredService<T>( this IServiceProvider serviceProvider )
             where T : class, IService
         {
@@ -35,7 +32,7 @@ namespace Metalama.Framework.Project
         /// Gets a service or returns <c>null</c> if the requested service has not been registered.
         /// </summary>
         public static T? GetService<T>( this IServiceProvider serviceProvider )
-            where T : class
+            where T : class, IService
             => (T?) serviceProvider.GetService( typeof(T) );
     }
 }

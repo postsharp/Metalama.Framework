@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Utilities;
 using System;
 
@@ -12,7 +13,7 @@ namespace Metalama.Framework.Engine.Utilities.Diagnostics
         private static readonly object _initializeSync = new();
         private static ILoggerFactory? _loggerFactory;
 
-        public static ILoggerFactory LoggerFactory => _loggerFactory ?? throw new InvalidOperationException( "Logger.Initialize has not been called." );
+        public static ILoggerFactory LoggerFactory => _loggerFactory ?? NullLogger.Instance;
 
         /// <summary>
         /// Initializes all loggers from the support services.
@@ -29,7 +30,7 @@ namespace Metalama.Framework.Engine.Utilities.Diagnostics
                     return;
                 }
 
-                _loggerFactory = DiagnosticServiceFactory.ServiceProvider.GetLoggerFactory();
+                _loggerFactory = BackstageServiceFactory.ServiceProvider.GetLoggerFactory();
                 var processInfo = _loggerFactory.GetLogger( "ProcessInfo" );
 
                 processInfo.Info?.Log( $"Command line: {Environment.CommandLine}" );
