@@ -23,6 +23,11 @@ namespace Metalama.Framework.DesignTime
     [ExcludeFromCodeCoverage]
     public class TheCodeRefactoringProvider : CodeRefactoringProvider
     {
+        static TheCodeRefactoringProvider()
+        {
+            DesignTimeServices.Initialize();
+        }
+
         private readonly ILogger _logger;
         private readonly ICodeRefactoringDiscoveryService _codeRefactoringDiscoveryService;
         private readonly ICodeActionExecutionService _codeActionExecutionService;

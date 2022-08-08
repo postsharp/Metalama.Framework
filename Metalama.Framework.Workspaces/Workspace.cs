@@ -40,6 +40,8 @@ namespace Metalama.Framework.Workspaces
             {
                 MSBuildLocator.RegisterDefaults();
             }
+
+            WorkspaceServices.Initialize();
         }
 
         private Workspace(

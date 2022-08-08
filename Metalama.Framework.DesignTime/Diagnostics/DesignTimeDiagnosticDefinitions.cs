@@ -4,11 +4,9 @@
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
-using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
@@ -49,8 +47,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
 
         private DesignTimeDiagnosticDefinitions()
         {
-            var directoryOptions = ServiceProviderFactory.GetServiceProvider().GetRequiredService<IPathOptions>();
-            var userDefinedDescriptors = UserDiagnosticRegistrationService.GetInstance( directoryOptions ).GetSupportedDescriptors();
+            var userDefinedDescriptors = UserDiagnosticRegistrationService.GetInstance( ServiceProviderFactory.GetServiceProvider() ).GetSupportedDescriptors();
 
             // The file may contain system descriptors by mistake. We must remove them otherwise we will have some duplicate key issue.
 

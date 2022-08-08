@@ -18,6 +18,8 @@ namespace Metalama.TestFramework
     {
         private readonly ITestFramework _implementation;
 
+        public static void Initialize() { }
+
         public AspectTestFramework( IMessageSink messageSink )
         {
             // We disable logging by default because it creates too many log records.

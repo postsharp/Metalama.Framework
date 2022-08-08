@@ -9,11 +9,6 @@ namespace Metalama.Framework.Engine.Diagnostics
 {
     public sealed class NullDiagnosticAdder : IDiagnosticAdder
     {
-        static NullDiagnosticAdder()
-        {
-            MetalamaDiagnosticsServiceFactory.Initialize( nameof(NullDiagnosticAdder) );
-        }
-
         private readonly ILogger _logger;
 
         public static NullDiagnosticAdder Instance { get; } = new();

@@ -14,10 +14,9 @@ namespace Metalama.Framework.Engine.Testing
 {
     internal static class MetalamaCompilerUtility
     {
-        public static string CompileAssembly( params string[] sourceFiles )
+        public static string CompileAssembly( string baseDirectory, params string[] sourceFiles )
         {
-            // TODO: somehow clean up the directory after the test completes?
-            var dir = TempPathHelper.GetTempPath( "Tests", Guid.NewGuid() );
+            var dir = Path.Combine( baseDirectory, "CompileAssembly", Guid.NewGuid().ToString() );
             Directory.CreateDirectory( dir );
 
             void WriteFile( string name, string text ) => File.WriteAllText( Path.Combine( dir, name ), text );

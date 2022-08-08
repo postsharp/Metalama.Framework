@@ -3,11 +3,11 @@
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Extensibility;
+using Metalama.Backstage.Maintenance;
 using Metalama.Backstage.Utilities;
 using Metalama.Compiler;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.Collections;
-using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
@@ -27,6 +27,8 @@ namespace Metalama.Framework.Engine.CompileTime
     /// </summary>
     internal class ReferenceAssemblyLocator : IService
     {
+        public const string TempDirectory = "AssemblyLocator";
+
         private const string _compileTimeFrameworkAssemblyName = "Metalama.Framework";
         private readonly string _cacheDirectory;
         private readonly ILogger _logger;
@@ -67,7 +69,9 @@ namespace Metalama.Framework.Engine.CompileTime
 
         public ReferenceAssemblyLocator( IServiceProvider serviceProvider )
         {
-            this._cacheDirectory = serviceProvider.GetRequiredService<IPathOptions>().AssemblyLocatorCacheDirectory;
+            this._cacheDirectory = serviceProvider.GetRequiredBackstageService<ITempFileManager>()
+                .GetTempDirectory( TempDirectory, CleanUpStrategy.WhenUnused );
+
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( nameof(ReferenceAssemblyLocator) );
 
             var platformInfo = (IPlatformInfo?) serviceProvider.GetService( typeof(IPlatformInfo) );

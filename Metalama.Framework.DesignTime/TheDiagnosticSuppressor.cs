@@ -34,6 +34,11 @@ namespace Metalama.Framework.DesignTime
         private readonly ILogger _logger;
         private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
 
+        static TheDiagnosticSuppressor()
+        {
+            DesignTimeServices.Initialize();
+        }
+
         public TheDiagnosticSuppressor() : this( DesignTimeServiceProviderFactory.GetServiceProvider() ) { }
 
         public TheDiagnosticSuppressor( IServiceProvider serviceProvider )

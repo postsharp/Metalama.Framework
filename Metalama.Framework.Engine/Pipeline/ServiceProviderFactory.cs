@@ -1,10 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Extensibility;
 using Metalama.Framework.Engine.CompileTime;
-using Metalama.Framework.Engine.Options;
-using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Project;
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -32,12 +30,12 @@ namespace Metalama.Framework.Engine.Pipeline
         /// <summary>
         /// Replaces the async-local <see cref="ServiceProvider"/> by a newly created provider, with a new instances
         /// of all services. This method must be called when the consumer needs to pass a different implementation
-        /// of <see cref="IPathOptions"/> than the default one cannot call <see cref="GetServiceProvider"/>
+        /// of <see cref="IServiceProvider"/> than the default one cannot call <see cref="GetServiceProvider"/>
         /// because it does not control the calling point. A typical consumer of this method is TryMetalama.
         /// </summary>
-        public static void InitializeAsyncLocalProvider( IPathOptions? directoryOptions = null, IServiceProvider? nextProvider = null )
+        public static void InitializeAsyncLocalProvider( IServiceProvider backstageServiceProvider )
         {
-            _asyncLocalInstance.Value = CreateBaseServiceProvider( directoryOptions ?? DefaultPathOptions.Instance )
+            _asyncLocalInstance.Value = CreateBaseServiceProvider( backstageServiceProvider )
                 .WithMark( ServiceProviderMark.AsyncLocal );
         }
 
@@ -58,18 +56,13 @@ namespace Metalama.Framework.Engine.Pipeline
             _asyncLocalInstance.Value = AsyncLocalProvider.WithServices( service );
         }
 
-        private static ServiceProvider CreateBaseServiceProvider( IPathOptions pathOptions )
+        private static ServiceProvider CreateBaseServiceProvider( IServiceProvider? backstageServiceProvider )
         {
-            // If support services are not initialized at this point, do it.
-            // When transformer execution starts, these services are replaced
-            // by project-scoped ones coming from the TransformerContext.
-            MetalamaDiagnosticsServiceFactory.Initialize( nameof(ServiceProviderFactory) );
-
             var serviceProvider = ServiceProvider.Empty
-                .WithNextProvider( DiagnosticServiceFactory.ServiceProvider )
-                .WithServices(
-                    pathOptions,
-                    new DefaultCompileTimeDomainFactory() )
+                .WithNextProvider( backstageServiceProvider ?? BackstageServiceFactory.ServiceProvider );
+
+            serviceProvider = serviceProvider
+                .WithServices( new DefaultCompileTimeDomainFactory() )
                 .WithSharedLazyInitializedService( sp => new ReferenceAssemblyLocator( sp ) );
 
             return serviceProvider;
@@ -81,7 +74,7 @@ namespace Metalama.Framework.Engine.Pipeline
         public static ServiceProvider GlobalProvider
             => LazyInitializer.EnsureInitialized(
                 ref _globalInstance,
-                () => CreateBaseServiceProvider( DefaultPathOptions.Instance ).WithMark( ServiceProviderMark.Global ) )!;
+                () => CreateBaseServiceProvider( null ).WithMark( ServiceProviderMark.Global ) )!;
 
         internal static ServiceProvider AsyncLocalProvider => _asyncLocalInstance.Value ??= GlobalProvider;
 
@@ -91,11 +84,11 @@ namespace Metalama.Framework.Engine.Pipeline
         /// <see cref="AddAsyncLocalService"/> are ignored). This scenario is used in tests. Otherwise, a shallow clone of the async-local or the global
         /// provider is provided.
         /// </summary>
-        public static ServiceProvider GetServiceProvider( IPathOptions? pathOptions = null, IServiceProvider? nextServiceProvider = null )
+        public static ServiceProvider GetServiceProvider( IServiceProvider? backstageServiceProvider = null )
         {
             ServiceProvider serviceProvider;
 
-            if ( pathOptions == null )
+            if ( backstageServiceProvider == null )
             {
                 // If we are not given specific directories, we try to provide shared, singleton instances of the services that don't depend on
                 // any other configuration. This avoids redundant initializations and improves performance.
@@ -103,12 +96,7 @@ namespace Metalama.Framework.Engine.Pipeline
             }
             else
             {
-                serviceProvider = CreateBaseServiceProvider( pathOptions );
-            }
-
-            if ( nextServiceProvider != null )
-            {
-                serviceProvider = serviceProvider.WithNextProvider( nextServiceProvider );
+                serviceProvider = CreateBaseServiceProvider( backstageServiceProvider );
             }
 
             return serviceProvider;

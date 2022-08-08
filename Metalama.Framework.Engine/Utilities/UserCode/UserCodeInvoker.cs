@@ -1,9 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Backstage.Extensibility;
+using Metalama.Backstage.Maintenance;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -87,11 +88,13 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             {
                 var location = exactLocation ?? context.InvokedMember.GetDiagnosticLocation() ?? Location.None;
 
-                var pathOptions = context.ServiceProvider.GetService<IPathOptions>();
-                var reportFile = pathOptions?.GetNewCrashReportPath();
+                var tempFileManager = context.ServiceProvider.GetRequiredBackstageService<ITempFileManager>();
+                var applicationInfoProvider = context.ServiceProvider.GetRequiredBackstageService<IApplicationInfoProvider>();
+                string reportFile;
 
-                if ( reportFile != null )
+                if ( applicationInfoProvider.CurrentApplication.ShouldCreateLocalCrashReports )
                 {
+                    reportFile = tempFileManager.GetTempDirectory( "CrashReports", CleanUpStrategy.Always );
                     File.WriteAllText( reportFile, e.ToString() );
                 }
                 else

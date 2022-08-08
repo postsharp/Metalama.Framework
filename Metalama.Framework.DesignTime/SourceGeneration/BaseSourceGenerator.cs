@@ -20,6 +20,11 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
     [ExcludeFromCodeCoverage]
     public abstract partial class BaseSourceGenerator : IIncrementalGenerator
     {
+        static BaseSourceGenerator()
+        {
+            DesignTimeServices.Initialize();
+        }
+
         protected ServiceProvider ServiceProvider { get; }
 
         private readonly ILogger _logger;

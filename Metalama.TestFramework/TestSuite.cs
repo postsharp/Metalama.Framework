@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Testing;
 using Metalama.TestFramework.Utilities;
 using Metalama.TestFramework.XunitFramework;
@@ -23,6 +22,11 @@ namespace Metalama.TestFramework
     /// </summary>
     public abstract class TestSuite
     {
+        static TestSuite()
+        {
+            TestingServices.Initialize();
+        }
+
         private record AssemblyAssets( TestProjectProperties ProjectProperties, TestDirectoryOptionsReader OptionsReader );
 
         private static readonly ConditionalWeakTable<Assembly, AssemblyAssets> _cache = new();
@@ -75,10 +79,7 @@ namespace Metalama.TestFramework
             var projectReferences = TestAssemblyMetadataReader.GetMetadata( new ReflectionAssemblyInfo( this.GetType().Assembly ) ).ToProjectReferences();
 
             using var testOptions = new TestProjectOptions( plugIns: projectReferences.PlugIns );
-
-            var serviceProvider =
-                ServiceProviderFactory.GetServiceProvider( testOptions.PathOptions )
-                    .WithService( testOptions );
+            using var testContext = new TestContext( testOptions );
 
             var fullPath = Path.Combine( directory, relativePath );
 
@@ -86,7 +87,7 @@ namespace Metalama.TestFramework
             var projectRelativePath = PathUtil.GetRelativePath( assemblyAssets.ProjectProperties.ProjectDirectory, fullPath );
 
             var testInput = TestInput.FromFile( assemblyAssets.ProjectProperties, assemblyAssets.OptionsReader, projectRelativePath );
-            var testRunner = TestRunnerFactory.CreateTestRunner( testInput, serviceProvider, projectReferences, this.Logger );
+            var testRunner = TestRunnerFactory.CreateTestRunner( testInput, testContext.ServiceProvider, projectReferences, this.Logger );
             await testRunner.RunAndAssertAsync( testInput );
         }
     }

@@ -1,10 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Engine.Options;
+using Metalama.Backstage.Extensibility;
+using Metalama.Backstage.Maintenance;
 using Metalama.Framework.Engine.Pipeline;
-using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Project;
+using System;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -17,17 +18,17 @@ namespace Metalama.Framework.Tests.UnitTests
         {
             Assert.False( ServiceProviderFactory.HasAsyncLocalProvider );
 
-            TestProjectOptions myOptions = new();
+            var backstageServiceProvider = new TestServiceProvider();
 
-            ServiceProviderFactory.InitializeAsyncLocalProvider( myOptions.PathOptions );
+            ServiceProviderFactory.InitializeAsyncLocalProvider( backstageServiceProvider );
             Assert.True( ServiceProviderFactory.HasAsyncLocalProvider );
 
-            Assert.Same( myOptions.PathOptions, ServiceProviderFactory.GetServiceProvider().GetRequiredService<IPathOptions>() );
+            Assert.Same( backstageServiceProvider, ServiceProviderFactory.GetServiceProvider().GetRequiredBackstageService<ITempFileManager>() );
 
             await Task.Yield();
 
             Assert.True( ServiceProviderFactory.HasAsyncLocalProvider );
-            Assert.Same( myOptions.PathOptions, ServiceProviderFactory.GetServiceProvider().GetRequiredService<IPathOptions>() );
+            Assert.Same( backstageServiceProvider, ServiceProviderFactory.GetServiceProvider().GetRequiredBackstageService<ITempFileManager>() );
 
             ServiceProviderFactory.AddAsyncLocalService( new TestService() );
 
@@ -39,5 +40,24 @@ namespace Metalama.Framework.Tests.UnitTests
         }
 
         private class TestService : IService { }
+
+        private class TestServiceProvider : IServiceProvider, ITempFileManager
+        {
+            public object? GetService( Type serviceType )
+            {
+                if ( serviceType == typeof(ITempFileManager) )
+                {
+                    return this;
+                }
+                else
+                {
+                    return null;
+                }
+            }
+
+            public string GetTempDirectory( string subdirectory, CleanUpStrategy cleanUpStrategy, Guid? guid = null ) => throw new NotImplementedException();
+
+            public bool ShouldReportCrashes { get; set; }
+        }
     }
 }

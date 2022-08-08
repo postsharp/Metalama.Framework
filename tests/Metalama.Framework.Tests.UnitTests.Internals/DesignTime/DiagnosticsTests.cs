@@ -3,7 +3,7 @@
 
 using Metalama.Framework.DesignTime.Diagnostics;
 using Microsoft.CodeAnalysis;
-using System.IO;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
@@ -18,9 +18,8 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
             file.Diagnostics.Add( "MY001", originalDiagnostic );
             file.Suppressions.Add( "MY001" );
 
-            StringWriter stringWriter = new();
-            file.Write( stringWriter );
-            var roundtrip = UserDiagnosticRegistrationFile.ReadContent( stringWriter.ToString() );
+            var json = JsonConvert.SerializeObject( file );
+            var roundtrip = JsonConvert.DeserializeObject<UserDiagnosticRegistrationFile>( json );
 
             Assert.Contains( "MY001", roundtrip.Suppressions );
             Assert.Contains( "MY001", roundtrip.Diagnostics.Keys );
