@@ -12,16 +12,16 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Pipeline.Diff;
 
-internal class CompilationChangeTrackerStrategy
+internal class DiffStrategy
 {
     private readonly bool _isTest;
     private readonly bool _detectCompileTimeCode;
     private readonly bool _detectPartialTypes;
 
-    public CompilationChangeTrackerStrategy( IServiceProvider serviceProvider, bool detectCompileTimeCode, bool detectPartialTypes )
+    public DiffStrategy( IServiceProvider serviceProvider, bool detectCompileTimeCode, bool detectPartialTypes )
         : this( serviceProvider.GetService<TestMarkerService>() != null, detectCompileTimeCode, detectPartialTypes ) { }
 
-    public CompilationChangeTrackerStrategy( bool isTest, bool detectCompileTimeCode, bool detectPartialTypes )
+    public DiffStrategy( bool isTest, bool detectCompileTimeCode, bool detectPartialTypes )
     {
         this._detectCompileTimeCode = detectCompileTimeCode;
         this._detectPartialTypes = detectPartialTypes;

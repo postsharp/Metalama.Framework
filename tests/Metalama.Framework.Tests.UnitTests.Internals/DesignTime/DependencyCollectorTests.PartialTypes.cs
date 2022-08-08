@@ -3,11 +3,11 @@
 
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
+using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using Xunit;
 
@@ -69,7 +69,7 @@ public partial class DependencyCollectorTests : TestBase
 
         var compilation = CreateCSharpCompilation( code );
 
-        var dependencyCollector = new DependencyCollector( testContext.ServiceProvider, compilation, Enumerable.Empty<CompilationVersion>() );
+        var dependencyCollector = new DependencyCollector( testContext.ServiceProvider, compilation, Enumerable.Empty<ICompilationVersion>() );
 
         var partialCompilation = PartialCompilation.CreatePartial( compilation, compilation.SyntaxTrees );
         partialCompilation.DerivedTypes.PopulateDependencies( dependencyCollector );
@@ -116,13 +116,7 @@ public partial class DependencyCollectorTests : TestBase
         var dependencyCollector = new DependencyCollector(
             testContext.ServiceProvider,
             compilation2,
-            new[]
-            {
-                new CompilationVersion(
-                    compilation1,
-                    0,
-                    compilation1.SyntaxTrees.ToImmutableDictionary( x => x.FilePath, x => new SyntaxTreeVersion( x ) ) )
-            } );
+            new ICompilationVersion[] { CompilationVersion.Create( compilation1, new DiffStrategy( true, true, true ) ) } );
 
         var partialCompilation = PartialCompilation.CreatePartial( compilation2, compilation2.SyntaxTrees );
         partialCompilation.DerivedTypes.PopulateDependencies( dependencyCollector );

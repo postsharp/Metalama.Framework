@@ -11,61 +11,83 @@ using System.Collections.Immutable;
 namespace Metalama.Framework.DesignTime.Pipeline.Diff
 {
     /// <summary>
-    /// Computes the changes between the last <see cref="Compilation"/> and a new one.
+    /// Computes and stores the changes between the last <see cref="Microsoft.CodeAnalysis.Compilation"/> and a new one.
     /// </summary>
-    internal readonly struct CompilationChangeTracker
+    internal readonly struct CompilationVersion : ICompilationVersion
     {
-        private readonly CompilationChangeTrackerStrategy _strategy;
+        private readonly DiffStrategy _strategy;
 
-        public ImmutableDictionary<string, SyntaxTreeVersion>? LastTrees { get; }
+        public ImmutableDictionary<string, SyntaxTreeVersion>? SyntaxTrees { get; }
+
+        public ImmutableDictionary<AssemblyIdentity, CompilationReference>? References { get; }
 
         /// <summary>
-        /// Gets the last <see cref="Compilation"/>, or <c>null</c> if the <see cref="Update(Microsoft.CodeAnalysis.Compilation)"/> method
+        /// Gets the last <see cref="Microsoft.CodeAnalysis.Compilation"/>, or <c>null</c> if the <see cref="Update(Microsoft.CodeAnalysis.Compilation)"/> method
         /// has not been invoked yet.
         /// </summary>
-        public Compilation? LastCompilation { get; }
+        public Compilation? Compilation { get; }
 
-        public CompilationChanges? UnprocessedChanges { get; }
+        public CompilationChanges Changes { get; }
 
-        public CompilationChangeTracker( CompilationChangeTrackerStrategy strategy )
+        public CompilationVersion( DiffStrategy strategy )
         {
             this._strategy = strategy;
-            this.LastTrees = default;
-            this.LastCompilation = default;
-            this.UnprocessedChanges = default;
+            this.SyntaxTrees = default;
+            this.Compilation = default;
+            this.Changes = default;
+            this.References = default;
         }
 
-        private CompilationChangeTracker(
-            Compilation? lastCompilation,
-            ImmutableDictionary<string, SyntaxTreeVersion>? lastTrees,
-            CompilationChanges? unprocessedChanges,
-            CompilationChangeTrackerStrategy strategy )
+        public static CompilationVersion Create( Compilation compilation, DiffStrategy strategy, CancellationToken cancellationToken = default )
         {
-            this.LastTrees = lastTrees;
-            this.LastCompilation = lastCompilation;
-            this.UnprocessedChanges = unprocessedChanges;
+            var compilationVersion = new CompilationVersion( strategy );
+
+            return compilationVersion.Update( compilation, DependencyChanges.Empty, cancellationToken ).ResetChanges();
+        }
+
+        private CompilationVersion(
+            Compilation? compilation,
+            ImmutableDictionary<string, SyntaxTreeVersion>? syntaxTrees,
+            ImmutableDictionary<AssemblyIdentity, CompilationReference>? references,
+            CompilationChanges changes,
+            DiffStrategy strategy )
+        {
+            this.SyntaxTrees = syntaxTrees;
+            this.References = references;
+            this.Compilation = compilation;
+            this.Changes = changes;
             this._strategy = strategy;
         }
 
-        public CompilationChangeTracker ResetUnprocessedChanges()
+        public CompilationVersion ResetChanges()
         {
-            if ( this.LastCompilation == null || this.UnprocessedChanges == null )
+            if ( this.Compilation == null )
             {
                 throw new InvalidOperationException();
             }
 
-            return new CompilationChangeTracker( this.LastCompilation, this.LastTrees, CompilationChanges.Empty( this.LastCompilation ), this._strategy );
+            return this.WithChanges( CompilationChanges.Empty( this.Compilation ) );
+        }
+
+        public CompilationVersion WithChanges( CompilationChanges changes )
+        {
+            if ( this.Compilation == null )
+            {
+                throw new InvalidOperationException();
+            }
+
+            return new CompilationVersion( this.Compilation, this.SyntaxTrees, this.References, changes, this._strategy );
         }
 
         private bool AreMetadataReferencesEqual( Compilation newCompilation )
         {
             // Detect changes in project references. 
-            if ( this.LastCompilation == null )
+            if ( this.Compilation == null )
             {
                 return false;
             }
 
-            var oldExternalReferences = this.LastCompilation.ExternalReferences;
+            var oldExternalReferences = this.Compilation.ExternalReferences;
 
             var newExternalReferences = newCompilation.ExternalReferences;
 
@@ -133,18 +155,19 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         }
 
         // Used for tests.
-        internal CompilationChangeTracker Update( Compilation newCompilation ) => this.Update( newCompilation, DependencyChanges.Empty );
+        internal CompilationVersion Update( Compilation newCompilation, CancellationToken cancellationToken = default )
+            => this.Update( newCompilation, DependencyChanges.Empty, cancellationToken );
 
         /// <summary>
-        /// Updates the <see cref="LastCompilation"/> property and returns the set of changes between the
-        /// old value of <see cref="LastCompilation"/> and the newly provided <see cref="Compilation"/>.
+        /// Updates the <see cref="Compilation"/> property and returns the set of changes between the
+        /// old value of <see cref="Compilation"/> and the newly provided <see cref="Microsoft.CodeAnalysis.Compilation"/>.
         /// </summary>
-        public CompilationChangeTracker Update(
+        public CompilationVersion Update(
             Compilation newCompilation,
             in DependencyChanges dependencyChanges,
             CancellationToken cancellationToken = default )
         {
-            if ( newCompilation == this.LastCompilation )
+            if ( newCompilation == this.Compilation )
             {
                 return this;
             }
@@ -158,7 +181,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             var hasCompileTimeChange = dependencyChanges.HasCompileTimeChange || !this.AreMetadataReferencesEqual( newCompilation );
 
             // Process new trees.
-            var lastTrees = this.LastTrees;
+            var lastTrees = this.SyntaxTrees;
 
             foreach ( var newSyntaxTree in newCompilation.SyntaxTrees )
             {
@@ -195,7 +218,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                             newCompilation,
                             out newSyntaxTreeVersion ) )
                     {
-                        compileTimeChangeKind = CompilationChangeTrackerStrategy.GetCompileTimeChangeKind(
+                        compileTimeChangeKind = DiffStrategy.GetCompileTimeChangeKind(
                             oldSyntaxTreeVersion.HasCompileTimeCode,
                             newSyntaxTreeVersion.HasCompileTimeCode );
 
@@ -217,7 +240,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                     // This is a new tree.
                     newSyntaxTreeVersion = this._strategy.GetSyntaxTreeVersion( newSyntaxTree, newCompilation );
 
-                    compileTimeChangeKind = CompilationChangeTrackerStrategy.GetCompileTimeChangeKind( false, newSyntaxTreeVersion.HasCompileTimeCode );
+                    compileTimeChangeKind = DiffStrategy.GetCompileTimeChangeKind( false, newSyntaxTreeVersion.HasCompileTimeCode );
 
                     var change = new SyntaxTreeChange(
                         newSyntaxTree.FilePath,
@@ -246,7 +269,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                         new SyntaxTreeChange(
                             oldSyntaxTree.Key,
                             SyntaxTreeChangeKind.Deleted,
-                            CompilationChangeTrackerStrategy.GetCompileTimeChangeKind( oldSyntaxTree.Value.HasCompileTimeCode, false ),
+                            DiffStrategy.GetCompileTimeChangeKind( oldSyntaxTree.Value.HasCompileTimeCode, false ),
                             oldSyntaxTree.Value,
                             default ) );
                 }
@@ -279,7 +302,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             if ( !hasCompileTimeChange && syntaxTreeChanges.Count == 0 )
             {
                 // There is no change, so we can analyze the previous compilation.
-                compilationChanges = CompilationChanges.Empty( this.LastCompilation! );
+                compilationChanges = CompilationChanges.Empty( this.Compilation! );
             }
             else
             {
@@ -292,15 +315,34 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                     addedPartialTypes,
                     hasCompileTimeChange,
                     compilationToAnalyze,
-                    this.LastCompilation != null );
+                    this.Compilation != null );
             }
 
-            if ( this.UnprocessedChanges != null )
+            compilationChanges = this.Changes.Merge( compilationChanges );
+
+            // Process references.
+            ImmutableDictionary<AssemblyIdentity, CompilationReference> references;
+
+            if ( this.Compilation?.ExternalReferences == newCompilation.ExternalReferences )
             {
-                compilationChanges = this.UnprocessedChanges.Merge( compilationChanges );
+                references = this.References.AssertNotNull();
+            }
+            else
+            {
+                references = newCompilation.ExternalReferences.OfType<CompilationReference>()
+                    .ToImmutableDictionary( r => r.Compilation.Assembly.Identity, r => r );
             }
 
-            return new CompilationChangeTracker( compilationChanges.CompilationToAnalyze, newTrees.ToImmutable(), compilationChanges, this._strategy );
+            return new CompilationVersion( compilationChanges.CompilationToAnalyze, newTrees.ToImmutable(), references, compilationChanges, this._strategy );
+        }
+
+        AssemblyIdentity ICompilationVersion.AssemblyIdentity => this.Compilation.AssertNotNull().Assembly.Identity;
+
+        ulong ICompilationVersion.CompileTimeProjectHash => throw new NotImplementedException();
+
+        public bool TryGetSyntaxTreeVersion( string path, out SyntaxTreeVersion syntaxTreeVersion )
+        {
+            return this.SyntaxTrees.AssertNotNull().TryGetValue( path, out syntaxTreeVersion );
         }
     }
 }

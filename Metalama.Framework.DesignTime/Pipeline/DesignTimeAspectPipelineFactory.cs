@@ -188,10 +188,10 @@ namespace Metalama.Framework.DesignTime.Pipeline
             return this.ExecuteAsync( compilation, cancellationToken );
         }
 
-        protected virtual bool IsMetalamaEnabled( Compilation compilation )
+        internal virtual bool IsMetalamaEnabled( Compilation compilation )
             => compilation.SyntaxTrees.FirstOrDefault()?.Options.PreprocessorSymbolNames.Contains( "METALAMA" ) ?? false;
 
-        private async Task<CompilationResult?> ExecuteAsync( Compilation compilation, CancellationToken cancellationToken )
+        internal async Task<CompilationResult?> ExecuteAsync( Compilation compilation, CancellationToken cancellationToken )
         {
             var pipeline = await this.GetPipelineAndWaitAsync( compilation, cancellationToken );
 
@@ -200,39 +200,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 return null;
             }
 
-            List<DesignTimeCompilationReference> compilationReferences = new();
-
-            foreach ( var reference in compilation.References.OfType<CompilationReference>() )
-            {
-                if ( this.IsMetalamaEnabled( reference.Compilation ) )
-                {
-                    // This is a Metalama reference. We need to compile the dependency.
-                    var referenceResult = await this.ExecuteAsync( reference.Compilation, cancellationToken );
-
-                    if ( referenceResult == null )
-                    {
-                        return null;
-                    }
-
-                    compilationReferences.Add(
-                        new DesignTimeCompilationReference(
-                            referenceResult.CompilationVersion,
-                            reference.Compilation, // TODO
-                            null,
-                            referenceResult.TransformationResult ) );
-                }
-                else
-                {
-                    // It is a non-Metalama reference.
-                    var projectTracker = this.GetNonMetalamaProjectTracker( ProjectKey.FromCompilation( reference.Compilation ) );
-                    var compilationReference = await projectTracker.GetCompilationReferenceAsync( reference.Compilation, cancellationToken );
-                    compilationReferences.Add( compilationReference );
-                }
-            }
-
-            var referenceCollection = new DesignTimeCompilationReferenceCollection( compilationReferences );
-
-            return await pipeline.ExecuteAsync( compilation, referenceCollection, cancellationToken );
+            return await pipeline.ExecuteAsync( compilation, cancellationToken );
         }
 
         public void Dispose()
@@ -246,7 +214,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             this.Domain.Dispose();
         }
 
-        private NonMetalamaProjectTracker GetNonMetalamaProjectTracker( ProjectKey projectKey )
+        internal NonMetalamaProjectTracker GetNonMetalamaProjectTracker( ProjectKey projectKey )
             => this._nonMetalamaProjectTrackers.GetOrAdd( projectKey, k => new NonMetalamaProjectTracker( k, this._serviceProvider ) );
 
         protected virtual async ValueTask<DesignTimeAspectPipeline?> GetPipelineAndWaitAsync( Compilation compilation, CancellationToken cancellationToken )

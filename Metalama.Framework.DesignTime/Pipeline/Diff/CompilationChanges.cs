@@ -10,7 +10,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
     /// <summary>
     /// Represents changes between two instances of the <see cref="Microsoft.CodeAnalysis.Compilation"/> class.
     /// </summary>
-    internal sealed class CompilationChanges
+    internal readonly struct CompilationChanges
     {
         private readonly ImmutableDictionary<string, SyntaxTreeChange> _syntaxTreeChanges;
 
@@ -52,7 +52,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
 
         /// <summary>
         /// Gets the <see cref="Microsoft.CodeAnalysis.Compilation"/> that must be analyzed. If <see cref="HasChange"/> is false,
-        /// this is the last compilation of <see cref="CompilationChangeTracker"/>. Otherwise, this is the new compilation. 
+        /// this is the last compilation of <see cref="CompilationVersion"/>. Otherwise, this is the new compilation. 
         /// </summary>
         public Compilation CompilationToAnalyze { get; }
 

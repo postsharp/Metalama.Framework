@@ -278,15 +278,61 @@ namespace Metalama.Framework.DesignTime.Pipeline
         public bool TryExecute( Compilation compilation, CancellationToken cancellationToken, [NotNullWhen( true )] out CompilationResult? compilationResult )
         {
             compilationResult = TaskHelper.RunAndWait(
-                () => this.ExecuteAsync( compilation, DesignTimeCompilationReferenceCollection.Empty, cancellationToken ),
+                () => this.ExecuteAsync( compilation, cancellationToken ),
                 cancellationToken );
 
             return compilationResult != null;
         }
 
+        private async ValueTask<DesignTimeCompilationReferenceCollection?> GetProjectReferences( Compilation compilation, CancellationToken cancellationToken )
+        {
+            List<DesignTimeCompilationReference> compilationReferences = new();
+
+            foreach ( var reference in compilation.ExternalReferences.OfType<CompilationReference>() )
+            {
+                var factory = this.Factory.AssertNotNull();
+
+                if ( factory.IsMetalamaEnabled( reference.Compilation ) )
+                {
+                    // This is a Metalama reference. We need to compile the dependency.
+                    var referenceResult = await factory.ExecuteAsync( reference.Compilation, cancellationToken );
+
+                    if ( referenceResult == null )
+                    {
+                        return null;
+                    }
+
+                    compilationReferences.Add(
+                        new DesignTimeCompilationReference(
+                            referenceResult.CompilationVersion,
+                            referenceResult.TransformationResult ) );
+                }
+                else
+                {
+                    // It is a non-Metalama reference.
+                    var projectTracker = factory.GetNonMetalamaProjectTracker( ProjectKey.FromCompilation( reference.Compilation ) );
+
+                    if ( this._currentState.CompilationVersion.References == null || this._currentState.CompilationVersion.References.TryGetValue(
+                            reference.Compilation.Assembly.Identity,
+                            out var oldReference ) )
+                    {
+                        oldReference = null;
+                    }
+
+                    var compilationReference = await projectTracker.GetCompilationReferenceAsync(
+                        oldReference?.Compilation,
+                        reference.Compilation,
+                        cancellationToken );
+
+                    compilationReferences.Add( compilationReference );
+                }
+            }
+
+            var referenceCollection = new DesignTimeCompilationReferenceCollection( compilationReferences );
+        }
+
         public async ValueTask<CompilationResult?> ExecuteAsync(
             Compilation compilation,
-            DesignTimeCompilationReferenceCollection references,
             CancellationToken cancellationToken )
         {
             if ( this._compilationResultCache.TryGetValue( compilation, out var compilationResult ) )

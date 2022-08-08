@@ -303,7 +303,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             return resultBuilders.Select( b => b.Value.ToImmutable( compilation.Compilation ) );
         }
 
-        internal CompilationPipelineResult Invalidate( CompilationChanges compilationChanges )
+        internal CompilationPipelineResult Invalidate( in CompilationChanges compilationChanges )
         {
             if ( !compilationChanges.HasChange )
             {

@@ -16,17 +16,17 @@ public partial class CompilationChangeTrackerTests
         var code = new Dictionary<string, string>();
         var compilation1 = CreateCSharpCompilation( code );
 
-        var tracker = new CompilationChangeTracker( this._strategy )
+        var tracker = new CompilationVersion( this._strategy )
             .Update( compilation1 )
-            .ResetUnprocessedChanges();
+            .ResetChanges();
 
-        Assert.False( tracker.UnprocessedChanges!.HasChange );
+        Assert.False( tracker.Changes!.HasChange );
 
         code.Add( "code.cs", "class C { }" );
 
         var compilation2 = CreateCSharpCompilation( code );
         tracker = tracker.Update( compilation2 );
-        var changes = tracker.UnprocessedChanges!;
+        var changes = tracker.Changes!;
         Assert.NotNull( changes );
         Assert.False( changes.HasCompileTimeCodeChange );
 
@@ -49,17 +49,17 @@ public partial class CompilationChangeTrackerTests
         var code = new Dictionary<string, string>();
         var compilation1 = CreateCSharpCompilation( code );
 
-        var tracker = new CompilationChangeTracker( this._strategy )
+        var tracker = new CompilationVersion( this._strategy )
             .Update( compilation1 )
-            .ResetUnprocessedChanges();
+            .ResetChanges();
 
-        Assert.False( tracker.UnprocessedChanges!.HasChange );
+        Assert.False( tracker.Changes!.HasChange );
 
         code.Add( "code.cs", "using Metalama.Framework.Aspects; class C { }" );
 
         var compilation2 = CreateCSharpCompilation( code );
         tracker = tracker.Update( compilation2 );
-        var changes = tracker.UnprocessedChanges!;
+        var changes = tracker.Changes!;
         Assert.NotNull( changes );
         Assert.True( changes.HasCompileTimeCodeChange );
 
@@ -82,17 +82,17 @@ public partial class CompilationChangeTrackerTests
         var code = new Dictionary<string, string>();
         var compilation1 = CreateCSharpCompilation( code );
 
-        var tracker = new CompilationChangeTracker( this._strategy )
+        var tracker = new CompilationVersion( this._strategy )
             .Update( compilation1 )
-            .ResetUnprocessedChanges();
+            .ResetChanges();
 
-        Assert.False( tracker.UnprocessedChanges!.HasChange );
+        Assert.False( tracker.Changes!.HasChange );
 
         code.Add( "code.cs", "partial class C { }" );
 
         var compilation2 = CreateCSharpCompilation( code );
         tracker = tracker.Update( compilation2 );
-        var changes = tracker.UnprocessedChanges!;
+        var changes = tracker.Changes!;
         Assert.NotNull( changes );
         Assert.False( changes.HasCompileTimeCodeChange );
 
@@ -115,17 +115,17 @@ public partial class CompilationChangeTrackerTests
         var code = new Dictionary<string, string> { { "code.cs", "class C { }" } };
         var compilation1 = CreateCSharpCompilation( code );
 
-        var tracker = new CompilationChangeTracker( this._strategy )
+        var tracker = new CompilationVersion( this._strategy )
             .Update( compilation1 )
-            .ResetUnprocessedChanges();
+            .ResetChanges();
 
-        Assert.False( tracker.UnprocessedChanges!.HasChange );
+        Assert.False( tracker.Changes!.HasChange );
 
         code.Clear();
 
         var compilation2 = CreateCSharpCompilation( code );
         tracker = tracker.Update( compilation2 );
-        var changes = tracker.UnprocessedChanges!;
+        var changes = tracker.Changes!;
         Assert.NotNull( changes );
         Assert.False( changes.HasCompileTimeCodeChange );
 
@@ -147,17 +147,17 @@ public partial class CompilationChangeTrackerTests
         var code = new Dictionary<string, string> { { "code.cs", "class C {}" } };
         var compilation1 = CreateCSharpCompilation( code );
 
-        var tracker = new CompilationChangeTracker( this._strategy )
+        var tracker = new CompilationVersion( this._strategy )
             .Update( compilation1 )
-            .ResetUnprocessedChanges();
+            .ResetChanges();
 
-        Assert.False( tracker.UnprocessedChanges!.HasChange );
+        Assert.False( tracker.Changes!.HasChange );
 
         code["code.cs"] = "class D {}";
 
         var compilation2 = CreateCSharpCompilation( code );
         tracker = tracker.Update( compilation2 );
-        var changes = tracker.UnprocessedChanges!;
+        var changes = tracker.Changes!;
         Assert.NotNull( changes );
         Assert.False( changes.HasCompileTimeCodeChange );
 
@@ -180,17 +180,17 @@ public partial class CompilationChangeTrackerTests
         var code = new Dictionary<string, string> { { "code.cs", "partial class C { void M() {} }" } };
         var compilation1 = CreateCSharpCompilation( code );
 
-        var tracker = new CompilationChangeTracker( this._strategy )
+        var tracker = new CompilationVersion( this._strategy )
             .Update( compilation1 )
-            .ResetUnprocessedChanges();
+            .ResetChanges();
 
-        Assert.False( tracker.UnprocessedChanges!.HasChange );
+        Assert.False( tracker.Changes!.HasChange );
 
         code["code.cs"] = "partial class C { void N() {} }";
 
         var compilation2 = CreateCSharpCompilation( code );
         tracker = tracker.Update( compilation2 );
-        var changes = tracker.UnprocessedChanges!;
+        var changes = tracker.Changes!;
         Assert.NotNull( changes );
         Assert.False( changes.HasCompileTimeCodeChange );
         Assert.True( changes.HasChange );
@@ -214,17 +214,17 @@ public partial class CompilationChangeTrackerTests
         var code = new Dictionary<string, string> { { "code.cs", "class C { int M => 1; }" } };
         var compilation1 = CreateCSharpCompilation( code );
 
-        var tracker = new CompilationChangeTracker( this._strategy )
+        var tracker = new CompilationVersion( this._strategy )
             .Update( compilation1 )
-            .ResetUnprocessedChanges();
+            .ResetChanges();
 
-        Assert.False( tracker.UnprocessedChanges!.HasChange );
+        Assert.False( tracker.Changes!.HasChange );
 
         code["code.cs"] = "class C { int M => 2; }";
 
         var compilation2 = CreateCSharpCompilation( code );
         tracker = tracker.Update( compilation2 );
-        var changes = tracker.UnprocessedChanges!;
+        var changes = tracker.Changes!;
         Assert.NotNull( changes );
 
         Assert.False( changes.HasChange );
@@ -237,17 +237,17 @@ public partial class CompilationChangeTrackerTests
         var code = new Dictionary<string, string> { { "code.cs", "class C {}" } };
         var compilation1 = CreateCSharpCompilation( code );
 
-        var tracker = new CompilationChangeTracker( this._strategy )
+        var tracker = new CompilationVersion( this._strategy )
             .Update( compilation1 )
-            .ResetUnprocessedChanges();
+            .ResetChanges();
 
-        Assert.False( tracker.UnprocessedChanges!.HasChange );
+        Assert.False( tracker.Changes!.HasChange );
 
         code["code.cs"] = "class C {} partial class D {}";
 
         var compilation2 = CreateCSharpCompilation( code );
         tracker = tracker.Update( compilation2 );
-        var changes = tracker.UnprocessedChanges!;
+        var changes = tracker.Changes!;
         Assert.NotNull( changes );
         Assert.False( changes.HasCompileTimeCodeChange );
         Assert.True( changes.HasChange );
@@ -262,17 +262,17 @@ public partial class CompilationChangeTrackerTests
         var code = new Dictionary<string, string> { { "code.cs", "class C {}" } };
         var compilation1 = CreateCSharpCompilation( code );
 
-        var tracker = new CompilationChangeTracker( this._strategy )
+        var tracker = new CompilationVersion( this._strategy )
             .Update( compilation1 )
-            .ResetUnprocessedChanges();
+            .ResetChanges();
 
-        Assert.False( tracker.UnprocessedChanges!.HasChange );
+        Assert.False( tracker.Changes!.HasChange );
 
         code["code.cs"] = "using Metalama.Framework.Aspects; class C {}";
 
         var compilation2 = CreateCSharpCompilation( code );
         tracker = tracker.Update( compilation2 );
-        var changes = tracker.UnprocessedChanges!;
+        var changes = tracker.Changes!;
         Assert.NotNull( changes );
         Assert.True( changes.HasCompileTimeCodeChange );
         Assert.True( changes.HasChange );
@@ -287,17 +287,17 @@ public partial class CompilationChangeTrackerTests
         var code = new Dictionary<string, string> { { "code.cs", "using Metalama.Framework.Aspects; class C {}" } };
         var compilation1 = CreateCSharpCompilation( code );
 
-        var tracker = new CompilationChangeTracker( this._strategy )
+        var tracker = new CompilationVersion( this._strategy )
             .Update( compilation1 )
-            .ResetUnprocessedChanges();
+            .ResetChanges();
 
-        Assert.False( tracker.UnprocessedChanges!.HasChange );
+        Assert.False( tracker.Changes!.HasChange );
 
         code["code.cs"] = "class C {}";
 
         var compilation2 = CreateCSharpCompilation( code );
         tracker = tracker.Update( compilation2 );
-        var changes = tracker.UnprocessedChanges!;
+        var changes = tracker.Changes!;
         Assert.NotNull( changes );
         Assert.True( changes.HasCompileTimeCodeChange );
         Assert.True( changes.HasChange );

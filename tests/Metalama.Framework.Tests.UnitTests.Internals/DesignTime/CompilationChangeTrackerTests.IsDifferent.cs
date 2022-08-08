@@ -9,8 +9,8 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
     public partial class CompilationChangeTrackerTests : TestBase
     {
-        private readonly CompilationChangeTrackerStrategy _strategy = new( true, true, true );
-        private readonly CompilationChangeTrackerStrategy _strategyWithoutPartialTypeDetection = new( true, true, false );
+        private readonly DiffStrategy _strategy = new( true, true, true );
+        private readonly DiffStrategy _strategyWithoutPartialTypeDetection = new( true, true, false );
 
         [Fact]
         public void IsDifferent_SameTrees()
