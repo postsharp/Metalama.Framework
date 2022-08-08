@@ -162,7 +162,8 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
             ImmutableArray<AdditionalText> additionalTexts,
             CancellationToken cancellationToken )
         {
-            if ( !options.TryGetValue( $"build_property.MetalamaSourceGeneratorTouchFile", out var touchFilePath ) )
+            if ( !options.TryGetValue( $"build_property.MetalamaSourceGeneratorTouchFile", out var touchFilePath )
+                 || string.IsNullOrWhiteSpace( touchFilePath ) )
             {
                 return "";
             }
