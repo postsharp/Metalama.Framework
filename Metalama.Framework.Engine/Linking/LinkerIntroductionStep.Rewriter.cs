@@ -970,16 +970,6 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            // The following methods remove the #if code and replaces with its content, but it's not sure that this is the right
-            // approach in the scenario where we have to produce code that can become source code ("divorce" feature).
-            // When this scenario is supported, more tests will need to be added to specifically support #if.
-
-            public override SyntaxNode? VisitIfDirectiveTrivia( IfDirectiveTriviaSyntax node ) => null;
-
-            public override SyntaxNode? VisitEndIfDirectiveTrivia( EndIfDirectiveTriviaSyntax node ) => null;
-
-            public override SyntaxNode? VisitElseDirectiveTrivia( ElseDirectiveTriviaSyntax node ) => null;
-
             private SuppressionContext WithSuppressions( SyntaxNode node ) => new( this, this.GetSuppressions( node ) );
 
             private SuppressionContext WithSuppressions( IDeclaration declaration ) => new( this, this.GetSuppressions( declaration ) );

@@ -180,6 +180,11 @@ namespace Metalama.TestFramework
         public int? AppliedCodeFixIndex { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether disabled code should be kept as trivia.
+        /// </summary>
+        public bool? KeepDisabledCode { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating which end-of-line sequence is expected.
         /// To set this option in a test, add this comment to your test file: <c>// @ExpectedEndOfLine(eol)</c> where EOL is <c>CR</c>, <c>LF</c> or <c>CRLF</c>.
         /// </summary>
@@ -243,6 +248,8 @@ namespace Metalama.TestFramework
             this.AcceptInvalidInput ??= baseOptions.AcceptInvalidInput;
 
             this.ApplyCodeFix ??= baseOptions.ApplyCodeFix;
+
+            this.KeepDisabledCode ??= baseOptions.KeepDisabledCode;
 
             this.AppliedCodeFixIndex ??= baseOptions.AppliedCodeFixIndex;
 
@@ -369,6 +376,11 @@ namespace Metalama.TestFramework
                         {
                             this.AppliedCodeFixIndex = index;
                         }
+
+                        break;
+
+                    case "KeepDisabledCode":
+                        this.KeepDisabledCode = true;
 
                         break;
 
