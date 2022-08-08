@@ -28,10 +28,7 @@ namespace Metalama.Framework.Engine.Pipeline
         public void Execute( TransformerContext context )
         {
             var serviceProvider = ServiceProviderFactory.GetServiceProvider( context.Services );
-
-            // Try.Metalama doesn't provide any backstage services.
-            IApplicationInfo? previousApplication = null;
-
+            
             try
             {
                 // Try.Metalama ships its own handler. Having the default ICompileTimeExceptionHandler added earlier

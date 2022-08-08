@@ -56,10 +56,10 @@ namespace Metalama.Framework.Engine.Pipeline
             _asyncLocalInstance.Value = AsyncLocalProvider.WithServices( service );
         }
 
-        private static ServiceProvider CreateBaseServiceProvider( IServiceProvider? backstageServiceProvider )
+        private static ServiceProvider CreateBaseServiceProvider( IServiceProvider? nextServiceProvider )
         {
             var serviceProvider = ServiceProvider.Empty
-                .WithNextProvider( backstageServiceProvider ?? BackstageServiceFactory.ServiceProvider );
+                .WithNextProvider( nextServiceProvider ?? BackstageServiceFactory.ServiceProvider );
 
             serviceProvider = serviceProvider
                 .WithServices( new DefaultCompileTimeDomainFactory() )
@@ -79,16 +79,16 @@ namespace Metalama.Framework.Engine.Pipeline
         internal static ServiceProvider AsyncLocalProvider => _asyncLocalInstance.Value ??= GlobalProvider;
 
         /// <summary>
-        /// Gets a new instance of the <see cref="ServiceProvider"/>. If an implementation of <see cref="IPathOptions"/> is provided,
+        /// Gets a new instance of the <see cref="ServiceProvider"/>. If a fallback <see cref="IServiceProvider"/> is provided,
         /// the new <see cref="ServiceProvider"/> gets a new implementation of all shared service (i.e. <see cref="AddGlobalService{T}"/> and
         /// <see cref="AddAsyncLocalService"/> are ignored). This scenario is used in tests. Otherwise, a shallow clone of the async-local or the global
         /// provider is provided.
         /// </summary>
-        public static ServiceProvider GetServiceProvider( IServiceProvider? backstageServiceProvider = null )
+        public static ServiceProvider GetServiceProvider( IServiceProvider? nextServiceProvider = null )
         {
             ServiceProvider serviceProvider;
 
-            if ( backstageServiceProvider == null )
+            if ( nextServiceProvider == null )
             {
                 // If we are not given specific directories, we try to provide shared, singleton instances of the services that don't depend on
                 // any other configuration. This avoids redundant initializations and improves performance.
@@ -96,7 +96,7 @@ namespace Metalama.Framework.Engine.Pipeline
             }
             else
             {
-                serviceProvider = CreateBaseServiceProvider( backstageServiceProvider );
+                serviceProvider = CreateBaseServiceProvider( nextServiceProvider );
             }
 
             return serviceProvider;

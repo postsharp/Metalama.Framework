@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.Testing;
 
 public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvider
 {
-    private static IApplicationInfo _applicationInfo = new TestFrameworkApplicationInfo();
+    private static readonly IApplicationInfo _applicationInfo = new TestFrameworkApplicationInfo();
     private readonly ITempFileManager _backstageTempFileManager;
 
     public TestProjectOptions ProjectOptions { get; }
@@ -131,7 +131,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 
     private class BackstageServiceProvider : IServiceProvider
     {
-        private TestContext _context;
+        private readonly TestContext _context;
 
         public BackstageServiceProvider( TestContext context )
         {

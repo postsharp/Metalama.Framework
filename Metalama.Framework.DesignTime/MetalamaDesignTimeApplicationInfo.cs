@@ -3,21 +3,9 @@
 
 using Metalama.Backstage.Extensibility;
 using Metalama.Compiler;
-using Metalama.Framework.Engine.Utilities.Diagnostics;
 
 namespace Metalama.Framework.DesignTime
 {
-    internal static class DesignTimeServices
-    {
-        public static void Initialize()
-        {
-            if ( !MetalamaCompilerInfo.IsActive )
-            {
-                BackstageServiceFactoryInitializer.Initialize<MetalamaDesignTimeApplicationInfo>();
-            }
-        }
-    }
-
     internal sealed class MetalamaDesignTimeApplicationInfo : ApplicationInfoBase
     {
         public override string Name => "Metalama.DesignTime";

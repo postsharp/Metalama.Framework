@@ -11,7 +11,7 @@ using System.Reflection;
 namespace Metalama.Framework.Engine.Testing
 {
     /// <summary>
-    /// An implementation of <see cref="IProjectOptions"/> and <see cref="IPathOptions"/> that can be used in tests.
+    /// An implementation of <see cref="IProjectOptions"/> that can be used in tests.
     /// </summary>
     public class TestProjectOptions : DefaultProjectOptions, IDisposable
     {

@@ -18,7 +18,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
         // Multiple instances are needed for testing.
         private static readonly ConcurrentDictionary<IConfigurationManager, UserDiagnosticRegistrationService> _instances = new();
         private readonly UserDiagnosticRegistrationFile _registrationFile;
-        private IConfigurationManager _configurationManager;
+        private readonly IConfigurationManager _configurationManager;
 
         public static UserDiagnosticRegistrationService GetInstance( IServiceProvider serviceProvider )
         {

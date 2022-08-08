@@ -19,7 +19,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
             file.Suppressions.Add( "MY001" );
 
             var json = JsonConvert.SerializeObject( file );
-            var roundtrip = JsonConvert.DeserializeObject<UserDiagnosticRegistrationFile>( json );
+            var roundtrip = JsonConvert.DeserializeObject<UserDiagnosticRegistrationFile>( json )!;
 
             Assert.Contains( "MY001", roundtrip.Suppressions );
             Assert.Contains( "MY001", roundtrip.Diagnostics.Keys );
