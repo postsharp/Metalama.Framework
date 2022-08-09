@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal class BuiltParameter : BuiltDeclaration, IParameterImpl
     {
-        public BuiltParameter( IParameterBuilder builder, CompilationModel compilation ) : base( compilation )
+        public BuiltParameter( IParameterBuilder builder, CompilationModel compilation ) : base( compilation, builder )
         {
             this.ParameterBuilder = builder;
         }
@@ -28,12 +28,12 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public int Index => this.ParameterBuilder.Index;
 
-        public TypedConstant DefaultValue => this.ParameterBuilder.DefaultValue;
+        public TypedConstant? DefaultValue => this.ParameterBuilder.DefaultValue;
 
         public bool IsParams => this.ParameterBuilder.IsParams;
 
         [Memo]
-        public IMember DeclaringMember => this.Compilation.Factory.GetDeclaration( this.ParameterBuilder.DeclaringMember );
+        public IHasParameters DeclaringMember => this.Compilation.Factory.GetDeclaration( this.ParameterBuilder.DeclaringMember );
 
         public ParameterInfo ToParameterInfo() => this.ParameterBuilder.ToParameterInfo();
 

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Advising;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using System;
@@ -209,7 +210,7 @@ namespace Metalama.Framework.Aspects
         /// <returns></returns>
         /// <seealso href="@templates"/>
         [TemplateKeyword]
-        public static dynamic? Cast( IType type, dynamic? value ) => ((ICompilationInternal) type.Compilation).TypeFactory.Cast( type, value );
+        public static dynamic? Cast( IType type, dynamic? value ) => ((ICompilationInternal) type.Compilation).Factory.Cast( type, value );
 
         /// <summary>
         /// Injects a comment to the target code.

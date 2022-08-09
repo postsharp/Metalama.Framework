@@ -4,7 +4,7 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Inlining;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -24,7 +24,21 @@ namespace Metalama.Framework.Engine.Linking
         {
             if ( this._introductionRegistry.IsOverrideTarget( symbol ) )
             {
+                if ( symbol.IsPartialDefinition && symbol.PartialImplementationPart != null )
+                {
+                    // This is a partial method declaration that is not to be transformed.
+                    return new[] { methodDeclaration };
+                }
+
                 var members = new List<MemberDeclarationSyntax>();
+
+                if ( symbol.IsPartialDefinition && symbol.PartialImplementationPart == null )
+                {
+                    // This is a partial method declaration that did not have any body.
+                    // Keep it as is and add a new declaration that will contain the override.
+                    members.Add( methodDeclaration );
+                }
+
                 var lastOverride = (IMethodSymbol) this._introductionRegistry.GetLastOverride( symbol );
 
                 if ( this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( lastOverride, IntermediateSymbolSemanticKind.Default ), out _ ) )
@@ -96,6 +110,9 @@ namespace Metalama.Framework.Engine.Linking
                         { ExpressionBody: { ArrowToken: var arrowToken }, SemicolonToken: var semicolonToken } =>
                             (arrowToken.LeadingTrivia.Add( ElasticLineFeed ), arrowToken.TrailingTrivia.Add( ElasticLineFeed ),
                              semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), semicolonToken.TrailingTrivia),
+                        { Body: null, ExpressionBody: null, SemicolonToken: var semicolonToken } =>
+                            (semicolonToken.LeadingTrivia.Add( ElasticLineFeed ), TriviaList( ElasticLineFeed ), TriviaList( ElasticLineFeed ),
+                             semicolonToken.TrailingTrivia),
                         _ => throw new AssertionFailedException()
                     };
 
@@ -170,6 +187,7 @@ namespace Metalama.Framework.Engine.Linking
                     .WithTrailingTrivia( ElasticLineFeed )
                     .WithBody( body )
                     .WithExpressionBody( expressionBody )
+                    .WithSemicolonToken( expressionBody != null ? Token( SyntaxKind.SemicolonToken ) : default )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
     }

@@ -4,11 +4,14 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Comparers;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Reflection;
+using MethodKind = Metalama.Framework.Code.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel.References
 {
@@ -32,7 +35,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
             Invariant.Implies(
                 typeof(T) == typeof(IMethod),
-                symbol.GetDeclarationKind() == DeclarationKind.Method );
+                symbol.GetDeclarationKind() is DeclarationKind.Method or DeclarationKind.Finalizer );
 
             return symbol;
         }
@@ -61,27 +64,45 @@ namespace Metalama.Framework.Engine.CodeModel.References
         /// </summary>
         public static Ref<IDeclaration> FromSymbol( ISymbol symbol, Compilation compilation ) => new( symbol, compilation );
 
-        public static Ref<IDeclaration> FromImplicitMember( IMember member ) => new( member );
+        public static Ref<IDeclaration> PseudoAccessor( IMethod accessor )
+        {
+            Invariant.Assert( accessor.IsImplicitlyDeclared );
+
+            if ( accessor.ContainingDeclaration is not IMemberWithAccessors declaringMember )
+            {
+                throw new AssertionFailedException();
+            }
+
+            return new Ref<IDeclaration>(
+                declaringMember.GetSymbol().AssertNotNull(),
+                declaringMember.GetCompilationModel().RoslynCompilation,
+                accessor.MethodKind switch
+                {
+                    MethodKind.PropertyGet => DeclarationRefTargetKind.PropertyGet,
+                    MethodKind.PropertySet => DeclarationRefTargetKind.PropertySet,
+                    _ => throw new AssertionFailedException()
+                } );
+        }
 
         public static Ref<T> FromSymbolId<T>( SymbolId symbolKey )
             where T : class, ICompilationElement
             => new( symbolKey );
 
-        public static Ref<T> FromSerializedId<T>( string id )
+        public static Ref<T> FromSerializedId<T>( DeclarationSerializableId id )
             where T : class, ICompilationElement
-            => new( id );
+            => new( id.Id );
 
         /// <summary>
         /// Creates a <see cref="Ref{T}"/> from a Roslyn symbol.
         /// </summary>
-        public static Ref<T> FromSymbol<T>( ISymbol symbol, Compilation compilation )
+        public static Ref<T> FromSymbol<T>( ISymbol symbol, Compilation compilation, DeclarationRefTargetKind targetKind = DeclarationRefTargetKind.Default )
             where T : class, ICompilationElement
-            => new( symbol, compilation );
+            => new( symbol, compilation, targetKind );
 
         public static Ref<IDeclaration> ReturnParameter( IMethodSymbol methodSymbol, Compilation compilation )
             => new( methodSymbol, compilation, DeclarationRefTargetKind.Return );
 
-        internal static Ref<ICompilation> Compilation( Compilation compilation ) => new( DeclarationRefTargetKind.Assembly, compilation );
+        internal static Ref<ICompilation> Compilation( Compilation compilation ) => FromSymbol( compilation.Assembly, compilation ).As<ICompilation>();
     }
 
     /// <summary>
@@ -89,7 +110,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
     /// </summary>
     /// <typeparam name="T"></typeparam>
     [Obfuscation( Exclude = true /* Serialized */ )]
-    internal readonly struct Ref<T> : IRefImpl<T>
+    internal readonly struct Ref<T> : IRefImpl<T>, IEquatable<Ref<T>>
         where T : class, ICompilationElement
     {
         // The compilation for which the symbol (stored in Target) is valid.
@@ -97,7 +118,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         internal Ref( ISymbol symbol, Compilation compilation, DeclarationRefTargetKind targetKind = DeclarationRefTargetKind.Default )
         {
-            Invariant.Assert( symbol is IErrorTypeSymbol || SymbolEqualityComparer.Default.Equals( symbol, symbol.GetSymbolId().Resolve( compilation ) ) );
+            Invariant.Assert( FixedSymbolComparer.Default.Equals( symbol, symbol.GetSymbolId().Resolve( compilation ).AssertNotNull() ) );
             symbol.AssertValidType<T>();
 
             this.TargetKind = targetKind;
@@ -119,13 +140,6 @@ namespace Metalama.Framework.Engine.CodeModel.References
             this._compilation = compilation;
         }
 
-        internal Ref( DeclarationRefTargetKind targetKind, Compilation compilation )
-        {
-            this._compilation = compilation;
-            this.TargetKind = targetKind;
-            this.Target = null;
-        }
-
         internal Ref( SymbolId symbolKey )
         {
             this.Target = symbolKey.ToString();
@@ -140,13 +154,6 @@ namespace Metalama.Framework.Engine.CodeModel.References
             this._compilation = null;
         }
 
-        internal Ref( IMember implicitMember )
-        {
-            this.Target = implicitMember;
-            this.TargetKind = DeclarationRefTargetKind.Default;
-            this._compilation = implicitMember.Compilation.GetRoslynCompilation();
-        }
-
         // ReSharper disable once UnusedParameter.Local
         public Ref( SyntaxNode? declaration, DeclarationRefTargetKind targetKind, Compilation compilation )
         {
@@ -159,7 +166,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public DeclarationRefTargetKind TargetKind { get; }
 
-        public string? ToSerializableId()
+        public DeclarationSerializableId ToSerializableId()
         {
             if ( this._compilation == null )
             {
@@ -168,7 +175,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
             var symbol = this.GetSymbol( this._compilation, true );
 
-            return DocumentationCommentId.CreateDeclarationId( symbol );
+            return new DeclarationSerializableId( DocumentationCommentId.CreateDeclarationId( symbol ) );
         }
 
         private static bool IsSerializableId( string id ) => char.IsLetter( id[0] ) && id[1] == ':';
@@ -176,25 +183,20 @@ namespace Metalama.Framework.Engine.CodeModel.References
         public static ISymbol? Deserialize( Compilation compilation, string serializedId )
             => DocumentationCommentId.GetFirstSymbolForDeclarationId( serializedId, compilation );
 
-        public T GetTarget( ICompilation compilation )
-        {
-            return this.GetTarget( compilation, true );
-        }
-
-        public T GetTarget( ICompilation compilation, bool applyRedirections )
+        public T GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default )
         {
             var compilationModel = (CompilationModel) compilation;
 
-            if ( applyRedirections && compilationModel.TryGetRedirectedDeclaration(
+            if ( options.FollowRedirections() && compilationModel.TryGetRedirectedDeclaration(
                     new Ref<IDeclaration>( this.Target, this._compilation, this.TargetKind ),
                     out var redirected ) )
             {
                 // Referencing redirected declaration.
-                return Resolve( redirected.Target, compilationModel, this.TargetKind );
+                return Resolve( redirected.Target, compilationModel, options, this.TargetKind );
             }
             else
             {
-                return Resolve( this.Target, compilationModel, this.TargetKind );
+                return Resolve( this.Target, compilationModel, options, this.TargetKind );
             }
         }
 
@@ -232,17 +234,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
             switch ( this.Target )
             {
                 case null:
-                    switch ( this.TargetKind )
-                    {
-                        case DeclarationRefTargetKind.Assembly:
-                            return compilation.Assembly;
-
-                        case DeclarationRefTargetKind.Module:
-                            return compilation.SourceModule;
-
-                        default:
-                            throw new AssertionFailedException();
-                    }
+                    throw new AssertionFailedException();
 
                 case ISymbol symbol:
                     return symbol.Translate( this._compilation, compilation ).AssertNotNull();
@@ -304,6 +296,9 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 case DeclarationRefTargetKind.Parameter when symbol is IMethodSymbol method:
                     return method.Parameters[0];
 
+                case DeclarationRefTargetKind.Property when symbol is IParameterSymbol parameter:
+                    return parameter.ContainingType.GetMembers( symbol.Name ).OfType<IPropertySymbol>().Single();
+
                 default:
                     throw new AssertionFailedException( $"Don't know how to get the symbol kind {this.TargetKind} for a {symbol.Kind}." );
             }
@@ -328,8 +323,24 @@ namespace Metalama.Framework.Engine.CodeModel.References
             return symbol;
         }
 
-        private static T Resolve( object? reference, CompilationModel compilation, DeclarationRefTargetKind kind = DeclarationRefTargetKind.Default )
+        private static T Resolve(
+            object? reference,
+            CompilationModel compilation,
+            ReferenceResolutionOptions options = default,
+            DeclarationRefTargetKind kind = DeclarationRefTargetKind.Default )
         {
+            T Convert( ICompilationElement compilationElement )
+            {
+                if ( compilationElement is not T safeCast )
+                {
+                    // Throw an exception with a better exception message for better troubleshooting.
+                    throw new InvalidOperationException(
+                        $"Cannot convert '{compilationElement}' into a {typeof(T).Name} within the compilation '{compilation.Identity}'." );
+                }
+
+                return safeCast;
+            }
+
             switch ( reference )
             {
                 case null:
@@ -338,16 +349,17 @@ namespace Metalama.Framework.Engine.CodeModel.References
                         : throw new AssertionFailedException();
 
                 case ISymbol symbol:
-                    return (T) compilation.Factory.GetCompilationElement( symbol.AssertValidType<T>(), kind ).AssertNotNull();
+                    return Convert( compilation.Factory.GetCompilationElement( symbol.AssertValidType<T>(), kind ).AssertNotNull() );
 
                 case SyntaxNode node:
-                    return (T) compilation.Factory.GetCompilationElement(
-                            GetSymbolOfNode( compilation.PartialCompilation.Compilation, node ).AssertValidType<T>(),
-                            kind )
-                        .AssertNotNull();
+                    return Convert(
+                        compilation.Factory.GetCompilationElement(
+                                GetSymbolOfNode( compilation.PartialCompilation.Compilation, node ).AssertValidType<T>(),
+                                kind )
+                            .AssertNotNull() );
 
                 case IDeclarationBuilder builder:
-                    return (T) compilation.Factory.GetDeclaration( builder );
+                    return Convert( compilation.Factory.GetDeclaration( builder, options ) );
 
                 case string id:
                     {
@@ -367,7 +379,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                             throw new SymbolNotFoundException( id, compilation.RoslynCompilation );
                         }
 
-                        return (T) compilation.Factory.GetCompilationElement( symbol ).AssertNotNull();
+                        return Convert( compilation.Factory.GetCompilationElement( symbol ).AssertNotNull() );
                     }
 
                 default:
@@ -375,12 +387,24 @@ namespace Metalama.Framework.Engine.CodeModel.References
             }
         }
 
-        public override string ToString() => this.Target?.ToString() ?? "null";
+        public override string ToString()
+        {
+            var value = this.Target?.ToString() ?? "null";
+
+            if ( this.TargetKind != DeclarationRefTargetKind.Default )
+            {
+                value += $" ({this.TargetKind})";
+            }
+
+            return value;
+        }
 
         public Ref<TOut> As<TOut>()
             where TOut : class, ICompilationElement
             => new( this.Target, this._compilation, this.TargetKind );
 
-        public override int GetHashCode() => this.Target?.GetHashCode() ?? 0;
+        public override int GetHashCode() => RefEqualityComparer<T>.Default.GetHashCode( this );
+
+        public bool Equals( Ref<T> other ) => RefEqualityComparer<T>.Default.Equals( this, other );
     }
 }

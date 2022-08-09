@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -20,6 +21,8 @@ namespace Metalama.Framework.Engine.Testing
     /// </summary>
     public static class TestCompilationFactory
     {
+        private static readonly ConcurrentDictionary<Assembly, PortableExecutableReference> _metadataReferenceCache = new();
+
         public static CSharpCompilation CreateEmptyCSharpCompilation(
             string? name,
             IEnumerable<Assembly> additionalAssemblies,
@@ -67,17 +70,20 @@ namespace Metalama.Framework.Engine.Testing
 
             var metalamaLibraries = addMetalamaReferences ? new[] { typeof(IAspect).Assembly, typeof(IAspectWeaver).Assembly } : null;
 
-            var systemLibraries = AppDomain.CurrentDomain.GetAssemblies()
-                .Where(
+            var systemLibraries = AppDomainUtility.GetLoadedAssemblies(
                     a => !a.IsDynamic && a.FullName != null && a.FullName.StartsWith( "System", StringComparison.Ordinal )
                          && !string.IsNullOrEmpty( a.Location ) )
                 .Concat( metalamaLibraries ?? Enumerable.Empty<Assembly>() )
                 .Concat( additionalAssemblies ?? Enumerable.Empty<Assembly>() )
                 .Distinct()
-                .Select( a => MetadataReference.CreateFromFile( a.Location ) )
+                .Select( GetCachedMetadataReference )
                 .ToList();
 
             return standardLibraries.Concat( systemLibraries ).ToList();
         }
+
+        // Caching is critical for memory usage, otherwise we get random OutOfMemoryException in parallel tests.
+        private static PortableExecutableReference GetCachedMetadataReference( Assembly assembly )
+            => _metadataReferenceCache.GetOrAdd( assembly, a => MetadataReference.CreateFromFile( a.Location ) );
     }
 }

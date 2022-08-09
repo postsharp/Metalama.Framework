@@ -30,7 +30,7 @@ public interface ISdkCodeActionContext : ICodeActionContext
     void UpdateTree( SyntaxNode transformedRoot, SyntaxTree originalTree );
 
     /// <summary>
-    /// Applies the modifications accumulated in a partial compilation, i.e. those done by <see cref="IPartialCompilation.WithSyntaxTreeModifications"/>.
+    /// Applies the modifications accumulated in a partial compilation, i.e. those done by <see cref="IPartialCompilation.WithSyntaxTreeTransformations"/>.
     /// </summary>
     void ApplyModifications( IPartialCompilation compilation );
 }

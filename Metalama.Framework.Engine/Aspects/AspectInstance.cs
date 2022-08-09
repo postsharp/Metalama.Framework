@@ -7,7 +7,7 @@ using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
@@ -30,6 +30,8 @@ namespace Metalama.Framework.Engine.Aspects
 
         IAspectClass IAspectInstance.AspectClass => this.AspectClass;
 
+        public int OrderWithinTypeAndAspectLayer { get; set; }
+
         public IAspectClassImpl AspectClass { get; }
 
         IRef<IDeclaration> IAspectInstance.TargetDeclaration => this.TargetDeclaration;
@@ -48,9 +50,9 @@ namespace Metalama.Framework.Engine.Aspects
 
         private AspectPredecessor FirstPredecessor => this.Predecessors[0];
 
-        public IAspectState? State { get; set; }
+        public IAspectState? AspectState { get; set; }
 
-        void IAspectInstanceInternal.SetState( IAspectState? value ) => this.State = value;
+        void IAspectInstanceInternal.SetState( IAspectState? value ) => this.AspectState = value;
 
         internal AspectInstance( IAspect aspect, in Ref<IDeclaration> declaration, AspectClass aspectClass, in AspectPredecessor predecessor ) : this(
             aspect,

@@ -5,7 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -53,13 +53,25 @@ namespace Metalama.Framework.Engine.Linking
 
             var syntaxReference = symbol.GetPrimarySyntaxReference();
 
-            // Event fields have accessors without declaring syntax references.
+            // For implicitly defined symbols, we need to try harder.
             if ( syntaxReference == null )
             {
                 switch ( symbol )
                 {
-                    case IMethodSymbol { MethodKind: RoslynMethodKind.EventAdd or RoslynMethodKind.EventRemove } eventAccessorSymbol:
-                        syntaxReference = eventAccessorSymbol.AssociatedSymbol.AssertNotNull().GetPrimarySyntaxReference();
+                    // For accessors, look at the associated symbol.
+                    case IMethodSymbol { AssociatedSymbol: { } associatedSymbol }:
+                        syntaxReference = associatedSymbol.GetPrimarySyntaxReference();
+
+                        if ( syntaxReference == null )
+                        {
+                            throw new AssertionFailedException();
+                        }
+
+                        break;
+
+                    // Otherwise (e.g. for implicit constructors), take the containing type.
+                    case { ContainingType: { } containingType }:
+                        syntaxReference = containingType.GetPrimarySyntaxReference();
 
                         if ( syntaxReference == null )
                         {
@@ -93,6 +105,11 @@ namespace Metalama.Framework.Engine.Linking
                     VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax } } => null,
                     BaseTypeDeclarationSyntax _ => null,
                     LocalFunctionStatementSyntax localFunction => (SyntaxNode?) localFunction.Body ?? localFunction.ExpressionBody,
+                    ConstructorDeclarationSyntax constructor => (SyntaxNode?) constructor.Body ?? constructor.ExpressionBody,
+                    DestructorDeclarationSyntax destructor => (SyntaxNode?) destructor.Body ?? destructor.ExpressionBody,
+                    OperatorDeclarationSyntax @operator => (SyntaxNode?) @operator.Body ?? @operator.ExpressionBody,
+                    ConversionOperatorDeclarationSyntax conversionOperator => (SyntaxNode?) conversionOperator.Body ?? conversionOperator.ExpressionBody,
+                    ParameterSyntax _ => null,
                     _ => throw new AssertionFailedException( $"Don't know how to get the body of a {syntaxReference.GetSyntax().Kind()}" )
                 };
 

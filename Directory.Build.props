@@ -4,6 +4,10 @@
         <RepoDirectory>$(MSBuildThisFileDirectory)</RepoDirectory>
         <RepoKind>AzureRepos</RepoKind>
         <Obfuscate Condition="'$(Obfuscate)'=='' AND '$(Configuration)'=='Release'">True</Obfuscate>
+
+         <!-- File header enforcement is now broken-->
+        <NoWarn>$(NoWarn);SA1636</NoWarn>
+
     </PropertyGroup>
 
     <Import Project="eng\Versions.props"/>
@@ -23,6 +27,7 @@
             
              The compiler will emit these warnings if we have aggressive inlining. This should not be important for code quality.     -->
         <NoWarn>$(NoWarn);CS8602;CS8604</NoWarn>
+
     </PropertyGroup>
 
     <PropertyGroup>
@@ -48,5 +53,9 @@
         </ItemGroup>
 
     </Target>
+
+	<PropertyGroup>
+		<FormattingCode>False</FormattingCode>
+	</PropertyGroup>
 
 </Project>

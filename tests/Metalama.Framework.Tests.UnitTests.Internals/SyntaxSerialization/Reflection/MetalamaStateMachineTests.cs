@@ -27,7 +27,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                 @"((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.Method~System.Collections.Generic.IEnumerable{System.Int32}"")))",
                 serialized );
 
-            TestExpression<MethodInfo>( code, serialized, info => Assert.Equal( "Method", info.Name ) );
+            this.TestExpression<MethodInfo>( code, serialized, info => Assert.Equal( "Method", info.Name ) );
         }
 
         [Fact]
@@ -45,7 +45,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                 @"((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.Method"")))",
                 serialized );
 
-            TestExpression<MethodInfo>( code, serialized, info => Assert.Equal( "Method", info.Name ) );
+            this.TestExpression<MethodInfo>( code, serialized, info => Assert.Equal( "Method", info.Name ) );
         }
     }
 }

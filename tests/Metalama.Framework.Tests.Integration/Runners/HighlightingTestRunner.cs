@@ -31,6 +31,11 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 background-color: rgba(50,50,90,0.1);
             }
 
+            .cr-NeutralTrivia
+            {
+                background-color: rgba(0,255,0,0.1);
+            }
+
             .cr-TemplateKeyword
             {
                 color: rgb(250, 0, 250) !important;
@@ -133,9 +138,10 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
         private void CompareHtmlFiles( string actualHtmlPath, string expectedHtmlPath )
         {
-            Assert.True( File.Exists( expectedHtmlPath ) );
-
             this.Logger?.WriteLine( "Actual HTML: " + actualHtmlPath );
+
+            Assert.True( File.Exists( expectedHtmlPath ), $"The expected HTML file '{expectedHtmlPath}' does not exist." );
+
             this.Logger?.WriteLine( "Expected HTML: " + expectedHtmlPath );
 
             var expectedHighlightedSource = NormalizeEndOfLines( File.ReadAllText( expectedHtmlPath ) );

@@ -8,7 +8,7 @@ using System;
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Accessibility
 {
     /*
-     * Tests a single OverrideProperty aspect on auto properties.
+     * Tests that overriding properties preserves accessibility.
      */
 
     public class OverrideAttribute : OverrideFieldOrPropertyAspect

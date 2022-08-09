@@ -28,6 +28,11 @@ namespace Metalama.Framework.Eligibility.Implementation
 
         public IEligibilityRule<T> Build()
         {
+            if ( this._predicates.Count == 0 )
+            {
+                return EligibilityRule<T>.Empty;
+            }
+
             var predicates = this._predicates.ToImmutableArray();
 
             return this._combinationOperator == BooleanCombinationOperator.Or

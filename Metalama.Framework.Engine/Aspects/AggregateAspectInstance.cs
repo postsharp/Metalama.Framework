@@ -54,6 +54,8 @@ internal sealed class AggregateAspectInstance : IAspectInstanceInternal
 
     public IAspectClassImpl AspectClass => this._primaryInstance.AspectClass;
 
+    public int OrderWithinTypeAndAspectLayer { get; set; }
+
     IAspectClass IAspectInstance.AspectClass => this.AspectClass;
 
     public bool IsSkipped => this._primaryInstance.IsSkipped;
@@ -62,9 +64,9 @@ internal sealed class AggregateAspectInstance : IAspectInstanceInternal
 
     public ImmutableArray<AspectPredecessor> Predecessors => this._primaryInstance.Predecessors;
 
-    public IAspectState? State => this._primaryInstance.State;
+    public IAspectState? AspectState => this._primaryInstance.AspectState;
 
-    public void SetState( IAspectState? value ) => this._primaryInstance.State = value;
+    public void SetState( IAspectState? value ) => this._primaryInstance.AspectState = value;
 
     public void Skip() => this._primaryInstance.Skip();
 

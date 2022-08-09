@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -261,6 +260,9 @@ namespace Metalama.Framework.CompilerExtensions
 
         private static string GetRoslynVersion()
         {
+            return "4.0.1";
+
+            /*
             var assembly = typeof(SyntaxNode).Assembly;
             var version = assembly.GetName().Version;
 
@@ -289,10 +291,12 @@ namespace Metalama.Framework.CompilerExtensions
             {
                 return "4.1.0";
             }
-            else
+            else 
             {
                 return "4.0.1";
             }
+
+            */
         }
     }
 }

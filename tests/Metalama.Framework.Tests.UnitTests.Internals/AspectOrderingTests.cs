@@ -1,8 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Compiler;
-using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
@@ -32,19 +30,18 @@ namespace Metalama.Framework.Tests.UnitTests
             Assert.True(
                 loader.TryGetCompileTimeProjectFromCompilation(
                     compilation.RoslynCompilation,
-                    RedistributionLicenseInfo.Empty, 
                     null,
                     new DiagnosticList(),
                     false,
                     CancellationToken.None,
                     out var compileTimeProject ) );
 
-            var aspectTypeFactory = new AspectClassMetadataFactory(
+            var aspectTypeFactory = new AspectClassFactory(
                 testContext.ServiceProvider,
-                new AspectDriverFactory( compilation.RoslynCompilation, ImmutableArray<object>.Empty, testContext.ServiceProvider ) );
+                new AspectDriverFactory( compilation, ImmutableArray<object>.Empty, testContext.ServiceProvider ) );
 
             var aspectNamedTypes = aspectNames.Select( name => compilation.Types.OfName( name ).Single().GetSymbol() ).ToReadOnlyList();
-            var aspectTypes = aspectTypeFactory.GetAspectClasses( aspectNamedTypes, compileTimeProject!, diagnostics ).ToImmutableArray();
+            var aspectTypes = aspectTypeFactory.GetClasses( aspectNamedTypes, compileTimeProject!, diagnostics ).ToImmutableArray();
             var allLayers = aspectTypes.SelectMany( a => a.Layers ).ToImmutableArray();
 
             var dependencies = new IAspectOrderingSource[]

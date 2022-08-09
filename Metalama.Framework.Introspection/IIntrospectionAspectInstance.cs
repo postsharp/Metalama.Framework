@@ -20,7 +20,7 @@ public interface IIntrospectionAspectInstance : IAspectInstance
     /// <summary>
     /// Gets the advice added by the aspect.
     /// </summary>
-    ImmutableArray<IIntrospectionAdvice> Advices { get; }
+    IReadOnlyList<IIntrospectionAdvice> Advice { get; }
 
     /// <summary>
     /// Gets the declaration to which the aspect is applied.

@@ -4,21 +4,16 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.CodeModel.Invokers;
-using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
-using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
 using System.Reflection;
-using MethodKind = Metalama.Framework.Code.MethodKind;
-using RefKind = Metalama.Framework.Code.RefKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal class BuiltProperty : BuiltMember, IPropertyImpl, IMemberRef<IProperty>
+    internal class BuiltProperty : BuiltMember, IPropertyImpl
     {
-        public BuiltProperty( PropertyBuilder builder, CompilationModel compilation ) : base( compilation )
+        public BuiltProperty( PropertyBuilder builder, CompilationModel compilation ) : base( compilation, builder )
         {
             this.PropertyBuilder = builder;
         }
@@ -57,12 +52,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => this.PropertyBuilder.ToFieldOrPropertyInfo();
 
         public PropertyInfo ToPropertyInfo() => this.PropertyBuilder.ToPropertyInfo();
-
-        string? IRef<IProperty>.ToSerializableId() => null;
-
-        IProperty IRef<IProperty>.GetTarget( ICompilation compilation ) => (IProperty) this.GetForCompilation( compilation );
-
-        ISymbol? ISdkRef<IProperty>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => throw new NotSupportedException();
 
         public IMethod? GetAccessor( MethodKind methodKind ) => this.GetAccessorImpl( methodKind );
 

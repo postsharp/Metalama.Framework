@@ -216,7 +216,7 @@ class User {
 
         private void TestExpression<T>( string context, string expression, Action<T> withResult, string expectedCode )
         {
-            TestExpression( context, expression, withResult );
+            this.TestExpression( context, expression, withResult );
             this.AssertEqual( expectedCode, expression );
         }
     }

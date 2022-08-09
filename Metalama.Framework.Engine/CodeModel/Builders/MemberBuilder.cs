@@ -4,7 +4,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
-using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
@@ -15,20 +15,19 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal abstract class MemberBuilder : MemberOrNamedTypeBuilder, IMemberBuilder, IMemberImpl
     {
-        protected MemberBuilder( Advice parentAdvice, INamedType declaringType, IObjectReader tags ) : base( parentAdvice, declaringType )
-        {
-            this.Tags = tags;
-        }
+        private bool _isVirtual;
+        private bool _isAsync;
+        private bool _isOverride;
 
-        public abstract bool IsImplicit { get; }
+        protected MemberBuilder( Advice parentAdvice, INamedType declaringType, string name ) : base( parentAdvice, declaringType, name ) { }
 
         public new INamedType DeclaringType => base.DeclaringType.AssertNotNull();
 
@@ -36,41 +35,43 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public abstract bool IsExplicitInterfaceImplementation { get; }
 
-        public bool IsVirtual { get; set; }
+        public bool IsVirtual
+        {
+            get => this._isVirtual;
+            set
+            {
+                this.CheckNotFrozen();
 
-        public bool IsAsync { get; set; }
+                this._isVirtual = value;
+            }
+        }
 
-        public bool IsOverride { get; set; }
+        public bool IsAsync
+        {
+            get => this._isAsync;
+            set
+            {
+                this.CheckNotFrozen();
 
-        public override bool IsDesignTime => !this.IsOverride;
+                this._isAsync = value;
+            }
+        }
+
+        public bool IsOverride
+        {
+            get => this._isOverride;
+            set
+            {
+                this.CheckNotFrozen();
+
+                this._isOverride = value;
+            }
+        }
+
+        public override bool IsDesignTime => !this.IsOverride && !this.IsNew;
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.DeclaringType.ToDisplayString( format, context ) + "." + this.Name;
-
-        protected IObjectReader Tags { get; }
-
-        public void ApplyTemplateAttribute( TemplateAttribute templateAttribute )
-        {
-            if ( templateAttribute.Name != null )
-            {
-                this.Name = templateAttribute.Name;
-            }
-
-            if ( templateAttribute.GetIsSealed().HasValue )
-            {
-                this.IsSealed = templateAttribute.GetIsSealed()!.Value;
-            }
-
-            if ( templateAttribute.GetAccessibility().HasValue )
-            {
-                this.Accessibility = templateAttribute.GetAccessibility()!.Value;
-            }
-
-            if ( templateAttribute.GetIsVirtual().HasValue )
-            {
-                this.IsVirtual = templateAttribute.GetIsVirtual().HasValue;
-            }
-        }
 
         public abstract IMember? OverriddenMember { get; }
 
@@ -80,7 +81,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             in MemberIntroductionContext context,
             IType targetType,
             IExpression? initializerExpression,
-            TemplateMember<T> initializerTemplate,
+            TemplateMember<T>? initializerTemplate,
+            IObjectReader tags,
             out ExpressionSyntax? initializerExpressionSyntax,
             out MethodDeclarationSyntax? initializerMethodSyntax )
             where T : class, IMember
@@ -95,7 +97,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 throw new ArgumentNullException( nameof(targetType) );
             }
 
-            if ( context.SyntaxGenerationContext.IsPartial && (initializerExpression != null || initializerTemplate.IsNotNull) )
+            if ( context.SyntaxGenerationContext.IsPartial && (initializerExpression != null || initializerTemplate != null) )
             {
                 // At design time when generating the partial code for source generators, we do not expand templates.
                 // This may cause warnings in the constructor (because some fields will not be initialized)
@@ -111,15 +113,15 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             {
                 // TODO: Error about the expression type?
                 initializerMethodSyntax = null;
-                initializerExpressionSyntax = ((IUserExpression) initializerExpression).ToSyntax( context.SyntaxGenerationContext );
+                initializerExpressionSyntax = ((IUserExpression) initializerExpression).ToExpressionSyntax( context.SyntaxGenerationContext );
 
                 return true;
             }
-            else if ( initializerTemplate.IsNotNull )
+            else if ( initializerTemplate != null )
             {
                 initializerExpressionSyntax = null;
 
-                if ( !this.TryExpandInitializerTemplate( context, initializerTemplate, out var initializerBlock ) )
+                if ( !this.TryExpandInitializerTemplate( context, initializerTemplate, tags, out var initializerBlock ) )
                 {
                     // Template expansion error.
                     initializerMethodSyntax = null;
@@ -175,18 +177,29 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
         }
 
+        protected SyntaxToken GetCleanName()
+        {
+            return
+                Identifier(
+                    this.IsExplicitInterfaceImplementation
+                        ? this.Name.Split( '.' ).Last()
+                        : this.Name );
+        }
+
         private bool TryExpandInitializerTemplate<T>(
             MemberIntroductionContext context,
             TemplateMember<T> initializerTemplate,
+            IObjectReader tags,
             [NotNullWhen( true )] out BlockSyntax? expression )
             where T : class, IMember
         {
             var metaApi = MetaApi.ForInitializer(
                 this,
                 new MetaApiProperties(
+                    this.ParentAdvice.SourceCompilation,
                     context.DiagnosticSink,
                     initializerTemplate.Cast(),
-                    this.Tags,
+                    tags,
                     this.ParentAdvice.AspectLayerId,
                     context.SyntaxGenerationContext,
                     this.ParentAdvice.Aspect,
@@ -196,7 +209,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             var expansionContext = new TemplateExpansionContext(
                 this.ParentAdvice.TemplateInstance.Instance,
                 metaApi,
-                this.Compilation,
                 context.LexicalScopeProvider.GetLexicalScope( this ),
                 context.ServiceProvider.GetRequiredService<SyntaxSerializationService>(),
                 context.SyntaxGenerationContext,
@@ -204,40 +216,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 null,
                 this.ParentAdvice.AspectLayerId );
 
-            var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( initializerTemplate.Declaration! );
+            var templateDriver = this.ParentAdvice.TemplateInstance.TemplateClass.GetTemplateDriver( initializerTemplate.Declaration );
 
             return templateDriver.TryExpandDeclaration( expansionContext, Array.Empty<object>(), out expression );
-        }
-
-        protected virtual SyntaxList<AttributeListSyntax> GetAttributeLists( in SyntaxGenerationContext syntaxGenerationContext )
-        {
-            var attributeLists = default(List<AttributeListSyntax>);
-            var templateAttribute = this.Compilation.Factory.GetTypeByReflectionType( typeof(TemplateAttribute) );
-
-            foreach ( var attributeBuilder in this.Attributes )
-            {
-                if ( attributeBuilder.Constructor.DeclaringType.Is( templateAttribute ) )
-                {
-                    // TODO: This is temporary logic - aspect-related attributes should be marked as compile time and all compile time attributes should be skipped.
-                    continue;
-                }
-
-                if ( attributeLists == null )
-                {
-                    attributeLists = new List<AttributeListSyntax>();
-                }
-
-                attributeLists.Add( AttributeList( SingletonSeparatedList( attributeBuilder.GetSyntax( syntaxGenerationContext ) ) ) );
-            }
-
-            if ( attributeLists != null )
-            {
-                return List( attributeLists );
-            }
-            else
-            {
-                return List<AttributeListSyntax>();
-            }
         }
     }
 }

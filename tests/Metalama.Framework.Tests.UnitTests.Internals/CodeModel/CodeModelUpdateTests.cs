@@ -1,8 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Code;
+using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.Transformations;
+using System;
 using System.Linq;
 using Xunit;
 
@@ -22,8 +26,8 @@ class C
 
         var immutableCompilation = testContext.CreateCompilationModel( code );
         Assert.Empty( immutableCompilation.Types.Single().Methods );
-        
-        var compilation = immutableCompilation.ToMutable();
+
+        var compilation = immutableCompilation.CreateMutableClone();
 
         var type = Assert.Single( compilation.Types )!;
 
@@ -31,12 +35,12 @@ class C
         Assert.Empty( type.Methods );
 
         // Add a method.
-        var methodBuilder = new MethodBuilder( null!, type, "M", ObjectReader.Empty );
+        var methodBuilder = new MethodBuilder( null!, type, "M" );
         compilation.AddTransformation( methodBuilder );
 
         // Assert that the method has been added.
         Assert.Single( type.Methods );
-        
+
         // Assert that there is still no method in original compilation.
         Assert.Empty( immutableCompilation.Types.Single().Methods );
     }
@@ -53,8 +57,8 @@ class C
 
         var immutableCompilation = testContext.CreateCompilationModel( code );
         Assert.Empty( immutableCompilation.Types.Single().Methods.OfName( "M" ) );
-        
-        var compilation = immutableCompilation.ToMutable();
+
+        var compilation = immutableCompilation.CreateMutableClone();
 
         var type = Assert.Single( compilation.Types )!;
 
@@ -62,12 +66,12 @@ class C
         Assert.Empty( type.Methods.OfName( "M" ) );
 
         // Add a method.
-        var methodBuilder = new MethodBuilder( null!, type, "M", ObjectReader.Empty );
+        var methodBuilder = new MethodBuilder( null!, type, "M" );
         compilation.AddTransformation( methodBuilder );
 
         // Assert that the method has been added.
         Assert.Single( type.Methods.OfName( "M" ) );
-        
+
         // Assert that there is still no method in original compilation.
         Assert.Empty( immutableCompilation.Types.Single().Methods.OfName( "M" ) );
     }
@@ -83,17 +87,17 @@ class C
 }";
 
         var immutableCompilation = testContext.CreateCompilationModel( code );
-        var compilation = immutableCompilation.ToMutable();
+        var compilation = immutableCompilation.CreateMutableClone();
 
         var type = Assert.Single( compilation.Types )!;
 
         // Add a method.
-        var methodBuilder = new MethodBuilder( null!, type, "M", ObjectReader.Empty );
+        var methodBuilder = new MethodBuilder( null!, type, "M" );
         compilation.AddTransformation( methodBuilder );
 
         // Assert that the method has been added.
         Assert.Single( type.Methods );
-        
+
         // Assert that there is still no method in original compilation.
         Assert.Empty( immutableCompilation.Types.Single().Methods );
     }
@@ -109,17 +113,17 @@ class C
 }";
 
         var immutableCompilation = testContext.CreateCompilationModel( code );
-        var compilation = immutableCompilation.ToMutable();
+        var compilation = immutableCompilation.CreateMutableClone();
 
         var type = Assert.Single( compilation.Types )!;
 
         // Add a method.
-        var methodBuilder = new MethodBuilder( null!, type, "M", ObjectReader.Empty );
+        var methodBuilder = new MethodBuilder( null!, type, "M" );
         compilation.AddTransformation( methodBuilder );
 
         // Assert that the method has been added.
         Assert.Single( type.Methods.OfName( "M" ) );
-        
+
         // Assert that there is still no method in original compilation.
         Assert.Empty( immutableCompilation.Types.Single().Methods.OfName( "M" ) );
     }
@@ -136,7 +140,7 @@ class C
 }";
 
         var immutableCompilation = testContext.CreateCompilationModel( code );
-        var compilation = immutableCompilation.ToMutable();
+        var compilation = immutableCompilation.CreateMutableClone();
 
         var type = Assert.Single( compilation.Types )!;
 
@@ -157,12 +161,12 @@ void M(int p){}
 }";
 
         var immutableCompilation = testContext.CreateCompilationModel( code );
-        var compilation = immutableCompilation.ToMutable();
+        var compilation = immutableCompilation.CreateMutableClone();
 
         var type = Assert.Single( compilation.Types )!;
 
         // Add a method.
-        var methodBuilder = new MethodBuilder( null!, type, "M", ObjectReader.Empty );
+        var methodBuilder = new MethodBuilder( null!, type, "M" );
         compilation.AddTransformation( methodBuilder );
 
         // Assert that the method has been added.
@@ -181,7 +185,7 @@ void M(int p){}
 }";
 
         var immutableCompilation = testContext.CreateCompilationModel( code );
-        var compilation = immutableCompilation.ToMutable();
+        var compilation = immutableCompilation.CreateMutableClone();
 
         var type = Assert.Single( compilation.Types )!;
 
@@ -189,7 +193,7 @@ void M(int p){}
         Assert.Single( type.Methods.OfName( "M" ) );
 
         // Add a method.
-        var methodBuilder = new MethodBuilder( null!, type, "M", ObjectReader.Empty );
+        var methodBuilder = new MethodBuilder( null!, type, "M" );
         compilation.AddTransformation( methodBuilder );
 
         // Assert that the method has been added.
@@ -207,7 +211,7 @@ class C
 }";
 
         var immutableCompilation = testContext.CreateCompilationModel( code );
-        var compilation = immutableCompilation.ToMutable();
+        var compilation = immutableCompilation.CreateMutableClone();
 
         var type = Assert.Single( compilation.Types )!;
 
@@ -233,7 +237,7 @@ class C
 }";
 
         var immutableCompilation = testContext.CreateCompilationModel( code );
-        var compilation = immutableCompilation.ToMutable();
+        var compilation = immutableCompilation.CreateMutableClone();
 
         var type = Assert.Single( compilation.Types )!;
 
@@ -256,7 +260,7 @@ class C
 }";
 
         var immutableCompilation = testContext.CreateCompilationModel( code );
-        var compilation = immutableCompilation.ToMutable();
+        var compilation = immutableCompilation.CreateMutableClone();
 
         var type = Assert.Single( compilation.Types )!;
 
@@ -282,7 +286,7 @@ class C
 }";
 
         var immutableCompilation = testContext.CreateCompilationModel( code );
-        var compilation = immutableCompilation.ToMutable();
+        var compilation = immutableCompilation.CreateMutableClone();
 
         var type = Assert.Single( compilation.Types )!;
 
@@ -292,5 +296,125 @@ class C
 
         // Assert that the method has been added.
         Assert.Single( type.Fields.OfName( "F" ) );
+    }
+
+    [Fact]
+    public void AddParameterToExplicitConstructor()
+    {
+        using var testContext = this.CreateTestContext();
+
+        var code = @"
+class C
+{    
+   public C() {}
+}";
+
+        var immutableCompilation = testContext.CreateCompilationModel( code );
+        var compilation = immutableCompilation.CreateMutableClone();
+
+        var constructor = compilation.Types.Single().Constructors.Single();
+
+        // Add a field.
+        var parameterBuilder = new ParameterBuilder( null!, constructor, 0, "p", compilation.Factory.GetTypeByReflectionType( typeof(int) ), RefKind.In );
+        compilation.AddTransformation( new IntroduceParameterTransformation( null!, parameterBuilder ) );
+
+        Assert.Single( constructor.Parameters );
+    }
+
+    [Fact]
+    public void AddParameterToImplicitConstructor()
+    {
+        using var testContext = this.CreateTestContext();
+
+        var code = @"
+class C
+{    
+  
+}";
+
+        var immutableCompilation = testContext.CreateCompilationModel( code );
+        var compilation = immutableCompilation.CreateMutableClone();
+
+        var constructor = compilation.Types.Single().Constructors.Single();
+
+        // Add a field.
+        var parameterBuilder = new ParameterBuilder( null!, constructor, 0, "p", compilation.Factory.GetTypeByReflectionType( typeof(int) ), RefKind.In );
+        compilation.AddTransformation( new IntroduceParameterTransformation( null!, parameterBuilder ) );
+
+        Assert.Single( constructor.Parameters );
+    }
+
+    [Fact]
+    public void AddAttribute_Type()
+    {
+        using var testContext = this.CreateTestContext();
+
+        var code = @"
+class C
+{    
+  
+}";
+
+        var immutableCompilation = testContext.CreateCompilationModel( code );
+        var compilation = immutableCompilation.CreateMutableClone();
+        var type = compilation.Types.Single();
+
+        Assert.Empty( type.Attributes );
+
+        compilation.AddTransformation(
+            new AttributeBuilder(
+                null!,
+                type,
+                AttributeConstruction.Create( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(SerializableAttribute) ) ) ) );
+
+        Assert.Single( type.Attributes );
+    }
+
+    [Fact]
+    public void AddAttribute_Compilation()
+    {
+        using var testContext = this.CreateTestContext();
+
+        var code = @"";
+
+        var immutableCompilation = testContext.CreateCompilationModel( code );
+        var compilation = immutableCompilation.CreateMutableClone();
+
+        Assert.Empty( compilation.Attributes );
+
+        compilation.AddTransformation(
+            new AttributeBuilder(
+                null!,
+                compilation,
+                AttributeConstruction.Create( (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(SerializableAttribute) ) ) ) );
+
+        Assert.Single( compilation.Attributes );
+    }
+
+    [Fact]
+    public void RemoveAttribute_Type()
+    {
+        using var testContext = this.CreateTestContext();
+
+        var code = @"
+[System.Serializable]
+class C
+{    
+  
+}";
+
+        var immutableCompilation = testContext.CreateCompilationModel( code );
+        var compilation = immutableCompilation.CreateMutableClone();
+        var type = compilation.Types.Single();
+
+        Assert.Single( type.Attributes );
+
+        compilation.AddTransformation(
+            new RemoveAttributesTransformation(
+                null!,
+                type,
+                (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(SerializableAttribute) ) ) );
+
+        Assert.Empty( type.Attributes );
     }
 }

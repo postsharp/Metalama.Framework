@@ -4,6 +4,7 @@
 using Metalama.Framework.Engine.CompileTime;
 using System.Diagnostics.CodeAnalysis;
 #if NET5_0_OR_GREATER
+using Metalama.Backstage.Utilities;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities;
 using System;
@@ -66,28 +67,35 @@ namespace Metalama.TestFramework
 #if NET5_0_OR_GREATER
             var waits = 0;
 
-            while ( this._loadedAssemblies.Any( r => r.IsAlive ) )
+            // While waiting for disposal, we need to prevent any other thread from taking a reference to the list of assemblies
+            // loaded in the AppDomain, because such reference would prevent the assembly from being unloaded.
+            lock ( AppDomainUtility.Sync )
             {
-                waits++;
-                Thread.Sleep( 10 );
-                GC.Collect();
-                GC.WaitForFullGCComplete();
-
-                if ( waits > 10 )
+                while ( this._loadedAssemblies.Any( r => r.IsAlive ) )
                 {
-                    var assemblies = string.Join( ",", this._loadedAssemblies.Where( r => r.IsAlive ).Select( r => ((Assembly) r.Target!).GetName().Name ) );
+                    waits++;
+                    Thread.Sleep( 10 );
+                    GC.Collect();
+                    GC.WaitForFullGCComplete();
 
-                    /* IF YOU ARE HERE BECAUSE YOU ARE DEBUGGING A MEMORY LEAK
-                     * 
-                     * Here are a few pointers:
-                     *  - You need to use WinDbg and sos.dll
-                     *  - To know where sos.dll is and how to load it in WinDbg, type `dotnet sos install`.
-                     *  - Follow instructions in https://docs.microsoft.com/en-us/dotnet/standard/assembly/unloadability
-                     */
+                    if ( waits > 10 )
+                    {
+                        var assemblies = string.Join(
+                            ",",
+                            this._loadedAssemblies.Where( r => r.IsAlive ).Select( r => ((Assembly) r.Target!).GetName().Name ) );
 
-                    throw new InvalidOperationException(
-                        "The domain could not be unloaded. There are probably dangling references. " +
-                        "The following assemblies are still loaded: " + assemblies + "." );
+                        /* IF YOU ARE HERE BECAUSE YOU ARE DEBUGGING A MEMORY LEAK
+                         * 
+                         * Here are a few pointers:
+                         *  - You need to use WinDbg and sos.dll
+                         *  - To know where sos.dll is and how to load it in WinDbg, type `dotnet sos install`.
+                         *  - Follow instructions in https://docs.microsoft.com/en-us/dotnet/standard/assembly/unloadability
+                         */
+
+                        throw new InvalidOperationException(
+                            "The domain could not be unloaded. There are probably dangling references. " +
+                            "The following assemblies are still loaded: " + assemblies + "." );
+                    }
                 }
             }
 #endif

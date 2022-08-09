@@ -27,7 +27,7 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this.IsAssignable = isAssignable;
         }
 
-        public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext ) => this._expression;
+        protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext ) => this._expression;
 
         public override IType Type { get; }
 

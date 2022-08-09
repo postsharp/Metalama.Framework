@@ -3,21 +3,26 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.SyntaxSerialization;
+using Metalama.Framework.Engine.Testing;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Immutable;
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
 {
     public abstract class SerializerTestsBase : TestBase
     {
-        private protected SerializerTestContext CreateSerializationTestContext( string code ) => new( this, code );
+        private TestProjectOptions CreateProjectOptions() => new( additionalAssemblies: ImmutableArray.Create( this.GetType().Assembly ) );
 
-        private protected SerializerTestContext CreateSerializationTestContext( CompilationModel compilation ) => new( this, compilation );
+        private protected SerializerTestContext CreateSerializationTestContext( string code ) => new( code, this.CreateProjectOptions() );
+
+        private protected SerializerTestContext CreateSerializationTestContext( CompilationModel compilation )
+            => new( compilation, this.CreateProjectOptions() );
 
         private protected class SerializerTestContext : TestContext
         {
             public CompilationModel Compilation { get; }
 
-            public SerializerTestContext( TestBase parent, CompilationModel compilationModel ) : base( parent, null, null )
+            public SerializerTestContext( CompilationModel compilationModel, TestProjectOptions projectOptions ) : base( projectOptions )
             {
                 this.Compilation = compilationModel;
 
@@ -31,7 +36,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
                 this.SerializationService = new SyntaxSerializationService( this.ServiceProvider );
             }
 
-            public SerializerTestContext( TestBase parent, string code ) : base( parent, null, null )
+            public SerializerTestContext( string code, TestProjectOptions projectOptions ) : base( projectOptions )
             {
                 this.Compilation = this.CreateCompilationModel( code );
 

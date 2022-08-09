@@ -4,13 +4,13 @@
 using Microsoft.CodeAnalysis;
 using System;
 
-#pragma warning disable CA1001 // IDisposable is not owned.
-
 namespace Metalama.Framework.Engine.CompileTime;
 
 internal partial class CompileTimeCompilationBuilder
 {
+#pragma warning disable CA1001 // Types that own disposable fields should be disposable
     private sealed partial class ProduceCompileTimeCodeRewriter
+#pragma warning restore CA1001 // Types that own disposable fields should be disposable
     {
         private class Context : IDisposable
         {

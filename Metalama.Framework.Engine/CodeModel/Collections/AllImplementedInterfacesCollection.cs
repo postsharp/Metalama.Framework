@@ -3,58 +3,27 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
-using Microsoft.CodeAnalysis;
+using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.Collections;
 
-internal class AllImplementedInterfacesCollection : IImplementedInterfaceCollection
+internal class AllImplementedInterfacesCollection : DeclarationCollection<INamedType, Ref<INamedType>>, IImplementedInterfaceCollection
 {
-    private readonly HashSet<INamedTypeSymbol> _implementedInterfacesSymbols = new( SymbolEqualityComparer.Default );
-    private readonly CompilationModel _compilation;
-    private List<INamedType>? _implementedInterfaces;
+    public AllImplementedInterfacesCollection( INamedType declaringType, AllInterfaceUpdatableCollection source ) : base( declaringType, source ) { }
 
-    public AllImplementedInterfacesCollection( INamedType type )
+    public bool Contains( INamedType namedType ) => ((AllInterfaceUpdatableCollection) this.Source).Contains( namedType.ToTypedRef() );
+
+    public bool Contains( Type type )
     {
-        var compilation = this._compilation = type.GetCompilationModel();
+        var itype = ((ICompilationInternal) this.ContainingDeclaration!.Compilation).Factory.GetTypeByReflectionType( type );
 
-        void ProcessInterface( INamedTypeSymbol interfaceType )
+        if ( itype is not INamedType namedType )
         {
-            if ( this._implementedInterfacesSymbols.Add( interfaceType ) )
-            {
-                foreach ( var child in interfaceType.AllInterfaces )
-                {
-                    ProcessInterface( child );
-                }
-            }
+            return false;
         }
 
-        for ( var t = type.GetSymbol(); t != null; t = t.BaseType )
-        {
-            var implementedInterfaces = compilation.GetInterfaceImplementationCollection( t, false );
-
-            foreach ( var i in implementedInterfaces )
-            {
-                ProcessInterface( (INamedTypeSymbol) i.GetSymbol( compilation.RoslynCompilation ) );
-            }
-        }
+        return this.Contains( namedType );
     }
-
-    public bool Contains( INamedType namedType ) => this._implementedInterfacesSymbols.Contains( namedType.GetSymbol() );
-
-    public bool Contains( Type type ) => this._implementedInterfacesSymbols.Contains( this._compilation.ReflectionMapper.GetTypeSymbol( type ) );
-
-    public IEnumerator<INamedType> GetEnumerator()
-    {
-        this._implementedInterfaces ??= this._implementedInterfacesSymbols.Select( x => this._compilation.Factory.GetNamedType( x ) ).ToList();
-
-        return this._implementedInterfaces.GetEnumerator();
-    }
-
-    IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
-
-    public int Count => this._implementedInterfacesSymbols.Count;
 }

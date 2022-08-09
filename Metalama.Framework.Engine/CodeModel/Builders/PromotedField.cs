@@ -3,12 +3,16 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.References;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using System;
+using Accessibility = Metalama.Framework.Code.Accessibility;
+using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
@@ -18,19 +22,26 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public MemberRef<IMember> ReplacedMember => this._field.ToMemberRef<IMember>();
 
-        public override Writeability Writeability => this._field.Writeability;
+        public override Writeability Writeability
+            => this._field.Writeability switch
+            {
+                Writeability.None => Writeability.None,
+                Writeability.ConstructorOnly => Writeability.InitOnly, // Read-only fields are promoted to init-only properties.
+                Writeability.All => Writeability.All,
+                _ => throw new AssertionFailedException()
+            };
 
-        public PromotedField( Advice advice, IField field, IObjectReader tags ) : base(
+        public PromotedField( IServiceProvider serviceProvider, Advice advice, IField field, IObjectReader initializerTags ) : base(
             advice,
             field.DeclaringType,
             field.Name,
             true,
             true,
             true,
-            false,
+            field is { IsStatic: false, Writeability: Writeability.ConstructorOnly },
             true,
             true,
-            tags )
+            initializerTags )
         {
             this._field = (IFieldImpl) field;
             this.Type = field.Type;
@@ -38,20 +49,27 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             this.IsStatic = this._field.IsStatic;
 
             this.GetMethod.AssertNotNull().Accessibility = this._field.Accessibility;
-            this.SetMethod.AssertNotNull().Accessibility = this._field.Accessibility;
 
-            foreach ( var attribute in field.Attributes )
+            this.SetMethod.AssertNotNull().Accessibility =
+                this._field switch
+                {
+                    { Writeability: Writeability.ConstructorOnly } => Accessibility.Private,
+                    _ => this._field.Accessibility
+                };
+
+            if ( field.Attributes.Count > 0 )
             {
-                this.AddAttribute( attribute.ToAttributeConstruction() );
+                var classificationService = serviceProvider.GetRequiredService<AttributeClassificationService>();
+
+                foreach ( var attribute in field.Attributes )
+                {
+                    if ( classificationService.MustMoveFromFieldToProperty( attribute.Type.GetSymbol() ) )
+                    {
+                        this.AddAttribute( attribute.ToAttributeConstruction() );
+                    }
+                }
             }
         }
-
-        public override SyntaxTree TargetSyntaxTree
-            => this._field switch
-            {
-                IDeclarationImpl declaration => declaration.PrimarySyntaxTree.AssertNotNull(),
-                _ => throw new AssertionFailedException()
-            };
 
         public override SyntaxTree? PrimarySyntaxTree => this._field.PrimarySyntaxTree;
 
@@ -73,17 +91,23 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     this.Type,
                     fieldBuilder.InitializerExpression,
                     fieldBuilder.InitializerTemplate,
+                    this.InitializerTags,
                     out initializerExpression,
                     out initializerMethod );
             }
             else
             {
                 // For original code fields, copy the initializer syntax.
-                var fieldDeclaration = (VariableDeclaratorSyntax) this._field.GetPrimaryDeclaration().AssertNotNull();
+                var fieldDeclaration = (VariableDeclaratorSyntax) this._field.GetPrimaryDeclarationSyntax().AssertNotNull();
 
                 if ( fieldDeclaration.Initializer != null )
                 {
                     initializerExpression = fieldDeclaration.Initializer.Value;
+                }
+                else if ( this.DeclaringType.TypeKind is TypeKind.Struct or TypeKind.RecordStruct )
+                {
+                    // In structs, we have to initialize all introduced fields.
+                    initializerExpression = SyntaxFactoryEx.Default;
                 }
                 else
                 {
@@ -94,12 +118,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
                 return true;
             }
-        }
-
-        protected override SyntaxList<AttributeListSyntax> GetAttributeLists( in SyntaxGenerationContext syntaxGenerationContext )
-        {
-            // TODO: 
-            return List<AttributeListSyntax>();
         }
     }
 }

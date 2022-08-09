@@ -3,10 +3,8 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advices;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
@@ -25,7 +23,7 @@ namespace Metalama.Framework.Engine.Pipeline
     /// <summary>
     /// Maintains the state of <see cref="HighLevelPipelineStage"/>, composed of several <see cref="PipelineStep"/>.
     /// The current object is essentially a mutable list of <see cref="PipelineStep"/> instances. It exposes methods
-    /// like <see cref="AddAdvices"/>, <see cref="AddAspectInstances"/> or <see cref="AddAspectSources"/> that
+    /// like <see cref="AddAspectInstances"/> or <see cref="AddAspectSources"/> that
     /// allow to add inputs to different steps of the pipeline. This object must create the steps in the appropriate order.
     /// </summary>
     internal class PipelineStepsState : IPipelineStepsResult, IDiagnosticAdder
@@ -38,8 +36,7 @@ namespace Metalama.Framework.Engine.Pipeline
         private readonly List<AspectInstanceResult> _aspectInstanceResults = new();
         private readonly List<IValidatorSource> _validatorSources = new();
         private readonly OverflowAspectSource _overflowAspectSource = new();
-        private readonly IntrospectionPipelineListener? _introspectionPipelineListener;
-
+        private readonly IntrospectionPipelineListener? _introspectionListener;
         private PipelineStep? _currentStep;
 
         public CompilationModel LastCompilation { get; private set; }
@@ -52,7 +49,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
         public ImmutableArray<IValidatorSource> ValidatorSources => this._validatorSources.ToImmutableArray();
 
-        public ImmutableUserDiagnosticList Diagnostics => this._diagnostics.ToImmutable();
+        ImmutableUserDiagnosticList IPipelineStepsResult.Diagnostics => this._diagnostics.ToImmutable();
 
         public ImmutableArray<IAspectSource> ExternalAspectSources => ImmutableArray.Create<IAspectSource>( this._overflowAspectSource );
 
@@ -67,7 +64,7 @@ namespace Metalama.Framework.Engine.Pipeline
             ImmutableArray<IValidatorSource> inputValidatorSources,
             AspectPipelineConfiguration pipelineConfiguration )
         {
-            this._introspectionPipelineListener = pipelineConfiguration.ServiceProvider.GetService<IntrospectionPipelineListener>();
+            this._introspectionListener = pipelineConfiguration.ServiceProvider.GetService<IntrospectionPipelineListener>();
 
             this._diagnostics = new UserDiagnosticSink( pipelineConfiguration.CompileTimeProject, pipelineConfiguration.CodeFixFilter );
             this.LastCompilation = inputLastCompilation;
@@ -205,82 +202,40 @@ namespace Metalama.Framework.Engine.Pipeline
 
             if ( !this._steps.TryGetValue( stepId, out step ) )
             {
-                if ( aspectLayer.IsDefault )
-                {
-                    step = new InitializeAspectInstancesPipelineStep( this, stepId, aspectLayer );
-                }
-                else
-                {
-                    step = new AdvicePipelineStep( this, stepId, aspectLayer );
-                }
-
+                step = new ExecuteAspectLayerPipelineStep( this, stepId, aspectLayer );
                 _ = this._steps.Add( stepId, step );
             }
 
             return true;
         }
 
-        public bool AddAdvices( IEnumerable<Advice> advices, ICompilation compilation )
-        {
-            Invariant.Assert( this._currentStep != null );
-
-            var success = true;
-
-            foreach ( var advice in advices )
-            {
-                var adviceTargetDeclaration = advice.TargetDeclaration.GetTarget( compilation );
-                var aspectTargetDeclaration = advice.Aspect.TargetDeclaration.GetTarget( compilation );
-                var aspectTargetTypeDeclaration = aspectTargetDeclaration.GetDeclaringType() ?? aspectTargetDeclaration;
-
-                var stepId = new PipelineStepId(
-                    advice.AspectLayerId,
-                    this.LastCompilation.GetDepth( aspectTargetTypeDeclaration ),
-                    this.LastCompilation.GetDepth( aspectTargetDeclaration ),
-                    PipelineStepPhase.Transform,
-                    this.LastCompilation.GetDepth( adviceTargetDeclaration ) );
-
-                if ( !this.TryGetOrAddStep( stepId, true, out var step ) )
-                {
-                    this._diagnostics.Report(
-                        GeneralDiagnosticDescriptors.CannotAddAdviceToPreviousPipelineStep.CreateRoslynDiagnostic(
-                            this._currentStep.AspectLayer.AspectClass.DiagnosticLocation,
-                            (this._currentStep.AspectLayer.AspectClass.ShortName, advice.TargetDeclaration) ) );
-
-                    success = false;
-
-                    continue;
-                }
-
-                ((AdvicePipelineStep) step).AddAdvice( advice );
-            }
-
-            return success;
-        }
-
         public void AddAspectInstances( IEnumerable<ResolvedAspectInstance> aspectInstances )
         {
             foreach ( var aspectInstance in aspectInstances )
             {
-                var aspectTargetDeclaration = (IDeclaration) aspectInstance.TargetDeclaration;
-                var aspectTargetTypeDeclaration = aspectTargetDeclaration.GetDeclaringType() ?? aspectTargetDeclaration;
-
-                var stepId = new PipelineStepId(
-                    new AspectLayerId( aspectInstance.AspectInstance.AspectClass ),
-                    this.LastCompilation.GetDepth( aspectTargetTypeDeclaration ),
-                    this.LastCompilation.GetDepth( aspectTargetDeclaration ),
-                    PipelineStepPhase.Initialize,
-                    -1 );
-
-                if ( !this.TryGetOrAddStep(
-                        stepId,
-                        true,
-                        out var step ) )
+                foreach ( var layer in aspectInstance.AspectInstance.AspectClass.Layers )
                 {
-                    // This should not happen here. The source should not have been added.
-                    throw new AssertionFailedException();
-                }
+                    var aspectTargetDeclaration = (IDeclaration) aspectInstance.TargetDeclaration;
+                    var aspectTargetTypeDeclaration = aspectTargetDeclaration.GetDeclaringType() ?? aspectTargetDeclaration;
 
-                ((InitializeAspectInstancesPipelineStep) step).AddAspectInstance( aspectInstance );
+                    var stepId = new PipelineStepId(
+                        new AspectLayerId( aspectInstance.AspectInstance.AspectClass, layer.LayerName ),
+                        this.LastCompilation.GetDepth( aspectTargetTypeDeclaration ),
+                        this.LastCompilation.GetDepth( aspectTargetDeclaration ),
+                        PipelineStepPhase.Initialize,
+                        -1 );
+
+                    if ( !this.TryGetOrAddStep(
+                            stepId,
+                            true,
+                            out var step ) )
+                    {
+                        // This should not happen here. The source should not have been added.
+                        throw new AssertionFailedException();
+                    }
+
+                    ((ExecuteAspectLayerPipelineStep) step).AddAspectInstance( aspectInstance );
+                }
             }
         }
 
@@ -289,14 +244,11 @@ namespace Metalama.Framework.Engine.Pipeline
             this._inheritableAspectInstances.AddRange( inheritedAspectInstances );
         }
 
-        public void AddDiagnostics(
-            IEnumerable<Diagnostic> diagnostics,
-            IEnumerable<ScopedSuppression> suppressions,
-            IEnumerable<CodeFixInstance> codeFixInstances )
+        public void AddDiagnostics( ImmutableUserDiagnosticList diagnostics )
         {
-            this._diagnostics.Report( diagnostics );
-            this._diagnostics.Suppress( suppressions );
-            this._diagnostics.AddCodeFixes( codeFixInstances );
+            this._diagnostics.Report( diagnostics.ReportedDiagnostics );
+            this._diagnostics.Suppress( diagnostics.DiagnosticSuppressions );
+            this._diagnostics.AddCodeFixes( diagnostics.CodeFixes );
         }
 
         public void AddTransformations( IEnumerable<ITransformation> transformations ) => this._transformations.AddRange( transformations );
@@ -310,11 +262,10 @@ namespace Metalama.Framework.Engine.Pipeline
 
         public void Report( Diagnostic diagnostic ) => this._diagnostics.Report( diagnostic );
 
-        public void AddAspectInstanceResults( ImmutableArray<AspectInstanceResult> aspectInstanceResults )
+        public void AddAspectInstanceResult( AspectInstanceResult aspectInstanceResult )
         {
-            this._aspectInstanceResults.AddRange( aspectInstanceResults );
+            this._aspectInstanceResults.Add( aspectInstanceResult );
+            this._introspectionListener?.AddAspectResult( aspectInstanceResult );
         }
-
-        public void AddAdviceResult( Advice advice, AdviceResult result ) => this._introspectionPipelineListener?.AddAdviceResult( advice, result );
     }
 }

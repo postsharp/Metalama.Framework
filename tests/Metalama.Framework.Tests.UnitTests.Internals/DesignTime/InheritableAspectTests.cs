@@ -41,7 +41,7 @@ public interface I {}
 
             Assert.Equal(
                 new[] { "T:I" },
-                compilationResult1.PipelineResult.GetInheritedAspects( "Aspect" ).Select( i => i.TargetDeclaration.ToSerializableId() ).ToArray() );
+                compilationResult1.PipelineResult.GetInheritedAspects( "Aspect" ).Select( i => i.TargetDeclaration.ToSerializableId().Id ).ToArray() );
         }
 
         [Fact]
@@ -69,7 +69,7 @@ public class Aspect : TypeAspect { }
 
             Assert.Equal(
                 new[] { "T:I" },
-                compilationResult1!.PipelineResult.GetInheritedAspects( "Aspect" ).Select( i => i.TargetDeclaration.ToSerializableId() ).ToArray() );
+                compilationResult1!.PipelineResult.GetInheritedAspects( "Aspect" ).Select( i => i.TargetDeclaration.ToSerializableId().Id ).ToArray() );
 
             // Add a target class.
             var targetTree2 = CSharpSyntaxTree.ParseText( "[Aspect] interface I {} [Aspect] class C {}", path: "target.cs" );
@@ -80,7 +80,7 @@ public class Aspect : TypeAspect { }
             Assert.Equal(
                 new[] { "T:C", "T:I" },
                 compilationResult2!.PipelineResult.GetInheritedAspects( "Aspect" )
-                    .Select( i => i.TargetDeclaration.ToSerializableId() )
+                    .Select( i => i.TargetDeclaration.ToSerializableId().Id )
                     .OrderBy( a => a )
                     .ToArray() );
 
@@ -92,7 +92,7 @@ public class Aspect : TypeAspect { }
             Assert.Equal(
                 new[] { "T:C" },
                 compilationResult3!.PipelineResult.GetInheritedAspects( "Aspect" )
-                    .Select( i => i.TargetDeclaration.ToSerializableId() )
+                    .Select( i => i.TargetDeclaration.ToSerializableId().Id )
                     .OrderBy( a => a )
                     .ToArray() );
         }

@@ -9,13 +9,25 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Methods.AdvisedSo
     {
         public override dynamic OverrideMethod()
         {
-            return meta.Target.Method.Invokers.Base!.Invoke(meta.This, meta.Target.Method.Parameters[0].Value);
+            if (meta.Target.Method.Parameters.Count == 0)
+            {
+                return meta.Target.Method.Invokers.Base!.Invoke(meta.This);
+            }
+            else
+            {
+                return meta.Target.Method.Invokers.Base!.Invoke(meta.This, meta.Target.Method.Parameters[0].Value);
+            }
         }
     }
 
     // <target>
     internal class TargetClass
     {
+        [Test]
+        public void VoidMethod()
+        {
+        }
+
         [Test]
         public int Method(int x)
         {

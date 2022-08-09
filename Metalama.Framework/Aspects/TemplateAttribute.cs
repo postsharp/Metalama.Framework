@@ -10,65 +10,37 @@ namespace Metalama.Framework.Aspects
     /// The base class for all custom attributes that mark a declaration as a template.
     /// </summary>
     [AttributeUsage( AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Event )]
-    public class TemplateAttribute : Attribute
+    public class TemplateAttribute : Attribute, ITemplateAttribute
     {
-        private Accessibility? _accessibility;
-        private bool? _isVirtual;
-        private bool? _isSealed;
+        internal static TemplateAttribute Default { get; } = new();
 
-        public string? Name { get; set; }
+        private TemplateAttributeImpl _impl;
+
+        public string? Name { get => this._impl.Name; set => this._impl.Name = value; }
 
         public Accessibility Accessibility
         {
-            get
-                => this._accessibility
-                   ?? throw new InvalidOperationException(
-                       $"The '{nameof(this.Accessibility)}' was not set, use {nameof(this.GetAccessibility)} to get nullable value." );
-            set => this._accessibility = value;
+            get => this._impl.Accessibility;
+            set => this._impl.Accessibility = value;
         }
-
-        public IntroductionScope Scope { get; set; }
-
-        /// <summary>
-        /// Gets or sets the implementation strategy (like <see cref="OverrideStrategy.Override"/>, <see cref="OverrideStrategy.Fail"/> or <see cref="OverrideStrategy.Ignore"/>) when the member is already declared in the target type.
-        /// The default value is <see cref="OverrideStrategy.Fail"/>. 
-        /// </summary>
-        public OverrideStrategy WhenExists { get; set; }
-
-        /// <summary>
-        /// Gets or sets the implementation strategy (like <see cref="OverrideStrategy.Override"/>, <see cref="OverrideStrategy.Fail"/> or <see cref="OverrideStrategy.Ignore"/>) when the member is already declared
-        /// in a parent class of the target tye.
-        /// The default value is <see cref="OverrideStrategy.Fail"/>. 
-        /// </summary>
-        [Obsolete( "Not implemented." )]
-        public OverrideStrategy WhenInherited { get; set; }
-
-        public Accessibility? GetAccessibility() => this._accessibility;
 
         public bool IsVirtual
         {
-            get
-                => this._isVirtual
-                   ?? throw new InvalidOperationException( $"The 'Virtual' property was not set, use {nameof(this.GetIsVirtual)} to get nullable value." );
-            set => this._isVirtual = value;
+            get => this._impl.IsVirtual;
+
+            set => this._impl.IsVirtual = value;
         }
 
         public bool IsSealed
         {
-            get
-                => this._isSealed
-                   ?? throw new InvalidOperationException( $"The 'IsSealed' property was not set, use {nameof(this.GetIsSealed)} to get nullable value." );
-            set => this._isSealed = value;
+            get => this._impl.IsSealed;
+            set => this._impl.IsSealed = value;
         }
 
-        public bool? GetIsVirtual()
-        {
-            return this._isVirtual;
-        }
+        bool? ITemplateAttribute.IsVirtual => this._impl.GetIsVirtual();
 
-        public bool? GetIsSealed()
-        {
-            return this._isSealed;
-        }
+        bool? ITemplateAttribute.IsSealed => this._impl.GetIsSealed();
+
+        Accessibility? ITemplateAttribute.Accessibility => this._impl.GetAccessibility();
     }
 }

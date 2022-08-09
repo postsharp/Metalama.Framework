@@ -22,7 +22,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                 "((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(\"M:Target.Method~System.Int32\")))",
                 serialized );
 
-            TestExpression<MethodInfo>(
+            this.TestExpression<MethodInfo>(
                 code,
                 serialized,
                 info =>
@@ -43,7 +43,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                 "((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(\"M:Target.Method``1(``0)~``0\")))",
                 serialized );
 
-            TestExpression<MethodInfo>(
+            this.TestExpression<MethodInfo>(
                 code,
                 serialized,
                 info =>

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Multiple;
@@ -64,7 +65,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
             builder.With( x => x.FieldsAndProperties ).AddAspect(x => new FirstOverrideAttribute());
-            builder.With( x => x.FieldsAndProperties).AddAspect(x => new SecondOverrideAttribute());
+            builder.With( x => x.FieldsAndProperties ).AddAspect(x => new SecondOverrideAttribute());
         }
 
         [Introduce]
@@ -80,7 +81,7 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fiel
     {
         public int Field;
 
-        public int StaticField;
+        public static int StaticField;
 
         public int InitializerField = 42;
 

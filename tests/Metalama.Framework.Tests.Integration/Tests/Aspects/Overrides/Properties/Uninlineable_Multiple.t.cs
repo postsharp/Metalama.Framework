@@ -117,10 +117,10 @@ internal class TargetClass
         }
     }
 
-    private int ExpressionBodiedProperty_Source => 42
+    private int ExpressionBodiedProperty_Source
+    => 42;
 
-
-public global::System.Int32 ExpressionBodiedProperty_SecondOverride
+    public global::System.Int32 ExpressionBodiedProperty_SecondOverride
     {
         get
         {
@@ -149,8 +149,8 @@ public global::System.Int32 ExpressionBodiedProperty_SecondOverride
         }
     }
 
-    private int AutoProperty_Source { get; set; }
-
+    private int AutoProperty_Source
+    { get; set; }
 
     public global::System.Int32 AutoProperty_SecondOverride
     {
@@ -180,7 +180,7 @@ public global::System.Int32 ExpressionBodiedProperty_SecondOverride
             return this.AutoGetOnlyProperty_SecondOverride;
 
         }
-        private set
+        private init
         {
             global::System.Console.WriteLine("First override.");
             this.AutoGetOnlyProperty_SecondOverride = value;
@@ -189,8 +189,8 @@ public global::System.Int32 ExpressionBodiedProperty_SecondOverride
         }
     }
 
-    private int AutoGetOnlyProperty_Source { get; set; }
-
+    private int AutoGetOnlyProperty_Source
+    { get; set; }
 
     public global::System.Int32 AutoGetOnlyProperty_SecondOverride
     {

@@ -3,7 +3,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
 using SpecialType = Metalama.Framework.Code.SpecialType;
@@ -42,6 +42,8 @@ namespace Metalama.Framework.Engine.CodeModel
                 (true, NullableAnnotation.NotAnnotated) => false,
                 _ => null
             };
+
+        public bool Equals( SpecialType specialType ) => this.SpecialType == specialType;
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 

@@ -2,6 +2,7 @@ internal class TargetClass
 {
 
 
+    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Uninlineable.OverrideAttribute]
     public global::System.Int32 Field
     {
         get
@@ -19,9 +20,10 @@ internal class TargetClass
 
         }
     }
-    private global::System.Int32 Field_Source { get; set; }
+    private global::System.Int32 Field_Source
+    { get; set; }
 
-
+    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Uninlineable.OverrideAttribute]
     public global::System.Int32 StaticField
     {
         get
@@ -39,9 +41,10 @@ internal class TargetClass
 
         }
     }
-    private global::System.Int32 StaticField_Source { get; set; }
+    private global::System.Int32 StaticField_Source
+    { get; set; }
 
-
+    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Uninlineable.OverrideAttribute]
     public global::System.Int32 InitializerField
     {
         get
@@ -59,10 +62,11 @@ internal class TargetClass
 
         }
     }
-    private global::System.Int32 InitializerField_Source { get; set; } = 42
+    private global::System.Int32 InitializerField_Source
+    { get; set; } = 42;
 
-
-public global::System.Int32 ReadOnlyField
+    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Uninlineable.OverrideAttribute]
+    public global::System.Int32 ReadOnlyField
     {
         get
         {
@@ -71,7 +75,7 @@ public global::System.Int32 ReadOnlyField
             return this.ReadOnlyField_Source;
 
         }
-        private set
+        private init
         {
             global::System.Console.WriteLine("Override.");
             this.ReadOnlyField_Source = value;
@@ -79,8 +83,8 @@ public global::System.Int32 ReadOnlyField
 
         }
     }
-    private global::System.Int32 ReadOnlyField_Source { get; set; }
-
+    private global::System.Int32 ReadOnlyField_Source
+    { get; set; }
     public TargetClass()
     {
         this.ReadOnlyField = 42;

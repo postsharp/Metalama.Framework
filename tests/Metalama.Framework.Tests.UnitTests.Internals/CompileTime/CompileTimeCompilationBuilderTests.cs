@@ -52,7 +52,7 @@ namespace Foo
 
             var rewriter = new CompileTimeCompilationBuilder.RemoveInvalidUsingRewriter( compilation );
 
-            var actual = rewriter.Visit( compilation.SyntaxTrees.Single().GetRoot() ).ToFullString();
+            var actual = rewriter.Visit( compilation.SyntaxTrees.Single().GetRoot() )!.ToFullString();
 
             Assert.Equal( expected, actual );
         }
@@ -548,7 +548,7 @@ class ReferencingClass
 
             var testContext2 = this.CreateTestContext();
 
-            var referencedPath = Path.Combine( testContext2.ProjectOptions.PathOptions.CompileTimeProjectCacheDirectory, "referenced.dll" );
+            var referencedPath = Path.Combine( testContext2.ProjectOptions.BaseDirectory, "referenced.dll" );
 
             using ( var testContext = this.CreateTestContext() )
             {
@@ -615,7 +615,7 @@ public class ReferencedClass
 
             // Emit the referenced assembly.
             var referencedCompilation = CreateCSharpCompilation( referencedCode );
-            var referencedPath = Path.Combine( testContext.ProjectOptions.PathOptions.CompileTimeProjectCacheDirectory, "referenced.dll" );
+            var referencedPath = Path.Combine( testContext.ProjectOptions.BaseDirectory, "referenced.dll" );
 
             DiagnosticList diagnosticList = new();
 
@@ -798,7 +798,11 @@ public class MyAspect : OverrideMethodAspect
 
         private static string GetCompileTimeCode( TestContext testContext, string code, OutputKind outputKind = OutputKind.DynamicallyLinkedLibrary )
         {
-            return GetCompileTimeCode( testContext, new Dictionary<string, string> { { "main.cs", code } }, outputKind ).Values.Single();
+            var compileTimeSyntaxTrees = GetCompileTimeCode( testContext, new Dictionary<string, string> { { "main.cs", code } }, outputKind );
+
+            return compileTimeSyntaxTrees
+                .Single( x => !x.Key.StartsWith( "__", StringComparison.Ordinal ) )
+                .Value;
         }
 
         private static IReadOnlyDictionary<string, string> GetCompileTimeCode(
@@ -819,7 +823,7 @@ public class MyAspect : OverrideMethodAspect
             // Just test that the output file has gone through formatting (we don't test that the whole formatting is correct). 
             var files = Directory
                 .GetFiles( project.Directory!, "*.cs" )
-                .Where( f => !f.EndsWith( CompileTimeConstants.PredefinedTypesFileName, StringComparison.OrdinalIgnoreCase ) );
+                .Where( f => !CompileTimeConstants.IsPredefinedSyntaxTree( f ) );
 
             return files.ToImmutableDictionary( f => Path.GetFileName( f ), File.ReadAllText );
         }
@@ -980,6 +984,108 @@ namespace SomeNamespace
             }
         }
     }
+}
+";
+
+            Assert.Equal( expected, compileTimeCode );
+        }
+
+        [Fact]
+        public void CompileTypeTypesOfAllTKindsAreCopied()
+        {
+            using var testContext = this.CreateTestContext( new TestProjectOptions( formatCompileTimeCode: true ) );
+
+            var code = @"
+using System;
+using Metalama.Framework.Aspects;
+
+namespace System.Runtime.CompilerServices { internal static class IsExternalInit {} }
+
+[CompileTime]
+public class SomeClass
+{
+    public void M() {}
+}
+
+[CompileTime]
+public struct SomeStruct
+{
+    public void M() {}
+}
+
+[CompileTime]
+public interface SomeInterface
+{
+    void M();
+}
+
+[CompileTime]
+public record SomeRecord( int P );
+
+[CompileTime]
+public delegate void SomeDelegate();
+";
+
+            var compileTimeCode = GetCompileTimeCode( testContext, code );
+
+            var expected = @"
+using System;
+using Metalama.Framework.Aspects;
+
+[CompileTime]
+public class SomeClass
+{
+    public void M() { }
+}
+
+[CompileTime]
+public struct SomeStruct
+{
+    public void M() { }
+}
+
+[CompileTime]
+public interface SomeInterface
+{
+    void M();
+}
+
+[CompileTime]
+public record SomeRecord(int P);
+
+[CompileTime]
+public delegate void SomeDelegate();
+";
+
+            Assert.Equal( expected, compileTimeCode );
+        }
+
+        [Fact]
+        public void SyntaxTreeWithOnlyCompileTimeInterfaceIsCopied()
+        {
+            using var testContext = this.CreateTestContext( new TestProjectOptions( formatCompileTimeCode: true ) );
+
+            var code = @"
+using System;
+using Metalama.Framework.Aspects;
+
+[CompileTime]
+public interface SomeInterface
+{
+    void M();
+}
+";
+
+            var compileTimeCode = GetCompileTimeCode( testContext, code );
+
+            var expected = @"
+using System;
+using Metalama.Framework.Aspects;
+
+[CompileTime]
+public interface SomeInterface
+{
+    void M();
 }
 ";
 

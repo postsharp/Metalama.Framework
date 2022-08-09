@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.TestFramework;
 using Metalama.TestFramework.Utilities;
 using Microsoft.CodeAnalysis;
@@ -143,7 +144,7 @@ public class TargetClass
             {
                 inputCompilation = inputCompilation.ReplaceSyntaxTree(
                     inputSyntaxTree,
-                    inputSyntaxTree.WithRootAndOptions( RemovingRewriter.Instance.Visit( await inputSyntaxTree.GetRootAsync() ), inputSyntaxTree.Options ) );
+                    inputSyntaxTree.WithRootAndOptions( RemovingRewriter.Instance.Visit( await inputSyntaxTree.GetRootAsync() )!, inputSyntaxTree.Options ) );
             }
 
             // Replace the project options to enable design time fallback.
@@ -194,7 +195,7 @@ public class TargetClass
             public DesignTimeFallbackProjectOptions( IProjectOptions underlying ) : base( underlying ) { }
         }
 
-        private class RemovingRewriter : CSharpSyntaxRewriter
+        private class RemovingRewriter : SafeSyntaxRewriter
         {
             public static readonly RemovingRewriter Instance = new();
 

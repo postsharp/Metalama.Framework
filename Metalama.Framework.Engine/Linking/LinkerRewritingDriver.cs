@@ -7,7 +7,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Inlining;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -197,7 +197,8 @@ namespace Metalama.Framework.Engine.Linking
 
                             if ( returnStatement.Expression != null )
                             {
-                                var assignStatement = CreateAssignmentStatement( returnStatement.Expression ).WithOriginalLocationAnnotationFrom( returnStatement );
+                                var assignStatement = CreateAssignmentStatement( returnStatement.Expression )
+                                    .WithOriginalLocationAnnotationFrom( returnStatement );
 
                                 replacements[returnStatement] =
                                     Block(
@@ -299,7 +300,17 @@ namespace Metalama.Framework.Engine.Linking
                 switch ( declaration )
                 {
                     case MethodDeclarationSyntax methodDecl:
-                        return (SyntaxNode?) methodDecl.Body ?? methodDecl.ExpressionBody ?? throw new AssertionFailedException();
+                        // Partial methods without declared body have empty implicit body.
+                        return methodDecl.Body ?? (SyntaxNode?) methodDecl.ExpressionBody ?? Block();
+
+                    case DestructorDeclarationSyntax destructorDecl:
+                        return (SyntaxNode?) destructorDecl.Body ?? destructorDecl.ExpressionBody ?? throw new AssertionFailedException();
+
+                    case OperatorDeclarationSyntax operatorDecl:
+                        return (SyntaxNode?) operatorDecl.Body ?? operatorDecl.ExpressionBody ?? throw new AssertionFailedException();
+
+                    case ConversionOperatorDeclarationSyntax operatorDecl:
+                        return (SyntaxNode?) operatorDecl.Body ?? operatorDecl.ExpressionBody ?? throw new AssertionFailedException();
 
                     case AccessorDeclarationSyntax accessorDecl:
                         var body = (SyntaxNode?) accessorDecl.Body ?? accessorDecl.ExpressionBody;
@@ -318,6 +329,7 @@ namespace Metalama.Framework.Engine.Linking
                         return arrowExpressionClause;
 
                     case VariableDeclaratorSyntax { Parent: VariableDeclarationSyntax { Parent: EventFieldDeclarationSyntax } }:
+                    case ParameterSyntax: // Record positional property.
                         return GetImplicitAccessorBody( symbol, generationContext );
 
                     default:
@@ -493,11 +505,20 @@ namespace Metalama.Framework.Engine.Linking
         {
             switch ( symbol )
             {
-                case IMethodSymbol methodSymbol:
+                case IMethodSymbol { MethodKind: MethodKind.Ordinary or MethodKind.ExplicitInterfaceImplementation } methodSymbol:
                     return this.RewriteMethod( (MethodDeclarationSyntax) syntax, methodSymbol, generationContext );
 
+                case IMethodSymbol { MethodKind: MethodKind.Destructor } destructorSymbol:
+                    return this.RewriteDestructor( (DestructorDeclarationSyntax) syntax, destructorSymbol, generationContext );
+
+                case IMethodSymbol { MethodKind: MethodKind.Conversion } operatorSymbol:
+                    return this.RewriteConversionOperator( (ConversionOperatorDeclarationSyntax) syntax, operatorSymbol, generationContext );
+
+                case IMethodSymbol { MethodKind: MethodKind.UserDefinedOperator } operatorSymbol:
+                    return this.RewriteOperator( (OperatorDeclarationSyntax) syntax, operatorSymbol, generationContext );
+
                 case IPropertySymbol propertySymbol:
-                    return this.RewriteProperty( (PropertyDeclarationSyntax) syntax, propertySymbol );
+                    return this.RewriteProperty( (PropertyDeclarationSyntax) syntax, propertySymbol, generationContext );
 
                 case IEventSymbol eventSymbol:
                     return syntax switch
@@ -650,7 +671,15 @@ namespace Metalama.Framework.Engine.Linking
                     _ => targetSymbol.Name
                 };
 
-            // Presume that all (annotated) aspect references are member access expressions.
+            SimpleNameSyntax GetRewrittenName( SimpleNameSyntax name )
+                => name switch
+                {
+                    GenericNameSyntax genericName => genericName.WithIdentifier( Identifier( targetMemberName.AssertNotNull() ) ),
+                    IdentifierNameSyntax _ => name.WithIdentifier( Identifier( targetMemberName.AssertNotNull() ) ),
+                    _ => throw new AssertionFailedException()
+                };
+
+            // Presume that all (annotated) aspect references are member access expressions or invocation expressions.
             switch ( aspectReference.Expression )
             {
                 case MemberAccessExpressionSyntax memberAccessExpression:
@@ -664,16 +693,26 @@ namespace Metalama.Framework.Engine.Linking
                         {
                             return memberAccessExpression
                                 .WithExpression( ThisExpression() )
-                                .WithName( IdentifierName( targetMemberName ) )
+                                .WithName( GetRewrittenName( memberAccessExpression.Name ) )
                                 .WithoutTrivia();
                         }
                         else
                         {
                             // This is the same type, we can just change the identifier in the expression.
                             // TODO: Is the target always accessible?
-                            return memberAccessExpression
-                                .WithName( IdentifierName( targetMemberName ) )
-                                .WithoutTrivia();
+                            if ( targetSymbol is IMethodSymbol { MethodKind: MethodKind.Destructor } )
+                            {
+                                return memberAccessExpression
+                                    .WithExpression( ThisExpression() )
+                                    .WithName( GetRewrittenName( memberAccessExpression.Name ) )
+                                    .WithoutTrivia();
+                            }
+                            else
+                            {
+                                return memberAccessExpression
+                                    .WithName( GetRewrittenName( memberAccessExpression.Name ) )
+                                    .WithoutTrivia();
+                            }
                         }
                     }
                     else
@@ -695,7 +734,7 @@ namespace Metalama.Framework.Engine.Linking
                                 MemberAccessExpression(
                                     SyntaxKind.SimpleMemberAccessExpression,
                                     syntaxGenerationContext.SyntaxGenerator.Type( targetSymbol.ContainingType ),
-                                    IdentifierName( targetMemberName ) );
+                                    GetRewrittenName( memberAccessExpression.Name ) );
                         }
                         else
                         {
@@ -706,16 +745,21 @@ namespace Metalama.Framework.Engine.Linking
                             else if ( aspectReference.ContainingSymbol.ContainingType.Is( targetSymbol.ContainingType ) )
                             {
                                 // Resolved symbol is declared in a base class.
-                                switch ( memberAccessExpression.Expression )
+                                switch (targetSymbol, memberAccessExpression.Expression)
                                 {
-                                    case IdentifierNameSyntax:
-                                    case BaseExpressionSyntax:
-                                    case ThisExpressionSyntax:
+                                    case (IMethodSymbol { MethodKind: MethodKind.Destructor }, _):
+                                        return
+                                            IdentifierName( "__LINKER_TO_BE_REMOVED__" )
+                                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.NullAspectReferenceExpression );
+
+                                    case (_, IdentifierNameSyntax):
+                                    case (_, BaseExpressionSyntax):
+                                    case (_, ThisExpressionSyntax):
                                         return
                                             MemberAccessExpression(
                                                 SyntaxKind.SimpleMemberAccessExpression,
                                                 BaseExpression(),
-                                                IdentifierName( targetMemberName ) );
+                                                GetRewrittenName( memberAccessExpression.Name ) );
 
                                     default:
                                         var aspectInstance = this.ResolveAspectInstance( aspectReference );
@@ -734,7 +778,7 @@ namespace Metalama.Framework.Engine.Linking
                             {
                                 // Resolved symbol is unrelated to the containing symbol.
                                 return memberAccessExpression
-                                    .WithName( IdentifierName( targetMemberName ) )
+                                    .WithName( GetRewrittenName( memberAccessExpression.Name ) )
                                     .WithoutTrivia();
                             }
                         }
@@ -756,7 +800,7 @@ namespace Metalama.Framework.Engine.Linking
                             return
                                 (ExpressionSyntax) rewriter.Visit(
                                     conditionalAccessExpression
-                                        .WithoutTrivia() );
+                                        .WithoutTrivia() )!;
                         }
                     }
                     else
@@ -773,7 +817,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             var introducedMember = this._introductionRegistry.GetIntroducedMemberForSymbol( aspectReference.ContainingSymbol );
 
-            return introducedMember.AssertNotNull().Introduction.Advice.Aspect;
+            return introducedMember.AssertNotNull().Introduction.ParentAdvice.Aspect;
         }
 
         private static string GetOriginalImplMemberName( ISymbol symbol ) => GetSpecialMemberName( symbol, "Source" );

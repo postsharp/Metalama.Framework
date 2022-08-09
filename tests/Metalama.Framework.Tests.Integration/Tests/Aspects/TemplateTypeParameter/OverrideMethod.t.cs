@@ -15,6 +15,6 @@ public class Target
     }
 
     private string M_Source()
-    => ""
-        public static T GenericMethod<T>(T x) => x;
+    => "";
+    public static T GenericMethod<T>(T x) => x;
 }

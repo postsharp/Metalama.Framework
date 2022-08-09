@@ -5,6 +5,7 @@ internal class TargetCode
 private global::System.Int32 _f;
 
 
+[global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.IgnoreValuesAttribute(new global::System.Object[]{0})]
 public global::System.Int32 F 
 { get
 { 
@@ -24,6 +25,7 @@ set
 private global::System.String? _s;
 
 
+[global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.IgnoreValuesAttribute(new global::System.Object[]{""})]
 public global::System.String? S 
 { get
 { 
@@ -43,6 +45,7 @@ set
 private global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.MyEnum _e;
 
 
+[global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.IgnoreValuesAttribute(new global::System.Object[]{0})]
 public global::Metalama.Framework.Tests.Integration.Aspects.Misc.WeaklyTypedSerialize.MyEnum E 
 { get
 { 

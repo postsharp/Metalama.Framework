@@ -5,6 +5,7 @@
     <MetalamaExportAspects>true</MetalamaExportAspects>
     <MetalamaEmitCompilerTransformedFiles>True</MetalamaEmitCompilerTransformedFiles>
     <MetalamaDebugTransformedCode>True</MetalamaDebugTransformedCode>
+	  <ProduceReferenceAssembly>True</ProduceReferenceAssembly>
   </PropertyGroup>
 
   <ItemGroup>

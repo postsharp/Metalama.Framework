@@ -120,7 +120,7 @@ internal class TargetClass
     }
 
 
-    private int _getOnlyAutoProperty;
+    private readonly int _getOnlyAutoProperty;
 
     public int GetOnlyAutoProperty
     {
@@ -132,7 +132,7 @@ internal class TargetClass
 
 
         }
-        private set
+        private init
         {
             global::System.Console.WriteLine("First override.");
             global::System.Console.WriteLine("Second override.");
@@ -190,7 +190,7 @@ internal class TargetClass
         }
     }
 
-    private global::System.Int32 _introducedGetOnlyAutoProperty;
+    private readonly global::System.Int32 _introducedGetOnlyAutoProperty;
 
 
     public global::System.Int32 IntroducedGetOnlyAutoProperty
@@ -201,13 +201,6 @@ internal class TargetClass
             global::System.Console.WriteLine("Second override.");
             return this._introducedGetOnlyAutoProperty;
 
-
-        }
-        private set
-        {
-            global::System.Console.WriteLine("First override.");
-            global::System.Console.WriteLine("Second override.");
-            this._introducedGetOnlyAutoProperty = value;
 
         }
     }

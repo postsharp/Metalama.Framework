@@ -272,6 +272,30 @@ class MyAttribute : Attribute
         }
 
         [Fact]
+        public void AttributeOnReturnValue()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = @"
+using System;
+
+class C 
+{
+   [return: MyAttribute]
+   void M() {}
+}
+
+class MyAttribute : Attribute
+{
+    public MyAttribute() {}
+}
+";
+
+            var compilation = testContext.CreateCompilationModel( code );
+            Assert.Single( compilation.Types.OfName( "C" ).Single().Methods.Single().ReturnParameter.Attributes );
+        }
+
+        [Fact]
         public void Arrays()
         {
             using var testContext = this.CreateTestContext();
@@ -432,9 +456,9 @@ class C : IDisposable
 
             var type = Assert.Single( compilation.Types )!;
 
-            Assert.Equal(
-                new[] { Default, Finalizer, ExplicitInterfaceImplementation, ConversionOperator, UserDefinedOperator },
-                type.Methods.Select( m => m.MethodKind ) );
+            Assert.Equal( new[] { Default, ExplicitInterfaceImplementation, Operator, Operator }, type.Methods.Select( m => m.MethodKind ) );
+
+            Assert.Equal( Finalizer, type.Finalizer?.MethodKind );
 
             Assert.Equal( new[] { PropertyGet, PropertySet }, type.Properties.SelectMany( p => new[] { p.GetMethod!.MethodKind, p.SetMethod!.MethodKind } ) );
             Assert.Equal( new[] { EventAdd, EventRemove }, type.Events.SelectMany( p => new[] { p.AddMethod.MethodKind, p.RemoveMethod.MethodKind } ) );
@@ -517,18 +541,17 @@ class C
 
             foreach ( var parameter in parametersWithoutDefaults )
             {
-                Assert.False( parameter.DefaultValue.IsAssigned );
-                _ = Assert.Throws<ArgumentNullException>( () => parameter.DefaultValue.Value );
+                Assert.Null( parameter.DefaultValue );
             }
 
             var parametersWithDefaults = method.Parameters.Skip( 1 ).ToList();
 
             foreach ( var parameter in parametersWithDefaults )
             {
-                Assert.True( parameter.DefaultValue.IsAssigned );
+                Assert.NotNull( parameter.DefaultValue );
             }
 
-            Assert.Equal( new object?[] { 42, "forty two", 3.14m, null, null, null }, parametersWithDefaults.Select( p => p.DefaultValue.Value ) );
+            Assert.Equal( new object?[] { 42, "forty two", 3.14m, null, null, null }, parametersWithDefaults.Select( p => p.DefaultValue!.Value.Value ) );
         }
 
         [Fact]
@@ -670,7 +693,7 @@ class Class<T>
             Assert.Equal( "Action<string>", openType.Events.Single().ForTypeInstance( typeInstance ).Type.ToString() );
             Assert.Equal( "string", openType.Methods.Single().ForTypeInstance( typeInstance ).ReturnType.ToString() );
             Assert.Equal( "string", openType.Constructors.Single().ForTypeInstance( typeInstance ).Parameters.ElementAt( 0 ).Type.ToString() );
-            Assert.Equal( typeInstance, openType.StaticConstructor.ForTypeInstance( typeInstance ).DeclaringType );
+            Assert.Equal( typeInstance, openType.StaticConstructor!.ForTypeInstance( typeInstance ).DeclaringType );
         }
 
         [Fact]
@@ -759,6 +782,27 @@ public sealed class C
             Assert.Single( compilation.Types );
             Assert.Single( compilation.Types.ElementAt( 0 ).Indexers );
             Assert.Single( compilation.Types.ElementAt( 0 ).Indexers.ElementAt( 0 ).Parameters );
+        }
+
+        [Fact]
+        public void Record()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = @"
+public record R( int A, int B );
+";
+
+#if NETFRAMEWORK
+            code +=
+                "namespace System.Runtime.CompilerServices { internal static class IsExternalInit {}}";
+#endif
+
+            var compilation = testContext.CreateCompilationModel( code );
+            var type = compilation.Types.OfName( "R" ).Single();
+            _ = type.Properties.First();
+            var constructor = type.Constructors.First();
+            _ = constructor.Parameters[0];
         }
 
         [Fact]
@@ -903,6 +947,20 @@ class T2 {}
             var externalType = (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(EventHandler) );
             Assert.True( externalType.IsExternal );
             Assert.Throws<InvalidOperationException>( () => externalType.Namespace );
+        }
+
+        [Theory]
+        [InlineData( SpecialType.Int32, SpecialType.Double, true )]
+        [InlineData( SpecialType.Double, SpecialType.Int32, false )]
+        public void TypeIs( SpecialType @from, SpecialType to, bool expectedResult )
+        {
+            using var testContext = this.CreateTestContext();
+            var compilation = testContext.CreateCompilationModel( "" );
+            var fromType = compilation.Factory.GetSpecialType( @from );
+            var toType = compilation.Factory.GetSpecialType( to );
+            var result = fromType.Is( toType );
+
+            Assert.Equal( expectedResult, result );
         }
     }
 }

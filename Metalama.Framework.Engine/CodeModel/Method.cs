@@ -10,13 +10,15 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
-using MethodKind = Microsoft.CodeAnalysis.MethodKind;
+using System.Runtime.CompilerServices;
+using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
@@ -24,7 +26,7 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         public Method( IMethodSymbol symbol, CompilationModel compilation ) : base( symbol, compilation )
         {
-            if ( symbol.MethodKind == MethodKind.Constructor || symbol.MethodKind == MethodKind.StaticConstructor )
+            if ( symbol.MethodKind == RoslynMethodKind.Constructor || symbol.MethodKind == RoslynMethodKind.StaticConstructor )
             {
                 throw new ArgumentOutOfRangeException( nameof(symbol), "Cannot use the Method class with constructors." );
             }
@@ -47,7 +49,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Method;
 
-        public override bool IsImplicit => false;
+        public OperatorKind OperatorKind => this.MethodSymbol.GetOperatorKind();
 
         public bool IsOpenGeneric => this.MethodSymbol.TypeArguments.Any( ga => ga is ITypeParameterSymbol ) || this.DeclaringType.IsOpenGeneric;
 
@@ -75,7 +77,11 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override bool IsExplicitInterfaceImplementation => !this.MethodSymbol.ExplicitInterfaceImplementations.IsEmpty;
 
-        public override bool IsAsync => this.MethodSymbol.IsAsync;
+        [Memo]
+        public override bool IsAsync
+            => this.MethodSymbol.MetadataToken == 0
+                ? this.MethodSymbol.IsAsync
+                : this.MethodSymbol.GetAttributes().Any( a => a.AttributeConstructor?.ContainingType.Name == nameof(AsyncStateMachineAttribute) );
 
         public IMethod? OverriddenMethod
         {

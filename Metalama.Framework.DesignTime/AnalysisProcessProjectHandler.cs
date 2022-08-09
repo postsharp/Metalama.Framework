@@ -5,9 +5,8 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Utilities;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.SourceGeneration;
-using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Options;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 
@@ -26,6 +25,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
 {
     private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
     private readonly ILogger _logger;
+    private volatile bool _disposed;
 
     private volatile CancellationTokenSource? _currentCancellationSource;
 
@@ -48,6 +48,13 @@ public class AnalysisProcessProjectHandler : ProjectHandler
 
             while ( true )
             {
+                if ( this._disposed )
+                {
+                    this._logger.Trace?.Log( "The object has been disposed." );
+
+                    return SourceGeneratorResult.Empty;
+                }
+
                 var currentCancellationSource = this._currentCancellationSource;
                 var newCancellationSource = new CancellationTokenSource();
 
@@ -82,14 +89,17 @@ public class AnalysisProcessProjectHandler : ProjectHandler
             if ( this.Compute( compilation, cancellationToken ) )
             {
                 // Publish the changes asynchronously.
-                var cancellationSource = this._currentCancellationSource = new CancellationTokenSource();
-                _ = Task.Run( () => this.PublishAsync( cancellationSource.Token ), cancellationSource.Token );
+                // We need to take the CancellationToken synchronously because the source may be disposed after the task is scheduled. 
+                var cancellationSource = new CancellationTokenSource();
+                var cancellationSourceToken = cancellationSource.Token;
+                _ = Task.Run( () => this.PublishAsync( cancellationSourceToken ), cancellationSourceToken );
+
+                this._currentCancellationSource = cancellationSource;
             }
         }
 
-#pragma warning disable CS8603 // Possible null reference return -- analyzer bug
-        return this.LastSourceGeneratorResult.AssertNotNull();
-#pragma warning restore CS8603
+        // LastSourceGeneratorResult can still be null here if the pipeline failed.
+        return this.LastSourceGeneratorResult ?? SourceGeneratorResult.Empty;
     }
 
     /// <summary>
@@ -153,6 +163,8 @@ public class AnalysisProcessProjectHandler : ProjectHandler
     {
         this._logger.Trace?.Log( $"{this.GetType().Name}.Publish('{this.ProjectOptions.ProjectId}'" );
 
+        cancellationToken.ThrowIfCancellationRequested();
+
         // Publish to the interactive process. We need to await before we change the touch file.
         await this.PublishGeneratedSourcesAsync( this.ProjectOptions.ProjectId, cancellationToken );
 
@@ -163,6 +175,8 @@ public class AnalysisProcessProjectHandler : ProjectHandler
         }
         else
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             this.UpdateTouchFile();
         }
     }
@@ -180,6 +194,8 @@ public class AnalysisProcessProjectHandler : ProjectHandler
 
     protected override void Dispose( bool disposing )
     {
+        this._disposed = true;
+
         base.Dispose( disposing );
         this._currentCancellationSource?.Dispose();
     }

@@ -7,7 +7,8 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Pipeline;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Diagnostics;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Validation;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
@@ -29,6 +30,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
             ImmutableDictionaryOfHashSet<string, InheritableAspectInstance>.Create(
                 StringComparer.Ordinal,
                 InheritableAspectInstance.ByTargetComparer.Instance );
+
+        private static long _nextId;
+        private readonly long _id = Interlocked.Increment( ref _nextId );
 
         internal DesignTimeValidatorCollection Validators { get; } = DesignTimeValidatorCollection.Empty;
 
@@ -62,6 +66,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
             this._inheritableAspects = inheritableAspects;
             this.Validators = validators;
             this.IsDirty = isDirty;
+
+            Logger.DesignTime.Trace?.Log(
+                $"CompilationPipelineResult {this._id} created with {this.SyntaxTreeResults.Count} syntax trees and {this._invalidSyntaxTreeResults.Count} introduced syntax trees." );
         }
 
         internal CompilationPipelineResult() { }
@@ -71,6 +78,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
         /// </summary>
         internal CompilationPipelineResult Update( PartialCompilation compilation, DesignTimePipelineExecutionResult pipelineResults )
         {
+            Logger.DesignTime.Trace?.Log( $"CompilationPipelineResult.Update( id = {this._id} )" );
+
             var resultsByTree = SplitResultsByTree( compilation, pipelineResults );
 
             var syntaxTreeResultBuilder = this.SyntaxTreeResults.ToBuilder();
@@ -93,6 +102,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                         foreach ( var introducedTree in oldSyntaxTreeResult.Introductions )
                         {
+                            Logger.DesignTime.Trace?.Log(
+                                $"CompilationPipelineResult.Update( id = {this._id} ): removing introduced tree '{introducedTree.Name}'." );
+
                             introducedSyntaxTreeBuilder.Remove( introducedTree.Name );
                         }
                     }
@@ -103,6 +115,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                         foreach ( var x in oldSyntaxTreeResult.InheritableAspects )
                         {
+                            Logger.DesignTime.Trace?.Log(
+                                $"CompilationPipelineResult.Update( id = {this._id} ): removing inheritable aspect of type '{x.AspectType}'." );
+
                             inheritableAspectsBuilder.Remove( x.AspectType, x.AspectInstance );
                         }
                     }
@@ -113,6 +128,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                         foreach ( var validator in oldSyntaxTreeResult.Validators )
                         {
+                            Logger.DesignTime.Trace?.Log( $"CompilationPipelineResult.Update( id = {this._id} ): removing validator." );
                             validatorsBuilder.Remove( validator );
                         }
                     }
@@ -125,6 +141,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                     foreach ( var introducedTree in result.Introductions )
                     {
+                        Logger.DesignTime.Trace?.Log(
+                            $"CompilationPipelineResult.Update( id = {this._id} ): adding introduced syntax tree '{introducedTree.Name}'." );
+
                         introducedSyntaxTreeBuilder.Add( introducedTree.Name, introducedTree );
                     }
                 }
@@ -135,6 +154,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                     foreach ( var x in result.InheritableAspects )
                     {
+                        Logger.DesignTime.Trace?.Log(
+                            $"CompilationPipelineResult.Update( id = {this._id} ): adding inheritable aspect of type '{x.AspectType}'." );
+
                         inheritableAspectsBuilder.Add( x.AspectType, x.AspectInstance );
                     }
                 }
@@ -145,6 +167,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                     foreach ( var validator in result.Validators )
                     {
+                        Logger.DesignTime.Trace?.Log( $"CompilationPipelineResult.Update( id = {this._id} ): adding validator." );
                         validatorsBuilder.Add( validator );
                     }
                 }

@@ -1,10 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-#pragma warning disable IDE0005
 using Metalama.AspectWorkbench.Model;
 using Metalama.Framework.Engine.Formatting;
-using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Tests.Integration.Runners;
 using Metalama.TestFramework;
@@ -19,9 +17,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
-using TestProjectOptions = Metalama.Framework.Engine.Testing.TestProjectOptions;
-
-#pragma warning restore IDE0005
 
 namespace Metalama.AspectWorkbench.ViewModels
 {
@@ -101,9 +96,9 @@ namespace Metalama.AspectWorkbench.ViewModels
             }
 
             using var testProjectOptions = new TestProjectOptions( formatCompileTimeCode: true );
+            using var testContext = new TestContext( testProjectOptions );
 
-            var serviceProvider = ServiceProviderFactory.GetServiceProvider( testProjectOptions.PathOptions )
-                .WithService( testProjectOptions )
+            var serviceProvider = testContext.ServiceProvider
                 .WithProjectScopedServices( TestCompilationFactory.GetMetadataReferences() );
 
             var syntaxColorizer = new SyntaxColorizer( serviceProvider );
@@ -169,7 +164,7 @@ namespace Metalama.AspectWorkbench.ViewModels
 
                     if ( testResult.CompileTimeCompilation != null )
                     {
-                        if ( !SyntaxTreeStructureVerifier.Verify( testResult.CompileTimeCompilation, serviceProvider ) )
+                        if ( !SyntaxTreeStructureVerifier.VerifyMetaSyntax( testResult.CompileTimeCompilation, serviceProvider ) )
                         {
                             testResult.SetFailed(
                                 "The compiled template syntax tree object model is incorrect: roundloop parsing verification failed. Add a breakpoint in SyntaxTreeStructureVerifier.Verify and diff manually." );

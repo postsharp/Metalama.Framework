@@ -25,7 +25,7 @@ namespace Metalama.Framework.Code
         /// value of the parameter is the default value of the struct type.
         /// </remarks>
         /// <exception cref="System.InvalidOperationException">The parameter has no default value.</exception>
-        TypedConstant DefaultValue { get; }
+        TypedConstant? DefaultValue { get; }
 
         /// <summary>
         /// Gets a value indicating whether the parameter has the <c>params</c> modifier.
@@ -35,7 +35,7 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets the parent <see cref="IMethod"/>, <see cref="IConstructor"/> or <see cref="IProperty"/>.
         /// </summary>
-        IMember DeclaringMember { get; }
+        IHasParameters DeclaringMember { get; }
 
         /// <summary>
         /// Gets a <see cref="ParameterInfo"/> that represents the current parameter at run time.

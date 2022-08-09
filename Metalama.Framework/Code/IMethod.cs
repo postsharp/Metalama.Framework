@@ -13,6 +13,11 @@ namespace Metalama.Framework.Code
     public interface IMethod : IMethodBase, IGeneric
     {
         /// <summary>
+        /// Gets the kind of method (such as <see cref="Code.MethodKind.Default"/> or <see cref="Code.MethodKind.PropertyGet"/>.
+        /// </summary>
+        MethodKind MethodKind { get; }
+
+        /// <summary>
         /// Gets an object representing the method return type and custom attributes, or  <c>null</c> for methods that don't have return types: constructors and finalizers.
         /// </summary>
         IParameter ReturnParameter { get; }
@@ -49,5 +54,10 @@ namespace Metalama.Framework.Code
         /// Gets a value indicating whether the method is <c>readonly</c>.
         /// </summary>
         bool IsReadOnly { get; }
+
+        /// <summary>
+        /// Gets a value indicating the type of operator the methods represents.
+        /// </summary>
+        OperatorKind OperatorKind { get; }
     }
 }

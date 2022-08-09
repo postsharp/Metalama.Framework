@@ -5,10 +5,14 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -22,32 +26,44 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal partial class LinkerIntroductionStep
     {
-        private partial class Rewriter : CSharpSyntaxRewriter
+        private partial class Rewriter : SafeSyntaxRewriter
         {
             private readonly CompilationModel _compilation;
             private readonly ImmutableDictionary<AspectLayerId, OrderedAspectLayer> _orderedAspectLayers;
+            private readonly SyntaxGenerationContextFactory _syntaxGenerationContextFactory;
             private readonly ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> _diagnosticSuppressions;
             private readonly SyntaxTransformationCollection _introducedMemberCollection;
-            private readonly IReadOnlyDictionary<SyntaxNode, IReadOnlyList<LinkerInsertedStatement>> _symbolInsertedStatements;
-            private readonly IReadOnlyDictionary<IIntroduceMemberTransformation, IReadOnlyList<LinkerInsertedStatement>> _introductionInsertedStatements;
+            private readonly IReadOnlyDictionary<SyntaxNode, MemberLevelTransformations> _symbolMemberLevelTransformations;
+            private readonly IReadOnlyDictionary<IIntroduceMemberTransformation, MemberLevelTransformations> _introductionMemberLevelTransformations;
+            private readonly HashSet<SyntaxNode> _nodesWithModifiedAttributes;
+            private readonly SyntaxTree _syntaxTreeForGlobalAttributes;
+            private readonly Dictionary<TypeDeclarationSyntax, TypeLevelTransformations> _typeLevelTransformations;
 
             // Maps a diagnostic id to the number of times it has been suppressed.
             private ImmutableHashSet<string> _activeSuppressions = ImmutableHashSet.Create<string>( StringComparer.OrdinalIgnoreCase );
 
             public Rewriter(
+                IServiceProvider serviceProvider,
                 SyntaxTransformationCollection introducedMemberCollection,
                 ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> diagnosticSuppressions,
                 CompilationModel compilation,
                 IReadOnlyList<OrderedAspectLayer> inputOrderedAspectLayers,
-                IReadOnlyDictionary<SyntaxNode, IReadOnlyList<LinkerInsertedStatement>> symbolInsertedStatements,
-                IReadOnlyDictionary<IIntroduceMemberTransformation, IReadOnlyList<LinkerInsertedStatement>> introductionInsertedStatements )
+                IReadOnlyDictionary<SyntaxNode, MemberLevelTransformations> symbolMemberLevelTransformations,
+                IReadOnlyDictionary<IIntroduceMemberTransformation, MemberLevelTransformations> introductionMemberLevelTransformations,
+                HashSet<SyntaxNode> nodesWithModifiedAttributes,
+                SyntaxTree syntaxTreeForGlobalAttributes,
+                Dictionary<TypeDeclarationSyntax, TypeLevelTransformations> typeLevelTransformations )
             {
+                this._syntaxGenerationContextFactory = new SyntaxGenerationContextFactory( compilation.RoslynCompilation, serviceProvider );
                 this._diagnosticSuppressions = diagnosticSuppressions;
                 this._compilation = compilation;
                 this._orderedAspectLayers = inputOrderedAspectLayers.ToImmutableDictionary( e => e.AspectLayerId, e => e );
                 this._introducedMemberCollection = introducedMemberCollection;
-                this._symbolInsertedStatements = symbolInsertedStatements;
-                this._introductionInsertedStatements = introductionInsertedStatements;
+                this._symbolMemberLevelTransformations = symbolMemberLevelTransformations;
+                this._introductionMemberLevelTransformations = introductionMemberLevelTransformations;
+                this._nodesWithModifiedAttributes = nodesWithModifiedAttributes;
+                this._syntaxTreeForGlobalAttributes = syntaxTreeForGlobalAttributes;
+                this._typeLevelTransformations = typeLevelTransformations;
             }
 
             public override bool VisitIntoStructuredTrivia => true;
@@ -122,13 +138,17 @@ namespace Metalama.Framework.Engine.Linking
                     var disable = Trivia(
                         PragmaWarningDirectiveTrivia( Token( SyntaxKind.DisableKeyword ), true )
                             .WithErrorCodes( errorCodes )
-                            .NormalizeWhitespace() );
+                            .NormalizeWhitespace()
+                            .WithLeadingTrivia( ElasticLineFeed )
+                            .WithTrailingTrivia( ElasticLineFeed ) );
 
                     var restore =
                         Trivia(
                             PragmaWarningDirectiveTrivia( Token( SyntaxKind.RestoreKeyword ), true )
                                 .WithErrorCodes( errorCodes )
-                                .NormalizeWhitespace() );
+                                .NormalizeWhitespace()
+                                .WithLeadingTrivia( ElasticLineFeed )
+                                .WithTrailingTrivia( ElasticLineFeed ) );
 
                     transformedNode =
                         transformedNode
@@ -139,18 +159,210 @@ namespace Metalama.Framework.Engine.Linking
                 return transformedNode;
             }
 
-            public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
+            private (SyntaxList<AttributeListSyntax> Attributes, SyntaxTriviaList Trivia) RewriteDeclarationAttributeLists(
+                SyntaxNode originalDeclaringNode,
+                SyntaxList<AttributeListSyntax> attributeLists )
             {
-                var members = new List<MemberDeclarationSyntax>( node.Members.Count );
-                var additionalBaseList = this._introducedMemberCollection.GetIntroducedInterfacesForTypeDecl( node );
-
-                using ( var classSuppressions = this.WithSuppressions( node ) )
+                if ( !this._nodesWithModifiedAttributes.Contains( originalDeclaringNode ) )
                 {
+                    return (attributeLists, default);
+                }
+
+                // Resolve the symbol.
+                var semanticModel = this._compilation.RoslynCompilation.GetSemanticModel( originalDeclaringNode.SyntaxTree );
+                var symbol = semanticModel.GetDeclaredSymbol( originalDeclaringNode );
+
+                if ( symbol == null )
+                {
+                    return (attributeLists, default);
+                }
+
+                var outputLists = new List<AttributeListSyntax>();
+                var outputTrivias = new List<SyntaxTrivia>();
+                SyntaxGenerationContext? syntaxGenerationContext = null;
+
+                this.RewriteAttributeLists(
+                    Ref.FromSymbol( symbol, this._compilation.RoslynCompilation ),
+                    SyntaxKind.None,
+                    originalDeclaringNode,
+                    attributeLists,
+                    ( a, n ) => a.ContainingDeclaration.GetPrimaryDeclarationSyntax() == n,
+                    outputLists,
+                    outputTrivias,
+                    ref syntaxGenerationContext );
+
+                switch ( symbol )
+                {
+                    case IMethodSymbol method:
+                        this.RewriteAttributeLists(
+                            Ref.ReturnParameter( method, this._compilation.RoslynCompilation ),
+                            SyntaxKind.ReturnKeyword,
+                            originalDeclaringNode,
+                            attributeLists,
+                            ( a, n ) => a.ContainingDeclaration.ContainingDeclaration!.GetPrimaryDeclarationSyntax() == n,
+                            outputLists,
+                            outputTrivias,
+                            ref syntaxGenerationContext );
+
+                        break;
+                }
+
+                if ( outputLists.Count == 0 )
+                {
+                    return (default, TriviaList( outputTrivias ));
+                }
+                else
+                {
+                    return (List( outputLists ), TriviaList( outputTrivias ));
+                }
+            }
+
+            private void RewriteAttributeLists(
+                Ref<IDeclaration> target,
+                SyntaxKind targetKind,
+                SyntaxNode originalDeclaringNode,
+                SyntaxList<AttributeListSyntax> inputAttributeLists,
+                Func<AttributeBuilder, SyntaxNode, bool> isPrimaryNode,
+                List<AttributeListSyntax> outputAttributeLists,
+                List<SyntaxTrivia> outputTrivia,
+                ref SyntaxGenerationContext? syntaxGenerationContext )
+            {
+                // Get the final list of attributes.
+                var finalModelAttributes = this._compilation.GetAttributeCollection( target );
+
+                // Remove attributes from the list.
+                foreach ( var list in inputAttributeLists )
+                {
+                    // Skip the different target kinds.
+                    if ( list.Target == null )
+                    {
+                        if ( targetKind != SyntaxKind.None )
+                        {
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        if ( !list.Target.Identifier.IsKind( targetKind ) )
+                        {
+                            continue;
+                        }
+                    }
+
+                    var modifiedList = list;
+
+                    foreach ( var attribute in list.Attributes )
+                    {
+                        if ( !finalModelAttributes.Any( a => a.IsSyntax( attribute ) ) )
+                        {
+                            modifiedList = modifiedList.RemoveNode( attribute, SyntaxRemoveOptions.KeepDirectives )!;
+                        }
+                    }
+
+                    if ( modifiedList.Attributes.Count > 0 )
+                    {
+                        outputAttributeLists.Add( modifiedList );
+                    }
+                    else
+                    {
+                        // If we are removing a custom attribute, keep its trivia.
+                        foreach ( var trivia in list.GetLeadingTrivia() )
+                        {
+                            switch ( trivia.Kind() )
+                            {
+                                case SyntaxKind.MultiLineCommentTrivia or SyntaxKind.MultiLineDocumentationCommentTrivia:
+                                    outputTrivia.Add( trivia );
+
+                                    break;
+
+                                case SyntaxKind.SingleLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia:
+                                    outputTrivia.Add( trivia );
+                                    outputTrivia.Add( ElasticLineFeed );
+
+                                    break;
+                            }
+                        }
+                    }
+                }
+
+                // Add new attributes.
+                foreach ( var attribute in finalModelAttributes )
+                {
+                    if ( attribute.Target is AttributeBuilder attributeBuilder && isPrimaryNode( attributeBuilder, originalDeclaringNode ) )
+                    {
+                        syntaxGenerationContext ??= this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( originalDeclaringNode );
+
+                        var newAttribute = syntaxGenerationContext.SyntaxGenerator.Attribute( attributeBuilder )
+                            .AssertNotNull();
+
+                        var newList = AttributeList( SingletonSeparatedList( newAttribute ) )
+                            .WithTrailingTrivia( ElasticLineFeed )
+                            .WithAdditionalAnnotations( attributeBuilder.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation );
+
+                        if ( targetKind != SyntaxKind.None )
+                        {
+                            newList = newList.WithTarget( AttributeTargetSpecifier( Token( targetKind ) ) );
+                        }
+
+                        outputAttributeLists.Add( newList );
+                    }
+                }
+            }
+
+            public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+
+            public override SyntaxNode? VisitStructDeclaration( StructDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+
+            public override SyntaxNode? VisitInterfaceDeclaration( InterfaceDeclarationSyntax node ) => this.VisitTypeDeclaration( node );
+
+            public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node )
+                => this.VisitTypeDeclaration(
+                    node,
+                    ( syntax, members ) =>
+                    {
+                        // If the record has no braces, add them.
+                        if ( syntax.OpenBraceToken.IsKind( SyntaxKind.None ) && members.Count > 0 )
+                        {
+                            // TODO: trivias.
+                            syntax = syntax
+                                .WithOpenBraceToken( Token( SyntaxKind.OpenBraceToken ).AddColoringAnnotation( TextSpanClassification.GeneratedCode ) )
+                                .WithCloseBraceToken( Token( SyntaxKind.CloseBraceToken ).AddColoringAnnotation( TextSpanClassification.GeneratedCode ) )
+                                .WithSemicolonToken( default );
+                        }
+
+                        return syntax.WithMembers( List( members ) );
+                    } );
+
+            private SyntaxNode? VisitTypeDeclaration<T>( T node, Func<T, List<MemberDeclarationSyntax>, T>? withMembers = null )
+                where T : TypeDeclarationSyntax
+            {
+                var originalNode = node;
+                var members = new List<MemberDeclarationSyntax>( node.Members.Count );
+                var additionalBaseList = this._introducedMemberCollection.GetIntroducedInterfacesForTypeDeclaration( node );
+                var syntaxGenerationContext = this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( node );
+
+                if ( this._typeLevelTransformations.TryGetValue( node, out var typeLevelTransformations ) )
+                {
+                    if ( typeLevelTransformations.AddExplicitDefaultConstructor )
+                    {
+                        var constructorBody = Block();
+
+                        var constructor = ConstructorDeclaration( node.Identifier )
+                            .WithModifiers( TokenList( Token( SyntaxKind.PublicKeyword ) ) )
+                            .WithBody( constructorBody )
+                            .NormalizeWhitespace()
+                            .AddColoringAnnotation( TextSpanClassification.GeneratedCode );
+
+                        members.Add( constructor );
+                    }
+                }
+
+                using ( var suppressionContext = this.WithSuppressions( node ) )
+                {
+                    // Process the type members.
                     foreach ( var member in node.Members )
                     {
-                        var visitedMember = (MemberDeclarationSyntax?) this.Visit( member );
-
-                        if ( visitedMember != null )
+                        foreach ( var visitedMember in this.VisitMember( member ) )
                         {
                             using ( var memberSuppressions = this.WithSuppressions( member ) )
                             {
@@ -165,13 +377,23 @@ namespace Metalama.Framework.Engine.Linking
 
                     AddIntroductionsOnPosition( new InsertPosition( InsertPositionRelation.Within, node ) );
 
-                    node = this.AddSuppression( node, classSuppressions.NewSuppressions ).WithMembers( List( members ) );
+                    node = this.AddSuppression( node, suppressionContext.NewSuppressions );
 
+                    if ( withMembers != null )
+                    {
+                        node = withMembers( node, members );
+                    }
+                    else
+                    {
+                        node = (T) node.WithMembers( List( members ) );
+                    }
+
+                    // Process the type bases.
                     if ( additionalBaseList.Any() )
                     {
                         if ( node.BaseList == null )
                         {
-                            node = node
+                            node = (T) node
                                 .WithIdentifier( node.Identifier.WithTrailingTrivia() )
                                 .WithBaseList(
                                     BaseList( SeparatedList( additionalBaseList ) )
@@ -180,13 +402,17 @@ namespace Metalama.Framework.Engine.Linking
                         }
                         else
                         {
-                            node = node.WithBaseList(
+                            node = (T) node.WithBaseList(
                                 BaseList(
                                     node.BaseList.Types.AddRange(
                                         additionalBaseList.Select(
                                             i => i.WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) ) ) ) );
                         }
                     }
+
+                    // Rewrite attributes.
+                    var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
+                    node = (T) node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
 
                     return node;
                 }
@@ -207,17 +433,22 @@ namespace Metalama.Framework.Engine.Linking
                         // IMPORTANT: This need to be here and cannot be in introducedMember.Syntax, result of TrackNodes is not trackable!
                         var introducedNode = introducedMember.Syntax.TrackNodes( introducedMember.Syntax );
 
-                        introducedNode = introducedNode.NormalizeWhitespace()
+                        introducedNode = introducedNode
                             .WithLeadingTrivia( ElasticLineFeed, ElasticLineFeed )
-                            .WithGeneratedCodeAnnotation( introducedMember.Introduction.Advice.Aspect.AspectClass.GeneratedCodeAnnotation );
+                            .WithGeneratedCodeAnnotation( introducedMember.Introduction.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation );
 
                         // Insert inserted statements into 
                         switch ( introducedNode )
                         {
                             case ConstructorDeclarationSyntax constructorDeclaration:
-                                if ( this._introductionInsertedStatements.TryGetValue( introducedMember.Introduction, out var insertedStatements ) )
+                                if ( this._introductionMemberLevelTransformations.TryGetValue(
+                                        introducedMember.Introduction,
+                                        out var memberLevelTransformations ) )
                                 {
-                                    introducedNode = this.WithInsertedStatements( constructorDeclaration, insertedStatements );
+                                    introducedNode = this.ApplyMemberLevelTransformations(
+                                        constructorDeclaration,
+                                        memberLevelTransformations,
+                                        syntaxGenerationContext );
                                 }
 
                                 break;
@@ -236,11 +467,84 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            private ConstructorDeclarationSyntax WithInsertedStatements(
-                ConstructorDeclarationSyntax constructorDeclaration,
-                IReadOnlyList<LinkerInsertedStatement>? insertedStatements )
+            private IReadOnlyList<MemberDeclarationSyntax> VisitMember( MemberDeclarationSyntax member )
             {
-                if ( insertedStatements == null )
+                static MemberDeclarationSyntax[] Singleton( MemberDeclarationSyntax m ) => new[] { m };
+
+                return member switch
+                {
+                    ConstructorDeclarationSyntax constructor => Singleton( this.VisitConstructorDeclarationCore( constructor ) ),
+                    MethodDeclarationSyntax method => Singleton( this.VisitMethodDeclarationCore( method ) ),
+                    PropertyDeclarationSyntax property => Singleton( this.VisitPropertyDeclarationCore( property ) ),
+                    OperatorDeclarationSyntax @operator => Singleton( this.VisitOperatorDeclarationCore( @operator ) ),
+                    EventDeclarationSyntax @event => Singleton( this.VisitEventDeclarationCore( @event ) ),
+                    FieldDeclarationSyntax field => this.VisitFieldDeclarationCore( field ),
+                    EventFieldDeclarationSyntax @eventField => this.VisitEventFieldDeclarationCore( @eventField ),
+                    _ => Singleton( (MemberDeclarationSyntax) this.Visit( member )! )
+                };
+            }
+
+            private ConstructorDeclarationSyntax ApplyMemberLevelTransformations(
+                ConstructorDeclarationSyntax constructorDeclaration,
+                MemberLevelTransformations memberLevelTransformations,
+                SyntaxGenerationContext syntaxGenerationContext )
+            {
+                constructorDeclaration = this.InsertStatements( constructorDeclaration, memberLevelTransformations.Statements );
+
+                constructorDeclaration = constructorDeclaration.WithParameterList(
+                    AppendParameters( constructorDeclaration.ParameterList, memberLevelTransformations.Parameters, syntaxGenerationContext ) );
+
+                constructorDeclaration = constructorDeclaration.WithInitializer(
+                    AppendInitializerArguments( constructorDeclaration.Initializer, memberLevelTransformations.Arguments ) );
+
+                return constructorDeclaration;
+            }
+
+            private static ParameterListSyntax AppendParameters(
+                ParameterListSyntax existingParameters,
+                ImmutableArray<IntroduceParameterTransformation> newParameters,
+                SyntaxGenerationContext syntaxGenerationContext )
+            {
+                if ( newParameters.IsEmpty )
+                {
+                    return existingParameters;
+                }
+                else
+                {
+                    return existingParameters.WithParameters(
+                        existingParameters.Parameters.AddRange(
+                            newParameters.Select( x => x.ToSyntax( syntaxGenerationContext ).WithTrailingTrivia( ElasticSpace ) ) ) );
+                }
+            }
+
+            private static ConstructorInitializerSyntax? AppendInitializerArguments(
+                ConstructorInitializerSyntax? initializerSyntax,
+                ImmutableArray<IntroduceConstructorInitializerArgumentTransformation> newArguments )
+            {
+                if ( newArguments.IsEmpty )
+                {
+                    return initializerSyntax;
+                }
+
+                var newArgumentsSyntax = newArguments.Select( a => a.ToSyntax().WithTrailingTrivia( ElasticSpace ) );
+
+                if ( initializerSyntax == null )
+                {
+                    return ConstructorInitializer(
+                        SyntaxKind.BaseConstructorInitializer,
+                        ArgumentList( SeparatedList( newArgumentsSyntax ) ) );
+                }
+                else
+                {
+                    return initializerSyntax.WithArgumentList( initializerSyntax.ArgumentList.AddArguments( newArgumentsSyntax.ToArray() ) );
+                }
+            }
+
+            private ConstructorDeclarationSyntax InsertStatements(
+                ConstructorDeclarationSyntax constructorDeclaration,
+                ImmutableArray<LinkerInsertedStatement> insertedStatements )
+            {
+                if ( insertedStatements.IsEmpty )
                 {
                     return constructorDeclaration;
                 }
@@ -322,91 +626,319 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            public override SyntaxNode? VisitVariableDeclarator( VariableDeclaratorSyntax node )
+            private IReadOnlyList<MemberDeclarationSyntax> VisitFieldDeclarationCore( FieldDeclarationSyntax node )
             {
-                if ( this._introducedMemberCollection.IsRemovedSyntax( node ) )
+                var originalNode = node;
+
+                // Rewrite attributes.
+                if ( originalNode.Declaration.Variables.Count > 1
+                     && originalNode.Declaration.Variables.Any( v => this._nodesWithModifiedAttributes.Contains( v ) ) )
                 {
-                    return null;
-                }
+                    // TODO: This needs to use rewritten variable declaration or do removal in place.
+                    var members = new List<MemberDeclarationSyntax>( originalNode.Declaration.Variables.Count );
 
-                return base.VisitVariableDeclarator( node );
-            }
-
-            public override SyntaxNode? VisitVariableDeclaration( VariableDeclarationSyntax node )
-            {
-                var remainingVariables = new List<VariableDeclaratorSyntax>();
-
-                foreach ( var variable in node.Variables )
-                {
-                    var rewrittenVariable = (VariableDeclaratorSyntax?) this.Visit( variable );
-
-                    if ( rewrittenVariable != null )
+                    // If we have changes in attributes and several members, we have to split them.
+                    foreach ( var variable in originalNode.Declaration.Variables )
                     {
-                        remainingVariables.Add( rewrittenVariable );
-                    }
-                }
+                        if ( this._introducedMemberCollection.IsRemovedSyntax( variable ) )
+                        {
+                            continue;
+                        }
 
-                if ( node.Variables.SequenceEqual( remainingVariables ) )
-                {
-                    return base.VisitVariableDeclaration( node );
-                }
-                else if ( remainingVariables.Count > 0 )
-                {
-                    return node
-                        .WithType( (TypeSyntax) this.Visit( node.Type ).AssertNotNull() )
-                        .WithVariables( SeparatedList( remainingVariables ) )
-                        .WithLeadingTrivia( this.VisitTriviaList( node.GetLeadingTrivia() ) )
-                        .WithTrailingTrivia( this.VisitTriviaList( node.GetTrailingTrivia() ) );
+                        var finalVariable = variable;
+
+                        if ( this._symbolMemberLevelTransformations.TryGetValue( variable, out var transformations )
+                             && transformations.AddDefaultInitializer )
+                        {
+                            finalVariable =
+                                finalVariable.WithInitializer(
+                                    EqualsValueClause(
+                                        LiteralExpression(
+                                            SyntaxKind.DefaultLiteralExpression,
+                                            Token( SyntaxKind.DefaultKeyword ) ) ) );
+                        }
+
+                        var declaration = VariableDeclaration( node.Declaration.Type, SingletonSeparatedList( finalVariable ) );
+                        var attributes = this.RewriteDeclarationAttributeLists( variable, originalNode.AttributeLists );
+
+                        var fieldDeclaration = FieldDeclaration( attributes.Attributes, node.Modifiers, declaration, Token( SyntaxKind.SemicolonToken ) )
+                            .WithTrailingTrivia( ElasticLineFeed )
+                            .WithLeadingTrivia( attributes.Trivia );
+
+                        members.Add( fieldDeclaration );
+                    }
+
+                    return members;
                 }
                 else
                 {
-                    return null;
+                    var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode.Declaration.Variables[0], originalNode.AttributeLists );
+                    node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
+
+                    var anyChangeToVariables = false;
+                    var rewrittenVariables = new List<VariableDeclaratorSyntax>();
+
+                    foreach ( var variable in originalNode.Declaration.Variables )
+                    {
+                        if ( this._introducedMemberCollection.IsRemovedSyntax( variable ) )
+                        {
+                            anyChangeToVariables = true;
+
+                            continue;
+                        }
+
+                        if ( this._symbolMemberLevelTransformations.TryGetValue( variable, out var transformations ) && transformations.AddDefaultInitializer )
+                        {
+                            anyChangeToVariables = true;
+
+                            rewrittenVariables.Add(
+                                variable.WithInitializer(
+                                    EqualsValueClause(
+                                        LiteralExpression(
+                                            SyntaxKind.DefaultLiteralExpression,
+                                            Token( SyntaxKind.DefaultKeyword ) ) ) ) );
+                        }
+                        else
+                        {
+                            rewrittenVariables.Add( variable );
+                        }
+                    }
+
+                    if ( anyChangeToVariables )
+                    {
+                        if ( rewrittenVariables.Count > 0 )
+                        {
+                            return new[] { node.WithDeclaration( node.Declaration.WithVariables( SeparatedList( rewrittenVariables ) ) ) };
+                        }
+                        else
+                        {
+                            return Array.Empty<MemberDeclarationSyntax>();
+                        }
+                    }
+                    else
+                    {
+                        return new[] { node };
+                    }
                 }
             }
 
-            public override SyntaxNode? VisitFieldDeclaration( FieldDeclarationSyntax node )
+            private ConstructorDeclarationSyntax VisitConstructorDeclarationCore( ConstructorDeclarationSyntax node )
             {
-                var rewrittenDeclaration = (VariableDeclarationSyntax?) this.Visit( node.Declaration );
+                var originalNode = node;
 
-                if ( rewrittenDeclaration == null )
+                if ( this._symbolMemberLevelTransformations.TryGetValue( node, out var memberLevelTransformations ) )
                 {
-                    return null;
+                    var syntaxGenerationContext = this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( node );
+                    node = this.ApplyMemberLevelTransformations( node, memberLevelTransformations, syntaxGenerationContext );
                 }
 
-                return node.WithDeclaration( rewrittenDeclaration );
+                // Rewrite attributes.
+                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
+                node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
+
+                return (ConstructorDeclarationSyntax) this.VisitConstructorDeclaration( node )!;
             }
 
-            public override SyntaxNode? VisitConstructorDeclaration( ConstructorDeclarationSyntax node )
+            private MethodDeclarationSyntax VisitMethodDeclarationCore( MethodDeclarationSyntax node )
             {
-                if ( this._symbolInsertedStatements.TryGetValue( node, out var insertedStatements ) )
-                {
-                    node = this.WithInsertedStatements( node, insertedStatements );
-                }
+                var originalNode = node;
+                node = (MethodDeclarationSyntax) this.VisitMethodDeclaration( node )!;
 
-                return base.VisitConstructorDeclaration( node );
+                // Rewrite attributes.
+                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
+                node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
+
+                return node;
             }
 
-            public override SyntaxNode? VisitPropertyDeclaration( PropertyDeclarationSyntax node )
+            private OperatorDeclarationSyntax VisitOperatorDeclarationCore( OperatorDeclarationSyntax node )
             {
-                if ( this._introducedMemberCollection.IsAutoPropertyWithSynthesizedSetter( node ) )
-                {
-                    return node.WithSynthesizedSetter();
-                }
+                var originalNode = node;
+                node = (OperatorDeclarationSyntax) this.VisitOperatorDeclaration( node )!;
 
-                return base.VisitPropertyDeclaration( node );
+                // Rewrite attributes.
+                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
+                node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
+
+                return node;
             }
 
-            public override SyntaxNode? VisitEventFieldDeclaration( EventFieldDeclarationSyntax node )
+            public override SyntaxNode? VisitParameter( ParameterSyntax node )
             {
-                var rewrittenDeclaration = (VariableDeclarationSyntax?) this.Visit( node.Declaration );
+                var originalNode = node;
+                node = (ParameterSyntax) base.VisitParameter( node )!;
 
-                if ( rewrittenDeclaration == null )
+                // Rewrite attributes.
+                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
+                node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
+
+                return node;
+            }
+
+            public override SyntaxNode? VisitTypeParameter( TypeParameterSyntax node )
+            {
+                var originalNode = node;
+                node = (TypeParameterSyntax) base.VisitTypeParameter( node )!;
+
+                // Rewrite attributes.
+                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
+                node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
+
+                return node;
+            }
+
+            private PropertyDeclarationSyntax VisitPropertyDeclarationCore( PropertyDeclarationSyntax node )
+            {
+                var originalNode = node;
+
+                node = (PropertyDeclarationSyntax) this.VisitPropertyDeclaration( node )!;
+
+                if ( this._introducedMemberCollection.IsAutoPropertyWithSynthesizedSetter( originalNode ) )
                 {
-                    // We are not supporting removal of event fields during introduction step.
-                    throw new AssertionFailedException();
+                    node = node.WithSynthesizedSetter();
                 }
 
-                return node.WithDeclaration( rewrittenDeclaration );
+                if ( this._symbolMemberLevelTransformations.TryGetValue( originalNode, out var transformations )
+                     && transformations.AddDefaultInitializer )
+                {
+                    node =
+                        node.WithInitializer(
+                            EqualsValueClause(
+                                LiteralExpression(
+                                    SyntaxKind.DefaultLiteralExpression,
+                                    Token( SyntaxKind.DefaultKeyword ) ) ) );
+                }
+
+                // Rewrite attributes.
+                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
+                node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
+
+                return node;
+            }
+
+            public override SyntaxNode? VisitAccessorDeclaration( AccessorDeclarationSyntax node )
+            {
+                var originalNode = node;
+                node = (AccessorDeclarationSyntax) base.VisitAccessorDeclaration( node )!;
+
+                // Rewrite attributes.
+                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
+                node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
+
+                return node;
+            }
+
+            private EventDeclarationSyntax VisitEventDeclarationCore( EventDeclarationSyntax node )
+            {
+                var originalNode = node;
+                node = (EventDeclarationSyntax) this.VisitEventDeclaration( node )!;
+
+                // Rewrite attributes.
+                var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
+                node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
+
+                return node;
+            }
+
+            private IReadOnlyList<MemberDeclarationSyntax> VisitEventFieldDeclarationCore( EventFieldDeclarationSyntax node )
+            {
+                var originalNode = node;
+
+                // Rewrite attributes.
+                if ( originalNode.Declaration.Variables.Count > 1
+                     && originalNode.Declaration.Variables.Any( v => this._nodesWithModifiedAttributes.Contains( v ) ) )
+                {
+                    var members = new List<MemberDeclarationSyntax>( originalNode.Declaration.Variables.Count );
+
+                    // If we have changes in attributes and several members, we have to split them.
+                    foreach ( var variable in originalNode.Declaration.Variables )
+                    {
+                        var finalVariable = variable;
+
+                        if ( this._symbolMemberLevelTransformations.TryGetValue( variable, out var transformations )
+                             && transformations.AddDefaultInitializer )
+                        {
+                            finalVariable =
+                                finalVariable.WithInitializer(
+                                    EqualsValueClause(
+                                        LiteralExpression(
+                                            SyntaxKind.DefaultLiteralExpression,
+                                            Token( SyntaxKind.DefaultKeyword ) ) ) );
+                        }
+
+                        var declaration = VariableDeclaration( node.Declaration.Type, SingletonSeparatedList( finalVariable ) );
+
+                        var attributes = this.RewriteDeclarationAttributeLists( variable, originalNode.AttributeLists );
+
+                        var eventDeclaration = EventFieldDeclaration(
+                                attributes.Attributes,
+                                node.Modifiers,
+                                Token( TriviaList(), SyntaxKind.EventKeyword, TriviaList( ElasticSpace ) ),
+                                declaration,
+                                Token( SyntaxKind.SemicolonToken ) )
+                            .WithTrailingTrivia( ElasticLineFeed )
+                            .WithLeadingTrivia( attributes.Trivia );
+
+                        members.Add( eventDeclaration );
+                    }
+
+                    return members;
+                }
+                else
+                {
+                    var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode.Declaration.Variables[0], originalNode.AttributeLists );
+                    node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
+
+                    var anyChange = false;
+                    var rewrittenVariables = new List<VariableDeclaratorSyntax>();
+
+                    foreach ( var variable in originalNode.Declaration.Variables )
+                    {
+                        if ( this._symbolMemberLevelTransformations.TryGetValue( variable, out var transformations ) && transformations.AddDefaultInitializer )
+                        {
+                            anyChange = true;
+
+                            rewrittenVariables.Add(
+                                variable.WithInitializer(
+                                    EqualsValueClause(
+                                        LiteralExpression(
+                                            SyntaxKind.DefaultLiteralExpression,
+                                            Token( SyntaxKind.DefaultKeyword ) ) ) ) );
+                        }
+                        else
+                        {
+                            rewrittenVariables.Add( variable );
+                        }
+                    }
+
+                    if ( anyChange )
+                    {
+                        return new[] { node.WithDeclaration( node.Declaration.WithVariables( SeparatedList( rewrittenVariables ) ) ) };
+                    }
+                    else
+                    {
+                        return new[] { node };
+                    }
+                }
+            }
+
+            public override SyntaxNode? VisitCompilationUnit( CompilationUnitSyntax node )
+            {
+                SyntaxGenerationContext? syntaxGenerationContext = null;
+                List<AttributeListSyntax> outputLists = new();
+                List<SyntaxTrivia> outputTrivias = new();
+
+                this.RewriteAttributeLists(
+                    this._compilation.ToTypedRef<IDeclaration>(),
+                    SyntaxKind.AssemblyKeyword,
+                    node,
+                    node.AttributeLists,
+                    ( _, n ) => n.SyntaxTree == this._syntaxTreeForGlobalAttributes,
+                    outputLists,
+                    outputTrivias,
+                    ref syntaxGenerationContext );
+
+                return ((CompilationUnitSyntax) base.VisitCompilationUnit( node )!).WithAttributeLists( List( outputLists ) );
             }
 
             public override SyntaxNode? VisitPragmaWarningDirectiveTrivia( PragmaWarningDirectiveTriviaSyntax node )
@@ -437,16 +969,6 @@ namespace Metalama.Framework.Engine.Linking
                     };
                 }
             }
-
-            // The following methods remove the #if code and replaces with its content, but it's not sure that this is the right
-            // approach in the scenario where we have to produce code that can become source code ("divorce" feature).
-            // When this scenario is supported, more tests will need to be added to specifically support #if.
-
-            public override SyntaxNode? VisitIfDirectiveTrivia( IfDirectiveTriviaSyntax node ) => null;
-
-            public override SyntaxNode? VisitEndIfDirectiveTrivia( EndIfDirectiveTriviaSyntax node ) => null;
-
-            public override SyntaxNode? VisitElseDirectiveTrivia( ElseDirectiveTriviaSyntax node ) => null;
 
             private SuppressionContext WithSuppressions( SyntaxNode node ) => new( this, this.GetSuppressions( node ) );
 

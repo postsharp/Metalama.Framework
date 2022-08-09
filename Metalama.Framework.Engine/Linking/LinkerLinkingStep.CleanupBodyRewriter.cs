@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -12,7 +13,7 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal partial class LinkerLinkingStep
     {
-        private class CleanupBodyRewriter : CSharpSyntaxRewriter
+        private class CleanupBodyRewriter : SafeSyntaxRewriter
         {
             // TODO: Optimize (this reallocates multiple times).
 
@@ -54,14 +55,17 @@ namespace Metalama.Framework.Engine.Linking
                             anyRewrittenStatement = true;
                         }
 
-                        newStatements.Add( (StatementSyntax) rewritten.AssertNotNull() );
+                        if ( rewritten != null )
+                        {
+                            newStatements.Add( (StatementSyntax) rewritten.AssertNotNull() );
+                        }
                     }
                 }
 
                 var finalStatements = new List<StatementSyntax>();
                 var overflowingTrivia = SyntaxTriviaList.Empty;
 
-                // Process statements, cleaning empty labeled statements, and trivia empty statements.
+                // Process statements, cleaning empty labeled statements, and trivia empty statements and invocations with empty empty expressions.
                 for ( var i = 0; i < newStatements.Count; i++ )
                 {
                     var statement = newStatements[i];
@@ -189,6 +193,36 @@ namespace Metalama.Framework.Engine.Linking
                         statements[lastStatementIndex] =
                             statements[lastStatementIndex].WithTrailingTrivia( statements[lastStatementIndex].GetTrailingTrivia().AddRange( trailingTrivia ) );
                     }
+                }
+            }
+
+            public override SyntaxNode? VisitInvocationExpression( InvocationExpressionSyntax node )
+            {
+                if ( node.Expression.GetLinkerGeneratedFlags().HasFlag( LinkerGeneratedFlags.NullAspectReferenceExpression ) )
+                {
+                    return IdentifierName( "__LINKER_TO_BE_REMOVED__" )
+                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.NullAspectReferenceExpression );
+                }
+
+                return node;
+            }
+
+            public override SyntaxNode? VisitExpressionStatement( ExpressionStatementSyntax node )
+            {
+                var transformed = (ExpressionSyntax) this.Visit( node.Expression ).AssertNotNull();
+
+                if ( transformed.GetLinkerGeneratedFlags().HasFlag( LinkerGeneratedFlags.NullAspectReferenceExpression ) )
+                {
+                    return null;
+                }
+
+                if ( node.Expression != transformed )
+                {
+                    return node.WithExpression( transformed );
+                }
+                else
+                {
+                    return node;
                 }
             }
         }

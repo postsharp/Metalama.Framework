@@ -8,6 +8,8 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CodeModel.UpdatableCollections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Comparers;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -25,7 +27,7 @@ using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal sealed partial class NamedType : MemberOrNamedType, INamedTypeInternal
+    internal sealed class NamedType : MemberOrNamedType, INamedTypeInternal
     {
         private SpecialType? _specialType;
 
@@ -126,6 +128,8 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
+        public bool Equals( SpecialType specialType ) => this.SpecialType == specialType;
+
         public override MemberInfo ToMemberInfo() => this.ToType();
 
         public bool IsReadOnly => this.TypeSymbol.IsReadOnly;
@@ -151,7 +155,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public IPropertyCollection Properties
             => new PropertyCollection(
                 this,
-                this.Compilation.GetPropertyCollection( this.TypeSymbol, false ) );
+                this.Compilation.GetPropertyCollection( this.TypeSymbol ) );
 
         [Memo]
         public IPropertyCollection AllProperties => new AllPropertiesCollection( this );
@@ -160,7 +164,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public IIndexerCollection Indexers
             => new IndexerCollection(
                 this,
-                this.Compilation.GetIndexerCollection( this.TypeSymbol, false ) );
+                this.Compilation.GetIndexerCollection( this.TypeSymbol ) );
 
         [Memo]
         public IIndexerCollection AllIndexers => new AllIndexersCollection( this );
@@ -169,7 +173,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public IFieldCollection Fields
             => new FieldCollection(
                 this,
-                this.Compilation.GetFieldCollection( this.TypeSymbol, false ) );
+                this.Compilation.GetFieldCollection( this.TypeSymbol ) );
 
         [Memo]
         public IFieldCollection AllFields => new AllFieldsCollection( this );
@@ -183,7 +187,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public IEventCollection Events
             => new EventCollection(
                 this,
-                this.Compilation.GetEventCollection( this.TypeSymbol, false ) );
+                this.Compilation.GetEventCollection( this.TypeSymbol ) );
 
         [Memo]
         public IEventCollection AllEvents => new AllEventsCollection( this );
@@ -192,7 +196,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public IMethodCollection Methods
             => new MethodCollection(
                 this,
-                this.Compilation.GetMethodCollection( this.TypeSymbol, false ) );
+                this.Compilation.GetMethodCollection( this.TypeSymbol ) );
 
         [Memo]
         public IMethodCollection AllMethods => new AllMethodsCollection( this );
@@ -201,12 +205,13 @@ namespace Metalama.Framework.Engine.CodeModel
         public IConstructorCollection Constructors
             => new ConstructorCollection(
                 this,
-                this.Compilation.GetConstructorCollection( this.TypeSymbol, false ) );
+                this.Compilation.GetConstructorCollection( this.TypeSymbol ) );
 
-        [Memo]
-        public IConstructor StaticConstructor => this.GetStaticConstructorImpl();
+        public IConstructor? StaticConstructor => this.GetStaticConstructorImpl();
 
-        private IConstructor GetStaticConstructorImpl()
+        public IMethod? Finalizer => this.GetFinalizerImpl();
+
+        private IConstructor? GetStaticConstructorImpl()
         {
             var builder = this.Compilation.GetStaticConstructor( this.TypeSymbol );
 
@@ -222,7 +227,28 @@ namespace Metalama.Framework.Engine.CodeModel
                 return this.Compilation.Factory.GetConstructor( symbol );
             }
 
-            return new ImplicitStaticConstructor( this );
+            return null;
+        }
+
+        private IMethod? GetFinalizerImpl()
+        {
+            var builder = this.Compilation.GetFinalizer( this.TypeSymbol );
+
+            if ( builder != null )
+            {
+                return this.Compilation.Factory.GetDeclaration<IMethod>( builder );
+            }
+
+            var symbol = this.TypeSymbol.GetMembers()
+                .OfType<IMethodSymbol>()
+                .SingleOrDefault( m => m.Name == "Finalize" && m.TypeParameters.Length == 0 && m.Parameters.Length == 0 );
+
+            if ( symbol != null )
+            {
+                return this.Compilation.Factory.GetFinalizer( symbol );
+            }
+
+            return null;
         }
 
         public bool IsPartial
@@ -281,13 +307,13 @@ namespace Metalama.Framework.Engine.CodeModel
         [Memo]
         public INamedType? BaseType => this.TypeSymbol.BaseType == null ? null : this.Compilation.Factory.GetNamedType( this.TypeSymbol.BaseType );
 
-        // TODO: the problem of this implementation is that the collection is reconstructed for each compilation version. This could be improved.
         [Memo]
-        public IImplementedInterfaceCollection AllImplementedInterfaces => new AllImplementedInterfacesCollection( this );
+        public IImplementedInterfaceCollection AllImplementedInterfaces
+            => new AllImplementedInterfacesCollection( this, this.Compilation.GetAllInterfaceImplementationCollection( this.TypeSymbol, false ) );
 
         [Memo]
         public IImplementedInterfaceCollection ImplementedInterfaces
-            => new ImplementedInterfaceCollection( this, this.Compilation.GetInterfaceImplementationCollection( this.TypeSymbol, false ) );
+            => new ImplementedInterfacesCollection( this, this.Compilation.GetInterfaceImplementationCollection( this.TypeSymbol, false ) );
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 

@@ -6,10 +6,11 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.LamaSerialization;
 using Metalama.Framework.Engine.Templating;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -29,13 +30,13 @@ namespace Metalama.Framework.Engine.CompileTime
 {
     internal partial class CompileTimeCompilationBuilder
     {
-#pragma warning disable CA1001 // Class must be disposable.
-
         /// <summary>
         /// Rewrites a run-time syntax tree into a compile-time syntax tree. Calls <see cref="TemplateCompiler"/> on templates,
         /// and removes run-time-only sub trees.
         /// </summary>
+#pragma warning disable CA1001 // Types that own disposable fields should be disposable
         private sealed partial class ProduceCompileTimeCodeRewriter : CompileTimeBaseRewriter
+#pragma warning restore CA1001 // Types that own disposable fields should be disposable
         {
             private static readonly SyntaxAnnotation _hasCompileTimeCodeAnnotation = new( "Metalama_HasCompileTimeCode" );
             private readonly Compilation _compileTimeCompilation;
@@ -133,6 +134,8 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
                 else
                 {
+                    this.FoundCompileTimeCode = true;
+
                     return base.VisitEnumDeclaration( node )!.WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
                 }
             }
@@ -280,22 +283,15 @@ namespace Metalama.Framework.Engine.CompileTime
 
             private IEnumerable<MemberDeclarationSyntax> VisitTypeDeclaration( TypeDeclarationSyntax node )
             {
-                // Eliminate System.Runtime.CompilerServices.IsExternalInit.
-                if ( node.Identifier.Text == "IsExternalInit" )
-                {
-                    var semanticModel = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree );
-
-                    if ( semanticModel.GetDeclaredSymbol( node ) is { } type
-                         && type.ContainingNamespace.ToDisplayString() == "System.Runtime.CompilerServices" )
-                    {
-                        // We are inserting this type anyway, so skip it if we find it in user code.
-                        return Array.Empty<MemberDeclarationSyntax>();
-                    }
-                }
-
                 this._cancellationToken.ThrowIfCancellationRequested();
 
                 var symbol = this.RunTimeCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node ).AssertNotNull();
+
+                // Eliminate system types.
+                if ( SystemTypeDetector.IsSystemType( symbol ) )
+                {
+                    return Array.Empty<MemberDeclarationSyntax>();
+                }
 
                 var scope = this.SymbolClassifier.GetTemplatingScope( symbol );
 
@@ -442,7 +438,8 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
 
                 // Add serialization logic if the type is serializable and this is the primary declaration.
-                if ( this._serializableTypes.TryGetValue( symbol, out var serializableType ) )
+                if ( this._serializableTypes.TryGetValue( symbol, out var serializableType )
+                     && symbol.GetPrimaryDeclaration() == node )
                 {
                     var serializedTypeName = this.CreateNameExpression( serializableType.Type );
 
@@ -1039,9 +1036,15 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 if ( transformedMembers.Any( m => m.HasAnnotation( _hasCompileTimeCodeAnnotation ) ) )
                 {
+                    var currentUsings = node.Usings.Select( n => n.ToString() ).ToHashSet();
+
                     return node.WithMembers( transformedMembers )
                         .WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation )
-                        .WithUsings( node.Usings.AddRange( this._globalUsings ) )
+                        .WithUsings(
+                            List(
+                                this._globalUsings.Where( u => !currentUsings.Contains( u.ToString() ) )
+                                    .Select( u => u.WithGlobalKeyword( default ) )
+                                    .Concat( node.Usings ) ) )
                         .WithAttributeLists(
                             List( node.AttributeLists.Select( x => (AttributeListSyntax?) this.Visit( x ) ).Where( x => x != null ).AssertNoneNull() ) );
                 }
@@ -1099,7 +1102,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             // The default implementation of Visit(SyntaxNode) and Visit(SyntaxToken) adds the location annotations.
 
-            public override SyntaxNode? Visit( SyntaxNode? node ) => this.AddLocationAnnotation( node, base.Visit( node ) );
+            protected override SyntaxNode? VisitCore( SyntaxNode? node ) => this.AddLocationAnnotation( node, base.VisitCore( node ) );
 
             public override SyntaxToken VisitToken( SyntaxToken token ) => this._templateCompiler.LocationAnnotationMap.AddLocationAnnotation( token );
 
@@ -1165,7 +1168,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 {
                     return PredefinedType( Token( SyntaxKind.ObjectKeyword ) ).WithTriviaFrom( node );
                 }
-                else if ( node.Identifier.IsKind( SyntaxKind.IdentifierToken ) && !node.IsVar )
+                else if ( node.Identifier.IsKind( SyntaxKind.IdentifierToken ) && !node.IsVar && node.Parent is not QualifiedNameSyntax )
                 {
                     // Fully qualifies simple identifiers.
 

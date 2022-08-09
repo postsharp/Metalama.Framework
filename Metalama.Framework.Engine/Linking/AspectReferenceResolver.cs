@@ -8,7 +8,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -185,7 +185,8 @@ namespace Metalama.Framework.Engine.Linking
                             referenceSpecification );
                     }
                     else if ( targetMemberIntroduction.Introduction is IReplaceMemberTransformation { ReplacedMember: { } replacedMember }
-                              && replacedMember.GetTarget( this._finalCompilationModel, false ).GetSymbol() != null )
+                              && replacedMember.GetTarget( this._finalCompilationModel, ReferenceResolutionOptions.DoNotFollowRedirections )
+                                  .GetSymbol() != null )
                     {
                         // Introduction replaced existing source member, resolve to default semantics, i.e. source symbol.
 
@@ -229,7 +230,7 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     if ( referencedSymbol.IsOverride )
                     {
-                        // Introduction is an override, resolve to symbol in the base class.
+                        // Introduction is an override, resolve to the symbol in the base class.
                         return new ResolvedAspectReference(
                             containingSymbol,
                             referencedSymbol,
@@ -404,7 +405,9 @@ namespace Metalama.Framework.Engine.Linking
 
             if ( introducedMember.Introduction is IReplaceMemberTransformation { ReplacedMember: { } replacedMemberRef } )
             {
-                var replacedMember = replacedMemberRef.GetTarget( this._finalCompilationModel, false );
+                var replacedMember = replacedMemberRef.GetTarget(
+                    this._finalCompilationModel,
+                    ReferenceResolutionOptions.DoNotFollowRedirections );
 
                 IDeclaration canonicalReplacedMember = replacedMember switch
                 {
@@ -415,7 +418,7 @@ namespace Metalama.Framework.Engine.Linking
                 if ( canonicalReplacedMember is ITransformation replacedTransformation )
                 {
                     // This is introduced field, which is then promoted. Semantics of the field and of the property are the same.
-                    return new MemberLayerIndex( this._layerIndex[replacedTransformation.Advice.AspectLayerId], 0 );
+                    return new MemberLayerIndex( this._layerIndex[replacedTransformation.ParentAdvice.AspectLayerId], 0 );
                 }
                 else
                 {
@@ -486,6 +489,56 @@ namespace Metalama.Framework.Engine.Linking
                 return containingSymbol.ContainingType.AssertNotNull().FindImplementationForInterfaceMember( referencedSymbol ).AssertNotNull();
             }
 
+            if ( referencedSymbol is IMethodSymbol { ContainingType: { Name: LinkerAspectReferenceSyntaxProvider.HelperTypeName } } helperMethod )
+            {
+                switch ( helperMethod )
+                {
+                    case { Name: LinkerAspectReferenceSyntaxProvider.FinalizeMemberName }:
+                        // Referencing type's finalizer.
+                        return containingSymbol.ContainingType.GetMembers( "Finalize" )
+                            .OfType<IMethodSymbol>()
+                            .Single( m => m.Parameters.Length == 0 && m.TypeParameters.Length == 0 );
+
+                    case { } when SymbolHelpers.GetOperatorKindFromName( helperMethod.Name ) is not OperatorKind.None and var operatorKind:
+                        if ( operatorKind.GetCategory() == OperatorCategory.Binary )
+                        {
+                            return containingSymbol.ContainingType.GetMembers( referencedSymbol.Name )
+                                .OfType<IMethodSymbol>()
+                                .Single(
+                                    m =>
+                                        m.Parameters.Length == 2
+                                        && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[0].Type, helperMethod.Parameters[0].Type )
+                                        && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[1].Type, helperMethod.Parameters[1].Type )
+                                        && SignatureTypeSymbolComparer.Instance.Equals( m.ReturnType, helperMethod.ReturnType ) );
+                        }
+                        else
+                        {
+                            return containingSymbol.ContainingType.GetMembers( referencedSymbol.Name )
+                                .OfType<IMethodSymbol>()
+                                .Single(
+                                    m =>
+                                        m.Parameters.Length == 1
+                                        && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[0].Type, helperMethod.Parameters[0].Type )
+                                        && SignatureTypeSymbolComparer.Instance.Equals( m.ReturnType, helperMethod.ReturnType ) );
+                        }
+
+                    default:
+                        throw new AssertionFailedException();
+                }
+            }
+
+            if ( referencedSymbol is IMethodSymbol
+                {
+                    Name: LinkerAspectReferenceSyntaxProvider.FinalizeMemberName,
+                    ContainingType: { Name: LinkerAspectReferenceSyntaxProvider.HelperTypeName }
+                } )
+            {
+                // Referencing type's finalizer.
+                return containingSymbol.ContainingType.GetMembers( "Finalize" )
+                    .OfType<IMethodSymbol>()
+                    .Single( m => m.Parameters.Length == 0 && m.TypeParameters.Length == 0 );
+            }
+
             return referencedSymbol;
         }
 
@@ -550,7 +603,8 @@ namespace Metalama.Framework.Engine.Linking
             {
                 var matchingSymbol = currentType.GetMembers()
                     .SingleOrDefault(
-                        member => member.IsVisibleTo( this._intermediateCompilation, symbol ) && StructuralSymbolComparer.Signature.Equals( symbol, member ) );
+                        member => member.IsVisibleTo( this._intermediateCompilation, symbol )
+                                  && SignatureTypeSymbolComparer.Instance.Equals( symbol, member ) );
 
                 if ( matchingSymbol != null )
                 {
@@ -582,6 +636,8 @@ namespace Metalama.Framework.Engine.Linking
                 case (IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation }, IMethodSymbol { MethodKind: MethodKind.Ordinary }):
                 case (IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation },
                     IMethodSymbol { MethodKind: MethodKind.ExplicitInterfaceImplementation }):
+                case (IMethodSymbol { MethodKind: MethodKind.Destructor }, IMethodSymbol { MethodKind: MethodKind.Ordinary }):
+                case (IMethodSymbol { MethodKind: MethodKind.Conversion or MethodKind.UserDefinedOperator }, IMethodSymbol { MethodKind: MethodKind.Ordinary }):
                 case (IPropertySymbol, IPropertySymbol):
                 case (IEventSymbol, IEventSymbol):
                 case (IFieldSymbol, IFieldSymbol):

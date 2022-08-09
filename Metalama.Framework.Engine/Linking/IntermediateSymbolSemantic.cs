@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Engine.Utilities.Comparers;
 using Microsoft.CodeAnalysis;
 using System;
 
@@ -20,14 +21,14 @@ namespace Metalama.Framework.Engine.Linking
 
         public bool Equals( IntermediateSymbolSemantic other )
         {
-            return SymbolEqualityComparer.Default.Equals( this.Symbol, other.Symbol )
+            return StructuralSymbolComparer.Default.Equals( this.Symbol, other.Symbol )
                    && other.Kind == this.Kind;
         }
 
         public override int GetHashCode()
         {
             return HashCode.Combine(
-                SymbolEqualityComparer.Default.GetHashCode( this.Symbol ),
+                StructuralSymbolComparer.Default.GetHashCode( this.Symbol ),
                 this.Kind );
         }
 

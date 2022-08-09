@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         public Method DeclaringMethod { get; }
 
-        public override IMember DeclaringMember => this.DeclaringMethod;
+        public override IHasParameters DeclaringMember => this.DeclaringMethod;
 
         public MethodReturnParameter( Method declaringMethod )
         {
@@ -31,6 +31,8 @@ namespace Metalama.Framework.Engine.CodeModel
         public override bool Equals( IDeclaration other )
             => other is MethodReturnParameter methodReturnParameter &&
                SymbolEqualityComparer.Default.Equals( this.DeclaringMethod.Symbol, methodReturnParameter.DeclaringMethod.Symbol );
+
+        public override bool IsImplicitlyDeclared => this.DeclaringMethod.IsImplicitlyDeclared;
 
         public override ISymbol? Symbol => null;
 

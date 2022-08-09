@@ -24,8 +24,8 @@ internal class TargetClass
 
         }
     }
-    private global::System.Int32 _field_Source { get; set; }
-
+    private global::System.Int32 _field_Source
+    { get; set; }
     public int Property
     {
         get
@@ -82,8 +82,8 @@ internal class TargetClass
 
         }
     }
-    private static global::System.Int32 _staticField_Source { get; set; }
-
+    private static global::System.Int32 _staticField_Source
+    { get; set; }
     public static int StaticProperty
     {
         get
@@ -131,9 +131,9 @@ internal class TargetClass
         }
     }
 
-    private int ExpressionBodiedProperty_Source => 42
-
-        public int AutoProperty
+    private int ExpressionBodiedProperty_Source
+    => 42;
+    public int AutoProperty
     {
         get
         {
@@ -155,8 +155,8 @@ internal class TargetClass
         }
     }
 
-    private int AutoProperty_Source { get; set; }
-
+    private int AutoProperty_Source
+    { get; set; }
     public int GetOnlyAutoProperty
     {
         get
@@ -169,7 +169,7 @@ internal class TargetClass
 
 
         }
-        private set
+        private init
         {
             global::System.Console.WriteLine("This is the overridden setter.");
             global::System.Console.WriteLine("This is the overridden setter.");
@@ -179,8 +179,8 @@ internal class TargetClass
         }
     }
 
-    private int GetOnlyAutoProperty_Source { get; set; }
-
+    private int GetOnlyAutoProperty_Source
+    { get; set; }
     public int InitializerAutoProperty
     {
         get
@@ -202,9 +202,9 @@ internal class TargetClass
 
         }
     }
-    private int InitializerAutoProperty_Source { get; set; } = 42
-
-        public TargetClass()
+    private int InitializerAutoProperty_Source
+    { get; set; } = 42;
+    public TargetClass()
     {
         this.GetOnlyAutoProperty = 42;
     }
@@ -231,8 +231,8 @@ internal class TargetClass
 
         }
     }
-    private global::System.Int32 IntroducedAutoProperty_Source { get; set; }
-
+    private global::System.Int32 IntroducedAutoProperty_Source
+    { get; set; }
 
     public global::System.Int32 IntroducedGetOnlyAutoProperty
     {
@@ -246,17 +246,9 @@ internal class TargetClass
 
 
         }
-        private set
-        {
-            global::System.Console.WriteLine("This is the overridden setter.");
-            global::System.Console.WriteLine("This is the overridden setter.");
-            this.IntroducedGetOnlyAutoProperty_Source = value;
-
-
-        }
     }
-    private global::System.Int32 IntroducedGetOnlyAutoProperty_Source { get; set; }
-
+    private global::System.Int32 IntroducedGetOnlyAutoProperty_Source
+    { get; }
 
     public global::System.Int32 IntroducedProperty_IntroduceAndOverride
     {

@@ -6,7 +6,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.LamaSerialization;
 using Metalama.Framework.Engine.Metrics;
 using Metalama.Framework.Engine.SyntaxSerialization;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
@@ -139,20 +139,23 @@ namespace Metalama.Framework.Engine.Pipeline
         public ServiceProvider WithProjectScopedServices( IEnumerable<MetadataReference> metadataReferences )
             => this.WithProjectScopedServices( metadataReferences, null );
 
-        public ServiceProvider WithProjectScopedServices( Compilation compilation ) => this.WithProjectScopedServices( compilation.References, null );
+        public ServiceProvider WithProjectScopedServices( Compilation compilation ) => this.WithProjectScopedServices( compilation.References, compilation );
 
-        private ServiceProvider WithProjectScopedServices( IEnumerable<MetadataReference> metadataReferences, Compilation? compilation )
+        private ServiceProvider WithProjectScopedServices(
+            IEnumerable<MetadataReference> metadataReferences,
+            Compilation? compilation )
         {
             // ReflectionMapperFactory cannot be a global service because it keeps a reference from compilations to types of the
             // user assembly. When we need to unload the user assembly, we first need to unload the ReflectionMapperFactory.
             var serviceProvider = this.WithServices(
                 new ReflectionMapperFactory(),
-                new AssemblyLocator( metadataReferences ) );
+                new AssemblyLocator( this, metadataReferences ) );
 
             serviceProvider = serviceProvider.WithService( new UserCodeInvoker( serviceProvider ) );
             serviceProvider = serviceProvider.WithService( new BuiltInSerializerFactoryProvider( serviceProvider ) );
             serviceProvider = serviceProvider.WithServices( new SyntaxSerializationService( serviceProvider ), new CompileTimeTypeFactory() );
             serviceProvider = serviceProvider.WithServices( new SystemTypeResolver( serviceProvider ) );
+            serviceProvider = serviceProvider.WithSharedLazyInitializedService( sp => new SymbolClassificationService( sp ) );
 
             serviceProvider = serviceProvider.WithService(
                 new SyntaxGenerationContextFactory( compilation ?? SyntaxGenerationContext.EmptyCompilation, serviceProvider ) );

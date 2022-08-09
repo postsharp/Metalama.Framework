@@ -3,12 +3,13 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.Templating;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
@@ -34,14 +35,18 @@ namespace Metalama.Framework.Engine.Aspects
         protected TemplateClass(
             IServiceProvider serviceProvider,
             Compilation compilation,
-            INamedTypeSymbol aspectTypeSymbol,
+            INamedTypeSymbol typeSymbol,
             IDiagnosticAdder diagnosticAdder,
-            TemplateClass? baseClass )
+            TemplateClass? baseClass,
+            string shortName )
         {
             this.ServiceProvider = serviceProvider;
             this.BaseClass = baseClass;
-            this.Members = this.GetMembers( compilation, aspectTypeSymbol, diagnosticAdder );
+            this.Members = this.GetMembers( compilation, typeSymbol, diagnosticAdder );
+            this.ShortName = shortName;
         }
+
+        public string ShortName { get; }
 
         /// <summary>
         /// Gets metadata of the base aspect class.
@@ -50,7 +55,10 @@ namespace Metalama.Framework.Engine.Aspects
 
         internal ImmutableDictionary<string, TemplateClassMember> Members { get; }
 
-        public abstract Type AspectType { get; }
+        /// <summary>
+        /// Gets the reflection type for the current <see cref="TemplateClass"/>.
+        /// </summary>
+        public abstract Type Type { get; }
 
         internal TemplateDriver GetTemplateDriver( IMember sourceTemplate )
         {
@@ -63,7 +71,7 @@ namespace Metalama.Framework.Engine.Aspects
             }
 
             var templateName = TemplateNameHelper.GetCompiledTemplateName( templateSymbol );
-            var compiledTemplateMethodInfo = this.AspectType.GetMethod( templateName );
+            var compiledTemplateMethodInfo = this.Type.GetMethod( templateName );
 
             if ( compiledTemplateMethodInfo == null )
             {
@@ -82,7 +90,7 @@ namespace Metalama.Framework.Engine.Aspects
         public abstract string FullName { get; }
 
         internal bool TryGetInterfaceMember( ISymbol symbol, [NotNullWhen( true )] out TemplateClassMember? member )
-            => this.Members.TryGetValue( DocumentationCommentId.CreateDeclarationId( symbol ), out member )
+            => this.Members.TryGetValue( symbol.GetDocumentationCommentId().AssertNotNull(), out member )
                && member.TemplateInfo.AttributeType == TemplateAttributeType.InterfaceMember;
 
         private ImmutableDictionary<string, TemplateClassMember> GetMembers( Compilation compilation, INamedTypeSymbol type, IDiagnosticAdder diagnosticAdder )
@@ -101,17 +109,18 @@ namespace Metalama.Framework.Engine.Aspects
             foreach ( var memberSymbol in type.GetMembers() )
             {
                 var templateInfo = symbolClassifier.GetTemplateInfo( memberSymbol ).AssertNotNull();
-                var memberName = memberSymbol.Name;
+                var memberKey = memberSymbol.Name;
 
                 switch ( templateInfo.AttributeType )
                 {
-                    case TemplateAttributeType.Introduction when memberSymbol is IMethodSymbol { AssociatedSymbol: not null }:
-                        // This is an accessor of an introduced event or property. We don't index them.
+                    case TemplateAttributeType.DeclarativeAdvice when memberSymbol is IMethodSymbol { AssociatedSymbol: not null }:
+                        // This is an accessor of a template or event declarative advice. We don't index them.
                         continue;
 
+                    case TemplateAttributeType.DeclarativeAdvice:
                     case TemplateAttributeType.InterfaceMember:
-                        // For interface members, we don't require a unique name.
-                        memberName = DocumentationCommentId.CreateDeclarationId( memberSymbol );
+                        // For interface members, we don't require a unique name, so we identify the template by documentation id.
+                        memberKey = memberSymbol.GetDocumentationCommentId().AssertNotNull();
 
                         break;
                 }
@@ -130,6 +139,7 @@ namespace Metalama.Framework.Engine.Aspects
                         accessors = accessors.Add(
                             accessor.MethodKind,
                             new TemplateClassMember(
+                                accessor.Name,
                                 accessor.Name,
                                 this,
                                 templateInfo,
@@ -204,7 +214,8 @@ namespace Metalama.Framework.Engine.Aspects
                 }
 
                 var aspectClassMember = new TemplateClassMember(
-                    memberName,
+                    memberSymbol.Name,
+                    memberKey,
                     this,
                     templateInfo,
                     memberSymbol.GetSymbolId(),
@@ -214,7 +225,7 @@ namespace Metalama.Framework.Engine.Aspects
 
                 if ( !templateInfo.IsNone )
                 {
-                    if ( members.TryGetValue( memberName, out var existingMember ) && !memberSymbol.IsOverride &&
+                    if ( members.TryGetValue( memberKey, out var existingMember ) && !memberSymbol.IsOverride &&
                          !existingMember.TemplateInfo.IsNone )
                     {
                         // Note we cannot get here when the member is defined in the same type because the compile-time assembly creation
@@ -224,19 +235,19 @@ namespace Metalama.Framework.Engine.Aspects
                         diagnosticAdder.Report(
                             GeneralDiagnosticDescriptors.TemplateWithSameNameAlreadyDefinedInBaseClass.CreateRoslynDiagnostic(
                                 memberSymbol.GetDiagnosticLocation(),
-                                (memberName, type.Name, existingMember.TemplateClass.AspectType.Name) ) );
+                                (memberKey, type.Name, existingMember.TemplateClass.Type.Name) ) );
 
                         continue;
                     }
 
                     // Add or replace the template.
-                    members[memberName] = aspectClassMember;
+                    members[memberKey] = aspectClassMember;
                 }
                 else
                 {
-                    if ( !members.ContainsKey( memberName ) )
+                    if ( !members.ContainsKey( memberKey ) )
                     {
-                        members.Add( memberName, aspectClassMember );
+                        members.Add( memberKey, aspectClassMember );
                     }
                 }
             }
@@ -244,13 +255,44 @@ namespace Metalama.Framework.Engine.Aspects
             return members.ToImmutable();
         }
 
-        internal IEnumerable<TemplateClassMember> GetDeclarativeAdvices( Compilation compilation )
+        internal IEnumerable<TemplateMember<IMemberOrNamedType>> GetDeclarativeAdvices( IServiceProvider serviceProvider, CompilationModel compilation )
+            => this.GetDeclarativeAdvices( serviceProvider, compilation.RoslynCompilation )
+                .Select(
+                    x => TemplateMemberFactory.Create(
+                        (IMemberOrNamedType) compilation.Factory.GetDeclaration( x.Symbol ),
+                        x.TemplateClassMember,
+                        x.Attribute ) );
+
+        internal IEnumerable<(TemplateClassMember TemplateClassMember, ISymbol Symbol, DeclarativeAdviceAttribute Attribute)> GetDeclarativeAdvices(
+            IServiceProvider serviceProvider,
+            Compilation compilation )
         {
+            TemplateAttributeFactory? templateAttributeFactory = null;
+
             return this.Members
-                .Where( m => m.Value.TemplateInfo.AttributeType == TemplateAttributeType.Introduction )
-                .Select( m => m.Value )
-                .OrderBy( m => m.SymbolId.Resolve( compilation ).GetPrimarySyntaxReference()?.SyntaxTree.FilePath )
-                .ThenBy( m => m.SymbolId.Resolve( compilation ).GetPrimarySyntaxReference()?.Span.Start );
+                .Where( m => m.Value.TemplateInfo.AttributeType == TemplateAttributeType.DeclarativeAdvice )
+                .Select(
+                    m =>
+                    {
+                        var symbol = m.Value.SymbolId.Resolve( compilation ).AssertNotNull();
+
+                        return (Template: m.Value, Symbol: symbol, Syntax: symbol.GetPrimarySyntaxReference());
+                    } )
+                .OrderBy( m => m.Syntax?.SyntaxTree.FilePath )
+                .ThenBy( m => m.Syntax?.Span.Start )
+                .Select( m => (m.Template, m.Symbol, ResolveAttribute( m.Template.SymbolId )) );
+
+            DeclarativeAdviceAttribute ResolveAttribute( SymbolId templateInfoSymbolId )
+            {
+                templateAttributeFactory ??= serviceProvider.GetRequiredService<TemplateAttributeFactory>();
+
+                if ( !templateAttributeFactory.TryGetTemplateAttribute( templateInfoSymbolId, NullDiagnosticAdder.Instance, out var attribute ) )
+                {
+                    throw new AssertionFailedException();
+                }
+
+                return (DeclarativeAdviceAttribute) attribute;
+            }
         }
     }
 }

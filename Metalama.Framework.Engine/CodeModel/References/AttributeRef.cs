@@ -12,11 +12,15 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel.References
 {
-    internal class AttributeRef : IRefImpl<IAttribute>
+    internal class AttributeRef : IRefImpl<IAttribute>, IEquatable<AttributeRef>
     {
         private readonly Ref<IDeclaration> _declaringDeclaration;
 
+        private readonly object _originalTarget;
+
         public object? Target { get; private set; }
+
+        bool IRefImpl.IsDefault => false;
 
         private (AttributeData? Attribute, ISymbol? Parent) ResolveAttributeData( AttributeSyntax attributeSyntax, Compilation compilation )
         {
@@ -42,19 +46,25 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         public AttributeRef( AttributeData attributeData, Ref<IDeclaration> declaringDeclaration )
         {
-            this.Target = attributeData;
+            this.Target = this._originalTarget = attributeData;
             this._declaringDeclaration = declaringDeclaration;
         }
 
         public AttributeRef( AttributeSyntax attributeSyntax, SyntaxNode? declaration, DeclarationRefTargetKind targetKind, Compilation compilation )
         {
-            this.Target = attributeSyntax;
+            this.Target = this._originalTarget = attributeSyntax;
             this._declaringDeclaration = new Ref<IDeclaration>( declaration, targetKind, compilation );
+        }
+
+        public AttributeRef( AttributeSyntax attributeSyntax, in Ref<IDeclaration> declaration )
+        {
+            this.Target = this._originalTarget = attributeSyntax;
+            this._declaringDeclaration = declaration;
         }
 
         public AttributeRef( AttributeBuilder builder )
         {
-            this.Target = builder;
+            this.Target = this._originalTarget = builder;
             this._declaringDeclaration = builder.ContainingDeclaration.ToTypedRef();
         }
 
@@ -73,9 +83,9 @@ namespace Metalama.Framework.Engine.CodeModel.References
                     _ => throw new AssertionFailedException()
                 } );
 
-        public string? ToSerializableId() => null;
+        public DeclarationSerializableId ToSerializableId() => throw new NotSupportedException();
 
-        public IAttribute GetTarget( ICompilation compilation )
+        public IAttribute GetTarget( ICompilation compilation, ReferenceResolutionOptions options = default )
         {
             if ( !this.TryGetTarget( (CompilationModel) compilation, out var attribute ) )
             {
@@ -84,6 +94,16 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
             return attribute;
         }
+
+        private AttributeSyntax? Syntax
+            => this.Target switch
+            {
+                null => null,
+                AttributeSyntax syntax => syntax,
+                AttributeData data => (AttributeSyntax?) data.ApplicationSyntaxReference?.GetSyntax(),
+                AttributeBuilder => null,
+                _ => throw new AssertionFailedException()
+            };
 
         public bool TryGetTarget( CompilationModel compilation, [NotNullWhen( true )] out IAttribute? attribute )
         {
@@ -132,5 +152,66 @@ namespace Metalama.Framework.Engine.CodeModel.References
         ISymbol? ISdkRef<IAttribute>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => throw new NotSupportedException();
 
         public override string ToString() => this.Target?.ToString() ?? "null";
+
+        public bool IsSyntax( AttributeSyntax attribute )
+            => this.Target switch
+            {
+                AttributeData targetAttributeData => targetAttributeData.ApplicationSyntaxReference?.GetSyntax() == attribute,
+                AttributeSyntax targetAttributeSyntax => targetAttributeSyntax == attribute,
+                _ => false
+            };
+
+        public bool Equals( AttributeRef other )
+        {
+            switch ( this._originalTarget )
+            {
+                case AttributeSyntax syntax:
+                    if ( syntax != other.Syntax )
+                    {
+                        return false;
+                    }
+
+                    break;
+
+                case AttributeData data:
+                    if ( data.ApplicationSyntaxReference?.GetSyntax() != other.Syntax )
+                    {
+                        return false;
+                    }
+
+                    break;
+
+                case AttributeBuilder builder:
+                    if ( builder != other.Target )
+                    {
+                        return false;
+                    }
+
+                    break;
+
+                default:
+                    throw new AssertionFailedException();
+            }
+
+            if ( !RefEqualityComparer<IDeclaration>.Default.Equals( this._declaringDeclaration, other._declaringDeclaration ) )
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public override int GetHashCode()
+        {
+            var targetHashCode = this._originalTarget switch
+            {
+                AttributeSyntax syntax => syntax.GetHashCode(),
+                AttributeData data => data.ApplicationSyntaxReference?.GetSyntax().GetHashCode() ?? 0,
+                AttributeBuilder builder => builder.GetHashCode(),
+                _ => throw new AssertionFailedException()
+            };
+
+            return HashCode.Combine( targetHashCode, RefEqualityComparer<IDeclaration>.Default.GetHashCode( this._declaringDeclaration ) );
+        }
     }
 }

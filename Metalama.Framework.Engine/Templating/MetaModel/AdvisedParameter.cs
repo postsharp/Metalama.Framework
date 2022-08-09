@@ -18,11 +18,11 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public RefKind RefKind => this.Underlying.RefKind;
 
-        public TypedConstant DefaultValue => this.Underlying.DefaultValue;
+        public TypedConstant? DefaultValue => this.Underlying.DefaultValue;
 
         public bool IsParams => this.Underlying.IsParams;
 
-        public IMember DeclaringMember => this.Underlying.DeclaringMember;
+        public IHasParameters DeclaringMember => this.Underlying.DeclaringMember;
 
         public ParameterInfo ToParameterInfo() => this.Underlying.ToParameterInfo();
 
@@ -53,11 +53,11 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
                 isReferenceable: true,
                 isAssignable: true );
 
-        public ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext ) => SyntaxFactory.IdentifierName( this.Underlying.Name );
+        public ExpressionSyntax ToExpressionSyntax( SyntaxGenerationContext syntaxGenerationContext ) => SyntaxFactory.IdentifierName( this.Underlying.Name );
 
-        public RunTimeTemplateExpression ToRunTimeTemplateExpression( SyntaxGenerationContext syntaxGenerationContext )
+        public TypedExpressionSyntax ToTypedExpressionSyntax( SyntaxGenerationContext syntaxGenerationContext )
             => new(
-                this.ToSyntax( syntaxGenerationContext ),
+                this.ToExpressionSyntax( syntaxGenerationContext ),
                 this.Type,
                 syntaxGenerationContext );
     }

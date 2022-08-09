@@ -11,7 +11,8 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Comparers;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.TestFramework;
 using Metalama.TestFramework.Utilities;
 using Microsoft.CodeAnalysis;
@@ -69,7 +70,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
         internal SyntaxNode ProcessSyntaxRoot( SyntaxNode syntaxRoot )
         {
-            return this._rewriter.Visit( syntaxRoot );
+            return this._rewriter.Visit( syntaxRoot )!;
         }
 
         public AspectLinkerInput ToAspectLinkerInput( PartialCompilation inputCompilation )
@@ -86,10 +87,10 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
             // TODO: All transformations should be ordered together, but there are no tests that would require that.
             var replacedCompilationModel = initialCompilationModel.WithTransformations(
-                this._rewriter.ReplacedTransformations.OrderBy( x => layerOrderLookup[x.Advice.AspectLayerId] ).ToList() );
+                this._rewriter.ReplacedTransformations.OrderBy( x => layerOrderLookup[x.ParentAdvice.AspectLayerId] ).ToList() );
 
             var inputCompilationModel = replacedCompilationModel.WithTransformations(
-                this._rewriter.ObservableTransformations.OrderBy( x => layerOrderLookup[x.Advice.AspectLayerId] ).ToList() );
+                this._rewriter.ObservableTransformations.OrderBy( x => layerOrderLookup[x.ParentAdvice.AspectLayerId] ).ToList() );
 
             var linkerInput = new AspectLinkerInput(
                 inputCompilation,
@@ -97,7 +98,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 this._rewriter.ReplacedTransformations.Cast<ITransformation>()
                     .Concat( this._rewriter.ObservableTransformations )
                     .Concat( this._rewriter.NonObservableTransformations )
-                    .OrderBy( x => layerOrderLookup[x.Advice.AspectLayerId] )
+                    .OrderBy( x => layerOrderLookup[x.ParentAdvice.AspectLayerId] )
                     .ToList(),
                 orderedLayers,
                 new ArraySegment<ScopedSuppression>( Array.Empty<ScopedSuppression>() ),
@@ -238,7 +239,9 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     }
 
                     A.CallTo( () => overriddenDeclaration.OverriddenDeclaration ).Returns( overridenMember );
-                    A.CallTo( () => ((IIntroduceMemberTransformation) overriddenDeclaration).TargetSyntaxTree ).Returns( symbolHelperNode.SyntaxTree );
+
+                    A.CallTo( () => ((IIntroduceMemberTransformation) overriddenDeclaration).TransformedSyntaxTree )
+                        .Returns( symbolHelperNode.SyntaxTree );
                 }
                 else if ( transformation is IObservableTransformation observableTransformation )
                 {
@@ -464,7 +467,8 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
             A.CallTo( () => ((IIntroduceMemberTransformation) observableTransformation).InsertPosition )
                 .Returns( new InsertPosition( insertPositionRelation, (MemberDeclarationSyntax) insertPositionNode ) );
 
-            A.CallTo( () => ((IIntroduceMemberTransformation) observableTransformation).TargetSyntaxTree ).Returns( symbolHelperNode.SyntaxTree );
+            A.CallTo( () => ((IIntroduceMemberTransformation) observableTransformation).TransformedSyntaxTree )
+                .Returns( symbolHelperNode.SyntaxTree );
 
             // ReSharper disable SuspiciousTypeConversion.Global
 

@@ -13,12 +13,15 @@ namespace Metalama.Framework.Engine.Templating
     {
         public TypeSyntax Syntax { get; }
 
+        public TypeSyntax SyntaxWithoutNullabilityAnnotations { get; }
+
         public IType Type { get; }
 
-        internal TemplateTypeArgument( TypeSyntax syntax, IType type )
+        internal TemplateTypeArgument( IType type, TypeSyntax syntax, TypeSyntax syntaxWithoutNullabilityAnnotations )
         {
             this.Syntax = syntax;
             this.Type = type;
+            this.SyntaxWithoutNullabilityAnnotations = syntaxWithoutNullabilityAnnotations;
         }
     }
 }

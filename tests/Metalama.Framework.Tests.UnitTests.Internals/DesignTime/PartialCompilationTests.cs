@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Testing;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -158,10 +159,10 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
             ApplySeveralModifications( PartialCompilation.CreateComplete( compilation ) );
         }
 
-        private class Rewriter : CSharpSyntaxRewriter
+        private class Rewriter : SafeSyntaxRewriter
         {
             // Apply some arbitrary transformation.
-            public override SyntaxNode? Visit( SyntaxNode? node ) => base.Visit( node )!.WithTrailingTrivia( SyntaxFactory.Space );
+            protected override SyntaxNode? VisitCore( SyntaxNode? node ) => base.VisitCore( node )!.WithTrailingTrivia( SyntaxFactory.Space );
         }
     }
 }

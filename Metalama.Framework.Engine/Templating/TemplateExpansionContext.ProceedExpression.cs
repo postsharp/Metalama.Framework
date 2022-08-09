@@ -24,40 +24,37 @@ namespace Metalama.Framework.Engine.Templating
                 this._parent = parent;
             }
 
-            public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
+            protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
             {
                 this.Validate();
 
-                return this._parent._proceedExpression!.ToSyntax( syntaxGenerationContext );
-            }
-
-            public override RunTimeTemplateExpression ToRunTimeTemplateExpression( SyntaxGenerationContext syntaxGenerationContext )
-            {
-                this.Validate();
-
-                return this._parent._proceedExpression!.ToRunTimeTemplateExpression( syntaxGenerationContext );
+                return this._parent._proceedExpression!.ToTypedExpressionSyntax( syntaxGenerationContext ).Syntax;
             }
 
             private void Validate()
             {
-                var targetMethod = this._parent.MetaApi.Target.Method;
-
-                var isValid = this._methodName switch
+                switch ( this._parent.MetaApi.Target.Declaration )
                 {
-                    nameof(meta.Proceed) => true,
-                    nameof(meta.ProceedAsync) => targetMethod.GetAsyncInfoImpl().IsAwaitableOrVoid,
-                    nameof(meta.ProceedEnumerable) => targetMethod.GetIteratorInfoImpl().EnumerableKind is EnumerableKind.IEnumerable or EnumerableKind
-                        .UntypedIEnumerable,
-                    nameof(meta.ProceedEnumerator) => targetMethod.GetIteratorInfoImpl().EnumerableKind is EnumerableKind.IEnumerator or EnumerableKind
-                        .UntypedIEnumerator,
-                    "ProceedAsyncEnumerable" => targetMethod.GetIteratorInfoImpl().EnumerableKind is EnumerableKind.IAsyncEnumerable,
-                    "ProceedAsyncEnumerator" => targetMethod.GetIteratorInfoImpl().EnumerableKind is EnumerableKind.IAsyncEnumerator,
-                    _ => throw new ArgumentOutOfRangeException()
-                };
+                    case IMethod targetMethod:
+                        var isValid = this._methodName switch
+                        {
+                            nameof(meta.Proceed) => true,
+                            nameof(meta.ProceedAsync) => targetMethod.GetAsyncInfoImpl().IsAwaitableOrVoid,
+                            nameof(meta.ProceedEnumerable) => targetMethod.GetIteratorInfoImpl().EnumerableKind is EnumerableKind.IEnumerable or EnumerableKind
+                                .UntypedIEnumerable,
+                            nameof(meta.ProceedEnumerator) => targetMethod.GetIteratorInfoImpl().EnumerableKind is EnumerableKind.IEnumerator or EnumerableKind
+                                .UntypedIEnumerator,
+                            "ProceedAsyncEnumerable" => targetMethod.GetIteratorInfoImpl().EnumerableKind is EnumerableKind.IAsyncEnumerable,
+                            "ProceedAsyncEnumerator" => targetMethod.GetIteratorInfoImpl().EnumerableKind is EnumerableKind.IAsyncEnumerator,
+                            _ => throw new ArgumentOutOfRangeException()
+                        };
 
-                if ( !isValid )
-                {
-                    throw TemplatingDiagnosticDescriptors.CannotUseSpecificProceedInThisContext.CreateException( (this._methodName, targetMethod) );
+                        if ( !isValid )
+                        {
+                            throw TemplatingDiagnosticDescriptors.CannotUseSpecificProceedInThisContext.CreateException( (this._methodName, targetMethod) );
+                        }
+
+                        break;
                 }
             }
 

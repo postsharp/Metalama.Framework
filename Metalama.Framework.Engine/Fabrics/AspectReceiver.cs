@@ -10,8 +10,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Licensing;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
 using Metalama.Framework.Validation;
@@ -35,7 +34,7 @@ namespace Metalama.Framework.Engine.Fabrics
         private readonly ISdkRef<IDeclaration> _containingDeclaration;
         private readonly IAspectReceiverParent _parent;
         private readonly CompilationModelVersion _compilationModelVersion;
-        private readonly Func<CompilationModel, IDiagnosticAdder, IEnumerable<T>> _selector;
+        private readonly System.Func<CompilationModel, IDiagnosticAdder, IEnumerable<T>> _selector;
 
         public AspectReceiver(
             ISdkRef<IDeclaration> containingDeclaration,
@@ -62,19 +61,9 @@ namespace Metalama.Framework.Engine.Fabrics
             return (AspectClass) aspectClass;
         }
 
-        private void RegisterAspectSource( IAspectSource aspectSource )
-        {
-            this._parent.ServiceProvider.GetService<LicenseVerifier>()?.VerifyCanAddChildAspect( this._parent.AspectPredecessor );
+        private void RegisterAspectSource( IAspectSource aspectSource ) => this._parent.AddAspectSource( aspectSource );
 
-            this._parent.AddAspectSource( aspectSource );
-        }
-
-        private void RegisterValidatorSource( ProgrammaticValidatorSource validatorSource )
-        {
-            this._parent.ServiceProvider.GetService<LicenseVerifier>()?.VerifyCanValidator( this._parent.AspectPredecessor );
-
-            this._parent.AddValidatorSource( validatorSource );
-        }
+        private void RegisterValidatorSource( ProgrammaticValidatorSource validatorSource ) => this._parent.AddValidatorSource( validatorSource );
 
         public void ValidateReferences( ValidatorDelegate<ReferenceValidationContext> validateMethod, ReferenceKinds referenceKinds )
         {

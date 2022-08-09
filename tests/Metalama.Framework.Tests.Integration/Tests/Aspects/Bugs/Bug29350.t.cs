@@ -1,23 +1,4 @@
-using System;
-using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
-using Metalama.Framework.Code.SyntaxBuilders;
-
-namespace Metalama.Framework.Tests.Integration.Aspects.Misc.Bug29350
-{
-#pragma warning disable CS0067
-
-    public class LogAttribute : OverrideMethodAspect
-    {
-        public override dynamic? OverrideMethod() => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
-
-
-        private static InterpolatedStringBuilder BuildInterpolatedString() => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
-
-    }
-#pragma warning restore CS0067
-
-    internal class Program
+internal class Program
     {
         private static void Main()
         {
@@ -43,4 +24,3 @@ __aspect_return_1:        global::System.Console.WriteLine($"Program.Add(a = {{{
     }
         }
     }
-}

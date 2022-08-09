@@ -2,29 +2,18 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.CodeModel.References;
-using Microsoft.CodeAnalysis;
-using System;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
 {
-    internal abstract class BuiltMember : BuiltMemberOrNamedType, IMemberImpl, IMemberRef<IMember>
+    internal abstract class BuiltMember : BuiltMemberOrNamedType, IMemberImpl
     {
-        protected BuiltMember( CompilationModel compilation ) : base( compilation ) { }
+        protected BuiltMember( CompilationModel compilation, MemberBuilder builder ) : base( compilation, builder ) { }
 
         public abstract MemberBuilder MemberBuilder { get; }
 
         public sealed override DeclarationBuilder Builder => this.MemberBuilder;
 
-        string? IRef<IMember>.ToSerializableId() => null;
-
-        IMember IRef<IMember>.GetTarget( ICompilation compilation ) => throw new NotImplementedException();
-
-        ISymbol? ISdkRef<IMember>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => throw new NotImplementedException();
-
         public bool IsExplicitInterfaceImplementation => this.MemberBuilder.IsExplicitInterfaceImplementation;
-
-        public bool IsImplicit => this.MemberBuilder.IsImplicit;
 
         public new INamedType DeclaringType => base.DeclaringType.AssertNotNull();
 

@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
 using System.Linq;
@@ -46,7 +45,7 @@ class C<T> : object
 
             // Constructors
             AssertLocation( "C", type.Constructors.Single().GetDiagnosticLocation() );
-            AssertLocation( "C", type.StaticConstructor.GetDiagnosticLocation() );
+            AssertLocation( "C", type.StaticConstructor!.GetDiagnosticLocation() );
 
             // Methods
             AssertLocation( "Method", method.GetDiagnosticLocation() );
@@ -55,11 +54,11 @@ class C<T> : object
             AssertLocation( "Method", method.ReturnParameter.GetDiagnosticLocation() );
 
             // Operators
-            AssertLocation( "operator", type.Methods.OfKind( MethodKind.UserDefinedOperator ).Single().GetDiagnosticLocation() );
-            AssertLocation( "operator", type.Methods.OfKind( MethodKind.ConversionOperator ).Single().GetDiagnosticLocation() );
+            AssertLocation( "operator", type.Methods.OfKind( MethodKind.Operator ).ElementAt( 0 ).GetDiagnosticLocation() );
+            AssertLocation( "operator", type.Methods.OfKind( MethodKind.Operator ).ElementAt( 1 ).GetDiagnosticLocation() );
 
             // Destructors
-            AssertLocation( "C", type.Methods.OfKind( MethodKind.Finalizer ).Single().GetDiagnosticLocation() );
+            AssertLocation( "C", type.Finalizer!.GetDiagnosticLocation() );
 
             // Properties
             AssertLocation( "AutomaticProperty", type.Properties.OfName( "AutomaticProperty" ).Single().GetDiagnosticLocation() );

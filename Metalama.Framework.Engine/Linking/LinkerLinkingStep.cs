@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Engine.CodeModel;
+using Metalama.Compiler;
 using System;
 using System.Collections.Generic;
 
@@ -52,22 +52,34 @@ namespace Metalama.Framework.Engine.Linking
             var linkingRewriter = new LinkingRewriter( this._serviceProvider, input.IntermediateCompilation.Compilation, rewritingDriver );
             var cleanupRewriter = new CleanupRewriter( input.ProjectOptions );
 
-            List<SyntaxTreeModification> replacedTrees = new();
+            List<SyntaxTreeTransformation> transformations = new( input.IntermediateCompilation.ModifiedSyntaxTrees.Count );
 
             foreach ( var modifiedSyntaxTree in input.IntermediateCompilation.ModifiedSyntaxTrees )
             {
-                var syntaxTree = modifiedSyntaxTree.Value.NewTree;
+                if ( modifiedSyntaxTree.Value.Kind == SyntaxTreeTransformationKind.Add )
+                {
+                    // This is an intermediate tree we added and we don't need it in the final compilation.
+                    transformations.Add( SyntaxTreeTransformation.RemoveTree( modifiedSyntaxTree.Value.NewTree.AssertNotNull() ) );
+                }
+                else
+                {
+                    var syntaxTree = modifiedSyntaxTree.Value.NewTree.AssertNotNull();
 
-                // Run the linking rewriter for this tree.
-                var linkedRoot = linkingRewriter.Visit( syntaxTree.GetRoot() );
-                var cleanRoot = cleanupRewriter.Visit( linkedRoot );
+                    // Run the linking rewriter for this tree.
+                    var linkedRoot = linkingRewriter.Visit( syntaxTree.GetRoot() )!;
+                    var cleanRoot = cleanupRewriter.Visit( linkedRoot )!;
 
-                var newSyntaxTree = syntaxTree.WithRootAndOptions( cleanRoot, syntaxTree.Options );
+                    var newSyntaxTree = syntaxTree.WithRootAndOptions( cleanRoot, syntaxTree.Options );
 
-                replacedTrees.Add( new SyntaxTreeModification( newSyntaxTree, syntaxTree ) );
+                    transformations.Add( SyntaxTreeTransformation.ReplaceTree( syntaxTree, newSyntaxTree ) );
+                }
             }
 
-            return new AspectLinkerResult( input.IntermediateCompilation.Update( replacedTrees ), input.DiagnosticSink.ToImmutable() );
+            var linkedCompilation =
+                input.IntermediateCompilation
+                    .Update( transformations );
+
+            return new AspectLinkerResult( linkedCompilation, input.DiagnosticSink.ToImmutable() );
         }
     }
 }

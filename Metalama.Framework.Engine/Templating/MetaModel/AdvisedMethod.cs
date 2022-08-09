@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
             {
                 return this.Invokers.Base.Invoke( this.IsStatic ? null : this.This, args );
             }
-            else if ( TypeExtensions.Equals( this.ReturnType, SpecialType.Void ) )
+            else if ( this.ReturnType.Equals( SpecialType.Void ) )
             {
                 return null;
             }
@@ -44,6 +44,8 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
         IParameterList IHasParameters.Parameters => this.Underlying.Parameters;
 
         public MethodKind MethodKind => this.Underlying.MethodKind;
+
+        public OperatorKind OperatorKind => this.Underlying.OperatorKind;
 
         public bool IsReadOnly => this.Underlying.IsReadOnly;
 

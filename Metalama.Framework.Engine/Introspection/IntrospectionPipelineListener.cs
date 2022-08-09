@@ -1,17 +1,33 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Project;
-using System.Collections.Generic;
+using System;
 
 namespace Metalama.Framework.Engine.Introspection;
 
 internal class IntrospectionPipelineListener : IService
 {
-    private readonly Dictionary<Advice, AdviceResult> _adviceResults = new();
+    private readonly IntrospectionAspectInstanceFactory _introspectionFactory;
 
-    public void AddAdviceResult( Advice advice, AdviceResult result ) => this._adviceResults.Add( advice, result );
+    public IntrospectionPipelineListener( IServiceProvider serviceProvider )
+    {
+        this._introspectionFactory = serviceProvider.GetRequiredService<IntrospectionAspectInstanceFactory>();
+    }
 
-    public AdviceResult GetAdviceResult( Advice advice ) => this._adviceResults[advice];
+    public void AddAdviceResult( IAspectInstance aspectInstance, Advice advice, AdviceImplementationResult result, ICompilation compilation )
+    {
+        var introspectionAdviceInstance = this._introspectionFactory.GetIntrospectionAspectInstance( aspectInstance );
+        introspectionAdviceInstance.Advice.Add( new IntrospectionAdvice( advice, result, compilation ) );
+    }
+
+    public void AddAspectResult( AspectInstanceResult result )
+    {
+        var introspectionAdviceInstance = this._introspectionFactory.GetIntrospectionAspectInstance( result.AspectInstance );
+        introspectionAdviceInstance.AspectInstanceResult = result;
+    }
 }

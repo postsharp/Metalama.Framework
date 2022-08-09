@@ -14,7 +14,7 @@ internal class Targets
             private NaturallyCloneable b;
 
 
-public global::Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Methods.Bug28810.Targets.BaseClass Clone()
+public virtual global::Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Methods.Bug28810.Targets.BaseClass Clone()
 {
     return null;
 }

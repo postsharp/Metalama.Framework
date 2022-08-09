@@ -67,6 +67,20 @@ namespace Metalama.Framework.Engine.CodeModel
             return isIterator;
         }
 
+        public static bool IsIterator( MethodDeclarationSyntax method )
+            => method switch
+            {
+                { Body: { } body } => FindYieldVisitor.Instance.VisitBlock( body ),
+                _ => false
+            };
+
+        public static bool IsIterator( AccessorDeclarationSyntax accessor )
+            => accessor switch
+            {
+                { Body: { } body } => FindYieldVisitor.Instance.VisitBlock( body ),
+                _ => false
+            };
+
         // We use the Impl suffix to resolve an ambiguity with the public API.
         public static IteratorInfo GetIteratorInfoImpl( this IMethod method )
         {

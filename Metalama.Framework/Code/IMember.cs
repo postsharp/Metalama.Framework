@@ -29,11 +29,6 @@ namespace Metalama.Framework.Code
         bool IsExplicitInterfaceImplementation { get; }
 
         /// <summary>
-        /// Gets a value indicating whether the member is implicit. Returns <c>false</c> if it is explicitly declared in code.
-        /// </summary>
-        bool IsImplicit { get; }
-
-        /// <summary>
         /// Gets the type containing the current member, or <c>null</c> if the current member is not contained
         /// within a type (which should not happen in C#).
         /// </summary>

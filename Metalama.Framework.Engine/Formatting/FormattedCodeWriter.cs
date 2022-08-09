@@ -108,18 +108,25 @@ namespace Metalama.Framework.Engine.Formatting
 
             var classifiedSpans = (await Classifier.GetClassifiedSpansAsync(
                     document,
-                    syntaxRoot.Span ))
+                    syntaxRoot.FullSpan ))
                 .OrderBy( c => c.TextSpan.Start )
                 .ThenBy( c => c.ClassificationType );
 
             foreach ( var csharpSpan in classifiedSpans )
             {
+                var classificationType = csharpSpan.ClassificationType;
+
+                if ( classificationType == "comment" && csharpSpan.TextSpan.Start == 0 )
+                {
+                    classificationType = "header";
+                }
+
                 foreach ( var existingSpan in classifiedTextSpans.GetClassifiedSpans( csharpSpan.TextSpan ) )
                 {
                     var combinedClassification =
                         existingSpan.Tags != null! && existingSpan.Tags.TryGetValue( CSharpClassTagName, out var existingClassification )
-                            ? existingClassification + ";" + csharpSpan.ClassificationType
-                            : csharpSpan.ClassificationType;
+                            ? existingClassification + ";" + classificationType
+                            : classificationType;
 
                     var intersection = csharpSpan.TextSpan.Intersection( csharpSpan.TextSpan ).AssertNotNull();
 

@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal Compilation Compilation { get; }
 
-        internal OurSyntaxGenerator SyntaxGenerator { get; }
+        internal SyntaxGeneratorWithContext SyntaxGenerator { get; }
 
         internal IServiceProvider ServiceProvider { get; }
 
@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.CodeModel
         {
             this.ServiceProvider = serviceProvider;
             this.Compilation = compilation;
-            this.SyntaxGenerator = syntaxGenerator;
+            this.SyntaxGenerator = new SyntaxGeneratorWithContext( syntaxGenerator, this );
             this.IsPartial = isPartial;
         }
 

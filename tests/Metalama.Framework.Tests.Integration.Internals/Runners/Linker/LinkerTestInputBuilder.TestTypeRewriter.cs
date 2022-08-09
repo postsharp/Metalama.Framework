@@ -6,13 +6,14 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine;
-using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -29,7 +30,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 {
     internal partial class LinkerTestInputBuilder
     {
-        private class TestTypeRewriter : CSharpSyntaxRewriter
+        private class TestTypeRewriter : SafeSyntaxRewriter
         {
             private readonly List<IObservableTransformation> _observableTransformations;
             private readonly List<IObservableTransformation> _replacedTransformations;
@@ -435,7 +436,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     case DeclarationKind.Method:
                         A.CallTo( () => ((IRefImpl<IMethod>) transformation).Target ).Returns( transformation );
 
-                        A.CallTo( () => ((IRefImpl<IMethod>) transformation).GetTarget( A<CompilationModel>.Ignored ) )
+                        A.CallTo( () => ((IRefImpl<IMethod>) transformation).GetTarget( A<CompilationModel>.Ignored, A<ReferenceResolutionOptions>.Ignored ) )
                             .Returns( (IMethod) transformation );
 
                         break;
@@ -443,20 +444,24 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     case DeclarationKind.Property:
                         A.CallTo( () => ((IRefImpl<IProperty>) transformation).Target ).Returns( transformation );
 
-                        A.CallTo( () => ((IRefImpl<IProperty>) transformation).GetTarget( A<CompilationModel>.Ignored ) )
+                        A.CallTo( () => ((IRefImpl<IProperty>) transformation).GetTarget( A<CompilationModel>.Ignored, A<ReferenceResolutionOptions>.Ignored ) )
                             .Returns( (IProperty) transformation );
 
                         break;
 
                     case DeclarationKind.Event:
                         A.CallTo( () => ((IRefImpl<IEvent>) transformation).Target ).Returns( transformation );
-                        A.CallTo( () => ((IRefImpl<IEvent>) transformation).GetTarget( A<CompilationModel>.Ignored ) ).Returns( (IEvent) transformation );
+
+                        A.CallTo( () => ((IRefImpl<IEvent>) transformation).GetTarget( A<CompilationModel>.Ignored, A<ReferenceResolutionOptions>.Ignored ) )
+                            .Returns( (IEvent) transformation );
 
                         break;
 
                     case DeclarationKind.Field:
                         A.CallTo( () => ((IRefImpl<IField>) transformation).Target ).Returns( transformation );
-                        A.CallTo( () => ((IRefImpl<IField>) transformation).GetTarget( A<CompilationModel>.Ignored ) ).Returns( (IField) transformation );
+
+                        A.CallTo( () => ((IRefImpl<IField>) transformation).GetTarget( A<CompilationModel>.Ignored, A<ReferenceResolutionOptions>.Ignored ) )
+                            .Returns( (IField) transformation );
 
                         break;
                 }
@@ -464,10 +469,11 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 A.CallTo( () => ((ISdkDeclaration) transformation).Symbol ).Returns( null );
                 A.CallTo( () => transformation.GetHashCode() ).Returns( 0 );
                 A.CallTo( () => transformation.ToString() ).Returns( "Introduced" );
-                A.CallTo( () => transformation.TargetSyntaxTree ).Returns( node.SyntaxTree );
+                A.CallTo( () => transformation.TransformedSyntaxTree ).Returns( node.SyntaxTree );
+                A.CallTo( () => ((IDeclarationImpl) transformation).PrimarySyntaxTree ).Returns( node.SyntaxTree );
 
                 var advice = this.CreateFakeAdvice( aspectLayer );
-                A.CallTo( () => transformation.Advice ).Returns( advice );
+                A.CallTo( () => transformation.ParentAdvice ).Returns( advice );
 
                 A.CallTo( () => transformation.GetIntroducedMembers( A<MemberIntroductionContext>.Ignored ) )
                     .Returns(
@@ -665,7 +671,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 A.CallTo( () => transformation.ToString() ).Returns( "Override" );
 
                 var advice = this.CreateFakeAdvice( aspectLayer );
-                A.CallTo( () => transformation.Advice ).Returns( advice );
+                A.CallTo( () => transformation.ParentAdvice ).Returns( advice );
 
                 A.CallTo( () => transformation.GetIntroducedMembers( A<MemberIntroductionContext>.Ignored ) )
                     .Returns(
@@ -841,8 +847,8 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                             fakeAspectInstance,
                             fakeAspectInstance.TemplateInstances.Values.Single(),
                             A.Fake<IDeclarationImpl>(),
-                            aspectLayer.LayerName,
-                            null
+                            A.Fake<ICompilation>(),
+                            aspectLayer.LayerName
                         } ) );
             }
         }

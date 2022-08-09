@@ -4,10 +4,9 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -22,7 +21,7 @@ namespace Metalama.Framework.Engine.Templating
         /// Performs the analysis that are not performed by the pipeline: essentially validates that run-time code does not
         /// reference compile-time-only code, and run the template compiler.
         /// </summary>
-        private class Visitor : CSharpSyntaxWalker, IDiagnosticAdder
+        private class Visitor : SafeSyntaxWalker, IDiagnosticAdder
         {
             private readonly ISymbolClassifier _classifier;
             private readonly HashSet<ISymbol> _alreadyReportedDiagnostics = new( SymbolEqualityComparer.Default );
@@ -58,13 +57,13 @@ namespace Metalama.Framework.Engine.Templating
                 this._reportCompileTimeTreeOutdatedError = reportCompileTimeTreeOutdatedError;
                 this._isDesignTime = isDesignTime;
                 this._cancellationToken = cancellationToken;
-                this._hasCompileTimeCodeFast = CompileTimeCodeDetector.HasCompileTimeCode( semanticModel.SyntaxTree.GetRoot() );
+                this._hasCompileTimeCodeFast = CompileTimeCodeFastDetector.HasCompileTimeCode( semanticModel.SyntaxTree.GetRoot() );
             }
 
             private bool IsInTemplate
                 => this._currentDeclarationTemplateType.HasValue && this._currentDeclarationTemplateType.Value != TemplateAttributeType.None;
 
-            public override void Visit( SyntaxNode? node )
+            protected override void VisitCore( SyntaxNode? node )
             {
                 bool IsTypeOfOrNameOf()
                 {
@@ -89,7 +88,7 @@ namespace Metalama.Framework.Engine.Templating
 
                 // We want children to be processed before parents, so that errors are reported on parent (declaring) symbols.
                 // This allows to reduce redundant messages.
-                base.Visit( node );
+                base.VisitCore( node );
 
                 // If the scope is null (e.g. in a using statement), we should not analyze.
                 if ( !this._currentScope.HasValue )
@@ -314,12 +313,14 @@ namespace Metalama.Framework.Engine.Templating
 
                         default:
                             {
-                                if ( scope != TemplatingScope.RunTimeOnly && !this._hasCompileTimeCodeFast )
+                                if ( scope != TemplatingScope.RunTimeOnly && !this._hasCompileTimeCodeFast
+                                                                          && !SystemTypeDetector.IsSystemType(
+                                                                              declaredSymbol as INamedTypeSymbol ?? declaredSymbol.ContainingType ) )
                                 {
                                     this.Report(
                                         TemplatingDiagnosticDescriptors.CompileTimeCodeNeedsNamespaceImport.CreateRoslynDiagnostic(
                                             declaredSymbol.GetDiagnosticLocation(),
-                                            (declaredSymbol, CompileTimeCodeDetector.Namespace) ) );
+                                            (declaredSymbol, CompileTimeCodeFastDetector.Namespace) ) );
                                 }
 
                                 break;

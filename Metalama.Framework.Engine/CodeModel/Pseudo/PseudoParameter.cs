@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         private IMethod DeclaringAccessor { get; }
 
-        public IMember DeclaringMember => this.DeclaringAccessor;
+        public IHasParameters DeclaringMember => this.DeclaringAccessor;
 
         public RefKind RefKind
             => this.DeclaringAccessor.ContainingDeclaration switch
@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
 
         public int Index { get; }
 
-        public TypedConstant DefaultValue => default;
+        public TypedConstant? DefaultValue => default;
 
         public bool IsParams => false;
 
@@ -50,6 +50,8 @@ namespace Metalama.Framework.Engine.CodeModel.Pseudo
         public override IAttributeCollection Attributes => AttributeCollection.Empty;
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Parameter;
+
+        public override bool IsImplicitlyDeclared => true;
 
         public override CompilationModel Compilation => this.DeclaringAccessor.GetCompilationModel();
 

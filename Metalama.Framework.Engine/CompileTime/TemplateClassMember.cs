@@ -3,16 +3,16 @@
 
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Collections;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
-    // TODO: a class member should not store an ISymbol because we should not store references to a Roslyn compilation.
-
     internal record TemplateClassMember(
         string Name,
+        string Key,
         TemplateClass TemplateClass,
         TemplateInfo TemplateInfo,
         SymbolId SymbolId,
@@ -20,6 +20,10 @@ namespace Metalama.Framework.Engine.CompileTime
         ImmutableArray<TemplateClassMemberParameter> TypeParameters,
         ImmutableDictionary<MethodKind, TemplateClassMember> Accessors )
     {
+        public ImmutableArray<TemplateClassMemberParameter> RunTimeParameters { get; } = Parameters.Where( p => !p.IsCompileTime ).ToImmutableArray();
+
+        public ImmutableArray<TemplateClassMemberParameter> CompileTimeParameters { get; } = Parameters.Where( p => p.IsCompileTime ).ToImmutableArray();
+
         public ImmutableDictionary<string, TemplateClassMemberParameter> IndexedParameters { get; } =
             Parameters.Concat( TypeParameters ).ToImmutableDictionary( x => x.Name, x => x );
     }

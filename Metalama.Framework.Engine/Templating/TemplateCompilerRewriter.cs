@@ -8,7 +8,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -201,9 +201,9 @@ namespace Metalama.Framework.Engine.Templating
 
         private T TransformCompileTimeCode<T>( T node )
             where T : SyntaxNode
-            => (T) this._compileTimeOnlyRewriter.Visit( node );
+            => (T) this._compileTimeOnlyRewriter.Visit( node )!;
 
-        public override SyntaxNode? Visit( SyntaxNode? node )
+        protected override SyntaxNode? VisitCore( SyntaxNode? node )
         {
             if ( node == null )
             {
@@ -237,7 +237,7 @@ namespace Metalama.Framework.Engine.Templating
             }
             else
             {
-                return base.Visit( node );
+                return base.VisitCore( node );
             }
         }
 
@@ -246,17 +246,24 @@ namespace Metalama.Framework.Engine.Templating
             // tuple can be initialize from variables and then items take names from variable name
             // but variable name is not safe and could be renamed because of target variables 
             // in this case we initialize tuple with explicit names
-            var symbol = (INamedTypeSymbol) this._syntaxTreeAnnotationMap.GetExpressionType( node )!;
+            var tupleType = (INamedTypeSymbol?) this._syntaxTreeAnnotationMap.GetExpressionType( node );
+
+            if ( tupleType == null )
+            {
+                // We may fail to get the tuple type if it has an element with the `default` keyword, i.e. `(default, "")`.
+                throw new AssertionFailedException( $"Cannot get the type of tuple '{node}'." );
+            }
+
             var transformedArguments = new ArgumentSyntax[node.Arguments.Count];
 
-            for ( var i = 0; i < symbol.TupleElements.Length; i++ )
+            for ( var i = 0; i < tupleType.TupleElements.Length; i++ )
             {
-                var tupleElement = symbol.TupleElements[i];
+                var tupleElement = tupleType.TupleElements[i];
                 ArgumentSyntax arg;
 
                 if ( !tupleElement.Name.Equals( tupleElement.CorrespondingTupleField!.Name, StringComparison.Ordinal ) )
                 {
-                    var name = symbol.TupleElements[i].Name;
+                    var name = tupleType.TupleElements[i].Name;
                     arg = node.Arguments[i].WithNameColon( NameColon( name ) );
                 }
                 else
@@ -451,11 +458,18 @@ namespace Metalama.Framework.Engine.Templating
             }
         }
 
+        protected override ExpressionSyntax TransformStatement( StatementSyntax statement )
+        {
+            // We can get here when the parent node is a run-time `if` or `foreach` and the current node a compile-time statement
+            // that is not a block. The easiest approach is to wrap the statement into a block.
+            return (ExpressionSyntax) this.BuildRunTimeBlock( Block( statement ), true );
+        }
+
         protected override ExpressionSyntax TransformExpression( ExpressionSyntax expression, ExpressionSyntax originalExpression )
             => this.CreateRunTimeExpression( expression );
 
         /// <summary>
-        /// Transforms an <see cref="ExpressionSyntax"/> that instantiates a <see cref="RunTimeTemplateExpression"/>
+        /// Transforms an <see cref="ExpressionSyntax"/> that instantiates a <see cref="TypedExpressionSyntax"/>
         /// that represents the input.
         /// </summary>
         private ExpressionSyntax CreateRunTimeExpression( ExpressionSyntax expression )
@@ -497,7 +511,8 @@ namespace Metalama.Framework.Engine.Templating
                             return InvocationExpression( this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.TypeOf) ) )
                                 .AddArgumentListArguments(
                                     Argument( SyntaxFactoryEx.LiteralExpression( typeOfAnnotation.Data! ) ),
-                                    Argument( this.CreateTypeParameterSubstitutionDictionary( nameof(TemplateTypeArgument.Syntax) ) ) );
+                                    Argument(
+                                        this.CreateTypeParameterSubstitutionDictionary( nameof(TemplateTypeArgument.SyntaxWithoutNullabilityAnnotations) ) ) );
                         }
 
                         break;
@@ -781,18 +796,37 @@ namespace Metalama.Framework.Engine.Templating
 
             if ( node.IsNameOf() )
             {
-                // nameof is always transformed into a literal.
-                var name = node.GetNameOfValue();
+                // nameof is always transformed into a literal except when it is a template parameter.
+
+                var expression = node.ArgumentList.Arguments[0].Expression;
+                var symbol = this._syntaxTreeAnnotationMap.GetSymbol( expression );
+
+                if ( symbol is IParameterSymbol parameter && this._templateMemberClassifier.IsRunTimeTemplateParameter( parameter ) )
+                {
+                    return this.MetaSyntaxFactory.InvocationExpression(
+                        this.MetaSyntaxFactory.IdentifierName(
+                            this.MetaSyntaxFactory.Identifier(
+                                SyntaxFactoryEx.Default,
+                                this.MetaSyntaxFactory.Kind( SyntaxKind.NameOfKeyword ),
+                                SyntaxFactoryEx.LiteralExpression( "nameof" ),
+                                SyntaxFactoryEx.LiteralExpression( "nameof" ),
+                                SyntaxFactoryEx.Default ) ),
+                        this.MetaSyntaxFactory.ArgumentList(
+                            this.MetaSyntaxFactory.SingletonSeparatedList<ArgumentSyntax>(
+                                this.MetaSyntaxFactory.Argument( SyntaxFactoryEx.Default, SyntaxFactoryEx.Default, expression ) ) ) );
+                }
+
+                var symbolName = symbol?.Name ?? "<error>";
 
                 if ( transformationKind == TransformationKind.Transform )
                 {
                     return this.MetaSyntaxFactory.LiteralExpression(
                         this.MetaSyntaxFactory.Kind( SyntaxKind.StringLiteralExpression ),
-                        this.MetaSyntaxFactory.Literal( name ) );
+                        this.MetaSyntaxFactory.Literal( symbolName ) );
                 }
                 else
                 {
-                    return SyntaxFactoryEx.LiteralExpression( name );
+                    return SyntaxFactoryEx.LiteralExpression( symbolName );
                 }
             }
             else if ( this._compileTimeOnlyRewriter.TryRewriteProceedInvocation( node, out var proceedNode ) )
@@ -853,7 +887,9 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     case MetaMemberKind.InsertComment:
                         {
-                            var arguments = node.ArgumentList.Arguments.Insert(
+                            var transformedArgumentList = (ArgumentListSyntax) this.Visit( node.ArgumentList )!;
+
+                            var arguments = transformedArgumentList.Arguments.Insert(
                                 0,
                                 Argument( IdentifierName( this._currentMetaContext!.StatementListVariableName ) ) );
 
@@ -867,7 +903,7 @@ namespace Metalama.Framework.Engine.Templating
 
                             var addCommentsStatement = this.DeepIndent(
                                 addCommentsMetaStatement.WithLeadingTrivia(
-                                    TriviaList( Comment( "// " + node.Parent!.WithoutTrivia().ToFullString() ) )
+                                    TriviaList( Comment( "// " + node.Parent!.WithoutTrivia().ToFullString() ), ElasticCarriageReturnLineFeed )
                                         .AddRange( addCommentsMetaStatement.GetLeadingTrivia() ) ) );
 
                             this._currentMetaContext.Statements.Add( addCommentsStatement );
@@ -890,7 +926,7 @@ namespace Metalama.Framework.Engine.Templating
 
                             var addStatementStatement = this.DeepIndent(
                                 addStatementMetaStatement.WithLeadingTrivia(
-                                    TriviaList( Comment( "// " + node.Parent!.WithoutTrivia().ToFullString() ) )
+                                    TriviaList( Comment( "// " + node.Parent!.WithoutTrivia().ToFullString() ), ElasticCarriageReturnLineFeed )
                                         .AddRange( addStatementMetaStatement.GetLeadingTrivia() ) ) );
 
                             this._currentMetaContext.Statements.Add( addStatementStatement );
@@ -955,7 +991,10 @@ namespace Metalama.Framework.Engine.Templating
 
                 if ( !isCompileTime )
                 {
-                    templateParameter = templateParameter.WithType( SyntaxFactoryEx.ExpressionSyntaxType );
+                    templateParameter =
+                        templateParameter
+                            .WithType( SyntaxFactoryEx.ExpressionSyntaxType )
+                            .WithModifiers( TokenList() );
                 }
 
                 templateParameters.Add( templateParameter );

@@ -5,6 +5,7 @@ using K4os.Hash.xxHash;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
@@ -304,7 +305,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             else
             {
                 var newSyntaxRoot = newSyntaxTree.GetRoot();
-                newHasCompileTimeCode = CompileTimeCodeDetector.HasCompileTimeCode( newSyntaxRoot );
+                newHasCompileTimeCode = CompileTimeCodeFastDetector.HasCompileTimeCode( newSyntaxRoot );
                 var hhx64 = new XXH64();
                 BaseCodeHasher hasher = newHasCompileTimeCode ? new CompileTimeCodeHasher( hhx64 ) : new RunTimeCodeHasher( hhx64 );
                 hasher.Visit( newSyntaxRoot );
@@ -317,7 +318,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         private static void AnalyzeSyntaxTree( SyntaxTree syntaxTree, out bool hasCompileTimeCode, out ulong hash )
         {
             var newSyntaxRoot = syntaxTree.GetRoot();
-            hasCompileTimeCode = CompileTimeCodeDetector.HasCompileTimeCode( newSyntaxRoot );
+            hasCompileTimeCode = CompileTimeCodeFastDetector.HasCompileTimeCode( newSyntaxRoot );
             var hhx64 = new XXH64();
             BaseCodeHasher hasher = hasCompileTimeCode ? new CompileTimeCodeHasher( hhx64 ) : new RunTimeCodeHasher( hhx64 );
             hasher.Visit( newSyntaxRoot );

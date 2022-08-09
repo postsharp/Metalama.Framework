@@ -60,7 +60,11 @@ namespace Metalama.Framework.Aspects
         protected bool UseAsyncTemplateForAnyAwaitable { get; init; }
 #pragma warning restore SA1623
 
-        public override void BuildEligibility( IEligibilityBuilder<IMethod> builder ) => builder.ExceptForInheritance().MustBeNonAbstract();
+        public override void BuildEligibility( IEligibilityBuilder<IMethod> builder )
+        {
+            builder.ExceptForInheritance().MustBeNonAbstract();
+            builder.MustBeExplicitlyDeclared();
+        }
 
         [Template]
         [Abstract]

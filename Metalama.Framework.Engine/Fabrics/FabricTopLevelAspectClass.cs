@@ -7,6 +7,7 @@ using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.AspectWeavers;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Fabrics;
 using Microsoft.CodeAnalysis;
@@ -20,7 +21,7 @@ namespace Metalama.Framework.Engine.Fabrics
     /// class. The real class is <see cref="FabricAggregateAspectClass"/>, which is instantiated in the middle of the pipeline,
     /// while <see cref="FabricTopLevelAspectClass"/> must exist while the pipeline is being instantiated.
     /// </summary>
-    internal class FabricTopLevelAspectClass : IBoundAspectClass, IAspectClassImpl
+    internal class FabricTopLevelAspectClass : IBoundAspectClass
     {
         public const string FabricAspectName = "<Fabric>";
 
@@ -42,7 +43,7 @@ namespace Metalama.Framework.Engine.Fabrics
 
         public Type Type => typeof(Fabric);
 
-        public FabricTopLevelAspectClass( IServiceProvider serviceProvider, Compilation compilation, CompileTimeProject project )
+        public FabricTopLevelAspectClass( IServiceProvider serviceProvider, CompilationModel compilation, CompileTimeProject project )
         {
             this.Layer = new AspectLayer( this, null );
             this.AspectDriver = new AspectDriver( serviceProvider, this, compilation );
@@ -58,6 +59,8 @@ namespace Metalama.Framework.Engine.Fabrics
         ImmutableArray<TemplateClass> IAspectClassImpl.TemplateClasses => ImmutableArray<TemplateClass>.Empty;
 
         SyntaxAnnotation IAspectClassImpl.GeneratedCodeAnnotation => throw new NotSupportedException();
+
+        public ImmutableArray<AspectLayer> Layers { get; } = ImmutableArray.Create( new AspectLayer( "<Fabric>", null ) );
 
         public EligibleScenarios GetEligibility( IDeclaration obj ) => EligibleScenarios.Aspect;
 

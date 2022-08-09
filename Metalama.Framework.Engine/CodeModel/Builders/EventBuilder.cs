@@ -5,7 +5,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Code.Invokers;
-using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Transformations;
@@ -22,34 +22,32 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal sealed class EventBuilder : MemberBuilder, IEventBuilder, IEventImpl
     {
-        private readonly bool _isEventField;
+        private readonly IObjectReader _initializerTags;
+
+        public bool IsEventField { get; }
 
         public EventBuilder(
             Advice parentAdvice,
             INamedType targetType,
             string name,
             bool isEventField,
-            IObjectReader tags )
-            : base( parentAdvice, targetType, tags )
+            IObjectReader initializerTags )
+            : base( parentAdvice, targetType, name )
         {
-            this.Name = name;
-            this._isEventField = isEventField;
+            this._initializerTags = initializerTags;
+            this.IsEventField = isEventField;
             this.Type = (INamedType) targetType.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(EventHandler) );
         }
-
-        public override string Name { get; set; }
-
-        public override bool IsImplicit => false;
 
         public INamedType Type { get; set; }
 
         public IMethod Signature => this.Type.Methods.OfName( "Invoke" ).Single();
 
         [Memo]
-        public IMethodBuilder AddMethod => new AccessorBuilder( this, MethodKind.EventAdd, this._isEventField );
+        public IMethodBuilder AddMethod => new AccessorBuilder( this, MethodKind.EventAdd, this.IsEventField );
 
         [Memo]
-        public IMethodBuilder RemoveMethod => new AccessorBuilder( this, MethodKind.EventRemove, this._isEventField );
+        public IMethodBuilder RemoveMethod => new AccessorBuilder( this, MethodKind.EventRemove, this.IsEventField );
 
         public IMethodBuilder? RaiseMethod => null;
 
@@ -76,7 +74,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IExpression? InitializerExpression { get; set; }
 
-        public TemplateMember<IEvent> InitializerTemplate { get; set; }
+        public TemplateMember<IEvent>? InitializerTemplate { get; set; }
 
         public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
         {
@@ -87,15 +85,16 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 this.Type,
                 this.InitializerExpression,
                 this.InitializerTemplate,
+                this._initializerTags,
                 out var initializerExpression,
                 out var initializerMethod );
 
-            Invariant.Assert( !(!this._isEventField && initializerExpression != null) );
+            Invariant.Assert( !(!this.IsEventField && initializerExpression != null) );
 
             MemberDeclarationSyntax @event =
-                this._isEventField && this.ExplicitInterfaceImplementations.Count == 0
+                this.IsEventField && this.ExplicitInterfaceImplementations.Count == 0
                     ? EventFieldDeclaration(
-                        this.GetAttributeLists( context.SyntaxGenerationContext ),
+                        this.GetAttributeLists( context ),
                         this.GetSyntaxModifierList(),
                         VariableDeclaration(
                             syntaxGenerator.Type( this.Type.GetSymbol() ),
@@ -110,17 +109,17 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                                             : null ) // TODO: Initializer.
                                 } ) ) )
                     : EventDeclaration(
-                        this.GetAttributeLists( context.SyntaxGenerationContext ),
+                        this.GetAttributeLists( context ),
                         this.GetSyntaxModifierList(),
                         syntaxGenerator.Type( this.Type.GetSymbol() ),
                         this.ExplicitInterfaceImplementations.Count > 0
                             ? ExplicitInterfaceSpecifier(
                                 (NameSyntax) syntaxGenerator.Type( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
                             : null,
-                        Identifier( this.Name ),
+                        this.GetCleanName(),
                         GenerateAccessorList() );
 
-            if ( this._isEventField && this.ExplicitInterfaceImplementations.Count > 0 )
+            if ( this.IsEventField && this.ExplicitInterfaceImplementations.Count > 0 )
             {
                 // Add annotation to the explicit annotation that the linker should treat this an event field.
                 @event = @event.WithLinkerDeclarationFlags( LinkerDeclarationFlags.EventField );
@@ -202,5 +201,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         }
 
         IType IHasType.Type => this.Type;
+
+        public override void Freeze()
+        {
+            base.Freeze();
+
+            ((DeclarationBuilder?) this.AddMethod)?.Freeze();
+            ((DeclarationBuilder?) this.RemoveMethod)?.Freeze();
+        }
     }
 }

@@ -5,7 +5,6 @@ using Metalama.Framework.Code.SyntaxBuilders;
 
 namespace Metalama.Framework.Tests.Integration.Aspects.Misc.Bug29350
 {
-
     public class LogAttribute : OverrideMethodAspect
     {
         public override dynamic? OverrideMethod()
@@ -86,6 +85,7 @@ namespace Metalama.Framework.Tests.Integration.Aspects.Misc.Bug29350
         }
     }
 
+    // <target>
     internal class Program
     {
         private static void Main()

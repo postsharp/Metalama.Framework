@@ -2,9 +2,10 @@ internal class TargetClass
 {
 
 
-    private global::System.Int32 _readOnlyField;
+    private readonly global::System.Int32 _readOnlyField;
 
 
+    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.ReadOnly.OverrideAttribute]
     public global::System.Int32 ReadOnlyField
     {
         get
@@ -12,7 +13,7 @@ internal class TargetClass
             global::System.Console.WriteLine("This is the overridden getter.");
             return this._readOnlyField;
         }
-        private set
+        private init
         {
             global::System.Console.WriteLine($"This is the overridden setter.");
             this._readOnlyField = value;
@@ -22,6 +23,7 @@ internal class TargetClass
     private static global::System.Int32 _staticReadOnlyField;
 
 
+    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.ReadOnly.OverrideAttribute]
     public static global::System.Int32 StaticReadOnlyField
     {
         get
@@ -36,9 +38,10 @@ internal class TargetClass
         }
     }
 
-    private global::System.Int32 _initializerReadOnlyField = 42;
+    private readonly global::System.Int32 _initializerReadOnlyField = 42;
 
 
+    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.ReadOnly.OverrideAttribute]
     public global::System.Int32 InitializerReadOnlyField
     {
         get
@@ -46,7 +49,7 @@ internal class TargetClass
             global::System.Console.WriteLine("This is the overridden getter.");
             return this._initializerReadOnlyField;
         }
-        private set
+        private init
         {
             global::System.Console.WriteLine($"This is the overridden setter.");
             this._initializerReadOnlyField = value;
@@ -56,6 +59,7 @@ internal class TargetClass
     private static global::System.Int32 _staticInitializerReadOnlyField = 42;
 
 
+    [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.ReadOnly.OverrideAttribute]
     public static global::System.Int32 StaticInitializerReadOnlyField
     {
         get
@@ -79,5 +83,15 @@ internal class TargetClass
     {
         this.ReadOnlyField = 42;
         this.InitializerReadOnlyField = 27;
+    }
+
+    public int __Init
+    {
+        init
+        {
+            // Overridden read-only fields should be accessible from init accessors.
+            this.ReadOnlyField = 13;
+            this.InitializerReadOnlyField = 13;
+        }
     }
 }

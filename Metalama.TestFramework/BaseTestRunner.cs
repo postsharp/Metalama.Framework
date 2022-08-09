@@ -134,6 +134,16 @@ namespace Metalama.TestFramework
 
                 var parseOptions = CSharpParseOptions.Default.WithPreprocessorSymbols( preprocessorSymbols );
 
+                if ( testInput.Options.LanguageVersion != null )
+                {
+                    parseOptions = parseOptions.WithLanguageVersion( testInput.Options.LanguageVersion.Value );
+                }
+
+                if ( testInput.Options.LanguageFeatures.Count > 0 )
+                {
+                    parseOptions = parseOptions.WithFeatures( testInput.Options.LanguageFeatures );
+                }
+
                 var emptyProject = this.CreateProject( testInput.Options ).WithParseOptions( parseOptions );
                 var project = emptyProject;
 
@@ -142,7 +152,11 @@ namespace Metalama.TestFramework
                     // Note that we don't pass the full path to the Document because it causes call stacks of exceptions to have full paths,
                     // which is more difficult to test.
                     var parsedSyntaxTree = CSharpSyntaxTree.ParseText( sourceCode, parseOptions, fileName, Encoding.UTF8 );
-                    var prunedSyntaxRoot = new InactiveCodeRemover().Visit( await parsedSyntaxTree.GetRootAsync() );
+
+                    var prunedSyntaxRoot =
+                        testInput.Options.KeepDisabledCode != true
+                        ? new InactiveCodeRemover().Visit( await parsedSyntaxTree.GetRootAsync() )!
+                        : await parsedSyntaxTree.GetRootAsync();
 
                     if ( !acceptFileWithoutMember && prunedSyntaxRoot is CompilationUnitSyntax { Members: { Count: 0 } } )
                     {
@@ -498,7 +512,11 @@ namespace Metalama.TestFramework
             var compilation = TestCompilationFactory.CreateEmptyCSharpCompilation(
                 null,
                 this.References.MetadataReferences,
-                OutputKind.DynamicallyLinkedLibrary,
+                options.OutputAssemblyType switch
+                {
+                    "Exe" => OutputKind.ConsoleApplication,
+                    _ => OutputKind.DynamicallyLinkedLibrary
+                },
                 nullableContextOptions: options.NullabilityDisabled == true ? NullableContextOptions.Disable : NullableContextOptions.Enable );
 
             var projectName = "test";

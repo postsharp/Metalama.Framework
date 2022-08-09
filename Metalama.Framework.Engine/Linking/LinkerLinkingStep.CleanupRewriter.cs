@@ -2,8 +2,8 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal partial class LinkerLinkingStep
     {
-        private class CleanupRewriter : CSharpSyntaxRewriter
+        private class CleanupRewriter : SafeSyntaxRewriter
         {
             private readonly IProjectOptions? _projectOptions;
 
@@ -28,7 +28,28 @@ namespace Metalama.Framework.Engine.Linking
                         .WithBody( this.RewriteBodyBlock( node.Body ) );
             }
 
+            public override SyntaxNode? VisitOperatorDeclaration( OperatorDeclarationSyntax node )
+            {
+                return
+                    node
+                        .WithBody( this.RewriteBodyBlock( node.Body ) );
+            }
+
+            public override SyntaxNode? VisitConversionOperatorDeclaration( ConversionOperatorDeclarationSyntax node )
+            {
+                return
+                    node
+                        .WithBody( this.RewriteBodyBlock( node.Body ) );
+            }
+
             public override SyntaxNode? VisitConstructorDeclaration( ConstructorDeclarationSyntax node )
+            {
+                return
+                    node
+                        .WithBody( this.RewriteBodyBlock( node.Body ) );
+            }
+
+            public override SyntaxNode? VisitDestructorDeclaration( DestructorDeclarationSyntax node )
             {
                 return
                     node

@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal class BuiltField : BuiltMember, IFieldImpl, IMemberRef<IField>
     {
-        public BuiltField( FieldBuilder builder, CompilationModel compilation ) : base( compilation )
+        public BuiltField( FieldBuilder builder, CompilationModel compilation ) : base( compilation, builder )
         {
             this.FieldBuilder = builder;
         }
@@ -45,9 +45,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public FieldInfo ToFieldInfo() => this.FieldBuilder.ToFieldInfo();
 
-        string? IRef<IField>.ToSerializableId() => null;
+        DeclarationSerializableId IRef<IField>.ToSerializableId() => throw new NotImplementedException();
 
-        IField IRef<IField>.GetTarget( ICompilation compilation ) => (IField) this.GetForCompilation( compilation );
+        IField IRef<IField>.GetTarget( ICompilation compilation, ReferenceResolutionOptions options )
+            => (IField) this.GetForCompilation( compilation, options );
 
         ISymbol? ISdkRef<IField>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => throw new NotSupportedException();
 

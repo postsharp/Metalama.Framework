@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal class BuiltEvent : BuiltMember, IEventImpl, IMemberRef<IEvent>
     {
-        public BuiltEvent( EventBuilder builder, CompilationModel compilation ) : base( compilation )
+        public BuiltEvent( EventBuilder builder, CompilationModel compilation ) : base( compilation, builder )
         {
             this.EventBuilder = builder;
         }
@@ -51,9 +51,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public EventInfo ToEventInfo() => this.EventBuilder.ToEventInfo();
 
-        string? IRef<IEvent>.ToSerializableId() => null;
+        DeclarationSerializableId IRef<IEvent>.ToSerializableId() => throw new NotImplementedException();
 
-        IEvent IRef<IEvent>.GetTarget( ICompilation compilation ) => (IEvent) this.GetForCompilation( compilation );
+        IEvent IRef<IEvent>.GetTarget( ICompilation compilation, ReferenceResolutionOptions options )
+            => (IEvent) this.GetForCompilation( compilation, options );
 
         ISymbol? ISdkRef<IEvent>.GetSymbol( Compilation compilation, bool ignoreAssemblyKey ) => throw new NotSupportedException();
 

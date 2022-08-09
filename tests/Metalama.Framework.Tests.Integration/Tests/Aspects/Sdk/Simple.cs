@@ -2,6 +2,7 @@ using System;
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.AspectWeavers;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -19,7 +20,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Sdk.Simple
             context.RewriteAspectTargets( new Rewriter() );
         }
 
-        private class Rewriter : CSharpSyntaxRewriter
+        private class Rewriter : SafeSyntaxRewriter
         {
             public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
             {

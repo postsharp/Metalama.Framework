@@ -22,7 +22,7 @@ internal class SyntaxGenerationContextFactory : IService
         this.NullOblivious = SyntaxGenerationContext.Create( serviceProvider, compilation, isNullOblivious: true );
     }
 
-    public SyntaxGenerationContext Get( SyntaxNode node )
+    public SyntaxGenerationContext GetSyntaxGenerationContext( SyntaxNode node )
     {
         var semanticModel = this.Compilation.GetSemanticModel( node.SyntaxTree );
         var nullableContext = semanticModel.GetNullableContext( node.SpanStart );

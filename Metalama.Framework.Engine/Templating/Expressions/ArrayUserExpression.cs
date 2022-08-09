@@ -22,9 +22,9 @@ namespace Metalama.Framework.Engine.Templating.Expressions
             this.Type = this._itemType.ConstructArrayType();
         }
 
-        public override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
+        protected override ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext )
         {
-            var items = this._arrayBuilder.Items.Select( i => RunTimeTemplateExpression.FromValue( i, this.Type.Compilation, syntaxGenerationContext ).Syntax )
+            var items = this._arrayBuilder.Items.Select( i => TypedExpressionSyntax.FromValue( i, this.Type.Compilation, syntaxGenerationContext ).Syntax )
                 .ToArray();
 
             var generator = syntaxGenerationContext.SyntaxGenerator;

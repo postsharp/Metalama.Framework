@@ -38,7 +38,7 @@ public static class MethodCollectionExtensions
 
         static (IType? Type, RefKind? RefKind) GetParameter( (IReadOnlyList<Type?>? ArgumentTypes, ICompilationInternal Compilation) context, int index )
             => context.ArgumentTypes != null && context.ArgumentTypes[index] != null
-                ? (context.Compilation.TypeFactory.GetTypeByReflectionType( context.ArgumentTypes[index]! ), null)
+                ? (context.Compilation.Factory.GetTypeByReflectionType( context.ArgumentTypes[index]! ), null)
                 : (null, null);
     }
 
@@ -124,7 +124,7 @@ public static class MethodCollectionExtensions
     }
 
     /// <summary>
-    /// Gets the list of methods of a given <see cref="MethodKind"/> (such as <see cref="MethodKind.ConversionOperator"/> or <see cref="MethodKind.Default"/>.
+    /// Gets the list of methods of a given <see cref="MethodKind"/> (such as <see cref="MethodKind.Operator"/> or <see cref="MethodKind.Default"/>.
     /// </summary>
     public static IEnumerable<IMethod> OfKind( this IMethodCollection methods, MethodKind kind ) => methods.Where( m => m.MethodKind == kind );
 }

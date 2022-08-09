@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Backstage.Diagnostics;
+using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Concurrent;
@@ -21,12 +23,14 @@ namespace Metalama.Framework.Engine.CompileTime
         private static int _nextDomainId;
         private readonly ConcurrentDictionary<AssemblyIdentity, Assembly> _assemblyCache = new();
         private readonly int _domainId = Interlocked.Increment( ref _nextDomainId );
+        private readonly ILogger _logger;
 
         private readonly ConcurrentDictionary<string, (Assembly Assembly, AssemblyIdentity Identity)> _assembliesByName = new();
 
         public CompileTimeDomain()
         {
             AppDomain.CurrentDomain.AssemblyResolve += this.OnAssemblyResolve;
+            this._logger = Logger.Domain;
         }
 
         private Assembly? OnAssemblyResolve( object sender, ResolveEventArgs args )
@@ -55,7 +59,14 @@ namespace Metalama.Framework.Engine.CompileTime
         /// </summary>
         internal Assembly GetOrLoadAssembly( AssemblyIdentity compileTimeIdentity, string path )
         {
-            var assembly = this._assemblyCache.GetOrAdd( compileTimeIdentity, _ => this.LoadAssembly( path ) );
+            var assembly = this._assemblyCache.GetOrAdd(
+                compileTimeIdentity,
+                _ =>
+                {
+                    this._logger.Trace?.Log( $"Loading assembly '{path}'." );
+
+                    return this.LoadAssembly( path );
+                } );
 
             // CompileTimeDomain is used only for compile-time assemblies, which always have a unique name, so we can have safely
             // index assemblies by name only.

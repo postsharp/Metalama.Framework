@@ -44,7 +44,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = testContext.Serialize( CompileTimeType.Create( allProperties.Single().Type ) )
                 .ToString();
 
-            TestExpression<Type>( code, serialized, info => Assert.Equal( expectedType, info ) );
+            this.TestExpression<Type>( code, serialized, info => Assert.Equal( expectedType, info ) );
 
             this.AssertEqual( expected, serialized );
         }

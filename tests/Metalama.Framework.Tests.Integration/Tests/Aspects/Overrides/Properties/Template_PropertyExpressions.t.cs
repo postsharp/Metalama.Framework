@@ -62,7 +62,7 @@ public class Target
             return default;
 
         }
-        private set
+        private init
         {
             global::System.Console.WriteLine("Overridden");
 

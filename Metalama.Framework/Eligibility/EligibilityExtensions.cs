@@ -21,11 +21,11 @@ namespace Metalama.Framework.Eligibility
         /// Gets an <see cref="IEligibilityBuilder"/> for the declaring type of the member validated by the current <see cref="IEligibilityBuilder"/>.
         /// </summary>
         public static IEligibilityBuilder<INamedType> DeclaringType<T>( this IEligibilityBuilder<T> eligibilityBuilder )
-            where T : IMember
+            where T : IMemberOrNamedType
         {
             return new ChildEligibilityBuilder<T, INamedType>(
                 eligibilityBuilder,
-                declaration => declaration.DeclaringType,
+                declaration => declaration as INamedType ?? declaration.DeclaringType!,
                 declarationDescription => $"the declaring type '{declarationDescription.Object.DeclaringType}'" );
         }
 
@@ -83,6 +83,14 @@ namespace Metalama.Framework.Eligibility
                 _ => $"" );
         }
 
+        public static IEligibilityBuilder<INamedType> DeclaringType( this IEligibilityBuilder<IMember> eligibilityBuilder )
+            => new ChildEligibilityBuilder<IMember, INamedType>(
+                eligibilityBuilder,
+                d => d.DeclaringType,
+                d => $"{d.Object.DeclaringType}",
+                _ => true,
+                _ => $"" );
+
         /// <summary>
         /// Gets an <see cref="IEligibilityBuilder"/> for the same declaration as the current <see cref="IEligibilityBuilder"/>
         /// but that is applicable only to specified <see cref="EligibleScenarios"/>.
@@ -128,6 +136,12 @@ namespace Metalama.Framework.Eligibility
             where T : class
         {
             eligibilityBuilder.Aggregate( BooleanCombinationOperator.And, requirements );
+        }
+
+        public static IEligibilityBuilder<T> If<T>( this IEligibilityBuilder<T> eligibilityBuilder, Predicate<T> condition )
+            where T : class
+        {
+            return new ConditionalEligibilityBuilder<T>( eligibilityBuilder, condition );
         }
 
         /// <summary>
@@ -238,6 +252,26 @@ namespace Metalama.Framework.Eligibility
             eligibilityBuilder.MustSatisfy(
                 p => p.RefKind == RefKind.Ref,
                 member => $"{member} must be a 'ref' parameter" );
+        }
+
+        /// <summary>
+        /// Requires the parameter not to be <c>void</c>.
+        /// </summary>
+        public static void MustNotBeVoid( this IEligibilityBuilder<IParameter> eligibilityBuilder )
+        {
+            eligibilityBuilder.MustSatisfy(
+                p => !p.Type.Is( SpecialType.Void ),
+                member => $"{member} must not have type 'void'" );
+        }
+
+        /// <summary>
+        /// Requires the declaration to be explicitly declared in source code.
+        /// </summary>
+        public static void MustBeExplicitlyDeclared( this IEligibilityBuilder<IDeclaration> eligibilityBuilder )
+        {
+            eligibilityBuilder.MustSatisfy(
+                m => !m.IsImplicitlyDeclared,
+                m => $"{m} must be explicitly declared" );
         }
 
         private static string GetInterfaceName<T>() => GetInterfaceName( typeof(T) );

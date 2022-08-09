@@ -6,7 +6,8 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Comparers;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -88,7 +89,7 @@ namespace Metalama.Framework.Engine.Linking
                 return Array.Empty<LinkerIntroducedMember>();
             }
 
-            var memberDeclaration = GetContainingMemberDeclaration( declaringSyntax );
+            var memberDeclaration = GetMemberDeclaration( declaringSyntax );
 
             var annotation = memberDeclaration.GetAnnotations( IntroducedNodeIdAnnotationId ).SingleOrDefault();
 
@@ -126,12 +127,13 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private static MemberDeclarationSyntax GetContainingMemberDeclaration( SyntaxNode declaringSyntax )
+        private static SyntaxNode GetMemberDeclaration( SyntaxNode declaringSyntax )
         {
             return declaringSyntax switch
             {
                 VariableDeclaratorSyntax { Parent: { Parent: MemberDeclarationSyntax memberDeclaration } } => memberDeclaration,
                 MemberDeclarationSyntax memberDeclaration => memberDeclaration,
+                ParameterSyntax { Parent: { Parent: RecordDeclarationSyntax } } => declaringSyntax,
                 _ => throw new AssertionFailedException()
             };
         }
@@ -164,7 +166,8 @@ namespace Metalama.Framework.Engine.Linking
             ISymbol? GetFromBuilder( IDeclarationBuilder builder )
             {
                 var introducedBuilder = this._builderLookup[builder];
-                var intermediateSyntaxTree = this._introducedTreeMap[((ISyntaxTreeTransformation) builder).TargetSyntaxTree];
+                var sourceSyntaxTree = ((IIntroduceMemberTransformation) builder).TransformedSyntaxTree.AssertNotNull();
+                var intermediateSyntaxTree = this._introducedTreeMap[sourceSyntaxTree];
                 var intermediateNode = intermediateSyntaxTree.GetRoot().GetCurrentNode( introducedBuilder.Syntax );
                 var intermediateSemanticModel = this._intermediateCompilation.GetSemanticModel( intermediateSyntaxTree );
 
@@ -226,7 +229,7 @@ namespace Metalama.Framework.Engine.Linking
         /// <returns></returns>
         public ISymbol GetSymbolForIntroducedMember( LinkerIntroducedMember introducedMember )
         {
-            var intermediateSyntaxTree = this._introducedTreeMap[introducedMember.Introduction.TargetSyntaxTree];
+            var intermediateSyntaxTree = this._introducedTreeMap[introducedMember.Introduction.TransformedSyntaxTree];
             var intermediateSyntax = intermediateSyntaxTree.GetRoot().GetCurrentNode( introducedMember.Syntax ).AssertNotNull();
 
             SyntaxNode symbolSyntax = intermediateSyntax switch

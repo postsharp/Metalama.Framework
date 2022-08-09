@@ -18,7 +18,7 @@ namespace Metalama.Framework.GenerateMetaSyntaxRewriter
                 return 1;
             }
 
-            var versionNames = new[] { "4.0.1", "4.1.0", "4.2.0" };
+            var versionNames = new[] { "4.0.1" };
             var baseDirectory = args[0];
 
             var syntaxDocuments = new SyntaxDocument[versionNames.Length];

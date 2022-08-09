@@ -3,10 +3,9 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
@@ -53,14 +52,14 @@ namespace Metalama.Framework.Engine.Transformations
                         Identifier(
                             context.IntroductionNameProvider.GetOverrideName(
                                 this.OverriddenDeclaration.DeclaringType,
-                                this.Advice.AspectLayerId,
+                                this.ParentAdvice.AspectLayerId,
                                 this.OverriddenDeclaration ) ),
                         context.SyntaxGenerator.TypeParameterList( this.OverriddenDeclaration ),
                         context.SyntaxGenerator.ParameterList( this.OverriddenDeclaration ),
                         context.SyntaxGenerator.ConstraintClauses( this.OverriddenDeclaration ),
                         body,
                         null ),
-                    this.Advice.AspectLayerId,
+                    this.ParentAdvice.AspectLayerId,
                     IntroducedMemberSemantic.Override,
                     this.OverriddenDeclaration )
             };
@@ -84,7 +83,7 @@ namespace Metalama.Framework.Engine.Transformations
                             IdentifierName( this.OverriddenDeclaration.Name ) );
 
                 return expression
-                    .WithAspectReferenceAnnotation( this.Advice.AspectLayerId, AspectReferenceOrder.Base );
+                    .WithAspectReferenceAnnotation( this.ParentAdvice.AspectLayerId, AspectReferenceOrder.Base );
             }
         }
     }

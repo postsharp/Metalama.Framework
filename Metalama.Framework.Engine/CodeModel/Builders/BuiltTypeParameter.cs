@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal class BuiltTypeParameter : BuiltDeclaration, ITypeParameter
     {
-        public BuiltTypeParameter( TypeParameterBuilder builder, CompilationModel compilation ) : base( compilation )
+        public BuiltTypeParameter( TypeParameterBuilder builder, CompilationModel compilation ) : base( compilation, builder )
         {
             this.TypeParameterBuilder = builder;
         }
@@ -27,6 +27,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public bool? IsReferenceType => this.TypeParameterBuilder.IsReferenceType;
 
         public bool? IsNullable => this.TypeParameterBuilder.IsNullable;
+
+        bool IType.Equals( SpecialType specialType ) => false;
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 

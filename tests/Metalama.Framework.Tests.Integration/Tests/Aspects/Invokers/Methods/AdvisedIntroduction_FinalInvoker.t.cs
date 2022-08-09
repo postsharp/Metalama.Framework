@@ -1,1 +1,16 @@
-// TODO: Replace this file with the correct transformed code. See the test output for the actual transformed code.
+[TestIntroduction]
+[Test]
+internal class TargetClass
+{
+
+    public global::System.Int32 Method(global::System.Int32 x)
+    {
+        return this.Method(x);
+    }
+
+    public void VoidMethod()
+    {
+        this.VoidMethod();
+        return;
+    }
+}

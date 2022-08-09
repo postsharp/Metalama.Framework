@@ -1,8 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.Linking
     internal partial class LinkerLinkingStep
     {
         // this rewriter is temporary until we properly use results of Control Flow Analysis while inlining.
-        private class RemoveTrivialLabelRewriter : CSharpSyntaxRewriter
+        private class RemoveTrivialLabelRewriter : SafeSyntaxRewriter
         {
             private readonly IReadOnlyDictionary<string, int> _observedLabelCounter;
 

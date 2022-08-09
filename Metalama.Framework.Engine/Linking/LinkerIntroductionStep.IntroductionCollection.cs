@@ -4,7 +4,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             private readonly List<LinkerIntroducedMember> _introducedMembers;
             private readonly Dictionary<InsertPosition, List<LinkerIntroducedMember>> _introducedMembersByInsertPosition;
-            private readonly Dictionary<BaseTypeDeclarationSyntax, List<BaseTypeSyntax>> _introducedInterfacesByTargetTypeDecl;
+            private readonly Dictionary<BaseTypeDeclarationSyntax, List<BaseTypeSyntax>> _introducedInterfacesByTargetTypeDeclaration;
             private readonly HashSet<VariableDeclaratorSyntax> _removedVariableDeclaratorSyntax;
             private readonly HashSet<PropertyDeclarationSyntax> _autoPropertyWithSynthesizedSetterSyntax;
 
@@ -36,7 +36,7 @@ namespace Metalama.Framework.Engine.Linking
             {
                 this._introducedMembers = new List<LinkerIntroducedMember>();
                 this._introducedMembersByInsertPosition = new Dictionary<InsertPosition, List<LinkerIntroducedMember>>();
-                this._introducedInterfacesByTargetTypeDecl = new Dictionary<BaseTypeDeclarationSyntax, List<BaseTypeSyntax>>();
+                this._introducedInterfacesByTargetTypeDeclaration = new Dictionary<BaseTypeDeclarationSyntax, List<BaseTypeSyntax>>();
                 this._removedVariableDeclaratorSyntax = new HashSet<VariableDeclaratorSyntax>();
                 this._autoPropertyWithSynthesizedSetterSyntax = new HashSet<PropertyDeclarationSyntax>();
             }
@@ -72,9 +72,9 @@ namespace Metalama.Framework.Engine.Linking
                 // Heuristic: select the file with the shortest path.
                 var targetTypeDecl = (BaseTypeDeclarationSyntax) targetTypeSymbol.GetPrimaryDeclaration().AssertNotNull();
 
-                if ( !this._introducedInterfacesByTargetTypeDecl.TryGetValue( targetTypeDecl, out var interfaceList ) )
+                if ( !this._introducedInterfacesByTargetTypeDeclaration.TryGetValue( targetTypeDecl, out var interfaceList ) )
                 {
-                    this._introducedInterfacesByTargetTypeDecl[targetTypeDecl] = interfaceList = new List<BaseTypeSyntax>();
+                    this._introducedInterfacesByTargetTypeDeclaration[targetTypeDecl] = interfaceList = new List<BaseTypeSyntax>();
                 }
 
                 interfaceList.Add( introducedInterface );
@@ -122,9 +122,9 @@ namespace Metalama.Framework.Engine.Linking
                 return Enumerable.Empty<LinkerIntroducedMember>();
             }
 
-            public IReadOnlyList<BaseTypeSyntax> GetIntroducedInterfacesForTypeDecl( BaseTypeDeclarationSyntax typeDeclaration )
+            public IReadOnlyList<BaseTypeSyntax> GetIntroducedInterfacesForTypeDeclaration( BaseTypeDeclarationSyntax typeDeclaration )
             {
-                if ( this._introducedInterfacesByTargetTypeDecl.TryGetValue( typeDeclaration, out var interfaceList ) )
+                if ( this._introducedInterfacesByTargetTypeDeclaration.TryGetValue( typeDeclaration, out var interfaceList ) )
                 {
                     return interfaceList;
                 }

@@ -23,13 +23,13 @@ namespace Metalama.Framework.Engine.Fabrics
             IDiagnosticAdder diagnosticAdder,
             TemplateClass? baseClass,
             CompileTimeProject project ) :
-            base( serviceProvider, compilation, fabricDriver.FabricSymbol, diagnosticAdder, baseClass )
+            base( serviceProvider, compilation, fabricDriver.FabricSymbol, diagnosticAdder, baseClass, fabricDriver.FabricSymbol.Name )
         {
             this.Driver = fabricDriver;
             this.Project = project;
         }
 
-        public override Type AspectType => this.Driver.Fabric.GetType();
+        public override Type Type => this.Driver.Fabric.GetType();
 
         internal override CompileTimeProject? Project { get; }
 

@@ -100,11 +100,12 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
 
             var arguments = this._method.GetArguments(
                 this._method.Parameters,
-                RunTimeTemplateExpression.FromValue( args, this.Compilation, generationContext ) );
+                TypedExpressionSyntax.FromValue( args, this.Compilation, generationContext ),
+                generationContext );
 
             if ( this._method.MethodKind == MethodKind.LocalFunction )
             {
-                var instanceExpression = RunTimeTemplateExpression.FromValue( instance, this.Compilation, generationContext );
+                var instanceExpression = TypedExpressionSyntax.FromValue( instance, this.Compilation, generationContext );
 
                 if ( instanceExpression.Syntax.Kind() != SyntaxKind.NullLiteralExpression )
                 {
@@ -117,7 +118,7 @@ namespace Metalama.Framework.Engine.CodeModel.Invokers
             {
                 var instanceExpression =
                     this._method.GetReceiverSyntax(
-                        RunTimeTemplateExpression.FromValue( instance!, this.Compilation, generationContext ),
+                        TypedExpressionSyntax.FromValue( instance!, this.Compilation, generationContext ),
                         generationContext );
 
                 return this.CreateInvocationExpression( instanceExpression, name, arguments, AspectReferenceTargetKind.Self );

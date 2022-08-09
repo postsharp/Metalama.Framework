@@ -62,7 +62,7 @@ internal partial class RemoveAttributeCodeAction : ICodeAction
                 syntaxNodes.Add( originalNode );
             }
 
-            transformedRoot = transformedRoot.ReplaceNodes( syntaxNodes, ( node, _ ) => rewriter.Visit( node ) );
+            transformedRoot = transformedRoot.ReplaceNodes( syntaxNodes, ( node, _ ) => rewriter.Visit( node )! );
 
             context.UpdateTree( transformedRoot, originalTree );
         }

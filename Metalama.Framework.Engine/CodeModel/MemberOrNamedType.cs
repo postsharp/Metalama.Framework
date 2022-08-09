@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -28,7 +29,9 @@ namespace Metalama.Framework.Engine.CodeModel
                     return false;
                 }
 
-                switch ( syntaxReference.GetSyntax() )
+                var syntaxNode = syntaxReference.GetSyntax();
+
+                switch ( syntaxNode )
                 {
                     case MemberDeclarationSyntax memberDeclaration:
                         return memberDeclaration.Modifiers.Any( m => m.IsKind( SyntaxKind.NewKeyword ) );
@@ -40,6 +43,9 @@ namespace Metalama.Framework.Engine.CodeModel
                         return fieldDeclaration.Modifiers.Any( m => m.IsKind( SyntaxKind.NewKeyword ) );
 
                     case LocalFunctionStatementSyntax:
+                        return false;
+
+                    case ParameterSyntax: // Record positional properties.
                         return false;
 
                     default:

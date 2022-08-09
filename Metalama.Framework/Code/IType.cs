@@ -44,5 +44,10 @@ namespace Metalama.Framework.Code
         /// as <c>Nullable&lt;T&gt;</c>.
         /// </summary>
         bool? IsNullable { get; }
+
+        /// <summary>
+        /// Determines whether the current type is equal to a well-known special type.
+        /// </summary>
+        bool Equals( SpecialType specialType );
     }
 }

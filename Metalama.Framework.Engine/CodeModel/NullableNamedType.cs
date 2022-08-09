@@ -49,6 +49,8 @@ internal class NullableNamedType : INamedTypeInternal
 
     bool? IType.IsNullable => true;
 
+    public bool Equals( SpecialType specialType ) => this._underlying.Equals( specialType );
+
     IRef<IDeclaration> IDeclaration.ToRef() => this.ToRef();
 
     ImmutableArray<SyntaxReference> IDeclarationImpl.DeclaringSyntaxReferences => this._underlying.DeclaringSyntaxReferences;
@@ -70,6 +72,8 @@ internal class NullableNamedType : INamedTypeInternal
     IAttributeCollection IDeclaration.Attributes => this._underlying.Attributes;
 
     DeclarationKind IDeclaration.DeclarationKind => this._underlying.DeclarationKind;
+
+    public bool IsImplicitlyDeclared => this._underlying.IsImplicitlyDeclared;
 
     string INamedDeclaration.Name => this._underlying.Name;
 
@@ -142,7 +146,9 @@ internal class NullableNamedType : INamedTypeInternal
 
     IConstructorCollection INamedType.Constructors => this._underlying.Constructors;
 
-    IConstructor INamedType.StaticConstructor => this._underlying.StaticConstructor;
+    IConstructor? INamedType.StaticConstructor => this._underlying.StaticConstructor;
+
+    IMethod? INamedType.Finalizer => this._underlying.Finalizer;
 
     bool INamedType.IsReadOnly => this._underlying.IsReadOnly;
 

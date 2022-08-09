@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Advising;
 using System;
 
 namespace Metalama.Framework.Aspects
@@ -16,5 +17,10 @@ namespace Metalama.Framework.Aspects
         /// Gets or sets a value indicating whether the interface member should be introduced explicitly.
         /// </summary>
         public bool IsExplicit { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indication the override strategy when interface member conflicts with an existing class member.
+        /// </summary>
+        public InterfaceMemberOverrideStrategy WhenExists { get; set; }
     }
 }

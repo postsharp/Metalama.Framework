@@ -153,7 +153,7 @@ namespace Metalama.TestFramework
 
             foreach ( var syntaxTree in compilation.SyntaxTrees )
             {
-                if ( Path.GetFileName( syntaxTree.FilePath ) == CompileTimeConstants.PredefinedTypesFileName )
+                if ( CompileTimeConstants.IsPredefinedSyntaxTree( syntaxTree.FilePath ) )
                 {
                     // This is the "Intrinsics" syntax tree.
                     continue;
@@ -269,10 +269,15 @@ namespace Metalama.TestFramework
                         outputSyntaxTree.InputPath,
                         this.OutputCompilationDiagnostics.ToArray() );
 
+                    // Add assembly-level custom attributes. We do not include AspectOrder because this would pollute many tests.
+                    consolidatedCompilationUnit = consolidatedCompilationUnit.WithAttributeLists(
+                        consolidatedCompilationUnit.AttributeLists.AddRange(
+                            outputSyntaxRoot.AttributeLists.Where( a => !a.ToString().ContainsOrdinal( "AspectOrder" ) ) ) );
+
                     // Find notes annotated with // <target> or with a comment containing <target> and choose the first one. If there is none, the test output is the whole tree
                     // passed to this method.
 
-                    var outputNodes =
+                    var outputMembers =
                         outputSyntaxRoot
                             .DescendantNodesAndSelf( _ => true )
                             .OfType<MemberDeclarationSyntax>()
@@ -282,18 +287,18 @@ namespace Metalama.TestFramework
                             .Cast<SyntaxNode>()
                             .ToArray();
 
-                    outputNodes = outputNodes switch
+                    outputMembers = outputMembers switch
                     {
                         { Length: 0 } => new SyntaxNode[] { outputSyntaxRoot },
-                        _ => outputNodes
+                        _ => outputMembers
                     };
 
-                    for ( var i = 0; i < outputNodes.Length; i++ )
+                    for ( var i = 0; i < outputMembers.Length; i++ )
                     {
-                        switch ( outputNodes[i] )
+                        switch ( outputMembers[i] )
                         {
                             case MemberDeclarationSyntax member:
-                                if ( i != outputNodes.Length - 1 )
+                                if ( i != outputMembers.Length - 1 )
                                 {
                                     consolidatedCompilationUnit =
                                         consolidatedCompilationUnit.AddMembers(
@@ -321,7 +326,7 @@ namespace Metalama.TestFramework
                                 break;
 
                             default:
-                                throw new InvalidOperationException( $"Don't know how to add a {outputNodes[i].Kind()} to the compilation unit." );
+                                throw new InvalidOperationException( $"Don't know how to add a {outputMembers[i].Kind()} to the compilation unit." );
                         }
                     }
                 }

@@ -28,7 +28,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                 @"new global::Metalama.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target).GetProperty(""Property"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance))",
                 serialized );
 
-            TestExpression<PropertyInfo>(
+            this.TestExpression<PropertyInfo>(
                 code,
                 StripLocationInfo( serialized ),
                 info =>
@@ -50,7 +50,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                 @"new global::Metalama.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target<>).GetProperty(""Property"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance))",
                 serialized );
 
-            TestExpression<PropertyInfo>(
+            this.TestExpression<PropertyInfo>(
                 code,
                 StripLocationInfo( serialized ),
                 info =>
@@ -72,7 +72,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                 @"new global::Metalama.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target).GetProperty(""Property"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance))",
                 serialized );
 
-            TestExpression<PropertyInfo>(
+            this.TestExpression<PropertyInfo>(
                 code,
                 StripLocationInfo( serialized ),
                 info =>
@@ -94,7 +94,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                 @"typeof(global::Target).GetProperty(""Item"", typeof(global::System.String), new global::System.Type[]{typeof(global::System.Int32)})",
                 serialized );
 
-            TestExpression<PropertyInfo>(
+            this.TestExpression<PropertyInfo>(
                 code,
                 StripLocationInfo( serialized ),
                 info =>
@@ -124,7 +124,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                 @"typeof(global::System.String).GetProperty(""Chars"", typeof(global::System.Char), new global::System.Type[]{typeof(global::System.Int32)})",
                 serialized );
 
-            TestExpression<PropertyInfo>(
+            this.TestExpression<PropertyInfo>(
                 code,
                 StripLocationInfo( serialized ),
                 info =>

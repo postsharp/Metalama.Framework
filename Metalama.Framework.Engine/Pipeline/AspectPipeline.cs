@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Diagnostics;
@@ -9,16 +10,18 @@ using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Options;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using MoreLinq;
 using System;
 using System.Collections.Generic;
@@ -35,6 +38,12 @@ namespace Metalama.Framework.Engine.Pipeline
     public abstract class AspectPipeline : IDisposable
     {
         private const string _highLevelStageGroupingKey = nameof(_highLevelStageGroupingKey);
+
+        private static readonly ImmutableHashSet<LanguageVersion> _supportedVersions = ImmutableHashSet.Create(
+            LanguageVersion.Latest,
+            LanguageVersion.LatestMajor,
+            LanguageVersion.CSharp10 );
+
         private readonly bool _ownsDomain;
 
         public IProjectOptions ProjectOptions { get; }
@@ -44,6 +53,8 @@ namespace Metalama.Framework.Engine.Pipeline
         // This member is intentionally protected because there can be one ServiceProvider per project,
         // but the pipeline can be used by many projects.
         public ServiceProvider ServiceProvider { get; }
+
+        protected ILogger Logger { get; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AspectPipeline"/> class.
@@ -58,6 +69,8 @@ namespace Metalama.Framework.Engine.Pipeline
             bool isTest,
             CompileTimeDomain? domain )
         {
+            this.Logger = serviceProvider.GetLoggerFactory().GetLogger( "AspectPipeline" );
+
             this.ProjectOptions = serviceProvider.GetRequiredService<IProjectOptions>();
 
             this.ServiceProvider = serviceProvider
@@ -91,7 +104,36 @@ namespace Metalama.Framework.Engine.Pipeline
 
             var roslynCompilation = compilation.Compilation;
 
+            // Check language version.
+
+            var languageVersion =
+                (((CSharpParseOptions?) compilation.Compilation.SyntaxTrees.FirstOrDefault()?.Options)?.LanguageVersion ?? LanguageVersion.Latest)
+                .MapSpecifiedToEffectiveVersion();
+
+            if ( languageVersion == LanguageVersion.Preview )
+            {
+                if ( !this.ProjectOptions.AllowPreviewLanguageFeatures )
+                {
+                    diagnosticAdder.Report( GeneralDiagnosticDescriptors.PreviewCSharpVersionNotSupported.CreateRoslynDiagnostic( null, default ) );
+                    configuration = null;
+
+                    return false;
+                }
+            }
+            else if ( !_supportedVersions.Contains( languageVersion ) )
+            {
+                diagnosticAdder.Report(
+                    GeneralDiagnosticDescriptors.CSharpVersionNotSupported.CreateRoslynDiagnostic(
+                        null,
+                        (languageVersion.ToDisplayString(), _supportedVersions.Select( x => x.ToDisplayString() ).ToArray()) ) );
+
+                configuration = null;
+
+                return false;
+            }
+
             // Create dependencies.
+
             var loader = CompileTimeProjectLoader.Create( this.Domain, this.ServiceProvider );
 
             // Prepare the compile-time assembly.
@@ -104,13 +146,17 @@ namespace Metalama.Framework.Engine.Pipeline
                     cancellationToken,
                     out var compileTimeProject ) )
             {
+                this.Logger.Warning?.Log( $"TryInitialized({this.ProjectOptions.AssemblyName}) failed: cannot get the compile-time compilation." );
+
                 configuration = null;
 
                 return false;
             }
 
             // Create a project-level service provider.
-            var projectServiceProviderWithoutPlugins = this.ServiceProvider.WithService( loader ).WithMark( ServiceProviderMark.Project );
+            var projectServiceProviderWithoutPlugins = this.ServiceProvider.WithService( loader )
+                .WithMark( ServiceProviderMark.Project );
+
             var projectServiceProviderWithProject = projectServiceProviderWithoutPlugins;
 
             // Create compiler plug-ins found in compile-time code.
@@ -181,11 +227,19 @@ namespace Metalama.Framework.Engine.Pipeline
             // Creates a project model that includes the final service provider.
             var projectModel = new ProjectModel( compilation.Compilation, projectServiceProviderWithProject );
 
-            // Create aspect types.
-            var driverFactory = new AspectDriverFactory( compilation.Compilation, compilerPlugIns, projectServiceProviderWithProject );
-            var aspectTypeFactory = new AspectClassMetadataFactory( projectServiceProviderWithProject, driverFactory );
+            // Create a compilation model for the aspect initialization.
+            var compilationModel = CompilationModel.CreateInitialInstance( projectModel, compilation );
 
-            var aspectClasses = aspectTypeFactory.GetAspectClasses( compilation.Compilation, compileTimeProject, diagnosticAdder ).ToImmutableArray();
+            // Create aspect types.
+            // We create a TemplateAttributeFactory for this purpose but we cannot add it to the ServiceProvider that will flow out because
+            // we don't want to leak the compilation for the design-time scenario.
+            var serviceProviderForAspectClassFactory =
+                projectServiceProviderWithProject.WithService( new TemplateAttributeFactory( projectServiceProviderWithProject, roslynCompilation ) );
+
+            var driverFactory = new AspectDriverFactory( compilationModel, compilerPlugIns, serviceProviderForAspectClassFactory );
+            var aspectTypeFactory = new AspectClassFactory( serviceProviderForAspectClassFactory, driverFactory );
+
+            var aspectClasses = aspectTypeFactory.GetClasses( compilation.Compilation, compileTimeProject, diagnosticAdder ).ToImmutableArray();
 
             // Get aspect parts and sort them.
             var unsortedAspectLayers = aspectClasses
@@ -202,11 +256,20 @@ namespace Metalama.Framework.Engine.Pipeline
 
             if ( !AspectLayerSorter.TrySort( unsortedAspectLayers, aspectOrderSources, diagnosticAdder, out var orderedAspectLayers ) )
             {
+                this.Logger.Warning?.Log( $"TryInitialized({this.ProjectOptions.AssemblyName}) failed: cannot sort aspect layers." );
+
                 configuration = null;
 
                 return false;
             }
 
+            // Create other template classes.
+            var otherTemplateClassFactory = new OtherTemplateClassFactory( serviceProviderForAspectClassFactory );
+
+            var otherTemplateClasses = otherTemplateClassFactory.GetClasses( compilation.Compilation, compileTimeProject, diagnosticAdder )
+                .ToImmutableDictionary( x => x.FullName, x => x );
+
+            // Add fabrics.
             ImmutableArray<OrderedAspectLayer> allOrderedAspectLayers;
             BoundAspectClassCollection allAspectClasses;
 
@@ -214,7 +277,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
             if ( compileTimeProject != null )
             {
-                var fabricTopLevelAspectClass = new FabricTopLevelAspectClass( projectServiceProviderWithProject, roslynCompilation, compileTimeProject );
+                var fabricTopLevelAspectClass = new FabricTopLevelAspectClass( projectServiceProviderWithProject, compilationModel, compileTimeProject );
                 var fabricAspectLayer = new OrderedAspectLayer( -1, fabricTopLevelAspectClass.Layer );
 
                 allOrderedAspectLayers = orderedAspectLayers.Insert( 0, fabricAspectLayer );
@@ -248,6 +311,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 this.Domain,
                 stages,
                 allAspectClasses,
+                otherTemplateClasses,
                 allOrderedAspectLayers,
                 compileTimeProject,
                 loader,
@@ -357,6 +421,13 @@ namespace Metalama.Framework.Engine.Pipeline
                     return false;
                 }
             }
+
+            // Add services that have a reference to the compilation.
+            pipelineConfiguration =
+                pipelineConfiguration.WithServiceProvider(
+                    pipelineConfiguration.ServiceProvider
+                        .WithService( new TemplateAttributeFactory( pipelineConfiguration.ServiceProvider, compilation.Compilation ) )
+                        .WithService( new AttributeClassificationService() ) );
 
             // When we reuse a pipeline configuration created from a different pipeline (e.g. design-time to code fix),
             // we need to substitute the code fix filter.

@@ -89,7 +89,14 @@ namespace Metalama.Framework.Engine.CodeModel
             InitializeDictionary( out this._events );
             InitializeDictionary( out this._properties );
             InitializeDictionary( out this._indexers );
+            InitializeDictionary( out this._allInterfaceImplementations );
             InitializeDictionary( out this._interfaceImplementations );
+
+            this._parameters = ImmutableDictionary.Create<Ref<IHasParameters>, ParameterUpdatableCollection>()
+                .WithComparers( RefEqualityComparer<IHasParameters>.Default );
+
+            this._attributes =
+                ImmutableDictionary<Ref<IDeclaration>, AttributeUpdatableCollection>.Empty.WithComparers( RefEqualityComparer<IDeclaration>.Default );
 
             this.Factory = new DeclarationFactory( this );
 
@@ -112,11 +119,13 @@ namespace Metalama.Framework.Engine.CodeModel
         /// </summary>
         /// <param name="prototype"></param>
         /// <param name="observableTransformations"></param>
-        private CompilationModel( CompilationModel prototype, IReadOnlyList<IObservableTransformation> observableTransformations ) : this( prototype, true )
+        private CompilationModel( CompilationModel prototype, IReadOnlyCollection<IObservableTransformation> observableTransformations ) : this(
+            prototype,
+            true )
         {
             foreach ( var transformation in observableTransformations )
             {
-                this.AddTransformation( prototype, transformation );
+                this.AddTransformation( transformation );
             }
 
             this.IsMutable = false;
@@ -157,7 +166,11 @@ namespace Metalama.Framework.Engine.CodeModel
             this._indexers = prototype._indexers;
             this._events = prototype._events;
             this._interfaceImplementations = prototype._interfaceImplementations;
+            this._allInterfaceImplementations = prototype._allInterfaceImplementations;
             this._staticConstructors = prototype._staticConstructors;
+            this._finalizers = prototype._finalizers;
+            this._parameters = prototype._parameters;
+            this._attributes = prototype._attributes;
 
             this.Factory = new DeclarationFactory( this );
             this._depthsCache = prototype._depthsCache;
@@ -174,9 +187,9 @@ namespace Metalama.Framework.Engine.CodeModel
             this._aspects = this._aspects.AddRange( aspectInstances, a => a.TargetDeclaration );
         }
 
-        internal CompilationModel WithTransformations( IReadOnlyList<IObservableTransformation> introducedDeclarations )
+        internal CompilationModel WithTransformations( IReadOnlyCollection<IObservableTransformation> introducedDeclarations )
         {
-            if ( !introducedDeclarations.Any() )
+            if ( introducedDeclarations.Count == 0 )
             {
                 return this;
             }
@@ -199,12 +212,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public override IAttributeCollection Attributes
             => new AttributeCollection(
                 this,
-                this.RoslynCompilation.Assembly
-                    .GetAttributes()
-                    .Union( this.RoslynCompilation.SourceModule.GetAttributes() )
-                    .Where( a => a.AttributeConstructor != null )
-                    .Select( a => new AttributeRef( a, Ref.FromSymbol( this.RoslynCompilation.Assembly, this.RoslynCompilation ) ) )
-                    .ToList() );
+                this.GetAttributeCollection( Ref.Compilation( this.RoslynCompilation ).As<IDeclaration>() ) );
 
         public override DeclarationKind DeclarationKind => DeclarationKind.Compilation;
 
@@ -215,7 +223,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public Compilation RoslynCompilation => this.PartialCompilation.Compilation;
 
-        ITypeFactory ICompilationInternal.TypeFactory => this.Factory;
+        IDeclarationFactory ICompilationInternal.Factory => this.Factory;
 
         public IReadOnlyList<IManagedResource> ManagedResources => throw new NotImplementedException();
 
@@ -259,7 +267,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public int Revision { get; }
 
-        IDeclaration? ICompilation.GetDeclarationFromId( string declarationId ) => this.Factory.GetDeclarationFromId( declarationId );
+        IDeclaration ICompilation.GetDeclarationFromId( DeclarationSerializableId declarationId )
+            => this.Factory.GetDeclarationFromSerializableId( declarationId );
 
         // TODO: throw an exception when the caller tries to get aspects that have not been initialized yet.
 
@@ -388,7 +397,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public string? Name => this.RoslynCompilation.AssemblyName;
 
-        public override string ToString() => $"{this.RoslynCompilation.AssemblyName}";
+        public override string ToString() => $"{this.RoslynCompilation.AssemblyName} ({this.Revision})";
 
         internal ICompilationHelpers Helpers { get; } = new CompilationHelpers();
 
@@ -419,6 +428,8 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override SyntaxTree? PrimarySyntaxTree => null;
 
-        public CompilationModel ToMutable() => new( this, true );
+        public CompilationModel CreateMutableClone() => new( this, true );
+
+        public bool Freeze() => this.IsMutable = false;
     }
 }

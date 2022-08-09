@@ -1,15 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Code.DeclarationBuilders;
-using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -23,9 +22,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 {
     internal class ConstructorBuilder : MemberBuilder, IConstructorBuilder, IConstructorImpl, IReplaceMemberTransformation
     {
-        public ConstructorInitializerKind InitializerKind => ConstructorInitializerKind.Undetermined;
-
-        public MethodKind MethodKind => this.IsStatic ? MethodKind.StaticConstructor : MethodKind.Constructor;
+        public ConstructorInitializerKind InitializerKind => ConstructorInitializerKind.None;
 
         public IParameterList Parameters => ParameterList.Empty;
 
@@ -33,20 +30,21 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override IMember? OverriddenMember => null;
 
+        // This is implemented by BuiltConstructor and there is no point to support it here.
+        public IConstructor? GetBaseConstructor() => throw new NotSupportedException();
+
         public override string Name
         {
             get => this.IsStatic ? ".cctor" : ".ctor";
             set => throw new NotSupportedException();
         }
 
-        public override bool IsImplicit => false;
-
         public override DeclarationKind DeclarationKind => DeclarationKind.Constructor;
 
         public MemberRef<IMember> ReplacedMember { get; }
 
-        public ConstructorBuilder( Advice parentAdvice, INamedType targetType, IObjectReader tags )
-            : base( parentAdvice, targetType, tags )
+        public ConstructorBuilder( Advice parentAdvice, INamedType targetType )
+            : base( parentAdvice, targetType, null! )
         {
             if ( targetType.Constructors.Any( c => c.GetSymbol().AssertNotNull().GetPrimarySyntaxReference() == null ) )
             {
@@ -55,12 +53,12 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
         }
 
-        public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant defaultValue = default )
+        public IParameterBuilder AddParameter( string name, IType type, RefKind refKind = RefKind.None, TypedConstant? defaultValue = null )
         {
             throw new NotImplementedException();
         }
 
-        public IParameterBuilder AddParameter( string name, Type type, RefKind refKind = RefKind.None, object? defaultValue = null )
+        public IParameterBuilder AddParameter( string name, Type type, RefKind refKind = RefKind.None, TypedConstant? defaultValue = null )
         {
             throw new NotImplementedException();
         }
@@ -71,9 +69,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             {
                 var syntax =
                     ConstructorDeclaration(
-                        List<AttributeListSyntax>(),
+                        this.GetAttributeLists( context ),
                         TokenList( Token( SyntaxKind.StaticKeyword ) ),
-                        ((TypeDeclarationSyntax) this.DeclaringType.GetPrimaryDeclaration().AssertNotNull()).Identifier,
+                        ((TypeDeclarationSyntax) this.DeclaringType.GetPrimaryDeclarationSyntax().AssertNotNull()).Identifier,
                         ParameterList(),
                         null,
                         Block().WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation ),
@@ -85,9 +83,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             {
                 var syntax =
                     ConstructorDeclaration(
-                        List<AttributeListSyntax>(),
+                        this.GetAttributeLists( context ),
                         TokenList( Token( SyntaxKind.PublicKeyword ) ),
-                        ((TypeDeclarationSyntax) this.DeclaringType.GetPrimaryDeclaration().AssertNotNull()).Identifier,
+                        ((TypeDeclarationSyntax) this.DeclaringType.GetPrimaryDeclarationSyntax().AssertNotNull()).Identifier,
                         ParameterList(),
                         null,
                         Block().WithGeneratedCodeAnnotation( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation ),

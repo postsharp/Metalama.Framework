@@ -4,7 +4,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Testing;
@@ -23,11 +22,12 @@ using Xunit;
 using Xunit.Abstractions;
 using StringExtensions = Metalama.TestFramework.Utilities.StringExtensions;
 
-#pragma warning disable CA1307 // Specify StringComparison for clarity
+#pragma warning disable IDE0079 // Remove unnecessary suppression.
+#pragma warning disable CA1307  // Specify StringComparison for clarity
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
-    public class PipelineIntegrationTests
+    public class PipelineIntegrationTests : TestBase
     {
         public PipelineIntegrationTests( ITestOutputHelper logger )
         {
@@ -207,7 +207,8 @@ Target.cs:
 0 introductions(s):
 ";
 
-            using TestProjectOptions projectOptions = new();
+            using var testContext = this.CreateTestContext();
+            var projectOptions = testContext.ProjectOptions;
 
             var compilation = CreateCSharpCompilation(
                 new Dictionary<string, string>()
@@ -309,8 +310,7 @@ Target.cs:
             // Build the project from the compile-time pipeline.
             using UnloadableCompileTimeDomain domain = new();
 
-            var serviceProvider = ServiceProviderFactory.GetServiceProvider( projectOptions.PathOptions )
-                .WithService( projectOptions )
+            var serviceProvider = testContext.ServiceProvider
                 .WithProjectScopedServices( compilation );
 
             var compileTimeAspectPipeline = new CompileTimeAspectPipeline( serviceProvider, true, domain );
@@ -404,6 +404,28 @@ partial class C
             TestWithTargetCode( "[MyAspect] partial class C { void }" );
             TestWithTargetCode( "[MyAspect] partial class C { void NewMethod() {} }" );
             TestWithTargetCode( "[MyAspect] partial class C { void NewMethod() { ; } }" );
+        }
+
+        [Fact]
+        public void ProjectDependencyWithNoMetalamaReferenceButSystemCompileTimeType()
+        {
+            var context = this.CreateTestContext();
+
+            // Disposing the domain crashes the CLR in this test.
+            var domain = new UnloadableCompileTimeDomain();
+
+            using var pipelineFactory = new DesignTimeAspectPipelineFactory( context.ServiceProvider, domain, true );
+
+            // The dependency cannot have a reference to Metalama.
+            // It needs to define a system type that is considered as compile-time.
+            var dependency = CreateCSharpCompilation( "namespace System; struct Index {}", addMetalamaReferences: false );
+
+            // The main compilation must have a compile-time syntax tree.
+            var compilation = context.CreateCompilationModel(
+                "using Metalama.Framework.Aspects; class A : TypeAspect {}",
+                additionalReferences: new[] { dependency.ToMetadataReference() } );
+
+            Assert.True( pipelineFactory.TryExecute( context.ProjectOptions, compilation.RoslynCompilation, CancellationToken.None, out _ ) );
         }
     }
 }

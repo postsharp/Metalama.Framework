@@ -7,32 +7,23 @@ using System;
 
 namespace Metalama.Framework.Engine.Transformations
 {
-    internal sealed class MemberIntroductionContext
+    internal sealed class MemberIntroductionContext : TransformationContext
     {
-        public IServiceProvider ServiceProvider { get; }
-
-        public UserDiagnosticSink DiagnosticSink { get; }
-
         public IntroductionNameProvider IntroductionNameProvider { get; }
 
-        public ITemplateLexicalScopeProvider LexicalScopeProvider { get; }
-
-        public SyntaxGenerationContext SyntaxGenerationContext { get; }
-
-        public OurSyntaxGenerator SyntaxGenerator => this.SyntaxGenerationContext.SyntaxGenerator;
+        public AspectReferenceSyntaxProvider AspectReferenceSyntaxProvider { get; }
 
         public MemberIntroductionContext(
             UserDiagnosticSink diagnosticSink,
             IntroductionNameProvider introductionNameProvider,
+            AspectReferenceSyntaxProvider aspectReferenceSyntaxProvider,
             ITemplateLexicalScopeProvider lexicalScopeProvider,
             SyntaxGenerationContext syntaxGenerationContext,
-            IServiceProvider serviceProvider )
+            IServiceProvider serviceProvider,
+            CompilationModel compilation ) : base( serviceProvider, diagnosticSink, syntaxGenerationContext, compilation, lexicalScopeProvider )
         {
-            this.DiagnosticSink = diagnosticSink;
-            this.LexicalScopeProvider = lexicalScopeProvider;
-            this.ServiceProvider = serviceProvider;
+            this.AspectReferenceSyntaxProvider = aspectReferenceSyntaxProvider;
             this.IntroductionNameProvider = introductionNameProvider;
-            this.SyntaxGenerationContext = syntaxGenerationContext;
         }
     }
 }

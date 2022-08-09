@@ -46,6 +46,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public bool? IsNullable => this.IsNullableImpl();
 
+        bool IType.Equals( SpecialType specialType ) => false;
+
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
         public override IDeclaration ContainingDeclaration { get; }
@@ -54,7 +56,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override bool CanBeInherited => ((IDeclarationImpl) this.ContainingDeclaration).CanBeInherited;
 
-        public override SyntaxTree PrimarySyntaxTree => ((MethodBuilder) this.ContainingDeclaration).TargetSyntaxTree;
+        public override SyntaxTree PrimarySyntaxTree => ((MethodBuilder) this.ContainingDeclaration).PrimarySyntaxTree.AssertNotNull();
 
         public TypeParameterBuilder( MethodBuilder containingMethod, int index, string name ) : base( containingMethod.ParentAdvice )
         {

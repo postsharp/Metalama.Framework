@@ -7,12 +7,15 @@
             Redistributable components for package 'Metalama.Framework'. This package should only be installed as a dependency.
             (This is not the package you are looking for).
         </PackageDescription>
-
+		<IsPackable>True</IsPackable>
+        <PackMetalamaSystemTypes>True</PackMetalamaSystemTypes>
     </PropertyGroup>
 
     <ItemGroup>
+    <!--
         <InternalsVisibleTo Include="Metalama.Framework.Engine.4.2.0" />
         <InternalsVisibleTo Include="Metalama.Framework.Engine.4.1.0" />
+    -->
         <InternalsVisibleTo Include="Metalama.Framework.Engine.4.0.1" />
         <InternalsVisibleTo Include="Metalama.TestFramework" />
         <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals" />
@@ -23,8 +26,5 @@
         <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
     </ItemGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\Metalama.SystemTypes\Metalama.SystemTypes.csproj" Condition="'$(TargetFramework)'=='netstandard2.0'" />
-    </ItemGroup>
 
 </Project>

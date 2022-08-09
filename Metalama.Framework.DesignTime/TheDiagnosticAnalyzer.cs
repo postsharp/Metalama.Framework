@@ -9,7 +9,7 @@ using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Templating;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Diagnostics;
@@ -37,7 +37,7 @@ namespace Metalama.Framework.DesignTime
 
         static TheDiagnosticAnalyzer()
         {
-            MetalamaDiagnosticsServiceFactory.Initialize( nameof(TheDiagnosticAnalyzer) );
+            DesignTimeServices.Initialize();
         }
 
         public TheDiagnosticAnalyzer() : this( DesignTimeServiceProviderFactory.GetServiceProvider() ) { }

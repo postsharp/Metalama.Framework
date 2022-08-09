@@ -35,9 +35,7 @@ namespace Metalama.Framework.Engine.CodeModel
         /// </summary>
         /// <seealso cref="PartialCompilationExtensions.UpdateSyntaxTrees(Metalama.Framework.Engine.CodeModel.IPartialCompilation,System.Func{Microsoft.CodeAnalysis.SyntaxTree,System.Threading.CancellationToken,Microsoft.CodeAnalysis.SyntaxTree},System.Threading.CancellationToken)"/>
         /// <seealso cref="PartialCompilationExtensions.RewriteSyntaxTrees"/>
-        IPartialCompilation WithSyntaxTreeModifications(
-            IReadOnlyList<SyntaxTreeModification>? modifications = null,
-            IReadOnlyList<SyntaxTree>? additions = null );
+        IPartialCompilation WithSyntaxTreeTransformations( IReadOnlyList<SyntaxTreeTransformation>? transformations = null );
 
         /// <summary>
         /// Returns a copy of the current <see cref="IPartialCompilation"/> where the <see cref="Resources"/> have been modified.

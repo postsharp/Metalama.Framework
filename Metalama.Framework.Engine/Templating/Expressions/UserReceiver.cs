@@ -13,6 +13,6 @@ namespace Metalama.Framework.Engine.Templating.Expressions
     /// </summary>
     internal abstract class UserReceiver : UserExpression
     {
-        public abstract RunTimeTemplateExpression CreateMemberAccessExpression( string member );
+        public abstract TypedExpressionSyntax CreateMemberAccessExpression( string member );
     }
 }

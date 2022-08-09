@@ -1,7 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Microsoft.CodeAnalysis.CSharp;
+using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.IO;
 using System.Text.RegularExpressions;
 
@@ -145,6 +148,11 @@ namespace Metalama.TestFramework
         public bool? ExecuteProgram { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating which type of the output assembly should be used for the test. Currently valid values are <c>Dll</c> <c>Exe</c> (default).
+        /// </summary>
+        public string? OutputAssemblyType { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether the test should be executed even if the input compilation has errors.
         /// To enable this option in a test, add this comment to your test file: <c>// @AcceptInvalidInput</c>.
         /// </summary>
@@ -172,6 +180,11 @@ namespace Metalama.TestFramework
         public int? AppliedCodeFixIndex { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether disabled code should be kept as trivia.
+        /// </summary>
+        public bool? KeepDisabledCode { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating which end-of-line sequence is expected.
         /// To set this option in a test, add this comment to your test file: <c>// @ExpectedEndOfLine(eol)</c> where EOL is <c>CR</c>, <c>LF</c> or <c>CRLF</c>.
         /// </summary>
@@ -185,11 +198,16 @@ namespace Metalama.TestFramework
         public bool? OutputAllSyntaxTrees { get; set; }
 
         /// <summary>
-        /// Gets or sets the name of a file in the project directory that contains the license key with which the test should be run.
-        /// If no license is specified, the licensing service is not included in the text.
-        /// To set this option in a test, add this comment to your test file: <c>// @LicenseFile(path)</c>. 
+        /// Gets or sets the version of the C# language that the test should be compiled with.
+        /// To set this option in a test, add this comment to your test file: <c>// @LanguageVersion(version)</c>.
         /// </summary>
-        public string? LicenseFile { get; set; }
+        public LanguageVersion? LanguageVersion { get; set; }
+
+        /// <summary>
+        /// Gets or sets the list of C# language features that the test should be compiled with.
+        /// To set this option in a test, add this comment to your test file: <c>// @LanguageFeature(feature)</c> or <c>// @LanguageFeature(feature=value)</c>.
+        /// </summary>
+        public ImmutableDictionary<string, string> LanguageFeatures { get; set; } = ImmutableDictionary<string, string>.Empty;
 
         /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
@@ -225,9 +243,13 @@ namespace Metalama.TestFramework
 
             this.ExecuteProgram ??= baseOptions.ExecuteProgram;
 
+            this.OutputAssemblyType ??= baseOptions.OutputAssemblyType;
+
             this.AcceptInvalidInput ??= baseOptions.AcceptInvalidInput;
 
             this.ApplyCodeFix ??= baseOptions.ApplyCodeFix;
+
+            this.KeepDisabledCode ??= baseOptions.KeepDisabledCode;
 
             this.AppliedCodeFixIndex ??= baseOptions.AppliedCodeFixIndex;
 
@@ -357,8 +379,18 @@ namespace Metalama.TestFramework
 
                         break;
 
+                    case "KeepDisabledCode":
+                        this.KeepDisabledCode = true;
+
+                        break;
+
                     case "ExecuteProgram":
                         this.ExecuteProgram = true;
+
+                        break;
+
+                    case "OutputAssemblyType":
+                        this.OutputAssemblyType = optionArg;
 
                         break;
 
@@ -377,8 +409,31 @@ namespace Metalama.TestFramework
 
                         break;
 
-                    case "LicenseFile":
-                        this.LicenseFile = optionArg;
+                    case "LanguageVersion":
+                        if ( LanguageVersionFacts.TryParse( optionArg, out var result ) )
+                        {
+                            this.LanguageVersion = result;
+                        }
+                        else
+                        {
+                            throw new InvalidOperationException( $"'{optionArg} is not a valid language version." );
+                        }
+
+                        break;
+
+                    case "LanguageFeature":
+                        {
+                            var parts = optionArg.Split( '=' );
+
+                            if ( parts.Length == 1 )
+                            {
+                                this.LanguageFeatures = this.LanguageFeatures.SetItem( parts[0], "" );
+                            }
+                            else
+                            {
+                                this.LanguageFeatures = this.LanguageFeatures.SetItem( parts[0], parts[1] );
+                            }
+                        }
 
                         break;
 

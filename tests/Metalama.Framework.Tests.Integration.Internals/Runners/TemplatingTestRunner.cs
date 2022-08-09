@@ -3,7 +3,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine;
-using Metalama.Framework.Engine.Advices;
+using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
@@ -13,7 +13,7 @@ using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Metalama.TestFramework;
 using Metalama.TestFramework.Utilities;
@@ -235,6 +235,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
                 var fakeTemplateClassMember = new TemplateClassMember(
                     "Template",
+                    "Template",
                     null!,
                     TemplateInfo.None,
                     default,
@@ -242,7 +243,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                     ImmutableArray<TemplateClassMemberParameter>.Empty,
                     ImmutableDictionary<MethodKind, TemplateClassMember>.Empty );
 
-                var template = TemplateMember.Create( compilationModel.Factory.GetMethod( templateMethod ), fakeTemplateClassMember );
+                var template = TemplateMemberFactory.Create( compilationModel.Factory.GetMethod( templateMethod ), fakeTemplateClassMember );
 
                 var (expansionContext, targetMethod) = CreateTemplateExpansionContext(
                     serviceProvider,
@@ -322,6 +323,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             var metaApi = MetaApi.ForMethod(
                 targetMethod,
                 new MetaApiProperties(
+                    compilation,
                     diagnostics,
                     template.Template.Cast(),
                     ObjectReader.GetReader( new { TestKey = "TestValue" } ),
@@ -334,11 +336,10 @@ namespace Metalama.Framework.Tests.Integration.Runners
             return (new TemplateExpansionContext(
                         templateInstance,
                         metaApi,
-                        compilation,
                         lexicalScope,
                         serviceProvider.GetRequiredService<SyntaxSerializationService>(),
                         syntaxGenerationContext,
-                        template,
+                        template.Template,
                         proceedExpression,
                         default ),
                     roslynTargetMethod);

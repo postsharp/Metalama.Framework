@@ -1,10 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Backstage.Configuration;
+using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.TestFramework;
 using System.Collections.Generic;
-using System.IO;
 using System.Threading;
 using Xunit;
 
@@ -15,8 +16,9 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
         [Fact]
         public void TestUserErrorReporting()
         {
-            this.TestUserDiagnosticsFileContent(
-                aspectCode: @"
+            var output =
+                this.GetUserDiagnosticsFileContent(
+                    aspectCode: @"
 using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -38,7 +40,7 @@ builder.Diagnostics.Report(             _userError.WithArguments( builder.Target
     }
 }
 ",
-                targetCode: @"
+                    targetCode: @"
 
 using System;
 
@@ -50,25 +52,18 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.TestCode
         public void Foo() { }
     }
 }
-",
-                expectedUserDiagnosticsFileContent: @"{
-  ""Diagnostics"": {
-    ""MY001"": {
-      ""Severity"": 3,
-      ""Id"": ""MY001"",
-      ""Category"": ""Metalama.User"",
-      ""Title"": ""A Metalama user diagnostic.""
-    }
-  },
-  ""Suppressions"": []
-}" );
+" );
+
+            Assert.Single( output.Diagnostics );
+            Assert.Empty( output.Suppressions );
         }
 
         [Fact]
         public void TestDiagnosticSuppression()
         {
-            this.TestUserDiagnosticsFileContent(
-                aspectCode: @"
+            var output =
+                this.GetUserDiagnosticsFileContent(
+                    aspectCode: @"
 using System;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -93,7 +88,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.TestCode
     }
 }
 ",
-                targetCode: @"
+                    targetCode: @"
 
 using System;
 
@@ -105,23 +100,13 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.TestCode
         public void Foo() { }
     }
 }
-",
-                expectedUserDiagnosticsFileContent: @"{
-  ""Diagnostics"": {
-    ""MY001"": {
-      ""Severity"": 2,
-      ""Id"": ""MY001"",
-      ""Category"": ""Metalama.User"",
-      ""Title"": ""A Metalama user diagnostic.""
-    }
-  },
-  ""Suppressions"": [
-    ""MY001""
-  ]
-}" );
+" );
+
+            Assert.Single( output.Diagnostics );
+            Assert.Single( output.Suppressions );
         }
 
-        private void TestUserDiagnosticsFileContent( string aspectCode, string targetCode, string expectedUserDiagnosticsFileContent )
+        private UserDiagnosticRegistrationFile GetUserDiagnosticsFileContent( string aspectCode, string targetCode )
         {
             using var testContext = this.CreateTestContext();
 
@@ -129,17 +114,16 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.TestCode
 
             var compilation = CreateCSharpCompilation( code );
 
+            // Create a service provider with our own configuration manager.
+            var configurationManager = new InMemoryConfigurationManager( testContext.ServiceProvider );
+            var serviceProvider = testContext.ServiceProvider.WithUntypedService( typeof(IConfigurationManager), configurationManager );
+
             using var domain = new UnloadableCompileTimeDomain();
-            using DesignTimeAspectPipeline pipeline = new( testContext.ServiceProvider, domain, compilation.References, true );
+            using DesignTimeAspectPipeline pipeline = new( serviceProvider, domain, compilation.References, true );
 
-            var diagnosticsFileName = Path.Combine( testContext.ProjectOptions.PathOptions.SettingsDirectory, "userDiagnostics.json" );
-
-            Assert.False( File.Exists( diagnosticsFileName ) );
             Assert.True( pipeline.TryExecute( compilation, CancellationToken.None, out _ ) );
 
-            var actualContent = File.ReadAllText( diagnosticsFileName );
-
-            Assert.Equal( expectedUserDiagnosticsFileContent, actualContent );
+            return configurationManager.Get<UserDiagnosticRegistrationFile>();
         }
     }
 }

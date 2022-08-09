@@ -9,6 +9,9 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Validation;
 using System.Collections.Immutable;
+#if DEBUG
+using System.Linq;
+#endif
 
 namespace Metalama.Framework.Engine.Pipeline
 {
@@ -92,6 +95,13 @@ namespace Metalama.Framework.Engine.Pipeline
             this.AdditionalCompilationOutputFiles = additionalCompilationOutputFiles.IsDefault
                 ? ImmutableArray<AdditionalCompilationOutputFile>.Empty
                 : additionalCompilationOutputFiles;
+
+#if DEBUG
+            if ( this.AdditionalSyntaxTrees.GroupBy( x => x.Name ).Any( g => g.Count() > 1 ) )
+            {
+                throw new AssertionFailedException( "Duplicate item in AdditionalSyntaxTrees." );
+            }
+#endif
         }
 
         public AspectPipelineResult WithAdditionalDiagnostics( ImmutableUserDiagnosticList diagnostics )

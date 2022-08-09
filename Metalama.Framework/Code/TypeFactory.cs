@@ -14,7 +14,7 @@ namespace Metalama.Framework.Code;
 [CompileTime]
 public static class TypeFactory
 {
-    internal static ITypeFactory Implementation => ((ICompilationInternal) SyntaxBuilder.CurrentImplementation.Compilation).TypeFactory;
+    internal static IDeclarationFactory Implementation => ((ICompilationInternal) SyntaxBuilder.CurrentImplementation.Compilation).Factory;
 
     /// <summary>
     /// Gets an <see cref="IType"/> given a reflection <see cref="Type"/>.
@@ -49,16 +49,16 @@ public static class TypeFactory
     /// <param name="rank">Rank of the array/.</param>
     /// <returns>An array type <c>T[]</c> where <c>T</c> is the current type.</returns>
     public static IArrayType ConstructArrayType( this IType elementType, int rank = 1 )
-        => ((ICompilationInternal) elementType.Compilation).TypeFactory.ConstructArrayType( elementType, rank );
+        => ((ICompilationInternal) elementType.Compilation).Factory.ConstructArrayType( elementType, rank );
 
     /// <summary>
     /// Creates an array type from the current type.
     /// </summary>
     /// <returns>An unsafe pointer type <c>*T</c> where <c>T</c> is the current type.</returns>
     public static IPointerType ConstructPointerType( this IType pointedType )
-        => ((ICompilationInternal) pointedType.Compilation).TypeFactory.ConstructPointerType( pointedType );
+        => ((ICompilationInternal) pointedType.Compilation).Factory.ConstructPointerType( pointedType );
 
     public static T ConstructNullable<T>( this T type )
         where T : IType
-        => ((ICompilationInternal) type.Compilation).TypeFactory.ConstructNullable( type );
+        => ((ICompilationInternal) type.Compilation).Factory.ConstructNullable( type );
 }
