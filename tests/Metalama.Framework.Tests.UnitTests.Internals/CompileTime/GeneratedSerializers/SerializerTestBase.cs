@@ -31,7 +31,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
             Assert.True(
                 compileTimeCompilationBuilder.TryGetCompileTimeProject(
                     runtimeCompilation,
-                    RedistributionLicenseInfo.Empty, 
+                    ProjectLicenseInfo.Empty, 
                     null,
                     Array.Empty<CompileTimeProject>(),
                     diagnosticList,

@@ -38,11 +38,6 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
-    public record RedistributionLicenseInfo( string? LicenseKey )
-    {
-        public static RedistributionLicenseInfo Empty { get; } = new RedistributionLicenseInfo( default(string) );
-    }
-        
     /// <summary>
     /// This class is responsible for building a compile-time <see cref="Compilation"/> based on a run-time one.
     /// </summary>
@@ -639,7 +634,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// </summary>
         internal bool TryGetCompileTimeProject(
             Compilation runTimeCompilation,
-            RedistributionLicenseInfo? redistributionLicenseInfo,
+            ProjectLicenseInfo? projectLicenseInfo,
             IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
             IReadOnlyList<CompileTimeProject> referencedProjects,
             IDiagnosticAdder diagnosticSink,
@@ -663,7 +658,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             return this.TryGetCompileTimeProjectImpl(
                 runTimeCompilation,
-                redistributionLicenseInfo,
+                projectLicenseInfo,
                 compileTimeArtifacts.SyntaxTrees,
                 referencedProjects,
                 compileTimeArtifacts.GlobalUsings,
@@ -732,7 +727,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private bool TryGetCompileTimeProjectImpl(
             Compilation runTimeCompilation,
-            RedistributionLicenseInfo? redistributionLicenseInfo,
+            ProjectLicenseInfo? projectLicenseInfo,
             IReadOnlyList<SyntaxTree> sourceTreesWithCompileTimeCode,
             IReadOnlyList<CompileTimeProject> referencedProjects,
             ImmutableArray<UsingDirectiveSyntax> globalUsings,
@@ -866,7 +861,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             transitiveFabricTypes,
                             otherTemplateTypes,
                             referencedProjects.Select( r => r.RunTimeIdentity.GetDisplayName() ).ToList(),
-                            redistributionLicenseInfo?.LicenseKey,
+                            projectLicenseInfo?.LicenseKey,
                             sourceHash,
                             textMapDirectory.FilesByTargetPath.Values.Select( f => new CompileTimeFile( f ) ).ToImmutableList() );
 

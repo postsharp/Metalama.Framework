@@ -95,7 +95,7 @@ namespace Metalama.Framework.Engine.Pipeline
         protected bool TryInitialize(
             IDiagnosticAdder diagnosticAdder,
             PartialCompilation compilation,
-            RedistributionLicenseInfo? redistributionLicenseInfo,
+            ProjectLicenseInfo? projectLicenseInfo,
             IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out AspectPipelineConfiguration? configuration )
@@ -139,7 +139,7 @@ namespace Metalama.Framework.Engine.Pipeline
             // Prepare the compile-time assembly.
             if ( !loader.TryGetCompileTimeProjectFromCompilation(
                     roslynCompilation,
-                    redistributionLicenseInfo,
+                    projectLicenseInfo,
                     compileTimeTreesHint,
                     diagnosticAdder,
                     false,
@@ -481,12 +481,12 @@ namespace Metalama.Framework.Engine.Pipeline
             }
 
             // Enforce licensing.
-            var licenseController = pipelineConfiguration.ServiceProvider.GetService<LicenseVerifier>();
+            var licenseVerifier = pipelineConfiguration.ServiceProvider.GetService<LicenseVerifier>();
 
-            if ( licenseController != null )
+            if ( licenseVerifier != null )
             {
                 var licensingDiagnostics = new UserDiagnosticSink();
-                licenseController.VerifyCompilationResult( pipelineStageResult.AspectInstanceResults, licensingDiagnostics );
+                licenseVerifier.VerifyCompilationResult( pipelineStageResult.AspectInstanceResults, licensingDiagnostics );
                 pipelineStageResult = pipelineStageResult.WithAdditionalDiagnostics( licensingDiagnostics.ToImmutable() );
             }
 

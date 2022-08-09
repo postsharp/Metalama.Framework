@@ -138,6 +138,13 @@ namespace Metalama.Framework.Engine.CompileTime
         /// <returns></returns>
         public MetadataReference ToMetadataReference() => MetadataReferenceCache.GetMetadataReference( this.AssertNotEmpty()._compiledAssemblyPath! );
 
+        [Memo]
+        public ProjectLicenseInfo ProjectLicenseInfo
+            => this._manifest?.RedistributionLicenseKey == null
+                ? ProjectLicenseInfo.Empty
+                : new ProjectLicenseInfo( this._manifest.RedistributionLicenseKey );
+        
+
         /// <summary>
         /// Gets the unique hash of the project, computed from the source code.
         /// </summary>

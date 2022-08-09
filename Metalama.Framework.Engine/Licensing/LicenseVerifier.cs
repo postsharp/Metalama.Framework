@@ -22,7 +22,8 @@ namespace Metalama.Framework.Engine.Licensing;
 /// </summary>
 internal class LicenseVerifier : IService
 {
-    private const int _maxAspectClasses = int.MaxValue;
+    private int _maxAspectClasses = int.MaxValue;
+
     private readonly bool _isLimitedLicense;
 
     public LicenseVerifier( IServiceProvider serviceProvider )
@@ -32,6 +33,7 @@ internal class LicenseVerifier : IService
         if ( licenseConsumptionManager != null )
         {
             // TODO: if the _current_ project has a redistribution license, it has no limitation.
+            // TODO: instead of a bool, there are 4 product editions.
             this._isLimitedLicense = !licenseConsumptionManager.CanConsumeFeatures( LicensedFeatures.Metalama );
         }
         else
@@ -41,23 +43,6 @@ internal class LicenseVerifier : IService
     }
 
     public void VerifyCanAddChildAspect( AspectPredecessor predecessor )
-    {
-        // Adding children aspects is currently not limited.
-    }
-
-    private static bool HasRedistributionLicense( CompileTimeProject? project )
-    {
-        if ( project == null )
-        {
-            return false;
-        }
-
-        // TODO: project.LicenseKeys
-
-        return false;
-    }
-
-    public void VerifyCanValidator( AspectPredecessor predecessor )
     {
         if ( this._isLimitedLicense )
         {
@@ -70,29 +55,34 @@ internal class LicenseVerifier : IService
         }
     }
 
+    private static bool HasRedistributionLicense( CompileTimeProject? project ) => project?.ProjectLicenseInfo.LicenseKey != null;
+
+    public void VerifyCanValidator( AspectPredecessor predecessor )
+    {
+        if ( this._isLimitedLicense )
+        {
+            switch ( predecessor.Instance )
+            {
+                case IFabricInstance fabricInstance:
+                    throw new InvalidOperationException(
+                        $"The '{fabricInstance.Fabric.GetType().Name}' fabric cannot add a validator because this feature is not covered by Metalama Essentials license. You can add a only validator from an aspect using Metalama Essentials." );
+            }
+        }
+    }
+
     public void VerifyCompilationResult( ImmutableArray<AspectInstanceResult> aspectInstanceResults, UserDiagnosticSink diagnostics )
     {
         var aspectClasses = aspectInstanceResults.Select( a => a.AspectInstance.AspectClass ).Distinct().ToList();
 
-        if ( aspectClasses.Count > _maxAspectClasses )
+        if ( aspectClasses.Count > this._maxAspectClasses )
         {
             var aspectClassNames = string.Join( ",", aspectClasses.Select( x => "'" + x.ShortName + "'" ) );
 
             diagnostics.Report(
                 LicensingDiagnosticDescriptors.TooManyAspectClasses.CreateRoslynDiagnostic(
                     null,
-                    (aspectClasses.Count, _maxAspectClasses, aspectClassNames) ) );
+                    (aspectClasses.Count, this._maxAspectClasses, aspectClassNames) ) );
         }
     }
 
-    public void VerifyCanBeInherited( AspectClass aspectClass, IAspect? prototype, IDiagnosticAdder diagnosticAdder )
-    {
-        if ( prototype == null )
-        {
-            // This happens only with abstract classes.
-            return;
-        }
-
-        // Inheritance is currently unlimited.
-    }
 }

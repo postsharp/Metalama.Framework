@@ -308,7 +308,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     if ( !state._pipeline.TryInitialize(
                             diagnosticAdder,
                             compilation,
-                            null,
+                            null, // Redistribution licenses are ignored at design time.
                             compileTimeTrees,
                             cancellationToken,
                             out configuration ) )

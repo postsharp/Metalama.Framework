@@ -160,7 +160,7 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
     /// </summary>
     public bool TryGetCompileTimeProjectFromCompilation(
         Compilation runTimeCompilation,
-        RedistributionLicenseInfo? redistributionLicenseInfo,
+        ProjectLicenseInfo? projectLicenseInfo,
         IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
         IDiagnosticAdder diagnosticSink,
         bool cacheOnly,
@@ -197,7 +197,7 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
 
         if ( !this._builder.TryGetCompileTimeProject(
                 runTimeCompilation,
-                redistributionLicenseInfo,
+                projectLicenseInfo,
                 compileTimeTreesHint,
                 referencedProjects,
                 diagnosticSink,
