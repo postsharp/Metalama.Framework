@@ -861,7 +861,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             transitiveFabricTypes,
                             otherTemplateTypes,
                             referencedProjects.Select( r => r.RunTimeIdentity.GetDisplayName() ).ToList(),
-                            projectLicenseInfo?.LicenseKey,
+                            projectLicenseInfo?.RedistributionLicenseKey,
                             sourceHash,
                             textMapDirectory.FilesByTargetPath.Values.Select( f => new CompileTimeFile( f ) ).ToImmutableList() );
 

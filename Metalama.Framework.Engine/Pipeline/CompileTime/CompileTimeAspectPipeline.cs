@@ -76,7 +76,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
 
             // TODO: initialize ProjectLicenseInfo from the license key specified in the project, but only if it is a redistribution one.
             // Get the value from the licensing service? 
-            ProjectLicenseInfo? projectLicenseInfo = null;
+            var projectLicenseInfo = ProjectLicenseInfo.Empty;
 
             // Initialize the pipeline and generate the compile-time project.
             if ( !this.TryInitialize( diagnosticAdder, partialCompilation, projectLicenseInfo, null, cancellationToken, out var configuration ) )

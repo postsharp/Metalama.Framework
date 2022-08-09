@@ -55,7 +55,7 @@ internal class LicenseVerifier : IService
         }
     }
 
-    private static bool HasRedistributionLicense( CompileTimeProject? project ) => project?.ProjectLicenseInfo.LicenseKey != null;
+    private static bool HasRedistributionLicense( CompileTimeProject? project ) => project?.ProjectLicenseInfo.RedistributionLicenseKey != null;
 
     public void VerifyCanValidator( AspectPredecessor predecessor )
     {
