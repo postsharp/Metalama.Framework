@@ -38,9 +38,9 @@ using System.Threading;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
-    public record RedistributionLicenseInfo( ImmutableArray<string> LicenseKeys )
+    public record RedistributionLicenseInfo( string? LicenseKey )
     {
-        public static RedistributionLicenseInfo Empty { get; } = new RedistributionLicenseInfo( ImmutableArray<string>.Empty );
+        public static RedistributionLicenseInfo Empty { get; } = new RedistributionLicenseInfo( default(string) );
     }
         
     /// <summary>
@@ -866,7 +866,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             transitiveFabricTypes,
                             otherTemplateTypes,
                             referencedProjects.Select( r => r.RunTimeIdentity.GetDisplayName() ).ToList(),
-                            redistributionLicenseInfo?.LicenseKeys ?? ImmutableArray<string>.Empty,
+                            redistributionLicenseInfo?.LicenseKey,
                             sourceHash,
                             textMapDirectory.FilesByTargetPath.Values.Select( f => new CompileTimeFile( f ) ).ToImmutableList() );
 

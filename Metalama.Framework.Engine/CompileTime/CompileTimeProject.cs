@@ -45,6 +45,7 @@ namespace Metalama.Framework.Engine.CompileTime
             ImmutableArray<string>.Empty,
             ImmutableArray<string>.Empty,
             ImmutableArray<string>.Empty,
+            null,
             0,
             ImmutableArray<CompileTimeFile>.Empty );
 
@@ -313,6 +314,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 fabricTypes,
                 transitiveFabricTypes,
                 templateProviders,
+                null,
                 null,
                 hash.Digest(),
                 Array.Empty<CompileTimeFile>() );

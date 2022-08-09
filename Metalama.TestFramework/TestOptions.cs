@@ -210,6 +210,12 @@ namespace Metalama.TestFramework
         public ImmutableDictionary<string, string> LanguageFeatures { get; set; } = ImmutableDictionary<string, string>.Empty;
 
         /// <summary>
+        /// Gets or sets the name of a file in the project directory containing the license key.
+        /// To set this option in a test, add this comment to your test file: <c>// @LicenseFile(file)</c>.
+        /// </summary>
+        public string? LicenseFile { get; set; }
+
+        /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
         /// that is not defined in the current object but defined in the argument.
         /// </summary>
@@ -261,6 +267,8 @@ namespace Metalama.TestFramework
             this.RequiredConstants.AddRange( baseOptions.RequiredConstants );
 
             this.OutputAllSyntaxTrees ??= baseOptions.OutputAllSyntaxTrees;
+
+            this.LicenseFile ??= baseOptions.LicenseFile;
         }
 
         public IReadOnlyList<string> InvalidSourceOptions => this._invalidSourceOptions;
@@ -434,6 +442,12 @@ namespace Metalama.TestFramework
                                 this.LanguageFeatures = this.LanguageFeatures.SetItem( parts[0], parts[1] );
                             }
                         }
+
+                        break;
+
+                    case "LicenseFile":
+
+                        this.LicenseFile = optionArg;
 
                         break;
 
