@@ -5,7 +5,6 @@ using Metalama.Backstage.Extensibility;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Project;
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
 namespace Metalama.Framework.Engine.Pipeline
