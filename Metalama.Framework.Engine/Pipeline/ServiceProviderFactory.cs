@@ -16,21 +16,9 @@ namespace Metalama.Framework.Engine.Pipeline
         private static ServiceProvider? _globalInstance;
 
         /// <summary>
-        /// Registers a global service, which will be available in the <see cref="GlobalProvider"/> provider and in all
-        /// instances returned by <see cref="GetServiceProvider"/>. This method is used by TryMetalama to register hooks.
-        /// </summary>
-        [ExcludeFromCodeCoverage]
-        public static void AddGlobalService<T>( T service )
-            where T : IService
-        {
-            _globalInstance = GlobalProvider.WithServices( service );
-            _asyncLocalInstance.Value = null;
-        }
-
-        /// <summary>
         /// Replaces the async-local <see cref="ServiceProvider"/> by a newly created provider, with a new instances
         /// of all services. This method must be called when the consumer needs to pass a different implementation
-        /// of <see cref="IServiceProvider"/> than the default one cannot call <see cref="GetServiceProvider"/>
+        /// of <see cref="IServiceProvider"/> than the default one cannot call <see cref="GetServiceProvider()"/>
         /// because it does not control the calling point. A typical consumer of this method is TryMetalama.
         /// </summary>
         public static void InitializeAsyncLocalProvider( IServiceProvider backstageServiceProvider )
@@ -48,7 +36,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
         /// <summary>
         /// Add a service to the async-local <see cref="ServiceProvider"/>, which is used as a prototype by the
-        /// <see cref="GetServiceProvider"/> method to create instances in the current async context. If no async-local
+        /// <see cref="GetServiceProvider()"/> method to create instances in the current async context. If no async-local
         /// context is defined yet, it is cloned from <see cref="GlobalProvider"/>.
         /// </summary>
         public static void AddAsyncLocalService( IService service )
@@ -79,16 +67,20 @@ namespace Metalama.Framework.Engine.Pipeline
         internal static ServiceProvider AsyncLocalProvider => _asyncLocalInstance.Value ??= GlobalProvider;
 
         /// <summary>
-        /// Gets a new instance of the <see cref="ServiceProvider"/>. If a fallback <see cref="IServiceProvider"/> is provided,
-        /// the new <see cref="ServiceProvider"/> gets a new implementation of all shared service (i.e. <see cref="AddGlobalService{T}"/> and
-        /// <see cref="AddAsyncLocalService"/> are ignored). This scenario is used in tests. Otherwise, a shallow clone of the async-local or the global
-        /// provider is provided.
+        /// Gets an instance of the <see cref="ServiceProvider"/> backed with the default backstage services.
         /// </summary>
-        public static ServiceProvider GetServiceProvider( IServiceProvider? nextServiceProvider = null )
+        public static ServiceProvider GetServiceProvider() => GetServiceProvider( null );
+        
+        /// <summary>
+        /// Gets an instance of <see cref="ServiceProvider"/> with a specific upstream <see cref="IServiceProvider"/>.
+        /// If <see cref="AddAsyncLocalService"/> has been called, the <paramref name="upstreamServiceProvider"/> parameter is ignored.
+        /// This situation happens in Metalama.Try.
+        /// </summary>
+        public static ServiceProvider GetServiceProvider( IServiceProvider? upstreamServiceProvider )
         {
             ServiceProvider serviceProvider;
 
-            if ( nextServiceProvider == null )
+            if ( _asyncLocalInstance.Value != null )
             {
                 // If we are not given specific directories, we try to provide shared, singleton instances of the services that don't depend on
                 // any other configuration. This avoids redundant initializations and improves performance.
@@ -96,7 +88,7 @@ namespace Metalama.Framework.Engine.Pipeline
             }
             else
             {
-                serviceProvider = CreateBaseServiceProvider( nextServiceProvider );
+                serviceProvider = CreateBaseServiceProvider( upstreamServiceProvider );
             }
 
             return serviceProvider;
