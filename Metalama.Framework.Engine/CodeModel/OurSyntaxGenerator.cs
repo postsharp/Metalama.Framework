@@ -492,6 +492,10 @@ namespace Metalama.Framework.Engine.CodeModel
                 {
                     return this.TypeOfExpression( typeValue.GetSymbol() );
                 }
+                else if ( value is Type systemTypeValue )
+                {
+                    return this.TypeOfExpression( TypeFactory.GetType( (Type) value ).GetSymbol() );
+                }
                 else
                 {
                     var literal = SyntaxFactoryEx.LiteralExpressionOrNull( value );
