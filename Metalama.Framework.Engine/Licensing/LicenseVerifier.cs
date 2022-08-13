@@ -49,8 +49,10 @@ internal class LicenseVerifier : IService
             switch ( predecessor.Instance )
             {
                 case IFabricInstance fabricInstance:
-                    throw new InvalidOperationException(
-                        $"The '{fabricInstance.Fabric.GetType().Name}' fabric cannot add an aspect because this feature is not covered by Metalama Essentials license. You can add a only validator from an aspect using Metalama Essentials." );
+                    throw new DiagnosticException(
+                        LicensingDiagnosticDescriptors.FabricsNotAvailable.CreateRoslynDiagnostic(
+                            null,
+                            (fabricInstance.Fabric.GetType().Name, "add an aspect") ) );
             }
         }
     }
@@ -64,8 +66,10 @@ internal class LicenseVerifier : IService
             switch ( predecessor.Instance )
             {
                 case IFabricInstance fabricInstance:
-                    throw new InvalidOperationException(
-                        $"The '{fabricInstance.Fabric.GetType().Name}' fabric cannot add a validator because this feature is not covered by Metalama Essentials license. You can add a only validator from an aspect using Metalama Essentials." );
+                    throw new DiagnosticException(
+                        LicensingDiagnosticDescriptors.FabricsNotAvailable.CreateRoslynDiagnostic(
+                            null,
+                            (fabricInstance.Fabric.GetType().Name, "add a validator") ) );
             }
         }
     }

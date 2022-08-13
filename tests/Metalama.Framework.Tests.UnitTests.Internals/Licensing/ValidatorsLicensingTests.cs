@@ -75,23 +75,23 @@ class TargetClass
 ";
 
         [Theory]
-        [InlineData( TestLicenseKeys.MetalamaUltimateEssentials )]
-        [InlineData( TestLicenseKeys.MetalamaUltimateBusiness )]
-        public async Task DeclarationValidatorIsAcceptedViaAspectAsync( string licenseKey )
+        [InlineData( TestLicenseKeys.MetalamaUltimateEssentials, true )]
+        [InlineData( TestLicenseKeys.MetalamaUltimateBusiness, true )]
+        public async Task DeclarationValidatorIsAcceptedViaAspectAsync( string licenseKey, bool accepted )
         {
             var diagnostics = await this.GetDiagnosticsAsync( _declarationValidationAspectAppliedCode, licenseKey );
 
-            Assert.Single( diagnostics, d => d.Id == "DEMO01" );
+            Assert.Single( diagnostics, d => d.Id == (accepted ? "DEMO01" : "LAMA0801") );
         }
 
         [Theory]
-        [InlineData( TestLicenseKeys.MetalamaUltimateEssentials )]
-        [InlineData( TestLicenseKeys.MetalamaUltimateBusiness )]
-        public async Task DeclarationValidatorIsAcceptedViaFabricAsync( string licenseKey )
+        [InlineData( TestLicenseKeys.MetalamaUltimateEssentials, false )]
+        [InlineData( TestLicenseKeys.MetalamaUltimateBusiness, true )]
+        public async Task DeclarationValidatorIsAcceptedViaFabricAsync( string licenseKey, bool accepted )
         {
             var diagnostics = await this.GetDiagnosticsAsync( _declarationValidationFabricAppliedCode, licenseKey );
 
-            Assert.Single( diagnostics, d => d.Id == "DEMO02" );
+            Assert.Single( diagnostics, d => d.Id == (accepted ? "DEMO02" : "LAMA0801") );
         }
     }
 }

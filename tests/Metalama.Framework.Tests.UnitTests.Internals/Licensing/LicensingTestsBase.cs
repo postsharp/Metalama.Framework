@@ -27,8 +27,7 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
                 domain,
                 ExecutionScenario.CompileTime );
             var diagnostics = new DiagnosticList();
-            var compileTimeResult = await compileTimePipeline.ExecuteAsync( diagnostics, inputCompilation, default, CancellationToken.None );
-            Assert.Null( compileTimeResult );
+            _ = await compileTimePipeline.ExecuteAsync( diagnostics, inputCompilation, default, CancellationToken.None );
             return diagnostics;
         }
     }
