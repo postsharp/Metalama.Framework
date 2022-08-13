@@ -23,5 +23,5 @@ internal interface IAspectReceiverParent : IValidatorDriverFactory, IAspectOrVal
 
     Type Type { get; }
     
-    LicenseVerifier LicenseVerifier { get; }
+    LicenseVerifier? LicenseVerifier { get; }
 }
