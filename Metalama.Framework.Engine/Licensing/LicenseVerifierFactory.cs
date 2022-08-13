@@ -11,10 +11,10 @@ public static class LicenseVerifierFactory
     /// <summary>
     /// Adds the license verifier to the service provider. This method is called from the testing framework.
     /// </summary>
-    public static ServiceProvider AddTestLicenseVerifier( ServiceProvider serviceProvider, string licenseKey )
+    public static ServiceProvider AddTestLicenseVerifier( this ServiceProvider serviceProvider, string licenseKey )
     {
         var serviceProviderBuilder = new ServiceProviderBuilder(
-            ( type, impl ) => { serviceProvider = serviceProvider.WithUntypedService( type, impl ); },
+            ( type, impl ) => serviceProvider = serviceProvider.WithUntypedService( type, impl ),
             () => serviceProvider );
 
         serviceProviderBuilder.AddLicensing( additionalLicenses: new[] { licenseKey }, ignoreUserProfileLicenses: true );

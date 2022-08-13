@@ -9,7 +9,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.ForTestsOnly
 {
     internal class ForTestOnlyAttribute : Aspect, IAspect<IDeclaration>
     {
-        private static readonly DiagnosticDefinition<IDeclaration> _warning = new(
+        private static readonly DiagnosticDefinition<IDeclaration> _error = new(
             "DEMO02",
             Severity.Error,
             "'{0}' can be used only in a namespace whose name ends with '.Tests'." );
@@ -23,7 +23,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.ForTestsOnly
         {
             if (!context.ReferencingType.Namespace.Name.EndsWith( ".Tests" ))
             {
-                context.Diagnostics.Report( _warning.WithArguments( context.ReferencedDeclaration ) );
+                context.Diagnostics.Report( _error.WithArguments( context.ReferencedDeclaration ) );
             }
         }
 
