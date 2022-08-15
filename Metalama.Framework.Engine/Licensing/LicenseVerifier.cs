@@ -89,4 +89,19 @@ internal class LicenseVerifier : IService
         }
     }
 
+    public void VerifyCanBeInherited( AspectClass aspectClass, IAspect? prototype, IDiagnosticAdder diagnostics )
+    {
+        if ( prototype == null )
+        {
+            // This happens only with abstract classes.
+            return;
+        }
+
+        if ( aspectClass.IsInherited && this._isLimitedLicense )
+        {
+            diagnostics.Report(
+                LicensingDiagnosticDescriptors.InheritanceNotAvailable.CreateRoslynDiagnostic(
+                    null, aspectClass.ShortName ) );
+        }
+    }
 }

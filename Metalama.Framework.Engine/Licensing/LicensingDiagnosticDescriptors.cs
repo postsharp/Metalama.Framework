@@ -7,7 +7,7 @@ namespace Metalama.Framework.Engine.Licensing;
 
 internal static class LicensingDiagnosticDescriptors
 {
-    // Reserved range: 800-801
+    // Reserved range: 800-802
 
     private const string _category = "Metalama.General";
 
@@ -26,4 +26,12 @@ internal static class LicensingDiagnosticDescriptors
             "The '{0}' fabric cannot {1} because this feature is not covered by Metalama Essentials license. You can only {1} validator from an aspect using Metalama Essentials.",
             Severity.Error,
             "Cannot {1} using fabrics with Metalama Essentials." );
+
+    internal static readonly DiagnosticDefinition<string> InheritanceNotAvailable =
+        new(
+            "LAMA0802",
+            _category,
+            "The '{0}' aspect cannot be inherited because this feature is not covered by Metalama Essentials license.",
+            Severity.Error,
+            "Cannot inherit aspects with Metalama Essentials." );
 }
