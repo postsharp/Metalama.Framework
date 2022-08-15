@@ -152,7 +152,11 @@ namespace Metalama.TestFramework
                     // Note that we don't pass the full path to the Document because it causes call stacks of exceptions to have full paths,
                     // which is more difficult to test.
                     var parsedSyntaxTree = CSharpSyntaxTree.ParseText( sourceCode, parseOptions, fileName, Encoding.UTF8 );
-                    var prunedSyntaxRoot = new InactiveCodeRemover().Visit( await parsedSyntaxTree.GetRootAsync() );
+
+                    var prunedSyntaxRoot =
+                        testInput.Options.KeepDisabledCode != true
+                        ? new InactiveCodeRemover().Visit( await parsedSyntaxTree.GetRootAsync() )!
+                        : await parsedSyntaxTree.GetRootAsync();
 
                     if ( !acceptFileWithoutMember && prunedSyntaxRoot is CompilationUnitSyntax { Members: { Count: 0 } } )
                     {

@@ -26,7 +26,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                 @"global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.Method(System.Int32)~System.Int32"")).GetParameters()[0]",
                 serialized );
 
-            TestExpression<ParameterInfo>(
+            this.TestExpression<ParameterInfo>(
                 code,
                 serialized,
                 parameterInfo =>
@@ -47,7 +47,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                 @"global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.Method``1(``0)~System.Int32"")).GetParameters()[0]",
                 serialized );
 
-            TestExpression<ParameterInfo>(
+            this.TestExpression<ParameterInfo>(
                 code,
                 serialized,
                 parameterInfo =>
@@ -68,7 +68,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                 @"global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target`1.Method``1(System.Tuple{`0,``0})~System.Int32""), typeof(global::Target<>).TypeHandle).GetParameters()[0]",
                 serialized );
 
-            TestExpression<ParameterInfo>(
+            this.TestExpression<ParameterInfo>(
                 code,
                 serialized,
                 parameterInfo =>
@@ -89,7 +89,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                 @"global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.Method(System.Single,System.Int32)~System.Int32"")).GetParameters()[1]",
                 serialized );
 
-            TestExpression<ParameterInfo>(
+            this.TestExpression<ParameterInfo>(
                 code,
                 serialized,
                 parameterInfo =>
@@ -110,7 +110,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                 @"((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.Method(System.Single,System.Int32)~System.String""))).ReturnParameter",
                 serialized );
 
-            TestExpression<ParameterInfo>(
+            this.TestExpression<ParameterInfo>(
                 code,
                 serialized,
                 parameterInfo =>
@@ -130,7 +130,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                 @"((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.get_Property~System.String""))).ReturnParameter",
                 serialized );
 
-            TestExpression<ParameterInfo>(
+            this.TestExpression<ParameterInfo>(
                 code,
                 serialized,
                 parameterInfo =>
@@ -150,7 +150,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                 @"global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.get_Item(System.Int32)~System.Int32"")).GetParameters()[0]",
                 serialized );
 
-            TestExpression<ParameterInfo>(
+            this.TestExpression<ParameterInfo>(
                 code,
                 serialized,
                 parameterInfo =>

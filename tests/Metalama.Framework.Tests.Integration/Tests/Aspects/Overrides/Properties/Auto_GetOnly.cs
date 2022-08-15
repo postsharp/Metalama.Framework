@@ -49,13 +49,13 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
 
         public TargetClass()
         {
-            this.Property = 42;
+            this.Property = 27;
             this.InitializerProperty = 27;
         }
 
         static TargetClass()
         {
-            StaticProperty = 42;
+            StaticProperty = 27;
             StaticInitializerProperty = 27;
         }
     }

@@ -40,10 +40,9 @@ namespace Metalama.Framework.Engine.CodeModel
                 ImmutableDictionary<string, SyntaxTree> syntaxTrees,
                 ImmutableHashSet<INamedTypeSymbol>? types,
                 PartialCompilation baseCompilation,
-                IReadOnlyList<SyntaxTreeModification>? modifiedSyntaxTrees,
-                IReadOnlyList<SyntaxTree>? addedTrees,
+                IReadOnlyList<SyntaxTreeTransformation>? modifications,
                 ImmutableArray<ManagedResource> resources )
-                : base( baseCompilation, modifiedSyntaxTrees, addedTrees, resources )
+                : base( baseCompilation, modifications, resources )
             {
                 this._types = types;
                 this._syntaxTrees = syntaxTrees;
@@ -73,37 +72,46 @@ namespace Metalama.Framework.Engine.CodeModel
             public override bool IsPartial => true;
 
             public override PartialCompilation Update(
-                IReadOnlyList<SyntaxTreeModification>? replacedTrees = null,
-                IReadOnlyList<SyntaxTree>? addedTrees = null,
+                IReadOnlyList<SyntaxTreeTransformation>? transformations = null,
                 ImmutableArray<ManagedResource> resources = default )
             {
-                this.Validate( addedTrees, replacedTrees );
+                this.Validate( transformations );
 
                 var syntaxTrees = this._syntaxTrees.ToBuilder();
 
-                if ( replacedTrees != null )
+                if ( transformations != null )
                 {
-                    foreach ( var replacement in replacedTrees )
+                    foreach ( var transformation in transformations )
                     {
-                        if ( !this._syntaxTrees.ContainsKey( replacement.FilePath ) )
+                        if ( transformation.OldTree != null && !this._syntaxTrees.ContainsKey( transformation.FilePath ) )
                         {
                             throw new KeyNotFoundException();
                         }
 
-                        syntaxTrees[replacement.FilePath] = replacement.NewTree;
-                    }
-                }
+                        switch ( transformation.Kind )
+                        {
+                            case SyntaxTreeTransformationKind.None:
+                                continue;
 
-                if ( addedTrees != null )
-                {
-                    foreach ( var addedTree in addedTrees )
-                    {
-                        syntaxTrees.Add( addedTree.FilePath, addedTree );
+                            case SyntaxTreeTransformationKind.Add:
+                            case SyntaxTreeTransformationKind.Replace:
+                                syntaxTrees[transformation.FilePath] = transformation.NewTree.AssertNotNull();
+
+                                break;
+
+                            case SyntaxTreeTransformationKind.Remove:
+                                syntaxTrees.Remove( transformation.FilePath );
+
+                                break;
+
+                            default:
+                                throw new AssertionFailedException();
+                        }
                     }
                 }
 
                 // TODO: when the compilation is modified, we should update the set of types and derived types.
-                return new PartialImpl( syntaxTrees.ToImmutable(), null, this, replacedTrees, addedTrees, resources );
+                return new PartialImpl( syntaxTrees.ToImmutable(), null, this, transformations, resources );
             }
         }
     }

@@ -16,9 +16,9 @@ namespace Metalama.Framework.Engine.Linking
     {
         private readonly Dictionary<INamedType, HashSet<string>> _introducedMemberNames;
 
-        public LinkerIntroductionNameProvider()
+        public LinkerIntroductionNameProvider( CompilationModel finalCompilationModel )
         {
-            this._introducedMemberNames = new Dictionary<INamedType, HashSet<string>>();
+            this._introducedMemberNames = new Dictionary<INamedType, HashSet<string>>( finalCompilationModel.InvariantComparer );
         }
 
         internal override string GetOverrideName( INamedType targetType, AspectLayerId aspectLayer, IMember overriddenMember )

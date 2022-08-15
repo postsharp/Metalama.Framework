@@ -52,18 +52,8 @@ namespace Metalama.Framework.Engine.Advising
         {
             if ( type.TypeKind is TypeKind.Struct or TypeKind.RecordStruct )
             {
-                // If we are in a struct, make sure that all existing constructors call `this()`.
-
-                foreach ( var constructor in type.Constructors )
-                {
-                    if ( !constructor.IsImplicitlyDeclared && constructor.InitializerKind == ConstructorInitializerKind.None )
-                    {
-                        addTransformation( new CallDefaultConstructorTransformation( advice, constructor ) );
-                    }
-                }
-
                 // If there is no 'this()' constructor, add one.
-                if ( !type.Constructors.Any( c => !c.IsImplicitlyDeclared && c.Parameters.Count == 0 ) )
+                if ( !type.Constructors.Any( c => !c.IsImplicitlyDeclared ) )
                 {
                     addTransformation( new AddExplicitDefaultConstructorTransformation( advice, type ) );
                 }

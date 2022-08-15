@@ -63,12 +63,9 @@ namespace Metalama.Framework.Aspects
 
         private static readonly IEligibilityRule<IParameter> _parameterEligibilityDefault =
             EligibilityRuleFactory.CreateRule<IParameter>(
-                parameter =>
-                {
-                    parameter.MustSatisfy(
-                        p => !(p.RefKind == RefKind.Out && p.DeclaringMember is IConstructor),
-                        _ => $"output contracts on constructors are not supported" );
-                } );
+                parameter => parameter.MustSatisfy(
+                    p => !(p.RefKind == RefKind.Out && p.DeclaringMember is IConstructor),
+                    _ => $"output contracts on constructors are not supported" ) );
 
         // Eligibility rules for return parameters.
         private static readonly IEligibilityRule<IParameter> _returnValueEligibilityMustNotBeVoid =

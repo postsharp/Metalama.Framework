@@ -5,7 +5,6 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.DesignTime.Diagnostics;
 using Metalama.Framework.DesignTime.Utilities;
-using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
@@ -32,6 +31,11 @@ namespace Metalama.Framework.DesignTime
     [ExcludeFromCodeCoverage]
     public class TheCodeFixProvider : CodeFixProvider
     {
+        static TheCodeFixProvider()
+        {
+            DesignTimeServices.Initialize();
+        }
+
         private const string _makePartialKey = "Metalama.MakePartial";
         private readonly DesignTimeDiagnosticDefinitions _designTimeDiagnosticDefinitions = DesignTimeDiagnosticDefinitions.GetInstance();
 

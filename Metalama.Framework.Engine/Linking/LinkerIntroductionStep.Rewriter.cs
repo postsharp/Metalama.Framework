@@ -12,7 +12,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal partial class LinkerIntroductionStep
     {
-        private partial class Rewriter : CSharpSyntaxRewriter
+        private partial class Rewriter : SafeSyntaxRewriter
         {
             private readonly CompilationModel _compilation;
             private readonly ImmutableDictionary<AspectLayerId, OrderedAspectLayer> _orderedAspectLayers;
@@ -138,13 +138,17 @@ namespace Metalama.Framework.Engine.Linking
                     var disable = Trivia(
                         PragmaWarningDirectiveTrivia( Token( SyntaxKind.DisableKeyword ), true )
                             .WithErrorCodes( errorCodes )
-                            .NormalizeWhitespace() );
+                            .NormalizeWhitespace()
+                            .WithLeadingTrivia( ElasticLineFeed )
+                            .WithTrailingTrivia( ElasticLineFeed ) );
 
                     var restore =
                         Trivia(
                             PragmaWarningDirectiveTrivia( Token( SyntaxKind.RestoreKeyword ), true )
                                 .WithErrorCodes( errorCodes )
-                                .NormalizeWhitespace() );
+                                .NormalizeWhitespace()
+                                .WithLeadingTrivia( ElasticLineFeed )
+                                .WithTrailingTrivia( ElasticLineFeed ) );
 
                     transformedNode =
                         transformedNode
@@ -262,12 +266,22 @@ namespace Metalama.Framework.Engine.Linking
                     else
                     {
                         // If we are removing a custom attribute, keep its trivia.
-                        outputTrivia.AddRange(
-                            list.GetLeadingTrivia()
-                                .Where(
-                                    t => t.Kind() is SyntaxKind.MultiLineCommentTrivia
-                                        or SyntaxKind.MultiLineDocumentationCommentTrivia or
-                                        SyntaxKind.SingleLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia ) );
+                        foreach ( var trivia in list.GetLeadingTrivia() )
+                        {
+                            switch ( trivia.Kind() )
+                            {
+                                case SyntaxKind.MultiLineCommentTrivia or SyntaxKind.MultiLineDocumentationCommentTrivia:
+                                    outputTrivia.Add( trivia );
+
+                                    break;
+
+                                case SyntaxKind.SingleLineCommentTrivia or SyntaxKind.SingleLineDocumentationCommentTrivia:
+                                    outputTrivia.Add( trivia );
+                                    outputTrivia.Add( ElasticLineFeed );
+
+                                    break;
+                            }
+                        }
                     }
                 }
 
@@ -282,7 +296,7 @@ namespace Metalama.Framework.Engine.Linking
                             .AssertNotNull();
 
                         var newList = AttributeList( SingletonSeparatedList( newAttribute ) )
-                            .WithTrailingTrivia( ElasticCarriageReturn )
+                            .WithTrailingTrivia( ElasticLineFeed )
                             .WithAdditionalAnnotations( attributeBuilder.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation );
 
                         if ( targetKind != SyntaxKind.None )
@@ -331,52 +345,7 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     if ( typeLevelTransformations.AddExplicitDefaultConstructor )
                     {
-                        // Initialize fields to their default value in the new initializer.
-                        var constructorStatements = new List<StatementSyntax>();
-
-                        void AddInitialization( SyntaxToken identifier )
-                        {
-                            constructorStatements.Add(
-                                ExpressionStatement(
-                                    AssignmentExpression( SyntaxKind.SimpleAssignmentExpression, IdentifierName( identifier ), SyntaxFactoryEx.Default ) ) );
-                        }
-
-                        var typeSymbol = this._compilation.RoslynCompilation.GetSemanticModel( node.SyntaxTree ).GetDeclaredSymbol( node );
-
-                        if ( typeSymbol != null )
-                        {
-                            foreach ( var member in typeSymbol.GetMembers() )
-                            {
-                                if ( member.GetDeclarationKind() is DeclarationKind.Field or DeclarationKind.Property )
-                                {
-                                    var memberSyntax = member.GetPrimaryDeclaration();
-
-                                    switch ( memberSyntax )
-                                    {
-                                        case PropertyDeclarationSyntax property:
-                                            if ( property.Initializer == null && ((IPropertySymbol) member).IsAutoProperty() )
-                                            {
-                                                AddInitialization( property.Identifier );
-                                            }
-
-                                            break;
-
-                                        case VariableDeclaratorSyntax field:
-                                            if ( field.Initializer == null && !this._introducedMemberCollection.IsRemovedSyntax( field ) )
-                                            {
-                                                AddInitialization( field.Identifier );
-                                            }
-
-                                            break;
-
-                                        default:
-                                            throw new AssertionFailedException();
-                                    }
-                                }
-                            }
-                        }
-
-                        var constructorBody = Block( constructorStatements );
+                        var constructorBody = Block();
 
                         var constructor = ConstructorDeclaration( node.Identifier )
                             .WithModifiers( TokenList( Token( SyntaxKind.PublicKeyword ) ) )
@@ -511,7 +480,7 @@ namespace Metalama.Framework.Engine.Linking
                     EventDeclarationSyntax @event => Singleton( this.VisitEventDeclarationCore( @event ) ),
                     FieldDeclarationSyntax field => this.VisitFieldDeclarationCore( field ),
                     EventFieldDeclarationSyntax @eventField => this.VisitEventFieldDeclarationCore( @eventField ),
-                    _ => Singleton( (MemberDeclarationSyntax) this.Visit( member ) )
+                    _ => Singleton( (MemberDeclarationSyntax) this.Visit( member )! )
                 };
             }
 
@@ -527,12 +496,6 @@ namespace Metalama.Framework.Engine.Linking
 
                 constructorDeclaration = constructorDeclaration.WithInitializer(
                     AppendInitializerArguments( constructorDeclaration.Initializer, memberLevelTransformations.Arguments ) );
-
-                if ( memberLevelTransformations.HasCallDefaultConstructorTransformation && constructorDeclaration.Initializer == null )
-                {
-                    constructorDeclaration =
-                        constructorDeclaration.WithInitializer( ConstructorInitializer( SyntaxKind.ThisConstructorInitializer ) );
-                }
 
                 return constructorDeclaration;
             }
@@ -663,68 +626,39 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            public override SyntaxNode? VisitVariableDeclarator( VariableDeclaratorSyntax node )
-            {
-                if ( this._introducedMemberCollection.IsRemovedSyntax( node ) )
-                {
-                    return null;
-                }
-
-                return base.VisitVariableDeclarator( node );
-            }
-
-            public override SyntaxNode? VisitVariableDeclaration( VariableDeclarationSyntax node )
-            {
-                var remainingVariables = new List<VariableDeclaratorSyntax>( node.Variables.Count );
-
-                foreach ( var variable in node.Variables )
-                {
-                    var rewrittenVariable = (VariableDeclaratorSyntax?) this.Visit( variable );
-
-                    if ( rewrittenVariable != null )
-                    {
-                        remainingVariables.Add( rewrittenVariable );
-                    }
-                }
-
-                if ( node.Variables.SequenceEqual( remainingVariables ) )
-                {
-                    return base.VisitVariableDeclaration( node );
-                }
-                else if ( remainingVariables.Count > 0 )
-                {
-                    return node
-                        .WithType( (TypeSyntax) this.Visit( node.Type ).AssertNotNull() )
-                        .WithVariables( SeparatedList( remainingVariables ) )
-                        .WithLeadingTrivia( this.VisitTriviaList( node.GetLeadingTrivia() ) )
-                        .WithTrailingTrivia( this.VisitTriviaList( node.GetTrailingTrivia() ) );
-                }
-                else
-                {
-                    return null;
-                }
-            }
-
             private IReadOnlyList<MemberDeclarationSyntax> VisitFieldDeclarationCore( FieldDeclarationSyntax node )
             {
                 var originalNode = node;
-                var rewrittenDeclaration = (VariableDeclarationSyntax?) this.Visit( node.Declaration );
-
-                if ( rewrittenDeclaration == null )
-                {
-                    return Array.Empty<MemberDeclarationSyntax>();
-                }
 
                 // Rewrite attributes.
                 if ( originalNode.Declaration.Variables.Count > 1
                      && originalNode.Declaration.Variables.Any( v => this._nodesWithModifiedAttributes.Contains( v ) ) )
                 {
+                    // TODO: This needs to use rewritten variable declaration or do removal in place.
                     var members = new List<MemberDeclarationSyntax>( originalNode.Declaration.Variables.Count );
 
                     // If we have changes in attributes and several members, we have to split them.
                     foreach ( var variable in originalNode.Declaration.Variables )
                     {
-                        var declaration = VariableDeclaration( node.Declaration.Type, SingletonSeparatedList( variable ) );
+                        if ( this._introducedMemberCollection.IsRemovedSyntax( variable ) )
+                        {
+                            continue;
+                        }
+
+                        var finalVariable = variable;
+
+                        if ( this._symbolMemberLevelTransformations.TryGetValue( variable, out var transformations )
+                             && transformations.AddDefaultInitializer )
+                        {
+                            finalVariable =
+                                finalVariable.WithInitializer(
+                                    EqualsValueClause(
+                                        LiteralExpression(
+                                            SyntaxKind.DefaultLiteralExpression,
+                                            Token( SyntaxKind.DefaultKeyword ) ) ) );
+                        }
+
+                        var declaration = VariableDeclaration( node.Declaration.Type, SingletonSeparatedList( finalVariable ) );
                         var attributes = this.RewriteDeclarationAttributeLists( variable, originalNode.AttributeLists );
 
                         var fieldDeclaration = FieldDeclaration( attributes.Attributes, node.Modifiers, declaration, Token( SyntaxKind.SemicolonToken ) )
@@ -741,7 +675,50 @@ namespace Metalama.Framework.Engine.Linking
                     var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode.Declaration.Variables[0], originalNode.AttributeLists );
                     node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
 
-                    return new[] { node.WithDeclaration( rewrittenDeclaration ) };
+                    var anyChangeToVariables = false;
+                    var rewrittenVariables = new List<VariableDeclaratorSyntax>();
+
+                    foreach ( var variable in originalNode.Declaration.Variables )
+                    {
+                        if ( this._introducedMemberCollection.IsRemovedSyntax( variable ) )
+                        {
+                            anyChangeToVariables = true;
+
+                            continue;
+                        }
+
+                        if ( this._symbolMemberLevelTransformations.TryGetValue( variable, out var transformations ) && transformations.AddDefaultInitializer )
+                        {
+                            anyChangeToVariables = true;
+
+                            rewrittenVariables.Add(
+                                variable.WithInitializer(
+                                    EqualsValueClause(
+                                        LiteralExpression(
+                                            SyntaxKind.DefaultLiteralExpression,
+                                            Token( SyntaxKind.DefaultKeyword ) ) ) ) );
+                        }
+                        else
+                        {
+                            rewrittenVariables.Add( variable );
+                        }
+                    }
+
+                    if ( anyChangeToVariables )
+                    {
+                        if ( rewrittenVariables.Count > 0 )
+                        {
+                            return new[] { node.WithDeclaration( node.Declaration.WithVariables( SeparatedList( rewrittenVariables ) ) ) };
+                        }
+                        else
+                        {
+                            return Array.Empty<MemberDeclarationSyntax>();
+                        }
+                    }
+                    else
+                    {
+                        return new[] { node };
+                    }
                 }
             }
 
@@ -814,12 +791,23 @@ namespace Metalama.Framework.Engine.Linking
             {
                 var originalNode = node;
 
-                if ( this._introducedMemberCollection.IsAutoPropertyWithSynthesizedSetter( node ) )
+                node = (PropertyDeclarationSyntax) this.VisitPropertyDeclaration( node )!;
+
+                if ( this._introducedMemberCollection.IsAutoPropertyWithSynthesizedSetter( originalNode ) )
                 {
-                    return node.WithSynthesizedSetter();
+                    node = node.WithSynthesizedSetter();
                 }
 
-                node = (PropertyDeclarationSyntax) this.VisitPropertyDeclaration( node )!;
+                if ( this._symbolMemberLevelTransformations.TryGetValue( originalNode, out var transformations )
+                     && transformations.AddDefaultInitializer )
+                {
+                    node =
+                        node.WithInitializer(
+                            EqualsValueClause(
+                                LiteralExpression(
+                                    SyntaxKind.DefaultLiteralExpression,
+                                    Token( SyntaxKind.DefaultKeyword ) ) ) );
+                }
 
                 // Rewrite attributes.
                 var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode, originalNode.AttributeLists );
@@ -856,16 +844,6 @@ namespace Metalama.Framework.Engine.Linking
             {
                 var originalNode = node;
 
-                // TODO: If we have several fields in the same declaration, and we have changes in custom attributes, we have to split the fields.
-
-                var rewrittenDeclaration = (VariableDeclarationSyntax?) this.Visit( node.Declaration );
-
-                if ( rewrittenDeclaration == null )
-                {
-                    // We are not supporting removal of event fields during introduction step.
-                    throw new AssertionFailedException();
-                }
-
                 // Rewrite attributes.
                 if ( originalNode.Declaration.Variables.Count > 1
                      && originalNode.Declaration.Variables.Any( v => this._nodesWithModifiedAttributes.Contains( v ) ) )
@@ -875,13 +853,27 @@ namespace Metalama.Framework.Engine.Linking
                     // If we have changes in attributes and several members, we have to split them.
                     foreach ( var variable in originalNode.Declaration.Variables )
                     {
-                        var declaration = VariableDeclaration( node.Declaration.Type, SingletonSeparatedList( variable ) );
+                        var finalVariable = variable;
+
+                        if ( this._symbolMemberLevelTransformations.TryGetValue( variable, out var transformations )
+                             && transformations.AddDefaultInitializer )
+                        {
+                            finalVariable =
+                                finalVariable.WithInitializer(
+                                    EqualsValueClause(
+                                        LiteralExpression(
+                                            SyntaxKind.DefaultLiteralExpression,
+                                            Token( SyntaxKind.DefaultKeyword ) ) ) );
+                        }
+
+                        var declaration = VariableDeclaration( node.Declaration.Type, SingletonSeparatedList( finalVariable ) );
+
                         var attributes = this.RewriteDeclarationAttributeLists( variable, originalNode.AttributeLists );
 
                         var eventDeclaration = EventFieldDeclaration(
                                 attributes.Attributes,
                                 node.Modifiers,
-                                Token( SyntaxKind.EventKeyword ),
+                                Token( TriviaList(), SyntaxKind.EventKeyword, TriviaList( ElasticSpace ) ),
                                 declaration,
                                 Token( SyntaxKind.SemicolonToken ) )
                             .WithTrailingTrivia( ElasticLineFeed )
@@ -897,7 +889,36 @@ namespace Metalama.Framework.Engine.Linking
                     var rewrittenAttributes = this.RewriteDeclarationAttributeLists( originalNode.Declaration.Variables[0], originalNode.AttributeLists );
                     node = node.WithAttributeLists( rewrittenAttributes.Attributes ).WithAdditionalLeadingTrivia( rewrittenAttributes.Trivia );
 
-                    return new[] { node.WithDeclaration( rewrittenDeclaration ) };
+                    var anyChange = false;
+                    var rewrittenVariables = new List<VariableDeclaratorSyntax>();
+
+                    foreach ( var variable in originalNode.Declaration.Variables )
+                    {
+                        if ( this._symbolMemberLevelTransformations.TryGetValue( variable, out var transformations ) && transformations.AddDefaultInitializer )
+                        {
+                            anyChange = true;
+
+                            rewrittenVariables.Add(
+                                variable.WithInitializer(
+                                    EqualsValueClause(
+                                        LiteralExpression(
+                                            SyntaxKind.DefaultLiteralExpression,
+                                            Token( SyntaxKind.DefaultKeyword ) ) ) ) );
+                        }
+                        else
+                        {
+                            rewrittenVariables.Add( variable );
+                        }
+                    }
+
+                    if ( anyChange )
+                    {
+                        return new[] { node.WithDeclaration( node.Declaration.WithVariables( SeparatedList( rewrittenVariables ) ) ) };
+                    }
+                    else
+                    {
+                        return new[] { node };
+                    }
                 }
             }
 
@@ -948,16 +969,6 @@ namespace Metalama.Framework.Engine.Linking
                     };
                 }
             }
-
-            // The following methods remove the #if code and replaces with its content, but it's not sure that this is the right
-            // approach in the scenario where we have to produce code that can become source code ("divorce" feature).
-            // When this scenario is supported, more tests will need to be added to specifically support #if.
-
-            public override SyntaxNode? VisitIfDirectiveTrivia( IfDirectiveTriviaSyntax node ) => null;
-
-            public override SyntaxNode? VisitEndIfDirectiveTrivia( EndIfDirectiveTriviaSyntax node ) => null;
-
-            public override SyntaxNode? VisitElseDirectiveTrivia( ElseDirectiveTriviaSyntax node ) => null;
 
             private SuppressionContext WithSuppressions( SyntaxNode node ) => new( this, this.GetSuppressions( node ) );
 

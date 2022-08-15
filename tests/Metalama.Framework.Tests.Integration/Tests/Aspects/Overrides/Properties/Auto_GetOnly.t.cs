@@ -2,7 +2,7 @@ internal class TargetClass
 {
 
 
-    private int _property;
+    private readonly int _property;
     [Override]
     public int Property
     {
@@ -11,7 +11,7 @@ internal class TargetClass
             global::System.Console.WriteLine("This is the overridden getter.");
             return this._property;
         }
-        private set
+        private init
         {
             global::System.Console.WriteLine($"This is the overridden setter.");
             this._property = value;
@@ -37,7 +37,7 @@ internal class TargetClass
     }
 
 
-    private int _initializerProperty = 42;
+    private readonly int _initializerProperty = 42;
 
     [Override]
     public int InitializerProperty
@@ -47,7 +47,7 @@ internal class TargetClass
             global::System.Console.WriteLine("This is the overridden getter.");
             return this._initializerProperty;
         }
-        private set
+        private init
         {
             global::System.Console.WriteLine($"This is the overridden setter.");
             this._initializerProperty = value;
@@ -72,13 +72,13 @@ internal class TargetClass
     }
     public TargetClass()
     {
-        this.Property = 42;
+        this.Property = 27;
         this.InitializerProperty = 27;
     }
 
     static TargetClass()
     {
-        StaticProperty = 42;
+        StaticProperty = 27;
         StaticInitializerProperty = 27;
     }
 }

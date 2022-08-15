@@ -34,14 +34,15 @@ namespace Metalama.Framework.Engine.Pipeline
             additionalSyntaxTrees = additionalSyntaxTreeDictionary.Values;
 
             LexicalScopeFactory lexicalScopeFactory = new( compilationModel );
-            var introductionNameProvider = new LinkerIntroductionNameProvider();
+            var introductionNameProvider = new LinkerIntroductionNameProvider( compilationModel );
 
             var aspectReferenceSyntaxProvider =
                 new LinkerAspectReferenceSyntaxProvider(
                     partialCompilation.InitialCompilation.Options.NullableContextOptions != NullableContextOptions.Disable );
 
             // Get all observable transformations except replacements, because replacements are not visible at design time.
-            var observableTransformations = transformations.Where( t => t is IObservableTransformation and not IReplaceMemberTransformation );
+            var observableTransformations =
+                transformations.Where( t => t is IObservableTransformation { IsDesignTime: true } and not IReplaceMemberTransformation );
 
             foreach ( var transformationGroup in
                      observableTransformations.GroupBy( t => ((IObservableTransformation) t).ContainingDeclaration ) )

@@ -47,17 +47,29 @@ namespace Metalama.Framework.Engine.CodeModel
                     return
                         this.Equals( leftFunctionPointerType.Signature, rightFunctionPointerType.Signature );
 
+                case (IParameterSymbol leftParameter, IParameterSymbol rightParameter):
+                    return
+                        this.Equals( leftParameter.Type, rightParameter.Type )
+                        && leftParameter.RefKind == rightParameter.RefKind;
+
                 case (IMethodSymbol leftMethod, IMethodSymbol rightMethod):
                     // Whole method signature matching.
                     return
                         StringComparer.Ordinal.Equals( leftMethod.Name, rightMethod.Name )
                         && leftMethod.TypeParameters.Length == rightMethod.TypeParameters.Length
                         && this.Equals( leftMethod.ReturnType, rightMethod.ReturnType )
-                        && leftMethod.Parameters.SequenceEqual(
-                            rightMethod.Parameters,
-                            ( l, r ) =>
-                                l.RefKind == r.RefKind
-                                && this.Equals( l, r ) );
+                        && leftMethod.Parameters.SequenceEqual( rightMethod.Parameters, ( l, r ) => this.Equals( l, r ) );
+
+                case (IEventSymbol leftEvent, IEventSymbol rightEvent):
+                    return
+                        StringComparer.Ordinal.Equals( leftEvent.Name, rightEvent.Name )
+                        && this.Equals( leftEvent.Type, rightEvent.Type );
+
+                case (IPropertySymbol leftProperty, IPropertySymbol rightProperty):
+                    return
+                        StringComparer.Ordinal.Equals( leftProperty.Name, rightProperty.Name )
+                        && this.Equals( leftProperty.Type, rightProperty.Type )
+                        && leftProperty.Parameters.SequenceEqual( rightProperty.Parameters, ( l, r ) => this.Equals( l, r ) );
 
                 case (INamedTypeSymbol leftNamedType, INamedTypeSymbol rightNamedType):
                     return
@@ -73,7 +85,42 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public int GetHashCode( ISymbol? obj )
         {
-            throw new NotImplementedException();
+            switch ( obj )
+            {
+                case IArrayTypeSymbol array:
+                    return HashCode.Combine( this.GetHashCode( array ) );
+
+                case IDynamicTypeSymbol:
+                    return HashCode.Combine( 0x57446317 );
+
+                case ITypeParameterSymbol typeParameter:
+                    return HashCode.Combine( typeParameter.TypeParameterKind, typeParameter.Ordinal );
+
+                case IPointerTypeSymbol pointerType:
+                    return HashCode.Combine( this.GetHashCode( pointerType.PointedAtType ) );
+
+                case IFunctionPointerTypeSymbol functionPointerType:
+                    return
+                        HashCode.Combine( this.GetHashCode( functionPointerType.Signature ) );
+
+                case IParameterSymbol parameterSymbol:
+                    return HashCode.Combine( parameterSymbol.Ordinal );
+
+                case IMethodSymbol method:
+                    // Whole method signature matching.
+                    return
+                        HashCode.Combine(
+                            method.Name,
+                            method.TypeParameters.Length,
+                            method.Parameters.Length );
+
+                case INamedTypeSymbol namedType:
+                    return
+                        HashCode.Combine( namedType.MetadataName );
+
+                default:
+                    return this._inner.GetHashCode( obj );
+            }
         }
     }
 }

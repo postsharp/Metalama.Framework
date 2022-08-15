@@ -68,7 +68,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
         }
 
-        public override bool IsDesignTime => !this.IsOverride;
+        public override bool IsDesignTime => !this.IsOverride && !this.IsNew;
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
             => this.DeclaringType.ToDisplayString( format, context ) + "." + this.Name;
@@ -113,7 +113,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             {
                 // TODO: Error about the expression type?
                 initializerMethodSyntax = null;
-                initializerExpressionSyntax = ((IUserExpression) initializerExpression).ToSyntax( context.SyntaxGenerationContext );
+                initializerExpressionSyntax = ((IUserExpression) initializerExpression).ToExpressionSyntax( context.SyntaxGenerationContext );
 
                 return true;
             }

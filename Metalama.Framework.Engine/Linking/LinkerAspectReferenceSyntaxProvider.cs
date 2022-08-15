@@ -20,6 +20,7 @@ namespace Metalama.Framework.Engine.Linking
     {
         public const string HelperTypeName = "__LinkerIntroductionHelpers__";
         public const string FinalizeMemberName = "__Finalize";
+        public const string SyntaxTreeName = "__LinkerIntroductionHelpers__.cs";
 
         private static readonly ConcurrentDictionary<LanguageOptions, SyntaxTree> _linkerHelperSyntaxTreeCache = new();
 
@@ -103,7 +104,7 @@ internal class {HelperTypeName}
 
             return CSharpSyntaxTree.ParseText(
                 code,
-                path: "__LinkerIntroductionHelpers__.cs",
+                path: SyntaxTreeName,
                 encoding: Encoding.UTF8,
                 options: options.ToParseOptions() );
         }

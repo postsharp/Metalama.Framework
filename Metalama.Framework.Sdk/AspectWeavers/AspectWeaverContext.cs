@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
@@ -77,7 +78,7 @@ namespace Metalama.Framework.Engine.AspectWeavers
                 .SelectMany( s => s!.DeclaringSyntaxReferences )
                 .GroupBy( r => r.SyntaxTree );
 
-            List<SyntaxTreeModification> modifiedSyntaxTrees = new();
+            List<SyntaxTreeTransformation> modifiedSyntaxTrees = new();
 
             foreach ( var group in nodes )
             {
@@ -88,11 +89,11 @@ namespace Metalama.Framework.Engine.AspectWeavers
 
                 if ( oldRoot != newRoot )
                 {
-                    modifiedSyntaxTrees.Add( new SyntaxTreeModification( oldTree.WithRootAndOptions( newRoot, oldTree.Options ), oldTree ) );
+                    modifiedSyntaxTrees.Add( SyntaxTreeTransformation.ReplaceTree( oldTree, oldTree.WithRootAndOptions( newRoot, oldTree.Options ) ) );
                 }
             }
 
-            this.Compilation = this.Compilation.WithSyntaxTreeModifications( modifiedSyntaxTrees );
+            this.Compilation = this.Compilation.WithSyntaxTreeTransformations( modifiedSyntaxTrees );
         }
 
         internal AspectWeaverContext(

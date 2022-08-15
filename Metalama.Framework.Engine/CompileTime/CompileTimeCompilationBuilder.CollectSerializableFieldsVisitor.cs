@@ -3,7 +3,7 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Serialization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.CompileTime
 {
     internal partial class CompileTimeCompilationBuilder
     {
-        private class CollectSerializableFieldsVisitor : CSharpSyntaxWalker
+        private class CollectSerializableFieldsVisitor : SafeSyntaxWalker
         {
             private readonly SemanticModel _semanticModel;
             private readonly SyntaxNode _typeDeclaration;

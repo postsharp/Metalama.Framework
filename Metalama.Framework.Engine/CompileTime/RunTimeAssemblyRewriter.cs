@@ -1,11 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Options;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -75,7 +77,8 @@ namespace Metalama.Compiler
                     instrinsicsSyntaxTree = instrinsicsSyntaxTree.WithRootAndOptions( instrinsicsSyntaxTree.GetRoot(), options );
                 }
 
-                transformedCompilation = transformedCompilation.WithSyntaxTreeModifications( null, new[] { instrinsicsSyntaxTree } );
+                transformedCompilation =
+                    transformedCompilation.WithSyntaxTreeTransformations( new[] { SyntaxTreeTransformation.AddTree( instrinsicsSyntaxTree ) } );
             }
 
             return transformedCompilation;
@@ -101,7 +104,27 @@ namespace Metalama.Compiler
 
             if ( symbol.GetMembers().Any( this.MustReplaceByThrow ) )
             {
-                var errorCodes = SingletonSeparatedList<ExpressionSyntax>( IdentifierName( "CS0067" ) );
+                var errorCodes = SeparatedList<ExpressionSyntax>(
+                    new[]
+                    {
+                        // An event was declared but never used in the class in which it was declared.
+                        IdentifierName( "CS0067" ),
+
+                        // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+                        IdentifierName( "CS8618" ),
+
+                        // Can be made static.
+                        IdentifierName( "CA1822" ),
+
+                        // The compiler detected code that will never be executed.
+                        IdentifierName( "CS0162" ),
+
+                        // The private field is never used.
+                        IdentifierName( "CS0169" ),
+
+                        // The private field 'field' is assigned but its value is never used.
+                        IdentifierName( "CS0414" )
+                    } );
 
                 leadingTrivia = leadingTrivia.Insert(
                     0,
@@ -110,7 +133,9 @@ namespace Metalama.Compiler
                                 Token( SyntaxKind.DisableKeyword ),
                                 true )
                             .WithErrorCodes( errorCodes )
-                            .NormalizeWhitespace() ) );
+                            .NormalizeWhitespace()
+                            .WithLeadingTrivia( ElasticLineFeed )
+                            .WithTrailingTrivia( ElasticLineFeed ) ) );
 
                 trailingTrivia = trailingTrivia.Add( ElasticLineFeed )
                     .Add(
@@ -119,7 +144,9 @@ namespace Metalama.Compiler
                                     Token( SyntaxKind.RestoreKeyword ),
                                     true )
                                 .WithErrorCodes( errorCodes )
-                                .NormalizeWhitespace() ) );
+                                .NormalizeWhitespace()
+                                .WithLeadingTrivia( ElasticLineFeed )
+                                .WithTrailingTrivia( ElasticLineFeed ) ) );
             }
 
             return base.VisitClassDeclaration( node )!
@@ -223,7 +250,10 @@ namespace Metalama.Compiler
             {
                 if ( node.Initializer != null )
                 {
-                    transformedNode = transformedNode.WithInitializer( null );
+                    transformedNode =
+                        transformedNode
+                            .WithInitializer( null )
+                            .WithSemicolonToken( default );
                 }
 
                 transformedNode = this.MakePublicMember( transformedNode, node, symbol );
@@ -279,7 +309,7 @@ namespace Metalama.Compiler
                 return transformedNode;
             }
 
-            var attributeList = this.CreateAccessibilityAttribute( originalNode, accessibility ).WithTrailingTrivia( ElasticLineFeed );
+            var attributeList = this.CreateCompiledTemplateAttribute( originalNode, accessibility ).WithTrailingTrivia( ElasticLineFeed );
 
             var newModifiers = transformedNode.Modifiers.Where( n => !n.IsAccessModifierKeyword() ).ToList();
 
@@ -303,26 +333,28 @@ namespace Metalama.Compiler
                 return transformedNode;
             }
 
-            var attributeList = this.CreateAccessibilityAttribute( originalNode, accessibility ).WithTrailingTrivia( ElasticSpace );
+            var attributeList = this.CreateCompiledTemplateAttribute( originalNode, accessibility ).WithTrailingTrivia( ElasticSpace );
 
             return transformedNode.WithModifiers( default )
                 .WithAttributeLists( transformedNode.AttributeLists.Add( attributeList ) )
                 .WithLeadingTrivia( transformedNode.GetLeadingTrivia() );
         }
 
-        private AttributeListSyntax CreateAccessibilityAttribute( SyntaxNode node, Accessibility accessibility )
+        private AttributeListSyntax CreateCompiledTemplateAttribute( SyntaxNode node, Accessibility accessibility )
         {
             var syntaxFactory = this._syntaxGenerationContextFactory.GetSyntaxGenerationContext( node );
-            var accessibilityAttributeType = (INamedTypeSymbol) syntaxFactory.ReflectionMapper.GetTypeSymbol( typeof(AccessibilityAttribute) );
+            var compiledTemplateAttributeType = (INamedTypeSymbol) syntaxFactory.ReflectionMapper.GetTypeSymbol( typeof(CompiledTemplateAttribute) );
             var accessibilityType = (INamedTypeSymbol) syntaxFactory.ReflectionMapper.GetTypeSymbol( typeof(Accessibility) );
 
-            var attribute = Attribute( (NameSyntax) syntaxFactory.SyntaxGenerator.Type( accessibilityAttributeType ) )
+            var attribute = Attribute( (NameSyntax) syntaxFactory.SyntaxGenerator.Type( compiledTemplateAttributeType ) )
                 .WithArgumentList(
                     AttributeArgumentList(
                         SingletonSeparatedList(
-                            AttributeArgument( syntaxFactory.SyntaxGenerator.EnumValueExpression( accessibilityType, (int) accessibility ) ) ) ) );
+                            AttributeArgument( syntaxFactory.SyntaxGenerator.EnumValueExpression( accessibilityType, (int) accessibility ) )
+                                .WithNameEquals( NameEquals( nameof(CompiledTemplateAttribute.Accessibility) ) ) ) ) );
 
-            var attributeList = AttributeList( SingletonSeparatedList( attribute ) );
+            var attributeList = AttributeList( SingletonSeparatedList( attribute ) )
+                .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
             return attributeList;
         }

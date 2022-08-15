@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -16,7 +17,7 @@ namespace Metalama.Framework.Engine.CompileTime
     /// <summary>
     /// A base <see cref="CSharpSyntaxRewriter"/> that stores the <see cref="RunTimeCompilation"/> and the <see cref="SymbolClassifier"/>.
     /// </summary>
-    internal abstract partial class CompileTimeBaseRewriter : CSharpSyntaxRewriter
+    internal abstract partial class CompileTimeBaseRewriter : SafeSyntaxRewriter
     {
         protected ISymbolClassifier SymbolClassifier { get; }
 
@@ -79,9 +80,11 @@ namespace Metalama.Framework.Engine.CompileTime
             StructuredTriviaSyntax GetPragmaTrivia( bool disable )
                 => PragmaWarningDirectiveTrivia(
                     Token( SyntaxKind.HashToken ).WithLeadingTrivia( ElasticLineFeed ),
-                    Token( SyntaxKind.PragmaKeyword ),
-                    Token( SyntaxKind.WarningKeyword ),
-                    disable ? Token( SyntaxKind.DisableKeyword ) : Token( SyntaxKind.RestoreKeyword ),
+                    Token( SyntaxKind.PragmaKeyword ).WithTrailingTrivia( ElasticSpace ),
+                    Token( SyntaxKind.WarningKeyword ).WithTrailingTrivia( ElasticSpace ),
+                    disable
+                        ? Token( SyntaxKind.DisableKeyword ).WithTrailingTrivia( ElasticSpace )
+                        : Token( SyntaxKind.RestoreKeyword ).WithTrailingTrivia( ElasticSpace ),
                     SeparatedList<ExpressionSyntax>( suppressedDiagnostics.Select( diagnosticCode => IdentifierName( diagnosticCode ) ) ),
                     Token( SyntaxKind.EndOfDirectiveToken ).WithTrailingTrivia( ElasticLineFeed ),
                     true );
@@ -129,7 +132,7 @@ namespace Metalama.Framework.Engine.CompileTime
                                 isIterator
                                     ? null
                                     : ArrowExpressionClause( GetNotSupportedExceptionExpression( message ) ) )
-                            .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) )
+                            .WithSemicolonToken( isIterator ? default : Token( SyntaxKind.SemicolonToken ) )
                             .NormalizeWhitespace()
                             .WithLeadingTrivia( method.GetLeadingTrivia() )
                             .WithTrailingTrivia( LineFeed, LineFeed ),

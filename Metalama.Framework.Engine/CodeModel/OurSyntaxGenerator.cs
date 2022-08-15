@@ -5,7 +5,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.Types;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Templating;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -88,7 +88,7 @@ namespace Metalama.Framework.Engine.CodeModel
             }
 
             // In any typeof, we must remove ? annotations of nullable types.
-            typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( type ).Visit( typeSyntax );
+            typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( type ).Visit( typeSyntax )!;
 
             // In any typeof, we must change dynamic to object.
             typeSyntax = (TypeSyntax) DynamicToVarRewriter.Instance.Visit( typeSyntax );
@@ -118,7 +118,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             if ( !this.IsNullAware )
             {
-                typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( symbol ).Visit( typeSyntax );
+                typeSyntax = (TypeSyntax) new RemoveReferenceNullableAnnotationsRewriter( symbol ).Visit( typeSyntax )!;
             }
 
             return typeSyntax;

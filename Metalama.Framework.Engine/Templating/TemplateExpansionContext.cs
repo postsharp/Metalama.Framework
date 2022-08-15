@@ -11,7 +11,8 @@ using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Templating.MetaModel;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -190,7 +191,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 var compilation = returnType.GetCompilationModel().RoslynCompilation;
 
-                if ( RunTimeTemplateExpression.TryFindExpressionType( returnExpression, compilation, out var expressionType ) &&
+                if ( ExpressionTypeAnnotationHelper.TryFindTypeFromAnnotation( returnExpression, compilation, out var expressionType ) &&
                      compilation.HasImplicitConversion( expressionType, returnType.GetSymbol() ) )
                 {
                     // No need to emit a cast.
@@ -397,19 +398,24 @@ namespace Metalama.Framework.Engine.Templating
 
         public UserDiagnosticSink DiagnosticSink => this.MetaApi.Diagnostics;
 
-        public StatementSyntax CreateReturnStatement( IUserExpression? returnExpression, bool awaitResult )
+        public StatementSyntax CreateReturnStatement( IUserExpression? returnUserExpression, bool awaitResult )
         {
-            if ( returnExpression == null )
+            if ( returnUserExpression == null )
             {
                 return ReturnStatement().WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation );
             }
-            else if ( returnExpression.Type.Equals( SpecialType.Void ) )
+            else if ( returnUserExpression.Type.Equals( SpecialType.Void ) )
             {
-                if ( this.MetaApi.Method.ReturnType.Equals( SpecialType.Void ) )
+                if ( this.MetaApi.Method.ReturnType.Equals( SpecialType.Void )
+                     || this.MetaApi.Method.ReturnType.GetAsyncInfo().ResultType.Equals( SpecialType.Void ) )
                 {
+                    var returnExpression = returnUserExpression
+                        .ToExpressionSyntax( this.SyntaxGenerationContext )
+                        .RemoveParenthesis();
+
                     return
                         Block(
-                                ExpressionStatement( returnExpression.ToRunTimeTemplateExpression( this.SyntaxGenerationContext ) ),
+                                ExpressionStatement( returnExpression ),
                                 ReturnStatement().WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation ) )
                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                 }
@@ -419,7 +425,7 @@ namespace Metalama.Framework.Engine.Templating
                     throw new AssertionFailedException();
                 }
             }
-            else if ( awaitResult && returnExpression.Type.GetAsyncInfo().ResultType.Equals( SpecialType.Void ) )
+            else if ( awaitResult && returnUserExpression.Type.GetAsyncInfo().ResultType.Equals( SpecialType.Void ) )
             {
                 Invariant.Assert( this._template != null && this._template.MustInterpretAsAsyncTemplate() );
 
@@ -428,7 +434,7 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     return
                         Block(
-                                ExpressionStatement( AwaitExpression( returnExpression.ToRunTimeTemplateExpression( this.SyntaxGenerationContext ) ) ),
+                                ExpressionStatement( AwaitExpression( returnUserExpression.ToExpressionSyntax( this.SyntaxGenerationContext ) ) ),
                                 ReturnStatement().WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation ) )
                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                 }
@@ -440,7 +446,7 @@ namespace Metalama.Framework.Engine.Templating
             }
             else
             {
-                return this.CreateReturnStatement( returnExpression.ToRunTimeTemplateExpression( this.SyntaxGenerationContext ), awaitResult );
+                return this.CreateReturnStatement( returnUserExpression.ToExpressionSyntax( this.SyntaxGenerationContext ), awaitResult );
             }
         }
 

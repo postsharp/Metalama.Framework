@@ -57,11 +57,11 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IEnumerable<IMethod> Accessors => this.Underlying.Accessors;
 
-        public ExpressionSyntax ToSyntax( SyntaxGenerationContext syntaxGenerationContext ) => SyntaxFactory.IdentifierName( this.Underlying.Name );
+        public ExpressionSyntax ToExpressionSyntax( SyntaxGenerationContext syntaxGenerationContext ) => SyntaxFactory.IdentifierName( this.Underlying.Name );
 
-        public RunTimeTemplateExpression ToRunTimeTemplateExpression( SyntaxGenerationContext syntaxGenerationContext )
+        public TypedExpressionSyntax ToTypedExpressionSyntax( SyntaxGenerationContext syntaxGenerationContext )
             => new(
-                this.ToSyntax( syntaxGenerationContext ),
+                this.ToExpressionSyntax( syntaxGenerationContext ),
                 this.Type,
                 syntaxGenerationContext );
     }

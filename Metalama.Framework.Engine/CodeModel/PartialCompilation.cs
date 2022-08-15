@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.CodeModel
         /// The key of the dictionary is the <see cref="SyntaxTree.FilePath"/> and the value is a <see cref="SyntaxTree"/>
         /// of <see cref="Compilation"/>. 
         /// </summary>
-        public ImmutableDictionary<string, SyntaxTreeModification> ModifiedSyntaxTrees { get; }
+        public ImmutableDictionary<string, SyntaxTreeTransformation> ModifiedSyntaxTrees { get; }
 
         /// <summary>
         /// Gets the Roslyn <see cref="Microsoft.CodeAnalysis.Compilation"/>.
@@ -81,7 +81,7 @@ namespace Metalama.Framework.Engine.CodeModel
         private PartialCompilation( Compilation compilation, DerivedTypeIndex derivedTypeIndex, ImmutableArray<ManagedResource> resources )
         {
             this.Compilation = this.InitialCompilation = compilation;
-            this.ModifiedSyntaxTrees = ImmutableDictionary<string, SyntaxTreeModification>.Empty;
+            this.ModifiedSyntaxTrees = ImmutableDictionary<string, SyntaxTreeTransformation>.Empty;
             this.Resources = resources.IsDefault ? ImmutableArray<ManagedResource>.Empty : resources;
             this.DerivedTypes = derivedTypeIndex;
         }
@@ -89,8 +89,7 @@ namespace Metalama.Framework.Engine.CodeModel
         // Incremental constructor.
         private PartialCompilation(
             PartialCompilation baseCompilation,
-            IReadOnlyList<SyntaxTreeModification>? modifiedSyntaxTrees,
-            IReadOnlyList<SyntaxTree>? addedSyntaxTrees,
+            IReadOnlyList<SyntaxTreeTransformation>? modifications,
             ImmutableArray<ManagedResource> newResources )
         {
             this.InitialCompilation = baseCompilation.InitialCompilation;
@@ -102,34 +101,82 @@ namespace Metalama.Framework.Engine.CodeModel
 
             var modifiedTreeBuilder = baseCompilation.ModifiedSyntaxTrees.ToBuilder();
 
-            if ( addedSyntaxTrees != null )
+            if ( modifications != null )
             {
-                compilation = compilation.AddSyntaxTrees( addedSyntaxTrees );
-
-                modifiedTreeBuilder.AddRange(
-                    addedSyntaxTrees.Select( t => new KeyValuePair<string, SyntaxTreeModification>( t.FilePath, new SyntaxTreeModification( t ) ) ) );
-            }
-
-            if ( modifiedSyntaxTrees != null )
-            {
-                foreach ( var replacement in modifiedSyntaxTrees )
+                foreach ( var transformation in modifications )
                 {
-                    var oldTree = replacement.OldTree.AssertNotNull();
-                    compilation = compilation.ReplaceSyntaxTree( oldTree, replacement.NewTree );
+                    if ( transformation.Kind == SyntaxTreeTransformationKind.None )
+                    {
+                        continue;
+                    }
 
                     // Find the tree in InitialCompilation.
                     SyntaxTree? initialTree;
 
-                    if ( baseCompilation.ModifiedSyntaxTrees.TryGetValue( replacement.FilePath, out var initialTreeReplacement ) )
+                    if ( transformation.OldTree == null )
+                    {
+                        initialTree = null;
+                    }
+                    else if ( baseCompilation.ModifiedSyntaxTrees.TryGetValue( transformation.FilePath, out var initialTreeReplacement ) )
                     {
                         initialTree = initialTreeReplacement.OldTree;
                     }
-                    else if ( !baseCompilation.SyntaxTrees.TryGetValue( replacement.FilePath, out initialTree! ) )
+                    else if ( !baseCompilation.SyntaxTrees.TryGetValue( transformation.FilePath, out initialTree! ) )
                     {
-                        initialTree = replacement.OldTree.AssertNotNull();
+                        initialTree = transformation.OldTree.AssertNotNull();
                     }
 
-                    modifiedTreeBuilder[replacement.FilePath] = new SyntaxTreeModification( replacement.NewTree, initialTree );
+                    SyntaxTreeTransformation? transformationFromInitialCompilation;
+
+                    switch ( transformation.Kind )
+                    {
+                        case SyntaxTreeTransformationKind.Add:
+                            compilation = compilation.AddSyntaxTrees( transformation.NewTree! );
+                            transformationFromInitialCompilation = transformation;
+
+                            break;
+
+                        case SyntaxTreeTransformationKind.Replace:
+                            var newTree = transformation.NewTree.AssertNotNull();
+                            compilation = compilation.ReplaceSyntaxTree( transformation.OldTree.AssertNotNull(), newTree );
+
+                            if ( initialTree != null )
+                            {
+                                transformationFromInitialCompilation = SyntaxTreeTransformation.ReplaceTree( initialTree, newTree );
+                            }
+                            else
+                            {
+                                transformationFromInitialCompilation = SyntaxTreeTransformation.AddTree( newTree );
+                            }
+
+                            break;
+
+                        case SyntaxTreeTransformationKind.Remove:
+                            compilation = compilation.RemoveSyntaxTrees( transformation.OldTree.AssertNotNull() );
+
+                            if ( initialTree != null )
+                            {
+                                transformationFromInitialCompilation = SyntaxTreeTransformation.RemoveTree( initialTree );
+                            }
+                            else
+                            {
+                                transformationFromInitialCompilation = null;
+                            }
+
+                            break;
+
+                        default:
+                            throw new AssertionFailedException();
+                    }
+
+                    if ( transformationFromInitialCompilation != null )
+                    {
+                        modifiedTreeBuilder[transformation.FilePath] = transformationFromInitialCompilation.Value;
+                    }
+                    else
+                    {
+                        modifiedTreeBuilder.Remove( transformation.FilePath );
+                    }
                 }
             }
 
@@ -181,13 +228,10 @@ namespace Metalama.Framework.Engine.CodeModel
                 resources );
         }
 
-        IPartialCompilation IPartialCompilation.WithSyntaxTreeModifications(
-            IReadOnlyList<SyntaxTreeModification>? modifications,
-            IReadOnlyList<SyntaxTree>? additions )
-            => this.Update( modifications, additions );
+        IPartialCompilation IPartialCompilation.WithSyntaxTreeTransformations( IReadOnlyList<SyntaxTreeTransformation>? transformations )
+            => this.Update( transformations );
 
-        public IPartialCompilation WithAdditionalResources( params ManagedResource[] resources )
-            => this.Update( null, null, this.Resources.AddRange( resources ) );
+        public IPartialCompilation WithAdditionalResources( params ManagedResource[] resources ) => this.Update( null, this.Resources.AddRange( resources ) );
 
         public ImmutableArray<ManagedResource> Resources { get; }
 
@@ -196,8 +240,7 @@ namespace Metalama.Framework.Engine.CodeModel
         /// representing the modified object.
         /// </summary>
         public abstract PartialCompilation Update(
-            IReadOnlyList<SyntaxTreeModification>? replacedTrees = null,
-            IReadOnlyList<SyntaxTree>? addedTrees = null,
+            IReadOnlyList<SyntaxTreeTransformation>? transformations = null,
             ImmutableArray<ManagedResource> resources = default );
 
         /// <summary>
@@ -279,8 +322,7 @@ namespace Metalama.Framework.Engine.CodeModel
             return (types.ToImmutable(), trees.ToImmutable(), derivedTypesBuilder.ToImmutable());
         }
 
-        public ImmutableArray<SyntaxTreeTransformation> ToTransformations()
-            => this.ModifiedSyntaxTrees.Values.Select( t => new SyntaxTreeTransformation( t.NewTree, t.OldTree ) ).ToImmutableArray();
+        public ImmutableArray<SyntaxTreeTransformation> ToTransformations() => this.ModifiedSyntaxTrees.Values.ToImmutableArray();
 
         public override string ToString()
             => $"{{Assembly={this.Compilation.AssemblyName}, SyntaxTrees={this.SyntaxTrees.Count}/{this.Compilation.SyntaxTrees.Count()}}}";
@@ -292,39 +334,36 @@ namespace Metalama.Framework.Engine.CodeModel
         /// </summary>
         public Compilation InitialCompilation { get; }
 
-        private void Validate( IReadOnlyList<SyntaxTree>? addedTrees, IReadOnlyList<SyntaxTreeModification>? replacedTrees )
+        private void Validate( IReadOnlyList<SyntaxTreeTransformation>? transformations )
         {
             // In production scenario, we need weavers to provide SyntaxTree instances with a valid Encoding value.
             // However, we don't need that in test scenarios, and tests currently don't set Encoding properly.
             // The way this test is implemented is to test Encoding in increments only if it is set properly in the initial compilation.
+            // It also happens, at design time, that Roslyn does not set the encoding. We also need to be tolerant to this situation.
 
             bool HasInitialCompilationEncoding() => this.InitialCompilation.SyntaxTrees.All( t => t.Encoding != null );
 
-            if ( addedTrees != null )
+            if ( transformations != null )
             {
-                if ( addedTrees.Any( t => string.IsNullOrEmpty( t.FilePath ) ) )
+                if ( transformations.Any( t => string.IsNullOrEmpty( t.FilePath ) ) )
                 {
-                    throw new ArgumentOutOfRangeException( nameof(addedTrees), "The SyntaxTree.FilePath property must be set to a non-empty value." );
+                    throw new ArgumentOutOfRangeException( nameof(transformations), "The SyntaxTree.FilePath property must be set to a non-empty value." );
                 }
 
-                if ( addedTrees.Any( t => t.Encoding == null ) && HasInitialCompilationEncoding() )
-                {
-                    throw new ArgumentOutOfRangeException( nameof(addedTrees), "The SyntaxTree.Encoding property cannot be null." );
-                }
-            }
-
-            if ( replacedTrees != null )
-            {
-                if ( replacedTrees.Any( t => string.IsNullOrEmpty( t.NewTree.FilePath ) ) )
+                if ( transformations.Any( t => t.NewTree != null && string.IsNullOrEmpty( t.NewTree.FilePath ) ) )
                 {
                     throw new ArgumentOutOfRangeException(
-                        nameof(replacedTrees),
+                        nameof(transformations),
                         "The SyntaxTree.FilePath property of the new SyntaxTree must be set to a non-empty value." );
                 }
 
-                if ( replacedTrees.Any( t => t.NewTree.Encoding == null ) && HasInitialCompilationEncoding() )
+                if ( transformations.Any( t => t.NewTree is { Encoding: null } && t.OldTree?.Encoding != null ) && HasInitialCompilationEncoding() )
                 {
-                    throw new ArgumentOutOfRangeException( nameof(addedTrees), "The SyntaxTree.Encoding property of the new SyntaxTree cannot be null." );
+                    var invalidTrees = transformations.Where( t => t.NewTree is { Encoding: null } ).Select( x => $"'{x.FilePath}'" );
+
+                    throw new ArgumentOutOfRangeException(
+                        nameof(transformations),
+                        $"The SyntaxTree.Encoding property of these SyntaxTrees cannot be null: {string.Join( ", ", invalidTrees )}" );
                 }
             }
         }

@@ -4,7 +4,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Testing;
@@ -208,7 +207,8 @@ Target.cs:
 0 introductions(s):
 ";
 
-            using TestProjectOptions projectOptions = new();
+            using var testContext = this.CreateTestContext();
+            var projectOptions = testContext.ProjectOptions;
 
             var compilation = CreateCSharpCompilation(
                 new Dictionary<string, string>()
@@ -310,8 +310,7 @@ Target.cs:
             // Build the project from the compile-time pipeline.
             using UnloadableCompileTimeDomain domain = new();
 
-            var serviceProvider = ServiceProviderFactory.GetServiceProvider( projectOptions.PathOptions )
-                .WithService( projectOptions )
+            var serviceProvider = testContext.ServiceProvider
                 .WithProjectScopedServices( compilation );
 
             var compileTimeAspectPipeline = new CompileTimeAspectPipeline( serviceProvider, true, domain );
@@ -426,7 +425,7 @@ partial class C
                 "using Metalama.Framework.Aspects; class A : TypeAspect {}",
                 additionalReferences: new[] { dependency.ToMetadataReference() } );
 
-            Assert.True( pipelineFactory.TryExecute( context.ProjectOptions, compilation.RoslynCompilation, CancellationToken.None, out var result ) );
+            Assert.True( pipelineFactory.TryExecute( context.ProjectOptions, compilation.RoslynCompilation, CancellationToken.None, out _ ) );
         }
     }
 }

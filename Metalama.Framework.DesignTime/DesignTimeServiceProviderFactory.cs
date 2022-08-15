@@ -7,7 +7,7 @@ using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Pipeline;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Diagnostics;
 
 namespace Metalama.Framework.DesignTime;
 
@@ -28,10 +28,9 @@ public static class DesignTimeServiceProviderFactory
             {
                 if ( _serviceProvider == null )
                 {
-                    MetalamaDiagnosticsServiceFactory.Initialize( nameof(DesignTimeServiceProviderFactory) );
+                    BackstageServiceFactoryInitializer.Initialize<MetalamaDesignTimeApplicationInfo>();
 
-                    _serviceProvider = ServiceProviderFactory.GetServiceProvider()
-                        .WithNextProvider( DiagnosticServiceFactory.ServiceProvider );
+                    _serviceProvider = ServiceProviderFactory.GetServiceProvider();
 
                     _serviceProvider = _serviceProvider
                         .WithService( new DesignTimeAspectPipelineFactory( _serviceProvider, new CompileTimeDomain() ) );

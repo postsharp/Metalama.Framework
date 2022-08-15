@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -10,7 +11,7 @@ namespace Metalama.TestFramework
 {
     public abstract partial class BaseTestRunner
     {
-        private class ValidateAttributesVisitor : CSharpSyntaxWalker
+        private class ValidateAttributesVisitor : SafeSyntaxWalker
         {
             private readonly Compilation _compilation;
 

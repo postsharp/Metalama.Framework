@@ -3,6 +3,7 @@
 
 using K4os.Hash.xxHash;
 using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Maintenance;
 using Metalama.Backstage.Utilities;
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
@@ -15,6 +16,8 @@ using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Templating.Mapping;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Diagnostics;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -45,7 +48,6 @@ namespace Metalama.Framework.Engine.CompileTime
         private readonly IServiceProvider _serviceProvider;
         private readonly CompileTimeDomain _domain;
         private readonly Dictionary<ulong, CompileTimeProject> _cache = new();
-        private readonly IPathOptions _pathOptions;
         private readonly IProjectOptions? _projectOptions;
         private readonly ICompileTimeCompilationBuilderObserver? _observer;
         private readonly ICompileTimeAssemblyBinaryRewriter? _rewriter;
@@ -74,10 +76,10 @@ namespace Metalama.Framework.Engine.CompileTime
         private static readonly Guid _buildId = AssemblyMetadataReader.GetInstance( typeof(CompileTimeCompilationBuilder).Assembly ).ModuleId;
         private readonly ReflectionMapperFactory _reflectionMapperFactory;
         private readonly SymbolClassificationService _classifierFactory;
+        private readonly ITempFileManager _tempFileManager;
 
         public CompileTimeCompilationBuilder( IServiceProvider serviceProvider, CompileTimeDomain domain )
         {
-            this._pathOptions = serviceProvider.GetRequiredService<IPathOptions>();
             this._serviceProvider = serviceProvider;
             this._domain = domain;
             this._observer = serviceProvider.GetService<ICompileTimeCompilationBuilderObserver>();
@@ -86,6 +88,7 @@ namespace Metalama.Framework.Engine.CompileTime
             this._reflectionMapperFactory = serviceProvider.GetRequiredService<ReflectionMapperFactory>();
             this._classifierFactory = serviceProvider.GetRequiredService<SymbolClassificationService>();
             this._logger = serviceProvider.GetLoggerFactory().CompileTime();
+            this._tempFileManager = (ITempFileManager) serviceProvider.GetService( typeof(ITempFileManager) ).AssertNotNull();
         }
 
         private static ulong ComputeSourceHash( FrameworkName? targetFramework, IReadOnlyList<SyntaxTree> compileTimeTrees, StringBuilder? log = null )
@@ -448,7 +451,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     // When the compile-time assembly is invalid, to enable troubleshooting, we store the source files and the list of diagnostics
                     // to a directory that will not be deleted after the build.
                     var troubleshootingDirectory = Path.Combine(
-                        TempPathHelper.GetTempPath( "CompileTimeTroubleshooting" ),
+                        this._tempFileManager.GetTempDirectory( "CompileTimeTroubleshooting", CleanUpStrategy.Always ),
                         Guid.NewGuid().ToString() );
 
                     Directory.CreateDirectory( troubleshootingDirectory );
@@ -584,7 +587,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     compileTimeTrees.Add( tree );
                 }
 
-                globalUsings.AddRange( visitor.GlobalUsings.Select( syntax => SyntaxFactory.UsingDirective( syntax ).NormalizeWhitespace() ) );
+                globalUsings.AddRange( visitor.GlobalUsings );
             }
 
             return (compileTimeTrees, globalUsings.ToImmutableArray());
@@ -595,10 +598,21 @@ namespace Metalama.Framework.Engine.CompileTime
             IReadOnlyList<SyntaxTree> compileTimeSyntaxTrees,
             CancellationToken cancellationToken )
         {
-            // TODO: Check that the mapper is not already registered.
-            var allSerializableTypes = new List<SerializableTypeInfo>();
+            var allSerializableTypes = new Dictionary<ISymbol, SerializableTypeInfo>( SymbolEqualityComparer.Default );
             var reflectionMapper = this._reflectionMapperFactory.GetInstance( runTimeCompilation );
             var classifier = this._classifierFactory.GetClassifier( runTimeCompilation );
+
+            void OnSerializableTypeDiscovered( SerializableTypeInfo type )
+            {
+                if ( allSerializableTypes.TryGetValue( type.Type, out var existingType ) )
+                {
+                    existingType.SerializedMembers.AddRange( type.SerializedMembers );
+                }
+                else
+                {
+                    allSerializableTypes[type.Type] = type;
+                }
+            }
 
             foreach ( var tree in compileTimeSyntaxTrees )
             {
@@ -606,14 +620,13 @@ namespace Metalama.Framework.Engine.CompileTime
                     runTimeCompilation.GetSemanticModel( tree, true ),
                     reflectionMapper,
                     classifier,
+                    OnSerializableTypeDiscovered,
                     cancellationToken );
 
                 visitor.Visit( tree.GetRoot() );
-
-                allSerializableTypes.AddRange( visitor.SerializableTypes );
             }
 
-            return allSerializableTypes;
+            return allSerializableTypes.Values.ToList();
         }
 
         /// <summary>
@@ -960,18 +973,16 @@ namespace Metalama.Framework.Engine.CompileTime
             // Get the directory name.
             var hash = projectHash.ToString( "x16", CultureInfo.InvariantCulture );
 
-            var directory = Path.Combine(
-                this._pathOptions.CompileTimeProjectCacheDirectory,
-                shortAssemblyName,
-                targetFrameworkName,
-                hash );
+            var directory = this._tempFileManager.GetTempDirectory(
+                Path.Combine( "CompileTime", shortAssemblyName, targetFrameworkName, hash ),
+                CleanUpStrategy.WhenUnused );
 
             // Make sure that the base path is short enough. There should be 16 characters left.
             var remainingPathLength = 256 - directory.Length;
 
             if ( remainingPathLength < 16 )
             {
-                throw new InvalidOperationException( $"The temporary path '{this._pathOptions.CompileTimeProjectCacheDirectory}' is too long." );
+                throw new InvalidOperationException( $"The temporary path '{directory}' is too long." );
             }
 
             var baseCompileTimeAssemblyName = $"{_compileTimeAssemblyPrefix}{runTimeAssemblyName}";

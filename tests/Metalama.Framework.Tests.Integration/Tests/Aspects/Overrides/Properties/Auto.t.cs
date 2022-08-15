@@ -37,7 +37,7 @@ internal class TargetClass
     }
 
 
-    private int _propertyInitOnly;
+    private readonly int _propertyInitOnly;
 
     [Override]
     public int PropertyInitOnly
@@ -54,21 +54,12 @@ internal class TargetClass
         }
     }
 
-
-    private int _staticPropertyInitOnly;
-
-    [Override]
-    public int StaticPropertyInitOnly
+    public int __Init
     {
-        get
-        {
-            global::System.Console.WriteLine("This is the overridden getter.");
-            return this._staticPropertyInitOnly;
-        }
         init
         {
-            global::System.Console.WriteLine($"This is the overridden setter.");
-            this._staticPropertyInitOnly = value;
+            // Init-only setter should be accessible from other init-only setters.
+            this.PropertyInitOnly = 42;
         }
     }
 }

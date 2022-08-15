@@ -12,6 +12,11 @@
                 background-color: rgba(50,50,90,0.1);
             }
 
+            .cr-NeutralTrivia
+            {
+                background-color: rgba(0,255,0,0.1);
+            }
+
             .cr-TemplateKeyword
             {
                 color: rgb(250, 0, 250) !important;
@@ -49,19 +54,19 @@
 
 <span class="cs-keyword">namespace</span> <span class="cs-namespace-name">Metalama</span><span class="cs-operator">.</span><span class="cs-namespace-name">Framework</span><span class="cs-operator">.</span><span class="cs-namespace-name">Tests</span><span class="cs-operator">.</span><span class="cs-namespace-name">Integration</span><span class="cs-operator">.</span><span class="cs-namespace-name">TestInputs</span><span class="cs-operator">.</span><span class="cs-namespace-name">Highlighting</span><span class="cs-operator">.</span><span class="cs-namespace-name">IfStatements</span><span class="cs-operator">.</span><span class="cs-namespace-name">TemplateKeywords</span>
 <span class="cs-punctuation">{</span>
-    <span class="cr-CompileTime cs-punctuation">[</span><span class="cr-CompileTime cs-class-name">RunTimeOrCompileTime</span><span class="cr-CompileTime cs-punctuation">]</span>
-    <span class="cr-CompileTime cs-keyword">class</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-class-name">Aspect</span>
-    <span class="cr-CompileTime cs-punctuation">{</span>
-        <span class="cs-punctuation">[</span><span class="cs-class-name">TestTemplate</span><span class="cs-punctuation">]</span>
-        <span class="cs-keyword">dynamic</span><span class="cs-operator">?</span> <span class="cs-method-name">Template</span><span class="cs-punctuation">()</span>
-        <span class="cr-RunTime cs-punctuation">{</span>
-            <span class="cr-TemplateKeyword cs-class-name cs-static-symbol">meta</span><span class="cr-TemplateKeyword cs-operator">.</span><span class="cr-TemplateKeyword cs-method-name cs-static-symbol">CompileTime</span><span class="cr-CompileTime cs-punctuation">(</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-number">0</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-punctuation">);</span>
-            <span class="cr-TemplateKeyword cs-class-name cs-static-symbol">meta</span><span class="cr-CompileTime cs-operator">.</span><span class="cr-TemplateKeyword cs-method-name cs-static-symbol">CompileTime</span><span class="cr-CompileTime cs-punctuation">&lt;</span><span class="cr-CompileTime cs-keyword">long</span><span class="cr-CompileTime cs-punctuation">&gt;(</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-number">0</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-punctuation">);</span>
-            <span class="cr-TemplateKeyword cs-class-name cs-static-symbol">meta</span><span class="cr-TemplateKeyword cs-operator">.</span><span class="cr-TemplateKeyword cs-method-name cs-static-symbol">InsertComment</span><span class="cr-CompileTime cs-punctuation">(</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-string">"Hey"</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-punctuation">);</span>
-            <span class="cr-RunTime cs-keyword cs-control">return</span><span class="cr-RunTime"> </span><span class="cr-TemplateKeyword cs-class-name cs-static-symbol">meta</span><span class="cr-TemplateKeyword cs-operator">.</span><span class="cr-TemplateKeyword cs-method-name cs-static-symbol">Proceed</span><span class="cr-CompileTime cs-punctuation">()</span><span class="cr-RunTime cs-punctuation">;</span>
-        <span class="cr-RunTime cs-punctuation">}</span>
-    <span class="cr-CompileTime cs-punctuation">}</span>
-<span class="cs-punctuation">}</span>
+<span class="cr-NeutralTrivia">    </span><span class="cr-CompileTime cs-punctuation">[</span><span class="cr-CompileTime cs-class-name">RunTimeOrCompileTime</span><span class="cr-CompileTime cs-punctuation">]</span>
+<span class="cr-NeutralTrivia">    </span><span class="cr-CompileTime cs-keyword">class</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-class-name">Aspect</span>
+<span class="cr-NeutralTrivia">    </span><span class="cr-CompileTime cs-punctuation">{</span>
+<span class="cr-NeutralTrivia">        </span><span class="cs-punctuation">[</span><span class="cs-class-name">TestTemplate</span><span class="cs-punctuation">]</span>
+<span class="cr-NeutralTrivia">        </span><span class="cs-keyword">dynamic</span><span class="cs-operator">?</span> <span class="cs-method-name">Template</span><span class="cs-punctuation">()</span>
+<span class="cr-NeutralTrivia">        </span><span class="cr-RunTime cs-punctuation">{</span>
+<span class="cr-NeutralTrivia">            </span><span class="cr-TemplateKeyword cs-class-name cs-static-symbol">meta</span><span class="cr-TemplateKeyword cs-operator">.</span><span class="cr-TemplateKeyword cs-method-name cs-static-symbol">CompileTime</span><span class="cr-CompileTime cs-punctuation">(</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-number">0</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-punctuation">);</span>
+<span class="cr-NeutralTrivia">            </span><span class="cr-TemplateKeyword cs-class-name cs-static-symbol">meta</span><span class="cr-CompileTime cs-operator">.</span><span class="cr-TemplateKeyword cs-method-name cs-static-symbol">CompileTime</span><span class="cr-CompileTime cs-punctuation">&lt;</span><span class="cr-CompileTime cs-keyword">long</span><span class="cr-CompileTime cs-punctuation">&gt;(</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-number">0</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-punctuation">);</span>
+<span class="cr-NeutralTrivia">            </span><span class="cr-TemplateKeyword cs-class-name cs-static-symbol">meta</span><span class="cr-TemplateKeyword cs-operator">.</span><span class="cr-TemplateKeyword cs-method-name cs-static-symbol">InsertComment</span><span class="cr-CompileTime cs-punctuation">(</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-string">"Hey"</span><span class="cr-CompileTime"> </span><span class="cr-CompileTime cs-punctuation">);</span>
+<span class="cr-NeutralTrivia">            </span><span class="cr-RunTime cs-keyword cs-control">return</span><span class="cr-RunTime"> </span><span class="cr-TemplateKeyword cs-class-name cs-static-symbol">meta</span><span class="cr-TemplateKeyword cs-operator">.</span><span class="cr-TemplateKeyword cs-method-name cs-static-symbol">Proceed</span><span class="cr-CompileTime cs-punctuation">()</span><span class="cr-RunTime cs-punctuation">;</span>
+<span class="cr-NeutralTrivia">        </span><span class="cr-RunTime cs-punctuation">}</span>
+<span class="cr-NeutralTrivia">    </span><span class="cr-CompileTime cs-punctuation">}</span><span class="cr-CompileTime">
+</span><span class="cs-punctuation">}</span>
 </code></pre>
        <p class='legend'>Legend:</p>
        <pre>
@@ -75,6 +80,7 @@
 <span class='cr-Excluded'>Excluded</span>
 <span class='cr-GeneratedCode'>GeneratedCode</span>
 <span class='cr-SourceCode'>SourceCode</span>
+<span class='cr-NeutralTrivia'>NeutralTrivia</span>
        </pre>
    </body>
 </html>

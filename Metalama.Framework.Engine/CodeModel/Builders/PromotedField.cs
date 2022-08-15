@@ -11,6 +11,7 @@ using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using Accessibility = Metalama.Framework.Code.Accessibility;
 using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
@@ -21,7 +22,14 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public MemberRef<IMember> ReplacedMember => this._field.ToMemberRef<IMember>();
 
-        public override Writeability Writeability => this._field.Writeability;
+        public override Writeability Writeability
+            => this._field.Writeability switch
+            {
+                Writeability.None => Writeability.None,
+                Writeability.ConstructorOnly => Writeability.InitOnly, // Read-only fields are promoted to init-only properties.
+                Writeability.All => Writeability.All,
+                _ => throw new AssertionFailedException()
+            };
 
         public PromotedField( IServiceProvider serviceProvider, Advice advice, IField field, IObjectReader initializerTags ) : base(
             advice,
@@ -30,7 +38,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             true,
             true,
             true,
-            false,
+            field is { IsStatic: false, Writeability: Writeability.ConstructorOnly },
             true,
             true,
             initializerTags )
@@ -41,7 +49,13 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             this.IsStatic = this._field.IsStatic;
 
             this.GetMethod.AssertNotNull().Accessibility = this._field.Accessibility;
-            this.SetMethod.AssertNotNull().Accessibility = this._field.Accessibility;
+
+            this.SetMethod.AssertNotNull().Accessibility =
+                this._field switch
+                {
+                    { Writeability: Writeability.ConstructorOnly } => Accessibility.Private,
+                    _ => this._field.Accessibility
+                };
 
             if ( field.Attributes.Count > 0 )
             {

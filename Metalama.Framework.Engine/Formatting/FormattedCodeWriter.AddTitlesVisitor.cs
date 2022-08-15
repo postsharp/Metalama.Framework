@@ -1,8 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 using System;
@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.Formatting
 {
     public partial class FormattedCodeWriter
     {
-        private class AddTitlesVisitor : CSharpSyntaxWalker
+        private class AddTitlesVisitor : SafeSyntaxWalker
         {
             private readonly ClassifiedTextSpanCollection _textSpans;
             private readonly SemanticModel _semanticModel;

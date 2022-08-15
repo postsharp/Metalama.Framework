@@ -2,8 +2,10 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Engine.ReflectionMocks;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Simplification;
 using System.Reflection;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization
@@ -12,9 +14,10 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
     {
         public override ExpressionSyntax Serialize( CompileTimeConstructorInfo obj, SyntaxSerializationContext serializationContext )
             => SyntaxFactory.ParenthesizedExpression(
-                SyntaxFactory.CastExpression(
-                    serializationContext.GetTypeSyntax( typeof(ConstructorInfo) ),
-                    SerializeMethodBase( obj, serializationContext ) ) );
+                    SyntaxFactory.CastExpression(
+                        serializationContext.GetTypeSyntax( typeof(ConstructorInfo) ),
+                        SerializeMethodBase( obj, serializationContext ) ) )
+                .WithAdditionalAnnotations( Simplifier.Annotation );
 
         public CompileTimeConstructorInfoSerializer( SyntaxSerializationService service ) : base( service ) { }
     }

@@ -77,7 +77,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
     }
 
     public IStatement CreateExpressionStatement( IExpression expression )
-        => new UserStatement( SyntaxFactory.ExpressionStatement( ((UserExpression) expression).ToSyntax( this._syntaxGenerationContext ) ) );
+        => new UserStatement( SyntaxFactory.ExpressionStatement( ((UserExpression) expression).ToExpressionSyntax( this._syntaxGenerationContext ) ) );
 
     public void AppendLiteral( object? value, StringBuilder stringBuilder, SpecialType specialType, bool stronglyTyped )
     {
@@ -152,7 +152,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
     public void AppendExpression( IExpression expression, StringBuilder stringBuilder )
     {
         stringBuilder.Append(
-            ((IUserExpression) expression).ToSyntax( this._syntaxGenerationContext )
+            ((IUserExpression) expression).ToExpressionSyntax( this._syntaxGenerationContext )
             .NormalizeWhitespace()
             .ToFullString() );
     }
@@ -161,7 +161,7 @@ internal class SyntaxBuilderImpl : ISyntaxBuilderImpl
         => stringBuilder.Append(
             expression == null
                 ? "null"
-                : ((RunTimeTemplateExpression) expression).Syntax.NormalizeWhitespace().ToFullString() );
+                : ((TypedExpressionSyntax) expression).Syntax.NormalizeWhitespace().ToFullString() );
 
     public IExpression Cast( IExpression expression, IType targetType )
         => expression.Type.Is( targetType ) ? expression : new CastUserExpression( targetType, expression );

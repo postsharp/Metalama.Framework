@@ -21,6 +21,7 @@ internal static class DesignTimeTextSpanClassificationHelper
             TextSpanClassification.SourceCode => DesignTimeTextSpanClassification.SourceCode,
             TextSpanClassification.TemplateKeyword => DesignTimeTextSpanClassification.TemplateKeyword,
             TextSpanClassification.CompileTimeVariable => DesignTimeTextSpanClassification.CompileTimeVariable,
+            TextSpanClassification.NeutralTrivia => DesignTimeTextSpanClassification.Default,
             _ => throw new ArgumentOutOfRangeException( nameof(classification), classification, null )
         };
 }

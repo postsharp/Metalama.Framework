@@ -24,7 +24,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                 @"((global::System.Reflection.ConstructorInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.#ctor(System.Int32)"")))",
                 serialized );
 
-            TestExpression<ConstructorInfo>(
+            this.TestExpression<ConstructorInfo>(
                 code,
                 serialized,
                 info =>
@@ -44,7 +44,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                 @"((global::System.Reflection.ConstructorInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target`1.#ctor(`0)""), typeof(global::Target<>).TypeHandle))",
                 serialized );
 
-            TestExpression<ConstructorInfo>(
+            this.TestExpression<ConstructorInfo>(
                 code,
                 serialized,
                 info =>
@@ -64,7 +64,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                 @"((global::System.Reflection.ConstructorInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.#ctor"")))",
                 serialized );
 
-            TestExpression<ConstructorInfo>(
+            this.TestExpression<ConstructorInfo>(
                 code,
                 serialized,
                 info =>

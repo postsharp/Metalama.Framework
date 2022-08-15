@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.Formatting
     /// </summary>
     public enum TextSpanClassification
     {
-        // NOTE: Order of declaration (or at last enum value) matters. The higher value overwrites the lower.
+        // NOTE: Order of declaration (or at last enum value) matters. The higher value (i.e. defined lower in the list) overwrites the lower.
         // NOTE: Renaming these items will break the string-based tests.
 
         /// <summary>
@@ -62,6 +62,11 @@ namespace Metalama.Framework.Engine.Formatting
         /// <summary>
         /// Used to classify the output code and marks the source code.
         /// </summary>
-        SourceCode
+        SourceCode,
+
+        /// <summary>
+        /// The white space at the beginning of a line.
+        /// </summary>
+        NeutralTrivia
     }
 }

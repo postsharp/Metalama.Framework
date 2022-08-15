@@ -2,8 +2,9 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.DesignTime.Pipeline;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeFixes;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 
 namespace Metalama.Framework.DesignTime.CodeFixes;
@@ -54,7 +55,7 @@ internal class ApplyLiveTemplateCodeActionModel : CodeActionModel
                 out var outputCompilation,
                 out _ ) )
         {
-            return Task.FromResult( new CodeActionResult( outputCompilation.ModifiedSyntaxTrees.Values.Select( x => x.NewTree ) ) );
+            return Task.FromResult( new CodeActionResult( outputCompilation.ModifiedSyntaxTrees.Values.Select( x => x.NewTree.AssertNotNull() ) ) );
         }
         else
         {

@@ -122,7 +122,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             Invariant.Assert( hasGetter || hasSetter );
             Invariant.Assert( !(!hasSetter && hasImplicitSetter) );
-            Invariant.Assert( !(hasInitOnlySetter && hasImplicitSetter) );
             Invariant.Assert( !(!isAutoProperty && hasImplicitSetter) );
 
             this._type = targetType.Compilation.GetCompilationModel().Factory.GetTypeByReflectionType( typeof(object) );
@@ -210,7 +209,11 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     // Writeable fields.
                     case (true, Writeability.All, { IsImplicitlyDeclared: true }, { IsImplicitlyDeclared: true }):
                     // Auto-properties with both accessors.
-                    case (true, Writeability.All or Writeability.InitOnly, { IsImplicitlyDeclared: false }, { IsImplicitlyDeclared: false }):
+                    case (true, Writeability.All or Writeability.InitOnly, { IsImplicitlyDeclared: false }, { IsImplicitlyDeclared: _ }):
+                        return AccessorList( List( new[] { GenerateGetAccessor(), GenerateSetAccessor() } ) );
+
+                    // Init only fields.
+                    case (true, Writeability.InitOnly, { IsImplicitlyDeclared: true }, { IsImplicitlyDeclared: true }):
                         return AccessorList( List( new[] { GenerateGetAccessor(), GenerateSetAccessor() } ) );
 
                     // Properties with only get accessor.

@@ -4,6 +4,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Templating.Expressions;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -52,7 +53,8 @@ internal class ContractPropertyTransformation : OverridePropertyBaseTransformati
                     return false;
                 }
 
-                proceedExpression = this.CreateProceedDynamicExpression( contextCopy, accessor, TemplateKind.Default ).ToSyntax( syntaxGenerationContext );
+                proceedExpression = this.CreateProceedDynamicExpression( contextCopy, accessor, TemplateKind.Default )
+                    .ToExpressionSyntax( syntaxGenerationContext );
 
                 return true;
             }

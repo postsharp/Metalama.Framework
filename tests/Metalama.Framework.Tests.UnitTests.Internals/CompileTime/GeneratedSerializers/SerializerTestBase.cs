@@ -4,6 +4,7 @@
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Serialization;
 using System;
 using System.Collections.Generic;

@@ -145,7 +145,7 @@ internal class TargetClass
     }
 
 
-    private int _restrictedInitProperty;
+    private readonly int _restrictedInitProperty;
 
     [Override]
     public int RestrictedInitProperty

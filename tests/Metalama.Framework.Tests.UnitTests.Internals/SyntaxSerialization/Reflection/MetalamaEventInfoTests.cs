@@ -26,7 +26,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                 @"typeof(global::Target).GetEvent(""Activated"")",
                 serialized );
 
-            TestExpression<EventInfo>(
+            this.TestExpression<EventInfo>(
                 code,
                 serialized,
                 info =>
@@ -48,7 +48,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                 @"typeof(global::Target).GetEvent(""Activated"")",
                 serialized );
 
-            TestExpression<EventInfo>(
+            this.TestExpression<EventInfo>(
                 code,
                 serialized,
                 info =>
@@ -70,7 +70,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                 @"typeof(global::Target<>).GetEvent(""Activated"")",
                 serialized );
 
-            TestExpression<EventInfo>(
+            this.TestExpression<EventInfo>(
                 code,
                 serialized,
                 info =>

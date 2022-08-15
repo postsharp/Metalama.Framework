@@ -17,13 +17,13 @@ internal partial class LinkerIntroductionStep
         public ImmutableArray<IntroduceConstructorInitializerArgumentTransformation> Arguments { get; private set; } =
             ImmutableArray<IntroduceConstructorInitializerArgumentTransformation>.Empty;
 
-        public bool HasCallDefaultConstructorTransformation { get; set; }
-
         public void Add( LinkerInsertedStatement statement ) => this.Statements = this.Statements.Add( statement );
 
         public void Add( IntroduceParameterTransformation transformation ) => this.Parameters = this.Parameters.Add( transformation );
 
         public void Add( IntroduceConstructorInitializerArgumentTransformation argument ) => this.Arguments = this.Arguments.Add( argument );
+
+        public bool AddDefaultInitializer { get; set; }
     }
 
     private class TypeLevelTransformations

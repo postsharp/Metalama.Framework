@@ -14,7 +14,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
 
         public override ExpressionSyntax Serialize( IExpression obj, SyntaxSerializationContext serializationContext )
         {
-            return ((IUserExpression) obj.Value!).ToRunTimeTemplateExpression( serializationContext.SyntaxGenerationContext );
+            return ((IUserExpression) obj.Value!).ToExpressionSyntax( serializationContext.SyntaxGenerationContext );
         }
 
         public override Type? OutputType => null;

@@ -76,8 +76,11 @@ internal class TransitiveAspectSource : IAspectSource, IValidatorSource
                 // Process inherited aspects.
                 foreach ( var aspectClassName in manifest.InheritableAspectTypes )
                 {
-                    // TODO: the next line may throw KeyNotFoundException.
-                    var aspectClass = aspectClassesByName[aspectClassName];
+                    if ( !aspectClassesByName.TryGetValue( aspectClassName, out var aspectClass ) )
+                    {
+                        // TODO: it seems to happen with inherited aspects at design time.
+                        throw new AssertionFailedException( $"Cannot find an aspect '{aspectClassName}'." );
+                    }
 
                     var targets = manifest.GetInheritedAspects( aspectClassName )
                         .WhereNotNull();

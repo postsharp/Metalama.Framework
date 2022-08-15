@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -15,7 +16,7 @@ namespace Metalama.Framework.Engine.Templating
     /// into something that filters build-time expressions.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    internal class TemplateRewriterFilter<T> : CSharpSyntaxRewriter
+    internal class TemplateRewriterFilter<T> : SafeSyntaxRewriter
         where T : CSharpSyntaxRewriter
     {
         private readonly SyntaxTreeAnnotationMap _syntaxTreeAnnotationMap;

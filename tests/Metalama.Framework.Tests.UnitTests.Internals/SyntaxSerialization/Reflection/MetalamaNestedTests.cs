@@ -22,7 +22,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                 @"typeof(global::Target.Sub)",
                 serialized );
 
-            TestExpression<Type>( code, serialized, info => Assert.Equal( "Sub", info.Name ) );
+            this.TestExpression<Type>( code, serialized, info => Assert.Equal( "Sub", info.Name ) );
         }
 
         private string SerializeType( string code )

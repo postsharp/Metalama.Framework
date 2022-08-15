@@ -19,12 +19,12 @@ namespace Metalama.Framework.Engine.LamaSerialization
         /// <summary>
         /// Gets a list of serializable fields an properties.
         /// </summary>
-        public IReadOnlyList<ISymbol> SerializedMembers { get; }
+        public List<ISymbol> SerializedMembers { get; } = new();
 
         public SerializableTypeInfo( INamedTypeSymbol type, IReadOnlyList<ISymbol> serializedMembers )
         {
             this.Type = type;
-            this.SerializedMembers = serializedMembers;
+            this.SerializedMembers.AddRange( serializedMembers );
         }
     }
 }

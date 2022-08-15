@@ -25,11 +25,14 @@ namespace Metalama.Framework.Tests.Integration.Validation.NamespaceFabric_
         }
     }
 
+    
+    // <target>
     internal class ValidatedClass
     {
         public static void Method( object o ) { }
     }
 
+    // <target>
     internal class DerivedClass : ValidatedClass
     {
         // Field type.
@@ -47,6 +50,7 @@ namespace Metalama.Framework.Tests.Integration.Validation.NamespaceFabric_
         }
     }
 
+    // <target>
     internal class ReferencingClass
     {
         private void ReferencingMethod()

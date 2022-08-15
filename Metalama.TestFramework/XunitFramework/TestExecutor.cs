@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Testing;
 using System;
 using System.Collections.Concurrent;
@@ -21,10 +20,8 @@ namespace Metalama.TestFramework.XunitFramework
     {
         private readonly TestFactory _factory;
 
-        public TestExecutor( AssemblyName assemblyName, IMessageSink messageSink )
+        public TestExecutor( AssemblyName assemblyName )
         {
-            _ = messageSink;
-
             var assembly = Assembly.Load( assemblyName );
             var assemblyInfo = new ReflectionAssemblyInfo( assembly );
             TestDiscoverer discoverer = new( assemblyInfo );
@@ -201,8 +198,7 @@ namespace Metalama.TestFramework.XunitFramework
                 testMetrics.OnTestStarted();
 
                 using var testOptions = new TestProjectOptions( plugIns: projectReferences.PlugIns );
-
-                var serviceProvider = ServiceProviderFactory.GetServiceProvider( testOptions.PathOptions ).WithService( testOptions );
+                using var testContext = new TestContext( testOptions );
 
                 var testInput = TestInput.FromFile( this._factory.ProjectProperties, directoryOptionsReader, testCase.UniqueID );
 
@@ -216,7 +212,7 @@ namespace Metalama.TestFramework.XunitFramework
                 {
                     var testRunner = TestRunnerFactory.CreateTestRunner(
                         testInput,
-                        serviceProvider,
+                        testContext.ServiceProvider,
                         projectReferences,
                         logger );
 

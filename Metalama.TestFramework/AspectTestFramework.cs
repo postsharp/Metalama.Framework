@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Engine.Testing;
 using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -16,29 +17,39 @@ namespace Metalama.TestFramework
     [ExcludeFromCodeCoverage]
     public class AspectTestFramework : ITestFramework
     {
+        static AspectTestFramework()
+        {
+            TestingServices.Initialize();
+        }
+
         private readonly ITestFramework _implementation;
 
         public AspectTestFramework( IMessageSink messageSink )
         {
+            // We disable logging by default because it creates too many log records.
+            var messageSinkOrNull = string.IsNullOrEmpty( Environment.GetEnvironmentVariable( "LogMetalamaTestFramework" ) )
+                ? null
+                : messageSink;
+
             const string debugEnvironmentVariable = "DebugMetalamaTestFramework";
 
             if ( !string.IsNullOrEmpty( Environment.GetEnvironmentVariable( debugEnvironmentVariable ) ) )
             {
-                messageSink.Trace( $"Environment variable '{debugEnvironmentVariable}' detected. Attaching debugger." );
+                messageSinkOrNull?.Trace( $"Environment variable '{debugEnvironmentVariable}' detected. Attaching debugger." );
                 Debugger.Launch();
             }
 
             if ( Process.GetCurrentProcess().ProcessName.StartsWith( "ResharperTestRunner", StringComparison.OrdinalIgnoreCase ) )
             {
-                messageSink.Trace( $"Resharper detected. Using the legacy test runner." );
+                messageSinkOrNull?.Trace( $"Resharper detected. Using the legacy test runner." );
 
                 this._implementation = new XunitTestFramework( messageSink );
             }
             else
             {
-                messageSink.Trace( $"Resharper NOT detected. Using the customized test runner." );
+                messageSinkOrNull?.Trace( $"Resharper NOT detected. Using the customized test runner." );
 
-                this._implementation = new AspectTestFrameworkVsImpl( messageSink );
+                this._implementation = new AspectTestFrameworkVsImpl( messageSinkOrNull );
             }
         }
 

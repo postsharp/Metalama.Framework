@@ -11,7 +11,8 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Comparers;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.TestFramework;
 using Metalama.TestFramework.Utilities;
 using Microsoft.CodeAnalysis;
@@ -69,7 +70,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
 
         internal SyntaxNode ProcessSyntaxRoot( SyntaxNode syntaxRoot )
         {
-            return this._rewriter.Visit( syntaxRoot );
+            return this._rewriter.Visit( syntaxRoot )!;
         }
 
         public AspectLinkerInput ToAspectLinkerInput( PartialCompilation inputCompilation )

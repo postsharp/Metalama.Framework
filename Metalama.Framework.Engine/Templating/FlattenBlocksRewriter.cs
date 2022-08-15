@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -14,7 +15,7 @@ namespace Metalama.Framework.Engine.Templating
     /// A <see cref="CSharpSyntaxRewriter"/> that flattens blocks from the output of <see cref="TemplateCompiler"/>.
     /// Some blocks must be flattened for semantic reasons, other just for aesthetic ones.
     /// </summary>
-    internal class FlattenBlocksRewriter : CSharpSyntaxRewriter
+    internal class FlattenBlocksRewriter : SafeSyntaxRewriter
     {
         public override SyntaxNode? VisitBlock( BlockSyntax node )
         {
@@ -26,7 +27,7 @@ namespace Metalama.Framework.Engine.Templating
 
             foreach ( var statement in node.Statements )
             {
-                var processedStatement = (StatementSyntax) this.Visit( statement );
+                var processedStatement = (StatementSyntax) this.Visit( statement )!;
 
                 switch ( processedStatement )
                 {

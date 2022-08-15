@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Templating;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -16,7 +17,7 @@ namespace Metalama.Framework.Engine.Formatting
     /// Produces a <see cref="ClassifiedTextSpanCollection"/> with compile-time code given
     /// a syntax tree annotated with <see cref="TemplateAnnotator"/>.
     /// </summary>
-    public sealed partial class TextSpanClassifier : CSharpSyntaxWalker
+    public sealed partial class TextSpanClassifier : SafeSyntaxWalker
     {
 #if !DEBUG
 #pragma warning disable IDE0052 // Remove unread private members
@@ -38,7 +39,7 @@ namespace Metalama.Framework.Engine.Formatting
         /// </summary>
         /// <param name="sourceText"></param>
         public TextSpanClassifier( SourceText sourceText )
-            : base( SyntaxWalkerDepth.Token )
+            : base( SyntaxWalkerDepth.Trivia )
         {
             this._sourceText = sourceText;
             this._sourceString = sourceText.ToString();
@@ -56,7 +57,7 @@ namespace Metalama.Framework.Engine.Formatting
                 _ => false
             };
 
-        public override void Visit( SyntaxNode? node )
+        protected override void VisitCore( SyntaxNode? node )
         {
             if ( node == null )
             {
@@ -69,7 +70,7 @@ namespace Metalama.Framework.Engine.Formatting
 
             try
             {
-                base.Visit( node );
+                base.VisitCore( node );
             }
             finally
             {
@@ -155,21 +156,25 @@ namespace Metalama.Framework.Engine.Formatting
             }
             else
             {
-                this.VisitMember( node );
+                this.VisitMember( node, base.VisitMethodDeclaration );
             }
         }
 
-        private void VisitMember( SyntaxNode node )
+        private void VisitMember<T>( T node, Action<T> callBase )
+            where T : SyntaxNode
         {
             if ( this._isInCompileTimeType )
             {
                 this.Mark( node, TextSpanClassification.CompileTime );
+
+                // We still visit the member to mark indentation.
+                callBase( node );
             }
         }
 
-        public override void VisitFieldDeclaration( FieldDeclarationSyntax node ) => this.VisitMember( node );
+        public override void VisitFieldDeclaration( FieldDeclarationSyntax node ) => this.VisitMember( node, base.VisitFieldDeclaration );
 
-        public override void VisitEventDeclaration( EventDeclarationSyntax node ) => this.VisitMember( node );
+        public override void VisitEventDeclaration( EventDeclarationSyntax node ) => this.VisitMember( node, base.VisitEventDeclaration );
 
         public override void VisitPropertyDeclaration( PropertyDeclarationSyntax node )
         {
@@ -187,7 +192,7 @@ namespace Metalama.Framework.Engine.Formatting
             }
             else
             {
-                this.VisitMember( node );
+                this.VisitMember( node, base.VisitPropertyDeclaration );
             }
         }
 
@@ -206,7 +211,7 @@ namespace Metalama.Framework.Engine.Formatting
             base.VisitAccessorDeclaration( node );
         }
 
-        public override void VisitEventFieldDeclaration( EventFieldDeclarationSyntax node ) => this.VisitMember( node );
+        public override void VisitEventFieldDeclaration( EventFieldDeclarationSyntax node ) => this.VisitMember( node, base.VisitEventFieldDeclaration );
 
         public override void VisitToken( SyntaxToken token )
         {
@@ -221,6 +226,41 @@ namespace Metalama.Framework.Engine.Formatting
             }
 
             base.VisitToken( token );
+        }
+
+        private bool _isAfterEndOfLine;
+
+        private void VisitTriviaList( SyntaxTriviaList triviaList )
+        {
+            foreach ( var trivia in triviaList )
+            {
+                switch ( trivia.Kind() )
+                {
+                    case SyntaxKind.EndOfLineTrivia:
+                        this._isAfterEndOfLine = true;
+
+                        break;
+
+                    case SyntaxKind.WhitespaceTrivia when this._isAfterEndOfLine:
+                    case SyntaxKind.MultiLineCommentTrivia:
+                    case SyntaxKind.SingleLineCommentTrivia:
+                        this.Mark( trivia.Span, TextSpanClassification.NeutralTrivia );
+
+                        break;
+                }
+            }
+        }
+
+        public override void VisitTrailingTrivia( SyntaxToken token )
+        {
+            this._isAfterEndOfLine = false;
+
+            this.VisitTriviaList( token.TrailingTrivia );
+        }
+
+        public override void VisitLeadingTrivia( SyntaxToken token )
+        {
+            this.VisitTriviaList( token.LeadingTrivia );
         }
 
         public override void DefaultVisit( SyntaxNode node )
@@ -335,13 +375,17 @@ namespace Metalama.Framework.Engine.Formatting
             this.ClassifiedTextSpans.Add( span, classification );
         }
 
+        /*
         public override void VisitLiteralExpression( LiteralExpressionSyntax node )
         {
             // We don't mark literals that are not a part of larger compile-time expressions because it does not bring anything useful.
         }
+        */
 
         public override void VisitIfStatement( IfStatementSyntax node )
         {
+            this.VisitToken( node.IfKeyword );
+
             if ( this._isInTemplate && node.GetScopeFromAnnotation() == TemplatingScope.CompileTimeOnly )
             {
                 this.Mark( TextSpan.FromBounds( node.IfKeyword.SpanStart, node.CloseParenToken.Span.End ), TextSpanClassification.CompileTime );
@@ -351,6 +395,7 @@ namespace Metalama.Framework.Engine.Formatting
                 if ( node.Else != null )
                 {
                     this.Mark( node.Else.ElseKeyword, TextSpanClassification.CompileTime );
+                    this.VisitToken( node.Else.ElseKeyword );
                     this.VisitCompileTimeStatementNode( node.Else.Statement );
                 }
             }
@@ -364,6 +409,8 @@ namespace Metalama.Framework.Engine.Formatting
         {
             if ( this._isInTemplate && node.GetScopeFromAnnotation() == TemplatingScope.CompileTimeOnly )
             {
+                this.VisitToken( node.ForEachKeyword );
+
                 this.Mark( TextSpan.FromBounds( node.ForEachKeyword.SpanStart, node.CloseParenToken.Span.End ), TextSpanClassification.CompileTime );
                 this.Mark( node.Identifier, TextSpanClassification.CompileTimeVariable );
                 this.Visit( node.Expression );
@@ -381,6 +428,10 @@ namespace Metalama.Framework.Engine.Formatting
             {
                 this.Mark( block.OpenBraceToken, TextSpanClassification.CompileTime );
                 this.Mark( block.CloseBraceToken, TextSpanClassification.CompileTime );
+
+                // Mark indentation
+                this.VisitToken( block.OpenBraceToken );
+                this.VisitToken( block.CloseBraceToken );
             }
 
             this.Visit( statement );

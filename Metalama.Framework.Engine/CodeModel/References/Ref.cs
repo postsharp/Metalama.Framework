@@ -4,7 +4,8 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Comparers;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Immutable;
@@ -328,6 +329,18 @@ namespace Metalama.Framework.Engine.CodeModel.References
             ReferenceResolutionOptions options = default,
             DeclarationRefTargetKind kind = DeclarationRefTargetKind.Default )
         {
+            T Convert( ICompilationElement compilationElement )
+            {
+                if ( compilationElement is not T safeCast )
+                {
+                    // Throw an exception with a better exception message for better troubleshooting.
+                    throw new InvalidOperationException(
+                        $"Cannot convert '{compilationElement}' into a {typeof(T).Name} within the compilation '{compilation.Identity}'." );
+                }
+
+                return safeCast;
+            }
+
             switch ( reference )
             {
                 case null:
@@ -336,16 +349,17 @@ namespace Metalama.Framework.Engine.CodeModel.References
                         : throw new AssertionFailedException();
 
                 case ISymbol symbol:
-                    return (T) compilation.Factory.GetCompilationElement( symbol.AssertValidType<T>(), kind ).AssertNotNull();
+                    return Convert( compilation.Factory.GetCompilationElement( symbol.AssertValidType<T>(), kind ).AssertNotNull() );
 
                 case SyntaxNode node:
-                    return (T) compilation.Factory.GetCompilationElement(
-                            GetSymbolOfNode( compilation.PartialCompilation.Compilation, node ).AssertValidType<T>(),
-                            kind )
-                        .AssertNotNull();
+                    return Convert(
+                        compilation.Factory.GetCompilationElement(
+                                GetSymbolOfNode( compilation.PartialCompilation.Compilation, node ).AssertValidType<T>(),
+                                kind )
+                            .AssertNotNull() );
 
                 case IDeclarationBuilder builder:
-                    return (T) compilation.Factory.GetDeclaration( builder, options );
+                    return Convert( compilation.Factory.GetDeclaration( builder, options ) );
 
                 case string id:
                     {
@@ -365,7 +379,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                             throw new SymbolNotFoundException( id, compilation.RoslynCompilation );
                         }
 
-                        return (T) compilation.Factory.GetCompilationElement( symbol ).AssertNotNull();
+                        return Convert( compilation.Factory.GetCompilationElement( symbol ).AssertNotNull() );
                     }
 
                 default:

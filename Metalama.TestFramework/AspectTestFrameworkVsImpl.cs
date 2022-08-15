@@ -12,9 +12,9 @@ namespace Metalama.TestFramework
     [ExcludeFromCodeCoverage]
     internal class AspectTestFrameworkVsImpl : ITestFramework, ISourceInformationProvider
     {
-        private readonly IMessageSink _messageSink;
+        private readonly IMessageSink? _messageSink;
 
-        public AspectTestFrameworkVsImpl( IMessageSink messageSink )
+        public AspectTestFrameworkVsImpl( IMessageSink? messageSink )
         {
             this._messageSink = messageSink;
         }
@@ -25,7 +25,7 @@ namespace Metalama.TestFramework
 
         ITestFrameworkDiscoverer ITestFramework.GetDiscoverer( IAssemblyInfo assembly ) => new TestDiscoverer( assembly, this._messageSink );
 
-        ITestFrameworkExecutor ITestFramework.GetExecutor( AssemblyName assemblyName ) => new TestExecutor( assemblyName, this._messageSink );
+        ITestFrameworkExecutor ITestFramework.GetExecutor( AssemblyName assemblyName ) => new TestExecutor( assemblyName );
 
         ISourceInformationProvider ITestFramework.SourceInformationProvider
         {

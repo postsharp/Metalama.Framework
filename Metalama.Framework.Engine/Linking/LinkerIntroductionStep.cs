@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Compiler;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
@@ -10,7 +11,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -43,7 +44,7 @@ namespace Metalama.Framework.Engine.Linking
             // We don't use a code fix filter because the linker is not supposed to suggest code fixes. If that changes, we need to pass a filter.
             var diagnostics = new UserDiagnosticSink( input.CompileTimeProject, null );
 
-            var nameProvider = new LinkerIntroductionNameProvider();
+            var nameProvider = new LinkerIntroductionNameProvider( input.CompilationModel );
             var syntaxTransformationCollection = new SyntaxTransformationCollection();
             var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
 
@@ -81,10 +82,10 @@ namespace Metalama.Framework.Engine.Linking
                 diagnostics,
                 lexicalScopeFactory,
                 allTransformations,
-                out var syntaxMemberLevelTransformations,
+                out var symbolMemberLevelTransformations,
                 out var introductionMemberLevelTransformations );
 
-            IndexTypeLevelTransformations( allTransformations, out var typeLevelTransformations );
+            IndexTypeLevelTransformations( allTransformations, symbolMemberLevelTransformations, out var typeLevelTransformations );
 
             IndexNodesWithModifiedAttributes( allTransformations, out var nodesWithModifiedAttributes );
 
@@ -101,7 +102,7 @@ namespace Metalama.Framework.Engine.Linking
                 suppressionsByTarget,
                 input.CompilationModel,
                 input.OrderedAspectLayers,
-                syntaxMemberLevelTransformations,
+                symbolMemberLevelTransformations,
                 introductionMemberLevelTransformations,
                 nodesWithModifiedAttributes,
                 syntaxTreeForGlobalAttributes,
@@ -126,13 +127,10 @@ namespace Metalama.Framework.Engine.Linking
             }
 
             var helperSyntaxTree = aspectReferenceSyntaxProvider.GetLinkerHelperSyntaxTree( intermediateCompilation.LanguageOptions );
+            var transformations = syntaxTreeMapping.Select( p => SyntaxTreeTransformation.ReplaceTree( p.Key, p.Value ) ).ToList();
+            transformations.Add( SyntaxTreeTransformation.AddTree( helperSyntaxTree ) );
 
-            intermediateCompilation =
-                helperSyntaxTree != null
-                    ? intermediateCompilation.Update(
-                        syntaxTreeMapping.Select( p => new SyntaxTreeModification( p.Value, p.Key ) ).ToList(),
-                        new[] { helperSyntaxTree } )
-                    : intermediateCompilation;
+            intermediateCompilation = intermediateCompilation.Update( transformations );
 
             var introductionRegistry = new LinkerIntroductionRegistry(
                 input.CompilationModel,
@@ -394,20 +392,21 @@ namespace Metalama.Framework.Engine.Linking
 
         private static void IndexTypeLevelTransformations(
             List<ITransformation> allTransformations,
+            Dictionary<SyntaxNode, MemberLevelTransformations> symbolMemberLevelTransformations,
             out Dictionary<TypeDeclarationSyntax, TypeLevelTransformations> typeLevelTransformations )
         {
             typeLevelTransformations = new Dictionary<TypeDeclarationSyntax, TypeLevelTransformations>();
 
             foreach ( var transformation in allTransformations.OfType<ITypeLevelTransformation>() )
             {
-                TypeLevelTransformations? theseTypeLevelTransformations;
+                TypeLevelTransformations? thisTypeLevelTransformations;
                 var declarationSyntax = (TypeDeclarationSyntax?) transformation.TargetType.GetPrimaryDeclarationSyntax();
 
                 if ( declarationSyntax != null )
                 {
-                    if ( !typeLevelTransformations.TryGetValue( declarationSyntax, out theseTypeLevelTransformations ) )
+                    if ( !typeLevelTransformations.TryGetValue( declarationSyntax, out thisTypeLevelTransformations ) )
                     {
-                        typeLevelTransformations[declarationSyntax] = theseTypeLevelTransformations = new TypeLevelTransformations();
+                        typeLevelTransformations[declarationSyntax] = thisTypeLevelTransformations = new TypeLevelTransformations();
                     }
                 }
                 else
@@ -418,7 +417,54 @@ namespace Metalama.Framework.Engine.Linking
                 switch ( transformation )
                 {
                     case AddExplicitDefaultConstructorTransformation:
-                        theseTypeLevelTransformations.AddExplicitDefaultConstructor = true;
+                        thisTypeLevelTransformations.AddExplicitDefaultConstructor = true;
+
+                        foreach ( var syntaxReference in transformation.TargetType.GetSymbol().DeclaringSyntaxReferences )
+                        {
+                            foreach ( var member in ((TypeDeclarationSyntax) syntaxReference.GetSyntax()).Members )
+                            {
+                                switch ( member )
+                                {
+                                    case PropertyDeclarationSyntax propertyDeclaration:
+                                        if ( !symbolMemberLevelTransformations.TryGetValue( propertyDeclaration, out var propertyTransformations ) )
+                                        {
+                                            symbolMemberLevelTransformations[propertyDeclaration] = propertyTransformations = new MemberLevelTransformations();
+                                        }
+
+                                        propertyTransformations.AddDefaultInitializer = true;
+
+                                        break;
+
+                                    case FieldDeclarationSyntax fieldDeclaration:
+
+                                        foreach ( var variable in fieldDeclaration.Declaration.Variables )
+                                        {
+                                            if ( !symbolMemberLevelTransformations.TryGetValue( variable, out var fieldTransformations ) )
+                                            {
+                                                symbolMemberLevelTransformations[variable] = fieldTransformations = new MemberLevelTransformations();
+                                            }
+
+                                            fieldTransformations.AddDefaultInitializer = true;
+                                        }
+
+                                        break;
+
+                                    case EventFieldDeclarationSyntax eventFieldDeclaration:
+
+                                        foreach ( var variable in eventFieldDeclaration.Declaration.Variables )
+                                        {
+                                            if ( !symbolMemberLevelTransformations.TryGetValue( variable, out var eventFieldTransformations ) )
+                                            {
+                                                symbolMemberLevelTransformations[variable] = eventFieldTransformations = new MemberLevelTransformations();
+                                            }
+
+                                            eventFieldTransformations.AddDefaultInitializer = true;
+                                        }
+
+                                        break;
+                                }
+                            }
+                        }
 
                         break;
 
@@ -530,11 +576,6 @@ namespace Metalama.Framework.Engine.Linking
 
                     case (IntroduceConstructorInitializerArgumentTransformation appendArgumentTransformation, _):
                         memberLevelTransformations.Add( appendArgumentTransformation );
-
-                        break;
-
-                    case (CallDefaultConstructorTransformation, _):
-                        memberLevelTransformations.HasCallDefaultConstructorTransformation = true;
 
                         break;
 

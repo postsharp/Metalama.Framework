@@ -91,7 +91,6 @@ namespace Metalama.TestFramework
                          *  - To know where sos.dll is and how to load it in WinDbg, type `dotnet sos install`.
                          *  - Follow instructions in https://docs.microsoft.com/en-us/dotnet/standard/assembly/unloadability
                          */
-                        MiniDumper.Write();
 
                         throw new InvalidOperationException(
                             "The domain could not be unloaded. There are probably dangling references. " +

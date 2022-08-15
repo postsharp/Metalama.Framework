@@ -85,11 +85,13 @@ internal class TemplateMember<T>
             return Accessibility.Private;
         }
 
-        var accessibilityAttribute = declaration.Attributes.OfAttributeType( typeof(AccessibilityAttribute) ).SingleOrDefault();
+        var compiledTemplateAttribute = declaration.Attributes.OfAttributeType( typeof(CompiledTemplateAttribute) ).SingleOrDefault();
 
-        if ( accessibilityAttribute != null )
+        if ( compiledTemplateAttribute != null && compiledTemplateAttribute.TryGetNamedArgument(
+                nameof(CompiledTemplateAttribute.Accessibility),
+                out var accessibility ) )
         {
-            return (Accessibility) accessibilityAttribute.ConstructorArguments[0].Value!;
+            return (Accessibility) accessibility.Value!;
         }
         else
         {

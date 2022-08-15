@@ -29,6 +29,7 @@ namespace Metalama.TestFramework.XunitFramework
         public TestDiscoverer( IAssemblyInfo assembly, IMessageSink? messageSink = null )
         {
             this._assembly = assembly;
+
             this._messageSink = messageSink;
 
             var attrib = assembly.GetCustomAttributes( typeof(TargetFrameworkAttribute) ).FirstOrDefault();

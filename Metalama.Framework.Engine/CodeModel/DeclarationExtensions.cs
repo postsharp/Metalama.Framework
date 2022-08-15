@@ -3,11 +3,12 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating.Expressions;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -16,6 +17,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Accessibility = Metalama.Framework.Code.Accessibility;
 using DeclarationKind = Metalama.Framework.Code.DeclarationKind;
 using EnumerableExtensions = Metalama.Framework.Engine.Collections.EnumerableExtensions;
@@ -23,6 +25,7 @@ using MethodKind = Microsoft.CodeAnalysis.MethodKind;
 using OperatorKind = Metalama.Framework.Code.OperatorKind;
 using RefKind = Metalama.Framework.Code.RefKind;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
+using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
@@ -139,7 +142,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 _ => null
             };
 
-        internal static void CheckArguments( this IDeclaration declaration, IReadOnlyList<IParameter> parameters, RunTimeTemplateExpression[]? arguments )
+        internal static void CheckArguments( this IDeclaration declaration, IReadOnlyList<IParameter> parameters, TypedExpressionSyntax[]? arguments )
         {
             // TODO: somehow provide locations for the diagnostics?
             var argumentsLength = arguments?.Length ?? 0;
@@ -166,7 +169,8 @@ namespace Metalama.Framework.Engine.CodeModel
         internal static ArgumentSyntax[] GetArguments(
             this IDeclaration declaration,
             IReadOnlyList<IParameter> parameters,
-            RunTimeTemplateExpression[]? args )
+            TypedExpressionSyntax[]? args,
+            SyntaxGenerationContext syntaxGenerationContext )
         {
             CheckArguments( declaration, parameters, args );
 
@@ -212,7 +216,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     }
                     else
                     {
-                        argument = SyntaxFactory.Argument( arg.ToTypedExpression( parameter.Type ) );
+                        argument = SyntaxFactory.Argument( arg.Convert( parameter.Type, syntaxGenerationContext ).Syntax.RemoveParenthesis() );
                     }
                 }
 
@@ -224,7 +228,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal static ExpressionSyntax GetReceiverSyntax<T>(
             this T declaration,
-            RunTimeTemplateExpression instance,
+            TypedExpressionSyntax instance,
             SyntaxGenerationContext generationContext )
             where T : IMember
         {
@@ -238,7 +242,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 throw GeneralDiagnosticDescriptors.MustProvideInstanceForInstanceMember.CreateException( declaration );
             }
 
-            return instance.ToTypedExpression( declaration.DeclaringType, true );
+            return instance.Convert( declaration.DeclaringType, generationContext );
         }
 
         internal static RefKind ToOurRefKind( this Microsoft.CodeAnalysis.RefKind roslynRefKind )
@@ -462,5 +466,65 @@ namespace Metalama.Framework.Engine.CodeModel
             => namedType.AllProperties.OfName( name ).FirstOrDefault() ??
                (IMember?) namedType.AllFields.OfName( name ).FirstOrDefault() ??
                namedType.AllEvents.OfName( name ).FirstOrDefault();
+
+        public static bool IsEventField( this IEvent @event )
+        {
+            if ( @event is Event codeEvent )
+            {
+                var eventSymbol = codeEvent.GetSymbol().AssertNotNull();
+
+                // TODO: partial events.
+                return eventSymbol.GetPrimaryDeclaration() switch
+                {
+                    VariableDeclaratorSyntax => true,
+                    { } => false,
+                    _ => @event.AddMethod.IsCompilerGenerated() && @event.RemoveMethod.IsCompilerGenerated()
+                };
+            }
+            else if ( @event is BuiltEvent builtEvent )
+            {
+                return builtEvent.EventBuilder.IsEventField;
+            }
+            else if ( @event is EventBuilder eventBuilder )
+            {
+                return eventBuilder.IsEventField;
+            }
+            else
+            {
+                throw new AssertionFailedException();
+            }
+        }
+
+        public static bool IsCompilerGenerated( this IDeclaration declaration )
+        {
+            return declaration.GetSymbol()?.GetAttributes().Any( a => a.AttributeConstructor?.ContainingType.Name == nameof(CompilerGeneratedAttribute) )
+                   == true;
+        }
+
+        /// <summary>
+        /// Determines if a given declaration is a child of another given declaration, using the <see cref="IDeclaration.ContainingDeclaration"/>
+        /// relationship for all declarations except for named type, where the parent namespace is considered.
+        /// </summary>
+        public static bool IsContainedIn( this IDeclaration declaration, IDeclaration containingDeclaration )
+        {
+            var comparer = declaration.GetCompilationModel().InvariantComparer;
+
+            if ( comparer.Equals( declaration.GetOriginalDefinition(), containingDeclaration.GetOriginalDefinition() ) )
+            {
+                return true;
+            }
+
+            if ( declaration is INamedType { ContainingDeclaration: not INamedType } namedType && containingDeclaration is INamespace containingNamespace )
+            {
+                return namedType.Namespace.IsContainedIn( containingNamespace );
+            }
+
+            return declaration.ContainingDeclaration != null && declaration.ContainingDeclaration.IsContainedIn( containingDeclaration );
+        }
+
+        public static bool IsImplicitInstanceConstructor( this IConstructor ctor )
+        {
+            return !ctor.IsStatic && ctor.IsImplicitlyDeclared && ctor.DeclaringType.TypeKind is TypeKind.Class or TypeKind.Struct;
+        }
     }
 }

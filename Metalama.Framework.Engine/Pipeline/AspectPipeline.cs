@@ -16,7 +16,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.Options;
-using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -37,6 +37,12 @@ namespace Metalama.Framework.Engine.Pipeline
     public abstract class AspectPipeline : IDisposable
     {
         private const string _highLevelStageGroupingKey = nameof(_highLevelStageGroupingKey);
+
+        private static readonly ImmutableHashSet<LanguageVersion> _supportedVersions = ImmutableHashSet.Create(
+            LanguageVersion.Latest,
+            LanguageVersion.LatestMajor,
+            LanguageVersion.CSharp10 );
+
         private readonly bool _ownsDomain;
 
         public IProjectOptions ProjectOptions { get; }
@@ -97,10 +103,28 @@ namespace Metalama.Framework.Engine.Pipeline
             var roslynCompilation = compilation.Compilation;
 
             // Check language version.
-            if ( compilation.SyntaxTrees.Count > 0
-                 && ((CSharpParseOptions) compilation.SyntaxTrees.First().Value.Options).LanguageVersion == LanguageVersion.Preview )
+
+            var languageVersion =
+                (((CSharpParseOptions?) compilation.Compilation.SyntaxTrees.FirstOrDefault()?.Options)?.LanguageVersion ?? LanguageVersion.Latest)
+                .MapSpecifiedToEffectiveVersion();
+
+            if ( languageVersion == LanguageVersion.Preview )
             {
-                diagnosticAdder.Report( GeneralDiagnosticDescriptors.PreviewCSharpVersionNotSupported.CreateRoslynDiagnostic( null, default ) );
+                if ( !this.ProjectOptions.AllowPreviewLanguageFeatures )
+                {
+                    diagnosticAdder.Report( GeneralDiagnosticDescriptors.PreviewCSharpVersionNotSupported.CreateRoslynDiagnostic( null, default ) );
+                    configuration = null;
+
+                    return false;
+                }
+            }
+            else if ( !_supportedVersions.Contains( languageVersion ) )
+            {
+                diagnosticAdder.Report(
+                    GeneralDiagnosticDescriptors.CSharpVersionNotSupported.CreateRoslynDiagnostic(
+                        null,
+                        (languageVersion.ToDisplayString(), _supportedVersions.Select( x => x.ToDisplayString() ).ToArray()) ) );
+
                 configuration = null;
 
                 return false;
