@@ -83,10 +83,12 @@ namespace Metalama.Framework.Code.DeclarationBuilders
             constructorArguments ??= ImmutableArray<object?>.Empty;
             namedArguments ??= ImmutableArray<KeyValuePair<string, object?>>.Empty;
 
-            var constructorArgumentTypes = constructorArguments
+            // Translate provided IType - typed parameters to System.Reflection.Type to get the correct constructor.
+            var constructorArgumentTypes =
+                constructorArguments
                 .Select( x => x?.GetType() )
-                .Select( x => x == null ? null : typeof( IType ).IsAssignableFrom( x ) ? typeof(Type) : x )
-                .ToList();
+                .Select( x => x == null ? null : typeof( IType ).IsAssignableFrom( x ) ? typeof( Type ) : x )
+                .ToArray();
 
             var constructors = attributeType.Constructors.OfCompatibleSignature( constructorArgumentTypes ).ToList();
 
