@@ -76,6 +76,8 @@ class TargetClass
 
         [Theory]
         [InlineData( TestLicenseKeys.MetalamaUltimateEssentials, true )]
+        [InlineData( TestLicenseKeys.MetalamaStarterBusiness, true )]
+        [InlineData( TestLicenseKeys.MetalamaProfessionalBusiness, true )]
         [InlineData( TestLicenseKeys.MetalamaUltimateBusiness, true )]
         public async Task DeclarationValidatorIsAcceptedViaAspectAsync( string licenseKey, bool accepted )
         {
@@ -86,6 +88,8 @@ class TargetClass
 
         [Theory]
         [InlineData( TestLicenseKeys.MetalamaUltimateEssentials, false )]
+        [InlineData( TestLicenseKeys.MetalamaStarterBusiness, true )]
+        [InlineData( TestLicenseKeys.MetalamaProfessionalBusiness, true )]
         [InlineData( TestLicenseKeys.MetalamaUltimateBusiness, true )]
         public async Task DeclarationValidatorIsAcceptedViaFabricAsync( string licenseKey, bool accepted )
         {

@@ -9,7 +9,6 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
-using System;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -22,29 +21,18 @@ namespace Metalama.Framework.Engine.Licensing;
 /// </summary>
 internal class LicenseVerifier : IService
 {
-    private int _maxAspectClasses = int.MaxValue;
+    // TODO: Namespace-limited licenses.
 
-    private readonly bool _isLimitedLicense;
+    private readonly ILicenseConsumptionManager _licenseConsumptionManager;
 
-    public LicenseVerifier( IServiceProvider serviceProvider )
+    public LicenseVerifier( ILicenseConsumptionManager licenseConsumptionManager )
     {
-        var licenseConsumptionManager = (ILicenseConsumptionManager?) serviceProvider.GetService( typeof(ILicenseConsumptionManager) );
-
-        if ( licenseConsumptionManager != null )
-        {
-            // TODO: if the _current_ project has a redistribution license, it has no limitation.
-            // TODO: instead of a bool, there are 4 product editions.
-            this._isLimitedLicense = !licenseConsumptionManager.CanConsumeFeatures( LicensedFeatures.Metalama );
-        }
-        else
-        {
-            this._isLimitedLicense = false;
-        }
+        this._licenseConsumptionManager = licenseConsumptionManager;
     }
 
     public void VerifyCanAddChildAspect( AspectPredecessor predecessor )
     {
-        if ( this._isLimitedLicense )
+        if ( !this._licenseConsumptionManager.CanConsumeFeatures( LicensedFeatures.MetalamaFabricsAspects ) )
         {
             switch ( predecessor.Instance )
             {
@@ -61,7 +49,7 @@ internal class LicenseVerifier : IService
 
     public void VerifyCanValidator( AspectPredecessor predecessor )
     {
-        if ( this._isLimitedLicense )
+        if ( !this._licenseConsumptionManager.CanConsumeFeatures( LicensedFeatures.MetalamaFabricsValidators ) )
         {
             switch ( predecessor.Instance )
             {
@@ -77,15 +65,16 @@ internal class LicenseVerifier : IService
     public void VerifyCompilationResult( ImmutableArray<AspectInstanceResult> aspectInstanceResults, UserDiagnosticSink diagnostics )
     {
         var aspectClasses = aspectInstanceResults.Select( a => a.AspectInstance.AspectClass ).Distinct().ToList();
+        var maxAspectsCount = this._licenseConsumptionManager.GetMaxAspectsCount();
 
-        if ( aspectClasses.Count > this._maxAspectClasses )
+        if ( aspectClasses.Count > maxAspectsCount )
         {
             var aspectClassNames = string.Join( ",", aspectClasses.Select( x => "'" + x.ShortName + "'" ) );
 
             diagnostics.Report(
                 LicensingDiagnosticDescriptors.TooManyAspectClasses.CreateRoslynDiagnostic(
                     null,
-                    (aspectClasses.Count, this._maxAspectClasses, aspectClassNames) ) );
+                    (aspectClasses.Count, maxAspectsCount, aspectClassNames) ) );
         }
     }
 
@@ -97,7 +86,7 @@ internal class LicenseVerifier : IService
             return;
         }
 
-        if ( aspectClass.IsInherited && this._isLimitedLicense )
+        if ( aspectClass.IsInherited && !this._licenseConsumptionManager.CanConsumeFeatures( LicensedFeatures.MetalamaAspectInheritance ) )
         {
             diagnostics.Report(
                 LicensingDiagnosticDescriptors.InheritanceNotAvailable.CreateRoslynDiagnostic(

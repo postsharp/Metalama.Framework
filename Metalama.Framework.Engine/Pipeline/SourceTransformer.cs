@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Backstage.Extensibility;
+using Metalama.Backstage.Licensing.Consumption;
 using Metalama.Compiler;
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.Diagnostics;
@@ -39,7 +41,12 @@ namespace Metalama.Framework.Engine.Pipeline
                 }
 
                 // Add the license verifier.
-                serviceProvider = serviceProvider.WithService( new LicenseVerifier( serviceProvider ) );
+                var licenseConsumptionManager = serviceProvider.GetBackstageService<ILicenseConsumptionManager>();
+
+                if ( licenseConsumptionManager != null )
+                {
+                    serviceProvider = serviceProvider.WithService( new LicenseVerifier( licenseConsumptionManager ) );
+                }
 
                 // Try.Metalama ships its own project options using the async-local service provider.
                 var projectOptions = serviceProvider.GetService<IProjectOptions>();

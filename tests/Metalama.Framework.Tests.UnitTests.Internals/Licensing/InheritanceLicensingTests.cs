@@ -1,10 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -71,6 +67,8 @@ namespace Doc.InheritedTypeLevel
 
         [Theory]
         [InlineData( TestLicenseKeys.MetalamaUltimateEssentials, false )]
+        [InlineData( TestLicenseKeys.MetalamaStarterBusiness, true )]
+        [InlineData( TestLicenseKeys.MetalamaProfessionalBusiness, true )]
         [InlineData( TestLicenseKeys.MetalamaUltimateBusiness, true )]
         public async Task InheritanceIsAcceptedAsync( string licenseKey, bool accepted )
         {

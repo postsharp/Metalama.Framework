@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Backstage.Extensibility;
+using Metalama.Backstage.Licensing.Consumption;
 using Metalama.Compiler;
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.Aspects;
@@ -12,6 +14,7 @@ using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -74,9 +77,9 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 return null;
             }
 
-            // TODO: initialize ProjectLicenseInfo from the license key specified in the project, but only if it is a redistribution one.
-            // Get the value from the licensing service? 
-            var projectLicenseInfo = ProjectLicenseInfo.Empty;
+            var licenseConsumptionManager = this.ServiceProvider.GetBackstageService<ILicenseConsumptionManager>();
+            var redistributionLicenseKey = licenseConsumptionManager == null ? null : string.Join( ";", licenseConsumptionManager.GetRedistributionLicenseKeys() );
+            var projectLicenseInfo = string.IsNullOrEmpty( redistributionLicenseKey ) ? ProjectLicenseInfo.Empty : new ProjectLicenseInfo( redistributionLicenseKey );
 
             // Initialize the pipeline and generate the compile-time project.
             if ( !this.TryInitialize( diagnosticAdder, partialCompilation, projectLicenseInfo, null, cancellationToken, out var configuration ) )

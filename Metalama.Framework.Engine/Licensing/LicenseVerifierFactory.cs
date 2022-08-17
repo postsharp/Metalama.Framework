@@ -2,6 +2,7 @@
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Backstage.Extensibility;
+using Metalama.Backstage.Licensing.Consumption;
 using Metalama.Framework.Engine.Pipeline;
 
 namespace Metalama.Framework.Engine.Licensing;
@@ -19,6 +20,6 @@ public static class LicenseVerifierFactory
 
         serviceProviderBuilder.AddLicensing( additionalLicenses: new[] { licenseKey }, ignoreUserProfileLicenses: true );
 
-        return serviceProvider.WithService( new LicenseVerifier( serviceProvider ) );
+        return serviceProvider.WithService( new LicenseVerifier( serviceProvider.GetRequiredBackstageService<ILicenseConsumptionManager>() ) );
     }
 }

@@ -10,6 +10,8 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
     {
         [Theory]
         [InlineData( TestLicenseKeys.MetalamaUltimateEssentials )]
+        [InlineData( TestLicenseKeys.MetalamaStarterBusiness )]
+        [InlineData( TestLicenseKeys.MetalamaProfessionalBusiness )]
         [InlineData( TestLicenseKeys.MetalamaUltimateBusiness )]
         public async Task CompilationPassesWithValidLicenseAsync( string licenseKey )
         {
