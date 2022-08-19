@@ -7,7 +7,7 @@ namespace Metalama.Framework.Engine.Licensing;
 
 internal static class LicensingDiagnosticDescriptors
 {
-    // Reserved range: 800-802
+    // Reserved range: 800-803
 
     private const string _category = "Metalama.General";
 
@@ -34,4 +34,12 @@ internal static class LicensingDiagnosticDescriptors
             "The '{0}' aspect cannot be inherited because this feature is not covered by Metalama Essentials license.",
             Severity.Error,
             "Cannot inherit aspects with Metalama Essentials." );
+
+    internal static readonly DiagnosticDefinition<string> RedistributionLicenseInvalid =
+        new(
+            "LAMA0803",
+            _category,
+            "The redistribution license of '{0}' assembly is invalid. All aspects used from this assembly will require a vaild user license.",
+            Severity.Warning,
+            "The redistribution license of '{0}' assembly is invalid." );
 }

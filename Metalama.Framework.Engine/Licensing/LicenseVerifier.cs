@@ -13,6 +13,7 @@ using Metalama.Framework.Project;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Metalama.Framework.Engine.Licensing;
 
@@ -67,7 +68,8 @@ internal class LicenseVerifier : IService
     public void VerifyCompilationResult( ImmutableArray<AspectInstanceResult> aspectInstanceResults, UserDiagnosticSink diagnostics )
     {
         var redistributionAspectClassesPerProject = new Dictionary<CompileTimeProject, List<AspectClass>>();
-        var remainingAspectClasses = new List<IAspectClass>();
+        var otherAspectClasses = new List<IAspectClass>();
+        var invalidRedistributionLicenseKeys = new HashSet<string>();
 
         foreach ( var aspectInstanceResult in aspectInstanceResults )
         {
@@ -75,6 +77,24 @@ internal class LicenseVerifier : IService
                 && aspectClass.Project != null
                 && !string.IsNullOrEmpty( aspectClass.Project.ProjectLicenseInfo.RedistributionLicenseKey ) )
             {
+                var projectRedistributionLicenseKey = aspectClass.Project.ProjectLicenseInfo.RedistributionLicenseKey!;
+
+                if ( invalidRedistributionLicenseKeys.Contains( projectRedistributionLicenseKey ) )
+                {
+                    continue;
+                }
+
+                if ( !this._licenseConsumptionManager.ValidateRedistributionLicenseKey( projectRedistributionLicenseKey ) )
+                {
+                    invalidRedistributionLicenseKeys.Add( projectRedistributionLicenseKey );
+
+                    diagnostics.Report(
+                        LicensingDiagnosticDescriptors.RedistributionLicenseInvalid.CreateRoslynDiagnostic(
+                            null, aspectClass.Project.RunTimeIdentity.Name ) );
+
+                    continue;
+                }
+
                 if ( !redistributionAspectClassesPerProject.TryGetValue( aspectClass.Project, out var aspects ) )
                 {
                     aspects = new List<AspectClass>();
@@ -85,20 +105,30 @@ internal class LicenseVerifier : IService
             }
             else
             {
-                remainingAspectClasses.Add( aspectInstanceResult.AspectInstance.AspectClass );
+                otherAspectClasses.Add( aspectInstanceResult.AspectInstance.AspectClass );
             }
         }
 
-        // TODO: Verify the redistribution license keys.
-
-        var aspectClassesCount = redistributionAspectClassesPerProject.Count + remainingAspectClasses.Count;
+        var aspectClassesCount = redistributionAspectClassesPerProject.Count + otherAspectClasses.Count;
         var maxAspectsCount = this._licenseConsumptionManager.GetMaxAspectsCount();
 
         if ( aspectClassesCount > maxAspectsCount )
         {
-            // TODO: list
-            // var aspectClassNames = string.Join( ",", aspectClasses.Select( x => "'" + x.ShortName + "'" ) );
-            var aspectClassNames = "TODO";
+            static string GetNames( IEnumerable<IAspectClass> aspectClasses ) => string.Join( ", ", aspectClasses.Select( a => $"'{a.ShortName}'" ) );
+
+            // This is to make test output deterministic.
+            static string NormalizeAssemblyName( string assemblyName ) => Regex.IsMatch( assemblyName, "^dependency_[0-9a-f]{16}$" )
+                ? "dependency_XXXXXXXXXXXXXXXX"
+                : assemblyName;
+
+            var aspectClassNames = string.Join( ", ", GetNames( otherAspectClasses ) );
+
+            if (redistributionAspectClassesPerProject.Count > 0)
+            {
+                aspectClassNames += ", ";
+                aspectClassNames += string.Join( ", ", redistributionAspectClassesPerProject.Select(
+                    r => $"aspects from '{NormalizeAssemblyName( r.Key.RunTimeIdentity.Name )}' assembly counted as one ({GetNames( r.Value )})" ) );
+            }
 
             diagnostics.Report(
                 LicensingDiagnosticDescriptors.TooManyAspectClasses.CreateRoslynDiagnostic(
