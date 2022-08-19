@@ -15,7 +15,7 @@ internal static class LicensingDiagnosticDescriptors
         new(
             "LAMA0800",
             _category,
-            "You have {0} aspect classes in the project exceed but only {1} are allowed by your license. The aspect classes are: {2}.",
+            "You have {0} aspect classes used in the project but only {1} are allowed by your license. The aspect classes are: {2}.",
             Severity.Error,
             "Too many aspect classes in the project." );
 

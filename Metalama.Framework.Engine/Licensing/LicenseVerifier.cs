@@ -5,10 +5,12 @@ using Metalama.Backstage.Licensing;
 using Metalama.Backstage.Licensing.Consumption;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 
@@ -64,17 +66,44 @@ internal class LicenseVerifier : IService
 
     public void VerifyCompilationResult( ImmutableArray<AspectInstanceResult> aspectInstanceResults, UserDiagnosticSink diagnostics )
     {
-        var aspectClasses = aspectInstanceResults.Select( a => a.AspectInstance.AspectClass ).Distinct().ToList();
+        var redistributionAspectClassesPerProject = new Dictionary<CompileTimeProject, List<AspectClass>>();
+        var remainingAspectClasses = new List<IAspectClass>();
+
+        foreach ( var aspectInstanceResult in aspectInstanceResults )
+        {
+            if ( aspectInstanceResult.AspectInstance.AspectClass is AspectClass aspectClass
+                && aspectClass.Project != null
+                && !string.IsNullOrEmpty( aspectClass.Project.ProjectLicenseInfo.RedistributionLicenseKey ) )
+            {
+                if ( !redistributionAspectClassesPerProject.TryGetValue( aspectClass.Project, out var aspects ) )
+                {
+                    aspects = new List<AspectClass>();
+                    redistributionAspectClassesPerProject.Add( aspectClass.Project, aspects );
+                }
+
+                aspects.Add( aspectClass );
+            }
+            else
+            {
+                remainingAspectClasses.Add( aspectInstanceResult.AspectInstance.AspectClass );
+            }
+        }
+
+        // TODO: Verify the redistribution license keys.
+
+        var aspectClassesCount = redistributionAspectClassesPerProject.Count + remainingAspectClasses.Count;
         var maxAspectsCount = this._licenseConsumptionManager.GetMaxAspectsCount();
 
-        if ( aspectClasses.Count > maxAspectsCount )
+        if ( aspectClassesCount > maxAspectsCount )
         {
-            var aspectClassNames = string.Join( ",", aspectClasses.Select( x => "'" + x.ShortName + "'" ) );
+            // TODO: list
+            // var aspectClassNames = string.Join( ",", aspectClasses.Select( x => "'" + x.ShortName + "'" ) );
+            var aspectClassNames = "TODO";
 
             diagnostics.Report(
                 LicensingDiagnosticDescriptors.TooManyAspectClasses.CreateRoslynDiagnostic(
                     null,
-                    (aspectClasses.Count, maxAspectsCount, aspectClassNames) ) );
+                    (aspectClassesCount, maxAspectsCount, aspectClassNames) ) );
         }
     }
 

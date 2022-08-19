@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Testing;
@@ -190,6 +191,13 @@ namespace Metalama.TestFramework
                     project.MetadataReferences,
                     (CSharpCompilationOptions?) project.CompilationOptions );
 
+                string? dependencyLicenseKey = null;
+
+                if ( testInput.Options.DependencyLicenseFile != null )
+                {
+                    dependencyLicenseKey = File.ReadAllText( Path.Combine( testInput.ProjectDirectory, testInput.Options.DependencyLicenseFile ) );
+                }
+
                 // Add additional test documents.
                 foreach ( var includedFile in testInput.Options.IncludedFiles )
                 {
@@ -215,7 +223,7 @@ namespace Metalama.TestFramework
                     else
                     {
                         // Dependencies must be compiled separately using Metalama.
-                        var dependency = await this.CompileDependencyAsync( includedText, emptyProject, testResult );
+                        var dependency = await this.CompileDependencyAsync( includedText, emptyProject, testResult, dependencyLicenseKey );
 
                         if ( dependency == null )
                         {
@@ -275,16 +283,20 @@ namespace Metalama.TestFramework
         /// <summary>
         /// Compiles a dependency using the Metalama pipeline, emits a binary assembly, and returns a reference to it.
         /// </summary>
-        private async Task<MetadataReference?> CompileDependencyAsync( string code, Project emptyProject, TestResult testResult )
+        private async Task<MetadataReference?> CompileDependencyAsync( string code, Project emptyProject, TestResult testResult, string? licenseKey = null )
         {
-            // The assembly name must match the file name otherwise it wont be found bu AssemblyLocator.
+            // The assembly name must match the file name otherwise it wont be found by AssemblyLocator.
             var name = "dependency_" + RandomIdGenerator.GenerateId();
             var project = emptyProject.AddDocument( "dependency.cs", code ).Project;
 
             using var domain = new UnloadableCompileTimeDomain();
             
-            // TODO: to test the redistribution license, add the fake licensing service here. (?)
             var serviceProvider = this.BaseServiceProvider.WithProjectScopedServices( this.References.MetadataReferences );
+
+            if ( !string.IsNullOrEmpty( licenseKey ) )
+            {
+                serviceProvider = LicenseVerifierFactory.AddTestLicenseVerifier( serviceProvider, licenseKey! );
+            }
 
             // Transform with Metalama.
             

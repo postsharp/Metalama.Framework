@@ -216,6 +216,12 @@ namespace Metalama.TestFramework
         public string? LicenseFile { get; set; }
 
         /// <summary>
+        /// Gets or sets the name of a file in the project directory containing the license key to be used to compile the dependency.
+        /// To set this option in a test, add this comment to your test file: <c>// @DependencyLicenseFile(file)</c>.
+        /// </summary>
+        public string? DependencyLicenseFile { get; set; }
+
+        /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
         /// that is not defined in the current object but defined in the argument.
         /// </summary>
@@ -269,6 +275,8 @@ namespace Metalama.TestFramework
             this.OutputAllSyntaxTrees ??= baseOptions.OutputAllSyntaxTrees;
 
             this.LicenseFile ??= baseOptions.LicenseFile;
+
+            this.DependencyLicenseFile ??= baseOptions.DependencyLicenseFile;
         }
 
         public IReadOnlyList<string> InvalidSourceOptions => this._invalidSourceOptions;
@@ -448,6 +456,12 @@ namespace Metalama.TestFramework
                     case "LicenseFile":
 
                         this.LicenseFile = optionArg;
+
+                        break;
+
+                    case "DependencyLicenseFile":
+
+                        this.DependencyLicenseFile = optionArg;
 
                         break;
 
