@@ -3,11 +3,16 @@
 
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.Licensing
 {
     public class CompilationLicensingTests : LicensingTestsBase
     {
+        public CompilationLicensingTests( ITestOutputHelper logger ) : base( logger )
+        {
+        }
+
         [Theory]
         [InlineData( TestLicenseKeys.MetalamaUltimateEssentials )]
         [InlineData( TestLicenseKeys.MetalamaStarterBusiness )]

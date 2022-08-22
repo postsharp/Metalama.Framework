@@ -8,12 +8,19 @@ using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.TestFramework;
 using System.Threading;
 using System.Threading.Tasks;
-using Xunit;
+using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.Licensing
 {
     public class LicensingTestsBase : TestBase
     {
+        protected ITestOutputHelper Logger { get; }
+
+        public LicensingTestsBase( ITestOutputHelper logger )
+        {
+            this.Logger = logger;
+        }
+
         protected async Task<DiagnosticList> GetDiagnosticsAsync( string code, string licenseKey )
         {
             using var domain = new UnloadableCompileTimeDomain();
@@ -28,6 +35,19 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
                 ExecutionScenario.CompileTime );
             var diagnostics = new DiagnosticList();
             _ = await compileTimePipeline.ExecuteAsync( diagnostics, inputCompilation, default, CancellationToken.None );
+
+            if (diagnostics.Count == 0 )
+            {
+                this.Logger.WriteLine( "No diagnostics reported." );
+            }
+            else
+            {
+                foreach ( var d in diagnostics )
+                {
+                    this.Logger.WriteLine( $"{d.WarningLevel} {d.Id} {d.GetMessage()}" );
+                }
+            }
+
             return diagnostics;
         }
     }

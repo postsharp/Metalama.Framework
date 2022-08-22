@@ -3,6 +3,7 @@
 
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.Licensing
 {
@@ -73,6 +74,10 @@ class TargetClass
     void TargetMethod() { }
 }
 ";
+
+        public ValidatorsLicensingTests( ITestOutputHelper logger ) : base( logger )
+        {
+        }
 
         [Theory]
         [InlineData( TestLicenseKeys.MetalamaUltimateEssentials, true )]

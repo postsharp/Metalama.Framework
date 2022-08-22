@@ -66,7 +66,6 @@ internal class LicenseVerifier : IService
     {
         var redistributionAspectClasses = new HashSet<AspectClass>();
         var redistributionAspectClassesPerProject = new Dictionary<CompileTimeProject, HashSet<AspectClass>>();
-        var nonredistributionAspectInstanceResults = new HashSet<AspectInstanceResult>();
         var nonredistributionAspectClasses = new HashSet<IAspectClass>();
 
         foreach ( var aspectInstanceResult in aspectInstanceResults )
@@ -97,7 +96,6 @@ internal class LicenseVerifier : IService
             }
             else
             {
-                nonredistributionAspectInstanceResults.Add( aspectInstanceResult );
                 nonredistributionAspectClasses.Add( aspectInstanceResult.AspectInstance.AspectClass );
             }
         }
@@ -114,18 +112,27 @@ internal class LicenseVerifier : IService
         var nonredistributionAspectClassesWithoutNamspaceLimitedLicense = new HashSet<IAspectClass>();
         var nonredistributionAspectClassesPerLicensedNamespace = new Dictionary<string, HashSet<IAspectClass>>();
         var redistributionProjectsPerLicensedNamespace = new Dictionary<string, HashSet<CompileTimeProject>>();
+        var redistributionProjectsWithoutNamespaceLimitedLicense = new HashSet<CompileTimeProject>();
 
-        foreach ( var aspectInstanceResult in nonredistributionAspectInstanceResults )
+        foreach ( var aspectInstanceResult in aspectInstanceResults )
         {
             var aspectClass = aspectInstanceResult.AspectInstance.AspectClass;
-            var target = aspectInstanceResult.AspectInstance.TargetDeclaration.GetSymbol( compilation );
-            var consumerNamespace = target?.ContainingNamespace?.Name;
+            var targetSymbol = aspectInstanceResult.AspectInstance.TargetDeclaration.GetSymbol( compilation );
+            var consumerNamespaceSymbol = targetSymbol is INamespaceSymbol ? (INamespaceSymbol)targetSymbol : targetSymbol?.ContainingNamespace;
+            var consumerNamespace = consumerNamespaceSymbol?.ToString();
 
             if ( string.IsNullOrEmpty( consumerNamespace )
                 || !this._licenseConsumptionManager.TryGetNamespaceLimitedMaxAspectsCount(
                     consumerNamespace!, out var maxAspectsCount, out var licensedNamespace ) )
             {
-                nonredistributionAspectClassesWithoutNamspaceLimitedLicense.Add( aspectClass );
+                if ( redistributionAspectClasses.Contains( aspectClass ) )
+                {
+                    redistributionProjectsWithoutNamespaceLimitedLicense.Add( ((AspectClass) aspectClass).Project! );
+                }
+                else
+                {
+                    nonredistributionAspectClassesWithoutNamspaceLimitedLicense.Add( aspectClass );
+                }
                 continue;
             }
 
@@ -174,30 +181,13 @@ internal class LicenseVerifier : IService
             }
         }
 
-        if ( nonredistributionAspectClassesWithoutNamspaceLimitedLicense.Count <= namespaceUnlimitedMaxAspectsCount && !anyLicensedNamespaceOverMaxAspectsCount )
+        var aspectClassesWithouNamespaceLimitedLicenseCount =
+            nonredistributionAspectClassesWithoutNamspaceLimitedLicense.Count
+            + redistributionProjectsWithoutNamespaceLimitedLicense.Count;
+
+        if ( aspectClassesWithouNamespaceLimitedLicenseCount <= namespaceUnlimitedMaxAspectsCount && !anyLicensedNamespaceOverMaxAspectsCount )
         {
             return;
-        }
-
-        static string GetNames( IEnumerable<IAspectClass> aspectClasses )
-        {
-            var aspectClassesList = aspectClasses.Select( a => $"'{a.ShortName}'" ).ToList();
-            aspectClassesList.Sort();
-            return string.Join( ", ", aspectClassesList );
-        }
-
-        // This is to make test output deterministic.
-        static string NormalizeAssemblyName( string assemblyName ) => Regex.IsMatch( assemblyName, "^dependency_[0-9a-f]{16}$" )
-            ? "dependency_XXXXXXXXXXXXXXXX"
-            : assemblyName;
-
-        var aspectClassNames = string.Join( ", ", GetNames( nonredistributionAspectClasses ) );
-
-        if ( redistributionAspectClassesPerProject.Count > 0 )
-        {
-            aspectClassNames += ", ";
-            aspectClassNames += string.Join( ", ", redistributionAspectClassesPerProject.Select(
-                r => $"aspects from '{NormalizeAssemblyName( r.Key.RunTimeIdentity.Name )}' assembly counted as one ({GetNames( r.Value )})" ) );
         }
 
         var maxAspectsCountDescriptions = new List<string>();
@@ -207,12 +197,41 @@ internal class LicenseVerifier : IService
             maxAspectsCountDescriptions.Add( namespaceUnlimitedMaxAspectsCount.ToString( CultureInfo.InvariantCulture ) );
         }
 
-        foreach ( var licensedNamespaceLimit in maxAspectsCountPerNamespace )
+        foreach ( var licensedNamespaceLimit in this._licenseConsumptionManager.GetNamespaceLimitedMaxAspectCounts() )
         {
-            maxAspectsCountDescriptions.Add( $"{licensedNamespaceLimit.Value} in '{licensedNamespaceLimit.Key}' namespace" );
+            maxAspectsCountDescriptions.Add( $"{(licensedNamespaceLimit.MaxAspectsCount < int.MaxValue ? licensedNamespaceLimit.MaxAspectsCount : "aspects used")} in '{licensedNamespaceLimit.LicensedNamespace}' namespace" );
         }
 
-        var maxAspectsCountDescription = string.Join( " or ", maxAspectsCountDescriptions );
+        var maxAspectsCountDescription = string.Join( " and ", maxAspectsCountDescriptions );
+
+        static string GetNames( IEnumerable<IAspectClass> aspectClasses )
+        {
+            var aspectClassesList = aspectClasses.Select( a => $"'{a.ShortName}'" ).ToList();
+            aspectClassesList.Sort();
+            return string.Join( ", ", aspectClassesList );
+        }
+
+        // This is to make the test output deterministic.
+        static string NormalizeAssemblyName( string assemblyName )
+        {
+            var match = Regex.Match( assemblyName, "^(test|dependency)_[0-9a-f]{16}$" );
+            return match.Success
+                ? $"{match.Groups[1]}_XXXXXXXXXXXXXXXX"
+                : assemblyName;
+        }
+
+        var aspectClassNames = string.Join( ", ", GetNames( nonredistributionAspectClasses ) );
+
+        if ( redistributionAspectClassesPerProject.Count > 0 )
+        {
+            if ( aspectClassNames.Length > 0 )
+            {
+                aspectClassNames += ", ";
+            }
+
+            aspectClassNames += string.Join( ", ", redistributionAspectClassesPerProject.Select(
+                r => $"aspects from '{NormalizeAssemblyName( r.Key.RunTimeIdentity.Name )}' assembly counted as one ({GetNames( r.Value )})" ) );
+        }
 
         diagnostics.Report(
             LicensingDiagnosticDescriptors.TooManyAspectClasses.CreateRoslynDiagnostic(

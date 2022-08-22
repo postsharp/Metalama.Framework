@@ -5,20 +5,32 @@ using System.Globalization;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.Licensing
 {
     public class AspectCountTests : LicensingTestsBase
     {
+        private const string UnlicensedNamespace = "AspectCountTests.UnlicensedNamespace";
+
+        public AspectCountTests( ITestOutputHelper logger ) : base( logger )
+        {
+        }
+
         [Theory]
-        [InlineData(TestLicenseKeys.MetalamaUltimateEssentials, 3, true)]
-        [InlineData( TestLicenseKeys.MetalamaUltimateEssentials, 4, false )]
-        [InlineData( TestLicenseKeys.MetalamaStarterBusiness, 5, true )]
-        [InlineData( TestLicenseKeys.MetalamaStarterBusiness, 6, false )]
-        [InlineData( TestLicenseKeys.MetalamaProfessionalBusiness, 10, true )]
-        [InlineData( TestLicenseKeys.MetalamaProfessionalBusiness, 11, false )]
-        [InlineData( TestLicenseKeys.MetalamaUltimateBusiness, 11, true )]
-        public async Task CompilationPassesWithNumberOfAspectsAsync(string licenseKey, int numberOfAspects, bool shouldPass )
+        [InlineData( TestLicenseKeys.MetalamaUltimateEssentials, 3, UnlicensedNamespace, UnlicensedNamespace, true )]
+        [InlineData( TestLicenseKeys.MetalamaUltimateEssentials, 4, UnlicensedNamespace, UnlicensedNamespace, false )]
+        [InlineData( TestLicenseKeys.MetalamaStarterBusiness, 5, UnlicensedNamespace, UnlicensedNamespace, true )]
+        [InlineData( TestLicenseKeys.MetalamaStarterBusiness, 6, UnlicensedNamespace, UnlicensedNamespace, false )]
+        [InlineData( TestLicenseKeys.MetalamaProfessionalBusiness, 10, UnlicensedNamespace, UnlicensedNamespace, true )]
+        [InlineData( TestLicenseKeys.MetalamaProfessionalBusiness, 11, UnlicensedNamespace, UnlicensedNamespace, false )]
+        [InlineData( TestLicenseKeys.MetalamaUltimateBusiness, 11, UnlicensedNamespace, UnlicensedNamespace, true )]
+        [InlineData( TestLicenseKeys.NamespaceLimitedMetalamaUltimateBusiness, 1, TestLicenseKeys.NamespaceLimitedMetalamaUltimateBusinessNamespace, UnlicensedNamespace, false )]
+        [InlineData( TestLicenseKeys.NamespaceLimitedMetalamaUltimateEssentials, 3, UnlicensedNamespace, TestLicenseKeys.NamespaceLimitedMetalamaUltimateEssentialsNamespace, true )]
+        [InlineData( TestLicenseKeys.NamespaceLimitedMetalamaUltimateEssentials, 4, UnlicensedNamespace, TestLicenseKeys.NamespaceLimitedMetalamaUltimateEssentialsNamespace, false )]
+        [InlineData( TestLicenseKeys.NamespaceLimitedMetalamaUltimateOpenSourceRedistribution, 1, TestLicenseKeys.NamespaceLimitedMetalamaUltimateOpenSourceRedistributionNamespace, UnlicensedNamespace, false )]
+        [InlineData( TestLicenseKeys.NamespaceLimitedMetalamaUltimateOpenSourceRedistribution, 11, TestLicenseKeys.NamespaceLimitedMetalamaUltimateOpenSourceRedistributionNamespace, TestLicenseKeys.NamespaceLimitedMetalamaUltimateOpenSourceRedistributionNamespace, true )]
+        public async Task CompilationPassesWithNumberOfAspectsAsync(string licenseKey, int numberOfAspects, string aspectNamespace, string targetNamespace, bool shouldPass )
         {
             const string usingsAndOrdering = @"
 using Metalama.Framework.Aspects;
@@ -28,22 +40,29 @@ using System;
 ";
 
             const string aspectPrototype = @"
-public class Aspect{0} : OverrideMethodAspect
+
+namespace {0}
 {{
-    public override dynamic? OverrideMethod()
+    public class Aspect{1} : OverrideMethodAspect
     {{
-        Console.WriteLine(meta.Target.Method.ToDisplayString() + "" enhanced by "" + nameof(Aspect{0}));
-        return meta.Proceed();
+        public override dynamic? OverrideMethod()
+        {{
+            Console.WriteLine(meta.Target.Method.ToDisplayString() + "" enhanced by "" + nameof(Aspect{1}));
+            return meta.Proceed();
+        }}
     }}
 }}
 ";
 
             const string targetPrototype = @"
-class TargetClass
+namespace {0}
 {{
-    {0}
-    void TargetMethod()
+    class TargetClass
     {{
+        {1}
+        void TargetMethod()
+        {{
+        }}
     }}
 }}
 ";
@@ -54,7 +73,13 @@ class TargetClass
 
             for ( var i = 1; i <= numberOfAspects; i++ )
             {
-                aspectOrderApplicationBuilder.Append( $"typeof(Aspect{i}) " );
+#pragma warning disable SA1114 // Parameter list should follow declaration
+                aspectOrderApplicationBuilder.AppendLine(
+#if NET
+                    CultureInfo.InvariantCulture,
+#endif
+                    $"typeof({aspectNamespace}.Aspect{i}) " );
+#pragma warning restore SA1114 // Parameter list should follow declaration
 
                 if ( i < numberOfAspects )
                 {
@@ -66,17 +91,17 @@ class TargetClass
 
             for ( var i = 1; i <= numberOfAspects; i++ )
             {
-                sourceCodeBuilder.AppendLine( string.Format( CultureInfo.InvariantCulture, aspectPrototype, i ) );
+                sourceCodeBuilder.AppendLine( string.Format( CultureInfo.InvariantCulture, aspectPrototype, aspectNamespace, i ) );
 #pragma warning disable SA1114 // Parameter list should follow declaration
                 customAttributeApplicationBuilder.AppendLine(
 #if NET
                     CultureInfo.InvariantCulture,
 #endif
-                    $"[Aspect{i}]" );
+                    $"[{aspectNamespace}.Aspect{i}]" );
 #pragma warning restore SA1114 // Parameter list should follow declaration
             }
 
-            sourceCodeBuilder.AppendLine( string.Format( CultureInfo.InvariantCulture, targetPrototype, customAttributeApplicationBuilder.ToString() ) );
+            sourceCodeBuilder.AppendLine( string.Format( CultureInfo.InvariantCulture, targetPrototype, targetNamespace, customAttributeApplicationBuilder.ToString() ) );
 
             var diagnostics = await this.GetDiagnosticsAsync( sourceCodeBuilder.ToString(), licenseKey );
 

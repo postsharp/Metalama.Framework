@@ -3,6 +3,7 @@
 
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.Licensing
 {
@@ -64,6 +65,10 @@ namespace Doc.InheritedTypeLevel
     }
 }
 ";
+
+        public InheritanceLicensingTests( ITestOutputHelper logger ) : base( logger )
+        {
+        }
 
         [Theory]
         [InlineData( TestLicenseKeys.MetalamaUltimateEssentials, false )]
