@@ -11,7 +11,7 @@ internal static class LicensingDiagnosticDescriptors
 
     private const string _category = "Metalama.General";
 
-    internal static readonly DiagnosticDefinition<(int ActualCount, int MaxCount, string ClassNames)> TooManyAspectClasses =
+    internal static readonly DiagnosticDefinition<(int ActualCount, string MaxCountsDescription, string ClassNames)> TooManyAspectClasses =
         new(
             "LAMA0800",
             _category,
@@ -35,11 +35,11 @@ internal static class LicensingDiagnosticDescriptors
             Severity.Error,
             "Cannot inherit aspects with Metalama Essentials." );
 
-    internal static readonly DiagnosticDefinition<string> RedistributionLicenseInvalid =
+    internal static readonly DiagnosticDefinition<(string, string)> RedistributionLicenseInvalid =
         new(
             "LAMA0803",
             _category,
-            "The redistribution license of '{0}' assembly is invalid. All aspects used from this assembly will require a vaild user license.",
+            "The redistribution license of '{0}' assembly is invalid for '{1}' aspect.",
             Severity.Warning,
-            "The redistribution license of '{0}' assembly is invalid." );
+            "Invalid redistribution license of '{0}' assembly." );
 }

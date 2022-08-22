@@ -89,5 +89,50 @@ class TargetClass
                 Assert.Single( diagnostics, d => d.Id == "LAMA0800" );
             }
         }
+
+        [Fact]
+        public async Task MultipleUsagesOfOneAspectAcceptedAsync()
+        {
+            const string code = @"
+using Metalama.Framework.Aspects;
+using System;
+
+public class Aspect : OverrideMethodAspect
+{
+    public override dynamic? OverrideMethod()
+    {
+        Console.WriteLine(meta.Target.Method.ToDisplayString() + "" enhanced by "" + nameof(Aspect));
+        return meta.Proceed();
+    }
+}
+
+class TargetClass
+{
+    [Aspect]
+    void TargetMethod1()
+    {
+    }
+
+    [Aspect]
+    void TargetMethod2()
+    {
+    }
+
+    [Aspect]
+    void TargetMethod3()
+    {
+    }
+
+    [Aspect]
+    void TargetMethod4()
+    {
+    }
+}
+";
+
+            var diagnostics = await this.GetDiagnosticsAsync( code, TestLicenseKeys.MetalamaUltimateEssentials );
+
+            Assert.Empty( diagnostics );
+        }
     }
 }

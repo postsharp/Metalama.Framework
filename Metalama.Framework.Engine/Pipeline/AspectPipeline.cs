@@ -486,7 +486,7 @@ namespace Metalama.Framework.Engine.Pipeline
             if ( licenseVerifier != null )
             {
                 var licensingDiagnostics = new UserDiagnosticSink();
-                licenseVerifier.VerifyCompilationResult( pipelineStageResult.AspectInstanceResults, licensingDiagnostics );
+                licenseVerifier.VerifyCompilationResult( compilation.Compilation, pipelineStageResult.AspectInstanceResults, licensingDiagnostics );
                 pipelineStageResult = pipelineStageResult.WithAdditionalDiagnostics( licensingDiagnostics.ToImmutable() );
             }
 
