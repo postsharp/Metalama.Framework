@@ -1,7 +1,4 @@
-﻿#if TEST_OPTIONS
-// @Skipped #28884
-#endif
-
+﻿
 using System;
 using Metalama.Framework.Aspects;
 
@@ -11,7 +8,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedSou
 {
     public class TestAttribute : OverrideEventAspect
     {
-        public override void OverrideAdd( dynamic handler )
+        public override void OverrideAdd( dynamic handler)
         {
             meta.Target.Event.AddMethod.Invoke( handler );
         }
