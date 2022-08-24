@@ -165,6 +165,22 @@ namespace Metalama.TestFramework
         public List<string> RequiredConstants { get; } = new();
 
         /// <summary>
+        /// Gets the set of preprocessor symbols that are defined for this test.
+        /// To add an item into this collection from a test, add this comment to your test file: <c>// @DefinedConstant(constant)</c>.
+        /// All constants of the test project and TESTRUNNER and METALAMA are defined by default.
+        /// /// Constants added via <see cref="DependencyDefinedConstants"/> option are not added.
+        /// </summary>
+        public List<string> DefinedConstants { get; } = new();
+
+        /// <summary>
+        /// Gets the set of preprocessor symbols that are defined for this test dependency.
+        /// To add an item into this collection from a test, add this comment to your test file: <c>// @DependencyDefinedConstant(constant)</c>.
+        /// All constants of the test project and TESTRUNNER and METALAMA are defined by default.
+        /// Constants added via <see cref="DefinedConstants"/> option are not added.
+        /// </summary>
+        public List<string> DependencyDefinedConstants { get; } = new();
+
+        /// <summary>
         /// Gets or sets a value indicating whether a code fix should be applied. When this value is true, the output buffer
         /// of the test is not the one transformed by the aspect, but the one transformed by the code fix. The test will fail
         /// if it does not generate any diagnostic with a code fix. By default, the first emitted code fix is applied.
@@ -181,6 +197,7 @@ namespace Metalama.TestFramework
 
         /// <summary>
         /// Gets or sets a value indicating whether disabled code should be kept as trivia.
+        /// To set this option in a test, add this comment to your test file: <c>// @KeepDisabledCode</c>.
         /// </summary>
         public bool? KeepDisabledCode { get; set; }
 
@@ -271,6 +288,10 @@ namespace Metalama.TestFramework
             }
 
             this.RequiredConstants.AddRange( baseOptions.RequiredConstants );
+
+            this.DefinedConstants.AddRange( baseOptions.DefinedConstants );
+
+            this.DependencyDefinedConstants.AddRange( baseOptions.DependencyDefinedConstants );
 
             this.OutputAllSyntaxTrees ??= baseOptions.OutputAllSyntaxTrees;
 
@@ -367,6 +388,16 @@ namespace Metalama.TestFramework
 
                     case "RequiredConstant":
                         this.RequiredConstants.Add( optionArg );
+
+                        break;
+
+                    case "DefinedConstant":
+                        this.DefinedConstants.Add( optionArg );
+
+                        break;
+
+                    case "DependencyDefinedConstant":
+                        this.DependencyDefinedConstants.Add( optionArg );
 
                         break;
 

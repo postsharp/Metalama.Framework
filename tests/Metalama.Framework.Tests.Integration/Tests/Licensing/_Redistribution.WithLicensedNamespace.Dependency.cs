@@ -1,4 +1,7 @@
-﻿using Metalama.Framework.Aspects;
+﻿// TODO: This is a copy of _Redistribution.Dependency.cs file and it can be removed when the #30975 is fixed.
+#define ASPECTS_IN_REDISTRIBUTION_NAMESPACE
+
+using Metalama.Framework.Aspects;
 using System;
 
 // TODO: Uncomment when #30975 is fixed.

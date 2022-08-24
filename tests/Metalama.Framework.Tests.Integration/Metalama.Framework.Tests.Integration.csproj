@@ -35,11 +35,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Remove="Tests\Licensing\RedistributionAllowed - Copy.t.cs" />
-      <Compile Remove="Tests\Licensing\RedistributionDisallowed - Copy.t.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
         <ProjectReference Include="..\..\Metalama.TestFramework\Metalama.TestFramework.csproj" />
@@ -50,22 +45,5 @@
     </ItemGroup>
 
     <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets" />
-
-    <ItemGroup>
-      <None Include="Tests\Licensing\RedistributionDisallowed.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>RedistributionDisallowed.cs</DependentUpon>
-      </None>
-      <None Include="Tests\Licensing\RedistributionReported.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>RedistributionReported.cs</DependentUpon>
-      </None>
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Update="C:\src\Metalama\Tests\Metalama.Framework.Tests.Integration\Tests\Licensing\_Redistribution.t.cs">
-        <DependentUpon>_Redistribution.cs</DependentUpon>
-      </None>
-    </ItemGroup>
 
 </Project>

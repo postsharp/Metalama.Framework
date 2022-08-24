@@ -133,20 +133,22 @@ namespace Metalama.TestFramework
                     .Add( "TESTRUNNER" )
                     .Add( "METALAMA" );
 
-                var parseOptions = CSharpParseOptions.Default.WithPreprocessorSymbols( preprocessorSymbols );
+                var defaultParseOptions = CSharpParseOptions.Default;
 
                 if ( testInput.Options.LanguageVersion != null )
                 {
-                    parseOptions = parseOptions.WithLanguageVersion( testInput.Options.LanguageVersion.Value );
+                    defaultParseOptions = defaultParseOptions.WithLanguageVersion( testInput.Options.LanguageVersion.Value );
                 }
 
                 if ( testInput.Options.LanguageFeatures.Count > 0 )
                 {
-                    parseOptions = parseOptions.WithFeatures( testInput.Options.LanguageFeatures );
+                    defaultParseOptions = defaultParseOptions.WithFeatures( testInput.Options.LanguageFeatures );
                 }
 
-                var emptyProject = this.CreateProject( testInput.Options ).WithParseOptions( parseOptions );
-                var project = emptyProject;
+                var emptyProject = this.CreateProject( testInput.Options );
+                var parseOptions = defaultParseOptions.WithPreprocessorSymbols(
+                    preprocessorSymbols.AddRange( testInput.Options.DefinedConstants ) );
+                var project = emptyProject.WithParseOptions( parseOptions );
 
                 async Task<Document?> AddDocumentAsync( string fileName, string sourceCode, bool acceptFileWithoutMember = false )
                 {
@@ -223,7 +225,10 @@ namespace Metalama.TestFramework
                     else
                     {
                         // Dependencies must be compiled separately using Metalama.
-                        var dependency = await this.CompileDependencyAsync( includedText, emptyProject, testResult, dependencyLicenseKey );
+                        var dependencyParseOptions = defaultParseOptions.WithPreprocessorSymbols(
+                            preprocessorSymbols.AddRange( testInput.Options.DependencyDefinedConstants ) );
+                        var dependencyProject = emptyProject.WithParseOptions( dependencyParseOptions );
+                        var dependency = await this.CompileDependencyAsync( includedText, dependencyProject, testResult, dependencyLicenseKey );
 
                         if ( dependency == null )
                         {

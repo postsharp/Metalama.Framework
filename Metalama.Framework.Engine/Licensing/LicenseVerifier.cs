@@ -64,6 +64,15 @@ internal class LicenseVerifier : IService
 
     public void VerifyCompilationResult( Compilation compilation, ImmutableArray<AspectInstanceResult> aspectInstanceResults, UserDiagnosticSink diagnostics )
     {
+        // This is to make the test output deterministic.
+        static string NormalizeAssemblyName( string assemblyName )
+        {
+            var match = Regex.Match( assemblyName, "^(test|dependency)_[0-9a-f]{1,16}$" );
+            return match.Success
+                ? $"{match.Groups[1]}_XXXXXXXXXXXXXXXX"
+                : assemblyName;
+        }
+
         var redistributionAspectClasses = new HashSet<AspectClass>();
         var redistributionAspectClassesPerProject = new Dictionary<CompileTimeProject, HashSet<AspectClass>>();
         var nonredistributionAspectClasses = new HashSet<IAspectClass>();
@@ -80,24 +89,24 @@ internal class LicenseVerifier : IService
                 {
                     diagnostics.Report(
                         LicensingDiagnosticDescriptors.RedistributionLicenseInvalid.CreateRoslynDiagnostic(
-                            null, (aspectClass.Project.RunTimeIdentity.Name, aspectClass.ShortName) ) );
+                            null, (NormalizeAssemblyName( aspectClass.Project.RunTimeIdentity.Name ), aspectClass.ShortName) ) );
+                }
+                else
+                {
+                    if ( !redistributionAspectClassesPerProject.TryGetValue( aspectClass.Project, out var aspects ) )
+                    {
+                        aspects = new();
+                        redistributionAspectClassesPerProject.Add( aspectClass.Project, aspects );
+                    }
+
+                    redistributionAspectClasses.Add( aspectClass );
+                    aspects.Add( aspectClass );
 
                     continue;
                 }
-
-                if ( !redistributionAspectClassesPerProject.TryGetValue( aspectClass.Project, out var aspects ) )
-                {
-                    aspects = new();
-                    redistributionAspectClassesPerProject.Add( aspectClass.Project, aspects );
-                }
-
-                redistributionAspectClasses.Add( aspectClass );
-                aspects.Add( aspectClass );
             }
-            else
-            {
-                nonredistributionAspectClasses.Add( aspectInstanceResult.AspectInstance.AspectClass );
-            }
+            
+            nonredistributionAspectClasses.Add( aspectInstanceResult.AspectInstance.AspectClass );
         }
 
         var aspectClassesCount = redistributionAspectClassesPerProject.Count + nonredistributionAspectClasses.Count;
@@ -209,15 +218,6 @@ internal class LicenseVerifier : IService
             var aspectClassesList = aspectClasses.Select( a => $"'{a.ShortName}'" ).ToList();
             aspectClassesList.Sort();
             return string.Join( ", ", aspectClassesList );
-        }
-
-        // This is to make the test output deterministic.
-        static string NormalizeAssemblyName( string assemblyName )
-        {
-            var match = Regex.Match( assemblyName, "^(test|dependency)_[0-9a-f]{16}$" );
-            return match.Success
-                ? $"{match.Groups[1]}_XXXXXXXXXXXXXXXX"
-                : assemblyName;
         }
 
         var aspectClassNames = string.Join( ", ", GetNames( nonredistributionAspectClasses ) );
