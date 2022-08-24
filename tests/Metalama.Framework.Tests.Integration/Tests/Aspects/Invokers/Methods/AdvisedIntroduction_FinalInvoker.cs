@@ -4,12 +4,12 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Invokers.Methods.AdvisedIntroduction_FinalInvoker;
 
-[assembly: AspectOrder( typeof(TestAttribute), typeof(TestIntroductionAttribute) )]
+[assembly: AspectOrder( typeof(TestAttribute), typeof(IntroductionAttribute) )]
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Methods.AdvisedIntroduction_FinalInvoker
 {
     [AttributeUsage( AttributeTargets.Class )]
-    public class TestIntroductionAttribute : TypeAspect
+    public class IntroductionAttribute : TypeAspect
     {
         [Introduce]
         public void VoidMethod()
@@ -49,7 +49,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Methods.AdvisedIn
     }
 
     // <target>
-    [TestIntroduction]
+    [Introduction]
     [Test]
     internal class TargetClass { }
 }

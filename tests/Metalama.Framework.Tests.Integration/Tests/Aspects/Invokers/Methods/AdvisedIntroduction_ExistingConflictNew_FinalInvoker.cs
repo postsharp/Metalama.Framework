@@ -2,7 +2,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Invokers.Methods.AdvisedIntroduction_ExistingConflictNew_FinalInvoker;
 
-[assembly: AspectOrder(typeof(TestIntroductionAttribute), typeof(TestAttribute))]
+[assembly: AspectOrder(typeof(TestAttribute), typeof(TestIntroductionAttribute))]
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Methods.AdvisedIntroduction_ExistingConflictNew_FinalInvoker
 {
