@@ -74,6 +74,7 @@ internal class LicenseVerifier : IService
                 : assemblyName;
         }
 
+        // Distinguish redistribution and non-redistribution aspect classes.
         var redistributionAspectClasses = new HashSet<AspectClass>();
         var redistributionAspectClassesPerProject = new Dictionary<CompileTimeProject, HashSet<AspectClass>>();
         var nonredistributionAspectClasses = new HashSet<IAspectClass>();
@@ -110,14 +111,17 @@ internal class LicenseVerifier : IService
             nonredistributionAspectClasses.Add( aspectInstanceResult.AspectInstance.AspectClass );
         }
 
+        // One redistribution library counts as one aspect class.
         var aspectClassesCount = redistributionAspectClassesPerProject.Count + nonredistributionAspectClasses.Count;
         var namespaceUnlimitedMaxAspectsCount = this._licenseConsumptionManager.GetNamespaceUnlimitedMaxAspectsCount();
 
         if ( aspectClassesCount <= namespaceUnlimitedMaxAspectsCount )
         {
+            // All aspect classes are covered by namespace unlimited licenses.
             return;
         }
 
+        // Filter aspect classes covered by namespace limited licenses.
         var maxAspectsCountPerNamespace = new Dictionary<string, int>();
         var nonredistributionAspectClassesWithoutNamspaceLimitedLicense = new HashSet<IAspectClass>();
         var nonredistributionAspectClassesPerLicensedNamespace = new Dictionary<string, HashSet<IAspectClass>>();
@@ -143,6 +147,7 @@ internal class LicenseVerifier : IService
                 {
                     nonredistributionAspectClassesWithoutNamspaceLimitedLicense.Add( aspectClass );
                 }
+
                 continue;
             }
 
@@ -170,6 +175,8 @@ internal class LicenseVerifier : IService
             }
         }
 
+        // Verify that the counts of aspect classes covered by namespace limited licenses
+        // aren't over the maximum aspect count of respective licenses.
         var anyLicensedNamespaceOverMaxAspectsCount = false;
 
         foreach ( var licensedNamespaceLimit in maxAspectsCountPerNamespace )
@@ -197,9 +204,12 @@ internal class LicenseVerifier : IService
 
         if ( aspectClassesWithouNamespaceLimitedLicenseCount <= namespaceUnlimitedMaxAspectsCount && !anyLicensedNamespaceOverMaxAspectsCount )
         {
+            // All aspect classes covered by namespace limited licenses are covered by these licenses
+            // and remaining aspect classes not covered by namespace limited licenses are covered by namespace unlimited licenses.
             return;
         }
 
+        // The count of aspect classes is not covered by the available licenses. Report an error.
         var maxAspectsCountDescriptions = new List<string>();
 
         if ( namespaceUnlimitedMaxAspectsCount > 0 )
