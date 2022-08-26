@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Project;
 using System;
@@ -54,6 +55,8 @@ internal sealed class LowLevelPipelineStage : PipelineStage
 
             return true;
         }
+
+        this.ServiceProvider.GetService<LicenseVerifier>()?.VerifyCanUseSdk( this._aspectWeaver, aspectInstances.Values, diagnostics );
 
         var context = new AspectWeaverContext(
             this._aspectClass,

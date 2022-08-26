@@ -7,7 +7,7 @@ namespace Metalama.Framework.Engine.Licensing;
 
 internal static class LicensingDiagnosticDescriptors
 {
-    // Reserved range: 800-803
+    // Reserved range: 800-804
 
     private const string _category = "Metalama.General";
 
@@ -23,17 +23,17 @@ internal static class LicensingDiagnosticDescriptors
         new(
             "LAMA0801",
             _category,
-            "The '{0}' fabric cannot {1} because this feature is not covered by Metalama Essentials license. You can only {1} validator from an aspect using Metalama Essentials.",
+            "The '{0}' fabric cannot {1} because this feature is not covered by your license. You can only {1} validator from an aspect.",
             Severity.Error,
-            "Cannot {1} using fabrics with Metalama Essentials." );
+            "Cannot {1} using fabrics." );
 
     internal static readonly DiagnosticDefinition<string> InheritanceNotAvailable =
         new(
             "LAMA0802",
             _category,
-            "The '{0}' aspect cannot be inherited because this feature is not covered by Metalama Essentials license.",
+            "The '{0}' aspect cannot be inherited because this feature is not covered by your license.",
             Severity.Error,
-            "Cannot inherit aspects with Metalama Essentials." );
+            "Cannot inherit aspects." );
 
     internal static readonly DiagnosticDefinition<(string, string)> RedistributionLicenseInvalid =
         new(
@@ -42,4 +42,12 @@ internal static class LicensingDiagnosticDescriptors
             "The redistribution license of '{0}' assembly is invalid for '{1}' aspect.",
             Severity.Warning,
             "Invalid redistribution license of '{0}' assembly." );
+
+    internal static readonly DiagnosticDefinition<(string, string)> SdkNotAvailable =
+        new(
+            "LAMA0804",
+            _category,
+            "The '{0}' aspect weaver cannot be used to weave aspects as Metalama SDK is not covered by your license. The aspect classes are: {1}.",
+            Severity.Error,
+            "Metalama SDK not available." );
 }

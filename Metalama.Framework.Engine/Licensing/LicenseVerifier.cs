@@ -6,6 +6,7 @@ using Metalama.Backstage.Licensing.Consumption;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
+using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
@@ -252,6 +253,18 @@ internal class LicenseVerifier : IService
             diagnostics.Report(
                 LicensingDiagnosticDescriptors.InheritanceNotAvailable.CreateRoslynDiagnostic(
                     null, aspectClass.ShortName ) );
+        }
+    }
+
+    public void VerifyCanUseSdk( IAspectWeaver aspectWeaver, IEnumerable<IAspectInstance> aspectInstances, IDiagnosticAdder diagnostics )
+    {
+        if ( !this._licenseConsumptionManager.CanConsumeFeatures( LicensedFeatures.MetalamaSdk ) )
+        {
+            var aspectClasses = string.Join( ", ", aspectInstances.Select( i => $"'{i.AspectClass.ShortName}'" ) );
+
+            diagnostics.Report(
+                LicensingDiagnosticDescriptors.SdkNotAvailable.CreateRoslynDiagnostic(
+                    null, (aspectWeaver.GetType().Name, aspectClasses) ) );
         }
     }
 }
