@@ -1,3 +1,7 @@
+#if TEST_OPTIONS
+// @Skipped(#30946)
+# endif
+
 using System;
 using System.Collections.Generic;
 using Metalama.Framework.Aspects;
@@ -19,7 +23,7 @@ public class MyAspect : MethodAspect
             builder.Target,
             AttributeConstruction.Create(
                 typeof(MyAttribute),
-                namedArguments: new KeyValuePair<string, object?>[] { new( "Property", typeof(C) ) }));
+                namedArguments: new KeyValuePair<string, object?>[] { new("Property", typeof(C)) }));
     }
 }
 

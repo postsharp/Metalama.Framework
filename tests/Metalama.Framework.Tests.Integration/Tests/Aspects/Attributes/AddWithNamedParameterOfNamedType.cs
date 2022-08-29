@@ -19,7 +19,7 @@ public class MyAspect : MethodAspect
             builder.Target,
             AttributeConstruction.Create(
                 typeof(MyAttribute),
-                namedArguments: new KeyValuePair<string, object?>[] { new( "Property", builder.Target.DeclaringType ) }));
+                namedArguments: new KeyValuePair<string, object?>[] { new("Property", TypeFactory.GetType(typeof(C))) }));
     }
 }
 

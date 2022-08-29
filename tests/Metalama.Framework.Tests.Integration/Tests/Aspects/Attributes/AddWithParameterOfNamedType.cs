@@ -17,10 +17,10 @@ public class MyAspect : MethodAspect
     public override void BuildAspect(IAspectBuilder<IMethod> builder)
     {
         builder.Advice.IntroduceAttribute(
-            builder.Target, 
+            builder.Target,
             AttributeConstruction.Create(
                 typeof(MyAttribute),
-                constructorArguments: new object?[] { builder.Target.DeclaringType }));
+                constructorArguments: new object?[] { TypeFactory.GetType(typeof(C)) }));
     }
 }
 
