@@ -666,6 +666,8 @@ namespace Metalama.Framework.Engine.CompileTime
                 out project );
         }
 
+        internal void ClearMemoryCache() => this._cache.Clear();
+
         private bool TryGetCompileTimeProjectFromCache(
             Compilation runTimeCompilation,
             IReadOnlyList<CompileTimeProject> referencedProjects,
@@ -848,10 +850,13 @@ namespace Metalama.Framework.Engine.CompileTime
                             .Select( t => t.GetReflectionName().AssertNotNull() )
                             .ToList();
 
+                        var preprocessorSymbols = sourceTreesWithCompileTimeCode.Last().Options.PreprocessorSymbolNames.ToList();
+
                         var manifest = new CompileTimeProjectManifest(
                             runTimeCompilation.Assembly.Identity.ToString(),
                             compileTimeCompilation.AssemblyName!,
                             runTimeCompilation.GetTargetFramework()?.ToString() ?? "",
+                            preprocessorSymbols,
                             aspectTypes,
                             compilerPlugInTypes,
                             fabricTypes,

@@ -1,10 +1,12 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Compiler;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.TestFramework;
@@ -17,6 +19,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.CompileTime
@@ -1076,6 +1079,59 @@ public interface SomeInterface
 ";
 
             Assert.Equal( expected, compileTimeCode );
+        }
+
+        [Fact]
+        public async Task CacheWithPreprocessorSymbols()
+        {
+            // Create a compilation that depends on a preprocessor symbol.
+            using var testContext1 = this.CreateTestContext();
+
+            var code1 = @"
+using Metalama.Framework.Aspects;
+[assembly: CompileTime]
+#if SYMBOL
+public class ReferencedClass
+{
+}
+#else
+Intentional syntax error.
+#endif
+";
+
+            var compilation1 = CreateCSharpCompilation( code1, preprocessorSymbols: new[] { "SYMBOL" } );
+
+            using var domain1 = new UnloadableCompileTimeDomain();
+            var pipeline1 = new CompileTimeAspectPipeline( testContext1.ServiceProvider, true, domain1 );
+
+            var pipelineResult1 = await pipeline1.ExecuteAsync(
+                NullDiagnosticAdder.Instance,
+                compilation1,
+                ImmutableArray<ManagedResource>.Empty,
+                CancellationToken.None );
+
+            var peFilePath = Path.Combine( testContext1.ProjectOptions.BaseDirectory, "reference.dll" );
+
+            using ( var peFile = File.Create( peFilePath ) )
+            {
+                Assert.True(
+                    pipelineResult1!.ResultingCompilation.Compilation.Emit(
+                            peFile,
+                            manifestResources: pipelineResult1.AdditionalResources.Select( x => x.Resource ) )
+                        .Success );
+            }
+
+            // Create compilation that references the compilation above, but
+            // we use a different test context so that the cache of the first step is not used.
+
+            using var testContext2 = this.CreateTestContext();
+            var compilation2 = CreateCSharpCompilation( "", additionalReferences: new[] { MetadataReference.CreateFromFile( peFilePath ) } );
+            using var domain2 = new UnloadableCompileTimeDomain();
+            var pipeline2 = new CompileTimeAspectPipeline( testContext2.ServiceProvider, true, domain2 );
+            DiagnosticList diagnosticList = new();
+            var pipelineResult2 = await pipeline2.ExecuteAsync( diagnosticList, compilation2, ImmutableArray<ManagedResource>.Empty, CancellationToken.None );
+
+            Assert.NotNull( pipelineResult2 );
         }
 
         private class Rewriter : ICompileTimeAssemblyBinaryRewriter
