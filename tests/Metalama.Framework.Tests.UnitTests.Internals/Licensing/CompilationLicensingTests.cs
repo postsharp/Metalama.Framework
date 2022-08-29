@@ -14,7 +14,10 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
         }
 
         [Theory]
-        [InlineData( TestLicenseKeys.MetalamaUltimateEssentials )]
+        [InlineData( TestLicenseKeys.PostSharpEssentials )]
+        [InlineData( TestLicenseKeys.PostSharpFramework )]
+        [InlineData( TestLicenseKeys.PostSharpUltimate )]
+        [InlineData( TestLicenseKeys.MetalamaFreePersonal )]
         [InlineData( TestLicenseKeys.MetalamaStarterBusiness )]
         [InlineData( TestLicenseKeys.MetalamaProfessionalBusiness )]
         [InlineData( TestLicenseKeys.MetalamaUltimateBusiness )]

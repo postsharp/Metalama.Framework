@@ -1,4 +1,4 @@
-﻿// @LicenseFile(Tests\Licensing\Licenses\Essentials.license)
+﻿// @LicenseFile(Tests\Licensing\Licenses\Free.license)
 // @DependencyLicenseFile(Tests\Licensing\Licenses\NamespaceLimitedRedistribution.license)
 // @Include(_Redistribution.cs);
 // TODO: Replace by _Redistribution.Dependency.cs when #30975 is fixed.

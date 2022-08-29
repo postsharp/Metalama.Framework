@@ -65,6 +65,9 @@ internal class LicenseVerifier : IService
 
     public void VerifyCompilationResult( Compilation compilation, ImmutableArray<AspectInstanceResult> aspectInstanceResults, UserDiagnosticSink diagnostics )
     {
+        // To simpify the code, we don't check if the MetalamaAspectFramework feature can be consumed.
+        // We assume, that if more than 0 aspect classes are allowed, then the MetalamaAspectFramework feature can be consumed.
+
         // This is to make the test output deterministic.
         static string NormalizeAssemblyName( string assemblyName )
         {
@@ -114,6 +117,12 @@ internal class LicenseVerifier : IService
         // One redistribution library counts as one aspect class.
         var aspectClassesCount = redistributionAspectClassesPerProject.Count + nonredistributionAspectClasses.Count;
         var namespaceUnlimitedMaxAspectsCount = this._licenseConsumptionManager.GetNamespaceUnlimitedMaxAspectsCount();
+
+        if ( aspectClassesCount == 0 )
+        {
+            // There are no aspect classes applied.
+            return;
+        }
 
         if ( aspectClassesCount <= namespaceUnlimitedMaxAspectsCount )
         {

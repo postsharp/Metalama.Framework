@@ -71,7 +71,10 @@ namespace Doc.InheritedTypeLevel
         }
 
         [Theory]
-        [InlineData( TestLicenseKeys.MetalamaUltimateEssentials, false )]
+        [InlineData( TestLicenseKeys.PostSharpEssentials, false )]
+        [InlineData( TestLicenseKeys.PostSharpFramework, true )]
+        [InlineData( TestLicenseKeys.PostSharpUltimate, true )]
+        [InlineData( TestLicenseKeys.MetalamaFreePersonal, false )]
         [InlineData( TestLicenseKeys.MetalamaStarterBusiness, true )]
         [InlineData( TestLicenseKeys.MetalamaProfessionalBusiness, true )]
         [InlineData( TestLicenseKeys.MetalamaUltimateBusiness, true )]

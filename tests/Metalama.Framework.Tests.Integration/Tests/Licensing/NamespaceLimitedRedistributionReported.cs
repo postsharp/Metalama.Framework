@@ -1,4 +1,4 @@
-﻿// @LicenseFile(Tests\Licensing\Licenses\Essentials.license)
+﻿// @LicenseFile(Tests\Licensing\Licenses\Free.license)
 // @DependencyLicenseFile(Tests\Licensing\Licenses\NamespaceLimitedRedistribution.license)
 // @Include(_NonredistributionAspects.cs);
 // @Include(_Redistribution.cs);

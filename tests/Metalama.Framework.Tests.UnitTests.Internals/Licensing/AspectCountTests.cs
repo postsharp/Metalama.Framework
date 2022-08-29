@@ -18,16 +18,21 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
         }
 
         [Theory]
-        [InlineData( TestLicenseKeys.MetalamaUltimateEssentials, 3, UnlicensedNamespace, UnlicensedNamespace, true )]
-        [InlineData( TestLicenseKeys.MetalamaUltimateEssentials, 4, UnlicensedNamespace, UnlicensedNamespace, false )]
+        [InlineData( TestLicenseKeys.PostSharpEssentials, 3, UnlicensedNamespace, UnlicensedNamespace, true )]
+        [InlineData( TestLicenseKeys.PostSharpEssentials, 4, UnlicensedNamespace, UnlicensedNamespace, false )]
+        [InlineData( TestLicenseKeys.PostSharpFramework, 10, UnlicensedNamespace, UnlicensedNamespace, true )]
+        [InlineData( TestLicenseKeys.PostSharpFramework, 11, UnlicensedNamespace, UnlicensedNamespace, false )]
+        [InlineData( TestLicenseKeys.PostSharpUltimate, 11, UnlicensedNamespace, UnlicensedNamespace, true )]
+        [InlineData( TestLicenseKeys.MetalamaFreePersonal, 3, UnlicensedNamespace, UnlicensedNamespace, true )]
+        [InlineData( TestLicenseKeys.MetalamaFreePersonal, 4, UnlicensedNamespace, UnlicensedNamespace, false )]
         [InlineData( TestLicenseKeys.MetalamaStarterBusiness, 5, UnlicensedNamespace, UnlicensedNamespace, true )]
         [InlineData( TestLicenseKeys.MetalamaStarterBusiness, 6, UnlicensedNamespace, UnlicensedNamespace, false )]
         [InlineData( TestLicenseKeys.MetalamaProfessionalBusiness, 10, UnlicensedNamespace, UnlicensedNamespace, true )]
         [InlineData( TestLicenseKeys.MetalamaProfessionalBusiness, 11, UnlicensedNamespace, UnlicensedNamespace, false )]
         [InlineData( TestLicenseKeys.MetalamaUltimateBusiness, 11, UnlicensedNamespace, UnlicensedNamespace, true )]
         [InlineData( TestLicenseKeys.NamespaceLimitedMetalamaUltimateBusiness, 1, TestLicenseKeys.NamespaceLimitedMetalamaUltimateBusinessNamespace, UnlicensedNamespace, false )]
-        [InlineData( TestLicenseKeys.NamespaceLimitedMetalamaUltimateEssentials, 3, UnlicensedNamespace, TestLicenseKeys.NamespaceLimitedMetalamaUltimateEssentialsNamespace, true )]
-        [InlineData( TestLicenseKeys.NamespaceLimitedMetalamaUltimateEssentials, 4, UnlicensedNamespace, TestLicenseKeys.NamespaceLimitedMetalamaUltimateEssentialsNamespace, false )]
+        [InlineData( TestLicenseKeys.NamespaceLimitedMetalamaFreePersonal, 3, UnlicensedNamespace, TestLicenseKeys.NamespaceLimitedMetalamaFreeNamespace, true )]
+        [InlineData( TestLicenseKeys.NamespaceLimitedMetalamaFreePersonal, 4, UnlicensedNamespace, TestLicenseKeys.NamespaceLimitedMetalamaFreeNamespace, false )]
         [InlineData( TestLicenseKeys.NamespaceLimitedMetalamaUltimateOpenSourceRedistribution, 1, TestLicenseKeys.NamespaceLimitedMetalamaUltimateOpenSourceRedistributionNamespace, UnlicensedNamespace, false )]
         [InlineData( TestLicenseKeys.NamespaceLimitedMetalamaUltimateOpenSourceRedistribution, 11, TestLicenseKeys.NamespaceLimitedMetalamaUltimateOpenSourceRedistributionNamespace, TestLicenseKeys.NamespaceLimitedMetalamaUltimateOpenSourceRedistributionNamespace, true )]
         public async Task CompilationPassesWithNumberOfAspectsAsync(string licenseKey, int numberOfAspects, string aspectNamespace, string targetNamespace, bool shouldPass )
@@ -155,7 +160,7 @@ class TargetClass
 }
 ";
 
-            var diagnostics = await this.GetDiagnosticsAsync( code, TestLicenseKeys.MetalamaUltimateEssentials );
+            var diagnostics = await this.GetDiagnosticsAsync( code, TestLicenseKeys.MetalamaFreePersonal );
 
             Assert.Empty( diagnostics );
         }

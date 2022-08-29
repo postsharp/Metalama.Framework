@@ -80,7 +80,10 @@ class TargetClass
         }
 
         [Theory]
-        [InlineData( TestLicenseKeys.MetalamaUltimateEssentials, true )]
+        [InlineData( TestLicenseKeys.PostSharpEssentials, true )]
+        [InlineData( TestLicenseKeys.PostSharpFramework, true )]
+        [InlineData( TestLicenseKeys.PostSharpUltimate, true )]
+        [InlineData( TestLicenseKeys.MetalamaFreePersonal, true )]
         [InlineData( TestLicenseKeys.MetalamaStarterBusiness, true )]
         [InlineData( TestLicenseKeys.MetalamaProfessionalBusiness, true )]
         [InlineData( TestLicenseKeys.MetalamaUltimateBusiness, true )]
@@ -92,7 +95,10 @@ class TargetClass
         }
 
         [Theory]
-        [InlineData( TestLicenseKeys.MetalamaUltimateEssentials, false )]
+        [InlineData( TestLicenseKeys.PostSharpEssentials, false )]
+        [InlineData( TestLicenseKeys.PostSharpFramework, true )]
+        [InlineData( TestLicenseKeys.PostSharpUltimate, true )]
+        [InlineData( TestLicenseKeys.MetalamaFreePersonal, false )]
         [InlineData( TestLicenseKeys.MetalamaStarterBusiness, true )]
         [InlineData( TestLicenseKeys.MetalamaProfessionalBusiness, true )]
         [InlineData( TestLicenseKeys.MetalamaUltimateBusiness, true )]
