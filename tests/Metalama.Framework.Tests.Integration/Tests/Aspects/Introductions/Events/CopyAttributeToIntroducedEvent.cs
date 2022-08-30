@@ -30,13 +30,13 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
     {
         public override void OverrideAdd(dynamic value)
         {
-            Console.WriteLine("This is the add template.");
+            Console.WriteLine("This is the overriden add template.");
             meta.Proceed();
         }
 
         public override void OverrideRemove(dynamic value)
         {
-            Console.WriteLine("This is the remove template.");
+            Console.WriteLine("This is the overriden remove template.");
             meta.Proceed();
         }
     }

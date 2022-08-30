@@ -18,73 +18,87 @@ internal class TargetClass
         }
     }
 
-    private int _property;
+    private global::System.Int32 _introducedProperty_Auto;
+
     [Override]
-    public int Property
+    public global::System.Int32 IntroducedProperty_Auto
     {
         get
         {
             global::System.Console.WriteLine("This is the overridden getter.");
-            return this._property;
+            return this._introducedProperty_Auto;
         }
         set
         {
             global::System.Console.WriteLine($"This is the overridden setter.");
-            this._property = value;
+            this._introducedProperty_Auto = value;
         }
     }
 
-
-    private static int _staticProperty;
+    private global::System.Int32 _introducedProperty_Auto_GetOnly;
 
     [Override]
-    public static int StaticProperty
+    public global::System.Int32 IntroducedProperty_Auto_GetOnly
     {
         get
         {
             global::System.Console.WriteLine("This is the overridden getter.");
-            return global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto.TargetClass._staticProperty;
+            return this._introducedProperty_Auto_GetOnly;
         }
         set
         {
             global::System.Console.WriteLine($"This is the overridden setter.");
-            global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Auto.TargetClass._staticProperty = value;
+            this._introducedProperty_Auto_GetOnly = value;
         }
     }
 
-
-    private int _propertyInitOnly;
+    private global::System.Int32 _introducedProperty_Auto_GetOnly_Initializer = (global::System.Int32)42;
 
     [Override]
-    public int PropertyInitOnly
+    public global::System.Int32 IntroducedProperty_Auto_GetOnly_Initializer
     {
         get
         {
             global::System.Console.WriteLine("This is the overridden getter.");
-            return this._propertyInitOnly;
+            return this._introducedProperty_Auto_GetOnly_Initializer;
         }
-        init
+        set
         {
             global::System.Console.WriteLine($"This is the overridden setter.");
-            this._propertyInitOnly = value;
+            this._introducedProperty_Auto_GetOnly_Initializer = value;
         }
     }
 
-
-    private int _staticPropertyInitOnly;
-
+    private global::System.Int32 _introducedProperty_Auto_Initializer = (global::System.Int32)42;
     [Override]
-    public int StaticPropertyInitOnly
+    public global::System.Int32 IntroducedProperty_Auto_Initializer
     {
         get
         {
             global::System.Console.WriteLine("This is the overridden getter.");
-            return this._staticPropertyInitOnly;
+            return this._introducedProperty_Auto_Initializer;
         }
-        init
+        set
         {
             global::System.Console.WriteLine($"This is the overridden setter.");
-            this._staticPropertyInitOnly = value;
+            this._introducedProperty_Auto_Initializer = value;
+        }
+    }
+
+    private static global::System.Int32 _introducedProperty_Auto_Static
+
+    [Override]
+    public static global::System.Int32 IntroducedProperty_Auto_Static
+    {
+        get
+        {
+            global::System.Console.WriteLine("This is the overridden getter.");
+            return global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.CopyAttributeToIntroducedProperty.TargetClass._introducedProperty_Auto_Static;
+        }
+        set
+        {
+            global::System.Console.WriteLine($"This is the overridden setter.");
+            global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.CopyAttributeToIntroducedProperty.TargetClass._introducedProperty_Auto_Static = value;
         }
     }
 }

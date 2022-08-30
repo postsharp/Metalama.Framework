@@ -2,7 +2,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.CopyAttributeToIntroducedProperty;
 
-[assembly: AspectOrder( typeof(IntroduceAttribute), typeof(OverrideAttribute) )]
+[assembly: AspectOrder( typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.CopyAttributeToIntroducedProperty
 {

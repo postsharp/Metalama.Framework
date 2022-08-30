@@ -3,74 +3,73 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.CopyAttributeToIntroducedMethod;
 
 
-[assembly: AspectOrder( typeof(CopiedLogAttribute), typeof(IntroductionAttribute) )]
+[assembly: AspectOrder( typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.CopyAttributeToIntroducedMethod
 {
     public class IntroductionAttribute : TypeAspect
     {
         [Introduce]
-        [CopiedLog]
+        [Override]
         public void IntroducedMethod_Void()
         {
             Console.WriteLine( "This is introduced method." );
-            meta.Proceed();
         }
 
         [Introduce]
-        [CopiedLog]
+        [Override]
         public int IntroducedMethod_Int()
         {
             Console.WriteLine( "This is introduced method." );
 
-            return meta.Proceed();
+            return 42;
         }
 
         [Introduce]
-        [CopiedLog]
+        [Override]
         public int IntroducedMethod_Param( int x )
         {
             Console.WriteLine( $"This is introduced method, x = {x}." );
 
-            return meta.Proceed();
+            return x;
         }
 
         [Introduce]
-        [CopiedLog]
+        [Override]
         public static int IntroducedMethod_StaticSignature()
         {
             Console.WriteLine( "This is introduced method." );
 
-            return meta.Proceed();
+            return 42;
         }
 
         [Introduce( IsVirtual = true )]
-        [CopiedLog]
+        [Override]
         public int IntroducedMethod_VirtualExplicit()
         {
             Console.WriteLine( "This is introduced method." );
 
-            return meta.Proceed();
+            return 42;
         }
     }
 
-    public class CopiedLogAttribute : OverrideMethodAspect
+    public class OverrideAttribute : OverrideMethodAspect
     {
         public override dynamic? OverrideMethod()
         {
-            Console.WriteLine(meta.Target.Method.ToDisplayString() + " started.");
+            Console.WriteLine("Start.");
 
             try
             {
                 var result = meta.Proceed();
 
-                Console.WriteLine(meta.Target.Method.ToDisplayString() + " succeeded.");
+                Console.WriteLine("Try.");
 
                 return result;
             }
             catch (Exception e)
             {
-                Console.WriteLine(meta.Target.Method.ToDisplayString() + " failed: " + e.Message);
+                Console.WriteLine(" Catch: " + e.Message);
 
                 throw;
             }
@@ -81,9 +80,11 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Copy
     [Introduction]
     internal class TargetClass
     {
-        [CopiedLog]
+        [Override]
         public int DefaultMethod()
         {
+            Console.WriteLine("This is original method.");
+
             return 0;
         }
     }
