@@ -9,24 +9,33 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.Ad
     public class TestIntroductionAttribute : TypeAspect
     {
         [Introduce(WhenExists = OverrideStrategy.New)]
-        public void VoidMethod()
+        public void BaseClass_VoidMethod()
         {
             meta.InsertComment("Introduced.");
+            this.Print();
             System.Console.WriteLine("Introduced method print.");
         }
 
         [Introduce(WhenExists = OverrideStrategy.New)]
-        public int? ExistingMethod()
+        public int? BaseClass_ExistingMethod()
         {
             meta.InsertComment("Introduced.");
+            this.Print();
             return 100;
         }
 
         [Introduce(WhenExists = OverrideStrategy.New)]
-        public int? ExistingMethod_Parameterized(int x)
+        public int? BaseClass_ExistingMethod_Parameterized(int? x)
         {
             meta.InsertComment("Introduced.");
+            this.Print();
             return x + 100;
+        }
+
+        [Introduce(WhenExists = OverrideStrategy.Override)]
+        public void Print()
+        {
+            System.Console.WriteLine("Print() called.");
         }
     }
 

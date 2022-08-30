@@ -28,7 +28,7 @@ internal class TargetClass : BaseClass
         return this?.BaseClass_ExistingMethod_Parameterized(x);
     }
 
-    public void BaseClass_VoidMethod()
+    public new void BaseClass_VoidMethod()
     {
         this?.BaseClass_VoidMethod();
         return;
