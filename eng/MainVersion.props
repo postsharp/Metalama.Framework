@@ -1,6 +1,6 @@
 <Project>
     <PropertyGroup>
-        <MainVersion>0.5.37</MainVersion>
+        <MainVersion>0.5.38</MainVersion>
         <PackageVersionSuffix>-preview</PackageVersionSuffix>
     </PropertyGroup>
 </Project>
