@@ -16,7 +16,7 @@ internal class TargetClass : BaseClass
         get => 42;
     }
 
-    public global::System.Int32 BaseClassProperty
+    public new global::System.Int32 BaseClassProperty
     {
         get
         {

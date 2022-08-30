@@ -9,45 +9,33 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.Ad
     public class TestIntroductionAttribute : TypeAspect
     {
         [Introduce(WhenExists = OverrideStrategy.Override)]
-        public void VoidMethod_Base()
+        public void BaseClass_VoidMethod()
         {
             meta.InsertComment("Introduced.");
+            this.Print();
             System.Console.WriteLine("Introduced method print.");
         }
 
         [Introduce(WhenExists = OverrideStrategy.Override)]
-        public int ExistingMethod_Base()
+        public int BaseClass_ExistingMethod()
         {
             meta.InsertComment("Introduced.");
+            this.Print();
             return 100;
         }
 
         [Introduce(WhenExists = OverrideStrategy.Override)]
-        public int ExistingMethod_Parameterized_Base(int x)
+        public int BaseClass_ExistingMethod_Parameterized(int x)
         {
             meta.InsertComment("Introduced.");
+            this.Print();
             return x + 100;
         }
 
         [Introduce(WhenExists = OverrideStrategy.Override)]
-        public void VoidMethod()
+        public void Print()
         {
-            meta.InsertComment("Introduced.");
-            System.Console.WriteLine("Introduced method print.");
-        }
-
-        [Introduce(WhenExists = OverrideStrategy.Override)]
-        public int ExistingMethod()
-        {
-            meta.InsertComment("Introduced.");
-            return 100;
-        }
-
-        [Introduce(WhenExists = OverrideStrategy.Override)]
-        public int ExistingMethod_Parameterized(int x)
-        {
-            meta.InsertComment("Introduced.");
-            return x + 100;
+            System.Console.WriteLine("Print() called.");
         }
     }
 
@@ -66,30 +54,32 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.Ad
         {
             if (meta.Target.Method.Parameters.Count == 0)
             {
-                return meta.Target.Method.Invokers.ConditionalBase!.Invoke(meta.This);
+                return meta.Target.Method.Invokers.Final!.Invoke(meta.This);
             }
             else
             {
-                return meta.Target.Method.Invokers.ConditionalBase!.Invoke(meta.This, meta.Target.Method.Parameters[0].Value);
+                return meta.Target.Method.Invokers.Final!.Invoke(meta.This, meta.Target.Method.Parameters[0].Value);
             }
         }
     }
 
     internal class BaseClass
     {
-        public virtual void VoidMethod_Base()
+        public virtual void BaseClass_VoidMethod()
         {
-            System.Console.WriteLine("Base method print.");
+            System.Console.WriteLine("BaseClass_VoidMethod()");
         }
 
-        public virtual int ExistingMethod_Base()
+        public virtual int BaseClass_ExistingMethod()
         {
+            System.Console.WriteLine("BaseClass_ExistingMethod()");
             return 42;
         }
 
-        public virtual int ExistingMethod_Parameterized_Base(int x)
+        public virtual int BaseClass_ExistingMethod_Parameterized(int x)
         {
-            return x;
+            System.Console.WriteLine("BaseClass_ExistingMethod_Parameterized()");
+            return x + 42;
         }
     }
 
@@ -100,17 +90,19 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.Ad
     {
         public void VoidMethod()
         {
-            System.Console.WriteLine("Target method print.");
+            System.Console.WriteLine("TargetClass_VoidMethod()");
         }
 
         public int ExistingMethod()
         {
+            System.Console.WriteLine("TargetClass_ExistingMethod()");
             return 42;
         }
 
         public int ExistingMethod_Parameterized(int x)
         {
-            return x;
+            System.Console.WriteLine("TargetClass_ExistingMethod_Parameterized");
+            return x + 42;
         }
     }
 }

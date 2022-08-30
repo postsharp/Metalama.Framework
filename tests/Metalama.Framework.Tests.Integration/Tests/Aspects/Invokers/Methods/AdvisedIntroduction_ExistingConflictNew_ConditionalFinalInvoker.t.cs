@@ -1,23 +1,42 @@
 ﻿[TestIntroduction]
 [Test]
-internal class TargetClass
+internal class TargetClass : BaseClass
 {
-    public int VoidMethod()
+    public void VoidMethod()
     {
-        // Introduced.
-        this.VoidMethod();
+        this?.VoidMethod();
         return;
     }
 
-    public int ExistingMethod()
+    public int? ExistingMethod()
     {
-        // Introduced.
-        return this.ExistingMethod();
+        return this?.ExistingMethod();
     }
 
-    public int ExistingMethod_Parameterized(int x)
+    public int? ExistingMethod_Parameterized(int? x)
     {
-        // Introduced.
-        return this.ExistingMethod_Parameterized(int x);
+        return this?.ExistingMethod_Parameterized(x);
+    }
+
+    public new global::System.Int32? BaseClass_ExistingMethod()
+    {
+        return this?.BaseClass_ExistingMethod();
+    }
+
+    public new global::System.Int32? BaseClass_ExistingMethod_Parameterized(global::System.Int32? x)
+    {
+        return this?.BaseClass_ExistingMethod_Parameterized(x);
+    }
+
+    public void BaseClass_VoidMethod()
+    {
+        this?.BaseClass_VoidMethod();
+        return;
+    }
+
+    public void Print()
+    {
+        this?.Print();
+        return;
     }
 }

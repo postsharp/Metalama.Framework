@@ -36,7 +36,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.FieldProm
     {
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
-            builder.Advice.Override(builder.Target.AllFieldsAndProperties.OfName( nameof(TargetClass.Field) ).Single(), nameof(PropertyTemplate));
+            builder.Advice.Override(builder.Target.FieldsAndProperties.OfName( nameof(TargetClass.Field) ).Single(), nameof(PropertyTemplate));
         }
 
         [Template]

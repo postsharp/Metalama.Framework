@@ -9,24 +9,33 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.Ad
     public class TestIntroductionAttribute : TypeAspect
     {
         [Introduce(WhenExists = OverrideStrategy.New)]
-        public void VoidMethod()
+        public void BaseClass_VoidMethod()
         {
             meta.InsertComment("Introduced.");
+            this.Print();
             System.Console.WriteLine("Introduced method print.");
         }
 
         [Introduce(WhenExists = OverrideStrategy.New)]
-        public int? ExistingMethod()
+        public int? BaseClass_ExistingMethod()
         {
             meta.InsertComment("Introduced.");
+            this.Print();
             return 100;
         }
 
         [Introduce(WhenExists = OverrideStrategy.New)]
-        public int? ExistingMethod_Parameterized(int x)
+        public int? BaseClass_ExistingMethod_Parameterized(int x)
         {
             meta.InsertComment("Introduced.");
+            this.Print();
             return x + 100;
+        }
+
+        [Introduce(WhenExists = OverrideStrategy.New)]
+        public void Print()
+        {
+            System.Console.WriteLine("Print() called.");
         }
     }
 
@@ -54,24 +63,46 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.Ad
         }
     }
 
-    // <target>
-    [TestIntroduction]
-    [Test]
-    internal class TargetClass
+    internal class BaseClass
     {
-        public void VoidMethod()
+        public virtual void BaseClass_VoidMethod()
         {
-            System.Console.WriteLine("Base method print.");
+            System.Console.WriteLine("BaseClass_VoidMethod()");
         }
 
-        public int? ExistingMethod()
+        public virtual int? BaseClass_ExistingMethod()
         {
+            System.Console.WriteLine("BaseClass_ExistingMethod()");
             return 42;
         }
 
-        public int? ExistingMethod_Parameterized(int x)
+        public virtual int? BaseClass_ExistingMethod_Parameterized(int? x)
         {
-            return x;
+            System.Console.WriteLine("BaseClass_ExistingMethod_Parameterized()");
+            return x + 42;
+        }
+    }
+
+    // <target>
+    [TestIntroduction]
+    [Test]
+    internal class TargetClass : BaseClass
+    {
+        public void VoidMethod()
+        {
+            System.Console.WriteLine("TargetClass_VoidMethod()");
+        }
+
+        public int ExistingMethod()
+        {
+            System.Console.WriteLine("TargetClass_ExistingMethod()");
+            return 42;
+        }
+
+        public int ExistingMethod_Parameterized(int x)
+        {
+            System.Console.WriteLine("TargetClass_ExistingMethod_Parameterized");
+            return x + 42;
         }
     }
 }

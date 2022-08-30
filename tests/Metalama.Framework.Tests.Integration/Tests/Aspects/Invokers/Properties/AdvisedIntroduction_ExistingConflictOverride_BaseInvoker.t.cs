@@ -4,7 +4,8 @@ internal class TargetClass : BaseClass
 {
     public int TargetClassProperty
     {
-        get {
+        get
+        {
             return this.TargetClassProperty;
         }
     }

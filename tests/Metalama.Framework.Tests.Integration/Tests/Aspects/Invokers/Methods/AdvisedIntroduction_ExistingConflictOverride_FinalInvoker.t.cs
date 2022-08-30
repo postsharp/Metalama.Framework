@@ -4,36 +4,39 @@ internal class TargetClass : BaseClass
 {
     public void VoidMethod()
     {
-        // Introduced.
-        global::System.Console.WriteLine("Introduced method print.");
+        this.VoidMethod();
+        return;
     }
+
     public int ExistingMethod()
     {
-        // Introduced.
-        return (global::System.Int32)100;
+        return this.ExistingMethod();
     }
 
     public int ExistingMethod_Parameterized(int x)
     {
-        // Introduced.
-        return (global::System.Int32)(x + 100);
+        return this.ExistingMethod_Parameterized(x);
     }
 
-    public override global::System.Int32 ExistingMethod_Base()
+    public override global::System.Int32 BaseClass_ExistingMethod()
     {
-        // Introduced.
-        return (global::System.Int32)100;
+        return this.BaseClass_ExistingMethod();
     }
 
-    public override global::System.Int32 ExistingMethod_Parameterized_Base(global::System.Int32 x)
+    public override global::System.Int32 BaseClass_ExistingMethod_Parameterized(global::System.Int32 x)
     {
-        // Introduced.
-        return (global::System.Int32)(x + 100);
+        return this.BaseClass_ExistingMethod_Parameterized(x);
     }
 
-    public override void VoidMethod_Base()
+    public override void BaseClass_VoidMethod()
     {
-        // Introduced.
-        global::System.Console.WriteLine("Introduced method print.");
+        this.BaseClass_VoidMethod();
+        return;
+    }
+
+    public void Print()
+    {
+        this.Print();
+        return;
     }
 }
