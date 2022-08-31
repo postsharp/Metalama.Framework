@@ -1144,5 +1144,57 @@ Intentional syntax error.
                 this.IsInvoked = true;
             }
         }
+
+        [Fact]
+        public void PreprocessorDirectivesAreConserved()
+        {
+            using var testContext = this.CreateTestContext( new TestProjectOptions( formatCompileTimeCode: true ) );
+
+            var code = @"
+#region Namespaces
+using System;
+using Metalama.Framework.Aspects;
+using StrippedNamespace;
+#endregion
+
+#region Using Attributes
+#if SYMBOL
+[assembly: MyRunTimeAttribute]
+#else
+[assembly: MyCompileTimeAttribute]
+#endif
+#endregion
+
+[CompileTime]
+public class MyCompileTimeAttribute : Attribute {}
+
+#region Defining MyRunTimeAttribute
+public class MyRunTimeAttribute : Attribute 
+{
+#region BadRegion
+}
+#endregion
+#endregion
+
+#region StrippedNamespace
+namespace StrippedNamespace {}
+#endregion
+";
+
+            var compileTimeCode = GetCompileTimeCode( testContext, code );
+
+            var expected = @"
+using System;
+using Metalama.Framework.Aspects;
+
+[CompileTime]
+public interface SomeInterface
+{
+    void M();
+}
+";
+
+            Assert.Equal( expected, compileTimeCode );
+        }
     }
 }

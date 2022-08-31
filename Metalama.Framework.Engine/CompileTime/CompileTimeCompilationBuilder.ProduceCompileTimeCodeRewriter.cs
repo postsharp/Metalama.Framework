@@ -281,7 +281,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
             }
 
-            private IEnumerable<MemberDeclarationSyntax> VisitTypeDeclaration( TypeDeclarationSyntax node )
+            private IReadOnlyCollection<MemberDeclarationSyntax> VisitTypeDeclaration( TypeDeclarationSyntax node )
             {
                 this._cancellationToken.ThrowIfCancellationRequested();
 
@@ -953,16 +953,31 @@ namespace Metalama.Framework.Engine.CompileTime
                 }
             }
 
-            private SyntaxList<MemberDeclarationSyntax> VisitTypeOrNamespaceMembers( IReadOnlyList<MemberDeclarationSyntax> members )
+            private IncompleteSyntaxListBuilder VisitTypeOrNamespaceMembers( IReadOnlyList<MemberDeclarationSyntax> members )
             {
-                var resultingMembers = new List<MemberDeclarationSyntax>( members.Count );
+                var resultingMembers = new IncompleteSyntaxListBuilder( members.Count );
+                this.VisitTypeOrNamespaceMembers( members, resultingMembers );
+
+                return resultingMembers;
+            }
+            private void VisitTypeOrNamespaceMembers( IReadOnlyList<MemberDeclarationSyntax> members, IncompleteSyntaxListBuilder resultingMembers )
+            {
 
                 foreach ( var member in members )
                 {
                     switch ( member )
                     {
                         case TypeDeclarationSyntax type:
-                            resultingMembers.AddRange( this.VisitTypeDeclaration( type ) );
+                            var typeDeclarations = this.VisitTypeDeclaration( type );
+
+                            if ( typeDeclarations.Count > 0 )
+                            {
+                                resultingMembers.AddRange( typeDeclarations );
+                            }
+                            else
+                            {
+                                resultingMembers.Skip( type );
+                            }
 
                             break;
 
@@ -973,12 +988,14 @@ namespace Metalama.Framework.Engine.CompileTime
                             {
                                 resultingMembers.Add( transformedMember );
                             }
+                            else
+                            {
+                                resultingMembers.Skip( member );
+                            }
 
                             break;
                     }
                 }
-
-                return List( resultingMembers );
             }
 
             public override SyntaxNode? VisitConstructorDeclaration( ConstructorDeclarationSyntax node )
@@ -999,11 +1016,16 @@ namespace Metalama.Framework.Engine.CompileTime
 
             public override SyntaxNode? VisitNamespaceDeclaration( NamespaceDeclarationSyntax node )
             {
-                var transformedMembers = this.VisitTypeOrNamespaceMembers( node.Members );
+                var transformedMemberBuilder = this.VisitTypeOrNamespaceMembers( node.Members );
+                var transformedMembers = transformedMemberBuilder.DequeueNodesOfType<MemberDeclarationSyntax>();
 
                 if ( transformedMembers.Any( m => m.HasAnnotation( _hasCompileTimeCodeAnnotation ) ) )
                 {
-                    return node.WithMembers( transformedMembers ).WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
+                    return node.WithMembers( List( transformedMembers ) )
+                        .WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation )
+                        .WithCloseBraceToken(
+                            node.CloseBraceToken.WithTrailingTrivia(
+                                node.CloseBraceToken.TrailingTrivia.InsertRange( 0, transformedMemberBuilder.DequeueTriviaList() ) ) );
                 }
                 else
                 {
@@ -1013,11 +1035,14 @@ namespace Metalama.Framework.Engine.CompileTime
 
             public override SyntaxNode? VisitFileScopedNamespaceDeclaration( FileScopedNamespaceDeclarationSyntax node )
             {
-                var transformedMembers = this.VisitTypeOrNamespaceMembers( node.Members );
+                var transformedMemberBuilder = this.VisitTypeOrNamespaceMembers( node.Members );
+                var transformedMembers = transformedMemberBuilder.DequeueNodesOfType<MemberDeclarationSyntax>();
 
                 if ( transformedMembers.Any( m => m.HasAnnotation( _hasCompileTimeCodeAnnotation ) ) )
                 {
-                    return node.WithMembers( transformedMembers ).WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
+                    return node.WithMembers(List(  transformedMembers ) )
+                        .WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation )
+                        .WithTrailingTrivia( node.GetTrailingTrivia().InsertRange( 0, transformedMemberBuilder.DequeueTriviaList() ) );
                 }
                 else
                 {
@@ -1032,21 +1057,33 @@ namespace Metalama.Framework.Engine.CompileTime
                         m => m is BaseTypeDeclarationSyntax or NamespaceDeclarationSyntax or DelegateDeclarationSyntax or FileScopedNamespaceDeclarationSyntax )
                     .ToList();
 
-                var transformedMembers = this.VisitTypeOrNamespaceMembers( nonTopLevelMembers );
+                
+                IncompleteSyntaxListBuilder compilationMemberBuilder = new();
+                
+                // Add usings.
+                var currentUsings = node.Usings.Select( n => n.ToString() ).ToHashSet();
+                var usings =
+                    this._globalUsings.Where( u => !currentUsings.Contains( u.ToString() ) )
+                        .Select( u => u.WithGlobalKeyword( default ) )
+                        .Concat( node.Usings );
+                compilationMemberBuilder.AddRange( usings );
+                
+                // Add assembly-level attributes.
+                compilationMemberBuilder.AddFilteredNodes( node.AttributeLists, x => (AttributeListSyntax?) this.Visit( x ) );
+                
+                // Add members.
+                this.VisitTypeOrNamespaceMembers( nonTopLevelMembers, compilationMemberBuilder );
 
-                if ( transformedMembers.Any( m => m.HasAnnotation( _hasCompileTimeCodeAnnotation ) ) )
+                if ( compilationMemberBuilder.ContainsNode<MemberDeclarationSyntax>( m => m.HasAnnotation( _hasCompileTimeCodeAnnotation ) ) )
                 {
-                    var currentUsings = node.Usings.Select( n => n.ToString() ).ToHashSet();
-
-                    return node.WithMembers( transformedMembers )
-                        .WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation )
-                        .WithUsings(
-                            List(
-                                this._globalUsings.Where( u => !currentUsings.Contains( u.ToString() ) )
-                                    .Select( u => u.WithGlobalKeyword( default ) )
-                                    .Concat( node.Usings ) ) )
-                        .WithAttributeLists(
-                            List( node.AttributeLists.Select( x => (AttributeListSyntax?) this.Visit( x ) ).Where( x => x != null ).AssertNoneNull() ) );
+                    
+                    // The order of dequeuing nodes and trivia must be the same as the enqueuing order.
+                    return node
+                        .WithUsings( List( compilationMemberBuilder.DequeueNodesOfType<UsingDirectiveSyntax>() ) )
+                        .WithAttributeLists( List( compilationMemberBuilder.DequeueNodesOfType<AttributeListSyntax>() ) )
+                        .WithMembers( List( compilationMemberBuilder.DequeueNodesOfType<MemberDeclarationSyntax>() ) )
+                        .WithTrailingTrivia( node.GetTrailingTrivia().InsertRange( 0, compilationMemberBuilder.DequeueTriviaList() ) )
+                        .WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
                 }
                 else
                 {
