@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.CompileTime
     /// Rewrites a run-time syntax tree so that the implementation of compile-time-only methods is replaced
     /// by a <c>throw new NotSupportedException()</c>.
     /// </summary>
-    internal class RunTimeAssemblyRewriter : CompileTimeBaseRewriter
+    internal class RunTimeAssemblyRewriter : SafeSyntaxRewriter
     {
         private const string _intrinsics = @"
 using System;
@@ -51,14 +51,19 @@ namespace Metalama.Compiler
         private readonly INamedTypeSymbol? _aspectDriverSymbol;
         private readonly bool _removeCompileTimeOnlyCode;
         private readonly SyntaxGenerationContextFactory _syntaxGenerationContextFactory;
+        private RewriterHelper _rewriterHelper;
 
         private RunTimeAssemblyRewriter( Compilation runTimeCompilation, IServiceProvider serviceProvider )
-            : base( runTimeCompilation, serviceProvider )
         {
+            this._rewriterHelper = new RewriterHelper( runTimeCompilation, serviceProvider );
             this._aspectDriverSymbol = runTimeCompilation.GetTypeByMetadataName( typeof(IAspectDriver).FullName );
             this._removeCompileTimeOnlyCode = serviceProvider.GetRequiredService<IProjectOptions>().RemoveCompileTimeOnlyCode;
             this._syntaxGenerationContextFactory = new SyntaxGenerationContextFactory( this.RunTimeCompilation, serviceProvider );
         }
+
+        private Compilation RunTimeCompilation => this._rewriterHelper.RunTimeCompilation;
+
+        private ISymbolClassifier SymbolClassifier => this._rewriterHelper.SymbolClassifier;
 
         public static IPartialCompilation Rewrite( IPartialCompilation compilation, IServiceProvider serviceProvider )
         {
@@ -201,7 +206,7 @@ namespace Metalama.Compiler
 
             if ( this.MustReplaceByThrow( symbol ) )
             {
-                transformedNode = this.WithThrowNotSupportedExceptionBody( node, "Compile-time-only code cannot be called at run-time." );
+                transformedNode = this._rewriterHelper.WithThrowNotSupportedExceptionBody( node, "Compile-time-only code cannot be called at run-time." );
             }
 
             if ( this.IsTemplate( symbol ) )
@@ -240,7 +245,7 @@ namespace Metalama.Compiler
                 }
                 else
                 {
-                    transformedNode = (PropertyDeclarationSyntax) this.WithThrowNotSupportedExceptionBody(
+                    transformedNode = (PropertyDeclarationSyntax) this._rewriterHelper.WithThrowNotSupportedExceptionBody(
                         node,
                         "Compile-time-only code cannot be called at run-time." );
                 }
@@ -285,7 +290,7 @@ namespace Metalama.Compiler
 
             if ( this.MustReplaceByThrow( symbol ) )
             {
-                transformedNode = (EventDeclarationSyntax) this.WithThrowNotSupportedExceptionBody(
+                transformedNode = (EventDeclarationSyntax) this._rewriterHelper.WithThrowNotSupportedExceptionBody(
                     node,
                     "Compile-time-only code cannot be called at run-time." );
             }

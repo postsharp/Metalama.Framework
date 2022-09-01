@@ -23,7 +23,6 @@ namespace Metalama.Framework.Engine.CompileTime
             string runTimeAssemblyIdentity,
             string compileTimeAssemblyName,
             string targetFramework,
-            IReadOnlyList<string> preprocessorSymbols,
             IReadOnlyList<string> aspectTypes,
             IReadOnlyList<string> plugInTypes,
             IReadOnlyList<string> fabricTypes,
@@ -36,7 +35,6 @@ namespace Metalama.Framework.Engine.CompileTime
             this.RunTimeAssemblyIdentity = runTimeAssemblyIdentity;
             this.CompileTimeAssemblyName = compileTimeAssemblyName;
             this.TargetFramework = targetFramework;
-            this.PreprocessorSymbols = preprocessorSymbols;
             this.AspectTypes = aspectTypes;
             this.PlugInTypes = plugInTypes;
             this.FabricTypes = fabricTypes;
@@ -61,11 +59,6 @@ namespace Metalama.Framework.Engine.CompileTime
         public string CompileTimeAssemblyName { get; }
 
         public string TargetFramework { get; }
-
-        /// <summary>
-        /// Gets or sets the list of preprocessor symbols to compile the code with.
-        /// </summary>
-        public IReadOnlyList<string> PreprocessorSymbols { get; }
 
         /// <summary>
         /// Gets the version of Metalama that created the compile-time project.

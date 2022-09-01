@@ -671,8 +671,8 @@ public class RunTimeOnlyClass
 ";
 
             var expected = @"
-using System;
-using Metalama.Framework.Aspects;
+using global::System;
+using global::Metalama.Framework.Aspects;
 
 [CompileTime]
 public class CompileTimeOnlyClass
@@ -904,8 +904,8 @@ namespace SomeNamespace
 
             var expected = @"
 using System;
-using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Fabrics;
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Serialization;
 
 [OriginalPath(""main.cs"")]
@@ -1146,7 +1146,7 @@ Intentional syntax error.
         }
 
         [Fact]
-        public void PreprocessorDirectivesAreConserved()
+        public void PreprocessorDirectivesAreRemoved()
         {
             using var testContext = this.CreateTestContext( new TestProjectOptions( formatCompileTimeCode: true ) );
 
@@ -1188,10 +1188,7 @@ using System;
 using Metalama.Framework.Aspects;
 
 [CompileTime]
-public interface SomeInterface
-{
-    void M();
-}
+public class MyCompileTimeAttribute : Attribute { }
 ";
 
             Assert.Equal( expected, compileTimeCode );

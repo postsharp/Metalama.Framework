@@ -342,7 +342,7 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
         var manifest = CompileTimeProjectManifest.Deserialize( manifestEntry.Open() );
 
         // Read source files.
-        var parseOptions = CSharpParseOptions.Default.WithPreprocessorSymbols( manifest.PreprocessorSymbols );
+        var parseOptions = CSharpParseOptions.Default;
 
         List<SyntaxTree> syntaxTrees = new();
 

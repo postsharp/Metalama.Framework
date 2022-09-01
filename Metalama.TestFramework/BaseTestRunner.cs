@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Metalama.TestFramework.Utilities;
 using Microsoft.CodeAnalysis;
@@ -36,6 +37,9 @@ namespace Metalama.TestFramework
         private static readonly Regex _spaceRegex = new( " +", RegexOptions.Compiled );
         private static readonly Regex _newLineRegex = new( "( *[\n|\r])+", RegexOptions.Compiled );
         private static readonly AsyncLocal<bool> _isTestRunning = new();
+
+        private static readonly RemovePreprocessorDirectivesRewriter _removePreprocessorDirectivesRewriter =
+            new( SyntaxKind.PragmaWarningDirectiveTrivia, SyntaxKind.NullableDirectiveTrivia );
 
         public ServiceProvider BaseServiceProvider { get; }
 
@@ -155,8 +159,8 @@ namespace Metalama.TestFramework
 
                     var prunedSyntaxRoot =
                         testInput.Options.KeepDisabledCode != true
-                        ? new InactiveCodeRemover().Visit( await parsedSyntaxTree.GetRootAsync() )!
-                        : await parsedSyntaxTree.GetRootAsync();
+                            ? _removePreprocessorDirectivesRewriter.Visit( await parsedSyntaxTree.GetRootAsync() )!
+                            : await parsedSyntaxTree.GetRootAsync();
 
                     if ( !acceptFileWithoutMember && prunedSyntaxRoot is CompilationUnitSyntax { Members: { Count: 0 } } )
                     {

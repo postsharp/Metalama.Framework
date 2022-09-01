@@ -37,7 +37,6 @@ namespace Metalama.Framework.Engine.CompileTime
             _frameworkAssemblyIdentity.ToString(),
             _frameworkAssemblyIdentity.ToString(),
             "",
-            ImmutableArray<string>.Empty,
             new[] { typeof(InternalImplementAttribute) }
                 .Select( t => t.FullName )
                 .ToImmutableArray(),
@@ -309,7 +308,6 @@ namespace Metalama.Framework.Engine.CompileTime
                 assemblyIdentity.ToString(),
                 assemblyIdentity.ToString(),
                 "",
-                ImmutableArray<string>.Empty,
                 aspectTypes,
                 Array.Empty<string>(),
                 fabricTypes,
