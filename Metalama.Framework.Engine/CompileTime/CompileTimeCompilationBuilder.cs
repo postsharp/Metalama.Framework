@@ -670,8 +670,6 @@ namespace Metalama.Framework.Engine.CompileTime
                 out project );
         }
 
-        internal void ClearMemoryCache() => this._cache.Clear();
-
         private bool TryGetCompileTimeProjectFromCache(
             Compilation runTimeCompilation,
             IReadOnlyList<CompileTimeProject> referencedProjects,

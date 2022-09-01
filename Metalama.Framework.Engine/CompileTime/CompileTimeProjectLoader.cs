@@ -106,12 +106,6 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
         return type;
     }
 
-    internal void ClearMemoryCache()
-    {
-        this._projects.Clear();
-        this._builder.ClearMemoryCache();
-    }
-
     /// <summary>
     /// Gets the <see cref="CompileTimeProject"/> for a given <see cref="AssemblyIdentity"/>,
     /// or <c>null</c> if it does not exist. 
