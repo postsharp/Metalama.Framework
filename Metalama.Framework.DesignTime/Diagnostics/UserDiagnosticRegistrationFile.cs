@@ -10,7 +10,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
     /// A JSON-serializable file that contains user-defined diagnostic and suppression descriptors.
     /// </summary>
     [Obfuscation( Exclude = true /* JSON */ )]
-    [ConfigurationFileAttribute( "userDiagnostics.json" )]
+    [ConfigurationFile( "userDiagnostics.json" )]
     internal class UserDiagnosticRegistrationFile : ConfigurationFile
     {
         public Dictionary<string, UserDiagnosticRegistration> Diagnostics { get; } = new( StringComparer.OrdinalIgnoreCase );

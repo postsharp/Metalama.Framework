@@ -76,7 +76,7 @@ namespace Metalama.Compiler
         private readonly INamedTypeSymbol? _aspectDriverSymbol;
         private readonly bool _removeCompileTimeOnlyCode;
         private readonly SyntaxGenerationContextFactory _syntaxGenerationContextFactory;
-        private RewriterHelper _rewriterHelper;
+        private readonly RewriterHelper _rewriterHelper;
 
         private RunTimeAssemblyRewriter( Compilation runTimeCompilation, IServiceProvider serviceProvider )
         {

@@ -31,7 +31,9 @@ namespace Metalama.Framework.Engine.CompileTime
 
         public Compilation RunTimeCompilation { get; }
 
-        private T RewriteThrowNotSupported<T>( T node ) where T : SyntaxNode => (T) this._rewriteThrowNotSupported( node );
+        private T RewriteThrowNotSupported<T>( T node ) 
+            where T : SyntaxNode 
+            => (T) this._rewriteThrowNotSupported( node );
 
         private static T WithSuppressedDiagnostics<T>( T member, params string[] suppressedDiagnostics )
             where T : MemberDeclarationSyntax

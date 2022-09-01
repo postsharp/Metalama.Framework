@@ -1082,7 +1082,7 @@ public interface SomeInterface
         }
 
         [Fact]
-        public async Task CacheWithPreprocessorSymbols()
+        public async Task CacheWithPreprocessorSymbolsAsync()
         {
             // Create a compilation that depends on a preprocessor symbol.
             using var testContext1 = this.CreateTestContext();
@@ -1112,6 +1112,7 @@ Intentional syntax error.
 
             var peFilePath = Path.Combine( testContext1.ProjectOptions.BaseDirectory, "reference.dll" );
 
+            // ReSharper disable once UseAwaitUsing
             using ( var peFile = File.Create( peFilePath ) )
             {
                 Assert.True(

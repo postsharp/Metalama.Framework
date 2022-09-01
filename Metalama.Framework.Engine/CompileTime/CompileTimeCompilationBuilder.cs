@@ -854,8 +854,6 @@ namespace Metalama.Framework.Engine.CompileTime
                             .Select( t => t.GetReflectionName().AssertNotNull() )
                             .ToList();
 
-                        var preprocessorSymbols = sourceTreesWithCompileTimeCode.Last().Options.PreprocessorSymbolNames.ToList();
-
                         var manifest = new CompileTimeProjectManifest(
                             runTimeCompilation.Assembly.Identity.ToString(),
                             compileTimeCompilation.AssemblyName!,
