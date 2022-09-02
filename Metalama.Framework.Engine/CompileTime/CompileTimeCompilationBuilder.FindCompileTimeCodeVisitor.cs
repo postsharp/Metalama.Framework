@@ -37,7 +37,8 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 if ( node.GlobalKeyword.IsKind( SyntaxKind.GlobalKeyword ) )
                 {
-                    this._globalUsings.Add( node );
+                    // We remove the trivia to make sure we don't have any preprocessor directive.
+                    this._globalUsings.Add( node.WithoutLeadingTrivia().WithTrailingTrivia( SyntaxFactory.ElasticCarriageReturnLineFeed ) );
                 }
             }
 

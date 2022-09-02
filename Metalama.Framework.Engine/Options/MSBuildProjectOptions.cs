@@ -90,7 +90,7 @@ namespace Metalama.Framework.Engine.Options
         public override bool RemoveCompileTimeOnlyCode => this.GetBooleanOption( "MetalamaRemoveCompileTimeOnlyCode", true );
 
         [Memo]
-        public override bool AllowPreviewLanguageFeatures => this.GetBooleanOption( "MetalamaAllowPreviewLanguageFeatures", false );
+        public override bool AllowPreviewLanguageFeatures => this.GetBooleanOption( "MetalamaAllowPreviewLanguageFeatures" );
 
         public override bool RequiresCodeCoverageAnnotations => this._transformerOptions.RequiresCodeCoverageAnnotations;
 
