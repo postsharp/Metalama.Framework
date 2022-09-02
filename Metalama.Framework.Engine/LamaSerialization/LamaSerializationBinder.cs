@@ -38,17 +38,14 @@ namespace Metalama.Framework.Engine.LamaSerialization
         public virtual void BindToName( Type type, out string typeName, out string assemblyName )
         {
             typeName = type.FullName!;
-
-            // TODO: Remove.
-            // if ( this.reflectionBindingManagerService != null )
-            // {
-            //    assemblyName = this.reflectionBindingManagerService.ResolveAssembly(type) ?? type.GetAssembly().FullName;
-            // }
-            // else
-            // {
-            assemblyName = type.Assembly.FullName;
-
-            // }
+            
+            // #31016
+            // We don't use the full name because it may happen that the graph is serialized in a process that higher
+            // assembly versions than the deserializing processes and we don't want, and don't need, to bother with versioning.
+            // Versioning and version update, if necessary, should be taken care of upstream, and not by the formatter.
+            // When deserializing, we will assume that a compatible assembly version has been loaded in the AppDomain.
+            
+            assemblyName = type.Assembly.GetName().Name;
         }
     }
 }

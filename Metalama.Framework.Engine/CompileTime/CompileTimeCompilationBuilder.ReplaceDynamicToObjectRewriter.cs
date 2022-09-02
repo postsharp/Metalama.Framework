@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.CompileTime
 {
-    internal abstract partial class CompileTimeBaseRewriter
+    internal partial class CompileTimeCompilationBuilder
     {
         protected class ReplaceDynamicToObjectRewriter : SafeSyntaxRewriter
         {

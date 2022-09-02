@@ -279,19 +279,12 @@ namespace Metalama.Framework.Engine.Templating
                                     SyntaxFactory.EqualsValueClause( variableValue ) ) ) ) )
                     .WithAdditionalAnnotations( OutputCodeFormatter.PossibleRedundantAnnotation );
 
-                if ( runtimeExpression != null )
-                {
-                    return SyntaxFactory.Block(
-                            awaitResult
-                                ? SyntaxFactory.ExpressionStatement( SyntaxFactory.AwaitExpression( runtimeExpression.RemoveParenthesis() ) )
-                                : SyntaxFactory.ExpressionStatement( runtimeExpression.RemoveParenthesis() ),
-                            localDeclarationStatement )
-                        .WithFlattenBlockAnnotation();
-                }
-                else
-                {
-                    return localDeclarationStatement;
-                }
+                return SyntaxFactory.Block(
+                        awaitResult
+                            ? SyntaxFactory.ExpressionStatement( SyntaxFactory.AwaitExpression( runtimeExpression.RemoveParenthesis() ) )
+                            : SyntaxFactory.ExpressionStatement( runtimeExpression.RemoveParenthesis() ),
+                        localDeclarationStatement )
+                    .WithFlattenBlockAnnotation();
             }
             else
             {

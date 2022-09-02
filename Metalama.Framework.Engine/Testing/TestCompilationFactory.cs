@@ -71,8 +71,8 @@ namespace Metalama.Framework.Engine.Testing
             var metalamaLibraries = addMetalamaReferences ? new[] { typeof(IAspect).Assembly, typeof(IAspectWeaver).Assembly } : null;
 
             var systemLibraries = AppDomainUtility.GetLoadedAssemblies(
-                    a => !a.IsDynamic && a.FullName != null && a.FullName.StartsWith( "System", StringComparison.Ordinal )
-                         && !string.IsNullOrEmpty( a.Location ) )
+                    a => !a.IsDynamic && a.FullName.StartsWith( "System", StringComparison.Ordinal )
+                                      && !string.IsNullOrEmpty( a.Location ) )
                 .Concat( metalamaLibraries ?? Enumerable.Empty<Assembly>() )
                 .Concat( additionalAssemblies ?? Enumerable.Empty<Assembly>() )
                 .Distinct()

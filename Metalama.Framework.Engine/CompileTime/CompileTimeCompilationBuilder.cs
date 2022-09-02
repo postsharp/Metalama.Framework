@@ -203,13 +203,17 @@ namespace Metalama.Framework.Engine.CompileTime
 
             // Creates the new syntax trees. Store them in a dictionary mapping the transformed trees to the source trees.
             var syntaxTrees = treesWithCompileTimeCode.Select(
-                    t => (TransformedTree: CSharpSyntaxTree.Create(
-                                  (CSharpSyntaxNode) produceCompileTimeCodeRewriter.Visit( t.GetRoot() ).AssertNotNull(),
-                                  CSharpParseOptions.Default,
-                                  t.FilePath,
-                                  Encoding.UTF8 )
-                              .WithFilePath( GetTransformedFilePath( outputPaths, t.FilePath ) ),
-                          SourceTree: t) )
+                    t =>
+                    {
+                        var compileTimeSyntaxTree = produceCompileTimeCodeRewriter.Visit( t.GetRoot() ).AssertNotNull();
+
+                        return CSharpSyntaxTree.Create(
+                                (CSharpSyntaxNode) compileTimeSyntaxTree,
+                                CSharpParseOptions.Default,
+                                t.FilePath,
+                                Encoding.UTF8 )
+                            .WithFilePath( GetTransformedFilePath( outputPaths, t.FilePath ) );
+                    } )
                 .ToList();
 
             locationAnnotationMap = templateCompiler.LocationAnnotationMap;
@@ -228,7 +232,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 return true;
             }
 
-            compileTimeCompilation = compileTimeCompilation.AddSyntaxTrees( syntaxTrees.Select( t => t.TransformedTree ) );
+            compileTimeCompilation = compileTimeCompilation.AddSyntaxTrees( syntaxTrees );
             compileTimeCompilation = new RemoveInvalidUsingRewriter( compileTimeCompilation ).VisitTrees( compileTimeCompilation );
 
             if ( this._projectOptions is { FormatCompileTimeCode: true } && OutputCodeFormatter.CanFormat )
