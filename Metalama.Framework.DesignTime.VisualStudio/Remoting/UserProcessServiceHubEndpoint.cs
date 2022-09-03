@@ -96,7 +96,9 @@ internal partial class UserProcessServiceHubEndpoint : ServerEndpoint, ICodeRefa
             return false;
         }
 
+#pragma warning disable VSTHRD002
         return endpointTask.Result.TryGetUnhandledSources( projectId, out sources );
+#pragma warning restore VSTHRD002
     }
 
     async Task<ComputeRefactoringResult> ICodeRefactoringDiscoveryService.ComputeRefactoringsAsync(
