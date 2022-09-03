@@ -18,9 +18,7 @@ internal partial class UserProcessRegistrationEndpoint : ServerEndpoint, ICodeRe
 
     private readonly IServiceProvider _serviceProvider;
     private readonly ApiImplementation _apiImplementation;
-
-    private ConcurrentDictionary<string, TaskCompletionSource<UserProcessEndpoint>> _waiters = new( StringComparer.Ordinal );
-
+    private readonly ConcurrentDictionary<string, TaskCompletionSource<UserProcessEndpoint>> _waiters = new( StringComparer.Ordinal );
     private readonly ConcurrentDictionary<string, UserProcessEndpoint> _registeredEndpointsByPipeName = new( StringComparer.Ordinal );
     private readonly ConcurrentDictionary<string, UserProcessEndpoint> _registeredEndpointsByProjectId = new( StringComparer.Ordinal );
 
@@ -49,7 +47,7 @@ internal partial class UserProcessRegistrationEndpoint : ServerEndpoint, ICodeRe
             }
         }
 
-        return _instance!;
+        return _instance;
     }
 
     public event Action<bool>? IsEditingCompileTimeCodeChanged;

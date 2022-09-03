@@ -24,7 +24,7 @@ internal class ClientEndpoint<T> : ServiceEndpoint, IDisposable
 
         try
         {
-            this._pipeStream = new NamedPipeClientStream( ".", this.PipeName!, PipeDirection.InOut, PipeOptions.Asynchronous );
+            this._pipeStream = new NamedPipeClientStream( ".", this.PipeName, PipeDirection.InOut, PipeOptions.Asynchronous );
             await this._pipeStream.ConnectAsync( cancellationToken );
 
             this._rpc = CreateRpc( this._pipeStream );

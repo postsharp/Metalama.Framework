@@ -44,7 +44,7 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
             }
         }
 
-        return _instance!;
+        return _instance;
     }
 
     public AnalysisProcessEndpoint( IServiceProvider serviceProvider, string pipeName ) : base( serviceProvider, pipeName )
