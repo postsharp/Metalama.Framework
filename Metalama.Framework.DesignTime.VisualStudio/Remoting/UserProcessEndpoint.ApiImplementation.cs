@@ -24,7 +24,7 @@ internal partial class UserProcessEndpoint
             ImmutableDictionary<string, string> sources,
             CancellationToken cancellationToken = default )
         {
-            this._parent._logger.Trace?.Log( $"Received new generated code from the remote host for project '{projectId}'." );
+            this._parent.Logger.Trace?.Log( $"Received new generated code from the remote host for project '{projectId}'." );
 
             if ( this._parent._projectHandlers.TryGetValue( projectId, out var client ) )
             {
@@ -32,7 +32,7 @@ internal partial class UserProcessEndpoint
             }
             else
             {
-                this._parent._logger.Warning?.Log( $"No client registered for project '{projectId}'." );
+                this._parent.Logger.Warning?.Log( $"No client registered for project '{projectId}'." );
 
                 // Store the event so that a source generator that would be create later can retrieve it.
                 this._parent._unhandledSources[projectId] = sources;

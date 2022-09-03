@@ -34,6 +34,13 @@ namespace Metalama.Framework.Engine.Utilities
 
             if ( !(_resourceCache.TryGetValue( path, out metadataInfo ) && metadataInfo.LastFileWrite == File.GetLastWriteTime( path )) )
             {
+                if ( !File.Exists( path ) )
+                {
+                    metadataInfo = null;
+
+                    return false;
+                }
+
                 metadataInfo = GetCompileTimeResourceCore( path );
                 _resourceCache.TryAdd( path, metadataInfo );
             }

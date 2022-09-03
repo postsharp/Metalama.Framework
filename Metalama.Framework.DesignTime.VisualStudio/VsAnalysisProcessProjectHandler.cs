@@ -23,6 +23,7 @@ internal class VsAnalysisProcessProjectHandler : AnalysisProcessProjectHandler
         if ( this._serviceHost != null )
         {
             this._serviceHost.ClientConnected += this.OnClientConnected;
+            this._serviceHost.RegisterProject( projectOptions.ProjectId );
         }
     }
 

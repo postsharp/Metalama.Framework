@@ -41,9 +41,9 @@ public static class VsServiceProviderFactory
                         case ProcessKind.DevEnv:
                             _serviceProvider = DesignTimeServiceProviderFactory.GetServiceProvider();
 
-                            var serviceClient = new UserProcessEndpoint( _serviceProvider );
-                            _ = serviceClient.ConnectAsync();
-                            _serviceProvider = _serviceProvider.WithService( serviceClient );
+                            var userProcessRegistrationService = UserProcessServiceHubEndpoint.GetInstance( _serviceProvider );
+
+                            _serviceProvider = _serviceProvider.WithService( userProcessRegistrationService );
 
                             var compilerServiceProvider = new CompilerServiceProvider(
                                 _serviceProvider,
@@ -65,9 +65,17 @@ public static class VsServiceProviderFactory
                             _serviceProvider =
                                 _serviceProvider.WithService( new TransformationPreviewServiceImpl( _serviceProvider ) );
 
-                            // ServiceHost depends on the services added above.
-                            var serviceHost = AnalysisProcessEndpoint.GetInstance( _serviceProvider );
-                            _serviceProvider = _serviceProvider.WithService( serviceHost );
+                            // AnalysisProcessEndpoint depends on the services added above.
+                            if ( AnalysisProcessServiceHubEndpoint.TryStart(
+                                    _serviceProvider,
+                                    CancellationToken.None,
+                                    out var endpointRegistrationApiProvider ) )
+                            {
+                                _serviceProvider = _serviceProvider.WithService( endpointRegistrationApiProvider );
+
+                                var analysisProcessEndpoint = AnalysisProcessEndpoint.GetInstance( _serviceProvider );
+                                _serviceProvider = _serviceProvider.WithService( analysisProcessEndpoint );
+                            }
 
                             break;
 

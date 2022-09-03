@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 using System;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
@@ -23,7 +24,8 @@ public sealed class SyntaxProcessingException : Exception
     public SyntaxNode? SyntaxNode { get; }
 
     public static bool ShouldWrapException( Exception exception, SyntaxNode? node )
-        => exception is not SyntaxProcessingException && node != null && node.GetLocation().SourceTree?.FilePath != null;
+        => exception is not (SyntaxProcessingException or OperationCanceledException or TaskCanceledException) && node != null
+            && node.GetLocation().SourceTree?.FilePath != null;
 
     private static string GetMessage( SyntaxNode? node, Exception innerException )
     {
