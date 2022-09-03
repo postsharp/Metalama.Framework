@@ -10,11 +10,11 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Preview
 {
     internal class UserProcessTransformationPreviewService : ITransformationPreviewService
     {
-        private readonly UserProcessRegistrationEndpoint _userProcessEndpoint;
+        private readonly UserProcessServiceHubEndpoint _userProcessEndpoint;
 
         public UserProcessTransformationPreviewService( IServiceProvider serviceProvider )
         {
-            this._userProcessEndpoint = serviceProvider.GetRequiredService<UserProcessRegistrationEndpoint>();
+            this._userProcessEndpoint = serviceProvider.GetRequiredService<UserProcessServiceHubEndpoint>();
         }
 
         public async ValueTask<PreviewTransformationResult> PreviewTransformationAsync(

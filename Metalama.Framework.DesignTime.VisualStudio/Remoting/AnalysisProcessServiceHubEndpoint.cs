@@ -6,14 +6,14 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
 
-internal class AnalysisProcessRegistrationEndpoint : ClientEndpoint<IEndpointRegistrationApi>, IEndpointRegistrationApiProvider
+internal class AnalysisProcessServiceHubEndpoint : ClientEndpoint<IServiceHubApi>, IServiceHubApiProvider
 {
-    public AnalysisProcessRegistrationEndpoint( IServiceProvider serviceProvider, string pipeName ) : base( serviceProvider, pipeName ) { }
+    public AnalysisProcessServiceHubEndpoint( IServiceProvider serviceProvider, string pipeName ) : base( serviceProvider, pipeName ) { }
 
     public static bool TryStart(
         IServiceProvider serviceProvider,
         CancellationToken cancellationToken,
-        [NotNullWhen( true )] out IEndpointRegistrationApiProvider? endpointRegistrationApiProvider )
+        [NotNullWhen( true )] out IServiceHubApiProvider? endpointRegistrationApiProvider )
     {
         if ( !TryGetPipeName( out var pipeName ) )
         {
@@ -22,7 +22,7 @@ internal class AnalysisProcessRegistrationEndpoint : ClientEndpoint<IEndpointReg
             return false;
         }
 
-        var endpoint = new AnalysisProcessRegistrationEndpoint( serviceProvider, pipeName );
+        var endpoint = new AnalysisProcessServiceHubEndpoint( serviceProvider, pipeName );
         _ = endpoint.ConnectAsync( cancellationToken );
 
         endpointRegistrationApiProvider = endpoint;
@@ -54,5 +54,5 @@ internal class AnalysisProcessRegistrationEndpoint : ClientEndpoint<IEndpointReg
         return true;
     }
 
-    public ValueTask<IEndpointRegistrationApi> GetApiAsync( CancellationToken cancellationToken ) => this.GetServerApiAsync( cancellationToken );
+    public ValueTask<IServiceHubApi> GetApiAsync( CancellationToken cancellationToken ) => this.GetServerApiAsync( cancellationToken );
 }

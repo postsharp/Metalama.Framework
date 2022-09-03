@@ -3,13 +3,13 @@
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
 
-internal partial class UserProcessRegistrationEndpoint
+internal partial class UserProcessServiceHubEndpoint
 {
-    private class ApiImplementation : IEndpointRegistrationApi
+    private class ApiImplementation : IServiceHubApi
     {
-        private readonly UserProcessRegistrationEndpoint _parent;
+        private readonly UserProcessServiceHubEndpoint _parent;
 
-        public ApiImplementation( UserProcessRegistrationEndpoint parent )
+        public ApiImplementation( UserProcessServiceHubEndpoint parent )
         {
             this._parent = parent;
         }

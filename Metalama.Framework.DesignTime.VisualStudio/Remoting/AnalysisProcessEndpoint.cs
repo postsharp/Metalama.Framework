@@ -68,7 +68,7 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
 
     protected override async Task OnPipeCreatedAsync( CancellationToken cancellationToken )
     {
-        var registrationServiceProvider = this._serviceProvider.GetService<IEndpointRegistrationApiProvider>();
+        var registrationServiceProvider = this._serviceProvider.GetService<IServiceHubApiProvider>();
 
         if ( registrationServiceProvider != null )
         {
@@ -119,7 +119,7 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
     {
         await this.WhenInitialized;
 
-        var registrationServiceProvider = this._serviceProvider.GetService<IEndpointRegistrationApiProvider>();
+        var registrationServiceProvider = this._serviceProvider.GetService<IServiceHubApiProvider>();
 
         if ( registrationServiceProvider != null )
         {

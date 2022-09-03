@@ -5,7 +5,7 @@ using Metalama.Framework.Project;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
 
-internal interface IEndpointRegistrationApi
+internal interface IServiceHubApi
 {
     Task RegisterEndpointAsync( string pipeName, CancellationToken cancellationToken );
 
@@ -16,7 +16,7 @@ internal interface IEndpointRegistrationApi
     Task UnregisterProjectAsync( string projectId, CancellationToken cancellationToken );
 }
 
-internal interface IEndpointRegistrationApiProvider : IService
+internal interface IServiceHubApiProvider : IService
 {
-    ValueTask<IEndpointRegistrationApi> GetApiAsync( CancellationToken cancellationToken );
+    ValueTask<IServiceHubApi> GetApiAsync( CancellationToken cancellationToken );
 }

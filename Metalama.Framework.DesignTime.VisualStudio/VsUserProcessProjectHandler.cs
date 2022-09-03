@@ -18,14 +18,14 @@ namespace Metalama.Framework.DesignTime.VisualStudio;
 /// </summary>
 internal class VsUserProcessProjectHandler : ProjectHandler, IProjectHandlerCallback
 {
-    private readonly UserProcessRegistrationEndpoint _userProcessEndpoint;
+    private readonly UserProcessServiceHubEndpoint _userProcessEndpoint;
     private readonly ILogger _logger;
     private ImmutableDictionary<string, string>? _sources;
 
     public VsUserProcessProjectHandler( IServiceProvider serviceProvider, IProjectOptions projectOptions ) : base( serviceProvider, projectOptions )
     {
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
-        this._userProcessEndpoint = serviceProvider.GetRequiredService<UserProcessRegistrationEndpoint>();
+        this._userProcessEndpoint = serviceProvider.GetRequiredService<UserProcessServiceHubEndpoint>();
 
         _ = this._userProcessEndpoint.RegisterProjectHandlerAsync( projectOptions.ProjectId, this );
     }

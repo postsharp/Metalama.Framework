@@ -41,7 +41,7 @@ public static class VsServiceProviderFactory
                         case ProcessKind.DevEnv:
                             _serviceProvider = DesignTimeServiceProviderFactory.GetServiceProvider();
 
-                            var userProcessRegistrationService = UserProcessRegistrationEndpoint.GetInstance( _serviceProvider );
+                            var userProcessRegistrationService = UserProcessServiceHubEndpoint.GetInstance( _serviceProvider );
 
                             _serviceProvider = _serviceProvider.WithService( userProcessRegistrationService );
 
@@ -66,7 +66,7 @@ public static class VsServiceProviderFactory
                                 _serviceProvider.WithService( new TransformationPreviewServiceImpl( _serviceProvider ) );
 
                             // AnalysisProcessEndpoint depends on the services added above.
-                            if ( AnalysisProcessRegistrationEndpoint.TryStart(
+                            if ( AnalysisProcessServiceHubEndpoint.TryStart(
                                     _serviceProvider,
                                     CancellationToken.None,
                                     out var endpointRegistrationApiProvider ) )

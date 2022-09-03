@@ -11,10 +11,10 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
 
-internal partial class UserProcessRegistrationEndpoint : ServerEndpoint, ICodeRefactoringDiscoveryService, ICodeActionExecutionService
+internal partial class UserProcessServiceHubEndpoint : ServerEndpoint, ICodeRefactoringDiscoveryService, ICodeActionExecutionService
 {
     private static readonly object _initializeLock = new();
-    private static UserProcessRegistrationEndpoint? _instance;
+    private static UserProcessServiceHubEndpoint? _instance;
 
     private readonly IServiceProvider _serviceProvider;
     private readonly ApiImplementation _apiImplementation;
@@ -22,7 +22,7 @@ internal partial class UserProcessRegistrationEndpoint : ServerEndpoint, ICodeRe
     private readonly ConcurrentDictionary<string, UserProcessEndpoint> _registeredEndpointsByPipeName = new( StringComparer.Ordinal );
     private readonly ConcurrentDictionary<string, UserProcessEndpoint> _registeredEndpointsByProjectId = new( StringComparer.Ordinal );
 
-    public UserProcessRegistrationEndpoint( IServiceProvider serviceProvider, string pipeName ) : base( serviceProvider, pipeName )
+    public UserProcessServiceHubEndpoint( IServiceProvider serviceProvider, string pipeName ) : base( serviceProvider, pipeName )
     {
         this._serviceProvider = serviceProvider;
         this._apiImplementation = new ApiImplementation( this );
@@ -32,7 +32,7 @@ internal partial class UserProcessRegistrationEndpoint : ServerEndpoint, ICodeRe
 
     public ICollection<UserProcessEndpoint> Endpoints => this._registeredEndpointsByPipeName.Values;
 
-    public static UserProcessRegistrationEndpoint GetInstance( IServiceProvider serviceProvider )
+    public static UserProcessServiceHubEndpoint GetInstance( IServiceProvider serviceProvider )
     {
         if ( _instance == null )
         {
@@ -41,7 +41,7 @@ internal partial class UserProcessRegistrationEndpoint : ServerEndpoint, ICodeRe
                 if ( _instance == null )
                 {
                     var pipeName = GetPipeName( ServiceRole.Discovery );
-                    _instance = new UserProcessRegistrationEndpoint( serviceProvider, pipeName );
+                    _instance = new UserProcessServiceHubEndpoint( serviceProvider, pipeName );
                     _instance.Start();
                 }
             }
@@ -54,7 +54,7 @@ internal partial class UserProcessRegistrationEndpoint : ServerEndpoint, ICodeRe
 
     protected override void ConfigureRpc( JsonRpc rpc )
     {
-        rpc.AddLocalRpcTarget<IEndpointRegistrationApi>( this._apiImplementation, null );
+        rpc.AddLocalRpcTarget<IServiceHubApi>( this._apiImplementation, null );
     }
 
     private async ValueTask<UserProcessEndpoint> GetEndpointAsync( string projectId, CancellationToken cancellationToken )

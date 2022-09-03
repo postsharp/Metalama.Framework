@@ -13,11 +13,11 @@ namespace Metalama.Framework.DesignTime.VisualStudio;
 /// </summary>
 internal class CompileTimeEditingStatusService : ICompileTimeEditingStatusService, IDisposable
 {
-    private readonly UserProcessRegistrationEndpoint _userProcessEndpoint;
+    private readonly UserProcessServiceHubEndpoint _userProcessEndpoint;
 
     public CompileTimeEditingStatusService( IServiceProvider serviceProvider )
     {
-        this._userProcessEndpoint = serviceProvider.GetRequiredService<UserProcessRegistrationEndpoint>();
+        this._userProcessEndpoint = serviceProvider.GetRequiredService<UserProcessServiceHubEndpoint>();
         this._userProcessEndpoint.IsEditingCompileTimeCodeChanged += this.OnIsEditingChanged;
     }
 

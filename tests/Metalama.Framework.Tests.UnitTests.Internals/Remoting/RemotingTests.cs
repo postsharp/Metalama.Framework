@@ -110,10 +110,10 @@ public class RemotingTests
     public async Task RegisterEndpointAsync()
     {
         var discoveryPipeName = $"Metalama_Test_Discovery_{Guid.NewGuid()}";
-        using var userProcessRegistrationEndpoint = new UserProcessRegistrationEndpoint( ServiceProvider.Empty, discoveryPipeName );
+        using var userProcessRegistrationEndpoint = new UserProcessServiceHubEndpoint( ServiceProvider.Empty, discoveryPipeName );
         userProcessRegistrationEndpoint.Start();
 
-        using var analysisProcessRegistrationEndpoint = new AnalysisProcessRegistrationEndpoint( ServiceProvider.Empty, discoveryPipeName );
+        using var analysisProcessRegistrationEndpoint = new AnalysisProcessServiceHubEndpoint( ServiceProvider.Empty, discoveryPipeName );
         _ = analysisProcessRegistrationEndpoint.ConnectAsync();
 
         var servicePipeName = $"Metalama_Test_Service_{Guid.NewGuid()}";
@@ -134,10 +134,10 @@ public class RemotingTests
     public async Task RegisterTwoEndpointsAsync()
     {
         var discoveryPipeName = $"Metalama_Test_Discovery_{Guid.NewGuid()}";
-        using var userProcessRegistrationEndpoint = new UserProcessRegistrationEndpoint( ServiceProvider.Empty, discoveryPipeName );
+        using var userProcessRegistrationEndpoint = new UserProcessServiceHubEndpoint( ServiceProvider.Empty, discoveryPipeName );
         userProcessRegistrationEndpoint.Start();
 
-        using var analysisProcessRegistrationEndpoint = new AnalysisProcessRegistrationEndpoint( ServiceProvider.Empty, discoveryPipeName );
+        using var analysisProcessRegistrationEndpoint = new AnalysisProcessServiceHubEndpoint( ServiceProvider.Empty, discoveryPipeName );
         _ = analysisProcessRegistrationEndpoint.ConnectAsync();
 
         for ( var i = 0; i < 2; i++ )
