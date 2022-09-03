@@ -106,6 +106,57 @@ public class RemotingTests
         Assert.Equal( "Transformed code", result.TransformedSourceText );
     }
 
+    [Fact]
+    public async Task RegisterEndpointAsync()
+    {
+        var discoveryPipeName = $"Metalama_Test_Discovery_{Guid.NewGuid()}";
+        using var userProcessRegistrationEndpoint = new UserProcessRegistrationEndpoint( ServiceProvider.Empty, discoveryPipeName );
+        userProcessRegistrationEndpoint.Start();
+
+        using var analysisProcessRegistrationEndpoint = new AnalysisProcessRegistrationEndpoint( ServiceProvider.Empty, discoveryPipeName );
+        _ = analysisProcessRegistrationEndpoint.ConnectAsync();
+
+        var servicePipeName = $"Metalama_Test_Service_{Guid.NewGuid()}";
+
+        using var analysisProcessEndpoint = new AnalysisProcessEndpoint(
+            ServiceProvider.Empty.WithService( analysisProcessRegistrationEndpoint ),
+            servicePipeName );
+
+        analysisProcessEndpoint.Start();
+
+        const string projectId = "MyProjectId";
+        await analysisProcessEndpoint.RegisterProjectAsync( projectId );
+
+        Assert.Contains( projectId, userProcessRegistrationEndpoint.RegisteredProjects );
+    }
+
+    [Fact]
+    public async Task RegisterTwoEndpointsAsync()
+    {
+        var discoveryPipeName = $"Metalama_Test_Discovery_{Guid.NewGuid()}";
+        using var userProcessRegistrationEndpoint = new UserProcessRegistrationEndpoint( ServiceProvider.Empty, discoveryPipeName );
+        userProcessRegistrationEndpoint.Start();
+
+        using var analysisProcessRegistrationEndpoint = new AnalysisProcessRegistrationEndpoint( ServiceProvider.Empty, discoveryPipeName );
+        _ = analysisProcessRegistrationEndpoint.ConnectAsync();
+
+        for ( var i = 0; i < 2; i++ )
+        {
+            var servicePipeName = $"Metalama_Test_Service_{Guid.NewGuid()}";
+
+            using var analysisProcessEndpoint = new AnalysisProcessEndpoint(
+                ServiceProvider.Empty.WithService( analysisProcessRegistrationEndpoint ),
+                servicePipeName );
+
+            analysisProcessEndpoint.Start();
+
+            var projectId = $"MyProjectId{i}";
+            await analysisProcessEndpoint.RegisterProjectAsync( projectId );
+
+            Assert.Contains( projectId, userProcessRegistrationEndpoint.RegisteredProjects );
+        }
+    }
+
     private class PreviewImpl : ITransformationPreviewServiceImpl
     {
         public Task<PreviewTransformationResult> PreviewTransformationAsync( string projectId, string syntaxTreeName, CancellationToken cancellationToken )
