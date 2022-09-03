@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.CompileTime
     /// Rewrites a run-time syntax tree so that the implementation of compile-time-only methods is replaced
     /// by a <c>throw new NotSupportedException()</c>.
     /// </summary>
-    internal class RunTimeAssemblyRewriter : CompileTimeBaseRewriter
+    internal class RunTimeAssemblyRewriter : SafeSyntaxRewriter
     {
         private const string _intrinsics = @"
 using System;
@@ -41,6 +41,31 @@ namespace Metalama.Compiler
 }
 ";
 
+        /// <summary>
+        /// List of warnings that are suppressed from the run-time code of aspects.
+        /// </summary>
+        private static readonly SeparatedSyntaxList<ExpressionSyntax> _suppressedWarnings = SeparatedList<ExpressionSyntax>(
+            new[]
+            {
+                // An event was declared but never used in the class in which it was declared.
+                IdentifierName( "CS0067" ),
+
+                // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+                IdentifierName( "CS8618" ),
+
+                // Can be made static.
+                IdentifierName( "CA1822" ),
+
+                // The compiler detected code that will never be executed.
+                IdentifierName( "CS0162" ),
+
+                // The private field is never used.
+                IdentifierName( "CS0169" ),
+
+                // The private field 'field' is assigned but its value is never used.
+                IdentifierName( "CS0414" )
+            } );
+
         // TODO: We can do more in cleaning the run-time assembly. 
         // Private compile-time code can be stripped, except when they are templates, because their metadata must be preserved.
         // In general, accessible compile-time metadata must remain.
@@ -51,14 +76,19 @@ namespace Metalama.Compiler
         private readonly INamedTypeSymbol? _aspectDriverSymbol;
         private readonly bool _removeCompileTimeOnlyCode;
         private readonly SyntaxGenerationContextFactory _syntaxGenerationContextFactory;
+        private readonly RewriterHelper _rewriterHelper;
 
         private RunTimeAssemblyRewriter( Compilation runTimeCompilation, IServiceProvider serviceProvider )
-            : base( runTimeCompilation, serviceProvider )
         {
+            this._rewriterHelper = new RewriterHelper( runTimeCompilation, serviceProvider );
             this._aspectDriverSymbol = runTimeCompilation.GetTypeByMetadataName( typeof(IAspectDriver).FullName );
             this._removeCompileTimeOnlyCode = serviceProvider.GetRequiredService<IProjectOptions>().RemoveCompileTimeOnlyCode;
             this._syntaxGenerationContextFactory = new SyntaxGenerationContextFactory( this.RunTimeCompilation, serviceProvider );
         }
+
+        private Compilation RunTimeCompilation => this._rewriterHelper.RunTimeCompilation;
+
+        private ISymbolClassifier SymbolClassifier => this._rewriterHelper.SymbolClassifier;
 
         public static IPartialCompilation Rewrite( IPartialCompilation compilation, IServiceProvider serviceProvider )
         {
@@ -104,49 +134,25 @@ namespace Metalama.Compiler
 
             if ( symbol.GetMembers().Any( this.MustReplaceByThrow ) )
             {
-                var errorCodes = SeparatedList<ExpressionSyntax>(
-                    new[]
-                    {
-                        // An event was declared but never used in the class in which it was declared.
-                        IdentifierName( "CS0067" ),
-
-                        // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
-                        IdentifierName( "CS8618" ),
-
-                        // Can be made static.
-                        IdentifierName( "CA1822" ),
-
-                        // The compiler detected code that will never be executed.
-                        IdentifierName( "CS0162" ),
-
-                        // The private field is never used.
-                        IdentifierName( "CS0169" ),
-
-                        // The private field 'field' is assigned but its value is never used.
-                        IdentifierName( "CS0414" )
-                    } );
-
-                leadingTrivia = leadingTrivia.Insert(
-                    0,
+                leadingTrivia = leadingTrivia.InsertAfterFirstNonWhitespaceTrivia(
                     Trivia(
                         PragmaWarningDirectiveTrivia(
                                 Token( SyntaxKind.DisableKeyword ),
                                 true )
-                            .WithErrorCodes( errorCodes )
+                            .WithErrorCodes( _suppressedWarnings )
                             .NormalizeWhitespace()
                             .WithLeadingTrivia( ElasticLineFeed )
                             .WithTrailingTrivia( ElasticLineFeed ) ) );
 
-                trailingTrivia = trailingTrivia.Add( ElasticLineFeed )
-                    .Add(
-                        Trivia(
-                            PragmaWarningDirectiveTrivia(
-                                    Token( SyntaxKind.RestoreKeyword ),
-                                    true )
-                                .WithErrorCodes( errorCodes )
-                                .NormalizeWhitespace()
-                                .WithLeadingTrivia( ElasticLineFeed )
-                                .WithTrailingTrivia( ElasticLineFeed ) ) );
+                trailingTrivia = trailingTrivia.InsertBeforeLastNonWhitespaceTrivia(
+                    Trivia(
+                        PragmaWarningDirectiveTrivia(
+                                Token( SyntaxKind.RestoreKeyword ),
+                                true )
+                            .WithErrorCodes( _suppressedWarnings )
+                            .NormalizeWhitespace()
+                            .WithLeadingTrivia( ElasticLineFeed )
+                            .WithTrailingTrivia( ElasticLineFeed ) ) );
             }
 
             return base.VisitClassDeclaration( node )!
@@ -201,7 +207,7 @@ namespace Metalama.Compiler
 
             if ( this.MustReplaceByThrow( symbol ) )
             {
-                transformedNode = this.WithThrowNotSupportedExceptionBody( node, "Compile-time-only code cannot be called at run-time." );
+                transformedNode = this._rewriterHelper.WithThrowNotSupportedExceptionBody( node, "Compile-time-only code cannot be called at run-time." );
             }
 
             if ( this.IsTemplate( symbol ) )
@@ -240,7 +246,7 @@ namespace Metalama.Compiler
                 }
                 else
                 {
-                    transformedNode = (PropertyDeclarationSyntax) this.WithThrowNotSupportedExceptionBody(
+                    transformedNode = (PropertyDeclarationSyntax) this._rewriterHelper.WithThrowNotSupportedExceptionBody(
                         node,
                         "Compile-time-only code cannot be called at run-time." );
                 }
@@ -285,7 +291,7 @@ namespace Metalama.Compiler
 
             if ( this.MustReplaceByThrow( symbol ) )
             {
-                transformedNode = (EventDeclarationSyntax) this.WithThrowNotSupportedExceptionBody(
+                transformedNode = (EventDeclarationSyntax) this._rewriterHelper.WithThrowNotSupportedExceptionBody(
                     node,
                     "Compile-time-only code cannot be called at run-time." );
             }

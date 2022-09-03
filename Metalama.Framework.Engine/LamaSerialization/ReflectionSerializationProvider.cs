@@ -138,7 +138,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
 
         private void ProcessImport( ImportSerializerAttribute importSerializerAttribute )
         {
-            if ( importSerializerAttribute.ObjectType != null && importSerializerAttribute.SerializerType != null )
+            if ( importSerializerAttribute.ObjectType != null! && importSerializerAttribute.SerializerType != null! )
             {
                 this.AddSerializer( importSerializerAttribute.ObjectType, importSerializerAttribute.SerializerType );
             }

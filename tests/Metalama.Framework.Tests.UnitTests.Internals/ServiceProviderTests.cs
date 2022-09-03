@@ -56,8 +56,6 @@ namespace Metalama.Framework.Tests.UnitTests
             }
 
             public string GetTempDirectory( string subdirectory, CleanUpStrategy cleanUpStrategy, Guid? guid = null ) => throw new NotImplementedException();
-
-            public bool ShouldReportCrashes { get; set; }
         }
     }
 }
