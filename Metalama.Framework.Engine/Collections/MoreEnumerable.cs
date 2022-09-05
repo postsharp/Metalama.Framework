@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 #pragma warning disable SA1008, SA1649, SA1600, SA1400, IDE0061, SA1506, SA1117, SA1012, SA1516, SA1124, SA1515
 
