@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using System;
 #if DEBUG
 using System.Runtime.Versioning;
 #endif
@@ -65,7 +66,9 @@ namespace Metalama.Framework.Engine.CompileTime
         /// <summary>
         /// Gets the version of Metalama that created the compile-time project.
         /// </summary>
-        public string MetalamaVersion { get; } = AssemblyMetadataReader.GetInstance( typeof(CompileTimeProjectManifest).Assembly ).PackageVersion;
+        public string MetalamaVersion { get; } =
+            AssemblyMetadataReader.GetInstance( typeof( CompileTimeProjectManifest ).Assembly ).PackageVersion
+            ?? throw new InvalidOperationException( "Metalama version for compile-time assembly not found." );
 
         /// <summary>
         /// Gets the list of all aspect types (specified by fully qualified name) of the aspect library.
