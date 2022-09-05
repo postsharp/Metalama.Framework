@@ -15,17 +15,24 @@ namespace Metalama.Framework.Engine.LamaSerialization
     /// </summary>
     internal class LamaSerializationBinder
     {
-        private readonly ImmutableDictionary<string, string> _preferredAssemblies;
+        private static readonly ImmutableDictionary<string, string> _ourAssemblyVersions;
+
         private readonly ILogger _logger;
+
+        static LamaSerializationBinder()
+        {
+            var assemblyNames = typeof(LamaSerializationBinder).Assembly.GetReferencedAssemblies().Concat( typeof(LamaSerializationBinder).Assembly.GetName() );
+
+            // The AppDomain may contain several versions of Metalama, so we need to be careful when choosing the assembly version to which we bind.
+            // Instead of looking at the AppDomain, we look at the assemblies that the current specific version references. This should work for Metalama
+            // and system assemblies. User assemblies are covered by CompileTimeLamaSerializationBinder. 
+            _ourAssemblyVersions = assemblyNames.GroupBy( a => a.Name )
+                .ToImmutableDictionary( x => x.Key, x => x.OrderByDescending( a => a.Version ).First().ToString() );
+        }
 
         public LamaSerializationBinder( IServiceProvider serviceProvider )
         {
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "Serialization" );
-
-            var assemblyNames = this.GetType().Assembly.GetReferencedAssemblies().Concat( this.GetType().Assembly.GetName() );
-
-            this._preferredAssemblies = assemblyNames.GroupBy( a => a.Name )
-                .ToImmutableDictionary( x => x.Key, x => x.OrderByDescending( a => a.Version ).First().ToString() );
         }
 
         /// <summary>
@@ -36,13 +43,13 @@ namespace Metalama.Framework.Engine.LamaSerialization
         /// <returns>The required <see cref="Type"/>.</returns>
         public virtual Type BindToType( string typeName, string assemblyName )
         {
-            if ( !this._preferredAssemblies.TryGetValue( assemblyName, out var preferredAssemblyName ) )
+            if ( !_ourAssemblyVersions.TryGetValue( assemblyName, out var ourAssemblyVersion ) )
             {
                 this._logger.Warning?.Log( $"'{assemblyName}' is not a known assembly name." );
-                preferredAssemblyName = assemblyName;
+                ourAssemblyVersion = assemblyName;
             }
 
-            var type = Type.GetType( ReflectionHelper.GetAssemblyQualifiedTypeName( typeName, preferredAssemblyName ) );
+            var type = Type.GetType( ReflectionHelper.GetAssemblyQualifiedTypeName( typeName, ourAssemblyVersion ) );
 
             if ( type == null )
             {
