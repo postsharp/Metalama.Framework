@@ -23,11 +23,11 @@ namespace Metalama.Framework.Engine.LamaSerialization
         /// Initializes a new instance of the <see cref="LamaFormatter"/> class.
         /// </summary>
         /// <param name="serviceProvider"></param>
-        private LamaFormatter( IServiceProvider serviceProvider ) : this( serviceProvider, new LamaSerializationBinder() ) { }
+        private LamaFormatter( IServiceProvider serviceProvider ) : this( serviceProvider, new LamaSerializationBinder( serviceProvider ) ) { }
 
         private LamaFormatter( CompileTimeProject project, IServiceProvider serviceProvider ) : this(
             serviceProvider,
-            new CompileTimeLamaSerializationBinder( project ) ) { }
+            new CompileTimeLamaSerializationBinder( serviceProvider, project ) ) { }
 
         public static LamaFormatter CreateTestInstance( IServiceProvider serviceProvider ) => new( serviceProvider );
 

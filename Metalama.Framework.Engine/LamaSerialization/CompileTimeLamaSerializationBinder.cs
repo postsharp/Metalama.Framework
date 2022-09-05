@@ -11,15 +11,15 @@ internal class CompileTimeLamaSerializationBinder : LamaSerializationBinder
     private readonly CompileTimeProject _project;
     private static readonly string _systemAssemblyName = typeof(object).Assembly.FullName;
 
-    public CompileTimeLamaSerializationBinder( CompileTimeProject project )
+    public CompileTimeLamaSerializationBinder( IServiceProvider serviceProvider, CompileTimeProject project ) : base( serviceProvider )
     {
         this._project = project;
     }
 
     public override Type BindToType( string typeName, string assemblyName )
     {
-        if ( assemblyName.StartsWith( "mscorlib,", StringComparison.Ordinal )
-             || assemblyName.StartsWith( "System.Private.CoreLib,", StringComparison.Ordinal ) )
+        if ( assemblyName.Equals( "mscorlib", StringComparison.Ordinal )
+             || assemblyName.Equals( "System.Private.CoreLib", StringComparison.Ordinal ) )
         {
             // We have a reference to a system assembly, which is different under .NET Framework and .NET Core.
             // Replace by the current system assembly.

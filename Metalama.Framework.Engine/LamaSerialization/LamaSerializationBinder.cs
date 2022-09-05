@@ -1,8 +1,12 @@
 // Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Backstage.Diagnostics;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using System;
+using System.Collections.Immutable;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.LamaSerialization
 {
@@ -11,6 +15,19 @@ namespace Metalama.Framework.Engine.LamaSerialization
     /// </summary>
     internal class LamaSerializationBinder
     {
+        private readonly ImmutableDictionary<string, string> _preferredAssemblies;
+        private readonly ILogger _logger;
+
+        public LamaSerializationBinder( IServiceProvider serviceProvider )
+        {
+            this._logger = serviceProvider.GetLoggerFactory().GetLogger( "Serialization" );
+
+            var assemblyNames = this.GetType().Assembly.GetReferencedAssemblies().Concat( this.GetType().Assembly.GetName() );
+
+            this._preferredAssemblies = assemblyNames.GroupBy( a => a.Name )
+                .ToImmutableDictionary( x => x.Key, x => x.OrderByDescending( a => a.Version ).First().ToString() );
+        }
+
         /// <summary>
         /// Gets a <see cref="Type"/> given a type name and an assembly name.
         /// </summary>
@@ -19,7 +36,13 @@ namespace Metalama.Framework.Engine.LamaSerialization
         /// <returns>The required <see cref="Type"/>.</returns>
         public virtual Type BindToType( string typeName, string assemblyName )
         {
-            var type = Type.GetType( ReflectionHelper.GetAssemblyQualifiedTypeName( typeName, assemblyName ) );
+            if ( !this._preferredAssemblies.TryGetValue( assemblyName, out var preferredAssemblyName ) )
+            {
+                this._logger.Warning?.Log( $"'{assemblyName}' is not a known assembly name." );
+                preferredAssemblyName = assemblyName;
+            }
+
+            var type = Type.GetType( ReflectionHelper.GetAssemblyQualifiedTypeName( typeName, preferredAssemblyName ) );
 
             if ( type == null )
             {
@@ -38,13 +61,13 @@ namespace Metalama.Framework.Engine.LamaSerialization
         public virtual void BindToName( Type type, out string typeName, out string assemblyName )
         {
             typeName = type.FullName!;
-            
+
             // #31016
             // We don't use the full name because it may happen that the graph is serialized in a process that higher
             // assembly versions than the deserializing processes and we don't want, and don't need, to bother with versioning.
             // Versioning and version update, if necessary, should be taken care of upstream, and not by the formatter.
             // When deserializing, we will assume that a compatible assembly version has been loaded in the AppDomain.
-            
+
             assemblyName = type.Assembly.GetName().Name;
         }
     }
