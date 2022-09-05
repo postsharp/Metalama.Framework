@@ -6,7 +6,7 @@
 
       <!-- The app must be built with `msbuild` -->
       <Exec Command="dotnet restore" WorkingDirectory="$(MSBuildThisFileDirectory)NetFrameworkBuildApp"/>
-      <Exec Command="msbuild $(MSBuildThisFileDirectory)NetFrameworkBuildApp\ConsoleApp1.csproj  /t:rebuild"/>
+      <Exec Command="msbuild $(MSBuildThisFileDirectory)NetFrameworkBuildApp\ConsoleApp1.csproj  /t:rebuild" EnvironmentVariables="DOTNET_ROOT_X64=;MSBUILD_EXE_PATH=;MSBuildSDKsPath="/>
   </Target>
 
 </Project>
