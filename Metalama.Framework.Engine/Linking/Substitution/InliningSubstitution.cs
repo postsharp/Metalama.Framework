@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
     {
         private readonly InliningSpecification _specification;
 
-        public override SyntaxNode TargetNode => this._specification.ReplacedStatement;
+        public override SyntaxNode TargetNode => this._specification.ReplacedRootNode;
 
         public InliningSubstitution(InliningSpecification specification )
         {
@@ -29,11 +29,6 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
         public override SyntaxNode Substitute( SyntaxNode currentNode, SubstitutionContext context )
         {
-            if (currentNode is not StatementSyntax currentStatement)
-            {
-                throw new AssertionFailedException();
-            }
-
             var statements = new List<StatementSyntax>();
 
             if (this._specification.DeclareReturnVariable)
@@ -52,7 +47,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
             var substitutedBody = context.RewritingDriver.GetSubstitutedBody( this._specification.TargetSemantic, context.WithInliningContext(this._specification.ContextIdentifier) );
 
             // Let the inliner to transform that.
-            var inlinedBody = this._specification.Inliner.Inline( context.SyntaxGenerationContext, this._specification, currentStatement, substitutedBody );
+            var inlinedBody = this._specification.Inliner.Inline( context.SyntaxGenerationContext, this._specification, currentNode, substitutedBody );
 
             statements.Add( inlinedBody );
 

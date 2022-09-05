@@ -58,9 +58,9 @@ namespace Metalama.Framework.Engine.Linking.Inlining
         /// Inlines the target of the annotated expression by specifying node to be replaced and the replacing node.
         /// </summary>
         /// <param name="specification">Inlining specification..</param>
-        /// <param name="currentReplacedStatement">Current statement (after substitutions).</param>
+        /// <param name="currentNode">Current node (after substitutions).</param>
         /// <param name="linkedTargetBody">Linked target body that is to be inlined.</param>
         /// <returns>Statement resulting from inlining.</returns>
-        public abstract StatementSyntax Inline( SyntaxGenerationContext syntaxGenerationContext, InliningSpecification specification, StatementSyntax currentReplacedStatement, StatementSyntax linkedTargetBody );
+        public abstract StatementSyntax Inline( SyntaxGenerationContext syntaxGenerationContext, InliningSpecification specification, SyntaxNode currentNode, StatementSyntax linkedTargetBody );
     }
 }

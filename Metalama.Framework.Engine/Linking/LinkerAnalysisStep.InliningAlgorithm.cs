@@ -126,7 +126,7 @@ namespace Metalama.Framework.Engine.Linking
                             var targetSemantic = aspectReference.ResolvedSemanticBody;
                             var info = inliner.GetInliningAnalysisInfo( context, aspectReference );
 
-                            if ( context.UsingSimpleInlining && (info.ReplacedStatement is ReturnStatementSyntax || currentSemantic.Kind == IntermediateSymbolSemanticKind.Final))
+                            if ( context.UsingSimpleInlining && (info.ReplacedRootNode is ReturnStatementSyntax or EqualsValueClauseSyntax || currentSemantic.Kind == IntermediateSymbolSemanticKind.Final))
                             {
                                 // This is inlining of a return statement while we can do simple inlining - no rewriting of returns is required.
                                 // Or it is inlining of in the final semantic, which is a special case.
@@ -139,7 +139,7 @@ namespace Metalama.Framework.Engine.Linking
                                         context.ParentOrdinal,
                                         aspectReference,
                                         inliner,
-                                        info.ReplacedStatement,
+                                        info.ReplacedRootNode,
                                         true,
                                         false,
                                         null,
@@ -168,7 +168,7 @@ namespace Metalama.Framework.Engine.Linking
                                         context.ParentOrdinal,
                                         aspectReference,
                                         inliner,
-                                        info.ReplacedStatement,
+                                        info.ReplacedRootNode,
                                         false,
                                         context.DeclaredReturnVariable,
                                         info.ReturnVariableIdentifier,

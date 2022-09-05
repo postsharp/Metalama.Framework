@@ -1,7 +1,7 @@
 ﻿using System;
 using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Overrides.Body.ReturnsInt_Simple
+namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Overrides.TemplateBody.ReturnsInt_While
 {
     // <target>
     class Target
@@ -16,10 +16,18 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Overrides.Bo
         int Foo_Override(int x)
         {
             Console.WriteLine( "Before");
-            int result;
-            result = link( _this.Foo, inline)(x);
+            int i = 0;
+            int k = 0;
+            while (i < 0)
+            {
+                int result;
+                result = link( _this.Foo, inline)(x);
+                k += result;
+                i++;
+            }
+
             Console.WriteLine( "After");
-            return result;
+            return k;
         }
     }
 }

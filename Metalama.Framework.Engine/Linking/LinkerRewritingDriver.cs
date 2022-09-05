@@ -228,7 +228,7 @@ namespace Metalama.Framework.Engine.Linking
                     return (BlockSyntax) rewriter.Visit( block ).AssertNotNull();
 
                 case ArrowExpressionClauseSyntax arrowExpressionClause:
-                    var rewrittenNode = rewriter.Visit( arrowExpressionClause.Expression );
+                    var rewrittenNode = rewriter.Visit( arrowExpressionClause );
 
                     if ( symbol.ReturnsVoid )
                     {
@@ -241,13 +241,13 @@ namespace Metalama.Framework.Engine.Linking
                             //     Block()
                             //         .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
-                            case ExpressionSyntax rewrittenExpression:
-                                return
-                                    Block( ExpressionStatement( rewrittenExpression ) )
-                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
-
                             case BlockSyntax rewrittenBlock:
                                 return rewrittenBlock;
+
+                            case ArrowExpressionClauseSyntax rewrittenArrowClause:
+                                return
+                                    Block( ExpressionStatement( rewrittenArrowClause.Expression ) )
+                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
                             default:
                                 throw new AssertionFailedException();
@@ -268,12 +268,12 @@ namespace Metalama.Framework.Engine.Linking
                             //                 Token( SyntaxKind.SemicolonToken ) ) )
                             //         .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 
-                            case ExpressionSyntax rewrittenExpression:
+                            case ArrowExpressionClauseSyntax rewrittenArrowClause:
                                 return
                                     Block(
                                             ReturnStatement(
                                                 Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
-                                                rewrittenExpression,
+                                                rewrittenArrowClause.Expression,
                                                 Token( SyntaxKind.SemicolonToken ) ) )
                                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
 

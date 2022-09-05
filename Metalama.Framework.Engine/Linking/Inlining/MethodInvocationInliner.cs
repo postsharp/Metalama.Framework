@@ -53,7 +53,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             return new InliningAnalysisInfo( expressionStatement, null );
         }
 
-        public override StatementSyntax Inline( SyntaxGenerationContext syntaxGenerationContext, InliningSpecification specification, StatementSyntax currentReplacedStatement, StatementSyntax linkedTargetBody )
+        public override StatementSyntax Inline( SyntaxGenerationContext syntaxGenerationContext, InliningSpecification specification, SyntaxNode currentNode, StatementSyntax linkedTargetBody )
         {
             return linkedTargetBody;
         }

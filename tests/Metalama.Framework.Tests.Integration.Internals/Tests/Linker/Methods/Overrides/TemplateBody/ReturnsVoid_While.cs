@@ -1,29 +1,28 @@
 ﻿using System;
 using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Overrides.Body.ReturnsInt_Condition
+namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Overrides.TemplateBody.ReturnsVoid_While
 {
     // <target>
     class Target
     {
-        int Foo(int x)
+        void Foo()
         {
             Console.WriteLine( "Original");
-            return x;
         }
 
         [PseudoOverride( nameof(Foo),"TestAspect")]
-        int Foo_Override(int x)
+        void Foo_Override()
         {
             Console.WriteLine( "Before");
-            int result = 0;
-            if (x == 0)
+            int i = 0;
+            while (i < 5)
             {
-                result = link( _this.Foo, inline)(x);
+                link( _this.Foo, inline)();
+                i++;
             }
 
             Console.WriteLine( "After");
-            return result;
         }
     }
 }

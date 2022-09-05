@@ -42,7 +42,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
         /// <summary>
         /// Gets the statement replaced by inlining.
         /// </summary>
-        public StatementSyntax ReplacedStatement { get; }
+        public SyntaxNode ReplacedRootNode { get; }
 
         /// <summary>
         /// Gets a value indicating whether simple inlining (no return transformation) may be used.
@@ -75,7 +75,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             int? parentInliningId,
             ResolvedAspectReference aspectReference, 
             Inliner inliner,
-            StatementSyntax replacedStatement,
+            SyntaxNode replacedRootNode,
             bool useSimpleInlining,
             bool declareReturnVariable,
             string? returnVariableIdentifier,
@@ -91,7 +91,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             this.AspectReference = aspectReference;
             this.Inliner = inliner;
             this.UseSimpleInlining = useSimpleInlining;
-            this.ReplacedStatement = replacedStatement;
+            this.ReplacedRootNode = replacedRootNode;
             this.ReturnVariableIdentifier = returnVariableIdentifier;
             this.ReturnLabelIdentifier = returnLabelIdentifier;
             this.TargetSemantic = targetSemantic;

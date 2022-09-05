@@ -5,6 +5,8 @@ using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Linking.Inlining;
 using Metalama.Framework.Engine.Linking.Substitution;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -19,6 +21,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             private readonly LinkerSyntaxHandler _syntaxHandler;
             private readonly LinkerIntroductionRegistry _introductionRegistry;
+            private readonly IReadOnlyList<IntermediateSymbolSemantic> _inlinedSemantics;
             private readonly IReadOnlyList<IntermediateSymbolSemantic> _nonInlinedSemantics;
             private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> _nonInlinedReferences;
             private readonly IReadOnlyList<InliningSpecification> _inliningSpecifications;
@@ -27,6 +30,7 @@ namespace Metalama.Framework.Engine.Linking
             public SubstitutionGenerator( 
                 LinkerSyntaxHandler syntaxHandler,
                 LinkerIntroductionRegistry introductionRegistry,
+                IReadOnlyList<IntermediateSymbolSemantic> inlinedSemantics,
                 IReadOnlyList<IntermediateSymbolSemantic> nonInlinedSemantics, 
                 IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> nonInlinedReferences,
                 IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, SemanticBodyAnalysisResult> bodyAnalysisResults,
@@ -34,6 +38,7 @@ namespace Metalama.Framework.Engine.Linking
             {
                 this._syntaxHandler = syntaxHandler;
                 this._introductionRegistry = introductionRegistry;
+                this._inlinedSemantics = inlinedSemantics;
                 this._nonInlinedSemantics = nonInlinedSemantics;
                 this._nonInlinedReferences = nonInlinedReferences;
                 this._inliningSpecifications = inliningSpecifications;
@@ -55,34 +60,13 @@ namespace Metalama.Framework.Engine.Linking
 
                     var nonInlinedSemanticBody = nonInlinedSemantic.ToTyped<IMethodSymbol>();
 
-                    switch ( nonInlinedSemanticBody.Kind )
+                    // Add aspect reference substitution for all aspect references.
+                    if ( this._nonInlinedReferences.TryGetValue( nonInlinedSemanticBody, out var nonInlinedReferenceList ) )
                     {
-                        case IntermediateSymbolSemanticKind.Default:
-                            if (this._introductionRegistry.IsOverrideTarget( nonInlinedSemanticBody.Symbol) && nonInlinedSemanticBody.Kind == IntermediateSymbolSemanticKind.Final)
-                            {
-                                AddSubstitution(
-                                    new InliningContextIdentifier( nonInlinedSemanticBody ),
-                                    this.CreateLastOverrideSubstitution( nonInlinedSemanticBody.Symbol, this._introductionRegistry.GetLastOverride( nonInlinedSemanticBody.Symbol ) ) );
-                            }
-                            else if ( this._introductionRegistry.IsOverride( nonInlinedSemanticBody.Symbol ) )
-                            {
-                                if ( this._nonInlinedReferences.TryGetValue( nonInlinedSemanticBody, out var nonInlinedReferenceList ) )
-                                {
-                                    foreach ( var nonInlinedReference in nonInlinedReferenceList )
-                                    {
-                                        AddSubstitution( new InliningContextIdentifier( nonInlinedSemanticBody ), new AspectReferenceSubstitution( nonInlinedReference ) );
-                                    }
-                                }
-                            }
-
-                            break;
-
-                        case IntermediateSymbolSemanticKind.Final:
-                        case IntermediateSymbolSemanticKind.Base:
-                            break;
-
-                        default:
-                            throw new AssertionFailedException();
+                        foreach ( var nonInlinedReference in nonInlinedReferenceList )
+                        {
+                            AddSubstitution( new InliningContextIdentifier( nonInlinedSemanticBody ), new AspectReferenceSubstitution( nonInlinedReference ) );
+                        }
                     }
                 }
 
@@ -114,6 +98,20 @@ namespace Metalama.Framework.Engine.Linking
                                     inliningSpecification.ReturnLabelIdentifier ) );
                         }
                     }
+                    else
+                    {
+                        // Add substitution that transforms original non-block body into a statement.
+                        if ( inliningSpecification.TargetSemantic.Kind == IntermediateSymbolSemanticKind.Default )
+                        {
+                            var symbol = inliningSpecification.TargetSemantic.Symbol;
+                            var root = this._syntaxHandler.GetCanonicalRootNode( symbol );
+
+                            if ( root is not StatementSyntax )
+                            {
+                                AddSubstitution( inliningSpecification.ContextIdentifier, this.CreateOriginalBodySubstitution( root, symbol ) );
+                            }
+                        }
+                    }
 
                     // Add substitutions of non-inlined aspect references.
                     if ( this._nonInlinedReferences.TryGetValue( inliningSpecification.TargetSemantic, out var nonInlinedReferenceList ) )
@@ -125,7 +123,7 @@ namespace Metalama.Framework.Engine.Linking
                     }
                 }
 
-                // TODO: We convert this later back to the dictionary, but for debugging it's better to have dictionary here.
+                // TODO: We convert this later back to the dictionary, but for debugging it's better to have dictionary also here.
                 return substitutions.ToDictionary( x => x.Key, x => x.Value.Values.ToReadOnlyList() );
 
                 void AddSubstitution( InliningContextIdentifier inliningContextId, SyntaxNodeSubstitution substitution )
@@ -139,22 +137,12 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            private SyntaxNodeSubstitution CreateLastOverrideSubstitution( IMethodSymbol method, IMethodSymbol lastOverride )
+            private SyntaxNodeSubstitution CreateOriginalBodySubstitution(SyntaxNode root, IMethodSymbol symbol)
             {
-                var root = this._syntaxHandler.GetCanonicalRootNode( method );
-
-                switch ( method )
+                switch ( root )
                 {
-                    case { MethodKind: MethodKind.Ordinary or MethodKind.ExplicitInterfaceImplementation }:
-                        return new MethodRedirectionSubstitution( root, lastOverride );
-                    case { MethodKind: MethodKind.PropertyGet, AssociatedSymbol: IPropertySymbol }:
-                        return new PropertyGetRedirectionSubstitution( root, (IPropertySymbol) lastOverride.AssociatedSymbol.AssertNotNull() );
-                    case { MethodKind: MethodKind.PropertySet, AssociatedSymbol: IPropertySymbol }:
-                        return new PropertySetRedirectionSubstitution( root, (IPropertySymbol) lastOverride.AssociatedSymbol.AssertNotNull() );
-                    case { MethodKind: MethodKind.EventAdd, AssociatedSymbol: IEventSymbol }:
-                        return new EventAddRedirectionSubstitution( root, (IEventSymbol) lastOverride.AssociatedSymbol.AssertNotNull() );
-                    case { MethodKind: MethodKind.EventRemove, AssociatedSymbol: IEventSymbol }:
-                        return new EventRemoveRedirectionSubstitution( root, (IEventSymbol) lastOverride.AssociatedSymbol.AssertNotNull() );
+                    case ArrowExpressionClauseSyntax arrowExpressionClause:
+                        return new ExpressionBodySubstitution( arrowExpressionClause, symbol );
                     default:
                         throw new AssertionFailedException();
                 }

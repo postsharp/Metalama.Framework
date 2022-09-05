@@ -21,10 +21,11 @@ namespace Metalama.Framework.Engine.Linking.Inlining
 
         public override InliningAnalysisInfo GetInliningAnalysisInfo( InliningAnalysisContext context, ResolvedAspectReference aspectReference )
         {
-            var body =
+            SyntaxNode body =
                 aspectReference.ContainingSemantic.Symbol.GetPrimaryDeclaration() switch
                 {
                     MethodDeclarationSyntax { Body : { } methodBody } => methodBody,
+                    MethodDeclarationSyntax { ExpressionBody: { } expressionBody } => expressionBody,
                     AccessorDeclarationSyntax { Body: { } accessorBody } => accessorBody,
                     _ => throw new AssertionFailedException(),
                 };
@@ -32,7 +33,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             return new InliningAnalysisInfo( body, null );
         }
 
-        public override StatementSyntax Inline( SyntaxGenerationContext syntaxGenerationContext, InliningSpecification specification, StatementSyntax currentReplacedStatement, StatementSyntax linkedTargetBody )
+        public override StatementSyntax Inline( SyntaxGenerationContext syntaxGenerationContext, InliningSpecification specification, SyntaxNode currentNode, StatementSyntax linkedTargetBody )
         {
             return linkedTargetBody;
         }

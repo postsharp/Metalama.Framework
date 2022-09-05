@@ -112,6 +112,7 @@ namespace Metalama.Framework.Engine.Linking
             var substitutionGenerator = new SubstitutionGenerator(
                 syntaxHandler,
                 input.IntroductionRegistry,
+                inlinedSemantics,
                 nonInlinedSemantics,
                 nonInlinedReferencesBySource,
                 bodyAnalysisResults, 

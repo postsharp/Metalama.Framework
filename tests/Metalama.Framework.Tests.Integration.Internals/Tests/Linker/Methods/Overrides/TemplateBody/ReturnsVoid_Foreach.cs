@@ -1,7 +1,7 @@
 ﻿using System;
 using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
 
-namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Overrides.Body.ReturnsVoid_Simple
+namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Overrides.TemplateBody.ReturnsVoid_Foreach
 {
     // <target>
     class Target
@@ -15,7 +15,11 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Methods.Overrides.Bo
         void Foo_Override()
         {
             Console.WriteLine( "Before");
-            link( _this.Foo, inline)();
+            foreach (var i in new[] { 1, 2, 3, 4, 5 })
+            {
+                link( _this.Foo, inline)();
+            }
+
             Console.WriteLine( "After");
         }
     }
