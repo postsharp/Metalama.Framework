@@ -36,7 +36,7 @@ var product = new Product( Dependencies.Metalama )
         },
         new DotNetSolution( "Tests\\Metalama.Framework.TestApp\\Metalama.Framework.TestApp.sln" ) { IsTestOnly = true, TestMethod = BuildMethod.Build },
         new ManyDotNetSolutions( "Tests\\Standalone\\**\\*.sln" ) { IsTestOnly = true },
-        new ManyDotNetSolutions( "Tests\\Standalone\\**\\*.proj" ) { IsTestOnly = true }
+        new ManyDotNetSolutions( "Tests\\Standalone\\**\\*.proj" ) { TestMethod = BuildMethod.Build, IsTestOnly = true }
     },
     PublicArtifacts = Pattern.Create(
         "Metalama.Framework.$(PackageVersion).nupkg",
