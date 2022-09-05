@@ -28,22 +28,9 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
         public const string MetalamaFreePersonal
             = "2-ZTQQQQQQ6QZEQCRCE4UW3UFEB4URXMHRB8KQBJJSB64LX7EAEJ2D6DXU2WGSFJYN7NBESWRPV5AX9D5WWKRKRQQK4J3YELXMLRVDXRVBTZSKQADXRJZQQDEZJGP4Q8USJG4X6P2";
 
+        public const string MetalamaUltimateOpenSourceRedistributionNamespace = "RedistributionTests.TargetNamespace";
+
         public const string MetalamaUltimateOpenSourceRedistribution
-            = "5-ZEAQQQQQXEAEQCRCE4UW3UFEB4URXMHRB8KQBJJSB64LX7EAEAPQPUW2VKAJDJ45JUQENSNR7N3L5PGFRUVNNYP3CTNN4DE2U6PTPXWC9UA2GDLGPMZQQDEZJGP4Q8USJG4X6P2";
-
-        public const string NamespaceLimitedMetalamaUltimateBusinessNamespace = "NonRedistributionTests.TargetNamespace";
-
-        public const string NamespaceLimitedMetalamaUltimateBusiness
-            = "6-ZTAQQQQQZEAEQCRCE4UW3UFEB4URXMHRB8KQBJJSB64LX7YQXG6LX7DCS2JBNJGVB4MWNMGVD88KXCHR629X37TCA6KVNBGVVCUMNBFVT4UXNBDAEJVU2BU4NZCND5MQR3M9ZHSUEXFPJG72M4AZQUHMXKBYDQW8HW82EWDWJARNVBKDXUZQQDEZJGP4Q8USJG4X6P2";
-
-        public const string NamespaceLimitedMetalamaFreeNamespace = "NonRedistributionTests.TargetNamespace";
-
-        public const string NamespaceLimitedMetalamaFreePersonal
-            = "7-ZUAQQQQQ6QZEQCRCE4UW3UFEB4URXMHRB8KQBJJSB64LX7YQXG6LX7DCS2JBNJGVB4MWNMGVD88KXCHR629X37TCA6KVNBGVVCUMNBFVT4UXNBDAEGPU3DDAH2CZCPE5KPFEEF6ERQX5ARC2LU3T3MSD3K564GWZBSAGTD5XBHGHH3WGTUZQQDEZJGP4Q8USJG4X6P2";
-
-        public const string NamespaceLimitedMetalamaUltimateOpenSourceRedistributionNamespace = "RedistributionTests.TargetNamespace";
-
-        public const string NamespaceLimitedMetalamaUltimateOpenSourceRedistribution
             = "8-ZQZQQQQQXEAEQCRCE4UW3UFEB4URXMHRB8KQBJJSB64LX7YQ2GYCXBSF629W7YDRH29BN7JFYCJX3MFVVAHZXJ9RS29KYTHFS8KQ7TFRS6ZTBVWZLKJVF3HZZHWA4ZKSX3DXZYBKR4MWCZF4AW43L2DLEPB5T8HFVMFKBYLUG2X78SQQBTWB2P7QNG4B27RXP3";
     }
 }

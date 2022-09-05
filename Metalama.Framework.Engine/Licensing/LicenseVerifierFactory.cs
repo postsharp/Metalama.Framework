@@ -18,7 +18,7 @@ public static class LicenseVerifierFactory
             ( type, impl ) => serviceProvider = serviceProvider.WithUntypedService( type, impl ),
             () => serviceProvider );
 
-        serviceProviderBuilder.AddLicensing( additionalLicenses: new[] { licenseKey }, ignoreUserProfileLicenses: true );
+        serviceProviderBuilder.AddLicensing( additionalLicense: licenseKey, ignoreUserProfileLicenses: true );
 
         return serviceProvider.WithService( new LicenseVerifier( serviceProvider.GetRequiredBackstageService<ILicenseConsumptionManager>() ) );
     }

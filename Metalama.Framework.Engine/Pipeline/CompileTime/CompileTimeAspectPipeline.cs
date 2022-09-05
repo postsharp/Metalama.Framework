@@ -14,7 +14,6 @@ using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -78,7 +77,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             }
 
             var licenseConsumptionManager = this.ServiceProvider.GetBackstageService<ILicenseConsumptionManager>();
-            var redistributionLicenseKey = licenseConsumptionManager == null ? null : string.Join( ";", licenseConsumptionManager.GetRedistributionLicenseKeys() );
+            var redistributionLicenseKey = licenseConsumptionManager?.RedistributionLicenseKey;
             var projectLicenseInfo = string.IsNullOrEmpty( redistributionLicenseKey ) ? ProjectLicenseInfo.Empty : new ProjectLicenseInfo( redistributionLicenseKey );
 
             // Initialize the pipeline and generate the compile-time project.

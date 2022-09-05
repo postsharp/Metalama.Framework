@@ -21,11 +21,11 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
             this.Logger = logger;
         }
 
-        protected async Task<DiagnosticList> GetDiagnosticsAsync( string code, string licenseKey )
+        protected async Task<DiagnosticList> GetDiagnosticsAsync( string code, string licenseKey, string? assemblyName = null )
         {
             using var domain = new UnloadableCompileTimeDomain();
             using var testContext = this.CreateTestContext();
-            var inputCompilation = CreateCSharpCompilation( code );
+            var inputCompilation = CreateCSharpCompilation( code, name: assemblyName );
             var serviceProvider =
                 testContext.ServiceProvider.AddTestLicenseVerifier( licenseKey );
             using var compileTimePipeline = new CompileTimeAspectPipeline(

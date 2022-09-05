@@ -4,11 +4,9 @@
 using Metalama.Backstage.Licensing;
 using Metalama.Backstage.Licensing.Consumption;
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.AspectWeavers;
-using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
@@ -35,7 +33,7 @@ internal class LicenseVerifier : IService
 
     public void VerifyCanAddChildAspect( AspectPredecessor predecessor )
     {
-        if ( !this._licenseConsumptionManager.CanConsumeFeatures( LicensedFeatures.MetalamaFabricsAspects ) )
+        if ( !this._licenseConsumptionManager.CanConsume( LicenseRequirement.Starter ) )
         {
             switch ( predecessor.Instance )
             {
@@ -50,7 +48,7 @@ internal class LicenseVerifier : IService
 
     public void VerifyCanValidator( AspectPredecessor predecessor )
     {
-        if ( !this._licenseConsumptionManager.CanConsumeFeatures( LicensedFeatures.MetalamaFabricsValidators ) )
+        if ( !this._licenseConsumptionManager.CanConsume( LicenseRequirement.Starter ) )
         {
             switch ( predecessor.Instance )
             {
@@ -65,9 +63,6 @@ internal class LicenseVerifier : IService
 
     public void VerifyCompilationResult( Compilation compilation, ImmutableArray<AspectInstanceResult> aspectInstanceResults, UserDiagnosticSink diagnostics )
     {
-        // To simpify the code, we don't check if the MetalamaAspectFramework feature can be consumed.
-        // We assume, that if more than 0 aspect classes are allowed, then the MetalamaAspectFramework feature can be consumed.
-
         // This is to make the test output deterministic.
         static string NormalizeAssemblyName( string assemblyName )
         {
@@ -78,45 +73,33 @@ internal class LicenseVerifier : IService
         }
 
         // Distinguish redistribution and non-redistribution aspect classes.
-        var redistributionAspectClasses = new HashSet<AspectClass>();
-        var redistributionAspectClassesPerProject = new Dictionary<CompileTimeProject, HashSet<AspectClass>>();
-        var nonredistributionAspectClasses = new HashSet<IAspectClass>();
+        var nonredistributionAspectClasses = aspectInstanceResults.Select( r => r.AspectInstance.AspectClass ).ToHashSet();
+        var projectsWithRedistributionLicense = nonredistributionAspectClasses
+            .Where( c => c is AspectClass )
+            .Select( c => (AspectClass) c )
+            .Where( c => c.Project != null )
+            .Select( c => c.Project! )
+            .Where( p => !string.IsNullOrEmpty( p.ProjectLicenseInfo.RedistributionLicenseKey ) )
+            .ToHashSet();
 
-        foreach ( var aspectInstanceResult in aspectInstanceResults )
+        foreach ( var project in projectsWithRedistributionLicense )
         {
-            if ( aspectInstanceResult.AspectInstance.AspectClass is AspectClass aspectClass
-                && aspectClass.Project != null
-                && !string.IsNullOrEmpty( aspectClass.Project.ProjectLicenseInfo.RedistributionLicenseKey ) )
+            var projectAssemblyName = project.RunTimeIdentity.Name;
+
+            if ( !this._licenseConsumptionManager.ValidateRedistributionLicenseKey( project.ProjectLicenseInfo.RedistributionLicenseKey!, project.RunTimeIdentity.Name ) )
             {
-                var projectRedistributionLicenseKey = aspectClass.Project.ProjectLicenseInfo.RedistributionLicenseKey!;
+                diagnostics.Report(
+                    LicensingDiagnosticDescriptors.RedistributionLicenseInvalid.CreateRoslynDiagnostic(
+                        null, NormalizeAssemblyName( projectAssemblyName ) ) );
 
-                if ( !this._licenseConsumptionManager.ValidateRedistributionLicenseKey( projectRedistributionLicenseKey, aspectClass.FullName ) )
-                {
-                    diagnostics.Report(
-                        LicensingDiagnosticDescriptors.RedistributionLicenseInvalid.CreateRoslynDiagnostic(
-                            null, (NormalizeAssemblyName( aspectClass.Project.RunTimeIdentity.Name ), aspectClass.ShortName) ) );
-                }
-                else
-                {
-                    if ( !redistributionAspectClassesPerProject.TryGetValue( aspectClass.Project, out var aspects ) )
-                    {
-                        aspects = new();
-                        redistributionAspectClassesPerProject.Add( aspectClass.Project, aspects );
-                    }
-
-                    redistributionAspectClasses.Add( aspectClass );
-                    aspects.Add( aspectClass );
-
-                    continue;
-                }
+                projectsWithRedistributionLicense.Remove( project );
             }
-            
-            nonredistributionAspectClasses.Add( aspectInstanceResult.AspectInstance.AspectClass );
         }
 
+        nonredistributionAspectClasses.RemoveWhere( c => c is AspectClass ac && ac.Project != null && projectsWithRedistributionLicense.Contains( ac.Project ) );
+
         // One redistribution library counts as one aspect class.
-        var aspectClassesCount = redistributionAspectClassesPerProject.Count + nonredistributionAspectClasses.Count;
-        var namespaceUnlimitedMaxAspectsCount = this._licenseConsumptionManager.GetNamespaceUnlimitedMaxAspectsCount();
+        var aspectClassesCount = projectsWithRedistributionLicense.Count + nonredistributionAspectClasses.Count;
 
         if ( aspectClassesCount == 0 )
         {
@@ -124,114 +107,23 @@ internal class LicenseVerifier : IService
             return;
         }
 
-        if ( aspectClassesCount <= namespaceUnlimitedMaxAspectsCount )
+        var maxAspectsCount = this._licenseConsumptionManager.CanConsume( LicenseRequirement.Free, compilation.AssemblyName )
+            ? this._licenseConsumptionManager.MaxAspectsCount
+            : 0;
+
+        if ( aspectClassesCount <= maxAspectsCount )
         {
-            // All aspect classes are covered by namespace unlimited licenses.
-            return;
-        }
-
-        // Filter aspect classes covered by namespace limited licenses.
-        var maxAspectsCountPerNamespace = new Dictionary<string, int>();
-        var nonredistributionAspectClassesWithoutNamspaceLimitedLicense = new HashSet<IAspectClass>();
-        var nonredistributionAspectClassesPerLicensedNamespace = new Dictionary<string, HashSet<IAspectClass>>();
-        var redistributionProjectsPerLicensedNamespace = new Dictionary<string, HashSet<CompileTimeProject>>();
-        var redistributionProjectsWithoutNamespaceLimitedLicense = new HashSet<CompileTimeProject>();
-
-        foreach ( var aspectInstanceResult in aspectInstanceResults )
-        {
-            var aspectClass = aspectInstanceResult.AspectInstance.AspectClass;
-            var targetSymbol = aspectInstanceResult.AspectInstance.TargetDeclaration.GetSymbol( compilation );
-            var consumerNamespaceSymbol = targetSymbol is INamespaceSymbol ? (INamespaceSymbol)targetSymbol : targetSymbol?.ContainingNamespace;
-            var consumerNamespace = consumerNamespaceSymbol?.ToString();
-
-            if ( string.IsNullOrEmpty( consumerNamespace )
-                || !this._licenseConsumptionManager.TryGetNamespaceLimitedMaxAspectsCount(
-                    consumerNamespace!, out var maxAspectsCount, out var licensedNamespace ) )
-            {
-                if ( redistributionAspectClasses.Contains( aspectClass ) )
-                {
-                    redistributionProjectsWithoutNamespaceLimitedLicense.Add( ((AspectClass) aspectClass).Project! );
-                }
-                else
-                {
-                    nonredistributionAspectClassesWithoutNamspaceLimitedLicense.Add( aspectClass );
-                }
-
-                continue;
-            }
-
-            maxAspectsCountPerNamespace[licensedNamespace] = maxAspectsCount;
-
-            if ( redistributionAspectClasses.Contains( aspectClass ) )
-            {
-                if ( !redistributionProjectsPerLicensedNamespace.TryGetValue( licensedNamespace, out var projects ) )
-                {
-                    projects = new();
-                    redistributionProjectsPerLicensedNamespace.Add( licensedNamespace, projects );
-                }
-
-                projects.Add( ((AspectClass) aspectClass).Project! );
-            }
-            else
-            {
-                if ( !nonredistributionAspectClassesPerLicensedNamespace.TryGetValue( licensedNamespace, out var aspectClasses ) )
-                {
-                    aspectClasses = new();
-                    nonredistributionAspectClassesPerLicensedNamespace.Add( licensedNamespace, aspectClasses );
-                }
-
-                aspectClasses.Add( aspectClass );
-            }
-        }
-
-        // Verify that the counts of aspect classes covered by namespace limited licenses
-        // aren't over the maximum aspect count of respective licenses.
-        var anyLicensedNamespaceOverMaxAspectsCount = false;
-
-        foreach ( var licensedNamespaceLimit in maxAspectsCountPerNamespace )
-        {
-            var nonredistributionAspectClassesCount =
-                nonredistributionAspectClassesPerLicensedNamespace.TryGetValue( licensedNamespaceLimit.Key, out var aspectClasses )
-                ? aspectClasses.Count : 0;
-
-            var redistributionProjectsCount =
-                redistributionProjectsPerLicensedNamespace.TryGetValue( licensedNamespaceLimit.Key, out var projects )
-                ? projects.Count : 0;
-
-            var namespaceLimitedAspectsCount = nonredistributionAspectClassesCount + redistributionProjectsCount;
-
-            if ( namespaceLimitedAspectsCount > licensedNamespaceLimit.Value )
-            {
-                anyLicensedNamespaceOverMaxAspectsCount = true;
-                break;
-            }
-        }
-
-        var aspectClassesWithouNamespaceLimitedLicenseCount =
-            nonredistributionAspectClassesWithoutNamspaceLimitedLicense.Count
-            + redistributionProjectsWithoutNamespaceLimitedLicense.Count;
-
-        if ( aspectClassesWithouNamespaceLimitedLicenseCount <= namespaceUnlimitedMaxAspectsCount && !anyLicensedNamespaceOverMaxAspectsCount )
-        {
-            // All aspect classes covered by namespace limited licenses are covered by these licenses
-            // and remaining aspect classes not covered by namespace limited licenses are covered by namespace unlimited licenses.
+            // All aspect classes are covered by ty available license.
             return;
         }
 
         // The count of aspect classes is not covered by the available licenses. Report an error.
         var maxAspectsCountDescriptions = new List<string>();
 
-        if ( namespaceUnlimitedMaxAspectsCount > 0 )
+        if ( maxAspectsCount > 0 )
         {
-            maxAspectsCountDescriptions.Add( namespaceUnlimitedMaxAspectsCount.ToString( CultureInfo.InvariantCulture ) );
+            maxAspectsCountDescriptions.Add( maxAspectsCount.ToString( CultureInfo.InvariantCulture ) );
         }
-
-        foreach ( var licensedNamespaceLimit in this._licenseConsumptionManager.GetNamespaceLimitedMaxAspectCounts() )
-        {
-            maxAspectsCountDescriptions.Add( $"{(licensedNamespaceLimit.MaxAspectsCount < int.MaxValue ? licensedNamespaceLimit.MaxAspectsCount : "aspects used")} in '{licensedNamespaceLimit.LicensedNamespace}' namespace" );
-        }
-
-        var maxAspectsCountDescription = string.Join( " and ", maxAspectsCountDescriptions );
 
         static string GetNames( IEnumerable<IAspectClass> aspectClasses )
         {
@@ -242,21 +134,21 @@ internal class LicenseVerifier : IService
 
         var aspectClassNames = string.Join( ", ", GetNames( nonredistributionAspectClasses ) );
 
-        if ( redistributionAspectClassesPerProject.Count > 0 )
+        if ( projectsWithRedistributionLicense.Count > 0 )
         {
-            if ( aspectClassNames.Length > 0 )
-            {
-                aspectClassNames += ", ";
-            }
-
-            aspectClassNames += string.Join( ", ", redistributionAspectClassesPerProject.Select(
-                r => $"aspects from '{NormalizeAssemblyName( r.Key.RunTimeIdentity.Name )}' assembly counted as one ({GetNames( r.Value )})" ) );
+            aspectClassNames += aspectInstanceResults
+                .Select( r => r.AspectInstance.AspectClass )
+                .Where( c => c is AspectClass )
+                .Select( c => (AspectClass) c )
+                .Where( c => c.Project != null && projectsWithRedistributionLicense.Contains( c.Project ) )
+                .GroupBy( c => c.Project! )
+                .Select( pc => $"aspects from '{NormalizeAssemblyName( pc.Key.RunTimeIdentity.Name )}' assembly counted as one ({GetNames( pc )})" );
         }
 
         diagnostics.Report(
             LicensingDiagnosticDescriptors.TooManyAspectClasses.CreateRoslynDiagnostic(
                 null,
-                (aspectClassesCount, maxAspectsCountDescription, aspectClassNames) ) );
+                (aspectClassesCount, this._licenseConsumptionManager.MaxAspectsCount, aspectClassNames) ) );
     }
 
     public void VerifyCanBeInherited( AspectClass aspectClass, IAspect? prototype, IDiagnosticAdder diagnostics )
@@ -267,7 +159,7 @@ internal class LicenseVerifier : IService
             return;
         }
 
-        if ( aspectClass.IsInherited && !this._licenseConsumptionManager.CanConsumeFeatures( LicensedFeatures.MetalamaAspectInheritance ) )
+        if ( aspectClass.IsInherited && !this._licenseConsumptionManager.CanConsume( LicenseRequirement.Starter ) )
         {
             diagnostics.Report(
                 LicensingDiagnosticDescriptors.InheritanceNotAvailable.CreateRoslynDiagnostic(
@@ -277,7 +169,7 @@ internal class LicenseVerifier : IService
 
     public void VerifyCanUseSdk( IAspectWeaver aspectWeaver, IEnumerable<IAspectInstance> aspectInstances, IDiagnosticAdder diagnostics )
     {
-        if ( !this._licenseConsumptionManager.CanConsumeFeatures( LicensedFeatures.MetalamaSdk ) )
+        if ( !this._licenseConsumptionManager.CanConsume( LicenseRequirement.Professional ) )
         {
             var aspectClasses = string.Join( ", ", aspectInstances.Select( i => $"'{i.AspectClass.ShortName}'" ) );
 
