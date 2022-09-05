@@ -18,8 +18,7 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
         }
 
         [Theory]
-        [InlineData( TestLicenseKeys.PostSharpEssentials, 3, ArbitraryNamespace, ArbitraryNamespace, true )]
-        [InlineData( TestLicenseKeys.PostSharpEssentials, 4, ArbitraryNamespace, ArbitraryNamespace, false )]
+        [InlineData( TestLicenseKeys.PostSharpEssentials, 1, ArbitraryNamespace, ArbitraryNamespace, false )]
         [InlineData( TestLicenseKeys.PostSharpFramework, 10, ArbitraryNamespace, ArbitraryNamespace, true )]
         [InlineData( TestLicenseKeys.PostSharpFramework, 11, ArbitraryNamespace, ArbitraryNamespace, false )]
         [InlineData( TestLicenseKeys.PostSharpUltimate, 11, ArbitraryNamespace, ArbitraryNamespace, true )]

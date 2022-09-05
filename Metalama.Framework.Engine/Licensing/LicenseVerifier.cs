@@ -107,9 +107,14 @@ internal class LicenseVerifier : IService
             return;
         }
 
-        var maxAspectsCount = this._licenseConsumptionManager.CanConsume( LicenseRequirement.Free, compilation.AssemblyName )
-            ? this._licenseConsumptionManager.MaxAspectsCount
-            : 0;
+        var maxAspectsCount = this switch
+        {
+            _ when this._licenseConsumptionManager.CanConsume( LicenseRequirement.Ultimate, compilation.AssemblyName ) => int.MaxValue,
+            _ when this._licenseConsumptionManager.CanConsume( LicenseRequirement.Professional, compilation.AssemblyName ) => 10,
+            _ when this._licenseConsumptionManager.CanConsume( LicenseRequirement.Starter, compilation.AssemblyName ) => 5,
+            _ when this._licenseConsumptionManager.CanConsume( LicenseRequirement.Free, compilation.AssemblyName ) => 3,
+            _ => 0
+        };
 
         if ( aspectClassesCount <= maxAspectsCount )
         {
@@ -148,7 +153,7 @@ internal class LicenseVerifier : IService
         diagnostics.Report(
             LicensingDiagnosticDescriptors.TooManyAspectClasses.CreateRoslynDiagnostic(
                 null,
-                (aspectClassesCount, this._licenseConsumptionManager.MaxAspectsCount, aspectClassNames) ) );
+                (aspectClassesCount, maxAspectsCount, aspectClassNames) ) );
     }
 
     public void VerifyCanBeInherited( AspectClass aspectClass, IAspect? prototype, IDiagnosticAdder diagnostics )
