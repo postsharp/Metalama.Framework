@@ -42,7 +42,7 @@ namespace Metalama.Framework.Engine
 #if !DEBUG
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif
-        public static void AssertNot( [DoesNotReturnIf( false )] bool condition )
+        public static void AssertNot( [DoesNotReturnIf( true )] bool condition )
         {
 #if DEBUG
             if ( condition )
