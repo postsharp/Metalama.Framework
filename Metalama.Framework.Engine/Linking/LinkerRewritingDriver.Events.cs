@@ -4,6 +4,7 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Inlining;
+using Metalama.Framework.Engine.Linking.Substitution;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -18,21 +19,21 @@ namespace Metalama.Framework.Engine.Linking
     {
         private IReadOnlyList<MemberDeclarationSyntax> RewriteEvent( EventDeclarationSyntax eventDeclaration, IEventSymbol symbol )
         {
-            var generationContext = SyntaxGenerationContext.Create( this._serviceProvider, this._intermediateCompilation, eventDeclaration );
+            var generationContext = SyntaxGenerationContext.Create( this.ServiceProvider, this.IntermediateCompilation, eventDeclaration );
 
-            if ( this._introductionRegistry.IsOverrideTarget( symbol ) )
+            if ( this.IntroductionRegistry.IsOverrideTarget( symbol ) )
             {
                 var members = new List<MemberDeclarationSyntax>();
-                var lastOverride = (IEventSymbol) this._introductionRegistry.GetLastOverride( symbol );
+                var lastOverride = (IEventSymbol) this.IntroductionRegistry.GetLastOverride( symbol );
 
                 if ( eventDeclaration.GetLinkerDeclarationFlags().HasFlag( LinkerDeclarationFlags.EventField )
-                     && this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) ) )
+                     && this.AnalysisRegistry.IsReachable( symbol.ToSemantic(IntermediateSymbolSemanticKind.Default) ) )
                 {
                     // Backing field for event field.
                     members.Add( GetEventBackingField( eventDeclaration, symbol ) );
                 }
 
-                if ( this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( lastOverride, IntermediateSymbolSemanticKind.Default ), out _ ) )
+                if ( this.AnalysisRegistry.IsInlined( lastOverride.ToSemantic(IntermediateSymbolSemanticKind.Default) ) )
                 {
                     members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final ) );
                 }
@@ -41,8 +42,8 @@ namespace Metalama.Framework.Engine.Linking
                     members.Add( GetTrampolineEvent( eventDeclaration, lastOverride ) );
                 }
 
-                if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
-                     && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
+                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic(IntermediateSymbolSemanticKind.Default) )
+                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic(IntermediateSymbolSemanticKind.Default) ) )
                 {
                     if ( eventDeclaration.GetLinkerDeclarationFlags().HasFlag( LinkerDeclarationFlags.EventField ) )
                     {
@@ -54,8 +55,8 @@ namespace Metalama.Framework.Engine.Linking
                     }
                 }
 
-                if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ) )
-                     && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ), out _ ) )
+                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic(IntermediateSymbolSemanticKind.Base) )
+                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic(IntermediateSymbolSemanticKind.Base) ) )
                 {
                     members.Add( GetEmptyImplEvent( eventDeclaration, symbol ) );
                 }
@@ -75,8 +76,8 @@ namespace Metalama.Framework.Engine.Linking
                     };
                 }
 
-                if ( !this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
-                     || this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
+                if ( !this.AnalysisRegistry.IsReachable( symbol.ToSemantic(IntermediateSymbolSemanticKind.Default) )
+                     || this.AnalysisRegistry.IsInlined( symbol.ToSemantic(IntermediateSymbolSemanticKind.Default) ) )
                 {
                     return Array.Empty<MemberDeclarationSyntax>();
                 }
@@ -115,10 +116,12 @@ namespace Metalama.Framework.Engine.Linking
                 AccessorDeclarationSyntax accessorDeclaration,
                 IMethodSymbol methodSymbol )
             {
-                var linkedBody =
-                    this.GetLinkedBody(
-                        methodSymbol.ToSemantic( semanticKind ),
-                        InliningContext.Create( this, methodSymbol, generationContext ) );
+                var linkedBody = this.GetSubstitutedBody(
+                    methodSymbol.ToSemantic( semanticKind ),
+                    new SubstitutionContext(
+                        this,
+                        generationContext,
+                        new InliningContextIdentifier( methodSymbol.ToSemantic( semanticKind ) ) ) );
 
                 // Trivia processing:
                 //   * For block bodies methods, we preserve trivia of the opening/closing brace.

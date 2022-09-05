@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Formatting;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
@@ -29,7 +31,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                 ?? (IPropertySymbol) ((aspectReference.ResolvedSemantic.Symbol as IMethodSymbol)?.AssociatedSymbol).AssertNotNull();
 
             // Should be within equals clause.
-            if ( aspectReference.Expression.Parent == null || aspectReference.Expression.Parent is not EqualsValueClauseSyntax equalsClause )
+            if ( aspectReference.SourceExpression.Parent == null || aspectReference.SourceExpression.Parent is not EqualsValueClauseSyntax equalsClause )
             {
                 return false;
             }
@@ -64,38 +66,28 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             return true;
         }
 
-        public override void Inline( InliningContext context, ResolvedAspectReference aspectReference, out SyntaxNode replacedNode, out SyntaxNode newNode )
+        public override InliningAnalysisInfo GetInliningAnalysisInfo( InliningAnalysisContext context, ResolvedAspectReference aspectReference )
         {
-            var equalsClause = (EqualsValueClauseSyntax) aspectReference.Expression.Parent.AssertNotNull();
+            var equalsClause = (EqualsValueClauseSyntax) aspectReference.SourceExpression.Parent.AssertNotNull();
             var variableDeclarator = (VariableDeclaratorSyntax) equalsClause.Parent.AssertNotNull();
             var variableDeclaration = (VariableDeclarationSyntax) variableDeclarator.Parent.AssertNotNull();
             var localDeclaration = (LocalDeclarationStatementSyntax) variableDeclaration.Parent.AssertNotNull();
 
-            var targetSymbol =
-                aspectReference.ResolvedSemantic.Symbol as IPropertySymbol
-                ?? (IPropertySymbol) ((aspectReference.ResolvedSemantic.Symbol as IMethodSymbol)?.AssociatedSymbol).AssertNotNull();
+            return new InliningAnalysisInfo( localDeclaration, variableDeclarator.Identifier.Text );
+        }
 
-            // Change the target local variable.
-            var contextWithLocal = context.WithReturnLocal( targetSymbol.GetMethod.AssertNotNull(), variableDeclarator.Identifier.ValueText );
-
-            // Get the final inlined body of the target method. 
-            var inlinedTargetBody =
-                contextWithLocal.GetLinkedBody( targetSymbol.GetMethod.AssertNotNull().ToSemantic( aspectReference.ResolvedSemantic.Kind ) );
-
-            // Mark the block as flattenable.
-            inlinedTargetBody = inlinedTargetBody.WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
-
-            // We're replacing the whole return statement.
-            newNode =
-                Block(
-                        LocalDeclarationStatement(
+        public override StatementSyntax Inline( SyntaxGenerationContext syntaxGenerationContext, InliningSpecification specification, StatementSyntax currentReplacedStatement, StatementSyntax linkedTargetBody )
+        {
+            return Block(
+                    LocalDeclarationStatement(
                             VariableDeclaration(
-                                context.SyntaxGenerationContext.SyntaxGenerator.Type( targetSymbol.Type ).WithTrailingTrivia( Whitespace( " " ) ),
-                                SingletonSeparatedList( VariableDeclarator( variableDeclarator.Identifier ) ) ) ),
-                        inlinedTargetBody )
-                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
-
-            replacedNode = localDeclaration;
+                                syntaxGenerationContext.SyntaxGenerator.Type( specification.DestinationSemantic.Symbol.ReturnType ),
+                                SingletonSeparatedList( VariableDeclarator( Identifier( specification.ReturnVariableIdentifier.AssertNotNull() ) ) ) ) )
+                        .NormalizeWhitespace()
+                        .WithTrailingTrivia( ElasticLineFeed ),
+                    linkedTargetBody )
+                .WithFormattingAnnotationsFrom( currentReplacedStatement )
+                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
         }
     }
 }

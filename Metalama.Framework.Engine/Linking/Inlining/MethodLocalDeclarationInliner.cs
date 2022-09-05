@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             }
 
             // Should be within invocation expression.
-            if ( aspectReference.Expression.Parent is not InvocationExpressionSyntax invocationExpression )
+            if ( aspectReference.SourceExpression.AssertNotNull().Parent is not InvocationExpressionSyntax invocationExpression )
             {
                 return false;
             }
@@ -71,7 +71,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             }
 
             // The invocation needs to be inlineable in itself.
-            if ( !IsInlineableInvocation( semanticModel, (IMethodSymbol) aspectReference.ContainingSymbol, invocationExpression ) )
+            if ( !IsInlineableInvocation( semanticModel, aspectReference.ContainingSemantic.Symbol, invocationExpression ) )
             {
                 return false;
             }
@@ -79,38 +79,29 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             return true;
         }
 
-        public override void Inline( InliningContext context, ResolvedAspectReference aspectReference, out SyntaxNode replacedNode, out SyntaxNode newNode )
+        public override InliningAnalysisInfo GetInliningAnalysisInfo( InliningAnalysisContext context, ResolvedAspectReference aspectReference )
         {
-            var invocationExpression = (InvocationExpressionSyntax) aspectReference.Expression.Parent.AssertNotNull();
+            var invocationExpression = (InvocationExpressionSyntax) aspectReference.SourceExpression.AssertNotNull().Parent.AssertNotNull();
             var equalsClause = (EqualsValueClauseSyntax) invocationExpression.Parent.AssertNotNull();
             var variableDeclarator = (VariableDeclaratorSyntax) equalsClause.Parent.AssertNotNull();
             var variableDeclaration = (VariableDeclarationSyntax) variableDeclarator.Parent.AssertNotNull();
             var localDeclaration = (LocalDeclarationStatementSyntax) variableDeclaration.Parent.AssertNotNull();
 
-            var targetSymbol = (aspectReference.ResolvedSemantic.Symbol as IMethodSymbol).AssertNotNull();
+            return new InliningAnalysisInfo( localDeclaration, variableDeclarator.Identifier.Text );
+        }
 
-            // Change the target local variable.
-            var contextWithLocal = context.WithReturnLocal( targetSymbol, variableDeclarator.Identifier.ValueText );
-
-            // Get the final inlined body of the target method. 
-            var inlinedTargetBody = contextWithLocal.GetLinkedBody( targetSymbol.ToSemantic( aspectReference.ResolvedSemantic.Kind ) );
-
-            // Mark the block as flattenable.
-            inlinedTargetBody = inlinedTargetBody.WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
-
-            // We're replacing the whole return statement.
-            newNode = Block(
+        public override StatementSyntax Inline( SyntaxGenerationContext syntaxGenerationContext, InliningSpecification specification, StatementSyntax currentReplacedStatement, StatementSyntax linkedTargetBody )
+        {
+            return Block(
                     LocalDeclarationStatement(
                             VariableDeclaration(
-                                context.SyntaxGenerationContext.SyntaxGenerator.Type( targetSymbol.ReturnType ),
-                                SingletonSeparatedList( VariableDeclarator( variableDeclarator.Identifier ) ) ) )
+                                syntaxGenerationContext.SyntaxGenerator.Type( specification.DestinationSemantic.Symbol.ReturnType ),
+                                SingletonSeparatedList( VariableDeclarator( Identifier( specification.ReturnVariableIdentifier.AssertNotNull() ) ) ) ) )
                         .NormalizeWhitespace()
                         .WithTrailingTrivia( ElasticLineFeed ),
-                    inlinedTargetBody )
-                .WithFormattingAnnotationsFrom( localDeclaration )
+                    linkedTargetBody )
+                .WithFormattingAnnotationsFrom( currentReplacedStatement )
                 .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
-
-            replacedNode = localDeclaration;
         }
     }
 }

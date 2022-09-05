@@ -25,6 +25,9 @@ namespace Metalama.Framework.Engine.Linking
                 case ParameterSyntax { Parent: { Parent: RecordDeclarationSyntax } }:
                     return default;
 
+                case AccessorDeclarationSyntax accessorDeclaration:
+                    return accessorDeclaration.Parent.AssertNotNull().GetLinkerDeclarationFlags();
+
                 case null:
                     return default;
 

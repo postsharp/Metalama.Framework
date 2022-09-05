@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -29,12 +30,12 @@ namespace Metalama.Framework.Engine.Linking.Inlining
 
             if ( !SymbolEqualityComparer.Default.Equals(
                     propertySymbol.Type,
-                    ((IMethodSymbol) aspectReference.ContainingSymbol).ReturnType ) )
+                    aspectReference.ContainingSemantic.Symbol.ReturnType ) )
             {
                 return false;
             }
 
-            if ( aspectReference.Expression.Parent == null || aspectReference.Expression.Parent is not ReturnStatementSyntax )
+            if ( aspectReference.SourceExpression.AssertNotNull().Parent == null || aspectReference.SourceExpression.AssertNotNull().Parent is not ReturnStatementSyntax )
             {
                 return false;
             }
@@ -42,22 +43,16 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             return true;
         }
 
-        public override void Inline( InliningContext context, ResolvedAspectReference aspectReference, out SyntaxNode replacedNode, out SyntaxNode newNode )
+        public override InliningAnalysisInfo GetInliningAnalysisInfo( InliningAnalysisContext context, ResolvedAspectReference aspectReference )
         {
-            var expressionStatement = (ReturnStatementSyntax) aspectReference.Expression.Parent.AssertNotNull();
+            var returnStatement = (ReturnStatementSyntax) aspectReference.SourceExpression.AssertNotNull().Parent.AssertNotNull();
 
-            var targetSymbol =
-                aspectReference.ResolvedSemantic.Symbol as IPropertySymbol
-                ?? (IPropertySymbol) ((aspectReference.ResolvedSemantic.Symbol as IMethodSymbol)?.AssociatedSymbol).AssertNotNull();
+            return new InliningAnalysisInfo( returnStatement, null );
+        }
 
-            // Get the final inlined body of the target property getter. 
-            var inlinedTargetBody = context.GetLinkedBody( targetSymbol.GetMethod.AssertNotNull().ToSemantic( aspectReference.ResolvedSemantic.Kind ) );
-
-            // Mark the block as flattenable.
-            inlinedTargetBody = inlinedTargetBody.WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
-
-            newNode = inlinedTargetBody;
-            replacedNode = expressionStatement;
+        public override StatementSyntax Inline( SyntaxGenerationContext syntaxGenerationContext, InliningSpecification specification, StatementSyntax currentReplacedStatement, StatementSyntax linkedTargetBody )
+        {
+            return linkedTargetBody;
         }
     }
 }

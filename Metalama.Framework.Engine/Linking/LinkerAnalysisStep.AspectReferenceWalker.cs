@@ -11,8 +11,6 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal partial class LinkerAnalysisStep
     {
-        // TODO: Change this to counting return statements that change the control flow.
-
         /// <summary>
         /// Walks method bodies, counting return statements.
         /// </summary>
@@ -20,11 +18,11 @@ namespace Metalama.Framework.Engine.Linking
         {
             private readonly AspectReferenceResolver _referenceResolver;
             private readonly SemanticModel _semanticModel;
-            private readonly ISymbol _containingSymbol;
+            private readonly IMethodSymbol _containingSymbol;
 
             public List<ResolvedAspectReference> AspectReferences { get; }
 
-            public AspectReferenceWalker( AspectReferenceResolver referenceResolver, SemanticModel semanticModel, ISymbol containingSymbol )
+            public AspectReferenceWalker( AspectReferenceResolver referenceResolver, SemanticModel semanticModel, IMethodSymbol containingSymbol )
             {
                 this._referenceResolver = referenceResolver;
                 this._semanticModel = semanticModel;
@@ -68,7 +66,7 @@ namespace Metalama.Framework.Engine.Linking
                     }
 
                     var resolvedReference = this._referenceResolver.Resolve(
-                        this._containingSymbol,
+                        this._containingSymbol.ToSemantic(IntermediateSymbolSemanticKind.Default),
                         referencedSymbol,
                         (ExpressionSyntax) node,
                         aspectReference );

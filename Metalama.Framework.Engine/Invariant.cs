@@ -35,6 +35,23 @@ namespace Metalama.Framework.Engine
 #endif
         }
 
+        /// <summary>
+        /// Checks that a given condition is false and throws an <see cref="AssertionFailedException"/> in case it is not.
+        /// </summary>
+        /// <param name="condition">The condition that must be true.</param>
+#if !DEBUG
+        [MethodImpl( MethodImplOptions.AggressiveInlining )]
+#endif
+        public static void AssertNot( [DoesNotReturnIf( false )] bool condition )
+        {
+#if DEBUG
+            if ( condition )
+            {
+                throw new AssertionFailedException();
+            }
+#endif
+        }
+
 #if !DEBUG
         [MethodImpl( MethodImplOptions.AggressiveInlining )]
 #endif

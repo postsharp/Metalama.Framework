@@ -37,6 +37,7 @@
 
     <ItemGroup>
         <!-- By convention, we use InternalsVisibleTo only for test projects that must have access to internals.. -->
+        <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
         <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals" />
         <InternalsVisibleTo Include="Metalama.Framework.Tests.Integration.Internals" />
         <InternalsVisibleTo Include="DynamicProxyGenAssembly2" Key="$(FakeItEasyKey)" LoadsWithinVisualStudio="false" />

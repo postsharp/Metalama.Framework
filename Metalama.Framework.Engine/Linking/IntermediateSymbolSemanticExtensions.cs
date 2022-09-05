@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Engine.Aspects;
 using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Linking
@@ -16,6 +17,30 @@ namespace Metalama.Framework.Engine.Linking
         public static IntermediateSymbolSemantic ToSemantic( this ISymbol symbol, IntermediateSymbolSemanticKind kind )
         {
             return new IntermediateSymbolSemantic( symbol, kind );
+        }
+
+        public static AspectReferenceTarget ToAspectReferenceTarget(this IntermediateSymbolSemantic target )
+        {
+            return new AspectReferenceTarget( target.Symbol, target.Kind, AspectReferenceTargetKind.Self );
+        }
+
+        public static AspectReferenceTarget ToAspectReferenceTarget( this IntermediateSymbolSemantic<IMethodSymbol> target )
+        {
+            return new AspectReferenceTarget( target.Symbol, target.Kind, AspectReferenceTargetKind.Self );
+        }
+
+        public static AspectReferenceTarget ToAspectReferenceTarget(this IntermediateSymbolSemantic<IPropertySymbol> property, AspectReferenceTargetKind targetKind)
+        {
+            Invariant.Assert( targetKind is AspectReferenceTargetKind.PropertyGetAccessor or AspectReferenceTargetKind.PropertySetAccessor );
+
+            return new AspectReferenceTarget( property.Symbol, property.Kind, targetKind );
+        }
+
+        public static AspectReferenceTarget ToAspectReferenceTarget( this IntermediateSymbolSemantic<IEventSymbol> @event, AspectReferenceTargetKind targetKind )
+        {
+            Invariant.Assert( targetKind is AspectReferenceTargetKind.EventAddAccessor or AspectReferenceTargetKind.EventRemoveAccessor );
+
+            return new AspectReferenceTarget( @event.Symbol, @event.Kind, targetKind );
         }
     }
 }

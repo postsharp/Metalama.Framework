@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Inlining;
+using Metalama.Framework.Engine.Linking.Substitution;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -26,11 +27,15 @@ namespace Metalama.Framework.Engine.Linking
     /// </summary>
     internal partial class LinkerRewritingDriver
     {
-        private readonly LinkerIntroductionRegistry _introductionRegistry;
-        private readonly LinkerAnalysisRegistry _analysisRegistry;
-        private readonly IServiceProvider _serviceProvider;
-        private readonly Compilation _intermediateCompilation;
-        private readonly UserDiagnosticSink _diagnosticSink;
+        public LinkerIntroductionRegistry IntroductionRegistry { get; }
+
+        public UserDiagnosticSink DiagnosticSink { get; }
+
+        public Compilation IntermediateCompilation { get; }
+
+        internal LinkerAnalysisRegistry AnalysisRegistry { get; }
+
+        public IServiceProvider ServiceProvider { get; }
 
         public LinkerRewritingDriver(
             Compilation intermediateCompilation,
@@ -39,11 +44,11 @@ namespace Metalama.Framework.Engine.Linking
             UserDiagnosticSink diagnosticSink,
             IServiceProvider serviceProvider )
         {
-            this._introductionRegistry = introductionRegistry;
-            this._analysisRegistry = analysisRegistry;
-            this._intermediateCompilation = intermediateCompilation;
-            this._diagnosticSink = diagnosticSink;
-            this._serviceProvider = serviceProvider;
+            this.IntroductionRegistry = introductionRegistry;
+            this.AnalysisRegistry = analysisRegistry;
+            this.IntermediateCompilation = intermediateCompilation;
+            this.DiagnosticSink = diagnosticSink;
+            this.ServiceProvider = serviceProvider;
         }
 
         /// <summary>
@@ -52,48 +57,14 @@ namespace Metalama.Framework.Engine.Linking
         /// <param name="semantic">Method or accessor symbol.</param>
         /// <param name="inliningContext"></param>
         /// <returns>Block representing the linked body.</returns>
-        public BlockSyntax GetLinkedBody( IntermediateSymbolSemantic<IMethodSymbol> semantic, InliningContext inliningContext )
+        public BlockSyntax GetSubstitutedBody( IntermediateSymbolSemantic<IMethodSymbol> semantic, SubstitutionContext substitutionContext )
         {
-            var replacements = new Dictionary<SyntaxNode, SyntaxNode?>();
-            var symbol = this.ResolveBodySource( semantic );
             var triviaSource = this.ResolveBodyBlockTriviaSource( semantic, out var shouldRemoveExistingTrivia );
-            var bodyRootNode = this.GetBodyRootNode( symbol, inliningContext.SyntaxGenerationContext, out var isImplicitlyLinked );
-
-            if ( !isImplicitlyLinked )
-            {
-                AddAspectReferenceReplacements();
-            }
-
-            if ( inliningContext.HasIndirectReturn )
-            {
-                // If the inlining context has indirect return (i.e. return through variable/label), we need to replace all remaining return statements.
-                AddReturnNodeReplacements();
-            }
-
-            var rewrittenBody = this.RewriteBody( bodyRootNode, symbol, replacements );
-
-            // TODO: This is not a nice place to have this, but there are problems if we attempt to do this using the replacements.
-            //       The replacement block would already have different statements that would not match original instances.
-            //       We would need either to annotate child statements or provide special mechanism for block changes (which should be enough for now).
-            if ( inliningContext.HasIndirectReturn
-                 && symbol.ReturnsVoid
-                 && !SymbolEqualityComparer.Default.Equals( symbol, inliningContext.CurrentDeclaration ) )
-            {
-                // TODO: This will not be hit until we are using results of control flow analysis. 
-                throw new AssertionFailedException( Justifications.CoverageMissing );
-
-                // // Add the implicit return for void methods.
-                // inliningContext.UseLabel();
-                //
-                // rewrittenBody =
-                //     Block(
-                //             rewrittenBody,
-                //             CreateGotoStatement() )
-                //         .AddLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
-            }
+            var bodyRootNode = this.GetBodyRootNode( semantic.Symbol, substitutionContext.SyntaxGenerationContext );
+            var rewrittenBody = this.RewriteBody( bodyRootNode, semantic.Symbol, substitutionContext );
 
             // Add the SourceCode annotation, if it is source code.
-            if ( !(symbol.GetPrimarySyntaxReference() is { } primarySyntax
+            if ( !(semantic.Symbol.GetPrimarySyntaxReference() is { } primarySyntax
                    && primarySyntax.GetSyntax().HasAnnotations( FormattingAnnotations.GeneratedCodeAnnotationKind )) )
             {
                 rewrittenBody = rewrittenBody.WithSourceCodeAnnotation();
@@ -154,149 +125,17 @@ namespace Metalama.Framework.Engine.Linking
                             .WithTrailingTrivia( closeBraceTrailingTrivia.Insert( 0, ElasticMarker ) ) )
                     .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
             }
-
-            void AddAspectReferenceReplacements()
-            {
-                // Get all aspect references that were found in the symbol during analysis.
-                var containedAspectReferences = this._analysisRegistry.GetContainedAspectReferences( symbol );
-
-                // Collect syntax node replacements from inliners and redirect the rest to correct targets.
-                foreach ( var aspectReference in containedAspectReferences )
-                {
-                    if ( aspectReference.Specification.Flags.HasFlag( AspectReferenceFlags.Inlineable )
-                         && SymbolEqualityComparer.Default.Equals( aspectReference.ContainingSymbol, aspectReference.ResolvedSemantic.Symbol ) )
-                    {
-                        // Inlineable self-reference would cause a stack overflow.
-                        throw new AssertionFailedException();
-                    }
-
-                    if ( this._analysisRegistry.IsInlineable( aspectReference.ResolvedSemantic, out var inliningSpecification ) )
-                    {
-                        inliningSpecification.SelectedInliners[aspectReference]
-                            .Inline( inliningContext, aspectReference, out var replacedNode, out var newNode );
-
-                        replacements.Add( replacedNode, newNode );
-                    }
-                    else
-                    {
-                        var linkedExpression = this.GetLinkedExpression( aspectReference, inliningContext.SyntaxGenerationContext );
-                        replacements.Add( aspectReference.Expression, linkedExpression );
-                    }
-                }
-            }
-
-            void AddReturnNodeReplacements()
-            {
-                foreach ( var returnNode in GetReturnNodes( bodyRootNode ) )
-                {
-                    if ( returnNode is ReturnStatementSyntax returnStatement )
-                    {
-                        if ( !replacements.ContainsKey( returnStatement ) )
-                        {
-                            inliningContext.UseLabel();
-
-                            if ( returnStatement.Expression != null )
-                            {
-                                var assignStatement = CreateAssignmentStatement( returnStatement.Expression )
-                                    .WithOriginalLocationAnnotationFrom( returnStatement );
-
-                                replacements[returnStatement] =
-                                    Block(
-                                            assignStatement,
-                                            CreateGotoStatement() )
-                                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
-                            }
-                            else
-                            {
-                                replacements[returnStatement] = CreateGotoStatement();
-                            }
-                        }
-                    }
-                    else if ( returnNode is ExpressionSyntax returnExpression )
-                    {
-                        inliningContext.UseLabel();
-
-                        if ( symbol.ReturnsVoid )
-                        {
-                            replacements[returnNode] =
-                                Block(
-                                        ExpressionStatement( returnExpression ),
-                                        CreateGotoStatement() )
-                                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
-                        }
-                        else
-                        {
-                            replacements[returnNode] =
-                                Block(
-                                        CreateAssignmentStatement( returnExpression ),
-                                        CreateGotoStatement() )
-                                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
-                        }
-                    }
-                    else
-                    {
-                        throw new AssertionFailedException();
-                    }
-                }
-            }
-
-            StatementSyntax CreateAssignmentStatement( ExpressionSyntax expression )
-            {
-                IdentifierNameSyntax identifier;
-
-                if ( inliningContext.ReturnVariableName != null )
-                {
-                    identifier = IdentifierName( inliningContext.ReturnVariableName );
-                }
-                else
-                {
-                    identifier =
-                        IdentifierName(
-                            Identifier(
-                                TriviaList(),
-                                SyntaxKind.UnderscoreToken,
-                                "_",
-                                "_",
-                                TriviaList() ) );
-                }
-
-                return
-                    ExpressionStatement(
-                            AssignmentExpression(
-                                SyntaxKind.SimpleAssignmentExpression,
-                                identifier,
-                                Token( TriviaList( ElasticSpace ), SyntaxKind.EqualsToken, TriviaList( ElasticSpace ) ),
-                                expression ),
-                            Token( SyntaxKind.SemicolonToken ).WithTrailingTrivia( ElasticLineFeed ) )
-                        .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
-            }
-
-            GotoStatementSyntax CreateGotoStatement()
-            {
-                return
-                    GotoStatement(
-                            SyntaxKind.GotoStatement,
-                            Token( SyntaxKind.GotoKeyword ).WithTrailingTrivia( ElasticSpace ),
-                            default,
-                            IdentifierName( inliningContext.ReturnLabelName.AssertNotNull() ),
-                            Token( SyntaxKind.SemicolonToken ).WithTrailingTrivia( ElasticLineFeed ) )
-                        .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
-            }
         }
 
         /// <summary>
-        /// Gets a node that becomes root node of the target symbol in the final compilation. This is used to get a block/expression for implicit
-        /// accessors, i.e. auto-properties and event fields.
+        /// Gets a node that is going to be starting point of substitutions.
         /// </summary>
-        private SyntaxNode GetBodyRootNode( IMethodSymbol symbol, SyntaxGenerationContext generationContext, out bool isImplicitlyLinked )
+        private SyntaxNode GetBodyRootNode( IMethodSymbol symbol, SyntaxGenerationContext generationContext )
         {
             var declaration = symbol.GetPrimaryDeclaration();
 
-            if ( this._introductionRegistry.IsOverrideTarget( symbol ) )
+            if ( this.IntroductionRegistry.IsOverrideTarget( symbol ) )
             {
-                // Override targets are implicitly linked, i.e. no replacement of aspect references is necessary.
-                isImplicitlyLinked = true;
-
                 switch ( declaration )
                 {
                     case MethodDeclarationSyntax methodDecl:
@@ -313,23 +152,19 @@ namespace Metalama.Framework.Engine.Linking
                         return (SyntaxNode?) operatorDecl.Body ?? operatorDecl.ExpressionBody ?? throw new AssertionFailedException();
 
                     case AccessorDeclarationSyntax accessorDecl:
-                        var body = (SyntaxNode?) accessorDecl.Body ?? accessorDecl.ExpressionBody;
-
-                        if ( body != null && !(symbol.AssociatedSymbol != null && symbol.AssociatedSymbol.IsExplicitInterfaceEventField()) )
-                        {
-                            return body;
-                        }
-                        else
-                        {
-                            return GetImplicitAccessorBody( symbol, generationContext );
-                        }
+                        // Accessors with no body are auto-properties, in which case we have substitution for the whole accessor declaration.
+                        Invariant.Assert( !symbol.IsAbstract );
+                        return accessorDecl.Body ?? (SyntaxNode?) accessorDecl.ExpressionBody ?? accessorDecl;
 
                     case ArrowExpressionClauseSyntax arrowExpressionClause:
                         // Expression-bodied property.
                         return arrowExpressionClause;
 
-                    case VariableDeclaratorSyntax { Parent: VariableDeclarationSyntax { Parent: EventFieldDeclarationSyntax } }:
-                    case ParameterSyntax: // Record positional property.
+                    case VariableDeclaratorSyntax { Parent: VariableDeclarationSyntax { Parent: EventFieldDeclarationSyntax } } variableDecl:
+                        // Event field accessors start replacement as variableDecls.
+                        return variableDecl;
+                    case ParameterSyntax: 
+                        // Record positional property.
                         return GetImplicitAccessorBody( symbol, generationContext );
 
                     default:
@@ -337,10 +172,8 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            if ( this._introductionRegistry.IsOverride( symbol ) )
+            if ( this.IntroductionRegistry.IsOverride( symbol ) )
             {
-                isImplicitlyLinked = false;
-
                 switch ( declaration )
                 {
                     case MethodDeclarationSyntax methodDecl:
@@ -356,8 +189,6 @@ namespace Metalama.Framework.Engine.Linking
 
             if ( symbol.AssociatedSymbol != null && symbol.AssociatedSymbol.IsExplicitInterfaceEventField() )
             {
-                isImplicitlyLinked = true;
-
                 return GetImplicitAccessorBody( symbol, generationContext );
             }
 
@@ -386,10 +217,10 @@ namespace Metalama.Framework.Engine.Linking
         }
 
 #pragma warning disable CA1822 // Mark members as static
-        private BlockSyntax RewriteBody( SyntaxNode bodyRootNode, IMethodSymbol symbol, Dictionary<SyntaxNode, SyntaxNode?> replacements )
+        private BlockSyntax RewriteBody( SyntaxNode bodyRootNode, IMethodSymbol symbol, SubstitutionContext context )
 #pragma warning restore CA1822 // Mark members as static
         {
-            var rewriter = new BodyRewriter( replacements );
+            var rewriter = new SubstitutingRewriter( context );
 
             switch ( bodyRootNode )
             {
@@ -458,6 +289,11 @@ namespace Metalama.Framework.Engine.Linking
                     throw new NotImplementedException();
             }
         }
+        
+        public IReadOnlyDictionary<SyntaxNode, SyntaxNodeSubstitution>? GetSubstitutions(InliningContextIdentifier inliningContextId)
+        {
+            return this.AnalysisRegistry.GetSubstitutions( inliningContextId );
+        }
 
         private static IEnumerable<SyntaxNode> GetReturnNodes( SyntaxNode? rootNode )
         {
@@ -484,8 +320,8 @@ namespace Metalama.Framework.Engine.Linking
         /// <returns></returns>
         public bool IsRewriteTarget( ISymbol symbol )
         {
-            if ( this._introductionRegistry.IsOverride( symbol )
-                 || this._introductionRegistry.IsOverrideTarget( symbol ) )
+            if ( this.IntroductionRegistry.IsOverride( symbol )
+                 || this.IntroductionRegistry.IsOverrideTarget( symbol ) )
             {
                 return true;
             }
@@ -541,14 +377,14 @@ namespace Metalama.Framework.Engine.Linking
         /// <returns></returns>
         private IMethodSymbol ResolveBodySource( IntermediateSymbolSemantic<IMethodSymbol> semantic )
         {
-            if ( this._introductionRegistry.IsOverride( semantic.Symbol ) )
+            if ( this.IntroductionRegistry.IsOverride( semantic.Symbol ) )
             {
                 Invariant.Assert( semantic.Kind == IntermediateSymbolSemanticKind.Default );
 
                 return semantic.Symbol;
             }
 
-            if ( this._introductionRegistry.IsOverrideTarget( semantic.Symbol ) )
+            if ( this.IntroductionRegistry.IsOverrideTarget( semantic.Symbol ) )
             {
                 switch ( semantic.Kind )
                 {
@@ -557,7 +393,7 @@ namespace Metalama.Framework.Engine.Linking
                         return semantic.Symbol;
 
                     case IntermediateSymbolSemanticKind.Final:
-                        return (IMethodSymbol) this._introductionRegistry.GetLastOverride( semantic.Symbol );
+                        return (IMethodSymbol) this.IntroductionRegistry.GetLastOverride( semantic.Symbol );
 
                     default:
                         throw new AssertionFailedException();
@@ -579,14 +415,14 @@ namespace Metalama.Framework.Engine.Linking
         {
             ISymbol? symbol;
 
-            if ( this._introductionRegistry.IsOverride( semantic.Symbol ) )
+            if ( this.IntroductionRegistry.IsOverride( semantic.Symbol ) )
             {
                 Invariant.Assert( semantic.Kind == IntermediateSymbolSemanticKind.Default );
 
                 symbol = semantic.Symbol;
                 shouldRemoveExistingTrivia = true;
             }
-            else if ( this._introductionRegistry.IsOverrideTarget( semantic.Symbol ) )
+            else if ( this.IntroductionRegistry.IsOverrideTarget( semantic.Symbol ) )
             {
                 symbol = null;
 
@@ -627,204 +463,11 @@ namespace Metalama.Framework.Engine.Linking
             };
         }
 
-        /// <summary>
-        /// Gets an expression that replaces the expression represented by the aspect reference. This for cases where the reference is not inlined.
-        /// </summary>
-        private ExpressionSyntax GetLinkedExpression( ResolvedAspectReference aspectReference, SyntaxGenerationContext syntaxGenerationContext )
-        {
-            // IMPORTANT: This method needs to always strip trivia if rewriting the existing expression.
-            //            Trivia existing around the expression are preserved during substitution.
-            if ( !SymbolEqualityComparer.Default.Equals(
-                    aspectReference.ResolvedSemantic.Symbol.ContainingType,
-                    aspectReference.ResolvedSemantic.Symbol.ContainingType ) )
-            {
-                throw new AssertionFailedException();
-            }
+        public static string GetOriginalImplMemberName( ISymbol symbol ) => GetSpecialMemberName( symbol, "Source" );
 
-            var targetSymbol = aspectReference.ResolvedSemantic.Symbol;
-            var targetSemanticKind = aspectReference.ResolvedSemantic.Kind;
+        public static string GetEmptyImplMemberName( ISymbol symbol ) => GetSpecialMemberName( symbol, "Empty" );
 
-            if ( this._introductionRegistry.IsLastOverride( targetSymbol ) )
-            {
-                throw new AssertionFailedException( Justifications.CoverageMissing );
-
-                // // If something is resolved to the last override, we will point to the target declaration instead.
-                // targetSymbol = aspectReference.OriginalSymbol;
-                // targetSemanticKind = IntermediateSymbolSemanticKind.Final;
-            }
-
-            // Determine the target name. Specifically, handle case when the resolved symbol points to the original implementation.
-            var targetMemberName =
-                targetSemanticKind switch
-                {
-                    IntermediateSymbolSemanticKind.Default
-                        when SymbolEqualityComparer.Default.Equals(
-                                 aspectReference.ResolvedSemantic.Symbol.ContainingType,
-                                 aspectReference.ContainingSymbol.ContainingType )
-                             && this._introductionRegistry.IsOverrideTarget( targetSymbol )
-                        => GetOriginalImplMemberName( targetSymbol ),
-                    IntermediateSymbolSemanticKind.Base
-                        when SymbolEqualityComparer.Default.Equals(
-                            aspectReference.ResolvedSemantic.Symbol.ContainingType,
-                            aspectReference.ContainingSymbol.ContainingType )
-                        => GetEmptyImplMemberName( targetSymbol ),
-                    _ => targetSymbol.Name
-                };
-
-            SimpleNameSyntax GetRewrittenName( SimpleNameSyntax name )
-                => name switch
-                {
-                    GenericNameSyntax genericName => genericName.WithIdentifier( Identifier( targetMemberName.AssertNotNull() ) ),
-                    IdentifierNameSyntax _ => name.WithIdentifier( Identifier( targetMemberName.AssertNotNull() ) ),
-                    _ => throw new AssertionFailedException()
-                };
-
-            // Presume that all (annotated) aspect references are member access expressions or invocation expressions.
-            switch ( aspectReference.Expression )
-            {
-                case MemberAccessExpressionSyntax memberAccessExpression:
-                    // The reference expression is member access.
-
-                    if ( SymbolEqualityComparer.Default.Equals(
-                            aspectReference.ContainingSymbol.ContainingType,
-                            targetSymbol.ContainingType ) )
-                    {
-                        if ( aspectReference.OriginalSymbol.IsInterfaceMemberImplementation() )
-                        {
-                            return memberAccessExpression
-                                .WithExpression( ThisExpression() )
-                                .WithName( GetRewrittenName( memberAccessExpression.Name ) )
-                                .WithoutTrivia();
-                        }
-                        else
-                        {
-                            // This is the same type, we can just change the identifier in the expression.
-                            // TODO: Is the target always accessible?
-                            if ( targetSymbol is IMethodSymbol { MethodKind: MethodKind.Destructor } )
-                            {
-                                return memberAccessExpression
-                                    .WithExpression( ThisExpression() )
-                                    .WithName( GetRewrittenName( memberAccessExpression.Name ) )
-                                    .WithoutTrivia();
-                            }
-                            else
-                            {
-                                return memberAccessExpression
-                                    .WithName( GetRewrittenName( memberAccessExpression.Name ) )
-                                    .WithoutTrivia();
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if ( targetSymbol.ContainingType.TypeKind == TypeKind.Interface )
-                        {
-                            // Overrides are always targeting member defined in the current type.
-                            throw new AssertionFailedException( Justifications.CoverageMissing );
-
-                            // return memberAccessExpression
-                            //     .WithExpression( ThisExpression() )
-                            //     .WithName( IdentifierName( targetMemberName ) );
-                        }
-
-                        if ( targetSymbol.IsStatic )
-                        {
-                            // Static member access where the target is a different type.
-                            return
-                                MemberAccessExpression(
-                                    SyntaxKind.SimpleMemberAccessExpression,
-                                    syntaxGenerationContext.SyntaxGenerator.Type( targetSymbol.ContainingType ),
-                                    GetRewrittenName( memberAccessExpression.Name ) );
-                        }
-                        else
-                        {
-                            if ( targetSymbol.ContainingType.Is( aspectReference.ContainingSymbol.ContainingType ) )
-                            {
-                                throw new AssertionFailedException( "Resolved symbol is declared in a derived class." );
-                            }
-                            else if ( aspectReference.ContainingSymbol.ContainingType.Is( targetSymbol.ContainingType ) )
-                            {
-                                // Resolved symbol is declared in a base class.
-                                switch (targetSymbol, memberAccessExpression.Expression)
-                                {
-                                    case (IMethodSymbol { MethodKind: MethodKind.Destructor }, _):
-                                        return
-                                            IdentifierName( "__LINKER_TO_BE_REMOVED__" )
-                                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.NullAspectReferenceExpression );
-
-                                    case (_, IdentifierNameSyntax):
-                                    case (_, BaseExpressionSyntax):
-                                    case (_, ThisExpressionSyntax):
-                                        return
-                                            MemberAccessExpression(
-                                                SyntaxKind.SimpleMemberAccessExpression,
-                                                BaseExpression(),
-                                                GetRewrittenName( memberAccessExpression.Name ) );
-
-                                    default:
-                                        var aspectInstance = this.ResolveAspectInstance( aspectReference );
-
-                                        var targetDeclaration = aspectInstance.TargetDeclaration.GetSymbol( this._intermediateCompilation );
-
-                                        this._diagnosticSink.Report(
-                                            AspectLinkerDiagnosticDescriptors.CannotUseBaseInvokerWithNonInstanceExpression.CreateRoslynDiagnostic(
-                                                targetDeclaration.GetDiagnosticLocation(),
-                                                (aspectInstance.AspectClass.ShortName, TargetDeclaration: targetDeclaration) ) );
-
-                                        return aspectReference.Expression;
-                                }
-                            }
-                            else
-                            {
-                                // Resolved symbol is unrelated to the containing symbol.
-                                return memberAccessExpression
-                                    .WithName( GetRewrittenName( memberAccessExpression.Name ) )
-                                    .WithoutTrivia();
-                            }
-                        }
-                    }
-
-                case ConditionalAccessExpressionSyntax conditionalAccessExpression:
-                    if ( SymbolEqualityComparer.Default.Equals(
-                            aspectReference.ContainingSymbol.ContainingType,
-                            targetSymbol.ContainingType ) )
-                    {
-                        if ( aspectReference.OriginalSymbol.IsInterfaceMemberImplementation() )
-                        {
-                            throw new AssertionFailedException( Justifications.CoverageMissing );
-                        }
-                        else
-                        {
-                            var rewriter = new ConditionalAccessRewriter( targetMemberName );
-
-                            return
-                                (ExpressionSyntax) rewriter.Visit(
-                                    conditionalAccessExpression
-                                        .WithoutTrivia() )!;
-                        }
-                    }
-                    else
-                    {
-                        throw new AssertionFailedException( Justifications.CoverageMissing );
-                    }
-
-                default:
-                    throw new AssertionFailedException();
-            }
-        }
-
-        private IAspectInstanceInternal ResolveAspectInstance( ResolvedAspectReference aspectReference )
-        {
-            var introducedMember = this._introductionRegistry.GetIntroducedMemberForSymbol( aspectReference.ContainingSymbol );
-
-            return introducedMember.AssertNotNull().Introduction.ParentAdvice.Aspect;
-        }
-
-        private static string GetOriginalImplMemberName( ISymbol symbol ) => GetSpecialMemberName( symbol, "Source" );
-
-        private static string GetEmptyImplMemberName( ISymbol symbol ) => GetSpecialMemberName( symbol, "Empty" );
-
-        private static string GetSpecialMemberName( ISymbol symbol, string suffix )
+        public static string GetSpecialMemberName( ISymbol symbol, string suffix )
         {
             switch ( symbol )
             {
@@ -875,7 +518,7 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private static string GetBackingFieldName( ISymbol symbol )
+        public static string GetBackingFieldName( ISymbol symbol )
         {
             string name;
 

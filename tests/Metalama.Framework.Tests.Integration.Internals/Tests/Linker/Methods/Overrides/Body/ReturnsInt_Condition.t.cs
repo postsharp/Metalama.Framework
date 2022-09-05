@@ -1,18 +1,16 @@
-    class Target
+class Target
+{
+    int Foo(int x)
     {
-        int Foo(int x)
+        Console.WriteLine("Before");
+        int result = 0;
+        if (x == 0)
         {
-    Console.WriteLine("Before");
-    int result = 0;
-    if (x == 0)
-    {
-                    Console.WriteLine( "Original");
+            Console.WriteLine("Original");
             result = x;
-goto __aspect_return_1;
-__aspect_return_1:;
-    }
-
-    Console.WriteLine("After");
-    return result;
         }
+
+        Console.WriteLine("After");
+        return result;
     }
+}

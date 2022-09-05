@@ -4,6 +4,7 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Inlining;
+using Metalama.Framework.Engine.Linking.Substitution;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -22,7 +23,7 @@ namespace Metalama.Framework.Engine.Linking
             IMethodSymbol symbol,
             SyntaxGenerationContext generationContext )
         {
-            if ( this._introductionRegistry.IsOverrideTarget( symbol ) )
+            if ( this.IntroductionRegistry.IsOverrideTarget( symbol ) )
             {
                 if ( symbol.IsPartialDefinition && symbol.PartialImplementationPart != null )
                 {
@@ -39,9 +40,9 @@ namespace Metalama.Framework.Engine.Linking
                     members.Add( methodDeclaration );
                 }
 
-                var lastOverride = (IMethodSymbol) this._introductionRegistry.GetLastOverride( symbol );
+                var lastOverride = this.IntroductionRegistry.GetLastOverride( symbol );
 
-                if ( this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( lastOverride, IntermediateSymbolSemanticKind.Default ), out _ ) )
+                if ( this.AnalysisRegistry.IsInlined( lastOverride.ToSemantic(IntermediateSymbolSemanticKind.Default) ) )
                 {
                     members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final, lastOverride.IsAsync ) );
                 }
@@ -50,24 +51,24 @@ namespace Metalama.Framework.Engine.Linking
                     members.Add( GetTrampolineMethod( methodDeclaration, lastOverride ) );
                 }
 
-                if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
-                     && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
+                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic(IntermediateSymbolSemanticKind.Default) )
+                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic(IntermediateSymbolSemanticKind.Default) ) )
                 {
                     members.Add( GetOriginalImplMethod( methodDeclaration, symbol, generationContext ) );
                 }
 
-                if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ) )
-                     && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ), out _ ) )
+                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic(IntermediateSymbolSemanticKind.Base) )
+                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic(IntermediateSymbolSemanticKind.Base) ) )
                 {
                     members.Add( GetEmptyImplMethod( methodDeclaration, symbol, generationContext ) );
                 }
 
                 return members;
             }
-            else if ( this._introductionRegistry.IsOverride( symbol ) )
+            else if ( this.IntroductionRegistry.IsOverride( symbol ) )
             {
-                if ( !this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
-                     || this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
+                if ( !this.AnalysisRegistry.IsReachable( symbol.ToSemantic(IntermediateSymbolSemanticKind.Default) )
+                     || this.AnalysisRegistry.IsInlined( symbol.ToSemantic(IntermediateSymbolSemanticKind.Default) ) )
                 {
                     return Array.Empty<MemberDeclarationSyntax>();
                 }
@@ -81,9 +82,12 @@ namespace Metalama.Framework.Engine.Linking
 
             MethodDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind, bool isAsync )
             {
-                var linkedBody = this.GetLinkedBody(
+                var linkedBody = this.GetSubstitutedBody(
                     symbol.ToSemantic( semanticKind ),
-                    InliningContext.Create( this, symbol, generationContext ) );
+                    new SubstitutionContext(
+                        this,
+                        generationContext,
+                        new InliningContextIdentifier( symbol.ToSemantic( semanticKind ) ) ) );
 
                 var modifiers = methodDeclaration.Modifiers;
 

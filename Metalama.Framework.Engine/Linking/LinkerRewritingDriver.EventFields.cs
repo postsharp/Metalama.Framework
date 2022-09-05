@@ -3,6 +3,7 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Linking.Inlining;
+using Metalama.Framework.Engine.Linking.Substitution;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -15,19 +16,19 @@ namespace Metalama.Framework.Engine.Linking
     {
         private IReadOnlyList<MemberDeclarationSyntax> RewriteEventField( EventFieldDeclarationSyntax eventFieldDeclaration, IEventSymbol symbol )
         {
-            var generationContext = SyntaxGenerationContext.Create( this._serviceProvider, this._intermediateCompilation, eventFieldDeclaration );
+            var generationContext = SyntaxGenerationContext.Create( this.ServiceProvider, this.IntermediateCompilation, eventFieldDeclaration );
 
-            if ( this._introductionRegistry.IsOverrideTarget( symbol ) )
+            if ( this.IntroductionRegistry.IsOverrideTarget( symbol ) )
             {
                 var members = new List<MemberDeclarationSyntax>();
-                var lastOverride = (IEventSymbol) this._introductionRegistry.GetLastOverride( symbol );
+                var lastOverride = (IEventSymbol) this.IntroductionRegistry.GetLastOverride( symbol );
 
-                if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) ) )
+                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic(IntermediateSymbolSemanticKind.Default) ) )
                 {
                     members.Add( GetEventBackingField( eventFieldDeclaration, symbol ) );
                 }
 
-                if ( this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( lastOverride, IntermediateSymbolSemanticKind.Default ), out _ ) )
+                if ( this.AnalysisRegistry.IsInlined( lastOverride.ToSemantic(IntermediateSymbolSemanticKind.Default) ) )
                 {
                     members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final ) );
                 }
@@ -36,14 +37,14 @@ namespace Metalama.Framework.Engine.Linking
                     members.Add( GetTrampolineEvent( eventFieldDeclaration, lastOverride ) );
                 }
 
-                if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
-                     && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
+                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic(IntermediateSymbolSemanticKind.Default) )
+                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic(IntermediateSymbolSemanticKind.Default) ) )
                 {
                     members.Add( GetOriginalImplEventField( eventFieldDeclaration.Declaration.Type, symbol, generationContext ) );
                 }
 
-                if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ) )
-                     && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ), out _ ) )
+                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic(IntermediateSymbolSemanticKind.Base) )
+                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic(IntermediateSymbolSemanticKind.Base) ) )
                 {
                     members.Add( GetEmptyImplEventField( eventFieldDeclaration.Declaration.Type, symbol ) );
                 }
@@ -89,10 +90,12 @@ namespace Metalama.Framework.Engine.Linking
                 SyntaxKind accessorKeyword,
                 IMethodSymbol methodSymbol )
             {
-                var linkedBody =
-                    this.GetLinkedBody(
-                        methodSymbol.ToSemantic( semanticKind ),
-                        InliningContext.Create( this, methodSymbol, generationContext ) );
+                var linkedBody = this.GetSubstitutedBody(
+                    methodSymbol.ToSemantic( semanticKind ),
+                    new SubstitutionContext(
+                        this,
+                        generationContext,
+                        new InliningContextIdentifier( methodSymbol.ToSemantic( semanticKind ) ) ) );
 
                 var (openBraceLeadingTrivia, openBraceTrailingTrivia, closeBraceLeadingTrivia, closeBraceTrailingTrivia) =
                     (TriviaList(), TriviaList( ElasticLineFeed ), TriviaList( ElasticMarker ), TriviaList( ElasticLineFeed ));

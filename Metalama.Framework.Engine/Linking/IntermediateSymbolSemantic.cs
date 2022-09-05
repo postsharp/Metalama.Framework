@@ -60,21 +60,15 @@ namespace Metalama.Framework.Engine.Linking
 
         public bool Equals( IntermediateSymbolSemantic<TSymbol> other )
         {
-            // No typed dictionary at the moment.
-            throw new AssertionFailedException( Justifications.CoverageMissing );
-
-            // return SymbolEqualityComparer.Default.Equals( this.Symbol, other.Symbol )
-            //       && other.Kind == this.Kind;
+            return StructuralSymbolComparer.Default.Equals( this.Symbol, other.Symbol )
+                  && other.Kind == this.Kind;
         }
 
         public override int GetHashCode()
         {
-            // No typed dictionary at the moment.
-            throw new AssertionFailedException( Justifications.CoverageMissing );
-
-            // return HashCode.Combine(
-            //    SymbolEqualityComparer.Default.GetHashCode( this.Symbol ),
-            //    this.Kind );
+            return HashCode.Combine(
+               StructuralSymbolComparer.Default.GetHashCode( this.Symbol ),
+               this.Kind );
         }
 
         public static implicit operator IntermediateSymbolSemantic( IntermediateSymbolSemantic<TSymbol> value )
