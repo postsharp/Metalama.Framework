@@ -52,7 +52,7 @@
     <Target Name="AddAssemblyMetadata"
             BeforeTargets="GenerateAdditionalSources"
             DependsOnTargets="RunResolvePackageDependencies"
-            Condition="'$(IsTestProject)'!='True'">
+            Condition="'$(AddAssemblyMetadataAttributes)'!='False'">
 
         <ItemGroup>
             <!-- Add all package versions to metadata -->

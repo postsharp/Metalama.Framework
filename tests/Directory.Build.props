@@ -9,7 +9,7 @@
              item when DeterministicSourcePaths is true -->
         <Deterministic>False</Deterministic>
 
-        <IsTestProject>True</IsTestProject>
+        <AddAssemblyMetadataAttributes>False</AddAssemblyMetadataAttributes>
     </PropertyGroup>
 
 </Project>
