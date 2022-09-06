@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Compiler;
 using Metalama.Framework.Engine.Utilities;
@@ -90,7 +89,7 @@ namespace Metalama.Framework.Engine.Options
         public override bool RemoveCompileTimeOnlyCode => this.GetBooleanOption( "MetalamaRemoveCompileTimeOnlyCode", true );
 
         [Memo]
-        public override bool AllowPreviewLanguageFeatures => this.GetBooleanOption( "MetalamaAllowPreviewLanguageFeatures", false );
+        public override bool AllowPreviewLanguageFeatures => this.GetBooleanOption( "MetalamaAllowPreviewLanguageFeatures" );
 
         public override bool RequiresCodeCoverageAnnotations => this._transformerOptions.RequiresCodeCoverageAnnotations;
 

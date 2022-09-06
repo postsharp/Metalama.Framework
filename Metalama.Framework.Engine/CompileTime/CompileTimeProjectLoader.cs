@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.Diagnostics;
@@ -336,13 +335,15 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
         var manifest = CompileTimeProjectManifest.Deserialize( manifestEntry.Open() );
 
         // Read source files.
+        var parseOptions = CSharpParseOptions.Default;
+
         List<SyntaxTree> syntaxTrees = new();
 
         foreach ( var entry in archive.Entries.Where( e => string.Equals( Path.GetExtension( e.Name ), ".cs", StringComparison.OrdinalIgnoreCase ) ) )
         {
             using var sourceReader = new StreamReader( entry.Open(), Encoding.UTF8 );
             var sourceText = sourceReader.ReadToEnd();
-            var syntaxTree = CSharpSyntaxTree.ParseText( sourceText, CSharpParseOptions.Default ).WithFilePath( entry.FullName );
+            var syntaxTree = CSharpSyntaxTree.ParseText( sourceText, parseOptions ).WithFilePath( entry.FullName );
             syntaxTrees.Add( syntaxTree );
         }
 

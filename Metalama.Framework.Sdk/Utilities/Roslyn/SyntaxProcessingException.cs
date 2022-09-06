@@ -1,10 +1,10 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 using System;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
@@ -23,7 +23,8 @@ public sealed class SyntaxProcessingException : Exception
     public SyntaxNode? SyntaxNode { get; }
 
     public static bool ShouldWrapException( Exception exception, SyntaxNode? node )
-        => exception is not SyntaxProcessingException && node != null && node.GetLocation().SourceTree?.FilePath != null;
+        => exception is not (SyntaxProcessingException or OperationCanceledException or TaskCanceledException) && node != null
+            && node.GetLocation().SourceTree?.FilePath != null;
 
     private static string GetMessage( SyntaxNode? node, Exception innerException )
     {

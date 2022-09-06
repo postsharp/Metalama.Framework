@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.SourceGeneration;
@@ -18,14 +17,14 @@ namespace Metalama.Framework.DesignTime.VisualStudio;
 /// </summary>
 internal class VsUserProcessProjectHandler : ProjectHandler, IProjectHandlerCallback
 {
-    private readonly UserProcessEndpoint _userProcessEndpoint;
+    private readonly UserProcessServiceHubEndpoint _userProcessEndpoint;
     private readonly ILogger _logger;
     private ImmutableDictionary<string, string>? _sources;
 
     public VsUserProcessProjectHandler( IServiceProvider serviceProvider, IProjectOptions projectOptions ) : base( serviceProvider, projectOptions )
     {
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
-        this._userProcessEndpoint = serviceProvider.GetRequiredService<UserProcessEndpoint>();
+        this._userProcessEndpoint = serviceProvider.GetRequiredService<UserProcessServiceHubEndpoint>();
 
         _ = this._userProcessEndpoint.RegisterProjectHandlerAsync( projectOptions.ProjectId, this );
     }
