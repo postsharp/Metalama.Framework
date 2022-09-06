@@ -1,8 +1,6 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -17,21 +15,24 @@ namespace Metalama.Framework.Engine.CompileTime
     /// <summary>
     /// A base <see cref="CSharpSyntaxRewriter"/> that stores the <see cref="RunTimeCompilation"/> and the <see cref="SymbolClassifier"/>.
     /// </summary>
-    internal abstract partial class CompileTimeBaseRewriter : SafeSyntaxRewriter
+    internal sealed class RewriterHelper
     {
-        protected ISymbolClassifier SymbolClassifier { get; }
+        private readonly Func<SyntaxNode, SyntaxNode> _rewriteThrowNotSupported;
 
-        protected CompileTimeBaseRewriter( Compilation runTimeCompilation, IServiceProvider serviceProvider )
+        public ISymbolClassifier SymbolClassifier { get; }
+
+        public RewriterHelper( Compilation runTimeCompilation, IServiceProvider serviceProvider, Func<SyntaxNode, SyntaxNode>? rewriteThrowNotSupported = null )
         {
+            this._rewriteThrowNotSupported = rewriteThrowNotSupported ?? (node => node);
             this.SymbolClassifier = serviceProvider.GetRequiredService<SymbolClassificationService>().GetClassifier( runTimeCompilation );
             this.RunTimeCompilation = runTimeCompilation;
         }
 
-        protected Compilation RunTimeCompilation { get; }
+        public Compilation RunTimeCompilation { get; }
 
-        protected virtual T RewriteThrowNotSupported<T>( T node )
+        private T RewriteThrowNotSupported<T>( T node )
             where T : SyntaxNode
-            => node;
+            => (T) this._rewriteThrowNotSupported( node );
 
         private static T WithSuppressedDiagnostics<T>( T member, params string[] suppressedDiagnostics )
             where T : MemberDeclarationSyntax
@@ -90,7 +91,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     true );
         }
 
-        protected MethodDeclarationSyntax WithThrowNotSupportedExceptionBody( MethodDeclarationSyntax method, string message )
+        public MethodDeclarationSyntax WithThrowNotSupportedExceptionBody( MethodDeclarationSyntax method, string message )
         {
             // Method does not have a body (e.g. because it's abstract) , so there is nothing to replace.
             if ( method.Body == null && method.ExpressionBody == null )
@@ -139,7 +140,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         suppressedWarnings.ToArray() ) );
         }
 
-        protected BasePropertyDeclarationSyntax WithThrowNotSupportedExceptionBody( BasePropertyDeclarationSyntax memberDeclaration, string message )
+        public BasePropertyDeclarationSyntax WithThrowNotSupportedExceptionBody( BasePropertyDeclarationSyntax memberDeclaration, string message )
         {
             if ( memberDeclaration.Modifiers.Any( x => x.IsKind( SyntaxKind.AbstractKeyword ) ) )
             {

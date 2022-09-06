@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.Contracts;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting;
@@ -13,11 +12,11 @@ namespace Metalama.Framework.DesignTime.VisualStudio;
 /// </summary>
 internal class CompileTimeEditingStatusService : ICompileTimeEditingStatusService, IDisposable
 {
-    private readonly UserProcessEndpoint _userProcessEndpoint;
+    private readonly UserProcessServiceHubEndpoint _userProcessEndpoint;
 
     public CompileTimeEditingStatusService( IServiceProvider serviceProvider )
     {
-        this._userProcessEndpoint = serviceProvider.GetRequiredService<UserProcessEndpoint>();
+        this._userProcessEndpoint = serviceProvider.GetRequiredService<UserProcessServiceHubEndpoint>();
         this._userProcessEndpoint.IsEditingCompileTimeCodeChanged += this.OnIsEditingChanged;
     }
 
@@ -33,14 +32,20 @@ internal class CompileTimeEditingStatusService : ICompileTimeEditingStatusServic
 
     public async Task OnEditingCompletedAsync( CancellationToken cancellationToken )
     {
-        var api = await this._userProcessEndpoint.GetServerApiAsync( cancellationToken );
-        await api.OnCompileTimeCodeEditingCompletedAsync( cancellationToken );
+        foreach ( var endpoint in this._userProcessEndpoint.Endpoints )
+        {
+            var api = await endpoint.GetServerApiAsync( cancellationToken );
+            await api.OnCompileTimeCodeEditingCompletedAsync( cancellationToken );
+        }
     }
 
     public async Task OnUserInterfaceAttachedAsync( CancellationToken cancellationToken )
     {
-        var api = await this._userProcessEndpoint.GetServerApiAsync( cancellationToken );
-        await api.OnUserInterfaceAttachedAsync( cancellationToken );
+        foreach ( var endpoint in this._userProcessEndpoint.Endpoints )
+        {
+            var api = await endpoint.GetServerApiAsync( cancellationToken );
+            await api.OnUserInterfaceAttachedAsync( cancellationToken );
+        }
     }
 
     public void Dispose()

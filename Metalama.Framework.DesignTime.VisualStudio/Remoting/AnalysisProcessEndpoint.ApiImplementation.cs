@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.DesignTime.Contracts;
@@ -25,9 +24,9 @@ internal partial class AnalysisProcessEndpoint
             this._parent = parent;
         }
 
-        public async Task OnProjectHandlerReadyAsync( string projectId, CancellationToken cancellationToken )
+        public async Task OnUserProcessProjectHandlerConnectedAsync( string projectId, CancellationToken cancellationToken )
         {
-            this._parent._logger.Trace?.Log( $"The client '{projectId}' has connected." );
+            this._parent.Logger.Trace?.Log( $"The user process for project '{projectId}' has connected." );
 
             this._parent._connectedClients[projectId] = projectId;
 
@@ -36,7 +35,7 @@ internal partial class AnalysisProcessEndpoint
             // If we received source before the client connected, publish it for the client now.
             if ( this._parent._sourcesForUnconnectedClients.TryRemove( projectId, out var sources ) )
             {
-                this._parent._logger.Trace?.Log( $"Publishing source for the client '{projectId}'." );
+                this._parent.Logger.Trace?.Log( $"Publishing source for the project '{projectId}'." );
 
                 await this._parent._client!.PublishGeneratedCodeAsync( projectId, sources, cancellationToken );
             }

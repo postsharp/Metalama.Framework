@@ -1,13 +1,10 @@
 [NotifyPropertyChanged]
 internal partial class Person:global::System.ComponentModel.INotifyPropertyChanged{
-    #region Constructors
-
+    
     public Person() { }
 
-    #endregion
-
-    #region Public Properties
-
+    
+    
     public string FirstName 
 { get
 { 
@@ -27,8 +24,8 @@ set
 }
 }
 
-private string FirstName_Source { get; set; }
-
+private string FirstName_Source
+{ get; set; }
     public string FullName
     {
         get
@@ -56,8 +53,8 @@ set
 }
 }
 
-private string LastName_Source { get; set; }
-
+private string LastName_Source
+{ get; set; }
 
 protected void OnPropertyChanged(global::System.String name)
 {
@@ -65,14 +62,12 @@ protected void OnPropertyChanged(global::System.String name)
 }
 
 public event global::System.ComponentModel.PropertyChangedEventHandler? PropertyChanged;
-    #endregion
-}
+    }
 
 [OptionalValueType]
 public partial class Account
 {
-    #region Public Properties
-
+    
     public string? Name 
 { get
 { 
@@ -99,8 +94,7 @@ set
 }
 }
 
-    #endregion
-
+    
     public partial class Optional { 
 
 public global::Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Request30355.OptionalValue<global::System.String?> Name { get; set; }

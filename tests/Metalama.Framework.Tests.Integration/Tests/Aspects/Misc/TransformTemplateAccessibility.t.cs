@@ -10,14 +10,14 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.TransformTemplateAccessibility
 {
-
-#pragma warning disable CS0067, CS8618, CA1822, CS0162, CS0169, CS0414
     /*
      
     Tests that the visibility of all templates, including accessors, is set to 'public', and
     that an [Accessibility] attribute is added.
 
      */
+#pragma warning disable CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823 
+
 
     internal class MyAspect : Framework.Aspects.TypeAspect
     {
@@ -44,7 +44,6 @@ public int ExplicitPropertyTemplate { [global::Metalama.Framework.Aspects.Compil
         [Template]
         internal event EventHandler? EventTemplate;
     }
+#pragma warning restore CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823 
 
-
-#pragma warning restore CS0067, CS8618, CA1822, CS0162, CS0169, CS0414
 }
