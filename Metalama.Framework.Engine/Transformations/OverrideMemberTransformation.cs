@@ -32,7 +32,7 @@ namespace Metalama.Framework.Engine.Transformations
             this.Tags = tags;
         }
 
-        public abstract IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context );
+        public abstract IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context );
 
         protected ExpressionSyntax CreateMemberAccessExpression( AspectReferenceTargetKind referenceTargetKind, SyntaxGenerationContext generationContext )
         {

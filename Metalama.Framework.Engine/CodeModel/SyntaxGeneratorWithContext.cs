@@ -13,6 +13,7 @@ using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
 using TypeKind = Metalama.Framework.Code.TypeKind;
+using VarianceKind = Metalama.Framework.Code.VarianceKind;
 
 namespace Metalama.Framework.Engine.CodeModel;
 
@@ -176,4 +177,52 @@ internal class SyntaxGeneratorWithContext : OurSyntaxGenerator
             return GetValue( typedConstant.Value, typedConstant.Type );
         }
     }
+
+    public TypeParameterListSyntax? TypeParameterList( IMethod method, CompilationModel compilation )
+    {
+        if ( method.TypeParameters.Count == 0 )
+        {
+            return null;
+        }
+        else
+        {
+            var list = SyntaxFactory.TypeParameterList( SeparatedList( method.TypeParameters.Select( p => this.TypeParameter( p, compilation ) ).ToArray() ) );
+
+            return list;
+        }
+    }
+#pragma warning restore CA1822 // Can be made static
+
+    private TypeParameterSyntax TypeParameter( ITypeParameter typeParameter, CompilationModel compilation )
+    {
+        var syntax = SyntaxFactory.TypeParameter( typeParameter.Name );
+
+        switch ( typeParameter.Variance )
+        {
+            case VarianceKind.In:
+                syntax = syntax.WithVarianceKeyword( Token( SyntaxKind.InKeyword ) );
+
+                break;
+
+            case VarianceKind.Out:
+                syntax = syntax.WithVarianceKeyword( Token( SyntaxKind.OutKeyword ) );
+
+                break;
+        }
+
+        syntax = syntax.WithAttributeLists( this.AttributesForDeclaration( typeParameter.ToTypedRef<IDeclaration>(), compilation ) );
+
+        return syntax;
+    }
+
+    public ParameterListSyntax ParameterList( IMethodBase method, CompilationModel compilation )
+        => SyntaxFactory.ParameterList(
+            SeparatedList(
+                method.Parameters.Select(
+                    p => Parameter(
+                        this.AttributesForDeclaration( p.ToTypedRef<IDeclaration>(), compilation ),
+                        p.GetSyntaxModifierList(),
+                        this.Type( p.Type.GetSymbol() ),
+                        Identifier( p.Name ),
+                        null ) ) ) );
 }

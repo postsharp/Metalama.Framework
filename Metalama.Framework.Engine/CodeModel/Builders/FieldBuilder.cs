@@ -54,7 +54,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             this.Type = this.Compilation.Factory.GetSpecialType( SpecialType.Object );
         }
 
-        public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
+        public override IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context )
         {
             var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
 
