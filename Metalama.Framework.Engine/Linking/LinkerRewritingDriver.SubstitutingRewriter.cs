@@ -35,7 +35,8 @@ namespace Metalama.Framework.Engine.Linking
                 if ( substitutions != null && substitutions.TryGetValue( node, out var substitution ) )
                 {
                     var currentNode = base.VisitCore( node ).AssertNotNull();
-                    return substitution.Substitute( currentNode, this._substitutionContext );
+                    var substitutedNode = substitution.Substitute( currentNode, this._substitutionContext );
+                    return substitutedNode;
                 }
                 else
                 {

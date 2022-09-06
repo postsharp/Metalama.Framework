@@ -1,5 +1,3 @@
-using System;
-
 class Target
 {
     int Foo()

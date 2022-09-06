@@ -223,6 +223,7 @@ namespace Metalama.Framework.Engine.Linking
             /// <returns></returns>
             public IReadOnlyList<IntermediateSymbolSemantic> GetInlinedSemantics( IReadOnlyList<IntermediateSymbolSemantic> inlineableSemantics, IReadOnlyDictionary<ResolvedAspectReference, Inliner> inlineableReferences)
             {
+                var inlineableSemanticHashSet = new HashSet<IntermediateSymbolSemantic>(inlineableSemantics);
                 var inlinedSemantics = new List<IntermediateSymbolSemantic>();
 
                 foreach (var inlineableSemantic in inlineableSemantics)
@@ -282,7 +283,7 @@ namespace Metalama.Framework.Engine.Linking
                                 && !IsInlinedSemanticBody( new IntermediateSymbolSemantic<IMethodSymbol>( property.SetMethod, semantic.Kind ) )
                                 && this._reachableSymbolSemantics.Contains( new IntermediateSymbolSemantic<IMethodSymbol>( property.SetMethod, semantic.Kind ) );
 
-                            return !hasNonInlinedGet && !hasNonInlinedSet;
+                            return inlineableSemanticHashSet.Contains(semantic) && !hasNonInlinedGet && !hasNonInlinedSet;
 
                         case IEventSymbol @event:
                             // Event is inlined if at least one of the accessors is reachable and not inlineable.
@@ -294,7 +295,7 @@ namespace Metalama.Framework.Engine.Linking
                                 !IsInlinedSemanticBody( new IntermediateSymbolSemantic<IMethodSymbol>( @event.RemoveMethod.AssertNotNull(), semantic.Kind ) )
                                 && this._reachableSymbolSemantics.Contains( new IntermediateSymbolSemantic<IMethodSymbol>( @event.RemoveMethod.AssertNotNull(), semantic.Kind ) );
 
-                            return !hasNonInlinedAdd && !hasNonInlinedRemove;
+                            return inlineableSemanticHashSet.Contains( semantic ) && !hasNonInlinedAdd && !hasNonInlinedRemove;
 
                         default:
                             throw new AssertionFailedException();

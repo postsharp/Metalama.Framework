@@ -38,7 +38,7 @@ namespace Metalama.Framework.Engine.Linking
                     switch ( overriddenMember )
                     {
                         case IMethodSymbol method:
-                            DepthFirstSearch( overriddenMember.ToSemantic( IntermediateSymbolSemanticKind.Final ) );
+                            DepthFirstSearch( method.ToSemantic( IntermediateSymbolSemanticKind.Final ) );
                             break;
 
                         case IPropertySymbol property:
@@ -46,10 +46,12 @@ namespace Metalama.Framework.Engine.Linking
                             {
                                 DepthFirstSearch( property.GetMethod.ToSemantic( IntermediateSymbolSemanticKind.Final ) );
                             }
+
                             if ( property.SetMethod != null )
                             {
                                 DepthFirstSearch( property.SetMethod.ToSemantic( IntermediateSymbolSemanticKind.Final ) );
                             }
+
                             break;
 
                         case IEventSymbol @event:
@@ -59,15 +61,35 @@ namespace Metalama.Framework.Engine.Linking
                     }
                 }
 
-                // Run DFS from any non-discardable declaration
+                // Run DFS from any non-discardable declaration.
                 foreach ( var introducedMember in this._introductionRegistry.GetIntroducedMembers() )
                 {
                     if ( introducedMember.Syntax.GetLinkerDeclarationFlags().HasFlag( LinkerDeclarationFlags.NotDiscardable ) )
                     {
-                        DepthFirstSearch(
-                            new IntermediateSymbolSemantic(
-                                this._introductionRegistry.GetSymbolForIntroducedMember( introducedMember ),
-                                IntermediateSymbolSemanticKind.Default ) );
+                        switch ( this._introductionRegistry.GetSymbolForIntroducedMember( introducedMember ) )
+                        {
+                            case IMethodSymbol method:
+                                DepthFirstSearch( method.ToSemantic( IntermediateSymbolSemanticKind.Default ) );
+                                break;
+
+                            case IPropertySymbol property:
+                                if ( property.GetMethod != null )
+                                {
+                                    DepthFirstSearch( property.GetMethod.ToSemantic( IntermediateSymbolSemanticKind.Default ) );
+                                }
+
+                                if ( property.SetMethod != null )
+                                {
+                                    DepthFirstSearch( property.SetMethod.ToSemantic( IntermediateSymbolSemanticKind.Default ) );
+                                }
+
+                                break;
+
+                            case IEventSymbol @event:
+                                DepthFirstSearch( @event.AddMethod.AssertNotNull().ToSemantic( IntermediateSymbolSemanticKind.Default ) );
+                                DepthFirstSearch( @event.RemoveMethod.AssertNotNull().ToSemantic( IntermediateSymbolSemanticKind.Default ) );
+                                break;
+                        }
                     }
                 }
 
