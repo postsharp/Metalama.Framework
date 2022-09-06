@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Project;
@@ -23,11 +22,11 @@ namespace Metalama.Framework.Engine.LamaSerialization
         /// Initializes a new instance of the <see cref="LamaFormatter"/> class.
         /// </summary>
         /// <param name="serviceProvider"></param>
-        private LamaFormatter( IServiceProvider serviceProvider ) : this( serviceProvider, new LamaSerializationBinder() ) { }
+        private LamaFormatter( IServiceProvider serviceProvider ) : this( serviceProvider, new LamaSerializationBinder( serviceProvider ) ) { }
 
         private LamaFormatter( CompileTimeProject project, IServiceProvider serviceProvider ) : this(
             serviceProvider,
-            new CompileTimeLamaSerializationBinder( project ) ) { }
+            new CompileTimeLamaSerializationBinder( serviceProvider, project ) ) { }
 
         public static LamaFormatter CreateTestInstance( IServiceProvider serviceProvider ) => new( serviceProvider );
 

@@ -1,7 +1,3 @@
-#if TEST_OPTIONS
-// @Skipped(#30946)
-# endif
-
 using System;
 using System.Collections.Generic;
 using Metalama.Framework.Aspects;

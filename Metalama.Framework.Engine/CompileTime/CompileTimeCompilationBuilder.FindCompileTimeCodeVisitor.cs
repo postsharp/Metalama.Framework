@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -37,7 +36,8 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 if ( node.GlobalKeyword.IsKind( SyntaxKind.GlobalKeyword ) )
                 {
-                    this._globalUsings.Add( node );
+                    // We remove the trivia to make sure we don't have any preprocessor directive.
+                    this._globalUsings.Add( node.WithoutLeadingTrivia().WithTrailingTrivia( SyntaxFactory.ElasticCarriageReturnLineFeed ) );
                 }
             }
 

@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using FakeItEasy;
 using Metalama.Framework.Aspects;
@@ -496,7 +495,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 A.CallTo( () => ((ITestTransformation) transformation).ContainingNodeId ).Returns( GetNodeId( this._currentTypeStack.Peek().Type ) );
 
                 A.CallTo( () => ((ITestTransformation) transformation).InsertPositionNodeId )
-                    .Returns( this._currentInsertPosition!.Value.SyntaxNode != null ? GetNodeId( this._currentInsertPosition.Value.SyntaxNode ) : null );
+                    .Returns( this._currentInsertPosition!.Value.SyntaxNode != null! ? GetNodeId( this._currentInsertPosition.Value.SyntaxNode ) : null );
 
                 A.CallTo( () => ((ITestTransformation) transformation).InsertPositionRelation ).Returns( this._currentInsertPosition.Value.Relation );
 
@@ -696,7 +695,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 A.CallTo( () => ((ITestTransformation) transformation).ContainingNodeId ).Returns( GetNodeId( this._currentTypeStack.Peek().Type ) );
 
                 A.CallTo( () => ((ITestTransformation) transformation).InsertPositionNodeId )
-                    .Returns( this._currentInsertPosition!.Value.SyntaxNode != null ? GetNodeId( this._currentInsertPosition.Value.SyntaxNode ) : null );
+                    .Returns( this._currentInsertPosition!.Value.SyntaxNode != null! ? GetNodeId( this._currentInsertPosition.Value.SyntaxNode ) : null );
 
                 A.CallTo( () => ((ITestTransformation) transformation).InsertPositionRelation ).Returns( this._currentInsertPosition.Value.Relation );
 

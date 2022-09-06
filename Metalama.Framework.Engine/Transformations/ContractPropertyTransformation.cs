@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -19,7 +18,7 @@ internal class ContractPropertyTransformation : OverridePropertyBaseTransformati
     public ContractPropertyTransformation( ContractAdvice advice, IProperty overriddenDeclaration ) :
         base( advice, overriddenDeclaration, ObjectReader.Empty ) { }
 
-    public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
+    public override IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context )
     {
         var advice = (ContractAdvice) this.ParentAdvice;
         var contextCopy = context;

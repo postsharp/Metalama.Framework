@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Project;
@@ -42,7 +41,7 @@ internal class AttributeClassificationService : IService
 
     public bool MustCopyTemplateAttribute( IAttribute attribute )
     {
-        if ( attribute.Type.FullName.StartsWith( "Metalama.Framework", StringComparison.Ordinal ) ||
+        if ( attribute.Type.FullName.StartsWith( "Metalama.Framework.Aspects.", StringComparison.Ordinal ) ||
              attribute.Type.FullName.Equals( "System.Runtime.CompilerServices.NullableAttribute", StringComparison.Ordinal ) )
         {
             return false;

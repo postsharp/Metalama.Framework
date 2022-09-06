@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.AspectWeavers;
@@ -71,8 +70,8 @@ namespace Metalama.Framework.Engine.Testing
             var metalamaLibraries = addMetalamaReferences ? new[] { typeof(IAspect).Assembly, typeof(IAspectWeaver).Assembly } : null;
 
             var systemLibraries = AppDomainUtility.GetLoadedAssemblies(
-                    a => !a.IsDynamic && a.FullName != null && a.FullName.StartsWith( "System", StringComparison.Ordinal )
-                         && !string.IsNullOrEmpty( a.Location ) )
+                    a => !a.IsDynamic && a.FullName.StartsWith( "System", StringComparison.Ordinal )
+                                      && !string.IsNullOrEmpty( a.Location ) )
                 .Concat( metalamaLibraries ?? Enumerable.Empty<Assembly>() )
                 .Concat( additionalAssemblies ?? Enumerable.Empty<Assembly>() )
                 .Distinct()

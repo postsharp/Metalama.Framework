@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -32,7 +31,7 @@ namespace Metalama.Framework.Engine.Transformations
             this.BoundTemplate = boundTemplate;
         }
 
-        public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
+        public override IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context )
         {
             var proceedExpression = this.CreateProceedExpression( context );
 
@@ -82,7 +81,7 @@ namespace Metalama.Framework.Engine.Transformations
                             this.ParentAdvice.AspectLayerId,
                             this.OverriddenDeclaration ) ),
                     null,
-                    context.SyntaxGenerator.ParameterList( this.OverriddenDeclaration ),
+                    context.SyntaxGenerator.ParameterList( this.OverriddenDeclaration, context.Compilation ),
                     List<TypeParameterConstraintClauseSyntax>(),
                     newMethodBody,
                     null );
