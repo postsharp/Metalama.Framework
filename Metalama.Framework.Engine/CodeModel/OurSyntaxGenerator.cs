@@ -242,7 +242,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 SeparatedList(
                     method.Parameters.Select(
                         p => Parameter(
-                            this.AttributesForDeclaration( method.ToTypedRef<IDeclaration>(), compilation ),
+                            this.AttributesForDeclaration( p.ToTypedRef<IDeclaration>(), compilation ),
                             p.GetSyntaxModifierList(),
                             this.Type( p.Type.GetSymbol() ),
                             Identifier( p.Name ),
