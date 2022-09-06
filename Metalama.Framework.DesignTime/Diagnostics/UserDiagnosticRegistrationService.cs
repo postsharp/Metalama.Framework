@@ -1,9 +1,12 @@
-// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Backstage.Configuration;
+using Metalama.Backstage.Diagnostics;
 using Metalama.Backstage.Extensibility;
 using Metalama.Framework.DesignTime.Pipeline;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
 
@@ -48,13 +51,19 @@ namespace Metalama.Framework.DesignTime.Diagnostics
         /// </summary>
         public void RegisterDescriptors( DesignTimePipelineExecutionResult pipelineResult )
         {
-            this._configurationManager.Update<UserDiagnosticRegistrationFile>(
-                f =>
-                {
-                    var missing = this.GetMissingDiagnostics( pipelineResult );
-
-                    if ( missing.Diagnostics.Count > 0 || missing.Suppressions.Count > 0 )
+            try
+            {
+                this._configurationManager.UpdateIf<UserDiagnosticRegistrationFile>(
+                    f =>
                     {
+                        var missing = GetMissingDiagnostics( f, pipelineResult );
+
+                        return (missing.Diagnostics.Count > 0 || missing.Suppressions.Count > 0);
+                    },
+                    f =>
+                    {
+                        var missing = GetMissingDiagnostics( f, pipelineResult );
+
                         foreach ( var diagnostic in missing.Diagnostics )
                         {
                             f.Diagnostics.Add( diagnostic.Id, new UserDiagnosticRegistration( diagnostic ) );
@@ -64,18 +73,25 @@ namespace Metalama.Framework.DesignTime.Diagnostics
                         {
                             f.Suppressions.Add( suppression );
                         }
-                    }
-                } );
+                    } );
+            }
+            catch ( Exception e )
+            {
+                // We swallow exceptions because we don't want to fail the pipeline in case of error here.
+                this._configurationManager.Logger.Error?.Log( $"Cannot register user diagnostics and registrations: {e.Message}." );
+            }
         }
 
-        private (List<string> Suppressions, List<DiagnosticDescriptor> Diagnostics) GetMissingDiagnostics( DesignTimePipelineExecutionResult pipelineResult )
+        private static (List<string> Suppressions, List<DiagnosticDescriptor> Diagnostics) GetMissingDiagnostics(
+            UserDiagnosticRegistrationFile file,
+            DesignTimePipelineExecutionResult pipelineResult )
         {
             List<string> missingSuppressions = new();
             List<DiagnosticDescriptor> missingDiagnostics = new();
 
             foreach ( var suppression in pipelineResult.Diagnostics.DiagnosticSuppressions.Select( s => s.Definition.SuppressedDiagnosticId ).Distinct() )
             {
-                if ( !this._registrationFile.Suppressions.Contains( suppression ) )
+                if ( !file.Suppressions.Contains( suppression ) )
                 {
                     missingSuppressions.Add( suppression );
                 }
@@ -85,7 +101,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
                          .Distinct( DiagnosticDescriptorComparer.Instance ) )
             {
                 if ( !DesignTimeDiagnosticDefinitions.StandardDiagnosticDescriptors.ContainsKey( diagnostic.Id )
-                     && !this._registrationFile.Diagnostics.ContainsKey( diagnostic.Id ) )
+                     && !file.Diagnostics.ContainsKey( diagnostic.Id ) )
                 {
                     missingDiagnostics.Add( diagnostic );
                 }
