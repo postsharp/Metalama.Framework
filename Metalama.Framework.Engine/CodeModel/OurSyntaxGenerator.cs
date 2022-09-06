@@ -1,4 +1,5 @@
-// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+// Copyright (c) SharpCrafters s.r.o. All rights reserved.
+// This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -195,54 +196,6 @@ namespace Metalama.Framework.Engine.CodeModel
         public TypeSyntax EventType( IEvent property ) => this.Type( property.Type.GetSymbol() );
 
 #pragma warning disable CA1822 // Can be made static
-        public TypeParameterListSyntax? TypeParameterList( IMethod method, CompilationModel compilation )
-        {
-            if ( method.TypeParameters.Count == 0 )
-            {
-                return null;
-            }
-            else
-            {
-                var list = SyntaxFactory.TypeParameterList(
-                    SeparatedList( method.TypeParameters.Select( p => this.TypeParameter( p, compilation ) ).ToArray() ) );
-
-                return list;
-            }
-        }
-#pragma warning restore CA1822 // Can be made static
-
-        private TypeParameterSyntax TypeParameter( ITypeParameter typeParameter, CompilationModel compilation )
-        {
-            var syntax = SyntaxFactory.TypeParameter( typeParameter.Name );
-
-            switch ( typeParameter.Variance )
-            {
-                case VarianceKind.In:
-                    syntax = syntax.WithVarianceKeyword( Token( SyntaxKind.InKeyword ) );
-
-                    break;
-
-                case VarianceKind.Out:
-                    syntax = syntax.WithVarianceKeyword( Token( SyntaxKind.OutKeyword ) );
-
-                    break;
-            }
-
-            syntax = syntax.WithAttributeLists( this.AttributesForDeclaration( typeParameter.ToTypedRef<IDeclaration>(), compilation ) );
-
-            return syntax;
-        }
-
-        public ParameterListSyntax ParameterList( IMethodBase method, CompilationModel compilation )
-            => SyntaxFactory.ParameterList(
-                SeparatedList(
-                    method.Parameters.Select(
-                        p => Parameter(
-                            this.AttributesForDeclaration( p.ToTypedRef<IDeclaration>(), compilation ),
-                            p.GetSyntaxModifierList(),
-                            this.Type( p.Type.GetSymbol() ),
-                            Identifier( p.Name ),
-                            null ) ) ) );
 
 #pragma warning disable CA1822 // Can be made static
         public ArgumentListSyntax ArgumentList( IMethodBase method, Func<IParameter, ExpressionSyntax?> expressionFunc )
