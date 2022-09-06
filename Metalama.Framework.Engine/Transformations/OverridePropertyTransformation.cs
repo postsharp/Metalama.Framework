@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.Transformations
             this.SetTemplate = setTemplate;
         }
 
-        public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
+        public override IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context )
         {
             var getTemplate = this.GetTemplate;
             var setTemplate = this.SetTemplate;

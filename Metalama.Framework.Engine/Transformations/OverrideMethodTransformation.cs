@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Transformations
             this.BoundTemplate = boundTemplate;
         }
 
-        public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
+        public override IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context )
         {
             var proceedExpression = this.CreateProceedExpression( context, this.BoundTemplate.Template.SelectedKind );
 

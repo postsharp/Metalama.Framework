@@ -1,76 +1,14 @@
 [Introduction]
-internal class TargetClass
-{
-    private global::System.Int32 _introducedField;
+internal class TargetClass { 
 
-    [global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Fields.CopyAttributeToIntroducedField.OverrideAttribute]
-    public global::System.Int32 IntroducedField
-    {
-        get
-        {
-            global::System.Console.WriteLine("Overriden.");
-            return this._introducedField;
-        }
-        set
-        {
-            global::System.Console.WriteLine("Overriden.");
-            this._introducedField = value;
-        }
-    }
+    [global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Field.CopyAttributeToIntroducedField.FooAttribute]
+    public global::System.Int32 IntroducedField;
 
+    [global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Field.CopyAttributeToIntroducedField.FooAttribute]
+    public global::System.Int32 IntroducedField_Initializer = (global::System.Int32)42;
 
+    [global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Field.CopyAttributeToIntroducedField.FooAttribute]
+    public static global::System.Int32 IntroducedField_Static;
 
-    private global::System.Int32 _introducedField_Initialized = 42;
-
-    [global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Fields.CopyAttributeToIntroducedField.OverrideAttribute]
-    public global::System.Int32 IntroducedField_Initializer
-    {
-        get
-        {
-            global::System.Console.WriteLine("Overriden.");
-            return this._introducedField_Static;
-        }
-        set
-        {
-            global::System.Console.WriteLine("Overriden.");
-            this._introducedField_Static = value;
-        }
-    }
-
-
-
-    private global::System.Int32 _introducedField_Static;
-
-    [global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Fields.CopyAttributeToIntroducedField.OverrideAttribute]
-    public static global::System.Int32 IntroducedField_Static
-    {
-        get
-        {
-            global::System.Console.WriteLine("Overriden.");
-            return this._introducedField_Static;
-        }
-        set
-        {
-            global::System.Console.WriteLine("Overriden.");
-            this._introducedField_Static = value;
-        }
-    }
-
-    private static global::System.Int32 _introducedField_Static_Initialized = 42;
-
-
-    [global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Fields.CopyAttributeToIntroducedField.OverrideAttribute]
-    public static global::System.Int32 IntroducedField_Static_Initializer
-    {
-        get
-        {
-            global::System.Console.WriteLine("Overriden.");
-            return this._introducedField_Static;
-        }
-        set
-        {
-            global::System.Console.WriteLine("Overriden.");
-            this._introducedField_Static = value;
-        }
-    }
-}
+    [global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Field.CopyAttributeToIntroducedField.FooAttribute]
+    public static global::System.Int32 IntroducedField_Static_Initializer = (global::System.Int32)42;}

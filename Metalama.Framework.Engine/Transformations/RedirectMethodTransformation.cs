@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.Transformations
             this.TargetMethod = targetMethod;
         }
 
-        public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
+        public override IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context )
         {
             var body =
                 Block(
@@ -54,8 +54,8 @@ namespace Metalama.Framework.Engine.Transformations
                                 this.OverriddenDeclaration.DeclaringType,
                                 this.ParentAdvice.AspectLayerId,
                                 this.OverriddenDeclaration ) ),
-                        context.SyntaxGenerator.TypeParameterList( this.OverriddenDeclaration ),
-                        context.SyntaxGenerator.ParameterList( this.OverriddenDeclaration ),
+                        context.SyntaxGenerator.TypeParameterList( this.OverriddenDeclaration, context.Compilation ),
+                        context.SyntaxGenerator.ParameterList( this.OverriddenDeclaration, context.Compilation ),
                         context.SyntaxGenerator.ConstraintClauses( this.OverriddenDeclaration ),
                         body,
                         null ),

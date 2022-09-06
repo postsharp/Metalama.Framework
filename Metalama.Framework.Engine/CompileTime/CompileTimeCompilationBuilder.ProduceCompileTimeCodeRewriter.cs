@@ -787,8 +787,9 @@ namespace Metalama.Framework.Engine.CompileTime
                                  v =>
                                  {
                                      var member = node.WithDeclaration(
-                                         node.Declaration.WithVariables( SingletonSeparatedList( v ) )
-                                             .WithType( (TypeSyntax) this.Visit( node.Declaration.Type )! ) );
+                                             node.Declaration.WithVariables( SingletonSeparatedList( v ) )
+                                                 .WithType( (TypeSyntax) this.Visit( node.Declaration.Type )! ) )
+                                         .WithAttributeLists( default );
 
                                      if ( removeReadOnly )
                                      {
@@ -811,8 +812,9 @@ namespace Metalama.Framework.Engine.CompileTime
                                  TemplateCompilerSemantics.Initializer,
                                  declarator,
                                  v => node.WithDeclaration(
-                                     node.Declaration.WithVariables( SingletonSeparatedList( v ) )
-                                         .WithType( (TypeSyntax) this.Visit( node.Declaration.Type )! ) ) ) )
+                                         node.Declaration.WithVariables( SingletonSeparatedList( v ) )
+                                             .WithType( (TypeSyntax) this.Visit( node.Declaration.Type )! ) )
+                                     .WithAttributeLists( default ) ) )
                     {
                         yield return result;
                     }

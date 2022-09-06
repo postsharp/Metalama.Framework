@@ -55,7 +55,7 @@ namespace Metalama.Framework.Engine.Transformations
             this.RemoveTemplate = removeTemplate?.ForOverride( overriddenDeclaration.RemoveMethod, parameters );
         }
 
-        public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
+        public override IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context )
         {
             if ( this.EventTemplate?.Declaration.IsEventField() == true )
             {

@@ -156,7 +156,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 out initializerMethod );
         }
 
-        public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
+        public override IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context )
         {
             var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
 
@@ -240,11 +240,10 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     this.GetMethod.Accessibility.AddTokens( tokens );
                 }
 
-                // TODO: Attributes.
                 return
                     AccessorDeclaration(
                             SyntaxKind.GetAccessorDeclaration,
-                            List<AttributeListSyntax>(),
+                            this.GetAttributeLists( context, this.GetMethod ),
                             TokenList( tokens ),
                             Token( SyntaxKind.GetKeyword ),
                             this.IsAutoPropertyOrField
@@ -271,7 +270,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 return
                     AccessorDeclaration(
                         this._hasInitOnlySetter ? SyntaxKind.InitAccessorDeclaration : SyntaxKind.SetAccessorDeclaration,
-                        List<AttributeListSyntax>(),
+                        this.GetAttributeLists( context, this.SetMethod ),
                         TokenList( tokens ),
                         this._hasInitOnlySetter ? Token( SyntaxKind.InitKeyword ) : Token( SyntaxKind.SetKeyword ),
                         this.IsAutoPropertyOrField

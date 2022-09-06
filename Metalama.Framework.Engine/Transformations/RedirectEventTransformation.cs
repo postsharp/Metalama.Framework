@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.Transformations
             this.TargetEvent = targetEvent;
         }
 
-        public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
+        public override IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context )
         {
             return new[]
             {

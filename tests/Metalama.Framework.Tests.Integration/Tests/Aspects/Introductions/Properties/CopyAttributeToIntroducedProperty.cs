@@ -1,37 +1,37 @@
 ﻿using System;
 using Metalama.Framework.Aspects;
-using Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.CopyAttributeToIntroducedProperty;
-
-[assembly: AspectOrder( typeof(OverrideAttribute), typeof(IntroductionAttribute) )]
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.CopyAttributeToIntroducedProperty
 {
     public class IntroductionAttribute : TypeAspect
     {
         [Introduce]
-        [Override]
-        public int IntroducedProperty_Auto { get; set; }
+        [Foo]
+        public int IntroducedProperty_Auto
+        {
+            [return: Foo]
+            get;
+            [return: Foo]
+            [param: Foo]
+            set;
+        }
 
         [Introduce]
-        [Override]
-        public int IntroducedProperty_Auto_Initializer { get; set; } = 42;
+        [Foo]
+        public int IntroducedProperty_Auto_Initializer
+        {
+            [return: Foo]
+            get;
+            [return: Foo]
+            [param: Foo]
+            set;
+        } = 42;
 
         [Introduce]
-        [Override]
-        public int IntroducedProperty_Auto_GetOnly { get; }
-
-        [Introduce]
-        [Override]
-        public int IntroducedProperty_Auto_GetOnly_Initializer { get; } = 42;
-
-        [Introduce]
-        [Override]
-        public static int IntroducedProperty_Auto_Static { get; set; }
-
-        [Introduce]
-        [Override]
+        [Foo]
         public int IntroducedProperty_Accessors
         {
+            [return: Foo]
             get
             {
                 Console.WriteLine( "Get" );
@@ -39,6 +39,8 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.C
                 return 42;
             }
 
+            [return: Foo]
+            [param: Foo]
             set
             {
                 Console.WriteLine( value );
@@ -46,23 +48,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.C
         }
     }
 
-    public class OverrideAttribute : OverrideFieldOrPropertyAspect
-    {
-        public override dynamic? OverrideProperty
-        {
-            get
-            {
-                Console.WriteLine("This is the overridden getter.");
-                return meta.Proceed();
-            }
-
-            set
-            {
-                Console.WriteLine($"This is the overridden setter.");
-                meta.Proceed();
-            }
-        }
-    }
+    public class FooAttribute : Attribute { }
 
     // <target>
     [Introduction]

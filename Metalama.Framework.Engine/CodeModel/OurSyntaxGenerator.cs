@@ -199,7 +199,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public TypeSyntax EventType( IEvent property ) => this.Type( property.Type.GetSymbol() );
 
 #pragma warning disable CA1822 // Can be made static
-        public TypeParameterListSyntax? TypeParameterList( IMethod method )
+        public TypeParameterListSyntax? TypeParameterList( IMethod method, CompilationModel compilation )
         {
             if ( method.TypeParameters.Count == 0 )
             {
@@ -207,14 +207,15 @@ namespace Metalama.Framework.Engine.CodeModel
             }
             else
             {
-                var list = SyntaxFactory.TypeParameterList( SeparatedList( method.TypeParameters.Select( TypeParameter ).ToArray() ) );
+                var list = SyntaxFactory.TypeParameterList(
+                    SeparatedList( method.TypeParameters.Select( p => this.TypeParameter( p, compilation ) ).ToArray() ) );
 
                 return list;
             }
         }
 #pragma warning restore CA1822 // Can be made static
 
-        private static TypeParameterSyntax TypeParameter( ITypeParameter typeParameter )
+        private TypeParameterSyntax TypeParameter( ITypeParameter typeParameter, CompilationModel compilation )
         {
             var syntax = SyntaxFactory.TypeParameter( typeParameter.Name );
 
@@ -231,22 +232,21 @@ namespace Metalama.Framework.Engine.CodeModel
                     break;
             }
 
+            syntax = syntax.WithAttributeLists( this.AttributesForDeclaration( typeParameter.ToTypedRef<IDeclaration>(), compilation ) );
+
             return syntax;
         }
 
-        public ParameterListSyntax ParameterList( IMethodBase method )
-            =>
-
-                // TODO: generics?, attributes
-                SyntaxFactory.ParameterList(
-                    SeparatedList(
-                        method.Parameters.Select(
-                            p => Parameter(
-                                List<AttributeListSyntax>(),
-                                p.GetSyntaxModifierList(),
-                                this.Type( p.Type.GetSymbol() ),
-                                Identifier( p.Name ),
-                                null ) ) ) );
+        public ParameterListSyntax ParameterList( IMethodBase method, CompilationModel compilation )
+            => SyntaxFactory.ParameterList(
+                SeparatedList(
+                    method.Parameters.Select(
+                        p => Parameter(
+                            this.AttributesForDeclaration( method.ToTypedRef<IDeclaration>(), compilation ),
+                            p.GetSyntaxModifierList(),
+                            this.Type( p.Type.GetSymbol() ),
+                            Identifier( p.Name ),
+                            null ) ) ) );
 
 #pragma warning disable CA1822 // Can be made static
         public ArgumentListSyntax ArgumentList( IMethodBase method, Func<IParameter, ExpressionSyntax?> expressionFunc )

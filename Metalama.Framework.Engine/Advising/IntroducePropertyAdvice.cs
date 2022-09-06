@@ -109,6 +109,24 @@ namespace Metalama.Framework.Engine.Advising
                 }
             }
 
+            if ( this._getTemplate != null )
+            {
+                CopyTemplateAttributes( this._getTemplate.Template.Declaration, this.Builder.GetMethod!, serviceProvider );
+                CopyTemplateAttributes( this._getTemplate.Template.Declaration.ReturnParameter, this.Builder.GetMethod!.ReturnParameter, serviceProvider );
+            }
+
+            if ( this._setTemplate != null )
+            {
+                CopyTemplateAttributes( this._setTemplate.Template.Declaration, this.Builder.SetMethod!, serviceProvider );
+
+                CopyTemplateAttributes(
+                    this._setTemplate.Template.Declaration.Parameters[0],
+                    (IDeclarationBuilder) this.Builder.SetMethod!.Parameters[0],
+                    serviceProvider );
+
+                CopyTemplateAttributes( this._setTemplate.Template.Declaration.ReturnParameter, this.Builder.SetMethod.ReturnParameter, serviceProvider );
+            }
+
             // TODO: For get accessor template, we are ignoring accessibility of set accessor template because it can be easily incompatible.
         }
 

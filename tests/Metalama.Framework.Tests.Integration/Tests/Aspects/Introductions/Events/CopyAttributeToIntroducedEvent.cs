@@ -2,44 +2,36 @@
 
 using System;
 using Metalama.Framework.Aspects;
-using Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Events.CopyAttributeToIntroducedEvent;
-
-[assembly: AspectOrder( typeof(IntroduceAttribute), typeof(OverrideAttribute) )]
 
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Events.CopyAttributeToIntroducedEvent
 {
     public class IntroductionAttribute : TypeAspect
     {
         [Introduce]
-        [Override]
+        [Foo]
         public event EventHandler? Event
         {
+            [return: Foo]
+            [param: Foo]
             add
             {
                 Console.WriteLine( "Original add accessor." );
             }
 
+            [return: Foo]
+            [param: Foo]
             remove
             {
                 Console.WriteLine( "Original remove accessor." );
             }
         }
+
+        [Introduce]
+        [Foo]
+        public event EventHandler? FieldLikeEvent;
     }
 
-    public class OverrideAttribute : OverrideEventAspect
-    {
-        public override void OverrideAdd(dynamic value)
-        {
-            Console.WriteLine("This is the overriden add template.");
-            meta.Proceed();
-        }
-
-        public override void OverrideRemove(dynamic value)
-        {
-            Console.WriteLine("This is the overriden remove template.");
-            meta.Proceed();
-        }
-    }
+    public class FooAttribute : Attribute { }
 
     // <target>
     [Introduction]

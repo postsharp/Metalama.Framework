@@ -177,7 +177,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                     RefKind.None );
         }
 
-        public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
+        public override IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context )
         {
             if ( this.DeclarationKind == DeclarationKind.Finalizer )
             {
@@ -205,7 +205,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                             TokenList( Token( SyntaxKind.PublicKeyword ), Token( SyntaxKind.StaticKeyword ) ),
                             this.OperatorKind.ToOperatorKeyword(),
                             context.SyntaxGenerator.Type( this.ReturnType.GetSymbol().AssertNotNull() ),
-                            context.SyntaxGenerator.ParameterList( this ),
+                            context.SyntaxGenerator.ParameterList( this, context.Compilation ),
                             null,
                             ArrowExpressionClause( context.SyntaxGenerator.DefaultExpression( this.ReturnType.GetSymbol().AssertNotNull() ) ) );
 
@@ -222,7 +222,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                             TokenList( Token( SyntaxKind.PublicKeyword ), Token( SyntaxKind.StaticKeyword ) ),
                             context.SyntaxGenerator.Type( this.ReturnType.GetSymbol().AssertNotNull() ),
                             this.OperatorKind.ToOperatorKeyword(),
-                            context.SyntaxGenerator.ParameterList( this ),
+                            context.SyntaxGenerator.ParameterList( this, context.Compilation ),
                             null,
                             ArrowExpressionClause( context.SyntaxGenerator.DefaultExpression( this.ReturnType.GetSymbol().AssertNotNull() ) ) );
 
@@ -244,8 +244,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                                 (NameSyntax) syntaxGenerator.Type( this.ExplicitInterfaceImplementations[0].DeclaringType.GetSymbol() ) )
                             : null,
                         this.GetCleanName(),
-                        context.SyntaxGenerator.TypeParameterList( this ),
-                        context.SyntaxGenerator.ParameterList( this ),
+                        context.SyntaxGenerator.TypeParameterList( this, context.Compilation ),
+                        context.SyntaxGenerator.ParameterList( this, context.Compilation ),
                         context.SyntaxGenerator.ConstraintClauses( this ),
                         Block(
                             List(
