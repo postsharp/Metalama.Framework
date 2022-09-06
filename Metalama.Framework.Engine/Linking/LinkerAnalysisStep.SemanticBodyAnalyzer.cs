@@ -156,6 +156,8 @@ namespace Metalama.Framework.Engine.Linking
 
                     case ArrowExpressionClauseSyntax:
                         return new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
+                    case AccessorDeclarationSyntax { Body: null, ExpressionBody: null } accessorDeclarationSyntax:
+                        return new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
                     default:
                         throw new AssertionFailedException();
                 }
@@ -306,7 +308,8 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         MethodDeclarationSyntax methodDecl => (SyntaxNode?) methodDecl.Body ?? methodDecl.ExpressionBody.AssertNotNull(),
                         AccessorDeclarationSyntax accessorDecl => accessorDecl.Body ?? (SyntaxNode?) accessorDecl.ExpressionBody ?? accessorDecl,
-                        VariableDeclaratorSyntax declarator => declarator ?? throw new AssertionFailedException(),
+                        VariableDeclaratorSyntax declarator => declarator,
+                        ArrowExpressionClauseSyntax arrowExpression => arrowExpression,
                         _ => throw new AssertionFailedException(),
                     };
             }

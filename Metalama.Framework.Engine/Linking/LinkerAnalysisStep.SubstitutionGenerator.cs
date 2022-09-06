@@ -108,7 +108,7 @@ namespace Metalama.Framework.Engine.Linking
 
                             if ( root is not StatementSyntax )
                             {
-                                AddSubstitution( inliningSpecification.ContextIdentifier, this.CreateOriginalBodySubstitution( root, symbol ) );
+                                AddSubstitution( inliningSpecification.ContextIdentifier, this.CreateOriginalBodySubstitution( root, symbol, inliningSpecification.ReturnVariableIdentifier ) );
                             }
                         }
                     }
@@ -137,12 +137,14 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            private SyntaxNodeSubstitution CreateOriginalBodySubstitution(SyntaxNode root, IMethodSymbol symbol)
+            private SyntaxNodeSubstitution CreateOriginalBodySubstitution(SyntaxNode root, IMethodSymbol symbol, string? returnVariableIdentifier)
             {
-                switch ( root )
+                switch ( (root, symbol) )
                 {
-                    case ArrowExpressionClauseSyntax arrowExpressionClause:
-                        return new ExpressionBodySubstitution( arrowExpressionClause, symbol );
+                    case (AccessorDeclarationSyntax accessorDeclarationSyntax, { AssociatedSymbol: IPropertySymbol { } property } ):
+                        return new AutoPropertyAccessorSubstitution( accessorDeclarationSyntax, property, returnVariableIdentifier );
+                    case (ArrowExpressionClauseSyntax arrowExpressionClause, _ ):
+                        return new PropertyExpressionBodySubstitution( arrowExpressionClause, symbol );
                     default:
                         throw new AssertionFailedException();
                 }

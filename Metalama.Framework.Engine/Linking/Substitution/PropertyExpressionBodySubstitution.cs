@@ -10,12 +10,12 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking.Substitution
 {
-    internal class ExpressionBodySubstitution : SyntaxNodeSubstitution
+    internal class PropertyExpressionBodySubstitution : SyntaxNodeSubstitution
     {
         private readonly ArrowExpressionClauseSyntax _rootNode;
         private readonly IMethodSymbol _targetMethod;
 
-        public ExpressionBodySubstitution( ArrowExpressionClauseSyntax rootNode, IMethodSymbol targetMethod )
+        public PropertyExpressionBodySubstitution( ArrowExpressionClauseSyntax rootNode, IMethodSymbol targetMethod )
         {
             this._rootNode = rootNode;
             this._targetMethod = targetMethod;

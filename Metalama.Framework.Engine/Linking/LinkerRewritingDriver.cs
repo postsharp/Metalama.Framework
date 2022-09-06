@@ -286,7 +286,7 @@ namespace Metalama.Framework.Engine.Linking
                     }
 
                 default:
-                    throw new NotImplementedException();
+                    throw new AssertionFailedException();
             }
         }
         

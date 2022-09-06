@@ -25,8 +25,11 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                 aspectReference.ContainingSemantic.Symbol.GetPrimaryDeclaration() switch
                 {
                     MethodDeclarationSyntax { Body : { } methodBody } => methodBody,
-                    MethodDeclarationSyntax { ExpressionBody: { } expressionBody } => expressionBody,
+                    MethodDeclarationSyntax { ExpressionBody: { } methodBody } => methodBody,
                     AccessorDeclarationSyntax { Body: { } accessorBody } => accessorBody,
+                    AccessorDeclarationSyntax { ExpressionBody: { } accessorBody } => accessorBody,
+                    AccessorDeclarationSyntax { Body: null, ExpressionBody: null } accessor => accessor,
+                    ArrowExpressionClauseSyntax arrowExpressionClause => arrowExpressionClause,
                     _ => throw new AssertionFailedException(),
                 };
 
