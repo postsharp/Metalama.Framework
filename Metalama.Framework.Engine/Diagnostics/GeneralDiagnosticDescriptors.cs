@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.Diagnostics
                 "LAMA0001",
                 _category,
                 "Unexpected exception occurred in Metalama: {0} Exception details are in '{1}'. " +
-                " Please report this issue at https://www.postsharp.net/support and attach this file to the ticket.",
+                "Please report this issue at https://www.postsharp.net/support and attach this file to the ticket. You may want to remove sensitive data from the report.",
                 Error,
                 "Unexpected exception in Metalama." );
 
