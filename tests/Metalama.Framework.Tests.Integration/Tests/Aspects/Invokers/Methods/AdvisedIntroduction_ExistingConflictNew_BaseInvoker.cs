@@ -1,45 +1,38 @@
 ﻿using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.AdvisedIntroduction_ExistingConflictNew_BaseInvoker;
+using System;
 
-[assembly: AspectOrder(typeof(TestAttribute), typeof(TestIntroductionAttribute))]
+[assembly: AspectOrder(typeof(IntroductionAttribute), typeof(OverrideAttribute))]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.AdvisedIntroduction_ExistingConflictNew_BaseInvoker
 {
-    public class TestIntroductionAttribute : TypeAspect
+    public class IntroductionAttribute : TypeAspect
     {
         [Introduce(WhenExists = OverrideStrategy.New)]
         public void BaseClass_VoidMethod()
         {
             meta.InsertComment("Introduced.");
-            this.Print();
-            System.Console.WriteLine("Introduced method print.");
+            meta.Target.Method.Invokers.Base!.Invoke(meta.This);
         }
 
         [Introduce(WhenExists = OverrideStrategy.New)]
         public int BaseClass_ExistingMethod()
         {
             meta.InsertComment("Introduced.");
-            this.Print();
-            return 100;
+            return meta.Target.Method.Invokers.Base!.Invoke(meta.This);
         }
 
         [Introduce(WhenExists = OverrideStrategy.New)]
         public int BaseClass_ExistingMethod_Parameterized(int x)
         {
             meta.InsertComment("Introduced.");
-            this.Print();
-            return x + 100;
+            return meta.Target.Method.Invokers.Base!.Invoke(meta.This, meta.Target.Method.Parameters[0].Value);
         }
 
-        [Introduce(WhenExists = OverrideStrategy.New)]
-        public void Print()
-        {
-            System.Console.WriteLine("Print() called.");
-        }
     }
 
-    public class TestAttribute : TypeAspect
+    public class OverrideAttribute : TypeAspect
     {
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
@@ -52,6 +45,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.Ad
         [Template]
         public dynamic MethodTemplate()
         {
+            Console.WriteLine("Override");
             if (meta.Target.Method.Parameters.Count == 0)
             {
                 return meta.Target.Method.Invokers.Base!.Invoke(meta.This);
@@ -84,8 +78,8 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.Ad
     }
 
     // <target>
-    [TestIntroduction]
-    [Test]
+    [Introduction]
+    [Override]
     internal class TargetClass : BaseClass
     {
         public void VoidMethod()

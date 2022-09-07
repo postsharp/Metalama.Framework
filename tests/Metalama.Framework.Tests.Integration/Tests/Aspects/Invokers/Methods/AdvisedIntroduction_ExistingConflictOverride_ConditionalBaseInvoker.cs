@@ -1,4 +1,8 @@
-﻿using Metalama.Framework.Aspects;
+﻿#if TEST_OPTIONS
+// @Skipped(#28907 Linker: conditional access expression)
+# endif
+
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.Methods.AdvisedIntroduction_ExistingConflictOverride_ConditionalBaseInvoker;
 

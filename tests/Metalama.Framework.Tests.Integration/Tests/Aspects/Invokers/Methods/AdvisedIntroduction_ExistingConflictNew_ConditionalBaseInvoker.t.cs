@@ -1,36 +1,26 @@
-﻿[TestIntroduction]
-[Test]
-internal class TargetClass
+﻿[Introduction]
+[Override]
+internal class TargetClass : BaseClass
 {
-    public virtual void BaseClass_VoidMethod()
+    public void TargetClass_Method()
     {
-        System.Console.WriteLine("BaseClass_VoidMethod()");
+        // Introduced.
+        global::System.Console.WriteLine("Override");
+        this?.TargetClass_Method_Source();
+        goto __aspect_return_1;
+
+    __aspect_return_1:;
     }
 
-    public virtual int? BaseClass_ExistingMethod()
+    private void TargetClass_Method_Source()
     {
-        System.Console.WriteLine("BaseClass_ExistingMethod()");
-        return 42;
+        System.Console.WriteLine("TargetClass_Method()");
     }
 
-    public virtual int? BaseClass_ExistingMethod_Parameterized(int? x)
-    {
-        System.Console.WriteLine("BaseClass_ExistingMethod_Parameterized()");
-        return x + 42;
-    }
 
-    public void VoidMethod()
+    public new void BaseClass_Method()
     {
-        global::System.Console.WriteLine("Base method print.");
-    }
-
-    public int ExistingMethod()
-    {
-        return (global::System.Int32)42;
-    }
-
-    public int ExistingMethod_Parameterized(int x)
-    {
-        return (global::System.Int32)(x);
+        // Introduced.
+        base.BaseClass_Method();
     }
 }

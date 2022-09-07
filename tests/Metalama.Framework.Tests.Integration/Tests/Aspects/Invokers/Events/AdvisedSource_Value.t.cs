@@ -1,20 +1,21 @@
 internal class TargetClass
 {
-
     private EventHandler? _field;
-
 
     [Test]
     public event EventHandler Event
     {
         add
         {
+            global::System.Console.WriteLine("Override");
             this.Event_Source += value;
-        }
 
+        }
         remove
         {
+            global::System.Console.WriteLine("Override");
             this.Event_Source -= value;
+
         }
     }
 
@@ -30,10 +31,12 @@ internal class TargetClass
     {
         add
         {
+            global::System.Console.WriteLine("Override");
             this.EventField_Source += value;
         }
         remove
         {
+            global::System.Console.WriteLine("Override");
             this.EventField_Source -= value;
         }
     }

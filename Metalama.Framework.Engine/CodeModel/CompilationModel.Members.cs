@@ -60,6 +60,14 @@ public partial class CompilationModel
         => this._properties.TryGetValue( propertyBuilder.DeclaringType.GetSymbol(), out var properties )
            && properties.Contains( propertyBuilder.ToTypedRef<IProperty>() );
 
+    internal bool Contains( BaseParameterBuilder parameterBuilder )
+        => parameterBuilder.ContainingDeclaration switch
+        {
+            DeclarationBuilder declarationBuilder => this.Contains( declarationBuilder ),
+            null => false,
+            _ => this._parameters.TryGetValue( ((IHasParameters) parameterBuilder.ContainingDeclaration).ToTypedRef<IHasParameters>(), out var parameters ) && parameters.Contains( parameterBuilder.ToTypedRef<IParameter>() )
+        };
+
     internal bool Contains( DeclarationBuilder builder )
         => builder switch
         {
@@ -68,6 +76,7 @@ public partial class CompilationModel
             ConstructorBuilder constructorBuilder => this.Contains( constructorBuilder ),
             EventBuilder eventBuilder => this.Contains( eventBuilder ),
             PropertyBuilder propertyBuilder => this.Contains( propertyBuilder ),
+            BaseParameterBuilder parameterBuilder => this.Contains( parameterBuilder ),
             _ => throw new AssertionFailedException()
         };
 

@@ -6,22 +6,19 @@ internal class TargetClass : BaseClass
     {
         get
         {
-            global::System.Console.WriteLine("This is introduced property.");
-            return this.TargetClassProperty_Source;
+            global::System.Console.WriteLine("Override");
+            return this.TargetClassProperty;
+
         }
     }
 
-    private int TargetClassProperty_Source
-    {
-        get => 42;
-    }
 
     public new global::System.Int32 BaseClassProperty
     {
         get
         {
-            global::System.Console.WriteLine("This is introduced property.");
-            return base.BaseClassProperty;
+            global::System.Console.WriteLine("Override");
+            return this.BaseClassProperty;
         }
     }
 }

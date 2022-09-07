@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
+using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.RunTime;
@@ -38,7 +39,9 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         [Memo]
         public IMethod? SetMethod => this.FieldBuilder.SetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this.FieldBuilder.SetMethod ) : null;
 
-        IInvokerFactory<IFieldOrPropertyInvoker> IFieldOrProperty.Invokers => throw new NotImplementedException();
+        [Memo]
+        public IInvokerFactory<IFieldOrPropertyInvoker> Invokers => 
+            new InvokerFactory<IFieldOrPropertyInvoker>( ( order, invokerOperator ) => new FieldOrPropertyInvoker( this, order, invokerOperator ) );
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => this.FieldBuilder.ToFieldOrPropertyInfo();
 

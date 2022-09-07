@@ -8,14 +8,16 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedSou
 {
     public class TestAttribute : OverrideEventAspect
     {
-        public override void OverrideAdd( dynamic handler)
+        public override void OverrideAdd( dynamic value)
         {
-            meta.Target.Event.AddMethod.Invoke( handler );
+            Console.WriteLine("Override");
+            meta.Target.Event.AddMethod.Invoke( value );
         }
 
-        public override void OverrideRemove( dynamic handler )
+        public override void OverrideRemove( dynamic value )
         {
-            meta.Target.Event.RemoveMethod.Invoke( handler );
+            Console.WriteLine("Override");
+            meta.Target.Event.RemoveMethod.Invoke( value );
         }
     }
 

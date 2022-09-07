@@ -6,7 +6,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedIntroduction_ExistingConflictOverride_BaseInvoker;
 
-[assembly: AspectOrder(typeof(TestAttribute), typeof(IntroductionAttribute))]
+[assembly: AspectOrder(typeof(OverrideAttribute), typeof(IntroductionAttribute))]
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedIntroduction_ExistingConflictOverride_BaseInvoker
 {
@@ -18,13 +18,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
             add
             {
                 Console.WriteLine("This is introduced event.");
-                meta.Proceed();
+                meta.Target.Event.Invokers.Base!.Add(meta.This, value);
             }
 
             remove
             {
                 Console.WriteLine("This is introduced event.");
-                meta.Proceed();
+                meta.Target.Event.Invokers.Base!.Remove(meta.This, value);
             }
         }
 
@@ -35,13 +35,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
             add
             {
                 Console.WriteLine("This is introduced event.");
-                meta.Proceed();
+                meta.Target.Event.Invokers.Base!.Add(meta.This, value);
             }
 
             remove
             {
                 Console.WriteLine("This is introduced event.");
-                meta.Proceed();
+                meta.Target.Event.Invokers.Base!.Remove(meta.This, value);
             }
         }
 
@@ -51,19 +51,19 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
             add
             {
                 Console.WriteLine("This is introduced event.");
-                meta.Proceed();
+                meta.Target.Event.Invokers.Base!.Add(meta.This, value);
             }
 
             remove
             {
                 Console.WriteLine("This is introduced event.");
-                meta.Proceed();
+                meta.Target.Event.Invokers.Base!.Remove(meta.This, value);
             }
         }
     }
 
     [AttributeUsage(AttributeTargets.Class)]
-    public class TestAttribute : TypeAspect
+    public class OverrideAttribute : TypeAspect
     {
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
@@ -111,7 +111,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
 
     // <target>
     [Introduction]
-    [Test]
+    [Override]
     internal class TargetClass : BaseClass
     {
         public override event EventHandler BaseClassAbstractEvent

@@ -4,7 +4,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.FieldPromotion_BaseInvoker;
 
-[assembly: AspectOrder(typeof(TestAttribute), typeof(PromoteAttribute))]
+[assembly: AspectOrder(typeof(OverrideAttribute), typeof(PromoteAttribute))]
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.FieldPromotion_BaseInvoker
 {
@@ -32,7 +32,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.FieldProm
         }
     }
 
-    public class TestAttribute : TypeAspect
+    public class OverrideAttribute : TypeAspect
     {
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
@@ -44,11 +44,13 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.FieldProm
         {
             get
             {
+                Console.WriteLine("Override");
                 return meta.Target.FieldOrProperty.Invokers.Base!.GetValue(meta.This);
             }
 
             set
             {
+                Console.WriteLine("Override");
                 meta.Target.FieldOrProperty.Invokers.Base!.SetValue(meta.This, value);
             }
         }
@@ -56,7 +58,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Overrides.Fields.FieldProm
 
     // <target>
     [Promote]
-    [Test]
+    [Override]
     internal class TargetClass
     {
         public int Field;

@@ -1,20 +1,47 @@
 ﻿[Introduction]
-[Test]
+[Override]
 internal class TargetClass : BaseClass
 {
-    public int TargetClassProperty
+    public virtual int TargetClassProperty
     {
         get
         {
-            return this.TargetClassProperty;
+            global::System.Console.WriteLine("Override");
+            return this.TargetClassProperty_Introduction;
+
         }
     }
 
-    public int BaseClassProperty
+    private int TargetClassProperty_Source
+    {
+        get => 42;
+    }
+
+
+    private global::System.Int32 TargetClassProperty_Introduction
     {
         get
         {
-            return this.BaseClassProperty;
+            global::System.Console.WriteLine("This is introduced property.");
+            return this.TargetClassProperty_Source;
+        }
+    }
+
+    private global::System.Int32 BaseClassProperty_Introduction
+    {
+        get
+        {
+            global::System.Console.WriteLine("This is introduced property.");
+            return base.BaseClassProperty;
+        }
+    }
+
+    public override global::System.Int32 BaseClassProperty
+    {
+        get
+        {
+            global::System.Console.WriteLine("Override");
+            return this.BaseClassProperty_Introduction;
         }
     }
 }

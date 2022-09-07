@@ -1,21 +1,22 @@
 ﻿[Promote]
-[Test]
+[Override]
 internal class TargetClass
 {
-    private global::System.Int32 _field;
+
 
     public global::System.Int32 Field
     {
         get
         {
-            global::System.Console.WriteLine("This is aspect code.");
-            return this._field;
-        }
+            global::System.Console.WriteLine("Override.");
+            return this.Field;
 
+        }
         set
         {
-            global::System.Console.WriteLine("This is aspect code.");
-            this._field = value;
+            global::System.Console.WriteLine("Override.");
+            this.Field = value;
+
         }
     }
 }

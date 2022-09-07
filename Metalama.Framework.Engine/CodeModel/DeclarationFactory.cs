@@ -390,7 +390,7 @@ namespace Metalama.Framework.Engine.CodeModel
         private static Exception CreateBuilderNotExists( IDeclarationBuilder builder )
             => new InvalidOperationException( $"The declaration '{builder}' does not exist in the current compilation." );
 
-        internal IParameter GetParameter( ParameterBuilder parameterBuilder, ReferenceResolutionOptions options )
+        internal IParameter GetParameter( BaseParameterBuilder parameterBuilder, ReferenceResolutionOptions options )
         {
             if ( options.MustExist() && !this._compilationModel.Contains( parameterBuilder ) )
             {
@@ -486,7 +486,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 FieldBuilder fieldBuilder => this.GetField( fieldBuilder, options ),
                 PropertyBuilder propertyBuilder => this.GetProperty( propertyBuilder, options ),
                 EventBuilder eventBuilder => this.GetEvent( eventBuilder, options ),
-                ParameterBuilder parameterBuilder => this.GetParameter( parameterBuilder, options ),
+                BaseParameterBuilder parameterBuilder => this.GetParameter( parameterBuilder, options ),
                 AttributeBuilder attributeBuilder => this.GetAttribute( attributeBuilder, options ),
                 TypeParameterBuilder genericParameterBuilder => this.GetGenericParameter( genericParameterBuilder, options ),
                 AccessorBuilder accessorBuilder => this.GetAccessor( accessorBuilder, options ),
@@ -495,7 +495,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 // This is for linker tests (fake builders), which resolve to themselves.
                 // ReSharper disable once SuspiciousTypeConversion.Global
                 ISdkRef<IDeclaration> reference => reference.GetTarget( this._compilationModel ).AssertNotNull(),
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException($"Cannot get a declaration for a {builder.GetType()}")
             };
 
         public IType GetIType( IType type )

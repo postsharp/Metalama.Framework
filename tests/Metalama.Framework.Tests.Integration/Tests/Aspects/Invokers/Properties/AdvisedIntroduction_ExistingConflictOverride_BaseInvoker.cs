@@ -3,7 +3,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.AdvisedIntroduction_ExistingConflictOverride_BaseInvoker;
 using System;
 
-[assembly: AspectOrder(typeof(TestAttribute), typeof(IntroductionAttribute))]
+[assembly: AspectOrder(typeof(OverrideAttribute), typeof(IntroductionAttribute))]
 
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.AdvisedIntroduction_ExistingConflictOverride_BaseInvoker
 {
@@ -16,7 +16,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.AdvisedInt
             {
                 Console.WriteLine("This is introduced property.");
 
-                return meta.Proceed();
+                return meta.Target.FieldOrProperty.Invokers.Base!.GetValue(meta.This);
             }
         }
 
@@ -27,12 +27,12 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.AdvisedInt
             {
                 Console.WriteLine("This is introduced property.");
 
-                return meta.Proceed();
+                return meta.Target.FieldOrProperty.Invokers.Base!.GetValue(meta.This);
             }
         }
     }
 
-    public class TestAttribute : TypeAspect
+    public class OverrideAttribute : TypeAspect
     {
         public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
@@ -48,11 +48,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.AdvisedInt
         {
             get
             {
+                Console.WriteLine("Override");
                 return meta.Target.FieldOrProperty.Invokers.Base!.GetValue(meta.This);
             }
 
             set
             {
+                Console.WriteLine("Override");
                 meta.Target.FieldOrProperty.Invokers.Base!.SetValue(meta.This, value);
             }
         }
@@ -69,10 +71,10 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Invokers.AdvisedInt
 
     // <target>
     [Introduction]
-    [Test]
+    [Override]
     internal class TargetClass : BaseClass
     {
-        public int TargetClassProperty
+        public virtual int TargetClassProperty
         {
             get => 42;
         }

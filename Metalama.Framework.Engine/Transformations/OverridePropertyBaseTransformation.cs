@@ -37,13 +37,17 @@ internal abstract class OverridePropertyBaseTransformation : OverrideMemberTrans
             ? SyntaxKind.InitAccessorDeclaration
             : SyntaxKind.SetAccessorDeclaration;
 
+        var modifiers = this.OverriddenDeclaration
+            .GetSyntaxModifierList( ModifierCategories.Static )
+            .Insert( 0, SyntaxFactory.Token( SyntaxKind.PrivateKeyword ) );
+
         var overrides = new[]
         {
             new IntroducedMember(
                 this,
                 SyntaxFactory.PropertyDeclaration(
                     SyntaxFactory.List<AttributeListSyntax>(),
-                    this.OverriddenDeclaration.GetSyntaxModifierList(),
+                    modifiers,
                     context.SyntaxGenerator.PropertyType( this.OverriddenDeclaration ),
                     null,
                     SyntaxFactory.Identifier( propertyName ),

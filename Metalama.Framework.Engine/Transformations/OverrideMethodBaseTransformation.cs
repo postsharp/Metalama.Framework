@@ -36,7 +36,9 @@ namespace Metalama.Framework.Engine.Transformations
         {
             TypeSyntax? returnType = null;
 
-            var modifiers = this.OverriddenDeclaration.GetSyntaxModifierList();
+            var modifiers = this.OverriddenDeclaration
+                .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Async )
+                .Insert( 0, Token( SyntaxKind.PrivateKeyword ) );
 
             if ( !this.OverriddenDeclaration.IsAsync )
             {
