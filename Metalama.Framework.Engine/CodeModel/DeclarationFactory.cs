@@ -495,7 +495,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 // This is for linker tests (fake builders), which resolve to themselves.
                 // ReSharper disable once SuspiciousTypeConversion.Global
                 ISdkRef<IDeclaration> reference => reference.GetTarget( this._compilationModel ).AssertNotNull(),
-                _ => throw new AssertionFailedException($"Cannot get a declaration for a {builder.GetType()}")
+                _ => throw new AssertionFailedException( $"Cannot get a declaration for a {builder.GetType()}" )
             };
 
         public IType GetIType( IType type )

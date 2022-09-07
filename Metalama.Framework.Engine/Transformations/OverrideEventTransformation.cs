@@ -133,12 +133,10 @@ namespace Metalama.Framework.Engine.Transformations
                 // Template expansion error.
                 return Enumerable.Empty<IntroducedMember>();
             }
-            
-            
+
             var modifiers = this.OverriddenDeclaration
                 .GetSyntaxModifierList( ModifierCategories.Static )
                 .Insert( 0, Token( SyntaxKind.PrivateKeyword ) );
-
 
             // TODO: Do not throw exception when template expansion fails.
             var overrides = new[]

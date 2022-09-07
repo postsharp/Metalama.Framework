@@ -40,8 +40,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IMethod? SetMethod => this.FieldBuilder.SetMethod != null ? new BuiltAccessor( this, (AccessorBuilder) this.FieldBuilder.SetMethod ) : null;
 
         [Memo]
-        public IInvokerFactory<IFieldOrPropertyInvoker> Invokers => 
-            new InvokerFactory<IFieldOrPropertyInvoker>( ( order, invokerOperator ) => new FieldOrPropertyInvoker( this, order, invokerOperator ) );
+        public IInvokerFactory<IFieldOrPropertyInvoker> Invokers
+            => new InvokerFactory<IFieldOrPropertyInvoker>( ( order, invokerOperator ) => new FieldOrPropertyInvoker( this, order, invokerOperator ) );
 
         public FieldOrPropertyInfo ToFieldOrPropertyInfo() => this.FieldBuilder.ToFieldOrPropertyInfo();
 
