@@ -7,6 +7,7 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
@@ -72,6 +73,29 @@ internal class LicenseVerifier : IService
                 : assemblyName;
         }
 
+        bool IsProjectWithValidRedistributionLicense( CompileTimeProject project)
+        {
+            var licenseKey = project.ProjectLicenseInfo.RedistributionLicenseKey;
+
+            if ( string.IsNullOrEmpty( licenseKey ) )
+            {
+                return false;
+            }
+
+            var projectAssemblyName = NormalizeAssemblyName( project.RunTimeIdentity.Name );
+
+            if ( !this._licenseConsumptionManager.ValidateRedistributionLicenseKey( licenseKey!, projectAssemblyName ) )
+            {
+                diagnostics.Report(
+                    LicensingDiagnosticDescriptors.RedistributionLicenseInvalid.CreateRoslynDiagnostic(
+                        null, NormalizeAssemblyName( projectAssemblyName ) ) );
+
+                return false;
+            }
+
+            return true;
+        }
+
         // Distinguish redistribution and non-redistribution aspect classes.
         var nonredistributionAspectClasses = aspectInstanceResults.Select( r => r.AspectInstance.AspectClass ).ToHashSet();
         var projectsWithRedistributionLicense = nonredistributionAspectClasses
@@ -79,22 +103,9 @@ internal class LicenseVerifier : IService
             .Select( c => (AspectClass) c )
             .Where( c => c.Project != null )
             .Select( c => c.Project! )
-            .Where( p => !string.IsNullOrEmpty( p.ProjectLicenseInfo.RedistributionLicenseKey ) )
+            .Distinct()
+            .Where( p => IsProjectWithValidRedistributionLicense( p ) )
             .ToHashSet();
-
-        foreach ( var project in projectsWithRedistributionLicense )
-        {
-            var projectAssemblyName = project.RunTimeIdentity.Name;
-
-            if ( !this._licenseConsumptionManager.ValidateRedistributionLicenseKey( project.ProjectLicenseInfo.RedistributionLicenseKey!, project.RunTimeIdentity.Name ) )
-            {
-                diagnostics.Report(
-                    LicensingDiagnosticDescriptors.RedistributionLicenseInvalid.CreateRoslynDiagnostic(
-                        null, NormalizeAssemblyName( projectAssemblyName ) ) );
-
-                projectsWithRedistributionLicense.Remove( project );
-            }
-        }
 
         nonredistributionAspectClasses.RemoveWhere( c => c is AspectClass ac && ac.Project != null && projectsWithRedistributionLicense.Contains( ac.Project ) );
 

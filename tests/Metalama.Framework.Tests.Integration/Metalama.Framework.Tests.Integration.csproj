@@ -56,10 +56,4 @@
 
     <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets" />
 
-    <ItemGroup>
-      <None Update="C:\src\Metalama\Tests\Metalama.Framework.Tests.Integration\Tests\Licensing\RedistributionDisallowed.t.cs">
-        <DependentUpon>RedistributionDisallowed.cs</DependentUpon>
-      </None>
-    </ItemGroup>
-
 </Project>

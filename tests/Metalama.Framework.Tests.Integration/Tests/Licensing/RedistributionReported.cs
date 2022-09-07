@@ -2,8 +2,7 @@
 // @DependencyLicenseFile(Tests\Licensing\Licenses\Redistribution.license)
 // @Include(_NonredistributionAspects.cs);
 // @Include(_Redistribution.cs);
-// TODO: Replace by _Redistribution.Dependency.cs when #30975 is fixed.
-// @Include(_Redistribution.WithLicensedNamespace.Dependency.cs);
+// @Include(_Redistribution.Dependency.cs);
 // @DefinedConstant(ASPECTS_IN_REDISTRIBUTION_NAMESPACE)
 // @DependencyDefinedConstant(ASPECTS_IN_REDISTRIBUTION_NAMESPACE)
 
