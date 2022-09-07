@@ -26,6 +26,12 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                 {
                     MethodDeclarationSyntax { Body : { } methodBody } => methodBody,
                     MethodDeclarationSyntax { ExpressionBody: { } methodBody } => methodBody,
+                    DestructorDeclarationSyntax { Body: { } destructorBody } => destructorBody,
+                    DestructorDeclarationSyntax { ExpressionBody: { } destructorBody } => destructorBody,
+                    OperatorDeclarationSyntax { Body: { } operatorBody } => operatorBody,
+                    OperatorDeclarationSyntax { ExpressionBody: { } operatorBody } => operatorBody,
+                    ConversionOperatorDeclarationSyntax { Body: { } conversionOperatorBody } => conversionOperatorBody,
+                    ConversionOperatorDeclarationSyntax { ExpressionBody: { } conversionOperatorBody } => conversionOperatorBody,
                     AccessorDeclarationSyntax { Body: { } accessorBody } => accessorBody,
                     AccessorDeclarationSyntax { ExpressionBody: { } accessorBody } => accessorBody,
                     AccessorDeclarationSyntax { Body: null, ExpressionBody: null } accessor => accessor,

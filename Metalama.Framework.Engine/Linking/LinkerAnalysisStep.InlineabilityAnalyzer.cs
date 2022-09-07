@@ -261,7 +261,7 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     switch ( semantic.Symbol )
                     {
-                        case IMethodSymbol { MethodKind: MethodKind.Ordinary or MethodKind.ExplicitInterfaceImplementation } method:
+                        case IMethodSymbol { MethodKind: MethodKind.Ordinary or MethodKind.ExplicitInterfaceImplementation or MethodKind.UserDefinedOperator or MethodKind.Conversion or MethodKind.Destructor } method:
                             return IsInlinedSemanticBody( semantic.ToTyped<IMethodSymbol>() );
 
                         case IMethodSymbol { MethodKind: MethodKind.PropertyGet or MethodKind.PropertySet } propertyAccessor:

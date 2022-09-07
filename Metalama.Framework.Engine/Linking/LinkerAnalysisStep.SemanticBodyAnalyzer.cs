@@ -310,6 +310,9 @@ namespace Metalama.Framework.Engine.Linking
                     => declaration switch
                     {
                         MethodDeclarationSyntax methodDecl => (SyntaxNode?) methodDecl.Body ?? methodDecl.ExpressionBody.AssertNotNull(),
+                        DestructorDeclarationSyntax destructorDecl => (SyntaxNode?) destructorDecl.Body ?? destructorDecl.ExpressionBody.AssertNotNull(),
+                        OperatorDeclarationSyntax operatorDecl => (SyntaxNode?) operatorDecl.Body ?? operatorDecl.ExpressionBody.AssertNotNull(),
+                        ConversionOperatorDeclarationSyntax conversionOperatorDecl => (SyntaxNode?) conversionOperatorDecl.Body ?? conversionOperatorDecl.ExpressionBody.AssertNotNull(),
                         AccessorDeclarationSyntax accessorDecl => accessorDecl.Body ?? (SyntaxNode?) accessorDecl.ExpressionBody ?? accessorDecl,
                         VariableDeclaratorSyntax declarator => declarator,
                         ArrowExpressionClauseSyntax arrowExpression => arrowExpression,

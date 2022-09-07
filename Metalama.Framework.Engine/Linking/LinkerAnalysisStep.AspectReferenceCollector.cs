@@ -94,6 +94,9 @@ namespace Metalama.Framework.Engine.Linking
                             containingSymbol.GetPrimaryDeclaration() switch
                             {
                                 MethodDeclarationSyntax method => method.Body ?? (SyntaxNode?) method.ExpressionBody ?? throw new AssertionFailedException(),
+                                DestructorDeclarationSyntax destructor => destructor.Body ?? (SyntaxNode?) destructor.ExpressionBody ?? throw new AssertionFailedException(),
+                                OperatorDeclarationSyntax @operator => @operator.Body ?? (SyntaxNode?) @operator.ExpressionBody ?? throw new AssertionFailedException(),
+                                ConversionOperatorDeclarationSyntax conversionOperator => conversionOperator.Body ?? (SyntaxNode?) conversionOperator.ExpressionBody ?? throw new AssertionFailedException(),
                                 AccessorDeclarationSyntax accessor => accessor.Body ?? (SyntaxNode?) accessor.ExpressionBody ?? accessor ?? throw new AssertionFailedException(),
                                 VariableDeclaratorSyntax declarator => declarator ?? throw new AssertionFailedException(),
                                 ArrowExpressionClauseSyntax arrowExpressionClause => arrowExpressionClause,
