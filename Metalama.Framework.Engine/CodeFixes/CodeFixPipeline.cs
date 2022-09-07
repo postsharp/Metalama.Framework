@@ -25,12 +25,13 @@ namespace Metalama.Framework.Engine.CodeFixes
 
         public CodeFixPipeline(
             ServiceProvider serviceProvider,
+            bool computingPreview,
             bool isTest,
             CompileTimeDomain? domain,
             string diagnosticId,
             string diagnosticFilePath,
             in TextSpan diagnosticSpan ) :
-            base( serviceProvider, ExecutionScenario.CodeFix, isTest, domain )
+            base( serviceProvider, computingPreview ? ExecutionScenario.CodeFixPreview : ExecutionScenario.CodeFix, isTest, domain )
         {
             this._diagnosticId = diagnosticId;
             this._diagnosticFilePath = diagnosticFilePath;

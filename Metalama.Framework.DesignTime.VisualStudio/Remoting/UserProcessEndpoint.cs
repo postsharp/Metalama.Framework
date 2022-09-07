@@ -60,10 +60,11 @@ internal partial class UserProcessEndpoint : ClientEndpoint<IAnalysisProcessApi>
     async Task<CodeActionResult> ICodeActionExecutionService.ExecuteCodeActionAsync(
         string projectId,
         CodeActionModel codeActionModel,
+        bool computingPreview,
         CancellationToken cancellationToken )
     {
         var peer = await this.GetServerApiAsync( cancellationToken );
 
-        return await peer.ExecuteCodeActionAsync( projectId, codeActionModel, cancellationToken );
+        return await peer.ExecuteCodeActionAsync( projectId, codeActionModel, computingPreview, cancellationToken );
     }
 }

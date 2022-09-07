@@ -15,11 +15,14 @@ public sealed class CodeActionExecutionContext
 
     internal string ProjectId { get; }
 
-    internal CodeActionExecutionContext( IServiceProvider serviceProvider, CompilationModel compilation, ILogger logger, string projectId )
+    internal bool ComputingPreview { get; }
+
+    internal CodeActionExecutionContext( IServiceProvider serviceProvider, CompilationModel compilation, ILogger logger, string projectId, bool computingPreview )
     {
         this.ServiceProvider = serviceProvider;
         this.Compilation = compilation;
         this.Logger = logger;
         this.ProjectId = projectId;
+        this.ComputingPreview = computingPreview;
     }
 }

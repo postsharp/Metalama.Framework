@@ -20,7 +20,7 @@ public class CodeActionExecutionService : ICodeActionExecutionService
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "CodeAction" );
     }
 
-    public async Task<CodeActionResult> ExecuteCodeActionAsync( string projectId, CodeActionModel codeActionModel, CancellationToken cancellationToken )
+    public async Task<CodeActionResult> ExecuteCodeActionAsync( string projectId, CodeActionModel codeActionModel, bool computingPreview, CancellationToken cancellationToken )
     {
         if ( !this._pipelineFactory.TryGetPipeline( projectId, out var pipeline ) )
         {
@@ -52,9 +52,14 @@ public class CodeActionExecutionService : ICodeActionExecutionService
             return CodeActionResult.Empty;
         }
 
+        if ( !computingPreview )
+        {
+            throw new NotImplementedException( "Check license." );
+        }
+
         var compilationModel = CompilationModel.CreateInitialInstance( configuration.ProjectModel, partialCompilation );
 
-        var executionContext = new CodeActionExecutionContext( configuration.ServiceProvider, compilationModel, this._logger, projectId );
+        var executionContext = new CodeActionExecutionContext( configuration.ServiceProvider, compilationModel, this._logger, projectId, computingPreview );
 
         return await codeActionModel.ExecuteAsync( executionContext, cancellationToken );
     }

@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Extensibility;
+using Metalama.Backstage.Licensing.Consumption;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Diagnostics;
@@ -72,10 +74,21 @@ namespace Metalama.Framework.Engine.Pipeline
 
             this.ProjectOptions = serviceProvider.GetRequiredService<IProjectOptions>();
 
-            this.ServiceProvider = serviceProvider
+            serviceProvider = serviceProvider
                 .WithServices( this.ProjectOptions.PlugIns.OfType<IService>() )
-                .WithServices( new AspectPipelineDescription( executionScenario, isTest ) )
-                .WithMark( ServiceProviderMark.Pipeline );
+                .WithServices( new AspectPipelineDescription( executionScenario, isTest ) );
+
+            if ( executionScenario.RequiresLicense )
+            {
+                var licenseConsumptionManager = serviceProvider.GetBackstageService<ILicenseConsumptionManager>();
+
+                if ( licenseConsumptionManager != null )
+                {
+                    serviceProvider = serviceProvider.WithService( new LicenseVerifier( licenseConsumptionManager ) );
+                }
+            }
+
+            this.ServiceProvider = serviceProvider.WithMark( ServiceProviderMark.Pipeline );
 
             if ( domain != null )
             {

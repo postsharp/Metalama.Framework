@@ -44,5 +44,10 @@ namespace Metalama.Framework.Project
         /// <see cref="CapturesCodeFixImplementations"/>.
         /// </summary>
         bool CapturesCodeFixTitles { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether licensing should be enforced in this scenarion.
+        /// </summary>
+        bool RequiresLicense { get; }
     }
 }

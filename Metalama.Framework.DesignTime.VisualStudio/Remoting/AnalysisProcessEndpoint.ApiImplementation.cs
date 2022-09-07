@@ -78,11 +78,11 @@ internal partial class AnalysisProcessEndpoint
             return service.ComputeRefactoringsAsync( projectId, syntaxTreePath, span, cancellationToken );
         }
 
-        public Task<CodeActionResult> ExecuteCodeActionAsync( string projectId, CodeActionModel codeActionModel, CancellationToken cancellationToken )
+        public Task<CodeActionResult> ExecuteCodeActionAsync( string projectId, CodeActionModel codeActionModel, bool computingPreview, CancellationToken cancellationToken )
         {
             var service = this._parent._serviceProvider.GetRequiredService<CodeActionExecutionService>();
 
-            return service.ExecuteCodeActionAsync( projectId, codeActionModel, cancellationToken );
+            return service.ExecuteCodeActionAsync( projectId, codeActionModel, computingPreview, cancellationToken );
         }
     }
 }

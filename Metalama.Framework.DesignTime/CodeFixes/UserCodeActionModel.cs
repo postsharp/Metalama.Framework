@@ -63,6 +63,6 @@ internal class UserCodeActionModel : CodeActionModel
 
         var codeFixRunner = new DesignTimeCodeFixRunner( executionContext.ServiceProvider );
 
-        return await codeFixRunner.ExecuteCodeFixAsync( compilation, syntaxTree, this.DiagnosticId, this.DiagnosticSpan, this.Title, cancellationToken );
+        return await codeFixRunner.ExecuteCodeFixAsync( compilation, syntaxTree, this.DiagnosticId, this.DiagnosticSpan, this.Title, executionContext.ComputingPreview, cancellationToken );
     }
 }

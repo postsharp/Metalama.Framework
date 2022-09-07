@@ -25,17 +25,17 @@ namespace Metalama.Framework.DesignTime.CodeFixes
         {
             var title = titlePrefix + this.Title;
 
-            return ImmutableArray.Create( CodeAction.Create( title, ct => this.InvokeAsync( invocationContext, ct ) ) );
+            return ImmutableArray.Create( LamaCodeAction.Create( title, ( p, ct ) => this.InvokeAsync( invocationContext, p, ct ) ) );
         }
 
         /// <summary>
         /// Invokes the implementation of the code action. This method is invoked from the user process, but the code action
         /// implementation runs in the analysis process. 
         /// </summary>
-        private async Task<Solution> InvokeAsync( CodeActionInvocationContext invocationContext, CancellationToken cancellationToken )
+        private async Task<Solution> InvokeAsync( CodeActionInvocationContext invocationContext, bool computingPreview, CancellationToken cancellationToken )
         {
             // Execute the current code action locally or remotely. In case of remote execution, the code action is serialized.
-            var result = await invocationContext.Service.ExecuteCodeActionAsync( invocationContext.ProjectId, this, cancellationToken );
+            var result = await invocationContext.Service.ExecuteCodeActionAsync( invocationContext.ProjectId, this, computingPreview, cancellationToken );
 
             // Apply the result to the current solution.
             var project = invocationContext.Document.Project;

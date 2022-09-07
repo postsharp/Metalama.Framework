@@ -511,6 +511,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             string aspectTypeName,
             Compilation inputCompilation,
             ISymbol targetSymbol,
+            bool computingPreview,
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out PartialCompilation? outputCompilation,
             out ImmutableArray<Diagnostic> diagnostics )
@@ -543,6 +544,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 x => x.AspectClasses.Single( c => c.FullName == aspectTypeName ),
                 partialCompilation,
                 sourceSymbol,
+                computingPreview,
                 diagnosticList,
                 cancellationToken,
                 out outputCompilation );

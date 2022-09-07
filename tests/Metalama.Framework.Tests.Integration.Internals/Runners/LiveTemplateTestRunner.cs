@@ -39,6 +39,8 @@ namespace Metalama.Framework.Tests.Integration.Runners
             var partialCompilation = PartialCompilation.CreateComplete( testResult.InputCompilation! );
             var target = compilation.Types.OfName( "TargetClass" ).Single().Methods.OfName( "TargetMethod" ).Single().GetSymbol();
 
+            throw new System.NotImplementedException( "TODO: implement testing of live template preview." );
+
             var success = LiveTemplateAspectPipeline.TryExecute(
                 serviceProvider,
                 domain,
@@ -46,6 +48,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 c => c.BoundAspectClasses.Single<IAspectClass>( a => a.ShortName == "TestAspect" ),
                 partialCompilation,
                 target!,
+                false,
                 testResult.PipelineDiagnostics,
                 CancellationToken.None,
                 out var outputCompilation );
