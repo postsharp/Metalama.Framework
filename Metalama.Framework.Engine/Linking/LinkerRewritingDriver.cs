@@ -226,9 +226,16 @@ namespace Metalama.Framework.Engine.Linking
                 case BlockSyntax block:
                     return (BlockSyntax) rewriter.Visit( block ).AssertNotNull();
 
+                case AccessorDeclarationSyntax accessorDecl:
+                    return (BlockSyntax) rewriter.Visit( accessorDecl ).AssertNotNull();
+
+                case VariableDeclaratorSyntax { Parent: {Parent: EventFieldDeclarationSyntax } } eventFieldVariable:
+                    return (BlockSyntax) rewriter.Visit( eventFieldVariable ).AssertNotNull();
+
                 case ArrowExpressionClauseSyntax arrowExpressionClause:
                     var rewrittenNode = rewriter.Visit( arrowExpressionClause );
 
+                    // TODO: This may be useless.
                     if ( symbol.ReturnsVoid )
                     {
                         switch ( rewrittenNode )

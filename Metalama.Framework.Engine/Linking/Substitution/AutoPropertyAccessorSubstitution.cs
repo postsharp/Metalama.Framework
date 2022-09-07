@@ -39,13 +39,19 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                                     ExpressionStatement(
                                         AssignmentExpression(
                                             SyntaxKind.SimpleAssignmentExpression,
-                                            IdentifierName( LinkerRewritingDriver.GetBackingFieldName( this._targetProperty ) ),
-                                            IdentifierName( "value" ) ) ) )
+                                            IdentifierName( this._returnVariableIdentifier ),
+                                            CreateFieldAccessExpression() ) ) )
                                 .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                         }
                         else
                         {
-                            return Block().WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                            return
+                                Block(
+                                    ReturnStatement(
+                                        Token( TriviaList(), SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
+                                        CreateFieldAccessExpression(),
+                                        Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) ) )
+                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                         }
                     }
                     else if (accessorDeclarationSyntax.IsKind(SyntaxKind.SetAccessorDeclaration) || accessorDeclarationSyntax.IsKind(SyntaxKind.InitAccessorDeclaration))
@@ -55,7 +61,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                                 ExpressionStatement(
                                     AssignmentExpression(
                                         SyntaxKind.SimpleAssignmentExpression,
-                                        IdentifierName( LinkerRewritingDriver.GetBackingFieldName( this._targetProperty ) ),
+                                        CreateFieldAccessExpression(),
                                         IdentifierName( "value" ) ) ) )
                             .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                     }
@@ -66,6 +72,26 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
                 default:
                     throw new AssertionFailedException();
+            }
+
+            ExpressionSyntax CreateFieldAccessExpression()
+            {
+                if (this._targetProperty.IsStatic)
+                {
+                    return
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            substitutionContext.SyntaxGenerationContext.SyntaxGenerator.Type(this._targetProperty.ContainingType),
+                            IdentifierName( LinkerRewritingDriver.GetBackingFieldName( this._targetProperty ) ) );
+                }
+                else
+                {
+                    return
+                        MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            ThisExpression(),
+                            IdentifierName( LinkerRewritingDriver.GetBackingFieldName( this._targetProperty ) ) );
+                }                
             }
         }
     }

@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Metalama.Framework.Engine.Linking
 {
@@ -90,7 +91,7 @@ namespace Metalama.Framework.Engine.Linking
                         var exitFlowingStatements = new HashSet<StatementSyntax>();
                         var returnStatementProperties = new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>();
 
-                        // Get all statements that flow to exit (blocks, ifs, trys).
+                        // Get all statements that flow to exit (blocks, ifs, trys, etc.).
                         DiscoverExitFlowingStatements( rootBlock, exitFlowingStatements );
 
                         // Go through all return statements.
@@ -157,6 +158,8 @@ namespace Metalama.Framework.Engine.Linking
                     case ArrowExpressionClauseSyntax:
                         return new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
                     case AccessorDeclarationSyntax { Body: null, ExpressionBody: null } accessorDeclarationSyntax:
+                        return new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
+                    case VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax } }:
                         return new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
                     default:
                         throw new AssertionFailedException();

@@ -15,12 +15,14 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Events.Inliners.Remo
         {
             add
             {
+            }
+            remove
+            {
                 Console.WriteLine("Before");
                 EventHandler? x = null;
                 x -= link[_this.Foo.add, inline];
                 Console.WriteLine("After");
             }
-            remove { }
         }
     }
 }

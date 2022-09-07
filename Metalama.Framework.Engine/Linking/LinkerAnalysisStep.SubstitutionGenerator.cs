@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
 // This project is not open source. Please see the LICENSE.md file in the repository root for details.
 
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Linking.Inlining;
 using Metalama.Framework.Engine.Linking.Substitution;
@@ -98,18 +99,16 @@ namespace Metalama.Framework.Engine.Linking
                                     inliningSpecification.ReturnLabelIdentifier ) );
                         }
                     }
-                    else
-                    {
-                        // Add substitution that transforms original non-block body into a statement.
-                        if ( inliningSpecification.TargetSemantic.Kind == IntermediateSymbolSemanticKind.Default )
-                        {
-                            var symbol = inliningSpecification.TargetSemantic.Symbol;
-                            var root = this._syntaxHandler.GetCanonicalRootNode( symbol );
 
-                            if ( root is not StatementSyntax )
-                            {
-                                AddSubstitution( inliningSpecification.ContextIdentifier, this.CreateOriginalBodySubstitution( root, symbol, inliningSpecification.ReturnVariableIdentifier ) );
-                            }
+                    // Add substitution that transforms original non-block body into a statement.
+                    if ( inliningSpecification.TargetSemantic.Kind == IntermediateSymbolSemanticKind.Default )
+                    {
+                        var symbol = inliningSpecification.TargetSemantic.Symbol;
+                        var root = this._syntaxHandler.GetCanonicalRootNode( symbol );
+
+                        if ( root is not StatementSyntax )
+                        {
+                            AddSubstitution( inliningSpecification.ContextIdentifier, this.CreateOriginalBodySubstitution( root, symbol, inliningSpecification.ReturnVariableIdentifier ) );
                         }
                     }
 
@@ -141,10 +140,12 @@ namespace Metalama.Framework.Engine.Linking
             {
                 switch ( (root, symbol) )
                 {
-                    case (AccessorDeclarationSyntax accessorDeclarationSyntax, { AssociatedSymbol: IPropertySymbol { } property } ):
+                    case (AccessorDeclarationSyntax accessorDeclarationSyntax, { AssociatedSymbol: IPropertySymbol property } ):
                         return new AutoPropertyAccessorSubstitution( accessorDeclarationSyntax, property, returnVariableIdentifier );
                     case (ArrowExpressionClauseSyntax arrowExpressionClause, _ ):
-                        return new PropertyExpressionBodySubstitution( arrowExpressionClause, symbol );
+                        return new ExpressionBodySubstitution( arrowExpressionClause, symbol, returnVariableIdentifier );
+                    case (VariableDeclaratorSyntax {Parent: {Parent: EventFieldDeclarationSyntax } } variableDeclarator, { AssociatedSymbol: IEventSymbol } ):
+                        return new EventFieldSubstitution( variableDeclarator, symbol );
                     default:
                         throw new AssertionFailedException();
                 }

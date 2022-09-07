@@ -4,8 +4,6 @@
 using Metalama.Framework.Engine.Linking.Substitution;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.Linking
 {

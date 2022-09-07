@@ -30,6 +30,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                     AccessorDeclarationSyntax { ExpressionBody: { } accessorBody } => accessorBody,
                     AccessorDeclarationSyntax { Body: null, ExpressionBody: null } accessor => accessor,
                     ArrowExpressionClauseSyntax arrowExpressionClause => arrowExpressionClause,
+                    VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax } } eventFieldVariable => eventFieldVariable,
                     _ => throw new AssertionFailedException(),
                 };
 

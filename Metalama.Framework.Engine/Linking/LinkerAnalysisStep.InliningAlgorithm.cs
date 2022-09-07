@@ -78,6 +78,7 @@ namespace Metalama.Framework.Engine.Linking
                             break;
 
                         case IPropertySymbol property:
+                            Invariant.Assert( false ); // temp.
                             if ( property.GetMethod != null )
                             {
                                 VisitSemanticBody( 
@@ -97,6 +98,7 @@ namespace Metalama.Framework.Engine.Linking
                             break;
 
                         case IEventSymbol @event:
+                            Invariant.Assert( false ); // temp.
                             VisitSemanticBody( 
                                 @event.AddMethod.AssertNotNull().ToSemantic( semantic.Kind ),
                                 @event.AddMethod.AssertNotNull().ToSemantic( semantic.Kind ),

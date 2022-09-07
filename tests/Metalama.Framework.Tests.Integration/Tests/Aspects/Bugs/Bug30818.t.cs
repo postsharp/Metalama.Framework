@@ -1,11 +1,42 @@
+[OnPropertyChangedAspect]
 internal class Foo
 {
-    public void Method1( [Trim] string nonNullableString, [Trim] string? nullableString )
+    [ValidationAspect]
+    public string Name
     {
-    nullableString = nullableString?.Trim();
-        nonNullableString = nonNullableString.Trim();
-            Console.WriteLine( $"nonNullableString='{nonNullableString}', nullableString='{nullableString}'" );
-    }
+        get
+        {
+            global::System.String returnValue;
+            returnValue = this.Name_Source;
 
-    public string Property { get; set; }
+            if (returnValue is not null)
+            {
+                throw new global::System.Exception($"The property 'Name' must not be set to null!");
+            }
+
+            return returnValue;
+
+
+        }
+        set
+        {
+            if (value is not null)
+            {
+                throw new global::System.Exception($"The property 'Name' must not be set to null!");
+            }
+
+            if (this.Name_Source == value)
+                goto __aspect_return_1;
+            OnChanged("Name", this.Name_Source, value);
+            this.Name_Source = value;
+        __aspect_return_1:;
+
+        }
+    }
+    private string Name_Source
+    { get; set; } = null!;
+
+    private void OnChanged(global::System.String propertyName, global::System.Object oldValue, global::System.Object newValue)
+    {
+    }
 }
