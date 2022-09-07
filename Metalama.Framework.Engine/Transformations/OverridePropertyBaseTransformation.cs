@@ -59,14 +59,14 @@ internal abstract class OverridePropertyBaseTransformation : OverrideMemberTrans
                                         ? SyntaxFactory.AccessorDeclaration(
                                             SyntaxKind.GetAccessorDeclaration,
                                             SyntaxFactory.List<AttributeListSyntax>(),
-                                            this.OverriddenDeclaration.GetMethod.AssertNotNull().GetSyntaxModifierList(),
+                                            default,
                                             getAccessorBody )
                                         : null,
                                     setAccessorBody != null
                                         ? SyntaxFactory.AccessorDeclaration(
                                             setAccessorDeclarationKind,
                                             SyntaxFactory.List<AttributeListSyntax>(),
-                                            this.OverriddenDeclaration.SetMethod.AssertNotNull().GetSyntaxModifierList(),
+                                            default,
                                             setAccessorBody )
                                         : null
                                 }.Where( a => a != null )
