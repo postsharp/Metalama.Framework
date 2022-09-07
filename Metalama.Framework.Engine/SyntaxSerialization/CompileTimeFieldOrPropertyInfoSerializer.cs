@@ -36,7 +36,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
 
                 case Field field:
                     {
-                        var typeCreation = this.Service.Serialize( CompileTimeType.Create( field.DeclaringType ), serializationContext );
+                        var typeCreation = TypeSerializationHelper.SerializeTypeSymbolRecursive( field.DeclaringType.GetSymbol(), serializationContext );
 
                         propertyInfo = InvocationExpression(
                                 MemberAccessExpression(

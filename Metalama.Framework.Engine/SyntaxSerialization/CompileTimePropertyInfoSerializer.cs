@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
 
         public ExpressionSyntax SerializeProperty( IPropertyOrIndexer propertyOrIndexer, SyntaxSerializationContext serializationContext )
         {
-            var typeCreation = this.Service.Serialize( CompileTimeType.Create( propertyOrIndexer.DeclaringType ), serializationContext );
+            var typeCreation = TypeSerializationHelper.SerializeTypeSymbolRecursive( propertyOrIndexer.DeclaringType.GetSymbol(), serializationContext );
 
             if ( propertyOrIndexer is IProperty )
             {
@@ -43,12 +43,13 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
             }
             else if ( propertyOrIndexer is IIndexer indexer )
             {
-                var returnTypeCreation = this.Service.Serialize( CompileTimeType.Create( propertyOrIndexer.Type ), serializationContext );
+                var returnTypeCreation = TypeSerializationHelper.SerializeTypeSymbolRecursive( propertyOrIndexer.Type.GetSymbol(), serializationContext );
                 var parameterTypes = new List<ExpressionSyntax>();
 
                 foreach ( var parameter in indexer.Parameters )
                 {
-                    parameterTypes.Add( this.Service.Serialize( CompileTimeType.Create( parameter.Type ), serializationContext ) );
+                    var parameterType = TypeSerializationHelper.SerializeTypeSymbolRecursive( parameter.Type.GetSymbol(), serializationContext );
+                    parameterTypes.Add( parameterType );
                 }
 
                 var propertyName = propertyOrIndexer.GetSymbol().AssertNotNull().MetadataName;
