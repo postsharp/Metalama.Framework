@@ -1,4 +1,4 @@
-﻿[Promote]
+[Promote]
 [Override]
 internal class TargetClass
 {

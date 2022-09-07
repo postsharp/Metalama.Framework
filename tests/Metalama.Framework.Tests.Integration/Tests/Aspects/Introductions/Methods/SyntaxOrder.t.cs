@@ -1,14 +1,12 @@
-    [Introduction1]
+[Introduction1]
     [Introduction2]
     [Override1]
     [Override2]
     [Override3]
     [Override4]
-    internal class TargetClass
-    {
+    internal class TargetClass { 
 
-
-public void Bar_Introduction2()
+private void Bar_Introduction2()
 {
     global::System.Console.WriteLine("This is introduced method.");
     this.Bar_Empty();
@@ -24,21 +22,21 @@ public void Bar()
 private void Bar_Empty()
 {}
 
-public void Foo_Introduction1()
+private void Foo_Introduction1()
 {
     global::System.Console.WriteLine("This is introduced method.");
     this.Foo_Empty();
     this.Foo_Empty();
 }
 
-public void Foo_Override1()
+private void Foo_Override1()
 {
     global::System.Console.WriteLine("This is overridden (1) method.");
     this.Foo_Introduction1();
     this.Foo_Introduction1();
 }
 
-public void Foo_Override2()
+private void Foo_Override2()
 {
     global::System.Console.WriteLine("This is overridden (2) method.");
     this.Foo_Override1();
@@ -52,4 +50,4 @@ public void Foo()
     this.Foo_Override2();
 }
 private void Foo_Empty()
-{}    }
+{}}
