@@ -164,6 +164,22 @@ namespace Metalama.TestFramework
         public List<string> RequiredConstants { get; } = new();
 
         /// <summary>
+        /// Gets the set of preprocessor symbols that are defined for this test.
+        /// To add an item into this collection from a test, add this comment to your test file: <c>// @DefinedConstant(constant)</c>.
+        /// All constants of the test project and TESTRUNNER and METALAMA are defined by default.
+        /// /// Constants added via <see cref="DependencyDefinedConstants"/> option are not added.
+        /// </summary>
+        public List<string> DefinedConstants { get; } = new();
+
+        /// <summary>
+        /// Gets the set of preprocessor symbols that are defined for this test dependency.
+        /// To add an item into this collection from a test, add this comment to your test file: <c>// @DependencyDefinedConstant(constant)</c>.
+        /// All constants of the test project and TESTRUNNER and METALAMA are defined by default.
+        /// Constants added via <see cref="DefinedConstants"/> option are not added.
+        /// </summary>
+        public List<string> DependencyDefinedConstants { get; } = new();
+
+        /// <summary>
         /// Gets or sets a value indicating whether a code fix should be applied. When this value is true, the output buffer
         /// of the test is not the one transformed by the aspect, but the one transformed by the code fix. The test will fail
         /// if it does not generate any diagnostic with a code fix. By default, the first emitted code fix is applied.
@@ -180,6 +196,7 @@ namespace Metalama.TestFramework
 
         /// <summary>
         /// Gets or sets a value indicating whether disabled code should be kept as trivia.
+        /// To set this option in a test, add this comment to your test file: <c>// @KeepDisabledCode</c>.
         /// </summary>
         public bool? KeepDisabledCode { get; set; }
 
@@ -207,6 +224,18 @@ namespace Metalama.TestFramework
         /// To set this option in a test, add this comment to your test file: <c>// @LanguageFeature(feature)</c> or <c>// @LanguageFeature(feature=value)</c>.
         /// </summary>
         public ImmutableDictionary<string, string> LanguageFeatures { get; set; } = ImmutableDictionary<string, string>.Empty;
+
+        /// <summary>
+        /// Gets or sets the name of a file in the project directory containing the license key.
+        /// To set this option in a test, add this comment to your test file: <c>// @LicenseFile(file)</c>.
+        /// </summary>
+        public string? LicenseFile { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name of a file in the project directory containing the license key to be used to compile the dependency.
+        /// To set this option in a test, add this comment to your test file: <c>// @DependencyLicenseFile(file)</c>.
+        /// </summary>
+        public string? DependencyLicenseFile { get; set; }
 
         /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
@@ -259,7 +288,15 @@ namespace Metalama.TestFramework
 
             this.RequiredConstants.AddRange( baseOptions.RequiredConstants );
 
+            this.DefinedConstants.AddRange( baseOptions.DefinedConstants );
+
+            this.DependencyDefinedConstants.AddRange( baseOptions.DependencyDefinedConstants );
+
             this.OutputAllSyntaxTrees ??= baseOptions.OutputAllSyntaxTrees;
+
+            this.LicenseFile ??= baseOptions.LicenseFile;
+
+            this.DependencyLicenseFile ??= baseOptions.DependencyLicenseFile;
         }
 
         public IReadOnlyList<string> InvalidSourceOptions => this._invalidSourceOptions;
@@ -353,6 +390,16 @@ namespace Metalama.TestFramework
 
                         break;
 
+                    case "DefinedConstant":
+                        this.DefinedConstants.Add( optionArg );
+
+                        break;
+
+                    case "DependencyDefinedConstant":
+                        this.DependencyDefinedConstants.Add( optionArg );
+
+                        break;
+
                     case "ClearIgnoredDiagnostics":
                         this.ClearIgnoredDiagnostics = true;
 
@@ -433,6 +480,18 @@ namespace Metalama.TestFramework
                                 this.LanguageFeatures = this.LanguageFeatures.SetItem( parts[0], parts[1] );
                             }
                         }
+
+                        break;
+
+                    case "LicenseFile":
+
+                        this.LicenseFile = optionArg;
+
+                        break;
+
+                    case "DependencyLicenseFile":
+
+                        this.DependencyLicenseFile = optionArg;
 
                         break;
 

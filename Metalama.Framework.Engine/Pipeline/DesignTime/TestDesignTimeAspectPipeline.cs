@@ -19,7 +19,7 @@ public class TestDesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
 
         var partialCompilation = PartialCompilation.CreateComplete( inputCompilation );
 
-        if ( !this.TryInitialize( diagnosticList, partialCompilation, null, CancellationToken.None, out var configuration ) )
+        if ( !this.TryInitialize( diagnosticList, partialCompilation, null, null, CancellationToken.None, out var configuration ) )
         {
             return new TestDesignTimeAspectPipelineResult( false, diagnosticList.ToImmutableArray(), ImmutableArray<IntroducedSyntaxTree>.Empty );
         }
