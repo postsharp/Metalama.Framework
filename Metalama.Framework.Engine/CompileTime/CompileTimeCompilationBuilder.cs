@@ -143,12 +143,10 @@ namespace Metalama.Framework.Engine.CompileTime
             h.Update( _buildId );
             log?.AppendLineInvariant( $"BuildId={_buildId}" );
 
-            if ( projectLicenseInfo != null )
-            {
-                var projectLicenseInfoHash = projectLicenseInfo.GetHashCode();
-                h.Update( projectLicenseInfoHash );
-                log?.AppendLineInvariant( $"ProjectLicneseInfo:={projectLicenseInfoHash:x}" );
-            }
+            projectLicenseInfo ??= ProjectLicenseInfo.Empty;
+            var projectLicenseInfoHash = projectLicenseInfo.GetHashCode();
+            h.Update( projectLicenseInfoHash );
+            log?.AppendLineInvariant( $"ProjectLicneseInfo:={projectLicenseInfoHash:x}" );
 
             foreach ( var reference in referencedProjects.OrderBy( r => r.Hash ) )
             {
@@ -1028,13 +1026,14 @@ namespace Metalama.Framework.Engine.CompileTime
             IReadOnlyList<SyntaxTree> syntaxTrees,
             ulong syntaxTreeHash,
             IReadOnlyList<CompileTimeProject> referencedProjects,
+            ProjectLicenseInfo? projectLicenseInfo,
             IDiagnosticAdder diagnosticAdder,
             CancellationToken cancellationToken,
             out string assemblyPath,
             out string? sourceDirectory )
         {
             this._logger.Trace?.Log( $"TryCompileDeserializedProject( '{runTimeAssemblyName}' )" );
-            var compileTimeAssemblyName = ComputeProjectHash( null, referencedProjects, syntaxTreeHash );
+            var compileTimeAssemblyName = ComputeProjectHash( projectLicenseInfo, referencedProjects, syntaxTreeHash );
 
             var outputPaths = this.GetOutputPaths( runTimeAssemblyName, targetFramework, compileTimeAssemblyName );
 

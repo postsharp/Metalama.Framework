@@ -152,13 +152,13 @@ internal class LicenseVerifier : IService
 
         if ( projectsWithRedistributionLicense.Count > 0 )
         {
-            aspectClassNames += aspectInstanceResults
+            aspectClassNames += ", " + string.Join( ", ", aspectInstanceResults
                 .Select( r => r.AspectInstance.AspectClass )
                 .Where( c => c is AspectClass )
                 .Select( c => (AspectClass) c )
                 .Where( c => c.Project != null && projectsWithRedistributionLicense.Contains( c.Project ) )
                 .GroupBy( c => c.Project! )
-                .Select( pc => $"aspects from '{NormalizeAssemblyName( pc.Key.RunTimeIdentity.Name )}' assembly counted as one ({GetNames( pc )})" );
+                .Select( pc => $"aspects from '{NormalizeAssemblyName( pc.Key.RunTimeIdentity.Name )}' assembly counted as one ({GetNames( pc )})" ) );
         }
 
         diagnostics.Report(
