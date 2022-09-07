@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -76,7 +75,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public TemplateMember<IEvent>? InitializerTemplate { get; set; }
 
-        public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
+        public override IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context )
         {
             var syntaxGenerator = context.SyntaxGenerationContext.SyntaxGenerator;
 
@@ -144,25 +143,32 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
                 {
                     case (not null, not null):
                         return AccessorList(
-                            List( new[] { GenerateAccessor( SyntaxKind.AddAccessorDeclaration ), GenerateAccessor( SyntaxKind.RemoveAccessorDeclaration ) } ) );
+                            List(
+                                new[]
+                                {
+                                    GenerateAccessor( this.AddMethod, SyntaxKind.AddAccessorDeclaration ),
+                                    GenerateAccessor( this.RemoveMethod, SyntaxKind.RemoveAccessorDeclaration )
+                                } ) );
 
                     case (not null, null):
-                        return AccessorList( List( new[] { GenerateAccessor( SyntaxKind.AddAccessorDeclaration ) } ) );
+                        return AccessorList( List( new[] { GenerateAccessor( this.AddMethod, SyntaxKind.AddAccessorDeclaration ) } ) );
 
                     case (null, not null):
-                        return AccessorList( List( new[] { GenerateAccessor( SyntaxKind.RemoveAccessorDeclaration ) } ) );
+                        return AccessorList( List( new[] { GenerateAccessor( this.RemoveMethod, SyntaxKind.RemoveAccessorDeclaration ) } ) );
 
                     default:
                         throw new AssertionFailedException();
                 }
             }
 
-            AccessorDeclarationSyntax GenerateAccessor( SyntaxKind accessorDeclarationKind )
+            AccessorDeclarationSyntax GenerateAccessor( IMethod accessor, SyntaxKind accessorDeclarationKind )
             {
+                var attributes = this.GetAttributeLists( context, accessor );
+
                 return
                     AccessorDeclaration(
                         accessorDeclarationKind,
-                        List<AttributeListSyntax>(),
+                        attributes,
                         TokenList(),
                         Block(),
                         null );

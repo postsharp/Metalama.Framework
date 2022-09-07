@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Licensing.Consumption;
@@ -30,7 +29,7 @@ namespace Metalama.Framework.Engine.Pipeline
         public void Execute( TransformerContext context )
         {
             var serviceProvider = ServiceProviderFactory.GetServiceProvider( context.Services );
-            
+
             try
             {
                 // Try.Metalama ships its own handler. Having the default ICompileTimeExceptionHandler added earlier

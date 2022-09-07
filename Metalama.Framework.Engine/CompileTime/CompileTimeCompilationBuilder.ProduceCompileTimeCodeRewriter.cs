@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -801,8 +800,9 @@ namespace Metalama.Framework.Engine.CompileTime
                                  v =>
                                  {
                                      var member = node.WithDeclaration(
-                                         node.Declaration.WithVariables( SingletonSeparatedList( v ) )
-                                             .WithType( (TypeSyntax) this.Visit( node.Declaration.Type )! ) );
+                                             node.Declaration.WithVariables( SingletonSeparatedList( v ) )
+                                                 .WithType( (TypeSyntax) this.Visit( node.Declaration.Type )! ) )
+                                         .WithAttributeLists( default );
 
                                      if ( removeReadOnly )
                                      {
@@ -825,8 +825,9 @@ namespace Metalama.Framework.Engine.CompileTime
                                  TemplateCompilerSemantics.Initializer,
                                  declarator,
                                  v => node.WithDeclaration(
-                                     node.Declaration.WithVariables( SingletonSeparatedList( v ) )
-                                         .WithType( (TypeSyntax) this.Visit( node.Declaration.Type )! ) ) ) )
+                                         node.Declaration.WithVariables( SingletonSeparatedList( v ) )
+                                             .WithType( (TypeSyntax) this.Visit( node.Declaration.Type )! ) )
+                                     .WithAttributeLists( default ) ) )
                     {
                         yield return result;
                     }

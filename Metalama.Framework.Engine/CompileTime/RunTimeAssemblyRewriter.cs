@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
@@ -53,9 +52,6 @@ namespace Metalama.Compiler
                 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
                 IdentifierName( "CS8618" ),
 
-                // Can be made static.
-                IdentifierName( "CA1822" ),
-
                 // The compiler detected code that will never be executed.
                 IdentifierName( "CS0162" ),
 
@@ -63,7 +59,13 @@ namespace Metalama.Compiler
                 IdentifierName( "CS0169" ),
 
                 // The private field 'field' is assigned but its value is never used.
-                IdentifierName( "CS0414" )
+                IdentifierName( "CS0414" ),
+
+                // Can be made static.
+                IdentifierName( "CA1822" ),
+
+                // Avoid unused private fields
+                IdentifierName( "CA1823 " )
             } );
 
         // TODO: We can do more in cleaning the run-time assembly. 

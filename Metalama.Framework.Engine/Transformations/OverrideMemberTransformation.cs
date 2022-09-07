@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -33,7 +32,7 @@ namespace Metalama.Framework.Engine.Transformations
             this.Tags = tags;
         }
 
-        public abstract IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context );
+        public abstract IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context );
 
         protected ExpressionSyntax CreateMemberAccessExpression( AspectReferenceTargetKind referenceTargetKind, SyntaxGenerationContext generationContext )
         {
