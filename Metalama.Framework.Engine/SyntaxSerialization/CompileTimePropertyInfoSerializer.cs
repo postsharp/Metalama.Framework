@@ -52,8 +52,6 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                     parameterTypes.Add( parameterType );
                 }
 
-                var propertyName = propertyOrIndexer.GetSymbol().AssertNotNull().MetadataName;
-
                 return SyntaxFactory.InvocationExpression(
                             SyntaxFactory.MemberAccessExpression(
                                 SyntaxKind.SimpleMemberAccessExpression,
@@ -63,7 +61,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                             SyntaxFactory.Argument(
                                 SyntaxFactory.LiteralExpression(
                                     SyntaxKind.StringLiteralExpression,
-                                    SyntaxFactory.Literal( propertyName ) ) ),
+                                    SyntaxFactory.Literal( propertyOrIndexer.Name ) ) ),
                             SyntaxFactory.Argument( returnTypeCreation ),
                             SyntaxFactory.Argument(
                                 SyntaxFactory.ArrayCreationExpression(

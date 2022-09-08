@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
             {
                 case IProperty property:
                     {
-                        propertyInfo = this.Service.CompileTimePropertyInfoSerializer.SerializeProperty( property, serializationContext );
+                        propertyInfo = CompileTimePropertyInfoSerializer.SerializeProperty( property, serializationContext );
 
                         break;
                     }
