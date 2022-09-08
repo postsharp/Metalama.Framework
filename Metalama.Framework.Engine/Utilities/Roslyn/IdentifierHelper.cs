@@ -8,78 +8,58 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
 internal static class IdentifierHelper
 {
-    public static bool IsIdentifierStartCharacter( char ch )
-    {
-        // identifier-start-character:
-        //   letter-character
-        //   _ (the underscore character U+005F)
-
-        if ( ch < 'a' ) // '\u0061'
+    private static bool IsIdentifierStartCharacter( char ch )
+        => ch switch
         {
-            if ( ch < 'A' ) // '\u0041'
-            {
-                return false;
-            }
+            // '\u0061'
+            // '\u0041'
+            < 'a' when ch < 'A' => false,
 
-            return ch <= 'Z'     // '\u005A'
-                   || ch == '_'; // '\u005F'
-        }
+            // identifier-start-character:
+            //   letter-character
+            //   _ (the underscore character U+005F)
+            < 'a' => ch <= 'Z' // '\u005A'
+                     || ch == '_',
 
-        if ( ch <= 'z' ) // '\u007A'
-        {
-            return true;
-        }
+            // '\u007A'
+            <= 'z' => true,
 
-        if ( ch <= '\u007F' ) // max ASCII
-        {
-            return false;
-        }
-
-        return IsLetterChar( CharUnicodeInfo.GetUnicodeCategory( ch ) );
-    }
+            // max ASCII
+            <= '\u007F' => false,
+            _ => IsLetterChar( CharUnicodeInfo.GetUnicodeCategory( ch ) )
+        };
 
     /// <summary>
     /// Returns true if the Unicode character can be a part of an identifier.
     /// </summary>
     /// <param name="ch">The Unicode character.</param>
-    public static bool IsIdentifierPartCharacter( char ch )
+    private static bool IsIdentifierPartCharacter( char ch )
     {
-        // identifier-part-character:
-        //   letter-character
-        //   decimal-digit-character
-        //   connecting-character
-        //   combining-character
-        //   formatting-character
-
-        if ( ch < 'a' ) // '\u0061'
+        switch ( ch )
         {
-            if ( ch < 'A' ) // '\u0041'
-            {
-                return ch >= '0'     // '\u0030'
-                       && ch <= '9'; // '\u0039'
-            }
+            case < 'a' when ch < 'A':
+                return ch is >= '0' and <= '9';
 
-            return ch <= 'Z'     // '\u005A'
-                   || ch == '_'; // '\u005F'
+            case < 'a':
+                return ch <= 'Z' || ch == '_'; 
+
+            case <= 'z':
+                return true;
+
+            case <= '\u007F':
+                return false;
+
+            default:
+                {
+                    var cat = CharUnicodeInfo.GetUnicodeCategory( ch );
+
+                    return IsLetterChar( cat )
+                           || IsDecimalDigitChar( cat )
+                           || IsConnectingChar( cat )
+                           || IsCombiningChar( cat )
+                           || IsFormattingChar( cat );
+                }
         }
-
-        if ( ch <= 'z' ) // '\u007A'
-        {
-            return true;
-        }
-
-        if ( ch <= '\u007F' ) // max ASCII
-        {
-            return false;
-        }
-
-        var cat = CharUnicodeInfo.GetUnicodeCategory( ch );
-
-        return IsLetterChar( cat )
-               || IsDecimalDigitChar( cat )
-               || IsConnectingChar( cat )
-               || IsCombiningChar( cat )
-               || IsFormattingChar( cat );
     }
 
     /// <summary>
@@ -92,14 +72,14 @@ internal static class IdentifierHelper
             return false;
         }
 
-        if ( !IsIdentifierStartCharacter( name[0] ) )
+        if ( !IsIdentifierStartCharacter( name![0] ) )
         {
             return false;
         }
 
         var nameLength = name.Length;
 
-        for ( var i = 1; i < nameLength; i++ ) //NB: start at 1
+        for ( var i = 1; i < nameLength; i++ )
         {
             if ( !IsIdentifierPartCharacter( name[i] ) )
             {
@@ -190,10 +170,8 @@ internal static class IdentifierHelper
 
     public static void ValidateSyntaxTreeName( string name )
     {
-        for ( var i = 0; i < name.Length; i++ )
+        foreach ( var c in name )
         {
-            var c = name[i];
-
             if ( !IsIdentifierPartCharacter( c )
                  && c != '.'
                  && c != ','
