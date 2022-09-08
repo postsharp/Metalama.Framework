@@ -213,8 +213,25 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal ICompilationElement? GetCompilationElement( ISymbol symbol, DeclarationRefTargetKind kind = DeclarationRefTargetKind.Default )
         {
-            Invariant.Assert(
-                FixedSymbolComparer.Default.Equals( symbol, symbol.GetSymbolId().Resolve( this._compilationModel.RoslynCompilation ).AssertNotNull() ) );
+            switch ( symbol.Kind )
+            {
+                case SymbolKind.Local:
+                case SymbolKind.Label:
+                case SymbolKind.ErrorType:
+                    return null;
+            }
+
+#if DEBUG
+            if ( !(symbol is IMethodSymbol { ContainingSymbol: IMethodSymbol }) )
+            {
+                var translatedSymbol = symbol.Translate( null, this.Compilation );
+
+                if ( !SymbolEqualityComparer.Default.Equals( translatedSymbol, symbol ) )
+                {
+                    throw new ArgumentOutOfRangeException( nameof(symbol), $"'{symbol}' does not belong to the current compilation." );
+                }
+            }
+#endif
 
             switch ( symbol.Kind )
             {
@@ -292,11 +309,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
                 case SymbolKind.NetModule:
                     return this._compilationModel;
-
-                case SymbolKind.Local:
-                case SymbolKind.Label:
-                case SymbolKind.ErrorType:
-                    return null;
 
                 default:
                     throw new AssertionFailedException( $"Don't know how to resolve a '{symbol.Kind}'." );
