@@ -128,7 +128,8 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Introduce_Buil
             // Methods
             Assert.NotNull(target.GetType().GetMethod("IntroducedMethod_Void"));
             Assert.NotNull(target.GetType().GetMethod("IntroducedMethod_Int"));
-            Assert.NotNull(target.GetType().GetMethod("IntroducedMethod_Param"));
+            int x = 0;
+            Assert.NotNull(target.GetType().GetMethod("IntroducedMethod_Param", new[] { typeof(Int32) }));
             Assert.NotNull(target.GetType().GetMethod("IntroducedMethod_StaticSignature"));
             Assert.NotNull(target.GetType().GetMethod("IntroducedMethod_VirtualExplicit"));
             Assert.NotNull(target.GetType().GetMethod("GenericMethod"));

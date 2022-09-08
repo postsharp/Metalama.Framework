@@ -18,7 +18,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeTargetDotMethod( code );
 
             Assert.Equal(
-                "((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(typeof(global::Target).Method(\"M:Target.Method~System.Int32\", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance)))",
+                "((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(typeof(global::Target).GetMethod(\"Method\", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance).MethodHandle))",
                 serialized );
 
             this.TestExpression<MethodInfo>(
@@ -39,7 +39,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeTargetDotMethod( code );
 
             Assert.Equal(
-                "((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(typeof(global::Target).Method(\"M:Target.Method``1(``0)~``0\", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance)))",
+                "((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(typeof(global::Target).GetMethod(\"Method\", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance).MethodHandle))",
                 serialized );
 
             this.TestExpression<MethodInfo>(
