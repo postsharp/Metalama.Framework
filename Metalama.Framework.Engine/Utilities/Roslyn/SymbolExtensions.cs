@@ -271,14 +271,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             }
             else
             {
-                // The symbol is not valid in the current compilation. We need to go through documentation id 
-                // TODO: port to SymbolKey
-
-                var symbolId = symbol.GetSymbolId();
-
-                var resolvedSymbol = symbolId.Resolve( compilation );
-
-                return resolvedSymbol;
+                return SymbolTranslator.GetInstance( compilation ).Translate( symbol );
             }
         }
 
