@@ -22,7 +22,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeParameter( code );
 
             this.AssertEqual(
-                @"global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.Method(System.Int32)~System.Int32"")).GetParameters()[0]",
+                @"global::System.Reflection.MethodBase.GetMethodFromHandle(typeof(global::Target).Method(""M:Target.Method(System.Int32)~System.Int32"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance)).GetParameters()[0]",
                 serialized );
 
             this.TestExpression<ParameterInfo>(
@@ -43,7 +43,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeParameter( code );
 
             this.AssertEqual(
-                @"global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.Method``1(``0)~System.Int32"")).GetParameters()[0]",
+                @"global::System.Reflection.MethodBase.GetMethodFromHandle(typeof(global::Target).Method(""M:Target.Method``1(``0)~System.Int32"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance)).GetParameters()[0]",
                 serialized );
 
             this.TestExpression<ParameterInfo>(
@@ -64,7 +64,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeParameter( code );
 
             this.AssertEqual(
-                @"global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target`1.Method``1(System.Tuple{`0,``0})~System.Int32""), typeof(global::Target<>).TypeHandle).GetParameters()[0]",
+                @"global::System.Reflection.MethodBase.GetMethodFromHandle(typeof(global::Target<>).Method(""M:Target`1.Method``1(System.Tuple{`0,``0})~System.Int32"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance), typeof(global::Target<>).TypeHandle).GetParameters()[0]",
                 serialized );
 
             this.TestExpression<ParameterInfo>(
@@ -85,7 +85,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeParameter( code );
 
             this.AssertEqual(
-                @"global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.Method(System.Single,System.Int32)~System.Int32"")).GetParameters()[1]",
+                @"global::System.Reflection.MethodBase.GetMethodFromHandle(typeof(global::Target).Method(""M:Target.Method(System.Single,System.Int32)~System.Int32"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance)).GetParameters()[1]",
                 serialized );
 
             this.TestExpression<ParameterInfo>(
@@ -106,7 +106,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeReturnParameter( code );
 
             this.AssertEqual(
-                @"((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.Method(System.Single,System.Int32)~System.String""))).ReturnParameter",
+                @"((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(typeof(global::Target).Method(""M:Target.Method(System.Single,System.Int32)~System.String"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance))).ReturnParameter",
                 serialized );
 
             this.TestExpression<ParameterInfo>(
@@ -126,7 +126,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeReturnParameterOfProperty( code );
 
             this.AssertEqual(
-                @"((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.get_Property~System.String""))).ReturnParameter",
+                @"((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(typeof(global::Target).get_Property(""M:Target.get_Property~System.String"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance))).ReturnParameter",
                 serialized );
 
             this.TestExpression<ParameterInfo>(
@@ -146,7 +146,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeIndexerParameter( code );
 
             this.AssertEqual(
-                @"global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target.get_Item(System.Int32)~System.Int32"")).GetParameters()[0]",
+                @"global::System.Reflection.MethodBase.GetMethodFromHandle(typeof(global::Target).get_Item(""M:Target.get_Item(System.Int32)~System.Int32"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance)).GetParameters()[0]",
                 serialized );
 
             this.TestExpression<ParameterInfo>(

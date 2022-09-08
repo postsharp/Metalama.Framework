@@ -2,13 +2,18 @@
 
 using Metalama.Compiler;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Simplification;
 using System;
 using System.Collections.Immutable;
+using System.Linq.Expressions;
 using System.Reflection;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using MethodBase = System.Reflection.MethodBase;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization
 {
@@ -22,23 +27,41 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
             ICompileTimeReflectionObject<IMethodBase> method,
             SyntaxSerializationContext serializationContext )
             => SerializeMethodBase(
-                (IMethodSymbol) method.Target.GetSymbol( serializationContext.Compilation )
+                method.Target.GetTarget( serializationContext.CompilationModel )
                     .AssertNotNull( Justifications.SerializersNotImplementedForIntroductions ),
                 serializationContext );
 
-        internal static ExpressionSyntax SerializeMethodBase( IMethodSymbol methodSymbol, SyntaxSerializationContext serializationContext )
+        internal static ExpressionSyntax SerializeMethodBase( IMethodBase method, SyntaxSerializationContext serializationContext )
         {
-            return SerializeMethodBase( methodSymbol, methodSymbol.ContainingType, serializationContext );
+            return SerializeMethodBase( method, method.DeclaringType.GetSymbol(), serializationContext );
         }
 
         private static ExpressionSyntax SerializeMethodBase(
-            IMethodSymbol methodSymbol,
+            IMethodBase method,
             ITypeSymbol? declaringGenericTypeSymbol,
             SyntaxSerializationContext serializationContext )
         {
-            methodSymbol = methodSymbol.OriginalDefinition;
-            var documentationId = DocumentationCommentId.CreateDeclarationId( methodSymbol );
-            var methodToken = IntrinsicsCaller.CreateLdTokenExpression( nameof(Intrinsics.GetRuntimeMethodHandle), documentationId );
+            var methodSymbol = method.GetOriginalDefinition().GetSymbol();
+            var documentationId = DocumentationCommentId.CreateDeclarationId( methodSymbol.AssertNotNull() );
+
+            // var methodToken = IntrinsicsCaller.CreateLdTokenExpression( nameof(Intrinsics.GetRuntimeMethodHandle), documentationId );
+            var allBindingFlags = SyntaxUtility.CreateBindingFlags( serializationContext );
+
+            var typeCreation = TypeSerializationHelper.SerializeTypeSymbolRecursive( method.DeclaringType.GetSymbol(), serializationContext );
+
+            var methodToken = InvocationExpression(
+                    MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            typeCreation,
+                            IdentifierName( method.Name ) )
+                        .WithAdditionalAnnotations( Simplifier.Annotation ) )
+                .AddArgumentListArguments(
+                    Argument(
+                        LiteralExpression(
+                            SyntaxKind.StringLiteralExpression,
+                            Literal( documentationId ) ) ),
+                    Argument( allBindingFlags )
+                    );
 
             ExpressionSyntax invokeGetMethodFromHandle;
 
@@ -46,27 +69,27 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
             {
                 var typeHandle = CreateTypeHandleExpression( declaringGenericTypeSymbol, serializationContext );
 
-                invokeGetMethodFromHandle = SyntaxFactory.InvocationExpression(
-                        SyntaxFactory.MemberAccessExpression(
+                invokeGetMethodFromHandle = InvocationExpression(
+                        MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             serializationContext.GetTypeSyntax( typeof(MethodBase) ),
-                            SyntaxFactory.IdentifierName( "GetMethodFromHandle" ) ) )
-                    .AddArgumentListArguments( SyntaxFactory.Argument( methodToken ), SyntaxFactory.Argument( typeHandle ) );
+                            IdentifierName( "GetMethodFromHandle" ) ) )
+                    .AddArgumentListArguments( Argument( methodToken ), Argument( typeHandle ) );
             }
             else
             {
-                invokeGetMethodFromHandle = SyntaxFactory.InvocationExpression(
-                        SyntaxFactory.MemberAccessExpression(
+                invokeGetMethodFromHandle = InvocationExpression(
+                        MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             serializationContext.GetTypeSyntax( typeof(MethodBase) ),
-                            SyntaxFactory.IdentifierName( "GetMethodFromHandle" ) ) )
-                    .AddArgumentListArguments( SyntaxFactory.Argument( methodToken ) );
+                            IdentifierName( "GetMethodFromHandle" ) ) )
+                    .AddArgumentListArguments( Argument( methodToken ) );
             }
 
             if ( serializationContext.CompilationModel.Project.PreprocessorSymbols.Contains( "NET" ) )
             {
                 // In the new .NET, the API is marked for nullability, so we have to suppress the warning.
-                invokeGetMethodFromHandle = SyntaxFactory.PostfixUnaryExpression( SyntaxKind.SuppressNullableWarningExpression, invokeGetMethodFromHandle );
+                invokeGetMethodFromHandle = PostfixUnaryExpression( SyntaxKind.SuppressNullableWarningExpression, invokeGetMethodFromHandle );
             }
 
             return invokeGetMethodFromHandle
@@ -77,10 +100,10 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
         {
             var typeExpression = TypeSerializationHelper.SerializeTypeSymbolRecursive( type, serializationContext );
 
-            ExpressionSyntax typeHandle = SyntaxFactory.MemberAccessExpression(
+            ExpressionSyntax typeHandle = MemberAccessExpression(
                 SyntaxKind.SimpleMemberAccessExpression,
                 typeExpression,
-                SyntaxFactory.IdentifierName( "TypeHandle" ) );
+                IdentifierName( "TypeHandle" ) );
 
             return typeHandle;
         }
