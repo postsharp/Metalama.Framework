@@ -169,6 +169,15 @@ namespace Metalama.Framework.Engine.Linking
                 .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Unsafe | ModifierCategories.Async )
                 .Insert( 0, Token( SyntaxKind.PrivateKeyword ) );
 
+            var constraints = method.ConstraintClauses;
+
+            if ( constraints.Count == 0 && symbol.OverriddenMethod != null )
+            {
+                // Constraints may be inherited from the overridden method.
+
+                constraints = generationContext.SyntaxGenerator.TypeParameterConstraintClauses( symbol.TypeParameters );
+            }
+
             return
                 MethodDeclaration(
                         List<AttributeListSyntax>(),
@@ -178,7 +187,7 @@ namespace Metalama.Framework.Engine.Linking
                         Identifier( name ),
                         method.TypeParameterList,
                         method.ParameterList,
-                        method.ConstraintClauses,
+                        constraints,
                         null,
                         null )
                     .NormalizeWhitespace()

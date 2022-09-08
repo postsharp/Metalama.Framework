@@ -1,27 +1,56 @@
 internal class TargetClass
+{
+    private EventHandler? _field;
+
+    [Test]
+    public event EventHandler Event
     {
-    
-private int _property;
-    
-        [Test]
-        public int Property {get    {
-        return (int)this.__Property__OriginalImpl;
+        add
+        {
+            global::System.Console.WriteLine("Override");
+            this.Event_Source += value;
+
+        }
+        remove
+        {
+            global::System.Console.WriteLine("Override");
+            this.Event_Source -= value;
+
+        }
     }
-    
-set    {
-this.__Property__OriginalImpl= value;
+
+    private event EventHandler Event_Source
+    {
+        add => _field += value;
+        remove => _field -= value;
+    }
+
+    private EventHandler? _eventField;
+
+    public event EventHandler? EventField
+    {
+        add
+        {
+            global::System.Console.WriteLine("Override");
+            this.EventField_Source += value;
+        }
+        remove
+        {
+            global::System.Console.WriteLine("Override");
+            this.EventField_Source -= value;
+        }
+    }
+
+    private event EventHandler? EventField_Source
+    {
+        add
+        {
+            this._eventField += value;
+        }
+
+        remove
+        {
+            this._eventField -= value;
+        }
     }
 }
-    
-private int __Property__OriginalImpl
-{
-    get
-    {
-        return this._property;
-    }
-    
-    set
-    {
-        this._property = value;
-    }
-}    }

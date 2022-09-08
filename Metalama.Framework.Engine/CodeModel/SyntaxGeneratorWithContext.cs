@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
@@ -225,4 +226,75 @@ internal class SyntaxGeneratorWithContext : OurSyntaxGenerator
                         this.Type( p.Type.GetSymbol() ),
                         Identifier( p.Name ),
                         null ) ) ) );
+
+    public SyntaxList<TypeParameterConstraintClauseSyntax> TypeParameterConstraintClauses( ImmutableArray<ITypeParameterSymbol> typeParameters )
+    {
+        // Spec: https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/generics/constraints-on-type-parameters
+
+        if ( typeParameters.IsDefaultOrEmpty )
+        {
+            return default;
+        }
+
+        var list = List<TypeParameterConstraintClauseSyntax>();
+
+        foreach ( var parameter in typeParameters )
+        {
+            var constraints = SeparatedList<TypeParameterConstraintSyntax>();
+
+            if ( parameter.HasNotNullConstraint )
+            {
+                constraints = constraints.Add( TypeConstraint( SyntaxFactory.IdentifierName( "notnull" ) ) );
+            }
+            else if ( parameter.HasReferenceTypeConstraint )
+            {
+                if ( parameter.ReferenceTypeConstraintNullableAnnotation != NullableAnnotation.Annotated )
+                {
+                    constraints = constraints.Add( ClassOrStructConstraint( SyntaxKind.ClassConstraint ) );
+                }
+                else
+                {
+                    constraints = constraints.Add(
+                        ClassOrStructConstraint( SyntaxKind.ClassConstraint ).WithQuestionToken( Token( SyntaxKind.QuestionToken ) ) );
+                }
+            }
+            else if ( parameter.HasValueTypeConstraint )
+            {
+                if ( parameter.HasUnmanagedTypeConstraint )
+                {
+                    constraints = constraints.Add(
+                        TypeConstraint(
+                            SyntaxFactory.IdentifierName(
+                                Identifier(
+                                    default,
+                                    SyntaxKind.UnmanagedKeyword,
+                                    "unmanaged",
+                                    "unmanaged",
+                                    default ) ) ) );
+                }
+                else
+                {
+                    constraints = constraints.Add( ClassOrStructConstraint( SyntaxKind.StructConstraint ) );
+                }
+            }
+
+            foreach ( var typeConstraint in parameter.ConstraintTypes )
+            {
+                constraints = constraints.Add( TypeConstraint( this.Type( typeConstraint ) ) );
+            }
+
+            if ( parameter.HasConstructorConstraint )
+            {
+                constraints = constraints.Add( ConstructorConstraint() );
+            }
+
+            if ( constraints.Count > 0 )
+            {
+                var clause = TypeParameterConstraintClause( parameter.Name ).WithConstraints( constraints ).NormalizeWhitespace();
+                list = list.Add( clause );
+            }
+        }
+
+        return list;
+    }
 }

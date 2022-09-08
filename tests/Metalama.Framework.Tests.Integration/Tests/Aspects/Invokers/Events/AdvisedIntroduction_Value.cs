@@ -1,14 +1,10 @@
-﻿#if TEST_OPTIONS
-// @Skipped(#29134 - Invokers.Base is null for an override aspect applied to a field)
-#endif
-
-using System;
+﻿using System;
 using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedIntroduction_Value;
 
-[assembly: AspectOrder( typeof(TestAttribute), typeof(TestIntroductionAttribute) )]
+[assembly: AspectOrder( typeof(OverrideAttribute), typeof(TestIntroductionAttribute) )]
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedIntroduction_Value
 {
@@ -20,7 +16,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
     }
 
     [AttributeUsage( AttributeTargets.Class )]
-    public class TestAttribute : TypeAspect
+    public class OverrideAttribute : TypeAspect
     {
         public override void BuildAspect( IAspectBuilder<INamedType> builder )
         {
@@ -32,20 +28,22 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
         }
 
         [Template]
-        public void AddTemplate( dynamic handler )
+        public void AddTemplate( dynamic value )
         {
-            meta.Target.Event.AddMethod.Invoke( handler );
+            Console.WriteLine("Override");
+            meta.Target.Event.AddMethod.Invoke( value );
         }
 
         [Template]
-        public void RemoveTemplate( dynamic handler )
+        public void RemoveTemplate( dynamic value )
         {
-            meta.Target.Event.RemoveMethod.Invoke( handler );
+            Console.WriteLine("Override");
+            meta.Target.Event.RemoveMethod.Invoke( value );
         }
     }
 
     // <target>
     [TestIntroduction]
-    [Test]
+    [Override]
     internal class TargetClass { }
 }

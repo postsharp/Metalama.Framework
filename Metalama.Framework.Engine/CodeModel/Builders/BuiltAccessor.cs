@@ -81,7 +81,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         [Memo]
         public IInvokerFactory<IMethodInvoker> Invokers
-            => new InvokerFactory<IMethodInvoker>( ( order, invokerOperator ) => new MethodInvoker( this, order, invokerOperator ), false );
+            => new InvokerFactory<IMethodInvoker>( ( order, invokerOperator ) => new MethodInvoker( this, order, invokerOperator ) );
 
         public IMethod? OverriddenMethod => this.AccessorBuilder.OverriddenMethod;
 
