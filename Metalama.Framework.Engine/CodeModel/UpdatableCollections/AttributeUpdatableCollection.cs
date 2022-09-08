@@ -38,7 +38,7 @@ internal class AttributeUpdatableCollection : UpdatableDeclarationCollection<IAt
 
                 foreach ( var attribute in attributes )
                 {
-                    if ( attribute.AttributeConstructor == null )
+                    if ( !SymbolValidator.Instance.VisitAttribute( attribute ) )
                     {
                         continue;
                     }

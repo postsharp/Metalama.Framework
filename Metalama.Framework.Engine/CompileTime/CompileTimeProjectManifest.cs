@@ -28,6 +28,7 @@ namespace Metalama.Framework.Engine.CompileTime
             IReadOnlyList<string> transitiveFabricTypes,
             IReadOnlyList<string> otherTemplateTypes,
             IReadOnlyList<string>? references,
+            string? redistributionLicenseKey,
             ulong sourceHash,
             IReadOnlyList<CompileTimeFile> files )
         {
@@ -40,6 +41,7 @@ namespace Metalama.Framework.Engine.CompileTime
             this.TransitiveFabricTypes = transitiveFabricTypes;
             this.OtherTemplateTypes = otherTemplateTypes;
             this.References = references;
+            this.RedistributionLicenseKey = redistributionLicenseKey;
             this.SourceHash = sourceHash;
             this.Files = files;
 
@@ -62,7 +64,8 @@ namespace Metalama.Framework.Engine.CompileTime
         /// <summary>
         /// Gets the version of Metalama that created the compile-time project.
         /// </summary>
-        public string MetalamaVersion { get; } = AssemblyMetadataReader.GetInstance( typeof(CompileTimeProjectManifest).Assembly ).PackageVersion;
+        public string MetalamaVersion { get; } =
+            AssemblyMetadataReader.GetInstance( typeof(CompileTimeProjectManifest).Assembly ).PackageVersion.AssertNotNull();
 
         /// <summary>
         /// Gets the list of all aspect types (specified by fully qualified name) of the aspect library.
@@ -93,6 +96,8 @@ namespace Metalama.Framework.Engine.CompileTime
         /// Gets the name of all project references (a fully-qualified assembly identity) of the compile-time project.
         /// </summary>
         public IReadOnlyList<string>? References { get; }
+        
+        public string? RedistributionLicenseKey { get; }
 
         /// <summary>
         /// Gets a unique hash of the source code and its dependencies.

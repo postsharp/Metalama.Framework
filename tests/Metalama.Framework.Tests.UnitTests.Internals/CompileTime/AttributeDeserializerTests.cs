@@ -272,29 +272,6 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
         }
 
         [Fact]
-        public void TestParamsInvalidType()
-        {
-            void Deserialize( string args )
-            {
-                using var testContext = this.CreateTestContext();
-
-                var code = $@"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestParamsAttribute( {args} )]";
-                var compilation = testContext.CreateCompilationModel( code, ignoreErrors: true );
-
-                using UnloadableCompileTimeDomain domain = new();
-                var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
-
-                var attribute = compilation.Attributes.Single();
-
-                Assert.False( loader.AttributeDeserializer.TryCreateAttribute( attribute, new DiagnosticList(), out _ ) );
-            }
-
-            Deserialize( "typeof(int), typeof(X)" );
-            Deserialize( "typeof(X), typeof(int)" );
-            Deserialize( "typeof(X), typeof(Y)" );
-        }
-
-        [Fact]
         public void TestParams2()
         {
             void Test( string args, object firstValue, object otherValues )
@@ -368,35 +345,6 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
 
             Assert.Empty( compilation.Attributes );
             Assert.Empty( compilation.Types.Single().Attributes );
-        }
-
-        [Fact]
-        public void PropertiesWithInvalidValueAreIgnored()
-        {
-            using var testContext = this.CreateTestContext();
-
-            var code = @"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( Int32Property = ""a"" )]";
-            var compilation = testContext.CreateCompilationModel( code, ignoreErrors: true );
-
-            using UnloadableCompileTimeDomain domain = new();
-            var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
-
-            var attribute = compilation.Attributes.Single();
-            DiagnosticList diagnosticList = new();
-
-            Assert.True( loader.AttributeDeserializer.TryCreateAttribute( attribute, diagnosticList, out _ ) );
-            Assert.Empty( diagnosticList );
-        }
-
-        [Fact]
-        public void AttributesWithInvalidConstructorArgumentsAreIgnored()
-        {
-            using var testContext = this.CreateTestContext();
-
-            var code = @"[assembly: Metalama.Framework.Tests.UnitTests.CompileTime.AttributeDeserializerTests.TestAttribute( 0 )]";
-            var compilation = testContext.CreateCompilationModel( code, ignoreErrors: true );
-
-            Assert.Empty( compilation.Attributes );
         }
 
         [Fact]

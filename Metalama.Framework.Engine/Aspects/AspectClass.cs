@@ -11,6 +11,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
@@ -190,6 +191,8 @@ namespace Metalama.Framework.Engine.Aspects
             }
 
             this.Layers = layers.Select( l => new AspectLayer( this, l ) ).ToImmutableArray();
+
+            this.ServiceProvider.GetService<LicenseVerifier>()?.VerifyCanBeInherited( this, prototype, diagnosticAdder );
         }
 
         private bool TryInitialize( IDiagnosticAdder diagnosticAdder, AspectDriverFactory aspectDriverFactory )

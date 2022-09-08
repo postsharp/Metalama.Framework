@@ -800,8 +800,9 @@ namespace Metalama.Framework.Engine.CompileTime
                                  v =>
                                  {
                                      var member = node.WithDeclaration(
-                                         node.Declaration.WithVariables( SingletonSeparatedList( v ) )
-                                             .WithType( (TypeSyntax) this.Visit( node.Declaration.Type )! ) );
+                                             node.Declaration.WithVariables( SingletonSeparatedList( v ) )
+                                                 .WithType( (TypeSyntax) this.Visit( node.Declaration.Type )! ) )
+                                         .WithAttributeLists( default );
 
                                      if ( removeReadOnly )
                                      {
@@ -824,8 +825,9 @@ namespace Metalama.Framework.Engine.CompileTime
                                  TemplateCompilerSemantics.Initializer,
                                  declarator,
                                  v => node.WithDeclaration(
-                                     node.Declaration.WithVariables( SingletonSeparatedList( v ) )
-                                         .WithType( (TypeSyntax) this.Visit( node.Declaration.Type )! ) ) ) )
+                                         node.Declaration.WithVariables( SingletonSeparatedList( v ) )
+                                             .WithType( (TypeSyntax) this.Visit( node.Declaration.Type )! ) )
+                                     .WithAttributeLists( default ) ) )
                     {
                         yield return result;
                     }
@@ -1009,14 +1011,17 @@ namespace Metalama.Framework.Engine.CompileTime
                     return visitedConstructor;
                 }
             }
-
+            
             public override SyntaxNode? VisitNamespaceDeclaration( NamespaceDeclarationSyntax node )
             {
                 var transformedMembers = this.VisitTypeOrNamespaceMembers( node.Members );
 
                 if ( transformedMembers.Any( m => m.HasAnnotation( _hasCompileTimeCodeAnnotation ) ) )
                 {
-                    return node.WithMembers( transformedMembers ).WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
+                    return node.WithMembers( transformedMembers )
+                        .WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation )
+                        .WithLeadingTrivia( this.VisitList( node.GetLeadingTrivia() ) )
+                        .WithTrailingTrivia( this.VisitList( node.GetTrailingTrivia() ) );
                 }
                 else
                 {
@@ -1030,7 +1035,10 @@ namespace Metalama.Framework.Engine.CompileTime
 
                 if ( transformedMembers.Any( m => m.HasAnnotation( _hasCompileTimeCodeAnnotation ) ) )
                 {
-                    return node.WithMembers( transformedMembers ).WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation );
+                    return node.WithMembers( transformedMembers )
+                        .WithAdditionalAnnotations( _hasCompileTimeCodeAnnotation )
+                        .WithLeadingTrivia( this.VisitList( node.GetLeadingTrivia() ) )
+                        .WithTrailingTrivia( this.VisitList( node.GetTrailingTrivia() ) );
                 }
                 else
                 {

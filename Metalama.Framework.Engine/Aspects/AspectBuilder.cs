@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Fabrics;
+using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.UserCode;
@@ -38,6 +39,7 @@ namespace Metalama.Framework.Engine.Aspects
             this._aspectBuilderState = aspectBuilderState;
             this.AdviceFactory = adviceFactory;
             this.AspectPredecessor = aspectPredecessor ?? new AspectPredecessor( AspectPredecessorKind.ChildAspect, aspectBuilderState.AspectInstance );
+            this.LicenseVerifier = this.ServiceProvider.GetService<LicenseVerifier>();
         }
 
         public IProject Project => this.Target.Compilation.Project;
@@ -163,5 +165,7 @@ namespace Metalama.Framework.Engine.Aspects
 
         public DeclarationValidatorDriver GetDeclarationValidatorDriver( ValidatorDelegate<DeclarationValidationContext> validate )
             => ((IValidatorDriverFactory) this.AspectInstance.AspectClass).GetDeclarationValidatorDriver( validate );
+
+        public LicenseVerifier? LicenseVerifier { get; }
     }
 }
