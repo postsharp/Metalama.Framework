@@ -60,8 +60,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                         LiteralExpression(
                             SyntaxKind.StringLiteralExpression,
                             Literal( documentationId ) ) ),
-                    Argument( allBindingFlags )
-                    );
+                    Argument( allBindingFlags ) );
 
             ExpressionSyntax invokeGetMethodFromHandle;
 
