@@ -1,3 +1,5 @@
+#pragma warning disable CS0067
+
 using System;
 using System.Collections.Generic;
 using Metalama.Framework;
@@ -128,7 +130,6 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Introduce_Buil
             // Methods
             Assert.NotNull(target.GetType().GetMethod("IntroducedMethod_Void"));
             Assert.NotNull(target.GetType().GetMethod("IntroducedMethod_Int"));
-            int x = 0;
             Assert.NotNull(target.GetType().GetMethod("IntroducedMethod_Param", new[] { typeof(Int32) }));
             Assert.NotNull(target.GetType().GetMethod("IntroducedMethod_StaticSignature"));
             Assert.NotNull(target.GetType().GetMethod("IntroducedMethod_VirtualExplicit"));
