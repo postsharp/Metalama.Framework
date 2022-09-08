@@ -62,7 +62,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public abstract MemberInfo ToMemberInfo();
 
-        protected MemberOrNamedType( CompilationModel compilation ) : base( compilation ) { }
+        protected MemberOrNamedType( CompilationModel compilation, ISymbol symbol ) : base( compilation, symbol ) { }
 
         public Accessibility Accessibility
             => this.Symbol.DeclaredAccessibility switch

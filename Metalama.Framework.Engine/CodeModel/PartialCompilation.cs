@@ -356,6 +356,9 @@ namespace Metalama.Framework.Engine.CodeModel
                         "The SyntaxTree.FilePath property of the new SyntaxTree must be set to a non-empty value." );
                 }
 
+                // We cannot validate the Encoding property because it may be null at design time because of a Roslyn bug, but this does not
+                // matter to us in that scenario.
+                /*
                 if ( transformations.Any( t => t.NewTree is { Encoding: null } && t.OldTree?.Encoding != null ) && HasInitialCompilationEncoding() )
                 {
                     var invalidTrees = transformations.Where( t => t.NewTree is { Encoding: null } ).Select( x => $"'{x.FilePath}'" );
@@ -364,6 +367,7 @@ namespace Metalama.Framework.Engine.CodeModel
                         nameof(transformations),
                         $"The SyntaxTree.Encoding property of these SyntaxTrees cannot be null: {string.Join( ", ", invalidTrees )}" );
                 }
+                */
             }
         }
     }

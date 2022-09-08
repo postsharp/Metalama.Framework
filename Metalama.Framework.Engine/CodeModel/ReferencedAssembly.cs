@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.CodeModel
 {
     internal class ReferencedAssembly : Declaration, IAssembly
     {
-        public ReferencedAssembly( IAssemblySymbol assemblySymbol, CompilationModel compilation ) : base( compilation )
+        public ReferencedAssembly( IAssemblySymbol assemblySymbol, CompilationModel compilation ) : base( compilation, assemblySymbol )
         {
             this.AssemblySymbol = assemblySymbol;
         }

@@ -40,7 +40,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => this.Compilation.GetDerivedTypes( this, deep );
 
-        internal NamedType( INamedTypeSymbol typeSymbol, CompilationModel compilation ) : base( compilation )
+        internal NamedType( INamedTypeSymbol typeSymbol, CompilationModel compilation ) : base( compilation, typeSymbol )
         {
             this.TypeSymbol = typeSymbol;
         }
@@ -287,7 +287,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public INamespace Namespace => this.Compilation.Factory.GetNamespace( this.TypeSymbol.ContainingNamespace );
 
         [Memo]
-        public string FullName => this.TypeSymbol.ToDisplayString();
+        public string FullName => this.TypeSymbol.GetFullName();
 
         [Memo]
         public IReadOnlyList<IType> TypeArguments => this.TypeSymbol.TypeArguments.Select( a => this.Compilation.Factory.GetIType( a ) ).ToImmutableList();
