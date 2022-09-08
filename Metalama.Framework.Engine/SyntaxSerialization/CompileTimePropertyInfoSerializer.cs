@@ -20,10 +20,10 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
         {
             var property = obj.Target.GetTarget( serializationContext.CompilationModel ).AssertNotNull();
 
-            return this.SerializeProperty( property, serializationContext );
+            return SerializeProperty( property, serializationContext );
         }
 
-        public ExpressionSyntax SerializeProperty( IPropertyOrIndexer propertyOrIndexer, SyntaxSerializationContext serializationContext )
+        public static ExpressionSyntax SerializeProperty( IPropertyOrIndexer propertyOrIndexer, SyntaxSerializationContext serializationContext )
         {
             var typeCreation = TypeSerializationHelper.SerializeTypeSymbolRecursive( propertyOrIndexer.DeclaringType.GetSymbol(), serializationContext );
 
