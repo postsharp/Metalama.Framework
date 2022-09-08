@@ -39,26 +39,31 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
             ITypeSymbol? declaringGenericTypeSymbol,
             SyntaxSerializationContext serializationContext )
         {
-            var methodSymbol = method.GetOriginalDefinition().GetSymbol();
-            var documentationId = DocumentationCommentId.CreateDeclarationId( methodSymbol.AssertNotNull() );
-
+            // var methodSymbol = method.GetOriginalDefinition().GetSymbol();
+            // var documentationId = DocumentationCommentId.CreateDeclarationId( methodSymbol.AssertNotNull() );
             // var methodToken = IntrinsicsCaller.CreateLdTokenExpression( nameof(Intrinsics.GetRuntimeMethodHandle), documentationId );
-            var allBindingFlags = SyntaxUtility.CreateBindingFlags( serializationContext );
 
             var typeCreation = TypeSerializationHelper.SerializeTypeSymbolRecursive( method.DeclaringType.GetSymbol(), serializationContext );
 
-            var methodToken = InvocationExpression(
+            var allBindingFlags = SyntaxUtility.CreateBindingFlags( serializationContext );
+
+            var invokeGetMethodToken = InvocationExpression(
                     MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             typeCreation,
-                            IdentifierName( method.Name ) )
+                            IdentifierName( "GetMethod" ) )
                         .WithAdditionalAnnotations( Simplifier.Annotation ) )
                 .AddArgumentListArguments(
                     Argument(
                         LiteralExpression(
                             SyntaxKind.StringLiteralExpression,
-                            Literal( documentationId ) ) ),
+                            Literal( method.Name ) ) ),
                     Argument( allBindingFlags ) );
+
+            var accessMethodMemberToken = MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    invokeGetMethodToken,
+                    IdentifierName( "MethodHandle" ) );
 
             ExpressionSyntax invokeGetMethodFromHandle;
 
@@ -71,7 +76,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                             SyntaxKind.SimpleMemberAccessExpression,
                             serializationContext.GetTypeSyntax( typeof(MethodBase) ),
                             IdentifierName( "GetMethodFromHandle" ) ) )
-                    .AddArgumentListArguments( Argument( methodToken ), Argument( typeHandle ) );
+                    .AddArgumentListArguments( Argument( accessMethodMemberToken ), Argument( typeHandle ) );
             }
             else
             {
@@ -80,7 +85,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                             SyntaxKind.SimpleMemberAccessExpression,
                             serializationContext.GetTypeSyntax( typeof(MethodBase) ),
                             IdentifierName( "GetMethodFromHandle" ) ) )
-                    .AddArgumentListArguments( Argument( methodToken ) );
+                    .AddArgumentListArguments( Argument( accessMethodMemberToken ) );
             }
 
             if ( serializationContext.CompilationModel.Project.PreprocessorSymbols.Contains( "NET" ) )
