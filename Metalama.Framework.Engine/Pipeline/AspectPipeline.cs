@@ -14,6 +14,7 @@ using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Fabrics;
+using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
@@ -93,6 +94,7 @@ namespace Metalama.Framework.Engine.Pipeline
         protected bool TryInitialize(
             IDiagnosticAdder diagnosticAdder,
             PartialCompilation compilation,
+            ProjectLicenseInfo? projectLicenseInfo,
             IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out AspectPipelineConfiguration? configuration )
@@ -136,6 +138,7 @@ namespace Metalama.Framework.Engine.Pipeline
             // Prepare the compile-time assembly.
             if ( !loader.TryGetCompileTimeProjectFromCompilation(
                     roslynCompilation,
+                    projectLicenseInfo,
                     compileTimeTreesHint,
                     diagnosticAdder,
                     false,
@@ -410,7 +413,7 @@ namespace Metalama.Framework.Engine.Pipeline
         {
             if ( pipelineConfiguration == null )
             {
-                if ( !this.TryInitialize( diagnosticAdder, compilation, null, cancellationToken, out pipelineConfiguration ) )
+                if ( !this.TryInitialize( diagnosticAdder, compilation, null, null, cancellationToken, out pipelineConfiguration ) )
                 {
                     pipelineStageResult = null;
 
@@ -444,6 +447,7 @@ namespace Metalama.Framework.Engine.Pipeline
             var aspectSources = this.CreateAspectSources( pipelineConfiguration, compilation.Compilation, cancellationToken );
             var additionalCompilationOutputFiles = GetAdditionalCompilationOutputFiles( pipelineConfiguration.ServiceProvider );
 
+            // Execute the pipeline stages.
             pipelineStageResult = new AspectPipelineResult(
                 compilation,
                 pipelineConfiguration.ProjectModel,
@@ -475,6 +479,17 @@ namespace Metalama.Framework.Engine.Pipeline
                 }
             }
 
+            // Enforce licensing.
+            var licenseVerifier = pipelineConfiguration.ServiceProvider.GetService<LicenseVerifier>();
+
+            if ( licenseVerifier != null )
+            {
+                var licensingDiagnostics = new UserDiagnosticSink();
+                licenseVerifier.VerifyCompilationResult( compilation.Compilation, pipelineStageResult.AspectInstanceResults, licensingDiagnostics );
+                pipelineStageResult = pipelineStageResult.WithAdditionalDiagnostics( licensingDiagnostics.ToImmutable() );
+            }
+
+            // Report diagnostics
             var hasError = pipelineStageResult.Diagnostics.ReportedDiagnostics.Any( d => d.Severity >= DiagnosticSeverity.Error );
 
             foreach ( var diagnostic in pipelineStageResult.Diagnostics.ReportedDiagnostics )

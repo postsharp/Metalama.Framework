@@ -159,6 +159,7 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
     /// </summary>
     public bool TryGetCompileTimeProjectFromCompilation(
         Compilation runTimeCompilation,
+        ProjectLicenseInfo? projectLicenseInfo,
         IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
         IDiagnosticAdder diagnosticSink,
         bool cacheOnly,
@@ -195,6 +196,7 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
 
         if ( !this._builder.TryGetCompileTimeProject(
                 runTimeCompilation,
+                projectLicenseInfo,
                 compileTimeTreesHint,
                 referencedProjects,
                 diagnosticSink,
@@ -229,6 +231,7 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
             case CompilationReference compilationReference:
                 return this.TryGetCompileTimeProjectFromCompilation(
                     compilationReference.Compilation,
+                    null,
                     null,
                     diagnosticSink,
                     cacheOnly,
@@ -383,6 +386,7 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
                 syntaxTrees,
                 manifest.SourceHash,
                 referenceProjects,
+                string.IsNullOrEmpty( manifest.RedistributionLicenseKey ) ? null : new ProjectLicenseInfo( manifest.RedistributionLicenseKey ),
                 diagnosticAdder,
                 cancellationToken,
                 out var assemblyPath,

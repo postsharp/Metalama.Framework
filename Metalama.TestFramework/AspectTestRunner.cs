@@ -4,6 +4,7 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Microsoft.CodeAnalysis;
@@ -73,11 +74,18 @@ namespace Metalama.TestFramework
                 return;
             }
 
-            var serviceProviderWithObserver = testResult.ProjectScopedServiceProvider.WithServices( new Observer( testResult ) );
+            var serviceProviderForThisTest = testResult.ProjectScopedServiceProvider.WithServices( new Observer( testResult ) );
+
+            if ( testInput.Options.LicenseFile != null )
+            {
+                var licenseKey = File.ReadAllText( Path.Combine( testInput.ProjectDirectory, testInput.Options.LicenseFile ) );
+
+                serviceProviderForThisTest = LicenseVerifierFactory.AddTestLicenseVerifier( serviceProviderForThisTest, licenseKey );
+            }
 
             using var domain = new UnloadableCompileTimeDomain();
 
-            var pipeline = new CompileTimeAspectPipeline( serviceProviderWithObserver, true, domain );
+            var pipeline = new CompileTimeAspectPipeline( serviceProviderForThisTest, true, domain );
 
             var pipelineResult = await pipeline.ExecuteAsync(
                 testResult.PipelineDiagnostics,
@@ -90,7 +98,7 @@ namespace Metalama.TestFramework
                 if ( testInput.Options.ApplyCodeFix.GetValueOrDefault() )
                 {
                     // When we test code fixes, we don't apply the pipeline output, but we apply the code fix instead.
-                    if ( !await ApplyCodeFixAsync( testInput, testResult, domain, serviceProviderWithObserver ) )
+                    if ( !await ApplyCodeFixAsync( testInput, testResult, domain, serviceProviderForThisTest ) )
                     {
                         return;
                     }
