@@ -65,9 +65,7 @@ namespace Doc.InheritedTypeLevel
 }
 ";
 
-        public InheritanceLicensingTests( ITestOutputHelper logger ) : base( logger )
-        {
-        }
+        public InheritanceLicensingTests( ITestOutputHelper logger ) : base( logger ) { }
 
         [Theory]
         [InlineData( TestLicenseKeys.PostSharpEssentials, false )]

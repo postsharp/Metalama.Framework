@@ -156,6 +156,8 @@ internal class NullableNamedType : INamedTypeInternal
     bool INamedType.TryFindImplementationForInterfaceMember( IMember interfaceMember, [NotNullWhen( true )] out IMember? implementationMember )
         => this._underlying.TryFindImplementationForInterfaceMember( interfaceMember, out implementationMember );
 
+    public INamedType TypeDefinition => this._underlying.TypeDefinition;
+
     ITypeInternal ITypeInternal.Accept( TypeRewriter visitor ) => this._underlying.Accept( visitor );
 
     T IMeasurableInternal.GetMetric<T>() => this._underlying.GetMetric<T>();

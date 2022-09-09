@@ -1045,5 +1045,63 @@ class T2 {}
 
             Assert.Equal( expectedResult, result );
         }
+
+        [Fact]
+        public void Generic()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = @"
+
+class NonGeneric { }
+
+class Base<T>
+{ 
+   public virtual void Method(T p ) {} 
+}
+
+class Derived : Base<int> 
+{
+  public override void Method(int p ) {}
+  public void GenericMethod<T>() {} 
+}
+";
+
+            var compilation = testContext.CreateCompilationModel( code );
+
+            var nonGenericClass = compilation.Types.OfName( "NonGeneric" ).Single();
+            Assert.False( nonGenericClass.IsGeneric );
+            Assert.False( nonGenericClass.IsOpenGeneric );
+            Assert.Same( nonGenericClass, nonGenericClass.TypeDefinition );
+
+            var baseClass = compilation.Types.OfName( "Base" ).Single();
+            Assert.True( baseClass.IsGeneric );
+            Assert.True( baseClass.IsOpenGeneric );
+            Assert.Same( baseClass, baseClass.TypeDefinition );
+
+            var baseMethod = baseClass.Methods.OfName( "Method" ).Single();
+            Assert.False( baseMethod.IsGeneric );
+            Assert.True( baseMethod.IsOpenGeneric );
+            Assert.Same( baseMethod, baseMethod.MethodDefinition );
+
+            var derivedClass = compilation.Types.OfName( "Derived" ).Single();
+            Assert.False( derivedClass.IsGeneric );
+            Assert.False( derivedClass.IsOpenGeneric );
+            Assert.True( derivedClass.BaseType!.IsGeneric );
+            Assert.False( derivedClass.BaseType.IsOpenGeneric );
+            Assert.Same( baseClass, derivedClass.BaseType.TypeDefinition );
+
+            var derivedMethod = derivedClass.Methods.OfName( "Method" ).Single();
+            Assert.False( derivedMethod.IsGeneric );
+            Assert.False( derivedMethod.IsOpenGeneric );
+            Assert.False( derivedMethod.OverriddenMethod!.IsGeneric );
+            Assert.False( derivedMethod.OverriddenMethod.IsOpenGeneric );
+            Assert.Same( baseMethod, derivedMethod.OverriddenMethod.MethodDefinition );
+
+            var genericMethod = derivedClass.Methods.OfName( "GenericMethod" ).Single();
+            Assert.True( genericMethod.IsGeneric );
+            Assert.True( genericMethod.IsOpenGeneric );
+            Assert.Same( genericMethod, genericMethod.MethodDefinition );
+        }
     }
 }

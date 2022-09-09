@@ -91,7 +91,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
         public ISymbol? Resolve( Compilation compilation, bool ignoreAssemblyKey = false, CancellationToken cancellationToken = default )
         {
-            var cache = _cache.GetOrAdd( compilation, c => new ConcurrentDictionary<SymbolId, ISymbol?>() );
+            var cache = _cache.GetOrAdd( compilation, _ => new ConcurrentDictionary<SymbolId, ISymbol?>() );
 
             if ( cache.TryGetValue( this, out var symbol ) )
             {

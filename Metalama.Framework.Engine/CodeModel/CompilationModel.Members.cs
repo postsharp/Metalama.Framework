@@ -65,7 +65,7 @@ public partial class CompilationModel
         {
             DeclarationBuilder declarationBuilder => this.Contains( declarationBuilder ),
             null => false,
-            _ => this._parameters.TryGetValue( ((IHasParameters) parameterBuilder.ContainingDeclaration).ToTypedRef<IHasParameters>(), out var parameters )
+            _ => this._parameters.TryGetValue( ((IHasParameters) parameterBuilder.ContainingDeclaration).ToTypedRef(), out var parameters )
                  && parameters.Contains( parameterBuilder.ToTypedRef<IParameter>() )
         };
 

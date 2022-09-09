@@ -8,9 +8,7 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
 {
     public class CompilationLicensingTests : LicensingTestsBase
     {
-        public CompilationLicensingTests( ITestOutputHelper logger ) : base( logger )
-        {
-        }
+        public CompilationLicensingTests( ITestOutputHelper logger ) : base( logger ) { }
 
         [Theory]
         [InlineData( TestLicenseKeys.PostSharpEssentials )]
