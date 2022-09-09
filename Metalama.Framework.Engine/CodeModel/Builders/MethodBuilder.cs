@@ -147,6 +147,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public OperatorKind OperatorKind { get; }
 
+        IMethod IMethod.MethodDefinition => this;
+
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations { get; private set; } = Array.Empty<IMethod>();
 
         public MethodBuilder(

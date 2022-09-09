@@ -20,7 +20,7 @@ public readonly struct SymbolDictionaryKey : IEquatable<SymbolDictionaryKey>
     private readonly int _hashCode;
     private readonly object _identity; // Can be a string (SymbolId) or an ISymbol.
 
-    public SymbolDictionaryKey( int hashCode, object identity )
+    private SymbolDictionaryKey( int hashCode, object identity )
     {
         this._hashCode = hashCode;
         this._identity = identity;

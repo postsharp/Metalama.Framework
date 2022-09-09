@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.CodeModel.Builders;
-using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
@@ -117,7 +116,6 @@ namespace Metalama.Framework.Engine.CodeModel.References
 
         internal Ref( ISymbol symbol, Compilation compilation, DeclarationRefTargetKind targetKind = DeclarationRefTargetKind.Default )
         {
-            Invariant.Assert( FixedSymbolComparer.Default.Equals( symbol, symbol.GetSymbolId().Resolve( compilation ).AssertNotNull() ) );
             symbol.AssertValidType<T>();
 
             this.TargetKind = targetKind;
@@ -191,11 +189,11 @@ namespace Metalama.Framework.Engine.CodeModel.References
                     out var redirected ) )
             {
                 // Referencing redirected declaration.
-                return Resolve( redirected.Target, compilationModel, options, this.TargetKind );
+                return this.Resolve( redirected.Target, compilationModel, options, this.TargetKind );
             }
             else
             {
-                return Resolve( this.Target, compilationModel, options, this.TargetKind );
+                return this.Resolve( this.Target, compilationModel, options, this.TargetKind );
             }
         }
 
@@ -322,7 +320,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
             return symbol;
         }
 
-        private static T Resolve(
+        private T Resolve(
             object? reference,
             CompilationModel compilation,
             ReferenceResolutionOptions options = default,
@@ -348,7 +346,11 @@ namespace Metalama.Framework.Engine.CodeModel.References
                         : throw new AssertionFailedException();
 
                 case ISymbol symbol:
-                    return Convert( compilation.Factory.GetCompilationElement( symbol.AssertValidType<T>(), kind ).AssertNotNull() );
+                    return Convert(
+                        compilation.Factory.GetCompilationElement(
+                                symbol.AssertValidType<T>().Translate( this._compilation, compilation.RoslynCompilation ).AssertNotNull(),
+                                kind )
+                            .AssertNotNull() );
 
                 case SyntaxNode node:
                     return Convert(

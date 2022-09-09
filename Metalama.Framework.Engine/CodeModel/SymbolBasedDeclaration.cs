@@ -12,6 +12,11 @@ namespace Metalama.Framework.Engine.CodeModel
 {
     public abstract class SymbolBasedDeclaration : BaseDeclaration
     {
+        protected SymbolBasedDeclaration( ISymbol symbol )
+        {
+            Invariant.Assert( symbol.Kind != SymbolKind.ErrorType );
+        }
+
         [Obfuscation( Exclude = true /* The obfuscator believes it implements ISdkDeclaration.Symbol, but it does not. */ )]
         public abstract ISymbol Symbol { get; }
 

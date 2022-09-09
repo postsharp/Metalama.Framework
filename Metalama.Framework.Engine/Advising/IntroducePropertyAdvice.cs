@@ -233,6 +233,7 @@ namespace Metalama.Framework.Engine.Advising
                         else
                         {
                             this.Builder.IsNew = true;
+                            this.Builder.OverriddenProperty = existingProperty;
 
                             var overriddenProperty = new OverridePropertyTransformation(
                                 this,

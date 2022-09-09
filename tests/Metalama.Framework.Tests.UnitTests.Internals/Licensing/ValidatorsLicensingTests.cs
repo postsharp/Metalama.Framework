@@ -74,9 +74,7 @@ class TargetClass
 }
 ";
 
-        public ValidatorsLicensingTests( ITestOutputHelper logger ) : base( logger )
-        {
-        }
+        public ValidatorsLicensingTests( ITestOutputHelper logger ) : base( logger ) { }
 
         [Theory]
         [InlineData( TestLicenseKeys.PostSharpEssentials, true )]

@@ -3,7 +3,9 @@
 using Microsoft.CodeAnalysis;
 using Newtonsoft.Json;
 using System;
+using System.Collections.Concurrent;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn
@@ -13,6 +15,8 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
     /// </summary>
     public readonly struct SymbolId : IEquatable<SymbolId>
     {
+        private static readonly ConditionalWeakTable<Compilation, ConcurrentDictionary<SymbolId, ISymbol?>> _cache = new();
+
         // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
         private static readonly Func<string, object> _newSymbolKeyFunc;
 
@@ -86,7 +90,20 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
         }
 
         public ISymbol? Resolve( Compilation compilation, bool ignoreAssemblyKey = false, CancellationToken cancellationToken = default )
-            => _resolveSymbolKeyFunc( this._symbolKey, compilation, ignoreAssemblyKey, cancellationToken );
+        {
+            var cache = _cache.GetOrAdd( compilation, _ => new ConcurrentDictionary<SymbolId, ISymbol?>() );
+
+            if ( cache.TryGetValue( this, out var symbol ) )
+            {
+                return symbol;
+            }
+
+            symbol = _resolveSymbolKeyFunc( this._symbolKey, compilation, ignoreAssemblyKey, cancellationToken );
+
+            cache.TryAdd( this, symbol );
+
+            return symbol;
+        }
 
         public override string ToString() => this._symbolKey.ToString();
 

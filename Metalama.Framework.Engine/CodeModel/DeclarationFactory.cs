@@ -213,8 +213,25 @@ namespace Metalama.Framework.Engine.CodeModel
 
         internal ICompilationElement? GetCompilationElement( ISymbol symbol, DeclarationRefTargetKind kind = DeclarationRefTargetKind.Default )
         {
-            Invariant.Assert(
-                FixedSymbolComparer.Default.Equals( symbol, symbol.GetSymbolId().Resolve( this._compilationModel.RoslynCompilation ).AssertNotNull() ) );
+            switch ( symbol.Kind )
+            {
+                case SymbolKind.Local:
+                case SymbolKind.Label:
+                case SymbolKind.ErrorType:
+                    return null;
+            }
+
+#if DEBUG
+            if ( !(symbol is IMethodSymbol { ContainingSymbol: IMethodSymbol }) )
+            {
+                var translatedSymbol = symbol.Translate( null, this.Compilation );
+
+                if ( !SymbolEqualityComparer.Default.Equals( translatedSymbol, symbol ) )
+                {
+                    throw new ArgumentOutOfRangeException( nameof(symbol), $"'{symbol}' does not belong to the current compilation." );
+                }
+            }
+#endif
 
             switch ( symbol.Kind )
             {
@@ -292,11 +309,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
                 case SymbolKind.NetModule:
                     return this._compilationModel;
-
-                case SymbolKind.Local:
-                case SymbolKind.Label:
-                case SymbolKind.ErrorType:
-                    return null;
 
                 default:
                     throw new AssertionFailedException( $"Don't know how to resolve a '{symbol.Kind}'." );
@@ -390,7 +402,7 @@ namespace Metalama.Framework.Engine.CodeModel
         private static Exception CreateBuilderNotExists( IDeclarationBuilder builder )
             => new InvalidOperationException( $"The declaration '{builder}' does not exist in the current compilation." );
 
-        internal IParameter GetParameter( ParameterBuilder parameterBuilder, ReferenceResolutionOptions options )
+        internal IParameter GetParameter( BaseParameterBuilder parameterBuilder, ReferenceResolutionOptions options )
         {
             if ( options.MustExist() && !this._compilationModel.Contains( parameterBuilder ) )
             {
@@ -486,7 +498,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 FieldBuilder fieldBuilder => this.GetField( fieldBuilder, options ),
                 PropertyBuilder propertyBuilder => this.GetProperty( propertyBuilder, options ),
                 EventBuilder eventBuilder => this.GetEvent( eventBuilder, options ),
-                ParameterBuilder parameterBuilder => this.GetParameter( parameterBuilder, options ),
+                BaseParameterBuilder parameterBuilder => this.GetParameter( parameterBuilder, options ),
                 AttributeBuilder attributeBuilder => this.GetAttribute( attributeBuilder, options ),
                 TypeParameterBuilder genericParameterBuilder => this.GetGenericParameter( genericParameterBuilder, options ),
                 AccessorBuilder accessorBuilder => this.GetAccessor( accessorBuilder, options ),
@@ -495,7 +507,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 // This is for linker tests (fake builders), which resolve to themselves.
                 // ReSharper disable once SuspiciousTypeConversion.Global
                 ISdkRef<IDeclaration> reference => reference.GetTarget( this._compilationModel ).AssertNotNull(),
-                _ => throw new AssertionFailedException()
+                _ => throw new AssertionFailedException( $"Cannot get a declaration for a {builder.GetType()}" )
             };
 
         public IType GetIType( IType type )

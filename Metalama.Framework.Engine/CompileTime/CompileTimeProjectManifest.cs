@@ -64,7 +64,8 @@ namespace Metalama.Framework.Engine.CompileTime
         /// <summary>
         /// Gets the version of Metalama that created the compile-time project.
         /// </summary>
-        public string MetalamaVersion { get; } = AssemblyMetadataReader.GetInstance( typeof(CompileTimeProjectManifest).Assembly ).PackageVersion.AssertNotNull();
+        public string MetalamaVersion { get; } =
+            AssemblyMetadataReader.GetInstance( typeof(CompileTimeProjectManifest).Assembly ).PackageVersion.AssertNotNull();
 
         /// <summary>
         /// Gets the list of all aspect types (specified by fully qualified name) of the aspect library.

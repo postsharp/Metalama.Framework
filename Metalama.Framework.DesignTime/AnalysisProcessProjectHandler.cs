@@ -170,7 +170,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
         // Notify Roslyn that we have changes.
         if ( this.ProjectOptions.SourceGeneratorTouchFile == null )
         {
-            this._logger.Error?.Log( "Property MetalamaSourceGeneratorTouchFile cannot be null." );
+            this._logger.Error?.Log( $"Property MetalamaSourceGeneratorTouchFile cannot be null for project '{this.ProjectOptions.ProjectId}'." );
         }
         else
         {

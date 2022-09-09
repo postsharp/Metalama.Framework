@@ -80,7 +80,7 @@ namespace Metalama.TestFramework
             {
                 var licenseKey = File.ReadAllText( Path.Combine( testInput.ProjectDirectory, testInput.Options.LicenseFile ) );
 
-                serviceProviderForThisTest = LicenseVerifierFactory.AddTestLicenseVerifier( serviceProviderForThisTest, licenseKey );
+                serviceProviderForThisTest = serviceProviderForThisTest.AddTestLicenseVerifier( licenseKey );
             }
 
             using var domain = new UnloadableCompileTimeDomain();
