@@ -67,12 +67,14 @@ internal class LicenseVerifier : IService
         static string NormalizeAssemblyName( string assemblyName )
         {
             var match = Regex.Match( assemblyName, "^(test|dependency)_[0-9a-f]{1,16}$" );
+
+            // ReSharper disable once StringLiteralTypo
             return match.Success
                 ? $"{match.Groups[1]}_XXXXXXXXXXXXXXXX"
                 : assemblyName;
         }
 
-        bool IsProjectWithValidRedistributionLicense( CompileTimeProject project)
+        bool IsProjectWithValidRedistributionLicense( CompileTimeProject project )
         {
             var licenseKey = project.ProjectLicenseInfo.RedistributionLicenseKey;
 
@@ -86,8 +88,7 @@ internal class LicenseVerifier : IService
             if ( !this._licenseConsumptionManager.ValidateRedistributionLicenseKey( licenseKey!, projectAssemblyName ) )
             {
                 diagnostics.Report(
-                    LicensingDiagnosticDescriptors.RedistributionLicenseInvalid.CreateRoslynDiagnostic(
-                        null, NormalizeAssemblyName( projectAssemblyName ) ) );
+                    LicensingDiagnosticDescriptors.RedistributionLicenseInvalid.CreateRoslynDiagnostic( null, NormalizeAssemblyName( projectAssemblyName ) ) );
 
                 return false;
             }
@@ -96,20 +97,21 @@ internal class LicenseVerifier : IService
         }
 
         // Distinguish redistribution and non-redistribution aspect classes.
-        var nonredistributionAspectClasses = aspectInstanceResults.Select( r => r.AspectInstance.AspectClass ).ToHashSet();
-        var projectsWithRedistributionLicense = nonredistributionAspectClasses
-            .Where( c => c is AspectClass )
-            .Select( c => (AspectClass) c )
+        var nonRedistributionAspectClasses = aspectInstanceResults.Select( r => r.AspectInstance.AspectClass ).ToHashSet();
+
+        var projectsWithRedistributionLicense = nonRedistributionAspectClasses
+            .OfType<AspectClass>()
             .Where( c => c.Project != null )
             .Select( c => c.Project! )
             .Distinct()
             .Where( p => IsProjectWithValidRedistributionLicense( p ) )
             .ToHashSet();
 
-        nonredistributionAspectClasses.RemoveWhere( c => c is AspectClass ac && ac.Project != null && projectsWithRedistributionLicense.Contains( ac.Project ) );
+        nonRedistributionAspectClasses.RemoveWhere(
+            c => c is AspectClass ac && ac.Project != null && projectsWithRedistributionLicense.Contains( ac.Project ) );
 
         // One redistribution library counts as one aspect class.
-        var aspectClassesCount = projectsWithRedistributionLicense.Count + nonredistributionAspectClasses.Count;
+        var aspectClassesCount = projectsWithRedistributionLicense.Count + nonRedistributionAspectClasses.Count;
 
         if ( aspectClassesCount == 0 )
         {
@@ -144,20 +146,22 @@ internal class LicenseVerifier : IService
         {
             var aspectClassesList = aspectClasses.Select( a => $"'{a.ShortName}'" ).ToList();
             aspectClassesList.Sort();
+
             return string.Join( ", ", aspectClassesList );
         }
 
-        var aspectClassNames = string.Join( ", ", GetNames( nonredistributionAspectClasses ) );
+        var aspectClassNames = string.Join( ", ", GetNames( nonRedistributionAspectClasses ) );
 
         if ( projectsWithRedistributionLicense.Count > 0 )
         {
-            aspectClassNames += ", " + string.Join( ", ", aspectInstanceResults
-                .Select( r => r.AspectInstance.AspectClass )
-                .Where( c => c is AspectClass )
-                .Select( c => (AspectClass) c )
-                .Where( c => c.Project != null && projectsWithRedistributionLicense.Contains( c.Project ) )
-                .GroupBy( c => c.Project! )
-                .Select( pc => $"aspects from '{NormalizeAssemblyName( pc.Key.RunTimeIdentity.Name )}' assembly counted as one ({GetNames( pc )})" ) );
+            aspectClassNames += ", " + string.Join(
+                ", ",
+                aspectInstanceResults
+                    .Select( r => r.AspectInstance.AspectClass )
+                    .OfType<AspectClass>()
+                    .Where( c => c.Project != null && projectsWithRedistributionLicense.Contains( c.Project ) )
+                    .GroupBy( c => c.Project! )
+                    .Select( pc => $"aspects from '{NormalizeAssemblyName( pc.Key.RunTimeIdentity.Name )}' assembly counted as one ({GetNames( pc )})" ) );
         }
 
         diagnostics.Report(
@@ -176,9 +180,7 @@ internal class LicenseVerifier : IService
 
         if ( aspectClass.IsInherited && !this._licenseConsumptionManager.CanConsume( LicenseRequirement.Starter ) )
         {
-            diagnostics.Report(
-                LicensingDiagnosticDescriptors.InheritanceNotAvailable.CreateRoslynDiagnostic(
-                    null, aspectClass.ShortName ) );
+            diagnostics.Report( LicensingDiagnosticDescriptors.InheritanceNotAvailable.CreateRoslynDiagnostic( null, aspectClass.ShortName ) );
         }
     }
 
@@ -188,9 +190,7 @@ internal class LicenseVerifier : IService
         {
             var aspectClasses = string.Join( ", ", aspectInstances.Select( i => $"'{i.AspectClass.ShortName}'" ) );
 
-            diagnostics.Report(
-                LicensingDiagnosticDescriptors.SdkNotAvailable.CreateRoslynDiagnostic(
-                    null, (aspectWeaver.GetType().Name, aspectClasses) ) );
+            diagnostics.Report( LicensingDiagnosticDescriptors.SdkNotAvailable.CreateRoslynDiagnostic( null, (aspectWeaver.GetType().Name, aspectClasses) ) );
         }
     }
 }

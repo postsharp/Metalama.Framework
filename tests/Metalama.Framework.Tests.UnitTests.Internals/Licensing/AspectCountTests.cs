@@ -10,29 +10,47 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
 {
     public class AspectCountTests : LicensingTestsBase
     {
-        private const string ArbitraryNamespace = "AspectCountTests.ArbitraryNamespace";
+        private const string _arbitraryNamespace = "AspectCountTests.ArbitraryNamespace";
 
-        public AspectCountTests( ITestOutputHelper logger ) : base( logger )
-        {
-        }
+        public AspectCountTests( ITestOutputHelper logger ) : base( logger ) { }
 
         [Theory]
-        [InlineData( TestLicenseKeys.PostSharpEssentials, 1, ArbitraryNamespace, ArbitraryNamespace, false )]
-        [InlineData( TestLicenseKeys.PostSharpFramework, 10, ArbitraryNamespace, ArbitraryNamespace, true )]
-        [InlineData( TestLicenseKeys.PostSharpFramework, 11, ArbitraryNamespace, ArbitraryNamespace, false )]
-        [InlineData( TestLicenseKeys.PostSharpUltimate, 11, ArbitraryNamespace, ArbitraryNamespace, true )]
-        [InlineData( TestLicenseKeys.MetalamaFreePersonal, 3, ArbitraryNamespace, ArbitraryNamespace, true )]
-        [InlineData( TestLicenseKeys.MetalamaFreePersonal, 4, ArbitraryNamespace, ArbitraryNamespace, false )]
-        [InlineData( TestLicenseKeys.MetalamaStarterBusiness, 5, ArbitraryNamespace, ArbitraryNamespace, true )]
-        [InlineData( TestLicenseKeys.MetalamaStarterBusiness, 6, ArbitraryNamespace, ArbitraryNamespace, false )]
-        [InlineData( TestLicenseKeys.MetalamaProfessionalBusiness, 10, ArbitraryNamespace, ArbitraryNamespace, true )]
-        [InlineData( TestLicenseKeys.MetalamaProfessionalBusiness, 11, ArbitraryNamespace, ArbitraryNamespace, false )]
-        [InlineData( TestLicenseKeys.MetalamaUltimateBusiness, 11, ArbitraryNamespace, ArbitraryNamespace, true )]
-        [InlineData( TestLicenseKeys.MetalamaUltimateOpenSourceRedistribution, 1, ArbitraryNamespace, ArbitraryNamespace, false )]
-        [InlineData( TestLicenseKeys.MetalamaUltimateOpenSourceRedistribution, 1, ArbitraryNamespace, TestLicenseKeys.MetalamaUltimateOpenSourceRedistributionNamespace, false )]
-        [InlineData( TestLicenseKeys.MetalamaUltimateOpenSourceRedistribution, 11, TestLicenseKeys.MetalamaUltimateOpenSourceRedistributionNamespace, ArbitraryNamespace, true )]
-        [InlineData( TestLicenseKeys.MetalamaUltimateOpenSourceRedistribution, 11, TestLicenseKeys.MetalamaUltimateOpenSourceRedistributionNamespace, TestLicenseKeys.MetalamaUltimateOpenSourceRedistributionNamespace, true )]
-        public async Task CompilationPassesWithNumberOfAspectsAsync( string licenseKey, int numberOfAspects, string aspectNamespace, string targetNamespace, bool shouldPass )
+        [InlineData( TestLicenseKeys.PostSharpEssentials, 1, _arbitraryNamespace, _arbitraryNamespace, false )]
+        [InlineData( TestLicenseKeys.PostSharpFramework, 10, _arbitraryNamespace, _arbitraryNamespace, true )]
+        [InlineData( TestLicenseKeys.PostSharpFramework, 11, _arbitraryNamespace, _arbitraryNamespace, false )]
+        [InlineData( TestLicenseKeys.PostSharpUltimate, 11, _arbitraryNamespace, _arbitraryNamespace, true )]
+        [InlineData( TestLicenseKeys.MetalamaFreePersonal, 3, _arbitraryNamespace, _arbitraryNamespace, true )]
+        [InlineData( TestLicenseKeys.MetalamaFreePersonal, 4, _arbitraryNamespace, _arbitraryNamespace, false )]
+        [InlineData( TestLicenseKeys.MetalamaStarterBusiness, 5, _arbitraryNamespace, _arbitraryNamespace, true )]
+        [InlineData( TestLicenseKeys.MetalamaStarterBusiness, 6, _arbitraryNamespace, _arbitraryNamespace, false )]
+        [InlineData( TestLicenseKeys.MetalamaProfessionalBusiness, 10, _arbitraryNamespace, _arbitraryNamespace, true )]
+        [InlineData( TestLicenseKeys.MetalamaProfessionalBusiness, 11, _arbitraryNamespace, _arbitraryNamespace, false )]
+        [InlineData( TestLicenseKeys.MetalamaUltimateBusiness, 11, _arbitraryNamespace, _arbitraryNamespace, true )]
+        [InlineData( TestLicenseKeys.MetalamaUltimateOpenSourceRedistribution, 1, _arbitraryNamespace, _arbitraryNamespace, false )]
+        [InlineData(
+            TestLicenseKeys.MetalamaUltimateOpenSourceRedistribution,
+            1,
+            _arbitraryNamespace,
+            TestLicenseKeys.MetalamaUltimateOpenSourceRedistributionNamespace,
+            false )]
+        [InlineData(
+            TestLicenseKeys.MetalamaUltimateOpenSourceRedistribution,
+            11,
+            TestLicenseKeys.MetalamaUltimateOpenSourceRedistributionNamespace,
+            _arbitraryNamespace,
+            true )]
+        [InlineData(
+            TestLicenseKeys.MetalamaUltimateOpenSourceRedistribution,
+            11,
+            TestLicenseKeys.MetalamaUltimateOpenSourceRedistributionNamespace,
+            TestLicenseKeys.MetalamaUltimateOpenSourceRedistributionNamespace,
+            true )]
+        public async Task CompilationPassesWithNumberOfAspectsAsync(
+            string licenseKey,
+            int numberOfAspects,
+            string aspectNamespace,
+            string targetNamespace,
+            bool shouldPass )
         {
             const string usingsAndOrdering = @"
 using Metalama.Framework.Aspects;
@@ -103,7 +121,8 @@ namespace {0}
 #pragma warning restore SA1114 // Parameter list should follow declaration
             }
 
-            sourceCodeBuilder.AppendLine( string.Format( CultureInfo.InvariantCulture, targetPrototype, targetNamespace, customAttributeApplicationBuilder.ToString() ) );
+            sourceCodeBuilder.AppendLine(
+                string.Format( CultureInfo.InvariantCulture, targetPrototype, targetNamespace, customAttributeApplicationBuilder.ToString() ) );
 
             var diagnostics = await this.GetDiagnosticsAsync( sourceCodeBuilder.ToString(), licenseKey, aspectNamespace );
 

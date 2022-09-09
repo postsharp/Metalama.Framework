@@ -19,8 +19,7 @@ namespace Metalama.Framework.Aspects
             builder.Advice.OverrideAccessors(
                 builder.Target,
                 nameof(this.OverrideAdd),
-                nameof(this.OverrideRemove),
-                null );
+                nameof(this.OverrideRemove) );
         }
 
         // TODO: When template parameters are properly resolved during expansion, the parameter name here should change to "handler".

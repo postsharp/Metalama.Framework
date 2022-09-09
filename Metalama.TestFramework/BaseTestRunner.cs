@@ -149,8 +149,7 @@ namespace Metalama.TestFramework
                 }
 
                 var emptyProject = this.CreateProject( testInput.Options );
-                var parseOptions = defaultParseOptions.WithPreprocessorSymbols(
-                    preprocessorSymbols.AddRange( testInput.Options.DefinedConstants ) );
+                var parseOptions = defaultParseOptions.WithPreprocessorSymbols( preprocessorSymbols.AddRange( testInput.Options.DefinedConstants ) );
                 var project = emptyProject.WithParseOptions( parseOptions );
 
                 async Task<Document?> AddDocumentAsync( string fileName, string sourceCode, bool acceptFileWithoutMember = false )
@@ -230,6 +229,7 @@ namespace Metalama.TestFramework
                         // Dependencies must be compiled separately using Metalama.
                         var dependencyParseOptions = defaultParseOptions.WithPreprocessorSymbols(
                             preprocessorSymbols.AddRange( testInput.Options.DependencyDefinedConstants ) );
+
                         var dependencyProject = emptyProject.WithParseOptions( dependencyParseOptions );
                         var dependency = await this.CompileDependencyAsync( includedText, dependencyProject, testResult, dependencyLicenseKey );
 
@@ -298,16 +298,17 @@ namespace Metalama.TestFramework
             var project = emptyProject.AddDocument( "dependency.cs", code ).Project;
 
             using var domain = new UnloadableCompileTimeDomain();
-            
+
             var serviceProvider = this.BaseServiceProvider.WithProjectScopedServices( this.References.MetadataReferences );
 
             if ( !string.IsNullOrEmpty( licenseKey ) )
             {
-                serviceProvider = LicenseVerifierFactory.AddTestLicenseVerifier( serviceProvider, licenseKey! );
+                // ReSharper disable once RedundantSuppressNullableWarningExpression
+                serviceProvider = serviceProvider.AddTestLicenseVerifier( licenseKey! );
             }
 
             // Transform with Metalama.
-            
+
             var pipeline = new CompileTimeAspectPipeline(
                 serviceProvider,
                 true,

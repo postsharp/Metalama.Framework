@@ -25,17 +25,20 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
             using var domain = new UnloadableCompileTimeDomain();
             using var testContext = this.CreateTestContext();
             var inputCompilation = CreateCSharpCompilation( code, name: assemblyName );
+
             var serviceProvider =
                 testContext.ServiceProvider.AddTestLicenseVerifier( licenseKey );
+
             using var compileTimePipeline = new CompileTimeAspectPipeline(
                 serviceProvider,
                 true,
                 domain,
                 ExecutionScenario.CompileTime );
+
             var diagnostics = new DiagnosticList();
             _ = await compileTimePipeline.ExecuteAsync( diagnostics, inputCompilation, default, CancellationToken.None );
 
-            if (diagnostics.Count == 0 )
+            if ( diagnostics.Count == 0 )
             {
                 this.Logger.WriteLine( "No diagnostics reported." );
             }

@@ -107,7 +107,7 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
         {
             Thread.MemoryBarrier();
 
-            this.Logger.Trace?.Log( $"Cannot publish source for the client '{projectId}' because it has not connected yet." );
+            this.Logger.Warning?.Log( $"Cannot publish source for the client '{projectId}' because it has not connected yet." );
             this._sourcesForUnconnectedClients[projectId] = generatedSources;
         }
     }
