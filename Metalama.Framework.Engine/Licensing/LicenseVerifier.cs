@@ -128,18 +128,11 @@ internal class LicenseVerifier : IService
 
         if ( aspectClassesCount <= maxAspectsCount )
         {
-            // All aspect classes are covered by ty available license.
+            // All aspect classes are covered by the available license.
             return;
         }
 
         // The count of aspect classes is not covered by the available licenses. Report an error.
-        var maxAspectsCountDescriptions = new List<string>();
-
-        if ( maxAspectsCount > 0 )
-        {
-            maxAspectsCountDescriptions.Add( maxAspectsCount.ToString( CultureInfo.InvariantCulture ) );
-        }
-
         static string GetNames( IEnumerable<IAspectClass> aspectClasses )
         {
             var aspectClassesList = aspectClasses.Select( a => $"'{a.ShortName}'" ).ToList();

@@ -54,6 +54,11 @@ public class CodeActionExecutionService : ICodeActionExecutionService
 
         if ( !computingPreview )
         {
+            // This place can handle all design-time restrictions, which are code-fixes and live templates. (Which are code-fixes as well.)
+            // TODO:
+            // Should we check here or in TryGetConfiguration?
+            // Do we want to use the license from MSBuild?
+            // Do we want to keep the change of ExecutionScenario?
             throw new NotImplementedException( "Check license." );
         }
 

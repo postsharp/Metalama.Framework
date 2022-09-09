@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.CodeFixes.Implementations;
 
-internal class AddAttributeCodeAction : CodeActionBase
+internal class AddAttributeCodeAction : ICodeAction
 {
     public IDeclaration TargetDeclaration { get; }
 
@@ -22,7 +22,7 @@ internal class AddAttributeCodeAction : CodeActionBase
         this.Attribute = attribute;
     }
 
-    protected override async Task ExecuteImplAsync( CodeActionContext context )
+    public async Task ExecuteAsync( CodeActionContext context )
     {
         context.CancellationToken.ThrowIfCancellationRequested();
 

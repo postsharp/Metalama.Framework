@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.CodeFixes.Implementations;
 
-internal class ApplyAspectCodeAction<TTarget> : CodeActionBase
+internal class ApplyAspectCodeAction<TTarget> : ICodeAction
     where TTarget : class, IDeclaration
 {
     public TTarget TargetDeclaration { get; }
@@ -27,7 +27,7 @@ internal class ApplyAspectCodeAction<TTarget> : CodeActionBase
         this.Aspect = aspect;
     }
 
-    protected override Task ExecuteImplAsync( CodeActionContext context )
+    public Task ExecuteAsync( CodeActionContext context )
     {
         var compilation = context.Compilation;
 

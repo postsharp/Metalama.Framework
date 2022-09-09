@@ -14,7 +14,7 @@ using Accessibility = Metalama.Framework.Code.Accessibility;
 
 namespace Metalama.Framework.Engine.CodeFixes.Implementations;
 
-internal class ChangeVisibilityCodeAction : CodeActionBase
+internal class ChangeVisibilityCodeAction : ICodeAction
 {
     public IMemberOrNamedType TargetMember { get; }
 
@@ -26,7 +26,7 @@ internal class ChangeVisibilityCodeAction : CodeActionBase
         this.Accessibility = accessibility;
     }
 
-    protected override Task ExecuteImplAsync( CodeActionContext context )
+    public Task ExecuteAsync( CodeActionContext context )
     {
         context.CancellationToken.ThrowIfCancellationRequested();
 

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.CodeFixes.Implementations;
 
-internal partial class RemoveAttributeCodeAction : CodeActionBase
+internal partial class RemoveAttributeCodeAction : ICodeAction
 {
     public RemoveAttributeCodeAction( IDeclaration targetDeclaration, INamedType attributeType )
     {
@@ -22,7 +22,7 @@ internal partial class RemoveAttributeCodeAction : CodeActionBase
 
     public INamedType AttributeType { get; }
 
-    protected override async Task ExecuteImplAsync( CodeActionContext context )
+    public async Task ExecuteAsync( CodeActionContext context )
     {
         context.CancellationToken.ThrowIfCancellationRequested();
 
