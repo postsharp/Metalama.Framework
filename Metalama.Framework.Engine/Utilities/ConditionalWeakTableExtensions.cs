@@ -26,6 +26,7 @@ internal static class ConditionalWeakTableExtensions
                 else
                 {
                     value = func( key );
+                    table.Add( key, value );
                 }
             }
         }
