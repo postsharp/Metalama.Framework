@@ -348,7 +348,7 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 case ISymbol symbol:
                     return Convert(
                         compilation.Factory.GetCompilationElement(
-                                symbol.AssertValidType<T>().Translate( this._compilation, compilation.RoslynCompilation ),
+                                symbol.AssertValidType<T>().Translate( this._compilation, compilation.RoslynCompilation ).AssertNotNull(),
                                 kind )
                             .AssertNotNull() );
 
