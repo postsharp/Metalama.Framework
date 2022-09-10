@@ -35,11 +35,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Remove="Tests\Licensing\RedistributionAllowed.t.cs" />
-      <Compile Remove="Tests\Licensing\RedistributionReported.t.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
         <ProjectReference Include="..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
         <ProjectReference Include="..\..\Metalama.Framework\Metalama.Framework.csproj" />
         <ProjectReference Include="..\..\Metalama.TestFramework\Metalama.TestFramework.csproj" />
@@ -47,11 +42,6 @@
 
     <ItemGroup>
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Include="Tests\Licensing\RedistributionAllowed.t.cs" />
-      <None Include="Tests\Licensing\RedistributionReported.t.cs" />
     </ItemGroup>
 
     <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets" />

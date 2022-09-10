@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Compiler;
+using Metalama.TestFramework.Licensing;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -17,7 +18,8 @@ internal record TestAssemblyMetadata(
     bool MustLaunchDebugger,
     ImmutableArray<TestAssemblyReference> AssemblyReferences,
     ImmutableArray<TestAssemblyReference> AnalyzerReferences,
-    string? GlobalUsingsFile )
+    string? GlobalUsingsFile,
+    TestFrameworkLicenseStatus License )
 {
     private static bool IsUserAnalyzer( TestAssemblyReference x )
     {

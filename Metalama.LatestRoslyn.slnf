@@ -23,7 +23,11 @@
       "Tests\\Metalama.Framework.Tests.UnitTests.Internals\\Metalama.Framework.Tests.UnitTests.Internals.csproj",
       "Tests\\Metalama.Framework.Tests.UnitTests\\Metalama.Framework.Tests.UnitTests.csproj",
       "Tests\\Metalama.Framework.Tests.Workspaces\\Metalama.Framework.Tests.Workspaces.csproj",
-      "Tests\\Metalama.LinqPad.Tests\\Metalama.LinqPad.Tests.csproj"
+      "Tests\\Metalama.LinqPad.Tests\\Metalama.LinqPad.Tests.csproj",
+      "Tests\\TestFrameworkLicensingTests\\TestExecutorTestsAllowed\\TestExecutorTestsAllowed.csproj",
+      "Tests\\TestFrameworkLicensingTests\\TestExecutorTestsForbidden\\TestExecutorTestsForbidden.csproj",
+      "Tests\\TestFrameworkLicensingTests\\TestSuiteTestsAllowed\\TestSuiteTestsAllowed.csproj",
+      "Tests\\TestFrameworkLicensingTests\\TestSuiteTestsFobidden\\TestSuiteTestsFobidden.csproj"
     ]
   }
 }

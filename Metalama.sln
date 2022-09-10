@@ -71,6 +71,16 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.SystemTypes", "Met
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Framework.Introspection", "Metalama.Framework.Introspection\Metalama.Framework.Introspection.csproj", "{A9502D9A-60CB-434A-A68C-A0FEF1648131}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "TestFrameworkLicensingTests", "TestFrameworkLicensingTests", "{7F348B90-4204-4DE7-BB2E-49153DA3C521}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestExecutorTestsAllowed", "Tests\TestFrameworkLicensingTests\TestExecutorTestsAllowed\TestExecutorTestsAllowed.csproj", "{B1E0B65C-1A61-4958-AE8A-1B05077BB7BE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestExecutorTestsForbidden", "Tests\TestFrameworkLicensingTests\TestExecutorTestsForbidden\TestExecutorTestsForbidden.csproj", "{29071B68-C19C-49EF-BD99-859DF0F5121E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestSuiteTestsAllowed", "Tests\TestFrameworkLicensingTests\TestSuiteTestsAllowed\TestSuiteTestsAllowed.csproj", "{74409C5F-3DF9-4F72-9759-12A3F1220A5A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestSuiteTestsFobidden", "Tests\TestFrameworkLicensingTests\TestSuiteTestsFobidden\TestSuiteTestsFobidden.csproj", "{44F64E1A-28A0-465A-AF1A-9999C1A7787F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -177,6 +187,22 @@ Global
 		{A9502D9A-60CB-434A-A68C-A0FEF1648131}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A9502D9A-60CB-434A-A68C-A0FEF1648131}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A9502D9A-60CB-434A-A68C-A0FEF1648131}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B1E0B65C-1A61-4958-AE8A-1B05077BB7BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1E0B65C-1A61-4958-AE8A-1B05077BB7BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1E0B65C-1A61-4958-AE8A-1B05077BB7BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1E0B65C-1A61-4958-AE8A-1B05077BB7BE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{29071B68-C19C-49EF-BD99-859DF0F5121E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{29071B68-C19C-49EF-BD99-859DF0F5121E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{29071B68-C19C-49EF-BD99-859DF0F5121E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{29071B68-C19C-49EF-BD99-859DF0F5121E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{74409C5F-3DF9-4F72-9759-12A3F1220A5A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{74409C5F-3DF9-4F72-9759-12A3F1220A5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{74409C5F-3DF9-4F72-9759-12A3F1220A5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{74409C5F-3DF9-4F72-9759-12A3F1220A5A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44F64E1A-28A0-465A-AF1A-9999C1A7787F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44F64E1A-28A0-465A-AF1A-9999C1A7787F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44F64E1A-28A0-465A-AF1A-9999C1A7787F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44F64E1A-28A0-465A-AF1A-9999C1A7787F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -192,6 +218,11 @@ Global
 		{62E8C6ED-B0E7-48E3-9C1C-345F46687E3C} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
 		{6B0B4099-06FA-408A-8230-5F952198245B} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
 		{6615862D-D68E-48D5-B7EF-0C520C0E0ABD} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
+		{7F348B90-4204-4DE7-BB2E-49153DA3C521} = {E4A0A0FD-0EC6-45C6-92C3-1D81974EE32B}
+		{B1E0B65C-1A61-4958-AE8A-1B05077BB7BE} = {7F348B90-4204-4DE7-BB2E-49153DA3C521}
+		{29071B68-C19C-49EF-BD99-859DF0F5121E} = {7F348B90-4204-4DE7-BB2E-49153DA3C521}
+		{74409C5F-3DF9-4F72-9759-12A3F1220A5A} = {7F348B90-4204-4DE7-BB2E-49153DA3C521}
+		{44F64E1A-28A0-465A-AF1A-9999C1A7787F} = {7F348B90-4204-4DE7-BB2E-49153DA3C521}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {59CB4F2D-3547-4DDF-9712-7B3F95C1ED66}

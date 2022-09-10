@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Testing;
+using Metalama.TestFramework.Licensing;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -157,7 +158,7 @@ namespace Metalama.TestFramework.XunitFramework
                         };
 
                         var task = Task.Run(
-                            () => this.RunTestAsync( executionMessageSink, projectReferences, directoryOptionsReader, testCase, test, testMetrics, logger ) );
+                            () => this.RunTestAsync( executionMessageSink, projectReferences, directoryOptionsReader, testCase, test, testMetrics, logger, projectMetadata.License ) );
 
                         if ( executionOptions.DisableParallelizationOrDefault() )
                         {
@@ -188,9 +189,17 @@ namespace Metalama.TestFramework.XunitFramework
             ITestCase testCase,
             Test test,
             Metrics testMetrics,
-            TestOutputHelper logger )
+            TestOutputHelper logger,
+            TestFrameworkLicenseStatus license )
         {
             var testStopwatch = Stopwatch.StartNew();
+
+            void OnTestSucceeded()
+            {
+                testMetrics.OnTestSucceeded( testStopwatch.Elapsed );
+
+                executionMessageSink.OnMessage( new TestPassed( test, testMetrics.ExecutionTime, logger.ToString() ) );
+            }
 
             try
             {
@@ -209,17 +218,30 @@ namespace Metalama.TestFramework.XunitFramework
                 }
                 else
                 {
-                    var testRunner = TestRunnerFactory.CreateTestRunner(
-                        testInput,
-                        testContext.ServiceProvider,
-                        projectReferences,
-                        logger );
+                    try
+                    {
+                        license.ThrowIfNotLicensed();
 
-                    await testRunner.RunAndAssertAsync( testInput );
+                        var testRunner = TestRunnerFactory.CreateTestRunner(
+                            testInput,
+                            testContext.ServiceProvider,
+                            projectReferences,
+                            logger );
 
-                    testMetrics.OnTestSucceeded( testStopwatch.Elapsed );
+                        await testRunner.RunAndAssertAsync( testInput );
 
-                    executionMessageSink.OnMessage( new TestPassed( test, testMetrics.ExecutionTime, logger.ToString() ) );
+                        OnTestSucceeded();
+                    }
+                    catch ( Exception e ) when ( e.GetType().FullName == testInput.Options.ExpectedException )
+                    {
+                        OnTestSucceeded();
+                        return;
+                    }
+
+                    if ( testInput.Options.ExpectedException != null )
+                    {
+                        throw new AssertActualExpectedException( testInput.Options.ExpectedException, null, "Expected exception has not been thrown." );
+                    }
                 }
             }
             catch ( Exception e )

@@ -1,6 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Extensibility;
 using Metalama.Framework.Engine.Testing;
+using Metalama.TestFramework.Licensing;
 using Metalama.TestFramework.Utilities;
 using Metalama.TestFramework.XunitFramework;
 using System;
@@ -9,6 +11,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Xunit;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
@@ -26,7 +29,11 @@ namespace Metalama.TestFramework
             TestingServices.Initialize();
         }
 
-        private record AssemblyAssets( TestProjectProperties ProjectProperties, TestDirectoryOptionsReader OptionsReader );
+        private record AssemblyAssets(
+            TestProjectProperties ProjectProperties,
+            TestDirectoryOptionsReader OptionsReader,
+            TestProjectReferences ProjectReferences,
+            TestFrameworkLicenseStatus License );
 
         private static readonly ConditionalWeakTable<Assembly, AssemblyAssets> _cache = new();
 
@@ -36,11 +43,16 @@ namespace Metalama.TestFramework
                 a =>
                 {
                     var assemblyInfo = new ReflectionAssemblyInfo( a );
+                    var metadata = TestAssemblyMetadataReader.GetMetadata( new ReflectionAssemblyInfo( a ) );
                     var discoverer = new TestDiscoverer( assemblyInfo );
 
                     var projectProperties = discoverer.GetTestProjectProperties();
 
-                    return new AssemblyAssets( projectProperties, new TestDirectoryOptionsReader( projectProperties.ProjectDirectory ) );
+                    return new AssemblyAssets(
+                        projectProperties,
+                        new TestDirectoryOptionsReader( projectProperties.ProjectDirectory ),
+                        metadata.ToProjectReferences(),
+                        metadata.License );
                 } );
 
         protected ITestOutputHelper Logger { get; }
@@ -73,11 +85,12 @@ namespace Metalama.TestFramework
         /// <param name="relativePath">Relative path of the file relatively to the directory of the caller code.</param>
         protected async Task RunTestAsync( string relativePath, [CallerMemberName] string? callerMemberName = null )
         {
-            var directory = this.GetDirectory( callerMemberName! );
-            var assemblyAssets = GetAssemblyAssets( this.GetType().Assembly );
-            var projectReferences = TestAssemblyMetadataReader.GetMetadata( new ReflectionAssemblyInfo( this.GetType().Assembly ) ).ToProjectReferences();
+            var testSuiteAssembly = this.GetType().Assembly;
+            var assemblyAssets = GetAssemblyAssets( testSuiteAssembly );
 
-            using var testOptions = new TestProjectOptions( plugIns: projectReferences.PlugIns );
+            var directory = this.GetDirectory( callerMemberName! );
+
+            using var testOptions = new TestProjectOptions( plugIns: assemblyAssets.ProjectReferences.PlugIns );
             using var testContext = new TestContext( testOptions );
 
             var fullPath = Path.Combine( directory, relativePath );
@@ -86,8 +99,24 @@ namespace Metalama.TestFramework
             var projectRelativePath = PathUtil.GetRelativePath( assemblyAssets.ProjectProperties.ProjectDirectory, fullPath );
 
             var testInput = TestInput.FromFile( assemblyAssets.ProjectProperties, assemblyAssets.OptionsReader, projectRelativePath );
-            var testRunner = TestRunnerFactory.CreateTestRunner( testInput, testContext.ServiceProvider, projectReferences, this.Logger );
-            await testRunner.RunAndAssertAsync( testInput );
+
+            try
+            {
+                assemblyAssets.License.ThrowIfNotLicensed();
+
+                var testRunner = TestRunnerFactory.CreateTestRunner( testInput, testContext.ServiceProvider, assemblyAssets.ProjectReferences, this.Logger );
+
+                await testRunner.RunAndAssertAsync( testInput );
+            }
+            catch ( Exception e ) when ( e.GetType().FullName == testInput.Options.ExpectedException )
+            {
+                return;
+            }
+
+            if ( testInput.Options.ExpectedException != null )
+            {
+                throw new AssertActualExpectedException( testInput.Options.ExpectedException, null, "Expected exception has not been thrown." );
+            }
         }
     }
 }
