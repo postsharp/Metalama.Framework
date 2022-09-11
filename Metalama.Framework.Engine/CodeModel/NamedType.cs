@@ -420,58 +420,10 @@ namespace Metalama.Framework.Engine.CodeModel
                 return this.Implementation.IsReadOnly;
             }
         }
-
-        [Memo]
-        public IGenericParameterList TypeParameters
-            => new TypeParameterList(
-                this,
-                this.TypeSymbol.TypeParameters
-                    .Select( x => Ref.FromSymbol<ITypeParameter>( x, this.Compilation.RoslynCompilation ) )
-                    .ToList() );
-
-        [Memo]
-        public INamespace Namespace => this.Compilation.Factory.GetNamespace( this.TypeSymbol.ContainingNamespace );
-
-        [Memo]
-        public string FullName => this.TypeSymbol.GetFullName().AssertNotNull();
-
-        [Memo]
-        public IReadOnlyList<IType> TypeArguments => this.TypeSymbol.TypeArguments.Select( a => this.Compilation.Factory.GetIType( a ) ).ToImmutableList();
-
-        [Memo]
-        public override IDeclaration? ContainingDeclaration
-            => this.TypeSymbol.ContainingSymbol switch
-            {
-                INamespaceSymbol => this.Compilation.Factory.GetAssembly( this.TypeSymbol.ContainingAssembly ),
-                INamedTypeSymbol containingType => this.Compilation.Factory.GetNamedType( containingType ),
-                _ => throw new AssertionFailedException()
-            };
-
-        public override DeclarationKind DeclarationKind => DeclarationKind.NamedType;
-
-        [Memo]
-        public INamedType? BaseType => this.TypeSymbol.BaseType == null ? null : this.Compilation.Factory.GetNamedType( this.TypeSymbol.BaseType );
-
-        [Memo]
-        public IImplementedInterfaceCollection AllImplementedInterfaces
-            => new AllImplementedInterfacesCollection( this, this.Compilation.GetAllInterfaceImplementationCollection( this.TypeSymbol, false ) );
-
-        [Memo]
-        public IImplementedInterfaceCollection ImplementedInterfaces
-            => new ImplementedInterfacesCollection( this, this.Compilation.GetInterfaceImplementationCollection( this.TypeSymbol, false ) );
-
+        
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
-        IGeneric IGenericInternal.ConstructGenericInstance( params IType[] typeArguments )
-        {
-            get
-            {
-                this.OnUsingDeclaration();
-
-                return this.Implementation.IsReadOnly;
-            }
-        }
-
+  
         public bool IsSubclassOf( INamedType type )
         {
             this.OnUsingDeclaration();
@@ -486,8 +438,8 @@ namespace Metalama.Framework.Engine.CodeModel
             return this.Implementation.TryFindImplementationForInterfaceMember( interfaceMember, out implementationMember );
         }
 
-        public INamedType TypeDefinition
-            => this.TypeSymbol == this.TypeSymbol.OriginalDefinition ? this : this.Compilation.Factory.GetNamedType( this.TypeSymbol.OriginalDefinition );
+        public INamedType TypeDefinition => this.Implementation.TypeDefinition;
+        
 
         private void PopulateAllInterfaces( ImmutableHashSet<INamedTypeSymbol>.Builder builder, GenericMap genericMap )
         {
@@ -506,16 +458,6 @@ namespace Metalama.Framework.Engine.CodeModel
             // TODO: process introductions.
         }
 
-        [Memo]
-        public ImmutableHashSet<INamedTypeSymbol> AllInterfaces => this.GetAllInterfaces();
-
-        private ImmutableHashSet<INamedTypeSymbol> GetAllInterfaces()
-        {
-            var builder = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>( SymbolEqualityComparer.Default );
-            this.PopulateAllInterfaces( builder, this.Compilation.EmptyGenericMap );
-
-            return builder.ToImmutable();
-        }
 
         public ITypeInternal Accept( TypeRewriter visitor ) => visitor.Visit( this );
 
@@ -565,5 +507,16 @@ namespace Metalama.Framework.Engine.CodeModel
         }
 
         public override IDeclaration? ContainingDeclaration => this.Implementation.ContainingDeclaration;
+
+        public ITypeSymbol? TypeSymbol
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Implementation.TypeSymbol;
+            }
+        }
+
     }
 }

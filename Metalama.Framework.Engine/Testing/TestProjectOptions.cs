@@ -41,8 +41,6 @@ namespace Metalama.Framework.Engine.Testing
             this.AdditionalAssemblies = additionalAssemblies;
         }
 
-        public TestPathOptions PathOptions { get; }
-
         private static Lazy<string> CreateDirectoryLazy( string path )
             => new(
                 () =>

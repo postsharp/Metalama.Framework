@@ -408,7 +408,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                     // Return the result from the cache.
                     compilationResult = new CompilationResult(
-                        this._currentState.CompilationVersion.AssertNotNull(),
+                        this._currentState.CompilationVersion,
                         this._currentState.PipelineResult,
                         this._currentState.ValidationResult,
                         this._currentState.Configuration?.CompileTimeProject );
@@ -431,7 +431,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     var validationResult = this.ValidateWithPausedPipeline( compilation, this, cancellationToken );
 
                     compilationResult = new CompilationResult(
-                        this._currentState.CompilationVersion.AssertNotNull(),
+                        this._currentState.CompilationVersion,
                         this._currentState.PipelineResult,
                         validationResult,
                         this._currentState.Configuration!.CompileTimeProject );

@@ -39,7 +39,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
 
     public override IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => this.Compilation.GetDerivedTypes( this, deep );
 
-    internal NamedTypeImpl( NamedType facade, INamedTypeSymbol typeSymbol, CompilationModel compilation ) : base( compilation )
+    internal NamedTypeImpl( NamedType facade, INamedTypeSymbol typeSymbol, CompilationModel compilation ) : base( compilation, typeSymbol )
     {
         this._facade = facade;
         this._typeSymbol = typeSymbol;
@@ -288,7 +288,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
     public INamespace Namespace => this.Compilation.Factory.GetNamespace( this._typeSymbol.ContainingNamespace );
 
     [Memo]
-    public string FullName => this._typeSymbol.ToDisplayString();
+    public string FullName => this._typeSymbol.GetFullName();
 
     [Memo]
     public IReadOnlyList<IType> TypeArguments => this._typeSymbol.TypeArguments.Select( a => this.Compilation.Factory.GetIType( a ) ).ToImmutableList();
@@ -515,6 +515,12 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
             return false;
         }
     }
+
+    public INamedTypeSymbol TypeSymbol => this._typeSymbol;
+
+    public INamedType TypeDefinition
+        => this.TypeSymbol == this.TypeSymbol.OriginalDefinition ? this : this.Compilation.Factory.GetNamedType( this.TypeSymbol.OriginalDefinition );
+
 
     private void PopulateAllInterfaces( ImmutableHashSet<INamedTypeSymbol>.Builder builder, GenericMap genericMap )
     {
