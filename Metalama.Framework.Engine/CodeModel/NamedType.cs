@@ -410,7 +410,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 return this.Implementation.Finalizer;
             }
         }
-        
+
         public bool IsReadOnly
         {
             get
@@ -420,10 +420,9 @@ namespace Metalama.Framework.Engine.CodeModel
                 return this.Implementation.IsReadOnly;
             }
         }
-        
+
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
-  
         public bool IsSubclassOf( INamedType type )
         {
             this.OnUsingDeclaration();
@@ -439,7 +438,6 @@ namespace Metalama.Framework.Engine.CodeModel
         }
 
         public INamedType TypeDefinition => this.Implementation.TypeDefinition;
-        
 
         private void PopulateAllInterfaces( ImmutableHashSet<INamedTypeSymbol>.Builder builder, GenericMap genericMap )
         {
@@ -457,7 +455,6 @@ namespace Metalama.Framework.Engine.CodeModel
 
             // TODO: process introductions.
         }
-
 
         public ITypeInternal Accept( TypeRewriter visitor ) => visitor.Visit( this );
 
@@ -517,6 +514,5 @@ namespace Metalama.Framework.Engine.CodeModel
                 return this.Implementation.TypeSymbol;
             }
         }
-
     }
 }

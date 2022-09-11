@@ -61,14 +61,14 @@ namespace Metalama.Framework.Engine.Pipeline
 
                 using CompileTimeAspectPipeline pipeline = new( serviceProvider, false );
 
-                    // ReSharper disable once AccessToDisposedClosure
-                    var pipelineResult =
-                        TaskHelper.RunAndWait(
-                            () => pipeline.ExecuteAsync(
-                                new DiagnosticAdderAdapter( context.ReportDiagnostic ),
-                                context.Compilation,
-                                context.Resources.ToImmutableArray(),
-                                CancellationToken.None ) );
+                // ReSharper disable once AccessToDisposedClosure
+                var pipelineResult =
+                    TaskHelper.RunAndWait(
+                        () => pipeline.ExecuteAsync(
+                            new DiagnosticAdderAdapter( context.ReportDiagnostic ),
+                            context.Compilation,
+                            context.Resources.ToImmutableArray(),
+                            CancellationToken.None ) );
 
                 if ( pipelineResult != null )
                 {

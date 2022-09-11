@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Microsoft.CodeAnalysis;
 using System.Globalization;
@@ -52,5 +51,5 @@ internal readonly struct TypeDependencyKey : IEquatable<TypeDependencyKey>
 
     public static bool operator !=( TypeDependencyKey left, TypeDependencyKey right ) => !left.Equals( right );
 
-    public override string ToString() => this._text ?? this._hashCode.ToString(CultureInfo.InvariantCulture);
+    public override string ToString() => this._text ?? this._hashCode.ToString( CultureInfo.InvariantCulture );
 }

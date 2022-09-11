@@ -297,7 +297,7 @@ namespace Metalama.Framework.Engine.Diagnostics
                 + "If you want to use preview features at your own risks, set the MSBuild property 'MetalamaAllowPreviewLanguageFeatures' to 'true'. It may work if you don't use preview features in templates.",
                 "Metalama does not support the 'preview' C# language version",
                 _category );
-        
+
         internal static readonly DiagnosticDefinition<(string SelectedVersion, string[] SupportedVersions)> CSharpVersionNotSupported =
             new(
                 "LAMA00052",
@@ -306,14 +306,14 @@ namespace Metalama.Framework.Engine.Diagnostics
                 "The selected C# language version is not supported",
                 _category );
 
-        internal static readonly DiagnosticDefinition MissingMetalamaPreprocessorSymbol = 
+        internal static readonly DiagnosticDefinition MissingMetalamaPreprocessorSymbol =
             new(
                 "LAMA00053",
                 Error,
                 "Metalama is enabled in this project, but the METALAMA preprocessor symbol is not defined.",
                 "Metalama is enabled in this project, but the METALAMA preprocessor symbol is not defined.",
                 _category );
-        
+
         // TODO: Use formattable string (C# does not seem to find extension methods).
         public static readonly DiagnosticDefinition<string>
             UnsupportedFeature = new(

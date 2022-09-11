@@ -52,7 +52,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                     partialCompilation,
                     ImmutableArray<AdditionalCompilationOutputFile>.Empty );
             }
-            
+
             // Report error if the compilation does not have the METALAMA preprocessor symbol.
             if ( !(compilation.SyntaxTrees.FirstOrDefault()?.Options.PreprocessorSymbolNames.Contains( "METALAMA" ) ?? false) )
             {
@@ -84,7 +84,10 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
 
             var licenseConsumptionManager = this.ServiceProvider.GetBackstageService<ILicenseConsumptionManager>();
             var redistributionLicenseKey = licenseConsumptionManager?.RedistributionLicenseKey;
-            var projectLicenseInfo = string.IsNullOrEmpty( redistributionLicenseKey ) ? ProjectLicenseInfo.Empty : new ProjectLicenseInfo( redistributionLicenseKey );
+
+            var projectLicenseInfo = string.IsNullOrEmpty( redistributionLicenseKey )
+                ? ProjectLicenseInfo.Empty
+                : new ProjectLicenseInfo( redistributionLicenseKey );
 
             // Initialize the pipeline and generate the compile-time project.
             if ( !this.TryInitialize( diagnosticAdder, partialCompilation, projectLicenseInfo, null, cancellationToken, out var configuration ) )

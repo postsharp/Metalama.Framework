@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -11,7 +10,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff;
 internal class PartialTypesVisitor : CSharpSyntaxVisitor<ImmutableArray<BaseTypeDeclarationSyntax>>
 {
     public static PartialTypesVisitor Instance { get; } = new();
-    
+
     private PartialTypesVisitor() { }
 
     public override ImmutableArray<BaseTypeDeclarationSyntax> DefaultVisit( SyntaxNode node )
@@ -40,15 +39,20 @@ internal class PartialTypesVisitor : CSharpSyntaxVisitor<ImmutableArray<BaseType
 
     public override ImmutableArray<BaseTypeDeclarationSyntax> VisitRecordDeclaration( RecordDeclarationSyntax node ) => VisitBaseTypeDeclaration( node );
 
-    public override ImmutableArray<BaseTypeDeclarationSyntax> VisitGlobalStatement( GlobalStatementSyntax node ) => ImmutableArray<BaseTypeDeclarationSyntax>.Empty;
+    public override ImmutableArray<BaseTypeDeclarationSyntax> VisitGlobalStatement( GlobalStatementSyntax node )
+        => ImmutableArray<BaseTypeDeclarationSyntax>.Empty;
 
-    public override ImmutableArray<BaseTypeDeclarationSyntax> VisitUsingDirective( UsingDirectiveSyntax node ) => ImmutableArray<BaseTypeDeclarationSyntax>.Empty;
+    public override ImmutableArray<BaseTypeDeclarationSyntax> VisitUsingDirective( UsingDirectiveSyntax node )
+        => ImmutableArray<BaseTypeDeclarationSyntax>.Empty;
 
-    public override ImmutableArray<BaseTypeDeclarationSyntax> VisitDelegateDeclaration( DelegateDeclarationSyntax node ) => ImmutableArray<BaseTypeDeclarationSyntax>.Empty;
+    public override ImmutableArray<BaseTypeDeclarationSyntax> VisitDelegateDeclaration( DelegateDeclarationSyntax node )
+        => ImmutableArray<BaseTypeDeclarationSyntax>.Empty;
 
-    public override ImmutableArray<BaseTypeDeclarationSyntax> VisitEnumDeclaration( EnumDeclarationSyntax node ) => ImmutableArray<BaseTypeDeclarationSyntax>.Empty;
+    public override ImmutableArray<BaseTypeDeclarationSyntax> VisitEnumDeclaration( EnumDeclarationSyntax node )
+        => ImmutableArray<BaseTypeDeclarationSyntax>.Empty;
 
-    public override ImmutableArray<BaseTypeDeclarationSyntax> VisitMethodDeclaration( MethodDeclarationSyntax node ) => ImmutableArray<BaseTypeDeclarationSyntax>.Empty;
+    public override ImmutableArray<BaseTypeDeclarationSyntax> VisitMethodDeclaration( MethodDeclarationSyntax node )
+        => ImmutableArray<BaseTypeDeclarationSyntax>.Empty;
 
     private static ImmutableArray<BaseTypeDeclarationSyntax> VisitBaseTypeDeclaration( BaseTypeDeclarationSyntax type )
     {
@@ -59,7 +63,7 @@ internal class PartialTypesVisitor : CSharpSyntaxVisitor<ImmutableArray<BaseType
                 return ImmutableArray.Create( type );
             }
         }
-        
+
         return ImmutableArray<BaseTypeDeclarationSyntax>.Empty;
     }
 }

@@ -157,7 +157,7 @@ class Expression
 
             public TestContext( TestBase parent, TestProjectOptions? projectOptions = null, Func<ServiceProvider, ServiceProvider>? addServices = null )
             {
-                this.ProjectOptions = projectOptions ?? new TestProjectOptions(additionalAssemblies: ImmutableArray.Create( this.GetType().Assembly ) );
+                this.ProjectOptions = projectOptions ?? new TestProjectOptions( additionalAssemblies: ImmutableArray.Create( this.GetType().Assembly ) );
 
                 // We add a default AspectPipelineDescription because some tests need this marker, however it can be replaced by the pipeline.
                 this.ServiceProvider = this.ServiceProvider.WithService( new TestMarkerService() );
@@ -169,12 +169,12 @@ class Expression
 
                 this.ServiceProvider = parent._addServices( this.ServiceProvider );
 
-                    if ( addServices != null )
-                    {
-                        provider = addServices( provider );
-                    }
+                if ( addServices != null )
+                {
+                    provider = addServices( provider );
+                }
 
-                    return provider;
-                } );
+                return provider;
+            } );
+        }
     }
-}

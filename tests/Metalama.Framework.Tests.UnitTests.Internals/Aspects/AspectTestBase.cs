@@ -26,7 +26,7 @@ public class AspectTestBase : TestBase
 
         if ( result == null && throwOnError )
         {
-            throw new DiagnosticException( "The Metalama pipeline failed.", diagnostics.ToImmutableArray() );        
+            throw new DiagnosticException( "The Metalama pipeline failed.", diagnostics.ToImmutableArray() );
         }
 
         return result;
@@ -45,7 +45,7 @@ public class AspectTestBase : TestBase
 
         if ( result == null && throwOnError )
         {
-            throw new DiagnosticException( "The Metalama pipeline failed.", diagnostics.ToImmutableArray() );        
+            throw new DiagnosticException( "The Metalama pipeline failed.", diagnostics.ToImmutableArray() );
         }
 
         return result;

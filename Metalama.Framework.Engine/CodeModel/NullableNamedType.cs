@@ -98,8 +98,7 @@ internal class NullableNamedType : INamedTypeInternal
 
     bool IGeneric.IsGeneric => this._underlying.IsGeneric;
 
-    IGeneric IGenericInternal.ConstructGenericInstance( params IType[] typeArguments )
-        => this._underlying.ConstructGenericInstance( typeArguments );
+    IGeneric IGenericInternal.ConstructGenericInstance( params IType[] typeArguments ) => this._underlying.ConstructGenericInstance( typeArguments );
 
     bool INamedType.IsPartial => this._underlying.IsPartial;
 
