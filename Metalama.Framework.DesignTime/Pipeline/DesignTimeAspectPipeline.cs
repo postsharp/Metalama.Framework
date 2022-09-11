@@ -327,7 +327,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 }
             }
 
-            var referenceCollection = new DesignTimeCompilationReferenceCollection( compilationReferences );
+            return new DesignTimeCompilationReferenceCollection( compilationReferences );
         }
 
         public async ValueTask<CompilationResult?> ExecuteAsync(
@@ -346,6 +346,14 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 if ( this._compilationResultCache.TryGetValue( compilation, out compilationResult ) )
                 {
                     return compilationResult;
+                }
+
+                var references = await this.GetProjectReferences( compilation, cancellationToken );
+
+                if ( references == null )
+                {
+                    // A dependency could not be compiled.
+                    return null;
                 }
 
                 // Invalidate the cache for the new compilation.

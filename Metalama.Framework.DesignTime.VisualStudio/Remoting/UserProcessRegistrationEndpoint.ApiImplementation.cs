@@ -26,19 +26,19 @@ internal partial class UserProcessServiceHubEndpoint
             }
         }
 
-        public Task RegisterProjectAsync( string projectId, string pipeName, CancellationToken cancellationToken )
+        public Task RegisterProjectAsync( ProjectKey projectKey, string pipeName, CancellationToken cancellationToken )
         {
-            this._parent.Logger.Trace?.Log( $"Registering the project '{projectId}' for endpoint '{pipeName}'." );
+            this._parent.Logger.Trace?.Log( $"Registering the project '{projectKey}' for endpoint '{pipeName}'." );
 
             if ( this._parent._registeredEndpointsByPipeName.TryGetValue( pipeName, out var endpoint ) )
             {
-                if ( !this._parent._registeredEndpointsByProjectId.TryAdd( projectId, endpoint ) )
+                if ( !this._parent._registeredEndpointsByProject.TryAdd( projectKey, endpoint ) )
                 {
-                    this._parent.Logger.Error?.Log( $"The project '{projectId}' was already registered." );
+                    this._parent.Logger.Error?.Log( $"The project '{projectKey}' was already registered." );
                 }
 
                 // Unblock waiters.
-                if ( this._parent._waiters.TryRemove( projectId, out var waiter ) )
+                if ( this._parent._waiters.TryRemove( projectKey, out var waiter ) )
                 {
                     waiter.SetResult( endpoint );
                 }
@@ -67,13 +67,13 @@ internal partial class UserProcessServiceHubEndpoint
             return Task.CompletedTask;
         }
 
-        public Task UnregisterProjectAsync( string projectId, CancellationToken cancellationToken )
+        public Task UnregisterProjectAsync( ProjectKey projectKey, CancellationToken cancellationToken )
         {
-            this._parent.Logger.Trace?.Log( $"Registering the project '{projectId}'." );
+            this._parent.Logger.Trace?.Log( $"Registering the project '{projectKey}'." );
 
-            if ( !this._parent._registeredEndpointsByProjectId.TryRemove( projectId, out _ ) )
+            if ( !this._parent._registeredEndpointsByProject.TryRemove( projectKey, out _ ) )
             {
-                this._parent.Logger.Error?.Log( $"The project '{projectId}' is not registered." );
+                this._parent.Logger.Error?.Log( $"The project '{projectKey}' is not registered." );
             }
 
             return Task.CompletedTask;

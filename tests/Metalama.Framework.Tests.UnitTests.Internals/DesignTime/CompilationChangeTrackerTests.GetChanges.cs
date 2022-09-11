@@ -26,9 +26,7 @@ public partial class CompilationChangeTrackerTests
         var compilation2 = CreateCSharpCompilation( code );
         tracker = tracker.Update( compilation2 );
         var changes = tracker.Changes!;
-        Assert.NotNull( changes );
         Assert.False( changes.HasCompileTimeCodeChange );
-
         Assert.True( changes.HasChange );
         Assert.True( changes.IsIncremental );
         Assert.Equal( compilation2, changes.CompilationToAnalyze );
@@ -59,10 +57,8 @@ public partial class CompilationChangeTrackerTests
         var compilation2 = CreateCSharpCompilation( code );
         tracker = tracker.Update( compilation2 );
         var changes = tracker.Changes!;
-        Assert.NotNull( changes );
-        Assert.True( changes.HasCompileTimeCodeChange );
-
         Assert.True( changes.HasChange );
+        Assert.True( changes.HasCompileTimeCodeChange );
         Assert.True( changes.IsIncremental );
         Assert.Equal( compilation2, changes.CompilationToAnalyze );
         Assert.Single( changes.SyntaxTreeChanges );
@@ -92,10 +88,8 @@ public partial class CompilationChangeTrackerTests
         var compilation2 = CreateCSharpCompilation( code );
         tracker = tracker.Update( compilation2 );
         var changes = tracker.Changes!;
-        Assert.NotNull( changes );
-        Assert.False( changes.HasCompileTimeCodeChange );
-
         Assert.True( changes.HasChange );
+        Assert.False( changes.HasCompileTimeCodeChange );
         Assert.True( changes.IsIncremental );
         Assert.Equal( compilation2, changes.CompilationToAnalyze );
         Assert.Single( changes.SyntaxTreeChanges );
@@ -125,10 +119,8 @@ public partial class CompilationChangeTrackerTests
         var compilation2 = CreateCSharpCompilation( code );
         tracker = tracker.Update( compilation2 );
         var changes = tracker.Changes!;
-        Assert.NotNull( changes );
-        Assert.False( changes.HasCompileTimeCodeChange );
-
         Assert.True( changes.HasChange );
+        Assert.False( changes.HasCompileTimeCodeChange );
         Assert.True( changes.IsIncremental );
         Assert.Equal( compilation2, changes.CompilationToAnalyze );
         Assert.Single( changes.SyntaxTreeChanges );
@@ -157,7 +149,7 @@ public partial class CompilationChangeTrackerTests
         var compilation2 = CreateCSharpCompilation( code );
         tracker = tracker.Update( compilation2 );
         var changes = tracker.Changes!;
-        Assert.NotNull( changes );
+        Assert.True( changes.HasChange );
         Assert.False( changes.HasCompileTimeCodeChange );
 
         Assert.True( changes.HasChange );
@@ -190,7 +182,6 @@ public partial class CompilationChangeTrackerTests
         var compilation2 = CreateCSharpCompilation( code );
         tracker = tracker.Update( compilation2 );
         var changes = tracker.Changes!;
-        Assert.NotNull( changes );
         Assert.False( changes.HasCompileTimeCodeChange );
         Assert.True( changes.HasChange );
         Assert.Empty( changes.AddedPartialTypes );
@@ -224,7 +215,6 @@ public partial class CompilationChangeTrackerTests
         var compilation2 = CreateCSharpCompilation( code );
         tracker = tracker.Update( compilation2 );
         var changes = tracker.Changes!;
-        Assert.NotNull( changes );
 
         Assert.False( changes.HasChange );
         Assert.False( changes.HasCompileTimeCodeChange );
@@ -247,7 +237,6 @@ public partial class CompilationChangeTrackerTests
         var compilation2 = CreateCSharpCompilation( code );
         tracker = tracker.Update( compilation2 );
         var changes = tracker.Changes!;
-        Assert.NotNull( changes );
         Assert.False( changes.HasCompileTimeCodeChange );
         Assert.True( changes.HasChange );
         Assert.Single( changes.AddedPartialTypes );
@@ -272,7 +261,6 @@ public partial class CompilationChangeTrackerTests
         var compilation2 = CreateCSharpCompilation( code );
         tracker = tracker.Update( compilation2 );
         var changes = tracker.Changes!;
-        Assert.NotNull( changes );
         Assert.True( changes.HasCompileTimeCodeChange );
         Assert.True( changes.HasChange );
         Assert.True( changes.IsIncremental );
@@ -297,7 +285,6 @@ public partial class CompilationChangeTrackerTests
         var compilation2 = CreateCSharpCompilation( code );
         tracker = tracker.Update( compilation2 );
         var changes = tracker.Changes!;
-        Assert.NotNull( changes );
         Assert.True( changes.HasCompileTimeCodeChange );
         Assert.True( changes.HasChange );
         Assert.True( changes.IsIncremental );

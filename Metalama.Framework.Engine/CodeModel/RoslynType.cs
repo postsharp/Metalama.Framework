@@ -46,7 +46,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         ICompilation ICompilationElement.Compilation => this.Compilation;
 
-        ITypeSymbol? ISdkType.TypeSymbol => this.Symbol;
+        ITypeSymbol ISdkType.TypeSymbol => this.Symbol;
 
         public bool Equals( IType other ) => this.Symbol.Equals( ((ITypeInternal) other).TypeSymbol );
 

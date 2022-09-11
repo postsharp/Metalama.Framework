@@ -25,9 +25,6 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         /// </summary>
         public bool HasCompileTimeCodeChange { get; }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CompilationChanges"/> class.
-        /// </summary>
         public CompilationChanges(
             ImmutableDictionary<string, SyntaxTreeChange> syntaxTreeChanges,
             ImmutableHashSet<TypeDependencyKey> addedPartialTypes,

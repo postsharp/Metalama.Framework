@@ -118,7 +118,9 @@ internal class CompilationVersionGraph
 
     private class ChangeLinkedList
     {
+#pragma warning disable SA1401 // Field should be private
         public readonly CompilationVersion CompilationVersion;
+#pragma warning restore SA1401        
 
         public IncrementalChangeNode? FirstIncrementalChange { get; private set; }
 

@@ -505,7 +505,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public override IDeclaration? ContainingDeclaration => this.Implementation.ContainingDeclaration;
 
-        public ITypeSymbol? TypeSymbol
+        public ITypeSymbol TypeSymbol
         {
             get
             {

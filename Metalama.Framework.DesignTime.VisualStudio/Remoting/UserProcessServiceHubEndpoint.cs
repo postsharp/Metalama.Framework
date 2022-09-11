@@ -17,9 +17,9 @@ internal partial class UserProcessServiceHubEndpoint : ServerEndpoint, ICodeRefa
 
     private readonly IServiceProvider _serviceProvider;
     private readonly ApiImplementation _apiImplementation;
-    private readonly ConcurrentDictionary<string, TaskCompletionSource<UserProcessEndpoint>> _waiters = new( StringComparer.Ordinal );
+    private readonly ConcurrentDictionary<ProjectKey, TaskCompletionSource<UserProcessEndpoint>> _waiters = new();
     private readonly ConcurrentDictionary<string, UserProcessEndpoint> _registeredEndpointsByPipeName = new( StringComparer.Ordinal );
-    private readonly ConcurrentDictionary<string, UserProcessEndpoint> _registeredEndpointsByProjectId = new( StringComparer.Ordinal );
+    private readonly ConcurrentDictionary<ProjectKey, UserProcessEndpoint> _registeredEndpointsByProject = new();
 
     public UserProcessServiceHubEndpoint( IServiceProvider serviceProvider, string pipeName ) : base( serviceProvider, pipeName )
     {
@@ -27,7 +27,7 @@ internal partial class UserProcessServiceHubEndpoint : ServerEndpoint, ICodeRefa
         this._apiImplementation = new ApiImplementation( this );
     }
 
-    public ICollection<string> RegisteredProjects => this._registeredEndpointsByProjectId.Keys;
+    public ICollection<ProjectKey> RegisteredProjects => this._registeredEndpointsByProject.Keys;
 
     public ICollection<UserProcessEndpoint> Endpoints => this._registeredEndpointsByPipeName.Values;
 
@@ -56,37 +56,37 @@ internal partial class UserProcessServiceHubEndpoint : ServerEndpoint, ICodeRefa
         rpc.AddLocalRpcTarget<IServiceHubApi>( this._apiImplementation, null );
     }
 
-    private async ValueTask<UserProcessEndpoint> GetEndpointAsync( string projectId, CancellationToken cancellationToken )
+    private async ValueTask<UserProcessEndpoint> GetEndpointAsync( ProjectKey projectKey, CancellationToken cancellationToken )
     {
         await this.WhenInitialized;
 
-        if ( !this._registeredEndpointsByProjectId.TryGetValue( projectId, out var endpoint ) )
+        if ( !this._registeredEndpointsByProject.TryGetValue( projectKey, out var endpoint ) )
         {
-            this.Logger.Warning?.Log( $"The project '{projectId}' is not registered. Waiting." );
-            var waiter = this._waiters.GetOrAdd( projectId, _ => new TaskCompletionSource<UserProcessEndpoint>() );
+            this.Logger.Warning?.Log( $"The project '{projectKey}' is not registered. Waiting." );
+            var waiter = this._waiters.GetOrAdd( projectKey, _ => new TaskCompletionSource<UserProcessEndpoint>() );
             endpoint = await waiter.Task.WithCancellation( cancellationToken );
         }
 
         return endpoint;
     }
 
-    public async Task<IAnalysisProcessApi> GetApiAsync( string projectId, CancellationToken cancellationToken )
+    public async Task<IAnalysisProcessApi> GetApiAsync( ProjectKey projectKey, CancellationToken cancellationToken )
     {
-        var endpoint = await this.GetEndpointAsync( projectId, cancellationToken );
+        var endpoint = await this.GetEndpointAsync( projectKey, cancellationToken );
 
         return await endpoint.GetServerApiAsync( cancellationToken );
     }
 
-    public async Task RegisterProjectHandlerAsync( string projectId, IProjectHandlerCallback callback, CancellationToken cancellationToken = default )
+    public async Task RegisterProjectHandlerAsync( ProjectKey projectKey, IProjectHandlerCallback callback, CancellationToken cancellationToken = default )
     {
-        var endpoint = await this.GetEndpointAsync( projectId, cancellationToken );
+        var endpoint = await this.GetEndpointAsync( projectKey, cancellationToken );
 
-        await endpoint.RegisterProjectHandlerAsync( projectId, callback, cancellationToken );
+        await endpoint.RegisterProjectHandlerAsync( projectKey, callback, cancellationToken );
     }
 
-    public bool TryGetUnhandledSources( string projectId, out ImmutableDictionary<string, string>? sources )
+    public bool TryGetUnhandledSources( ProjectKey projectKey, out ImmutableDictionary<string, string>? sources )
     {
-        var endpointTask = this.GetEndpointAsync( projectId, CancellationToken.None );
+        var endpointTask = this.GetEndpointAsync( projectKey, CancellationToken.None );
 
         if ( !endpointTask.IsCompleted )
         {
@@ -96,29 +96,29 @@ internal partial class UserProcessServiceHubEndpoint : ServerEndpoint, ICodeRefa
         }
 
 #pragma warning disable VSTHRD002
-        return endpointTask.Result.TryGetUnhandledSources( projectId, out sources );
+        return endpointTask.Result.TryGetUnhandledSources( projectKey, out sources );
 #pragma warning restore VSTHRD002
     }
 
     async Task<ComputeRefactoringResult> ICodeRefactoringDiscoveryService.ComputeRefactoringsAsync(
-        string projectId,
+        ProjectKey projectKey,
         string syntaxTreePath,
         TextSpan span,
         CancellationToken cancellationToken )
     {
-        var api = await this.GetApiAsync( projectId, cancellationToken );
+        var api = await this.GetApiAsync( projectKey, cancellationToken );
 
-        return await api.ComputeRefactoringsAsync( projectId, syntaxTreePath, span, cancellationToken );
+        return await api.ComputeRefactoringsAsync( projectKey, syntaxTreePath, span, cancellationToken );
     }
 
     async Task<CodeActionResult> ICodeActionExecutionService.ExecuteCodeActionAsync(
-        string projectId,
+        ProjectKey projectKey,
         CodeActionModel codeActionModel,
         CancellationToken cancellationToken )
     {
-        var api = await this.GetApiAsync( projectId, cancellationToken );
+        var api = await this.GetApiAsync( projectKey, cancellationToken );
 
-        return await api.ExecuteCodeActionAsync( projectId, codeActionModel, cancellationToken );
+        return await api.ExecuteCodeActionAsync( projectKey, codeActionModel, cancellationToken );
     }
 
     private void OnIsEditingCompileTimeCodeChanged( bool value )

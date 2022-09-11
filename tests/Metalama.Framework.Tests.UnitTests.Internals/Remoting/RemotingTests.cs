@@ -128,10 +128,10 @@ public class RemotingTests
 
         analysisProcessEndpoint.Start();
 
-        const string projectId = "MyProjectId";
-        await analysisProcessEndpoint.RegisterProjectAsync( projectId );
+        var projectKey = ProjectKey.CreateTest( "MyProjectId" );
+        await analysisProcessEndpoint.RegisterProjectAsync( projectKey );
 
-        Assert.Contains( projectId, userProcessRegistrationEndpoint.RegisteredProjects );
+        Assert.Contains( projectKey, userProcessRegistrationEndpoint.RegisteredProjects );
     }
 
     [Fact]
@@ -154,10 +154,10 @@ public class RemotingTests
 
             analysisProcessEndpoint.Start();
 
-            var projectId = $"MyProjectId{i}";
-            await analysisProcessEndpoint.RegisterProjectAsync( projectId );
+            var projectKey = ProjectKey.CreateTest( $"MyProjectId{i}" );
+            await analysisProcessEndpoint.RegisterProjectAsync( projectKey );
 
-            Assert.Contains( projectId, userProcessRegistrationEndpoint.RegisteredProjects );
+            Assert.Contains( projectKey, userProcessRegistrationEndpoint.RegisteredProjects );
         }
     }
 

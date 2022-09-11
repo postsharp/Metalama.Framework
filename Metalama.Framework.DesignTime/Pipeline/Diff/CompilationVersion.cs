@@ -21,7 +21,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         public ImmutableDictionary<AssemblyIdentity, CompilationReference>? References { get; }
 
         /// <summary>
-        /// Gets the last <see cref="Microsoft.CodeAnalysis.Compilation"/>, or <c>null</c> if the <see cref="Update(Microsoft.CodeAnalysis.Compilation)"/> method
+        /// Gets the last <see cref="Microsoft.CodeAnalysis.Compilation"/>, or <c>null</c> if the <see cref="Update(Microsoft.CodeAnalysis.Compilation,System.Threading.CancellationToken)"/> method
         /// has not been invoked yet.
         /// </summary>
         public Compilation? Compilation { get; }

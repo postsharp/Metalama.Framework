@@ -42,7 +42,11 @@ namespace Metalama.Framework.Engine.LamaSerialization
 
         public static SerializationIntrinsicType GetIntrinsicType( Type? type, bool useObjRef = false )
         {
-            if ( type.IsEnum )
+            if ( type == null )
+            {
+                return SerializationIntrinsicType.None;
+            }
+            else if ( type.IsEnum )
             {
                 return SerializationIntrinsicType.Enum;
             }

@@ -17,11 +17,8 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
     private static AnalysisProcessEndpoint? _instance;
 
     private readonly ApiImplementation _apiImplementation;
-    private readonly string _pipeName;
-    private readonly CancellationTokenSource _startCancellationSource = new();
     private readonly ConcurrentDictionary<ProjectKey, ProjectKey> _connectedClients = new();
     private readonly ConcurrentDictionary<ProjectKey, ImmutableDictionary<string, string>> _sourcesForUnconnectedClients = new();
-    private readonly TaskCompletionSource<bool> _startTask = new();
     private readonly IServiceProvider _serviceProvider;
 
     private readonly ICompileTimeCodeEditingStatusService? _compileTimeCodeEditingStatusService;
@@ -110,14 +107,14 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
         {
             Thread.MemoryBarrier();
 
-            this._logger.Warning?.Log( $"Cannot publish source for the client '{projectKey}' because it has not connected yet." );
+            this.Logger.Warning?.Log( $"Cannot publish source for the client '{projectKey}' because it has not connected yet." );
             this._sourcesForUnconnectedClients[projectKey] = generatedSources;
         }
     }
 
-    public void RegisterProject( string projectId ) => _ = this.RegisterProjectAsync( projectId );
+    public void RegisterProject( ProjectKey projectKey ) => _ = this.RegisterProjectAsync( projectKey );
 
-    public async Task RegisterProjectAsync( string projectId )
+    public async Task RegisterProjectAsync( ProjectKey projectKey )
     {
         await this.WhenInitialized;
 
@@ -126,7 +123,7 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
         if ( registrationServiceProvider != null )
         {
             var registrationService = await registrationServiceProvider.GetApiAsync( CancellationToken.None );
-            await registrationService.RegisterProjectAsync( projectId, this.PipeName, CancellationToken.None );
+            await registrationService.RegisterProjectAsync( projectKey, this.PipeName, CancellationToken.None );
         }
     }
 }

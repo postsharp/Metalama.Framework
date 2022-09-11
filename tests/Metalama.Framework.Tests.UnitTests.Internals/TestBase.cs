@@ -7,7 +7,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
 
@@ -145,36 +144,23 @@ class Expression
         protected TestContext CreateTestContext( TestProjectOptions? projectOptions = null ) => this.CreateTestContext( null, projectOptions );
 
         protected TestContext CreateTestContext( Func<ServiceProvider, ServiceProvider>? addServices, TestProjectOptions? projectOptions = null )
-            => new( this, projectOptions, addServices );
+            => new(
+                projectOptions,
+                provider =>
+                {
+                    if ( this._addServices != null )
+                    {
+                        provider = this._addServices( provider );
+                    }
+
+                    if ( addServices != null )
+                    {
+                        provider = addServices( provider );
+                    }
+
+                    return provider;
+                } );
 
         protected virtual IEnumerable<Assembly> GetTestAssemblies() => new[] { this.GetType().Assembly };
-
-        protected class TestContext : IDisposable
-        {
-            public TestProjectOptions ProjectOptions { get; }
-
-            public ServiceProvider ServiceProvider { get; }
-
-            public TestContext( TestBase parent, TestProjectOptions? projectOptions = null, Func<ServiceProvider, ServiceProvider>? addServices = null )
-            {
-                this.ProjectOptions = projectOptions ?? new TestProjectOptions( additionalAssemblies: ImmutableArray.Create( this.GetType().Assembly ) );
-
-                // We add a default AspectPipelineDescription because some tests need this marker, however it can be replaced by the pipeline.
-                this.ServiceProvider = this.ServiceProvider.WithService( new TestMarkerService() );
-
-                this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( this.ProjectOptions.PathOptions )
-                    .WithService( this.ProjectOptions )
-                    .WithProjectScopedServices( TestCompilationFactory.GetMetadataReferences() )
-                    .WithMark( ServiceProviderMark.Test );
-
-                this.ServiceProvider = parent._addServices( this.ServiceProvider );
-
-                if ( addServices != null )
-                {
-                    provider = addServices( provider );
-                }
-
-                return provider;
-            } );
-        }
     }
+}

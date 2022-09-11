@@ -18,8 +18,7 @@ internal partial class UserProcessEndpoint : ClientEndpoint<IAnalysisProcessApi>
     private readonly ApiImplementation _apiImplementation;
     private readonly ConcurrentDictionary<ProjectKey, ImmutableDictionary<string, string>> _unhandledSources = new();
     private readonly ConcurrentDictionary<ProjectKey, IProjectHandlerCallback> _projectHandlers = new();
-    private readonly TaskCompletionSource<bool> _connectTask = new();
-
+    
     public UserProcessEndpoint( IServiceProvider serviceProvider, string pipeName ) : base( serviceProvider, pipeName )
     {
         this._apiImplementation = new ApiImplementation( this );
@@ -34,8 +33,8 @@ internal partial class UserProcessEndpoint : ClientEndpoint<IAnalysisProcessApi>
     public async Task RegisterProjectHandlerAsync( ProjectKey projectKey, IProjectHandlerCallback callback, CancellationToken cancellationToken = default )
     {
         await this.WhenInitialized.WithCancellation( cancellationToken );
-        this._projectHandlers[projectId] = callback;
-        await (await this.GetServerApiAsync( cancellationToken )).OnUserProcessProjectHandlerConnectedAsync( projectId, cancellationToken );
+        this._projectHandlers[projectKey] = callback;
+        await (await this.GetServerApiAsync( cancellationToken )).OnUserProcessProjectHandlerConnectedAsync( projectKey, cancellationToken );
     }
 
     public bool TryGetUnhandledSources( ProjectKey projectKey, out ImmutableDictionary<string, string>? sources )

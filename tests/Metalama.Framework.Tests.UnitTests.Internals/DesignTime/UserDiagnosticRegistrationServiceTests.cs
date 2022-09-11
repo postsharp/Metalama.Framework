@@ -118,7 +118,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.TestCode
             var serviceProvider = testContext.ServiceProvider.WithUntypedService( typeof(IConfigurationManager), configurationManager );
 
             using var domain = new UnloadableCompileTimeDomain();
-            using DesignTimeAspectPipeline pipeline = new( serviceProvider, domain, compilation.References, true );
+            using DesignTimeAspectPipeline pipeline = new( serviceProvider, domain, compilation, true );
 
             Assert.True( pipeline.TryExecute( compilation, CancellationToken.None, out _ ) );
 
