@@ -1,7 +1,7 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Backstage.Utilities;
+using Metalama.Backstage.Configuration;
+using Metalama.Backstage.Extensibility;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
@@ -18,47 +18,23 @@ namespace Metalama.Framework.DesignTime.Diagnostics
     internal class UserDiagnosticRegistrationService
     {
         // Multiple instances are needed for testing.
-        private static readonly ConcurrentDictionary<IPathOptions, UserDiagnosticRegistrationService> _instances = new();
-        private readonly string _settingsFilePath;
-        private UserDiagnosticRegistrationFile _registrationFile;
+        private static readonly ConcurrentDictionary<IConfigurationManager, UserDiagnosticRegistrationService> _instances = new();
+        private readonly UserDiagnosticRegistrationFile _registrationFile;
+        private readonly IConfigurationManager _configurationManager;
 
-        public static UserDiagnosticRegistrationService GetInstance( IPathOptions pathOptions )
-            => _instances.GetOrAdd(
-                pathOptions,
-                _ => new UserDiagnosticRegistrationService( pathOptions ) );
-
-        private UserDiagnosticRegistrationService( IPathOptions pathOptions )
+        public static UserDiagnosticRegistrationService GetInstance( IServiceProvider serviceProvider )
         {
-            var settingsDirectory = pathOptions.SettingsDirectory;
+            var configurationManager = serviceProvider.GetRequiredBackstageService<IConfigurationManager>();
 
-            RetryHelper.Retry(
-                () =>
-                {
-                    if ( !Directory.Exists( settingsDirectory ) )
-                    {
-                        Directory.CreateDirectory( settingsDirectory );
-                    }
-                },
-                logger: Logger.DesignTime );
-
-            this._settingsFilePath = Path.Combine( settingsDirectory, "userDiagnostics.json" );
-
-            this._registrationFile = UserDiagnosticRegistrationFile.ReadFile( this._settingsFilePath );
+            return _instances.GetOrAdd(
+                configurationManager,
+                _ => new UserDiagnosticRegistrationService( configurationManager ) );
         }
 
-        private void RefreshRegistrationFile()
+        private UserDiagnosticRegistrationService( IConfigurationManager configurationManager )
         {
-            if ( File.Exists( this._settingsFilePath ) )
-            {
-                if ( File.GetLastWriteTime( this._settingsFilePath ) > this._registrationFile.Timestamp )
-                {
-                    this._registrationFile = UserDiagnosticRegistrationFile.ReadFile( this._settingsFilePath );
-                }
-            }
-            else
-            {
-                this._registrationFile = new UserDiagnosticRegistrationFile();
-            }
+            this._configurationManager = configurationManager;
+            this._registrationFile = configurationManager.Get<UserDiagnosticRegistrationFile>();
         }
 
         /// <summary>
@@ -75,43 +51,47 @@ namespace Metalama.Framework.DesignTime.Diagnostics
         /// </summary>
         public void RegisterDescriptors( DesignTimePipelineExecutionResult pipelineResult )
         {
-            var missing = this.GetMissingDiagnostics( pipelineResult );
-            var timestamp = this._registrationFile.Timestamp;
-
-            if ( missing.Diagnostics.Count > 0 || missing.Suppressions.Count > 0 )
+            try
             {
-                using ( MutexHelper.WithGlobalLock( this._settingsFilePath ) )
-                {
-                    this.RefreshRegistrationFile();
-
-                    if ( timestamp != this._registrationFile.Timestamp )
+                this._configurationManager.UpdateIf<UserDiagnosticRegistrationFile>(
+                    f =>
                     {
-                        missing = this.GetMissingDiagnostics( pipelineResult );
-                    }
+                        var missing = GetMissingDiagnostics( f, pipelineResult );
 
-                    foreach ( var diagnostic in missing.Diagnostics )
+                        return missing.Diagnostics.Count > 0 || missing.Suppressions.Count > 0;
+                    },
+                    f =>
                     {
-                        this._registrationFile.Diagnostics.Add( diagnostic.Id, new UserDiagnosticRegistration( diagnostic ) );
-                    }
+                        var missing = GetMissingDiagnostics( f, pipelineResult );
 
-                    foreach ( var suppression in missing.Suppressions )
-                    {
-                        this._registrationFile.Suppressions.Add( suppression );
-                    }
+                        foreach ( var diagnostic in missing.Diagnostics )
+                        {
+                            f.Diagnostics.Add( diagnostic.Id, new UserDiagnosticRegistration( diagnostic ) );
+                        }
 
-                    this._registrationFile.Write( this._settingsFilePath );
-                }
+                        foreach ( var suppression in missing.Suppressions )
+                        {
+                            f.Suppressions.Add( suppression );
+                        }
+                    } );
+            }
+            catch ( Exception e )
+            {
+                // We swallow exceptions because we don't want to fail the pipeline in case of error here.
+                this._configurationManager.Logger.Error?.Log( $"Cannot register user diagnostics and registrations: {e.Message}." );
             }
         }
 
-        private (List<string> Suppressions, List<DiagnosticDescriptor> Diagnostics) GetMissingDiagnostics( DesignTimePipelineExecutionResult pipelineResult )
+        private static (List<string> Suppressions, List<DiagnosticDescriptor> Diagnostics) GetMissingDiagnostics(
+            UserDiagnosticRegistrationFile file,
+            DesignTimePipelineExecutionResult pipelineResult )
         {
             List<string> missingSuppressions = new();
             List<DiagnosticDescriptor> missingDiagnostics = new();
 
             foreach ( var suppression in pipelineResult.Diagnostics.DiagnosticSuppressions.Select( s => s.Definition.SuppressedDiagnosticId ).Distinct() )
             {
-                if ( !this._registrationFile.Suppressions.Contains( suppression ) )
+                if ( !file.Suppressions.Contains( suppression ) )
                 {
                     missingSuppressions.Add( suppression );
                 }
@@ -121,7 +101,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
                          .Distinct( DiagnosticDescriptorComparer.Instance ) )
             {
                 if ( !DesignTimeDiagnosticDefinitions.StandardDiagnosticDescriptors.ContainsKey( diagnostic.Id )
-                     && !this._registrationFile.Diagnostics.ContainsKey( diagnostic.Id ) )
+                     && !file.Diagnostics.ContainsKey( diagnostic.Id ) )
                 {
                     missingDiagnostics.Add( diagnostic );
                 }

@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
@@ -32,7 +31,7 @@ internal class IntrospectionAspectPipeline : AspectPipeline
                 .ToImmutableArray<IIntrospectionDiagnostic>();
         }
 
-        if ( !this.TryInitialize( diagnostics, compilation.PartialCompilation, null, cancellationToken, out var configuration ) )
+        if ( !this.TryInitialize( diagnostics, compilation.PartialCompilation, null, null, cancellationToken, out var configuration ) )
         {
             return new IntrospectionCompilationResultModel( false, compilation, MapDiagnostics() );
         }

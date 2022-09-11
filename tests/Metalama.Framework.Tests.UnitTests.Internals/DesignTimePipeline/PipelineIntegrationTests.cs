@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.DesignTime.Pipeline;
@@ -208,6 +207,7 @@ Target.cs:
 ";
 
             using var testContext = this.CreateTestContext();
+            var projectOptions = testContext.ProjectOptions;
 
             var compilation = CreateCSharpCompilation(
                 new Dictionary<string, string>()
@@ -309,7 +309,10 @@ Target.cs:
             // Build the project from the compile-time pipeline.
             using UnloadableCompileTimeDomain domain = new();
 
-            var compileTimeAspectPipeline = new CompileTimeAspectPipeline( testContext.ServiceProvider, true, domain );
+            var serviceProvider = testContext.ServiceProvider
+                .WithProjectScopedServices( compilation );
+
+            var compileTimeAspectPipeline = new CompileTimeAspectPipeline( serviceProvider, true, domain );
             DiagnosticList compileDiagnostics = new();
             var pipelineResult = await compileTimeAspectPipeline.ExecuteAsync( compileDiagnostics, compilation5, default, CancellationToken.None );
 

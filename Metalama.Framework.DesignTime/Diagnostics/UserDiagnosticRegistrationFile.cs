@@ -1,9 +1,6 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Backstage.Utilities;
-using Metalama.Framework.Engine.Utilities.Diagnostics;
-using Newtonsoft.Json;
+using Metalama.Backstage.Configuration;
 using System.Reflection;
 
 namespace Metalama.Framework.DesignTime.Diagnostics
@@ -12,65 +9,29 @@ namespace Metalama.Framework.DesignTime.Diagnostics
     /// A JSON-serializable file that contains user-defined diagnostic and suppression descriptors.
     /// </summary>
     [Obfuscation( Exclude = true /* JSON */ )]
-    internal class UserDiagnosticRegistrationFile
+    [ConfigurationFile( "userDiagnostics.json" )]
+    internal class UserDiagnosticRegistrationFile : ConfigurationFile
     {
         public Dictionary<string, UserDiagnosticRegistration> Diagnostics { get; } = new( StringComparer.OrdinalIgnoreCase );
 
         public HashSet<string> Suppressions { get; } = new( StringComparer.OrdinalIgnoreCase );
 
-        [JsonIgnore]
-        public DateTime Timestamp { get; private set; }
-
-        public void Write( string file )
+        public override void CopyFrom( ConfigurationFile configurationFile )
         {
-            var textWriter = new StringWriter();
-            this.Write( textWriter );
-            RetryHelper.Retry( () => File.WriteAllText( file, textWriter.ToString() ), logger: Logger.DesignTime );
-        }
+            var source = (UserDiagnosticRegistrationFile) configurationFile;
 
-        public void Write( TextWriter textWriter )
-        {
-            var serializer = JsonSerializer.Create();
-            serializer.Formatting = Formatting.Indented;
+            this.Diagnostics.Clear();
+            this.Suppressions.Clear();
 
-            serializer.Serialize( textWriter, this );
-
-            this.Timestamp = DateTime.UtcNow;
-        }
-
-        public static UserDiagnosticRegistrationFile ReadFile( string file )
-        {
-            if ( !File.Exists( file ) )
+            foreach ( var diagnostic in source.Diagnostics )
             {
-                // Return an empty file.
-                return new UserDiagnosticRegistrationFile();
+                this.Diagnostics.Add( diagnostic.Key, diagnostic.Value );
             }
 
-            try
+            foreach ( var suppression in source.Suppressions )
             {
-                var json = File.ReadAllText( file );
-
-                var timestamp = File.GetLastWriteTimeUtc( file );
-
-                var obj = ReadContent( json );
-
-                obj.Timestamp = timestamp;
-
-                return obj;
+                this.Suppressions.Add( suppression );
             }
-            catch
-            {
-                // Return an empty file.
-                return new UserDiagnosticRegistrationFile();
-            }
-        }
-
-        public static UserDiagnosticRegistrationFile ReadContent( string json )
-        {
-            var serializer = JsonSerializer.Create();
-
-            return serializer.Deserialize<UserDiagnosticRegistrationFile>( new JsonTextReader( new StringReader( json ) ) )
-                   ?? new UserDiagnosticRegistrationFile();
         }
     }
 }

@@ -1,12 +1,13 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Metalama.TestFramework.Utilities;
 using Microsoft.CodeAnalysis;
@@ -36,6 +37,9 @@ namespace Metalama.TestFramework
         private static readonly Regex _spaceRegex = new( " +", RegexOptions.Compiled );
         private static readonly Regex _newLineRegex = new( "( *[\n|\r])+", RegexOptions.Compiled );
         private static readonly AsyncLocal<bool> _isTestRunning = new();
+
+        private static readonly RemovePreprocessorDirectivesRewriter _removePreprocessorDirectivesRewriter =
+            new( SyntaxKind.PragmaWarningDirectiveTrivia, SyntaxKind.NullableDirectiveTrivia );
 
         public ServiceProvider BaseServiceProvider { get; }
 
@@ -132,27 +136,32 @@ namespace Metalama.TestFramework
                     .Add( "TESTRUNNER" )
                     .Add( "METALAMA" );
 
-                var parseOptions = CSharpParseOptions.Default.WithPreprocessorSymbols( preprocessorSymbols );
+                var defaultParseOptions = CSharpParseOptions.Default;
 
                 if ( testInput.Options.LanguageVersion != null )
                 {
-                    parseOptions = parseOptions.WithLanguageVersion( testInput.Options.LanguageVersion.Value );
+                    defaultParseOptions = defaultParseOptions.WithLanguageVersion( testInput.Options.LanguageVersion.Value );
                 }
 
                 if ( testInput.Options.LanguageFeatures.Count > 0 )
                 {
-                    parseOptions = parseOptions.WithFeatures( testInput.Options.LanguageFeatures );
+                    defaultParseOptions = defaultParseOptions.WithFeatures( testInput.Options.LanguageFeatures );
                 }
 
-                var emptyProject = this.CreateProject( testInput.Options ).WithParseOptions( parseOptions );
-                var project = emptyProject;
+                var emptyProject = this.CreateProject( testInput.Options );
+                var parseOptions = defaultParseOptions.WithPreprocessorSymbols( preprocessorSymbols.AddRange( testInput.Options.DefinedConstants ) );
+                var project = emptyProject.WithParseOptions( parseOptions );
 
                 async Task<Document?> AddDocumentAsync( string fileName, string sourceCode, bool acceptFileWithoutMember = false )
                 {
                     // Note that we don't pass the full path to the Document because it causes call stacks of exceptions to have full paths,
                     // which is more difficult to test.
                     var parsedSyntaxTree = CSharpSyntaxTree.ParseText( sourceCode, parseOptions, fileName, Encoding.UTF8 );
-                    var prunedSyntaxRoot = new InactiveCodeRemover().Visit( await parsedSyntaxTree.GetRootAsync() )!;
+
+                    var prunedSyntaxRoot =
+                        testInput.Options.KeepDisabledCode != true
+                            ? _removePreprocessorDirectivesRewriter.Visit( await parsedSyntaxTree.GetRootAsync() )!
+                            : await parsedSyntaxTree.GetRootAsync();
 
                     if ( !acceptFileWithoutMember && prunedSyntaxRoot is CompilationUnitSyntax { Members: { Count: 0 } } )
                     {
@@ -186,6 +195,13 @@ namespace Metalama.TestFramework
                     project.MetadataReferences,
                     (CSharpCompilationOptions?) project.CompilationOptions );
 
+                string? dependencyLicenseKey = null;
+
+                if ( testInput.Options.DependencyLicenseFile != null )
+                {
+                    dependencyLicenseKey = File.ReadAllText( Path.Combine( testInput.ProjectDirectory, testInput.Options.DependencyLicenseFile ) );
+                }
+
                 // Add additional test documents.
                 foreach ( var includedFile in testInput.Options.IncludedFiles )
                 {
@@ -211,7 +227,11 @@ namespace Metalama.TestFramework
                     else
                     {
                         // Dependencies must be compiled separately using Metalama.
-                        var dependency = await this.CompileDependencyAsync( includedText, emptyProject, testResult );
+                        var dependencyParseOptions = defaultParseOptions.WithPreprocessorSymbols(
+                            preprocessorSymbols.AddRange( testInput.Options.DependencyDefinedConstants ) );
+
+                        var dependencyProject = emptyProject.WithParseOptions( dependencyParseOptions );
+                        var dependency = await this.CompileDependencyAsync( includedText, dependencyProject, testResult, dependencyLicenseKey );
 
                         if ( dependency == null )
                         {
@@ -271,17 +291,26 @@ namespace Metalama.TestFramework
         /// <summary>
         /// Compiles a dependency using the Metalama pipeline, emits a binary assembly, and returns a reference to it.
         /// </summary>
-        private async Task<MetadataReference?> CompileDependencyAsync( string code, Project emptyProject, TestResult testResult )
+        private async Task<MetadataReference?> CompileDependencyAsync( string code, Project emptyProject, TestResult testResult, string? licenseKey = null )
         {
-            // The assembly name must match the file name otherwise it wont be found bu AssemblyLocator.
+            // The assembly name must match the file name otherwise it wont be found by AssemblyLocator.
             var name = "dependency_" + RandomIdGenerator.GenerateId();
             var project = emptyProject.AddDocument( "dependency.cs", code ).Project;
 
             using var domain = new UnloadableCompileTimeDomain();
 
+            var serviceProvider = this.BaseServiceProvider.WithProjectScopedServices( this.References.MetadataReferences );
+
+            if ( !string.IsNullOrEmpty( licenseKey ) )
+            {
+                // ReSharper disable once RedundantSuppressNullableWarningExpression
+                serviceProvider = serviceProvider.AddTestLicenseVerifier( licenseKey! );
+            }
+
             // Transform with Metalama.
+
             var pipeline = new CompileTimeAspectPipeline(
-                this.BaseServiceProvider.WithProjectScopedServices( this.References.MetadataReferences ),
+                serviceProvider,
                 true,
                 domain );
 

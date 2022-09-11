@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using FakeItEasy;
 using Metalama.Framework.Code;
@@ -160,12 +159,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 }
             }
 
-            var nameObliviousSignatureComparer =
-                new StructuralSymbolComparer(
-                    StructuralSymbolComparerOptions.GenericArguments
-                    | StructuralSymbolComparerOptions.GenericParameterCount
-                    | StructuralSymbolComparerOptions.ParameterModifiers
-                    | StructuralSymbolComparerOptions.ParameterTypes );
+            var nameObliviousSignatureComparer = StructuralSymbolComparer.NameObliviousComparer;
 
             // Update transformations to reflect the input compilation.
             foreach ( var transformation in rewriter.ObservableTransformations.Cast<object>()

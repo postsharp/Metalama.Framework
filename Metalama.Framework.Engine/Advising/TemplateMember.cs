@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -87,7 +86,9 @@ internal class TemplateMember<T>
 
         var compiledTemplateAttribute = declaration.Attributes.OfAttributeType( typeof(CompiledTemplateAttribute) ).SingleOrDefault();
 
-        if ( compiledTemplateAttribute != null && compiledTemplateAttribute.TryGetNamedArgument( nameof(CompiledTemplateAttribute.Accessibility), out var accessibility ) )
+        if ( compiledTemplateAttribute != null && compiledTemplateAttribute.TryGetNamedArgument(
+                nameof(CompiledTemplateAttribute.Accessibility),
+                out var accessibility ) )
         {
             return (Accessibility) accessibility.Value!;
         }

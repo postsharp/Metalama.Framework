@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Microsoft.CodeAnalysis;
 using System;
@@ -28,15 +27,26 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                 StructuralSymbolComparerOptions.ParameterTypes |
                 StructuralSymbolComparerOptions.ParameterModifiers );
 
+        internal static readonly StructuralSymbolComparer NameObliviousComparer = new(
+            StructuralSymbolComparerOptions.GenericArguments
+            | StructuralSymbolComparerOptions.GenericParameterCount
+            | StructuralSymbolComparerOptions.ParameterModifiers
+            | StructuralSymbolComparerOptions.ParameterTypes );
+
         private readonly StructuralSymbolComparerOptions _options;
 
-        public StructuralSymbolComparer( StructuralSymbolComparerOptions options )
+        private StructuralSymbolComparer( StructuralSymbolComparerOptions options )
         {
             this._options = options;
         }
 
         public bool Equals( ISymbol x, ISymbol y )
         {
+            if ( ReferenceEquals( x, y ) )
+            {
+                return true;
+            }
+
             if ( x.Kind != y.Kind )
             {
                 // Unequal kinds.
@@ -108,13 +118,13 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                     throw new NotImplementedException( $"{x.Kind}" );
             }
 
-            if ( this._options.HasFlag( StructuralSymbolComparerOptions.ContainingDeclaration )
+            if ( this._options.HasFlagFast( StructuralSymbolComparerOptions.ContainingDeclaration )
                  && !ContainingDeclarationEquals( x.ContainingSymbol, y.ContainingSymbol ) )
             {
                 return false;
             }
 
-            if ( this._options.HasFlag( StructuralSymbolComparerOptions.ContainingAssembly )
+            if ( this._options.HasFlagFast( StructuralSymbolComparerOptions.ContainingAssembly )
                  && !ContainingModuleEquals( x.ContainingModule, y.ContainingModule ) )
             {
                 return false;
@@ -123,20 +133,43 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
             return true;
         }
 
-        private static bool NamedTypeEquals( INamedTypeSymbol namedTypeX, INamedTypeSymbol namedTypeY, StructuralSymbolComparerOptions options )
+        private static bool NamespaceEquals( INamespaceSymbol nsX, INamespaceSymbol nsY )
         {
-            if ( options.HasFlag( StructuralSymbolComparerOptions.Name ) && !StringComparer.Ordinal.Equals( namedTypeX.Name, namedTypeY.Name ) )
+            if ( !StringComparer.Ordinal.Equals( nsX.Name, nsY.Name ) )
             {
                 return false;
             }
 
-            if ( options.HasFlag( StructuralSymbolComparerOptions.GenericParameterCount )
+            if ( nsX.IsGlobalNamespace != nsY.IsGlobalNamespace )
+            {
+                return false;
+            }
+
+            if ( nsX.IsGlobalNamespace )
+            {
+                return true;
+            }
+
+            return NamespaceEquals( nsX.ContainingNamespace, nsY.ContainingNamespace );
+        }
+
+        private static bool NamedTypeEquals( INamedTypeSymbol namedTypeX, INamedTypeSymbol namedTypeY, StructuralSymbolComparerOptions options )
+        {
+            if ( options.HasFlagFast( StructuralSymbolComparerOptions.Name ) &&
+                 (!StringComparer.Ordinal.Equals( namedTypeX.Name, namedTypeY.Name ) || !NamespaceEquals(
+                     namedTypeX.ContainingNamespace,
+                     namedTypeY.ContainingNamespace )) )
+            {
+                return false;
+            }
+
+            if ( options.HasFlagFast( StructuralSymbolComparerOptions.GenericParameterCount )
                  && namedTypeX.TypeParameters.Length != namedTypeY.TypeParameters.Length )
             {
                 return false;
             }
 
-            if ( options.HasFlag( StructuralSymbolComparerOptions.GenericArguments ) )
+            if ( options.HasFlagFast( StructuralSymbolComparerOptions.GenericArguments ) )
             {
                 // TODO: optimize using for loop.
                 foreach ( var (typeArgumentX, typeArgumentY) in namedTypeX.TypeArguments.Zip( namedTypeY.TypeArguments, ( x, y ) => (x, y) ) )
@@ -153,17 +186,24 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
         private static bool MethodEquals( IMethodSymbol methodX, IMethodSymbol methodY, StructuralSymbolComparerOptions options )
         {
-            if ( options.HasFlag( StructuralSymbolComparerOptions.Name ) && !StringComparer.Ordinal.Equals( methodX.Name, methodY.Name ) )
+            if ( ReferenceEquals( methodX, methodY ) )
+            {
+                return true;
+            }
+
+            if ( options.HasFlagFast( StructuralSymbolComparerOptions.Name ) && !StringComparer.Ordinal.Equals( methodX.Name, methodY.Name ) )
             {
                 return false;
             }
 
-            if ( options.HasFlag( StructuralSymbolComparerOptions.GenericParameterCount ) && methodX.TypeParameters.Length != methodY.TypeParameters.Length )
+            if ( options.HasFlagFast( StructuralSymbolComparerOptions.GenericParameterCount )
+                 && methodX.TypeParameters.Length != methodY.TypeParameters.Length )
             {
                 return false;
             }
 
-            if ( options.HasFlag( StructuralSymbolComparerOptions.ParameterTypes ) || options.HasFlag( StructuralSymbolComparerOptions.ParameterModifiers ) )
+            if ( options.HasFlagFast( StructuralSymbolComparerOptions.ParameterTypes )
+                 || options.HasFlagFast( StructuralSymbolComparerOptions.ParameterModifiers ) )
             {
                 if ( methodX.Parameters.Length != methodY.Parameters.Length )
                 {
@@ -173,12 +213,12 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                 // TODO: optimize using for loop.
                 foreach ( var (parameterX, parameterY) in methodX.Parameters.Zip( methodY.Parameters, ( x, y ) => (x, y) ) )
                 {
-                    if ( options.HasFlag( StructuralSymbolComparerOptions.ParameterTypes ) && !TypeEquals( parameterX.Type, parameterY.Type ) )
+                    if ( options.HasFlagFast( StructuralSymbolComparerOptions.ParameterTypes ) && !TypeEquals( parameterX.Type, parameterY.Type ) )
                     {
                         return false;
                     }
 
-                    if ( options.HasFlag( StructuralSymbolComparerOptions.ParameterModifiers ) && parameterX.RefKind != parameterY.RefKind )
+                    if ( options.HasFlagFast( StructuralSymbolComparerOptions.ParameterModifiers ) && parameterX.RefKind != parameterY.RefKind )
                     {
                         return false;
                     }
@@ -190,12 +230,13 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
         private static bool PropertyEquals( IPropertySymbol propertyX, IPropertySymbol propertyY, StructuralSymbolComparerOptions options )
         {
-            if ( options.HasFlag( StructuralSymbolComparerOptions.Name ) && !StringComparer.Ordinal.Equals( propertyX.Name, propertyY.Name ) )
+            if ( options.HasFlagFast( StructuralSymbolComparerOptions.Name ) && !StringComparer.Ordinal.Equals( propertyX.Name, propertyY.Name ) )
             {
                 return false;
             }
 
-            if ( options.HasFlag( StructuralSymbolComparerOptions.ParameterTypes ) || options.HasFlag( StructuralSymbolComparerOptions.ParameterModifiers ) )
+            if ( options.HasFlagFast( StructuralSymbolComparerOptions.ParameterTypes )
+                 || options.HasFlagFast( StructuralSymbolComparerOptions.ParameterModifiers ) )
             {
                 if ( propertyX.Parameters.Length != propertyY.Parameters.Length )
                 {
@@ -205,12 +246,12 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                 // TODO: optimize using for loop.
                 foreach ( var (parameterX, parameterY) in propertyX.Parameters.Zip( propertyY.Parameters, ( x, y ) => (x, y) ) )
                 {
-                    if ( options.HasFlag( StructuralSymbolComparerOptions.ParameterTypes ) && !TypeEquals( parameterX.Type, parameterY.Type ) )
+                    if ( options.HasFlagFast( StructuralSymbolComparerOptions.ParameterTypes ) && !TypeEquals( parameterX.Type, parameterY.Type ) )
                     {
                         return false;
                     }
 
-                    if ( options.HasFlag( StructuralSymbolComparerOptions.ParameterModifiers ) && parameterX.RefKind != parameterY.RefKind )
+                    if ( options.HasFlagFast( StructuralSymbolComparerOptions.ParameterModifiers ) && parameterX.RefKind != parameterY.RefKind )
                     {
                         return false;
                     }
@@ -222,7 +263,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
         private static bool EventEquals( IEventSymbol eventX, IEventSymbol eventY, StructuralSymbolComparerOptions options )
         {
-            if ( options.HasFlag( StructuralSymbolComparerOptions.Name ) && !StringComparer.Ordinal.Equals( eventX.Name, eventY.Name ) )
+            if ( options.HasFlagFast( StructuralSymbolComparerOptions.Name ) && !StringComparer.Ordinal.Equals( eventX.Name, eventY.Name ) )
             {
                 return false;
             }
@@ -232,7 +273,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
         private static bool FieldEquals( IFieldSymbol fieldX, IFieldSymbol fieldY, StructuralSymbolComparerOptions options )
         {
-            if ( options.HasFlag( StructuralSymbolComparerOptions.Name ) && !StringComparer.Ordinal.Equals( fieldX.Name, fieldY.Name ) )
+            if ( options.HasFlagFast( StructuralSymbolComparerOptions.Name ) && !StringComparer.Ordinal.Equals( fieldX.Name, fieldY.Name ) )
             {
                 return false;
             }
@@ -360,12 +401,12 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                     break;
 
                 case INamedTypeSymbol type:
-                    if ( options.HasFlag( StructuralSymbolComparerOptions.Name ) )
+                    if ( options.HasFlagFast( StructuralSymbolComparerOptions.Name ) )
                     {
                         h = HashCode.Combine( h, type.Name );
                     }
 
-                    if ( options.HasFlag( StructuralSymbolComparerOptions.GenericParameterCount ) )
+                    if ( options.HasFlagFast( StructuralSymbolComparerOptions.GenericParameterCount ) )
                     {
                         h = HashCode.Combine( h, type.TypeParameters.Length );
                     }
@@ -373,25 +414,25 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                     break;
 
                 case IMethodSymbol method:
-                    if ( options.HasFlag( StructuralSymbolComparerOptions.Name ) )
+                    if ( options.HasFlagFast( StructuralSymbolComparerOptions.Name ) )
                     {
                         h = HashCode.Combine( h, method.Name );
                     }
 
-                    if ( options.HasFlag( StructuralSymbolComparerOptions.ParameterTypes )
-                         || options.HasFlag( StructuralSymbolComparerOptions.ParameterModifiers ) )
+                    if ( options.HasFlagFast( StructuralSymbolComparerOptions.ParameterTypes )
+                         || options.HasFlagFast( StructuralSymbolComparerOptions.ParameterModifiers ) )
                     {
                         h = HashCode.Combine( h, method.Parameters.Length );
 
                         // TODO: optimize using for loop.
                         foreach ( var parameter in method.Parameters )
                         {
-                            if ( options.HasFlag( StructuralSymbolComparerOptions.ParameterTypes ) )
+                            if ( options.HasFlagFast( StructuralSymbolComparerOptions.ParameterTypes ) )
                             {
                                 h = HashCode.Combine( h, GetHashCode( parameter.Type, StructuralSymbolComparerOptions.Type ) );
                             }
 
-                            if ( options.HasFlag( StructuralSymbolComparerOptions.ParameterModifiers ) )
+                            if ( options.HasFlagFast( StructuralSymbolComparerOptions.ParameterModifiers ) )
                             {
                                 h = HashCode.Combine( h, parameter.RefKind );
                             }
@@ -401,25 +442,25 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                     break;
 
                 case IPropertySymbol property:
-                    if ( options.HasFlag( StructuralSymbolComparerOptions.Name ) )
+                    if ( options.HasFlagFast( StructuralSymbolComparerOptions.Name ) )
                     {
                         h = HashCode.Combine( h, property.Name );
                     }
 
-                    if ( options.HasFlag( StructuralSymbolComparerOptions.ParameterTypes )
-                         || options.HasFlag( StructuralSymbolComparerOptions.ParameterModifiers ) )
+                    if ( options.HasFlagFast( StructuralSymbolComparerOptions.ParameterTypes )
+                         || options.HasFlagFast( StructuralSymbolComparerOptions.ParameterModifiers ) )
                     {
                         h = HashCode.Combine( h, property.Parameters.Length );
 
                         // TODO: optimize using for loop.
                         foreach ( var parameter in property.Parameters )
                         {
-                            if ( options.HasFlag( StructuralSymbolComparerOptions.ParameterTypes ) )
+                            if ( options.HasFlagFast( StructuralSymbolComparerOptions.ParameterTypes ) )
                             {
                                 h = HashCode.Combine( h, GetHashCode( parameter.Type, StructuralSymbolComparerOptions.Type ) );
                             }
 
-                            if ( options.HasFlag( StructuralSymbolComparerOptions.ParameterModifiers ) )
+                            if ( options.HasFlagFast( StructuralSymbolComparerOptions.ParameterModifiers ) )
                             {
                                 h = HashCode.Combine( h, parameter.RefKind );
                             }
@@ -429,7 +470,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                     break;
 
                 case IFieldSymbol field:
-                    if ( options.HasFlag( StructuralSymbolComparerOptions.Name ) )
+                    if ( options.HasFlagFast( StructuralSymbolComparerOptions.Name ) )
                     {
                         h = HashCode.Combine( h, field.Name );
                     }
@@ -437,7 +478,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                     break;
 
                 case IEventSymbol @event:
-                    if ( options.HasFlag( StructuralSymbolComparerOptions.Name ) )
+                    if ( options.HasFlagFast( StructuralSymbolComparerOptions.Name ) )
                     {
                         h = HashCode.Combine( h, @event.Name );
                     }
@@ -445,7 +486,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                     break;
 
                 case INamespaceSymbol @namespace:
-                    if ( options.HasFlag( StructuralSymbolComparerOptions.Name ) )
+                    if ( options.HasFlagFast( StructuralSymbolComparerOptions.Name ) )
                     {
                         h = HashCode.Combine( h, @namespace.Name );
                     }
@@ -456,7 +497,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                     break;
 
                 case ITypeParameterSymbol typeParameter:
-                    if ( options.HasFlag( StructuralSymbolComparerOptions.Name ) )
+                    if ( options.HasFlagFast( StructuralSymbolComparerOptions.Name ) )
                     {
                         h = HashCode.Combine( h, typeParameter.Name );
                     }
@@ -483,7 +524,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                     throw new NotImplementedException( $"{symbol.Kind}" );
             }
 
-            if ( options.HasFlag( StructuralSymbolComparerOptions.ContainingDeclaration ) )
+            if ( options.HasFlagFast( StructuralSymbolComparerOptions.ContainingDeclaration ) )
             {
                 var current = symbol.ContainingSymbol;
 
@@ -525,7 +566,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
                 }
             }
 
-            if ( options.HasFlag( StructuralSymbolComparerOptions.ContainingAssembly ) )
+            if ( options.HasFlagFast( StructuralSymbolComparerOptions.ContainingAssembly ) )
             {
                 // Version should not differ often.
                 h = HashCode.Combine( h, symbol.ContainingModule.Name, symbol.ContainingAssembly.Name );

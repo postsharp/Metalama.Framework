@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code.Invokers;
 using System.Collections.Generic;
@@ -43,7 +42,7 @@ namespace Metalama.Framework.Code
         IInvokerFactory<IEventInvoker> Invokers { get; }
 
         /// <summary>
-        /// Gets the base event that is overridden by the current event.
+        /// Gets the base event that is overridden or hidden by the current event.
         /// </summary>
         IEvent? OverriddenEvent { get; }
 

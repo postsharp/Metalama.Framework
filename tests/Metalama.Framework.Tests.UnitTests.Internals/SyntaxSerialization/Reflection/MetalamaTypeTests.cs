@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.ReflectionMocks;
@@ -21,7 +20,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeType( code );
             this.AssertEqual( @"typeof(global::Target)", serialized );
 
-            TestExpression<Type>( code, serialized, info => Assert.Equal( "Target", info.Name ) );
+            this.TestExpression<Type>( code, serialized, info => Assert.Equal( "Target", info.Name ) );
         }
 
         [Fact]
@@ -31,7 +30,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeType( code );
             this.AssertEqual( @"typeof(global::Target<,>)", serialized );
 
-            TestExpression<Type>(
+            this.TestExpression<Type>(
                 code,
                 serialized,
                 info =>
@@ -51,7 +50,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                 @"typeof(global::System.Int32[])",
                 serialized );
 
-            TestExpression<Type>(
+            this.TestExpression<Type>(
                 code,
                 serialized,
                 info =>
@@ -71,7 +70,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                 @"typeof(global::System.Int32[,])",
                 serialized );
 
-            TestExpression<Type>(
+            this.TestExpression<Type>(
                 code,
                 serialized,
                 info =>

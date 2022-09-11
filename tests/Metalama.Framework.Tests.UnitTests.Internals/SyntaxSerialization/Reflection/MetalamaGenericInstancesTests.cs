@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.ReflectionMocks;
 using System;
@@ -44,7 +43,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = testContext.Serialize( CompileTimeType.Create( allProperties.Single().Type ) )
                 .ToString();
 
-            TestExpression<Type>( code, serialized, info => Assert.Equal( expectedType, info ) );
+            this.TestExpression<Type>( code, serialized, info => Assert.Equal( expectedType, info ) );
 
             this.AssertEqual( expected, serialized );
         }

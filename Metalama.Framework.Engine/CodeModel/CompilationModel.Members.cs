@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
@@ -61,6 +60,15 @@ public partial class CompilationModel
         => this._properties.TryGetValue( propertyBuilder.DeclaringType.GetSymbol(), out var properties )
            && properties.Contains( propertyBuilder.ToTypedRef<IProperty>() );
 
+    internal bool Contains( BaseParameterBuilder parameterBuilder )
+        => parameterBuilder.ContainingDeclaration switch
+        {
+            DeclarationBuilder declarationBuilder => this.Contains( declarationBuilder ),
+            null => false,
+            _ => this._parameters.TryGetValue( ((IHasParameters) parameterBuilder.ContainingDeclaration).ToTypedRef(), out var parameters )
+                 && parameters.Contains( parameterBuilder.ToTypedRef<IParameter>() )
+        };
+
     internal bool Contains( DeclarationBuilder builder )
         => builder switch
         {
@@ -69,6 +77,7 @@ public partial class CompilationModel
             ConstructorBuilder constructorBuilder => this.Contains( constructorBuilder ),
             EventBuilder eventBuilder => this.Contains( eventBuilder ),
             PropertyBuilder propertyBuilder => this.Contains( propertyBuilder ),
+            BaseParameterBuilder parameterBuilder => this.Contains( parameterBuilder ),
             _ => throw new AssertionFailedException()
         };
 

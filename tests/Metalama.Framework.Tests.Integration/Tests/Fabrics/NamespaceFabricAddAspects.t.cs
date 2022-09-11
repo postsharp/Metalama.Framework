@@ -6,23 +6,25 @@ using Metalama.Framework.Fabrics;
 
 namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Fabrics.NamespaceFabricAddAspects
 {
-#pragma warning disable CS0067, CS8618, CA1822, CS0162, CS0169, CS0414
-    internal class Fabric : NamespaceFabric
+    
+#pragma warning disable CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823 
+internal class Fabric : NamespaceFabric
     {
         public override void AmendNamespace(INamespaceAmender amender) => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
 
     }
+#pragma warning restore CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823 
 
-#pragma warning restore CS0067, CS8618, CA1822, CS0162, CS0169, CS0414
-#pragma warning disable CS0067, CS8618, CA1822, CS0162, CS0169, CS0414
 
-    internal class Aspect : OverrideMethodAspect
+    
+#pragma warning disable CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823 
+internal class Aspect : OverrideMethodAspect
     {
         public override dynamic? OverrideMethod() => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
 
     }
+#pragma warning restore CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823 
 
-#pragma warning restore CS0067, CS8618, CA1822, CS0162, CS0169, CS0414
 
     internal class TargetCode
     {

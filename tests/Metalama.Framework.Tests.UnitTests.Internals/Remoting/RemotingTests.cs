@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.Contracts;
@@ -109,6 +108,57 @@ public class RemotingTests
 
         Assert.True( result.IsSuccessful );
         Assert.Equal( "Transformed code", result.TransformedSourceText );
+    }
+
+    [Fact]
+    public async Task RegisterEndpointAsync()
+    {
+        var discoveryPipeName = $"Metalama_Test_Discovery_{Guid.NewGuid()}";
+        using var userProcessRegistrationEndpoint = new UserProcessServiceHubEndpoint( ServiceProvider.Empty, discoveryPipeName );
+        userProcessRegistrationEndpoint.Start();
+
+        using var analysisProcessRegistrationEndpoint = new AnalysisProcessServiceHubEndpoint( ServiceProvider.Empty, discoveryPipeName );
+        _ = analysisProcessRegistrationEndpoint.ConnectAsync();
+
+        var servicePipeName = $"Metalama_Test_Service_{Guid.NewGuid()}";
+
+        using var analysisProcessEndpoint = new AnalysisProcessEndpoint(
+            ServiceProvider.Empty.WithService( analysisProcessRegistrationEndpoint ),
+            servicePipeName );
+
+        analysisProcessEndpoint.Start();
+
+        const string projectId = "MyProjectId";
+        await analysisProcessEndpoint.RegisterProjectAsync( projectId );
+
+        Assert.Contains( projectId, userProcessRegistrationEndpoint.RegisteredProjects );
+    }
+
+    [Fact]
+    public async Task RegisterTwoEndpointsAsync()
+    {
+        var discoveryPipeName = $"Metalama_Test_Discovery_{Guid.NewGuid()}";
+        using var userProcessRegistrationEndpoint = new UserProcessServiceHubEndpoint( ServiceProvider.Empty, discoveryPipeName );
+        userProcessRegistrationEndpoint.Start();
+
+        using var analysisProcessRegistrationEndpoint = new AnalysisProcessServiceHubEndpoint( ServiceProvider.Empty, discoveryPipeName );
+        _ = analysisProcessRegistrationEndpoint.ConnectAsync();
+
+        for ( var i = 0; i < 2; i++ )
+        {
+            var servicePipeName = $"Metalama_Test_Service_{Guid.NewGuid()}";
+
+            using var analysisProcessEndpoint = new AnalysisProcessEndpoint(
+                ServiceProvider.Empty.WithService( analysisProcessRegistrationEndpoint ),
+                servicePipeName );
+
+            analysisProcessEndpoint.Start();
+
+            var projectId = $"MyProjectId{i}";
+            await analysisProcessEndpoint.RegisterProjectAsync( projectId );
+
+            Assert.Contains( projectId, userProcessRegistrationEndpoint.RegisteredProjects );
+        }
     }
 
     private class PreviewImpl : ITransformationPreviewServiceImpl

@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code.Collections;
 using System;
@@ -164,5 +163,11 @@ namespace Metalama.Framework.Code
         /// Finds the the implementation of the given interface member that is valid for this type.
         /// </summary>
         bool TryFindImplementationForInterfaceMember( IMember interfaceMember, [NotNullWhen( true )] out IMember? implementationMember );
+        
+        /// <summary>
+        /// Gets the type definition with unassigned type parameters. When the current <see cref="INamedType"/> is not a generic type instance ,
+        /// returns the current <see cref="IMethod"/>.
+        /// </summary>
+        INamedType TypeDefinition { get; }
     }
 }

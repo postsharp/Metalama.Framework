@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.DesignTime.Contracts;
@@ -15,7 +14,7 @@ internal interface IAnalysisProcessApi : ICodeRefactoringDiscoveryService, ICode
     /// Notifies the analysis process that the user process is now ready to process notifications for a given project, which means that the analysis process will start
     /// calling <see cref="IProjectHandlerCallback.PublishGeneratedCodeAsync"/> for this project.
     /// </summary>
-    Task OnProjectHandlerReadyAsync( ProjectKey projectKey, CancellationToken cancellationToken = default );
+    Task OnUserProcessProjectHandlerConnectedAsync( ProjectKey projectKey, CancellationToken cancellationToken = default );
 
     /// <summary>
     /// Computes the transformed code by running the pipeline, and returns the result.

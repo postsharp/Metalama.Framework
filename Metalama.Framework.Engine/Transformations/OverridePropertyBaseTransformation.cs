@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -38,13 +37,17 @@ internal abstract class OverridePropertyBaseTransformation : OverrideMemberTrans
             ? SyntaxKind.InitAccessorDeclaration
             : SyntaxKind.SetAccessorDeclaration;
 
+        var modifiers = this.OverriddenDeclaration
+            .GetSyntaxModifierList( ModifierCategories.Static )
+            .Insert( 0, SyntaxFactory.Token( SyntaxKind.PrivateKeyword ) );
+
         var overrides = new[]
         {
             new IntroducedMember(
                 this,
                 SyntaxFactory.PropertyDeclaration(
                     SyntaxFactory.List<AttributeListSyntax>(),
-                    this.OverriddenDeclaration.GetSyntaxModifierList(),
+                    modifiers,
                     context.SyntaxGenerator.PropertyType( this.OverriddenDeclaration ),
                     null,
                     SyntaxFactory.Identifier( propertyName ),
@@ -56,14 +59,14 @@ internal abstract class OverridePropertyBaseTransformation : OverrideMemberTrans
                                         ? SyntaxFactory.AccessorDeclaration(
                                             SyntaxKind.GetAccessorDeclaration,
                                             SyntaxFactory.List<AttributeListSyntax>(),
-                                            this.OverriddenDeclaration.GetMethod.AssertNotNull().GetSyntaxModifierList(),
+                                            default,
                                             getAccessorBody )
                                         : null,
                                     setAccessorBody != null
                                         ? SyntaxFactory.AccessorDeclaration(
                                             setAccessorDeclarationKind,
                                             SyntaxFactory.List<AttributeListSyntax>(),
-                                            this.OverriddenDeclaration.SetMethod.AssertNotNull().GetSyntaxModifierList(),
+                                            default,
                                             setAccessorBody )
                                         : null
                                 }.Where( a => a != null )

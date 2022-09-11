@@ -1,6 +1,6 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Utilities;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.IO;
@@ -28,6 +28,7 @@ namespace Metalama.Framework.Engine.CompileTime
             IReadOnlyList<string> transitiveFabricTypes,
             IReadOnlyList<string> otherTemplateTypes,
             IReadOnlyList<string>? references,
+            string? redistributionLicenseKey,
             ulong sourceHash,
             IReadOnlyList<CompileTimeFile> files )
         {
@@ -40,6 +41,7 @@ namespace Metalama.Framework.Engine.CompileTime
             this.TransitiveFabricTypes = transitiveFabricTypes;
             this.OtherTemplateTypes = otherTemplateTypes;
             this.References = references;
+            this.RedistributionLicenseKey = redistributionLicenseKey;
             this.SourceHash = sourceHash;
             this.Files = files;
 
@@ -58,6 +60,12 @@ namespace Metalama.Framework.Engine.CompileTime
         public string CompileTimeAssemblyName { get; }
 
         public string TargetFramework { get; }
+
+        /// <summary>
+        /// Gets the version of Metalama that created the compile-time project.
+        /// </summary>
+        public string MetalamaVersion { get; } =
+            AssemblyMetadataReader.GetInstance( typeof(CompileTimeProjectManifest).Assembly ).PackageVersion.AssertNotNull();
 
         /// <summary>
         /// Gets the list of all aspect types (specified by fully qualified name) of the aspect library.
@@ -88,6 +96,8 @@ namespace Metalama.Framework.Engine.CompileTime
         /// Gets the name of all project references (a fully-qualified assembly identity) of the compile-time project.
         /// </summary>
         public IReadOnlyList<string>? References { get; }
+        
+        public string? RedistributionLicenseKey { get; }
 
         /// <summary>
         /// Gets a unique hash of the source code and its dependencies.

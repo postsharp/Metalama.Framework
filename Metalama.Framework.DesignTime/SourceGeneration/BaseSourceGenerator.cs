@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Compiler;
@@ -20,6 +19,11 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
     [ExcludeFromCodeCoverage]
     public abstract partial class BaseSourceGenerator : IIncrementalGenerator
     {
+        static BaseSourceGenerator()
+        {
+            DesignTimeServices.Initialize();
+        }
+
         protected ServiceProvider ServiceProvider { get; }
 
         private readonly ILogger _logger;
@@ -159,7 +163,8 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
             ImmutableArray<AdditionalText> additionalTexts,
             CancellationToken cancellationToken )
         {
-            if ( !options.TryGetValue( $"build_property.MetalamaSourceGeneratorTouchFile", out var touchFilePath ) )
+            if ( !options.TryGetValue( $"build_property.MetalamaSourceGeneratorTouchFile", out var touchFilePath )
+                 || string.IsNullOrWhiteSpace( touchFilePath ) )
             {
                 return "";
             }

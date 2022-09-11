@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
@@ -216,7 +215,7 @@ class User {
 
         private void TestExpression<T>( string context, string expression, Action<T> withResult, string expectedCode )
         {
-            TestExpression( context, expression, withResult );
+            this.TestExpression( context, expression, withResult );
             this.AssertEqual( expectedCode, expression );
         }
     }

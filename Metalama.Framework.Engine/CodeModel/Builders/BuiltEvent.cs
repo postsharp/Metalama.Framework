@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Invokers;
@@ -42,7 +41,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         [Memo]
         public IInvokerFactory<IEventInvoker> Invokers
-            => new InvokerFactory<IEventInvoker>( ( order, invokerOperator ) => new EventInvoker( this, order, invokerOperator ), false );
+            => new InvokerFactory<IEventInvoker>( ( order, invokerOperator ) => new EventInvoker( this, order, invokerOperator ) );
 
         public IEvent? OverriddenEvent => this.EventBuilder.OverriddenEvent;
 

@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.Contracts;
 using Metalama.Framework.DesignTime.VisualStudio.Remoting;
@@ -10,11 +9,11 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Preview
 {
     internal class UserProcessTransformationPreviewService : ITransformationPreviewService
     {
-        private readonly UserProcessEndpoint _userProcessEndpoint;
+        private readonly UserProcessServiceHubEndpoint _userProcessEndpoint;
 
         public UserProcessTransformationPreviewService( IServiceProvider serviceProvider )
         {
-            this._userProcessEndpoint = serviceProvider.GetRequiredService<UserProcessEndpoint>();
+            this._userProcessEndpoint = serviceProvider.GetRequiredService<UserProcessServiceHubEndpoint>();
         }
 
         public async ValueTask<PreviewTransformationResult> PreviewTransformationAsync(
@@ -25,7 +24,7 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Preview
             var projectKey = ProjectKey.FromCompilation( compilation );
 
             var transformationResult =
-                await (await this._userProcessEndpoint.GetServerApiAsync( cancellationToken )).PreviewTransformationAsync(
+                await (await this._userProcessEndpoint.GetApiAsync( projectKey, cancellationToken )).PreviewTransformationAsync(
                     projectKey,
                     syntaxTree.FilePath,
                     cancellationToken );

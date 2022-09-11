@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
@@ -62,6 +61,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public MethodKind MethodKind => this.AccessorBuilder.MethodKind;
 
         public OperatorKind OperatorKind => this.AccessorBuilder.OperatorKind;
+        
+        IMethod IMethod.MethodDefinition => this;
 
         [Memo]
         public IParameter ReturnParameter => new BuiltParameter( this.AccessorBuilder.ReturnParameter, this.Compilation );
@@ -82,7 +83,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         [Memo]
         public IInvokerFactory<IMethodInvoker> Invokers
-            => new InvokerFactory<IMethodInvoker>( ( order, invokerOperator ) => new MethodInvoker( this, order, invokerOperator ), false );
+            => new InvokerFactory<IMethodInvoker>( ( order, invokerOperator ) => new MethodInvoker( this, order, invokerOperator ) );
 
         public IMethod? OverriddenMethod => this.AccessorBuilder.OverriddenMethod;
 

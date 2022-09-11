@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using System.Collections.Immutable;
 
@@ -24,7 +23,7 @@ internal partial class UserProcessEndpoint
             ImmutableDictionary<string, string> sources,
             CancellationToken cancellationToken = default )
         {
-            this._parent._logger.Trace?.Log( $"Received new generated code from the remote host for project '{projectKey}'." );
+            this._parent.Logger.Trace?.Log( $"Received new generated code from the remote host for project '{projectId}'." );
 
             if ( this._parent._projectHandlers.TryGetValue( projectKey, out var client ) )
             {
@@ -32,7 +31,7 @@ internal partial class UserProcessEndpoint
             }
             else
             {
-                this._parent._logger.Warning?.Log( $"No client registered for project '{projectKey}'." );
+                this._parent.Logger.Warning?.Log( $"No client registered for project '{projectId}'." );
 
                 // Store the event so that a source generator that would be create later can retrieve it.
                 this._parent._unhandledSources[projectKey] = sources;

@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.AdditionalOutputs;
@@ -103,5 +102,20 @@ namespace Metalama.Framework.Engine.Pipeline
             }
 #endif
         }
+
+        public AspectPipelineResult WithAdditionalDiagnostics( ImmutableUserDiagnosticList diagnostics )
+            => new(
+                this.Compilation,
+                this.Project,
+                this.AspectLayers,
+                this.CompilationModels,
+                this.Diagnostics.Concat( diagnostics ),
+                this.AspectSources,
+                this.ValidatorSources,
+                this.ExternallyInheritableAspects,
+                this.ExternallyVisibleValidators,
+                this.AdditionalSyntaxTrees,
+                this.AspectInstanceResults,
+                this.AdditionalCompilationOutputFiles );
     }
 }

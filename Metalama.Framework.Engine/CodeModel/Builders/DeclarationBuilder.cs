@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
@@ -15,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using MethodKind = Metalama.Framework.Code.MethodKind;
 using SyntaxReference = Microsoft.CodeAnalysis.SyntaxReference;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
@@ -110,7 +110,36 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         protected virtual SyntaxKind AttributeTargetSyntaxKind => SyntaxKind.None;
 
-        public SyntaxList<AttributeListSyntax> GetAttributeLists( in MemberIntroductionContext context )
-            => context.SyntaxGenerator.AttributesForDeclaration( this.ToRef(), context.Compilation, this.AttributeTargetSyntaxKind );
+        public SyntaxList<AttributeListSyntax> GetAttributeLists( MemberIntroductionContext context, IDeclaration? declaration = null )
+        {
+            var attributes = context.SyntaxGenerator.AttributesForDeclaration(
+                (declaration ?? this).ToTypedRef(),
+                context.Compilation,
+                this.AttributeTargetSyntaxKind );
+
+            if ( declaration is IMethod method )
+            {
+                attributes = attributes.AddRange(
+                    context.SyntaxGenerator.AttributesForDeclaration(
+                        method.ReturnParameter.ToTypedRef<IDeclaration>(),
+                        context.Compilation,
+                        SyntaxKind.ReturnKeyword ) );
+
+                if ( method.MethodKind is MethodKind.EventAdd or MethodKind.EventRemove or MethodKind.PropertySet )
+                {
+                    attributes = attributes.AddRange(
+                        context.SyntaxGenerator.AttributesForDeclaration(
+                            method.Parameters[0].ToTypedRef<IDeclaration>(),
+                            context.Compilation,
+                            SyntaxKind.ParamKeyword ) );
+                }
+            }
+            else if ( declaration is IProperty { IsAutoPropertyOrField: true } )
+            {
+                // TODO: field-level attributes
+            }
+
+            return attributes;
+        }
     }
 }

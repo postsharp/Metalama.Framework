@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.Diagnostics;
@@ -10,12 +9,10 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Engine.Validation;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
@@ -328,6 +325,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     if ( !state._pipeline.TryInitialize(
                             diagnosticAdder,
                             compilation,
+                            null, // Redistribution licenses are ignored at design time.
                             compileTimeTrees,
                             cancellationToken,
                             out configuration ) )
@@ -450,8 +448,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     ?? ImmutableArray<InheritableAspectInstance>.Empty,
                     pipelineResult?.ExternallyVisibleValidators ?? ImmutableArray<ReferenceValidatorInstance>.Empty );
 
-                var directoryOptions = state._pipeline.ServiceProvider.GetRequiredService<IPathOptions>();
-                UserDiagnosticRegistrationService.GetInstance( directoryOptions ).RegisterDescriptors( result );
+                UserDiagnosticRegistrationService.GetInstance( configuration.ServiceProvider ).RegisterDescriptors( result );
 
                 // Update the dependency graph with results of the pipeline.
                 DependencyGraph newDependencies;

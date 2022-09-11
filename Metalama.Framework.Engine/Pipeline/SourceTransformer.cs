@@ -1,10 +1,11 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Extensibility;
+using Metalama.Backstage.Licensing.Consumption;
 using Metalama.Compiler;
 using Metalama.Framework.Engine.AdditionalOutputs;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Utilities;
@@ -28,18 +29,7 @@ namespace Metalama.Framework.Engine.Pipeline
     {
         public void Execute( TransformerContext context )
         {
-            var serviceProvider = ServiceProviderFactory.GetServiceProvider( nextServiceProvider: context.Services );
-
-            var applicationInfoProvider = (IApplicationInfoProvider?) context.Services.GetService( typeof(IApplicationInfoProvider) );
-
-            // Try.Metalama doesn't provide any backstage services.
-            IApplicationInfo? previousApplication = null;
-
-            if ( applicationInfoProvider != null )
-            {
-                previousApplication = applicationInfoProvider.CurrentApplication;
-                applicationInfoProvider.CurrentApplication = new MetalamaApplicationInfo();
-            }
+            var serviceProvider = ServiceProviderFactory.GetServiceProvider( context.Services );
 
             try
             {
@@ -48,6 +38,14 @@ namespace Metalama.Framework.Engine.Pipeline
                 if ( serviceProvider.GetService<ICompileTimeExceptionHandler>() == null )
                 {
                     serviceProvider = serviceProvider.WithService( new CompileTimeExceptionHandler( serviceProvider ) );
+                }
+
+                // Add the license verifier.
+                var licenseConsumptionManager = serviceProvider.GetBackstageService<ILicenseConsumptionManager>();
+
+                if ( licenseConsumptionManager != null )
+                {
+                    serviceProvider = serviceProvider.WithService( new LicenseVerifier( licenseConsumptionManager ) );
                 }
 
                 // Try.Metalama ships its own project options using the async-local service provider.
@@ -61,9 +59,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
                 serviceProvider = serviceProvider.WithProjectScopedServices( context.Compilation );
 
-                try
-                {
-                    using CompileTimeAspectPipeline pipeline = new( serviceProvider, false );
+                using CompileTimeAspectPipeline pipeline = new( serviceProvider, false );
 
                     // ReSharper disable once AccessToDisposedClosure
                     var pipelineResult =
@@ -74,33 +70,25 @@ namespace Metalama.Framework.Engine.Pipeline
                                 context.Resources.ToImmutableArray(),
                                 CancellationToken.None ) );
 
-                    if ( pipelineResult != null )
-                    {
-                        context.AddResources( pipelineResult.AdditionalResources );
-                        context.AddSyntaxTreeTransformations( pipelineResult.SyntaxTreeTransformations );
-                    }
-
-                    HandleAdditionalCompilationOutputFiles( projectOptions, pipelineResult );
-                }
-                catch ( Exception e )
+                if ( pipelineResult != null )
                 {
-                    var isHandled = false;
-
-                    serviceProvider
-                        .GetService<ICompileTimeExceptionHandler>()
-                        ?.ReportException( e, context.ReportDiagnostic, false, out isHandled );
-
-                    if ( !isHandled )
-                    {
-                        throw;
-                    }
+                    context.AddResources( pipelineResult.AdditionalResources );
+                    context.AddSyntaxTreeTransformations( pipelineResult.SyntaxTreeTransformations );
                 }
+
+                HandleAdditionalCompilationOutputFiles( projectOptions, pipelineResult );
             }
-            finally
+            catch ( Exception e )
             {
-                if ( applicationInfoProvider != null )
+                var isHandled = false;
+
+                serviceProvider
+                    .GetService<ICompileTimeExceptionHandler>()
+                    ?.ReportException( e, context.ReportDiagnostic, false, out isHandled );
+
+                if ( !isHandled )
                 {
-                    applicationInfoProvider.CurrentApplication = previousApplication!;
+                    throw;
                 }
             }
         }

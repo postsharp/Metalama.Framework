@@ -1,17 +1,16 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Options;
-using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Reflection;
 
 namespace Metalama.Framework.Engine.Testing
 {
     /// <summary>
-    /// An implementation of <see cref="IProjectOptions"/> and <see cref="IPathOptions"/> that can be used in tests.
+    /// An implementation of <see cref="IProjectOptions"/> that can be used in tests.
     /// </summary>
     public class TestProjectOptions : DefaultProjectOptions, IDisposable
     {
@@ -23,27 +22,23 @@ namespace Metalama.Framework.Engine.Testing
             ImmutableDictionary<string, string>? properties = null,
             ImmutableArray<object> plugIns = default,
             bool formatOutput = false,
-            bool formatCompileTimeCode = false )
+            bool formatCompileTimeCode = false,
+            ImmutableArray<Assembly> additionalAssemblies = default )
         {
             this.PlugIns = plugIns.IsDefault ? ImmutableArray<object>.Empty : plugIns;
 
             this._properties = properties ?? ImmutableDictionary<string, string>.Empty;
-            var baseDirectory = Path.Combine( Path.GetTempPath(), "Metalama", "Tests", RandomIdGenerator.GenerateId() );
+
+            // We don't use the backstage TempFileManager because it would generate paths that are too long.
+            var baseDirectory = Path.Combine( Path.GetTempPath(), "Metalama", "Tests", Guid.NewGuid().ToString() );
             this._baseDirectory = CreateDirectoryLazy( baseDirectory );
-
-            var compileTimeProjectCacheDirectory = Path.Combine( this.BaseDirectory, "Cache" );
-            var compileTimeProjectCacheDirectoryLazy = CreateDirectoryLazy( compileTimeProjectCacheDirectory );
-
-            var settingsDirectory = Path.Combine( baseDirectory, "Settings" );
-            var settingsDirectoryLazy = CreateDirectoryLazy( settingsDirectory );
-
-            this.PathOptions = new TestPathOptions( settingsDirectoryLazy, compileTimeProjectCacheDirectoryLazy );
 
             var projectDirectory = Path.Combine( baseDirectory, "Project" );
             this._projectDirectory = CreateDirectoryLazy( projectDirectory );
 
             this.FormatOutput = formatOutput;
             this.FormatCompileTimeCode = formatCompileTimeCode;
+            this.AdditionalAssemblies = additionalAssemblies;
         }
 
         public TestPathOptions PathOptions { get; }
@@ -64,6 +59,8 @@ namespace Metalama.Framework.Engine.Testing
         public override bool FormatOutput { get; }
 
         public override bool FormatCompileTimeCode { get; }
+
+        public ImmutableArray<Assembly> AdditionalAssemblies { get; }
 
         public string ProjectDirectory => this._projectDirectory.Value;
 

@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using K4os.Hash.xxHash;
 using Metalama.Compiler;
@@ -45,6 +44,7 @@ namespace Metalama.Framework.Engine.CompileTime
             ImmutableArray<string>.Empty,
             ImmutableArray<string>.Empty,
             ImmutableArray<string>.Empty,
+            null,
             0,
             ImmutableArray<CompileTimeFile>.Empty );
 
@@ -136,6 +136,15 @@ namespace Metalama.Framework.Engine.CompileTime
         /// </summary>
         /// <returns></returns>
         public MetadataReference ToMetadataReference() => MetadataReferenceCache.GetMetadataReference( this.AssertNotEmpty()._compiledAssemblyPath! );
+
+        /// <summary>
+        /// Gets a <see cref="CompileTime.ProjectLicenseInfo"/> corresponding to the current project.
+        /// </summary>
+        [Memo]
+        public ProjectLicenseInfo ProjectLicenseInfo
+            => this._manifest?.RedistributionLicenseKey == null
+                ? ProjectLicenseInfo.Empty
+                : new ProjectLicenseInfo( this._manifest.RedistributionLicenseKey );
 
         /// <summary>
         /// Gets the unique hash of the project, computed from the source code.
@@ -313,6 +322,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 fabricTypes,
                 transitiveFabricTypes,
                 templateProviders,
+                null,
                 null,
                 hash.Digest(),
                 Array.Empty<CompileTimeFile>() );

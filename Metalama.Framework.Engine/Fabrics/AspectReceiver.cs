@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -61,9 +60,19 @@ namespace Metalama.Framework.Engine.Fabrics
             return (AspectClass) aspectClass;
         }
 
-        private void RegisterAspectSource( IAspectSource aspectSource ) => this._parent.AddAspectSource( aspectSource );
+        private void RegisterAspectSource( IAspectSource aspectSource )
+        {
+            this._parent.LicenseVerifier?.VerifyCanAddChildAspect( this._parent.AspectPredecessor );
+            
+            this._parent.AddAspectSource( aspectSource );
+        }
 
-        private void RegisterValidatorSource( ProgrammaticValidatorSource validatorSource ) => this._parent.AddValidatorSource( validatorSource );
+        private void RegisterValidatorSource( ProgrammaticValidatorSource validatorSource )
+        {
+            this._parent.LicenseVerifier?.VerifyCanValidator( this._parent.AspectPredecessor );
+            
+            this._parent.AddValidatorSource( validatorSource );
+        }
 
         public void ValidateReferences( ValidatorDelegate<ReferenceValidationContext> validateMethod, ReferenceKinds referenceKinds )
         {
@@ -82,7 +91,7 @@ namespace Metalama.Framework.Engine.Fabrics
                     nameof(validateMethod),
                     $"The type '{this._parent.Type}' must have only one method called '{methodInfo.Name}'." );
             }
-
+            
             this.RegisterValidatorSource(
                 new ProgrammaticValidatorSource(
                     this._parent,

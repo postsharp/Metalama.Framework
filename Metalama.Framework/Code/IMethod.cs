@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code.Invokers;
 using System.Collections.Generic;
@@ -33,7 +32,7 @@ namespace Metalama.Framework.Code
         IInvokerFactory<IMethodInvoker> Invokers { get; }
 
         /// <summary>
-        /// Gets the base method that is overridden by the current method.
+        /// Gets the base method that is overridden or hidden by the current method.
         /// </summary>
         IMethod? OverriddenMethod { get; }
 
@@ -48,6 +47,9 @@ namespace Metalama.Framework.Code
         /// <returns>A <see cref="MethodInfo"/> that can be used only in run-time code.</returns>
         MethodInfo ToMethodInfo();
 
+        /// <summary>
+        /// Gets the parent property or event when the current <see cref="IMethod"/> represents a property or event accessor, otherwise <c>null</c>.
+        /// </summary>
         IMemberWithAccessors? DeclaringMember { get; }
 
         /// <summary>
@@ -59,5 +61,11 @@ namespace Metalama.Framework.Code
         /// Gets a value indicating the type of operator the methods represents.
         /// </summary>
         OperatorKind OperatorKind { get; }
+ 
+        /// <summary>
+        /// Gets the method definition with unassigned type parameters. When the current <see cref="IMethod"/> is neither a generic method instance
+        /// nor a method of a generic type, returns the current <see cref="IMethod"/>.
+        /// </summary>
+        IMethod MethodDefinition { get; }
     }
 }

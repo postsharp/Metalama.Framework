@@ -1,5 +1,4 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.ReflectionMocks;
@@ -32,7 +31,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                 @"new global::Metalama.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target<>.Nested<>).GetField(""Field"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance))",
                 serialized );
 
-            TestExpression<FieldInfo>(
+            this.TestExpression<FieldInfo>(
                 code,
                 MetalamaPropertyInfoTests.StripLocationInfo( serialized ),
                 info =>
@@ -57,7 +56,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                 @"((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(""M:Target`1.ReturnSelf~`0""), typeof(global::Target<>).TypeHandle))",
                 serialized );
 
-            TestExpression<MethodInfo>(
+            this.TestExpression<MethodInfo>(
                 code,
                 serialized,
                 info =>
@@ -78,13 +77,13 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                 .Serialize( CompileTimeType.Create( testContext.Compilation.Types.Single( t => t.Name == "User" ).BaseType! ) )
                 .ToString();
 
-            TestExpression<Type>( code, serialized, info => Assert.Equal( "Target`1[T2]", info.ToString() ) );
+            this.TestExpression<Type>( code, serialized, info => Assert.Equal( "Target`1[T2]", info.ToString() ) );
 
             var serialized2 = testContext
                 .Serialize( CompileTimeType.Create( testContext.Compilation.Types.Single( t => t.Name == "Target" ) ) )
                 .ToString();
 
-            TestExpression<Type>( code, serialized2, info => Assert.Equal( "Target`1[T1]", info.ToString() ) );
+            this.TestExpression<Type>( code, serialized2, info => Assert.Equal( "Target`1[T1]", info.ToString() ) );
         }
 
         [Fact]
@@ -98,7 +97,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                     CompileTimeMethodInfo.Create( testContext.Compilation.Types.Single( t => t.Name == "User" ).BaseType!.Methods.First() ) )
                 .ToString();
 
-            TestExpression<MethodInfo>( code, serialized, info => Assert.Equal( "Target`2[System.Int32,T]", info.DeclaringType?.ToString() ) );
+            this.TestExpression<MethodInfo>( code, serialized, info => Assert.Equal( "Target`2[System.Int32,T]", info.DeclaringType?.ToString() ) );
             var code2 = "class Target<T1, T2> { void Method(T1 a, T2 b) { } } class User<T> : Target<T, int> { }";
 
             using var testContext2 = this.CreateSerializationTestContext( code2 );
@@ -107,7 +106,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                     CompileTimeMethodInfo.Create( testContext2.Compilation.Types.Single( t => t.Name == "User" ).BaseType!.Methods.First() ) )
                 .ToString();
 
-            TestExpression<MethodInfo>( code2, serialized2, info => Assert.Equal( "Target`2[T,System.Int32]", info.DeclaringType?.ToString() ) );
+            this.TestExpression<MethodInfo>( code2, serialized2, info => Assert.Equal( "Target`2[T,System.Int32]", info.DeclaringType?.ToString() ) );
         }
     }
 }

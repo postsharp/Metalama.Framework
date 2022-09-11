@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -37,7 +36,9 @@ namespace Metalama.Framework.Engine.Transformations
         {
             TypeSyntax? returnType = null;
 
-            var modifiers = this.OverriddenDeclaration.GetSyntaxModifierList();
+            var modifiers = this.OverriddenDeclaration
+                .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Async )
+                .Insert( 0, Token( SyntaxKind.PrivateKeyword ) );
 
             if ( !this.OverriddenDeclaration.IsAsync )
             {
@@ -77,8 +78,8 @@ namespace Metalama.Framework.Engine.Transformations
                         this.OverriddenDeclaration.DeclaringType,
                         this.ParentAdvice.AspectLayerId,
                         this.OverriddenDeclaration ) ),
-                context.SyntaxGenerator.TypeParameterList( this.OverriddenDeclaration ),
-                context.SyntaxGenerator.ParameterList( this.OverriddenDeclaration ),
+                context.SyntaxGenerator.TypeParameterList( this.OverriddenDeclaration, context.Compilation ),
+                context.SyntaxGenerator.ParameterList( this.OverriddenDeclaration, context.Compilation ),
                 context.SyntaxGenerator.ConstraintClauses( this.OverriddenDeclaration ),
                 newMethodBody,
                 null );

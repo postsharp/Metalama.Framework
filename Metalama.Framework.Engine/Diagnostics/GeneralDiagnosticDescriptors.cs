@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -25,7 +24,7 @@ namespace Metalama.Framework.Engine.Diagnostics
                 "LAMA0001",
                 _category,
                 "Unexpected exception occurred in Metalama: {0} Exception details are in '{1}'. " +
-                " Please report this issue at https://www.postsharp.net/support and attach this file to the ticket.",
+                "Please report this issue at https://www.postsharp.net/support and attach this file to the ticket. You may want to remove sensitive data from the report.",
                 Error,
                 "Unexpected exception in Metalama." );
 

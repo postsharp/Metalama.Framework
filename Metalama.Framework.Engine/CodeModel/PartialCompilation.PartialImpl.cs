@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Compiler;
 using Microsoft.CodeAnalysis;
@@ -75,7 +74,7 @@ namespace Metalama.Framework.Engine.CodeModel
                 IReadOnlyList<SyntaxTreeTransformation>? transformations = null,
                 ImmutableArray<ManagedResource> resources = default )
             {
-                this.Validate( transformations );
+                Validate( transformations );
 
                 var syntaxTrees = this._syntaxTrees.ToBuilder();
 

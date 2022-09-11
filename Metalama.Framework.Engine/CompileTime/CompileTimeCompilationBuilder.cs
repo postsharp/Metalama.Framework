@@ -1,8 +1,8 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using K4os.Hash.xxHash;
 using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Maintenance;
 using Metalama.Backstage.Utilities;
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
@@ -48,7 +48,6 @@ namespace Metalama.Framework.Engine.CompileTime
         private readonly IServiceProvider _serviceProvider;
         private readonly CompileTimeDomain _domain;
         private readonly Dictionary<ulong, CompileTimeProject> _cache = new();
-        private readonly IPathOptions _pathOptions;
         private readonly IProjectOptions? _projectOptions;
         private readonly ICompileTimeCompilationBuilderObserver? _observer;
         private readonly ICompileTimeAssemblyBinaryRewriter? _rewriter;
@@ -77,10 +76,10 @@ namespace Metalama.Framework.Engine.CompileTime
         private static readonly Guid _buildId = AssemblyMetadataReader.GetInstance( typeof(CompileTimeCompilationBuilder).Assembly ).ModuleId;
         private readonly ReflectionMapperFactory _reflectionMapperFactory;
         private readonly SymbolClassificationService _classifierFactory;
+        private readonly ITempFileManager _tempFileManager;
 
         public CompileTimeCompilationBuilder( IServiceProvider serviceProvider, CompileTimeDomain domain )
         {
-            this._pathOptions = serviceProvider.GetRequiredService<IPathOptions>();
             this._serviceProvider = serviceProvider;
             this._domain = domain;
             this._observer = serviceProvider.GetService<ICompileTimeCompilationBuilderObserver>();
@@ -89,6 +88,7 @@ namespace Metalama.Framework.Engine.CompileTime
             this._reflectionMapperFactory = serviceProvider.GetRequiredService<ReflectionMapperFactory>();
             this._classifierFactory = serviceProvider.GetRequiredService<SymbolClassificationService>();
             this._logger = serviceProvider.GetLoggerFactory().CompileTime();
+            this._tempFileManager = (ITempFileManager) serviceProvider.GetService( typeof(ITempFileManager) ).AssertNotNull();
         }
 
         private static ulong ComputeSourceHash( FrameworkName? targetFramework, IReadOnlyList<SyntaxTree> compileTimeTrees, StringBuilder? log = null )
@@ -132,6 +132,7 @@ namespace Metalama.Framework.Engine.CompileTime
         }
 
         private static ulong ComputeProjectHash(
+            ProjectLicenseInfo? projectLicenseInfo,
             IEnumerable<CompileTimeProject> referencedProjects,
             ulong sourceHash,
             StringBuilder? log = null )
@@ -141,6 +142,11 @@ namespace Metalama.Framework.Engine.CompileTime
             XXH64 h = new();
             h.Update( _buildId );
             log?.AppendLineInvariant( $"BuildId={_buildId}" );
+
+            projectLicenseInfo ??= ProjectLicenseInfo.Empty;
+            var projectLicenseInfoHash = projectLicenseInfo.GetHashCode();
+            h.Update( projectLicenseInfoHash );
+            log?.AppendLineInvariant( $"ProjectLicenseInfo:={projectLicenseInfoHash:x}" );
 
             foreach ( var reference in referencedProjects.OrderBy( r => r.Hash ) )
             {
@@ -195,13 +201,17 @@ namespace Metalama.Framework.Engine.CompileTime
 
             // Creates the new syntax trees. Store them in a dictionary mapping the transformed trees to the source trees.
             var syntaxTrees = treesWithCompileTimeCode.Select(
-                    t => (TransformedTree: CSharpSyntaxTree.Create(
-                                  (CSharpSyntaxNode) produceCompileTimeCodeRewriter.Visit( t.GetRoot() ).AssertNotNull(),
-                                  CSharpParseOptions.Default,
-                                  t.FilePath,
-                                  Encoding.UTF8 )
-                              .WithFilePath( GetTransformedFilePath( outputPaths, t.FilePath ) ),
-                          SourceTree: t) )
+                    t =>
+                    {
+                        var compileTimeSyntaxTree = produceCompileTimeCodeRewriter.Visit( t.GetRoot() ).AssertNotNull();
+
+                        return CSharpSyntaxTree.Create(
+                                (CSharpSyntaxNode) compileTimeSyntaxTree,
+                                CSharpParseOptions.Default,
+                                t.FilePath,
+                                Encoding.UTF8 )
+                            .WithFilePath( GetTransformedFilePath( outputPaths, t.FilePath ) );
+                    } )
                 .ToList();
 
             locationAnnotationMap = templateCompiler.LocationAnnotationMap;
@@ -220,7 +230,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 return true;
             }
 
-            compileTimeCompilation = compileTimeCompilation.AddSyntaxTrees( syntaxTrees.Select( t => t.TransformedTree ) );
+            compileTimeCompilation = compileTimeCompilation.AddSyntaxTrees( syntaxTrees );
             compileTimeCompilation = new RemoveInvalidUsingRewriter( compileTimeCompilation ).VisitTrees( compileTimeCompilation );
 
             if ( this._projectOptions is { FormatCompileTimeCode: true } && OutputCodeFormatter.CanFormat )
@@ -451,7 +461,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     // When the compile-time assembly is invalid, to enable troubleshooting, we store the source files and the list of diagnostics
                     // to a directory that will not be deleted after the build.
                     var troubleshootingDirectory = Path.Combine(
-                        TempPathHelper.GetTempPath( "CompileTimeTroubleshooting" ),
+                        this._tempFileManager.GetTempDirectory( "CompileTimeTroubleshooting", CleanUpStrategy.Always ),
                         Guid.NewGuid().ToString() );
 
                     Directory.CreateDirectory( troubleshootingDirectory );
@@ -634,6 +644,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// </summary>
         internal bool TryGetCompileTimeProject(
             Compilation runTimeCompilation,
+            ProjectLicenseInfo? projectLicenseInfo,
             IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
             IReadOnlyList<CompileTimeProject> referencedProjects,
             IDiagnosticAdder diagnosticSink,
@@ -657,6 +668,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             return this.TryGetCompileTimeProjectImpl(
                 runTimeCompilation,
+                projectLicenseInfo,
                 compileTimeArtifacts.SyntaxTrees,
                 referencedProjects,
                 compileTimeArtifacts.GlobalUsings,
@@ -725,6 +737,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private bool TryGetCompileTimeProjectImpl(
             Compilation runTimeCompilation,
+            ProjectLicenseInfo? projectLicenseInfo,
             IReadOnlyList<SyntaxTree> sourceTreesWithCompileTimeCode,
             IReadOnlyList<CompileTimeProject> referencedProjects,
             ImmutableArray<UsingDirectiveSyntax> globalUsings,
@@ -735,7 +748,7 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             // Check the in-process cache.
             var (sourceHash, projectHash, outputPaths) =
-                this.GetPreCacheProjectInfo( runTimeCompilation, sourceTreesWithCompileTimeCode, referencedProjects );
+                this.GetPreCacheProjectInfo( runTimeCompilation, projectLicenseInfo, sourceTreesWithCompileTimeCode, referencedProjects );
 
             if ( !this.TryGetCompileTimeProjectFromCache(
                     runTimeCompilation,
@@ -858,6 +871,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             transitiveFabricTypes,
                             otherTemplateTypes,
                             referencedProjects.Select( r => r.RunTimeIdentity.GetDisplayName() ).ToList(),
+                            projectLicenseInfo?.RedistributionLicenseKey,
                             sourceHash,
                             textMapDirectory.FilesByTargetPath.Values.Select( f => new CompileTimeFile( f ) ).ToImmutableList() );
 
@@ -889,6 +903,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private (ulong SourceHash, ulong ProjectHash, OutputPaths OutputPaths) GetPreCacheProjectInfo(
             Compilation runTimeCompilation,
+            ProjectLicenseInfo? projectLicenseInfo,
             IReadOnlyList<SyntaxTree> sourceTreesWithCompileTimeCode,
             IReadOnlyList<CompileTimeProject> referencedProjects,
             StringBuilder? log = null )
@@ -896,7 +911,7 @@ namespace Metalama.Framework.Engine.CompileTime
             var targetFramework = runTimeCompilation.GetTargetFramework();
 
             var sourceHash = ComputeSourceHash( targetFramework, sourceTreesWithCompileTimeCode, log );
-            var projectHash = ComputeProjectHash( referencedProjects, sourceHash, log );
+            var projectHash = ComputeProjectHash( projectLicenseInfo, referencedProjects, sourceHash, log );
 
             var outputPaths = this.GetOutputPaths( runTimeCompilation.AssemblyName!, targetFramework, projectHash );
 
@@ -973,18 +988,16 @@ namespace Metalama.Framework.Engine.CompileTime
             // Get the directory name.
             var hash = projectHash.ToString( "x16", CultureInfo.InvariantCulture );
 
-            var directory = Path.Combine(
-                this._pathOptions.CompileTimeProjectCacheDirectory,
-                shortAssemblyName,
-                targetFrameworkName,
-                hash );
+            var directory = this._tempFileManager.GetTempDirectory(
+                Path.Combine( "CompileTime", shortAssemblyName, targetFrameworkName, hash ),
+                CleanUpStrategy.WhenUnused );
 
             // Make sure that the base path is short enough. There should be 16 characters left.
             var remainingPathLength = 256 - directory.Length;
 
             if ( remainingPathLength < 16 )
             {
-                throw new InvalidOperationException( $"The temporary path '{this._pathOptions.CompileTimeProjectCacheDirectory}' is too long." );
+                throw new InvalidOperationException( $"The temporary path '{directory}' is too long." );
             }
 
             var baseCompileTimeAssemblyName = $"{_compileTimeAssemblyPrefix}{runTimeAssemblyName}";
@@ -1013,13 +1026,14 @@ namespace Metalama.Framework.Engine.CompileTime
             IReadOnlyList<SyntaxTree> syntaxTrees,
             ulong syntaxTreeHash,
             IReadOnlyList<CompileTimeProject> referencedProjects,
+            ProjectLicenseInfo? projectLicenseInfo,
             IDiagnosticAdder diagnosticAdder,
             CancellationToken cancellationToken,
             out string assemblyPath,
             out string? sourceDirectory )
         {
             this._logger.Trace?.Log( $"TryCompileDeserializedProject( '{runTimeAssemblyName}' )" );
-            var compileTimeAssemblyName = ComputeProjectHash( referencedProjects, syntaxTreeHash );
+            var compileTimeAssemblyName = ComputeProjectHash( projectLicenseInfo, referencedProjects, syntaxTreeHash );
 
             var outputPaths = this.GetOutputPaths( runTimeAssemblyName, targetFramework, compileTimeAssemblyName );
 

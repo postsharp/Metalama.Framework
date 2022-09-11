@@ -1,32 +1,28 @@
-﻿#if TEST_OPTIONS
-// @Skipped(#29134 - Invokers.Base is null for an override aspect applied to a field)
-#endif
-
-using System;
+﻿using System;
 using System.Linq;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.IntegrationTests.Aspects.Invokers.Fields.AdvisedIntroduction_FinalInvoker;
 
-[assembly: AspectOrder( typeof(TestAttribute), typeof(TestIntroductionAttribute) )]
+[assembly: AspectOrder(typeof(OverrideAttribute), typeof(IntroductionAttribute))]
 
 namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Fields.AdvisedIntroduction_FinalInvoker
 {
-    [AttributeUsage( AttributeTargets.Class )]
-    public class TestIntroductionAttribute : TypeAspect
+    [AttributeUsage(AttributeTargets.Class)]
+    public class IntroductionAttribute : TypeAspect
     {
         [Introduce]
         public int Field;
     }
 
-    [AttributeUsage( AttributeTargets.Class )]
-    public class TestAttribute : TypeAspect
+    [AttributeUsage(AttributeTargets.Class)]
+    public class OverrideAttribute : TypeAspect
     {
-        public override void BuildAspect( IAspectBuilder<INamedType> builder )
+        public override void BuildAspect(IAspectBuilder<INamedType> builder)
         {
             builder.Advice.Override(
-                builder.Target.Fields.OfName( nameof(TestIntroductionAttribute.Field) ).Single(),
-                nameof(PropertyTemplate) );
+                builder.Target.Fields.OfName(nameof(IntroductionAttribute.Field)).Single(),
+                nameof(PropertyTemplate));
         }
 
         [Template]
@@ -34,18 +30,20 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Fields.AdvisedInt
         {
             get
             {
-                return meta.Target.FieldOrProperty.Invokers.Final.GetValue( meta.This );
+                Console.WriteLine("Override");
+                return meta.Target.FieldOrProperty.Invokers.Final.GetValue(meta.This);
             }
 
             set
             {
-                meta.Target.FieldOrProperty.Invokers.Final.SetValue( meta.This, value );
+                Console.WriteLine("Override");
+                meta.Target.FieldOrProperty.Invokers.Final.SetValue(meta.This, value);
             }
         }
     }
 
     // <target>
-    [TestIntroduction]
-    [Test]
+    [Introduction]
+    [Override]
     internal class TargetClass { }
 }

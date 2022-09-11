@@ -1,6 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <Import Project="..\Build\RoslynVersion\Latest.imports"/>
+    <Import Project="..\Build\RoslynVersion\Latest.imports" />
 
     <PropertyGroup>
         <!-- This project never executes under .NET 6.0 in production, but we are including the framework
@@ -13,10 +13,10 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\Metalama.Framework.DesignTime$(ThisRoslynVersionProjectSuffix)\Metalama.Framework.DesignTime$(ThisRoslynVersionProjectSuffix).csproj"/>
-        <PackageReference Include="StreamJsonRpc" Version="$(StreamJsonRpcVersion)"/>
-        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals"/>
-        <ProjectReference Include="..\Metalama.SystemTypes\Metalama.SystemTypes.csproj" Condition="'$(TargetFramework)'=='netstandard2.0'"/>
+        <ProjectReference Include="..\Metalama.Framework.DesignTime$(ThisRoslynVersionProjectSuffix)\Metalama.Framework.DesignTime$(ThisRoslynVersionProjectSuffix).csproj" />
+        <PackageReference Include="StreamJsonRpc" Version="$(StreamJsonRpcVersion)" />
+        <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals" />
+        <ProjectReference Include="..\Metalama.SystemTypes\Metalama.SystemTypes.csproj" Condition="'$(TargetFramework)'=='netstandard2.0'" />
     </ItemGroup>
 
 </Project>

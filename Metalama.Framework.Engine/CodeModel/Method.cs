@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
@@ -50,6 +49,10 @@ namespace Metalama.Framework.Engine.CodeModel
         public override DeclarationKind DeclarationKind => DeclarationKind.Method;
 
         public OperatorKind OperatorKind => this.MethodSymbol.GetOperatorKind();
+
+        [Memo]
+        public IMethod MethodDefinition
+            => this.MethodSymbol == this.MethodSymbol.OriginalDefinition ? this : this.Compilation.Factory.GetMethod( this.MethodSymbol.OriginalDefinition );
 
         public bool IsOpenGeneric => this.MethodSymbol.TypeArguments.Any( ga => ga is ITypeParameterSymbol ) || this.DeclaringType.IsOpenGeneric;
 

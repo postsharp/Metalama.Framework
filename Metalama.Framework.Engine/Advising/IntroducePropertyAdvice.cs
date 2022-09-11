@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
@@ -109,6 +108,24 @@ namespace Metalama.Framework.Engine.Advising
                 }
             }
 
+            if ( this._getTemplate != null )
+            {
+                CopyTemplateAttributes( this._getTemplate.Template.Declaration, this.Builder.GetMethod!, serviceProvider );
+                CopyTemplateAttributes( this._getTemplate.Template.Declaration.ReturnParameter, this.Builder.GetMethod!.ReturnParameter, serviceProvider );
+            }
+
+            if ( this._setTemplate != null )
+            {
+                CopyTemplateAttributes( this._setTemplate.Template.Declaration, this.Builder.SetMethod!, serviceProvider );
+
+                CopyTemplateAttributes(
+                    this._setTemplate.Template.Declaration.Parameters[0],
+                    (IDeclarationBuilder) this.Builder.SetMethod!.Parameters[0],
+                    serviceProvider );
+
+                CopyTemplateAttributes( this._setTemplate.Template.Declaration.ReturnParameter, this.Builder.SetMethod.ReturnParameter, serviceProvider );
+            }
+
             // TODO: For get accessor template, we are ignoring accessibility of set accessor template because it can be easily incompatible.
         }
 
@@ -216,6 +233,7 @@ namespace Metalama.Framework.Engine.Advising
                         else
                         {
                             this.Builder.IsNew = true;
+                            this.Builder.OverriddenProperty = existingProperty;
 
                             var overriddenProperty = new OverridePropertyTransformation(
                                 this,

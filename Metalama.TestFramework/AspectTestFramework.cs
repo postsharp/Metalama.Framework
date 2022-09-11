@@ -1,6 +1,6 @@
-// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Testing;
 using System;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -16,6 +16,11 @@ namespace Metalama.TestFramework
     [ExcludeFromCodeCoverage]
     public class AspectTestFramework : ITestFramework
     {
+        static AspectTestFramework()
+        {
+            TestingServices.Initialize();
+        }
+
         private readonly ITestFramework _implementation;
 
         public AspectTestFramework( IMessageSink messageSink )

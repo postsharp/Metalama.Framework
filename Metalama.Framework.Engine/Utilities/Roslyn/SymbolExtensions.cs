@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Microsoft.CodeAnalysis;
@@ -272,14 +271,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             }
             else
             {
-                // The symbol is not valid in the current compilation. We need to go through documentation id 
-                // TODO: port to SymbolKey
-
-                var symbolId = symbol.GetSymbolId();
-
-                var resolvedSymbol = symbolId.Resolve( compilation );
-
-                return resolvedSymbol;
+                return SymbolTranslator.GetInstance( compilation ).Translate( symbol );
             }
         }
 

@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
@@ -170,6 +169,15 @@ namespace Metalama.Framework.Engine.Linking
                 .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Unsafe | ModifierCategories.Async )
                 .Insert( 0, Token( SyntaxKind.PrivateKeyword ) );
 
+            var constraints = method.ConstraintClauses;
+
+            if ( constraints.Count == 0 && symbol.OverriddenMethod != null )
+            {
+                // Constraints may be inherited from the overridden method.
+
+                constraints = generationContext.SyntaxGenerator.TypeParameterConstraintClauses( symbol.TypeParameters );
+            }
+
             return
                 MethodDeclaration(
                         List<AttributeListSyntax>(),
@@ -179,7 +187,7 @@ namespace Metalama.Framework.Engine.Linking
                         Identifier( name ),
                         method.TypeParameterList,
                         method.ParameterList,
-                        method.ConstraintClauses,
+                        constraints,
                         null,
                         null )
                     .NormalizeWhitespace()

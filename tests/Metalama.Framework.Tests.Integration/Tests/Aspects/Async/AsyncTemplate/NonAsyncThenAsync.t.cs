@@ -3,10 +3,10 @@ internal class TargetCode
         [Aspect1]
         [Aspect2]
         public Task<int> AsyncMethod( int a )
-{
+        {
     global::System.Console.WriteLine("Non-async intercept");
     return this.AsyncMethod_Aspect2(a);
-}
+        }
 
 private async Task<int> AsyncMethod_Source(int a)
         {
@@ -16,7 +16,7 @@ private async Task<int> AsyncMethod_Source(int a)
         }
 
 
-public async global::System.Threading.Tasks.Task<global::System.Int32> AsyncMethod_Aspect2(global::System.Int32 a)
+private async global::System.Threading.Tasks.Task<global::System.Int32> AsyncMethod_Aspect2(global::System.Int32 a)
 {
     global::System.Console.WriteLine("Async intercept");
     await global::System.Threading.Tasks.Task.Yield();
@@ -26,10 +26,10 @@ public async global::System.Threading.Tasks.Task<global::System.Int32> AsyncMeth
         [Aspect1]
         [Aspect2]
         public Task<int> NonAsyncMethod( int a )
-{
+        {
     global::System.Console.WriteLine("Non-async intercept");
     return this.NonAsyncMethod_Aspect2(a);
-}
+        }
 
 private Task<int> NonAsyncMethod_Source(int a)
         {
@@ -37,7 +37,7 @@ private Task<int> NonAsyncMethod_Source(int a)
         }
 
 
-public async global::System.Threading.Tasks.Task<global::System.Int32> NonAsyncMethod_Aspect2(global::System.Int32 a)
+private async global::System.Threading.Tasks.Task<global::System.Int32> NonAsyncMethod_Aspect2(global::System.Int32 a)
 {
     global::System.Console.WriteLine("Async intercept");
     await global::System.Threading.Tasks.Task.Yield();

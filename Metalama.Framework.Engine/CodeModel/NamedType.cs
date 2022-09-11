@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
@@ -24,7 +23,7 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         public NamedTypeImpl Implementation { get; }
 
-        internal NamedType( INamedTypeSymbol typeSymbol, CompilationModel compilation ) : base( compilation )
+        internal NamedType( INamedTypeSymbol typeSymbol, CompilationModel compilation ) : base( compilation, typeSymbol )
         {
             this.Implementation = new NamedTypeImpl( this, typeSymbol, compilation );
         }
@@ -411,8 +410,59 @@ namespace Metalama.Framework.Engine.CodeModel
                 return this.Implementation.Finalizer;
             }
         }
-
+        
         public bool IsReadOnly
+        {
+            get
+            {
+                this.OnUsingDeclaration();
+
+                return this.Implementation.IsReadOnly;
+            }
+        }
+
+        [Memo]
+        public IGenericParameterList TypeParameters
+            => new TypeParameterList(
+                this,
+                this.TypeSymbol.TypeParameters
+                    .Select( x => Ref.FromSymbol<ITypeParameter>( x, this.Compilation.RoslynCompilation ) )
+                    .ToList() );
+
+        [Memo]
+        public INamespace Namespace => this.Compilation.Factory.GetNamespace( this.TypeSymbol.ContainingNamespace );
+
+        [Memo]
+        public string FullName => this.TypeSymbol.GetFullName().AssertNotNull();
+
+        [Memo]
+        public IReadOnlyList<IType> TypeArguments => this.TypeSymbol.TypeArguments.Select( a => this.Compilation.Factory.GetIType( a ) ).ToImmutableList();
+
+        [Memo]
+        public override IDeclaration? ContainingDeclaration
+            => this.TypeSymbol.ContainingSymbol switch
+            {
+                INamespaceSymbol => this.Compilation.Factory.GetAssembly( this.TypeSymbol.ContainingAssembly ),
+                INamedTypeSymbol containingType => this.Compilation.Factory.GetNamedType( containingType ),
+                _ => throw new AssertionFailedException()
+            };
+
+        public override DeclarationKind DeclarationKind => DeclarationKind.NamedType;
+
+        [Memo]
+        public INamedType? BaseType => this.TypeSymbol.BaseType == null ? null : this.Compilation.Factory.GetNamedType( this.TypeSymbol.BaseType );
+
+        [Memo]
+        public IImplementedInterfaceCollection AllImplementedInterfaces
+            => new AllImplementedInterfacesCollection( this, this.Compilation.GetAllInterfaceImplementationCollection( this.TypeSymbol, false ) );
+
+        [Memo]
+        public IImplementedInterfaceCollection ImplementedInterfaces
+            => new ImplementedInterfacesCollection( this, this.Compilation.GetInterfaceImplementationCollection( this.TypeSymbol, false ) );
+
+        ICompilation ICompilationElement.Compilation => this.Compilation;
+
+        IGeneric IGenericInternal.ConstructGenericInstance( params IType[] typeArguments )
         {
             get
             {
@@ -436,7 +486,36 @@ namespace Metalama.Framework.Engine.CodeModel
             return this.Implementation.TryFindImplementationForInterfaceMember( interfaceMember, out implementationMember );
         }
 
-        public ITypeSymbol TypeSymbol => ((ISdkType) this.Implementation).TypeSymbol!;
+        public INamedType TypeDefinition
+            => this.TypeSymbol == this.TypeSymbol.OriginalDefinition ? this : this.Compilation.Factory.GetNamedType( this.TypeSymbol.OriginalDefinition );
+
+        private void PopulateAllInterfaces( ImmutableHashSet<INamedTypeSymbol>.Builder builder, GenericMap genericMap )
+        {
+            // Process the Roslyn type system.
+            foreach ( var type in this.TypeSymbol.Interfaces )
+            {
+                builder.Add( (INamedTypeSymbol) genericMap.Map( type ) );
+            }
+
+            if ( this.TypeSymbol.BaseType != null )
+            {
+                var newGenericMap = genericMap.CreateBaseMap( this.TypeSymbol.BaseType.TypeArguments );
+                ((NamedType) this.BaseType!).PopulateAllInterfaces( builder, newGenericMap );
+            }
+
+            // TODO: process introductions.
+        }
+
+        [Memo]
+        public ImmutableHashSet<INamedTypeSymbol> AllInterfaces => this.GetAllInterfaces();
+
+        private ImmutableHashSet<INamedTypeSymbol> GetAllInterfaces()
+        {
+            var builder = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>( SymbolEqualityComparer.Default );
+            this.PopulateAllInterfaces( builder, this.Compilation.EmptyGenericMap );
+
+            return builder.ToImmutable();
+        }
 
         public ITypeInternal Accept( TypeRewriter visitor ) => visitor.Visit( this );
 

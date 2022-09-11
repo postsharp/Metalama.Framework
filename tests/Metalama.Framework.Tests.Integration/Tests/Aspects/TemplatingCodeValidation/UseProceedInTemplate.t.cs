@@ -2,9 +2,10 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.TemplatingCodeValid
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-#pragma warning disable CS0067, CS8618, CA1822, CS0162, CS0169, CS0414
 
 
+
+#pragma warning disable CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823 
 internal class RetryAttribute : OverrideMethodAspect
 {
     // Template that overrides the methods to which the aspect is applied.
@@ -15,5 +16,5 @@ internal class RetryAttribute : OverrideMethodAspect
 public void Method() => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
 
 }
+#pragma warning restore CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823 
 
-#pragma warning restore CS0067, CS8618, CA1822, CS0162, CS0169, CS0414

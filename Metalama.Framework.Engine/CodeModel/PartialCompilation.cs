@@ -1,5 +1,4 @@
-﻿// Copyright (c) SharpCrafters s.r.o. All rights reserved.
-// This project is not open source. Please see the LICENSE.md file in the repository root for details.
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Compiler;
 using Metalama.Framework.Code.Collections;
@@ -58,8 +57,6 @@ namespace Metalama.Framework.Engine.CodeModel
         /// Gets a value indicating whether the current <see cref="PartialCompilation"/> is actually partial, or represents a complete compilation.
         /// </summary>
         public abstract bool IsPartial { get; }
-
-        public bool IsEmpty => this.SyntaxTrees.Count == 0;
 
         internal LanguageOptions LanguageOptions
         {
@@ -348,14 +345,12 @@ namespace Metalama.Framework.Engine.CodeModel
         /// </summary>
         public Compilation InitialCompilation { get; }
 
-        private void Validate( IReadOnlyList<SyntaxTreeTransformation>? transformations )
+        private static void Validate( IReadOnlyList<SyntaxTreeTransformation>? transformations )
         {
             // In production scenario, we need weavers to provide SyntaxTree instances with a valid Encoding value.
             // However, we don't need that in test scenarios, and tests currently don't set Encoding properly.
             // The way this test is implemented is to test Encoding in increments only if it is set properly in the initial compilation.
             // It also happens, at design time, that Roslyn does not set the encoding. We also need to be tolerant to this situation.
-
-            bool HasInitialCompilationEncoding() => this.InitialCompilation.SyntaxTrees.All( t => t.Encoding != null );
 
             if ( transformations != null )
             {
@@ -371,6 +366,11 @@ namespace Metalama.Framework.Engine.CodeModel
                         "The SyntaxTree.FilePath property of the new SyntaxTree must be set to a non-empty value." );
                 }
 
+                // We cannot validate the Encoding property because it may be null at design time because of a Roslyn bug, but this does not
+                // matter to us in that scenario.
+                /*
+                 bool HasInitialCompilationEncoding() => this.InitialCompilation.SyntaxTrees.All( t => t.Encoding != null );
+
                 if ( transformations.Any( t => t.NewTree is { Encoding: null } && t.OldTree?.Encoding != null ) && HasInitialCompilationEncoding() )
                 {
                     var invalidTrees = transformations.Where( t => t.NewTree is { Encoding: null } ).Select( x => $"'{x.FilePath}'" );
@@ -379,6 +379,7 @@ namespace Metalama.Framework.Engine.CodeModel
                         nameof(transformations),
                         $"The SyntaxTree.Encoding property of these SyntaxTrees cannot be null: {string.Join( ", ", invalidTrees )}" );
                 }
+                */
             }
         }
     }
