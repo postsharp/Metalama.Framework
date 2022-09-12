@@ -11,6 +11,9 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Pipeline.Diff;
 
+/// <summary>
+/// Implementation of the code diff algorithm.
+/// </summary>
 internal class DiffStrategy
 {
     private readonly bool _isTest;

@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using K4os.Hash.xxHash;
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Utilities;
@@ -35,6 +36,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             this.Compilation = default;
             this.Changes = default;
             this.References = default;
+            this.CompileTimeProjectHash = 0;
         }
 
         public static CompilationVersion Create( Compilation compilation, DiffStrategy strategy, CancellationToken cancellationToken = default )
@@ -49,12 +51,14 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             ImmutableDictionary<string, SyntaxTreeVersion>? syntaxTrees,
             ImmutableDictionary<AssemblyIdentity, CompilationReference>? references,
             CompilationChanges changes,
-            DiffStrategy strategy )
+            DiffStrategy strategy,
+            ulong compileTimeProjectHash )
         {
             this.SyntaxTrees = syntaxTrees;
             this.References = references;
             this.Compilation = compilation;
             this.Changes = changes;
+            this.CompileTimeProjectHash = compileTimeProjectHash;
             this._strategy = strategy;
         }
 
@@ -75,7 +79,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                 throw new InvalidOperationException();
             }
 
-            return new CompilationVersion( this.Compilation, this.SyntaxTrees, this.References, changes, this._strategy );
+            return new CompilationVersion( this.Compilation, this.SyntaxTrees, this.References, changes, this._strategy, this.CompileTimeProjectHash );
         }
 
         private bool AreMetadataReferencesEqual( Compilation newCompilation )
@@ -332,16 +336,37 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                     .ToImmutableDictionary( r => r.Compilation.Assembly.Identity, r => r );
             }
 
-            return new CompilationVersion( compilationChanges.CompilationToAnalyze, newTrees.ToImmutable(), references, compilationChanges, this._strategy );
+            var syntaxTreeVersions = newTrees.ToImmutable();
+
+            return new CompilationVersion(
+                compilationChanges.CompilationToAnalyze,
+                syntaxTreeVersions,
+                references,
+                compilationChanges,
+                this._strategy,
+                ComputeCompileTimeProjectHash( syntaxTreeVersions ) );
+        }
+
+        private ulong ComputeCompileTimeProjectHash( ImmutableDictionary<string, SyntaxTreeVersion> syntaxTreeVersions )
+        {
+            XXH64 hasher = new();
+
+            foreach ( var syntaxTree in syntaxTreeVersions )
+            {
+                if ( syntaxTree.Value.HasCompileTimeCode )
+                {
+                    hasher.Update( syntaxTree.Value.DeclarationHash );
+                }
+            }
+
+            return hasher.Digest();
         }
 
         AssemblyIdentity ICompilationVersion.AssemblyIdentity => this.Compilation.AssertNotNull().Assembly.Identity;
 
-        ulong ICompilationVersion.CompileTimeProjectHash => throw new NotImplementedException();
+        public ulong CompileTimeProjectHash { get; }
 
         public bool TryGetSyntaxTreeVersion( string path, out SyntaxTreeVersion syntaxTreeVersion )
-        {
-            return this.SyntaxTrees.AssertNotNull().TryGetValue( path, out syntaxTreeVersion );
-        }
+            => this.SyntaxTrees.AssertNotNull().TryGetValue( path, out syntaxTreeVersion );
     }
 }
