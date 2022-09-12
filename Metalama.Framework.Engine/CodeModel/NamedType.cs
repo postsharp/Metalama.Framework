@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Microsoft.CodeAnalysis;
 using System;
@@ -437,7 +438,10 @@ namespace Metalama.Framework.Engine.CodeModel
             return this.Implementation.TryFindImplementationForInterfaceMember( interfaceMember, out implementationMember );
         }
 
-        public INamedType TypeDefinition => this.Implementation.TypeDefinition;
+        [Memo]
+        public INamedType TypeDefinition
+            => this.TypeSymbol == this.TypeSymbol.OriginalDefinition ? this : this.Compilation.Factory.GetNamedType( ((INamedTypeSymbol) this.TypeSymbol).OriginalDefinition );
+
 
         private void PopulateAllInterfaces( ImmutableHashSet<INamedTypeSymbol>.Builder builder, GenericMap genericMap )
         {

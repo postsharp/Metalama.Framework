@@ -1201,7 +1201,7 @@ Intentional syntax error.
 #endif
 ";
 
-            var compilation1 = CreateCSharpCompilation( code1, preprocessorSymbols: new[] { "SYMBOL" } );
+            var compilation1 = CreateCSharpCompilation( code1, preprocessorSymbols: new[] { "METALAMA", "SYMBOL" } );
 
             using var domain1 = new UnloadableCompileTimeDomain();
             var pipeline1 = new CompileTimeAspectPipeline( testContext1.ServiceProvider, true, domain1 );

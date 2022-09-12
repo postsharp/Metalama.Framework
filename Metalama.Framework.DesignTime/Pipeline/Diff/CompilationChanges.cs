@@ -42,7 +42,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         public static CompilationChanges Empty( Compilation compilation )
             => new( ImmutableDictionary<string, SyntaxTreeChange>.Empty, ImmutableHashSet<TypeDependencyKey>.Empty, false, compilation, true );
 
-        public bool HasChange => this._syntaxTreeChanges.Count > 0 || this.HasCompileTimeCodeChange;
+        public bool HasChange => this._syntaxTreeChanges != null && this._syntaxTreeChanges.Count > 0 || this.HasCompileTimeCodeChange;
 
         public bool IsIncremental { get; }
 

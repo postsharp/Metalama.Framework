@@ -27,14 +27,14 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 
     public ServiceProvider ServiceProvider { get; }
 
-    public TestContext( TestProjectOptions? projectOptions = null, Func<ServiceProvider, ServiceProvider>? addServices = null )
+    public TestContext( TestProjectOptions projectOptions, Func<ServiceProvider, ServiceProvider>? addServices = null )
     {
         this._backstageTempFileManager = (ITempFileManager) BackstageServiceFactory.ServiceProvider.GetService( typeof(ITempFileManager) );
 
         var backstageServiceProvider = new BackstageServiceProvider( this );
         this._configurationManager = new InMemoryConfigurationManager( backstageServiceProvider );
 
-        this.ProjectOptions = projectOptions ?? new TestProjectOptions( additionalAssemblies: ImmutableArray.Create( this.GetType().Assembly ) );
+        this.ProjectOptions = projectOptions;
 
         this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( backstageServiceProvider )
             .WithService( new TestMarkerService() )

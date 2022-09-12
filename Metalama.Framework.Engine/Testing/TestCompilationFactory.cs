@@ -11,6 +11,7 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 
 namespace Metalama.Framework.Engine.Testing
 {
@@ -67,7 +68,8 @@ namespace Metalama.Framework.Engine.Testing
             "System.IO.FileSystem.Watcher",
             "System.Reflection.Extensions",
             "System.Collections.Immutable",
-            "System.Reflection.Metadata" );
+            "System.Reflection.Metadata",
+            "System.Core");
 
         public static CSharpCompilation CreateEmptyCSharpCompilation(
             string? name,
@@ -115,6 +117,9 @@ namespace Metalama.Framework.Engine.Testing
                 .ToList();
 
             var metalamaLibraries = addMetalamaReferences ? new[] { typeof(IAspect).Assembly, typeof(IAspectWeaver).Assembly } : null;
+
+            // Force the loading of some system assemblies before we search them in the AppDomain.
+            _ = typeof(DynamicAttribute);
 
             var systemLibraries = AppDomainUtility.GetLoadedAssemblies(
                     a => !a.IsDynamic && _allowedSystemAssemblies.Contains( a.GetName().Name )

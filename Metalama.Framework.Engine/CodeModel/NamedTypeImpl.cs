@@ -516,9 +516,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
 
     public INamedTypeSymbol TypeSymbol { get; }
 
-    [Memo]
-    public INamedType TypeDefinition
-        => this.TypeSymbol == this.TypeSymbol.OriginalDefinition ? this : this.Compilation.Factory.GetNamedType( this.TypeSymbol.OriginalDefinition );
+    INamedType INamedType.TypeDefinition => throw new NotSupportedException();
 
     private void PopulateAllInterfaces( ImmutableHashSet<INamedTypeSymbol>.Builder builder, GenericMap genericMap )
     {
