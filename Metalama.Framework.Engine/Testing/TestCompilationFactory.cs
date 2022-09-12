@@ -28,6 +28,8 @@ namespace Metalama.Framework.Engine.Testing
         private static readonly ImmutableHashSet<string> _allowedSystemAssemblies = ImmutableHashSet.Create(
             "System.Private.CoreLib",
             "System.Runtime",
+            "System.Core",
+            "System",
             "System.Console",
             "System.Threading",
             "System.Text.Encoding.Extensions",
@@ -68,8 +70,7 @@ namespace Metalama.Framework.Engine.Testing
             "System.IO.FileSystem.Watcher",
             "System.Reflection.Extensions",
             "System.Collections.Immutable",
-            "System.Reflection.Metadata",
-            "System.Core");
+            "System.Reflection.Metadata" );
 
         public static CSharpCompilation CreateEmptyCSharpCompilation(
             string? name,
