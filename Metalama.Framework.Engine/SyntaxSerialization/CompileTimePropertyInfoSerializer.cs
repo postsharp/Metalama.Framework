@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                             SyntaxFactory.LiteralExpression(
                                 SyntaxKind.StringLiteralExpression,
                                 SyntaxFactory.Literal( propertyOrIndexer.Name ) ) ),
-                        SyntaxFactory.Argument( SyntaxUtility.CreateBindingFlags( serializationContext ) ) );
+                        SyntaxFactory.Argument( SyntaxUtility.CreateBindingFlags( propertyOrIndexer, serializationContext ) ) );
             }
             else if ( propertyOrIndexer is IIndexer indexer )
             {

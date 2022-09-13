@@ -24,7 +24,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeProperty( code );
 
             this.AssertEqual(
-                @"new global::Metalama.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target).GetProperty(""Property"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance))",
+                @"new global::Metalama.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target).GetProperty(""Property"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance))",
                 serialized );
 
             this.TestExpression<PropertyInfo>(
@@ -46,7 +46,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeProperty( code );
 
             this.AssertEqual(
-                @"new global::Metalama.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target<>).GetProperty(""Property"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance))",
+                @"new global::Metalama.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target<>).GetProperty(""Property"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance))",
                 serialized );
 
             this.TestExpression<PropertyInfo>(
@@ -68,7 +68,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeProperty( code );
 
             this.AssertEqual(
-                @"new global::Metalama.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target).GetProperty(""Property"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance))",
+                @"new global::Metalama.Framework.RunTime.FieldOrPropertyInfo(typeof(global::Target).GetProperty(""Property"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance))",
                 serialized );
 
             this.TestExpression<PropertyInfo>(

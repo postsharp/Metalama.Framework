@@ -20,7 +20,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeConstructor( code );
 
             this.AssertEqual(
-                @"((global::System.Reflection.ConstructorInfo)typeof(global::Target).GetConstructor(global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance, new[]{typeof(global::System.Int32)}))",
+                @"((global::System.Reflection.ConstructorInfo)typeof(global::Target).GetConstructor(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, new[]{typeof(global::System.Int32)}))",
                 serialized );
 
             this.TestExpression<ConstructorInfo>(
@@ -40,7 +40,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeConstructor( code );
 
             this.AssertEqual(
-                @"((global::System.Reflection.ConstructorInfo)typeof(global::Target<>).GetConstructor(global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance, new[]{typeof(T)}))",
+                @"((global::System.Reflection.ConstructorInfo)typeof(global::Target<>).GetConstructor(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, new[]{typeof(T)}))",
                 serialized );
 
             this.TestExpression<ConstructorInfo>(
@@ -60,7 +60,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeConstructor( code );
 
             this.AssertEqual(
-                @"((global::System.Reflection.ConstructorInfo)typeof(global::Target).GetConstructor(global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance, new[]{}))",
+                @"((global::System.Reflection.ConstructorInfo)typeof(global::Target).GetConstructor(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, new[]{}))",
                 serialized );
 
             this.TestExpression<ConstructorInfo>(

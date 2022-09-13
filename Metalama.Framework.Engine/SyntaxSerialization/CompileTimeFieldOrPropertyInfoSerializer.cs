@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
         public override ExpressionSyntax Serialize( CompileTimeFieldOrPropertyInfo obj, SyntaxSerializationContext serializationContext )
         {
             ExpressionSyntax propertyInfo;
-            var allBindingFlags = SyntaxUtility.CreateBindingFlags( serializationContext );
+            var allBindingFlags = SyntaxUtility.CreateBindingFlags( obj.FieldOrProperty, serializationContext );
 
             switch ( obj.FieldOrProperty )
             {

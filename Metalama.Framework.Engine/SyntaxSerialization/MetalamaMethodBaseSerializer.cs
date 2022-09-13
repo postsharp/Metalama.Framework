@@ -48,7 +48,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
             */
 
             var typeCreation = TypeSerializationHelper.SerializeTypeSymbolRecursive( method.DeclaringType.GetSymbol(), serializationContext );
-            var allBindingFlags = SyntaxUtility.CreateBindingFlags( serializationContext );
+            var allBindingFlags = SyntaxUtility.CreateBindingFlags( method, serializationContext );
 
             ExpressionSyntax invokeGetMethod;
 

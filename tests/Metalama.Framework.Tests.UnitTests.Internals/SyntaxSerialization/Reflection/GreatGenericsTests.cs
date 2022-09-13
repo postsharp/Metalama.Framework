@@ -64,7 +64,7 @@ class User {
                     Assert.Equal( "T2", m.ReturnType.Name );
                     Assert.Equal( "T1", m.GetParameters()[0].ParameterType.Name );
                 },
-                @"((global::System.Reflection.MethodInfo)typeof(global::Origin<>.NestedInOrigin<>).GetMethod(""Method21"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance, new[]{typeof(T1)}))" );
+                @"((global::System.Reflection.MethodInfo)typeof(global::Origin<>.NestedInOrigin<>).GetMethod(""Method21"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, new[]{typeof(T1)}))" );
 
             this.TestSerializable(
                 descendant.BaseType!.Method( "Method21" ),
@@ -73,7 +73,7 @@ class User {
                     Assert.Equal( "T3", m.ReturnType.Name );
                     Assert.Equal( "String", m.GetParameters()[0].ParameterType.Name );
                 },
-                @"((global::System.Reflection.MethodInfo)typeof(global::Origin<global::System.String>.NestedInOrigin<T3>).GetMethod(""Method21"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance, new[]{typeof(global::System.String)}))" );
+                @"((global::System.Reflection.MethodInfo)typeof(global::Origin<global::System.String>.NestedInOrigin<T3>).GetMethod(""Method21"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, new[]{typeof(global::System.String)}))" );
         }
 
         [Fact]
@@ -92,7 +92,7 @@ class User {
                     Assert.Equal( typeof(float), m.ReturnType );
                     Assert.Equal( typeof(string), m.GetParameters()[0].ParameterType );
                 },
-                @"((global::System.Reflection.MethodInfo)typeof(global::Origin<global::System.String>.NestedInOrigin<global::System.Single>).GetMethod(""Method21"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance, new[]{typeof(global::System.String)}))" );
+                @"((global::System.Reflection.MethodInfo)typeof(global::Origin<global::System.String>.NestedInOrigin<global::System.Single>).GetMethod(""Method21"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, new[]{typeof(global::System.String)}))" );
 
             this.TestSerializable(
                 instantiatedNested.Constructors.Single(),
@@ -102,37 +102,37 @@ class User {
                     Assert.Equal( typeof(float), c.DeclaringType.GenericTypeArguments[1] );
                     Assert.Equal( typeof(int), c.DeclaringType.BaseType!.GenericTypeArguments[0] );
                 },
-                @"((global::System.Reflection.ConstructorInfo)typeof(global::Origin<global::System.String>.NestedInOrigin<global::System.Single>).GetConstructor(global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance, new[]{}))" );
+                @"((global::System.Reflection.ConstructorInfo)typeof(global::Origin<global::System.String>.NestedInOrigin<global::System.Single>).GetConstructor(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, new[]{}))" );
 
             this.TestSerializable(
                 ((INamedType) instantiatedNested.ContainingDeclaration!).Method( "Method" ),
                 m => Assert.Equal( typeof(string), m.ReturnType ),
-                @"((global::System.Reflection.MethodInfo)typeof(global::Origin<global::System.String>).GetMethod(""Method"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance, new[]{typeof(global::System.String)}))" );
+                @"((global::System.Reflection.MethodInfo)typeof(global::Origin<global::System.String>).GetMethod(""Method"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, new[]{typeof(global::System.String)}))" );
 
             this.TestSerializable(
                 instantiatedDescendant.Field( "Field" ),
                 ( FieldInfo f ) => Assert.Equal( typeof(float), f.FieldType ),
-                @"typeof(global::Descendant<global::System.Single>).GetField(""Field"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance)" );
+                @"typeof(global::Descendant<global::System.Single>).GetField(""Field"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance)" );
 
             this.TestSerializable(
                 instantiatedBaseOrigin.Field( "Field" ),
                 ( FieldInfo f ) => Assert.Equal( typeof(int), f.FieldType ),
-                @"typeof(global::Origin<global::System.Int32>).GetField(""Field"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance)" );
+                @"typeof(global::Origin<global::System.Int32>).GetField(""Field"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance)" );
 
             this.TestSerializable(
                 instantiatedBaseOrigin.Field( "privateField" ),
                 ( FieldInfo f ) => Assert.Equal( typeof(int), f.FieldType ),
-                @"typeof(global::Origin<global::System.Int32>).GetField(""privateField"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance)" );
+                @"typeof(global::Origin<global::System.Int32>).GetField(""privateField"", global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance)" );
 
             this.TestSerializable(
                 instantiatedBaseOrigin.Property( "Property" ),
                 ( PropertyInfo p ) => Assert.Equal( typeof(int), p.PropertyType ),
-                @"typeof(global::Origin<global::System.Int32>).GetProperty(""Property"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance)" );
+                @"typeof(global::Origin<global::System.Int32>).GetProperty(""Property"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance)" );
 
             this.TestSerializable(
                 instantiatedBaseOrigin.Property( "privateProperty" ),
                 ( PropertyInfo p ) => Assert.Equal( typeof(int), p.PropertyType ),
-                @"typeof(global::Origin<global::System.Int32>).GetProperty(""privateProperty"", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance)" );
+                @"typeof(global::Origin<global::System.Int32>).GetProperty(""privateProperty"", global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance)" );
 
             this.TestSerializable(
                 instantiatedBaseOrigin,
