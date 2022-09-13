@@ -45,6 +45,22 @@ namespace Metalama.Framework.Engine.Linking
                 };
         }
 
+        public bool HasResolvedSemanticBody
+        {
+            get
+                => (this.ResolvedSemantic, this.TargetKind) switch
+                {
+                    ({ Symbol: IMethodSymbol }, AspectReferenceTargetKind.Self ) => true,
+                    ({ Symbol: IPropertySymbol }, AspectReferenceTargetKind.PropertyGetAccessor ) => true,
+                    ({ Symbol: IPropertySymbol }, AspectReferenceTargetKind.PropertySetAccessor ) => true,
+                    ({ Symbol: IEventSymbol }, AspectReferenceTargetKind.EventAddAccessor ) => true,
+                    ({ Symbol: IEventSymbol }, AspectReferenceTargetKind.EventRemoveAccessor ) => true,
+                    ({ Symbol: IFieldSymbol }, AspectReferenceTargetKind.PropertyGetAccessor ) => false,
+                    ({ Symbol: IFieldSymbol }, AspectReferenceTargetKind.PropertySetAccessor ) => false,
+                    _ => throw new AssertionFailedException(),
+                };
+        }
+
         /// <summary>
         /// Gets the annotated expression. This is for convenience in inliners which always work with expressions.
         /// </summary>

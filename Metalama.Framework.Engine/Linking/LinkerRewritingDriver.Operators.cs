@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    members.Add( GetTrampolineOperator( operatorDeclaration, lastOverride ) );
+                    members.Add( GetTrampolineForOperator( operatorDeclaration, lastOverride ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic(IntermediateSymbolSemanticKind.Default) )
@@ -122,7 +122,11 @@ namespace Metalama.Framework.Engine.Linking
             OperatorDeclarationSyntax @operator,
             IMethodSymbol symbol )
         {
-            var emptyBody = Block().NormalizeWhitespace();
+            var emptyBody =
+                Block(
+                    ReturnStatement(
+                        DefaultExpression( @operator.ReturnType ) ) )
+                .NormalizeWhitespace();
 
             return GetSpecialImplOperator( @operator, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ) );
         }
@@ -157,6 +161,32 @@ namespace Metalama.Framework.Engine.Linking
                     .WithExpressionBody( expressionBody )
                     .WithSemicolonToken( expressionBody != null ? Token( SyntaxKind.SemicolonToken ) : default )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
+        }
+
+        private static OperatorDeclarationSyntax GetTrampolineForOperator( OperatorDeclarationSyntax @operator, IMethodSymbol targetSymbol )
+        {
+            // TODO: First override not being inlineable probably does not happen outside of specifically written linker tests, i.e. trampolines may not be needed.
+
+            return
+                @operator
+                    .WithBody( GetBody() )
+                    .NormalizeWhitespace()
+                    .WithLeadingTrivia( @operator.GetLeadingTrivia() )
+                    .WithTrailingTrivia( @operator.GetTrailingTrivia() );
+
+            BlockSyntax GetBody()
+            {
+                var invocation =
+                    InvocationExpression(
+                        IdentifierName( targetSymbol.Name ),
+                        ArgumentList() );
+
+                return Block(
+                    ReturnStatement(
+                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
+                        invocation,
+                        Token( SyntaxKind.SemicolonToken ) ) );
+            }
         }
     }
 }

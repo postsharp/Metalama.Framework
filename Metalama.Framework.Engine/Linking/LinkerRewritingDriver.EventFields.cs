@@ -1,12 +1,14 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Inlining;
 using Metalama.Framework.Engine.Linking.Substitution;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking
@@ -22,28 +24,29 @@ namespace Metalama.Framework.Engine.Linking
                 var members = new List<MemberDeclarationSyntax>();
                 var lastOverride = (IEventSymbol) this.IntroductionRegistry.GetLastOverride( symbol );
 
-                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic(IntermediateSymbolSemanticKind.Default) ) )
+                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
+                     && this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     members.Add( GetEventBackingField( eventFieldDeclaration, symbol ) );
                 }
 
-                if ( this.AnalysisRegistry.IsInlined( lastOverride.ToSemantic(IntermediateSymbolSemanticKind.Default) ) )
+                if ( this.AnalysisRegistry.IsInlined( lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final ) );
                 }
                 else
                 {
-                    members.Add( GetTrampolineEvent( eventFieldDeclaration, lastOverride ) );
+                    members.Add( GetTrampolineForEventField( eventFieldDeclaration, lastOverride ) );
                 }
 
-                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic(IntermediateSymbolSemanticKind.Default) )
-                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic(IntermediateSymbolSemanticKind.Default) ) )
+                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
+                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     members.Add( GetOriginalImplEventField( eventFieldDeclaration.Declaration.Type, symbol, generationContext ) );
                 }
 
-                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic(IntermediateSymbolSemanticKind.Base) )
-                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic(IntermediateSymbolSemanticKind.Base) ) )
+                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
+                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ) )
                 {
                     members.Add( GetEmptyImplEventField( eventFieldDeclaration.Declaration.Type, symbol ) );
                 }
@@ -119,21 +122,7 @@ namespace Metalama.Framework.Engine.Linking
 
         private static MemberDeclarationSyntax GetOriginalImplEventField( TypeSyntax eventType, IEventSymbol symbol, SyntaxGenerationContext generationContext )
         {
-            var accessorList =
-                AccessorList(
-                        List(
-                            new[]
-                            {
-                                AccessorDeclaration(
-                                    SyntaxKind.AddAccessorDeclaration,
-                                    GetImplicitAdderBody( symbol.AddMethod.AssertNotNull(), generationContext ) ),
-                                AccessorDeclaration(
-                                    SyntaxKind.RemoveAccessorDeclaration,
-                                    GetImplicitRemoverBody( symbol.RemoveMethod.AssertNotNull(), generationContext ) )
-                            } ) )
-                    .NormalizeWhitespace();
-
-            return GetSpecialImplEvent( eventType, accessorList, symbol, GetOriginalImplMemberName( symbol ) );
+            return GetSpecialImplEventField( eventType, symbol, GetOriginalImplMemberName( symbol ) );
         }
 
         private static MemberDeclarationSyntax GetEmptyImplEventField( TypeSyntax eventType, IEventSymbol symbol )
@@ -149,6 +138,78 @@ namespace Metalama.Framework.Engine.Linking
                     .NormalizeWhitespace();
 
             return GetSpecialImplEvent( eventType, accessorList, symbol, GetEmptyImplMemberName( symbol ) );
+        }
+
+        private static MemberDeclarationSyntax GetSpecialImplEventField( TypeSyntax eventType, IEventSymbol symbol, string name )
+        {
+            return
+                EventFieldDeclaration(
+                        List<AttributeListSyntax>(),
+                        symbol.IsStatic
+                            ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
+                            : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
+                        Token( SyntaxKind.EventKeyword ),
+                        VariableDeclaration(
+                            eventType,
+                            SingletonSeparatedList( VariableDeclarator( Identifier( name ) ) ) ),
+                        Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) )
+                    .NormalizeWhitespace()
+                    .WithLeadingTrivia( ElasticLineFeed )
+                    .WithTrailingTrivia( ElasticLineFeed )
+                    .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
+        }
+
+        private static EventDeclarationSyntax GetTrampolineForEventField( EventFieldDeclarationSyntax eventField, IEventSymbol targetSymbol )
+        {
+            // TODO: Do not copy leading/trailing trivia to all declarations.
+
+            return
+                EventDeclaration(
+                        List<AttributeListSyntax>(),
+                        eventField.Modifiers,
+                        Token( SyntaxKind.EventKeyword ).WithTrailingTrivia( ElasticSpace ),
+                        eventField.Declaration.Type,
+                        null,
+                        eventField.Declaration.Variables.Single().Identifier,
+                        AccessorList(
+                            List(
+                                new[]
+                                    {
+                                        AccessorDeclaration(
+                                                SyntaxKind.AddAccessorDeclaration,
+                                                Block(
+                                                    ExpressionStatement(
+                                                        AssignmentExpression(
+                                                            SyntaxKind.AddAssignmentExpression,
+                                                            GetInvocationTarget(),
+                                                            IdentifierName( "value" ) ) ) ) )
+                                            .NormalizeWhitespace(),
+                                        AccessorDeclaration(
+                                                SyntaxKind.RemoveAccessorDeclaration,
+                                                Block(
+                                                    ExpressionStatement(
+                                                        AssignmentExpression(
+                                                            SyntaxKind.SubtractAssignmentExpression,
+                                                            GetInvocationTarget(),
+                                                            IdentifierName( "value" ) ) ) ) )
+                                            .NormalizeWhitespace()
+                                    }.Where( a => a != null )
+                                    .AssertNoneNull() ) ),
+                        default )
+                    .WithLeadingTrivia( eventField.GetLeadingTrivia() )
+                    .WithTrailingTrivia( eventField.GetTrailingTrivia() );
+
+            ExpressionSyntax GetInvocationTarget()
+            {
+                if ( targetSymbol.IsStatic )
+                {
+                    return IdentifierName( targetSymbol.Name );
+                }
+                else
+                {
+                    return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( targetSymbol.Name ) );
+                }
+            }
         }
     }
 }

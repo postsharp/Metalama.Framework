@@ -157,5 +157,31 @@ namespace Metalama.Framework.Engine.Linking
                     .WithExpressionBody( expressionBody )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
+
+        private static DestructorDeclarationSyntax GetTrampolineDestructor( DestructorDeclarationSyntax destructor, IMethodSymbol targetSymbol )
+        {
+            // TODO: First override not being inlineable probably does not happen outside of specifically written linker tests, i.e. trampolines may not be needed.
+
+            return
+                destructor
+                    .WithBody( GetBody() )
+                    .NormalizeWhitespace()
+                    .WithLeadingTrivia( destructor.GetLeadingTrivia() )
+                    .WithTrailingTrivia( destructor.GetTrailingTrivia() );
+
+            BlockSyntax GetBody()
+            {
+                var invocation =
+                    InvocationExpression(
+                        MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( targetSymbol.Name ) ),
+                        ArgumentList() );
+
+                return Block(
+                    ReturnStatement(
+                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
+                        invocation,
+                        Token( SyntaxKind.SemicolonToken ) ) );
+            }
+        }
     }
 }

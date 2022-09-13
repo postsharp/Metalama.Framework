@@ -49,10 +49,9 @@ namespace Metalama.Framework.Engine.Linking
 
             this._intermediateSymbolMap = new Dictionary<ISymbol, ISymbol>( StructuralSymbolComparer.Default );
 
+            var walker = new SymbolDiscoveryWalker( intermediateCompilation, this._intermediateSymbolMap );
             foreach ( var syntaxTree in intermediateCompilation.SyntaxTrees )
             {
-                var semanticModel = intermediateCompilation.GetSemanticModel( syntaxTree );
-                var walker = new SymbolDiscoveryWalker( semanticModel, this._intermediateSymbolMap );
                 walker.Visit( syntaxTree.GetRoot() );
             }
 

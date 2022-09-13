@@ -144,8 +144,12 @@ namespace Metalama.Framework.Engine.Linking
                         return new AutoPropertyAccessorSubstitution( accessorDeclarationSyntax, property, returnVariableIdentifier );
                     case (ArrowExpressionClauseSyntax arrowExpressionClause, _ ):
                         return new ExpressionBodySubstitution( arrowExpressionClause, symbol, returnVariableIdentifier );
-                    case (VariableDeclaratorSyntax {Parent: {Parent: EventFieldDeclarationSyntax } } variableDeclarator, { AssociatedSymbol: IEventSymbol } ):
+                    case (VariableDeclaratorSyntax { Parent: {Parent: EventFieldDeclarationSyntax } } variableDeclarator, { AssociatedSymbol: IEventSymbol } ):
                         return new EventFieldSubstitution( variableDeclarator, symbol );
+                    case (MethodDeclarationSyntax { Body: null, ExpressionBody: null } emptyVoidPartialMethod, _ ):
+                        return new EmptyVoidPartialMethodSubstitution( emptyVoidPartialMethod );
+                    case (ParameterSyntax { Parent: ParameterListSyntax { Parent: RecordDeclarationSyntax } } recordParameter, _ ):
+                        return new RecordParameterSubstitution( recordParameter, symbol, returnVariableIdentifier );
                     default:
                         throw new AssertionFailedException();
                 }

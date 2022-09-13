@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -105,6 +106,17 @@ namespace Metalama.Framework.Engine.Linking
             // Get the local symbol that is referenced.
             // E.g. explicit interface implementation must be referenced as interface member reference.
             referencedSymbol = GetLocalReferencedSymbol( containingSemantic.Symbol, referencedSymbol );
+            var targetKind = referenceSpecification.TargetKind;
+            var isInlineable = (referenceSpecification.Flags & AspectReferenceFlags.Inlineable) != 0;
+
+            if ( targetKind == AspectReferenceTargetKind.Self && referencedSymbol is IPropertySymbol or IEventSymbol or IFieldSymbol )
+            {
+                // Resolves the symbol based on expression - this is used when aspect reference target property but it is not specified whether the getter or setter is targeted.
+                targetKind = ResolveExpressionTarget( referencedSymbol, expression );
+            }
+
+            // At this point we should always target a method or a specific target.
+            Invariant.AssertNot( referencedSymbol is IPropertySymbol or IEventSymbol && targetKind == AspectReferenceTargetKind.Self );
 
             var annotationLayerIndex = this.GetAnnotationLayerIndex( containingSemantic.Symbol, referencedSymbol, referenceSpecification );
 
@@ -138,8 +150,8 @@ namespace Metalama.Framework.Engine.Linking
                     referencedSymbol,
                     field.ToSemantic( fieldSemantic ),
                     expression,
-                    referenceSpecification.TargetKind,
-                    (referenceSpecification.Flags & AspectReferenceFlags.Inlineable) != 0 );
+                    targetKind,
+                    isInlineable );
             }
 
             // At this point resolvedIndex should be 0, equal to target introduction index, this._orderedLayers.Count or be equal to index of one of the overrides.
@@ -165,8 +177,8 @@ namespace Metalama.Framework.Engine.Linking
                         referencedSymbol,
                         referencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
                         expression,
-                        referenceSpecification.TargetKind,
-                        (referenceSpecification.Flags & AspectReferenceFlags.Inlineable) != 0 );
+                        targetKind,
+                        isInlineable );
                 }
                 else
                 {
@@ -179,8 +191,8 @@ namespace Metalama.Framework.Engine.Linking
                             referencedSymbol,
                             GetOverriddenSymbol( referencedSymbol ).AssertNotNull().ToSemantic( IntermediateSymbolSemanticKind.Default ),
                             expression,
-                            referenceSpecification.TargetKind,
-                            (referenceSpecification.Flags & AspectReferenceFlags.Inlineable) != 0 );
+                            targetKind,
+                            isInlineable );
                     }
                     else if ( targetMemberIntroduction.Introduction is IReplaceMemberTransformation { ReplacedMember: { } replacedMember }
                               && replacedMember.GetTarget( this._finalCompilationModel, ReferenceResolutionOptions.DoNotFollowRedirections )
@@ -193,8 +205,8 @@ namespace Metalama.Framework.Engine.Linking
                             referencedSymbol,
                             referencedSymbol.ToSemantic(IntermediateSymbolSemanticKind.Default),
                             expression,
-                            referenceSpecification.TargetKind,
-                            (referenceSpecification.Flags & AspectReferenceFlags.Inlineable) != 0 );
+                            targetKind,
+                            isInlineable );
                     }
                     else
                     {
@@ -204,8 +216,8 @@ namespace Metalama.Framework.Engine.Linking
                             referencedSymbol,
                             referencedSymbol.ToSemantic(IntermediateSymbolSemanticKind.Base ),
                             expression,
-                            referenceSpecification.TargetKind,
-                            (referenceSpecification.Flags & AspectReferenceFlags.Inlineable) != 0 );
+                            targetKind,
+                            isInlineable );
                     }
                 }
             }
@@ -220,8 +232,8 @@ namespace Metalama.Framework.Engine.Linking
                         referencedSymbol,
                         referencedSymbol.ToSemantic(IntermediateSymbolSemanticKind.Default ),
                         expression,
-                        referenceSpecification.TargetKind,
-                        (referenceSpecification.Flags & AspectReferenceFlags.Inlineable) != 0 );
+                        targetKind,
+                        isInlineable );
                 }
                 else
                 {
@@ -233,8 +245,8 @@ namespace Metalama.Framework.Engine.Linking
                             referencedSymbol,
                             GetOverriddenSymbol( referencedSymbol ).AssertNotNull().ToSemantic( IntermediateSymbolSemanticKind.Default ),
                             expression,
-                            referenceSpecification.TargetKind,
-                            (referenceSpecification.Flags & AspectReferenceFlags.Inlineable) != 0 );
+                            targetKind,
+                            isInlineable );
                     }
                     else if ( this.TryGetHiddenSymbol( referencedSymbol, out var hiddenSymbol ) )
                     {
@@ -244,8 +256,8 @@ namespace Metalama.Framework.Engine.Linking
                             referencedSymbol,
                             hiddenSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
                             expression,
-                            referenceSpecification.TargetKind,
-                            (referenceSpecification.Flags & AspectReferenceFlags.Inlineable) != 0 );
+                            targetKind,
+                            isInlineable );
                     }
                     else
                     {
@@ -255,8 +267,8 @@ namespace Metalama.Framework.Engine.Linking
                             referencedSymbol,
                             referencedSymbol.ToSemantic(IntermediateSymbolSemanticKind.Base ),
                             expression,
-                            referenceSpecification.TargetKind,
-                            (referenceSpecification.Flags & AspectReferenceFlags.Inlineable) != 0 );
+                            targetKind,
+                            isInlineable );
                     }
                 }
             }
@@ -286,8 +298,8 @@ namespace Metalama.Framework.Engine.Linking
                         referencedSymbol,
                         this.GetSymbolFromIntroducedMember( referencedSymbol, resolvedIntroducedMember.AssertNotNull() ).ToSemantic( IntermediateSymbolSemanticKind.Default ),
                         expression,
-                        referenceSpecification.TargetKind,
-                        (referenceSpecification.Flags & AspectReferenceFlags.Inlineable) != 0 );
+                        targetKind,
+                        isInlineable );
                 }
             }
             else
@@ -297,8 +309,8 @@ namespace Metalama.Framework.Engine.Linking
                     referencedSymbol,
                     referencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Final ),
                     expression,
-                    referenceSpecification.TargetKind,
-                    (referenceSpecification.Flags & AspectReferenceFlags.Inlineable) != 0 );
+                    targetKind,
+                    isInlineable );
             }
         }
 
@@ -532,6 +544,27 @@ namespace Metalama.Framework.Engine.Linking
             }
 
             return referencedSymbol;
+        }
+
+        private static AspectReferenceTargetKind ResolveExpressionTarget( ISymbol referencedSymbol, ExpressionSyntax expression )
+        {
+            switch ( (referencedSymbol, expression) )
+            {
+                case (IPropertySymbol, { Parent: AssignmentExpressionSyntax } ):
+                    return AspectReferenceTargetKind.PropertyGetAccessor;
+                case (IPropertySymbol, _ ):
+                    return AspectReferenceTargetKind.PropertySetAccessor;
+                case (IFieldSymbol, { Parent: AssignmentExpressionSyntax } ):
+                    return AspectReferenceTargetKind.PropertyGetAccessor;
+                case (IFieldSymbol, _ ):
+                    return AspectReferenceTargetKind.PropertySetAccessor;
+                case (IEventSymbol, { Parent: AssignmentExpressionSyntax { OperatorToken: { RawKind: (int)SyntaxKind.AddAssignmentExpression } } } ):
+                    return AspectReferenceTargetKind.EventAddAccessor;
+                case (IEventSymbol, { Parent: AssignmentExpressionSyntax { OperatorToken: { RawKind: (int) SyntaxKind.SubtractAssignmentExpression } } } ):
+                    return AspectReferenceTargetKind.EventRemoveAccessor;
+                default:
+                    throw new AssertionFailedException();
+            }
         }
 
         private static bool HasImplicitImplementation( ISymbol symbol )

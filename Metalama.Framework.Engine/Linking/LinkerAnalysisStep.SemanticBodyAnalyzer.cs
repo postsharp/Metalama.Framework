@@ -32,26 +32,75 @@ namespace Metalama.Framework.Engine.Linking
 
                 foreach (var semantic in this._reachableSemantics)
                 {
-                    if (semantic.Kind != IntermediateSymbolSemanticKind.Default)
+                    if (semantic.Kind == IntermediateSymbolSemanticKind.Final )
                     {
+                        continue;
+                    }
+
+                    if ( semantic.Kind == IntermediateSymbolSemanticKind.Base )
+                    {
+                        switch ( semantic.Symbol )
+                        {
+                            case IMethodSymbol methodSymbol:
+                                results[semantic.ToTyped<IMethodSymbol>()] = 
+                                    new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
+                                break;
+
+                            case IPropertySymbol propertySymbol:
+                                if ( propertySymbol.GetMethod != null )
+                                {
+                                    results[semantic.WithSymbol(propertySymbol.GetMethod)] =
+                                        new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
+                                }
+
+                                if ( propertySymbol.SetMethod != null )
+                                {
+                                    results[semantic.WithSymbol( propertySymbol.SetMethod )] =
+                                        new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
+                                }
+
+                                break;
+
+                            case IEventSymbol @eventSymbol:
+                                if ( @eventSymbol.AddMethod != null )
+                                {
+                                    results[semantic.WithSymbol( @eventSymbol.AddMethod )] =
+                                        new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
+                                }
+
+                                if ( @eventSymbol.RemoveMethod != null )
+                                {
+                                    results[semantic.WithSymbol( @eventSymbol.RemoveMethod )] =
+                                        new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
+                                }
+
+                                break;
+
+                            case IFieldSymbol fieldSymbol:
+                                break;
+
+                            default:
+                                throw new AssertionFailedException();
+                        }
+
                         continue;
                     }
 
                     switch (semantic.Symbol)
                     {
                         case IMethodSymbol methodSymbol:
-                            results[methodSymbol.ToSemantic(IntermediateSymbolSemanticKind.Default)] = this.Analyze( methodSymbol );
+                            results[semantic.ToTyped<IMethodSymbol>()] = this.Analyze( methodSymbol );
                             break;
 
                         case IPropertySymbol propertySymbol:
                             if ( propertySymbol.GetMethod != null )
                             {
-                                results[propertySymbol.GetMethod.ToSemantic( IntermediateSymbolSemanticKind.Default )] = this.Analyze( propertySymbol.GetMethod );
+                                results[semantic.WithSymbol( propertySymbol.GetMethod )] = this.Analyze( propertySymbol.GetMethod );
                             }
 
                             if ( propertySymbol.SetMethod != null )
                             {
-                                results[propertySymbol.SetMethod.ToSemantic( IntermediateSymbolSemanticKind.Default )] = this.Analyze( propertySymbol.SetMethod );
+                                results[semantic.WithSymbol( propertySymbol.SetMethod )] = this.Analyze( propertySymbol.SetMethod );
                             }
 
                             break;
@@ -59,14 +108,17 @@ namespace Metalama.Framework.Engine.Linking
                         case IEventSymbol @eventSymbol:
                             if ( @eventSymbol.AddMethod != null )
                             {
-                                results[@eventSymbol.AddMethod.ToSemantic( IntermediateSymbolSemanticKind.Default )] = this.Analyze( @eventSymbol.AddMethod );
+                                results[semantic.WithSymbol( @eventSymbol.AddMethod )] = this.Analyze( @eventSymbol.AddMethod );
                             }
 
                             if ( @eventSymbol.RemoveMethod != null )
                             {
-                                results[@eventSymbol.RemoveMethod.ToSemantic( IntermediateSymbolSemanticKind.Default )] = this.Analyze( @eventSymbol.RemoveMethod );
+                                results[semantic.WithSymbol( @eventSymbol.RemoveMethod )] = this.Analyze( @eventSymbol.RemoveMethod );
                             }
 
+                            break;
+
+                        case IFieldSymbol fieldSymbol:
                             break;
 
                         default:
@@ -157,9 +209,13 @@ namespace Metalama.Framework.Engine.Linking
 
                     case ArrowExpressionClauseSyntax:
                         return new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
+                    case MethodDeclarationSyntax { Body: null, ExpressionBody: null } accessorDeclarationSyntax:
+                        return new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
                     case AccessorDeclarationSyntax { Body: null, ExpressionBody: null } accessorDeclarationSyntax:
                         return new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
                     case VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax } }:
+                        return new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
+                    case ParameterSyntax { Parent: ParameterListSyntax { Parent: RecordDeclarationSyntax } }:
                         return new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
                     default:
                         throw new AssertionFailedException();
@@ -309,13 +365,14 @@ namespace Metalama.Framework.Engine.Linking
                 static SyntaxNode GetDeclarationBody( SyntaxNode declaration )
                     => declaration switch
                     {
-                        MethodDeclarationSyntax methodDecl => (SyntaxNode?) methodDecl.Body ?? methodDecl.ExpressionBody.AssertNotNull(),
+                        MethodDeclarationSyntax methodDecl =>methodDecl.Body ?? (SyntaxNode?) methodDecl.ExpressionBody ?? methodDecl,
                         DestructorDeclarationSyntax destructorDecl => (SyntaxNode?) destructorDecl.Body ?? destructorDecl.ExpressionBody.AssertNotNull(),
                         OperatorDeclarationSyntax operatorDecl => (SyntaxNode?) operatorDecl.Body ?? operatorDecl.ExpressionBody.AssertNotNull(),
                         ConversionOperatorDeclarationSyntax conversionOperatorDecl => (SyntaxNode?) conversionOperatorDecl.Body ?? conversionOperatorDecl.ExpressionBody.AssertNotNull(),
                         AccessorDeclarationSyntax accessorDecl => accessorDecl.Body ?? (SyntaxNode?) accessorDecl.ExpressionBody ?? accessorDecl,
                         VariableDeclaratorSyntax declarator => declarator,
-                        ArrowExpressionClauseSyntax arrowExpression => arrowExpression,
+                        ArrowExpressionClauseSyntax arrowExpressionClause => arrowExpressionClause,
+                        ParameterSyntax { Parent: ParameterListSyntax { Parent: RecordDeclarationSyntax } } recordParameter => recordParameter,
                         _ => throw new AssertionFailedException(),
                     };
             }

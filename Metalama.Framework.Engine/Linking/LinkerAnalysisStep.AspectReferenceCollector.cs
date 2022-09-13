@@ -93,13 +93,14 @@ namespace Metalama.Framework.Engine.Linking
                         var sourceNode =
                             containingSymbol.GetPrimaryDeclaration() switch
                             {
-                                MethodDeclarationSyntax method => method.Body ?? (SyntaxNode?) method.ExpressionBody ?? throw new AssertionFailedException(),
+                                MethodDeclarationSyntax method => method.Body ?? (SyntaxNode?) method.ExpressionBody ?? method,
                                 DestructorDeclarationSyntax destructor => destructor.Body ?? (SyntaxNode?) destructor.ExpressionBody ?? throw new AssertionFailedException(),
                                 OperatorDeclarationSyntax @operator => @operator.Body ?? (SyntaxNode?) @operator.ExpressionBody ?? throw new AssertionFailedException(),
                                 ConversionOperatorDeclarationSyntax conversionOperator => conversionOperator.Body ?? (SyntaxNode?) conversionOperator.ExpressionBody ?? throw new AssertionFailedException(),
                                 AccessorDeclarationSyntax accessor => accessor.Body ?? (SyntaxNode?) accessor.ExpressionBody ?? accessor ?? throw new AssertionFailedException(),
                                 VariableDeclaratorSyntax declarator => declarator ?? throw new AssertionFailedException(),
                                 ArrowExpressionClauseSyntax arrowExpressionClause => arrowExpressionClause,
+                                ParameterSyntax { Parent: ParameterListSyntax { Parent: RecordDeclarationSyntax } } recordParameter => recordParameter,
                                 _ => throw new AssertionFailedException(),
                             };
 

@@ -148,6 +148,11 @@ namespace Metalama.Framework.Engine.Linking
 
                 foreach ( var reference in pair.Value )
                 {
+                    if ( !reference.HasResolvedSemanticBody )
+                    {
+                        continue;
+                    }
+
                     if ( reachableSemantics.Contains( reference.ContainingSemantic ) )
                     {
                         list.Add( reference );

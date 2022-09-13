@@ -95,16 +95,19 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                         {
                             // This is the same type, we can just change the identifier in the expression.
                             // TODO: Is the target always accessible?
-                            if ( targetSymbol is IMethodSymbol { MethodKind: MethodKind.Destructor } )
+                            switch ( targetSymbol )
                             {
-                                return memberAccessExpression
-                                    .WithExpression( ThisExpression() )
-                                    .WithName( GetRewrittenName( memberAccessExpression.Name ) );
-                            }
-                            else
-                            {
-                                return memberAccessExpression
-                                    .WithName( GetRewrittenName( memberAccessExpression.Name ) );
+                                case IMethodSymbol { MethodKind: MethodKind.Destructor }:
+                                    return memberAccessExpression
+                                        .WithExpression( ThisExpression() )
+                                        .WithName( IdentifierName( targetMemberName ) );
+                                case IMethodSymbol { MethodKind: MethodKind.UserDefinedOperator or MethodKind.Conversion }:
+                                    return memberAccessExpression
+                                        .WithExpression( context.SyntaxGenerationContext.SyntaxGenerator.Type( targetSymbol.ContainingType ) )
+                                        .WithName( IdentifierName( targetMemberName ) );
+                                default:
+                                    return memberAccessExpression
+                                        .WithName( GetRewrittenName( memberAccessExpression.Name ) );
                             }
                         }
                     }

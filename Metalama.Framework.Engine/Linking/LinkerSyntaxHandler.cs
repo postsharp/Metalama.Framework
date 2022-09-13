@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     case MethodDeclarationSyntax methodDecl:
                         // Partial methods without declared body have empty implicit body.
-                        return methodDecl.Body ?? (SyntaxNode?) methodDecl.ExpressionBody ?? Block();
+                        return methodDecl.Body ?? (SyntaxNode?) methodDecl.ExpressionBody ?? methodDecl;
 
                     case DestructorDeclarationSyntax destructorDecl:
                         return (SyntaxNode?) destructorDecl.Body ?? destructorDecl.ExpressionBody ?? throw new AssertionFailedException();

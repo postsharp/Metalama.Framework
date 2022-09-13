@@ -24,8 +24,9 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             SyntaxNode body =
                 aspectReference.ContainingSemantic.Symbol.GetPrimaryDeclaration() switch
                 {
-                    MethodDeclarationSyntax { Body : { } methodBody } => methodBody,
+                    MethodDeclarationSyntax { Body: { } methodBody } => methodBody,
                     MethodDeclarationSyntax { ExpressionBody: { } methodBody } => methodBody,
+                    MethodDeclarationSyntax { Body: null, ExpressionBody: null } partialMethodDeclaration => partialMethodDeclaration,
                     DestructorDeclarationSyntax { Body: { } destructorBody } => destructorBody,
                     DestructorDeclarationSyntax { ExpressionBody: { } destructorBody } => destructorBody,
                     OperatorDeclarationSyntax { Body: { } operatorBody } => operatorBody,
@@ -37,6 +38,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                     AccessorDeclarationSyntax { Body: null, ExpressionBody: null } accessor => accessor,
                     ArrowExpressionClauseSyntax arrowExpressionClause => arrowExpressionClause,
                     VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax } } eventFieldVariable => eventFieldVariable,
+                    ParameterSyntax { Parent: ParameterListSyntax { Parent: RecordDeclarationSyntax } } recordParameter => recordParameter,
                     _ => throw new AssertionFailedException(),
                 };
 

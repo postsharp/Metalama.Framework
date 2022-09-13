@@ -138,8 +138,8 @@ namespace Metalama.Framework.Engine.Linking
                 switch ( declaration )
                 {
                     case MethodDeclarationSyntax methodDecl:
-                        // Partial methods without declared body have empty implicit body.
-                        return methodDecl.Body ?? (SyntaxNode?) methodDecl.ExpressionBody ?? Block();
+                        // Partial methods without declared body have the whoel declaration as body.
+                        return methodDecl.Body ?? (SyntaxNode?) methodDecl.ExpressionBody ?? methodDecl;
 
                     case DestructorDeclarationSyntax destructorDecl:
                         return (SyntaxNode?) destructorDecl.Body ?? destructorDecl.ExpressionBody ?? throw new AssertionFailedException();
@@ -162,9 +162,10 @@ namespace Metalama.Framework.Engine.Linking
                     case VariableDeclaratorSyntax { Parent: VariableDeclarationSyntax { Parent: EventFieldDeclarationSyntax } } variableDecl:
                         // Event field accessors start replacement as variableDecls.
                         return variableDecl;
-                    case ParameterSyntax: 
+
+                    case ParameterSyntax { Parent: { Parent: RecordDeclarationSyntax } } positionalProperty: 
                         // Record positional property.
-                        return GetImplicitAccessorBody( symbol, generationContext );
+                        return positionalProperty;
 
                     default:
                         throw new AssertionFailedException();
@@ -229,8 +230,14 @@ namespace Metalama.Framework.Engine.Linking
                 case AccessorDeclarationSyntax accessorDecl:
                     return (BlockSyntax) rewriter.Visit( accessorDecl ).AssertNotNull();
 
+                case MethodDeclarationSyntax partialMethodDeclaration:
+                    return (BlockSyntax) rewriter.Visit( partialMethodDeclaration ).AssertNotNull();
+
                 case VariableDeclaratorSyntax { Parent: {Parent: EventFieldDeclarationSyntax } } eventFieldVariable:
                     return (BlockSyntax) rewriter.Visit( eventFieldVariable ).AssertNotNull();
+
+                case ParameterSyntax { Parent: { Parent: RecordDeclarationSyntax } } positionalProperty:
+                    return (BlockSyntax) rewriter.Visit( positionalProperty ).AssertNotNull();
 
                 case ArrowExpressionClauseSyntax arrowExpressionClause:
                     var rewrittenNode = rewriter.Visit( arrowExpressionClause );
@@ -591,6 +598,18 @@ namespace Metalama.Framework.Engine.Linking
                         }
                     }
                 }
+            }
+        }
+
+        private static SyntaxList<AttributeListSyntax> GetAttributeListsForTarget(SyntaxList<AttributeListSyntax> attributeLists, SyntaxKind targetKind, bool preserveTarget )
+        {
+            if ( preserveTarget )
+            {
+                return List( attributeLists.Where( al => al.Target?.Identifier.IsKind( targetKind ) == true ).ToList() );
+            }
+            else
+            {
+                return List( attributeLists.Where( al => al.Target?.Identifier.IsKind( targetKind ) == true ).Select(al => al.WithTarget(null)).ToList() );
             }
         }
     }

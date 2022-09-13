@@ -16,7 +16,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Events.Inliners.AddA
             add
             {
                 Console.WriteLine("Before");
-                link[_this.Foo.add, inline](null, null);
+                link[_this.Foo.add, inline]?.Invoke(null, null);
                 Console.WriteLine("After");
             }
             remove { }

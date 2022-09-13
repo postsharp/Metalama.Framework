@@ -10,6 +10,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking
@@ -38,7 +39,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    members.Add( GetTrampolineEvent( eventDeclaration, lastOverride ) );
+                    members.Add( GetTrampolineForEvent( eventDeclaration, lastOverride ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic(IntermediateSymbolSemanticKind.Default) )
@@ -227,6 +228,57 @@ namespace Metalama.Framework.Engine.Linking
                     .WithTrailingTrivia( ElasticLineFeed )
                     .WithAccessorList( accessorList )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
+        }
+
+        private static EventDeclarationSyntax GetTrampolineForEvent( EventDeclarationSyntax @event, IEventSymbol targetSymbol )
+        {
+            var addAccessor = @event.AccessorList?.Accessors.SingleOrDefault( x => x.Kind() == SyntaxKind.AddAccessorDeclaration );
+            var removeAccessor = @event.AccessorList?.Accessors.SingleOrDefault( x => x.Kind() == SyntaxKind.RemoveAccessorDeclaration );
+
+            return @event
+                .WithAccessorList(
+                    AccessorList(
+                        List(
+                            new[]
+                                {
+                                    addAccessor != null
+                                        ? AccessorDeclaration(
+                                                SyntaxKind.AddAccessorDeclaration,
+                                                Block(
+                                                    ExpressionStatement(
+                                                        AssignmentExpression(
+                                                            SyntaxKind.AddAssignmentExpression,
+                                                            GetInvocationTarget(),
+                                                            IdentifierName( "value" ) ) ) ) )
+                                            .NormalizeWhitespace()
+                                        : null,
+                                    removeAccessor != null
+                                        ? AccessorDeclaration(
+                                                SyntaxKind.RemoveAccessorDeclaration,
+                                                Block(
+                                                    ExpressionStatement(
+                                                        AssignmentExpression(
+                                                            SyntaxKind.SubtractAssignmentExpression,
+                                                            GetInvocationTarget(),
+                                                            IdentifierName( "value" ) ) ) ) )
+                                            .NormalizeWhitespace()
+                                        : null
+                                }.Where( a => a != null )
+                                .AssertNoneNull() ) ) )
+                .WithLeadingTrivia( @event.GetLeadingTrivia() )
+                .WithTrailingTrivia( @event.GetTrailingTrivia() );
+
+            ExpressionSyntax GetInvocationTarget()
+            {
+                if ( targetSymbol.IsStatic )
+                {
+                    return IdentifierName( targetSymbol.Name );
+                }
+                else
+                {
+                    return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( targetSymbol.Name ) );
+                }
+            }
         }
     }
 }

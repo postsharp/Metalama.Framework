@@ -123,6 +123,11 @@ namespace Metalama.Framework.Engine.Linking
                     // Go through all references and recurse into inlined bodies.
                     foreach ( var aspectReference in aspectReferences )
                     {
+                        if (!aspectReference.HasResolvedSemanticBody )
+                        {
+                            continue;
+                        }
+                        
                         if ( this._inlinedReferences.TryGetValue( aspectReference, out var inliner ) )
                         {
                             var targetSemantic = aspectReference.ResolvedSemanticBody;

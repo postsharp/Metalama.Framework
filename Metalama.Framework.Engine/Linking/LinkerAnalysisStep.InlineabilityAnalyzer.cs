@@ -7,9 +7,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.Linking
 {
@@ -89,9 +87,9 @@ namespace Metalama.Framework.Engine.Linking
                         return false;
                     }
 
-                    if ( semantic.Kind == IntermediateSymbolSemanticKind.Final || semantic.Kind == IntermediateSymbolSemanticKind.Base )
+                    if ( semantic.Kind == IntermediateSymbolSemanticKind.Final )
                     {
-                        // Final and base semantic is never inlineable.
+                        // Final semantic is never inlineable.
                         return false;
                     }
 
@@ -105,6 +103,10 @@ namespace Metalama.Framework.Engine.Linking
 
                         case IEventSymbol:
                             return IsInlineableEvent( semantic.ToTyped<IEventSymbol>() );
+
+                        case IFieldSymbol:
+                            // Fields are never inlineable.
+                            return false;
 
                         default:
                             throw new AssertionFailedException();
@@ -198,12 +200,21 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     if ( !reference.IsInlineable )
                     {
+                        // References that are not marked as inlineable cannot be inlined.
+                        inliner = null;
+                        return false;
+                    }
+
+                    if (!SymbolEqualityComparer.Default.Equals(reference.ContainingSemantic.Symbol.ContainingType, reference.ResolvedSemantic.Symbol.ContainingType) )
+                    {
+                        // References between types cannot be inlined.
                         inliner = null;
                         return false;
                     }
 
                     if (reference.SourceNode is not ExpressionSyntax)
                     {
+                        // Use a special inliner for non-expression references.
                         inliner = ImplicitLastOverrideReferenceInliner.Instance;
                         return true;
                     }
@@ -265,34 +276,34 @@ namespace Metalama.Framework.Engine.Linking
                             return IsInlinedSemanticBody( semantic.ToTyped<IMethodSymbol>() );
 
                         case IMethodSymbol { MethodKind: MethodKind.PropertyGet or MethodKind.PropertySet } propertyAccessor:
-                            return IsInlinedSemantic( new IntermediateSymbolSemantic( propertyAccessor.AssociatedSymbol.AssertNotNull(), semantic.Kind ) );
+                            return IsInlinedSemantic( semantic.WithSymbol( propertyAccessor.AssociatedSymbol.AssertNotNull() ) );
 
                         case IMethodSymbol { MethodKind: MethodKind.EventAdd or MethodKind.EventRemove } eventAccessor:
-                            return IsInlinedSemantic( new IntermediateSymbolSemantic( eventAccessor.AssociatedSymbol.AssertNotNull(), semantic.Kind ) );
+                            return IsInlinedSemantic( semantic.WithSymbol( eventAccessor.AssociatedSymbol.AssertNotNull() ) );
 
                         case IPropertySymbol property:
                             // Property is inlined if at least one of the accessors is reachable and not inlineable.
                             var hasNonInlinedGet =
                                 property.GetMethod != null 
-                                && !IsInlinedSemanticBody( new IntermediateSymbolSemantic<IMethodSymbol>( property.GetMethod, semantic.Kind ))
-                                && this._reachableSymbolSemantics.Contains( new IntermediateSymbolSemantic<IMethodSymbol>( property.GetMethod, semantic.Kind ) );
+                                && !IsInlinedSemanticBody( semantic.WithSymbol( property.GetMethod ))
+                                && this._reachableSymbolSemantics.Contains( semantic.WithSymbol( property.GetMethod ) );
 
                             var hasNonInlinedSet =
                                 property.SetMethod != null 
-                                && !IsInlinedSemanticBody( new IntermediateSymbolSemantic<IMethodSymbol>( property.SetMethod, semantic.Kind ) )
-                                && this._reachableSymbolSemantics.Contains( new IntermediateSymbolSemantic<IMethodSymbol>( property.SetMethod, semantic.Kind ) );
+                                && !IsInlinedSemanticBody( semantic.WithSymbol( property.SetMethod ) )
+                                && this._reachableSymbolSemantics.Contains( semantic.WithSymbol( property.SetMethod ) );
 
                             return inlineableSemanticHashSet.Contains(semantic) && !hasNonInlinedGet && !hasNonInlinedSet;
 
                         case IEventSymbol @event:
                             // Event is inlined if at least one of the accessors is reachable and not inlineable.
                             var hasNonInlinedAdd = 
-                                !IsInlinedSemanticBody( new IntermediateSymbolSemantic<IMethodSymbol>( @event.AddMethod.AssertNotNull(), semantic.Kind ) )
-                                && this._reachableSymbolSemantics.Contains( new IntermediateSymbolSemantic<IMethodSymbol>( @event.AddMethod.AssertNotNull(), semantic.Kind ) );
+                                !IsInlinedSemanticBody( semantic.WithSymbol( @event.AddMethod.AssertNotNull() ) )
+                                && this._reachableSymbolSemantics.Contains( semantic.WithSymbol( @event.AddMethod.AssertNotNull() ) );
 
                             var hasNonInlinedRemove = 
-                                !IsInlinedSemanticBody( new IntermediateSymbolSemantic<IMethodSymbol>( @event.RemoveMethod.AssertNotNull(), semantic.Kind ) )
-                                && this._reachableSymbolSemantics.Contains( new IntermediateSymbolSemantic<IMethodSymbol>( @event.RemoveMethod.AssertNotNull(), semantic.Kind ) );
+                                !IsInlinedSemanticBody( semantic.WithSymbol( @event.RemoveMethod.AssertNotNull() ) )
+                                && this._reachableSymbolSemantics.Contains( semantic.WithSymbol( @event.RemoveMethod.AssertNotNull() ) );
 
                             return inlineableSemanticHashSet.Contains( semantic ) && !hasNonInlinedAdd && !hasNonInlinedRemove;
 

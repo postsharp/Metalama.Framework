@@ -139,7 +139,15 @@ namespace Metalama.Framework.Engine.Linking
                                 continue;
                             }
 
-                            DepthFirstSearch( aspectReference.ResolvedSemanticBody );
+                            if ( aspectReference.HasResolvedSemanticBody )
+                            {
+                                DepthFirstSearch( aspectReference.ResolvedSemanticBody );
+                            }
+                            else
+                            {
+                                // If the semantic does not have a body, visit at least the semantic (case for fields).
+                                DepthFirstSearch( aspectReference.ResolvedSemantic );
+                            }
                         }
                     }
                 }

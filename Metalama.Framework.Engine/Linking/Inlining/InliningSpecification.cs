@@ -83,7 +83,8 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             IntermediateSymbolSemantic<IMethodSymbol> targetSemantic)
         {
             Invariant.AssertNot( declareReturnVariable && returnVariableIdentifier == null );
-            Invariant.Assert( targetSemantic.Kind == IntermediateSymbolSemanticKind.Default );
+            Invariant.AssertNot( targetSemantic.Kind == IntermediateSymbolSemanticKind.Final );
+            Invariant.Assert( SymbolEqualityComparer.Default.Equals( targetSemantic.Symbol.ContainingType, destinationSemantic.Symbol.ContainingType ) );
 
             this.DestinationSemantic = destinationSemantic;
             this._inliningId = inliningId;
@@ -99,7 +100,8 @@ namespace Metalama.Framework.Engine.Linking.Inlining
 
         public override string ToString()
         {
-            return $"Inline {this.AspectReference.ResolvedSemanticBody} into {this.DestinationSemantic} (id: {this._inliningId})";
+            return $"Inline {(this.AspectReference.HasResolvedSemanticBody ? this.AspectReference.ResolvedSemanticBody : this.AspectReference.ResolvedSemantic)} " +
+                $"into {this.DestinationSemantic} (id: {this._inliningId})";
         }
     }
 }

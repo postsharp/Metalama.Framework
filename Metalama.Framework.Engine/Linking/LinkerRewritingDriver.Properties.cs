@@ -40,7 +40,12 @@ namespace Metalama.Framework.Engine.Linking
                      && this.AnalysisRegistry.IsInlined( symbol.ToSemantic(IntermediateSymbolSemanticKind.Default) ) )
                 {
                     // Backing field for auto property.
-                    members.Add( GetPropertyBackingField( propertyDeclaration, symbol ) );
+                    members.Add( 
+                        GetPropertyBackingField( 
+                            propertyDeclaration.Type, 
+                            propertyDeclaration.Initializer,
+                            GetAttributeListsForTarget( propertyDeclaration.AttributeLists, SyntaxKind.FieldKeyword, false ),
+                            symbol ) );
                 }
 
                 if ( this.AnalysisRegistry.IsInlined( lastOverride.ToSemantic(IntermediateSymbolSemanticKind.Default) ) )
@@ -49,19 +54,32 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    members.Add( GetTrampolineProperty( propertyDeclaration, lastOverride ) );
+                    members.Add( GetTrampolineForProperty( propertyDeclaration, lastOverride ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic(IntermediateSymbolSemanticKind.Default) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic(IntermediateSymbolSemanticKind.Default) ) )
                 {
-                    members.Add( GetOriginalImplProperty( propertyDeclaration, symbol, generationContext, propertyDeclaration.IsAutoPropertyDeclaration() ) );
+                    members.Add( 
+                        GetOriginalImplProperty( 
+                            symbol, 
+                            propertyDeclaration.IsAutoPropertyDeclaration(), 
+                            propertyDeclaration.Type, 
+                            propertyDeclaration.Initializer, 
+                            propertyDeclaration.AccessorList,
+                            propertyDeclaration.ExpressionBody, 
+                            generationContext ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic(IntermediateSymbolSemanticKind.Base) )
                      && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic(IntermediateSymbolSemanticKind.Base) ) )
                 {
-                    members.Add( GetEmptyImplProperty( propertyDeclaration, symbol ) );
+                    members.Add( 
+                        GetEmptyImplProperty( 
+                            symbol,
+                            propertyDeclaration.IsAutoPropertyDeclaration(),
+                            propertyDeclaration.Type,
+                            propertyDeclaration.AccessorList ) );
                 }
 
                 return members;
@@ -208,7 +226,7 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private static FieldDeclarationSyntax GetPropertyBackingField( PropertyDeclarationSyntax propertyDeclaration, IPropertySymbol symbol )
+        private static FieldDeclarationSyntax GetPropertyBackingField( TypeSyntax type, EqualsValueClauseSyntax? initializer, SyntaxList<AttributeListSyntax> attributes, IPropertySymbol symbol )
         {
             var modifiers = new List<SyntaxToken> { Token( SyntaxKind.PrivateKeyword ) };
 
@@ -223,15 +241,15 @@ namespace Metalama.Framework.Engine.Linking
             }
 
             return FieldDeclaration(
-                    List<AttributeListSyntax>(),
+                    attributes,
                     TokenList( modifiers ),
                     VariableDeclaration(
-                        propertyDeclaration.Type,
+                        type,
                         SingletonSeparatedList(
                             VariableDeclarator(
                                 Identifier( GetBackingFieldName( symbol ) ),
                                 null,
-                                propertyDeclaration.Initializer ) ) ) )
+                                initializer ) ) ) )
                 .NormalizeWhitespace()
                 .WithLeadingTrivia( LineFeed, LineFeed )
                 .WithTrailingTrivia( LineFeed )
@@ -266,61 +284,62 @@ namespace Metalama.Framework.Engine.Linking
                 .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
         private static MemberDeclarationSyntax GetOriginalImplProperty(
-            PropertyDeclarationSyntax property,
             IPropertySymbol symbol,
-            SyntaxGenerationContext generationContext,
-            bool autoProperty )
+            bool isAutoProperty,
+            TypeSyntax type,
+            EqualsValueClauseSyntax? initializer,
+            AccessorListSyntax? existingAccessorList,
+            ArrowExpressionClauseSyntax? existingExpressionBody,
+            SyntaxGenerationContext generationContext )
         {
             var accessorList =
-                property.IsAutoPropertyDeclaration()
+                isAutoProperty
                     ? AccessorList(
                             List(
                                 new[]
-                                    {
-                                        symbol.GetMethod != null
-                                            ? autoProperty
-                                                ? AccessorDeclaration(
-                                                    SyntaxKind.GetAccessorDeclaration,
-                                                    List<AttributeListSyntax>(),
-                                                    TokenList(),
-                                                    Token( SyntaxKind.GetKeyword ),
-                                                    null,
-                                                    null,
-                                                    Token( SyntaxKind.SemicolonToken ) )
-                                                : AccessorDeclaration(
-                                                    SyntaxKind.GetAccessorDeclaration,
-                                                    GetImplicitGetterBody( symbol.GetMethod, generationContext ) )
-                                            : null,
-                                        symbol.SetMethod != null
-                                            ? autoProperty
-                                                ? AccessorDeclaration(
-                                                    SyntaxKind.SetAccessorDeclaration,
-                                                    List<AttributeListSyntax>(),
-                                                    TokenList(),
-                                                    Token( SyntaxKind.SetKeyword ),
-                                                    null,
-                                                    null,
-                                                    Token( SyntaxKind.SemicolonToken ) )
-                                                : AccessorDeclaration(
-                                                    SyntaxKind.SetAccessorDeclaration,
-                                                    GetImplicitSetterBody( symbol.SetMethod, generationContext ) )
-                                            : null
-                                    }.Where( a => a != null )
+                                {
+                                    symbol.GetMethod != null
+                                        ? isAutoProperty
+                                            ? AccessorDeclaration(
+                                                SyntaxKind.GetAccessorDeclaration,
+                                                List<AttributeListSyntax>(),
+                                                TokenList(),
+                                                Token( SyntaxKind.GetKeyword ),
+                                                null,
+                                                null,
+                                                Token( SyntaxKind.SemicolonToken ) )
+                                            : AccessorDeclaration(
+                                                SyntaxKind.GetAccessorDeclaration,
+                                                GetImplicitGetterBody( symbol.GetMethod, generationContext ) )
+                                        : null,
+                                    symbol.SetMethod != null
+                                        ? isAutoProperty
+                                            ? AccessorDeclaration(
+                                                SyntaxKind.SetAccessorDeclaration,
+                                                List<AttributeListSyntax>(),
+                                                TokenList(),
+                                                Token( SyntaxKind.SetKeyword ),
+                                                null,
+                                                null,
+                                                Token( SyntaxKind.SemicolonToken ) )
+                                            : AccessorDeclaration(
+                                                SyntaxKind.SetAccessorDeclaration,
+                                                GetImplicitSetterBody( symbol.SetMethod, generationContext ) )
+                                        : null
+                                }.Where( a => a != null )
                                     .AssertNoneNull() ) )
                         .NormalizeWhitespace()
-                    : property.AccessorList?.WithSourceCodeAnnotation();
+                    : existingAccessorList?.WithSourceCodeAnnotation();
 
             var expressionBody =
-                property.IsAutoPropertyDeclaration()
+                isAutoProperty
                     ? null
-                    : property.AccessorList != null
+                    : existingAccessorList != null
                         ? null
-                        : property.ExpressionBody;
-
-            var initializer = property.Initializer;
+                        : existingExpressionBody;
 
             return GetSpecialImplProperty(
-                property.Type,
+                type,
                 accessorList,
                 expressionBody,
                 initializer.WithSourceCodeAnnotation(),
@@ -328,35 +347,39 @@ namespace Metalama.Framework.Engine.Linking
                 GetOriginalImplMemberName( symbol ) );
         }
 
-        private static MemberDeclarationSyntax GetEmptyImplProperty( PropertyDeclarationSyntax property, IPropertySymbol symbol )
+        private static MemberDeclarationSyntax GetEmptyImplProperty(
+            IPropertySymbol symbol,
+            bool isAutoProperty,
+            TypeSyntax type,
+            AccessorListSyntax? existingAccessorList )
         {
             var accessorList =
-                property.IsAutoPropertyDeclaration()
+                isAutoProperty
                     ? AccessorList(
                             List(
                                 new[]
-                                    {
-                                        symbol.GetMethod != null
-                                            ? AccessorDeclaration(
-                                                SyntaxKind.GetAccessorDeclaration,
-                                                List<AttributeListSyntax>(),
-                                                TokenList(),
-                                                Token( SyntaxKind.GetKeyword ),
-                                                null,
-                                                ArrowExpressionClause( DefaultExpression( property.Type ) ),
-                                                Token( SyntaxKind.SemicolonToken ) )
-                                            : null,
-                                        symbol.SetMethod != null
-                                            ? AccessorDeclaration(
-                                                SyntaxKind.SetAccessorDeclaration,
-                                                Block() )
-                                            : null
-                                    }.Where( a => a != null )
-                                    .AssertNoneNull() ) )
+                                {
+                                    symbol.GetMethod != null
+                                        ? AccessorDeclaration(
+                                            SyntaxKind.GetAccessorDeclaration,
+                                            List<AttributeListSyntax>(),
+                                            TokenList(),
+                                            Token( SyntaxKind.GetKeyword ),
+                                            null,
+                                            ArrowExpressionClause( DefaultExpression( type ) ),
+                                            Token( SyntaxKind.SemicolonToken ) )
+                                        : null,
+                                    symbol.SetMethod != null
+                                        ? AccessorDeclaration(
+                                            SyntaxKind.SetAccessorDeclaration,
+                                            Block() )
+                                        : null
+                                }.Where( a => a != null )
+                                .AssertNoneNull() ) )
                         .NormalizeWhitespace()
-                    : property.AccessorList.AssertNotNull();
+                    : existingAccessorList.AssertNotNull();
 
-            return GetSpecialImplProperty( property.Type, accessorList, null, null, symbol, GetEmptyImplMemberName( symbol ) );
+            return GetSpecialImplProperty( type, accessorList, null, null, symbol, GetEmptyImplMemberName( symbol ) );
         }
 
         private static MemberDeclarationSyntax GetSpecialImplProperty(
@@ -387,6 +410,56 @@ namespace Metalama.Framework.Engine.Linking
                     .WithInitializer( initializer.WithSourceCodeAnnotation() )
                     .WithSemicolonToken( expressionBody != null || initializer != null ? Token( SyntaxKind.SemicolonToken ) : default )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
+        }
+
+        private static PropertyDeclarationSyntax GetTrampolineForProperty( PropertyDeclarationSyntax property, IPropertySymbol targetSymbol )
+        {
+            var getAccessor = property.AccessorList?.Accessors.SingleOrDefault( x => x.Kind() == SyntaxKind.GetAccessorDeclaration );
+            var setAccessor = property.AccessorList?.Accessors.SingleOrDefault( x => x.Kind() == SyntaxKind.SetAccessorDeclaration );
+
+            return property
+                .WithAccessorList(
+                    AccessorList(
+                        List(
+                            new[]
+                                {
+                                    getAccessor != null
+                                        ? AccessorDeclaration(
+                                                SyntaxKind.GetAccessorDeclaration,
+                                                Block(
+                                                    ReturnStatement(
+                                                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
+                                                        GetInvocationTarget(),
+                                                        Token( SyntaxKind.SemicolonToken ) ) ) )
+                                            .NormalizeWhitespace()
+                                        : null,
+                                    setAccessor != null
+                                        ? AccessorDeclaration(
+                                                SyntaxKind.SetAccessorDeclaration,
+                                                Block(
+                                                    ExpressionStatement(
+                                                        AssignmentExpression(
+                                                            SyntaxKind.SimpleAssignmentExpression,
+                                                            GetInvocationTarget(),
+                                                            IdentifierName( "value" ) ) ) ) )
+                                            .NormalizeWhitespace()
+                                        : null
+                                }.Where( a => a != null )
+                                .AssertNoneNull() ) ) )
+                .WithLeadingTrivia( property.GetLeadingTrivia() )
+                .WithTrailingTrivia( property.GetTrailingTrivia() );
+
+            ExpressionSyntax GetInvocationTarget()
+            {
+                if ( targetSymbol.IsStatic )
+                {
+                    return IdentifierName( targetSymbol.Name );
+                }
+                else
+                {
+                    return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( targetSymbol.Name ) );
+                }
+            }
         }
     }
 }

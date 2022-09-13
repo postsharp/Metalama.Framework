@@ -122,7 +122,11 @@ namespace Metalama.Framework.Engine.Linking
             ConversionOperatorDeclarationSyntax @operator,
             IMethodSymbol symbol )
         {
-            var emptyBody = Block().NormalizeWhitespace();
+            var emptyBody =
+                Block(
+                    ReturnStatement(
+                        DefaultExpression( @operator.Type ) ) )
+                .NormalizeWhitespace();
 
             return GetSpecialImplConversionOperator( @operator, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ) );
         }
@@ -156,6 +160,33 @@ namespace Metalama.Framework.Engine.Linking
                     .WithBody( body )
                     .WithExpressionBody( expressionBody )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
+        }
+        private static ConversionOperatorDeclarationSyntax GetTrampolineConversionOperator(
+            ConversionOperatorDeclarationSyntax @operator,
+            IMethodSymbol targetSymbol )
+        {
+            // TODO: First override not being inlineable probably does not happen outside of specifically written linker tests, i.e. trampolines may not be needed.
+
+            return
+                @operator
+                    .WithBody( GetBody() )
+                    .NormalizeWhitespace()
+                    .WithLeadingTrivia( @operator.GetLeadingTrivia() )
+                    .WithTrailingTrivia( @operator.GetTrailingTrivia() );
+
+            BlockSyntax GetBody()
+            {
+                var invocation =
+                    InvocationExpression(
+                        IdentifierName( targetSymbol.Name ),
+                        ArgumentList() );
+
+                return Block(
+                    ReturnStatement(
+                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
+                        invocation,
+                        Token( SyntaxKind.SemicolonToken ) ) );
+            }
         }
     }
 }

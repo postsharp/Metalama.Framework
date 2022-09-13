@@ -47,7 +47,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
                 else
                 {
-                    members.Add( GetTrampolineMethod( methodDeclaration, lastOverride ) );
+                    members.Add( GetTrampolineForMethod( methodDeclaration, lastOverride ) );
                 }
 
                 if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic(IntermediateSymbolSemanticKind.Default) )
@@ -192,6 +192,51 @@ namespace Metalama.Framework.Engine.Linking
                     .WithExpressionBody( expressionBody )
                     .WithSemicolonToken( expressionBody != null ? Token( SyntaxKind.SemicolonToken ) : default )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
+        }
+
+        private static MethodDeclarationSyntax GetTrampolineForMethod( MethodDeclarationSyntax method, IMethodSymbol targetSymbol )
+        {
+            // TODO: First override not being inlineable probably does not happen outside of specifically written linker tests, i.e. trampolines may not be needed.
+
+            return method
+                .WithBody( GetBody() )
+                .WithModifiers( TokenList( method.Modifiers.Where( m => !m.IsKind( SyntaxKind.AsyncKeyword ) ) ) )
+                .NormalizeWhitespace()
+                .WithLeadingTrivia( method.GetLeadingTrivia() )
+                .WithTrailingTrivia( method.GetTrailingTrivia() );
+
+            BlockSyntax GetBody()
+            {
+                var invocation =
+                    InvocationExpression(
+                        GetInvocationTarget(),
+                        ArgumentList( SeparatedList( method.ParameterList.Parameters.Select( x => Argument( IdentifierName( x.Identifier ) ) ) ) ) );
+
+                if ( !targetSymbol.ReturnsVoid )
+                {
+                    return Block(
+                        ReturnStatement(
+                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
+                            invocation,
+                            Token( SyntaxKind.SemicolonToken ) ) );
+                }
+                else
+                {
+                    return Block( ExpressionStatement( invocation ) );
+                }
+
+                ExpressionSyntax GetInvocationTarget()
+                {
+                    if ( targetSymbol.IsStatic )
+                    {
+                        return IdentifierName( targetSymbol.Name );
+                    }
+                    else
+                    {
+                        return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( targetSymbol.Name ) );
+                    }
+                }
+            }
         }
     }
 }
