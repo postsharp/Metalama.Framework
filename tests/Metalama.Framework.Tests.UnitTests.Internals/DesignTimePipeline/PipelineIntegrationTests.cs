@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Tests.UnitTests.DesignTime;
 using Metalama.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -138,8 +139,8 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTimePipeline
             using var testContext = this.CreateTestContext();
 
             var compilation = CreateCSharpCompilation( new Dictionary<string, string>() { { "F1.cs", "public class X {}" } } );
-            using TestDesignTimeAspectPipelineFactory factory = new( new UnloadableCompileTimeDomain(), testContext.ServiceProvider );
-            var pipeline = factory.GetOrCreatePipeline( testContext.ProjectOptions, compilation, CancellationToken.None )!;
+            using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+            var pipeline = factory.CreatePipeline( compilation );
 
             // First execution of the pipeline.
             Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, CancellationToken.None, out var results ) );
@@ -218,8 +219,8 @@ Target.cs:
                 },
                 assemblyName );
 
-            using TestDesignTimeAspectPipelineFactory factory = new( new UnloadableCompileTimeDomain(), testContext.ServiceProvider );
-            var pipeline = factory.GetOrCreatePipeline( testContext.ProjectOptions, compilation, CancellationToken.None )!;
+            using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+            var pipeline = factory.CreatePipeline( compilation );
 
             // First execution of the pipeline.
             Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, CancellationToken.None, out var results ) );
@@ -382,7 +383,7 @@ partial class C
 
             using var testContext = this.CreateTestContext();
 
-            using TestDesignTimeAspectPipelineFactory factory = new( new UnloadableCompileTimeDomain(), testContext.ServiceProvider );
+            using TestDesignTimeAspectPipelineFactory factory = new( testContext );
 
             void TestWithTargetCode( string targetCode )
             {
@@ -412,10 +413,7 @@ partial class C
         {
             var context = this.CreateTestContext();
 
-            // Disposing the domain crashes the CLR in this test.
-            var domain = new UnloadableCompileTimeDomain();
-
-            using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( domain, context.ServiceProvider );
+            using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( context );
 
             // The dependency cannot have a reference to Metalama.
             // It needs to define a system type that is considered as compile-time.

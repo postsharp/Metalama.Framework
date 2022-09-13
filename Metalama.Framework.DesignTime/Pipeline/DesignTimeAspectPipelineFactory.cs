@@ -31,7 +31,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
         private readonly ILogger _logger;
         private readonly ConcurrentQueue<TaskCompletionSource<DesignTimeAspectPipeline>> _newPipelineListeners = new();
         private readonly CancellationToken _globalCancellationToken = CancellationToken.None;
-        private readonly ServiceProvider _serviceProvider;
+
+        public ServiceProvider ServiceProvider { get; }
 
         private readonly bool _isTest;
 
@@ -44,7 +45,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         public DesignTimeAspectPipelineFactory( ServiceProvider serviceProvider, CompileTimeDomain domain, bool isTest = false )
         {
             this.Domain = domain;
-            this._serviceProvider = serviceProvider;
+            this.ServiceProvider = serviceProvider.WithService( this );
             this._isTest = isTest;
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
 
@@ -84,8 +85,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                         return pipeline;
                     }
 
-                    var serviceProvider = this._serviceProvider.WithServices( projectOptions, this );
-                    pipeline = new DesignTimeAspectPipeline( serviceProvider, this.Domain, compilationId, compilation.References, this._isTest );
+                    pipeline = new DesignTimeAspectPipeline( this, projectOptions, compilationId, compilation.References, this._isTest );
                     pipeline.PipelineResumed += this.OnPipelineResumed;
                     pipeline.StatusChanged += this.OnPipelineStatusChanged;
 
@@ -207,7 +207,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             return await pipeline.ExecuteAsync( compilation, cancellationToken );
         }
 
-        public void Dispose()
+        public virtual void Dispose()
         {
             foreach ( var designTimeAspectPipeline in this._pipelinesByProjectKey.Values )
             {
@@ -219,7 +219,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         }
 
         internal NonMetalamaProjectTracker GetNonMetalamaProjectTracker( ProjectKey projectKey )
-            => this._nonMetalamaProjectTrackers.GetOrAdd( projectKey, k => new NonMetalamaProjectTracker( this._serviceProvider ) );
+            => this._nonMetalamaProjectTrackers.GetOrAdd( projectKey, k => new NonMetalamaProjectTracker( this.ServiceProvider ) );
 
         protected virtual async ValueTask<DesignTimeAspectPipeline?> GetPipelineAndWaitAsync( Compilation compilation, CancellationToken cancellationToken )
         {

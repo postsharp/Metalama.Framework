@@ -4,7 +4,6 @@ using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Tests.UnitTests.Utilities;
-using Metalama.TestFramework;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -83,12 +82,12 @@ using Metalama.Framework.Code;
 
             var compilation1 = CreateCSharpCompilation( code );
 
-            using var domain = new UnloadableCompileTimeDomain();
             var serviceProvider = testContext.ServiceProvider.WithServices( fileSystemWatcherFactory );
+            using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext, serviceProvider );
 
             using DesignTimeAspectPipeline pipeline = new(
-                serviceProvider,
-                domain,
+                pipelineFactory,
+                testContext.ProjectOptions,
                 compilation1,
                 true );
 

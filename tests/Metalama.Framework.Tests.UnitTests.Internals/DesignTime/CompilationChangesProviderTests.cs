@@ -20,13 +20,13 @@ public class CompilationChangesProviderTests : TestBase
         var graph = new CompilationChangesProvider( testContext.ServiceProvider.WithService( observer ) );
         var compilation1 = CreateCSharpCompilation( code );
         var compilationChanges1 = await graph.GetCompilationChangesAsync( null, compilation1 );
-        Assert.Same( compilation1, compilationChanges1.NewCompilationVersion.Compilation );
+        Assert.Same( compilation1, compilationChanges1.NewCompilationVersion.CompilationToAnalyze );
         Assert.False( compilationChanges1.IsIncremental );
         Assert.True( compilationChanges1.HasChange );
         Assert.True( compilationChanges1.HasCompileTimeCodeChange );
         Assert.Equal( 1, observer.NewCompilationEventCount );
-        Assert.Equal( 1, observer.UpdateCompilationVersionEventCount );
-        Assert.Equal( 0, observer.MergeCompilationChangesEventCount );
+        Assert.Equal( 1, observer.ComputeNonIncrementalChangesEventCount );
+        Assert.Equal( 0, observer.ComputeIncrementalChangesEventCount );
 
         // Create a second compilation. We explicitly copy the references from the first compilation because references
         // may not be equal due to a change in the loaded assemblies in the AppDomain during the execution of the test.
@@ -35,16 +35,16 @@ public class CompilationChangesProviderTests : TestBase
         Assert.True( compilationChanges2.IsIncremental );
         Assert.False( compilationChanges2.HasChange );
         Assert.False( compilationChanges2.HasCompileTimeCodeChange );
-        Assert.Same( compilation1, compilationChanges2.NewCompilationVersion.Compilation ); // There is no change, so compilation1 is expected.
+        Assert.Same( compilation1, compilationChanges2.NewCompilationVersion.CompilationToAnalyze ); // There is no change, so compilation1 is expected.
         Assert.Equal( 1, observer.NewCompilationEventCount );
-        Assert.Equal( 2, observer.UpdateCompilationVersionEventCount );
-        Assert.Equal( 0, observer.MergeCompilationChangesEventCount );
+        Assert.Equal( 1, observer.ComputeNonIncrementalChangesEventCount );
+        Assert.Equal( 1, observer.ComputeIncrementalChangesEventCount );
 
-        // Calling GetCompilationVersion a second time with the same parameter should not trigger an UpdateCompilationVersion.
+        // Calling GetCompilationVersion a second time with the same parameter should not trigger an computation of changes.
         _ = await graph.GetCompilationChangesAsync( compilation1, compilation2 );
         Assert.Equal( 1, observer.NewCompilationEventCount );
-        Assert.Equal( 2, observer.UpdateCompilationVersionEventCount );
-        Assert.Equal( 0, observer.MergeCompilationChangesEventCount );
+        Assert.Equal( 1, observer.ComputeNonIncrementalChangesEventCount );
+        Assert.Equal( 1, observer.ComputeIncrementalChangesEventCount );
 
         // Create a third compilation with no change.
         var compilation3 = CreateCSharpCompilation( code ).WithReferences( compilation1.References );
@@ -52,10 +52,9 @@ public class CompilationChangesProviderTests : TestBase
         Assert.True( compilationChanges3.IsIncremental );
         Assert.False( compilationChanges3.HasChange );
         Assert.False( compilationChanges3.HasCompileTimeCodeChange );
-        Assert.Same( compilation1, compilationChanges3.NewCompilationVersion.Compilation ); // There is no change, so compilation1 is expected.
-        Assert.Equal( 1, observer.NewCompilationEventCount );
-        Assert.Equal( 3, observer.UpdateCompilationVersionEventCount );
-        Assert.Equal( 0, observer.MergeCompilationChangesEventCount );
+        Assert.Same( compilation1, compilationChanges3.NewCompilationVersion.CompilationToAnalyze ); // There is no change, so compilation1 is expected.
+        Assert.Equal( 1, observer.ComputeNonIncrementalChangesEventCount );
+        Assert.Equal( 2, observer.ComputeIncrementalChangesEventCount );
     }
 
     [Fact]

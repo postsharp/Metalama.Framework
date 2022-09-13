@@ -21,9 +21,16 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
 
         public Compilation Compilation { get; }
 
+        /// <summary>
+        /// Gets the compilation that should be analyzed by the pipeline. This is typically an older version of
+        /// the current <see cref="CompilationVersion"/>, but without the generated syntax trees.
+        /// </summary>
+        public Compilation CompilationToAnalyze { get; }
+
         public CompilationVersion(
             DiffStrategy strategy,
             Compilation compilation,
+            Compilation compilationToAnalyze,
             ImmutableDictionary<string, SyntaxTreeVersion> syntaxTrees,
             ImmutableDictionary<AssemblyIdentity, CompilationReference> references,
             ulong compileTimeProjectHash )
@@ -32,6 +39,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             this.SyntaxTrees = syntaxTrees;
             this.References = references;
             this.Compilation = compilation;
+            this.CompilationToAnalyze = compilationToAnalyze;
             this.CompileTimeProjectHash = compileTimeProjectHash;
         }
 
@@ -39,7 +47,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         /// Returns a copy of the current <see cref="CompilationVersion"/> that differs only by the <see cref="Compilation"/> property.
         /// </summary>
         public CompilationVersion WithCompilation( Compilation compilation )
-            => new( this.Strategy, compilation, this.SyntaxTrees, this.References, this.CompileTimeProjectHash );
+            => new( this.Strategy, compilation, this.CompilationToAnalyze, this.SyntaxTrees, this.References, this.CompileTimeProjectHash );
 
         public static CompilationVersion Create( Compilation compilation, DiffStrategy strategy, CancellationToken cancellationToken = default )
         {
@@ -50,12 +58,16 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
 
             var partialTypesBuilder = ImmutableHashSet.CreateBuilder<TypeDependencyKey>();
 
+            var generatedSyntaxTrees = new List<SyntaxTree>();
+
             foreach ( var syntaxTree in compilation.SyntaxTrees )
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
                 if ( SourceGeneratorHelper.IsGeneratedFile( syntaxTree ) )
                 {
+                    generatedSyntaxTrees.Add( syntaxTree );
+
                     continue;
                 }
 
@@ -71,9 +83,12 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
 
             var syntaxTreeVersions = syntaxTreesBuilder.ToImmutable();
 
+            var compilationToAnalyze = generatedSyntaxTrees.Count > 0 ? compilation.RemoveSyntaxTrees( generatedSyntaxTrees ) : compilation;
+
             return new CompilationVersion(
                 strategy,
                 compilation,
+                compilationToAnalyze,
                 syntaxTreeVersions,
                 references.ToImmutableDictionary(),
                 DiffStrategy.ComputeCompileTimeProjectHash( syntaxTreeVersions ) );

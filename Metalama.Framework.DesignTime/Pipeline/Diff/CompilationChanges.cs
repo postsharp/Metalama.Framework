@@ -37,7 +37,6 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             CompilationVersion newCompilationVersion,
             ImmutableDictionary<string, SyntaxTreeChange> syntaxTreeChanges,
             bool hasCompileTimeCodeChange,
-            Compilation compilationToAnalyze,
             bool isIncremental )
         {
             this._strategy = strategy;
@@ -45,7 +44,6 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             this.OldCompilationVersion = oldCompilationVersion;
             this.NewCompilationVersion = newCompilationVersion;
             this.HasCompileTimeCodeChange = hasCompileTimeCodeChange;
-            this.CompilationToAnalyze = compilationToAnalyze;
             this.IsIncremental = isIncremental;
         }
 
@@ -59,18 +57,11 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                 newCompilation,
                 ImmutableDictionary<string, SyntaxTreeChange>.Empty,
                 false,
-                newCompilation.Compilation,
                 oldCompilation != null );
 
         public bool HasChange => this._syntaxTreeChanges is { Count: > 0 } || this.HasCompileTimeCodeChange;
 
         public bool IsIncremental { get; }
-
-        /// <summary>
-        /// Gets the <see cref="Microsoft.CodeAnalysis.Compilation"/> that must be analyzed. If <see cref="HasChange"/> is false,
-        /// this is the last compilation of <see cref="CompilationVersion"/>. Otherwise, this is the new compilation. 
-        /// </summary>
-        public Compilation CompilationToAnalyze { get; }
 
         public CompilationChanges Merge( CompilationChanges compilationChanges )
         {
@@ -114,13 +105,14 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                     compilationChanges.NewCompilationVersion,
                     mergedSyntaxTreeBuilder.ToImmutable(),
                     this.HasCompileTimeCodeChange | compilationChanges.HasCompileTimeCodeChange,
-                    compilationChanges.CompilationToAnalyze,
                     this.IsIncremental );
             }
         }
 
         public static CompilationChanges NonIncremental( CompilationVersion compilationVersion )
         {
+            compilationVersion.Strategy.Observer?.OnComputeNonIncrementalChanges();
+
             var syntaxTreeChanges = compilationVersion.SyntaxTrees.ToImmutableDictionary( t => t.Key, t => SyntaxTreeChange.NonIncremental( t.Value ) );
 
             return new CompilationChanges(
@@ -129,7 +121,6 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                 compilationVersion,
                 syntaxTreeChanges,
                 true,
-                compilationVersion.Compilation,
                 false );
         }
 
@@ -149,7 +140,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                 dependencyChanges = DependencyChanges.Empty;
             }
 
-            oldCompilationVersion.Strategy.Observer?.OnUpdateCompilationVersion();
+            oldCompilationVersion.Strategy.Observer?.OnComputeIncrementalChanges();
 
             var newTrees = ImmutableDictionary.CreateBuilder<string, SyntaxTreeVersion>( StringComparer.Ordinal );
             var generatedTrees = new List<SyntaxTree>();
@@ -289,13 +280,6 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             // Create the new CompilationVersion.
             var syntaxTreeVersions = newTrees.ToImmutable();
 
-            var newCompilationVersion = new CompilationVersion(
-                oldCompilationVersion.Strategy,
-                newCompilation,
-                syntaxTreeVersions,
-                references,
-                DiffStrategy.ComputeCompileTimeProjectHash( syntaxTreeVersions ) );
-
             // Determine which compilation should be analyzed.
             CompilationChanges compilationChanges;
 
@@ -307,8 +291,18 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             else
             {
                 // We have to analyze a new compilation, however we need to remove generated trees.
-                cancellationToken.ThrowIfCancellationRequested();
+
                 var compilationToAnalyze = newCompilation.RemoveSyntaxTrees( generatedTrees );
+
+                var newCompilationVersion = new CompilationVersion(
+                    oldCompilationVersion.Strategy,
+                    newCompilation,
+                    compilationToAnalyze,
+                    syntaxTreeVersions,
+                    references,
+                    DiffStrategy.ComputeCompileTimeProjectHash( syntaxTreeVersions ) );
+
+                cancellationToken.ThrowIfCancellationRequested();
 
                 compilationChanges = new CompilationChanges(
                     oldCompilationVersion.Strategy,
@@ -316,7 +310,6 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                     newCompilationVersion,
                     syntaxTreeChanges.ToImmutable(),
                     hasCompileTimeChange,
-                    compilationToAnalyze,
                     true );
             }
 

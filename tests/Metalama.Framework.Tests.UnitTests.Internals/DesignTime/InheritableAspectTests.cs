@@ -1,6 +1,5 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.TestFramework;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
@@ -31,7 +30,8 @@ public interface I {}
 
             var compilation1 = testContext.CreateCompilationModel( code1 );
 
-            var pipeline = new DesignTimeAspectPipeline( testContext.ServiceProvider, domain, compilation1.RoslynCompilation, true );
+            using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
+            var pipeline = pipelineFactory.CreatePipeline( compilation1.RoslynCompilation );
 
             Assert.True( pipeline.TryExecute( compilation1.RoslynCompilation, CancellationToken.None, out var compilationResult1 ) );
 
@@ -46,7 +46,6 @@ public interface I {}
         public void IncrementalCompilationWorks()
         {
             using var testContext = this.CreateTestContext();
-            using var domain = new UnloadableCompileTimeDomain();
 
             var aspectCode = @"
 using Metalama.Framework.Aspects;
@@ -62,7 +61,9 @@ public class Aspect : TypeAspect { }
 
             var targetTree1 = compilation1.RoslynCompilation.SyntaxTrees.Single( t => t.FilePath == "target.cs" );
 
-            var pipeline = new DesignTimeAspectPipeline( testContext.ServiceProvider, domain, compilation1.RoslynCompilation, true );
+            using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
+            var pipeline = pipelineFactory.CreatePipeline( compilation1.RoslynCompilation );
+
             Assert.True( pipeline.TryExecute( compilation1.RoslynCompilation, CancellationToken.None, out var compilationResult1 ) );
 
             Assert.Equal(
@@ -104,7 +105,6 @@ public class Aspect : TypeAspect { }
         {
             using var domain = new UnloadableCompileTimeDomain();
             using var testContext = this.CreateTestContext();
-            using var factory = new TestDesignTimeAspectPipelineFactory( domain, testContext.ServiceProvider );
 
             var code1 = @"
 using Metalama.Framework.Aspects;
@@ -133,8 +133,10 @@ public interface I {}
             // We have to execute the pipeline on compilation1 first and explicitly because implicit running is not currently possible
             // because of missing project options.
 
-            Assert.True( factory.TryExecute( testContext1.ProjectOptions, compilation1, CancellationToken.None, out _ ) );
-            Assert.True( factory.TryExecute( testContext2.ProjectOptions, compilation2, CancellationToken.None, out var compilationResult2 ) );
+            using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
+
+            Assert.True( pipelineFactory.TryExecute( testContext1.ProjectOptions, compilation1, CancellationToken.None, out _ ) );
+            Assert.True( pipelineFactory.TryExecute( testContext2.ProjectOptions, compilation2, CancellationToken.None, out var compilationResult2 ) );
 
             Assert.Single( compilationResult2!.TransformationResult.IntroducedSyntaxTrees );
         }

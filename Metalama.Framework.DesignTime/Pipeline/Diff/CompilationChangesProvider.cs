@@ -156,16 +156,17 @@ internal class CompilationChangesProvider
 
     private class ChangeLinkedList
     {
+        private CompilationChanges? _nonIncrementalChanges;
+
         public CompilationVersion CompilationVersion { get; }
 
-        public CompilationChanges NonIncrementalChanges { get; }
+        public CompilationChanges NonIncrementalChanges => this._nonIncrementalChanges ??= CompilationChanges.NonIncremental( this.CompilationVersion );
 
         public IncrementalChangeNode? FirstIncrementalChange { get; private set; }
 
         public ChangeLinkedList( CompilationVersion compilationVersion )
         {
             this.CompilationVersion = compilationVersion;
-            this.NonIncrementalChanges = CompilationChanges.NonIncremental( compilationVersion );
         }
 
         public void Insert( CompilationChanges changes )

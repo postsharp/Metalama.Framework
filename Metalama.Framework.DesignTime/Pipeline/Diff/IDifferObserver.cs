@@ -8,7 +8,7 @@ public interface IDifferObserver : IService
 {
     void OnNewCompilation();
 
-    void OnUpdateCompilationVersion();
+    void OnComputeIncrementalChanges();
 
-    void OnMergeCompilationChanges();
+    void OnComputeNonIncrementalChanges();
 }

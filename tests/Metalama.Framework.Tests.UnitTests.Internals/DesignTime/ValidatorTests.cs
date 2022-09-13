@@ -1,9 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.TestFramework;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using System.Linq;
@@ -18,7 +16,6 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
         public void ReferenceValidatorsMakeItToCompilationResult()
         {
             using var testContext = this.CreateTestContext();
-            using var domain = new UnloadableCompileTimeDomain();
 
             // Initial compilation.
             var code1 = @"
@@ -42,7 +39,8 @@ public class C {}
 
             var compilation1 = testContext.CreateCompilationModel( code1 );
 
-            var pipeline = new DesignTimeAspectPipeline( testContext.ServiceProvider, domain, compilation1.RoslynCompilation, true );
+            using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
+            var pipeline = pipelineFactory.CreatePipeline( compilation1.RoslynCompilation );
 
             Assert.True( pipeline.TryExecute( compilation1.RoslynCompilation, CancellationToken.None, out var compilationResult1 ) );
 
@@ -54,7 +52,6 @@ public class C {}
         public void IncrementalCompilationWorks()
         {
             using var testContext = this.CreateTestContext();
-            using var domain = new UnloadableCompileTimeDomain();
 
             var aspectCode = @"
 using Metalama.Framework.Aspects;
@@ -91,7 +88,9 @@ public class Aspect2 : TypeAspect
 
             var targetTree1 = compilation1.RoslynCompilation.SyntaxTrees.Single( t => t.FilePath == "target.cs" );
 
-            var pipeline = new DesignTimeAspectPipeline( testContext.ServiceProvider, domain, compilation1.RoslynCompilation, true );
+            using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
+            var pipeline = pipelineFactory.CreatePipeline( compilation1.RoslynCompilation );
+
             Assert.True( pipeline.TryExecute( compilation1.RoslynCompilation, CancellationToken.None, out var compilationResult1 ) );
 
             Assert.False( compilationResult1!.TransformationResult.Validators.IsEmpty );

@@ -8,8 +8,8 @@ using Metalama.Framework.Eligibility;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Pipeline.LiveTemplates;
@@ -76,21 +76,24 @@ namespace Metalama.Framework.DesignTime.Pipeline
         private IEnumerable<AspectClass>? AspectClasses => this._currentState.Configuration?.AspectClasses.OfType<AspectClass>();
 
         public DesignTimeAspectPipeline(
-            ServiceProvider serviceProvider,
-            CompileTimeDomain domain,
+            DesignTimeAspectPipelineFactory pipelineFactory,
+            IProjectOptions projectOptions,
             Compilation compilation,
-            bool isTest ) : this( serviceProvider, domain, ProjectKey.FromCompilation( compilation ), compilation.References, isTest ) { }
+            bool isTest ) : this( pipelineFactory, projectOptions, ProjectKey.FromCompilation( compilation ), compilation.References, isTest ) { }
 
         public DesignTimeAspectPipeline(
-            ServiceProvider serviceProvider,
-            CompileTimeDomain domain,
+            DesignTimeAspectPipelineFactory pipelineFactory,
+            IProjectOptions projectOptions,
             ProjectKey projectKey,
             IEnumerable<MetadataReference> metadataReferences,
             bool isTest )
-            : base( serviceProvider.WithProjectScopedServices( metadataReferences ), isTest, domain )
+            : base(
+                pipelineFactory.ServiceProvider.WithService( projectOptions ).WithProjectScopedServices( metadataReferences ),
+                isTest,
+                pipelineFactory.Domain )
         {
             this._projectKey = projectKey;
-            this._factory = this.ServiceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
+            this._factory = pipelineFactory;
 
             this._currentState = new PipelineState( this );
 
@@ -372,7 +375,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                         this.Status != DesignTimeAspectPipelineStatus.Paused,
                         cancellationToken );
 
-                    compilationToAnalyze = changes.CompilationToAnalyze;
+                    compilationToAnalyze = changes.NewCompilationVersion.CompilationToAnalyze;
 
                     if ( this.Logger.Trace != null )
                     {
