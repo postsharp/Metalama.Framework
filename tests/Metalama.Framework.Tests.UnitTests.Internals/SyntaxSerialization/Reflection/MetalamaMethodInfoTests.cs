@@ -53,6 +53,27 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                 } );
         }
 
+        [Fact]
+        public void TestMethodWithOutParameter()
+        {
+            var code = "class Target { public static int Method( out int x) { x = 100; return 42;  } }";
+            var serialized = this.SerializeTargetDotMethod( code );
+
+            Assert.Equal(
+                "((global::System.Reflection.MethodInfo)typeof(global::Target).GetMethod(\"Method\", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static, new[]{typeof(global::System.Int32).MakeByRefType()}))",
+                serialized );
+
+            this.TestExpression<MethodInfo>(
+                code,
+                serialized,
+                info =>
+                {
+                    Assert.Equal( "Target", info.DeclaringType!.Name );
+                    Assert.Equal( "Method", info.Name );
+                    Assert.Equal( 42, info.Invoke( null, Array.Empty<object>() ) );
+                } );
+        }
+
         private string SerializeTargetDotMethod( string code )
         {
             using var testContext = this.CreateSerializationTestContext( code );
