@@ -440,8 +440,9 @@ namespace Metalama.Framework.Engine.CodeModel
 
         [Memo]
         public INamedType TypeDefinition
-            => this.TypeSymbol == this.TypeSymbol.OriginalDefinition ? this : this.Compilation.Factory.GetNamedType( ((INamedTypeSymbol) this.TypeSymbol).OriginalDefinition );
-
+            => this.TypeSymbol == this.TypeSymbol.OriginalDefinition
+                ? this
+                : this.Compilation.Factory.GetNamedType( ((INamedTypeSymbol) this.TypeSymbol).OriginalDefinition );
 
         private void PopulateAllInterfaces( ImmutableHashSet<INamedTypeSymbol>.Builder builder, GenericMap genericMap )
         {

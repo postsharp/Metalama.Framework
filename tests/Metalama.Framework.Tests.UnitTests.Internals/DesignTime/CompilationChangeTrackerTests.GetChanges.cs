@@ -6,7 +6,6 @@ using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;
@@ -121,7 +120,7 @@ public partial class CompilationChangesTests
     }
 
     [Fact]
-    public async Task ChangeSyntaxTree_ChangeDeclaration()
+    public void ChangeSyntaxTree_ChangeDeclaration()
     {
         var code = new Dictionary<string, string> { { "code.cs", "class C {}" } };
         var compilation1 = CreateCSharpCompilation( code );
@@ -148,7 +147,7 @@ public partial class CompilationChangesTests
     }
 
     [Fact]
-    public async Task ChangeSyntaxTree_ChangePartialTypeMembers()
+    public void ChangeSyntaxTree_ChangePartialTypeMembers()
     {
         var code = new Dictionary<string, string> { { "code.cs", "partial class C { void M() {} }" } };
         var compilation1 = CreateCSharpCompilation( code );
@@ -176,7 +175,7 @@ public partial class CompilationChangesTests
     }
 
     [Fact]
-    public async Task ChangeSyntaxTree_ChangeBody()
+    public void ChangeSyntaxTree_ChangeBody()
     {
         var code = new Dictionary<string, string> { { "code.cs", "class C { int M => 1; }" } };
         var compilation1 = CreateCSharpCompilation( code );
@@ -192,7 +191,7 @@ public partial class CompilationChangesTests
     }
 
     [Fact]
-    public async Task ChangeSyntaxTree_AddPartialType()
+    public void ChangeSyntaxTree_AddPartialType()
     {
         var code = new Dictionary<string, string> { { "code.cs", "class C {}" } };
         var compilation1 = CreateCSharpCompilation( code );
@@ -213,7 +212,7 @@ public partial class CompilationChangesTests
     }
 
     [Fact]
-    public async Task ChangeSyntaxTree_NewlyCompileTime()
+    public void ChangeSyntaxTree_NewlyCompileTime()
     {
         var code = new Dictionary<string, string> { { "code.cs", "class C {}" } };
         var compilation1 = CreateCSharpCompilation( code );
@@ -232,7 +231,7 @@ public partial class CompilationChangesTests
     }
 
     [Fact]
-    public async Task ChangeSyntaxTree_NoLongerCompileTime()
+    public void ChangeSyntaxTree_NoLongerCompileTime()
     {
         var code = new Dictionary<string, string> { { "code.cs", "using Metalama.Framework.Aspects; class C {}" } };
         var compilation1 = CreateCSharpCompilation( code );

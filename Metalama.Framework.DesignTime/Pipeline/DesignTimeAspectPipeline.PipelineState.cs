@@ -126,7 +126,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 {
                     // The cache has not been set yet, so we need to compute the value from zero.
 
-                    if ( state.CompilationVersion.Compilation != null && state.CompilationVersion.Compilation != compilation )
+                    if ( state.CompilationVersion?.Compilation != null && state.CompilationVersion.Compilation != compilation )
                     {
                         throw new AssertionFailedException();
                     }
@@ -474,7 +474,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 ExecuteValidators( ref state, compilation, configuration, cancellationToken );
 
                 compilationResult = new CompilationResult(
-                    state.CompilationVersion,
+                    state.CompilationVersion.AssertNotNull(),
                     state.PipelineResult,
                     state.ValidationResult,
                     configuration.CompileTimeProject );

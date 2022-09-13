@@ -316,7 +316,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     // It is a non-Metalama reference.
                     var projectTracker = factory.GetNonMetalamaProjectTracker( ProjectKey.FromCompilation( reference.Compilation ) );
 
-                    if ( this._currentState.CompilationVersion.References == null || this._currentState.CompilationVersion.References.TryGetValue(
+                    if ( this._currentState.CompilationVersion?.References == null || this._currentState.CompilationVersion.References.TryGetValue(
                             reference.Compilation.Assembly.Identity,
                             out var oldReference ) )
                     {
@@ -425,7 +425,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                     // Return the result from the cache.
                     compilationResult = new CompilationResult(
-                        this._currentState.CompilationVersion,
+                        this._currentState.CompilationVersion.AssertNotNull(),
                         this._currentState.PipelineResult,
                         this._currentState.ValidationResult,
                         this._currentState.Configuration?.CompileTimeProject );
@@ -448,7 +448,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     var validationResult = this.ValidateWithPausedPipeline( compilation, this, cancellationToken );
 
                     compilationResult = new CompilationResult(
-                        this._currentState.CompilationVersion,
+                        this._currentState.CompilationVersion.AssertNotNull(),
                         this._currentState.PipelineResult,
                         validationResult,
                         this._currentState.Configuration!.CompileTimeProject );

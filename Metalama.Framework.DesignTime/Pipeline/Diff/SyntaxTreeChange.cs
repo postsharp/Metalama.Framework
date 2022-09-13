@@ -1,40 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.Engine;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Pipeline.Diff
 {
-    internal enum PartialTypeChangeKind
-    {
-        None,
-        Added,
-        Removed
-    }
-
-    internal readonly struct PartialTypeChange
-    {
-        public TypeDependencyKey Type { get; }
-
-        public PartialTypeChangeKind Kind { get; }
-
-        public PartialTypeChange( TypeDependencyKey type, PartialTypeChangeKind kind )
-        {
-            this.Type = type;
-            this.Kind = kind;
-        }
-
-        public PartialTypeChange Merge( PartialTypeChange change )
-            => (this.Kind, change.Kind) switch
-            {
-                (_, PartialTypeChangeKind.None) => this,
-                (PartialTypeChangeKind.None, _) => change,
-                _ => new PartialTypeChange( this.Type, PartialTypeChangeKind.None )
-            };
-    }
-
     /// <summary>
     /// Represents a change between two versions of a <see cref="SyntaxTree"/>.
     /// </summary>

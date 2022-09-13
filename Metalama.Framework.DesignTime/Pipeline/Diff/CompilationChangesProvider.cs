@@ -4,7 +4,6 @@ using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Microsoft.CodeAnalysis;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using AssertionFailedException = Metalama.Framework.Engine.AssertionFailedException;
 
 namespace Metalama.Framework.DesignTime.Pipeline.Diff;
 
@@ -13,11 +12,10 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff;
 /// </summary>
 internal class CompilationChangesProvider
 {
-    private DiffStrategy _metalamaDiffStrategy;
-    private DiffStrategy _nonMetalamaDiffStrategy;
-
     private readonly ConditionalWeakTable<Compilation, ChangeLinkedList> _cache = new();
     private readonly SemaphoreSlim _semaphore = new( 1 );
+    private readonly DiffStrategy _metalamaDiffStrategy;
+    private readonly DiffStrategy _nonMetalamaDiffStrategy;
 
     public CompilationChangesProvider( IServiceProvider serviceProvider )
     {
