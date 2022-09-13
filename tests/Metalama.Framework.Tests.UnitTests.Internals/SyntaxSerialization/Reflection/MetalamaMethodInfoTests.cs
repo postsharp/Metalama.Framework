@@ -18,7 +18,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeTargetDotMethod( code );
 
             Assert.Equal(
-                "((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(typeof(global::Target).GetMethod(\"Method\", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance).MethodHandle))",
+                "((global::System.Reflection.MethodInfo)typeof(global::Target).GetMethod(\"Method\", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance, new[]{}))",
                 serialized );
 
             this.TestExpression<MethodInfo>(
@@ -39,7 +39,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeTargetDotMethod( code );
 
             Assert.Equal(
-                "((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(typeof(global::Target).GetMethod(\"Method\", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance).MethodHandle))",
+                "((global::System.Reflection.MethodInfo)typeof(global::Target).GetMethod(\"Method\", global::System.Reflection.BindingFlags.DeclaredOnly | global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Static | global::System.Reflection.BindingFlags.Instance, new[]{typeof(T)}))",
                 serialized );
 
             this.TestExpression<MethodInfo>(
