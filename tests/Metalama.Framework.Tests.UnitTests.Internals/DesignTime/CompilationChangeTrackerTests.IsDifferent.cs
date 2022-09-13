@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
-    public partial class CompilationChangeTrackerTests : TestBase
+    public partial class CompilationChangesTests : TestBase
     {
         private readonly DiffStrategy _strategy = new( true, true, true );
         private readonly DiffStrategy _strategyWithoutPartialTypeDetection = new( true, true, false );

@@ -5,6 +5,7 @@ using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Testing;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
@@ -20,8 +21,13 @@ internal class DiffStrategy
     private readonly bool _detectCompileTimeCode;
     private readonly bool _detectPartialTypes;
 
+    public IDifferObserver? Observer { get; }
+
     public DiffStrategy( IServiceProvider serviceProvider, bool detectCompileTimeCode, bool detectPartialTypes )
-        : this( serviceProvider.GetService<TestMarkerService>() != null, detectCompileTimeCode, detectPartialTypes ) { }
+        : this( serviceProvider.GetService<TestMarkerService>() != null, detectCompileTimeCode, detectPartialTypes )
+    {
+        this.Observer = serviceProvider.GetService<IDifferObserver>();
+    }
 
     public DiffStrategy( bool isTest, bool detectCompileTimeCode, bool detectPartialTypes )
     {
@@ -38,6 +44,21 @@ internal class DiffStrategy
             (true, false) => CompileTimeChangeKind.NoLongerCompileTime,
             (false, true) => CompileTimeChangeKind.NewlyCompileTime
         };
+
+    public static ulong ComputeCompileTimeProjectHash( ImmutableDictionary<string, SyntaxTreeVersion> syntaxTreeVersions )
+    {
+        XXH64 hasher = new();
+
+        foreach ( var syntaxTree in syntaxTreeVersions )
+        {
+            if ( syntaxTree.Value.HasCompileTimeCode )
+            {
+                hasher.Update( syntaxTree.Value.DeclarationHash );
+            }
+        }
+
+        return hasher.Digest();
+    }
 
     /// <summary>
     /// Determines whether two syntax trees are significantly different. This overload is called from tests.

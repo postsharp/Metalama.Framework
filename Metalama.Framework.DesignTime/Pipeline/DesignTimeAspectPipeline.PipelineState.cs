@@ -25,8 +25,6 @@ namespace Metalama.Framework.DesignTime.Pipeline
         {
             private readonly DesignTimeAspectPipeline _pipeline;
 
-            public readonly CompilationVersion CompilationVersion;
-
             private static readonly ImmutableDictionary<string, SyntaxTree?> _emptyCompileTimeSyntaxTrees =
                 ImmutableDictionary.Create<string, SyntaxTree?>( StringComparer.Ordinal );
 
@@ -40,7 +38,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             internal DesignTimeAspectPipelineStatus Status { get; }
 
-            public CompilationChanges? UnprocessedChanges => this.CompilationVersion.Changes;
+            public CompilationVersion? CompilationVersion => this.UnprocessedChanges?.NewCompilationVersion;
+
+            public CompilationChanges? UnprocessedChanges { get; }
 
             public CompilationPipelineResult PipelineResult { get; }
 
@@ -54,13 +54,12 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 this.PipelineResult = new CompilationPipelineResult();
                 this.ValidationResult = CompilationValidationResult.Empty;
                 this.Dependencies = DependencyGraph.Empty;
-                this.CompilationVersion = new CompilationVersion( new DiffStrategy( pipeline.ServiceProvider, true, true ) );
             }
 
             private PipelineState( PipelineState prototype )
             {
                 this._pipeline = prototype._pipeline;
-                this.CompilationVersion = prototype.CompilationVersion;
+                this.UnprocessedChanges = prototype.UnprocessedChanges;
                 this.CompileTimeSyntaxTrees = prototype.CompileTimeSyntaxTrees;
                 this.Configuration = prototype.Configuration;
                 this.Status = prototype.Status;
@@ -82,14 +81,14 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 PipelineState prototype,
                 ImmutableDictionary<string, SyntaxTree?> compileTimeSyntaxTrees,
                 DesignTimeAspectPipelineStatus status,
-                CompilationVersion compilationVersion,
+                CompilationChanges unprocessedChanges,
                 CompilationPipelineResult pipelineResult,
                 AspectPipelineConfiguration? configuration )
                 : this( prototype )
             {
                 this.CompileTimeSyntaxTrees = compileTimeSyntaxTrees;
                 this.Status = status;
-                this.CompilationVersion = compilationVersion;
+                this.UnprocessedChanges = unprocessedChanges;
                 this.PipelineResult = pipelineResult;
                 this.Configuration = configuration;
             }
@@ -102,12 +101,12 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             private PipelineState(
                 PipelineState prototype,
-                CompilationVersion compilationVersion,
+                CompilationChanges unprocessedChanges,
                 CompilationPipelineResult pipelineResult,
                 DependencyGraph dependencies ) : this( prototype )
             {
                 this.PipelineResult = pipelineResult;
-                this.CompilationVersion = compilationVersion;
+                this.UnprocessedChanges = unprocessedChanges;
                 this.Dependencies = dependencies;
             }
 
@@ -168,7 +167,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             /// <summary>
             /// Invalidates the cache given a new <see cref="Compilation"/>.
             /// </summary>
-            internal PipelineState InvalidateCacheForNewCompilation(
+            internal async ValueTask<PipelineState> InvalidateCacheForNewCompilationAsync(
                 Compilation newCompilation,
                 DesignTimeCompilationReferenceCollection references,
                 bool invalidateCompilationResult,
@@ -181,9 +180,13 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 // Detect changes from dependencies.
                 var dependenciesChanges = DependencyChanges.Create( this.Dependencies, references, cancellationToken );
 
-                // Detect changes in compile-time syntax trees.
-                var newTracker = this.CompilationVersion.Update( newCompilation, dependenciesChanges, cancellationToken );
-                var newChanges = newTracker.Changes;
+                // Detect changes in the syntax trees of the tracked compilation.
+                var newChanges = await this._pipeline._factory.CompilationChangesProvider.GetCompilationChangesAsync(
+                    this.CompilationVersion?.Compilation,
+                    newCompilation,
+                    true,
+                    dependenciesChanges,
+                    cancellationToken );
 
                 ImmutableDictionary<string, SyntaxTree?> newCompileTimeSyntaxTrees;
 
@@ -250,12 +253,13 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                 // Return the new state.
                 var newCompilationResult = invalidateCompilationResult ? this.PipelineResult.Invalidate( newChanges ) : this.PipelineResult;
+                var newUnprocessedChanges = this.UnprocessedChanges == null ? newChanges : this.UnprocessedChanges.Merge( newChanges );
 
                 newState = new PipelineState(
                     newState,
                     newCompileTimeSyntaxTrees,
                     newStatus,
-                    newTracker,
+                    newUnprocessedChanges,
                     newCompilationResult,
                     newConfiguration );
 
@@ -551,7 +555,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             {
                 var compilationResult = this.PipelineResult.Update( compilation, pipelineResult );
 
-                return new PipelineState( this, this.CompilationVersion.ResetChanges(), compilationResult, dependencies );
+                return new PipelineState( this, CompilationChanges.Empty( null, this.CompilationVersion.AssertNotNull() ), compilationResult, dependencies );
             }
         }
     }

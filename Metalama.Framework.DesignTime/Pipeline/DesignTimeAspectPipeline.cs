@@ -31,10 +31,11 @@ namespace Metalama.Framework.DesignTime.Pipeline
     /// Must be public because of testing.
     internal partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
     {
-        private readonly ConditionalWeakTable<Compilation, CompilationResult> _compilationResultCache = new();
         private static readonly string _sourceGeneratorAssemblyName = typeof(DesignTimeAspectPipelineFactory).Assembly.GetName().Name;
 
+        private readonly ConditionalWeakTable<Compilation, CompilationResult> _compilationResultCache = new();
         private readonly IFileSystemWatcher? _fileSystemWatcher;
+        private readonly ProjectKey _projectKey;
 
         // This field should not be changed directly, but only through the SetState method.
         private PipelineState _currentState;
@@ -46,8 +47,6 @@ namespace Metalama.Framework.DesignTime.Pipeline
         /// </summary>
         public int PipelineExecutionCount => this._pipelineExecutionCount;
 
-        public ProjectKey ProjectKey { get; }
-
         /// <summary>
         /// Gets an object that can be locked to get exclusive access to
         /// the current instance.
@@ -58,6 +57,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
         internal DesignTimeAspectPipelineStatus Status => this._currentState.Status;
 
         internal event Action<DesignTimePipelineStatusChangedEventArgs>? StatusChanged;
+
+        private readonly DesignTimeAspectPipelineFactory _factory;
 
         private void SetState( in PipelineState state )
         {
@@ -88,8 +89,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
             bool isTest )
             : base( serviceProvider.WithProjectScopedServices( metadataReferences ), isTest, domain )
         {
-            this.ProjectKey = projectKey;
-            this.Factory = this.ServiceProvider.GetService<DesignTimeAspectPipelineFactory>();
+            this._projectKey = projectKey;
+            this._factory = this.ServiceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
 
             this._currentState = new PipelineState( this );
 
@@ -129,7 +130,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
 
             // There was an external build. Touch the files to re-run the analyzer.
-            this.Logger.Trace?.Log( $"Detected an external build for project '{this.ProjectKey}'." );
+            this.Logger.Trace?.Log( $"Detected an external build for project '{this._projectKey}'." );
 
             _ = this.ResumeAsync( true, CancellationToken.None );
         }
@@ -140,7 +141,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             {
                 if ( this.Status != DesignTimeAspectPipelineStatus.Paused )
                 {
-                    this.Logger.Trace?.Log( $"A Resume request was requested for project '{this.ProjectKey}', but the pipeline was not paused." );
+                    this.Logger.Trace?.Log( $"A Resume request was requested for project '{this._projectKey}', but the pipeline was not paused." );
 
                     return;
                 }
@@ -164,7 +165,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 if ( hasRelevantChange )
                 {
                     this.Logger.Trace?.Log(
-                        $"Resuming the pipeline for project '{this.ProjectKey}'. The following files had compile-time changes: {string.Join( ", ", filesToTouch.Select( x => $"'{x}'" ) )} " );
+                        $"Resuming the pipeline for project '{this._projectKey}'. The following files had compile-time changes: {string.Join( ", ", filesToTouch.Select( x => $"'{x}'" ) )} " );
 
                     this.SetState( new PipelineState( this ) );
                     this.PipelineResumed?.Invoke( this, EventArgs.Empty );
@@ -181,7 +182,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 }
                 else
                 {
-                    this.Logger.Trace?.Log( $"A Resume request was requested for project '{this.ProjectKey}', but there was no relevant change." );
+                    this.Logger.Trace?.Log( $"A Resume request was requested for project '{this._projectKey}', but there was no relevant change." );
                 }
             }
         }
@@ -219,9 +220,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         public Compilation? LastCompilation { get; private set; }
 
-        public DesignTimeAspectPipelineFactory? Factory { get; }
-
-        public bool MustReportPausedPipelineAsErrors => this.Factory == null || !this.Factory.IsUserInterfaceAttached;
+        public bool MustReportPausedPipelineAsErrors => !this._factory.IsUserInterfaceAttached;
 
         protected override void Dispose( bool disposing )
         {
@@ -230,13 +229,19 @@ namespace Metalama.Framework.DesignTime.Pipeline
             this._sync.Dispose();
         }
 
-        private CompilationChanges InvalidateCache(
+        private async ValueTask<CompilationChanges> InvalidateCacheAsync(
             Compilation compilation,
             DesignTimeCompilationReferenceCollection references,
             bool invalidateCompilationResult,
             CancellationToken cancellationToken )
         {
-            this.SetState( this._currentState.InvalidateCacheForNewCompilation( compilation, references, invalidateCompilationResult, cancellationToken ) );
+            var newState = await this._currentState.InvalidateCacheForNewCompilationAsync(
+                compilation,
+                references,
+                invalidateCompilationResult,
+                cancellationToken );
+
+            this.SetState( newState );
 
 #pragma warning disable IDE0079 // Remove unnecessary suppression
 #pragma warning disable CS8603  // Analyzer error in Release build only.
@@ -289,7 +294,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             foreach ( var reference in compilation.ExternalReferences.OfType<CompilationReference>() )
             {
-                var factory = this.Factory.AssertNotNull();
+                var factory = this._factory.AssertNotNull();
 
                 if ( factory.IsMetalamaEnabled( reference.Compilation ) )
                 {
@@ -361,7 +366,11 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                 if ( this.Status != DesignTimeAspectPipelineStatus.Paused )
                 {
-                    var changes = this.InvalidateCache( compilation, references, this.Status != DesignTimeAspectPipelineStatus.Paused, cancellationToken );
+                    var changes = await this.InvalidateCacheAsync(
+                        compilation,
+                        references,
+                        this.Status != DesignTimeAspectPipelineStatus.Paused,
+                        cancellationToken );
 
                     compilationToAnalyze = changes.CompilationToAnalyze;
 
@@ -575,12 +584,12 @@ namespace Metalama.Framework.DesignTime.Pipeline
         {
             if ( this._sync.CurrentCount < 1 )
             {
-                this.Logger.Trace?.Log( $"Waiting for lock on '{this.ProjectKey}'." );
+                this.Logger.Trace?.Log( $"Waiting for lock on '{this._projectKey}'." );
             }
 
             await this._sync.WaitAsync( cancellationToken );
 
-            this.Logger.Trace?.Log( $"Lock on '{this.ProjectKey}' acquired." );
+            this.Logger.Trace?.Log( $"Lock on '{this._projectKey}' acquired." );
 
             return new Lock( this );
         }
@@ -596,7 +605,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             public void Dispose()
             {
-                this._parent.Logger.Trace?.Log( $"Releasing lock on '{this._parent.ProjectKey}'." );
+                this._parent.Logger.Trace?.Log( $"Releasing lock on '{this._parent._projectKey}'." );
                 this._parent._sync.Release();
             }
         }

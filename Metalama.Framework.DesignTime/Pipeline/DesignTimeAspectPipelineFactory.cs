@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
@@ -38,12 +39,16 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         public CompileTimeDomain Domain { get; }
 
+        public CompilationChangesProvider CompilationChangesProvider { get; }
+
         public DesignTimeAspectPipelineFactory( ServiceProvider serviceProvider, CompileTimeDomain domain, bool isTest = false )
         {
             this.Domain = domain;
             this._serviceProvider = serviceProvider;
             this._isTest = isTest;
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
+
+            this.CompilationChangesProvider = new CompilationChangesProvider( serviceProvider );
         }
 
         /// <summary>
@@ -214,7 +219,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         }
 
         internal NonMetalamaProjectTracker GetNonMetalamaProjectTracker( ProjectKey projectKey )
-            => this._nonMetalamaProjectTrackers.GetOrAdd( projectKey, k => new NonMetalamaProjectTracker( k, this._serviceProvider ) );
+            => this._nonMetalamaProjectTrackers.GetOrAdd( projectKey, k => new NonMetalamaProjectTracker( this._serviceProvider ) );
 
         protected virtual async ValueTask<DesignTimeAspectPipeline?> GetPipelineAndWaitAsync( Compilation compilation, CancellationToken cancellationToken )
         {

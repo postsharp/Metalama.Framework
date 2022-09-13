@@ -10,12 +10,6 @@ internal class DesignTimeCompilationReference
 
     public ICompilationVersion CompilationVersion { get; }
 
-    // For tests only.
-    public DesignTimeCompilationReference( ICompilationVersion compilationVersion )
-    {
-        this.CompilationVersion = compilationVersion;
-    }
-
     public DesignTimeCompilationReference(
         ICompilationVersion compilationVersion,
         ITransitiveAspectsManifest? transitiveAspectsManifest = null )

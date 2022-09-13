@@ -7,6 +7,34 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Pipeline.Diff
 {
+    internal enum PartialTypeChangeKind
+    {
+        None,
+        Added,
+        Removed
+    }
+
+    internal readonly struct PartialTypeChange
+    {
+        public TypeDependencyKey Type { get; }
+
+        public PartialTypeChangeKind Kind { get; }
+
+        public PartialTypeChange( TypeDependencyKey type, PartialTypeChangeKind kind )
+        {
+            this.Type = type;
+            this.Kind = kind;
+        }
+
+        public PartialTypeChange Merge( PartialTypeChange change )
+            => (this.Kind, change.Kind) switch
+            {
+                (_, PartialTypeChangeKind.None) => this,
+                (PartialTypeChangeKind.None, _) => change,
+                _ => new PartialTypeChange( this.Type, PartialTypeChangeKind.None )
+            };
+    }
+
     /// <summary>
     /// Represents a change between two versions of a <see cref="SyntaxTree"/>.
     /// </summary>
@@ -37,7 +65,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         /// <summary>
         /// Gets the list of partial types that have been added between the old version and the new version.
         /// </summary>
-        public ImmutableArray<TypeDependencyKey> AddedPartialTypes { get; }
+        public ImmutableArray<PartialTypeChange> PartialTypeChanges { get; }
 
         /// <summary>
         /// Gets the new syntax tree, unless the current item represents a deleted tree.
@@ -53,6 +81,14 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         /// </summary>
         public bool HasCompileTimeCode => this.NewSyntaxTreeVersion.HasCompileTimeCode;
 
+        public static SyntaxTreeChange NonIncremental( in SyntaxTreeVersion syntaxTreeVersion )
+            => new(
+                syntaxTreeVersion.SyntaxTree.FilePath,
+                SyntaxTreeChangeKind.Added,
+                syntaxTreeVersion.HasCompileTimeCode ? CompileTimeChangeKind.NewlyCompileTime : CompileTimeChangeKind.None,
+                default,
+                syntaxTreeVersion );
+
         public SyntaxTreeChange(
             string filePath,
             SyntaxTreeChangeKind syntaxTreeChangeKind,
@@ -67,7 +103,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             this.OldSyntaxTreeVersion = oldSyntaxTreeVersion;
 
             // Detecting changes in partial types.
-            this.AddedPartialTypes = ImmutableArray<TypeDependencyKey>.Empty;
+            this.PartialTypeChanges = ImmutableArray<PartialTypeChange>.Empty;
 
             switch ( syntaxTreeChangeKind )
             {
@@ -76,15 +112,23 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                     {
                         if ( !oldSyntaxTreeVersion.PartialTypes.Contains( partialType ) )
                         {
-                            this.AddedPartialTypes = this.AddedPartialTypes.Add( partialType );
+                            this.PartialTypeChanges = this.PartialTypeChanges.Add( new PartialTypeChange( partialType, PartialTypeChangeKind.Added ) );
+                        }
+                    }
+
+                    foreach ( var partialType in oldSyntaxTreeVersion.PartialTypes )
+                    {
+                        if ( !newSyntaxTreeVersion.PartialTypes.Contains( partialType ) )
+                        {
+                            this.PartialTypeChanges = this.PartialTypeChanges.Add( new PartialTypeChange( partialType, PartialTypeChangeKind.Removed ) );
                         }
                     }
 
                     break;
 
                 case SyntaxTreeChangeKind.Added:
-
-                    this.AddedPartialTypes = newSyntaxTreeVersion.PartialTypes;
+                    this.PartialTypeChanges = newSyntaxTreeVersion.PartialTypes.Select( t => new PartialTypeChange( t, PartialTypeChangeKind.Added ) )
+                        .ToImmutableArray();
 
                     break;
             }

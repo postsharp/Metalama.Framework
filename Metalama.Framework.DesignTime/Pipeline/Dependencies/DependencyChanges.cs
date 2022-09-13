@@ -59,4 +59,6 @@ internal readonly struct DependencyChanges
 
         return new DependencyChanges( false, invalidatedFiles.ToImmutable() );
     }
+
+    public bool IsUninitialized => this.InvalidatedSyntaxTrees == null!;
 }

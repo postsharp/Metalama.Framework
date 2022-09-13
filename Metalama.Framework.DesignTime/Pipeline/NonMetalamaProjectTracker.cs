@@ -1,30 +1,29 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.Pipeline.Diff;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.Pipeline;
 
 internal class NonMetalamaProjectTracker
 {
-    private readonly CompilationVersionGraph _compilationVersionGraph;
+    private readonly CompilationChangesProvider _compilationChangesProvider;
 
-    public NonMetalamaProjectTracker( ProjectKey projectKey, IServiceProvider serviceProvider )
+    public NonMetalamaProjectTracker( IServiceProvider serviceProvider )
     {
-        this.ProjectKey = projectKey;
-        this._compilationVersionGraph = new CompilationVersionGraph( new DiffStrategy( serviceProvider, false, true ) );
+        this._compilationChangesProvider = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>().CompilationChangesProvider;
     }
-
-    public ProjectKey ProjectKey { get; }
 
     public async ValueTask<DesignTimeCompilationReference> GetCompilationReferenceAsync(
         Compilation? oldCompilation,
         Compilation newCompilation,
         CancellationToken cancellationToken )
     {
-        var compilationVersion = await this._compilationVersionGraph.GetCompilationVersion( oldCompilation, newCompilation, cancellationToken );
+        // We don't need the changes, but using the CompilationChangesProvider allows us to get the new CompilationVersion incrementally,
+        // without recomputing it from scratch.
+        var changes = await this._compilationChangesProvider.GetCompilationChangesAsync( oldCompilation, newCompilation, false, default, cancellationToken );
 
-        // If we fall here, it means that the new compilation is identical to the previous one.
-        return new DesignTimeCompilationReference( compilationVersion );
+        return new DesignTimeCompilationReference( changes.NewCompilationVersion );
     }
 }
