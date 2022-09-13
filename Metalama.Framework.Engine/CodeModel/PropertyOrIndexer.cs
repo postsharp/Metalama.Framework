@@ -17,7 +17,7 @@ internal abstract class PropertyOrIndexer : Member, IPropertyOrIndexer
 {
     protected IPropertySymbol PropertySymbol { get; }
 
-    public PropertyOrIndexer( IPropertySymbol symbol, CompilationModel compilation ) : base( compilation )
+    public PropertyOrIndexer( IPropertySymbol symbol, CompilationModel compilation ) : base( compilation, symbol )
     {
         this.PropertySymbol = symbol;
     }

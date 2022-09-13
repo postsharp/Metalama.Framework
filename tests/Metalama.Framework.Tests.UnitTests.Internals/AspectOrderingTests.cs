@@ -30,6 +30,7 @@ namespace Metalama.Framework.Tests.UnitTests
                 loader.TryGetCompileTimeProjectFromCompilation(
                     compilation.RoslynCompilation,
                     null,
+                    null,
                     new DiagnosticList(),
                     false,
                     CancellationToken.None,

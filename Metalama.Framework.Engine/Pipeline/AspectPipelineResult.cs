@@ -102,5 +102,20 @@ namespace Metalama.Framework.Engine.Pipeline
             }
 #endif
         }
+
+        public AspectPipelineResult WithAdditionalDiagnostics( ImmutableUserDiagnosticList diagnostics )
+            => new(
+                this.Compilation,
+                this.Project,
+                this.AspectLayers,
+                this.CompilationModels,
+                this.Diagnostics.Concat( diagnostics ),
+                this.AspectSources,
+                this.ValidatorSources,
+                this.ExternallyInheritableAspects,
+                this.ExternallyVisibleValidators,
+                this.AdditionalSyntaxTrees,
+                this.AspectInstanceResults,
+                this.AdditionalCompilationOutputFiles );
     }
 }

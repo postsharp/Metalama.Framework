@@ -351,7 +351,7 @@ namespace Metalama.Framework.Advising
             IEvent targetEvent,
             string? addTemplate,
             string? removeTemplate,
-            string? raiseTemplate,
+            string? raiseTemplate = null,
             object? args = null,
             object? tags = null );
 

@@ -54,7 +54,7 @@ namespace Metalama.Framework.Engine.Transformations
             this.RemoveTemplate = removeTemplate?.ForOverride( overriddenDeclaration.RemoveMethod, parameters );
         }
 
-        public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
+        public override IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context )
         {
             if ( this.EventTemplate?.Declaration.IsEventField() == true )
             {
@@ -134,6 +134,10 @@ namespace Metalama.Framework.Engine.Transformations
                 return Enumerable.Empty<IntroducedMember>();
             }
 
+            var modifiers = this.OverriddenDeclaration
+                .GetSyntaxModifierList( ModifierCategories.Static )
+                .Insert( 0, Token( SyntaxKind.PrivateKeyword ) );
+
             // TODO: Do not throw exception when template expansion fails.
             var overrides = new[]
             {
@@ -141,7 +145,7 @@ namespace Metalama.Framework.Engine.Transformations
                     this,
                     EventDeclaration(
                         List<AttributeListSyntax>(),
-                        this.OverriddenDeclaration.GetSyntaxModifierList(),
+                        modifiers,
                         context.SyntaxGenerator.EventType( this.OverriddenDeclaration ),
                         null,
                         Identifier( eventName ),

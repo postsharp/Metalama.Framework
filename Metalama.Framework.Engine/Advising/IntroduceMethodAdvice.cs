@@ -199,6 +199,7 @@ namespace Metalama.Framework.Engine.Advising
                         {
                             this.Builder.IsNew = true;
                             this.Builder.IsOverride = false;
+                            this.Builder.OverriddenMethod = existingMethod;
 
                             var overriddenMethod = new OverrideMethodTransformation( this, this.Builder, this.BoundTemplate, this.Tags );
 

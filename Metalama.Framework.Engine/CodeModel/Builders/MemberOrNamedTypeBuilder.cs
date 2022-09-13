@@ -101,7 +101,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             this._name = name;
         }
 
-        public abstract IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context );
+        public abstract IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context );
 
         public InsertPosition InsertPosition => this.ToInsertPosition();
 

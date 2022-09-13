@@ -41,7 +41,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         [Memo]
         public IInvokerFactory<IFieldOrPropertyInvoker> Invokers
-            => new InvokerFactory<IFieldOrPropertyInvoker>( ( order, invokerOperator ) => new FieldOrPropertyInvoker( this, order, invokerOperator ), false );
+            => new InvokerFactory<IFieldOrPropertyInvoker>( ( order, invokerOperator ) => new FieldOrPropertyInvoker( this, order, invokerOperator ) );
 
         public IProperty? OverriddenProperty => this.PropertyBuilder.OverriddenProperty;
 

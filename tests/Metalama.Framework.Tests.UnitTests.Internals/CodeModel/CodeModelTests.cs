@@ -52,12 +52,16 @@ class C
 namespace NS
 {
     class C {}
-}";
+}
+
+class E<T> {}
+
+";
 
             var compilation = testContext.CreateCompilationModel( code );
 
             var types = compilation.Types.OrderBySource();
-            Assert.Equal( 2, types.Length );
+            Assert.Equal( 3, types.Length );
 
             var c1 = types.ElementAt( 0 );
             Assert.Equal( "C", c1.Name );
@@ -73,6 +77,10 @@ namespace NS
             Assert.Equal( "C", c2.Name );
             Assert.Equal( "NS.C", c2.FullName );
             Assert.IsAssignableFrom<ICompilation>( c2.ContainingDeclaration );
+
+            var e = types.ElementAt( 2 );
+            Assert.Equal( "E", e.Name );
+            Assert.Equal( "E", e.FullName );
         }
 
         [Fact]
@@ -141,7 +149,7 @@ class TestAttribute : Attribute
             var type0 = Assert.IsAssignableFrom<INamedType>( types.ElementAt( 0 ).Value );
             Assert.Equal( "E", type0.FullName );
             var type1 = Assert.IsAssignableFrom<INamedType>( types.ElementAt( 1 ).Value );
-            Assert.Equal( "System.Action<,>", type1.FullName );
+            Assert.Equal( "System.Action", type1.FullName );
             Assert.Null( types.ElementAt( 2 ).Value );
         }
 
@@ -161,8 +169,7 @@ class TestAttribute : Attribute
 
             var compilation = testContext.CreateCompilationModel( code, ignoreErrors: true );
             var type = compilation.Types.Single();
-            var attribute = type.Attributes.Single();
-            Assert.Single( attribute.ConstructorArguments );
+            Assert.Empty( type.Attributes );
         }
 
         [Fact]
@@ -352,6 +359,23 @@ class C
         }
 
         [Fact]
+        public void InvalidProperty()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = @"
+public sealed class C
+{
+    public InvalidType Property {get;set;}
+}
+";
+
+            var compilation = testContext.CreateCompilationModel( code, ignoreErrors: true );
+            Assert.Single( compilation.Types );
+            Assert.Empty( compilation.Types.ElementAt( 0 ).Properties );
+        }
+
+        [Fact]
         public void Fields()
         {
             using var testContext = this.CreateTestContext();
@@ -374,6 +398,23 @@ class C
             var fieldNames = type.Fields.Select( p => p.Name );
 
             Assert.Equal( new[] { "a", "b", "c" }, fieldNames );
+        }
+
+        [Fact]
+        public void InvalidField()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = @"
+public sealed class C
+{
+   InvalidType field;
+}
+";
+
+            var compilation = testContext.CreateCompilationModel( code, ignoreErrors: true );
+            Assert.Single( compilation.Types );
+            Assert.Empty( compilation.Types.ElementAt( 0 ).Fields );
         }
 
         [Fact]
@@ -463,6 +504,27 @@ class C : IDisposable
             Assert.Equal( new[] { EventAdd, EventRemove }, type.Events.SelectMany( p => new[] { p.AddMethod.MethodKind, p.RemoveMethod.MethodKind } ) );
             Assert.Single( type.Constructors );
             Assert.NotNull( type.StaticConstructor );
+        }
+
+        [Fact]
+        public void InvalidMethods()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = @"
+public sealed class C
+{
+    public InvalidType M1() {}
+    public void M2(InvalidType m) {}
+    public void M3(InvalidType[] m) {}
+    public void M4(System.List<InvalidType> m) {}
+    public void M5<T>(T m) where T : InvalidType {}
+}
+";
+
+            var compilation = testContext.CreateCompilationModel( code, ignoreErrors: true );
+            Assert.Single( compilation.Types );
+            Assert.Empty( compilation.Types.ElementAt( 0 ).Methods );
         }
 
         [Fact]
@@ -599,7 +661,7 @@ class C<T>
             Assert.Equal( new[] { "Int32", "Enumerator", "Dictionary", "ValueTuple" }, fieldTypes.Select( t => t.Name ) );
 
             Assert.Equal(
-                new[] { "int", "System.Collections.Generic.List<T>.Enumerator", "System.Collections.Generic.Dictionary<int, string>", "(int i, int j)" },
+                new[] { "System.Int32", "System.Collections.Generic.List.Enumerator", "System.Collections.Generic.Dictionary", "System.ValueTuple" },
                 fieldTypes.Select( t => t.FullName ) );
         }
 
@@ -784,6 +846,28 @@ public sealed class C
         }
 
         [Fact]
+        public void InvalidIndexer()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = @"
+public sealed class C
+{
+    public string this[InvalidType key]
+    {
+        get { return string.Empty; }
+
+        set { }
+    }
+}
+";
+
+            var compilation = testContext.CreateCompilationModel( code, ignoreErrors: true );
+            Assert.Single( compilation.Types );
+            Assert.Empty( compilation.Types.ElementAt( 0 ).Indexers );
+        }
+
+        [Fact]
         public void Record()
         {
             using var testContext = this.CreateTestContext();
@@ -960,6 +1044,64 @@ class T2 {}
             var result = fromType.Is( toType );
 
             Assert.Equal( expectedResult, result );
+        }
+
+        [Fact]
+        public void Generic()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = @"
+
+class NonGeneric { }
+
+class Base<T>
+{ 
+   public virtual void Method(T p ) {} 
+}
+
+class Derived : Base<int> 
+{
+  public override void Method(int p ) {}
+  public void GenericMethod<T>() {} 
+}
+";
+
+            var compilation = testContext.CreateCompilationModel( code );
+
+            var nonGenericClass = compilation.Types.OfName( "NonGeneric" ).Single();
+            Assert.False( nonGenericClass.IsGeneric );
+            Assert.False( nonGenericClass.IsOpenGeneric );
+            Assert.Same( nonGenericClass, nonGenericClass.TypeDefinition );
+
+            var baseClass = compilation.Types.OfName( "Base" ).Single();
+            Assert.True( baseClass.IsGeneric );
+            Assert.True( baseClass.IsOpenGeneric );
+            Assert.Same( baseClass, baseClass.TypeDefinition );
+
+            var baseMethod = baseClass.Methods.OfName( "Method" ).Single();
+            Assert.False( baseMethod.IsGeneric );
+            Assert.True( baseMethod.IsOpenGeneric );
+            Assert.Same( baseMethod, baseMethod.MethodDefinition );
+
+            var derivedClass = compilation.Types.OfName( "Derived" ).Single();
+            Assert.False( derivedClass.IsGeneric );
+            Assert.False( derivedClass.IsOpenGeneric );
+            Assert.True( derivedClass.BaseType!.IsGeneric );
+            Assert.False( derivedClass.BaseType.IsOpenGeneric );
+            Assert.Same( baseClass, derivedClass.BaseType.TypeDefinition );
+
+            var derivedMethod = derivedClass.Methods.OfName( "Method" ).Single();
+            Assert.False( derivedMethod.IsGeneric );
+            Assert.False( derivedMethod.IsOpenGeneric );
+            Assert.False( derivedMethod.OverriddenMethod!.IsGeneric );
+            Assert.False( derivedMethod.OverriddenMethod.IsOpenGeneric );
+            Assert.Same( baseMethod, derivedMethod.OverriddenMethod.MethodDefinition );
+
+            var genericMethod = derivedClass.Methods.OfName( "GenericMethod" ).Single();
+            Assert.True( genericMethod.IsGeneric );
+            Assert.True( genericMethod.IsOpenGeneric );
+            Assert.Same( genericMethod, genericMethod.MethodDefinition );
         }
     }
 }

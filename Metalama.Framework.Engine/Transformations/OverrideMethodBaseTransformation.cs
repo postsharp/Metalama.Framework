@@ -36,7 +36,9 @@ namespace Metalama.Framework.Engine.Transformations
         {
             TypeSyntax? returnType = null;
 
-            var modifiers = this.OverriddenDeclaration.GetSyntaxModifierList();
+            var modifiers = this.OverriddenDeclaration
+                .GetSyntaxModifierList( ModifierCategories.Static | ModifierCategories.Async )
+                .Insert( 0, Token( SyntaxKind.PrivateKeyword ) );
 
             if ( !this.OverriddenDeclaration.IsAsync )
             {
@@ -76,8 +78,8 @@ namespace Metalama.Framework.Engine.Transformations
                         this.OverriddenDeclaration.DeclaringType,
                         this.ParentAdvice.AspectLayerId,
                         this.OverriddenDeclaration ) ),
-                context.SyntaxGenerator.TypeParameterList( this.OverriddenDeclaration ),
-                context.SyntaxGenerator.ParameterList( this.OverriddenDeclaration ),
+                context.SyntaxGenerator.TypeParameterList( this.OverriddenDeclaration, context.Compilation ),
+                context.SyntaxGenerator.ParameterList( this.OverriddenDeclaration, context.Compilation ),
                 context.SyntaxGenerator.ConstraintClauses( this.OverriddenDeclaration ),
                 newMethodBody,
                 null );

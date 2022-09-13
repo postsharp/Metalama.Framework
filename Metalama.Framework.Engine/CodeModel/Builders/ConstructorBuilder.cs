@@ -62,7 +62,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             throw new NotImplementedException();
         }
 
-        public override IEnumerable<IntroducedMember> GetIntroducedMembers( in MemberIntroductionContext context )
+        public override IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context )
         {
             if ( this.IsStatic )
             {

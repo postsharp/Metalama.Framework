@@ -13,9 +13,11 @@ internal abstract class NonUniquelyNamedMemberUpdatableCollection<T> : NonUnique
 {
     protected abstract Func<ISymbol, bool> Predicate { get; }
 
-    protected override IEnumerable<ISymbol> GetMembers( string name ) => this.DeclaringTypeOrNamespace.GetMembers( name ).Where( this.Predicate );
+    protected override IEnumerable<ISymbol> GetMembers( string name )
+        => this.DeclaringTypeOrNamespace.GetMembers( name ).Where( x => this.Predicate( x ) && SymbolValidator.Instance.Visit( x ) );
 
-    protected override IEnumerable<ISymbol> GetMembers() => this.DeclaringTypeOrNamespace.GetMembers().Where( this.Predicate );
+    protected override IEnumerable<ISymbol> GetMembers()
+        => this.DeclaringTypeOrNamespace.GetMembers().Where( x => this.Predicate( x ) && SymbolValidator.Instance.Visit( x ) );
 
     protected NonUniquelyNamedMemberUpdatableCollection( CompilationModel compilation, INamespaceOrTypeSymbol declaringType ) : base(
         compilation,

@@ -131,6 +131,7 @@ namespace Metalama.Framework.Engine.CompileTime
         }
 
         private static ulong ComputeProjectHash(
+            ProjectLicenseInfo? projectLicenseInfo,
             IEnumerable<CompileTimeProject> referencedProjects,
             ulong sourceHash,
             StringBuilder? log = null )
@@ -140,6 +141,11 @@ namespace Metalama.Framework.Engine.CompileTime
             XXH64 h = new();
             h.Update( _buildId );
             log?.AppendLineInvariant( $"BuildId={_buildId}" );
+
+            projectLicenseInfo ??= ProjectLicenseInfo.Empty;
+            var projectLicenseInfoHash = projectLicenseInfo.GetHashCode();
+            h.Update( projectLicenseInfoHash );
+            log?.AppendLineInvariant( $"ProjectLicenseInfo:={projectLicenseInfoHash:x}" );
 
             foreach ( var reference in referencedProjects.OrderBy( r => r.Hash ) )
             {
@@ -637,6 +643,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// </summary>
         internal bool TryGetCompileTimeProject(
             Compilation runTimeCompilation,
+            ProjectLicenseInfo? projectLicenseInfo,
             IReadOnlyList<SyntaxTree>? compileTimeTreesHint,
             IReadOnlyList<CompileTimeProject> referencedProjects,
             IDiagnosticAdder diagnosticSink,
@@ -660,6 +667,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
             return this.TryGetCompileTimeProjectImpl(
                 runTimeCompilation,
+                projectLicenseInfo,
                 compileTimeArtifacts.SyntaxTrees,
                 referencedProjects,
                 compileTimeArtifacts.GlobalUsings,
@@ -728,6 +736,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private bool TryGetCompileTimeProjectImpl(
             Compilation runTimeCompilation,
+            ProjectLicenseInfo? projectLicenseInfo,
             IReadOnlyList<SyntaxTree> sourceTreesWithCompileTimeCode,
             IReadOnlyList<CompileTimeProject> referencedProjects,
             ImmutableArray<UsingDirectiveSyntax> globalUsings,
@@ -738,7 +747,7 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             // Check the in-process cache.
             var (sourceHash, projectHash, outputPaths) =
-                this.GetPreCacheProjectInfo( runTimeCompilation, sourceTreesWithCompileTimeCode, referencedProjects );
+                this.GetPreCacheProjectInfo( runTimeCompilation, projectLicenseInfo, sourceTreesWithCompileTimeCode, referencedProjects );
 
             if ( !this.TryGetCompileTimeProjectFromCache(
                     runTimeCompilation,
@@ -861,6 +870,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             transitiveFabricTypes,
                             otherTemplateTypes,
                             referencedProjects.Select( r => r.RunTimeIdentity.GetDisplayName() ).ToList(),
+                            projectLicenseInfo?.RedistributionLicenseKey,
                             sourceHash,
                             textMapDirectory.FilesByTargetPath.Values.Select( f => new CompileTimeFile( f ) ).ToImmutableList() );
 
@@ -892,6 +902,7 @@ namespace Metalama.Framework.Engine.CompileTime
 
         private (ulong SourceHash, ulong ProjectHash, OutputPaths OutputPaths) GetPreCacheProjectInfo(
             Compilation runTimeCompilation,
+            ProjectLicenseInfo? projectLicenseInfo,
             IReadOnlyList<SyntaxTree> sourceTreesWithCompileTimeCode,
             IReadOnlyList<CompileTimeProject> referencedProjects,
             StringBuilder? log = null )
@@ -899,7 +910,7 @@ namespace Metalama.Framework.Engine.CompileTime
             var targetFramework = runTimeCompilation.GetTargetFramework();
 
             var sourceHash = ComputeSourceHash( targetFramework, sourceTreesWithCompileTimeCode, log );
-            var projectHash = ComputeProjectHash( referencedProjects, sourceHash, log );
+            var projectHash = ComputeProjectHash( projectLicenseInfo, referencedProjects, sourceHash, log );
 
             var outputPaths = this.GetOutputPaths( runTimeCompilation.AssemblyName!, targetFramework, projectHash );
 
@@ -1014,13 +1025,14 @@ namespace Metalama.Framework.Engine.CompileTime
             IReadOnlyList<SyntaxTree> syntaxTrees,
             ulong syntaxTreeHash,
             IReadOnlyList<CompileTimeProject> referencedProjects,
+            ProjectLicenseInfo? projectLicenseInfo,
             IDiagnosticAdder diagnosticAdder,
             CancellationToken cancellationToken,
             out string assemblyPath,
             out string? sourceDirectory )
         {
             this._logger.Trace?.Log( $"TryCompileDeserializedProject( '{runTimeAssemblyName}' )" );
-            var compileTimeAssemblyName = ComputeProjectHash( referencedProjects, syntaxTreeHash );
+            var compileTimeAssemblyName = ComputeProjectHash( projectLicenseInfo, referencedProjects, syntaxTreeHash );
 
             var outputPaths = this.GetOutputPaths( runTimeAssemblyName, targetFramework, compileTimeAssemblyName );
 

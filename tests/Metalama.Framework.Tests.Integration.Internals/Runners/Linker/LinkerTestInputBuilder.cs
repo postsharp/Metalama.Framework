@@ -159,12 +159,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                 }
             }
 
-            var nameObliviousSignatureComparer =
-                new StructuralSymbolComparer(
-                    StructuralSymbolComparerOptions.GenericArguments
-                    | StructuralSymbolComparerOptions.GenericParameterCount
-                    | StructuralSymbolComparerOptions.ParameterModifiers
-                    | StructuralSymbolComparerOptions.ParameterTypes );
+            var nameObliviousSignatureComparer = StructuralSymbolComparer.NameObliviousComparer;
 
             // Update transformations to reflect the input compilation.
             foreach ( var transformation in rewriter.ObservableTransformations.Cast<object>()

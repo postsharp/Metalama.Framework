@@ -17,7 +17,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Testing;
 
-public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvider
+public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvider, IDateTimeProvider
 {
     private static readonly IApplicationInfo _applicationInfo = new TestFrameworkApplicationInfo();
     private readonly ITempFileManager _backstageTempFileManager;
@@ -123,6 +123,8 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
         }
     }
 
+    DateTime IDateTimeProvider.Now => DateTime.Now;
+
     public void Dispose()
     {
         this.ProjectOptions.Dispose();
@@ -139,7 +141,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 
         object? IServiceProvider.GetService( Type serviceType )
         {
-            if ( serviceType == typeof(ITempFileManager) || serviceType == typeof(IApplicationInfoProvider) )
+            if ( serviceType == typeof(ITempFileManager) || serviceType == typeof(IApplicationInfoProvider) || serviceType == typeof(IDateTimeProvider) )
             {
                 return this._context;
             }

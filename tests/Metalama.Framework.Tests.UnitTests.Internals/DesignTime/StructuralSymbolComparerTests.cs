@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.Comparers;
-using Microsoft.CodeAnalysis;
 using System.Linq;
 using Xunit;
 
@@ -9,23 +9,12 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
     public class StructuralSymbolComparerTests : TestBase
     {
-        private static void Equal( StructuralSymbolComparer comparer, ISymbol x, ISymbol y )
-        {
-            Assert.True( comparer.Equals( x, y ) );
-            Assert.True( comparer.Equals( y, x ) );
-            Assert.Equal( comparer.GetHashCode( x ), comparer.GetHashCode( y ) );
-        }
-
-        private static void NotEqual( StructuralSymbolComparer comparer, ISymbol x, ISymbol y )
-        {
-            Assert.False( comparer.Equals( x, y ) );
-            Assert.False( comparer.Equals( y, x ) );
-        }
-
         [Fact]
         public void Names()
         {
             const string code = @"
+using System.Collections.Generic;
+
 class A
 {
     public void Foo() {}
@@ -38,6 +27,11 @@ class A
 class B
 {
     public void Foo(int x) {}
+    public void Foo(ref int x) {}
+    public void Foo(int[] x) {}
+    public void Foo(List<int> x) {}
+    public void Foo(List<long> x) {}
+    public unsafe void Foo(int* x) {}
     public void Bar<T>() {}
     public void Quz(ref int x) {}
 }
@@ -50,46 +44,27 @@ namespace C
 namespace D {}
 ";
 
-            var comparer = new StructuralSymbolComparer( StructuralSymbolComparerOptions.Name );
+            using var testContext = this.CreateTestContext();
 
-            var compilation = CreateCSharpCompilation( code );
-            var globalNamespaceMembers = compilation.Assembly.Modules.Single().GlobalNamespace.GetMembers().ToArray();
-            var typeA = globalNamespaceMembers[0];
-            var typeB = globalNamespaceMembers[1];
-            var namespaceC = globalNamespaceMembers[2];
-            var typeCb = namespaceC.GetMembers().Single();
-            var namespaceD = globalNamespaceMembers[3];
-            var typeAFoo = typeA.GetMembers()[0];
-            var typeABar = typeA.GetMembers()[1];
-            var typeABarInt = typeA.GetMembers()[2];
-            var typeAQuz = typeA.GetMembers()[3];
-            var typeAQuzT = typeA.GetMembers()[4];
-            var typeBFooInt = typeB.GetMembers()[0];
-            var typeBBarT = typeB.GetMembers()[1];
-            var typeBQuzInt = typeB.GetMembers()[2];
+            var compilation1 = testContext.CreateCompilationModel( code );
+            var compilation2 = testContext.CreateCompilationModel( code );
 
-            // Namespaces
-            NotEqual( comparer, namespaceC, namespaceD );
+            var declarations1 = compilation1.GetContainedDeclarations().ToList();
+            var declarations2 = compilation2.GetContainedDeclarations().ToList();
 
-            // Types
-            NotEqual( comparer, typeA, typeB );
-            Equal( comparer, typeB, typeCb );
+            for ( var i1 = 0; i1 < declarations1.Count; i1++ )
+            {
+                for ( var i2 = 0; i1 < i2; i2++ )
+                {
+                    var symbol1 = declarations1[i1].GetSymbol();
+                    var symbol2 = declarations2[i2].GetSymbol();
 
-            // Methods
-            NotEqual( comparer, typeAFoo, typeABar );
-            NotEqual( comparer, typeABar, typeAQuzT );
-            NotEqual( comparer, typeAQuz, typeBFooInt );
-            NotEqual( comparer, typeBBarT, typeAQuzT );
-
-            Equal( comparer, typeAFoo, typeBFooInt );
-
-            Equal( comparer, typeABar, typeABarInt );
-            Equal( comparer, typeABar, typeBBarT );
-            Equal( comparer, typeABarInt, typeBBarT );
-
-            Equal( comparer, typeAQuz, typeAQuzT );
-            Equal( comparer, typeAQuz, typeBQuzInt );
-            Equal( comparer, typeAQuzT, typeBQuzInt );
+                    if ( symbol1 != null && symbol2 != null )
+                    {
+                        Assert.Equal( i1 == i2, StructuralSymbolComparer.Default.Equals( symbol1, symbol2 ) );
+                    }
+                }
+            }
         }
 
         // TODO: More tests.
