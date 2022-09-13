@@ -123,9 +123,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
         }
     }
 
-    private DateTime? Now { get; set; }
-
-    DateTime IDateTimeProvider.Now => this.Now ?? DateTime.Now;
+    DateTime IDateTimeProvider.Now => DateTime.Now;
 
     public void Dispose()
     {

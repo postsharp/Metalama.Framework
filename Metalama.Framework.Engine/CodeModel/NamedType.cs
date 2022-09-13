@@ -287,7 +287,7 @@ namespace Metalama.Framework.Engine.CodeModel
         public INamespace Namespace => this.Compilation.Factory.GetNamespace( this.TypeSymbol.ContainingNamespace );
 
         [Memo]
-        public string FullName => this.TypeSymbol.GetFullName();
+        public string FullName => this.TypeSymbol.GetFullName().AssertNotNull();
 
         [Memo]
         public IReadOnlyList<IType> TypeArguments => this.TypeSymbol.TypeArguments.Select( a => this.Compilation.Factory.GetIType( a ) ).ToImmutableList();
@@ -514,6 +514,9 @@ namespace Metalama.Framework.Engine.CodeModel
                 return false;
             }
         }
+
+        public INamedType TypeDefinition
+            => this.TypeSymbol == this.TypeSymbol.OriginalDefinition ? this : this.Compilation.Factory.GetNamedType( this.TypeSymbol.OriginalDefinition );
 
         private void PopulateAllInterfaces( ImmutableHashSet<INamedTypeSymbol>.Builder builder, GenericMap genericMap )
         {

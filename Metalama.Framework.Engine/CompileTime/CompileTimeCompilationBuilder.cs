@@ -145,7 +145,7 @@ namespace Metalama.Framework.Engine.CompileTime
             projectLicenseInfo ??= ProjectLicenseInfo.Empty;
             var projectLicenseInfoHash = projectLicenseInfo.GetHashCode();
             h.Update( projectLicenseInfoHash );
-            log?.AppendLineInvariant( $"ProjectLicneseInfo:={projectLicenseInfoHash:x}" );
+            log?.AppendLineInvariant( $"ProjectLicenseInfo:={projectLicenseInfoHash:x}" );
 
             foreach ( var reference in referencedProjects.OrderBy( r => r.Hash ) )
             {

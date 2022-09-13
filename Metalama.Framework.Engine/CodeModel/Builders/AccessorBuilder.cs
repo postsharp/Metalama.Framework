@@ -103,6 +103,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public OperatorKind OperatorKind => OperatorKind.None;
 
+        IMethod IMethod.MethodDefinition => this;
+
         public Accessibility Accessibility
         {
             get => this._accessibility ?? this.ContainingMember.Accessibility;
