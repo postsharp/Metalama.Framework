@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
             }
 
             var retrieveMethodBase = CompileTimeMethodInfoSerializer.SerializeMethodBase(
-                method.AssertNotNull( Justifications.SerializersNotImplementedForIntroductions ),
+                method,
                 serializationContext );
 
             return ElementAccessExpression(
