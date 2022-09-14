@@ -11,4 +11,6 @@ internal interface ICompilationVersion
     ulong CompileTimeProjectHash { get; }
 
     bool TryGetSyntaxTreeVersion( string path, out SyntaxTreeVersion syntaxTreeVersion );
+    
+    Compilation Compilation { get; }
 }

@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
@@ -75,6 +74,8 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             }
             else
             {
+                this._strategy.Observer?.OnMergeCompilationChanges();
+                
                 // Merge syntax tree changes.
                 var mergedSyntaxTreeBuilder = this._syntaxTreeChanges.ToBuilder();
 
@@ -127,17 +128,11 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         public static CompilationChanges Incremental(
             CompilationVersion oldCompilationVersion,
             Compilation newCompilation,
-            DependencyChanges dependencyChanges = default,
             CancellationToken cancellationToken = default )
         {
             if ( newCompilation == oldCompilationVersion.Compilation )
             {
                 return Empty( oldCompilationVersion, oldCompilationVersion.WithCompilation( newCompilation ) );
-            }
-
-            if ( dependencyChanges.IsUninitialized )
-            {
-                dependencyChanges = DependencyChanges.Empty;
             }
 
             oldCompilationVersion.Strategy.Observer?.OnComputeIncrementalChanges();
@@ -147,8 +142,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
 
             var syntaxTreeChanges = ImmutableDictionary.CreateBuilder<string, SyntaxTreeChange>( StringComparer.Ordinal );
 
-            var hasCompileTimeChange = dependencyChanges.HasCompileTimeChange
-                                       || !AreMetadataReferencesEqual( oldCompilationVersion.Compilation, newCompilation );
+            var hasCompileTimeChange =  !AreMetadataReferencesEqual( oldCompilationVersion.Compilation, newCompilation );
 
             // Process new trees.
             var lastTrees = oldCompilationVersion.SyntaxTrees;
@@ -240,27 +234,6 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                             DiffStrategy.GetCompileTimeChangeKind( oldSyntaxTree.Value.HasCompileTimeCode, false ),
                             oldSyntaxTree.Value,
                             default ) );
-                }
-            }
-
-            // Process dependencies.
-            foreach ( var dependency in dependencyChanges.InvalidatedSyntaxTrees )
-            {
-                if ( !syntaxTreeChanges.TryGetValue( dependency, out var change ) || change.SyntaxTreeChangeKind == SyntaxTreeChangeKind.None )
-                {
-                    // The tree in itself has not changed, but a dependency of the tree has.
-
-                    if ( lastTrees == null || !lastTrees.TryGetValue( dependency, out var lastTree ) )
-                    {
-                        continue;
-                    }
-
-                    syntaxTreeChanges[dependency] = new SyntaxTreeChange(
-                        dependency,
-                        SyntaxTreeChangeKind.ChangedDependency,
-                        CompileTimeChangeKind.None,
-                        lastTree,
-                        lastTree );
                 }
             }
 

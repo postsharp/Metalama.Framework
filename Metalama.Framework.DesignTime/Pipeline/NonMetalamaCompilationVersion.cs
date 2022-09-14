@@ -31,8 +31,11 @@ internal class NonMetalamaCompilationVersion : ICompilationVersion
         }
     }
 
+    public Compilation Compilation { get; set; }
+
     public NonMetalamaCompilationVersion( Compilation compilation, Func<SyntaxTree, ulong> computeHashFunc )
     {
+        this.Compilation = compilation;
         this.AssemblyIdentity = compilation.Assembly.Identity;
         this._computeHashFunc = computeHashFunc;
         this._syntaxTrees = compilation.GetIndexedSyntaxTrees();

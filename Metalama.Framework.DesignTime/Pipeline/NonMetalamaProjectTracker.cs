@@ -22,8 +22,8 @@ internal class NonMetalamaProjectTracker
     {
         // We don't need the changes, but using the CompilationChangesProvider allows us to get the new CompilationVersion incrementally,
         // without recomputing it from scratch.
-        var changes = await this._compilationChangesProvider.GetCompilationChangesAsync( oldCompilation, newCompilation, false, default, cancellationToken );
+        var changes = await this._compilationChangesProvider.GetCompilationChangesAsync( oldCompilation, newCompilation, false, cancellationToken );
 
-        return new DesignTimeCompilationReference( changes.NewCompilationVersion );
+        return new DesignTimeCompilationReference( changes.NewCompilationVersion, false );
     }
 }

@@ -2,7 +2,10 @@
 
 using Metalama.Framework.DesignTime.Pipeline;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
@@ -15,6 +18,7 @@ internal class TestCompilationVersion : ICompilationVersion
         this._hashes = hashes;
         this.AssemblyIdentity = assemblyIdentity;
         this.CompileTimeProjectHash = compileTimeProjectHash;
+        this.Compilation = CSharpCompilation.Create( assemblyIdentity.Name, hashes?.Select( p => CSharpSyntaxTree.ParseText( "", path: p.Key ) ) );
     }
 
     public AssemblyIdentity AssemblyIdentity { get; }
@@ -43,4 +47,6 @@ internal class TestCompilationVersion : ICompilationVersion
             return false;
         }
     }
+
+    public Compilation Compilation { get; }
 }

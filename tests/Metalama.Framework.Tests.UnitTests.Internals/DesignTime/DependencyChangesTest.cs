@@ -2,17 +2,22 @@
 
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
+using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
-public class DependencyChangesTest
+public class DependencyChangesTest : TestBase
 {
     [Fact]
-    public void NoChange()
+    public async Task NoChange()
     {
+        using var testContext = this.CreateTestContext();
+        var compilationChangesProvider = new CompilationChangesProvider(testContext.ServiceProvider);
+
         const ulong hash = 54;
 
         const string masterFilePath = "master.cs";
@@ -26,7 +31,8 @@ public class DependencyChangesTest
 
         var graph = DependencyGraph.Empty.Update( new[] { dependentFilePath }, dependencies );
 
-        var changes = DependencyChanges.Create(
+        var changes = await DependencyChanges.IncrementalFromReferencesAsync(
+            compilationChangesProvider,
             graph,
             new DesignTimeCompilationReferenceCollection( new DesignTimeCompilationReference( masterCompilationVersion ) ) );
 
@@ -34,8 +40,11 @@ public class DependencyChangesTest
     }
 
     [Fact]
-    public void FileHashChanged()
+    public async Task FileHashChanged()
     {
+        using var testContext = this.CreateTestContext();
+        var compilationChangesProvider = new CompilationChangesProvider(testContext.ServiceProvider);
+        
         const ulong hash1 = 1;
         const ulong hash2 = 2;
 
@@ -53,7 +62,8 @@ public class DependencyChangesTest
         // Create a second version of the master compilation with a different hash.
         var masterCompilationVersion2 = new TestCompilationVersion( masterCompilation, hashes: new Dictionary<string, ulong> { [masterFilePath] = hash2 } );
 
-        var changes = DependencyChanges.Create(
+        var changes = await DependencyChanges.IncrementalFromReferencesAsync(
+            compilationChangesProvider,
             dependencyGraph,
             new DesignTimeCompilationReferenceCollection( new DesignTimeCompilationReference( masterCompilationVersion2 ) ) );
 
@@ -62,8 +72,11 @@ public class DependencyChangesTest
     }
 
     [Fact]
-    public void FileHashBeenRemoved()
+    public async Task FileHashBeenRemoved()
     {
+        using var testContext = this.CreateTestContext();
+        var compilationChangesProvider = new CompilationChangesProvider(testContext.ServiceProvider);
+
         const ulong hash1 = 1;
 
         const string masterFilePath = "master.cs";
@@ -85,7 +98,8 @@ public class DependencyChangesTest
                 /* Intentionally empty. */
             } );
 
-        var changes = DependencyChanges.Create(
+        var changes = await DependencyChanges.IncrementalFromReferencesAsync(
+            compilationChangesProvider,
             dependencyGraph,
             new DesignTimeCompilationReferenceCollection( new DesignTimeCompilationReference( masterCompilationVersion2 ) ) );
 

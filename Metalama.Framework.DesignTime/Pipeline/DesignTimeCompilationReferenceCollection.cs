@@ -8,8 +8,6 @@ namespace Metalama.Framework.DesignTime.Pipeline;
 
 internal class DesignTimeCompilationReferenceCollection : ITransitiveAspectManifestProvider
 {
-    public static DesignTimeCompilationReferenceCollection Empty { get; } = new( Enumerable.Empty<DesignTimeCompilationReference>() );
-
     public ImmutableDictionary<AssemblyIdentity, DesignTimeCompilationReference> References { get; }
 
     public DesignTimeCompilationReferenceCollection( params DesignTimeCompilationReference[] references ) : this(

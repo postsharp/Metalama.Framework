@@ -11,4 +11,6 @@ public interface IDifferObserver : IService
     void OnComputeIncrementalChanges();
 
     void OnComputeNonIncrementalChanges();
+
+    void OnMergeCompilationChanges();
 }

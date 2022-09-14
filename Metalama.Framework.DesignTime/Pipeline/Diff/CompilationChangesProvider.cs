@@ -1,6 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.DesignTime.Pipeline.Dependencies;
+using Metalama.Framework.Engine;
 using Microsoft.CodeAnalysis;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
@@ -31,13 +31,15 @@ internal class CompilationChangesProvider
         Compilation oldCompilation,
         Compilation newCompilation,
         CancellationToken cancellationToken,
-        [NotNullWhen( true )] out CompilationChanges? changes )
+        [NotNullWhen( true )] out CompilationChanges? exactChanges,
+        out CompilationChanges? closestChanges )
     {
         if ( !this._cache.TryGetValue( oldCompilation, out var list ) )
         {
             // If the old compilation is not in the cache, we cannot compute any incremental change.
 
-            changes = null;
+            exactChanges = null;
+            closestChanges = null;
 
             return false;
         }
@@ -49,13 +51,18 @@ internal class CompilationChangesProvider
             if ( node.IncrementalChanges.NewCompilationVersion.Compilation == newCompilation )
             {
                 // The exact pair old-and-new compilation was found in the cache.
-                changes = node.IncrementalChanges;
+                exactChanges = node.IncrementalChanges;
+                closestChanges = null;
 
                 return true;
             }
         }
 
-        changes = null;
+        // We did not find the incremental changes for the pair of compilations, so we return the incremental changes
+        // from the given original compilation to the last known compilation, which is hopefully very similar to the
+        // new compilation because of the time correlation, as it should have just a few user edits.
+        closestChanges = list.FirstIncrementalChange?.IncrementalChanges;
+        exactChanges = null;
 
         return false;
     }
@@ -64,7 +71,6 @@ internal class CompilationChangesProvider
         Compilation? oldCompilation,
         Compilation newCompilation,
         bool isMetalamaEnabled = true,
-        DependencyChanges dependencyChanges = default,
         CancellationToken cancellationToken = default )
     {
         var diffStrategy = isMetalamaEnabled ? this._metalamaDiffStrategy : this._nonMetalamaDiffStrategy;
@@ -103,8 +109,32 @@ internal class CompilationChangesProvider
         {
             // Find the pre-computed incremental changes from the graph. 
 
-            if ( this.TryGetIncrementalChangesFromCache( oldCompilation, newCompilation, cancellationToken, out var incrementalChanges ) )
+            if ( this.TryGetIncrementalChangesFromCache( oldCompilation, newCompilation, cancellationToken, out var incrementalChanges, out var closestIncrementalChanges ) )
             {
+                // We already computed the changes between this exact pair of compilations.
+                
+                return incrementalChanges;
+            }
+            else if ( closestIncrementalChanges != null )
+            {
+                // We do not have the exact pair of compilations in the cache, however we have already computed a diff from the same old
+                // compilation, so it's a good idea to compute the diff from the last known compilation instead of from the initial compilation,
+                // as it should contain fewer changes.
+
+                var changesFromClosestCompilation = CompilationChanges.Incremental(
+                    closestIncrementalChanges.NewCompilationVersion,
+                    newCompilation,
+                    cancellationToken );
+
+                incrementalChanges = closestIncrementalChanges.Merge( changesFromClosestCompilation );
+                
+                if ( !this._cache.TryGetValue( oldCompilation, out var changeLinkedListFromOldCompilation ) )
+                {
+                    throw new AssertionFailedException();
+                }
+                
+                changeLinkedListFromOldCompilation.Insert( incrementalChanges );
+
                 return incrementalChanges;
             }
             else
@@ -129,7 +159,6 @@ internal class CompilationChangesProvider
                     incrementalChanges = CompilationChanges.Incremental(
                         changeLinkedListFromOldCompilation.CompilationVersion,
                         newCompilation,
-                        dependencyChanges,
                         cancellationToken );
 
                     if ( !this._cache.TryGetValue( newCompilation, out _ ) )

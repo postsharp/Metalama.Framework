@@ -291,7 +291,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             return compilationResult != null;
         }
 
-        private async ValueTask<DesignTimeCompilationReferenceCollection?> GetProjectReferences( Compilation compilation, CancellationToken cancellationToken )
+        private async ValueTask<DesignTimeCompilationReferenceCollection?> GetProjectReferencesAsync( Compilation compilation, CancellationToken cancellationToken )
         {
             List<DesignTimeCompilationReference> compilationReferences = new();
 
@@ -312,6 +312,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     compilationReferences.Add(
                         new DesignTimeCompilationReference(
                             referenceResult.CompilationVersion,
+                            true,
                             referenceResult.TransformationResult ) );
                 }
                 else
@@ -356,7 +357,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     return compilationResult;
                 }
 
-                var references = await this.GetProjectReferences( compilation, cancellationToken );
+                var references = await this.GetProjectReferencesAsync( compilation, cancellationToken );
 
                 if ( references == null )
                 {

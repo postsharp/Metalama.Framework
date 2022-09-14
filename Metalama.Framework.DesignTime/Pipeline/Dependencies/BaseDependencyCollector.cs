@@ -27,7 +27,7 @@ internal class BaseDependencyCollector
 
     public BaseDependencyCollector( params ICompilationVersion[] compilationReferences ) : this( (IEnumerable<ICompilationVersion>) compilationReferences ) { }
 
-    public BaseDependencyCollector( IEnumerable<ICompilationVersion> compilationReferences )
+    protected BaseDependencyCollector( IEnumerable<ICompilationVersion> compilationReferences )
     {
         this.CompilationReferences = compilationReferences.ToImmutableDictionary( x => x.AssemblyIdentity, x => x );
     }

@@ -1,5 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.DesignTime.Pipeline.Diff;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
@@ -22,36 +24,49 @@ internal readonly struct DependencyChanges
 
     public ImmutableHashSet<string> InvalidatedSyntaxTrees { get; }
 
-    public static DependencyChanges Create(
-        DependencyGraph dependencies,
-        DesignTimeCompilationReferenceCollection currentReferences,
+    public static async ValueTask<DependencyChanges> IncrementalFromReferencesAsync(
+        CompilationChangesProvider compilationChangesProvider,
+        DependencyGraph oldGraph,
+        DesignTimeCompilationReferenceCollection newReferences,
         CancellationToken cancellationToken = default )
     {
         var invalidatedFiles = ImmutableHashSet.CreateBuilder<string>( StringComparer.Ordinal );
 
-        foreach ( var compilationReference in currentReferences.References )
+        foreach ( var compilationReference in newReferences.References )
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if ( dependencies.Compilations.TryGetValue( compilationReference.Key, out var dependenciesOfReference ) )
+           
+
+            if ( oldGraph.Compilations.TryGetValue( compilationReference.Key, out var dependenciesOfReference ) )
             {
                 if ( dependenciesOfReference.CompileTimeProjectHash != compilationReference.Value.CompilationVersion.CompileTimeProjectHash )
                 {
                     // If we have a compile-time change, there is no need to do anything.
                     return new DependencyChanges( true, ImmutableHashSet<string>.Empty );
                 }
+                
+                oldGraph.References.TryGetValue( compilationReference.Key, out var oldReference );
 
-                foreach ( var syntaxTreeDependencyCollection in dependenciesOfReference.DependenciesByMasterFilePath )
+                var compilationChanges = await compilationChangesProvider.GetCompilationChangesAsync(
+                    oldReference?.Compilation,
+                    compilationReference.Value.CompilationVersion.Compilation,
+                    compilationReference.Value.IsMetalamaEnabled,
+                    cancellationToken );
+
+                foreach ( var syntaxTreeChange in compilationChanges.SyntaxTreeChanges )
                 {
-                    cancellationToken.ThrowIfCancellationRequested();
-
-                    if ( !compilationReference.Value.CompilationVersion.TryGetSyntaxTreeVersion(
-                             syntaxTreeDependencyCollection.Key,
-                             out var syntaxTreeVersion )
-                         || syntaxTreeVersion.DeclarationHash != syntaxTreeDependencyCollection.Value.DeclarationHash )
+                    if ( dependenciesOfReference.DependenciesByMasterFilePath.TryGetValue( syntaxTreeChange.FilePath, out var dependenciesOfSyntaxTree ) )
                     {
-                        // The file was changed or removed.
-                        invalidatedFiles.UnionWith( syntaxTreeDependencyCollection.Value.DependentFilePaths );
+                        invalidatedFiles.UnionWith( dependenciesOfSyntaxTree.DependentFilePaths );
+                    }
+
+                    foreach ( var partialTypeChange in syntaxTreeChange.PartialTypeChanges )
+                    {
+                        if ( dependenciesOfReference.DependenciesByMasterPartialType.TryGetValue( partialTypeChange.Type, out var dependenciesOfPartialType ) )
+                        {
+                            invalidatedFiles.UnionWith( dependenciesOfPartialType.DependentFilePaths );
+                        }
                     }
                 }
             }

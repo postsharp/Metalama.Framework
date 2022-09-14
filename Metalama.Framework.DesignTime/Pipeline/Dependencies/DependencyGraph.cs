@@ -7,7 +7,9 @@ namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 
 internal readonly struct DependencyGraph
 {
-    public static DependencyGraph Empty { get; } = new( ImmutableDictionary<AssemblyIdentity, DependencyGraphByDependentCompilation>.Empty );
+    public ImmutableDictionary<AssemblyIdentity, ICompilationVersion> References { get; }
+    
+    public static DependencyGraph Empty { get; } = new( ImmutableDictionary<AssemblyIdentity, DependencyGraphByDependentCompilation>.Empty, ImmutableDictionary<AssemblyIdentity, ICompilationVersion>.Empty );
 
     public ImmutableDictionary<AssemblyIdentity, DependencyGraphByDependentCompilation> Compilations { get; }
 
@@ -84,11 +86,12 @@ internal readonly struct DependencyGraph
             }
         }
 
-        return new DependencyGraph( compilationsBuilder.ToImmutable() );
+        return new DependencyGraph( compilationsBuilder.ToImmutable(), dependencies.CompilationReferences );
     }
 
-    private DependencyGraph( ImmutableDictionary<AssemblyIdentity, DependencyGraphByDependentCompilation> compilations )
+    private DependencyGraph( ImmutableDictionary<AssemblyIdentity, DependencyGraphByDependentCompilation> compilations, ImmutableDictionary<AssemblyIdentity, ICompilationVersion> references )
     {
         this.Compilations = compilations;
+        this.References = references;
     }
 }
