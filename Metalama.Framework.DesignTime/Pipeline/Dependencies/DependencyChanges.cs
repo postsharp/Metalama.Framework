@@ -1,12 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.Pipeline.Diff;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 
-internal readonly struct DependencyChanges
+internal class DependencyChanges
 {
     private static readonly ImmutableHashSet<string> _emptyHashSet = ImmutableHashSet<string>.Empty.WithComparer( StringComparer.Ordinal );
 
@@ -72,6 +71,4 @@ internal readonly struct DependencyChanges
 
         return new DependencyChanges( false, invalidatedFiles.ToImmutable() );
     }
-
-    public bool IsUninitialized => this.InvalidatedSyntaxTrees == null!;
 }

@@ -4,7 +4,6 @@ using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,10 +13,10 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
 public class DependencyChangesTest : TestBase
 {
-    private DiffStrategy _strategy = new( true, true, true );
+    private readonly DiffStrategy _strategy = new( true, true, true );
 
     [Fact]
-    public async Task NoChange()
+    public async Task NoChangeAsync()
     {
         using var testContext = this.CreateTestContext();
         var compilationChangesProvider = new CompilationChangesProvider( testContext.ServiceProvider );
@@ -44,7 +43,7 @@ public class DependencyChangesTest : TestBase
     }
 
     [Fact]
-    public async Task FileHashChanged()
+    public async Task FileHashChangedAsync()
     {
         using var testContext = this.CreateTestContext();
         var compilationChangesProvider = new CompilationChangesProvider( testContext.ServiceProvider );
@@ -78,7 +77,7 @@ public class DependencyChangesTest : TestBase
     }
 
     [Fact]
-    public async Task FileHashBeenRemoved()
+    public async Task FileHashBeenRemovedAsync()
     {
         using var testContext = this.CreateTestContext();
         var compilationChangesProvider = new CompilationChangesProvider( testContext.ServiceProvider );
