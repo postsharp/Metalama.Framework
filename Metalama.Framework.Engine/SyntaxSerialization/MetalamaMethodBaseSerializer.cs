@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -49,62 +50,43 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
 
             var typeCreation = TypeSerializationHelper.SerializeTypeSymbolRecursive( method.DeclaringType.GetSymbol(), serializationContext );
             var allBindingFlags = SyntaxUtility.CreateBindingFlags( method, serializationContext );
+            var reflectionHelperTypeSyntax = serializationContext.SyntaxGenerator.Type( serializationContext.GetTypeSymbol( typeof(ReflectionHelper) ) );
 
             ExpressionSyntax invokeGetMethod;
 
             if ( method is IConstructor )
             {
                 invokeGetMethod = InvocationExpression(
-                    MemberAccessExpression(
+                        MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
-                            typeCreation,
-                            IdentifierName( "GetConstructor" ) )
-                        .WithAdditionalAnnotations( Simplifier.Annotation ) )
-                .AddArgumentListArguments(
-                    Argument( allBindingFlags ),
-                    Argument(
-                        ImplicitArrayCreationExpression(
-                            InitializerExpression(
-                                SyntaxKind.ArrayInitializerExpression,
-                                SeparatedList<ExpressionSyntax>(
-                                    method.Parameters.Select( p => p.RefKind != Code.RefKind.None
-                                    ?
-                                    (ExpressionSyntax) InvocationExpression(
-                                        MemberAccessExpression(
-                                            SyntaxKind.SimpleMemberAccessExpression,
-                                            serializationContext.SyntaxGenerator.TypeOfExpression( p.Type.GetSymbol() ),
-                                            IdentifierName( "MakeByRefType" ) ) ).AddArgumentListArguments()
-                                    :
-                                    serializationContext.SyntaxGenerator.TypeOfExpression( p.Type.GetSymbol() ) ) ) ) ) ) );
+                            reflectionHelperTypeSyntax,
+                            IdentifierName( nameof(ReflectionHelper.GetConstructor) ) ) )
+                    .AddArgumentListArguments(
+                        Argument( typeCreation ),
+                        Argument( allBindingFlags ),
+                        Argument(
+                            LiteralExpression(
+                                SyntaxKind.StringLiteralExpression,
+                                Literal( method.ToString() ) ) ) );
             }
             else
             {
                 invokeGetMethod = InvocationExpression(
-                    MemberAccessExpression(
+                        MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
-                            typeCreation,
-                            IdentifierName( "GetMethod" ) )
-                        .WithAdditionalAnnotations( Simplifier.Annotation ) )
-                .AddArgumentListArguments(
-                    Argument(
-                        LiteralExpression(
-                            SyntaxKind.StringLiteralExpression,
-                            Literal( method.Name ) ) ),
-                    Argument( allBindingFlags ),
-                    Argument(
-                        ImplicitArrayCreationExpression(
-                            InitializerExpression(
-                                SyntaxKind.ArrayInitializerExpression,
-                                SeparatedList(
-                                    method.Parameters.Select( p => p.RefKind != Code.RefKind.None
-                                    ?
-                                    (ExpressionSyntax) InvocationExpression(
-                                        MemberAccessExpression(
-                                            SyntaxKind.SimpleMemberAccessExpression,
-                                            serializationContext.SyntaxGenerator.TypeOfExpression( p.Type.GetSymbol() ),
-                                            IdentifierName( "MakeByRefType" ) ) ).AddArgumentListArguments()
-                                    :
-                                    serializationContext.SyntaxGenerator.TypeOfExpression( p.Type.GetSymbol() ) ) ) ) ) ) );
+                            reflectionHelperTypeSyntax,
+                            IdentifierName( nameof(ReflectionHelper.GetMethod) ) ) )
+                    .AddArgumentListArguments(
+                        Argument( typeCreation ),
+                        Argument(
+                            LiteralExpression(
+                                SyntaxKind.StringLiteralExpression,
+                                Literal( method.Name ) ) ),
+                        Argument( allBindingFlags ),
+                        Argument(
+                            LiteralExpression(
+                                SyntaxKind.StringLiteralExpression,
+                                Literal( method.ToString() ) ) ) );
             }
 
             if ( serializationContext.CompilationModel.Project.PreprocessorSymbols.Contains( "NET" ) )
@@ -117,7 +99,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                 .NormalizeWhitespace();
         }
 
-        // The following is the old code that was used alongisde Intrinsics.
+        // The following is the old code that was used alongside Intrinsics.
         /*
         private static ExpressionSyntax CreateTypeHandleExpression( ITypeSymbol type, SyntaxSerializationContext serializationContext )
         {

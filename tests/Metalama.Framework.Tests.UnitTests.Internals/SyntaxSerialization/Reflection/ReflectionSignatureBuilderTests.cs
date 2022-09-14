@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Xunit;
+
 // ReSharper disable MemberCanBePrivate.Global
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection;
@@ -20,7 +21,7 @@ public class ReflectionSignatureBuilderTests : TestBase
         var compilation = testContext.CreateCompilationModel( "" );
         var modelType = (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(C<>) );
 
-        foreach ( var reflectionMethod in typeof(C<>).GetMethods( BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly) )
+        foreach ( var reflectionMethod in typeof(C<>).GetMethods( BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly ) )
         {
             var modelMethod = modelType.Methods.OfName( reflectionMethod.Name ).Single();
 
@@ -29,9 +30,29 @@ public class ReflectionSignatureBuilderTests : TestBase
             Assert.Equal( reflectionMethod.ToString(), signature );
         }
     }
+
+    [Fact]
+    public void TestGetConstructorSignature()
+    {
+        using var testContext = this.CreateTestContext();
+        var compilation = testContext.CreateCompilationModel( "" );
+        var modelType = (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(C<>) );
+
+        var parametersCount = 0;
+
+        foreach ( var reflectionConstructor in typeof(C<>).GetConstructors( BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly ) )
+        {
+            var modelConstructor = modelType.Constructors.Single( c => c.Parameters.Count == parametersCount );
+
+            var signature = ReflectionSignatureBuilder.GetConstructorSignature( modelConstructor );
+
+            Assert.Equal( reflectionConstructor.ToString(), signature );
+            parametersCount++;
+        }
+    }
     
     [Fact]
-    public void TestHasTypeArgument()
+    public void TestMethodHasTypeArgument()
     {
         using var testContext = this.CreateTestContext();
         var compilation = testContext.CreateCompilationModel( "" );
@@ -47,9 +68,30 @@ public class ReflectionSignatureBuilderTests : TestBase
         }
     }
 
+    [Fact]
+    public void TestConstructorHasTypeArgument()
+    {
+        using var testContext = this.CreateTestContext();
+        var compilation = testContext.CreateCompilationModel( "" );
+        var modelType = (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(C<>) );
+
+        var parametersCount = 0;
+
+        foreach ( var reflectionConstructor in typeof(C<>).GetConstructors( BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly ) )
+        {
+            var modelConstructor = modelType.Constructors.Single( c => c.Parameters.Count == parametersCount );
+
+            var hasTypeArgument = ReflectionSignatureBuilder.HasTypeArgument( modelConstructor );
+
+            Assert.Equal( reflectionConstructor.ToString().Contains( "TypeArgument" ), hasTypeArgument );
+            parametersCount++;
+        }
+    }
+
     // The class and the methods must be public otherwise they are not present in the reference assembly that visible from the compilation model.
     public class C<TypeArgument1>
     {
+        // Methods.
         public void M1() { }
 
         public void M2( TypeArgument1 x, dynamic y ) { }
@@ -71,8 +113,27 @@ public class ReflectionSignatureBuilderTests : TestBase
 
         public void M9<TypeArgument2>( List<TypeArgument2> x, Dictionary<int, string> y ) { }
 
-        public void M10<TypeArgument2>( TypeArgument2? x ) { }
+        public void M10<TypeArgument2>( List<List<TypeArgument1>> x, Dictionary<Dictionary<int, double>, Dictionary<bool, string>> y ) { }
 
-        public void M11<TypeArgument2>( TypeArgument2? x ) where TypeArgument2 : struct { }
+        public void M11<TypeArgument2>( TypeArgument2? x ) { }
+
+        public void M12<TypeArgument2>( TypeArgument2? x ) where TypeArgument2 : struct { }
+
+        public void M13( double[][] x, double y, double[,] z ) { }
+
+        // Constructors.
+        public C() { }
+
+        public C( TypeArgument1 p1 ) { }
+
+        public C( out TypeArgument1? p1, Dictionary<int, Dictionary<double, TypeArgument1>> p2 ) { p1 = default; }
+
+        public C( TypeArgument1[,] p1, Dictionary<Dictionary<TypeArgument1, int>, dynamic> p2, ref List<TypeArgument1> p3 ) { }
+
+        public C( Enum p1, Type p2, dynamic p3, ref ushort p4 ) { }
+
+        public unsafe C( TypeArgument1[] p1, List<TypeArgument1> p2, Type p3, int* p4, double[][] p5 ) { }
+
+        public C( int p1, object p2, bool p3, byte p4, byte p5, sbyte p6 ) { }
     }
 }

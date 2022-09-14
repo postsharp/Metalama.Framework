@@ -6,18 +6,22 @@ using Microsoft.CodeAnalysis;
 using System;
 using System.Linq;
 using System.Text;
+using RefKind = Metalama.Framework.Code.RefKind;
 using SpecialType = Microsoft.CodeAnalysis.SpecialType;
+using TypeKind = Metalama.Framework.Code.TypeKind;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization;
 
 public static class ReflectionSignatureBuilder
 {
-
     public static bool HasTypeArgument( IMethod method )
         => TypeArgumentDetector.Instance.Visit( method.ReturnType.GetSymbol() )
            || method.TypeParameters.Count > 0
-           || method.Parameters.Any( p => TypeArgumentDetector.Instance.Visit( p.Type.GetSymbol() ) ); 
+           || method.Parameters.Any( p => TypeArgumentDetector.Instance.Visit( p.Type.GetSymbol() ) );
 
+    public static bool HasTypeArgument( IConstructor constructor )
+        => constructor.Parameters.Any( p => p.Type.TypeKind == TypeKind.TypeParameter )
+           || constructor.Parameters.Any( p => TypeArgumentDetector.Instance.Visit( p.Type.GetSymbol() ) );
 
     public static string GetMethodSignature( IMethod method )
     {
@@ -25,10 +29,17 @@ public static class ReflectionSignatureBuilder
         impl.BuildSignature( method );
 
         return impl.ToString();
-
     }
 
-    class TypeArgumentDetector : SymbolVisitor<bool>
+    public static string GetConstructorSignature( IConstructor constructor )
+    {
+        var impl = new StringBuildingVisitor();
+        impl.BuildSignature( constructor );
+
+        return impl.ToString();
+    }
+
+    private class TypeArgumentDetector : SymbolVisitor<bool>
     {
         public static TypeArgumentDetector Instance { get; } = new();
 
@@ -36,7 +47,7 @@ public static class ReflectionSignatureBuilder
 
         public override bool DefaultVisit( ISymbol symbol ) => throw new AssertionFailedException();
 
-        public override bool VisitNamedType( INamedTypeSymbol symbol ) => symbol.TypeArguments.Any(this.Visit);
+        public override bool VisitNamedType( INamedTypeSymbol symbol ) => symbol.TypeArguments.Any( this.Visit );
 
         public override bool VisitArrayType( IArrayTypeSymbol symbol ) => this.Visit( symbol.ElementType );
 
@@ -47,9 +58,10 @@ public static class ReflectionSignatureBuilder
         public override bool VisitFunctionPointerType( IFunctionPointerTypeSymbol symbol ) => throw new NotImplementedException();
     }
 
-class StringBuildingVisitor : SymbolVisitor
+    private class StringBuildingVisitor : SymbolVisitor
     {
-        private StringBuilder _stringBuilder = new StringBuilder();
+        private readonly StringBuilder _stringBuilder = new StringBuilder();
+        private bool _isTypeArgument;
 
         public void BuildSignature( IMethod method )
         {
@@ -63,14 +75,14 @@ class StringBuildingVisitor : SymbolVisitor
 
                 foreach ( var typeParameter in method.TypeParameters )
                 {
-                    if ( typeParameter.Index > 1 )
+                    if ( typeParameter.Index > 0 )
                     {
                         this._stringBuilder.Append( ',' );
                     }
 
                     this._stringBuilder.Append( typeParameter.Name );
                 }
-                
+
                 this._stringBuilder.Append( ']' );
             }
 
@@ -82,10 +94,40 @@ class StringBuildingVisitor : SymbolVisitor
                 {
                     this._stringBuilder.Append( ", " );
                 }
-                
+
                 this.Visit( parameter.Type.GetSymbol() );
+
+                if ( parameter.RefKind != RefKind.None )
+                {
+                    this._stringBuilder.Append( " ByRef" );
+                }
             }
-            
+
+            this._stringBuilder.Append( ')' );
+        }
+
+        public void BuildSignature( IConstructor constructor )
+        {
+            this._stringBuilder.Append( "Void " );
+            this._stringBuilder.Append( constructor.Name );
+
+            this._stringBuilder.Append( '(' );
+
+            foreach ( var parameter in constructor.Parameters )
+            {
+                if ( parameter.Index > 0 )
+                {
+                    this._stringBuilder.Append( ", " );
+                }
+
+                this.Visit( parameter.Type.GetSymbol() );
+
+                if ( parameter.RefKind != RefKind.None )
+                {
+                    this._stringBuilder.Append( " ByRef" );
+                }
+            }
+
             this._stringBuilder.Append( ')' );
         }
 
@@ -102,7 +144,7 @@ class StringBuildingVisitor : SymbolVisitor
             {
                 this._stringBuilder.Append( ',' );
             }
-            
+
             this._stringBuilder.Append( ']' );
         }
 
@@ -110,9 +152,9 @@ class StringBuildingVisitor : SymbolVisitor
 
         public override void VisitNamedType( INamedTypeSymbol symbol )
         {
-            var requiresNamespace = symbol.SpecialType switch
+            var requiresNamespace = this._isTypeArgument || symbol.SpecialType switch
             {
-                SpecialType.None => false,
+                SpecialType.None => true,
                 SpecialType.System_Object => true,
                 SpecialType.System_Enum => true,
                 SpecialType.System_MulticastDelegate => true,
@@ -131,7 +173,7 @@ class StringBuildingVisitor : SymbolVisitor
                 SpecialType.System_UInt64 => false,
                 SpecialType.System_Decimal => true,
                 SpecialType.System_Single => true,
-                SpecialType.System_Double => true,
+                SpecialType.System_Double => false,
                 SpecialType.System_String => true,
                 SpecialType.System_IntPtr => true,
                 SpecialType.System_UIntPtr => true,
@@ -139,7 +181,7 @@ class StringBuildingVisitor : SymbolVisitor
                 _ => true
             };
 
-            if ( requiresNamespace && symbol.ContainingNamespace.IsGlobalNamespace )
+            if ( requiresNamespace && !symbol.ContainingNamespace.IsGlobalNamespace )
             {
                 this.VisitNamespace( symbol.ContainingNamespace );
                 this._stringBuilder.Append( '.' );
@@ -149,7 +191,9 @@ class StringBuildingVisitor : SymbolVisitor
 
             if ( symbol.TypeArguments.Length > 0 )
             {
-                this._stringBuilder.Append( '<' );
+                var oldIsTypeArgument = this._isTypeArgument;
+                this._isTypeArgument = true;
+                this._stringBuilder.Append( '[' );
 
                 for ( var i = 0; i < symbol.TypeArguments.Length; i++ )
                 {
@@ -163,7 +207,8 @@ class StringBuildingVisitor : SymbolVisitor
                     this.Visit( typeArgument );
                 }
 
-                this._stringBuilder.Append( '>' );
+                this._isTypeArgument = oldIsTypeArgument;
+                this._stringBuilder.Append( ']' );
             }
         }
 
@@ -173,7 +218,7 @@ class StringBuildingVisitor : SymbolVisitor
             {
                 throw new AssertionFailedException();
             }
-            
+
             if ( !symbol.ContainingNamespace.IsGlobalNamespace )
             {
                 this.VisitNamespace( symbol.ContainingNamespace );
@@ -181,7 +226,6 @@ class StringBuildingVisitor : SymbolVisitor
             }
 
             this._stringBuilder.Append( symbol.Name );
-
         }
 
         public override void VisitPointerType( IPointerTypeSymbol symbol )

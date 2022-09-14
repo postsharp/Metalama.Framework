@@ -16,7 +16,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                 .Select(
                     f => (ExpressionSyntax) SyntaxFactory.MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
-                        serializationContext.GetTypeSyntax( typeof( BindingFlags ) ),
+                        serializationContext.GetTypeSyntax( typeof(BindingFlags) ),
                         SyntaxFactory.IdentifierName( f ) ) )
                 .Aggregate( ( l, r ) => SyntaxFactory.BinaryExpression( SyntaxKind.BitwiseOrExpression, l, r ) );
         }
