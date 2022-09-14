@@ -33,34 +33,34 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                         {
                             return
                                 Block(
-                                    ExpressionStatement(
-                                        AssignmentExpression(
-                                            SyntaxKind.SimpleAssignmentExpression,
-                                            IdentifierName( this._returnVariableIdentifier ),
-                                            CreateFieldAccessExpression() ) ) )
-                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                        ExpressionStatement(
+                                            AssignmentExpression(
+                                                SyntaxKind.SimpleAssignmentExpression,
+                                                IdentifierName( this._returnVariableIdentifier ),
+                                                CreateFieldAccessExpression() ) ) )
+                                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                         }
                         else
                         {
                             return
                                 Block(
-                                    ReturnStatement(
-                                        Token( TriviaList(), SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
-                                        CreateFieldAccessExpression(),
-                                        Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) ) )
-                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                        ReturnStatement(
+                                            Token( TriviaList(), SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
+                                            CreateFieldAccessExpression(),
+                                            Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) ) )
+                                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                         }
                     }
                     else if ( this._targetAccessor.MethodKind == MethodKind.PropertySet )
                     {
                         return
                             Block(
-                                ExpressionStatement(
-                                    AssignmentExpression(
-                                        SyntaxKind.SimpleAssignmentExpression,
-                                        CreateFieldAccessExpression(),
-                                        IdentifierName( "value" ) ) ) )
-                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                    ExpressionStatement(
+                                        AssignmentExpression(
+                                            SyntaxKind.SimpleAssignmentExpression,
+                                            CreateFieldAccessExpression(),
+                                            IdentifierName( "value" ) ) ) )
+                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                     }
                     else
                     {
@@ -77,7 +77,8 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     MemberAccessExpression(
                         SyntaxKind.SimpleMemberAccessExpression,
                         ThisExpression(),
-                        IdentifierName( LinkerRewritingDriver.GetBackingFieldName( (IPropertySymbol)this._targetAccessor.AssociatedSymbol.AssertNotNull() ) ) );
+                        IdentifierName(
+                            LinkerRewritingDriver.GetBackingFieldName( (IPropertySymbol) this._targetAccessor.AssociatedSymbol.AssertNotNull() ) ) );
             }
         }
     }

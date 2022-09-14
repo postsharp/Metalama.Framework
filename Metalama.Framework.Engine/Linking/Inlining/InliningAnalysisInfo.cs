@@ -10,10 +10,10 @@ namespace Metalama.Framework.Engine.Linking.Inlining
 
         public string? ReturnVariableIdentifier { get; }
 
-        public InliningAnalysisInfo(SyntaxNode replacedRootNode, string? returnVariableIdentifier )
+        public InliningAnalysisInfo( SyntaxNode replacedRootNode, string? returnVariableIdentifier )
         {
             this.ReplacedRootNode = replacedRootNode;
             this.ReturnVariableIdentifier = returnVariableIdentifier;
-        }   
+        }
     }
 }

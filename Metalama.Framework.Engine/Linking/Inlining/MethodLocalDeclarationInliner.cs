@@ -89,9 +89,13 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             return new InliningAnalysisInfo( localDeclaration, variableDeclarator.Identifier.Text );
         }
 
-        public override StatementSyntax Inline( SyntaxGenerationContext syntaxGenerationContext, InliningSpecification specification, SyntaxNode currentNode, StatementSyntax linkedTargetBody )
+        public override StatementSyntax Inline(
+            SyntaxGenerationContext syntaxGenerationContext,
+            InliningSpecification specification,
+            SyntaxNode currentNode,
+            StatementSyntax linkedTargetBody )
         {
-            if (currentNode is not StatementSyntax currentStatement)
+            if ( currentNode is not StatementSyntax currentStatement )
             {
                 throw new AssertionFailedException();
             }

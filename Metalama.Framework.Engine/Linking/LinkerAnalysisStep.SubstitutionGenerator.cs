@@ -13,30 +13,24 @@ namespace Metalama.Framework.Engine.Linking
     internal partial class LinkerAnalysisStep
     {
         /// <summary>
-        /// Generates all subsitutions required to get correct bodies for semantics during the linking step.
+        /// Generates all substitutions required to get correct bodies for semantics during the linking step.
         /// </summary>
         private class SubstitutionGenerator
         {
             private readonly LinkerSyntaxHandler _syntaxHandler;
-            private readonly LinkerIntroductionRegistry _introductionRegistry;
-            private readonly IReadOnlyList<IntermediateSymbolSemantic> _inlinedSemantics;
             private readonly IReadOnlyList<IntermediateSymbolSemantic> _nonInlinedSemantics;
             private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> _nonInlinedReferences;
             private readonly IReadOnlyList<InliningSpecification> _inliningSpecifications;
             private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, SemanticBodyAnalysisResult> _bodyAnalysisResults;
 
-            public SubstitutionGenerator( 
+            public SubstitutionGenerator(
                 LinkerSyntaxHandler syntaxHandler,
-                LinkerIntroductionRegistry introductionRegistry,
-                IReadOnlyList<IntermediateSymbolSemantic> inlinedSemantics,
-                IReadOnlyList<IntermediateSymbolSemantic> nonInlinedSemantics, 
+                IReadOnlyList<IntermediateSymbolSemantic> nonInlinedSemantics,
                 IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> nonInlinedReferences,
                 IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, SemanticBodyAnalysisResult> bodyAnalysisResults,
                 IReadOnlyList<InliningSpecification> inliningSpecifications )
             {
                 this._syntaxHandler = syntaxHandler;
-                this._introductionRegistry = introductionRegistry;
-                this._inlinedSemantics = inlinedSemantics;
                 this._nonInlinedSemantics = nonInlinedSemantics;
                 this._nonInlinedReferences = nonInlinedReferences;
                 this._inliningSpecifications = inliningSpecifications;
@@ -50,7 +44,7 @@ namespace Metalama.Framework.Engine.Linking
                 // Add substitutions to non-inlined semantics (these are always roots of inlining).
                 foreach ( var nonInlinedSemantic in this._nonInlinedSemantics )
                 {
-                    if (nonInlinedSemantic.Symbol is not IMethodSymbol)
+                    if ( nonInlinedSemantic.Symbol is not IMethodSymbol )
                     {
                         // Skip non-body semantics.
                         continue;
@@ -69,7 +63,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
 
                 // Add substitutions for all inlining specifications.
-                foreach (var inliningSpecification in this._inliningSpecifications)
+                foreach ( var inliningSpecification in this._inliningSpecifications )
                 {
                     // Add the inlining substitution itself.
                     AddSubstitution( inliningSpecification.ParentContextIdentifier, new InliningSubstitution( inliningSpecification ) );
@@ -105,7 +99,9 @@ namespace Metalama.Framework.Engine.Linking
 
                         if ( root is not StatementSyntax )
                         {
-                            AddSubstitution( inliningSpecification.ContextIdentifier, this.CreateOriginalBodySubstitution( root, symbol, inliningSpecification.ReturnVariableIdentifier ) );
+                            AddSubstitution(
+                                inliningSpecification.ContextIdentifier,
+                                this.CreateOriginalBodySubstitution( root, symbol, inliningSpecification.ReturnVariableIdentifier ) );
                         }
                     }
 
@@ -124,29 +120,34 @@ namespace Metalama.Framework.Engine.Linking
 
                 void AddSubstitution( InliningContextIdentifier inliningContextId, SyntaxNodeSubstitution substitution )
                 {
-                    if (!substitutions.TryGetValue( inliningContextId, out var dictionary))
+                    if ( !substitutions.TryGetValue( inliningContextId, out var dictionary ) )
                     {
                         substitutions[inliningContextId] = dictionary = new Dictionary<SyntaxNode, SyntaxNodeSubstitution>();
                     }
 
-                    dictionary.Add(substitution.TargetNode, substitution);
+                    dictionary.Add( substitution.TargetNode, substitution );
                 }
             }
 
-            private SyntaxNodeSubstitution CreateOriginalBodySubstitution(SyntaxNode root, IMethodSymbol symbol, string? returnVariableIdentifier)
+            private SyntaxNodeSubstitution CreateOriginalBodySubstitution( SyntaxNode root, IMethodSymbol symbol, string? returnVariableIdentifier )
             {
-                switch ( (root, symbol) )
+                switch (root, symbol)
                 {
-                    case (AccessorDeclarationSyntax accessorDeclarationSyntax, { AssociatedSymbol: IPropertySymbol property } ):
+                    case (AccessorDeclarationSyntax accessorDeclarationSyntax, { AssociatedSymbol: IPropertySymbol property }):
                         return new AutoPropertyAccessorSubstitution( accessorDeclarationSyntax, property, returnVariableIdentifier );
-                    case (ArrowExpressionClauseSyntax arrowExpressionClause, _ ):
+
+                    case (ArrowExpressionClauseSyntax arrowExpressionClause, _):
                         return new ExpressionBodySubstitution( arrowExpressionClause, symbol, returnVariableIdentifier );
-                    case (VariableDeclaratorSyntax { Parent: {Parent: EventFieldDeclarationSyntax } } variableDeclarator, { AssociatedSymbol: IEventSymbol } ):
+
+                    case (VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax } } variableDeclarator, { AssociatedSymbol: IEventSymbol }):
                         return new EventFieldSubstitution( variableDeclarator, symbol );
-                    case (MethodDeclarationSyntax { Body: null, ExpressionBody: null } emptyVoidPartialMethod, _ ):
+
+                    case (MethodDeclarationSyntax { Body: null, ExpressionBody: null } emptyVoidPartialMethod, _):
                         return new EmptyVoidPartialMethodSubstitution( emptyVoidPartialMethod );
-                    case (ParameterSyntax { Parent: ParameterListSyntax { Parent: RecordDeclarationSyntax } } recordParameter, _ ):
+
+                    case (ParameterSyntax { Parent: ParameterListSyntax { Parent: RecordDeclarationSyntax } } recordParameter, _):
                         return new RecordParameterSubstitution( recordParameter, symbol, returnVariableIdentifier );
+
                     default:
                         throw new AssertionFailedException();
                 }

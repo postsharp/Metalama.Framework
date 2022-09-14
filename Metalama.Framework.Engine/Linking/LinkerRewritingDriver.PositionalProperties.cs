@@ -32,19 +32,19 @@ namespace Metalama.Framework.Engine.Linking
                 var members = new List<MemberDeclarationSyntax>();
                 var lastOverride = (IPropertySymbol) this.IntroductionRegistry.GetLastOverride( symbol );
 
-                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic(IntermediateSymbolSemanticKind.Default) )
-                     && this.AnalysisRegistry.IsInlined( symbol.ToSemantic(IntermediateSymbolSemanticKind.Default) ) )
+                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
+                     && this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     // Backing field for auto property.
-                    members.Add( 
-                        GetPropertyBackingField( 
-                            recordParameter.Type.AssertNotNull(), 
+                    members.Add(
+                        GetPropertyBackingField(
+                            recordParameter.Type.AssertNotNull(),
                             EqualsValueClause( IdentifierName( recordParameter.Identifier.ValueText ) ),
                             FilterAttributeListsForTarget( recordParameter.AttributeLists, SyntaxKind.FieldKeyword, false, false ),
                             symbol ) );
                 }
 
-                if ( this.AnalysisRegistry.IsInlined( lastOverride.ToSemantic(IntermediateSymbolSemanticKind.Default) ) )
+                if ( this.AnalysisRegistry.IsInlined( lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final ) );
                 }
@@ -53,14 +53,15 @@ namespace Metalama.Framework.Engine.Linking
                     members.Add( GetTrampolineForPositionalProperty( recordParameter.Identifier, recordParameter.Type.AssertNotNull(), lastOverride ) );
                 }
 
-                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic(IntermediateSymbolSemanticKind.Default) )
-                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic(IntermediateSymbolSemanticKind.Default) ) )
+                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
+                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
-                    members.Add( GetOriginalImplProperty( symbol, true, recordParameter.Type.AssertNotNull(), recordParameter.Default, null, null, generationContext ) );
+                    members.Add(
+                        GetOriginalImplProperty( symbol, true, recordParameter.Type.AssertNotNull(), recordParameter.Default, null, null, generationContext ) );
                 }
 
-                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic(IntermediateSymbolSemanticKind.Base) )
-                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic(IntermediateSymbolSemanticKind.Base) ) )
+                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
+                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ) )
                 {
                     members.Add( GetEmptyImplProperty( symbol, true, recordParameter.Type.AssertNotNull(), null ) );
                 }
@@ -69,8 +70,8 @@ namespace Metalama.Framework.Engine.Linking
             }
             else if ( this.IntroductionRegistry.IsOverride( symbol ) )
             {
-                if ( !this.AnalysisRegistry.IsReachable( symbol.ToSemantic(IntermediateSymbolSemanticKind.Default) )
-                     || this.AnalysisRegistry.IsInlined( symbol.ToSemantic(IntermediateSymbolSemanticKind.Default) ) )
+                if ( !this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
+                     || this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     return Array.Empty<MemberDeclarationSyntax>();
                 }
@@ -86,35 +87,35 @@ namespace Metalama.Framework.Engine.Linking
             {
                 var generatedAccessors = new List<AccessorDeclarationSyntax>
                 {
-                    GetLinkedAccessor( 
-                        semanticKind, 
-                        SyntaxKind.GetAccessorDeclaration, 
+                    GetLinkedAccessor(
+                        semanticKind,
+                        SyntaxKind.GetAccessorDeclaration,
                         symbol.GetMethod.AssertNotNull() ),
-                    GetLinkedAccessor( 
-                        semanticKind, 
+                    GetLinkedAccessor(
+                        semanticKind,
                         symbol.SetMethod.AssertNotNull().IsInitOnly
                             ? SyntaxKind.InitAccessorDeclaration
                             : SyntaxKind.SetAccessorDeclaration,
-                        symbol.SetMethod.AssertNotNull() ),
+                        symbol.SetMethod.AssertNotNull() )
                 };
 
                 return
                     PropertyDeclaration(
-                        FilterAttributeListsForTarget( recordParameter.AttributeLists, SyntaxKind.PropertyKeyword, false, false ),
-                        TokenList( Token( SyntaxKind.PublicKeyword ) ),
-                        recordParameter.Type.AssertNotNull(),
-                        null,
-                        recordParameter.Identifier,
-                        AccessorList( List( generatedAccessors ) ),
-                        null,
-                        null,
-                        default )
-                    .NormalizeWhitespace();
+                            FilterAttributeListsForTarget( recordParameter.AttributeLists, SyntaxKind.PropertyKeyword, false, false ),
+                            TokenList( Token( SyntaxKind.PublicKeyword ) ),
+                            recordParameter.Type.AssertNotNull(),
+                            null,
+                            recordParameter.Identifier,
+                            AccessorList( List( generatedAccessors ) ),
+                            null,
+                            null,
+                            default )
+                        .NormalizeWhitespace();
             }
 
             AccessorDeclarationSyntax GetLinkedAccessor(
                 IntermediateSymbolSemanticKind semanticKind,
-                SyntaxKind accessorSyntaxKind,                
+                SyntaxKind accessorSyntaxKind,
                 IMethodSymbol methodSymbol )
             {
                 var linkedBody = this.GetSubstitutedBody(
@@ -124,29 +125,29 @@ namespace Metalama.Framework.Engine.Linking
                         generationContext,
                         new InliningContextIdentifier( methodSymbol.ToSemantic( semanticKind ) ) ) );
 
-                var body =                             
+                var body =
                     linkedBody
-                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
-                    .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
+                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
+                        .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
 
                 return
                     AccessorDeclaration(
-                        accessorSyntaxKind,
-                        List<AttributeListSyntax>(),
-                        TokenList(),
-                        Token(
-                            accessorSyntaxKind switch
-                            {
-                                SyntaxKind.GetAccessorDeclaration => SyntaxKind.GetKeyword,
-                                SyntaxKind.SetAccessorDeclaration => SyntaxKind.SetKeyword,
-                                SyntaxKind.InitAccessorDeclaration => SyntaxKind.InitKeyword,
-                                _ => throw new AssertionFailedException(),
-                            } ),
-                        null,
-                        null,
-                        default )
-                    .NormalizeWhitespace()
-                    .WithBody( body );
+                            accessorSyntaxKind,
+                            List<AttributeListSyntax>(),
+                            TokenList(),
+                            Token(
+                                accessorSyntaxKind switch
+                                {
+                                    SyntaxKind.GetAccessorDeclaration => SyntaxKind.GetKeyword,
+                                    SyntaxKind.SetAccessorDeclaration => SyntaxKind.SetKeyword,
+                                    SyntaxKind.InitAccessorDeclaration => SyntaxKind.InitKeyword,
+                                    _ => throw new AssertionFailedException()
+                                } ),
+                            null,
+                            null,
+                            default )
+                        .NormalizeWhitespace()
+                        .WithBody( body );
             }
         }
 
@@ -173,16 +174,16 @@ namespace Metalama.Framework.Engine.Linking
 
             return
                 PropertyDeclaration(
-                    List<AttributeListSyntax>(),
-                    TokenList( Token( SyntaxKind.PublicKeyword ) ),
-                    type,
-                    null,
-                    identifier,
-                    AccessorList( List( new[] { getAccessor, setAccessor } ) ),
-                    null,
-                    null,
-                    default )
-                .NormalizeWhitespace();
+                        List<AttributeListSyntax>(),
+                        TokenList( Token( SyntaxKind.PublicKeyword ) ),
+                        type,
+                        null,
+                        identifier,
+                        AccessorList( List( new[] { getAccessor, setAccessor } ) ),
+                        null,
+                        null,
+                        default )
+                    .NormalizeWhitespace();
 
             ExpressionSyntax GetInvocationTarget()
             {

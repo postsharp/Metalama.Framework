@@ -5,7 +5,5 @@ namespace Metalama.Framework.Engine.Linking.Inlining
     /// <summary>
     /// Path of inlining, that uniquely identifies context of inlined aspect reference.
     /// </summary>
-    public class InliningPath
-    {
-    }
+    public class InliningPath { }
 }

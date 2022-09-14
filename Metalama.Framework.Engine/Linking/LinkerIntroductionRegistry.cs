@@ -50,6 +50,7 @@ namespace Metalama.Framework.Engine.Linking
             this._intermediateSymbolMap = new Dictionary<ISymbol, ISymbol>( StructuralSymbolComparer.Default );
 
             var walker = new SymbolDiscoveryWalker( intermediateCompilation, this._intermediateSymbolMap );
+
             foreach ( var syntaxTree in intermediateCompilation.SyntaxTrees )
             {
                 walker.Visit( syntaxTree.GetRoot() );
@@ -86,7 +87,7 @@ namespace Metalama.Framework.Engine.Linking
         public T MapSymbol<T>( T symbol )
             where T : ISymbol
         {
-            return (T)this._intermediateSymbolMap[symbol];
+            return (T) this._intermediateSymbolMap[symbol];
         }
 
         /// <summary>

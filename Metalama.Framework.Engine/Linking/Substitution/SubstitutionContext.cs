@@ -14,7 +14,10 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
         public SyntaxGenerationContext SyntaxGenerationContext { get; }
 
-        public SubstitutionContext( LinkerRewritingDriver rewritingDriver, SyntaxGenerationContext syntaxGenerationContext, InliningContextIdentifier inliningContextId )
+        public SubstitutionContext(
+            LinkerRewritingDriver rewritingDriver,
+            SyntaxGenerationContext syntaxGenerationContext,
+            InliningContextIdentifier inliningContextId )
         {
             this._inliningContextId = inliningContextId;
             this.RewritingDriver = rewritingDriver;

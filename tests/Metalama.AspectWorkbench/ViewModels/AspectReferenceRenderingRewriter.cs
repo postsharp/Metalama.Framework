@@ -15,20 +15,23 @@ namespace Metalama.AspectWorkbench.ViewModels
         {
             var transformedNode = base.Visit( node );
 
-            if ( node!=null && transformedNode != null && node.TryGetAspectReference( out var aspectReference ) )
+            if ( node != null && transformedNode != null && node.TryGetAspectReference( out var aspectReference ) )
             {
+                // ReSharper disable once StringLiteralTypo
                 return transformedNode
                     .WithLeadingTrivia(
-                        transformedNode.GetLeadingTrivia().Add(
-                            SyntaxTrivia(
-                                SyntaxKind.MultiLineCommentTrivia,
-                                $"/*REF({aspectReference.ToString(true)})*/" ) ) )
+                        transformedNode.GetLeadingTrivia()
+                            .Add(
+                                SyntaxTrivia(
+                                    SyntaxKind.MultiLineCommentTrivia,
+                                    $"/*REF({aspectReference.ToString( true )})*/" ) ) )
                     .WithTrailingTrivia(
-                        transformedNode.GetTrailingTrivia().Insert(
-                            0,
-                            SyntaxTrivia(
-                                SyntaxKind.MultiLineCommentTrivia,
-                                "/*ENDREF*/" ) ) );
+                        transformedNode.GetTrailingTrivia()
+                            .Insert(
+                                0,
+                                SyntaxTrivia(
+                                    SyntaxKind.MultiLineCommentTrivia,
+                                    "/*ENDREF*/" ) ) );
             }
             else
             {

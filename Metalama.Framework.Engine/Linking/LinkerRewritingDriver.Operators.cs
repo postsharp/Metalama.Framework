@@ -27,7 +27,7 @@ namespace Metalama.Framework.Engine.Linking
                 var members = new List<MemberDeclarationSyntax>();
                 var lastOverride = this.IntroductionRegistry.GetLastOverride( symbol );
 
-                if ( this.AnalysisRegistry.IsInlined( lastOverride.ToSemantic(IntermediateSymbolSemanticKind.Default) ) )
+                if ( this.AnalysisRegistry.IsInlined( lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final, lastOverride.IsAsync ) );
                 }
@@ -36,14 +36,14 @@ namespace Metalama.Framework.Engine.Linking
                     members.Add( GetTrampolineForOperator( operatorDeclaration, lastOverride ) );
                 }
 
-                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic(IntermediateSymbolSemanticKind.Default) )
-                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic(IntermediateSymbolSemanticKind.Default) ) )
+                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
+                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     members.Add( GetOriginalImplOperator( operatorDeclaration, symbol ) );
                 }
 
-                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic(IntermediateSymbolSemanticKind.Base) )
-                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic(IntermediateSymbolSemanticKind.Base) ) )
+                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
+                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ) )
                 {
                     members.Add( GetEmptyImplOperator( operatorDeclaration, symbol ) );
                 }
@@ -122,10 +122,8 @@ namespace Metalama.Framework.Engine.Linking
             IMethodSymbol symbol )
         {
             var emptyBody =
-                Block(
-                    ReturnStatement(
-                        DefaultExpression( @operator.ReturnType ) ) )
-                .NormalizeWhitespace();
+                Block( ReturnStatement( DefaultExpression( @operator.ReturnType ) ) )
+                    .NormalizeWhitespace();
 
             return GetSpecialImplOperator( @operator, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ) );
         }

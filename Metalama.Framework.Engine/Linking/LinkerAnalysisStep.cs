@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             /*
              * Algorithm of this step:
-             *  1) Collect and resolve aspect references and add implicit references (final -> first override).
+             *  1) Collect and resolve aspect references and add implicit references (final semantic -> first override).
              *  2) Analyze reachability of semantics through aspect references, which is a DFS starting in entry point semantics, searching through all aspect references.
              *  3) Determine inlineability of reachable semantics (based on reference count).
              *  4) Determine inlineability of aspect references in pointing to inlineable semantics:
@@ -29,7 +29,7 @@ namespace Metalama.Framework.Engine.Linking
              *      * If there is at least one inliner, reference is inlineable.
              *      * If there are multiple inliners, select one (temporarily the first one).
              *      * The selected inliner provides the principal statement.
-             *  5) Inlined semantic is a semantic that is inlineable and all aspect references pointing to is are also inlineable.
+             *  5) Inlined semantic is a semantic that is inlineable and all aspect references pointing to it are also inlineable.
              *  6) Inlined aspect reference is a aspect reference pointing to an inlined semantic.
              *  7) Analyze bodies of inlined semantics:
              *      * Collect all return statements.
@@ -60,7 +60,7 @@ namespace Metalama.Framework.Engine.Linking
                 input.IntroductionRegistry,
                 referenceResolver );
 
-            var resolvedReferencesBySource = aspectReferenceCollector.Run();            
+            var resolvedReferencesBySource = aspectReferenceCollector.Run();
 
             var reachabilityAnalyzer = new ReachabilityAnalyzer(
                 input.IntroductionRegistry,
@@ -70,7 +70,7 @@ namespace Metalama.Framework.Engine.Linking
 
             GetReachableReferences(
                 resolvedReferencesBySource,
-                new HashSet<IntermediateSymbolSemantic>(reachableSemantics),
+                new HashSet<IntermediateSymbolSemantic>( reachableSemantics ),
                 out var reachableReferencesBySource,
                 out var reachableReferencesByTarget );
 
@@ -94,7 +94,6 @@ namespace Metalama.Framework.Engine.Linking
             var bodyAnalysisResults = bodyAnalyzer.Run();
 
             var inliningAlgorithm = new InliningAlgorithm(
-                input.IntroductionRegistry,
                 reachableReferencesBySource,
                 reachableSemantics,
                 inlinedSemantics,
@@ -105,16 +104,14 @@ namespace Metalama.Framework.Engine.Linking
 
             var substitutionGenerator = new SubstitutionGenerator(
                 syntaxHandler,
-                input.IntroductionRegistry,
-                inlinedSemantics,
                 nonInlinedSemantics,
                 nonInlinedReferencesBySource,
-                bodyAnalysisResults, 
+                bodyAnalysisResults,
                 inliningSpecifications );
 
             var substitutions = substitutionGenerator.Run();
 
-            var analysisRegistry = new LinkerAnalysisRegistry( 
+            var analysisRegistry = new LinkerAnalysisRegistry(
                 reachableSemantics,
                 inlinedSemantics,
                 substitutions );
@@ -152,7 +149,7 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         list.Add( reference );
 
-                        if (!bySource.TryGetValue(reference.ContainingSemantic, out var list2))
+                        if ( !bySource.TryGetValue( reference.ContainingSemantic, out var list2 ) )
                         {
                             bySource[reference.ContainingSemantic] = list2 = new List<ResolvedAspectReference>();
                         }
@@ -174,7 +171,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            reachableReferencesBySource = bySource.ToDictionary(x => x.Key, x => (IReadOnlyList<ResolvedAspectReference>)x.Value);
+            reachableReferencesBySource = bySource.ToDictionary( x => x.Key, x => (IReadOnlyList<ResolvedAspectReference>) x.Value );
             reachableReferencesByTarget = byTarget.ToDictionary( x => x.Key, x => (IReadOnlyList<ResolvedAspectReference>) x.Value );
         }
 
@@ -184,11 +181,11 @@ namespace Metalama.Framework.Engine.Linking
         {
             var result = new Dictionary<IntermediateSymbolSemantic<IMethodSymbol>, List<ResolvedAspectReference>>();
 
-            foreach (var reachableReference in reachableReferencesBySource.Values.SelectMany(x => x))
+            foreach ( var reachableReference in reachableReferencesBySource.Values.SelectMany( x => x ) )
             {
-                if (!inlinedReferences.ContainsKey(reachableReference))
-                { 
-                    if (!result.TryGetValue(reachableReference.ContainingSemantic, out var list))
+                if ( !inlinedReferences.ContainsKey( reachableReference ) )
+                {
+                    if ( !result.TryGetValue( reachableReference.ContainingSemantic, out var list ) )
                     {
                         result[reachableReference.ContainingSemantic] = list = new List<ResolvedAspectReference>();
                     }
@@ -197,7 +194,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            return result.ToDictionary(x => x.Key, x => (IReadOnlyList<ResolvedAspectReference>) x.Value);
+            return result.ToDictionary( x => x.Key, x => (IReadOnlyList<ResolvedAspectReference>) x.Value );
         }
     }
 }

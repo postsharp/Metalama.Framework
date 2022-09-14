@@ -3,7 +3,6 @@
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Generic;
 
@@ -18,31 +17,31 @@ namespace Metalama.Framework.Engine.Linking
         {
             private readonly Compilation _compilation;
             private readonly IDictionary<ISymbol, ISymbol> _symbolMap;
-            private readonly HashSet<ITypeSymbol> _visitedTypes = new HashSet<ITypeSymbol>( StructuralSymbolComparer.Default );
+            private readonly HashSet<ITypeSymbol> _visitedTypes = new( StructuralSymbolComparer.Default );
 
             private SyntaxTree? _currentSyntaxTree;
             private SemanticModel? _currentSemanticModel;
 
-            public SymbolDiscoveryWalker(Compilation compilation, IDictionary<ISymbol, ISymbol> symbolMap) 
+            public SymbolDiscoveryWalker( Compilation compilation, IDictionary<ISymbol, ISymbol> symbolMap )
             {
                 this._compilation = compilation;
                 this._symbolMap = symbolMap;
             }
 
-            protected override void VisitCore(SyntaxNode? node)
+            protected override void VisitCore( SyntaxNode? node )
             {
-                if (node == null)
+                if ( node == null )
                 {
                     return;
                 }
 
-                if (node.SyntaxTree != this._currentSyntaxTree)
+                if ( node.SyntaxTree != this._currentSyntaxTree )
                 {
                     this._currentSemanticModel = this._compilation.GetSemanticModel( node.SyntaxTree );
                     this._currentSyntaxTree = node.SyntaxTree;
                 }
 
-                var symbol = this._currentSemanticModel!.GetDeclaredSymbol(node);
+                var symbol = this._currentSemanticModel!.GetDeclaredSymbol( node );
 
                 switch ( symbol )
                 {
@@ -61,21 +60,22 @@ namespace Metalama.Framework.Engine.Linking
 
                 base.VisitCore( node );
 
-                void VisitMemberSymbol(ISymbol symbol)
+                void VisitMemberSymbol( ISymbol memberSymbol )
                 {
-                    if (symbol is IMethodSymbol { IsPartialDefinition: true, PartialImplementationPart: { } partialImplementation } )
+                    if ( memberSymbol is IMethodSymbol { IsPartialDefinition: true, PartialImplementationPart: { } partialImplementation } )
                     {
                         // For partial definitions with implementation part, we go to the implementation part and skip the definition.
                         VisitMemberSymbol( partialImplementation );
+
                         return;
                     }
-                    
-                    if ( this._symbolMap.ContainsKey( symbol ) )
+
+                    if ( this._symbolMap.ContainsKey( memberSymbol ) )
                     {
                         throw new AssertionFailedException();
                     }
 
-                    this._symbolMap.Add( symbol, symbol );
+                    this._symbolMap.Add( memberSymbol, memberSymbol );
                 }
             }
 

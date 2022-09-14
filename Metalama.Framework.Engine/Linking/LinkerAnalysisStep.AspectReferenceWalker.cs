@@ -65,7 +65,7 @@ namespace Metalama.Framework.Engine.Linking
                     }
 
                     var resolvedReference = this._referenceResolver.Resolve(
-                        this._containingSymbol.ToSemantic(IntermediateSymbolSemanticKind.Default),
+                        this._containingSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
                         referencedSymbol,
                         (ExpressionSyntax) node,
                         aspectReference );

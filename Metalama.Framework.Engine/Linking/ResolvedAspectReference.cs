@@ -27,39 +27,33 @@ namespace Metalama.Framework.Engine.Linking
         /// Gets the symbol semantic for the target body (always a method).
         /// </summary>
         public IntermediateSymbolSemantic<IMethodSymbol> ResolvedSemanticBody
-        {
-            get
-                => (this.ResolvedSemantic, this.TargetKind) switch
-                {
-                    ({ Symbol: IMethodSymbol method }, AspectReferenceTargetKind.Self) =>
-                        method.ToSemantic( this.ResolvedSemantic.Kind ),
-                    ({ Symbol: IPropertySymbol property }, AspectReferenceTargetKind.PropertyGetAccessor ) =>
-                        property.GetMethod.AssertNotNull().ToSemantic( this.ResolvedSemantic.Kind ),
-                    ({ Symbol: IPropertySymbol property }, AspectReferenceTargetKind.PropertySetAccessor ) =>
-                        property.SetMethod.AssertNotNull().ToSemantic( this.ResolvedSemantic.Kind ),
-                    ({ Symbol: IEventSymbol @event }, AspectReferenceTargetKind.EventAddAccessor ) =>
-                        @event.AddMethod.AssertNotNull().ToSemantic( this.ResolvedSemantic.Kind ),
-                    ({ Symbol: IEventSymbol @event }, AspectReferenceTargetKind.EventRemoveAccessor ) =>
-                        @event.RemoveMethod.AssertNotNull().ToSemantic( this.ResolvedSemantic.Kind ),
-                    _ => throw new AssertionFailedException(),
-                };
-        }
+            => (this.ResolvedSemantic, this.TargetKind) switch
+            {
+                ({ Symbol: IMethodSymbol method }, AspectReferenceTargetKind.Self) =>
+                    method.ToSemantic( this.ResolvedSemantic.Kind ),
+                ({ Symbol: IPropertySymbol property }, AspectReferenceTargetKind.PropertyGetAccessor) =>
+                    property.GetMethod.AssertNotNull().ToSemantic( this.ResolvedSemantic.Kind ),
+                ({ Symbol: IPropertySymbol property }, AspectReferenceTargetKind.PropertySetAccessor) =>
+                    property.SetMethod.AssertNotNull().ToSemantic( this.ResolvedSemantic.Kind ),
+                ({ Symbol: IEventSymbol @event }, AspectReferenceTargetKind.EventAddAccessor) =>
+                    @event.AddMethod.AssertNotNull().ToSemantic( this.ResolvedSemantic.Kind ),
+                ({ Symbol: IEventSymbol @event }, AspectReferenceTargetKind.EventRemoveAccessor) =>
+                    @event.RemoveMethod.AssertNotNull().ToSemantic( this.ResolvedSemantic.Kind ),
+                _ => throw new AssertionFailedException()
+            };
 
         public bool HasResolvedSemanticBody
-        {
-            get
-                => (this.ResolvedSemantic, this.TargetKind) switch
-                {
-                    ({ Symbol: IMethodSymbol }, AspectReferenceTargetKind.Self ) => true,
-                    ({ Symbol: IPropertySymbol }, AspectReferenceTargetKind.PropertyGetAccessor ) => true,
-                    ({ Symbol: IPropertySymbol }, AspectReferenceTargetKind.PropertySetAccessor ) => true,
-                    ({ Symbol: IEventSymbol }, AspectReferenceTargetKind.EventAddAccessor ) => true,
-                    ({ Symbol: IEventSymbol }, AspectReferenceTargetKind.EventRemoveAccessor ) => true,
-                    ({ Symbol: IFieldSymbol }, AspectReferenceTargetKind.PropertyGetAccessor ) => false,
-                    ({ Symbol: IFieldSymbol }, AspectReferenceTargetKind.PropertySetAccessor ) => false,
-                    _ => throw new AssertionFailedException(),
-                };
-        }
+            => (this.ResolvedSemantic, this.TargetKind) switch
+            {
+                ({ Symbol: IMethodSymbol }, AspectReferenceTargetKind.Self) => true,
+                ({ Symbol: IPropertySymbol }, AspectReferenceTargetKind.PropertyGetAccessor) => true,
+                ({ Symbol: IPropertySymbol }, AspectReferenceTargetKind.PropertySetAccessor) => true,
+                ({ Symbol: IEventSymbol }, AspectReferenceTargetKind.EventAddAccessor) => true,
+                ({ Symbol: IEventSymbol }, AspectReferenceTargetKind.EventRemoveAccessor) => true,
+                ({ Symbol: IFieldSymbol }, AspectReferenceTargetKind.PropertyGetAccessor) => false,
+                ({ Symbol: IFieldSymbol }, AspectReferenceTargetKind.PropertySetAccessor) => false,
+                _ => throw new AssertionFailedException()
+            };
 
         /// <summary>
         /// Gets the annotated expression. This is for convenience in inliners which always work with expressions.
@@ -90,7 +84,13 @@ namespace Metalama.Framework.Engine.Linking
             bool isInlineable )
         {
             Invariant.AssertNot( containingSemantic.Kind != IntermediateSymbolSemanticKind.Final && sourceNode is not ExpressionSyntax );
-            Invariant.AssertNot( resolvedSemantic.Symbol is IMethodSymbol { MethodKind: not MethodKind.Ordinary and not MethodKind.ExplicitInterfaceImplementation and not MethodKind.Destructor and not MethodKind.UserDefinedOperator and not MethodKind.Conversion } );
+
+            Invariant.AssertNot(
+                resolvedSemantic.Symbol is IMethodSymbol
+                {
+                    MethodKind: not MethodKind.Ordinary and not MethodKind.ExplicitInterfaceImplementation and not MethodKind.Destructor
+                    and not MethodKind.UserDefinedOperator and not MethodKind.Conversion
+                } );
 
             this.ContainingSemantic = containingSemantic;
             this.OriginalSymbol = originalSymbol;

@@ -84,23 +84,33 @@ namespace Metalama.Framework.Engine.Linking
                             break;
                     }
 
-                    void AddImplicitReference( IMethodSymbol containingSymbol, ISymbol target, ISymbol lastOverrideSymbol, AspectReferenceTargetKind targetKind )
+                    void AddImplicitReference(
+                        IMethodSymbol containingSymbol,
+                        ISymbol target,
+                        ISymbol lastOverrideSymbol,
+                        AspectReferenceTargetKind targetKind )
                     {
                         // Implicit reference pointing from final semantic to the last override.
-                        var containingSemantic = containingSymbol.ToSemantic(IntermediateSymbolSemanticKind.Final);
+                        var containingSemantic = containingSymbol.ToSemantic( IntermediateSymbolSemanticKind.Final );
 
                         var sourceNode =
                             containingSymbol.GetPrimaryDeclaration() switch
                             {
                                 MethodDeclarationSyntax method => method.Body ?? (SyntaxNode?) method.ExpressionBody ?? method,
-                                DestructorDeclarationSyntax destructor => destructor.Body ?? (SyntaxNode?) destructor.ExpressionBody ?? throw new AssertionFailedException(),
-                                OperatorDeclarationSyntax @operator => @operator.Body ?? (SyntaxNode?) @operator.ExpressionBody ?? throw new AssertionFailedException(),
-                                ConversionOperatorDeclarationSyntax conversionOperator => conversionOperator.Body ?? (SyntaxNode?) conversionOperator.ExpressionBody ?? throw new AssertionFailedException(),
-                                AccessorDeclarationSyntax accessor => accessor.Body ?? (SyntaxNode?) accessor.ExpressionBody ?? accessor ?? throw new AssertionFailedException(),
+                                DestructorDeclarationSyntax destructor => destructor.Body
+                                                                          ?? (SyntaxNode?) destructor.ExpressionBody ?? throw new AssertionFailedException(),
+                                OperatorDeclarationSyntax @operator => @operator.Body
+                                                                       ?? (SyntaxNode?) @operator.ExpressionBody ?? throw new AssertionFailedException(),
+                                ConversionOperatorDeclarationSyntax conversionOperator => conversionOperator.Body
+                                                                                          ?? (SyntaxNode?) conversionOperator.ExpressionBody
+                                                                                          ?? throw new AssertionFailedException(),
+                                AccessorDeclarationSyntax accessor => accessor.Body
+                                                                      ?? (SyntaxNode?) accessor.ExpressionBody
+                                                                      ?? accessor ?? throw new AssertionFailedException(),
                                 VariableDeclaratorSyntax declarator => declarator ?? throw new AssertionFailedException(),
                                 ArrowExpressionClauseSyntax arrowExpressionClause => arrowExpressionClause,
                                 ParameterSyntax { Parent: ParameterListSyntax { Parent: RecordDeclarationSyntax } } recordParameter => recordParameter,
-                                _ => throw new AssertionFailedException(),
+                                _ => throw new AssertionFailedException()
                             };
 
                         aspectReferences.Add(
@@ -110,7 +120,7 @@ namespace Metalama.Framework.Engine.Linking
                                 new ResolvedAspectReference(
                                     containingSemantic,
                                     target,
-                                    lastOverrideSymbol.ToSemantic(IntermediateSymbolSemanticKind.Default),
+                                    lastOverrideSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
                                     sourceNode,
                                     targetKind,
                                     isInlineable: true )
@@ -198,13 +208,13 @@ namespace Metalama.Framework.Engine.Linking
 
                 void AnalyzeOverriddenBody( IMethodSymbol symbol )
                 {
-                    var semantic = symbol.ToSemantic(IntermediateSymbolSemanticKind.Default);
+                    var semantic = symbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
                     aspectReferences[semantic] = ImmutableArray<ResolvedAspectReference>.Empty;
                 }
 
                 void AnalyzeIntroducedBody( IMethodSymbol symbol )
                 {
-                    var semantic = symbol.ToSemantic(IntermediateSymbolSemanticKind.Default);
+                    var semantic = symbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
                     var syntax = symbol.GetPrimaryDeclaration().AssertNotNull();
 
                     var aspectReferenceCollector = new AspectReferenceWalker(

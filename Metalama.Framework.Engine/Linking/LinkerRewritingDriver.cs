@@ -135,7 +135,7 @@ namespace Metalama.Framework.Engine.Linking
                 switch ( declaration )
                 {
                     case MethodDeclarationSyntax methodDecl:
-                        // Partial methods without declared body have the whoel declaration as body.
+                        // Partial methods without declared body have the whole declaration as body.
                         return methodDecl.Body ?? (SyntaxNode?) methodDecl.ExpressionBody ?? methodDecl;
 
                     case DestructorDeclarationSyntax destructorDecl:
@@ -150,6 +150,7 @@ namespace Metalama.Framework.Engine.Linking
                     case AccessorDeclarationSyntax accessorDecl:
                         // Accessors with no body are auto-properties, in which case we have substitution for the whole accessor declaration.
                         Invariant.Assert( !symbol.IsAbstract );
+
                         return accessorDecl.Body ?? (SyntaxNode?) accessorDecl.ExpressionBody ?? accessorDecl;
 
                     case ArrowExpressionClauseSyntax arrowExpressionClause:
@@ -160,7 +161,7 @@ namespace Metalama.Framework.Engine.Linking
                         // Event field accessors start replacement as variableDecls.
                         return variableDecl;
 
-                    case ParameterSyntax { Parent: { Parent: RecordDeclarationSyntax } } positionalProperty: 
+                    case ParameterSyntax { Parent: { Parent: RecordDeclarationSyntax } } positionalProperty:
                         // Record positional property.
                         return positionalProperty;
 
@@ -299,28 +300,10 @@ namespace Metalama.Framework.Engine.Linking
                     throw new AssertionFailedException();
             }
         }
-        
-        public IReadOnlyDictionary<SyntaxNode, SyntaxNodeSubstitution>? GetSubstitutions(InliningContextIdentifier inliningContextId)
+
+        public IReadOnlyDictionary<SyntaxNode, SyntaxNodeSubstitution>? GetSubstitutions( InliningContextIdentifier inliningContextId )
         {
             return this.AnalysisRegistry.GetSubstitutions( inliningContextId );
-        }
-
-        private static IEnumerable<SyntaxNode> GetReturnNodes( SyntaxNode? rootNode )
-        {
-            switch ( rootNode )
-            {
-                case BlockSyntax block:
-                    var walker = new ReturnStatementWalker();
-                    walker.Visit( block );
-
-                    return walker.ReturnStatements;
-
-                case ArrowExpressionClauseSyntax arrowExpressionClause:
-                    return new[] { arrowExpressionClause.Expression };
-
-                default:
-                    throw new NotImplementedException();
-            }
         }
 
         /// <summary>
@@ -377,45 +360,6 @@ namespace Metalama.Framework.Engine.Linking
                 default:
                     throw new InvalidOperationException();
             }
-        }
-
-        /// <summary>
-        /// Gets a method symbol that will be the source for the body of the specified declaration. For example, source for the overridden declaration is the last override and source
-        /// for the first override is the original declaration.
-        /// </summary>
-        /// <param name="semantic"></param>
-        /// <returns></returns>
-        private IMethodSymbol ResolveBodySource( IntermediateSymbolSemantic<IMethodSymbol> semantic )
-        {
-            if ( this.IntroductionRegistry.IsOverride( semantic.Symbol ) )
-            {
-                Invariant.Assert( semantic.Kind == IntermediateSymbolSemanticKind.Default );
-
-                return semantic.Symbol;
-            }
-
-            if ( this.IntroductionRegistry.IsOverrideTarget( semantic.Symbol ) )
-            {
-                switch ( semantic.Kind )
-                {
-                    case IntermediateSymbolSemanticKind.Base:
-                    case IntermediateSymbolSemanticKind.Default:
-                        return semantic.Symbol;
-
-                    case IntermediateSymbolSemanticKind.Final:
-                        return this.IntroductionRegistry.GetLastOverride( semantic.Symbol );
-
-                    default:
-                        throw new AssertionFailedException();
-                }
-            }
-
-            if ( semantic.Symbol.AssociatedSymbol != null && semantic.Symbol.AssociatedSymbol.IsExplicitInterfaceEventField() )
-            {
-                return semantic.Symbol;
-            }
-
-            throw new AssertionFailedException();
         }
 
         /// <summary>
@@ -598,7 +542,11 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private static SyntaxList<AttributeListSyntax> FilterAttributeListsForTarget( SyntaxList<AttributeListSyntax> attributeLists, SyntaxKind targetKind, bool includeEmptyTarget, bool preserveTarget )
+        private static SyntaxList<AttributeListSyntax> FilterAttributeListsForTarget(
+            SyntaxList<AttributeListSyntax> attributeLists,
+            SyntaxKind targetKind,
+            bool includeEmptyTarget,
+            bool preserveTarget )
         {
             if ( preserveTarget )
             {
@@ -606,10 +554,10 @@ namespace Metalama.Framework.Engine.Linking
             }
             else
             {
-                return List( attributeLists.Where( Filter ).Select(al => al.WithTarget(null)).ToList() );
+                return List( attributeLists.Where( Filter ).Select( al => al.WithTarget( null ) ).ToList() );
             }
 
-            bool Filter(AttributeListSyntax list)
+            bool Filter( AttributeListSyntax list )
             {
                 if ( list.Target == null && includeEmptyTarget )
                 {

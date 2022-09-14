@@ -29,23 +29,23 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     {
                         return
                             Block(
-                                ExpressionStatement(
-                                    AssignmentExpression(
-                                        SyntaxKind.AddAssignmentExpression,
-                                        CreateFieldAccessExpression(),
-                                        IdentifierName( "value" ) ) ) )
-                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                    ExpressionStatement(
+                                        AssignmentExpression(
+                                            SyntaxKind.AddAssignmentExpression,
+                                            CreateFieldAccessExpression(),
+                                            IdentifierName( "value" ) ) ) )
+                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                     }
                     else if ( this._targetAccessor.MethodKind == MethodKind.EventRemove )
                     {
                         return
                             Block(
-                                ExpressionStatement(
-                                    AssignmentExpression(
-                                        SyntaxKind.SubtractAssignmentExpression,
-                                        CreateFieldAccessExpression(),
-                                        IdentifierName( "value" ) ) ) )
-                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                    ExpressionStatement(
+                                        AssignmentExpression(
+                                            SyntaxKind.SubtractAssignmentExpression,
+                                            CreateFieldAccessExpression(),
+                                            IdentifierName( "value" ) ) ) )
+                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                     }
                     else
                     {

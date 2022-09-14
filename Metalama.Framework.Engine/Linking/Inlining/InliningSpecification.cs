@@ -11,7 +11,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
 
         /// <summary>
         /// Gets the semantic which is a the destination of inlining (the top-level semantic which will contain the body).
-        /// This allows us to discern between inlinings of one aspect reference into two separate bodies (used for deconstructed auto properties).
+        /// This allows us to discern between inlining of one aspect reference into two separate bodies (used for deconstructed auto properties).
         /// </summary>
         public IntermediateSymbolSemantic<IMethodSymbol> DestinationSemantic { get; }
 
@@ -19,13 +19,13 @@ namespace Metalama.Framework.Engine.Linking.Inlining
         /// Gets the identifier of inlining within the destination semantic.
         /// This allows us to inline one aspect reference twice into one target body (used for deconstructed auto properties).
         /// </summary>
-        public InliningContextIdentifier ContextIdentifier => new InliningContextIdentifier( this.DestinationSemantic, this._inliningId );
+        public InliningContextIdentifier ContextIdentifier => new( this.DestinationSemantic, this._inliningId );
 
         /// <summary>
         /// Gets the identifier of inlining within the destination semantic.
         /// This allows us to inline one aspect reference twice into one target body (used for deconstructed auto properties).
         /// </summary>
-        public InliningContextIdentifier ParentContextIdentifier => new InliningContextIdentifier( this.DestinationSemantic, this._parentInliningId );
+        public InliningContextIdentifier ParentContextIdentifier => new( this.DestinationSemantic, this._parentInliningId );
 
         /// <summary>
         /// Gets the aspect reference to be inlined.
@@ -58,7 +58,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
         public string? ReturnVariableIdentifier { get; }
 
         /// <summary>
-        /// Gets the return label indentifier.
+        /// Gets the return label identifier.
         /// </summary>
         public string? ReturnLabelIdentifier { get; }
 
@@ -71,14 +71,14 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             IntermediateSymbolSemantic<IMethodSymbol> destinationSemantic,
             int inliningId,
             int? parentInliningId,
-            ResolvedAspectReference aspectReference, 
+            ResolvedAspectReference aspectReference,
             Inliner inliner,
             SyntaxNode replacedRootNode,
             bool useSimpleInlining,
             bool declareReturnVariable,
             string? returnVariableIdentifier,
             string? returnLabelIdentifier,
-            IntermediateSymbolSemantic<IMethodSymbol> targetSemantic)
+            IntermediateSymbolSemantic<IMethodSymbol> targetSemantic )
         {
             Invariant.AssertNot( declareReturnVariable && returnVariableIdentifier == null );
             Invariant.AssertNot( targetSemantic.Kind == IntermediateSymbolSemanticKind.Final );
@@ -91,6 +91,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             this.Inliner = inliner;
             this.UseSimpleInlining = useSimpleInlining;
             this.ReplacedRootNode = replacedRootNode;
+            this.DeclareReturnVariable = declareReturnVariable;
             this.ReturnVariableIdentifier = returnVariableIdentifier;
             this.ReturnLabelIdentifier = returnLabelIdentifier;
             this.TargetSemantic = targetSemantic;
@@ -98,7 +99,9 @@ namespace Metalama.Framework.Engine.Linking.Inlining
 
         public override string ToString()
         {
-            return $"Inline {(this.AspectReference.HasResolvedSemanticBody ? this.AspectReference.ResolvedSemanticBody : this.AspectReference.ResolvedSemantic)} " +
+            return
+                $"Inline {(this.AspectReference.HasResolvedSemanticBody ? this.AspectReference.ResolvedSemanticBody : this.AspectReference.ResolvedSemantic)} "
+                +
                 $"into {this.DestinationSemantic} (id: {this._inliningId})";
         }
     }

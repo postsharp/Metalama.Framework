@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.Linking
     {
         private readonly LinkerIntroductionRegistry _introductionRegistry;
 
-        public LinkerSyntaxHandler(LinkerIntroductionRegistry introductionRegistry )
+        public LinkerSyntaxHandler( LinkerIntroductionRegistry introductionRegistry )
         {
             this._introductionRegistry = introductionRegistry;
         }
@@ -39,6 +39,7 @@ namespace Metalama.Framework.Engine.Linking
                     case AccessorDeclarationSyntax accessorDecl:
                         // Accessors with no body are auto-properties, in which case we have a substitution for the whole accessor declaration.
                         Invariant.Assert( !symbol.IsAbstract );
+
                         return accessorDecl.Body ?? (SyntaxNode?) accessorDecl.ExpressionBody ?? accessorDecl;
 
                     case ArrowExpressionClauseSyntax arrowExpressionClause:

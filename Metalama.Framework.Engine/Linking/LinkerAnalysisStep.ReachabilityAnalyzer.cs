@@ -37,6 +37,7 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         case IMethodSymbol method:
                             DepthFirstSearch( method.ToSemantic( IntermediateSymbolSemanticKind.Final ) );
+
                             break;
 
                         case IPropertySymbol property:
@@ -55,6 +56,7 @@ namespace Metalama.Framework.Engine.Linking
                         case IEventSymbol @event:
                             DepthFirstSearch( @event.AddMethod.AssertNotNull().ToSemantic( IntermediateSymbolSemanticKind.Final ) );
                             DepthFirstSearch( @event.RemoveMethod.AssertNotNull().ToSemantic( IntermediateSymbolSemanticKind.Final ) );
+
                             break;
                     }
                 }
@@ -68,6 +70,7 @@ namespace Metalama.Framework.Engine.Linking
                         {
                             case IMethodSymbol method:
                                 DepthFirstSearch( method.ToSemantic( IntermediateSymbolSemanticKind.Default ) );
+
                                 break;
 
                             case IPropertySymbol property:
@@ -86,6 +89,7 @@ namespace Metalama.Framework.Engine.Linking
                             case IEventSymbol @event:
                                 DepthFirstSearch( @event.AddMethod.AssertNotNull().ToSemantic( IntermediateSymbolSemanticKind.Default ) );
                                 DepthFirstSearch( @event.RemoveMethod.AssertNotNull().ToSemantic( IntermediateSymbolSemanticKind.Default ) );
+
                                 break;
                         }
                     }
@@ -106,10 +110,12 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         case IMethodSymbol { AssociatedSymbol: IPropertySymbol property }:
                             DepthFirstSearch( new IntermediateSymbolSemantic( property, current.Kind ) );
+
                             break;
 
                         case IMethodSymbol { AssociatedSymbol: IEventSymbol @event }:
                             DepthFirstSearch( new IntermediateSymbolSemantic( @event, current.Kind ) );
+
                             break;
 
                         case IMethodSymbol { AssociatedSymbol: null }:
@@ -124,8 +130,8 @@ namespace Metalama.Framework.Engine.Linking
                     }
 
                     // If the method contains aspect references, visit them.
-                    if ( current.Symbol is IMethodSymbol methodSymbol
-                        && this._aspectReferencesBySemantic.TryGetValue( current.ToTyped<IMethodSymbol>(), out var aspectReferences ) )
+                    if ( current.Symbol is IMethodSymbol
+                         && this._aspectReferencesBySemantic.TryGetValue( current.ToTyped<IMethodSymbol>(), out var aspectReferences ) )
                     {
                         // Edges representing resolved aspect references.
                         foreach ( var aspectReference in aspectReferences )

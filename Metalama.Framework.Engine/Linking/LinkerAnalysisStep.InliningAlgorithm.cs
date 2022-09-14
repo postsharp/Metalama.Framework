@@ -12,25 +12,24 @@ namespace Metalama.Framework.Engine.Linking
     {
         private class InliningAlgorithm
         {
-            private readonly LinkerIntroductionRegistry _introductionRegistry;
-            private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> _aspectReferencesByContainingSemantic;
+            private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>>
+                _aspectReferencesByContainingSemantic;
+
             private readonly IReadOnlyList<IntermediateSymbolSemantic> _reachableSemantics;
             private readonly HashSet<IntermediateSymbolSemantic> _inlinedSemantics;
             private readonly IReadOnlyDictionary<ResolvedAspectReference, Inliner> _inlinedReferences;
             private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, SemanticBodyAnalysisResult> _bodyAnalysisResults;
 
-            public InliningAlgorithm( 
-                LinkerIntroductionRegistry introductionRegistry,
-                IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> aspectReferencesByContainingSemantic, 
-                IReadOnlyList<IntermediateSymbolSemantic> reachableSemantics, 
-                IReadOnlyList<IntermediateSymbolSemantic> inlinedSemantics, 
-                IReadOnlyDictionary<ResolvedAspectReference, Inliner> inlinedReferences, 
+            public InliningAlgorithm(
+                IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> aspectReferencesByContainingSemantic,
+                IReadOnlyList<IntermediateSymbolSemantic> reachableSemantics,
+                IReadOnlyList<IntermediateSymbolSemantic> inlinedSemantics,
+                IReadOnlyDictionary<ResolvedAspectReference, Inliner> inlinedReferences,
                 IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, SemanticBodyAnalysisResult> bodyAnalysisResults )
             {
-                this._introductionRegistry = introductionRegistry;
                 this._aspectReferencesByContainingSemantic = aspectReferencesByContainingSemantic;
                 this._reachableSemantics = reachableSemantics;
-                this._inlinedSemantics = new HashSet<IntermediateSymbolSemantic>(inlinedSemantics);
+                this._inlinedSemantics = new HashSet<IntermediateSymbolSemantic>( inlinedSemantics );
                 this._inlinedReferences = inlinedReferences;
                 this._bodyAnalysisResults = bodyAnalysisResults;
             }
@@ -41,7 +40,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 foreach ( var semantic in this._reachableSemantics )
                 {
-                    if (semantic.Symbol is not IMethodSymbol)
+                    if ( semantic.Symbol is not IMethodSymbol )
                     {
                         continue;
                     }
@@ -75,9 +74,10 @@ namespace Metalama.Framework.Engine.Linking
 
                         case IPropertySymbol property:
                             Invariant.Assert( false ); // temp.
+
                             if ( property.GetMethod != null )
                             {
-                                VisitSemanticBody( 
+                                VisitSemanticBody(
                                     property.GetMethod.ToSemantic( semantic.Kind ),
                                     property.GetMethod.ToSemantic( semantic.Kind ),
                                     context );
@@ -85,7 +85,7 @@ namespace Metalama.Framework.Engine.Linking
 
                             if ( property.SetMethod != null )
                             {
-                                VisitSemanticBody( 
+                                VisitSemanticBody(
                                     property.SetMethod.ToSemantic( semantic.Kind ),
                                     property.SetMethod.ToSemantic( semantic.Kind ),
                                     context );
@@ -95,12 +95,13 @@ namespace Metalama.Framework.Engine.Linking
 
                         case IEventSymbol @event:
                             Invariant.Assert( false ); // temp.
-                            VisitSemanticBody( 
+
+                            VisitSemanticBody(
                                 @event.AddMethod.AssertNotNull().ToSemantic( semantic.Kind ),
                                 @event.AddMethod.AssertNotNull().ToSemantic( semantic.Kind ),
                                 context );
 
-                            VisitSemanticBody( 
+                            VisitSemanticBody(
                                 @event.RemoveMethod.AssertNotNull().ToSemantic( semantic.Kind ),
                                 @event.RemoveMethod.AssertNotNull().ToSemantic( semantic.Kind ),
                                 context );
@@ -109,7 +110,10 @@ namespace Metalama.Framework.Engine.Linking
                     }
                 }
 
-                void VisitSemanticBody( IntermediateSymbolSemantic<IMethodSymbol> destinationSemantic, IntermediateSymbolSemantic<IMethodSymbol> currentSemantic, InliningAnalysisContext context )
+                void VisitSemanticBody(
+                    IntermediateSymbolSemantic<IMethodSymbol> destinationSemantic,
+                    IntermediateSymbolSemantic<IMethodSymbol> currentSemantic,
+                    InliningAnalysisContext context )
                 {
                     if ( !this._aspectReferencesByContainingSemantic.TryGetValue( currentSemantic, out var aspectReferences ) )
                     {
@@ -119,22 +123,23 @@ namespace Metalama.Framework.Engine.Linking
                     // Go through all references and recurse into inlined bodies.
                     foreach ( var aspectReference in aspectReferences )
                     {
-                        if (!aspectReference.HasResolvedSemanticBody )
+                        if ( !aspectReference.HasResolvedSemanticBody )
                         {
                             continue;
                         }
-                        
+
                         if ( this._inlinedReferences.TryGetValue( aspectReference, out var inliner ) )
                         {
                             var targetSemantic = aspectReference.ResolvedSemanticBody;
                             var info = inliner.GetInliningAnalysisInfo( context, aspectReference );
 
-                            if ( context.UsingSimpleInlining && (info.ReplacedRootNode is ReturnStatementSyntax or EqualsValueClauseSyntax || currentSemantic.Kind == IntermediateSymbolSemanticKind.Final))
+                            if ( context.UsingSimpleInlining && (info.ReplacedRootNode is ReturnStatementSyntax or EqualsValueClauseSyntax
+                                                                 || currentSemantic.Kind == IntermediateSymbolSemanticKind.Final) )
                             {
                                 // This is inlining of a return statement while we can do simple inlining - no rewriting of returns is required.
                                 // Or it is inlining of in the final semantic, which is a special case.
                                 Invariant.Assert( info.ReturnVariableIdentifier == null );
-                                
+
                                 inliningSpecifications.Add(
                                     new InliningSpecification(
                                         destinationSemantic,
@@ -153,7 +158,7 @@ namespace Metalama.Framework.Engine.Linking
                             }
                             else
                             {
-                                if (!this._bodyAnalysisResults.TryGetValue(targetSemantic, out var bodyAnalysisResult) )
+                                if ( !this._bodyAnalysisResults.TryGetValue( targetSemantic, out var bodyAnalysisResult ) )
                                 {
                                     throw new AssertionFailedException();
                                 }
@@ -161,8 +166,8 @@ namespace Metalama.Framework.Engine.Linking
                                 // Allocate return label if and only if there is a return statement, removal of which would cause change in control flow in the inlined body.
                                 var returnLabelIdentifier =
                                     bodyAnalysisResult.ReturnStatements.Any( s => !s.Value.FlowsToExitIfRewritten )
-                                    ? context.AllocateReturnLabel()
-                                    : null;
+                                        ? context.AllocateReturnLabel()
+                                        : null;
 
                                 inliningSpecifications.Add(
                                     new InliningSpecification(

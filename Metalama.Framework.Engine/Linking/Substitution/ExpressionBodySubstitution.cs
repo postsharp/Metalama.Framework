@@ -29,10 +29,9 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                 case ArrowExpressionClauseSyntax arrowExpressionClause:
                     if ( this._targetMethod.ReturnsVoid )
                     {
-                        return 
-                            Block(
-                                ExpressionStatement( arrowExpressionClause.Expression ) ) 
-                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                        return
+                            Block( ExpressionStatement( arrowExpressionClause.Expression ) )
+                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                     }
                     else
                     {
@@ -40,26 +39,30 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                         {
                             return
                                 Block(
-                                    ExpressionStatement(
-                                        AssignmentExpression(
-                                        SyntaxKind.SimpleAssignmentExpression,
-                                        IdentifierName(this._returnVariableIdentifier),
-                                        Token( TriviaList(ElasticSpace), SyntaxKind.EqualsToken, TriviaList( ElasticSpace ) ),
-                                        arrowExpressionClause.Expression ),
-                                        Token(TriviaList(), SyntaxKind.SemicolonToken, TriviaList(ElasticLineFeed) ) ) )
-                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                        ExpressionStatement(
+                                            AssignmentExpression(
+                                                SyntaxKind.SimpleAssignmentExpression,
+                                                IdentifierName( this._returnVariableIdentifier ),
+                                                Token( TriviaList( ElasticSpace ), SyntaxKind.EqualsToken, TriviaList( ElasticSpace ) ),
+                                                arrowExpressionClause.Expression ),
+                                            Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) ) )
+                                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                         }
                         else
                         {
                             return
                                 Block(
-                                    ReturnStatement(
-                                        Token( arrowExpressionClause.Expression.GetLeadingTrivia(), SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
-                                        arrowExpressionClause.Expression,
-                                        Token( TriviaList(), SyntaxKind.SemicolonToken, arrowExpressionClause.Expression.GetTrailingTrivia().Add( ElasticLineFeed ) ) ) )
-                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                        ReturnStatement(
+                                            Token( arrowExpressionClause.Expression.GetLeadingTrivia(), SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
+                                            arrowExpressionClause.Expression,
+                                            Token(
+                                                TriviaList(),
+                                                SyntaxKind.SemicolonToken,
+                                                arrowExpressionClause.Expression.GetTrailingTrivia().Add( ElasticLineFeed ) ) ) )
+                                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                         }
                     }
+
                 default:
                     throw new AssertionFailedException();
             }

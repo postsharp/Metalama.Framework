@@ -203,7 +203,7 @@ namespace Metalama.Framework.Engine.Linking
                         return new ResolvedAspectReference(
                             containingSemantic,
                             referencedSymbol,
-                            referencedSymbol.ToSemantic(IntermediateSymbolSemanticKind.Default),
+                            referencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
                             expression,
                             targetKind,
                             isInlineable );
@@ -214,7 +214,7 @@ namespace Metalama.Framework.Engine.Linking
                         return new ResolvedAspectReference(
                             containingSemantic,
                             referencedSymbol,
-                            referencedSymbol.ToSemantic(IntermediateSymbolSemanticKind.Base ),
+                            referencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Base ),
                             expression,
                             targetKind,
                             isInlineable );
@@ -230,7 +230,7 @@ namespace Metalama.Framework.Engine.Linking
                     return new ResolvedAspectReference(
                         containingSemantic,
                         referencedSymbol,
-                        referencedSymbol.ToSemantic(IntermediateSymbolSemanticKind.Default ),
+                        referencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
                         expression,
                         targetKind,
                         isInlineable );
@@ -265,7 +265,7 @@ namespace Metalama.Framework.Engine.Linking
                         return new ResolvedAspectReference(
                             containingSemantic,
                             referencedSymbol,
-                            referencedSymbol.ToSemantic(IntermediateSymbolSemanticKind.Base ),
+                            referencedSymbol.ToSemantic( IntermediateSymbolSemanticKind.Base ),
                             expression,
                             targetKind,
                             isInlineable );
@@ -296,7 +296,8 @@ namespace Metalama.Framework.Engine.Linking
                     return new ResolvedAspectReference(
                         containingSemantic,
                         referencedSymbol,
-                        this.GetSymbolFromIntroducedMember( referencedSymbol, resolvedIntroducedMember.AssertNotNull() ).ToSemantic( IntermediateSymbolSemanticKind.Default ),
+                        this.GetSymbolFromIntroducedMember( referencedSymbol, resolvedIntroducedMember.AssertNotNull() )
+                            .ToSemantic( IntermediateSymbolSemanticKind.Default ),
                         expression,
                         targetKind,
                         isInlineable );
@@ -548,20 +549,26 @@ namespace Metalama.Framework.Engine.Linking
 
         private static AspectReferenceTargetKind ResolveExpressionTarget( ISymbol referencedSymbol, ExpressionSyntax expression )
         {
-            switch ( (referencedSymbol, expression) )
+            switch (referencedSymbol, expression)
             {
-                case (IPropertySymbol, { Parent: AssignmentExpressionSyntax } ):
+                case (IPropertySymbol, { Parent: AssignmentExpressionSyntax }):
                     return AspectReferenceTargetKind.PropertyGetAccessor;
-                case (IPropertySymbol, _ ):
+
+                case (IPropertySymbol, _):
                     return AspectReferenceTargetKind.PropertySetAccessor;
-                case (IFieldSymbol, { Parent: AssignmentExpressionSyntax } ):
+
+                case (IFieldSymbol, { Parent: AssignmentExpressionSyntax }):
                     return AspectReferenceTargetKind.PropertyGetAccessor;
-                case (IFieldSymbol, _ ):
+
+                case (IFieldSymbol, _):
                     return AspectReferenceTargetKind.PropertySetAccessor;
-                case (IEventSymbol, { Parent: AssignmentExpressionSyntax { OperatorToken: { RawKind: (int)SyntaxKind.AddAssignmentExpression } } } ):
+
+                case (IEventSymbol, { Parent: AssignmentExpressionSyntax { OperatorToken: { RawKind: (int) SyntaxKind.AddAssignmentExpression } } }):
                     return AspectReferenceTargetKind.EventAddAccessor;
-                case (IEventSymbol, { Parent: AssignmentExpressionSyntax { OperatorToken: { RawKind: (int) SyntaxKind.SubtractAssignmentExpression } } } ):
+
+                case (IEventSymbol, { Parent: AssignmentExpressionSyntax { OperatorToken: { RawKind: (int) SyntaxKind.SubtractAssignmentExpression } } }):
                     return AspectReferenceTargetKind.EventRemoveAccessor;
+
                 default:
                     throw new AssertionFailedException();
             }

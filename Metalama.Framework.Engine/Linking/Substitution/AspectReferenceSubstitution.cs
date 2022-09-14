@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -20,13 +19,13 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
         public override SyntaxNode TargetNode => this._aspectReference.SourceNode;
 
-        public AspectReferenceSubstitution( ResolvedAspectReference aspectReference)
+        public AspectReferenceSubstitution( ResolvedAspectReference aspectReference )
         {
             this._aspectReference = aspectReference;
         }
 
-        public override SyntaxNode? Substitute( SyntaxNode currentNode, SubstitutionContext context)
-        {            
+        public override SyntaxNode? Substitute( SyntaxNode currentNode, SubstitutionContext context )
+        {
             // IMPORTANT: This method needs to always strip trivia if rewriting the existing expression.
             //            Trivia existing around the expression are preserved during substitution.
             if ( !SymbolEqualityComparer.Default.Equals(
@@ -100,10 +99,12 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                                     return memberAccessExpression
                                         .WithExpression( ThisExpression() )
                                         .WithName( IdentifierName( targetMemberName ) );
+
                                 case IMethodSymbol { MethodKind: MethodKind.UserDefinedOperator or MethodKind.Conversion }:
                                     return memberAccessExpression
                                         .WithExpression( context.SyntaxGenerationContext.SyntaxGenerator.Type( targetSymbol.ContainingType ) )
                                         .WithName( IdentifierName( targetMemberName ) );
+
                                 default:
                                     return memberAccessExpression
                                         .WithName( GetRewrittenName( memberAccessExpression.Name ) );
@@ -127,11 +128,11 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                             // Static member access where the target is a different type.
                             return
                                 MemberAccessExpression(
-                                    SyntaxKind.SimpleMemberAccessExpression,
-                                    context.SyntaxGenerationContext.SyntaxGenerator.Type( targetSymbol.ContainingType ),
-                                    GetRewrittenName( memberAccessExpression.Name ) )
-                                .WithLeadingTrivia( memberAccessExpression.GetLeadingTrivia() )
-                                .WithTrailingTrivia( memberAccessExpression.GetTrailingTrivia() );
+                                        SyntaxKind.SimpleMemberAccessExpression,
+                                        context.SyntaxGenerationContext.SyntaxGenerator.Type( targetSymbol.ContainingType ),
+                                        GetRewrittenName( memberAccessExpression.Name ) )
+                                    .WithLeadingTrivia( memberAccessExpression.GetLeadingTrivia() )
+                                    .WithTrailingTrivia( memberAccessExpression.GetTrailingTrivia() );
                         }
                         else
                         {
@@ -144,23 +145,23 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                                 // Resolved symbol is declared in a base class.
                                 switch (targetSymbol, memberAccessExpression.Expression)
                                 {
-                                    case (IMethodSymbol { MethodKind: MethodKind.Destructor }, _ ):
+                                    case (IMethodSymbol { MethodKind: MethodKind.Destructor }, _):
                                         return
                                             IdentifierName( "__LINKER_TO_BE_REMOVED__" )
-                                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.NullAspectReferenceExpression )
-                                            .WithLeadingTrivia( memberAccessExpression.GetLeadingTrivia() )
-                                            .WithTrailingTrivia( memberAccessExpression.GetTrailingTrivia() );
+                                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.NullAspectReferenceExpression )
+                                                .WithLeadingTrivia( memberAccessExpression.GetLeadingTrivia() )
+                                                .WithTrailingTrivia( memberAccessExpression.GetTrailingTrivia() );
 
-                                    case (_, IdentifierNameSyntax ):
-                                    case (_, BaseExpressionSyntax ):
-                                    case (_, ThisExpressionSyntax ):
+                                    case (_, IdentifierNameSyntax):
+                                    case (_, BaseExpressionSyntax):
+                                    case (_, ThisExpressionSyntax):
                                         return
                                             MemberAccessExpression(
-                                                SyntaxKind.SimpleMemberAccessExpression,
-                                                BaseExpression(),
-                                                GetRewrittenName( memberAccessExpression.Name ) )
-                                            .WithLeadingTrivia( memberAccessExpression.GetLeadingTrivia() )
-                                            .WithTrailingTrivia( memberAccessExpression.GetTrailingTrivia() );
+                                                    SyntaxKind.SimpleMemberAccessExpression,
+                                                    BaseExpression(),
+                                                    GetRewrittenName( memberAccessExpression.Name ) )
+                                                .WithLeadingTrivia( memberAccessExpression.GetLeadingTrivia() )
+                                                .WithTrailingTrivia( memberAccessExpression.GetTrailingTrivia() );
 
                                     default:
                                         var aspectInstance = this.ResolveAspectInstance( context );

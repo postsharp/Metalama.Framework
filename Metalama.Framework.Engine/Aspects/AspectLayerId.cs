@@ -53,7 +53,8 @@ namespace Metalama.Framework.Engine.Aspects
 
         public string FullName => this.AspectName == null! ? "(null)" : this.LayerName == null ? this.AspectName : this.AspectName + ":" + this.LayerName;
 
-        public string ShortName => this.AspectShortName == null! ? "(null)" : this.LayerName == null ? this.AspectShortName : this.AspectShortName + ":" + this.LayerName;
+        public string ShortName
+            => this.AspectShortName == null! ? "(null)" : this.LayerName == null ? this.AspectShortName : this.AspectShortName + ":" + this.LayerName;
 
         public override string ToString() => this.FullName;
 

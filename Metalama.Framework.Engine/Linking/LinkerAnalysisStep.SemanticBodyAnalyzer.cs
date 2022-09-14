@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Linking
             private readonly PartialCompilation _intermediateCompilation;
             private readonly IReadOnlyList<IntermediateSymbolSemantic> _reachableSemantics;
 
-            public BodyAnalyzer(PartialCompilation intermediateCompilation, IReadOnlyList<IntermediateSymbolSemantic> reachableSemantics)
+            public BodyAnalyzer( PartialCompilation intermediateCompilation, IReadOnlyList<IntermediateSymbolSemantic> reachableSemantics )
             {
                 this._intermediateCompilation = intermediateCompilation;
                 this._reachableSemantics = reachableSemantics;
@@ -28,9 +28,9 @@ namespace Metalama.Framework.Engine.Linking
             {
                 var results = new Dictionary<IntermediateSymbolSemantic<IMethodSymbol>, SemanticBodyAnalysisResult>();
 
-                foreach (var semantic in this._reachableSemantics)
+                foreach ( var semantic in this._reachableSemantics )
                 {
-                    if (semantic.Kind == IntermediateSymbolSemanticKind.Final )
+                    if ( semantic.Kind == IntermediateSymbolSemanticKind.Final )
                     {
                         continue;
                     }
@@ -39,15 +39,16 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         switch ( semantic.Symbol )
                         {
-                            case IMethodSymbol methodSymbol:
-                                results[semantic.ToTyped<IMethodSymbol>()] = 
+                            case IMethodSymbol:
+                                results[semantic.ToTyped<IMethodSymbol>()] =
                                     new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
+
                                 break;
 
                             case IPropertySymbol propertySymbol:
                                 if ( propertySymbol.GetMethod != null )
                                 {
-                                    results[semantic.WithSymbol(propertySymbol.GetMethod)] =
+                                    results[semantic.WithSymbol( propertySymbol.GetMethod )] =
                                         new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
                                 }
 
@@ -74,7 +75,7 @@ namespace Metalama.Framework.Engine.Linking
 
                                 break;
 
-                            case IFieldSymbol fieldSymbol:
+                            case IFieldSymbol:
                                 break;
 
                             default:
@@ -84,10 +85,11 @@ namespace Metalama.Framework.Engine.Linking
                         continue;
                     }
 
-                    switch (semantic.Symbol)
+                    switch ( semantic.Symbol )
                     {
                         case IMethodSymbol methodSymbol:
                             results[semantic.ToTyped<IMethodSymbol>()] = this.Analyze( methodSymbol );
+
                             break;
 
                         case IPropertySymbol propertySymbol:
@@ -116,7 +118,7 @@ namespace Metalama.Framework.Engine.Linking
 
                             break;
 
-                        case IFieldSymbol fieldSymbol:
+                        case IFieldSymbol:
                             break;
 
                         default:
@@ -127,12 +129,12 @@ namespace Metalama.Framework.Engine.Linking
                 return results;
             }
 
-            private SemanticBodyAnalysisResult Analyze(IMethodSymbol symbol)
+            private SemanticBodyAnalysisResult Analyze( IMethodSymbol symbol )
             {
                 var declaration = symbol.GetPrimaryDeclaration().AssertNotNull();
                 var semanticModel = this._intermediateCompilation.Compilation.GetSemanticModel( declaration.SyntaxTree );
 
-                var body = GetDeclarationBody(declaration);
+                var body = GetDeclarationBody( declaration );
 
                 switch ( body )
                 {
@@ -150,37 +152,43 @@ namespace Metalama.Framework.Engine.Linking
                             switch ( returnStatement )
                             {
                                 case { Parent: BlockSyntax parentBlock }:
-                                    AddIfExitFlowing( returnStatement, parentBlock );
+                                    AddIfExitFlowing( parentBlock );
 
                                     break;
 
                                 case { Parent: IfStatementSyntax ifStatement }:
-                                    AddIfExitFlowing( returnStatement, ifStatement);
+                                    AddIfExitFlowing( ifStatement );
+
                                     break;
 
                                 case { Parent: ElseClauseSyntax { Parent: IfStatementSyntax ifStatement } }:
-                                    AddIfExitFlowing( returnStatement, ifStatement );
+                                    AddIfExitFlowing( ifStatement );
+
                                     break;
 
-                                case { Parent: SwitchSectionSyntax { Parent: SwitchStatementSyntax switchStatement } switchSection }:
-                                    AddIfExitFlowing( returnStatement, switchStatement );
+                                case { Parent: SwitchSectionSyntax { Parent: SwitchStatementSyntax switchStatement } }:
+                                    AddIfExitFlowing( switchStatement );
 
                                     break;
 
                                 case { Parent: LockStatementSyntax lockStatement }:
-                                    AddIfExitFlowing( returnStatement, lockStatement );
+                                    AddIfExitFlowing( lockStatement );
+
                                     break;
 
                                 case { Parent: FixedStatementSyntax fixedStatement }:
-                                    AddIfExitFlowing( returnStatement, fixedStatement );
+                                    AddIfExitFlowing( fixedStatement );
+
                                     break;
 
                                 case { Parent: LabeledStatementSyntax labeledStatement }:
-                                    AddIfExitFlowing( returnStatement, labeledStatement );
+                                    AddIfExitFlowing( labeledStatement );
+
                                     break;
 
                                 case { Parent: UsingStatementSyntax usingStatement }:
-                                    AddIfExitFlowing( returnStatement, usingStatement );
+                                    AddIfExitFlowing( usingStatement );
+
                                     break;
 
                                 default:
@@ -189,7 +197,7 @@ namespace Metalama.Framework.Engine.Linking
                                     break;
                             }
 
-                            void AddIfExitFlowing(ReturnStatementSyntax returnStatement, StatementSyntax controlStatement)
+                            void AddIfExitFlowing( StatementSyntax controlStatement )
                             {
                                 if ( exitFlowingStatements.Contains( controlStatement ) )
                                 {
@@ -207,14 +215,19 @@ namespace Metalama.Framework.Engine.Linking
 
                     case ArrowExpressionClauseSyntax:
                         return new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
-                    case MethodDeclarationSyntax { Body: null, ExpressionBody: null } accessorDeclarationSyntax:
+
+                    case MethodDeclarationSyntax { Body: null, ExpressionBody: null }:
                         return new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
-                    case AccessorDeclarationSyntax { Body: null, ExpressionBody: null } accessorDeclarationSyntax:
+
+                    case AccessorDeclarationSyntax { Body: null, ExpressionBody: null }:
                         return new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
+
                     case VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax } }:
                         return new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
+
                     case ParameterSyntax { Parent: ParameterListSyntax { Parent: RecordDeclarationSyntax } }:
                         return new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
+
                     default:
                         throw new AssertionFailedException();
                 }
@@ -231,7 +244,7 @@ namespace Metalama.Framework.Engine.Linking
                      *   * Fixed statements.
                      *   * Using statements.
                      *   * Labeled statements.
-                     */ 
+                     */
 
                     switch ( statement )
                     {
@@ -253,7 +266,7 @@ namespace Metalama.Framework.Engine.Linking
 
                             DiscoverExitFlowingStatements( ifStatement.Statement, exitFlowingStatements );
 
-                            if ( ifStatement.Else != null)
+                            if ( ifStatement.Else != null )
                             {
                                 DiscoverExitFlowingStatements( ifStatement.Else.Statement, exitFlowingStatements );
                             }
@@ -319,7 +332,7 @@ namespace Metalama.Framework.Engine.Linking
                         case TryStatementSyntax tryStatement:
                             DiscoverExitFlowingStatements( tryStatement.Block, exitFlowingStatements );
 
-                            foreach (var catchClause in tryStatement.Catches)
+                            foreach ( var catchClause in tryStatement.Catches )
                             {
                                 DiscoverExitFlowingStatements( catchClause.Block, exitFlowingStatements );
                             }
@@ -329,9 +342,6 @@ namespace Metalama.Framework.Engine.Linking
                                 DiscoverExitFlowingStatements( tryStatement.Finally.Block, exitFlowingStatements );
                             }
 
-                            break;
-
-                        default:
                             break;
                     }
 
@@ -348,6 +358,7 @@ namespace Metalama.Framework.Engine.Linking
                                 if ( statements[i] is not LocalFunctionStatementSyntax )
                                 {
                                     lastNonIgnoredStatement = statements[i];
+
                                     break;
                                 }
                             }
@@ -363,15 +374,16 @@ namespace Metalama.Framework.Engine.Linking
                 static SyntaxNode GetDeclarationBody( SyntaxNode declaration )
                     => declaration switch
                     {
-                        MethodDeclarationSyntax methodDecl =>methodDecl.Body ?? (SyntaxNode?) methodDecl.ExpressionBody ?? methodDecl,
+                        MethodDeclarationSyntax methodDecl => methodDecl.Body ?? (SyntaxNode?) methodDecl.ExpressionBody ?? methodDecl,
                         DestructorDeclarationSyntax destructorDecl => (SyntaxNode?) destructorDecl.Body ?? destructorDecl.ExpressionBody.AssertNotNull(),
                         OperatorDeclarationSyntax operatorDecl => (SyntaxNode?) operatorDecl.Body ?? operatorDecl.ExpressionBody.AssertNotNull(),
-                        ConversionOperatorDeclarationSyntax conversionOperatorDecl => (SyntaxNode?) conversionOperatorDecl.Body ?? conversionOperatorDecl.ExpressionBody.AssertNotNull(),
+                        ConversionOperatorDeclarationSyntax conversionOperatorDecl => (SyntaxNode?) conversionOperatorDecl.Body
+                                                                                      ?? conversionOperatorDecl.ExpressionBody.AssertNotNull(),
                         AccessorDeclarationSyntax accessorDecl => accessorDecl.Body ?? (SyntaxNode?) accessorDecl.ExpressionBody ?? accessorDecl,
                         VariableDeclaratorSyntax declarator => declarator,
                         ArrowExpressionClauseSyntax arrowExpressionClause => arrowExpressionClause,
                         ParameterSyntax { Parent: ParameterListSyntax { Parent: RecordDeclarationSyntax } } recordParameter => recordParameter,
-                        _ => throw new AssertionFailedException(),
+                        _ => throw new AssertionFailedException()
                     };
             }
         }

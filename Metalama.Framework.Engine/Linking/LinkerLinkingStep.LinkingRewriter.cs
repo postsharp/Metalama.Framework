@@ -33,24 +33,18 @@ namespace Metalama.Framework.Engine.Linking
                 this._rewritingDriver = rewritingDriver;
             }
 
-            public override SyntaxNode? VisitStructDeclaration( StructDeclarationSyntax node )
-            {
-                return node.WithMembers( List( this.GetMembersForTypeDeclaration( node ) ) );
-            }
+            public override SyntaxNode? VisitStructDeclaration( StructDeclarationSyntax node ) 
+                => node.WithMembers( List( this.GetMembersForTypeDeclaration( node ) ) );
 
-            public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
-            {
-                return node.WithMembers( List( this.GetMembersForTypeDeclaration( node ) ) );
-            }
+            public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node ) 
+                => node.WithMembers( List( this.GetMembersForTypeDeclaration( node ) ) );
 
-            public override SyntaxNode? VisitInterfaceDeclaration( InterfaceDeclarationSyntax node )
-            {
-                return node.WithMembers( List( this.GetMembersForTypeDeclaration( node ) ) );
-            }
+            public override SyntaxNode? VisitInterfaceDeclaration( InterfaceDeclarationSyntax node ) 
+                => node.WithMembers( List( this.GetMembersForTypeDeclaration( node ) ) );
 
             public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node )
             {
-                var transformedMembers = this.GetMembersForTypeDeclaration( node )!;
+                var transformedMembers = this.GetMembersForTypeDeclaration( node ).AssertNotNull();
 
                 if ( node.ParameterList != null )
                 {
@@ -87,19 +81,24 @@ namespace Metalama.Framework.Engine.Linking
                             if ( this._rewritingDriver.IsRewriteTarget( propertySymbol.AssertNotNull() ) )
                             {
                                 // Add new members that take place of synthesized positional property.
-                                newMembers.AddRange( this._rewritingDriver.RewritePositionalProperty( parameter, propertySymbol.AssertNotNull(), GetSyntaxGenerationContext() ) );
+                                newMembers.AddRange(
+                                    this._rewritingDriver.RewritePositionalProperty(
+                                        parameter,
+                                        propertySymbol.AssertNotNull(),
+                                        GetSyntaxGenerationContext() ) );
                             }
 
                             // Remove all attributes related to properties (property/field/get/set target specifiers).
-                            var transformedParameter = 
-                                parameter.WithAttributeLists( 
-                                    List( 
+                            var transformedParameter =
+                                parameter.WithAttributeLists(
+                                    List(
                                         parameter.AttributeLists
-                                        .Where( l => 
-                                            l.Target?.Identifier.IsKind(SyntaxKind.PropertyKeyword) != true
-                                            && l.Target?.Identifier.IsKind( SyntaxKind.FieldKeyword ) != true
-                                            && l.Target?.Identifier.IsKind(SyntaxKind.GetKeyword ) != true
-                                            && l.Target?.Identifier.IsKind(SyntaxKind.SetKeyword ) != true ) ) );
+                                            .Where(
+                                                l =>
+                                                    l.Target?.Identifier.IsKind( SyntaxKind.PropertyKeyword ) != true
+                                                    && l.Target?.Identifier.IsKind( SyntaxKind.FieldKeyword ) != true
+                                                    && l.Target?.Identifier.IsKind( SyntaxKind.GetKeyword ) != true
+                                                    && l.Target?.Identifier.IsKind( SyntaxKind.SetKeyword ) != true ) ) );
 
                             transformedParametersAndCommas.Add( transformedParameter );
                         }
@@ -114,10 +113,9 @@ namespace Metalama.Framework.Engine.Linking
                         }
                     }
 
-                    node = node.WithParameterList(
-                        node.ParameterList.WithParameters( SeparatedList<ParameterSyntax>( transformedParametersAndCommas ) ) );
+                    node = node.WithParameterList( node.ParameterList.WithParameters( SeparatedList<ParameterSyntax>( transformedParametersAndCommas ) ) );
 
-                    if (newMembers != null && newMembers.Count > 0)
+                    if ( newMembers != null && newMembers.Count > 0 )
                     {
                         transformedMembers =
                             transformedMembers.Concat( newMembers ).ToList();

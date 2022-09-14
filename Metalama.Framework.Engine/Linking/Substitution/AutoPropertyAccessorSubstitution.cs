@@ -27,40 +27,41 @@ namespace Metalama.Framework.Engine.Linking.Substitution
             switch ( currentNode )
             {
                 case AccessorDeclarationSyntax accessorDeclarationSyntax:
-                    if (accessorDeclarationSyntax.IsKind( SyntaxKind.GetAccessorDeclaration))
+                    if ( accessorDeclarationSyntax.IsKind( SyntaxKind.GetAccessorDeclaration ) )
                     {
                         if ( this._returnVariableIdentifier != null )
                         {
                             return
                                 Block(
-                                    ExpressionStatement(
-                                        AssignmentExpression(
-                                            SyntaxKind.SimpleAssignmentExpression,
-                                            IdentifierName( this._returnVariableIdentifier ),
-                                            CreateFieldAccessExpression() ) ) )
-                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                        ExpressionStatement(
+                                            AssignmentExpression(
+                                                SyntaxKind.SimpleAssignmentExpression,
+                                                IdentifierName( this._returnVariableIdentifier ),
+                                                CreateFieldAccessExpression() ) ) )
+                                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                         }
                         else
                         {
                             return
                                 Block(
-                                    ReturnStatement(
-                                        Token( TriviaList(), SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
-                                        CreateFieldAccessExpression(),
-                                        Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) ) )
-                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                        ReturnStatement(
+                                            Token( TriviaList(), SyntaxKind.ReturnKeyword, TriviaList( ElasticSpace ) ),
+                                            CreateFieldAccessExpression(),
+                                            Token( TriviaList(), SyntaxKind.SemicolonToken, TriviaList( ElasticLineFeed ) ) ) )
+                                    .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                         }
                     }
-                    else if (accessorDeclarationSyntax.IsKind(SyntaxKind.SetAccessorDeclaration) || accessorDeclarationSyntax.IsKind(SyntaxKind.InitAccessorDeclaration))
+                    else if ( accessorDeclarationSyntax.IsKind( SyntaxKind.SetAccessorDeclaration )
+                              || accessorDeclarationSyntax.IsKind( SyntaxKind.InitAccessorDeclaration ) )
                     {
                         return
                             Block(
-                                ExpressionStatement(
-                                    AssignmentExpression(
-                                        SyntaxKind.SimpleAssignmentExpression,
-                                        CreateFieldAccessExpression(),
-                                        IdentifierName( "value" ) ) ) )
-                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                    ExpressionStatement(
+                                        AssignmentExpression(
+                                            SyntaxKind.SimpleAssignmentExpression,
+                                            CreateFieldAccessExpression(),
+                                            IdentifierName( "value" ) ) ) )
+                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                     }
                     else
                     {
@@ -73,12 +74,12 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
             ExpressionSyntax CreateFieldAccessExpression()
             {
-                if (this._targetProperty.IsStatic)
+                if ( this._targetProperty.IsStatic )
                 {
                     return
                         MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
-                            substitutionContext.SyntaxGenerationContext.SyntaxGenerator.Type(this._targetProperty.ContainingType),
+                            substitutionContext.SyntaxGenerationContext.SyntaxGenerator.Type( this._targetProperty.ContainingType ),
                             IdentifierName( LinkerRewritingDriver.GetBackingFieldName( this._targetProperty ) ) );
                 }
                 else
@@ -88,7 +89,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                             SyntaxKind.SimpleMemberAccessExpression,
                             ThisExpression(),
                             IdentifierName( LinkerRewritingDriver.GetBackingFieldName( this._targetProperty ) ) );
-                }                
+                }
             }
         }
     }

@@ -42,7 +42,7 @@ namespace Metalama.Framework.Engine.Linking
 
         public IReadOnlyDictionary<SyntaxNode, SyntaxNodeSubstitution>? GetSubstitutions( InliningContextIdentifier contextId )
         {
-            if (!this._substitutions.TryGetValue( contextId, out var substitutions ) )
+            if ( !this._substitutions.TryGetValue( contextId, out var substitutions ) )
             {
                 return null;
             }

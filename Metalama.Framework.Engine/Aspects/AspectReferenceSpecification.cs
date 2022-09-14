@@ -75,7 +75,7 @@ namespace Metalama.Framework.Engine.Aspects
             return $"{this.AspectLayerId.FullName}${this.Order}${this.TargetKind}${this.Flags}";
         }
 
-        public string ToString(bool useShortName = false)
+        public string ToString( bool useShortName )
         {
             // TODO: Cache strings.
             return $"{(useShortName ? this.AspectLayerId.ShortName : this.AspectLayerId.FullName)}${this.Order}${this.TargetKind}${this.Flags}";

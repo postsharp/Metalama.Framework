@@ -21,7 +21,11 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 
         public override SyntaxNode TargetNode => this._returnNode;
 
-        public ReturnStatementSubstitution( SyntaxNode returnNode, IMethodSymbol containingSymbol, string? returnVariableIdentifier, string? returnLabelIdentifier )
+        public ReturnStatementSubstitution(
+            SyntaxNode returnNode,
+            IMethodSymbol containingSymbol,
+            string? returnVariableIdentifier,
+            string? returnLabelIdentifier )
         {
             this._returnNode = returnNode;
             this._containingSymbol = containingSymbol;
@@ -39,12 +43,12 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     {
                         return
                             Block(
-                                CreateAssignmentStatement( returnStatement.Expression )
-                                .WithLeadingTrivia( returnStatement.GetLeadingTrivia() )
-                                .WithTrailingTrivia( returnStatement.GetTrailingTrivia() )
-                                .WithOriginalLocationAnnotationFrom( returnStatement ),
-                                CreateGotoStatement() )
-                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                                    CreateAssignmentStatement( returnStatement.Expression )
+                                        .WithLeadingTrivia( returnStatement.GetLeadingTrivia() )
+                                        .WithTrailingTrivia( returnStatement.GetTrailingTrivia() )
+                                        .WithOriginalLocationAnnotationFrom( returnStatement ),
+                                    CreateGotoStatement() )
+                                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
                     }
                     else
                     {
@@ -55,17 +59,17 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                 {
                     if ( returnStatement.Expression != null )
                     {
-                        return 
+                        return
                             CreateAssignmentStatement( returnStatement.Expression )
-                            .WithLeadingTrivia( returnStatement.GetLeadingTrivia() )
-                            .WithTrailingTrivia( returnStatement.GetTrailingTrivia() )
-                            .WithOriginalLocationAnnotationFrom( returnStatement );
+                                .WithLeadingTrivia( returnStatement.GetLeadingTrivia() )
+                                .WithTrailingTrivia( returnStatement.GetTrailingTrivia() )
+                                .WithOriginalLocationAnnotationFrom( returnStatement );
                     }
                     else
                     {
                         return EmptyStatement()
                             .WithOriginalLocationAnnotationFrom( returnStatement )
-                            .WithLinkerGeneratedFlags(LinkerGeneratedFlags.EmptyTriviaStatement);
+                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.EmptyTriviaStatement );
                     }
                 }
             }
@@ -94,9 +98,9 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                 {
                     if ( this._containingSymbol.ReturnsVoid )
                     {
-                        return 
+                        return
                             ExpressionStatement( returnExpression )
-                            .WithOriginalLocationAnnotationFrom( returnExpression );
+                                .WithOriginalLocationAnnotationFrom( returnExpression );
                     }
                     else
                     {
@@ -144,12 +148,12 @@ namespace Metalama.Framework.Engine.Linking.Substitution
             {
                 return
                     GotoStatement(
-                        SyntaxKind.GotoStatement,
-                        Token( SyntaxKind.GotoKeyword ).WithTrailingTrivia( ElasticSpace ),
-                        default,
-                        IdentifierName( this._returnLabelIdentifier.AssertNotNull() ),
-                        Token( SyntaxKind.SemicolonToken ).WithTrailingTrivia( ElasticLineFeed ) )
-                    .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
+                            SyntaxKind.GotoStatement,
+                            Token( SyntaxKind.GotoKeyword ).WithTrailingTrivia( ElasticSpace ),
+                            default,
+                            IdentifierName( this._returnLabelIdentifier.AssertNotNull() ),
+                            Token( SyntaxKind.SemicolonToken ).WithTrailingTrivia( ElasticLineFeed ) )
+                        .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
             }
         }
     }

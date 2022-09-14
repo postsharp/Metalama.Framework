@@ -26,7 +26,8 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                 return false;
             }
 
-            if ( aspectReference.SourceExpression.AssertNotNull().Parent == null || aspectReference.SourceExpression.AssertNotNull().Parent is not InvocationExpressionSyntax invocationExpression )
+            if ( aspectReference.SourceExpression.AssertNotNull().Parent == null
+                 || aspectReference.SourceExpression.AssertNotNull().Parent is not InvocationExpressionSyntax invocationExpression )
             {
                 return false;
             }
@@ -66,7 +67,11 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             return new InliningAnalysisInfo( returnStatement, null );
         }
 
-        public override StatementSyntax Inline( SyntaxGenerationContext syntaxGenerationContext, InliningSpecification specification, SyntaxNode currentNode, StatementSyntax linkedTargetBody )
+        public override StatementSyntax Inline(
+            SyntaxGenerationContext syntaxGenerationContext,
+            InliningSpecification specification,
+            SyntaxNode currentNode,
+            StatementSyntax linkedTargetBody )
         {
             return linkedTargetBody;
         }

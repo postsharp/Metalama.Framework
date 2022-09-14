@@ -35,9 +35,9 @@ namespace Metalama.Framework.Engine.Linking
                 this._reachableReferencesByTarget = reachableReferencesByTarget;
             }
 
-            private IReadOnlyList<ResolvedAspectReference> GetReachableReferencesByTarget(AspectReferenceTarget target)
+            private IReadOnlyList<ResolvedAspectReference> GetReachableReferencesByTarget( AspectReferenceTarget target )
             {
-                if (!this._reachableReferencesByTarget.TryGetValue(target, out var references))
+                if ( !this._reachableReferencesByTarget.TryGetValue( target, out var references ) )
                 {
                     return Array.Empty<ResolvedAspectReference>();
                 }
@@ -53,7 +53,7 @@ namespace Metalama.Framework.Engine.Linking
             {
                 var inlineableSemantics = new List<IntermediateSymbolSemantic>();
 
-                foreach (var semantic in this._reachableSymbolSemantics)
+                foreach ( var semantic in this._reachableSymbolSemantics )
                 {
                     if ( IsInlineable( semantic ) )
                     {
@@ -63,9 +63,9 @@ namespace Metalama.Framework.Engine.Linking
 
                 return inlineableSemantics;
 
-                bool IsInlineable(IntermediateSymbolSemantic semantic)
+                bool IsInlineable( IntermediateSymbolSemantic semantic )
                 {
-                    if ( semantic.Symbol.GetDeclarationFlags().HasFlag( LinkerDeclarationFlags.NotInlineable ))
+                    if ( semantic.Symbol.GetDeclarationFlags().HasFlag( LinkerDeclarationFlags.NotInlineable ) )
                     {
                         // Semantics marked as non-inlineable are not inlineable.
                         return false;
@@ -131,8 +131,11 @@ namespace Metalama.Framework.Engine.Linking
 
                 bool IsInlineableProperty( IntermediateSymbolSemantic<IPropertySymbol> semantic )
                 {
-                    var getAspectReferences = this.GetReachableReferencesByTarget( semantic.ToAspectReferenceTarget( AspectReferenceTargetKind.PropertyGetAccessor ));
-                    var setAspectReferences = this.GetReachableReferencesByTarget( semantic.ToAspectReferenceTarget( AspectReferenceTargetKind.PropertySetAccessor ));
+                    var getAspectReferences =
+                        this.GetReachableReferencesByTarget( semantic.ToAspectReferenceTarget( AspectReferenceTargetKind.PropertyGetAccessor ) );
+
+                    var setAspectReferences =
+                        this.GetReachableReferencesByTarget( semantic.ToAspectReferenceTarget( AspectReferenceTargetKind.PropertySetAccessor ) );
 
                     if ( getAspectReferences.Count > 1 || setAspectReferences.Count > 1
                                                        || (getAspectReferences.Count == 0 && setAspectReferences.Count == 0) )
@@ -145,8 +148,11 @@ namespace Metalama.Framework.Engine.Linking
 
                 bool IsInlineableEvent( IntermediateSymbolSemantic<IEventSymbol> semantic )
                 {
-                    var addAspectReferences = this.GetReachableReferencesByTarget( semantic.ToAspectReferenceTarget( AspectReferenceTargetKind.EventAddAccessor ) );
-                    var removeAspectReferences = this.GetReachableReferencesByTarget( semantic.ToAspectReferenceTarget( AspectReferenceTargetKind.EventRemoveAccessor ) );
+                    var addAspectReferences =
+                        this.GetReachableReferencesByTarget( semantic.ToAspectReferenceTarget( AspectReferenceTargetKind.EventAddAccessor ) );
+
+                    var removeAspectReferences =
+                        this.GetReachableReferencesByTarget( semantic.ToAspectReferenceTarget( AspectReferenceTargetKind.EventRemoveAccessor ) );
 
                     if ( addAspectReferences.Count > 1 || removeAspectReferences.Count > 1
                                                        || (addAspectReferences.Count == 0 && removeAspectReferences.Count == 0) )
@@ -162,7 +168,8 @@ namespace Metalama.Framework.Engine.Linking
             /// Determines which aspect references can be inlined.
             /// </summary>
             /// <returns>Aspect references with selected inliners.</returns>
-            public IReadOnlyDictionary<ResolvedAspectReference, Inliner> GetInlineableReferences(IReadOnlyList<IntermediateSymbolSemantic> inlineableSemantics)
+            public IReadOnlyDictionary<ResolvedAspectReference, Inliner> GetInlineableReferences(
+                IReadOnlyList<IntermediateSymbolSemantic> inlineableSemantics )
             {
                 var inlineableReferences = new Dictionary<ResolvedAspectReference, Inliner>();
 
@@ -185,20 +192,25 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         // References that are not marked as inlineable cannot be inlined.
                         inliner = null;
+
                         return false;
                     }
 
-                    if (!SymbolEqualityComparer.Default.Equals(reference.ContainingSemantic.Symbol.ContainingType, reference.ResolvedSemantic.Symbol.ContainingType) )
+                    if ( !SymbolEqualityComparer.Default.Equals(
+                            reference.ContainingSemantic.Symbol.ContainingType,
+                            reference.ResolvedSemantic.Symbol.ContainingType ) )
                     {
                         // References between types cannot be inlined.
                         inliner = null;
+
                         return false;
                     }
 
-                    if (reference.SourceNode is not ExpressionSyntax)
+                    if ( reference.SourceNode is not ExpressionSyntax )
                     {
                         // Use a special inliner for non-expression references.
                         inliner = ImplicitLastOverrideReferenceInliner.Instance;
+
                         return true;
                     }
 
@@ -214,12 +226,14 @@ namespace Metalama.Framework.Engine.Linking
             /// <param name="inlineableSemantics"></param>
             /// <param name="inlineableReferences"></param>
             /// <returns></returns>
-            public IReadOnlyList<IntermediateSymbolSemantic> GetInlinedSemantics( IReadOnlyList<IntermediateSymbolSemantic> inlineableSemantics, IReadOnlyDictionary<ResolvedAspectReference, Inliner> inlineableReferences)
+            public IReadOnlyList<IntermediateSymbolSemantic> GetInlinedSemantics(
+                IReadOnlyList<IntermediateSymbolSemantic> inlineableSemantics,
+                IReadOnlyDictionary<ResolvedAspectReference, Inliner> inlineableReferences )
             {
-                var inlineableSemanticHashSet = new HashSet<IntermediateSymbolSemantic>(inlineableSemantics);
+                var inlineableSemanticHashSet = new HashSet<IntermediateSymbolSemantic>( inlineableSemantics );
                 var inlinedSemantics = new List<IntermediateSymbolSemantic>();
 
-                foreach (var inlineableSemantic in inlineableSemantics)
+                foreach ( var inlineableSemantic in inlineableSemantics )
                 {
                     if ( IsInlinedSemantic( inlineableSemantic ) )
                     {
@@ -229,7 +243,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 return inlinedSemantics;
 
-                bool IsInlinedSemanticBody(IntermediateSymbolSemantic<IMethodSymbol> semanticBody)
+                bool IsInlinedSemanticBody( IntermediateSymbolSemantic<IMethodSymbol> semanticBody )
                 {
                     if ( !this._reachableReferencesByTarget.TryGetValue( semanticBody.ToAspectReferenceTarget(), out var aspectReferences ) )
                     {
@@ -244,6 +258,7 @@ namespace Metalama.Framework.Engine.Linking
                         if ( !inlineableReferences.ContainsKey( reference ) )
                         {
                             anyNonInlineableReference = true;
+
                             break;
                         }
                     }
@@ -251,11 +266,15 @@ namespace Metalama.Framework.Engine.Linking
                     return !anyNonInlineableReference;
                 }
 
-                bool IsInlinedSemantic(IntermediateSymbolSemantic semantic)
+                bool IsInlinedSemantic( IntermediateSymbolSemantic semantic )
                 {
                     switch ( semantic.Symbol )
                     {
-                        case IMethodSymbol { MethodKind: MethodKind.Ordinary or MethodKind.ExplicitInterfaceImplementation or MethodKind.UserDefinedOperator or MethodKind.Conversion or MethodKind.Destructor } method:
+                        case IMethodSymbol
+                        {
+                            MethodKind: MethodKind.Ordinary or MethodKind.ExplicitInterfaceImplementation or MethodKind.UserDefinedOperator
+                            or MethodKind.Conversion or MethodKind.Destructor
+                        }:
                             return IsInlinedSemanticBody( semantic.ToTyped<IMethodSymbol>() );
 
                         case IMethodSymbol { MethodKind: MethodKind.PropertyGet or MethodKind.PropertySet } propertyAccessor:
@@ -267,24 +286,24 @@ namespace Metalama.Framework.Engine.Linking
                         case IPropertySymbol property:
                             // Property is inlined if at least one of the accessors is reachable and not inlineable.
                             var hasNonInlinedGet =
-                                property.GetMethod != null 
-                                && !IsInlinedSemanticBody( semantic.WithSymbol( property.GetMethod ))
+                                property.GetMethod != null
+                                && !IsInlinedSemanticBody( semantic.WithSymbol( property.GetMethod ) )
                                 && this._reachableSymbolSemantics.Contains( semantic.WithSymbol( property.GetMethod ) );
 
                             var hasNonInlinedSet =
-                                property.SetMethod != null 
+                                property.SetMethod != null
                                 && !IsInlinedSemanticBody( semantic.WithSymbol( property.SetMethod ) )
                                 && this._reachableSymbolSemantics.Contains( semantic.WithSymbol( property.SetMethod ) );
 
-                            return inlineableSemanticHashSet.Contains(semantic) && !hasNonInlinedGet && !hasNonInlinedSet;
+                            return inlineableSemanticHashSet.Contains( semantic ) && !hasNonInlinedGet && !hasNonInlinedSet;
 
                         case IEventSymbol @event:
                             // Event is inlined if at least one of the accessors is reachable and not inlineable.
-                            var hasNonInlinedAdd = 
+                            var hasNonInlinedAdd =
                                 !IsInlinedSemanticBody( semantic.WithSymbol( @event.AddMethod.AssertNotNull() ) )
                                 && this._reachableSymbolSemantics.Contains( semantic.WithSymbol( @event.AddMethod.AssertNotNull() ) );
 
-                            var hasNonInlinedRemove = 
+                            var hasNonInlinedRemove =
                                 !IsInlinedSemanticBody( semantic.WithSymbol( @event.RemoveMethod.AssertNotNull() ) )
                                 && this._reachableSymbolSemantics.Contains( semantic.WithSymbol( @event.RemoveMethod.AssertNotNull() ) );
 
@@ -302,7 +321,9 @@ namespace Metalama.Framework.Engine.Linking
             /// <param name="inlineableReferences"></param>
             /// <param name="inlinedSemantics"></param>
             /// <returns></returns>
-            public IReadOnlyDictionary<ResolvedAspectReference, Inliner> GetInlinedReferences( IReadOnlyDictionary<ResolvedAspectReference, Inliner> inlineableReferences, IReadOnlyList<IntermediateSymbolSemantic> inlinedSemantics)
+            public IReadOnlyDictionary<ResolvedAspectReference, Inliner> GetInlinedReferences(
+                IReadOnlyDictionary<ResolvedAspectReference, Inliner> inlineableReferences,
+                IReadOnlyList<IntermediateSymbolSemantic> inlinedSemantics )
             {
                 var inlinedReferences = new Dictionary<ResolvedAspectReference, Inliner>();
 
@@ -310,7 +331,7 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     foreach ( var reference in this.GetReachableReferencesByTarget( inlinedSemantic.ToAspectReferenceTarget() ) )
                     {
-                        if (!inlineableReferences.TryGetValue(reference, out var inliner))
+                        if ( !inlineableReferences.TryGetValue( reference, out var inliner ) )
                         {
                             throw new AssertionFailedException();
                         }

@@ -10,11 +10,9 @@ namespace Metalama.Framework.Engine.Linking.Inlining
 {
     internal class ImplicitLastOverrideReferenceInliner : Inliner
     {
-        public static ImplicitLastOverrideReferenceInliner Instance { get; } = new ImplicitLastOverrideReferenceInliner();
+        public static ImplicitLastOverrideReferenceInliner Instance { get; } = new();
 
-        private ImplicitLastOverrideReferenceInliner()
-        {
-        }
+        private ImplicitLastOverrideReferenceInliner() { }
 
         public override bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
@@ -41,13 +39,17 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                     ArrowExpressionClauseSyntax arrowExpressionClause => arrowExpressionClause,
                     VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax } } eventFieldVariable => eventFieldVariable,
                     ParameterSyntax { Parent: ParameterListSyntax { Parent: RecordDeclarationSyntax } } recordParameter => recordParameter,
-                    _ => throw new AssertionFailedException(),
+                    _ => throw new AssertionFailedException()
                 };
 
             return new InliningAnalysisInfo( body, null );
         }
 
-        public override StatementSyntax Inline( SyntaxGenerationContext syntaxGenerationContext, InliningSpecification specification, SyntaxNode currentNode, StatementSyntax linkedTargetBody )
+        public override StatementSyntax Inline(
+            SyntaxGenerationContext syntaxGenerationContext,
+            InliningSpecification specification,
+            SyntaxNode currentNode,
+            StatementSyntax linkedTargetBody )
         {
             return linkedTargetBody;
         }

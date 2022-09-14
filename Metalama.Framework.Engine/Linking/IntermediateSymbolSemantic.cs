@@ -8,7 +8,6 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal readonly struct IntermediateSymbolSemantic : IEquatable<IntermediateSymbolSemantic>
     {
-
         public ISymbol Symbol { get; }
 
         public IntermediateSymbolSemanticKind Kind { get; }
@@ -38,7 +37,7 @@ namespace Metalama.Framework.Engine.Linking
             return new IntermediateSymbolSemantic<TSymbol>( (TSymbol) this.Symbol, this.Kind );
         }
 
-        public IntermediateSymbolSemantic WithSymbol(ISymbol symbol)
+        public IntermediateSymbolSemantic WithSymbol( ISymbol symbol )
         {
             return new IntermediateSymbolSemantic( symbol, this.Kind );
         }
@@ -77,14 +76,14 @@ namespace Metalama.Framework.Engine.Linking
         public bool Equals( IntermediateSymbolSemantic<TSymbol> other )
         {
             return StructuralSymbolComparer.Default.Equals( this.Symbol, other.Symbol )
-                  && other.Kind == this.Kind;
+                   && other.Kind == this.Kind;
         }
 
         public override int GetHashCode()
         {
             return HashCode.Combine(
-               StructuralSymbolComparer.Default.GetHashCode( this.Symbol ),
-               this.Kind );
+                StructuralSymbolComparer.Default.GetHashCode( this.Symbol ),
+                this.Kind );
         }
 
         public static implicit operator IntermediateSymbolSemantic( IntermediateSymbolSemantic<TSymbol> value )

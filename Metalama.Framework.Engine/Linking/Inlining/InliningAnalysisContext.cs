@@ -4,7 +4,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
 {
     internal sealed class InliningAnalysisContext
     {
-        private readonly PersitentContext _persistentContext;
+        private readonly PersistentContext _persistentContext;
 
         public bool UsingSimpleInlining { get; }
 
@@ -16,11 +16,9 @@ namespace Metalama.Framework.Engine.Linking.Inlining
 
         public int? ParentOrdinal { get; }
 
-        public InliningAnalysisContext() : this( null, new PersitentContext(), true )
-        {
-        }
+        public InliningAnalysisContext() : this( null, new PersistentContext(), true ) { }
 
-        private InliningAnalysisContext( int? parentOrdinal, PersitentContext identifierProvider, bool usingSimpleInlining )
+        private InliningAnalysisContext( int? parentOrdinal, PersistentContext identifierProvider, bool usingSimpleInlining )
         {
             this.UsingSimpleInlining = usingSimpleInlining;
             this._persistentContext = identifierProvider;
@@ -31,12 +29,14 @@ namespace Metalama.Framework.Engine.Linking.Inlining
         public string AllocateReturnVariable()
         {
             this.DeclaredReturnVariable = true;
+
             return this._persistentContext.AllocateReturnVariable();
         }
 
         public string AllocateReturnLabel()
         {
             this.DeclaredReturnLabel = true;
+
             return this._persistentContext.AllocateReturnLabel();
         }
 
@@ -50,7 +50,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             return new InliningAnalysisContext( this.Ordinal, this._persistentContext, false );
         }
 
-        private class PersitentContext
+        private class PersistentContext
         {
             private int _nextOrdinal;
             private int _nextReturnLabelIdentifier = 1;

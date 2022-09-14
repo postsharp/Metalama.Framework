@@ -29,51 +29,46 @@ namespace Metalama.Framework.Engine.Linking
         /// Gets the target semantic (method, property, event).
         /// </summary>
         /// <returns></returns>
-        public IntermediateSymbolSemantic TargetSemantic => new IntermediateSymbolSemantic( this.Symbol, this.SemanticKind );
+        public IntermediateSymbolSemantic TargetSemantic => new( this.Symbol, this.SemanticKind );
 
         /// <summary>
         /// Gets the target semantic body (method, property accessor, event accessor).
         /// </summary>
         /// <returns></returns>
-        public IntermediateSymbolSemantic<IMethodSymbol> GetTargetSemanticBody
-        {
-            get
-            {
-                return new IntermediateSymbolSemantic<IMethodSymbol>( 
-                    (this.Symbol, this.TargetKind) switch
-                    {
-                        (IMethodSymbol method, AspectReferenceTargetKind.Self ) => method,
-                        (IPropertySymbol { GetMethod: { } getMethod }, AspectReferenceTargetKind.PropertyGetAccessor ) => getMethod,
-                        (IPropertySymbol { SetMethod: { } setMethod }, AspectReferenceTargetKind.PropertySetAccessor ) => setMethod,
-                        (IEventSymbol { AddMethod: { } addMethod }, AspectReferenceTargetKind.EventAddAccessor ) => addMethod,
-                        (IEventSymbol { RemoveMethod: { } removeMethod }, AspectReferenceTargetKind.EventRemoveAccessor ) => removeMethod,
-                        _ => throw new AssertionFailedException(),
-                    }, 
-                    this.SemanticKind );
-            }
-        }
+        public IntermediateSymbolSemantic<IMethodSymbol> GetTargetSemanticBody 
+            => new IntermediateSymbolSemantic<IMethodSymbol>(
+                (this.Symbol, this.TargetKind) switch
+                {
+                    (IMethodSymbol method, AspectReferenceTargetKind.Self) => method,
+                    (IPropertySymbol { GetMethod: { } getMethod }, AspectReferenceTargetKind.PropertyGetAccessor) => getMethod,
+                    (IPropertySymbol { SetMethod: { } setMethod }, AspectReferenceTargetKind.PropertySetAccessor) => setMethod,
+                    (IEventSymbol { AddMethod: { } addMethod }, AspectReferenceTargetKind.EventAddAccessor) => addMethod,
+                    (IEventSymbol { RemoveMethod: { } removeMethod }, AspectReferenceTargetKind.EventRemoveAccessor) => removeMethod,
+                    _ => throw new AssertionFailedException()
+                },
+                this.SemanticKind );
 
         public AspectReferenceTarget( ISymbol symbol, IntermediateSymbolSemanticKind semantic, AspectReferenceTargetKind targetKind )
         {
             // Normalize the target.
             (this.Symbol, this.TargetKind) = (symbol, targetKind) switch
             {
-                ( IMethodSymbol { MethodKind: MethodKind.PropertyGet, AssociatedSymbol: IPropertySymbol property }, AspectReferenceTargetKind.Self) 
+                (IMethodSymbol { MethodKind: MethodKind.PropertyGet, AssociatedSymbol: IPropertySymbol property }, AspectReferenceTargetKind.Self)
                     => ((ISymbol) property, AspectReferenceTargetKind.PropertyGetAccessor),
-                ( IMethodSymbol { MethodKind: MethodKind.PropertySet, AssociatedSymbol: IPropertySymbol property }, AspectReferenceTargetKind.Self ) 
+                (IMethodSymbol { MethodKind: MethodKind.PropertySet, AssociatedSymbol: IPropertySymbol property }, AspectReferenceTargetKind.Self)
                     => (property, AspectReferenceTargetKind.PropertySetAccessor),
-                (IMethodSymbol { MethodKind: MethodKind.EventAdd, AssociatedSymbol: IEventSymbol @event }, AspectReferenceTargetKind.Self ) 
+                (IMethodSymbol { MethodKind: MethodKind.EventAdd, AssociatedSymbol: IEventSymbol @event }, AspectReferenceTargetKind.Self)
                     => (@event, AspectReferenceTargetKind.EventAddAccessor),
-                (IMethodSymbol { MethodKind: MethodKind.EventRemove, AssociatedSymbol: IEventSymbol @event }, AspectReferenceTargetKind.Self ) 
+                (IMethodSymbol { MethodKind: MethodKind.EventRemove, AssociatedSymbol: IEventSymbol @event }, AspectReferenceTargetKind.Self)
                     => (@event, AspectReferenceTargetKind.EventRemoveAccessor),
-                ( IMethodSymbol method, AspectReferenceTargetKind.Self) => (method, AspectReferenceTargetKind.Self),
-                ( IPropertySymbol property, AspectReferenceTargetKind.PropertyGetAccessor or AspectReferenceTargetKind.PropertySetAccessor )
+                (IMethodSymbol method, AspectReferenceTargetKind.Self) => (method, AspectReferenceTargetKind.Self),
+                (IPropertySymbol property, AspectReferenceTargetKind.PropertyGetAccessor or AspectReferenceTargetKind.PropertySetAccessor)
                     => (property, targetKind),
-                ( IEventSymbol @event, AspectReferenceTargetKind.EventAddAccessor or AspectReferenceTargetKind.EventRemoveAccessor )
+                (IEventSymbol @event, AspectReferenceTargetKind.EventAddAccessor or AspectReferenceTargetKind.EventRemoveAccessor)
                     => (@event, targetKind),
-                (IPropertySymbol property, AspectReferenceTargetKind.Self ) => (property, AspectReferenceTargetKind.Self),
-                (IEventSymbol @event, AspectReferenceTargetKind.Self ) => (@event, AspectReferenceTargetKind.Self),
-                _ => throw new AssertionFailedException(),
+                (IPropertySymbol property, AspectReferenceTargetKind.Self) => (property, AspectReferenceTargetKind.Self),
+                (IEventSymbol @event, AspectReferenceTargetKind.Self) => (@event, AspectReferenceTargetKind.Self),
+                _ => throw new AssertionFailedException()
             };
 
             this.SemanticKind = semantic;
