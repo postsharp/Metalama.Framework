@@ -64,7 +64,7 @@ class User {
                     Assert.Equal( "T2", m.ReturnType.Name );
                     Assert.Equal( "T1", m.GetParameters()[0].ParameterType.Name );
                 },
-                @"((global::System.Reflection.MethodInfo)typeof(global::Origin<>.NestedInOrigin<>).GetMethod(""Method21"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, new[]{typeof(T1)}))" );
+                @"((global::System.Reflection.MethodInfo)global::Metalama.Framework.RunTime.ReflectionHelper.GetMethod(typeof(global::Origin<>.NestedInOrigin<>), ""Method21"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, ""Origin<T1>.NestedInOrigin<T2>.Method21(T1)""))");
 
             this.TestSerializable(
                 descendant.BaseType!.Method( "Method21" ),
@@ -73,7 +73,7 @@ class User {
                     Assert.Equal( "T3", m.ReturnType.Name );
                     Assert.Equal( "String", m.GetParameters()[0].ParameterType.Name );
                 },
-                @"((global::System.Reflection.MethodInfo)typeof(global::Origin<global::System.String>.NestedInOrigin<T3>).GetMethod(""Method21"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, new[]{typeof(global::System.String)}))" );
+                @"((global::System.Reflection.MethodInfo)global::Metalama.Framework.RunTime.ReflectionHelper.GetMethod(typeof(global::Origin<global::System.String>.NestedInOrigin<T3>), ""Method21"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, ""Origin<string>.NestedInOrigin<T3>.Method21(string)""))" );
         }
 
         [Fact]
@@ -92,7 +92,7 @@ class User {
                     Assert.Equal( typeof(float), m.ReturnType );
                     Assert.Equal( typeof(string), m.GetParameters()[0].ParameterType );
                 },
-                @"((global::System.Reflection.MethodInfo)typeof(global::Origin<global::System.String>.NestedInOrigin<global::System.Single>).GetMethod(""Method21"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, new[]{typeof(global::System.String)}))" );
+                @"((global::System.Reflection.MethodInfo)global::Metalama.Framework.RunTime.ReflectionHelper.GetMethod(typeof(global::Origin<global::System.String>.NestedInOrigin<global::System.Single>), ""Method21"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, ""Origin<string>.NestedInOrigin<float>.Method21(string)""))" );
 
             this.TestSerializable(
                 instantiatedNested.Constructors.Single(),
@@ -102,12 +102,12 @@ class User {
                     Assert.Equal( typeof(float), c.DeclaringType.GenericTypeArguments[1] );
                     Assert.Equal( typeof(int), c.DeclaringType.BaseType!.GenericTypeArguments[0] );
                 },
-                @"((global::System.Reflection.ConstructorInfo)typeof(global::Origin<global::System.String>.NestedInOrigin<global::System.Single>).GetConstructor(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, new[]{}))" );
+                @"((global::System.Reflection.ConstructorInfo)global::Metalama.Framework.RunTime.ReflectionHelper.GetConstructor(typeof(global::Origin<global::System.String>.NestedInOrigin<global::System.Single>), global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, ""Origin<string>.NestedInOrigin<float>.NestedInOrigin()""))" );
 
             this.TestSerializable(
                 ((INamedType) instantiatedNested.ContainingDeclaration!).Method( "Method" ),
                 m => Assert.Equal( typeof(string), m.ReturnType ),
-                @"((global::System.Reflection.MethodInfo)typeof(global::Origin<global::System.String>).GetMethod(""Method"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, new[]{typeof(global::System.String)}))" );
+                @"((global::System.Reflection.MethodInfo)global::Metalama.Framework.RunTime.ReflectionHelper.GetMethod(typeof(global::Origin<global::System.String>), ""Method"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, ""Origin<string>.Method(string)""))" );
 
             this.TestSerializable(
                 instantiatedDescendant.Field( "Field" ),

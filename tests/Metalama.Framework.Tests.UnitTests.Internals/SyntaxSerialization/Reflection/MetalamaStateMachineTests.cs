@@ -23,7 +23,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                 .ToString();
 
             this.AssertEqual(
-                @"((global::System.Reflection.MethodInfo)typeof(global::Target).GetMethod(""Method"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static, new[]{}))",
+                @"((global::System.Reflection.MethodInfo)global::Metalama.Framework.RunTime.ReflectionHelper.GetMethod(typeof(global::Target), ""Method"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static, ""Target.Method()""))",
                 serialized );
 
             this.TestExpression<MethodInfo>( code, serialized, info => Assert.Equal( "Method", info.Name ) );
@@ -41,7 +41,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                 .ToString();
 
             this.AssertEqual(
-                @"((global::System.Reflection.MethodInfo)typeof(global::Target).GetMethod(""Method"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static, new[]{}))",
+                @"((global::System.Reflection.MethodInfo)global::Metalama.Framework.RunTime.ReflectionHelper.GetMethod(typeof(global::Target), ""Method"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static, ""Target.Method()""))",
                 serialized );
 
             this.TestExpression<MethodInfo>( code, serialized, info => Assert.Equal( "Method", info.Name ) );

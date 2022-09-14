@@ -18,7 +18,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeTargetDotMethod( code );
 
             Assert.Equal(
-                "((global::System.Reflection.MethodInfo)typeof(global::Target).GetMethod(\"Method\", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static, new[]{}))",
+                @"((global::System.Reflection.MethodInfo)global::Metalama.Framework.RunTime.ReflectionHelper.GetMethod(typeof(global::Target), ""Method"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static, ""Target.Method()""))",
                 serialized );
 
             this.TestExpression<MethodInfo>(
@@ -39,7 +39,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeTargetDotMethod( code );
 
             Assert.Equal(
-                "((global::System.Reflection.MethodInfo)typeof(global::Target).GetMethod(\"Method\", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static, new[]{typeof(T)}))",
+                @"((global::System.Reflection.MethodInfo)global::Metalama.Framework.RunTime.ReflectionHelper.GetMethod(typeof(global::Target), ""Method"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static, ""Target.Method<T>(T)""))",
                 serialized );
 
             this.TestExpression<MethodInfo>(
@@ -60,7 +60,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeTargetDotMethod( code );
 
             Assert.Equal(
-                "((global::System.Reflection.MethodInfo)typeof(global::Target).GetMethod(\"Method\", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static, new[]{typeof(global::System.Int32).MakeByRefType()}))",
+                @"((global::System.Reflection.MethodInfo)global::Metalama.Framework.RunTime.ReflectionHelper.GetMethod(typeof(global::Target), ""Method"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static, ""Target.Method(out int)""))",
                 serialized );
 
             this.TestExpression<MethodInfo>(

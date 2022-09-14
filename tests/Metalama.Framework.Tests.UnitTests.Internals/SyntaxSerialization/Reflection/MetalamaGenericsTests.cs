@@ -53,7 +53,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                 .ToString();
 
             this.AssertEqual(
-                @"((global::System.Reflection.MethodInfo)typeof(global::Target<>).GetMethod(""ReturnSelf"", global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, new[]{}))",
+                @"((global::System.Reflection.MethodInfo)global::Metalama.Framework.RunTime.ReflectionHelper.GetMethod(typeof(global::Target<>), ""ReturnSelf"", global::System.Reflection.BindingFlags.NonPublic | global::System.Reflection.BindingFlags.Instance, ""Target<TKey>.ReturnSelf()""))",
                 serialized );
 
             this.TestExpression<MethodInfo>(
