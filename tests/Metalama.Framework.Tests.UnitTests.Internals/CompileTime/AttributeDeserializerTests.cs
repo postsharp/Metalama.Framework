@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.TestFramework;
 using System;
@@ -16,11 +17,14 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
 {
     public class AttributeDeserializerTests : TestBase
     {
-        public AttributeDeserializerTests() : base( p => p.WithService( new HackedSystemTypeResolver( p ) ) )
+        public AttributeDeserializerTests() : base()
         {
             // For the ease of testing, we need the custom attributes and helper classes nested here to be considered to 
             // belong to a system library so they can be shared between the compile-time code and the testing code.
         }
+
+        protected override ServiceProvider ConfigureServiceProvider( ServiceProvider serviceProvider )
+            => serviceProvider.WithService( new HackedSystemTypeResolver( serviceProvider ) );
 
         private object? GetDeserializedProperty( string property, string value, string? dependentCode = null, string? additionalCode = "" )
         {

@@ -40,16 +40,15 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         public CompileTimeDomain Domain { get; }
 
-        public CompilationVersionProvider CompilationVersionProvider { get; }
-
         public DesignTimeAspectPipelineFactory( ServiceProvider serviceProvider, CompileTimeDomain domain, bool isTest = false )
         {
+            serviceProvider = serviceProvider.WithService( this );
+            serviceProvider = serviceProvider.WithService( new CompilationVersionProvider( serviceProvider ) );
+
             this.Domain = domain;
             this.ServiceProvider = serviceProvider.WithService( this );
             this._isTest = isTest;
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
-
-            this.CompilationVersionProvider = new CompilationVersionProvider( serviceProvider );
         }
 
         /// <summary>

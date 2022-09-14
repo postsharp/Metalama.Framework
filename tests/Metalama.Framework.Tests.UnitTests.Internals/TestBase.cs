@@ -27,12 +27,9 @@ namespace Metalama.Framework.Tests.UnitTests
         /// </summary>
         private const bool _doCodeExecutionTests = false;
 
-        private readonly Func<ServiceProvider, ServiceProvider> _addServices;
+        protected TestBase() { }
 
-        protected TestBase( Func<ServiceProvider, ServiceProvider>? addServices = null )
-        {
-            this._addServices = addServices ?? new Func<ServiceProvider, ServiceProvider>( p => p );
-        }
+        protected virtual ServiceProvider ConfigureServiceProvider( ServiceProvider serviceProvider ) => serviceProvider;
 
         protected static CSharpCompilation CreateCSharpCompilation(
             string code,
@@ -149,10 +146,7 @@ class Expression
                 projectOptions ?? new TestProjectOptions( additionalAssemblies: ImmutableArray.Create( this.GetType().Assembly ) ),
                 provider =>
                 {
-                    if ( this._addServices != null )
-                    {
-                        provider = this._addServices( provider );
-                    }
+                    provider = this.ConfigureServiceProvider( provider );
 
                     if ( addServices != null )
                     {

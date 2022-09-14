@@ -3,6 +3,7 @@
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
+using Metalama.Framework.Engine.Pipeline;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,7 +12,13 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
-public class DependencyGraphTest : TestBase
+public abstract class DesignTimeTestBase : TestBase
+{
+    protected override ServiceProvider ConfigureServiceProvider( ServiceProvider serviceProvider )
+        => serviceProvider.WithService( new TestMetalamaProjectClassifier() );
+}
+
+public class DependencyGraphTest : DesignTimeTestBase
 {
     private readonly DiffStrategy _strategy = new( true, true, true );
 

@@ -18,6 +18,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 internal class TestDesignTimeAspectPipelineFactory : DesignTimeAspectPipelineFactory
 {
     private readonly IProjectOptions _projectOptions;
+    private static readonly TestMetalamaProjectClassifier _projectClassifier = new();
 
     public TestDesignTimeAspectPipelineFactory( TestContext testContext, ServiceProvider? serviceProvider = null ) :
         base(
@@ -33,9 +34,7 @@ internal class TestDesignTimeAspectPipelineFactory : DesignTimeAspectPipelineFac
         return new ValueTask<DesignTimeAspectPipeline?>( this.GetOrCreatePipeline( this._projectOptions, compilation, CancellationToken.None ) );
     }
 
-    public override bool IsMetalamaEnabled( Compilation compilation )
-        => compilation.References.OfType<PortableExecutableReference>()
-            .Any( x => Path.GetFileNameWithoutExtension( x.FilePath )!.Equals( "Metalama.Framework", StringComparison.OrdinalIgnoreCase ) );
+    public override bool IsMetalamaEnabled( Compilation compilation ) => _projectClassifier.IsMetalamaEnabled( compilation );
 
     public DesignTimeAspectPipeline CreatePipeline( Compilation compilation )
         => this.GetOrCreatePipeline( this._projectOptions, compilation, CancellationToken.None ).AssertNotNull();

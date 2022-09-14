@@ -12,7 +12,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff;
 /// <summary>
 /// Computes and caches the <see cref="CompilationChanges"/> between pairs of <see cref="Compilation"/> instances.
 /// </summary>
-internal class CompilationVersionProvider
+internal class CompilationVersionProvider : IService
 {
     private readonly ConditionalWeakTable<Compilation, ChangeLinkedList> _cache = new();
     private readonly SemaphoreSlim _semaphore = new( 1 );

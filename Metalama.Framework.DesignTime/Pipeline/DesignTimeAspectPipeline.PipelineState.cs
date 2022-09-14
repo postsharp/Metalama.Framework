@@ -177,7 +177,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 var newConfiguration = this.Configuration;
 
                 // Detect changes in the syntax trees of the tracked compilation.
-                var newChanges = await this._pipeline._factory.CompilationVersionProvider.GetCompilationChangesAsync(
+                var newChanges = await this._pipeline.CompilationVersionProvider.GetCompilationChangesAsync(
                     this.CompilationVersion?.Compilation,
                     newCompilation,
                     cancellationToken );

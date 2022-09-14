@@ -12,7 +12,7 @@ internal class NonMetalamaProjectTracker
 
     public NonMetalamaProjectTracker( IServiceProvider serviceProvider )
     {
-        this._compilationVersionProvider = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>().CompilationVersionProvider;
+        this._compilationVersionProvider = serviceProvider.GetRequiredService<CompilationVersionProvider>();
     }
 
     public async ValueTask<DesignTimeCompilationReference> GetCompilationReferenceAsync(

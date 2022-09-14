@@ -7,7 +7,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
-public class CompilationChangesProviderTests : TestBase
+public class CompilationChangesProviderTests : DesignTimeTestBase
 {
     [Fact]
     public async Task DifferentCompilationWithNoChangeAsync()

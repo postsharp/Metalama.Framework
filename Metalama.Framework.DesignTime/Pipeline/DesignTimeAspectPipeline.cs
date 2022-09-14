@@ -60,6 +60,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         private readonly DesignTimeAspectPipelineFactory _factory;
 
+        public CompilationVersionProvider CompilationVersionProvider { get; }
+
         private void SetState( in PipelineState state )
         {
             var oldStatus = this._currentState.Status;
@@ -94,6 +96,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         {
             this._projectKey = projectKey;
             this._factory = pipelineFactory;
+            this.CompilationVersionProvider = this.ServiceProvider.GetRequiredService<CompilationVersionProvider>();
 
             this._currentState = new PipelineState( this );
 
@@ -295,7 +298,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             Compilation compilation,
             CancellationToken cancellationToken )
         {
-            var compilationVersion = await this._factory.CompilationVersionProvider.GetCompilationVersionAsync(
+            var compilationVersion = await this.CompilationVersionProvider.GetCompilationVersionAsync(
                 this._currentState.CompilationVersion?.Compilation,
                 compilation,
                 cancellationToken );
