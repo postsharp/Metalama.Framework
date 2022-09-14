@@ -4,7 +4,9 @@ using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -12,6 +14,8 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
 public class DependencyChangesTest : TestBase
 {
+    private DiffStrategy _strategy = new DiffStrategy( true, true, true );
+    
     [Fact]
     public async Task NoChange()
     {
@@ -45,22 +49,21 @@ public class DependencyChangesTest : TestBase
         using var testContext = this.CreateTestContext();
         var compilationChangesProvider = new CompilationChangesProvider(testContext.ServiceProvider);
         
-        const ulong hash1 = 1;
-        const ulong hash2 = 2;
-
+        
         const string masterFilePath = "master.cs";
         const string dependentFilePath = "dependent.cs";
 
-        var masterCompilation = new AssemblyIdentity( "MasterAssembly" );
-        var masterCompilationVersion1 = new TestCompilationVersion( masterCompilation, hashes: new Dictionary<string, ulong> { [masterFilePath] = hash1 } );
+        var masterCompilation1 = CreateCSharpCompilation( new Dictionary<string, string> { [masterFilePath] = "class C{}" },  name: "MasterAssembly" );
+        var masterCompilationVersion1 = CompilationVersion.Create( masterCompilation1, this._strategy);
         var dependencyCollector = new BaseDependencyCollector( masterCompilationVersion1 );
 
-        dependencyCollector.AddSyntaxTreeDependency( dependentFilePath, masterCompilation, masterFilePath, hash1 );
+        dependencyCollector.AddSyntaxTreeDependency( dependentFilePath, masterCompilation1.Assembly.Identity, masterFilePath, masterCompilationVersion1.SyntaxTrees.Single().Value.DeclarationHash );
 
         var dependencyGraph = DependencyGraph.Empty.Update( new[] { dependentFilePath }, dependencyCollector );
 
         // Create a second version of the master compilation with a different hash.
-        var masterCompilationVersion2 = new TestCompilationVersion( masterCompilation, hashes: new Dictionary<string, ulong> { [masterFilePath] = hash2 } );
+        var masterCompilation2 = CreateCSharpCompilation( new Dictionary<string, string> { [masterFilePath] = "class D{}" },  name: "MasterAssembly" );
+        var masterCompilationVersion2 = CompilationVersion.Create( masterCompilation2, this._strategy);
 
         var changes = await DependencyChanges.IncrementalFromReferencesAsync(
             compilationChangesProvider,
