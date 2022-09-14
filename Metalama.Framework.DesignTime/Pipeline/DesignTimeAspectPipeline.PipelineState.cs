@@ -178,7 +178,11 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 var newConfiguration = this.Configuration;
 
                 // Detect changes from dependencies.
-                var dependenciesChanges = DependencyChanges.IncrementalFromReferencesAsync( this._pipeline._factory.CompilationChangesProvider, this.Dependencies, references, cancellationToken );
+                var dependenciesChanges = DependencyChanges.IncrementalFromReferencesAsync(
+                    this._pipeline._factory.CompilationChangesProvider,
+                    this.Dependencies,
+                    references,
+                    cancellationToken );
 
                 // Detect changes in the syntax trees of the tracked compilation.
                 var newChanges = await this._pipeline._factory.CompilationChangesProvider.GetCompilationChangesAsync(

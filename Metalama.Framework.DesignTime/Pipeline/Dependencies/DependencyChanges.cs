@@ -36,17 +36,15 @@ internal readonly struct DependencyChanges
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-           
-
-            if ( oldGraph.Compilations.TryGetValue( compilationReference.Key, out var dependenciesOfReference ) )
+            if ( oldGraph.DependenciesByCompilation.TryGetValue( compilationReference.Key, out var dependenciesOfReference ) )
             {
                 if ( dependenciesOfReference.CompileTimeProjectHash != compilationReference.Value.CompilationVersion.CompileTimeProjectHash )
                 {
                     // If we have a compile-time change, there is no need to do anything.
                     return new DependencyChanges( true, ImmutableHashSet<string>.Empty );
                 }
-                
-                oldGraph.References.TryGetValue( compilationReference.Key, out var oldReference );
+
+                oldGraph.Compilations.TryGetValue( compilationReference.Key, out var oldReference );
 
                 var compilationChanges = await compilationChangesProvider.GetCompilationChangesAsync(
                     oldReference?.Compilation,

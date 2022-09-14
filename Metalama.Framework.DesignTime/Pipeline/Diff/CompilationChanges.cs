@@ -75,7 +75,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             else
             {
                 this._strategy.Observer?.OnMergeCompilationChanges();
-                
+
                 // Merge syntax tree changes.
                 var mergedSyntaxTreeBuilder = this._syntaxTreeChanges.ToBuilder();
 
@@ -142,7 +142,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
 
             var syntaxTreeChanges = ImmutableDictionary.CreateBuilder<string, SyntaxTreeChange>( StringComparer.Ordinal );
 
-            var hasCompileTimeChange =  !AreMetadataReferencesEqual( oldCompilationVersion.Compilation, newCompilation );
+            var hasCompileTimeChange = !AreMetadataReferencesEqual( oldCompilationVersion.Compilation, newCompilation );
 
             // Process new trees.
             var lastTrees = oldCompilationVersion.SyntaxTrees;

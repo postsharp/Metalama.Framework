@@ -291,7 +291,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
             return compilationResult != null;
         }
 
-        private async ValueTask<DesignTimeCompilationReferenceCollection?> GetProjectReferencesAsync( Compilation compilation, CancellationToken cancellationToken )
+        private async ValueTask<DesignTimeCompilationReferenceCollection?> GetProjectReferencesAsync(
+            Compilation compilation,
+            CancellationToken cancellationToken )
         {
             List<DesignTimeCompilationReference> compilationReferences = new();
 

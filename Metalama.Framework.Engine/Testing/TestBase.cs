@@ -79,7 +79,7 @@ namespace Metalama.Framework.Engine.Testing
 
         protected TestContext CreateTestContext( Func<ServiceProvider, ServiceProvider>? addServices, TestProjectOptions? projectOptions = null )
             => new(
-                projectOptions ?? new TestProjectOptions( additionalAssemblies:ImmutableArray.Create( this.GetType().Assembly ) ),
+                projectOptions ?? new TestProjectOptions( additionalAssemblies: ImmutableArray.Create( this.GetType().Assembly ) ),
                 serviceProvider =>
                 {
                     if ( addServices != null )

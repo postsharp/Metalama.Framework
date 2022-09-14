@@ -11,7 +11,7 @@ internal class DifferObserver : IDifferObserver
     public int ComputeIncrementalChangesEventCount { get; private set; }
 
     public int ComputeNonIncrementalChangesEventCount { get; private set; }
-    
+
     public int MergeCompilationChangesEventCounts { get; private set; }
 
     void IDifferObserver.OnNewCompilation() => this.NewCompilationEventCount++;

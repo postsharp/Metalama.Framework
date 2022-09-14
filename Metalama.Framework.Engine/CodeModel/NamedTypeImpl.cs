@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.CodeModel;
 internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
 {
     private readonly NamedType _facade;
-    
+
     ITypeSymbol ISdkType.TypeSymbol => this.TypeSymbol;
 
     public override ISymbol Symbol => this.TypeSymbol;

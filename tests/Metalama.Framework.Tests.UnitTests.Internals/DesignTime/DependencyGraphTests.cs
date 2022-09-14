@@ -24,9 +24,9 @@ public class DependencyGraphTests
 
         var graph = DependencyGraph.Empty.Update( new[] { dependentFilePath }, dependencies );
 
-        var dependenciesByCompilation = graph.Compilations.Values.Single();
+        var dependenciesByCompilation = graph.DependenciesByCompilation.Values.Single();
         Assert.Equal( masterCompilation, dependenciesByCompilation.AssemblyIdentity );
-        var dependenciesByMasterFile = graph.Compilations[masterCompilation].DependenciesByMasterFilePath.Values.Single();
+        var dependenciesByMasterFile = graph.DependenciesByCompilation[masterCompilation].DependenciesByMasterFilePath.Values.Single();
         Assert.Equal( masterFilePath, dependenciesByMasterFile.FilePath );
         Assert.Equal( hash, dependenciesByMasterFile.DeclarationHash );
     }
@@ -47,10 +47,16 @@ public class DependencyGraphTests
 
         var graph = DependencyGraph.Empty.Update( new[] { dependentFilePath1, dependentFilePath2 }, dependencies );
 
-        var dependenciesByCompilation = graph.Compilations.Values.Single();
+        var dependenciesByCompilation = graph.DependenciesByCompilation.Values.Single();
         Assert.Equal( masterCompilation, dependenciesByCompilation.AssemblyIdentity );
-        Assert.Contains( dependentFilePath1, graph.Compilations[masterCompilation].DependenciesByMasterFilePath[masterFilePath].DependentFilePaths );
-        Assert.Contains( dependentFilePath2, graph.Compilations[masterCompilation].DependenciesByMasterFilePath[masterFilePath].DependentFilePaths );
+
+        Assert.Contains(
+            dependentFilePath1,
+            graph.DependenciesByCompilation[masterCompilation].DependenciesByMasterFilePath[masterFilePath].DependentFilePaths );
+
+        Assert.Contains(
+            dependentFilePath2,
+            graph.DependenciesByCompilation[masterCompilation].DependenciesByMasterFilePath[masterFilePath].DependentFilePaths );
     }
 
     [Fact]
@@ -72,8 +78,13 @@ public class DependencyGraphTests
 
         var graph = DependencyGraph.Empty.Update( new[] { dependentFilePath1, dependentFilePath2 }, dependencies );
 
-        Assert.Contains( dependentFilePath1, graph.Compilations[masterCompilation1].DependenciesByMasterFilePath[masterFilePath].DependentFilePaths );
-        Assert.Contains( dependentFilePath2, graph.Compilations[masterCompilation2].DependenciesByMasterFilePath[masterFilePath].DependentFilePaths );
+        Assert.Contains(
+            dependentFilePath1,
+            graph.DependenciesByCompilation[masterCompilation1].DependenciesByMasterFilePath[masterFilePath].DependentFilePaths );
+
+        Assert.Contains(
+            dependentFilePath2,
+            graph.DependenciesByCompilation[masterCompilation2].DependenciesByMasterFilePath[masterFilePath].DependentFilePaths );
     }
 
     [Fact]
@@ -92,7 +103,7 @@ public class DependencyGraphTests
             .Update( new[] { dependentFilePath }, dependencies )
             .Update( new[] { dependentFilePath }, BaseDependencyCollector.Empty );
 
-        Assert.Empty( graph.Compilations[masterCompilation].DependenciesByMasterFilePath );
+        Assert.Empty( graph.DependenciesByCompilation[masterCompilation].DependenciesByMasterFilePath );
     }
 
     [Fact]
@@ -113,10 +124,16 @@ public class DependencyGraphTests
             .Update( new[] { dependentFilePath1, dependentFilePath2 }, dependencies )
             .Update( new[] { dependentFilePath2 }, BaseDependencyCollector.Empty );
 
-        var dependenciesByCompilation = graph.Compilations.Values.Single();
+        var dependenciesByCompilation = graph.DependenciesByCompilation.Values.Single();
         Assert.Equal( masterCompilation, dependenciesByCompilation.AssemblyIdentity );
-        Assert.Contains( dependentFilePath1, graph.Compilations[masterCompilation].DependenciesByMasterFilePath[masterFilePath].DependentFilePaths );
-        Assert.DoesNotContain( dependentFilePath2, graph.Compilations[masterCompilation].DependenciesByMasterFilePath[masterFilePath].DependentFilePaths );
+
+        Assert.Contains(
+            dependentFilePath1,
+            graph.DependenciesByCompilation[masterCompilation].DependenciesByMasterFilePath[masterFilePath].DependentFilePaths );
+
+        Assert.DoesNotContain(
+            dependentFilePath2,
+            graph.DependenciesByCompilation[masterCompilation].DependenciesByMasterFilePath[masterFilePath].DependentFilePaths );
     }
 
     [Fact]
@@ -139,6 +156,6 @@ public class DependencyGraphTests
 
         var graph2 = graph1.Update( new[] { dependentFilePath }, dependencies2 );
 
-        Assert.Equal( hash2, graph2.Compilations[masterCompilation].DependenciesByMasterFilePath[masterFilePath].DeclarationHash );
+        Assert.Equal( hash2, graph2.DependenciesByCompilation[masterCompilation].DependenciesByMasterFilePath[masterFilePath].DeclarationHash );
     }
 }

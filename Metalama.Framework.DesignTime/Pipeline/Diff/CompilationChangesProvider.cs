@@ -109,10 +109,15 @@ internal class CompilationChangesProvider
         {
             // Find the pre-computed incremental changes from the graph. 
 
-            if ( this.TryGetIncrementalChangesFromCache( oldCompilation, newCompilation, cancellationToken, out var incrementalChanges, out var closestIncrementalChanges ) )
+            if ( this.TryGetIncrementalChangesFromCache(
+                    oldCompilation,
+                    newCompilation,
+                    cancellationToken,
+                    out var incrementalChanges,
+                    out var closestIncrementalChanges ) )
             {
                 // We already computed the changes between this exact pair of compilations.
-                
+
                 return incrementalChanges;
             }
             else if ( closestIncrementalChanges != null )
@@ -127,12 +132,12 @@ internal class CompilationChangesProvider
                     cancellationToken );
 
                 incrementalChanges = closestIncrementalChanges.Merge( changesFromClosestCompilation );
-                
+
                 if ( !this._cache.TryGetValue( oldCompilation, out var changeLinkedListFromOldCompilation ) )
                 {
                     throw new AssertionFailedException();
                 }
-                
+
                 changeLinkedListFromOldCompilation.Insert( incrementalChanges );
 
                 return incrementalChanges;

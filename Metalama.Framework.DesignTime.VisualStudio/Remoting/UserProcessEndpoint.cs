@@ -18,7 +18,7 @@ internal partial class UserProcessEndpoint : ClientEndpoint<IAnalysisProcessApi>
     private readonly ApiImplementation _apiImplementation;
     private readonly ConcurrentDictionary<ProjectKey, ImmutableDictionary<string, string>> _unhandledSources = new();
     private readonly ConcurrentDictionary<ProjectKey, IProjectHandlerCallback> _projectHandlers = new();
-    
+
     public UserProcessEndpoint( IServiceProvider serviceProvider, string pipeName ) : base( serviceProvider, pipeName )
     {
         this._apiImplementation = new ApiImplementation( this );
