@@ -191,7 +191,7 @@ namespace Metalama.AspectWorkbench.ViewModels
             {
                 var intermediateSyntaxTree = testResult.IntermediateLinkerCompilation.Compilation.SyntaxTrees.First();
                 var linkerProject = testRunner.CreateProject( testInput.Options );
-                var linkerDocument = linkerProject.AddDocument( "IntermediateLinkerCode.cs", RenderAspectReferences(await intermediateSyntaxTree.GetRootAsync()) );
+                var linkerDocument = linkerProject.AddDocument( "IntermediateLinkerCode.cs", this.RenderAspectReferences(await intermediateSyntaxTree.GetRootAsync()) );
                 this.IntermediateLinkerCodeCodeDocument = await syntaxColorizer.WriteSyntaxColoringAsync( linkerDocument );
             }
 

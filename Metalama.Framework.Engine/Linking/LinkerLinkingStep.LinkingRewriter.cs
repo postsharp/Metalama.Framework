@@ -1,17 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Formatting;
-using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.Linking
@@ -87,50 +83,6 @@ namespace Metalama.Framework.Engine.Linking
                                     this._intermediateCompilation,
                                     node.SyntaxTree,
                                     node.SpanStart );
-
-                            //var setAccessor =
-                            //    node.ClassOrStructKeyword.IsKind( SyntaxKind.StructKeyword )
-                            //        ? node.Modifiers.Any( m => m.IsKind( SyntaxKind.ReadOnlyKeyword ) )
-                            //            ? AccessorDeclaration( SyntaxKind.InitAccessorDeclaration )
-                            //            : AccessorDeclaration( SyntaxKind.SetAccessorDeclaration )
-                            //        : AccessorDeclaration( SyntaxKind.InitAccessorDeclaration );
-
-                            //// We need to create a "fake" syntax for the property, so we can use normal logic to process
-                            //// properties with almost no change.
-                            //var property = PropertyDeclaration(
-                            //        default,
-                            //        TokenList( Token( SyntaxKind.PublicKeyword ) ),
-                            //        parameter.Type.AssertNotNull(),
-                            //        default,
-                            //        parameter.Identifier,
-                            //        AccessorList(
-                            //            List(
-                            //                new[]
-                            //                {
-                            //                    AccessorDeclaration( SyntaxKind.GetAccessorDeclaration )
-                            //                        .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) ),
-                            //                    setAccessor.WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) )
-                            //                } ) ),
-                            //        null,
-                            //        EqualsValueClause( IdentifierName( parameter.Identifier ) ) )
-                            //    .NormalizeWhitespace()
-                            //    .AddColoringAnnotation( TextSpanClassification.GeneratedCode );
-
-                            //// Property-level custom attributes must be moved from the parameter to the new property.
-                            //foreach ( var attributeList in parameter.AttributeLists )
-                            //{
-                            //    if ( attributeList.Target != null )
-                            //    {
-                            //        var propertyLevelAttributeList = attributeList;
-
-                            //        if ( attributeList.Target.Identifier.IsKind( SyntaxKind.PropertyKeyword ) )
-                            //        {
-                            //            propertyLevelAttributeList = attributeList.WithTarget( default );
-                            //        }
-
-                            //        property = property.WithAttributeLists( property.AttributeLists.Add( propertyLevelAttributeList ) );
-                            //    }
-                            //}
 
                             if ( this._rewritingDriver.IsRewriteTarget( propertySymbol.AssertNotNull() ) )
                             {

@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
-using Metalama.Framework.Engine.Linking.Inlining;
 using Metalama.Framework.Engine.Linking.Substitution;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -44,7 +43,7 @@ namespace Metalama.Framework.Engine.Linking
                         GetPropertyBackingField( 
                             propertyDeclaration.Type, 
                             propertyDeclaration.Initializer,
-                            GetAttributeListsForTarget( propertyDeclaration.AttributeLists, SyntaxKind.FieldKeyword, false ),
+                            FilterAttributeListsForTarget( propertyDeclaration.AttributeLists, SyntaxKind.FieldKeyword, false, false ),
                             symbol ) );
                 }
 

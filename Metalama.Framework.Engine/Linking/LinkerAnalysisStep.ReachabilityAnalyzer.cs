@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Microsoft.CodeAnalysis;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -105,11 +104,11 @@ namespace Metalama.Framework.Engine.Linking
                     // Implicit edges between accessors and method group.
                     switch ( current.Symbol )
                     {
-                        case IMethodSymbol {AssociatedSymbol: IPropertySymbol property }:
+                        case IMethodSymbol { AssociatedSymbol: IPropertySymbol property }:
                             DepthFirstSearch( new IntermediateSymbolSemantic( property, current.Kind ) );
                             break;
 
-                        case IMethodSymbol { AssociatedSymbol: IEventSymbol @event}:
+                        case IMethodSymbol { AssociatedSymbol: IEventSymbol @event }:
                             DepthFirstSearch( new IntermediateSymbolSemantic( @event, current.Kind ) );
                             break;
 

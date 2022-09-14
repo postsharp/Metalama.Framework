@@ -1,9 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.Aspects;
-using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Linking.Inlining;
-using Metalama.Framework.Engine.Utilities.Comparers;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
@@ -79,10 +76,8 @@ namespace Metalama.Framework.Engine.Linking
 
             var inlineabilityAnalyzer = new InlineabilityAnalyzer(
                 input.IntermediateCompilation,
-                input.IntroductionRegistry,
                 reachableSemantics,
                 inlinerProvider,
-                reachableReferencesBySource,
                 reachableReferencesByTarget );
 
             var inlineableSemantics = inlineabilityAnalyzer.GetInlineableSemantics();
@@ -189,7 +184,7 @@ namespace Metalama.Framework.Engine.Linking
         {
             var result = new Dictionary<IntermediateSymbolSemantic<IMethodSymbol>, List<ResolvedAspectReference>>();
 
-            foreach(var reachableReference in reachableReferencesBySource.Values.SelectMany(x => x))
+            foreach (var reachableReference in reachableReferencesBySource.Values.SelectMany(x => x))
             {
                 if (!inlinedReferences.ContainsKey(reachableReference))
                 { 

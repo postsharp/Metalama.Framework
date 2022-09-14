@@ -2,15 +2,12 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
-using Metalama.Framework.Engine.Linking.Inlining;
 using Metalama.Framework.Engine.Linking.Substitution;
-using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 // Properties with overrides have the following structure:
@@ -43,7 +40,7 @@ namespace Metalama.Framework.Engine.Linking
                         GetPropertyBackingField( 
                             recordParameter.Type.AssertNotNull(), 
                             EqualsValueClause( IdentifierName( recordParameter.Identifier.ValueText ) ),
-                            GetAttributeListsForTarget(recordParameter.AttributeLists, SyntaxKind.FieldKeyword, false),
+                            FilterAttributeListsForTarget( recordParameter.AttributeLists, SyntaxKind.FieldKeyword, false, false ),
                             symbol ) );
                 }
 
@@ -103,7 +100,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 return
                     PropertyDeclaration(
-                        GetAttributeListsForTarget( recordParameter.AttributeLists, SyntaxKind.PropertyKeyword, false ),
+                        FilterAttributeListsForTarget( recordParameter.AttributeLists, SyntaxKind.PropertyKeyword, false, false ),
                         TokenList( Token( SyntaxKind.PublicKeyword ) ),
                         recordParameter.Type.AssertNotNull(),
                         null,
@@ -135,7 +132,7 @@ namespace Metalama.Framework.Engine.Linking
                 return
                     AccessorDeclaration(
                         accessorSyntaxKind,
-                        List<AttributeListSyntax>(), //TODO
+                        List<AttributeListSyntax>(),
                         TokenList(),
                         Token(
                             accessorSyntaxKind switch

@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
         private readonly StructuralSymbolComparerOptions _options;
 
-        private StructuralSymbolComparer( StructuralSymbolComparerOptions options )
+        private protected StructuralSymbolComparer( StructuralSymbolComparerOptions options )
         {
             this._options = options;
         }

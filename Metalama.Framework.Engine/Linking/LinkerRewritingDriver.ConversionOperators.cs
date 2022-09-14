@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
-using Metalama.Framework.Engine.Linking.Inlining;
 using Metalama.Framework.Engine.Linking.Substitution;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -26,7 +25,7 @@ namespace Metalama.Framework.Engine.Linking
             if ( this.IntroductionRegistry.IsOverrideTarget( symbol ) )
             {
                 var members = new List<MemberDeclarationSyntax>();
-                var lastOverride = (IMethodSymbol) this.IntroductionRegistry.GetLastOverride( symbol );
+                var lastOverride = this.IntroductionRegistry.GetLastOverride( symbol );
 
                 if ( this.AnalysisRegistry.IsInlined( lastOverride.ToSemantic(IntermediateSymbolSemanticKind.Default) ) )
                 {
@@ -161,6 +160,7 @@ namespace Metalama.Framework.Engine.Linking
                     .WithExpressionBody( expressionBody )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
         }
+
         private static ConversionOperatorDeclarationSyntax GetTrampolineConversionOperator(
             ConversionOperatorDeclarationSyntax @operator,
             IMethodSymbol targetSymbol )

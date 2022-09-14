@@ -1,10 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Linking.Substitution;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Linking.Inlining
 {
@@ -48,7 +46,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
         /// <summary>
         /// Gets the inlining info during analysis.
         /// </summary>
-        /// <param name="context">Context</param>
+        /// <param name="context">Context.</param>
         /// <param name="aspectReference">Aspect reference to inline.</param>
         /// <returns>Inlining specification.</returns>
         public abstract InliningAnalysisInfo GetInliningAnalysisInfo( InliningAnalysisContext context, ResolvedAspectReference aspectReference );

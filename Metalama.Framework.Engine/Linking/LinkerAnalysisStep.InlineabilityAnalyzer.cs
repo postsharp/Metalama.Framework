@@ -19,41 +19,25 @@ namespace Metalama.Framework.Engine.Linking
         public class InlineabilityAnalyzer
         {
             private readonly PartialCompilation _intermediateCompilation;
-            private readonly LinkerIntroductionRegistry _introductionRegistry;
             private readonly ISet<IntermediateSymbolSemantic> _reachableSymbolSemantics;
             private readonly InlinerProvider _inlinerProvider;
-            private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> _reachableReferencesBySource;
             private readonly IReadOnlyDictionary<AspectReferenceTarget, IReadOnlyList<ResolvedAspectReference>> _reachableReferencesByTarget;
 
             public InlineabilityAnalyzer(
                 PartialCompilation intermediateCompilation,
-                LinkerIntroductionRegistry introductionRegistry,
                 IReadOnlyList<IntermediateSymbolSemantic> reachableSymbolSemantics,
                 InlinerProvider inlinerProvider,
-                IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> reachableReferencesBySource,
                 IReadOnlyDictionary<AspectReferenceTarget, IReadOnlyList<ResolvedAspectReference>> reachableReferencesByTarget )
             {
                 this._intermediateCompilation = intermediateCompilation;
-                this._introductionRegistry = introductionRegistry;
                 this._reachableSymbolSemantics = new HashSet<IntermediateSymbolSemantic>( reachableSymbolSemantics );
                 this._inlinerProvider = inlinerProvider;
-                this._reachableReferencesBySource = reachableReferencesBySource;
                 this._reachableReferencesByTarget = reachableReferencesByTarget;
             }
 
             private IReadOnlyList<ResolvedAspectReference> GetReachableReferencesByTarget(AspectReferenceTarget target)
             {
                 if (!this._reachableReferencesByTarget.TryGetValue(target, out var references))
-                {
-                    return Array.Empty<ResolvedAspectReference>();
-                }
-
-                return references;
-            }
-
-            private IReadOnlyList<ResolvedAspectReference> GetReachableReferencesBySource( IntermediateSymbolSemantic<IMethodSymbol> source )
-            {
-                if ( !this._reachableReferencesBySource.TryGetValue( source, out var references ) )
                 {
                     return Array.Empty<ResolvedAspectReference>();
                 }
@@ -177,7 +161,6 @@ namespace Metalama.Framework.Engine.Linking
             /// <summary>
             /// Determines which aspect references can be inlined.
             /// </summary>
-            /// <param name="aspectReferences"></param>
             /// <returns>Aspect references with selected inliners.</returns>
             public IReadOnlyDictionary<ResolvedAspectReference, Inliner> GetInlineableReferences(IReadOnlyList<IntermediateSymbolSemantic> inlineableSemantics)
             {

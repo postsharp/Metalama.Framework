@@ -1,11 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Compiler;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
-using Metalama.Framework.Engine.Linking.Inlining;
 using Metalama.Framework.Engine.Linking.Substitution;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
@@ -54,7 +51,7 @@ namespace Metalama.Framework.Engine.Linking
         /// Assembles a linked body of the method/accessor, where aspect reference annotations are replaced by target symbols and inlineable references are inlined.
         /// </summary>
         /// <param name="semantic">Method or accessor symbol.</param>
-        /// <param name="inliningContext"></param>
+        /// <param name="substitutionContext">Substitution context.</param>
         /// <returns>Block representing the linked body.</returns>
         public BlockSyntax GetSubstitutedBody( IntermediateSymbolSemantic<IMethodSymbol> semantic, SubstitutionContext substitutionContext )
         {
@@ -233,7 +230,7 @@ namespace Metalama.Framework.Engine.Linking
                 case MethodDeclarationSyntax partialMethodDeclaration:
                     return (BlockSyntax) rewriter.Visit( partialMethodDeclaration ).AssertNotNull();
 
-                case VariableDeclaratorSyntax { Parent: {Parent: EventFieldDeclarationSyntax } } eventFieldVariable:
+                case VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax } } eventFieldVariable:
                     return (BlockSyntax) rewriter.Visit( eventFieldVariable ).AssertNotNull();
 
                 case ParameterSyntax { Parent: { Parent: RecordDeclarationSyntax } } positionalProperty:
@@ -406,7 +403,7 @@ namespace Metalama.Framework.Engine.Linking
                         return semantic.Symbol;
 
                     case IntermediateSymbolSemanticKind.Final:
-                        return (IMethodSymbol) this.IntroductionRegistry.GetLastOverride( semantic.Symbol );
+                        return this.IntroductionRegistry.GetLastOverride( semantic.Symbol );
 
                     default:
                         throw new AssertionFailedException();
@@ -601,15 +598,27 @@ namespace Metalama.Framework.Engine.Linking
             }
         }
 
-        private static SyntaxList<AttributeListSyntax> GetAttributeListsForTarget(SyntaxList<AttributeListSyntax> attributeLists, SyntaxKind targetKind, bool preserveTarget )
+        private static SyntaxList<AttributeListSyntax> FilterAttributeListsForTarget( SyntaxList<AttributeListSyntax> attributeLists, SyntaxKind targetKind, bool includeEmptyTarget, bool preserveTarget )
         {
             if ( preserveTarget )
             {
-                return List( attributeLists.Where( al => al.Target?.Identifier.IsKind( targetKind ) == true ).ToList() );
+                return List( attributeLists.Where( Filter ).ToList() );
             }
             else
             {
-                return List( attributeLists.Where( al => al.Target?.Identifier.IsKind( targetKind ) == true ).Select(al => al.WithTarget(null)).ToList() );
+                return List( attributeLists.Where( Filter ).Select(al => al.WithTarget(null)).ToList() );
+            }
+
+            bool Filter(AttributeListSyntax list)
+            {
+                if ( list.Target == null && includeEmptyTarget )
+                {
+                    return true;
+                }
+                else
+                {
+                    return list.Target?.Identifier.IsKind( targetKind ) == true;
+                }
             }
         }
     }

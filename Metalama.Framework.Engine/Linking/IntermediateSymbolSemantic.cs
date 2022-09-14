@@ -44,7 +44,7 @@ namespace Metalama.Framework.Engine.Linking
         }
 
         public IntermediateSymbolSemantic<TSymbol> WithSymbol<TSymbol>( TSymbol symbol )
-            where TSymbol: ISymbol
+            where TSymbol : ISymbol
         {
             return new IntermediateSymbolSemantic<TSymbol>( symbol, this.Kind );
         }
