@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
@@ -96,7 +95,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
 
             var syntaxTreeChanges = ImmutableDictionary.CreateBuilder<string, SyntaxTreeChange>( StringComparer.Ordinal );
 
-            var hasCompileTimeChange = !AreMetadataReferencesEqual( oldCompilationVersion.Compilation, newCompilation );
+            var hasCompileTimeChange = referencedCompilationChanges.Any(c => c.Value.HasCompileTimeCodeChange);
 
             // Process new trees.
             var lastTrees = oldCompilationVersion.SyntaxTrees;
@@ -229,82 +228,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
 
             return compilationChanges;
         }
-
-        private static bool AreMetadataReferencesEqual( Compilation? oldCompilation, Compilation newCompilation )
-        {
-            // Detect changes in project references. 
-            if ( oldCompilation == null )
-            {
-                return false;
-            }
-
-            var oldExternalReferences = oldCompilation.ExternalReferences;
-
-            var newExternalReferences = newCompilation.ExternalReferences;
-
-            Logger.DesignTime.Trace?.Log(
-                $"Comparing metadata references: old count is {oldExternalReferences.Length}, new count is {newExternalReferences.Length}." );
-
-            if ( oldExternalReferences == newExternalReferences )
-            {
-                return true;
-            }
-
-            // If the only differences are in compilation references, do not consider this as a difference.
-            // Cross-project dependencies are not yet taken into consideration.
-            var hasChange = false;
-
-            if ( oldExternalReferences.Length != newExternalReferences.Length )
-            {
-                hasChange = true;
-            }
-            else
-            {
-                for ( var i = 0; i < oldExternalReferences.Length; i++ )
-                {
-                    if ( !MetadataReferencesEqual( oldExternalReferences[i], newExternalReferences[i] ) )
-                    {
-                        Logger.DesignTime.Trace?.Log( $"Difference found in {i}-th reference: '{oldExternalReferences[i]}' != '{newExternalReferences[i]}'." );
-                        hasChange = true;
-
-                        break;
-                    }
-                }
-            }
-
-            if ( hasChange )
-            {
-                Logger.DesignTime.Trace?.Log( "Change found in metadata reference. The last configuration cannot be reused." );
-
-                return false;
-            }
-
-            return true;
-
-            static bool MetadataReferencesEqual( MetadataReference a, MetadataReference b )
-            {
-                if ( a == b )
-                {
-                    return true;
-                }
-                else
-                {
-                    switch (a, b)
-                    {
-                        case (CompilationReference compilationReferenceA, CompilationReference compilationReferenceB):
-                            // The way we compare in this case is naive, but we are processing cross-project dependencies through
-                            // a different mechanism.
-                            return compilationReferenceA.Compilation.AssemblyName == compilationReferenceB.Compilation.AssemblyName;
-
-                        case (PortableExecutableReference portableExecutableReferenceA, PortableExecutableReference portableExecutableReferenceB):
-                            return portableExecutableReferenceA.FilePath == portableExecutableReferenceB.FilePath;
-                    }
-
-                    return false;
-                }
-            }
-        }
-
+        
         public override string ToString() => $"HasCompileTimeCodeChange={this.HasCompileTimeCodeChange}, SyntaxTreeChanges={this.SyntaxTreeChanges.Count}";
     }
 }
