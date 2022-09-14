@@ -7,9 +7,6 @@ using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Testing;
 using Metalama.TestFramework;
 using Microsoft.CodeAnalysis;
-using System;
-using System.IO;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 

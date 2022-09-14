@@ -86,6 +86,7 @@ internal class CompilationVersionProvider : IService
     private async ValueTask<ImmutableDictionary<AssemblyIdentity, ICompilationVersion>> GetReferencesAsync(
         Compilation? oldCompilation,
         Compilation newCompilation,
+        bool semaphoreOwned,
         CancellationToken cancellationToken )
     {
         var builder = ImmutableDictionary.CreateBuilder<AssemblyIdentity, ICompilationVersion>();
@@ -118,7 +119,11 @@ internal class CompilationVersionProvider : IService
                     oldReferenceCompilation = null;
                 }
 
-                referenceVersion = await this.GetCompilationVersionAsync( oldReferenceCompilation, reference.Compilation, cancellationToken );
+                referenceVersion = (await this.GetCompilationChangesAsyncCore(
+                    oldReferenceCompilation,
+                    reference.Compilation,
+                    semaphoreOwned,
+                    cancellationToken )).NewCompilationVersion;
             }
 
             builder.Add( reference.Compilation.Assembly.Identity, referenceVersion );
@@ -127,9 +132,16 @@ internal class CompilationVersionProvider : IService
         return builder.ToImmutable();
     }
 
-    public async ValueTask<CompilationChanges> GetCompilationChangesAsync(
+    public ValueTask<CompilationChanges> GetCompilationChangesAsync(
         Compilation? oldCompilation,
         Compilation newCompilation,
+        CancellationToken cancellationToken = default )
+        => this.GetCompilationChangesAsyncCore( oldCompilation, newCompilation, false, cancellationToken );
+
+    private async ValueTask<CompilationChanges> GetCompilationChangesAsyncCore(
+        Compilation? oldCompilation,
+        Compilation newCompilation,
+        bool semaphoreOwned,
         CancellationToken cancellationToken = default )
     {
         DiffStrategy? diffStrategy = null;
@@ -152,13 +164,16 @@ internal class CompilationVersionProvider : IService
 
             GetDiffStrategy().Observer?.OnNewCompilation();
 
-            await this._semaphore.WaitAsync( cancellationToken );
+            if ( !semaphoreOwned )
+            {
+                await this._semaphore.WaitAsync( cancellationToken );
+            }
 
             try
             {
                 if ( !this._cache.TryGetValue( newCompilation, out newList ) )
                 {
-                    var references = await this.GetReferencesAsync( oldCompilation, newCompilation, cancellationToken );
+                    var references = await this.GetReferencesAsync( oldCompilation, newCompilation, true, cancellationToken );
 
                     var compilationVersion = CompilationVersion.Create( newCompilation, GetDiffStrategy(), references, cancellationToken );
 
@@ -170,7 +185,10 @@ internal class CompilationVersionProvider : IService
             }
             finally
             {
-                this._semaphore.Release();
+                if ( !semaphoreOwned )
+                {
+                    this._semaphore.Release();
+                }
             }
         }
         else
@@ -197,6 +215,7 @@ internal class CompilationVersionProvider : IService
                 var references = await this.GetReferencesAsync(
                     closestIncrementalChanges.NewCompilationVersion.Compilation,
                     newCompilation,
+                    semaphoreOwned,
                     cancellationToken );
 
                 var changesFromClosestCompilation = CompilationChanges.Incremental(
@@ -220,7 +239,10 @@ internal class CompilationVersionProvider : IService
             {
                 // We could not get the changes from the cache, so we need to run the diff algorithm.
 
-                await this._semaphore.WaitAsync( cancellationToken );
+                if ( !semaphoreOwned )
+                {
+                    await this._semaphore.WaitAsync( cancellationToken );
+                }
 
                 try
                 {
@@ -228,7 +250,7 @@ internal class CompilationVersionProvider : IService
                     {
                         // We have never processed the old compilation, so we have to compute it from the scratch.
 
-                        var oldReferences = await this.GetReferencesAsync( null, oldCompilation, cancellationToken );
+                        var oldReferences = await this.GetReferencesAsync( null, oldCompilation, true, cancellationToken );
 
                         var oldCompilationVersion = CompilationVersion.Create( oldCompilation, GetDiffStrategy(), oldReferences, cancellationToken );
 
@@ -239,6 +261,7 @@ internal class CompilationVersionProvider : IService
                     var newReferences = await this.GetReferencesAsync(
                         changeLinkedListFromOldCompilation.CompilationVersion.Compilation,
                         newCompilation,
+                        true,
                         cancellationToken );
 
                     // Compute the increment.
@@ -264,7 +287,10 @@ internal class CompilationVersionProvider : IService
                 }
                 finally
                 {
-                    this._semaphore.Release();
+                    if ( !semaphoreOwned )
+                    {
+                        this._semaphore.Release();
+                    }
                 }
             }
         }
