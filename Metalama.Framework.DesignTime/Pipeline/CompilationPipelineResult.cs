@@ -318,8 +318,10 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 var syntaxTreeBuilders = this.SyntaxTreeResults.ToBuilder();
                 var invalidSyntaxTreeBuilders = this._invalidSyntaxTreeResults.ToBuilder();
 
-                foreach ( var change in compilationChanges.SyntaxTreeChanges )
+                foreach ( var changePair in compilationChanges.SyntaxTreeChanges )
                 {
+                    var change = changePair.Value;
+
                     switch ( change.SyntaxTreeChangeKind )
                     {
                         case SyntaxTreeChangeKind.Added:

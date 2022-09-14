@@ -54,7 +54,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         public static CompilationVersion Create(
             Compilation compilation,
             DiffStrategy strategy,
-            ImmutableDictionary<AssemblyIdentity, ICompilationVersion>? references = null, // Can be null for test scenarios.
+            ImmutableDictionary<AssemblyIdentity, ICompilationVersion>? referencedCompilations = null, // Can be null for test scenarios.
             CancellationToken cancellationToken = default )
         {
             var syntaxTreesBuilder = ImmutableDictionary.CreateBuilder<string, SyntaxTreeVersion>( StringComparer.Ordinal );
@@ -93,7 +93,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                 compilation,
                 compilationToAnalyze,
                 syntaxTreeVersions,
-                references ?? ImmutableDictionary<AssemblyIdentity, ICompilationVersion>.Empty,
+                referencedCompilations ?? ImmutableDictionary<AssemblyIdentity, ICompilationVersion>.Empty,
                 DiffStrategy.ComputeCompileTimeProjectHash( syntaxTreeVersions ) );
         }
 

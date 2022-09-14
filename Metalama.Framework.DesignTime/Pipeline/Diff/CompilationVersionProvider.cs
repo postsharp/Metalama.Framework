@@ -14,230 +14,218 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff;
 /// </summary>
 internal class CompilationVersionProvider : IService
 {
-    private readonly ConditionalWeakTable<Compilation, ChangeLinkedList> _cache = new();
-    private readonly SemaphoreSlim _semaphore = new( 1 );
-    private readonly DiffStrategy _metalamaDiffStrategy;
-    private readonly DiffStrategy _nonMetalamaDiffStrategy;
-    private readonly IMetalamaProjectClassifier _metalamaProjectClassifier;
+    private readonly Implementation _implementation;
 
     public CompilationVersionProvider( IServiceProvider serviceProvider )
     {
-        this._metalamaDiffStrategy = new DiffStrategy( serviceProvider, true, true );
-        this._nonMetalamaDiffStrategy = new DiffStrategy( serviceProvider, false, true );
-        this._metalamaProjectClassifier = serviceProvider.GetRequiredService<IMetalamaProjectClassifier>();
+        this._implementation = new Implementation( serviceProvider );
     }
 
-    /// <summary>
-    /// Computes an incremental <see cref="CompilationChanges"/> between an old compilation and a new compilation
-    /// based on the values from the cache only, or returns <c>null</c> if the value was not found in the cache.
-    /// </summary>
-    private bool TryGetIncrementalChangesFromCache(
-        Compilation oldCompilation,
-        Compilation newCompilation,
-        CancellationToken cancellationToken,
-        [NotNullWhen( true )] out CompilationChanges? exactChanges,
-        out CompilationChanges? closestChanges )
-    {
-        if ( !this._cache.TryGetValue( oldCompilation, out var list ) )
-        {
-            // If the old compilation is not in the cache, we cannot compute any incremental change.
-
-            exactChanges = null;
-            closestChanges = null;
-
-            return false;
-        }
-
-        for ( var node = list.FirstIncrementalChange; node != null; node = node.Next )
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if ( node.IncrementalChanges.NewCompilationVersion.Compilation == newCompilation )
-            {
-                // The exact pair old-and-new compilation was found in the cache.
-                exactChanges = node.IncrementalChanges;
-                closestChanges = null;
-
-                return true;
-            }
-        }
-
-        // We did not find the incremental changes for the pair of compilations, so we return the incremental changes
-        // from the given original compilation to the last known compilation, which is hopefully very similar to the
-        // new compilation because of the time correlation, as it should have just a few user edits.
-        closestChanges = list.FirstIncrementalChange?.IncrementalChanges;
-        exactChanges = null;
-
-        return false;
-    }
-
-    public async ValueTask<CompilationVersion> GetCompilationVersionAsync(
+    public ValueTask<CompilationVersion> GetCompilationVersionAsync(
         Compilation? oldCompilation,
         Compilation newCompilation,
         CancellationToken cancellationToken = default )
-    {
-        // When we are asked a CompilationVersion, we do it through getting a CompilationChanges, because this path is incremental
-        // and offers optimal performances.
-        var changes = await this.GetCompilationChangesAsync( oldCompilation, newCompilation, cancellationToken );
-
-        return changes.NewCompilationVersion;
-    }
-
-    private async ValueTask<ImmutableDictionary<AssemblyIdentity, ICompilationVersion>> GetReferencesAsync(
-        Compilation? oldCompilation,
-        Compilation newCompilation,
-        bool semaphoreOwned,
-        CancellationToken cancellationToken )
-    {
-        var builder = ImmutableDictionary.CreateBuilder<AssemblyIdentity, ICompilationVersion>();
-        Dictionary<AssemblyIdentity, Compilation>? oldReferences = null;
-
-        foreach ( var reference in newCompilation.ExternalReferences.OfType<CompilationReference>() )
-        {
-            CompilationVersion referenceVersion;
-
-            if ( this._cache.TryGetValue( reference.Compilation, out var list ) )
-            {
-                // We already have a CompilationVersion for the Compilation.
-                referenceVersion = list.CompilationVersion;
-            }
-            else
-            {
-                // We don't have a CompilationVersion for the exact Compilation of the reference, but we may have a recent CompilationVersion.
-                // Get the Compilation for the old value of the reference.
-                Compilation? oldReferenceCompilation;
-
-                if ( oldCompilation != null )
-                {
-                    oldReferences ??= oldCompilation.ExternalReferences.OfType<CompilationReference>()
-                        .ToDictionary( x => x.Compilation.Assembly.Identity, x => x.Compilation );
-
-                    oldReferences.TryGetValue( reference.Compilation.Assembly.Identity, out oldReferenceCompilation );
-                }
-                else
-                {
-                    oldReferenceCompilation = null;
-                }
-
-                referenceVersion = (await this.GetCompilationChangesAsyncCore(
-                    oldReferenceCompilation,
-                    reference.Compilation,
-                    semaphoreOwned,
-                    cancellationToken )).NewCompilationVersion;
-            }
-
-            builder.Add( reference.Compilation.Assembly.Identity, referenceVersion );
-        }
-
-        return builder.ToImmutable();
-    }
+        => this._implementation.GetCompilationVersionCoreAsync( oldCompilation, newCompilation, false, cancellationToken );
 
     public ValueTask<CompilationChanges> GetCompilationChangesAsync(
         Compilation? oldCompilation,
         Compilation newCompilation,
         CancellationToken cancellationToken = default )
-        => this.GetCompilationChangesAsyncCore( oldCompilation, newCompilation, false, cancellationToken );
+        => this._implementation.GetCompilationChangesAsyncCore( oldCompilation, newCompilation, false, cancellationToken );
 
-    private async ValueTask<CompilationChanges> GetCompilationChangesAsyncCore(
-        Compilation? oldCompilation,
-        Compilation newCompilation,
-        bool semaphoreOwned,
+    public ValueTask<CompilationChanges> MergeChangesAsync( CompilationChanges first, CompilationChanges second, CancellationToken cancellationToken )
+        => this._implementation.MergeChangesCoreAsync( first, second, false, cancellationToken );
+
+    public ValueTask<ReferencedCompilationChange> MergeChangesAsync(
+        ReferencedCompilationChange first,
+        ReferencedCompilationChange second,
         CancellationToken cancellationToken = default )
+        => this._implementation.MergeChangesCoreAsync( first, second, false, cancellationToken );
+
+    private class Implementation
     {
-        DiffStrategy? diffStrategy = null;
+        private readonly ConditionalWeakTable<Compilation, ChangeLinkedList> _cache = new();
+        private readonly SemaphoreSlim _semaphore = new( 1 );
+        private readonly DiffStrategy _metalamaDiffStrategy;
+        private readonly DiffStrategy _nonMetalamaDiffStrategy;
+        private readonly IMetalamaProjectClassifier _metalamaProjectClassifier;
 
-        DiffStrategy GetDiffStrategy()
+        public Implementation( IServiceProvider serviceProvider )
         {
-            return diffStrategy ??= this._metalamaProjectClassifier.IsMetalamaEnabled( newCompilation )
-                ? this._metalamaDiffStrategy
-                : this._nonMetalamaDiffStrategy;
+            this._metalamaDiffStrategy = new DiffStrategy( serviceProvider, true, true );
+            this._nonMetalamaDiffStrategy = new DiffStrategy( serviceProvider, false, true );
+            this._metalamaProjectClassifier = serviceProvider.GetRequiredService<IMetalamaProjectClassifier>();
         }
 
-        if ( oldCompilation == null )
+        /// <summary>
+        /// Computes an incremental <see cref="CompilationChanges"/> between an old compilation and a new compilation
+        /// based on the values from the cache only, or returns <c>null</c> if the value was not found in the cache.
+        /// </summary>
+        private bool TryGetIncrementalChangesFromCache(
+            Compilation oldCompilation,
+            Compilation newCompilation,
+            CancellationToken cancellationToken,
+            [NotNullWhen( true )] out CompilationChanges? exactChanges,
+            out CompilationChanges? closestChanges )
         {
-            // If we were not given an old compilation, we will return a non-incremental changes (i.e., from an empty compilation).
-
-            if ( this._cache.TryGetValue( newCompilation, out var newList ) )
+            if ( !this._cache.TryGetValue( oldCompilation, out var list ) )
             {
-                return newList.NonIncrementalChanges;
+                // If the old compilation is not in the cache, we cannot compute any incremental change.
+
+                exactChanges = null;
+                closestChanges = null;
+
+                return false;
             }
 
-            GetDiffStrategy().Observer?.OnNewCompilation();
-
-            if ( !semaphoreOwned )
+            for ( var node = list.FirstIncrementalChange; node != null; node = node.Next )
             {
-                await this._semaphore.WaitAsync( cancellationToken );
-            }
+                cancellationToken.ThrowIfCancellationRequested();
 
-            try
-            {
-                if ( !this._cache.TryGetValue( newCompilation, out newList ) )
+                if ( node.IncrementalChanges.NewCompilationVersion.Compilation == newCompilation )
                 {
-                    var references = await this.GetReferencesAsync( oldCompilation, newCompilation, true, cancellationToken );
+                    // The exact pair old-and-new compilation was found in the cache.
+                    exactChanges = node.IncrementalChanges;
+                    closestChanges = null;
 
-                    var compilationVersion = CompilationVersion.Create( newCompilation, GetDiffStrategy(), references, cancellationToken );
-
-                    newList = new ChangeLinkedList( compilationVersion );
-                    this._cache.Add( newCompilation, newList );
-                }
-
-                return newList.NonIncrementalChanges;
-            }
-            finally
-            {
-                if ( !semaphoreOwned )
-                {
-                    this._semaphore.Release();
+                    return true;
                 }
             }
+
+            // We did not find the incremental changes for the pair of compilations, so we return the incremental changes
+            // from the given original compilation to the last known compilation, which is hopefully very similar to the
+            // new compilation because of the time correlation, as it should have just a few user edits.
+            closestChanges = list.FirstIncrementalChange?.IncrementalChanges;
+            exactChanges = null;
+
+            return false;
         }
-        else
+
+        public async ValueTask<CompilationVersion> GetCompilationVersionCoreAsync(
+            Compilation? oldCompilation,
+            Compilation newCompilation,
+            bool semaphoreOwned,
+            CancellationToken cancellationToken = default )
         {
-            // Find the pre-computed incremental changes from the graph. 
+            // When we are asked a CompilationVersion, we do it through getting a CompilationChanges, because this path is incremental
+            // and offers optimal performances.
+            var changes = await this.GetCompilationChangesAsyncCore( oldCompilation, newCompilation, semaphoreOwned, cancellationToken );
 
-            if ( this.TryGetIncrementalChangesFromCache(
-                    oldCompilation,
-                    newCompilation,
-                    cancellationToken,
-                    out var incrementalChanges,
-                    out var closestIncrementalChanges ) )
+            return changes.NewCompilationVersion;
+        }
+
+        private async ValueTask<(ImmutableDictionary<AssemblyIdentity, ICompilationVersion> References,
+            ImmutableDictionary<AssemblyIdentity, ReferencedCompilationChange> Changes)> GetReferencesAsync(
+            Compilation? oldCompilation,
+            Compilation newCompilation,
+            bool semaphoreOwned,
+            CancellationToken cancellationToken )
+        {
+            // If references are the same by reference, there is no need to compare anything. Most hits to the method should take this shortcut.
+            if ( oldCompilation != null && oldCompilation.ExternalReferences == newCompilation.ExternalReferences
+                                        && this._cache.TryGetValue( oldCompilation, out var list ) )
             {
-                // We already computed the changes between this exact pair of compilations.
-
-                return incrementalChanges;
+                return (list.CompilationVersion.References, ImmutableDictionary<AssemblyIdentity, ReferencedCompilationChange>.Empty);
             }
-            else if ( closestIncrementalChanges != null )
+
+            var changeListBuilder = ImmutableDictionary.CreateBuilder<AssemblyIdentity, ReferencedCompilationChange>();
+            var referenceListBuilder = ImmutableDictionary.CreateBuilder<AssemblyIdentity, ICompilationVersion>();
+
+            var oldReferences = oldCompilation?.ExternalReferences.OfType<CompilationReference>()
+                .ToDictionary( x => x.Compilation.Assembly.Identity, x => x.Compilation );
+
+            var compilationReferences = newCompilation.ExternalReferences.OfType<CompilationReference>().ToList();
+
+            foreach ( var reference in compilationReferences )
             {
-                // We do not have the exact pair of compilations in the cache, however we have already computed a diff from the same old
-                // compilation, so it's a good idea to compute the diff from the last known compilation instead of from the initial compilation,
-                // as it should contain fewer changes.
+                ReferencedCompilationChange changes;
+                ICompilationVersion compilationVersion;
 
-                var references = await this.GetReferencesAsync(
-                    closestIncrementalChanges.NewCompilationVersion.Compilation,
-                    newCompilation,
-                    semaphoreOwned,
-                    cancellationToken );
+                var assemblyIdentity = reference.Compilation.Assembly.Identity;
 
-                var changesFromClosestCompilation = CompilationChanges.Incremental(
-                    closestIncrementalChanges.NewCompilationVersion,
-                    newCompilation,
-                    references,
-                    cancellationToken );
-
-                incrementalChanges = closestIncrementalChanges.Merge( changesFromClosestCompilation );
-
-                if ( !this._cache.TryGetValue( oldCompilation, out var changeLinkedListFromOldCompilation ) )
+                if ( oldCompilation != null && oldReferences!.TryGetValue( assemblyIdentity, out var oldReferenceCompilation ) )
                 {
-                    throw new AssertionFailedException();
+                    var compilationChanges = await this.GetCompilationChangesAsyncCore(
+                        oldReferenceCompilation,
+                        reference.Compilation,
+                        semaphoreOwned,
+                        cancellationToken );
+
+                    compilationVersion = compilationChanges.NewCompilationVersion;
+
+                    if ( compilationChanges.HasChange )
+                    {
+                        changes = new ReferencedCompilationChange(
+                            oldReferenceCompilation,
+                            reference.Compilation,
+                            ReferencedCompilationChangeKind.Modified,
+                            compilationChanges );
+                    }
+                    else
+                    {
+                        // No change.
+                        changes = default;
+                    }
+                }
+                else
+                {
+                    // If there is no old compilation, the reference is new.
+                    changes = new ReferencedCompilationChange( null, reference.Compilation, ReferencedCompilationChangeKind.Added );
+                    compilationVersion = await this.GetCompilationVersionCoreAsync( null, reference.Compilation, semaphoreOwned, cancellationToken );
                 }
 
-                changeLinkedListFromOldCompilation.Insert( incrementalChanges );
+                if ( changes.ChangeKind != ReferencedCompilationChangeKind.None )
+                {
+                    changeListBuilder.Add( assemblyIdentity, changes );
+                }
 
-                return incrementalChanges;
+                referenceListBuilder.Add( assemblyIdentity, compilationVersion );
             }
-            else
+
+            // Check removed references.
+            if ( oldCompilation != null )
             {
-                // We could not get the changes from the cache, so we need to run the diff algorithm.
+                var referencedAssemblyIdentifies = new HashSet<AssemblyIdentity>( compilationReferences.Select( x => x.Compilation.Assembly.Identity ) );
+
+                foreach ( var reference in oldReferences! )
+                {
+                    if ( !referencedAssemblyIdentifies.Contains( reference.Key ) )
+                    {
+                        changeListBuilder.Add(
+                            reference.Key,
+                            new ReferencedCompilationChange( reference.Value, null, ReferencedCompilationChangeKind.Removed ) );
+                    }
+                }
+            }
+
+            return (referenceListBuilder.ToImmutable(), changeListBuilder.ToImmutable());
+        }
+
+        public async ValueTask<CompilationChanges> GetCompilationChangesAsyncCore(
+            Compilation? oldCompilation,
+            Compilation newCompilation,
+            bool semaphoreOwned,
+            CancellationToken cancellationToken = default )
+        {
+            DiffStrategy? diffStrategy = null;
+
+            DiffStrategy GetDiffStrategy()
+            {
+                return diffStrategy ??= this._metalamaProjectClassifier.IsMetalamaEnabled( newCompilation )
+                    ? this._metalamaDiffStrategy
+                    : this._nonMetalamaDiffStrategy;
+            }
+
+            if ( oldCompilation == null )
+            {
+                // If we were not given an old compilation, we will return a non-incremental changes (i.e., from an empty compilation).
+
+                if ( this._cache.TryGetValue( newCompilation, out var newList ) )
+                {
+                    return newList.NonIncrementalChanges;
+                }
+
+                GetDiffStrategy().Observer?.OnNewCompilation();
 
                 if ( !semaphoreOwned )
                 {
@@ -246,44 +234,21 @@ internal class CompilationVersionProvider : IService
 
                 try
                 {
-                    if ( !this._cache.TryGetValue( oldCompilation, out var changeLinkedListFromOldCompilation ) )
+                    if ( !this._cache.TryGetValue( newCompilation, out newList ) )
                     {
-                        // We have never processed the old compilation, so we have to compute it from the scratch.
+                        var referencedCompilationChanges = await this.GetReferencesAsync( oldCompilation, newCompilation, true, cancellationToken );
 
-                        var oldReferences = await this.GetReferencesAsync( null, oldCompilation, true, cancellationToken );
+                        var compilationVersion = CompilationVersion.Create(
+                            newCompilation,
+                            GetDiffStrategy(),
+                            referencedCompilationChanges.References,
+                            cancellationToken );
 
-                        var oldCompilationVersion = CompilationVersion.Create( oldCompilation, GetDiffStrategy(), oldReferences, cancellationToken );
-
-                        changeLinkedListFromOldCompilation = new ChangeLinkedList( oldCompilationVersion );
-                        this._cache.Add( oldCompilation, changeLinkedListFromOldCompilation );
+                        newList = new ChangeLinkedList( compilationVersion );
+                        this._cache.Add( newCompilation, newList );
                     }
 
-                    var newReferences = await this.GetReferencesAsync(
-                        changeLinkedListFromOldCompilation.CompilationVersion.Compilation,
-                        newCompilation,
-                        true,
-                        cancellationToken );
-
-                    // Compute the increment.
-                    incrementalChanges = CompilationChanges.Incremental(
-                        changeLinkedListFromOldCompilation.CompilationVersion,
-                        newCompilation,
-                        newReferences,
-                        cancellationToken );
-
-                    if ( !this._cache.TryGetValue( newCompilation, out _ ) )
-                    {
-                        this._cache.Add( newCompilation, new ChangeLinkedList( incrementalChanges.NewCompilationVersion ) );
-                    }
-                    else
-                    {
-                        // The new compilation was already computed, but we could not reuse it because no diff from the old
-                        // compilation was available.
-                    }
-
-                    changeLinkedListFromOldCompilation.Insert( incrementalChanges );
-
-                    return incrementalChanges;
+                    return newList.NonIncrementalChanges;
                 }
                 finally
                 {
@@ -293,44 +258,283 @@ internal class CompilationVersionProvider : IService
                     }
                 }
             }
+            else
+            {
+                // Find the pre-computed incremental changes from the graph. 
+
+                if ( this.TryGetIncrementalChangesFromCache(
+                        oldCompilation,
+                        newCompilation,
+                        cancellationToken,
+                        out var incrementalChanges,
+                        out var closestIncrementalChanges ) )
+                {
+                    // We already computed the changes between this exact pair of compilations.
+
+                    return incrementalChanges;
+                }
+                else if ( closestIncrementalChanges != null )
+                {
+                    // We do not have the exact pair of compilations in the cache, however we have already computed a diff from the same old
+                    // compilation, so it's a good idea to compute the diff from the last known compilation instead of from the initial compilation,
+                    // as it should contain fewer changes.
+
+                    var references = await this.GetReferencesAsync(
+                        closestIncrementalChanges.NewCompilationVersion.Compilation,
+                        newCompilation,
+                        semaphoreOwned,
+                        cancellationToken );
+
+                    var changesFromClosestCompilation = CompilationChanges.Incremental(
+                        closestIncrementalChanges.NewCompilationVersion,
+                        newCompilation,
+                        references.References,
+                        references.Changes,
+                        cancellationToken );
+
+                    incrementalChanges = await this.MergeChangesCoreAsync(
+                        closestIncrementalChanges,
+                        changesFromClosestCompilation,
+                        semaphoreOwned,
+                        cancellationToken );
+
+                    if ( !this._cache.TryGetValue( oldCompilation, out var changeLinkedListFromOldCompilation ) )
+                    {
+                        throw new AssertionFailedException();
+                    }
+
+                    changeLinkedListFromOldCompilation.Insert( incrementalChanges );
+
+                    return incrementalChanges;
+                }
+                else
+                {
+                    // We could not get the changes from the cache, so we need to run the diff algorithm.
+
+                    if ( !semaphoreOwned )
+                    {
+                        await this._semaphore.WaitAsync( cancellationToken );
+                    }
+
+                    try
+                    {
+                        if ( !this._cache.TryGetValue( oldCompilation, out var changeLinkedListFromOldCompilation ) )
+                        {
+                            // We have never processed the old compilation, so we have to compute it from the scratch.
+
+                            var oldReferences = await this.GetReferencesAsync( null, oldCompilation, true, cancellationToken );
+
+                            var oldCompilationVersion = CompilationVersion.Create(
+                                oldCompilation,
+                                GetDiffStrategy(),
+                                oldReferences.References,
+                                cancellationToken );
+
+                            changeLinkedListFromOldCompilation = new ChangeLinkedList( oldCompilationVersion );
+                            this._cache.Add( oldCompilation, changeLinkedListFromOldCompilation );
+                        }
+
+                        var newReferences = await this.GetReferencesAsync(
+                            changeLinkedListFromOldCompilation.CompilationVersion.Compilation,
+                            newCompilation,
+                            true,
+                            cancellationToken );
+
+                        // Compute the increment.
+                        incrementalChanges = CompilationChanges.Incremental(
+                            changeLinkedListFromOldCompilation.CompilationVersion,
+                            newCompilation,
+                            newReferences.References,
+                            newReferences.Changes,
+                            cancellationToken );
+
+                        if ( !this._cache.TryGetValue( newCompilation, out _ ) )
+                        {
+                            this._cache.Add( newCompilation, new ChangeLinkedList( incrementalChanges.NewCompilationVersion ) );
+                        }
+                        else
+                        {
+                            // The new compilation was already computed, but we could not reuse it because no diff from the old
+                            // compilation was available.
+                        }
+
+                        changeLinkedListFromOldCompilation.Insert( incrementalChanges );
+
+                        return incrementalChanges;
+                    }
+                    finally
+                    {
+                        if ( !semaphoreOwned )
+                        {
+                            this._semaphore.Release();
+                        }
+                    }
+                }
+            }
         }
-    }
 
-    private class ChangeLinkedList
-    {
-        private CompilationChanges? _nonIncrementalChanges;
-
-        public CompilationVersion CompilationVersion { get; }
-
-        public CompilationChanges NonIncrementalChanges => this._nonIncrementalChanges ??= CompilationChanges.NonIncremental( this.CompilationVersion );
-
-        public IncrementalChangeNode? FirstIncrementalChange { get; private set; }
-
-        public ChangeLinkedList( CompilationVersion compilationVersion )
+        public async ValueTask<CompilationChanges> MergeChangesCoreAsync(
+            CompilationChanges first,
+            CompilationChanges second,
+            bool semaphoreOwned,
+            CancellationToken cancellationToken )
         {
-            this.CompilationVersion = compilationVersion;
+            if ( !first.HasChange || !second.IsIncremental )
+            {
+                return second;
+            }
+            else if ( !second.HasChange )
+            {
+                return first;
+            }
+            else
+            {
+                this._metalamaDiffStrategy.Observer?.OnMergeCompilationChanges();
+
+                // Merge syntax tree changes.
+                var mergedSyntaxTreeBuilder = first.SyntaxTreeChanges.ToBuilder();
+
+                foreach ( var syntaxTreeChanges in second.SyntaxTreeChanges )
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    if ( !mergedSyntaxTreeBuilder.TryGetValue( syntaxTreeChanges.Key, out var oldSyntaxTreeChange ) )
+                    {
+                        mergedSyntaxTreeBuilder.Add( syntaxTreeChanges );
+                    }
+                    else
+                    {
+                        var merged = oldSyntaxTreeChange.Merge( syntaxTreeChanges.Value );
+
+                        if ( merged.SyntaxTreeChangeKind == SyntaxTreeChangeKind.None )
+                        {
+                            mergedSyntaxTreeBuilder.Remove( syntaxTreeChanges );
+                        }
+                        else
+                        {
+                            mergedSyntaxTreeBuilder[syntaxTreeChanges.Key] = merged;
+                        }
+                    }
+                }
+
+                // Merge changes in referenced compilations.
+                var mergedReferencedCompilationBuilder = first.ReferencedCompilationChanges.ToBuilder();
+
+                foreach ( var referencedCompilationChange in second.ReferencedCompilationChanges )
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    if ( !mergedReferencedCompilationBuilder.TryGetValue( referencedCompilationChange.Key, out var oldReferencedCompilationChange ) )
+                    {
+                        mergedReferencedCompilationBuilder.Add( referencedCompilationChange );
+                    }
+                    else
+                    {
+                        var merged = await this.MergeChangesCoreAsync(
+                            oldReferencedCompilationChange,
+                            referencedCompilationChange.Value,
+                            semaphoreOwned,
+                            cancellationToken );
+                        mergedReferencedCompilationBuilder.Add( referencedCompilationChange.Key, merged );
+                    }
+                }
+
+                return new CompilationChanges(
+                    first.OldCompilationVersion,
+                    second.NewCompilationVersion,
+                    mergedSyntaxTreeBuilder.ToImmutable(),
+                    mergedReferencedCompilationBuilder.ToImmutable(),
+                    first.HasCompileTimeCodeChange | second.HasCompileTimeCodeChange,
+                    first.IsIncremental );
+            }
         }
 
-        public void Insert( CompilationChanges changes )
+        public async ValueTask<ReferencedCompilationChange> MergeChangesCoreAsync(
+            ReferencedCompilationChange first,
+            ReferencedCompilationChange second,
+            bool semaphoreOwned,
+            CancellationToken cancellationToken = default )
         {
-            this.FirstIncrementalChange = new IncrementalChangeNode( changes, this.FirstIncrementalChange );
+            switch (first.ChangeKind, second.ChangeKind)
+            {
+                case (_, ReferencedCompilationChangeKind.None):
+                    return first;
+
+                case (ReferencedCompilationChangeKind.None, _):
+                    return second;
+
+                case (ReferencedCompilationChangeKind.Removed, ReferencedCompilationChangeKind.Added):
+                    {
+                        var changes = await this.GetCompilationChangesAsyncCore(
+                            first.OldCompilation.AssertNotNull(),
+                            second.NewCompilation.AssertNotNull(),
+                            semaphoreOwned,
+                            cancellationToken );
+
+                        return new ReferencedCompilationChange(
+                            first.OldCompilation,
+                            second.NewCompilation,
+                            ReferencedCompilationChangeKind.Modified,
+                            changes );
+                    }
+
+                case (ReferencedCompilationChangeKind.Added, ReferencedCompilationChangeKind.Removed):
+                    return new ReferencedCompilationChange( first.NewCompilation, first.OldCompilation, ReferencedCompilationChangeKind.None );
+
+                case (ReferencedCompilationChangeKind.Modified, ReferencedCompilationChangeKind.Modified):
+                    {
+                        var changes = await this.MergeChangesCoreAsync( first.Changes!, second.Changes!, semaphoreOwned, cancellationToken );
+
+                        return changes.HasChange
+                            ? new ReferencedCompilationChange(
+                                first.OldCompilation,
+                                first.NewCompilation,
+                                ReferencedCompilationChangeKind.Modified,
+                                changes )
+                            : new ReferencedCompilationChange( first.NewCompilation, first.OldCompilation, ReferencedCompilationChangeKind.None );
+                    }
+
+                default:
+                    throw new AssertionFailedException();
+            }
         }
-    }
 
-    private class IncrementalChangeNode
-    {
-        /// <summary>
-        /// Gets the incremental changes between the compilation at the head of the linked list
-        /// and the value of <see cref="CompilationChanges.NewCompilationVersion"/>.
-        /// </summary>
-        public CompilationChanges IncrementalChanges { get; }
-
-        public IncrementalChangeNode( CompilationChanges changes, IncrementalChangeNode? next )
+        private class ChangeLinkedList
         {
-            this.IncrementalChanges = changes;
-            this.Next = next;
+            private CompilationChanges? _nonIncrementalChanges;
+
+            public CompilationVersion CompilationVersion { get; }
+
+            public CompilationChanges NonIncrementalChanges => this._nonIncrementalChanges ??= CompilationChanges.NonIncremental( this.CompilationVersion );
+
+            public IncrementalChangeNode? FirstIncrementalChange { get; private set; }
+
+            public ChangeLinkedList( CompilationVersion compilationVersion )
+            {
+                this.CompilationVersion = compilationVersion;
+            }
+
+            public void Insert( CompilationChanges changes )
+            {
+                this.FirstIncrementalChange = new IncrementalChangeNode( changes, this.FirstIncrementalChange );
+            }
         }
 
-        public IncrementalChangeNode? Next { get; }
+        private class IncrementalChangeNode
+        {
+            /// <summary>
+            /// Gets the incremental changes between the compilation at the head of the linked list
+            /// and the value of <see cref="CompilationChanges.NewCompilationVersion"/>.
+            /// </summary>
+            public CompilationChanges IncrementalChanges { get; }
+
+            public IncrementalChangeNode( CompilationChanges changes, IncrementalChangeNode? next )
+            {
+                this.IncrementalChanges = changes;
+                this.Next = next;
+            }
+
+            public IncrementalChangeNode? Next { get; }
+        }
     }
 }

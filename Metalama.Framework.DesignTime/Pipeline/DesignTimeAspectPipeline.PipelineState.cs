@@ -194,8 +194,10 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     var compileTimeSyntaxTreesBuilder = this.CompileTimeSyntaxTrees?.ToBuilder()
                                                         ?? ImmutableDictionary.CreateBuilder<string, SyntaxTree?>( StringComparer.Ordinal );
 
-                    foreach ( var change in newChanges.SyntaxTreeChanges )
+                    foreach ( var changeEntry in newChanges.SyntaxTreeChanges )
                     {
+                        var change = changeEntry.Value;
+
                         switch ( change.CompileTimeChangeKind )
                         {
                             case CompileTimeChangeKind.None:
@@ -247,7 +249,10 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                 // Return the new state.
                 var newCompilationResult = invalidateCompilationResult ? this.PipelineResult.Invalidate( newChanges ) : this.PipelineResult;
-                var newUnprocessedChanges = this.UnprocessedChanges == null ? newChanges : this.UnprocessedChanges.Merge( newChanges );
+
+                var newUnprocessedChanges = this.UnprocessedChanges == null
+                    ? newChanges
+                    : await this._pipeline.CompilationVersionProvider.MergeChangesAsync( this.UnprocessedChanges, newChanges, cancellationToken );
 
                 newState = new PipelineState(
                     newState,

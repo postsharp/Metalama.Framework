@@ -50,8 +50,10 @@ internal class DependencyChanges
                     compilationReference.Value.CompilationVersion.Compilation,
                     cancellationToken );
 
-                foreach ( var syntaxTreeChange in compilationChanges.SyntaxTreeChanges )
+                foreach ( var syntaxTreeChangeEntry in compilationChanges.SyntaxTreeChanges )
                 {
+                    var syntaxTreeChange = syntaxTreeChangeEntry.Value;
+
                     if ( dependenciesOfReference.DependenciesByMasterFilePath.TryGetValue( syntaxTreeChange.FilePath, out var dependenciesOfSyntaxTree ) )
                     {
                         invalidatedFiles.UnionWith( dependenciesOfSyntaxTree.DependentFilePaths );

@@ -18,6 +18,7 @@ public partial class CompilationChangesTests : TestBase
             CompilationVersion.Create( compilation1, this._strategy ),
             compilation2,
             ImmutableDictionary<AssemblyIdentity, ICompilationVersion>.Empty, // We are ignoring references.
+            ImmutableDictionary<AssemblyIdentity, ReferencedCompilationChange>.Empty,
             CancellationToken.None );
 
     [Fact]
@@ -37,7 +38,7 @@ public partial class CompilationChangesTests : TestBase
         Assert.Equal( compilation2, changes.NewCompilationVersion.CompilationToAnalyze );
         Assert.Single( changes.SyntaxTreeChanges );
 
-        var syntaxTreeChange = changes.SyntaxTreeChanges.Single();
+        var syntaxTreeChange = changes.SyntaxTreeChanges.Single().Value;
 
         Assert.Equal( SyntaxTreeChangeKind.Added, syntaxTreeChange.SyntaxTreeChangeKind );
         Assert.Equal( CompileTimeChangeKind.None, syntaxTreeChange.CompileTimeChangeKind );
@@ -62,7 +63,7 @@ public partial class CompilationChangesTests : TestBase
         Assert.Equal( compilation2, changes.NewCompilationVersion.CompilationToAnalyze );
         Assert.Single( changes.SyntaxTreeChanges );
 
-        var syntaxTreeChange = changes.SyntaxTreeChanges.Single();
+        var syntaxTreeChange = changes.SyntaxTreeChanges.Single().Value;
 
         Assert.Equal( SyntaxTreeChangeKind.Added, syntaxTreeChange.SyntaxTreeChangeKind );
         Assert.Equal( CompileTimeChangeKind.NewlyCompileTime, syntaxTreeChange.CompileTimeChangeKind );
@@ -87,7 +88,7 @@ public partial class CompilationChangesTests : TestBase
         Assert.Equal( compilation2, changes.NewCompilationVersion.CompilationToAnalyze );
         Assert.Single( changes.SyntaxTreeChanges );
 
-        var syntaxTreeChange = changes.SyntaxTreeChanges.Single();
+        var syntaxTreeChange = changes.SyntaxTreeChanges.Single().Value;
 
         Assert.Equal( SyntaxTreeChangeKind.Added, syntaxTreeChange.SyntaxTreeChangeKind );
         Assert.Equal( CompileTimeChangeKind.None, syntaxTreeChange.CompileTimeChangeKind );
@@ -113,7 +114,7 @@ public partial class CompilationChangesTests : TestBase
         Assert.Equal( compilation2, changes.NewCompilationVersion.CompilationToAnalyze );
         Assert.Single( changes.SyntaxTreeChanges );
 
-        var syntaxTreeChange = changes.SyntaxTreeChanges.Single();
+        var syntaxTreeChange = changes.SyntaxTreeChanges.Single().Value;
 
         Assert.Equal( SyntaxTreeChangeKind.Deleted, syntaxTreeChange.SyntaxTreeChangeKind );
         Assert.Equal( CompileTimeChangeKind.None, syntaxTreeChange.CompileTimeChangeKind );
@@ -139,7 +140,7 @@ public partial class CompilationChangesTests : TestBase
         Assert.Equal( compilation2, changes.NewCompilationVersion.CompilationToAnalyze );
         Assert.Single( changes.SyntaxTreeChanges );
 
-        var syntaxTreeChange = changes.SyntaxTreeChanges.Single();
+        var syntaxTreeChange = changes.SyntaxTreeChanges.Single().Value;
 
         Assert.Equal( SyntaxTreeChangeKind.Changed, syntaxTreeChange.SyntaxTreeChangeKind );
         Assert.Equal( CompileTimeChangeKind.None, syntaxTreeChange.CompileTimeChangeKind );
@@ -166,7 +167,7 @@ public partial class CompilationChangesTests : TestBase
         Assert.True( changes.IsIncremental );
         Assert.Equal( compilation2, changes.NewCompilationVersion.CompilationToAnalyze );
 
-        var syntaxTreeChange = changes.SyntaxTreeChanges.Single();
+        var syntaxTreeChange = changes.SyntaxTreeChanges.Single().Value;
 
         Assert.Empty( syntaxTreeChange.PartialTypeChanges );
         Assert.Equal( SyntaxTreeChangeKind.Changed, syntaxTreeChange.SyntaxTreeChangeKind );
@@ -208,7 +209,7 @@ public partial class CompilationChangesTests : TestBase
         Assert.True( changes.IsIncremental );
         Assert.Single( changes.SyntaxTreeChanges );
 
-        var syntaxTreeChange = changes.SyntaxTreeChanges.Single();
+        var syntaxTreeChange = changes.SyntaxTreeChanges.Single().Value;
         Assert.Single( syntaxTreeChange.PartialTypeChanges );
     }
 
@@ -228,7 +229,7 @@ public partial class CompilationChangesTests : TestBase
         Assert.True( changes.HasChange );
         Assert.True( changes.IsIncremental );
         Assert.Single( changes.SyntaxTreeChanges );
-        Assert.Equal( CompileTimeChangeKind.NewlyCompileTime, changes.SyntaxTreeChanges.Single().CompileTimeChangeKind );
+        Assert.Equal( CompileTimeChangeKind.NewlyCompileTime, changes.SyntaxTreeChanges.Single().Value.CompileTimeChangeKind );
     }
 
     [Fact]
@@ -247,6 +248,6 @@ public partial class CompilationChangesTests : TestBase
         Assert.True( changes.HasChange );
         Assert.True( changes.IsIncremental );
         Assert.Single( changes.SyntaxTreeChanges );
-        Assert.Equal( CompileTimeChangeKind.NoLongerCompileTime, changes.SyntaxTreeChanges.Single().CompileTimeChangeKind );
+        Assert.Equal( CompileTimeChangeKind.NoLongerCompileTime, changes.SyntaxTreeChanges.Single().Value.CompileTimeChangeKind );
     }
 }
