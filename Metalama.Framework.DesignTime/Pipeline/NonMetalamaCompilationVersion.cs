@@ -33,6 +33,10 @@ internal class NonMetalamaCompilationVersion : ICompilationVersion
 
     public Compilation Compilation { get; set; }
 
+    public IEnumerable<string> EnumerateSyntaxTreePaths() => this._syntaxTrees.Keys;
+
+    public ImmutableDictionary<AssemblyIdentity, ICompilationVersion> References => throw new NotSupportedException();
+
     public NonMetalamaCompilationVersion( Compilation compilation, Func<SyntaxTree, ulong> computeHashFunc )
     {
         this.Compilation = compilation;

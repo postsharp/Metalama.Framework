@@ -8,21 +8,30 @@ namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 /// <summary>
 /// Represents all dependencies of a given compilation.
 /// </summary>
-internal readonly struct DependencyGraph
+internal class DependencyGraph
 {
-    public ImmutableDictionary<AssemblyIdentity, ICompilationVersion> Compilations { get; }
+    /// <summary>
+    /// Gets the main compilation for which this <see cref="DependencyGraph"/> is created.
+    /// </summary>
+    public ICompilationVersion Compilation { get; }
 
-    public static DependencyGraph Empty { get; } = new(
-        ImmutableDictionary<AssemblyIdentity, DependencyGraphByDependentCompilation>.Empty,
-        ImmutableDictionary<AssemblyIdentity, ICompilationVersion>.Empty );
+    public static DependencyGraph Create( ICompilationVersion compilation, BaseDependencyCollector dependencies )
+    {
+        var emptyGraph = new DependencyGraph( compilation, ImmutableDictionary<AssemblyIdentity, DependencyGraphByDependentCompilation>.Empty );
 
+        return emptyGraph.Update( compilation, dependencies );
+    }
+
+    /// <summary>
+    /// Gets the dependencies indexed by compilation.
+    /// </summary>
     public ImmutableDictionary<AssemblyIdentity, DependencyGraphByDependentCompilation> DependenciesByCompilation { get; }
 
     public DependencyGraph Update(
-        IEnumerable<string> syntaxTrees,
+        ICompilationVersion compilationVersion,
         BaseDependencyCollector dependencies )
     {
-        var compilationsBuilder = this.DependenciesByCompilation.ToBuilder();
+        var dependenciesByCompilationDictionaryBuilder = this.DependenciesByCompilation.ToBuilder();
 
         // Updating compilation references.
         foreach ( var compilationReference in dependencies.CompilationReferences )
@@ -33,12 +42,12 @@ internal readonly struct DependencyGraph
                         compilationReference.Value.CompileTimeProjectHash,
                         out var newValue ) )
                 {
-                    compilationsBuilder[compilationReference.Key] = newValue;
+                    dependenciesByCompilationDictionaryBuilder[compilationReference.Key] = newValue;
                 }
             }
             else
             {
-                compilationsBuilder[compilationReference.Key] = new DependencyGraphByDependentCompilation(
+                dependenciesByCompilationDictionaryBuilder[compilationReference.Key] = new DependencyGraphByDependentCompilation(
                     compilationReference.Key,
                     compilationReference.Value.CompileTimeProjectHash );
             }
@@ -55,7 +64,7 @@ internal readonly struct DependencyGraph
             {
                 var compilation = dependenciesByCompilation.Key;
 
-                if ( !compilationsBuilder.TryGetValue( compilation, out var currentDependenciesOfCompilation ) )
+                if ( !dependenciesByCompilationDictionaryBuilder.TryGetValue( compilation, out var currentDependenciesOfCompilation ) )
                 {
                     var hashCode = dependencies.CompilationReferences.TryGetValue( compilation, out var reference ) ? reference.CompileTimeProjectHash : 0;
                     currentDependenciesOfCompilation = new DependencyGraphByDependentCompilation( compilation, hashCode );
@@ -66,7 +75,7 @@ internal readonly struct DependencyGraph
                         dependenciesByCompilation.Value,
                         out var newDependenciesOfCompilation ) )
                 {
-                    compilationsBuilder[compilation] = newDependenciesOfCompilation;
+                    dependenciesByCompilationDictionaryBuilder[compilation] = newDependenciesOfCompilation;
                 }
                 else
                 {
@@ -75,8 +84,8 @@ internal readonly struct DependencyGraph
             }
         }
 
-        // Remove dependencies.
-        foreach ( var dependentFilePath in syntaxTrees )
+        // Remove graphs for syntax trees that have been removed from the compilation
+        foreach ( var dependentFilePath in compilationVersion.EnumerateSyntaxTreePaths() )
         {
             if ( !dependencies.DependenciesByDependentFilePath.ContainsKey( dependentFilePath ) )
             {
@@ -85,20 +94,20 @@ internal readonly struct DependencyGraph
                 {
                     if ( compilationDependencies.Value.TryRemoveDependentSyntaxTree( dependentFilePath, out var newDependencies ) )
                     {
-                        compilationsBuilder[compilationDependencies.Key] = newDependencies;
+                        dependenciesByCompilationDictionaryBuilder[compilationDependencies.Key] = newDependencies;
                     }
                 }
             }
         }
 
-        return new DependencyGraph( compilationsBuilder.ToImmutable(), dependencies.CompilationReferences );
+        return new DependencyGraph( compilationVersion, dependenciesByCompilationDictionaryBuilder.ToImmutable() );
     }
 
     private DependencyGraph(
-        ImmutableDictionary<AssemblyIdentity, DependencyGraphByDependentCompilation> dependenciesByCompilation,
-        ImmutableDictionary<AssemblyIdentity, ICompilationVersion> compilations )
+        ICompilationVersion compilation,
+        ImmutableDictionary<AssemblyIdentity, DependencyGraphByDependentCompilation> dependenciesByCompilation )
     {
         this.DependenciesByCompilation = dependenciesByCompilation;
-        this.Compilations = compilations;
+        this.Compilation = compilation;
     }
 }

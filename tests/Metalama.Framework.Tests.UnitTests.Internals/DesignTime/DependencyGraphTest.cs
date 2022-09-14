@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
-public class DependencyChangesTest : TestBase
+public class DependencyGraphTest : TestBase
 {
     private readonly DiffStrategy _strategy = new( true, true, true );
 
@@ -19,7 +19,7 @@ public class DependencyChangesTest : TestBase
     public async Task NoChangeAsync()
     {
         using var testContext = this.CreateTestContext();
-        var compilationChangesProvider = new CompilationChangesProvider( testContext.ServiceProvider );
+        var compilationChangesProvider = new CompilationVersionProvider( testContext.ServiceProvider );
 
         const ulong hash = 54;
 
@@ -32,12 +32,17 @@ public class DependencyChangesTest : TestBase
 
         dependencies.AddSyntaxTreeDependency( dependentFilePath, masterCompilation, masterFilePath, hash );
 
-        var graph = DependencyGraph.Empty.Update( new[] { dependentFilePath }, dependencies );
+        var dependentCompilationVersion = new TestCompilationVersion(
+            new AssemblyIdentity( "DependentAssembly" ),
+            hashes: new Dictionary<string, ulong>() { [dependentFilePath] = 0 },
+            referencedCompilations: new[] { masterCompilationVersion } );
+
+        var graph = DependencyGraph.Create( dependentCompilationVersion, dependencies );
 
         var changes = await DependencyChanges.IncrementalFromReferencesAsync(
             compilationChangesProvider,
             graph,
-            new DesignTimeCompilationReferenceCollection( new DesignTimeCompilationReference( masterCompilationVersion ) ) );
+            new DesignTimeCompilationVersion( dependentCompilationVersion ) );
 
         Assert.True( changes.IsEmpty );
     }
@@ -46,7 +51,7 @@ public class DependencyChangesTest : TestBase
     public async Task FileHashChangedAsync()
     {
         using var testContext = this.CreateTestContext();
-        var compilationChangesProvider = new CompilationChangesProvider( testContext.ServiceProvider );
+        var compilationChangesProvider = new CompilationVersionProvider( testContext.ServiceProvider );
 
         const string masterFilePath = "master.cs";
         const string dependentFilePath = "dependent.cs";
@@ -61,16 +66,26 @@ public class DependencyChangesTest : TestBase
             masterFilePath,
             masterCompilationVersion1.SyntaxTrees.Single().Value.DeclarationHash );
 
-        var dependencyGraph = DependencyGraph.Empty.Update( new[] { dependentFilePath }, dependencyCollector );
+        var dependentCompilationVersion1 = new TestCompilationVersion(
+            new AssemblyIdentity( "DependentAssembly" ),
+            hashes: new Dictionary<string, ulong>() { [dependentFilePath] = 0 },
+            referencedCompilations: new[] { masterCompilationVersion1 } );
+
+        var dependencyGraph = DependencyGraph.Create( dependentCompilationVersion1, dependencyCollector );
 
         // Create a second version of the master compilation with a different hash.
         var masterCompilation2 = CreateCSharpCompilation( new Dictionary<string, string> { [masterFilePath] = "class D{}" }, name: "MasterAssembly" );
         var masterCompilationVersion2 = CompilationVersion.Create( masterCompilation2, this._strategy );
 
+        var dependentCompilationVersion2 = new TestCompilationVersion(
+            new AssemblyIdentity( "DependentAssembly" ),
+            hashes: new Dictionary<string, ulong>() { [dependentFilePath] = 0 },
+            referencedCompilations: new[] { masterCompilationVersion2 } );
+
         var changes = await DependencyChanges.IncrementalFromReferencesAsync(
             compilationChangesProvider,
             dependencyGraph,
-            new DesignTimeCompilationReferenceCollection( new DesignTimeCompilationReference( masterCompilationVersion2 ) ) );
+            new DesignTimeCompilationVersion( dependentCompilationVersion2 ) );
 
         Assert.False( changes.IsEmpty );
         Assert.Contains( dependentFilePath, changes.InvalidatedSyntaxTrees );
@@ -80,7 +95,7 @@ public class DependencyChangesTest : TestBase
     public async Task FileHashBeenRemovedAsync()
     {
         using var testContext = this.CreateTestContext();
-        var compilationChangesProvider = new CompilationChangesProvider( testContext.ServiceProvider );
+        var compilationChangesProvider = new CompilationVersionProvider( testContext.ServiceProvider );
 
         const ulong hash1 = 1;
 
@@ -93,7 +108,12 @@ public class DependencyChangesTest : TestBase
 
         dependencyCollector.AddSyntaxTreeDependency( dependentFilePath, masterCompilation, masterFilePath, hash1 );
 
-        var dependencyGraph = DependencyGraph.Empty.Update( new[] { dependentFilePath }, dependencyCollector );
+        var dependentCompilationVersion1 = new TestCompilationVersion(
+            new AssemblyIdentity( "DependentAssembly" ),
+            hashes: new Dictionary<string, ulong>() { [dependentFilePath] = 0 },
+            referencedCompilations: new[] { masterCompilationVersion1 } );
+
+        var dependencyGraph = DependencyGraph.Create( dependentCompilationVersion1, dependencyCollector );
 
         // Create a second version of the master compilation with a different hash.
         var masterCompilationVersion2 = new TestCompilationVersion(
@@ -103,10 +123,15 @@ public class DependencyChangesTest : TestBase
                 /* Intentionally empty. */
             } );
 
+        var dependentCompilationVersion2 = new TestCompilationVersion(
+            new AssemblyIdentity( "DependentAssembly" ),
+            hashes: new Dictionary<string, ulong>() { [dependentFilePath] = 0 },
+            referencedCompilations: new[] { masterCompilationVersion2 } );
+
         var changes = await DependencyChanges.IncrementalFromReferencesAsync(
             compilationChangesProvider,
             dependencyGraph,
-            new DesignTimeCompilationReferenceCollection( new DesignTimeCompilationReference( masterCompilationVersion2 ) ) );
+            new DesignTimeCompilationVersion( dependentCompilationVersion2 ) );
 
         Assert.False( changes.IsEmpty );
         Assert.Contains( dependentFilePath, changes.InvalidatedSyntaxTrees );

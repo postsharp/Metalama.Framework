@@ -1,8 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 using Xunit;
@@ -15,6 +17,7 @@ public partial class CompilationChangesTests : TestBase
         => CompilationChanges.Incremental(
             CompilationVersion.Create( compilation1, this._strategy ),
             compilation2,
+            ImmutableDictionary<AssemblyIdentity, ICompilationVersion>.Empty, // We are ignoring references.
             CancellationToken.None );
 
     [Fact]

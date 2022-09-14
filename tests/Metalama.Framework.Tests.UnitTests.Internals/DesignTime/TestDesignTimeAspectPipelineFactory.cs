@@ -33,7 +33,7 @@ internal class TestDesignTimeAspectPipelineFactory : DesignTimeAspectPipelineFac
         return new ValueTask<DesignTimeAspectPipeline?>( this.GetOrCreatePipeline( this._projectOptions, compilation, CancellationToken.None ) );
     }
 
-    internal override bool IsMetalamaEnabled( Compilation compilation )
+    public override bool IsMetalamaEnabled( Compilation compilation )
         => compilation.References.OfType<PortableExecutableReference>()
             .Any( x => Path.GetFileNameWithoutExtension( x.FilePath )!.Equals( "Metalama.Framework", StringComparison.OrdinalIgnoreCase ) );
 

@@ -8,11 +8,11 @@ namespace Metalama.Framework.DesignTime.Pipeline;
 
 internal class NonMetalamaProjectTracker
 {
-    private readonly CompilationChangesProvider _compilationChangesProvider;
+    private readonly CompilationVersionProvider _compilationVersionProvider;
 
     public NonMetalamaProjectTracker( IServiceProvider serviceProvider )
     {
-        this._compilationChangesProvider = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>().CompilationChangesProvider;
+        this._compilationVersionProvider = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>().CompilationVersionProvider;
     }
 
     public async ValueTask<DesignTimeCompilationReference> GetCompilationReferenceAsync(
@@ -22,8 +22,8 @@ internal class NonMetalamaProjectTracker
     {
         // We don't need the changes, but using the CompilationChangesProvider allows us to get the new CompilationVersion incrementally,
         // without recomputing it from scratch.
-        var changes = await this._compilationChangesProvider.GetCompilationChangesAsync( oldCompilation, newCompilation, false, cancellationToken );
+        var compilationVersion = await this._compilationVersionProvider.GetCompilationVersionAsync( oldCompilation, newCompilation, cancellationToken );
 
-        return new DesignTimeCompilationReference( changes.NewCompilationVersion, false );
+        return new DesignTimeCompilationReference( compilationVersion, false );
     }
 }

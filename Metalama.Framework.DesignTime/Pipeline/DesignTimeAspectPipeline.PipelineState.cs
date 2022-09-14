@@ -46,14 +46,13 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             public CompilationValidationResult ValidationResult { get; }
 
-            public DependencyGraph Dependencies { get; }
+            public DependencyGraph? Dependencies { get; }
 
             internal PipelineState( DesignTimeAspectPipeline pipeline ) : this()
             {
                 this._pipeline = pipeline;
                 this.PipelineResult = new CompilationPipelineResult();
                 this.ValidationResult = CompilationValidationResult.Empty;
-                this.Dependencies = DependencyGraph.Empty;
             }
 
             private PipelineState( PipelineState prototype )
@@ -103,7 +102,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 PipelineState prototype,
                 CompilationChanges unprocessedChanges,
                 CompilationPipelineResult pipelineResult,
-                DependencyGraph dependencies ) : this( prototype )
+                DependencyGraph? dependencies ) : this( prototype )
             {
                 this.PipelineResult = pipelineResult;
                 this.UnprocessedChanges = unprocessedChanges;
@@ -169,7 +168,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             /// </summary>
             internal async ValueTask<PipelineState> InvalidateCacheForNewCompilationAsync(
                 Compilation newCompilation,
-                DesignTimeCompilationReferenceCollection references,
+                DesignTimeCompilationVersion references,
                 bool invalidateCompilationResult,
                 CancellationToken cancellationToken )
             {
@@ -178,10 +177,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 var newConfiguration = this.Configuration;
 
                 // Detect changes in the syntax trees of the tracked compilation.
-                var newChanges = await this._pipeline._factory.CompilationChangesProvider.GetCompilationChangesAsync(
+                var newChanges = await this._pipeline._factory.CompilationVersionProvider.GetCompilationChangesAsync(
                     this.CompilationVersion?.Compilation,
                     newCompilation,
-                    true,
                     cancellationToken );
 
                 ImmutableDictionary<string, SyntaxTree?> newCompileTimeSyntaxTrees;
@@ -380,7 +378,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             public static bool TryExecute(
                 ref PipelineState state,
                 PartialCompilation compilation,
-                DesignTimeCompilationReferenceCollection references,
+                DesignTimeCompilationVersion compilationVersion,
                 CancellationToken cancellationToken,
                 [NotNullWhen( true )] out CompilationResult? compilationResult )
             {
@@ -412,12 +410,12 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                 // Execute the pipeline.
                 var dependencyCollector = new DependencyCollector(
-                    configuration.ServiceProvider.WithService( references ),
+                    configuration.ServiceProvider.WithService( compilationVersion ),
                     compilation.Compilation,
-                    references.References.Values.Select( x => x.CompilationVersion ) );
+                    compilationVersion.References.Values.Select( x => x.CompilationVersion ) );
 
                 compilation.DerivedTypes.PopulateDependencies( dependencyCollector );
-                var serviceProvider = configuration.ServiceProvider.WithServices( dependencyCollector, references );
+                var serviceProvider = configuration.ServiceProvider.WithServices( dependencyCollector, compilationVersion );
 
                 var success = state._pipeline.TryExecute(
                     compilation,
@@ -451,11 +449,18 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 UserDiagnosticRegistrationService.GetInstance( configuration.ServiceProvider ).RegisterDescriptors( result );
 
                 // Update the dependency graph with results of the pipeline.
-                DependencyGraph newDependencies;
+                DependencyGraph? newDependencies;
 
                 if ( success )
                 {
-                    newDependencies = state.Dependencies.Update( compilation.SyntaxTrees.Keys, dependencyCollector );
+                    if ( state.Dependencies == null )
+                    {
+                        newDependencies = DependencyGraph.Create( compilationVersion.CompilationVersion, dependencyCollector );
+                    }
+                    else
+                    {
+                        newDependencies = state.Dependencies.Update( compilationVersion.CompilationVersion, dependencyCollector );
+                    }
                 }
                 else
                 {
@@ -547,7 +552,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             private PipelineState SetPipelineResult(
                 PartialCompilation compilation,
                 DesignTimePipelineExecutionResult pipelineResult,
-                DependencyGraph dependencies )
+                DependencyGraph? dependencies )
             {
                 var compilationResult = this.PipelineResult.Update( compilation, pipelineResult );
 

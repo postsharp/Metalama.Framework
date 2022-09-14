@@ -24,7 +24,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
     /// cache invalidation methods as appropriate.
     /// </summary>
     internal class DesignTimeAspectPipelineFactory : IDisposable, IAspectPipelineConfigurationProvider,
-                                                     ICompileTimeCodeEditingStatusService
+                                                     ICompileTimeCodeEditingStatusService, IMetalamaProjectClassifier
     {
         private readonly ConcurrentDictionary<ProjectKey, DesignTimeAspectPipeline> _pipelinesByProjectKey = new();
         private readonly ConcurrentDictionary<ProjectKey, NonMetalamaProjectTracker> _nonMetalamaProjectTrackers = new();
@@ -40,7 +40,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         public CompileTimeDomain Domain { get; }
 
-        public CompilationChangesProvider CompilationChangesProvider { get; }
+        public CompilationVersionProvider CompilationVersionProvider { get; }
 
         public DesignTimeAspectPipelineFactory( ServiceProvider serviceProvider, CompileTimeDomain domain, bool isTest = false )
         {
@@ -49,7 +49,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             this._isTest = isTest;
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
 
-            this.CompilationChangesProvider = new CompilationChangesProvider( serviceProvider );
+            this.CompilationVersionProvider = new CompilationVersionProvider( serviceProvider );
         }
 
         /// <summary>
@@ -192,7 +192,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             return this.ExecuteAsync( compilation, cancellationToken );
         }
 
-        internal virtual bool IsMetalamaEnabled( Compilation compilation )
+        public virtual bool IsMetalamaEnabled( Compilation compilation )
             => compilation.SyntaxTrees.FirstOrDefault()?.Options.PreprocessorSymbolNames.Contains( "METALAMA" ) ?? false;
 
         internal async Task<CompilationResult?> ExecuteAsync( Compilation compilation, CancellationToken cancellationToken )

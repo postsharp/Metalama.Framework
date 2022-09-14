@@ -17,9 +17,11 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
 
         public ImmutableDictionary<string, SyntaxTreeVersion> SyntaxTrees { get; }
 
-        public ImmutableDictionary<AssemblyIdentity, CompilationReference> References { get; }
+        public ImmutableDictionary<AssemblyIdentity, ICompilationVersion> References { get; }
 
         public Compilation Compilation { get; }
+
+        public IEnumerable<string> EnumerateSyntaxTreePaths() => this.Compilation.SyntaxTrees.Select( x => x.FilePath );
 
         /// <summary>
         /// Gets the compilation that should be analyzed by the pipeline. This is typically an older version of
@@ -32,7 +34,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             Compilation compilation,
             Compilation compilationToAnalyze,
             ImmutableDictionary<string, SyntaxTreeVersion> syntaxTrees,
-            ImmutableDictionary<AssemblyIdentity, CompilationReference> references,
+            ImmutableDictionary<AssemblyIdentity, ICompilationVersion> references,
             ulong compileTimeProjectHash )
         {
             this.Strategy = strategy;
@@ -49,11 +51,12 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         public CompilationVersion WithCompilation( Compilation compilation )
             => new( this.Strategy, compilation, this.CompilationToAnalyze, this.SyntaxTrees, this.References, this.CompileTimeProjectHash );
 
-        public static CompilationVersion Create( Compilation compilation, DiffStrategy strategy, CancellationToken cancellationToken = default )
+        public static CompilationVersion Create(
+            Compilation compilation,
+            DiffStrategy strategy,
+            ImmutableDictionary<AssemblyIdentity, ICompilationVersion>? references = null, // Can be null for test scenarios.
+            CancellationToken cancellationToken = default )
         {
-            var references = compilation.ExternalReferences.OfType<CompilationReference>()
-                .ToImmutableDictionary( r => r.Compilation.Assembly.Identity, r => r );
-
             var syntaxTreesBuilder = ImmutableDictionary.CreateBuilder<string, SyntaxTreeVersion>( StringComparer.Ordinal );
 
             var partialTypesBuilder = ImmutableHashSet.CreateBuilder<TypeDependencyKey>();
@@ -90,7 +93,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                 compilation,
                 compilationToAnalyze,
                 syntaxTreeVersions,
-                references.ToImmutableDictionary(),
+                references ?? ImmutableDictionary<AssemblyIdentity, ICompilationVersion>.Empty,
                 DiffStrategy.ComputeCompileTimeProjectHash( syntaxTreeVersions ) );
         }
 

@@ -128,6 +128,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         public static CompilationChanges Incremental(
             CompilationVersion oldCompilationVersion,
             Compilation newCompilation,
+            ImmutableDictionary<AssemblyIdentity, ICompilationVersion> newReferences,
             CancellationToken cancellationToken = default )
         {
             if ( newCompilation == oldCompilationVersion.Compilation )
@@ -237,19 +238,6 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                 }
             }
 
-            // Process references.
-            ImmutableDictionary<AssemblyIdentity, CompilationReference> references;
-
-            if ( oldCompilationVersion.Compilation.ExternalReferences == newCompilation.ExternalReferences )
-            {
-                references = oldCompilationVersion.References.AssertNotNull();
-            }
-            else
-            {
-                references = newCompilation.ExternalReferences.OfType<CompilationReference>()
-                    .ToImmutableDictionary( r => r.Compilation.Assembly.Identity, r => r );
-            }
-
             // Create the new CompilationVersion.
             var syntaxTreeVersions = newTrees.ToImmutable();
 
@@ -272,7 +260,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                     newCompilation,
                     compilationToAnalyze,
                     syntaxTreeVersions,
-                    references,
+                    newReferences,
                     DiffStrategy.ComputeCompileTimeProjectHash( syntaxTreeVersions ) );
 
                 cancellationToken.ThrowIfCancellationRequested();

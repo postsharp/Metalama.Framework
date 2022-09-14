@@ -24,9 +24,9 @@ internal class DependencyChanges
     public ImmutableHashSet<string> InvalidatedSyntaxTrees { get; }
 
     public static async ValueTask<DependencyChanges> IncrementalFromReferencesAsync(
-        CompilationChangesProvider compilationChangesProvider,
+        CompilationVersionProvider compilationVersionProvider,
         DependencyGraph oldGraph,
-        DesignTimeCompilationReferenceCollection newReferences,
+        DesignTimeCompilationVersion newReferences,
         CancellationToken cancellationToken = default )
     {
         var invalidatedFiles = ImmutableHashSet.CreateBuilder<string>( StringComparer.Ordinal );
@@ -43,12 +43,11 @@ internal class DependencyChanges
                     return new DependencyChanges( true, ImmutableHashSet<string>.Empty );
                 }
 
-                oldGraph.Compilations.TryGetValue( compilationReference.Key, out var oldReference );
+                oldGraph.Compilation.References.TryGetValue( compilationReference.Key, out var oldReference );
 
-                var compilationChanges = await compilationChangesProvider.GetCompilationChangesAsync(
+                var compilationChanges = await compilationVersionProvider.GetCompilationChangesAsync(
                     oldReference?.Compilation,
                     compilationReference.Value.CompilationVersion.Compilation,
-                    compilationReference.Value.IsMetalamaEnabled,
                     cancellationToken );
 
                 foreach ( var syntaxTreeChange in compilationChanges.SyntaxTreeChanges )

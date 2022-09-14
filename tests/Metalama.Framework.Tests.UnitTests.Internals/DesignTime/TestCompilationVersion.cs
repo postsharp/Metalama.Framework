@@ -4,20 +4,28 @@ using Metalama.Framework.DesignTime.Pipeline;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
 internal class TestCompilationVersion : ICompilationVersion
 {
-    private readonly Dictionary<string, ulong>? _hashes;
+    private readonly Dictionary<string, ulong> _hashes;
 
-    public TestCompilationVersion( AssemblyIdentity assemblyIdentity, ulong compileTimeProjectHash = 0, Dictionary<string, ulong>? hashes = null )
+    public TestCompilationVersion(
+        AssemblyIdentity assemblyIdentity,
+        ulong compileTimeProjectHash = 0,
+        Dictionary<string, ulong>? hashes = null,
+        ICompilationVersion[]? referencedCompilations = null )
     {
-        this._hashes = hashes;
+        this._hashes = hashes ?? new Dictionary<string, ulong>();
         this.AssemblyIdentity = assemblyIdentity;
         this.CompileTimeProjectHash = compileTimeProjectHash;
         this.Compilation = CSharpCompilation.Create( assemblyIdentity.Name, hashes?.Select( p => CSharpSyntaxTree.ParseText( "", path: p.Key ) ) );
+
+        this.References = referencedCompilations?.ToImmutableDictionary( c => c.AssemblyIdentity, c => c )
+                          ?? ImmutableDictionary<AssemblyIdentity, ICompilationVersion>.Empty;
     }
 
     public AssemblyIdentity AssemblyIdentity { get; }
@@ -26,13 +34,6 @@ internal class TestCompilationVersion : ICompilationVersion
 
     public bool TryGetSyntaxTreeVersion( string path, out SyntaxTreeVersion syntaxTreeVersion )
     {
-        if ( this._hashes == null )
-        {
-            syntaxTreeVersion = default;
-
-            return false;
-        }
-
         if ( this._hashes.TryGetValue( path, out var hash ) )
         {
             syntaxTreeVersion = new SyntaxTreeVersion( null!, false, hash );
@@ -48,4 +49,8 @@ internal class TestCompilationVersion : ICompilationVersion
     }
 
     public Compilation Compilation { get; }
+
+    public IEnumerable<string> EnumerateSyntaxTreePaths() => this._hashes.Keys;
+
+    public ImmutableDictionary<AssemblyIdentity, ICompilationVersion> References { get; }
 }

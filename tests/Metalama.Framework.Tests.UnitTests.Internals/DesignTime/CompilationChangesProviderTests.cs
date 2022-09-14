@@ -17,7 +17,7 @@ public class CompilationChangesProviderTests : TestBase
         using var testContext = this.CreateTestContext();
         var observer = new DifferObserver();
 
-        var graph = new CompilationChangesProvider( testContext.ServiceProvider.WithService( observer ) );
+        var graph = new CompilationVersionProvider( testContext.ServiceProvider.WithService( observer ) );
         var compilation1 = CreateCSharpCompilation( code );
         var compilationChanges1 = await graph.GetCompilationChangesAsync( null, compilation1 );
         Assert.Same( compilation1, compilationChanges1.NewCompilationVersion.CompilationToAnalyze );
@@ -65,7 +65,7 @@ public class CompilationChangesProviderTests : TestBase
         using var testContext = this.CreateTestContext();
         var observer = new DifferObserver();
 
-        var graph = new CompilationChangesProvider( testContext.ServiceProvider.WithService( observer ) );
+        var graph = new CompilationVersionProvider( testContext.ServiceProvider.WithService( observer ) );
         var compilation1 = CreateCSharpCompilation( code );
         _ = await graph.GetCompilationChangesAsync( null, compilation1 );
         _ = await graph.GetCompilationChangesAsync( null, compilation1 );
@@ -79,7 +79,7 @@ public class CompilationChangesProviderTests : TestBase
         using var testContext = this.CreateTestContext();
         var observer = new DifferObserver();
 
-        var graph = new CompilationChangesProvider( testContext.ServiceProvider.WithService( observer ) );
+        var graph = new CompilationVersionProvider( testContext.ServiceProvider.WithService( observer ) );
         var compilation1 = CreateCSharpCompilation( code );
         var compilation2 = CreateCSharpCompilation( code );
         var compilation3 = CreateCSharpCompilation( code );

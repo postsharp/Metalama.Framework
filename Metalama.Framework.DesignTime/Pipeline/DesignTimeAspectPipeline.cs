@@ -234,7 +234,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         private async ValueTask<CompilationChanges> InvalidateCacheAsync(
             Compilation compilation,
-            DesignTimeCompilationReferenceCollection references,
+            DesignTimeCompilationVersion references,
             bool invalidateCompilationResult,
             CancellationToken cancellationToken )
         {
@@ -263,7 +263,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         private bool TryExecutePartial(
             PartialCompilation partialCompilation,
-            DesignTimeCompilationReferenceCollection references,
+            DesignTimeCompilationVersion references,
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out CompilationResult? compilationResult )
         {
@@ -291,13 +291,18 @@ namespace Metalama.Framework.DesignTime.Pipeline
             return compilationResult != null;
         }
 
-        private async ValueTask<DesignTimeCompilationReferenceCollection?> GetProjectReferencesAsync(
+        private async ValueTask<DesignTimeCompilationVersion?> GetDesignTimeCompilationVersionAsync(
             Compilation compilation,
             CancellationToken cancellationToken )
         {
+            var compilationVersion = await this._factory.CompilationVersionProvider.GetCompilationVersionAsync(
+                this._currentState.CompilationVersion?.Compilation,
+                compilation,
+                cancellationToken );
+
             List<DesignTimeCompilationReference> compilationReferences = new();
 
-            foreach ( var reference in compilation.ExternalReferences.OfType<CompilationReference>() )
+            foreach ( var reference in compilationVersion.References.Values )
             {
                 var factory = this._factory.AssertNotNull();
 
@@ -338,7 +343,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 }
             }
 
-            return new DesignTimeCompilationReferenceCollection( compilationReferences );
+            return new DesignTimeCompilationVersion( compilationVersion, compilationReferences );
         }
 
         public async ValueTask<CompilationResult?> ExecuteAsync(
@@ -359,7 +364,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     return compilationResult;
                 }
 
-                var references = await this.GetProjectReferencesAsync( compilation, cancellationToken );
+                var references = await this.GetDesignTimeCompilationVersionAsync( compilation, cancellationToken );
 
                 if ( references == null )
                 {
