@@ -380,7 +380,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     var compilationVersion = await this.InvalidateCacheAsync(
                         compilation,
                         references,
-                        this.Status != DesignTimeAspectPipelineStatus.Paused,
+                        true,
                         cancellationToken );
 
                     compilationToAnalyze = compilationVersion.CompilationToAnalyze;

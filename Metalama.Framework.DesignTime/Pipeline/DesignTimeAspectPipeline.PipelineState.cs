@@ -244,8 +244,19 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     }
 
                     newCompileTimeSyntaxTrees = compileTimeSyntaxTreesBuilder.ToImmutable();
-                    newDependencyGraph = DependencyGraph.Empty;
-                    newCompilationResult = new CompilationPipelineResult();
+
+                    if ( invalidateCompilationResult )
+                    {
+                        newDependencyGraph = DependencyGraph.Empty;
+                        newCompilationResult = new CompilationPipelineResult();
+                    }
+                    else
+                    {
+                        // The pipeline is paused. We do not invalidate the results to we can still serve the old ones.
+                        
+                        newDependencyGraph = this.Dependencies;
+                        newCompilationResult = this.PipelineResult;
+                    }
                 }
                 else
                 {

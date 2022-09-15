@@ -2,12 +2,9 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.DesignTime.Pipeline;
-using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Tests.UnitTests.DesignTime;
-using Metalama.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
@@ -251,7 +248,7 @@ Target.cs:
             Assert.Equal( 1, pipeline.PipelineInitializationCount );
             Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "2" ).Trim(), dumpedResults3 );
 
-            // Forth execution, with modified aspect but not target code. We don't trigger a build, so we should get the old result.
+            // Forth execution, with modified aspect but not target code. This should pause the pipeline. We don't resume the pipeline, so we should get the old result.
             var compilation4 = CreateCSharpCompilation(
                 new Dictionary<string, string>()
                 {
@@ -307,18 +304,6 @@ Target.cs:
             Assert.Contains(
                 diagnostics5,
                 d => d.Severity == DiagnosticSeverity.Error && d.Id == TemplatingDiagnosticDescriptors.CompileTimeTypeNeedsRebuild.Id );
-
-            // Build the project from the compile-time pipeline.
-            using UnloadableCompileTimeDomain domain = new();
-
-            var serviceProvider = testContext.ServiceProvider
-                .WithProjectScopedServices( compilation );
-
-            var compileTimeAspectPipeline = new CompileTimeAspectPipeline( serviceProvider, true, domain );
-            DiagnosticList compileDiagnostics = new();
-            var pipelineResult = await compileTimeAspectPipeline.ExecuteAsync( compileDiagnostics, compilation5, default, CancellationToken.None );
-
-            Assert.NotNull( pipelineResult );
 
             // Simulate an external build event. This is normally triggered by the build touch file or by a UI signal.
             await pipeline.ResumeAsync( false, CancellationToken.None );
