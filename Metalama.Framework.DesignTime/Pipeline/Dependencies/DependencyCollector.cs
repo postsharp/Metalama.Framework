@@ -127,7 +127,7 @@ internal class DependencyCollector : BaseDependencyCollector, IDependencyCollect
                     {
                         this.AddPartialTypeDependency(
                             dependentSyntaxReference.SyntaxTree.FilePath,
-                            currentCompilationAssembly.Identity,
+                            referencedCompilationVersion.AssemblyIdentity,
                             new TypeDependencyKey( masterSymbol, this._storeTypeName ) );
                     }
                 }

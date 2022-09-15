@@ -464,11 +464,12 @@ class C : BaseClass
             Assert.Equal( 2, observer.InitializePipelineEvents.Count );
             Assert.Contains( "Master", observer.InitializePipelineEvents );
             Assert.Contains( "Dependent", observer.InitializePipelineEvents );
+            observer.InitializePipelineEvents.Clear();
 
             Assert.Contains( "Fields='Field1'", results1!.TransformationResult.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage() );
 
             // Second compilation with a different master compilation.
-            var masterCode2 = new Dictionary<string, string>() { ["master.cs"] = @"public class BaseClass { public int Field2; }" };
+            var masterCode2 = new Dictionary<string, string>() { ["master.cs"] = @"public partial class BaseClass { public int Field2; }" };
 
             var masterCompilation2 = CreateCSharpCompilation( masterCode2, name: "Master" );
 
@@ -477,13 +478,32 @@ class C : BaseClass
                 name: "Dependent",
                 additionalReferences: new[] { masterCompilation2.ToMetadataReference() } );
 
-            observer.InitializePipelineEvents.Clear();
-
             Assert.True( factory.TryExecute( testContext.ProjectOptions, dependentCompilation2, CancellationToken.None, out var results2 ) );
 
             Assert.Empty( observer.InitializePipelineEvents );
 
             Assert.Contains( "Fields='Field2'", results2!.TransformationResult.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage() );
+
+            // Third compilation. Add a syntax tree with a partial type.
+            var masterCode3 = new Dictionary<string, string>()
+            {
+                ["master.cs"] = @"public partial class BaseClass { public int Field2; }", ["partial.cs"] = "partial class BaseClass { public int Field3; }"
+            };
+
+            var masterCompilation3 = CreateCSharpCompilation( masterCode3, name: "Master" );
+
+            var dependentCompilation3 = CreateCSharpCompilation(
+                dependentCode,
+                name: "Dependent",
+                additionalReferences: new[] { masterCompilation3.ToMetadataReference() } );
+
+            observer.InitializePipelineEvents.Clear();
+
+            Assert.True( factory.TryExecute( testContext.ProjectOptions, dependentCompilation3, CancellationToken.None, out var results3 ) );
+
+            Assert.Empty( observer.InitializePipelineEvents );
+
+            Assert.Contains( "Fields='Field2,Field3'", results3!.TransformationResult.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage() );
         }
     }
 }
