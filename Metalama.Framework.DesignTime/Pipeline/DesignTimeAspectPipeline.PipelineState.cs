@@ -40,7 +40,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             internal DesignTimeAspectPipelineStatus Status { get; }
 
             public CompilationVersion? CompilationVersion => this._unprocessedChanges?.NewCompilationVersion;
-            
+
             public CompilationPipelineResult PipelineResult { get; }
 
             public CompilationValidationResult ValidationResult { get; }
@@ -253,7 +253,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     else
                     {
                         // The pipeline is paused. We do not invalidate the results to we can still serve the old ones.
-                        
+
                         newDependencyGraph = this.Dependencies;
                         newCompilationResult = this.PipelineResult;
                     }
@@ -356,6 +356,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     // If we don't have any configuration, we will build one, because this is the first time we are called.
 
                     var compileTimeTrees = GetCompileTimeSyntaxTrees( ref state, compilation.Compilation, cancellationToken );
+
+                    state._pipeline.Observer?.OnInitializePipeline( compilation.Compilation );
 
                     if ( !state._pipeline.TryInitialize(
                             diagnosticAdder,

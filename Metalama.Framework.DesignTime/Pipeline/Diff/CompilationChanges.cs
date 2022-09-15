@@ -55,7 +55,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                 false,
                 oldCompilation != null );
 
-        public bool HasChange => this.SyntaxTreeChanges is { Count: > 0 } || this.HasCompileTimeCodeChange;
+        public bool HasChange => this.HasCompileTimeCodeChange || this.SyntaxTreeChanges.Count > 0 || this.ReferencedCompilationChanges.Count > 0;
 
         public bool IsIncremental { get; }
 
@@ -198,7 +198,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             // Determine which compilation should be analyzed.
             CompilationChanges compilationChanges;
 
-            if ( !hasCompileTimeChange && syntaxTreeChanges.Count == 0 )
+            if ( !hasCompileTimeChange && syntaxTreeChanges.Count == 0 && referencedCompilationChanges.Count == 0 )
             {
                 // There is no significant change, so we can analyze the previous compilation.
                 compilationChanges = Empty( oldCompilationVersion, oldCompilationVersion.WithCompilation( newCompilation ) );

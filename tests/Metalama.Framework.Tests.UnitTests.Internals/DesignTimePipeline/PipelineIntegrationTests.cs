@@ -163,7 +163,7 @@ F1.cs:
         }
 
         [Fact]
-        public async Task ChangeInAspectCodeAsync()
+        public async Task ChangeInAspectCode()
         {
             var assemblyName = "test_" + RandomIdGenerator.GenerateId();
 
@@ -409,6 +409,80 @@ partial class C
                 additionalReferences: new[] { dependency.ToMetadataReference() } );
 
             Assert.True( pipelineFactory.TryExecute( context.ProjectOptions, compilation.RoslynCompilation, CancellationToken.None, out _ ) );
+        }
+
+        [Fact]
+        public void ChangeInDependency()
+        {
+            using var testContext = this.CreateTestContext();
+            var observer = new TestDesignTimePipelineObserver();
+
+            using TestDesignTimeAspectPipelineFactory factory = new( testContext, testContext.ServiceProvider.WithService( observer ) );
+
+            var dependentCode = new Dictionary<string, string>()
+            {
+                ["dependent.cs"] = @"
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Eligibility;
+using System.Linq;
+using System;
+
+class MyAspect : MethodAspect
+{
+   private static readonly DiagnosticDefinition<string> _description = new(""MY001"", Severity.Warning, ""Fields='{0}'"" );
+   
+   public override void BuildAspect( IAspectBuilder<IMethod> aspectBuilder )
+   {
+        var allFields = string.Join( "","",  aspectBuilder.Target.DeclaringType.AllFields.Select( f => f.Name ) );
+        aspectBuilder.Diagnostics.Report( _description.WithArguments( allFields ) );
+   }
+}
+
+class C : BaseClass
+{
+   [MyAspect]
+   void M() {}
+}
+"
+            };
+
+            // First compilation.
+            var masterCode1 = new Dictionary<string, string>() { ["master.cs"] = @"public class BaseClass { public int Field1; }" };
+
+            var masterCompilation1 = CreateCSharpCompilation( masterCode1, name: "Master" );
+
+            var dependentCompilation1 = CreateCSharpCompilation(
+                dependentCode,
+                name: "Dependent",
+                additionalReferences: new[] { masterCompilation1.ToMetadataReference() } );
+
+            Assert.True( factory.TryExecute( testContext.ProjectOptions, dependentCompilation1, CancellationToken.None, out var results1 ) );
+
+            Assert.Equal( 2, observer.InitializePipelineEvents.Count );
+            Assert.Contains( "Master", observer.InitializePipelineEvents );
+            Assert.Contains( "Dependent", observer.InitializePipelineEvents );
+
+            Assert.Contains( "Fields='Field1'", results1!.TransformationResult.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage() );
+
+            // Second compilation with a different master compilation.
+            var masterCode2 = new Dictionary<string, string>() { ["master.cs"] = @"public class BaseClass { public int Field2; }" };
+
+            var masterCompilation2 = CreateCSharpCompilation( masterCode2, name: "Master" );
+
+            var dependentCompilation2 = CreateCSharpCompilation(
+                dependentCode,
+                name: "Dependent",
+                additionalReferences: new[] { masterCompilation2.ToMetadataReference() } );
+
+            observer.InitializePipelineEvents.Clear();
+
+            Assert.True( factory.TryExecute( testContext.ProjectOptions, dependentCompilation2, CancellationToken.None, out var results2 ) );
+
+            Assert.Empty( observer.InitializePipelineEvents );
+
+            Assert.Contains( "Fields='Field2'", results2!.TransformationResult.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage() );
         }
     }
 }

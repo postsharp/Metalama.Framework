@@ -168,7 +168,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
                 {
                     var declaringType = declaration.GetTopNamedType();
 
-                    if ( declaringType != null && declaringType != this._targetType && this._targetType.IsSubclassOf( declaringType ) )
+                    if ( declaringType != null && declaringType != this._targetType && !this._targetType.IsSubclassOf( declaringType ) )
                     {
                         throw new DeclarationOutOfScopeException(
                             UserMessageFormatter.Format(

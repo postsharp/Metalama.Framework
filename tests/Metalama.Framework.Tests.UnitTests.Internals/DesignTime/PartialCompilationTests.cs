@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -9,11 +10,19 @@ using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using System.Linq;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
     public class PartialCompilationTests : TestBase
     {
+        private ITestOutputHelper _logger;
+
+        public PartialCompilationTests( ITestOutputHelper logger )
+        {
+            this._logger = logger;
+        }
+
         [Fact]
         public void Bug28733()
         {
@@ -69,6 +78,36 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
             Assert.Equal(
                 new[] { "Class2", "Class3", "Class4", "Interface1", "Interface2", "Interface3" },
                 compilationModel4.Types.Select( t => t.Name ).OrderBy( t => t ) );
+        }
+
+        [Fact]
+        public void Dependencies()
+        {
+            using var testContext = this.CreateTestContext();
+
+            var code = new Dictionary<string, string>
+            {
+                ["Class1.cs"] = "public class Class1 { }",
+                ["Class2.cs"] = "public class Class2 { }",
+                ["Class3.cs"] = "public class Class3 : Class2 { }",
+                ["Interface1.cs"] = "public interface Interface1 { }",
+                ["Interface2.cs"] = "public interface Interface2 : Interface1 { }",
+                ["Interface3.cs"] = "public interface Interface3 : Interface2 { }",
+                ["Class4.cs"] = "public class Class4 : Class3, Interface3 { }"
+            };
+
+            var compilation = PartialCompilation.CreateComplete( CreateCSharpCompilation( code ) );
+            var collector = new TestDependencyCollector();
+
+            compilation.DerivedTypes.PopulateDependencies( collector );
+
+            var dependencies = string.Join( ",", collector.Dependencies.OrderBy( x => x ) );
+
+            this._logger.WriteLine( dependencies );
+
+            Assert.Equal(
+                "Class3->Class2,Class4->Class2,Class4->Class3,Class4->Interface1,Class4->Interface2,Class4->Interface3,Interface2->Interface1,Interface3->Interface1,Interface3->Interface2",
+                dependencies );
         }
 
         [Fact]

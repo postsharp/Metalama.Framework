@@ -97,6 +97,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             this._projectKey = projectKey;
             this._factory = pipelineFactory;
             this.CompilationVersionProvider = this.ServiceProvider.GetRequiredService<CompilationVersionProvider>();
+            this.Observer = this.ServiceProvider.GetService<IDesignTimeAspectPipelineObserver>();
 
             this._currentState = new PipelineState( this );
 
@@ -113,18 +114,18 @@ namespace Metalama.Framework.DesignTime.Pipeline
             var watchedFilter = "*" + Path.GetExtension( this.ProjectOptions.BuildTouchFile );
             var watchedDirectory = Path.GetDirectoryName( this.ProjectOptions.BuildTouchFile );
 
-            if ( watchedDirectory == null )
+            if ( watchedDirectory != null )
             {
-                return;
+                var fileSystemWatcherFactory = this.ServiceProvider.GetService<IFileSystemWatcherFactory>() ?? new FileSystemWatcherFactory();
+                this._fileSystemWatcher = fileSystemWatcherFactory.Create( watchedDirectory, watchedFilter );
+                this._fileSystemWatcher.IncludeSubdirectories = false;
+
+                this._fileSystemWatcher.Changed += this.OnOutputDirectoryChanged;
+                this._fileSystemWatcher.EnableRaisingEvents = true;
             }
-
-            var fileSystemWatcherFactory = this.ServiceProvider.GetService<IFileSystemWatcherFactory>() ?? new FileSystemWatcherFactory();
-            this._fileSystemWatcher = fileSystemWatcherFactory.Create( watchedDirectory, watchedFilter );
-            this._fileSystemWatcher.IncludeSubdirectories = false;
-
-            this._fileSystemWatcher.Changed += this.OnOutputDirectoryChanged;
-            this._fileSystemWatcher.EnableRaisingEvents = true;
         }
+
+        internal IDesignTimeAspectPipelineObserver? Observer { get; }
 
         public event EventHandler? PipelineResumed;
 
