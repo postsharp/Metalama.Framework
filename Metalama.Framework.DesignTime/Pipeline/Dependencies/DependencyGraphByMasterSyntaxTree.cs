@@ -4,14 +4,12 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 
+/// <summary>
+/// Represents the set of syntax trees that are dependent on a master syntax tree.
+/// </summary>
 internal readonly struct DependencyGraphByMasterSyntaxTree
 {
     private static readonly ImmutableHashSet<string> _emptyDependencies = ImmutableHashSet.Create<string>().WithComparer( StringComparer.Ordinal );
-
-    /// <summary>
-    /// Gets the file path of the master syntax tree.
-    /// </summary>
-    public string FilePath { get; }
 
     /// <summary>
     /// Gets the hash of of the master syntax tree.
@@ -23,11 +21,10 @@ internal readonly struct DependencyGraphByMasterSyntaxTree
     /// </summary>
     public ImmutableHashSet<string> DependentFilePaths { get; }
 
-    public DependencyGraphByMasterSyntaxTree( string filePath, ulong declarationHash ) : this( filePath, declarationHash, _emptyDependencies ) { }
+    public DependencyGraphByMasterSyntaxTree( ulong declarationHash ) : this( declarationHash, _emptyDependencies ) { }
 
-    private DependencyGraphByMasterSyntaxTree( string filePath, ulong declarationHash, ImmutableHashSet<string> dependentFilePaths )
+    private DependencyGraphByMasterSyntaxTree( ulong declarationHash, ImmutableHashSet<string> dependentFilePaths )
     {
-        this.FilePath = filePath;
         this.DeclarationHash = declarationHash;
         this.DependentFilePaths = dependentFilePaths;
     }
@@ -40,17 +37,17 @@ internal readonly struct DependencyGraphByMasterSyntaxTree
         }
         else
         {
-            return new DependencyGraphByMasterSyntaxTree( this.FilePath, this.DeclarationHash, this.DependentFilePaths.Add( dependentFilePath ) );
+            return new DependencyGraphByMasterSyntaxTree( this.DeclarationHash, this.DependentFilePaths.Add( dependentFilePath ) );
         }
     }
 
     public DependencyGraphByMasterSyntaxTree RemoveDependency( string dependentFilePath )
     {
-        return new DependencyGraphByMasterSyntaxTree( this.FilePath, this.DeclarationHash, this.DependentFilePaths.Remove( dependentFilePath ) );
+        return new DependencyGraphByMasterSyntaxTree( this.DeclarationHash, this.DependentFilePaths.Remove( dependentFilePath ) );
     }
 
     public DependencyGraphByMasterSyntaxTree UpdateDeclarationHash( ulong hash )
     {
-        return new DependencyGraphByMasterSyntaxTree( this.FilePath, hash, this.DependentFilePaths );
+        return new DependencyGraphByMasterSyntaxTree( hash, this.DependentFilePaths );
     }
 }

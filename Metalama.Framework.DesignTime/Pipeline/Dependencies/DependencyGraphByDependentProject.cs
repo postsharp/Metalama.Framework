@@ -5,7 +5,7 @@ using System.Collections.Immutable;
 namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 
 /// <summary>
-/// Represents a dependency of a compilation to another compilation.
+/// Represents a dependency of a compilation to another project.
 /// </summary>
 internal readonly struct DependencyGraphByDependentProject
 {
@@ -129,7 +129,7 @@ internal readonly struct DependencyGraphByDependentProject
         {
             if ( !dependenciesByMasterFilePathBuilder.TryGetValue( masterFilePathAndHash.Key, out var syntaxTreeDependencies ) )
             {
-                syntaxTreeDependencies = new DependencyGraphByMasterSyntaxTree( masterFilePathAndHash.Key, masterFilePathAndHash.Value );
+                syntaxTreeDependencies = new DependencyGraphByMasterSyntaxTree( masterFilePathAndHash.Value );
             }
             else
             {
@@ -144,7 +144,7 @@ internal readonly struct DependencyGraphByDependentProject
         {
             if ( !dependenciesByMasterPartialTypeBuilder.TryGetValue( masterPartialType, out var partialTypeDependencies ) )
             {
-                partialTypeDependencies = new DependencyGraphByMasterPartialType( masterPartialType );
+                partialTypeDependencies = new DependencyGraphByMasterPartialType();
             }
 
             dependenciesByMasterPartialTypeBuilder[masterPartialType] = partialTypeDependencies.AddPartialTypeDependency( dependentFilePath );

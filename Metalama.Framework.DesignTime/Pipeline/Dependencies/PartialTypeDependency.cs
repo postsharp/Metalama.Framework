@@ -2,4 +2,7 @@
 
 namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 
+/// <summary>
+/// Represents a dependency between a master partial type and a dependent syntax tree. Used in tests only.
+/// </summary>
 internal record struct PartialTypeDependency( TypeDependencyKey MasterType, string DependentFilePath );

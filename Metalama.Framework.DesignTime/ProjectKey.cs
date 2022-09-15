@@ -22,13 +22,15 @@ public sealed class ProjectKey : IEquatable<ProjectKey>
 {
     private static readonly ConditionalWeakTable<Compilation, ProjectKey> _cache = new();
 
+    private static readonly ConditionalWeakTable<ParseOptions, StrongBox<ulong>> _preprocessorSymbolHashCodeCache = new();
+
     // We compare equality of two projects that have the same assembly name by hashing their preprocessor 
     // symbols. There are typically very few compilations of the same assembly name in a solution (one for each different platform)
     // so the change of collision is negligible.
 
-    public string AssemblyName { get; }
+    private readonly ulong _preprocessorSymbolHashCode;
 
-    public ulong PreprocessorSymbolHashCode { get; }
+    public string AssemblyName { get; }
 
     private ProjectKey( Compilation compilation )
     {
@@ -38,43 +40,49 @@ public sealed class ProjectKey : IEquatable<ProjectKey>
 
         if ( syntaxTrees.IsDefaultOrEmpty )
         {
-            this.PreprocessorSymbolHashCode = 0;
+            this._preprocessorSymbolHashCode = 0;
         }
         else
         {
-            var preprocessorSymbols = syntaxTrees[0].Options.PreprocessorSymbolNames;
-
-            // ProjectKey is a cross-process identifier so we have to use a robust hasher.
-            var hasher = new XXH64();
-
-            if ( preprocessorSymbols is ImmutableArray<string> immutableArray )
-            {
-                // The Roslyn implementation of PreprocessorSymbolNames is an ImmutableArray, so we allocate less memory.
-
-                foreach ( var symbol in immutableArray )
-                {
-                    hasher.Update( symbol );
-                }
-            }
-            else
-            {
-                // This is for forward compatibility.
-
-                foreach ( var symbol in immutableArray )
-                {
-                    hasher.Update( symbol );
-                }
-            }
-
-            this.PreprocessorSymbolHashCode = hasher.Digest();
+            var parseOptions = syntaxTrees[0].Options;
+            this._preprocessorSymbolHashCode = _preprocessorSymbolHashCodeCache.GetOrAdd( parseOptions, GetPreprocessorSymbolHashCode ).Value;
         }
+    }
+
+    private static StrongBox<ulong> GetPreprocessorSymbolHashCode( ParseOptions parseOptions )
+    {
+        // ProjectKey is a cross-process identifier so we have to use a robust hasher.
+        var hasher = new XXH64();
+
+        var preprocessorSymbolNames = parseOptions.PreprocessorSymbolNames;
+
+        if ( preprocessorSymbolNames is ImmutableArray<string> immutableArray )
+        {
+            // The Roslyn implementation of PreprocessorSymbolNames is an ImmutableArray, so we allocate less memory.
+
+            foreach ( var symbol in immutableArray )
+            {
+                hasher.Update( symbol );
+            }
+        }
+        else
+        {
+            // This is for forward compatibility.
+
+            foreach ( var symbol in preprocessorSymbolNames )
+            {
+                hasher.Update( symbol );
+            }
+        }
+
+        return new StrongBox<ulong>( hasher.Digest() );
     }
 
     [JsonConstructor]
     private ProjectKey( string assemblyName, ulong preprocessorSymbolHashCode )
     {
         this.AssemblyName = assemblyName;
-        this.PreprocessorSymbolHashCode = preprocessorSymbolHashCode;
+        this._preprocessorSymbolHashCode = preprocessorSymbolHashCode;
     }
 
     public static ProjectKey FromCompilation( Compilation compilation ) => _cache.GetOrAdd( compilation, c => new ProjectKey( c ) );
@@ -101,7 +109,7 @@ public sealed class ProjectKey : IEquatable<ProjectKey>
             return false;
         }
 
-        if ( this.PreprocessorSymbolHashCode != other.PreprocessorSymbolHashCode )
+        if ( this._preprocessorSymbolHashCode != other._preprocessorSymbolHashCode )
         {
             return false;
         }
@@ -131,12 +139,12 @@ public sealed class ProjectKey : IEquatable<ProjectKey>
 
     public override int GetHashCode()
     {
-        return HashCode.Combine( this.AssemblyName, this.PreprocessorSymbolHashCode );
+        return HashCode.Combine( this.AssemblyName, this._preprocessorSymbolHashCode );
     }
 
     public static bool operator ==( ProjectKey? left, ProjectKey? right ) => Equals( left, right );
 
     public static bool operator !=( ProjectKey? left, ProjectKey? right ) => !Equals( left, right );
 
-    public override string ToString() => $"{this.AssemblyName}, {this.PreprocessorSymbolHashCode:x}";
+    public override string ToString() => $"{this.AssemblyName}, {this._preprocessorSymbolHashCode:x}";
 }

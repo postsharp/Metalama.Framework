@@ -28,9 +28,9 @@ public class DependencyGraphTests : DesignTimeTestBase
 
         var dependenciesByCompilation = graph.DependenciesByCompilation.Values.Single();
         Assert.Equal( masterCompilation, dependenciesByCompilation.ProjectKey );
-        var dependenciesByMasterFile = graph.DependenciesByCompilation[masterCompilation].DependenciesByMasterFilePath.Values.Single();
-        Assert.Equal( masterFilePath, dependenciesByMasterFile.FilePath );
-        Assert.Equal( hash, dependenciesByMasterFile.DeclarationHash );
+        var dependenciesByMasterFile = graph.DependenciesByCompilation[masterCompilation].DependenciesByMasterFilePath.Single();
+        Assert.Equal( masterFilePath, dependenciesByMasterFile.Key );
+        Assert.Equal( hash, dependenciesByMasterFile.Value.DeclarationHash );
     }
 
     [Fact]
