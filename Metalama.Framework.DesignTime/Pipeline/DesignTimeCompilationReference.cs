@@ -8,17 +8,17 @@ internal class DesignTimeCompilationReference
 {
     public ITransitiveAspectsManifest? TransitiveAspectsManifest { get; }
 
-    public ICompilationVersion CompilationVersion { get; }
+    public IProjectVersion ProjectVersion { get; }
 
     public bool IsMetalamaEnabled { get; }
 
     public DesignTimeCompilationReference(
-        ICompilationVersion compilationVersion,
+        IProjectVersion projectVersion,
         bool isMetalamaEnabled = true,
         ITransitiveAspectsManifest? transitiveAspectsManifest = null )
     {
         this.TransitiveAspectsManifest = transitiveAspectsManifest;
-        this.CompilationVersion = compilationVersion;
+        this.ProjectVersion = projectVersion;
         this.IsMetalamaEnabled = isMetalamaEnabled;
     }
 }

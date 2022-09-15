@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Testing;
@@ -9,6 +10,7 @@ using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Concurrent;
 
 namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 
@@ -20,13 +22,31 @@ internal class DependencyCollector : BaseDependencyCollector, IDependencyCollect
     private readonly ILogger _logger;
     private readonly bool _storeTypeName;
 
-    private readonly HashSet<(ISymbol, ISymbol)> _processedDependencies = new();
+    private readonly ConcurrentDictionary<(ISymbol, ISymbol), bool> _processedDependencies = new();
+    private readonly Dictionary<AssemblyIdentity, ProjectKey> _referencesProjects = new();
 
-    public DependencyCollector( IServiceProvider serviceProvider, ICompilationVersion compilationVersion, PartialCompilation? partialCompilation = null ) :
-        base( compilationVersion, partialCompilation )
+    public DependencyCollector( IServiceProvider serviceProvider, IProjectVersion projectVersion, PartialCompilation? partialCompilation = null ) :
+        base( projectVersion, partialCompilation )
     {
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DependencyCollector" );
         this._storeTypeName = serviceProvider.GetService<TestMarkerService>() != null;
+
+        this.IndexReferencedProjects( projectVersion );
+    }
+
+    private void IndexReferencedProjects( IProjectVersion projectVersion )
+    {
+        var assemblyIdentity = projectVersion.Compilation.Assembly.Identity;
+
+        if ( !this._referencesProjects.ContainsKey( assemblyIdentity ) )
+        {
+            this._referencesProjects.Add( assemblyIdentity, projectVersion.ProjectKey );
+
+            foreach ( var reference in projectVersion.ReferencedProjectVersions )
+            {
+                this.IndexReferencedProjects( reference.Value );
+            }
+        }
     }
 
     public void AddDependency( INamedTypeSymbol masterSymbol, INamedTypeSymbol dependentSymbol )
@@ -56,12 +76,12 @@ internal class DependencyCollector : BaseDependencyCollector, IDependencyCollect
         }
 
         // Avoid spending time processing the same call twice.
-        if ( !this._processedDependencies.Add( (masterSymbol, dependentSymbol) ) )
+        if ( !this._processedDependencies.TryAdd( (masterSymbol, dependentSymbol), true ) )
         {
             return;
         }
 
-        var currentCompilationAssembly = this.CompilationVersion.Compilation.Assembly;
+        var currentCompilationAssembly = this.ProjectVersion.Compilation.Assembly;
 
         if ( !SymbolEqualityComparer.Default.Equals( dependentSymbol.ContainingAssembly, currentCompilationAssembly ) )
         {
@@ -83,7 +103,7 @@ internal class DependencyCollector : BaseDependencyCollector, IDependencyCollect
                     {
                         this.AddSyntaxTreeDependency(
                             dependentSyntaxReference.SyntaxTree.FilePath,
-                            currentCompilationAssembly.Identity,
+                            this.ProjectVersion.ProjectKey,
                             masterSyntaxReference.SyntaxTree.FilePath,
                             0 );
                     }
@@ -93,42 +113,50 @@ internal class DependencyCollector : BaseDependencyCollector, IDependencyCollect
                 {
                     this.AddPartialTypeDependency(
                         dependentSyntaxReference.SyntaxTree.FilePath,
-                        currentCompilationAssembly.Identity,
+                        this.ProjectVersion.ProjectKey,
                         new TypeDependencyKey( masterSymbol, this._storeTypeName ) );
                 }
             }
         }
-        else if ( this.CompilationVersion.ReferencedCompilations.TryGetValue( masterSymbol.ContainingAssembly.Identity, out var referencedCompilationVersion ) )
+        else
         {
-            // We have a dependency to a different compilation.
-
-            foreach ( var masterSyntaxReference in masterSymbol.DeclaringSyntaxReferences )
+            if ( !this._referencesProjects.TryGetValue( masterSymbol.ContainingAssembly.Identity, out var containingProjectKey ) )
             {
-                if ( referencedCompilationVersion.TryGetSyntaxTreeVersion( masterSyntaxReference.SyntaxTree.FilePath, out var masterSyntaxTreeVersion ) )
-                {
-                    foreach ( var dependentSyntaxReference in dependentSymbol.DeclaringSyntaxReferences )
-                    {
-                        this.AddSyntaxTreeDependency(
-                            dependentSyntaxReference.SyntaxTree.FilePath,
-                            referencedCompilationVersion.AssemblyIdentity,
-                            masterSyntaxReference.SyntaxTree.FilePath,
-                            masterSyntaxTreeVersion.DeclarationHash );
-                    }
-                }
-                else
-                {
-                    this._logger.Warning?.Log(
-                        $"Cannot find '{masterSyntaxReference.SyntaxTree.FilePath}' in '{referencedCompilationVersion.AssemblyIdentity}'." );
-                }
+                throw new AssertionFailedException();
+            }
 
-                if ( masterIsPartial )
+            if ( this.ProjectVersion.ReferencedProjectVersions.TryGetValue( containingProjectKey, out var referencedCompilationVersion ) )
+            {
+                // We have a dependency to a different compilation.
+
+                foreach ( var masterSyntaxReference in masterSymbol.DeclaringSyntaxReferences )
                 {
-                    foreach ( var dependentSyntaxReference in dependentSymbol.DeclaringSyntaxReferences )
+                    if ( referencedCompilationVersion.TryGetSyntaxTreeVersion( masterSyntaxReference.SyntaxTree.FilePath, out var masterSyntaxTreeVersion ) )
                     {
-                        this.AddPartialTypeDependency(
-                            dependentSyntaxReference.SyntaxTree.FilePath,
-                            referencedCompilationVersion.AssemblyIdentity,
-                            new TypeDependencyKey( masterSymbol, this._storeTypeName ) );
+                        foreach ( var dependentSyntaxReference in dependentSymbol.DeclaringSyntaxReferences )
+                        {
+                            this.AddSyntaxTreeDependency(
+                                dependentSyntaxReference.SyntaxTree.FilePath,
+                                referencedCompilationVersion.ProjectKey,
+                                masterSyntaxReference.SyntaxTree.FilePath,
+                                masterSyntaxTreeVersion.DeclarationHash );
+                        }
+                    }
+                    else
+                    {
+                        this._logger.Warning?.Log(
+                            $"Cannot find '{masterSyntaxReference.SyntaxTree.FilePath}' in '{referencedCompilationVersion.ProjectKey}'." );
+                    }
+
+                    if ( masterIsPartial )
+                    {
+                        foreach ( var dependentSyntaxReference in dependentSymbol.DeclaringSyntaxReferences )
+                        {
+                            this.AddPartialTypeDependency(
+                                dependentSyntaxReference.SyntaxTree.FilePath,
+                                referencedCompilationVersion.ProjectKey,
+                                new TypeDependencyKey( masterSymbol, this._storeTypeName ) );
+                        }
                     }
                 }
             }

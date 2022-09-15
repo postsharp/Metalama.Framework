@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
-using Microsoft.CodeAnalysis;
+using System.Collections.Concurrent;
 
 namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 
@@ -10,21 +10,21 @@ namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 /// </summary>
 internal class BaseDependencyCollector
 {
-    public ICompilationVersion CompilationVersion { get; }
+    public IProjectVersion ProjectVersion { get; }
 
     /// <summary>
     /// Gets the <see cref="PartialCompilation"/> for which the dependency graph was collected.
     /// </summary>
     public PartialCompilation PartialCompilation { get; }
 
-    private readonly Dictionary<string, DependencyCollectorByDependentSyntaxTree> _dependenciesByDependentFilePath = new();
+    private readonly ConcurrentDictionary<string, DependencyCollectorByDependentSyntaxTree> _dependenciesByDependentFilePath = new();
 
     public IReadOnlyDictionary<string, DependencyCollectorByDependentSyntaxTree> DependenciesByDependentFilePath => this._dependenciesByDependentFilePath;
 
-    public BaseDependencyCollector( ICompilationVersion compilationVersion, PartialCompilation? partialCompilation = null )
+    public BaseDependencyCollector( IProjectVersion projectVersion, PartialCompilation? partialCompilation = null )
     {
-        this.CompilationVersion = compilationVersion;
-        this.PartialCompilation = partialCompilation ?? PartialCompilation.CreateComplete( compilationVersion.Compilation );
+        this.ProjectVersion = projectVersion;
+        this.PartialCompilation = partialCompilation ?? PartialCompilation.CreateComplete( projectVersion.Compilation );
     }
 
     /// <summary>
@@ -61,7 +61,7 @@ internal class BaseDependencyCollector
         }
     }
 
-    public void AddPartialTypeDependency( string dependentFilePath, AssemblyIdentity masterCompilationIdentity, TypeDependencyKey masterPartialType )
+    public void AddPartialTypeDependency( string dependentFilePath, ProjectKey masterProjectKey, TypeDependencyKey masterPartialType )
     {
 #if DEBUG
         if ( this.IsReadOnly )
@@ -70,16 +70,12 @@ internal class BaseDependencyCollector
         }
 #endif
 
-        if ( !this._dependenciesByDependentFilePath.TryGetValue( dependentFilePath, out var dependencies ) )
-        {
-            dependencies = new DependencyCollectorByDependentSyntaxTree( dependentFilePath );
-            this._dependenciesByDependentFilePath.Add( dependentFilePath, dependencies );
-        }
+        var dependencies = this._dependenciesByDependentFilePath.GetOrAdd( dependentFilePath, x => new DependencyCollectorByDependentSyntaxTree( x ) );
 
-        dependencies.AddPartialTypeDependency( masterCompilationIdentity, masterPartialType );
+        dependencies.AddPartialTypeDependency( masterProjectKey, masterPartialType );
     }
 
-    public void AddSyntaxTreeDependency( string dependentFilePath, AssemblyIdentity masterCompilationIdentity, string masterFilePath, ulong masterHash )
+    public void AddSyntaxTreeDependency( string dependentFilePath, ProjectKey masterProjectKey, string masterFilePath, ulong masterHash )
     {
 #if DEBUG
         if ( this.IsReadOnly )
@@ -88,13 +84,9 @@ internal class BaseDependencyCollector
         }
 #endif
 
-        if ( !this._dependenciesByDependentFilePath.TryGetValue( dependentFilePath, out var dependencies ) )
-        {
-            dependencies = new DependencyCollectorByDependentSyntaxTree( dependentFilePath );
-            this._dependenciesByDependentFilePath.Add( dependentFilePath, dependencies );
-        }
+        var dependencies = this._dependenciesByDependentFilePath.GetOrAdd( dependentFilePath, x => new DependencyCollectorByDependentSyntaxTree( x ) );
 
-        dependencies.AddSyntaxTreeDependency( masterCompilationIdentity, masterFilePath, masterHash );
+        dependencies.AddSyntaxTreeDependency( masterProjectKey, masterFilePath, masterHash );
     }
 
 #if DEBUG

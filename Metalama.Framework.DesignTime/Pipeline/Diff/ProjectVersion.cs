@@ -9,51 +9,54 @@ using System.Collections.Immutable;
 namespace Metalama.Framework.DesignTime.Pipeline.Diff
 {
     /// <summary>
-    /// Computes and stores the changes between the last <see cref="Microsoft.CodeAnalysis.Compilation"/> and a new one.
+    /// The main implementation of <see cref="IProjectVersion"/>.
     /// </summary>
-    internal class CompilationVersion : ICompilationVersion
+    internal class ProjectVersion : IProjectVersion
     {
         public DiffStrategy Strategy { get; }
 
         public ImmutableDictionary<string, SyntaxTreeVersion> SyntaxTrees { get; }
 
-        public ImmutableDictionary<AssemblyIdentity, ICompilationVersion> ReferencedCompilations { get; }
+        public ImmutableDictionary<ProjectKey, IProjectVersion> ReferencedProjectVersions { get; }
 
         public Compilation Compilation { get; }
 
         /// <summary>
         /// Gets the compilation that should be analyzed by the pipeline. This is typically an older version of
-        /// the current <see cref="CompilationVersion"/>, but without the generated syntax trees.
+        /// the current <see cref="ProjectVersion"/>, but without the generated syntax trees.
         /// </summary>
         public Compilation CompilationToAnalyze { get; }
 
-        public CompilationVersion(
+        public ProjectVersion(
             DiffStrategy strategy,
+            ProjectKey projectKey,
             Compilation compilation,
             Compilation compilationToAnalyze,
             ImmutableDictionary<string, SyntaxTreeVersion> syntaxTrees,
-            ImmutableDictionary<AssemblyIdentity, ICompilationVersion> referencedCompilations )
+            ImmutableDictionary<ProjectKey, IProjectVersion> referencedCompilations )
         {
             this.Strategy = strategy;
             this.SyntaxTrees = syntaxTrees;
-            this.ReferencedCompilations = referencedCompilations;
+            this.ReferencedProjectVersions = referencedCompilations;
             this.Compilation = compilation;
+            this.ProjectKey = projectKey;
             this.CompilationToAnalyze = compilationToAnalyze;
         }
 
         /// <summary>
-        /// Returns a copy of the current <see cref="CompilationVersion"/> that differs only by the <see cref="Compilation"/> property.
+        /// Returns a copy of the current <see cref="ProjectVersion"/> that differs only by the <see cref="Compilation"/> property.
         /// </summary>
-        public CompilationVersion WithCompilation( Compilation compilation )
-            => new( this.Strategy, compilation, this.CompilationToAnalyze, this.SyntaxTrees, this.ReferencedCompilations );
+        public ProjectVersion WithCompilation( Compilation compilation )
+            => new( this.Strategy, this.ProjectKey, compilation, this.CompilationToAnalyze, this.SyntaxTrees, this.ReferencedProjectVersions );
 
-        public static CompilationVersion Create(
+        public static ProjectVersion Create(
             Compilation compilation,
+            ProjectKey projectKey,
             DiffStrategy strategy,
-            ImmutableDictionary<AssemblyIdentity, ICompilationVersion>? referencedCompilations = null, // Can be null for test scenarios.
+            ImmutableDictionary<ProjectKey, IProjectVersion>? referencedCompilations = null, // Can be null for test scenarios.
             CancellationToken cancellationToken = default )
         {
-            referencedCompilations ??= ImmutableDictionary<AssemblyIdentity, ICompilationVersion>.Empty;
+            referencedCompilations ??= ImmutableDictionary<ProjectKey, IProjectVersion>.Empty;
 
             var syntaxTreesBuilder = ImmutableDictionary.CreateBuilder<string, SyntaxTreeVersion>( StringComparer.Ordinal );
 
@@ -86,15 +89,16 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
 
             var compilationToAnalyze = generatedSyntaxTrees.Count > 0 ? compilation.RemoveSyntaxTrees( generatedSyntaxTrees ) : compilation;
 
-            return new CompilationVersion(
+            return new ProjectVersion(
                 strategy,
+                projectKey,
                 compilation,
                 compilationToAnalyze,
                 syntaxTreeVersions,
                 referencedCompilations );
         }
 
-        AssemblyIdentity ICompilationVersion.AssemblyIdentity => this.Compilation.AssertNotNull().Assembly.Identity;
+        public ProjectKey ProjectKey { get; }
 
         public bool TryGetSyntaxTreeVersion( string path, out SyntaxTreeVersion syntaxTreeVersion )
             => this.SyntaxTrees.AssertNotNull().TryGetValue( path, out syntaxTreeVersion );

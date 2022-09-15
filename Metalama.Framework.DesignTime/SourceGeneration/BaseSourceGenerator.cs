@@ -105,7 +105,7 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
                 return SourceGeneratorResult.Empty;
             }
 
-            var projectKey = ProjectKey.FromCompilation( compilation );
+            var projectKey = ProjectKeyExtensions.GetProjectKey( compilation );
 
             // Get or create an IProjectHandler instance.
             if ( !this._projectHandlers.TryGetValue( projectKey, out var projectHandler ) )

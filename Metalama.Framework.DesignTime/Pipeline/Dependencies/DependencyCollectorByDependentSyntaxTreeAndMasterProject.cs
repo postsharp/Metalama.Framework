@@ -1,14 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine;
-using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 
 /// <summary>
 /// Collects the dependencies of a given dependent syntax tree in a given compilation.
 /// </summary>
-internal class DependencyCollectorByDependentSyntaxTreeAndMasterCompilation
+internal class DependencyCollectorByDependentSyntaxTreeAndMasterProject
 {
     private readonly Dictionary<string, ulong> _masterFilePathsAndHashes = new( StringComparer.Ordinal );
     private readonly HashSet<TypeDependencyKey> _masterPartialTypes = new();
@@ -16,7 +15,7 @@ internal class DependencyCollectorByDependentSyntaxTreeAndMasterCompilation
 
     public string DependentFilePath { get; }
 
-    public AssemblyIdentity AssemblyIdentity { get; }
+    public ProjectKey ProjectKey { get; }
 
     public IReadOnlyDictionary<string, ulong> MasterFilePathsAndHashes => this._masterFilePathsAndHashes;
 
@@ -24,10 +23,10 @@ internal class DependencyCollectorByDependentSyntaxTreeAndMasterCompilation
 
     public bool Contains( TypeDependencyKey type ) => this._masterPartialTypes.Contains( type );
 
-    public DependencyCollectorByDependentSyntaxTreeAndMasterCompilation( string dependentFilePath, AssemblyIdentity assemblyIdentity )
+    public DependencyCollectorByDependentSyntaxTreeAndMasterProject( string dependentFilePath, ProjectKey projectKey )
     {
         this.DependentFilePath = dependentFilePath;
-        this.AssemblyIdentity = assemblyIdentity;
+        this.ProjectKey = projectKey;
     }
 
     public void AddSyntaxTreeDependency( string masterFilePath, ulong masterHash )
@@ -74,7 +73,7 @@ internal class DependencyCollectorByDependentSyntaxTreeAndMasterCompilation
     }
 #endif
 
-    public bool IsStructurallyEqual( DependencyCollectorByDependentSyntaxTreeAndMasterCompilation other )
+    public bool IsStructurallyEqual( DependencyCollectorByDependentSyntaxTreeAndMasterProject other )
     {
         if ( ReferenceEquals( this, other ) )
         {

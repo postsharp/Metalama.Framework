@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Microsoft.CodeAnalysis;
@@ -15,10 +16,10 @@ public partial class CompilationChangesTests
 {
     private CompilationChanges CompareCompilations( Compilation compilation1, Compilation compilation2 )
         => CompilationChanges.Incremental(
-            CompilationVersion.Create( compilation1, this._strategy ),
+            ProjectVersion.Create( compilation1, compilation1.GetProjectKey(), this._strategy ),
             compilation2,
-            ImmutableDictionary<AssemblyIdentity, ICompilationVersion>.Empty, // We are ignoring references.
-            ImmutableDictionary<AssemblyIdentity, ReferencedCompilationChange>.Empty,
+            ImmutableDictionary<ProjectKey, IProjectVersion>.Empty, // We are ignoring references.
+            ImmutableDictionary<ProjectKey, ReferencedProjectChange>.Empty,
             CancellationToken.None );
 
     [Fact]
@@ -35,7 +36,7 @@ public partial class CompilationChangesTests
         Assert.False( changes.HasCompileTimeCodeChange );
         Assert.True( changes.HasChange );
         Assert.True( changes.IsIncremental );
-        Assert.Equal( compilation2, changes.NewCompilationVersion.CompilationToAnalyze );
+        Assert.Equal( compilation2, changes.NewProjectVersion.CompilationToAnalyze );
         Assert.Single( changes.SyntaxTreeChanges );
 
         var syntaxTreeChange = changes.SyntaxTreeChanges.Single().Value;
@@ -60,7 +61,7 @@ public partial class CompilationChangesTests
         Assert.True( changes.HasChange );
         Assert.True( changes.HasCompileTimeCodeChange );
         Assert.True( changes.IsIncremental );
-        Assert.Equal( compilation2, changes.NewCompilationVersion.CompilationToAnalyze );
+        Assert.Equal( compilation2, changes.NewProjectVersion.CompilationToAnalyze );
         Assert.Single( changes.SyntaxTreeChanges );
 
         var syntaxTreeChange = changes.SyntaxTreeChanges.Single().Value;
@@ -85,7 +86,7 @@ public partial class CompilationChangesTests
         Assert.True( changes.HasChange );
         Assert.False( changes.HasCompileTimeCodeChange );
         Assert.True( changes.IsIncremental );
-        Assert.Equal( compilation2, changes.NewCompilationVersion.CompilationToAnalyze );
+        Assert.Equal( compilation2, changes.NewProjectVersion.CompilationToAnalyze );
         Assert.Single( changes.SyntaxTreeChanges );
 
         var syntaxTreeChange = changes.SyntaxTreeChanges.Single().Value;
@@ -111,12 +112,12 @@ public partial class CompilationChangesTests
         Assert.True( changes.HasChange );
         Assert.False( changes.HasCompileTimeCodeChange );
         Assert.True( changes.IsIncremental );
-        Assert.Equal( compilation2, changes.NewCompilationVersion.CompilationToAnalyze );
+        Assert.Equal( compilation2, changes.NewProjectVersion.CompilationToAnalyze );
         Assert.Single( changes.SyntaxTreeChanges );
 
         var syntaxTreeChange = changes.SyntaxTreeChanges.Single().Value;
 
-        Assert.Equal( SyntaxTreeChangeKind.Deleted, syntaxTreeChange.SyntaxTreeChangeKind );
+        Assert.Equal( SyntaxTreeChangeKind.Removed, syntaxTreeChange.SyntaxTreeChangeKind );
         Assert.Equal( CompileTimeChangeKind.None, syntaxTreeChange.CompileTimeChangeKind );
         Assert.True( syntaxTreeChange.NewSyntaxTreeVersion.IsDefault );
     }
@@ -137,7 +138,7 @@ public partial class CompilationChangesTests
 
         Assert.True( changes.HasChange );
         Assert.True( changes.IsIncremental );
-        Assert.Equal( compilation2, changes.NewCompilationVersion.CompilationToAnalyze );
+        Assert.Equal( compilation2, changes.NewProjectVersion.CompilationToAnalyze );
         Assert.Single( changes.SyntaxTreeChanges );
 
         var syntaxTreeChange = changes.SyntaxTreeChanges.Single().Value;
@@ -165,7 +166,7 @@ public partial class CompilationChangesTests
         Assert.Single( changes.SyntaxTreeChanges );
 
         Assert.True( changes.IsIncremental );
-        Assert.Equal( compilation2, changes.NewCompilationVersion.CompilationToAnalyze );
+        Assert.Equal( compilation2, changes.NewProjectVersion.CompilationToAnalyze );
 
         var syntaxTreeChange = changes.SyntaxTreeChanges.Single().Value;
 

@@ -43,7 +43,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         public DesignTimeAspectPipelineFactory( ServiceProvider serviceProvider, CompileTimeDomain domain, bool isTest = false )
         {
             serviceProvider = serviceProvider.WithService( this );
-            serviceProvider = serviceProvider.WithService( new CompilationVersionProvider( serviceProvider ) );
+            serviceProvider = serviceProvider.WithService( new ProjectVersionProvider( serviceProvider ) );
 
             this.Domain = domain;
             this.ServiceProvider = serviceProvider.WithService( this );
@@ -66,7 +66,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             // We lock the dictionary because the ConcurrentDictionary does not guarantee that the creation delegate
             // is called only once, and we prefer a single instance for the simplicity of debugging. 
 
-            var compilationId = ProjectKey.FromCompilation( compilation );
+            var compilationId = ProjectKeyExtensions.GetProjectKey( compilation );
 
             if ( this._pipelinesByProjectKey.TryGetValue( compilationId, out var pipeline ) )
             {
@@ -222,7 +222,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         protected virtual async ValueTask<DesignTimeAspectPipeline?> GetPipelineAndWaitAsync( Compilation compilation, CancellationToken cancellationToken )
         {
-            var projectKey = ProjectKey.FromCompilation( compilation );
+            var projectKey = ProjectKeyExtensions.GetProjectKey( compilation );
 
             DesignTimeAspectPipeline? pipeline;
 

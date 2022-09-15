@@ -5,26 +5,29 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.Pipeline.Diff;
 
-internal readonly struct ReferencedCompilationChange
+/// <summary>
+/// Represents a change in a referenced project.
+/// </summary>
+internal readonly struct ReferencedProjectChange
 {
-    public ReferencedCompilationChangeKind ChangeKind { get; }
+    public ReferencedProjectChangeKind ChangeKind { get; }
 
     public Compilation? NewCompilation { get; }
 
     public Compilation? OldCompilation { get; }
 
-    public bool HasCompileTimeCodeChange => this.ChangeKind != ReferencedCompilationChangeKind.Modified || this.Changes.AssertNotNull().HasCompileTimeCodeChange;
+    public bool HasCompileTimeCodeChange => this.ChangeKind != ReferencedProjectChangeKind.Modified || this.Changes.AssertNotNull().HasCompileTimeCodeChange;
 
     /// <summary>
-    /// Gets the changes in the referenced compilation, but only if <see cref="ChangeKind"/> is <see cref="ReferencedCompilationChangeKind.Modified"/>.
-    /// Specifically, the property is not set when <see cref="ChangeKind"/> is <see cref="ReferencedCompilationChangeKind.Added"/>.
+    /// Gets the changes in the referenced compilation, but only if <see cref="ChangeKind"/> is <see cref="ReferencedProjectChangeKind.Modified"/>.
+    /// Specifically, the property is not set when <see cref="ChangeKind"/> is <see cref="ReferencedProjectChangeKind.Added"/>.
     /// </summary>
     public CompilationChanges? Changes { get; }
 
-    public ReferencedCompilationChange(
+    public ReferencedProjectChange(
         Compilation? oldCompilation,
         Compilation? newCompilation,
-        ReferencedCompilationChangeKind changeKind,
+        ReferencedProjectChangeKind changeKind,
         CompilationChanges? changes = null )
     {
         this.OldCompilation = oldCompilation;

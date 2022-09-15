@@ -13,12 +13,12 @@ internal sealed class CompilationResult
 
     public CompilationPipelineResult TransformationResult { get; }
 
-    public CompilationVersion CompilationVersion { get; }
+    public ProjectVersion ProjectVersion { get; }
 
     public CompileTimeProject? CompileTimeProject { get; }
 
     internal CompilationResult(
-        in CompilationVersion compilationVersion,
+        in ProjectVersion projectVersion,
         CompilationPipelineResult transformationResult,
         CompilationValidationResult validationResult,
         CompileTimeProject? compileTimeProject )
@@ -26,7 +26,7 @@ internal sealed class CompilationResult
         this.ValidationResult = validationResult;
         this.CompileTimeProject = compileTimeProject;
         this.TransformationResult = transformationResult;
-        this.CompilationVersion = compilationVersion;
+        this.ProjectVersion = projectVersion;
     }
 
     internal IEnumerable<Diagnostic> GetAllDiagnostics( string path )

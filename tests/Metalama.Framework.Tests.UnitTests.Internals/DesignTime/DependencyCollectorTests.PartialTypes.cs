@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
@@ -15,8 +16,8 @@ public partial class DependencyCollectorTests : TestBase
     [Fact]
     public void AddOnePartialTypeDependency()
     {
-        var assemblyIdentity = new AssemblyIdentity( "DependentAssembly" );
-        var dependencies = new BaseDependencyCollector( new TestCompilationVersion( assemblyIdentity ) );
+        var assemblyIdentity = ProjectKey.CreateTest( "DependentAssembly" );
+        var dependencies = new BaseDependencyCollector( new TestProjectVersion( assemblyIdentity ) );
 
         const string dependentFilePath = "dependent.cs";
         var masterType = new TypeDependencyKey( "type" );
@@ -32,13 +33,13 @@ public partial class DependencyCollectorTests : TestBase
     [Fact]
     public void AddDuplicatePartialDependency()
     {
-        var assemblyIdentity = new AssemblyIdentity( "DependentAssembly" );
-        var dependencies = new BaseDependencyCollector( new TestCompilationVersion( assemblyIdentity ) );
+        var projectKey = ProjectKey.CreateTest( "DependentAssembly" );
+        var dependencies = new BaseDependencyCollector( new TestProjectVersion( projectKey ) );
 
         const string dependentFilePath = "dependent.cs";
         var masterType = new TypeDependencyKey( "type" );
-        dependencies.AddPartialTypeDependency( dependentFilePath, assemblyIdentity, masterType );
-        dependencies.AddPartialTypeDependency( dependentFilePath, assemblyIdentity, masterType );
+        dependencies.AddPartialTypeDependency( dependentFilePath, projectKey, masterType );
+        dependencies.AddPartialTypeDependency( dependentFilePath, projectKey, masterType );
 
         Assert.Contains(
             masterType,
@@ -66,7 +67,7 @@ public partial class DependencyCollectorTests : TestBase
 
         var compilation = CreateCSharpCompilation( code );
 
-        var dependencyCollector = new DependencyCollector( testContext.ServiceProvider, new TestCompilationVersion( compilation ) );
+        var dependencyCollector = new DependencyCollector( testContext.ServiceProvider, new TestProjectVersion( compilation ) );
 
         var partialCompilation = PartialCompilation.CreatePartial( compilation, compilation.SyntaxTrees );
         partialCompilation.DerivedTypes.PopulateDependencies( dependencyCollector );
@@ -112,7 +113,7 @@ public partial class DependencyCollectorTests : TestBase
 
         var dependencyCollector = new DependencyCollector(
             testContext.ServiceProvider,
-            new TestCompilationVersion( compilation2 ) );
+            new TestProjectVersion( compilation2 ) );
 
         var partialCompilation = PartialCompilation.CreatePartial( compilation2, compilation2.SyntaxTrees );
         partialCompilation.DerivedTypes.PopulateDependencies( dependencyCollector );

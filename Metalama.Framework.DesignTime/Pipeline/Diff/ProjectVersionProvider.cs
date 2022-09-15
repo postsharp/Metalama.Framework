@@ -10,22 +10,22 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff;
 /// <summary>
 /// Computes and caches the <see cref="CompilationChanges"/> between pairs of <see cref="Compilation"/> instances.
 /// </summary>
-internal partial class CompilationVersionProvider : IService
+internal partial class ProjectVersionProvider : IService
 {
     private readonly Implementation _implementation;
 
-    public CompilationVersionProvider( IServiceProvider serviceProvider )
+    public ProjectVersionProvider( IServiceProvider serviceProvider )
     {
         this._implementation = new Implementation( serviceProvider );
     }
 
-    public ValueTask<CompilationVersion> GetCompilationVersionAsync(
+    public ValueTask<ProjectVersion> GetCompilationVersionAsync(
         Compilation? oldCompilation,
         Compilation newCompilation,
         CancellationToken cancellationToken = default )
         => this._implementation.GetCompilationVersionCoreAsync( oldCompilation, newCompilation, false, cancellationToken );
 
-    public ValueTask<CompilationVersion> GetCompilationVersionAsync(
+    public ValueTask<ProjectVersion> GetCompilationVersionAsync(
         Compilation newCompilation,
         CancellationToken cancellationToken = default )
         => this._implementation.GetCompilationVersionCoreAsync( null, newCompilation, false, cancellationToken );
@@ -64,13 +64,13 @@ internal partial class CompilationVersionProvider : IService
         async ValueTask ProcessCompilationRecursiveAsync( CompilationChanges currentCompilationChanges )
         {
             // Prevent duplicate processing.
-            if ( !processedCompilations.Add( currentCompilationChanges.NewCompilationVersion.Compilation ) )
+            if ( !processedCompilations.Add( currentCompilationChanges.NewProjectVersion.Compilation ) )
             {
                 // This set of changes has already been processed.
                 return;
             }
 
-            if ( dependencyGraph.DependenciesByCompilation.TryGetValue( currentCompilationChanges.AssemblyIdentity, out var dependenciesOfCompilation ) )
+            if ( dependencyGraph.DependenciesByCompilation.TryGetValue( currentCompilationChanges.ProjectKey, out var dependenciesOfCompilation ) )
             {
                 // Process syntax trees.
                 foreach ( var syntaxTreeChangeEntry in currentCompilationChanges.SyntaxTreeChanges )
@@ -79,7 +79,7 @@ internal partial class CompilationVersionProvider : IService
 
                     var syntaxTreeChange = syntaxTreeChangeEntry.Value;
 
-                    if ( syntaxTreeChange.SyntaxTreeChangeKind is SyntaxTreeChangeKind.Changed or SyntaxTreeChangeKind.Deleted )
+                    if ( syntaxTreeChange.SyntaxTreeChangeKind is SyntaxTreeChangeKind.Changed or SyntaxTreeChangeKind.Removed )
                     {
                         if ( dependenciesOfCompilation.DependenciesByMasterFilePath.TryGetValue( syntaxTreeChange.FilePath, out var dependenciesOfSyntaxTree ) )
                         {
@@ -89,7 +89,7 @@ internal partial class CompilationVersionProvider : IService
                             }
                         }
 
-                        if ( syntaxTreeChange.SyntaxTreeChangeKind == SyntaxTreeChangeKind.Deleted )
+                        if ( syntaxTreeChange.SyntaxTreeChangeKind == SyntaxTreeChangeKind.Removed )
                         {
                             dependencyGraphBuilder.RemoveDependentSyntaxTree( syntaxTreeChange.FilePath );
                         }
@@ -122,7 +122,7 @@ internal partial class CompilationVersionProvider : IService
 
                 switch ( reference.Value.ChangeKind )
                 {
-                    case ReferencedCompilationChangeKind.Modified
+                    case ReferencedProjectChangeKind.Modified
                         when !processedCompilations.Contains( reference.Value.NewCompilation.AssertNotNull() ):
                         {
                             var referenceChanges = reference.Value.Changes
@@ -136,8 +136,8 @@ internal partial class CompilationVersionProvider : IService
                             break;
                         }
 
-                    case ReferencedCompilationChangeKind.Removed:
-                        dependencyGraphBuilder.RemoveCompilation( reference.Key );
+                    case ReferencedProjectChangeKind.Removed:
+                        dependencyGraphBuilder.RemoveProject( reference.Key );
 
                         break;
                 }

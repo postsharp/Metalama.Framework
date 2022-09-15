@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
@@ -15,13 +16,13 @@ public partial class DependencyCollectorTests
     [Fact]
     public void AddOneSyntaxTreeDependency()
     {
-        var assemblyIdentity = new AssemblyIdentity( "DependentAssembly" );
-        var dependencies = new BaseDependencyCollector( new TestCompilationVersion( assemblyIdentity ) );
+        var projectKey = ProjectKey.CreateTest( "DependentAssembly" );
+        var dependencies = new BaseDependencyCollector( new TestProjectVersion( projectKey ) );
         const ulong hash = 54;
 
         const string dependentFilePath = "dependent.cs";
         const string masterFilePath = "master.cs";
-        dependencies.AddSyntaxTreeDependency( dependentFilePath, assemblyIdentity, masterFilePath, hash );
+        dependencies.AddSyntaxTreeDependency( dependentFilePath, projectKey, masterFilePath, hash );
 
         Assert.Equal( dependentFilePath, dependencies.DependenciesByDependentFilePath[dependentFilePath].DependentFilePath );
 
@@ -35,15 +36,15 @@ public partial class DependencyCollectorTests
     [Fact]
     public void AddDuplicateSyntaxTreeDependency()
     {
-        var assemblyIdentity = new AssemblyIdentity( "DependentAssembly" );
-        var dependencies = new BaseDependencyCollector( new TestCompilationVersion( assemblyIdentity ) );
+        var projectKey = ProjectKey.CreateTest( "DependentAssembly" );
+        var dependencies = new BaseDependencyCollector( new TestProjectVersion( projectKey ) );
 
         const ulong hash = 54;
 
         const string dependentFilePath = "dependent.cs";
         const string masterFilePath = "master.cs";
-        dependencies.AddSyntaxTreeDependency( dependentFilePath, assemblyIdentity, masterFilePath, hash );
-        dependencies.AddSyntaxTreeDependency( dependentFilePath, assemblyIdentity, masterFilePath, hash );
+        dependencies.AddSyntaxTreeDependency( dependentFilePath, projectKey, masterFilePath, hash );
+        dependencies.AddSyntaxTreeDependency( dependentFilePath, projectKey, masterFilePath, hash );
 
         Assert.Equal( dependentFilePath, dependencies.DependenciesByDependentFilePath[dependentFilePath].DependentFilePath );
 
@@ -72,7 +73,7 @@ public partial class DependencyCollectorTests
 
         var compilation = CreateCSharpCompilation( code );
 
-        var dependencyCollector = new DependencyCollector( testContext.ServiceProvider, new TestCompilationVersion( compilation ) );
+        var dependencyCollector = new DependencyCollector( testContext.ServiceProvider, new TestProjectVersion( compilation ) );
 
         var partialCompilation = PartialCompilation.CreatePartial( compilation, compilation.SyntaxTrees );
         partialCompilation.DerivedTypes.PopulateDependencies( dependencyCollector );
@@ -120,7 +121,7 @@ public partial class DependencyCollectorTests
 
         var dependencyCollector = new DependencyCollector(
             testContext.ServiceProvider,
-            new TestCompilationVersion( compilation2 ) );
+            new TestProjectVersion( compilation2 ) );
 
         var partialCompilation = PartialCompilation.CreatePartial( compilation2, compilation2.SyntaxTrees );
         partialCompilation.DerivedTypes.PopulateDependencies( dependencyCollector );

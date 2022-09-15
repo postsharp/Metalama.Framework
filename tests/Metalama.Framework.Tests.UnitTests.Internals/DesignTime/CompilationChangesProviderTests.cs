@@ -20,10 +20,10 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
         using var testContext = this.CreateTestContext();
         var observer = new DifferObserver();
 
-        var compilationVersionProvider = new CompilationVersionProvider( testContext.ServiceProvider.WithService( observer ) );
+        var compilationVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider.WithService( observer ) );
         var compilation1 = CreateCSharpCompilation( code );
         var compilationChanges1 = await compilationVersionProvider.GetCompilationChangesAsync( null, compilation1 );
-        Assert.Same( compilation1, compilationChanges1.NewCompilationVersion.CompilationToAnalyze );
+        Assert.Same( compilation1, compilationChanges1.NewProjectVersion.CompilationToAnalyze );
         Assert.False( compilationChanges1.IsIncremental );
         Assert.True( compilationChanges1.HasChange );
         Assert.True( compilationChanges1.HasCompileTimeCodeChange );
@@ -38,7 +38,7 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
         Assert.True( compilationChanges2.IsIncremental );
         Assert.False( compilationChanges2.HasChange );
         Assert.False( compilationChanges2.HasCompileTimeCodeChange );
-        Assert.Same( compilation1, compilationChanges2.NewCompilationVersion.CompilationToAnalyze ); // There is no change, so compilation1 is expected.
+        Assert.Same( compilation1, compilationChanges2.NewProjectVersion.CompilationToAnalyze ); // There is no change, so compilation1 is expected.
         Assert.Equal( 1, observer.NewCompilationEventCount );
         Assert.Equal( 1, observer.ComputeNonIncrementalChangesEventCount );
         Assert.Equal( 1, observer.ComputeIncrementalChangesEventCount );
@@ -55,7 +55,7 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
         Assert.True( compilationChanges3.IsIncremental );
         Assert.False( compilationChanges3.HasChange );
         Assert.False( compilationChanges3.HasCompileTimeCodeChange );
-        Assert.Same( compilation1, compilationChanges3.NewCompilationVersion.CompilationToAnalyze ); // There is no change, so compilation1 is expected.
+        Assert.Same( compilation1, compilationChanges3.NewProjectVersion.CompilationToAnalyze ); // There is no change, so compilation1 is expected.
         Assert.Equal( 1, observer.ComputeNonIncrementalChangesEventCount );
         Assert.Equal( 2, observer.ComputeIncrementalChangesEventCount );
     }
@@ -68,13 +68,13 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
         using var testContext = this.CreateTestContext();
         var observer = new DifferObserver();
 
-        var compilationVersionProvider = new CompilationVersionProvider( testContext.ServiceProvider.WithService( observer ) );
+        var compilationVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider.WithService( observer ) );
         var compilation1 = CreateCSharpCompilation( code );
         var changes1 = await compilationVersionProvider.GetCompilationChangesAsync( null, compilation1 );
         var changes2 = await compilationVersionProvider.GetCompilationChangesAsync( null, compilation1 );
-        
+
         Assert.Null( changes1.OldCompilationVersion );
-        Assert.Same( compilation1, changes1.NewCompilationVersion.Compilation );
+        Assert.Same( compilation1, changes1.NewProjectVersion.Compilation );
         Assert.False( changes1.IsIncremental );
         Assert.Same( changes1, changes2 );
     }
@@ -87,7 +87,7 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
         using var testContext = this.CreateTestContext();
         var observer = new DifferObserver();
 
-        var compilationVersionProvider = new CompilationVersionProvider( testContext.ServiceProvider.WithService( observer ) );
+        var compilationVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider.WithService( observer ) );
         var compilation1 = CreateCSharpCompilation( code, name: "test" );
         var compilation2 = CreateCSharpCompilation( code, name: "test" );
         var compilation3 = CreateCSharpCompilation( code, name: "test" );
@@ -95,11 +95,11 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
         var changes2 = await compilationVersionProvider.GetCompilationChangesAsync( compilation2, compilation3 );
 
         Assert.Same( compilation1, changes1.OldCompilationVersion!.Compilation );
-        Assert.Same( compilation3, changes1.NewCompilationVersion.Compilation );
-        Assert.Same( compilation1, changes1.NewCompilationVersion.CompilationToAnalyze );
+        Assert.Same( compilation3, changes1.NewProjectVersion.Compilation );
+        Assert.Same( compilation1, changes1.NewProjectVersion.CompilationToAnalyze );
         Assert.Same( compilation2, changes2.OldCompilationVersion!.Compilation );
-        Assert.Same( compilation3, changes2.NewCompilationVersion.Compilation );
-        Assert.Same( compilation1, changes2.NewCompilationVersion.CompilationToAnalyze );
+        Assert.Same( compilation3, changes2.NewProjectVersion.Compilation );
+        Assert.Same( compilation1, changes2.NewProjectVersion.CompilationToAnalyze );
     }
 
     [Fact]
@@ -108,7 +108,7 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
         using var testContext = this.CreateTestContext();
         var observer = new DifferObserver();
 
-        var compilationVersionProvider = new CompilationVersionProvider( testContext.ServiceProvider.WithService( observer ) );
+        var compilationVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider.WithService( observer ) );
 
         var dependentCode = new Dictionary<string, string> { { "code.cs", "using Metalama.Framework.Aspects; class C {}" } };
         var compilation1 = CreateCSharpCompilation( dependentCode );
@@ -125,7 +125,7 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
         Assert.Empty( changes.SyntaxTreeChanges );
         Assert.Single( changes.ReferencedCompilationChanges );
         var referencedCompilationChange = changes.ReferencedCompilationChanges.Single().Value;
-        Assert.Equal( ReferencedCompilationChangeKind.Added, referencedCompilationChange.ChangeKind );
+        Assert.Equal( ReferencedProjectChangeKind.Added, referencedCompilationChange.ChangeKind );
         Assert.Null( referencedCompilationChange.OldCompilation );
         Assert.Same( masterCompilation, referencedCompilationChange.NewCompilation );
         Assert.Null( referencedCompilationChange.Changes );
@@ -138,7 +138,7 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
         using var testContext = this.CreateTestContext();
         var observer = new DifferObserver();
 
-        var compilationVersionProvider = new CompilationVersionProvider( testContext.ServiceProvider.WithService( observer ) );
+        var compilationVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider.WithService( observer ) );
 
         var masterCode = new Dictionary<string, string> { { "code.cs", "class D{}" } };
         var masterCompilation = CreateCSharpCompilation( masterCode );
@@ -155,7 +155,7 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
         Assert.Empty( changes.SyntaxTreeChanges );
         Assert.Single( changes.ReferencedCompilationChanges );
         var referencedCompilationChange = changes.ReferencedCompilationChanges.Single().Value;
-        Assert.Equal( ReferencedCompilationChangeKind.Removed, referencedCompilationChange.ChangeKind );
+        Assert.Equal( ReferencedProjectChangeKind.Removed, referencedCompilationChange.ChangeKind );
         Assert.Null( referencedCompilationChange.NewCompilation );
         Assert.Same( masterCompilation, referencedCompilationChange.OldCompilation );
         Assert.Null( referencedCompilationChange.Changes );
@@ -168,7 +168,7 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
         using var testContext = this.CreateTestContext();
         var observer = new DifferObserver();
 
-        var compilationVersionProvider = new CompilationVersionProvider( testContext.ServiceProvider.WithService( observer ) );
+        var compilationVersionProvider = new ProjectVersionProvider( testContext.ServiceProvider.WithService( observer ) );
 
         var level1Code = new Dictionary<string, string> { { "code.cs", "class E {}" } };
         var compilationLevel1 = CreateCSharpCompilation( level1Code, name: "Level1" );
@@ -202,7 +202,7 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
         Assert.Empty( changes.SyntaxTreeChanges );
         Assert.Single( changes.ReferencedCompilationChanges );
         var level3ReferencedCompilationChange = changes.ReferencedCompilationChanges.Single().Value;
-        Assert.Equal( ReferencedCompilationChangeKind.Modified, level3ReferencedCompilationChange.ChangeKind );
+        Assert.Equal( ReferencedProjectChangeKind.Modified, level3ReferencedCompilationChange.ChangeKind );
         Assert.Same( compilationLevel2WithoutLevel1Reference, level3ReferencedCompilationChange.OldCompilation );
         Assert.Same( compilationLevel2WithLevel1Reference, level3ReferencedCompilationChange.NewCompilation );
         Assert.True( level3ReferencedCompilationChange.HasCompileTimeCodeChange );
@@ -210,7 +210,7 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
         Assert.Empty( level3ReferencedCompilationChange.Changes!.SyntaxTreeChanges );
         Assert.Single( level3ReferencedCompilationChange.Changes!.ReferencedCompilationChanges );
         var level2ReferencedCompilationChange = level3ReferencedCompilationChange.Changes.ReferencedCompilationChanges.Single().Value;
-        Assert.Equal( ReferencedCompilationChangeKind.Added, level2ReferencedCompilationChange.ChangeKind );
+        Assert.Equal( ReferencedProjectChangeKind.Added, level2ReferencedCompilationChange.ChangeKind );
         Assert.Same( compilationLevel1, level2ReferencedCompilationChange.NewCompilation );
     }
 }

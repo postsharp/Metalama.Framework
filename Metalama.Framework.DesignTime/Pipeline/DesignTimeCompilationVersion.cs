@@ -8,24 +8,24 @@ namespace Metalama.Framework.DesignTime.Pipeline;
 
 internal class DesignTimeCompilationVersion : ITransitiveAspectManifestProvider
 {
-    public ICompilationVersion CompilationVersion { get; }
+    public IProjectVersion ProjectVersion { get; }
 
-    public ImmutableDictionary<AssemblyIdentity, DesignTimeCompilationReference> References { get; }
+    public ImmutableDictionary<ProjectKey, DesignTimeCompilationReference> References { get; }
 
     // For test only.
-    public DesignTimeCompilationVersion( ICompilationVersion compilationVersion ) : this(
-        compilationVersion,
-        compilationVersion.ReferencedCompilations.Values.Select( x => new DesignTimeCompilationReference( x ) ) ) { }
+    public DesignTimeCompilationVersion( IProjectVersion projectVersion ) : this(
+        projectVersion,
+        projectVersion.ReferencedProjectVersions.Values.Select( x => new DesignTimeCompilationReference( x ) ) ) { }
 
-    public DesignTimeCompilationVersion( ICompilationVersion compilationVersion, IEnumerable<DesignTimeCompilationReference> references )
+    public DesignTimeCompilationVersion( IProjectVersion projectVersion, IEnumerable<DesignTimeCompilationReference> references )
     {
-        this.CompilationVersion = compilationVersion;
-        this.References = references.ToImmutableDictionary( x => x.CompilationVersion.AssemblyIdentity, x => x );
+        this.ProjectVersion = projectVersion;
+        this.References = references.ToImmutableDictionary( x => x.ProjectVersion.ProjectKey, x => x );
     }
 
     public ITransitiveAspectsManifest? GetTransitiveAspectsManifest( Compilation compilation, CancellationToken cancellationToken )
     {
-        if ( this.References.TryGetValue( compilation.Assembly.Identity, out var reference ) )
+        if ( this.References.TryGetValue( ProjectKeyExtensions.GetProjectKey( compilation ), out var reference ) )
         {
             return reference.TransitiveAspectsManifest;
         }

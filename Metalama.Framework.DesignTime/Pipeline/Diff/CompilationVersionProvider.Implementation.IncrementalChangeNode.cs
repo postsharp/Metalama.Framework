@@ -2,7 +2,7 @@
 
 namespace Metalama.Framework.DesignTime.Pipeline.Diff;
 
-internal partial class CompilationVersionProvider
+internal partial class ProjectVersionProvider
 {
     private partial class Implementation
     {
@@ -10,7 +10,7 @@ internal partial class CompilationVersionProvider
         {
             /// <summary>
             /// Gets the incremental changes between the compilation at the head of the linked list
-            /// and the value of <see cref="CompilationChanges.NewCompilationVersion"/>.
+            /// and the value of <see cref="CompilationChanges.NewProjectVersion"/>.
             /// </summary>
             public CompilationChanges IncrementalChanges { get; }
 

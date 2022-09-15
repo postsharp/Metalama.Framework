@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.DesignTime;
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
 using System.Collections.Generic;
@@ -20,7 +21,7 @@ public class DependencyGraphInvalidationTests : DesignTimeTestBase
             Dictionary<string, string> codeAfter )
     {
         using var testContext = this.CreateTestContext();
-        var compilationChangesProvider = new CompilationVersionProvider( testContext.ServiceProvider );
+        var compilationChangesProvider = new ProjectVersionProvider( testContext.ServiceProvider );
 
         var compilation1 = CreateCSharpCompilation( codeBefore, name: "test", ignoreErrors: true );
         var compilationVersion1 = await compilationChangesProvider.GetCompilationVersionAsync( compilation1 );
@@ -32,7 +33,7 @@ public class DependencyGraphInvalidationTests : DesignTimeTestBase
             {
                 dependencyCollector.AddSyntaxTreeDependency(
                     dependency.Dependent,
-                    compilation1.Assembly.Identity,
+                    compilation1.GetProjectKey(),
                     dependency.Master,
                     compilationVersion1.SyntaxTrees[dependency.Master].DeclarationHash );
             }
@@ -40,7 +41,7 @@ public class DependencyGraphInvalidationTests : DesignTimeTestBase
             {
                 dependencyCollector.AddPartialTypeDependency(
                     dependency.Dependent,
-                    compilation1.Assembly.Identity,
+                    compilation1.GetProjectKey(),
                     new TypeDependencyKey( dependency.Master ) );
             }
         }

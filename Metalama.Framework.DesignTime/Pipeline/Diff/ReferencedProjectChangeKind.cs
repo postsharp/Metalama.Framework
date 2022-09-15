@@ -2,7 +2,10 @@
 
 namespace Metalama.Framework.DesignTime.Pipeline.Diff;
 
-internal enum ReferencedCompilationChangeKind
+/// <summary>
+/// Kinds of <see cref="ReferencedProjectChange"/>.
+/// </summary>
+internal enum ReferencedProjectChangeKind
 {
     None,
     Added,

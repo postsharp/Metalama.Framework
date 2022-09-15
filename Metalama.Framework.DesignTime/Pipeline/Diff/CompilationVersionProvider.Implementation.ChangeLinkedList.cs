@@ -2,7 +2,7 @@
 
 namespace Metalama.Framework.DesignTime.Pipeline.Diff;
 
-internal partial class CompilationVersionProvider
+internal partial class ProjectVersionProvider
 {
     private partial class Implementation
     {
@@ -10,15 +10,15 @@ internal partial class CompilationVersionProvider
         {
             private CompilationChanges? _nonIncrementalChanges;
 
-            public CompilationVersion CompilationVersion { get; }
+            public ProjectVersion ProjectVersion { get; }
 
-            public CompilationChanges NonIncrementalChanges => this._nonIncrementalChanges ??= CompilationChanges.NonIncremental( this.CompilationVersion );
+            public CompilationChanges NonIncrementalChanges => this._nonIncrementalChanges ??= CompilationChanges.NonIncremental( this.ProjectVersion );
 
             public IncrementalChangeNode? FirstIncrementalChange { get; private set; }
 
-            public ChangeLinkedList( CompilationVersion compilationVersion )
+            public ChangeLinkedList( ProjectVersion projectVersion )
             {
-                this.CompilationVersion = compilationVersion;
+                this.ProjectVersion = projectVersion;
             }
 
             public void Insert( CompilationChanges changes )

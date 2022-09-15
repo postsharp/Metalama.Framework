@@ -1,9 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
+using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.Pipeline.Diff;
 
+/// <summary>
+/// Represents a change in the set of partial types of a <see cref="SyntaxTree"/>. Exposed by <see cref="SyntaxTreeChange"/>.
+/// </summary>
 internal readonly struct PartialTypeChange
 {
     public TypeDependencyKey Type { get; }

@@ -39,7 +39,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             internal DesignTimeAspectPipelineStatus Status { get; }
 
-            public CompilationVersion? CompilationVersion => this._unprocessedChanges?.NewCompilationVersion;
+            public ProjectVersion? CompilationVersion => this._unprocessedChanges?.NewProjectVersion;
 
             public CompilationPipelineResult PipelineResult { get; }
 
@@ -178,7 +178,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 var newConfiguration = this.Configuration;
 
                 // Detect changes in the syntax trees of the tracked compilation.
-                var newChanges = await this._pipeline.CompilationVersionProvider.GetCompilationChangesAsync(
+                var newChanges = await this._pipeline.ProjectVersionProvider.GetCompilationChangesAsync(
                     this.CompilationVersion?.Compilation,
                     newCompilation,
                     cancellationToken );
@@ -267,7 +267,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     {
                         var invalidator = this.PipelineResult.ToInvalidator();
 
-                        newDependencyGraph = await this._pipeline.CompilationVersionProvider.ProcessCompilationChangesAsync(
+                        newDependencyGraph = await this._pipeline.ProjectVersionProvider.ProcessCompilationChangesAsync(
                             newChanges,
                             this.Dependencies,
                             invalidator.InvalidateSyntaxTree,
@@ -289,7 +289,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     newState,
                     newCompileTimeSyntaxTrees,
                     newStatus,
-                    CompilationChanges.Empty( null, newChanges.NewCompilationVersion ),
+                    CompilationChanges.Empty( null, newChanges.NewProjectVersion ),
                     newCompilationResult,
                     newDependencyGraph,
                     newConfiguration );
@@ -450,7 +450,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 // Execute the pipeline.
                 var dependencyCollector = new DependencyCollector(
                     configuration.ServiceProvider.WithService( compilationVersion ),
-                    compilationVersion.CompilationVersion,
+                    compilationVersion.ProjectVersion,
                     compilation );
 
                 compilation.DerivedTypes.PopulateDependencies( dependencyCollector );

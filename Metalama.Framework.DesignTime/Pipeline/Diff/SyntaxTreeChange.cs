@@ -112,12 +112,12 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             var newSyntaxTreeChangeKind = (this.SyntaxTreeChangeKind, newChange.SyntaxTreeChangeKind) switch
             {
                 (SyntaxTreeChangeKind.Added, SyntaxTreeChangeKind.Changed) => SyntaxTreeChangeKind.Added,
-                (SyntaxTreeChangeKind.Added, SyntaxTreeChangeKind.Deleted) => SyntaxTreeChangeKind.None,
+                (SyntaxTreeChangeKind.Added, SyntaxTreeChangeKind.Removed) => SyntaxTreeChangeKind.None,
                 (SyntaxTreeChangeKind.Added, SyntaxTreeChangeKind.Added) => throw new AssertionFailedException(),
-                (_, SyntaxTreeChangeKind.Deleted) => SyntaxTreeChangeKind.Deleted,
-                (SyntaxTreeChangeKind.Deleted, SyntaxTreeChangeKind.Added) when newChange.NewHash != this.OldHash => SyntaxTreeChangeKind.Changed,
-                (SyntaxTreeChangeKind.Deleted, SyntaxTreeChangeKind.Added) when newChange.NewHash == this.OldHash => SyntaxTreeChangeKind.None,
-                (SyntaxTreeChangeKind.Deleted, _) => throw new AssertionFailedException(),
+                (_, SyntaxTreeChangeKind.Removed) => SyntaxTreeChangeKind.Removed,
+                (SyntaxTreeChangeKind.Removed, SyntaxTreeChangeKind.Added) when newChange.NewHash != this.OldHash => SyntaxTreeChangeKind.Changed,
+                (SyntaxTreeChangeKind.Removed, SyntaxTreeChangeKind.Added) when newChange.NewHash == this.OldHash => SyntaxTreeChangeKind.None,
+                (SyntaxTreeChangeKind.Removed, _) => throw new AssertionFailedException(),
                 (SyntaxTreeChangeKind.Changed, SyntaxTreeChangeKind.Changed) => SyntaxTreeChangeKind.Changed,
                 _ => throw new AssertionFailedException()
             };

@@ -1,7 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Microsoft.CodeAnalysis;
-
 namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 
 /// <summary>
@@ -9,11 +7,11 @@ namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 /// </summary>
 internal class DependencyCollectorByDependentSyntaxTree
 {
-    private readonly Dictionary<AssemblyIdentity, DependencyCollectorByDependentSyntaxTreeAndMasterCompilation> _dependenciesByCompilation = new();
+    private readonly Dictionary<ProjectKey, DependencyCollectorByDependentSyntaxTreeAndMasterProject> _dependenciesByCompilation = new();
 
     public string DependentFilePath { get; }
 
-    public IReadOnlyDictionary<AssemblyIdentity, DependencyCollectorByDependentSyntaxTreeAndMasterCompilation> DependenciesByCompilation
+    public IReadOnlyDictionary<ProjectKey, DependencyCollectorByDependentSyntaxTreeAndMasterProject> DependenciesByCompilation
         => this._dependenciesByCompilation;
 
     public DependencyCollectorByDependentSyntaxTree( string dependentFilePath )
@@ -21,7 +19,7 @@ internal class DependencyCollectorByDependentSyntaxTree
         this.DependentFilePath = dependentFilePath;
     }
 
-    public void AddSyntaxTreeDependency( AssemblyIdentity masterCompilation, string masterFilePath, ulong masterHash )
+    public void AddSyntaxTreeDependency( ProjectKey masterCompilation, string masterFilePath, ulong masterHash )
     {
 #if DEBUG
         if ( this.IsReadOnly )
@@ -32,14 +30,14 @@ internal class DependencyCollectorByDependentSyntaxTree
 
         if ( !this._dependenciesByCompilation.TryGetValue( masterCompilation, out var compilationCollector ) )
         {
-            compilationCollector = new DependencyCollectorByDependentSyntaxTreeAndMasterCompilation( this.DependentFilePath, masterCompilation );
+            compilationCollector = new DependencyCollectorByDependentSyntaxTreeAndMasterProject( this.DependentFilePath, masterCompilation );
             this._dependenciesByCompilation.Add( masterCompilation, compilationCollector );
         }
 
         compilationCollector.AddSyntaxTreeDependency( masterFilePath, masterHash );
     }
 
-    public void AddPartialTypeDependency( AssemblyIdentity masterCompilation, TypeDependencyKey masterPartialType )
+    public void AddPartialTypeDependency( ProjectKey masterCompilation, TypeDependencyKey masterPartialType )
     {
 #if DEBUG
         if ( this.IsReadOnly )
@@ -50,7 +48,7 @@ internal class DependencyCollectorByDependentSyntaxTree
 
         if ( !this._dependenciesByCompilation.TryGetValue( masterCompilation, out var compilationCollector ) )
         {
-            compilationCollector = new DependencyCollectorByDependentSyntaxTreeAndMasterCompilation( this.DependentFilePath, masterCompilation );
+            compilationCollector = new DependencyCollectorByDependentSyntaxTreeAndMasterProject( this.DependentFilePath, masterCompilation );
             this._dependenciesByCompilation.Add( masterCompilation, compilationCollector );
         }
 

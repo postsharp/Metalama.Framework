@@ -21,7 +21,7 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Preview
             SyntaxTree syntaxTree,
             CancellationToken cancellationToken )
         {
-            var projectKey = ProjectKey.FromCompilation( compilation );
+            var projectKey = ProjectKeyExtensions.GetProjectKey( compilation );
 
             var transformationResult =
                 await (await this._userProcessEndpoint.GetApiAsync( projectKey, cancellationToken )).PreviewTransformationAsync(

@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
@@ -8,15 +7,15 @@ namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 /// <summary>
 /// Represents a dependency of a compilation to another compilation.
 /// </summary>
-internal readonly struct DependencyGraphByDependentCompilation
+internal readonly struct DependencyGraphByDependentProject
 {
     private static readonly ImmutableDictionary<string, DependencyGraphByMasterSyntaxTree> _emptyDependenciesByMasterFilePath =
         ImmutableDictionary<string, DependencyGraphByMasterSyntaxTree>.Empty.WithComparers( StringComparer.Ordinal );
 
-    private static readonly ImmutableDictionary<string, DependencyCollectorByDependentSyntaxTreeAndMasterCompilation> _emptyDependenciesByDependentFilePath =
-        ImmutableDictionary<string, DependencyCollectorByDependentSyntaxTreeAndMasterCompilation>.Empty.WithComparers( StringComparer.Ordinal );
+    private static readonly ImmutableDictionary<string, DependencyCollectorByDependentSyntaxTreeAndMasterProject> _emptyDependenciesByDependentFilePath =
+        ImmutableDictionary<string, DependencyCollectorByDependentSyntaxTreeAndMasterProject>.Empty.WithComparers( StringComparer.Ordinal );
 
-    public AssemblyIdentity AssemblyIdentity { get; }
+    public ProjectKey ProjectKey { get; }
 
     /// <summary>
     /// Gets the list of dependencies on syntax trees within the master compilation, indexed by file path.
@@ -27,27 +26,27 @@ internal readonly struct DependencyGraphByDependentCompilation
 
     public bool IsEmpty => this.DependenciesByMasterFilePath.Count == 0 && this.DependenciesByMasterPartialType.Count == 0;
 
-    private readonly ImmutableDictionary<string, DependencyCollectorByDependentSyntaxTreeAndMasterCompilation> _dependenciesByDependentFilePath;
+    private readonly ImmutableDictionary<string, DependencyCollectorByDependentSyntaxTreeAndMasterProject> _dependenciesByDependentFilePath;
 
-    public DependencyGraphByDependentCompilation( AssemblyIdentity assemblyIdentity ) : this(
-        assemblyIdentity,
+    public DependencyGraphByDependentProject( ProjectKey projectKey ) : this(
+        projectKey,
         _emptyDependenciesByMasterFilePath,
         ImmutableDictionary<TypeDependencyKey, DependencyGraphByMasterPartialType>.Empty,
         _emptyDependenciesByDependentFilePath ) { }
 
-    private DependencyGraphByDependentCompilation(
-        AssemblyIdentity assemblyIdentity,
+    private DependencyGraphByDependentProject(
+        ProjectKey projectKey,
         ImmutableDictionary<string, DependencyGraphByMasterSyntaxTree> dependenciesByMasterFilePath,
         ImmutableDictionary<TypeDependencyKey, DependencyGraphByMasterPartialType> dependenciesByMasterPartialType,
-        ImmutableDictionary<string, DependencyCollectorByDependentSyntaxTreeAndMasterCompilation> dependenciesByDependentFilePath )
+        ImmutableDictionary<string, DependencyCollectorByDependentSyntaxTreeAndMasterProject> dependenciesByDependentFilePath )
     {
-        this.AssemblyIdentity = assemblyIdentity;
+        this.ProjectKey = projectKey;
         this.DependenciesByMasterFilePath = dependenciesByMasterFilePath;
         this.DependenciesByMasterPartialType = dependenciesByMasterPartialType;
         this._dependenciesByDependentFilePath = dependenciesByDependentFilePath;
     }
 
-    public bool TryRemoveDependentSyntaxTree( string dependentFilePath, out DependencyGraphByDependentCompilation newDependenciesGraph )
+    public bool TryRemoveDependentSyntaxTree( string dependentFilePath, out DependencyGraphByDependentProject newDependenciesGraph )
     {
         if ( !this._dependenciesByDependentFilePath.TryGetValue( dependentFilePath, out var oldDependencies ) )
         {
@@ -99,8 +98,8 @@ internal readonly struct DependencyGraphByDependentCompilation
             }
         }
 
-        newDependenciesGraph = new DependencyGraphByDependentCompilation(
-            this.AssemblyIdentity,
+        newDependenciesGraph = new DependencyGraphByDependentProject(
+            this.ProjectKey,
             dependenciesByMasterFilePathBuilder.ToImmutable(),
             dependenciesByMasterPartialTypesBuilder.ToImmutable(),
             this._dependenciesByDependentFilePath.Remove( dependentFilePath ) );
@@ -110,8 +109,8 @@ internal readonly struct DependencyGraphByDependentCompilation
 
     public bool TryUpdateDependencies(
         string dependentFilePath,
-        DependencyCollectorByDependentSyntaxTreeAndMasterCompilation dependencies,
-        out DependencyGraphByDependentCompilation newDependenciesGraph )
+        DependencyCollectorByDependentSyntaxTreeAndMasterProject dependencies,
+        out DependencyGraphByDependentProject newDependenciesGraph )
     {
         // Check if there is any change.
         if ( this._dependenciesByDependentFilePath.TryGetValue( dependentFilePath, out var oldDependencies )
@@ -199,8 +198,8 @@ internal readonly struct DependencyGraphByDependentCompilation
             }
         }
 
-        newDependenciesGraph = new DependencyGraphByDependentCompilation(
-            this.AssemblyIdentity,
+        newDependenciesGraph = new DependencyGraphByDependentProject(
+            this.ProjectKey,
             dependenciesByMasterFilePathBuilder.ToImmutable(),
             dependenciesByMasterPartialTypeBuilder.ToImmutable(),
             this._dependenciesByDependentFilePath.SetItem( dependentFilePath, dependencies ) );

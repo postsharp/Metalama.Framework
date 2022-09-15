@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
@@ -12,19 +11,19 @@ internal readonly struct DependencyGraph
 {
     public static DependencyGraph Create( BaseDependencyCollector dependencies )
     {
-        var emptyGraph = new DependencyGraph( ImmutableDictionary<AssemblyIdentity, DependencyGraphByDependentCompilation>.Empty );
+        var emptyGraph = new DependencyGraph( ImmutableDictionary<ProjectKey, DependencyGraphByDependentProject>.Empty );
 
         return emptyGraph.Update( dependencies );
     }
 
-    public static DependencyGraph Empty => new( ImmutableDictionary<AssemblyIdentity, DependencyGraphByDependentCompilation>.Empty );
+    public static DependencyGraph Empty => new( ImmutableDictionary<ProjectKey, DependencyGraphByDependentProject>.Empty );
 
     public bool IsUninitialized => this.DependenciesByCompilation == null!;
 
     /// <summary>
     /// Gets the dependencies indexed by compilation.
     /// </summary>
-    public ImmutableDictionary<AssemblyIdentity, DependencyGraphByDependentCompilation> DependenciesByCompilation { get; }
+    public ImmutableDictionary<ProjectKey, DependencyGraphByDependentProject> DependenciesByCompilation { get; }
 
     /// <summary>
     /// Updates the <see cref="DependencyGraph"/> based on a <see cref="BaseDependencyCollector"/>.
@@ -62,7 +61,7 @@ internal readonly struct DependencyGraph
 
     public Builder ToBuilder() => new( this );
 
-    private DependencyGraph( ImmutableDictionary<AssemblyIdentity, DependencyGraphByDependentCompilation> dependenciesByCompilation )
+    private DependencyGraph( ImmutableDictionary<ProjectKey, DependencyGraphByDependentProject> dependenciesByCompilation )
     {
         this.DependenciesByCompilation = dependenciesByCompilation;
     }
@@ -70,7 +69,7 @@ internal readonly struct DependencyGraph
     public struct Builder
     {
         private readonly DependencyGraph _dependencyGraph;
-        private ImmutableDictionary<AssemblyIdentity, DependencyGraphByDependentCompilation>.Builder? _dependenciesByCompilationBuilder;
+        private ImmutableDictionary<ProjectKey, DependencyGraphByDependentProject>.Builder? _dependenciesByCompilationBuilder;
 
         public Builder( DependencyGraph dependencyGraph )
         {
@@ -78,11 +77,11 @@ internal readonly struct DependencyGraph
             this._dependenciesByCompilationBuilder = null;
         }
 
-        private ImmutableDictionary<AssemblyIdentity, DependencyGraphByDependentCompilation>.Builder GetDependenciesByCompilationBuilder()
+        private ImmutableDictionary<ProjectKey, DependencyGraphByDependentProject>.Builder GetDependenciesByCompilationBuilder()
             => this._dependenciesByCompilationBuilder ??= this._dependencyGraph.DependenciesByCompilation.ToBuilder();
 
-        private IReadOnlyDictionary<AssemblyIdentity, DependencyGraphByDependentCompilation> GetDependenciesByCompilation()
-            => (IReadOnlyDictionary<AssemblyIdentity, DependencyGraphByDependentCompilation>?) this._dependenciesByCompilationBuilder
+        private IReadOnlyDictionary<ProjectKey, DependencyGraphByDependentProject> GetDependenciesByCompilation()
+            => (IReadOnlyDictionary<ProjectKey, DependencyGraphByDependentProject>?) this._dependenciesByCompilationBuilder
                ?? this._dependencyGraph.DependenciesByCompilation;
 
         public void RemoveDependentSyntaxTree( string path )
@@ -103,22 +102,22 @@ internal readonly struct DependencyGraph
             }
         }
 
-        public void RemoveCompilation( AssemblyIdentity assemblyIdentity )
+        public void RemoveProject( ProjectKey projectKey )
         {
-            if ( this.GetDependenciesByCompilation().ContainsKey( assemblyIdentity ) )
+            if ( this.GetDependenciesByCompilation().ContainsKey( projectKey ) )
             {
-                this.GetDependenciesByCompilationBuilder().Remove( assemblyIdentity );
+                this.GetDependenciesByCompilationBuilder().Remove( projectKey );
             }
         }
 
         public void UpdateDependencies(
-            AssemblyIdentity compilation,
+            ProjectKey projectKey,
             string dependentFilePath,
-            DependencyCollectorByDependentSyntaxTreeAndMasterCompilation dependencies )
+            DependencyCollectorByDependentSyntaxTreeAndMasterProject dependencies )
         {
-            if ( !this.GetDependenciesByCompilation().TryGetValue( compilation, out var currentDependenciesOfCompilation ) )
+            if ( !this.GetDependenciesByCompilation().TryGetValue( projectKey, out var currentDependenciesOfCompilation ) )
             {
-                currentDependenciesOfCompilation = new DependencyGraphByDependentCompilation( compilation );
+                currentDependenciesOfCompilation = new DependencyGraphByDependentProject( projectKey );
             }
 
             if ( currentDependenciesOfCompilation.TryUpdateDependencies(
@@ -126,7 +125,7 @@ internal readonly struct DependencyGraph
                     dependencies,
                     out var newDependenciesOfCompilation ) )
             {
-                this.GetDependenciesByCompilationBuilder()[compilation] = newDependenciesOfCompilation;
+                this.GetDependenciesByCompilationBuilder()[projectKey] = newDependenciesOfCompilation;
             }
             else
             {

@@ -60,7 +60,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         private readonly DesignTimeAspectPipelineFactory _factory;
 
-        public CompilationVersionProvider CompilationVersionProvider { get; }
+        public ProjectVersionProvider ProjectVersionProvider { get; }
 
         private void SetState( in PipelineState state )
         {
@@ -81,7 +81,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             DesignTimeAspectPipelineFactory pipelineFactory,
             IProjectOptions projectOptions,
             Compilation compilation,
-            bool isTest ) : this( pipelineFactory, projectOptions, ProjectKey.FromCompilation( compilation ), compilation.References, isTest ) { }
+            bool isTest ) : this( pipelineFactory, projectOptions, ProjectKeyExtensions.GetProjectKey( compilation ), compilation.References, isTest ) { }
 
         public DesignTimeAspectPipeline(
             DesignTimeAspectPipelineFactory pipelineFactory,
@@ -96,7 +96,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         {
             this._projectKey = projectKey;
             this._factory = pipelineFactory;
-            this.CompilationVersionProvider = this.ServiceProvider.GetRequiredService<CompilationVersionProvider>();
+            this.ProjectVersionProvider = this.ServiceProvider.GetRequiredService<ProjectVersionProvider>();
             this.Observer = this.ServiceProvider.GetService<IDesignTimeAspectPipelineObserver>();
 
             this._currentState = new PipelineState( this );
@@ -236,7 +236,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             this._sync.Dispose();
         }
 
-        private async ValueTask<CompilationVersion> InvalidateCacheAsync(
+        private async ValueTask<ProjectVersion> InvalidateCacheAsync(
             Compilation compilation,
             DesignTimeCompilationVersion references,
             bool invalidateCompilationResult,
@@ -295,14 +295,14 @@ namespace Metalama.Framework.DesignTime.Pipeline
             Compilation compilation,
             CancellationToken cancellationToken )
         {
-            var compilationVersion = await this.CompilationVersionProvider.GetCompilationVersionAsync(
+            var compilationVersion = await this.ProjectVersionProvider.GetCompilationVersionAsync(
                 this._currentState.CompilationVersion?.Compilation,
                 compilation,
                 cancellationToken );
 
             List<DesignTimeCompilationReference> compilationReferences = new();
 
-            foreach ( var reference in compilationVersion.ReferencedCompilations.Values )
+            foreach ( var reference in compilationVersion.ReferencedProjectVersions.Values )
             {
                 var factory = this._factory.AssertNotNull();
 
@@ -318,18 +318,19 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                     compilationReferences.Add(
                         new DesignTimeCompilationReference(
-                            referenceResult.CompilationVersion,
+                            referenceResult.ProjectVersion,
                             true,
                             referenceResult.TransformationResult ) );
                 }
                 else
                 {
                     // It is a non-Metalama reference.
-                    var projectTracker = factory.GetNonMetalamaProjectTracker( ProjectKey.FromCompilation( reference.Compilation ) );
+                    var projectKey = ProjectKeyExtensions.GetProjectKey( reference.Compilation );
+                    var projectTracker = factory.GetNonMetalamaProjectTracker( projectKey );
 
-                    if ( this._currentState.CompilationVersion?.ReferencedCompilations == null
-                         || this._currentState.CompilationVersion.ReferencedCompilations.TryGetValue(
-                             reference.Compilation.Assembly.Identity,
+                    if ( this._currentState.CompilationVersion?.ReferencedProjectVersions == null
+                         || this._currentState.CompilationVersion.ReferencedProjectVersions.TryGetValue(
+                             projectKey,
                              out var oldReference ) )
                     {
                         oldReference = null;
