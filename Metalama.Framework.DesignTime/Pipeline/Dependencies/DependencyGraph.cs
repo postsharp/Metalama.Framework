@@ -1,7 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.DesignTime.Pipeline.Diff;
-using Metalama.Framework.Engine;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
@@ -18,6 +16,8 @@ internal readonly struct DependencyGraph
 
         return emptyGraph.Update( dependencies );
     }
+
+    public static DependencyGraph Empty => new( ImmutableDictionary<AssemblyIdentity, DependencyGraphByDependentCompilation>.Empty );
 
     public bool IsUninitialized => this.DependenciesByCompilation == null!;
 

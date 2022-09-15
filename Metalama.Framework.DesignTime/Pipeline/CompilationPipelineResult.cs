@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
@@ -17,7 +16,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
     /// <summary>
     /// Caches the pipeline results for each syntax tree.
     /// </summary>
-    internal sealed class CompilationPipelineResult : ITransitiveAspectsManifest
+    internal sealed partial class CompilationPipelineResult : ITransitiveAspectsManifest
     {
         private static readonly ImmutableDictionary<string, SyntaxTreePipelineResult> _emptySyntaxTreeResults =
             ImmutableDictionary.Create<string, SyntaxTreePipelineResult>( StringComparer.Ordinal );
@@ -302,62 +301,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             return resultBuilders.Select( b => b.Value.ToImmutable( compilation.Compilation ) );
         }
 
-        internal CompilationPipelineResult Invalidate( in CompilationChanges compilationChanges )
-        {
-            if ( !compilationChanges.HasChange )
-            {
-                // Nothing to do.
-                return this;
-            }
-            else if ( compilationChanges.HasCompileTimeCodeChange )
-            {
-                return this.Clear();
-            }
-            else
-            {
-                var syntaxTreeBuilders = this.SyntaxTreeResults.ToBuilder();
-                var invalidSyntaxTreeBuilders = this._invalidSyntaxTreeResults.ToBuilder();
-
-                foreach ( var changePair in compilationChanges.SyntaxTreeChanges )
-                {
-                    var change = changePair.Value;
-
-                    switch ( change.SyntaxTreeChangeKind )
-                    {
-                        case SyntaxTreeChangeKind.Added:
-                            break;
-
-                        case SyntaxTreeChangeKind.Deleted:
-                        case SyntaxTreeChangeKind.Changed:
-                            Logger.DesignTime.Trace?.Log( $"DesignTimeSyntaxTreeResultCache.InvalidateCache({change.FilePath}): removed from cache." );
-
-                            if ( syntaxTreeBuilders.TryGetValue( change.FilePath, out var oldSyntaxTreeResult ) )
-                            {
-                                syntaxTreeBuilders.Remove( change.FilePath );
-                                invalidSyntaxTreeBuilders.Add( change.FilePath, oldSyntaxTreeResult );
-                            }
-
-                            break;
-                    }
-                }
-
-                return new CompilationPipelineResult(
-                    syntaxTreeBuilders.ToImmutable(),
-                    invalidSyntaxTreeBuilders.ToImmutable(),
-                    this.IntroducedSyntaxTrees,
-                    this._inheritableAspects,
-                    this.Validators );
-            }
-        }
-
-#pragma warning disable CA1822
-        private CompilationPipelineResult Clear()
-#pragma warning restore CA1822
-        {
-            Logger.DesignTime.Trace?.Log( $"DesignTimeSyntaxTreeResultCache.Clear()." );
-
-            return new CompilationPipelineResult();
-        }
+        public Invalidator ToInvalidator() => new( this );
 
         internal (ImmutableArray<Diagnostic> Diagnostics, ImmutableArray<CacheableScopedSuppression> Suppressions) GetDiagnosticsOnSyntaxTree( string path )
         {

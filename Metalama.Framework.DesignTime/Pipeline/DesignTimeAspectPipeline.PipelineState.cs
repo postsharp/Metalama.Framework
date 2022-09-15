@@ -24,6 +24,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         internal readonly struct PipelineState
         {
             private readonly DesignTimeAspectPipeline _pipeline;
+            private readonly CompilationChanges? _unprocessedChanges;
 
             private static readonly ImmutableDictionary<string, SyntaxTree?> _emptyCompileTimeSyntaxTrees =
                 ImmutableDictionary.Create<string, SyntaxTree?>( StringComparer.Ordinal );
@@ -38,10 +39,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             internal DesignTimeAspectPipelineStatus Status { get; }
 
-            public CompilationVersion? CompilationVersion => this.UnprocessedChanges?.NewCompilationVersion;
-
-            public CompilationChanges? UnprocessedChanges { get; }
-
+            public CompilationVersion? CompilationVersion => this._unprocessedChanges?.NewCompilationVersion;
+            
             public CompilationPipelineResult PipelineResult { get; }
 
             public CompilationValidationResult ValidationResult { get; }
@@ -58,7 +57,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             private PipelineState( PipelineState prototype )
             {
                 this._pipeline = prototype._pipeline;
-                this.UnprocessedChanges = prototype.UnprocessedChanges;
+                this._unprocessedChanges = prototype._unprocessedChanges;
                 this.CompileTimeSyntaxTrees = prototype.CompileTimeSyntaxTrees;
                 this.Configuration = prototype.Configuration;
                 this.Status = prototype.Status;
@@ -82,14 +81,16 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 DesignTimeAspectPipelineStatus status,
                 CompilationChanges unprocessedChanges,
                 CompilationPipelineResult pipelineResult,
+                DependencyGraph dependencies,
                 AspectPipelineConfiguration? configuration )
                 : this( prototype )
             {
                 this.CompileTimeSyntaxTrees = compileTimeSyntaxTrees;
                 this.Status = status;
-                this.UnprocessedChanges = unprocessedChanges;
+                this._unprocessedChanges = unprocessedChanges;
                 this.PipelineResult = pipelineResult;
                 this.Configuration = configuration;
+                this.Dependencies = dependencies;
             }
 
             private PipelineState( PipelineState prototype, ImmutableDictionary<string, SyntaxTree?> compileTimeSyntaxTrees )
@@ -105,7 +106,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 DependencyGraph dependencies ) : this( prototype )
             {
                 this.PipelineResult = pipelineResult;
-                this.UnprocessedChanges = unprocessedChanges;
+                this._unprocessedChanges = unprocessedChanges;
                 this.Dependencies = dependencies;
             }
 
@@ -183,6 +184,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     cancellationToken );
 
                 ImmutableDictionary<string, SyntaxTree?> newCompileTimeSyntaxTrees;
+                DependencyGraph newDependencyGraph;
+                CompilationPipelineResult newCompilationResult;
 
                 if ( newChanges.HasCompileTimeCodeChange )
                 {
@@ -241,25 +244,43 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     }
 
                     newCompileTimeSyntaxTrees = compileTimeSyntaxTreesBuilder.ToImmutable();
+                    newDependencyGraph = DependencyGraph.Empty;
+                    newCompilationResult = new CompilationPipelineResult();
                 }
                 else
                 {
+                    // Compile-time trees are unchanged.
                     newCompileTimeSyntaxTrees = this.CompileTimeSyntaxTrees ?? _emptyCompileTimeSyntaxTrees;
+
+                    if ( newChanges.HasChange )
+                    {
+                        var invalidator = this.PipelineResult.ToInvalidator();
+
+                        newDependencyGraph = await this._pipeline.CompilationVersionProvider.ProcessCompilationChangesAsync(
+                            newChanges,
+                            this.Dependencies,
+                            invalidator.InvalidateSyntaxTree,
+                            false,
+                            cancellationToken );
+
+                        newCompilationResult = invalidator.ToImmutable();
+                    }
+                    else
+                    {
+                        newDependencyGraph = this.Dependencies;
+                        newCompilationResult = this.PipelineResult;
+                    }
                 }
 
                 // Return the new state.
-                var newCompilationResult = invalidateCompilationResult ? this.PipelineResult.Invalidate( newChanges ) : this.PipelineResult;
-
-                var newUnprocessedChanges = this.UnprocessedChanges == null
-                    ? newChanges
-                    : await this._pipeline.CompilationVersionProvider.MergeChangesAsync( this.UnprocessedChanges, newChanges, cancellationToken );
 
                 newState = new PipelineState(
                     newState,
                     newCompileTimeSyntaxTrees,
                     newStatus,
-                    newUnprocessedChanges,
+                    CompilationChanges.Empty( null, newChanges.NewCompilationVersion ),
                     newCompilationResult,
+                    newDependencyGraph,
                     newConfiguration );
 
                 return newState;

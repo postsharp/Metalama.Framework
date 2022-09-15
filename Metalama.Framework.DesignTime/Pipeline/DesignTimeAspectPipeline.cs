@@ -235,7 +235,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             this._sync.Dispose();
         }
 
-        private async ValueTask<CompilationChanges> InvalidateCacheAsync(
+        private async ValueTask<CompilationVersion> InvalidateCacheAsync(
             Compilation compilation,
             DesignTimeCompilationVersion references,
             bool invalidateCompilationResult,
@@ -249,11 +249,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             this.SetState( newState );
 
-#pragma warning disable IDE0079 // Remove unnecessary suppression
-#pragma warning disable CS8603  // Analyzer error in Release build only.
-            return this._currentState.UnprocessedChanges.AssertNotNull();
-#pragma warning restore CS8603
-#pragma warning restore IDE0079
+            return newState.CompilationVersion.AssertNotNull();
         }
 
         public async ValueTask InvalidateCacheAsync( CancellationToken cancellationToken )
@@ -381,13 +377,13 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                 if ( this.Status != DesignTimeAspectPipelineStatus.Paused )
                 {
-                    var changes = await this.InvalidateCacheAsync(
+                    var compilationVersion = await this.InvalidateCacheAsync(
                         compilation,
                         references,
                         this.Status != DesignTimeAspectPipelineStatus.Paused,
                         cancellationToken );
 
-                    compilationToAnalyze = changes.NewCompilationVersion.CompilationToAnalyze;
+                    compilationToAnalyze = compilationVersion.CompilationToAnalyze;
 
                     if ( this.Logger.Trace != null )
                     {
