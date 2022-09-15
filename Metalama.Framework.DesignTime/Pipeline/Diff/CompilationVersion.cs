@@ -21,8 +21,6 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
 
         public Compilation Compilation { get; }
 
-        public IEnumerable<string> EnumerateSyntaxTreePaths() => this.Compilation.SyntaxTrees.Select( x => x.FilePath );
-
         /// <summary>
         /// Gets the compilation that should be analyzed by the pipeline. This is typically an older version of
         /// the current <see cref="CompilationVersion"/>, but without the generated syntax trees.
@@ -34,22 +32,20 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             Compilation compilation,
             Compilation compilationToAnalyze,
             ImmutableDictionary<string, SyntaxTreeVersion> syntaxTrees,
-            ImmutableDictionary<AssemblyIdentity, ICompilationVersion> referencedCompilations,
-            ulong compileTimeProjectHash )
+            ImmutableDictionary<AssemblyIdentity, ICompilationVersion> referencedCompilations )
         {
             this.Strategy = strategy;
             this.SyntaxTrees = syntaxTrees;
             this.ReferencedCompilations = referencedCompilations;
             this.Compilation = compilation;
             this.CompilationToAnalyze = compilationToAnalyze;
-            this.CompileTimeProjectHash = compileTimeProjectHash;
         }
 
         /// <summary>
         /// Returns a copy of the current <see cref="CompilationVersion"/> that differs only by the <see cref="Compilation"/> property.
         /// </summary>
         public CompilationVersion WithCompilation( Compilation compilation )
-            => new( this.Strategy, compilation, this.CompilationToAnalyze, this.SyntaxTrees, this.ReferencedCompilations, this.CompileTimeProjectHash );
+            => new( this.Strategy, compilation, this.CompilationToAnalyze, this.SyntaxTrees, this.ReferencedCompilations );
 
         public static CompilationVersion Create(
             Compilation compilation,
@@ -95,13 +91,10 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                 compilation,
                 compilationToAnalyze,
                 syntaxTreeVersions,
-                referencedCompilations,
-                DiffStrategy.ComputeCompileTimeProjectHash( syntaxTreeVersions ) );
+                referencedCompilations );
         }
 
         AssemblyIdentity ICompilationVersion.AssemblyIdentity => this.Compilation.AssertNotNull().Assembly.Identity;
-
-        public ulong CompileTimeProjectHash { get; }
 
         public bool TryGetSyntaxTreeVersion( string path, out SyntaxTreeVersion syntaxTreeVersion )
             => this.SyntaxTrees.AssertNotNull().TryGetValue( path, out syntaxTreeVersion );

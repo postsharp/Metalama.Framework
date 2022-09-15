@@ -1,6 +1,5 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -12,11 +11,13 @@ using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
 
+#pragma warning disable VSTHRD200 // Warning VSTHRD200 : Use "Async" suffix in names of methods that return an awaitable type.
+
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
     public class PartialCompilationTests : TestBase
     {
-        private ITestOutputHelper _logger;
+        private readonly ITestOutputHelper _logger;
 
         public PartialCompilationTests( ITestOutputHelper logger )
         {

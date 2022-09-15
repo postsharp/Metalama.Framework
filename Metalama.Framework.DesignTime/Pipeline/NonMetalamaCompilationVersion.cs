@@ -13,8 +13,6 @@ internal class NonMetalamaCompilationVersion : ICompilationVersion
 
     public AssemblyIdentity AssemblyIdentity { get; }
 
-    public ulong CompileTimeProjectHash => 0;
-
     public bool TryGetSyntaxTreeVersion( string path, out SyntaxTreeVersion syntaxTreeVersion )
     {
         if ( this._syntaxTrees.TryGetValue( path, out var syntaxTree ) )
@@ -32,8 +30,6 @@ internal class NonMetalamaCompilationVersion : ICompilationVersion
     }
 
     public Compilation Compilation { get; set; }
-
-    public IEnumerable<string> EnumerateSyntaxTreePaths() => this._syntaxTrees.Keys;
 
     public ImmutableDictionary<AssemblyIdentity, ICompilationVersion> ReferencedCompilations => throw new NotSupportedException();
 

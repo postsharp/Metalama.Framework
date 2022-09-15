@@ -2,7 +2,6 @@
 
 using Metalama.Framework.DesignTime.Pipeline;
 using Microsoft.CodeAnalysis;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTimePipeline;

@@ -31,7 +31,6 @@ internal class TestCompilationVersion : ICompilationVersion
     {
         this._hashes = hashes ?? new Dictionary<string, ulong>();
         this.AssemblyIdentity = assemblyIdentity;
-        this.CompileTimeProjectHash = compileTimeProjectHash;
         this.Compilation = CSharpCompilation.Create( assemblyIdentity.Name, hashes?.Select( p => CSharpSyntaxTree.ParseText( "", path: p.Key ) ) );
 
         this.ReferencedCompilations = referencedCompilations?.ToImmutableDictionary( c => c.AssemblyIdentity, c => c )
@@ -41,7 +40,6 @@ internal class TestCompilationVersion : ICompilationVersion
     public TestCompilationVersion( Compilation compilation )
     {
         this.AssemblyIdentity = compilation.Assembly.Identity;
-        this.CompileTimeProjectHash = 5;
         this.Compilation = compilation;
 
         this.ReferencedCompilations = compilation.References.OfType<CompilationReference>()
@@ -53,8 +51,6 @@ internal class TestCompilationVersion : ICompilationVersion
     }
 
     public AssemblyIdentity AssemblyIdentity { get; }
-
-    public ulong CompileTimeProjectHash { get; }
 
     public bool TryGetSyntaxTreeVersion( string path, out SyntaxTreeVersion syntaxTreeVersion )
     {
@@ -73,8 +69,6 @@ internal class TestCompilationVersion : ICompilationVersion
     }
 
     public Compilation Compilation { get; }
-
-    public IEnumerable<string> EnumerateSyntaxTreePaths() => this._hashes.Keys;
 
     public ImmutableDictionary<AssemblyIdentity, ICompilationVersion> ReferencedCompilations { get; }
 }

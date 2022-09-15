@@ -9,13 +9,9 @@ internal interface ICompilationVersion
 {
     AssemblyIdentity AssemblyIdentity { get; }
 
-    ulong CompileTimeProjectHash { get; }
-
     bool TryGetSyntaxTreeVersion( string path, out SyntaxTreeVersion syntaxTreeVersion );
 
     Compilation Compilation { get; }
-
-    IEnumerable<string> EnumerateSyntaxTreePaths();
 
     /// <summary>
     /// Gets the compilations directly referenced by the current <see cref="ICompilationVersion"/>.

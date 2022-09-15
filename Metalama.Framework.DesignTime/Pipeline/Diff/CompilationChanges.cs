@@ -214,8 +214,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                     newCompilation,
                     compilationToAnalyze,
                     syntaxTreeVersions,
-                    newReferences,
-                    DiffStrategy.ComputeCompileTimeProjectHash( syntaxTreeVersions ) );
+                    newReferences );
 
                 cancellationToken.ThrowIfCancellationRequested();
 

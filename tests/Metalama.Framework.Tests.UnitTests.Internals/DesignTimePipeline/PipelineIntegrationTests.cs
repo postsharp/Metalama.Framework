@@ -18,8 +18,9 @@ using Xunit;
 using Xunit.Abstractions;
 using StringExtensions = Metalama.TestFramework.Utilities.StringExtensions;
 
-#pragma warning disable IDE0079 // Remove unnecessary suppression.
-#pragma warning disable CA1307  // Specify StringComparison for clarity
+#pragma warning disable IDE0079   // Remove unnecessary suppression.
+#pragma warning disable CA1307    // Specify StringComparison for clarity
+#pragma warning disable VSTHRD200 // Warning VSTHRD200 : Use "Async" suffix in names of methods that return an awaitable type.
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTimePipeline
 {
