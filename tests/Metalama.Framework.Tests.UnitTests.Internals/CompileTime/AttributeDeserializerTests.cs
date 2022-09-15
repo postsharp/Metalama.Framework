@@ -17,12 +17,6 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
 {
     public class AttributeDeserializerTests : TestBase
     {
-        public AttributeDeserializerTests() : base()
-        {
-            // For the ease of testing, we need the custom attributes and helper classes nested here to be considered to 
-            // belong to a system library so they can be shared between the compile-time code and the testing code.
-        }
-
         protected override ServiceProvider ConfigureServiceProvider( ServiceProvider serviceProvider )
             => serviceProvider.WithService( new HackedSystemTypeResolver( serviceProvider ) );
 

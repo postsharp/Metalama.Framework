@@ -286,7 +286,7 @@ internal sealed class NamedTypeImpl : MemberOrNamedType, INamedTypeInternal
     public INamespace Namespace => this.Compilation.Factory.GetNamespace( this.TypeSymbol.ContainingNamespace );
 
     [Memo]
-    public string FullName => this.TypeSymbol.GetFullName();
+    public string FullName => this.TypeSymbol.GetFullName().AssertNotNull();
 
     [Memo]
     public IReadOnlyList<IType> TypeArguments => this.TypeSymbol.TypeArguments.Select( a => this.Compilation.Factory.GetIType( a ) ).ToImmutableList();

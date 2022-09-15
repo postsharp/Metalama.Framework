@@ -11,7 +11,7 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
-public partial class CompilationChangesTests : TestBase
+public partial class CompilationChangesTests
 {
     private CompilationChanges CompareCompilations( Compilation compilation1, Compilation compilation2 )
         => CompilationChanges.Incremental(

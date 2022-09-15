@@ -210,7 +210,6 @@ Target.cs:
 ";
 
             using var testContext = this.CreateTestContext();
-            var projectOptions = testContext.ProjectOptions;
 
             var compilation = CreateCSharpCompilation(
                 new Dictionary<string, string>()

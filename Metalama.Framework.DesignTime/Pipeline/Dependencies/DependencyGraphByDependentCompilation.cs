@@ -27,7 +27,7 @@ internal readonly struct DependencyGraphByDependentCompilation
 
     private readonly ImmutableDictionary<string, DependencyCollectorByDependentSyntaxTreeAndMasterCompilation> _dependenciesByDependentFilePath;
 
-    public DependencyGraphByDependentCompilation( AssemblyIdentity assemblyIdentity, ulong compileTimeProjectHash ) : this(
+    public DependencyGraphByDependentCompilation( AssemblyIdentity assemblyIdentity ) : this(
         assemblyIdentity,
         _emptyDependenciesByMasterFilePath,
         ImmutableDictionary<TypeDependencyKey, DependencyGraphByMasterPartialType>.Empty,

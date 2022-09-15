@@ -35,12 +35,4 @@ internal class TestDesignTimeAspectPipelineFactory : DesignTimeAspectPipelineFac
 
     public DesignTimeAspectPipeline CreatePipeline( Compilation compilation )
         => this.GetOrCreatePipeline( this._projectOptions, compilation, CancellationToken.None ).AssertNotNull();
-
-    public override void Dispose()
-    {
-        base.Dispose();
-
-        // Disposing the domain crashes the CLR in many design-time tests.
-        //       this.Domain.Dispose();
-    }
 }

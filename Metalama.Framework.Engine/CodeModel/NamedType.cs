@@ -444,23 +444,6 @@ namespace Metalama.Framework.Engine.CodeModel
                 ? this
                 : this.Compilation.Factory.GetNamedType( ((INamedTypeSymbol) this.TypeSymbol).OriginalDefinition );
 
-        private void PopulateAllInterfaces( ImmutableHashSet<INamedTypeSymbol>.Builder builder, GenericMap genericMap )
-        {
-            // Process the Roslyn type system.
-            foreach ( var type in this.TypeSymbol.Interfaces )
-            {
-                builder.Add( (INamedTypeSymbol) genericMap.Map( type ) );
-            }
-
-            if ( this.TypeSymbol.BaseType != null )
-            {
-                var newGenericMap = genericMap.CreateBaseMap( this.TypeSymbol.BaseType.TypeArguments );
-                ((NamedType) this.BaseType!).PopulateAllInterfaces( builder, newGenericMap );
-            }
-
-            // TODO: process introductions.
-        }
-
         public ITypeInternal Accept( TypeRewriter visitor ) => visitor.Visit( this );
 
         public IEnumerable<IMember> GetOverridingMembers( IMember member )

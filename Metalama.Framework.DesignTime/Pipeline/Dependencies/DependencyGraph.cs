@@ -41,11 +41,7 @@ internal class DependencyGraph
 
                 if ( !dependenciesByCompilationDictionaryBuilder.TryGetValue( compilation, out var currentDependenciesOfCompilation ) )
                 {
-                    var hashCode = dependencyCollector.CompilationVersion.ReferencedCompilations.TryGetValue( compilation, out var reference )
-                        ? reference.CompileTimeProjectHash
-                        : 0;
-
-                    currentDependenciesOfCompilation = new DependencyGraphByDependentCompilation( compilation, hashCode );
+                    currentDependenciesOfCompilation = new DependencyGraphByDependentCompilation( compilation );
                 }
 
                 if ( currentDependenciesOfCompilation.TryUpdateDependencies(

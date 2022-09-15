@@ -218,7 +218,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         }
 
         internal NonMetalamaProjectTracker GetNonMetalamaProjectTracker( ProjectKey projectKey )
-            => this._nonMetalamaProjectTrackers.GetOrAdd( projectKey, k => new NonMetalamaProjectTracker( this.ServiceProvider ) );
+            => this._nonMetalamaProjectTrackers.GetOrAdd( projectKey, _ => new NonMetalamaProjectTracker( this.ServiceProvider ) );
 
         protected virtual async ValueTask<DesignTimeAspectPipeline?> GetPipelineAndWaitAsync( Compilation compilation, CancellationToken cancellationToken )
         {

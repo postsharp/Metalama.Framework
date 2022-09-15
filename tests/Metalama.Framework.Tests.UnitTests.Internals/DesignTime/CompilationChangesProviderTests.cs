@@ -70,8 +70,13 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
 
         var compilationVersionProvider = new CompilationVersionProvider( testContext.ServiceProvider.WithService( observer ) );
         var compilation1 = CreateCSharpCompilation( code );
-        _ = await compilationVersionProvider.GetCompilationChangesAsync( null, compilation1 );
-        _ = await compilationVersionProvider.GetCompilationChangesAsync( null, compilation1 );
+        var changes1 = await compilationVersionProvider.GetCompilationChangesAsync( null, compilation1 );
+        var changes2 = await compilationVersionProvider.GetCompilationChangesAsync( null, compilation1 );
+        
+        Assert.Null( changes1.OldCompilationVersion );
+        Assert.Same( compilation1, changes1.NewCompilationVersion.Compilation );
+        Assert.False( changes1.IsIncremental );
+        Assert.Same( changes1, changes2 );
     }
 
     [Fact]
@@ -83,11 +88,18 @@ public class CompilationChangesProviderTests : DesignTimeTestBase
         var observer = new DifferObserver();
 
         var compilationVersionProvider = new CompilationVersionProvider( testContext.ServiceProvider.WithService( observer ) );
-        var compilation1 = CreateCSharpCompilation( code );
-        var compilation2 = CreateCSharpCompilation( code );
-        var compilation3 = CreateCSharpCompilation( code );
-        var compilationVersion3a = await compilationVersionProvider.GetCompilationChangesAsync( compilation1, compilation3 );
-        var compilationVersion3b = await compilationVersionProvider.GetCompilationChangesAsync( compilation2, compilation3 );
+        var compilation1 = CreateCSharpCompilation( code, name: "test" );
+        var compilation2 = CreateCSharpCompilation( code, name: "test" );
+        var compilation3 = CreateCSharpCompilation( code, name: "test" );
+        var changes1 = await compilationVersionProvider.GetCompilationChangesAsync( compilation1, compilation3 );
+        var changes2 = await compilationVersionProvider.GetCompilationChangesAsync( compilation2, compilation3 );
+
+        Assert.Same( compilation1, changes1.OldCompilationVersion!.Compilation );
+        Assert.Same( compilation3, changes1.NewCompilationVersion.Compilation );
+        Assert.Same( compilation1, changes1.NewCompilationVersion.CompilationToAnalyze );
+        Assert.Same( compilation2, changes2.OldCompilationVersion!.Compilation );
+        Assert.Same( compilation3, changes2.NewCompilationVersion.Compilation );
+        Assert.Same( compilation1, changes2.NewCompilationVersion.CompilationToAnalyze );
     }
 
     [Fact]

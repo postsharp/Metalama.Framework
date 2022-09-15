@@ -14,6 +14,7 @@ internal partial class CompilationVersionProvider
     private partial class Implementation
     {
         private readonly ConditionalWeakTable<Compilation, ChangeLinkedList> _cache = new();
+        private readonly Dictionary<ProjectKey, WeakReference<Compilation>> _lastCompilationPerProject = new();
         private readonly SemaphoreSlim _semaphore = new( 1 );
         private readonly DiffStrategy _metalamaDiffStrategy;
         private readonly DiffStrategy _nonMetalamaDiffStrategy;
@@ -215,6 +216,7 @@ internal partial class CompilationVersionProvider
 
                         newList = new ChangeLinkedList( compilationVersion );
                         this._cache.Add( newCompilation, newList );
+                        this._lastCompilationPerProject[ProjectKey.FromCompilation( newCompilation )] = new WeakReference<Compilation>( newCompilation );
                     }
 
                     return newList.NonIncrementalChanges;
@@ -267,12 +269,10 @@ internal partial class CompilationVersionProvider
                         semaphoreOwned,
                         cancellationToken );
 
-                    if ( !this._cache.TryGetValue( oldCompilation, out var changeLinkedListFromOldCompilation ) )
+                    if ( this._cache.TryGetValue( oldCompilation, out var changeLinkedListFromOldCompilation ) )
                     {
-                        throw new AssertionFailedException();
+                        changeLinkedListFromOldCompilation.Insert( incrementalChanges );
                     }
-
-                    changeLinkedListFromOldCompilation.Insert( incrementalChanges );
 
                     return incrementalChanges;
                 }
@@ -287,31 +287,62 @@ internal partial class CompilationVersionProvider
 
                     try
                     {
-                        if ( !this._cache.TryGetValue( oldCompilation, out var changeLinkedListFromOldCompilation ) )
+                        CompilationVersion oldCompilationVersion;
+
+                        if ( this._cache.TryGetValue( oldCompilation, out var changeLinkedListFromOldCompilation ) )
+                        {
+                            oldCompilationVersion = changeLinkedListFromOldCompilation.CompilationVersion;
+                        }
+                        else
                         {
                             // We have never processed the old compilation, so we have to compute it from the scratch.
 
-                            var oldReferences = await this.GetReferencesAsync( null, oldCompilation, true, cancellationToken );
+                            // Get the last compilation we know for the project. It can help building the old CompilationVersion incrementally.
+                            Compilation? lastCompilationOfProject = null;
 
-                            var oldCompilationVersion = CompilationVersion.Create(
-                                oldCompilation,
-                                GetDiffStrategy(),
-                                oldReferences.References,
-                                cancellationToken );
+                            if ( this._lastCompilationPerProject.TryGetValue(
+                                    ProjectKey.FromCompilation( oldCompilation ),
+                                    out var lastCompilationOfProjectRef ) )
+                            {
+                                _ = lastCompilationOfProjectRef.TryGetTarget( out lastCompilationOfProject );
+                            }
 
-                            changeLinkedListFromOldCompilation = new ChangeLinkedList( oldCompilationVersion );
-                            this._cache.Add( oldCompilation, changeLinkedListFromOldCompilation );
+                            var oldReferences = await this.GetReferencesAsync( lastCompilationOfProject, oldCompilation, true, cancellationToken );
+
+                            if ( lastCompilationOfProject != null )
+                            {
+                                // Build oldCompilationVersion incrementally.
+                                oldCompilationVersion = await this.GetCompilationVersionCoreAsync(
+                                    lastCompilationOfProject,
+                                    oldCompilation,
+                                    true,
+                                    cancellationToken );
+
+                                this._cache.TryGetValue( oldCompilation, out changeLinkedListFromOldCompilation );
+                            }
+                            else
+                            {
+                                // Build oldCompilationVersion from scratch.
+                                oldCompilationVersion = CompilationVersion.Create(
+                                    oldCompilation,
+                                    GetDiffStrategy(),
+                                    oldReferences.References,
+                                    cancellationToken );
+
+                                changeLinkedListFromOldCompilation = new ChangeLinkedList( oldCompilationVersion );
+                                this._cache.Add( oldCompilation, changeLinkedListFromOldCompilation );
+                            }
                         }
 
                         var newReferences = await this.GetReferencesAsync(
-                            changeLinkedListFromOldCompilation.CompilationVersion.Compilation,
+                            oldCompilation,
                             newCompilation,
                             true,
                             cancellationToken );
 
                         // Compute the increment.
                         incrementalChanges = CompilationChanges.Incremental(
-                            changeLinkedListFromOldCompilation.CompilationVersion,
+                            oldCompilationVersion,
                             newCompilation,
                             newReferences.References,
                             newReferences.Changes,
@@ -320,6 +351,7 @@ internal partial class CompilationVersionProvider
                         if ( !this._cache.TryGetValue( newCompilation, out _ ) )
                         {
                             this._cache.Add( newCompilation, new ChangeLinkedList( incrementalChanges.NewCompilationVersion ) );
+                            this._lastCompilationPerProject[ProjectKey.FromCompilation( newCompilation )] = new WeakReference<Compilation>( newCompilation );
                         }
                         else
                         {
@@ -350,11 +382,23 @@ internal partial class CompilationVersionProvider
         {
             if ( !first.HasChange || !second.IsIncremental )
             {
-                return second;
+                return new CompilationChanges(
+                    first.OldCompilationVersion,
+                    second.NewCompilationVersion,
+                    second.SyntaxTreeChanges,
+                    second.ReferencedCompilationChanges,
+                    second.HasCompileTimeCodeChange,
+                    second.IsIncremental );
             }
             else if ( !second.HasChange )
             {
-                return first;
+                return new CompilationChanges(
+                    first.OldCompilationVersion,
+                    second.NewCompilationVersion,
+                    first.SyntaxTreeChanges,
+                    first.ReferencedCompilationChanges,
+                    first.HasCompileTimeCodeChange,
+                    first.IsIncremental );
             }
             else
             {
