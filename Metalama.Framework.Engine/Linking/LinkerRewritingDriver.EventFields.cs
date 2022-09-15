@@ -142,12 +142,11 @@ namespace Metalama.Framework.Engine.Linking
         private static MemberDeclarationSyntax GetSpecialImplEventField( TypeSyntax eventType, IEventSymbol symbol, string name )
         {
             return
-                EventFieldDeclaration(
+                FieldDeclaration(
                         List<AttributeListSyntax>(),
                         symbol.IsStatic
                             ? TokenList( Token( SyntaxKind.PrivateKeyword ), Token( SyntaxKind.StaticKeyword ) )
                             : TokenList( Token( SyntaxKind.PrivateKeyword ) ),
-                        Token( SyntaxKind.EventKeyword ),
                         VariableDeclaration(
                             eventType,
                             SingletonSeparatedList( VariableDeclarator( Identifier( name ) ) ) ),

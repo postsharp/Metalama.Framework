@@ -36,5 +36,5 @@ internal class TargetClass
         }
     }
 
-    private event EventHandler? EventField_Source;
+    private EventHandler? EventField_Source;
 }

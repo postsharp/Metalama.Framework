@@ -152,7 +152,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Invokers.Events.AdvisedInt
         public void OverrideRemove()
         {
             Console.WriteLine("Override.");
-            meta.Target.Event.Invokers.Base!.Add(meta.This, meta.Target.Parameters[0].Value);
+            meta.Target.Event.Invokers.Base!.Remove(meta.This, meta.Target.Parameters[0].Value);
         }
 
     }

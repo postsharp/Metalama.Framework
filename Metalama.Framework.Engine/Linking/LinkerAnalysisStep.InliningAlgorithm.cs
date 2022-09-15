@@ -152,7 +152,7 @@ namespace Metalama.Framework.Engine.Linking
                                         false,
                                         null,
                                         null,
-                                        targetSemantic ) );
+                                        targetSemantic) );
 
                                 VisitSemanticBody( destinationSemantic, targetSemantic, context.Recurse() );
                             }

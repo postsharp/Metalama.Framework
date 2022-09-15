@@ -109,7 +109,9 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                         .WithTrailingTrivia( ElasticLineFeed ),
                     linkedTargetBody )
                 .WithFormattingAnnotationsFrom( currentStatement )
-                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
+                .WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock )
+                .WithLeadingTrivia( currentNode.GetLeadingTrivia().AddRange( linkedTargetBody.GetLeadingTrivia() ) )
+                .WithTrailingTrivia( linkedTargetBody.GetTrailingTrivia().AddRange( currentNode.GetTrailingTrivia() ) );
         }
     }
 }

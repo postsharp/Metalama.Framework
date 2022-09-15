@@ -139,7 +139,8 @@ namespace Metalama.Framework.Engine.Linking
                             .WithErrorCodes( errorCodes )
                             .NormalizeWhitespace()
                             .WithLeadingTrivia( ElasticLineFeed )
-                            .WithTrailingTrivia( ElasticLineFeed ) );
+                            .WithTrailingTrivia( ElasticLineFeed ) )
+                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.GeneratedSuppression );
 
                     var restore =
                         Trivia(
@@ -147,7 +148,8 @@ namespace Metalama.Framework.Engine.Linking
                                 .WithErrorCodes( errorCodes )
                                 .NormalizeWhitespace()
                                 .WithLeadingTrivia( ElasticLineFeed )
-                                .WithTrailingTrivia( ElasticLineFeed ) );
+                                .WithTrailingTrivia( ElasticLineFeed ) )
+                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.GeneratedSuppression );
 
                     transformedNode =
                         transformedNode

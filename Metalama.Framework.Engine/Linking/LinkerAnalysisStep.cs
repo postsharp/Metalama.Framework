@@ -75,6 +75,7 @@ namespace Metalama.Framework.Engine.Linking
                 out var reachableReferencesByTarget );
 
             var inlineabilityAnalyzer = new InlineabilityAnalyzer(
+                input.IntroductionRegistry,
                 input.IntermediateCompilation,
                 reachableSemantics,
                 inlinerProvider,

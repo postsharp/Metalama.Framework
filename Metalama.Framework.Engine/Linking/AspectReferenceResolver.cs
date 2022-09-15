@@ -111,7 +111,8 @@ namespace Metalama.Framework.Engine.Linking
 
             if ( targetKind == AspectReferenceTargetKind.Self && referencedSymbol is IPropertySymbol or IEventSymbol or IFieldSymbol )
             {
-                // Resolves the symbol based on expression - this is used when aspect reference target property but it is not specified whether the getter or setter is targeted.
+                // Resolves the symbol based on expression - this is used when aspect reference targets property/event/field
+                // but it is not specified whether the getter/setter/adder/remover is targeted.
                 targetKind = ResolveExpressionTarget( referencedSymbol, expression );
             }
 
@@ -568,6 +569,9 @@ namespace Metalama.Framework.Engine.Linking
 
                 case (IEventSymbol, { Parent: AssignmentExpressionSyntax { OperatorToken: { RawKind: (int) SyntaxKind.SubtractAssignmentExpression } } }):
                     return AspectReferenceTargetKind.EventRemoveAccessor;
+
+                case (IEventSymbol, _):
+                    return AspectReferenceTargetKind.EventRaiseAccessor;
 
                 default:
                     throw new AssertionFailedException();

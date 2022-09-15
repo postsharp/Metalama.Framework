@@ -18,17 +18,20 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         public class InlineabilityAnalyzer
         {
+            private readonly LinkerIntroductionRegistry _introductionRegistry;
             private readonly PartialCompilation _intermediateCompilation;
             private readonly ISet<IntermediateSymbolSemantic> _reachableSymbolSemantics;
             private readonly InlinerProvider _inlinerProvider;
             private readonly IReadOnlyDictionary<AspectReferenceTarget, IReadOnlyList<ResolvedAspectReference>> _reachableReferencesByTarget;
 
             public InlineabilityAnalyzer(
+                LinkerIntroductionRegistry introductionRegistry,
                 PartialCompilation intermediateCompilation,
                 IReadOnlyList<IntermediateSymbolSemantic> reachableSymbolSemantics,
                 InlinerProvider inlinerProvider,
                 IReadOnlyDictionary<AspectReferenceTarget, IReadOnlyList<ResolvedAspectReference>> reachableReferencesByTarget )
             {
+                this._introductionRegistry = introductionRegistry;
                 this._intermediateCompilation = intermediateCompilation;
                 this._reachableSymbolSemantics = new HashSet<IntermediateSymbolSemantic>( reachableSymbolSemantics );
                 this._inlinerProvider = inlinerProvider;
@@ -192,7 +195,6 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         // References that are not marked as inlineable cannot be inlined.
                         inliner = null;
-
                         return false;
                     }
 

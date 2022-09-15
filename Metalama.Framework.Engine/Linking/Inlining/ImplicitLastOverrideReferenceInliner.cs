@@ -51,7 +51,9 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             SyntaxNode currentNode,
             StatementSyntax linkedTargetBody )
         {
-            return linkedTargetBody;
+            return linkedTargetBody
+                .WithLeadingTrivia( currentNode.GetLeadingTrivia().AddRange( linkedTargetBody.GetLeadingTrivia() ) )
+                .WithTrailingTrivia( linkedTargetBody.GetTrailingTrivia().AddRange( currentNode.GetTrailingTrivia() ) );
         }
 
         public override bool IsValidForContainingSymbol( ISymbol symbol )

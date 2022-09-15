@@ -23,12 +23,6 @@
         <Compile Remove="Tests\**\__*.cs" />
         <None Include="Tests\**\__*.cs" />
     </ItemGroup>
-
-    <ItemGroup>
-      <Compile Remove="Tests\Linker\Methods\Overrides\Jump\ReturnsVoid_NJ_FJ - Copy.t.cs" />
-      <Compile Remove="Tests\Linker\Methods\Overrides\Jump\ReturnsVoid_UnreachableEndPoint - Copy.t.cs" />
-      <Compile Remove="Tests\Linker\Methods\Overrides\TargetBody\ReturnsVoid_ExpressionBody - Copy.t.cs" />
-    </ItemGroup>
   
     <ItemGroup>
         <PackageReference Include="FakeItEasy" Version="6.2.1" />
@@ -84,20 +78,6 @@
     <!-- Ignore project if the build is obfuscated because this project relies on obfuscated internals -->
     <ItemGroup Condition="'$(Obfuscate)'=='True'">
         <Compile Remove="**\*" />
-    </ItemGroup>
-    <ItemGroup>
-      <None Include="Tests\Linker\Methods\Overrides\Jump\ReturnsVoid_ReachableEndPoint.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>ReturnsVoid_ReachableEndPoint.cs</DependentUpon>
-      </None>
-      <None Include="Tests\Linker\Methods\Overrides\Jump\ReturnsVoid_UnreachableEndPoint.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>ReturnsVoid_UnreachableEndPoint.cs</DependentUpon>
-      </None>
-      <None Include="Tests\Linker\Methods\Overrides\TargetBody\ReturnsInt_ExpressionBody.t.cs">
-        <SubType>Code</SubType>
-        <DependentUpon>ReturnsInt_ExpressionBody.cs</DependentUpon>
-      </None>
     </ItemGroup>
 
 </Project>
