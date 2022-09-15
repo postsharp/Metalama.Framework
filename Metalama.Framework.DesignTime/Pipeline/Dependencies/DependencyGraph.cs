@@ -1,5 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.DesignTime.Pipeline.Diff;
+using Metalama.Framework.Engine;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
@@ -8,25 +10,28 @@ namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 /// <summary>
 /// Represents all dependencies of a given compilation.
 /// </summary>
-internal class DependencyGraph
+internal readonly struct DependencyGraph
 {
-    public static DependencyGraph Create( ICompilationVersion compilation, BaseDependencyCollector dependencies )
+    public static DependencyGraph Create( BaseDependencyCollector dependencies )
     {
         var emptyGraph = new DependencyGraph( ImmutableDictionary<AssemblyIdentity, DependencyGraphByDependentCompilation>.Empty );
 
-        return emptyGraph.Update( compilation, dependencies );
+        return emptyGraph.Update( dependencies );
     }
+
+    public bool IsUninitialized => this.DependenciesByCompilation == null!;
 
     /// <summary>
     /// Gets the dependencies indexed by compilation.
     /// </summary>
     public ImmutableDictionary<AssemblyIdentity, DependencyGraphByDependentCompilation> DependenciesByCompilation { get; }
 
-    public DependencyGraph Update(
-        ICompilationVersion compilationVersion,
-        BaseDependencyCollector dependencyCollector )
+    /// <summary>
+    /// Updates the <see cref="DependencyGraph"/> based on a <see cref="BaseDependencyCollector"/>.
+    /// </summary>
+    public DependencyGraph Update( BaseDependencyCollector dependencyCollector )
     {
-        var dependenciesByCompilationDictionaryBuilder = this.DependenciesByCompilation.ToBuilder();
+        var builder = this.ToBuilder();
 
         // Add or update dependencies.
         foreach ( var dependenciesByDependentFilePath in dependencyCollector.DependenciesByDependentFilePath )
@@ -38,47 +43,100 @@ internal class DependencyGraph
             foreach ( var dependenciesByCompilation in dependenciesByDependentFilePath.Value.DependenciesByCompilation )
             {
                 var compilation = dependenciesByCompilation.Key;
-
-                if ( !dependenciesByCompilationDictionaryBuilder.TryGetValue( compilation, out var currentDependenciesOfCompilation ) )
-                {
-                    currentDependenciesOfCompilation = new DependencyGraphByDependentCompilation( compilation );
-                }
-
-                if ( currentDependenciesOfCompilation.TryUpdateDependencies(
-                        dependentFilePath,
-                        dependenciesByCompilation.Value,
-                        out var newDependenciesOfCompilation ) )
-                {
-                    dependenciesByCompilationDictionaryBuilder[compilation] = newDependenciesOfCompilation;
-                }
-                else
-                {
-                    // The dependencies have not changed.
-                }
+                builder.UpdateDependencies( compilation, dependentFilePath, dependenciesByCompilation.Value );
             }
         }
 
-        // Remove graphs for syntax trees that have been removed from the compilation
-        foreach ( var dependentFilePath in compilationVersion.EnumerateSyntaxTreePaths() )
+        // Remove graphs for dependent syntax trees were analyzed but for which no dependency was found.
+        foreach ( var syntaxTreeEntry in dependencyCollector.PartialCompilation.SyntaxTrees )
         {
-            if ( !dependencyCollector.DependenciesByDependentFilePath.ContainsKey( dependentFilePath ) )
+            if ( !dependencyCollector.DependenciesByDependentFilePath.ContainsKey( syntaxTreeEntry.Key ) )
             {
                 // The syntax tree does not have any dependency in any compilation.
-                foreach ( var compilationDependencies in this.DependenciesByCompilation )
+                builder.RemoveDependentSyntaxTree( syntaxTreeEntry.Key );
+            }
+        }
+
+        return builder.ToImmutable();
+    }
+
+    public Builder ToBuilder() => new( this );
+
+    private DependencyGraph( ImmutableDictionary<AssemblyIdentity, DependencyGraphByDependentCompilation> dependenciesByCompilation )
+    {
+        this.DependenciesByCompilation = dependenciesByCompilation;
+    }
+
+    public struct Builder
+    {
+        private readonly DependencyGraph _dependencyGraph;
+        private ImmutableDictionary<AssemblyIdentity, DependencyGraphByDependentCompilation>.Builder? _dependenciesByCompilationBuilder;
+
+        public Builder( DependencyGraph dependencyGraph )
+        {
+            this._dependencyGraph = dependencyGraph;
+            this._dependenciesByCompilationBuilder = null;
+        }
+
+        private ImmutableDictionary<AssemblyIdentity, DependencyGraphByDependentCompilation>.Builder GetDependenciesByCompilationBuilder()
+            => this._dependenciesByCompilationBuilder ??= this._dependencyGraph.DependenciesByCompilation.ToBuilder();
+
+        private IReadOnlyDictionary<AssemblyIdentity, DependencyGraphByDependentCompilation> GetDependenciesByCompilation()
+            => (IReadOnlyDictionary<AssemblyIdentity, DependencyGraphByDependentCompilation>?) this._dependenciesByCompilationBuilder
+               ?? this._dependencyGraph.DependenciesByCompilation;
+
+        public void RemoveDependentSyntaxTree( string path )
+        {
+            foreach ( var compilationDependencies in this.GetDependenciesByCompilation() )
+            {
+                if ( compilationDependencies.Value.TryRemoveDependentSyntaxTree( path, out var newDependencies ) )
                 {
-                    if ( compilationDependencies.Value.TryRemoveDependentSyntaxTree( dependentFilePath, out var newDependencies ) )
+                    if ( newDependencies.IsEmpty )
                     {
-                        dependenciesByCompilationDictionaryBuilder[compilationDependencies.Key] = newDependencies;
+                        this.GetDependenciesByCompilationBuilder().Remove( compilationDependencies.Key );
+                    }
+                    else
+                    {
+                        this.GetDependenciesByCompilationBuilder()[compilationDependencies.Key] = newDependencies;
                     }
                 }
             }
         }
 
-        return new DependencyGraph( dependenciesByCompilationDictionaryBuilder.ToImmutable() );
-    }
+        public void RemoveCompilation( AssemblyIdentity assemblyIdentity )
+        {
+            if ( this.GetDependenciesByCompilation().ContainsKey( assemblyIdentity ) )
+            {
+                this.GetDependenciesByCompilationBuilder().Remove( assemblyIdentity );
+            }
+        }
 
-    private DependencyGraph( ImmutableDictionary<AssemblyIdentity, DependencyGraphByDependentCompilation> dependenciesByCompilation )
-    {
-        this.DependenciesByCompilation = dependenciesByCompilation;
+        public void UpdateDependencies(
+            AssemblyIdentity compilation,
+            string dependentFilePath,
+            DependencyCollectorByDependentSyntaxTreeAndMasterCompilation dependencies )
+        {
+            if ( !this.GetDependenciesByCompilation().TryGetValue( compilation, out var currentDependenciesOfCompilation ) )
+            {
+                currentDependenciesOfCompilation = new DependencyGraphByDependentCompilation( compilation );
+            }
+
+            if ( currentDependenciesOfCompilation.TryUpdateDependencies(
+                    dependentFilePath,
+                    dependencies,
+                    out var newDependenciesOfCompilation ) )
+            {
+                this.GetDependenciesByCompilationBuilder()[compilation] = newDependenciesOfCompilation;
+            }
+            else
+            {
+                // The dependencies have not changed.
+            }
+        }
+
+        public DependencyGraph ToImmutable()
+            => this._dependenciesByCompilationBuilder != null
+                ? new DependencyGraph( this._dependenciesByCompilationBuilder.ToImmutable() )
+                : this._dependencyGraph;
     }
 }

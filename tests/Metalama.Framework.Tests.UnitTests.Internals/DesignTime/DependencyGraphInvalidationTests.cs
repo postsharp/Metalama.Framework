@@ -13,10 +13,11 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
 public class DependencyGraphInvalidationTests : DesignTimeTestBase
 {
-    private async Task<List<string>> GetInvalidatedSyntaxTreesAsync(
-        Dictionary<string, string> codeBefore,
-        Dependency[] dependencies,
-        Dictionary<string, string> codeAfter )
+    private async Task<( List<string> InvalidatedSyntaxTrees, DependencyGraph DependenciesBefore, DependencyGraph DependenciesAfter )>
+        ProcessCompilationChangesAsync(
+            Dictionary<string, string> codeBefore,
+            Dependency[] dependencies,
+            Dictionary<string, string> codeAfter )
     {
         using var testContext = this.CreateTestContext();
         var compilationChangesProvider = new CompilationVersionProvider( testContext.ServiceProvider );
@@ -44,16 +45,17 @@ public class DependencyGraphInvalidationTests : DesignTimeTestBase
             }
         }
 
-        var dependencyGraph = DependencyGraph.Create( compilationVersion1, dependencyCollector );
+        var dependencyGraph = DependencyGraph.Create( dependencyCollector );
 
         var compilation2 = CreateCSharpCompilation( codeAfter, name: "test", ignoreErrors: true );
 
         var changes = await compilationChangesProvider.GetCompilationChangesAsync( compilation1, compilation2 );
         var invalidatedSyntaxTrees = new HashSet<string>();
 
-        await compilationChangesProvider.InvokeForInvalidatedSyntaxTreesAsync( changes, dependencyGraph, t => invalidatedSyntaxTrees.Add( t ) );
+        var newDependencyGraph =
+            await compilationChangesProvider.ProcessCompilationChangesAsync( changes, dependencyGraph, t => invalidatedSyntaxTrees.Add( t ), true );
 
-        return invalidatedSyntaxTrees.OrderBy( x => x ).ToList();
+        return (invalidatedSyntaxTrees.OrderBy( x => x ).ToList(), dependencyGraph, newDependencyGraph);
     }
 
     private record Dependency( DependencyKind Kind, string Master, string Dependent );
@@ -73,37 +75,56 @@ public class DependencyGraphInvalidationTests : DesignTimeTestBase
         var dependencies = new[] { new Dependency( DependencyKind.SyntaxTree, masterFile, dependentFile ) };
         var codeAfter = codeBefore;
 
-        var invalidated = await this.GetInvalidatedSyntaxTreesAsync( codeBefore, dependencies, codeAfter );
+        var result = await this.ProcessCompilationChangesAsync( codeBefore, dependencies, codeAfter );
 
-        Assert.Empty( invalidated );
+        Assert.Empty( result.InvalidatedSyntaxTrees );
+        Assert.Same( result.DependenciesBefore.DependenciesByCompilation, result.DependenciesAfter.DependenciesByCompilation );
     }
 
     [Fact]
-    public async Task SyntaxTreeDependency_FileChanged()
+    public async Task SyntaxTreeDependency_MasterFileChanged()
     {
         const string masterFile = "master.cs";
         const string dependentFile = "dependent.cs";
         var codeBefore = new Dictionary<string, string> { [masterFile] = "class C {}", [dependentFile] = "class D : C {}" };
         var dependencies = new[] { new Dependency( DependencyKind.SyntaxTree, masterFile, dependentFile ) };
         var codeAfter = new Dictionary<string, string> { [masterFile] = "class C { void M() {} }", [dependentFile] = "class D : C {}" };
-     
-        var invalidated = await this.GetInvalidatedSyntaxTreesAsync( codeBefore, dependencies, codeAfter );
 
-        Assert.Single( invalidated, dependentFile );
+        var result = await this.ProcessCompilationChangesAsync( codeBefore, dependencies, codeAfter );
+
+        Assert.Single( result.InvalidatedSyntaxTrees, dependentFile );
+        Assert.Same( result.DependenciesBefore.DependenciesByCompilation, result.DependenciesAfter.DependenciesByCompilation );
     }
 
     [Fact]
-    public async Task SyntaxTreeDependency_FileRemoved()
+    public async Task SyntaxTreeDependency_MasterFileRemoved()
     {
         const string masterFile = "master.cs";
         const string dependentFile = "dependent.cs";
         var codeBefore = new Dictionary<string, string> { [masterFile] = "class C {}", [dependentFile] = "class D : C {}" };
         var dependencies = new[] { new Dependency( DependencyKind.SyntaxTree, masterFile, dependentFile ) };
         var codeAfter = new Dictionary<string, string> { [dependentFile] = "class D : C {}" };
-     
-        var invalidated = await this.GetInvalidatedSyntaxTreesAsync( codeBefore, dependencies, codeAfter );
 
-        Assert.Single( invalidated, dependentFile );
+        var result = await this.ProcessCompilationChangesAsync( codeBefore, dependencies, codeAfter );
+
+        Assert.Single( result.InvalidatedSyntaxTrees, dependentFile );
+        Assert.Same( result.DependenciesBefore.DependenciesByCompilation, result.DependenciesAfter.DependenciesByCompilation );
+    }
+
+    [Fact]
+    public async Task SyntaxTreeDependency_DependentFileRemoved()
+    {
+        const string masterFile = "master.cs";
+        const string dependentFile = "dependent.cs";
+        var codeBefore = new Dictionary<string, string> { [masterFile] = "class C {}", [dependentFile] = "class D : C {}" };
+        var dependencies = new[] { new Dependency( DependencyKind.SyntaxTree, masterFile, dependentFile ) };
+        var codeAfter = new Dictionary<string, string> { [masterFile] = "class C {}" };
+
+        var result = await this.ProcessCompilationChangesAsync( codeBefore, dependencies, codeAfter );
+
+        Assert.Empty( result.InvalidatedSyntaxTrees );
+        Assert.Single( result.DependenciesBefore.DependenciesByCompilation );
+        Assert.Empty( result.DependenciesAfter.DependenciesByCompilation );
     }
 
     [Fact]
@@ -120,9 +141,10 @@ public class DependencyGraphInvalidationTests : DesignTimeTestBase
             [masterFile1] = "partial class C {}", [masterFile2] = "partial class C {}", [dependentFile] = "class D : C {}"
         };
 
-        var invalidated = await this.GetInvalidatedSyntaxTreesAsync( codeBefore, dependencies, codeAfter );
+        var result = await this.ProcessCompilationChangesAsync( codeBefore, dependencies, codeAfter );
 
-        Assert.Single( invalidated, dependentFile );
+        Assert.Single( result.InvalidatedSyntaxTrees, dependentFile );
+        Assert.Same( result.DependenciesBefore.DependenciesByCompilation, result.DependenciesAfter.DependenciesByCompilation );
     }
 
     [Fact]
@@ -139,8 +161,9 @@ public class DependencyGraphInvalidationTests : DesignTimeTestBase
             [masterFile1] = "partial class C {}", [masterFile2] = "partial class C {}", [dependentFile] = "class D : C {}"
         };
 
-        var invalidated = await this.GetInvalidatedSyntaxTreesAsync( codeBefore, dependencies, codeAfter );
+        var result = await this.ProcessCompilationChangesAsync( codeBefore, dependencies, codeAfter );
 
-        Assert.Single( invalidated, dependentFile );
+        Assert.Single( result.InvalidatedSyntaxTrees, dependentFile );
+        Assert.Same( result.DependenciesBefore.DependenciesByCompilation, result.DependenciesAfter.DependenciesByCompilation );
     }
 }

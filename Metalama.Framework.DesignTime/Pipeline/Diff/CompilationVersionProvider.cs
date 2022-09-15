@@ -39,25 +39,31 @@ internal partial class CompilationVersionProvider : IService
     public ValueTask<CompilationChanges> MergeChangesAsync( CompilationChanges first, CompilationChanges second, CancellationToken cancellationToken )
         => this._implementation.MergeChangesCoreAsync( first, second, false, cancellationToken );
 
-    public ValueTask<ReferencedCompilationChange> MergeChangesAsync(
-        ReferencedCompilationChange first,
-        ReferencedCompilationChange second,
-        CancellationToken cancellationToken = default )
-        => this._implementation.MergeChangesCoreAsync( first, second, false, cancellationToken );
-
-    public async ValueTask InvokeForInvalidatedSyntaxTreesAsync(
+    public async ValueTask<DependencyGraph> ProcessCompilationChangesAsync(
         CompilationChanges changes,
         DependencyGraph dependencyGraph,
         Action<string> invalidateAction,
+        bool invalidateOnlyDependencies = false,
         CancellationToken cancellationToken = default )
     {
         HashSet<Compilation> processedCompilations = new();
+        var dependencyGraphBuilder = dependencyGraph.ToBuilder();
 
         await ProcessCompilationRecursiveAsync( changes );
 
+        if ( !invalidateOnlyDependencies )
+        {
+            foreach ( var syntaxTreeChange in changes.SyntaxTreeChanges )
+            {
+                invalidateAction( syntaxTreeChange.Key );
+            }
+        }
+
+        return dependencyGraphBuilder.ToImmutable();
+
         async ValueTask ProcessCompilationRecursiveAsync( CompilationChanges currentCompilationChanges )
         {
-            // Prevent
+            // Prevent duplicate processing.
             if ( !processedCompilations.Add( currentCompilationChanges.NewCompilationVersion.Compilation ) )
             {
                 // This set of changes has already been processed.
@@ -81,6 +87,11 @@ internal partial class CompilationVersionProvider : IService
                             {
                                 invalidateAction( dependentSyntaxTree );
                             }
+                        }
+
+                        if ( syntaxTreeChange.SyntaxTreeChangeKind == SyntaxTreeChangeKind.Deleted )
+                        {
+                            dependencyGraphBuilder.RemoveDependentSyntaxTree( syntaxTreeChange.FilePath );
                         }
                     }
 
@@ -109,16 +120,26 @@ internal partial class CompilationVersionProvider : IService
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                if ( reference.Value.ChangeKind == ReferencedCompilationChangeKind.Modified
-                     && !processedCompilations.Contains( reference.Value.NewCompilation.AssertNotNull() ) )
+                switch ( reference.Value.ChangeKind )
                 {
-                    var referenceChanges = reference.Value.Changes
-                                           ?? await this.GetCompilationChangesAsync(
-                                               reference.Value.OldCompilation.AssertNotNull(),
-                                               reference.Value.NewCompilation.AssertNotNull(),
-                                               cancellationToken );
+                    case ReferencedCompilationChangeKind.Modified
+                        when !processedCompilations.Contains( reference.Value.NewCompilation.AssertNotNull() ):
+                        {
+                            var referenceChanges = reference.Value.Changes
+                                                   ?? await this.GetCompilationChangesAsync(
+                                                       reference.Value.OldCompilation.AssertNotNull(),
+                                                       reference.Value.NewCompilation.AssertNotNull(),
+                                                       cancellationToken );
 
-                    await ProcessCompilationRecursiveAsync( referenceChanges );
+                            await ProcessCompilationRecursiveAsync( referenceChanges );
+
+                            break;
+                        }
+
+                    case ReferencedCompilationChangeKind.Removed:
+                        dependencyGraphBuilder.RemoveCompilation( reference.Key );
+
+                        break;
                 }
             }
         }

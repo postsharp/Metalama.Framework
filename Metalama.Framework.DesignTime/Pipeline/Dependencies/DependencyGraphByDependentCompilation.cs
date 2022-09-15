@@ -25,6 +25,8 @@ internal readonly struct DependencyGraphByDependentCompilation
 
     public ImmutableDictionary<TypeDependencyKey, DependencyGraphByMasterPartialType> DependenciesByMasterPartialType { get; }
 
+    public bool IsEmpty => this.DependenciesByMasterFilePath.Count == 0 && this.DependenciesByMasterPartialType.Count == 0;
+
     private readonly ImmutableDictionary<string, DependencyCollectorByDependentSyntaxTreeAndMasterCompilation> _dependenciesByDependentFilePath;
 
     public DependencyGraphByDependentCompilation( AssemblyIdentity assemblyIdentity ) : this(
