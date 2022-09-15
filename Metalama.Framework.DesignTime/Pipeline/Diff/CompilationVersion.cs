@@ -17,7 +17,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
 
         public ImmutableDictionary<string, SyntaxTreeVersion> SyntaxTrees { get; }
 
-        public ImmutableDictionary<AssemblyIdentity, ICompilationVersion> References { get; }
+        public ImmutableDictionary<AssemblyIdentity, ICompilationVersion> ReferencedCompilations { get; }
 
         public Compilation Compilation { get; }
 
@@ -34,12 +34,12 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             Compilation compilation,
             Compilation compilationToAnalyze,
             ImmutableDictionary<string, SyntaxTreeVersion> syntaxTrees,
-            ImmutableDictionary<AssemblyIdentity, ICompilationVersion> references,
+            ImmutableDictionary<AssemblyIdentity, ICompilationVersion> referencedCompilations,
             ulong compileTimeProjectHash )
         {
             this.Strategy = strategy;
             this.SyntaxTrees = syntaxTrees;
-            this.References = references;
+            this.ReferencedCompilations = referencedCompilations;
             this.Compilation = compilation;
             this.CompilationToAnalyze = compilationToAnalyze;
             this.CompileTimeProjectHash = compileTimeProjectHash;
@@ -49,7 +49,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         /// Returns a copy of the current <see cref="CompilationVersion"/> that differs only by the <see cref="Compilation"/> property.
         /// </summary>
         public CompilationVersion WithCompilation( Compilation compilation )
-            => new( this.Strategy, compilation, this.CompilationToAnalyze, this.SyntaxTrees, this.References, this.CompileTimeProjectHash );
+            => new( this.Strategy, compilation, this.CompilationToAnalyze, this.SyntaxTrees, this.ReferencedCompilations, this.CompileTimeProjectHash );
 
         public static CompilationVersion Create(
             Compilation compilation,
@@ -57,6 +57,8 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             ImmutableDictionary<AssemblyIdentity, ICompilationVersion>? referencedCompilations = null, // Can be null for test scenarios.
             CancellationToken cancellationToken = default )
         {
+            referencedCompilations ??= ImmutableDictionary<AssemblyIdentity, ICompilationVersion>.Empty;
+
             var syntaxTreesBuilder = ImmutableDictionary.CreateBuilder<string, SyntaxTreeVersion>( StringComparer.Ordinal );
 
             var partialTypesBuilder = ImmutableHashSet.CreateBuilder<TypeDependencyKey>();
@@ -93,7 +95,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
                 compilation,
                 compilationToAnalyze,
                 syntaxTreeVersions,
-                referencedCompilations ?? ImmutableDictionary<AssemblyIdentity, ICompilationVersion>.Empty,
+                referencedCompilations,
                 DiffStrategy.ComputeCompileTimeProjectHash( syntaxTreeVersions ) );
         }
 

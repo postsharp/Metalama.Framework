@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -16,16 +17,14 @@ namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 /// </summary>
 internal class DependencyCollector : BaseDependencyCollector, IDependencyCollector
 {
-    private readonly Compilation _currentCompilation;
     private readonly ILogger _logger;
     private readonly bool _storeTypeName;
 
     private readonly HashSet<(ISymbol, ISymbol)> _processedDependencies = new();
 
-    public DependencyCollector( IServiceProvider serviceProvider, Compilation compilation, IEnumerable<ICompilationVersion> compilationReferences ) : base(
-        compilationReferences )
+    public DependencyCollector( IServiceProvider serviceProvider, ICompilationVersion compilationVersion, PartialCompilation? partialCompilation = null ) :
+        base( compilationVersion, partialCompilation )
     {
-        this._currentCompilation = compilation;
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DependencyCollector" );
         this._storeTypeName = serviceProvider.GetService<TestMarkerService>() != null;
     }
@@ -62,7 +61,7 @@ internal class DependencyCollector : BaseDependencyCollector, IDependencyCollect
             return;
         }
 
-        var currentCompilationAssembly = this._currentCompilation.Assembly;
+        var currentCompilationAssembly = this.CompilationVersion.Compilation.Assembly;
 
         if ( !SymbolEqualityComparer.Default.Equals( dependentSymbol.ContainingAssembly, currentCompilationAssembly ) )
         {
@@ -99,26 +98,27 @@ internal class DependencyCollector : BaseDependencyCollector, IDependencyCollect
                 }
             }
         }
-        else if ( this.CompilationReferences.TryGetValue( masterSymbol.ContainingAssembly.Identity, out var compilationReference ) )
+        else if ( this.CompilationVersion.ReferencedCompilations.TryGetValue( masterSymbol.ContainingAssembly.Identity, out var referencedCompilationVersion ) )
         {
             // We have a dependency to a different compilation.
 
             foreach ( var masterSyntaxReference in masterSymbol.DeclaringSyntaxReferences )
             {
-                if ( compilationReference.TryGetSyntaxTreeVersion( masterSyntaxReference.SyntaxTree.FilePath, out var masterSyntaxTreeVersion ) )
+                if ( referencedCompilationVersion.TryGetSyntaxTreeVersion( masterSyntaxReference.SyntaxTree.FilePath, out var masterSyntaxTreeVersion ) )
                 {
                     foreach ( var dependentSyntaxReference in dependentSymbol.DeclaringSyntaxReferences )
                     {
                         this.AddSyntaxTreeDependency(
                             dependentSyntaxReference.SyntaxTree.FilePath,
-                            compilationReference.AssemblyIdentity,
+                            referencedCompilationVersion.AssemblyIdentity,
                             masterSyntaxReference.SyntaxTree.FilePath,
                             masterSyntaxTreeVersion.DeclarationHash );
                     }
                 }
                 else
                 {
-                    this._logger.Warning?.Log( $"Cannot find '{masterSyntaxReference.SyntaxTree.FilePath}' in '{compilationReference.AssemblyIdentity}'." );
+                    this._logger.Warning?.Log(
+                        $"Cannot find '{masterSyntaxReference.SyntaxTree.FilePath}' in '{referencedCompilationVersion.AssemblyIdentity}'." );
                 }
 
                 if ( masterIsPartial )

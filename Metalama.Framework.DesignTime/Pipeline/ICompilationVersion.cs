@@ -17,5 +17,8 @@ internal interface ICompilationVersion
 
     IEnumerable<string> EnumerateSyntaxTreePaths();
 
-    ImmutableDictionary<AssemblyIdentity, ICompilationVersion> References { get; }
+    /// <summary>
+    /// Gets the compilations directly referenced by the current <see cref="ICompilationVersion"/>.
+    /// </summary>
+    ImmutableDictionary<AssemblyIdentity, ICompilationVersion> ReferencedCompilations { get; }
 }

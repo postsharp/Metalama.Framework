@@ -33,8 +33,24 @@ internal readonly struct DependencyGraphByMasterSyntaxTree
     }
 
     public DependencyGraphByMasterSyntaxTree AddSyntaxTreeDependency( string dependentFilePath )
-        => new( this.FilePath, this.DeclarationHash, this.DependentFilePaths.Add( dependentFilePath ) );
+    {
+        if ( this.DependentFilePaths.Contains( dependentFilePath ) )
+        {
+            return this;
+        }
+        else
+        {
+            return new DependencyGraphByMasterSyntaxTree( this.FilePath, this.DeclarationHash, this.DependentFilePaths.Add( dependentFilePath ) );
+        }
+    }
 
     public DependencyGraphByMasterSyntaxTree RemoveDependency( string dependentFilePath )
-        => new( this.FilePath, this.DeclarationHash, this.DependentFilePaths.Remove( dependentFilePath ) );
+    {
+        return new DependencyGraphByMasterSyntaxTree( this.FilePath, this.DeclarationHash, this.DependentFilePaths.Remove( dependentFilePath ) );
+    }
+
+    public DependencyGraphByMasterSyntaxTree UpdateDeclarationHash( ulong hash )
+    {
+        return new DependencyGraphByMasterSyntaxTree( this.FilePath, hash, this.DependentFilePaths );
+    }
 }

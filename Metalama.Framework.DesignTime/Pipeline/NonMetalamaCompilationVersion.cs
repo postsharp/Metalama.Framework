@@ -35,7 +35,7 @@ internal class NonMetalamaCompilationVersion : ICompilationVersion
 
     public IEnumerable<string> EnumerateSyntaxTreePaths() => this._syntaxTrees.Keys;
 
-    public ImmutableDictionary<AssemblyIdentity, ICompilationVersion> References => throw new NotSupportedException();
+    public ImmutableDictionary<AssemblyIdentity, ICompilationVersion> ReferencedCompilations => throw new NotSupportedException();
 
     public NonMetalamaCompilationVersion( Compilation compilation, Func<SyntaxTree, ulong> computeHashFunc )
     {

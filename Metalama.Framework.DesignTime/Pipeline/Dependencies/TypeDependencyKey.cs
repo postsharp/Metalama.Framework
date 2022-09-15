@@ -17,27 +17,31 @@ internal readonly struct TypeDependencyKey : IEquatable<TypeDependencyKey>
     {
         var hashCode = default(HashCode);
 
-        for ( var d = (ISymbol) type; d is { } and not IAssemblySymbol and not IModuleSymbol; d = d.ContainingSymbol )
+        for ( var d = (ISymbol) type;
+              d is { } and not IAssemblySymbol and not IModuleSymbol and not INamespaceSymbol { IsGlobalNamespace: true };
+              d = d.ContainingSymbol )
         {
             hashCode.Add( d.Name );
         }
 
         this._hashCode = hashCode.ToHashCode();
-
-        if ( storeTypeName )
-        {
-            this._text = type.ToString();
-        }
-        else
-        {
-            this._text = null;
-        }
+        this._text = storeTypeName ? type.ToString() : null;
     }
 
     // For test only.
     public TypeDependencyKey( string name )
     {
-        this._hashCode = name.GetHashCode();
+        // We should generate the same hashcode than in the production constructor so that we can match a hand-generated TypeDependencyKey
+        // with a symbol-generated TypeDependencyKey.
+        var hashCode = default(HashCode);
+        var nameParts = name.Split( '.' );
+
+        for ( var i = nameParts.Length - 1; i >= 0; i-- )
+        {
+            hashCode.Add( nameParts[i] );
+        }
+
+        this._hashCode = hashCode.ToHashCode();
         this._text = name;
     }
 

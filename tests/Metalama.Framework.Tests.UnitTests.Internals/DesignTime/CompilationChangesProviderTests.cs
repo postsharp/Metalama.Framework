@@ -8,6 +8,8 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 
+#pragma warning disable VSTHRD200 // Async method names must have "Async" suffix.
+
 public class CompilationChangesProviderTests : DesignTimeTestBase
 {
     [Fact]

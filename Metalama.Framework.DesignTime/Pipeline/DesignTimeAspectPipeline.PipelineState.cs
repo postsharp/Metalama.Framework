@@ -416,8 +416,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 // Execute the pipeline.
                 var dependencyCollector = new DependencyCollector(
                     configuration.ServiceProvider.WithService( compilationVersion ),
-                    compilation.Compilation,
-                    compilationVersion.References.Values.Select( x => x.CompilationVersion ) );
+                    compilationVersion.CompilationVersion,
+                    compilation );
 
                 compilation.DerivedTypes.PopulateDependencies( dependencyCollector );
                 var serviceProvider = configuration.ServiceProvider.WithServices( dependencyCollector, compilationVersion );

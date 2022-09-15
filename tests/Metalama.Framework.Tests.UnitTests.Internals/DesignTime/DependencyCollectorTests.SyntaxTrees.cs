@@ -1,8 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
-using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
 using System;
@@ -74,7 +72,7 @@ public partial class DependencyCollectorTests
 
         var compilation = CreateCSharpCompilation( code );
 
-        var dependencyCollector = new DependencyCollector( testContext.ServiceProvider, compilation, Enumerable.Empty<ICompilationVersion>() );
+        var dependencyCollector = new DependencyCollector( testContext.ServiceProvider, new TestCompilationVersion( compilation ) );
 
         var partialCompilation = PartialCompilation.CreatePartial( compilation, compilation.SyntaxTrees );
         partialCompilation.DerivedTypes.PopulateDependencies( dependencyCollector );
@@ -122,8 +120,7 @@ public partial class DependencyCollectorTests
 
         var dependencyCollector = new DependencyCollector(
             testContext.ServiceProvider,
-            compilation2,
-            new ICompilationVersion[] { CompilationVersion.Create( compilation1, new DiffStrategy( true, true, true ) ) } );
+            new TestCompilationVersion( compilation2 ) );
 
         var partialCompilation = PartialCompilation.CreatePartial( compilation2, compilation2.SyntaxTrees );
         partialCompilation.DerivedTypes.PopulateDependencies( dependencyCollector );

@@ -7,7 +7,6 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         None,
         Added,
         Changed,
-        Deleted,
-        ChangedDependency
+        Deleted
     }
 }

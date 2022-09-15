@@ -10,14 +10,9 @@ namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 /// </summary>
 internal class DependencyGraph
 {
-    /// <summary>
-    /// Gets the main compilation for which this <see cref="DependencyGraph"/> is created.
-    /// </summary>
-    public ICompilationVersion Compilation { get; }
-
     public static DependencyGraph Create( ICompilationVersion compilation, BaseDependencyCollector dependencies )
     {
-        var emptyGraph = new DependencyGraph( compilation, ImmutableDictionary<AssemblyIdentity, DependencyGraphByDependentCompilation>.Empty );
+        var emptyGraph = new DependencyGraph( ImmutableDictionary<AssemblyIdentity, DependencyGraphByDependentCompilation>.Empty );
 
         return emptyGraph.Update( compilation, dependencies );
     }
@@ -29,32 +24,12 @@ internal class DependencyGraph
 
     public DependencyGraph Update(
         ICompilationVersion compilationVersion,
-        BaseDependencyCollector dependencies )
+        BaseDependencyCollector dependencyCollector )
     {
         var dependenciesByCompilationDictionaryBuilder = this.DependenciesByCompilation.ToBuilder();
 
-        // Updating compilation references.
-        foreach ( var compilationReference in dependencies.CompilationReferences )
-        {
-            if ( this.DependenciesByCompilation.TryGetValue( compilationReference.Key, out var currentDependencyGraphByDependentCompilation ) )
-            {
-                if ( currentDependencyGraphByDependentCompilation.TryUpdateCompileTimeProjectHash(
-                        compilationReference.Value.CompileTimeProjectHash,
-                        out var newValue ) )
-                {
-                    dependenciesByCompilationDictionaryBuilder[compilationReference.Key] = newValue;
-                }
-            }
-            else
-            {
-                dependenciesByCompilationDictionaryBuilder[compilationReference.Key] = new DependencyGraphByDependentCompilation(
-                    compilationReference.Key,
-                    compilationReference.Value.CompileTimeProjectHash );
-            }
-        }
-
         // Add or update dependencies.
-        foreach ( var dependenciesByDependentFilePath in dependencies.DependenciesByDependentFilePath )
+        foreach ( var dependenciesByDependentFilePath in dependencyCollector.DependenciesByDependentFilePath )
         {
             var dependentFilePath = dependenciesByDependentFilePath.Key;
 
@@ -66,7 +41,10 @@ internal class DependencyGraph
 
                 if ( !dependenciesByCompilationDictionaryBuilder.TryGetValue( compilation, out var currentDependenciesOfCompilation ) )
                 {
-                    var hashCode = dependencies.CompilationReferences.TryGetValue( compilation, out var reference ) ? reference.CompileTimeProjectHash : 0;
+                    var hashCode = dependencyCollector.CompilationVersion.ReferencedCompilations.TryGetValue( compilation, out var reference )
+                        ? reference.CompileTimeProjectHash
+                        : 0;
+
                     currentDependenciesOfCompilation = new DependencyGraphByDependentCompilation( compilation, hashCode );
                 }
 
@@ -87,7 +65,7 @@ internal class DependencyGraph
         // Remove graphs for syntax trees that have been removed from the compilation
         foreach ( var dependentFilePath in compilationVersion.EnumerateSyntaxTreePaths() )
         {
-            if ( !dependencies.DependenciesByDependentFilePath.ContainsKey( dependentFilePath ) )
+            if ( !dependencyCollector.DependenciesByDependentFilePath.ContainsKey( dependentFilePath ) )
             {
                 // The syntax tree does not have any dependency in any compilation.
                 foreach ( var compilationDependencies in this.DependenciesByCompilation )
@@ -100,14 +78,11 @@ internal class DependencyGraph
             }
         }
 
-        return new DependencyGraph( compilationVersion, dependenciesByCompilationDictionaryBuilder.ToImmutable() );
+        return new DependencyGraph( dependenciesByCompilationDictionaryBuilder.ToImmutable() );
     }
 
-    private DependencyGraph(
-        ICompilationVersion compilation,
-        ImmutableDictionary<AssemblyIdentity, DependencyGraphByDependentCompilation> dependenciesByCompilation )
+    private DependencyGraph( ImmutableDictionary<AssemblyIdentity, DependencyGraphByDependentCompilation> dependenciesByCompilation )
     {
         this.DependenciesByCompilation = dependenciesByCompilation;
-        this.Compilation = compilation;
     }
 }

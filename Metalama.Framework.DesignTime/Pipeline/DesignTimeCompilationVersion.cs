@@ -15,7 +15,7 @@ internal class DesignTimeCompilationVersion : ITransitiveAspectManifestProvider
     // For test only.
     public DesignTimeCompilationVersion( ICompilationVersion compilationVersion ) : this(
         compilationVersion,
-        compilationVersion.References.Values.Select( x => new DesignTimeCompilationReference( x ) ) ) { }
+        compilationVersion.ReferencedCompilations.Values.Select( x => new DesignTimeCompilationReference( x ) ) ) { }
 
     public DesignTimeCompilationVersion( ICompilationVersion compilationVersion, IEnumerable<DesignTimeCompilationReference> references )
     {

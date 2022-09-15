@@ -14,6 +14,16 @@ internal class TestCompilationVersion : ICompilationVersion
     private readonly Dictionary<string, ulong> _hashes;
 
     public TestCompilationVersion(
+        string assemblyIdentity,
+        ulong compileTimeProjectHash = 0,
+        Dictionary<string, ulong>? hashes = null,
+        ICompilationVersion[]? referencedCompilations = null ) : this(
+        new AssemblyIdentity( assemblyIdentity ),
+        compileTimeProjectHash,
+        hashes,
+        referencedCompilations ) { }
+
+    public TestCompilationVersion(
         AssemblyIdentity assemblyIdentity,
         ulong compileTimeProjectHash = 0,
         Dictionary<string, ulong>? hashes = null,
@@ -24,8 +34,22 @@ internal class TestCompilationVersion : ICompilationVersion
         this.CompileTimeProjectHash = compileTimeProjectHash;
         this.Compilation = CSharpCompilation.Create( assemblyIdentity.Name, hashes?.Select( p => CSharpSyntaxTree.ParseText( "", path: p.Key ) ) );
 
-        this.References = referencedCompilations?.ToImmutableDictionary( c => c.AssemblyIdentity, c => c )
-                          ?? ImmutableDictionary<AssemblyIdentity, ICompilationVersion>.Empty;
+        this.ReferencedCompilations = referencedCompilations?.ToImmutableDictionary( c => c.AssemblyIdentity, c => c )
+                                      ?? ImmutableDictionary<AssemblyIdentity, ICompilationVersion>.Empty;
+    }
+
+    public TestCompilationVersion( Compilation compilation )
+    {
+        this.AssemblyIdentity = compilation.Assembly.Identity;
+        this.CompileTimeProjectHash = 5;
+        this.Compilation = compilation;
+
+        this.ReferencedCompilations = compilation.References.OfType<CompilationReference>()
+            .ToImmutableDictionary( r => r.Compilation.Assembly.Identity, c => (ICompilationVersion) new TestCompilationVersion( c.Compilation ) );
+
+#pragma warning disable CA1307
+        this._hashes = compilation.SyntaxTrees.ToDictionary( t => t.FilePath, t => (ulong) t.GetRoot().ToFullString().GetHashCode() );
+#pragma warning restore CA1307
     }
 
     public AssemblyIdentity AssemblyIdentity { get; }
@@ -52,5 +76,5 @@ internal class TestCompilationVersion : ICompilationVersion
 
     public IEnumerable<string> EnumerateSyntaxTreePaths() => this._hashes.Keys;
 
-    public ImmutableDictionary<AssemblyIdentity, ICompilationVersion> References { get; }
+    public ImmutableDictionary<AssemblyIdentity, ICompilationVersion> ReferencedCompilations { get; }
 }

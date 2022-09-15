@@ -305,7 +305,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             List<DesignTimeCompilationReference> compilationReferences = new();
 
-            foreach ( var reference in compilationVersion.References.Values )
+            foreach ( var reference in compilationVersion.ReferencedCompilations.Values )
             {
                 var factory = this._factory.AssertNotNull();
 
@@ -330,9 +330,10 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     // It is a non-Metalama reference.
                     var projectTracker = factory.GetNonMetalamaProjectTracker( ProjectKey.FromCompilation( reference.Compilation ) );
 
-                    if ( this._currentState.CompilationVersion?.References == null || this._currentState.CompilationVersion.References.TryGetValue(
-                            reference.Compilation.Assembly.Identity,
-                            out var oldReference ) )
+                    if ( this._currentState.CompilationVersion?.ReferencedCompilations == null
+                         || this._currentState.CompilationVersion.ReferencedCompilations.TryGetValue(
+                             reference.Compilation.Assembly.Identity,
+                             out var oldReference ) )
                     {
                         oldReference = null;
                     }

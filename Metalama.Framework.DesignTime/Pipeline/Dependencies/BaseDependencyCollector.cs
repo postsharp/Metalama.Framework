@@ -1,7 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
-using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 
@@ -10,26 +10,21 @@ namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
 /// </summary>
 internal class BaseDependencyCollector
 {
-    public static BaseDependencyCollector Empty { get; } = new();
+    public ICompilationVersion CompilationVersion { get; }
 
-#if DEBUG
-    static BaseDependencyCollector()
-    {
-        Empty.Freeze();
-    }
-#endif
-
-    public ImmutableDictionary<AssemblyIdentity, ICompilationVersion> CompilationReferences { get; }
+    /// <summary>
+    /// Gets the <see cref="PartialCompilation"/> for which the dependency graph was collected.
+    /// </summary>
+    public PartialCompilation PartialCompilation { get; }
 
     private readonly Dictionary<string, DependencyCollectorByDependentSyntaxTree> _dependenciesByDependentFilePath = new();
 
     public IReadOnlyDictionary<string, DependencyCollectorByDependentSyntaxTree> DependenciesByDependentFilePath => this._dependenciesByDependentFilePath;
 
-    public BaseDependencyCollector( params ICompilationVersion[] compilationReferences ) : this( (IEnumerable<ICompilationVersion>) compilationReferences ) { }
-
-    protected BaseDependencyCollector( IEnumerable<ICompilationVersion> compilationReferences )
+    public BaseDependencyCollector( ICompilationVersion compilationVersion, PartialCompilation? partialCompilation = null )
     {
-        this.CompilationReferences = compilationReferences.ToImmutableDictionary( x => x.AssemblyIdentity, x => x );
+        this.CompilationVersion = compilationVersion;
+        this.PartialCompilation = partialCompilation ?? PartialCompilation.CreateComplete( compilationVersion.Compilation );
     }
 
     /// <summary>

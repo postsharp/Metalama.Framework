@@ -20,6 +20,8 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
 
         public ImmutableDictionary<AssemblyIdentity, ReferencedCompilationChange> ReferencedCompilationChanges { get; }
 
+        public AssemblyIdentity AssemblyIdentity => this.NewCompilationVersion.Compilation.Assembly.Identity;
+
         /// <summary>
         /// Gets a value indicating whether the changes affects the compile-time subproject.
         /// </summary>
@@ -63,7 +65,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
 
             var syntaxTreeChanges = compilationVersion.SyntaxTrees.ToImmutableDictionary( t => t.Key, t => SyntaxTreeChange.NonIncremental( t.Value ) );
 
-            var references = compilationVersion.References.ToImmutableDictionary(
+            var references = compilationVersion.ReferencedCompilations.ToImmutableDictionary(
                 x => x.Key,
                 x => new ReferencedCompilationChange( null, x.Value.Compilation, ReferencedCompilationChangeKind.Added ) );
 
@@ -95,7 +97,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
 
             var syntaxTreeChanges = ImmutableDictionary.CreateBuilder<string, SyntaxTreeChange>( StringComparer.Ordinal );
 
-            var hasCompileTimeChange = referencedCompilationChanges.Any(c => c.Value.HasCompileTimeCodeChange);
+            var hasCompileTimeChange = referencedCompilationChanges.Any( c => c.Value.HasCompileTimeCodeChange );
 
             // Process new trees.
             var lastTrees = oldCompilationVersion.SyntaxTrees;
@@ -228,7 +230,7 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
 
             return compilationChanges;
         }
-        
+
         public override string ToString() => $"HasCompileTimeCodeChange={this.HasCompileTimeCodeChange}, SyntaxTreeChanges={this.SyntaxTreeChanges.Count}";
     }
 }
