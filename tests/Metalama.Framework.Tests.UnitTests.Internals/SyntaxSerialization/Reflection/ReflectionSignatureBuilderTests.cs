@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.SyntaxSerialization;
+using Metalama.TestFramework.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -64,7 +65,7 @@ public class ReflectionSignatureBuilderTests : TestBase
 
             var hasTypeArgument = ReflectionSignatureBuilder.HasTypeArgument( modelMethod );
 
-            Assert.Equal( reflectionMethod.ToString().Contains( "TypeArgument" ), hasTypeArgument );
+            Assert.Equal( reflectionMethod.ToString()!.ContainsOrdinal( "TypeArgument" ), hasTypeArgument );
         }
     }
 
@@ -83,7 +84,7 @@ public class ReflectionSignatureBuilderTests : TestBase
 
             var hasTypeArgument = ReflectionSignatureBuilder.HasTypeArgument( modelConstructor );
 
-            Assert.Equal( reflectionConstructor.ToString().Contains( "TypeArgument" ), hasTypeArgument );
+            Assert.Equal( reflectionConstructor.ToString()!.ContainsOrdinal( "TypeArgument" ), hasTypeArgument );
             parametersCount++;
         }
     }
@@ -117,7 +118,8 @@ public class ReflectionSignatureBuilderTests : TestBase
 
         public void M11<TypeArgument2>( TypeArgument2? x ) { }
 
-        public void M12<TypeArgument2>( TypeArgument2? x ) where TypeArgument2 : struct { }
+        public void M12<TypeArgument2>( TypeArgument2? x )
+            where TypeArgument2 : struct { }
 
         public void M13( double[][] x, double y, double[,] z ) { }
 
@@ -128,7 +130,7 @@ public class ReflectionSignatureBuilderTests : TestBase
 
         public C( out TypeArgument1? p1, Dictionary<int, Dictionary<double, TypeArgument1>> p2 ) { p1 = default; }
 
-        public C( TypeArgument1[,] p1, Dictionary<Dictionary<TypeArgument1, int>, dynamic> p2, ref List<TypeArgument1> p3 ) { }
+        public C( TypeArgument1[,] p1, Dictionary<Dictionary<double[], int>, dynamic> p2, ref List<TypeArgument1> p3 ) { }
 
         public C( Enum p1, Type p2, dynamic p3, ref ushort p4 ) { }
 
