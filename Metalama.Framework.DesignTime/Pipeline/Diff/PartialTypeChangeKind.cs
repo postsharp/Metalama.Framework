@@ -2,6 +2,9 @@
 
 namespace Metalama.Framework.DesignTime.Pipeline.Diff;
 
+/// <summary>
+/// Kinds of <see cref="PartialTypeChange"/>.
+/// </summary>
 internal enum PartialTypeChangeKind
 {
     None,

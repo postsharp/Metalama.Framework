@@ -15,7 +15,7 @@ internal class NonMetalamaProjectTracker
         this._projectVersionProvider = serviceProvider.GetRequiredService<ProjectVersionProvider>();
     }
 
-    public async ValueTask<DesignTimeCompilationReference> GetCompilationReferenceAsync(
+    public async ValueTask<DesignTimeProjectReference> GetCompilationReferenceAsync(
         Compilation? oldCompilation,
         Compilation newCompilation,
         CancellationToken cancellationToken )
@@ -24,6 +24,6 @@ internal class NonMetalamaProjectTracker
         // without recomputing it from scratch.
         var compilationVersion = await this._projectVersionProvider.GetCompilationVersionAsync( oldCompilation, newCompilation, cancellationToken );
 
-        return new DesignTimeCompilationReference( compilationVersion, false );
+        return new DesignTimeProjectReference( compilationVersion );
     }
 }

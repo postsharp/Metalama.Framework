@@ -8,7 +8,7 @@ using Microsoft.CodeAnalysis;
 namespace Metalama.Framework.DesignTime.Pipeline.Diff;
 
 /// <summary>
-/// Computes and caches the <see cref="CompilationChanges"/> between pairs of <see cref="Compilation"/> instances.
+/// Computes and instances of <see cref="ProjectVersion"/> and <see cref="CompilationChanges"/>.
 /// </summary>
 internal partial class ProjectVersionProvider : IService
 {
@@ -35,9 +35,6 @@ internal partial class ProjectVersionProvider : IService
         Compilation newCompilation,
         CancellationToken cancellationToken = default )
         => this._implementation.GetCompilationChangesAsyncCore( oldCompilation, newCompilation, false, cancellationToken );
-
-    public ValueTask<CompilationChanges> MergeChangesAsync( CompilationChanges first, CompilationChanges second, CancellationToken cancellationToken )
-        => this._implementation.MergeChangesCoreAsync( first, second, false, cancellationToken );
 
     public async ValueTask<DependencyGraph> ProcessCompilationChangesAsync(
         CompilationChanges changes,

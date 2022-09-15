@@ -238,13 +238,11 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         private async ValueTask<ProjectVersion> InvalidateCacheAsync(
             Compilation compilation,
-            DesignTimeCompilationVersion references,
             bool invalidateCompilationResult,
             CancellationToken cancellationToken )
         {
             var newState = await this._currentState.InvalidateCacheForNewCompilationAsync(
                 compilation,
-                references,
                 invalidateCompilationResult,
                 cancellationToken );
 
@@ -263,13 +261,13 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         private bool TryExecutePartial(
             PartialCompilation partialCompilation,
-            DesignTimeCompilationVersion references,
+            DesignTimeProjectVersion projectVersion,
             CancellationToken cancellationToken,
             [NotNullWhen( true )] out CompilationResult? compilationResult )
         {
             var state = this._currentState;
 
-            if ( !PipelineState.TryExecute( ref state, partialCompilation, references, cancellationToken, out compilationResult ) )
+            if ( !PipelineState.TryExecute( ref state, partialCompilation, projectVersion, cancellationToken, out compilationResult ) )
             {
                 return false;
             }
@@ -291,7 +289,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             return compilationResult != null;
         }
 
-        private async ValueTask<DesignTimeCompilationVersion?> GetDesignTimeCompilationVersionAsync(
+        private async ValueTask<DesignTimeProjectVersion?> GetDesignTimeProjectVersionAsync(
             Compilation compilation,
             CancellationToken cancellationToken )
         {
@@ -300,7 +298,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 compilation,
                 cancellationToken );
 
-            List<DesignTimeCompilationReference> compilationReferences = new();
+            List<DesignTimeProjectReference> compilationReferences = new();
 
             foreach ( var reference in compilationVersion.ReferencedProjectVersions.Values )
             {
@@ -317,9 +315,8 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     }
 
                     compilationReferences.Add(
-                        new DesignTimeCompilationReference(
+                        new DesignTimeProjectReference(
                             referenceResult.ProjectVersion,
-                            true,
                             referenceResult.TransformationResult ) );
                 }
                 else
@@ -345,7 +342,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 }
             }
 
-            return new DesignTimeCompilationVersion( compilationVersion, compilationReferences );
+            return new DesignTimeProjectVersion( compilationVersion, compilationReferences );
         }
 
         public async ValueTask<CompilationResult?> ExecuteAsync(
@@ -366,9 +363,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     return compilationResult;
                 }
 
-                var references = await this.GetDesignTimeCompilationVersionAsync( compilation, cancellationToken );
+                var projectVersion = await this.GetDesignTimeProjectVersionAsync( compilation, cancellationToken );
 
-                if ( references == null )
+                if ( projectVersion == null )
                 {
                     // A dependency could not be compiled.
                     return null;
@@ -381,7 +378,6 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 {
                     var compilationVersion = await this.InvalidateCacheAsync(
                         compilation,
-                        references,
                         true,
                         cancellationToken );
 
@@ -430,7 +426,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     {
                         Interlocked.Increment( ref this._pipelineExecutionCount );
 
-                        if ( !this.TryExecutePartial( partialCompilation, references, cancellationToken, out compilationResult ) )
+                        if ( !this.TryExecutePartial( partialCompilation, projectVersion, cancellationToken, out compilationResult ) )
                         {
                             return null;
                         }

@@ -6,18 +6,13 @@ using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Pipeline;
 
-internal class DesignTimeCompilationVersion : ITransitiveAspectManifestProvider
+internal class DesignTimeProjectVersion : ITransitiveAspectManifestProvider
 {
     public IProjectVersion ProjectVersion { get; }
 
-    public ImmutableDictionary<ProjectKey, DesignTimeCompilationReference> References { get; }
-
-    // For test only.
-    public DesignTimeCompilationVersion( IProjectVersion projectVersion ) : this(
-        projectVersion,
-        projectVersion.ReferencedProjectVersions.Values.Select( x => new DesignTimeCompilationReference( x ) ) ) { }
-
-    public DesignTimeCompilationVersion( IProjectVersion projectVersion, IEnumerable<DesignTimeCompilationReference> references )
+    public ImmutableDictionary<ProjectKey, DesignTimeProjectReference> References { get; }
+    
+    public DesignTimeProjectVersion( IProjectVersion projectVersion, IEnumerable<DesignTimeProjectReference> references )
     {
         this.ProjectVersion = projectVersion;
         this.References = references.ToImmutableDictionary( x => x.ProjectVersion.ProjectKey, x => x );

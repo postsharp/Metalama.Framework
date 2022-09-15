@@ -169,7 +169,6 @@ namespace Metalama.Framework.DesignTime.Pipeline
             /// </summary>
             internal async ValueTask<PipelineState> InvalidateCacheForNewCompilationAsync(
                 Compilation newCompilation,
-                DesignTimeCompilationVersion references,
                 bool invalidateCompilationResult,
                 CancellationToken cancellationToken )
             {
@@ -417,7 +416,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             public static bool TryExecute(
                 ref PipelineState state,
                 PartialCompilation compilation,
-                DesignTimeCompilationVersion compilationVersion,
+                DesignTimeProjectVersion projectVersion,
                 CancellationToken cancellationToken,
                 [NotNullWhen( true )] out CompilationResult? compilationResult )
             {
@@ -449,12 +448,12 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                 // Execute the pipeline.
                 var dependencyCollector = new DependencyCollector(
-                    configuration.ServiceProvider.WithService( compilationVersion ),
-                    compilationVersion.ProjectVersion,
+                    configuration.ServiceProvider.WithService( projectVersion ),
+                    projectVersion.ProjectVersion,
                     compilation );
 
                 compilation.DerivedTypes.PopulateDependencies( dependencyCollector );
-                var serviceProvider = configuration.ServiceProvider.WithServices( dependencyCollector, compilationVersion );
+                var serviceProvider = configuration.ServiceProvider.WithServices( dependencyCollector, projectVersion );
 
                 var success = state._pipeline.TryExecute(
                     compilation,

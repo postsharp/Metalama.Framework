@@ -4,21 +4,20 @@ using Metalama.Framework.Engine.Aspects;
 
 namespace Metalama.Framework.DesignTime.Pipeline;
 
-internal class DesignTimeCompilationReference
+/// <summary>
+/// Associates a <see cref="ProjectVersion"/> and a <see cref="TransitiveAspectsManifest"/>.
+/// </summary>
+internal readonly struct DesignTimeProjectReference
 {
     public ITransitiveAspectsManifest? TransitiveAspectsManifest { get; }
 
     public IProjectVersion ProjectVersion { get; }
 
-    public bool IsMetalamaEnabled { get; }
-
-    public DesignTimeCompilationReference(
+    public DesignTimeProjectReference(
         IProjectVersion projectVersion,
-        bool isMetalamaEnabled = true,
         ITransitiveAspectsManifest? transitiveAspectsManifest = null )
     {
         this.TransitiveAspectsManifest = transitiveAspectsManifest;
         this.ProjectVersion = projectVersion;
-        this.IsMetalamaEnabled = isMetalamaEnabled;
     }
 }
