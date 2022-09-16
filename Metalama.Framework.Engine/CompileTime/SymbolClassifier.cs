@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -67,6 +68,7 @@ namespace Metalama.Framework.Engine.CompileTime
         private readonly ConcurrentDictionary<ISymbol, TemplateInfo> _cacheNonInheritedTemplateInfo = new( SymbolEqualityComparer.Default );
         private readonly ReferenceAssemblyLocator _referenceAssemblyLocator;
         private readonly AttributeDeserializer _attributeDeserializer;
+        private readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SymbolClassifier"/> class.
@@ -77,6 +79,7 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             this._referenceAssemblyLocator = serviceProvider.GetRequiredService<ReferenceAssemblyLocator>();
             this._attributeDeserializer = attributeDeserializer;
+            this._logger = serviceProvider.GetLoggerFactory().GetLogger( "SymbolClassifier" );
 
             if ( compilation != null )
             {
@@ -151,6 +154,11 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 // This happens when the attribute class is defined in user code.
                 // In this case, we have to instantiate the attribute later, after we have the compile-time assembly for the user code.
+
+                // It also happens in case of mismatch between the current Metalama version and the Metalama version to which the project is
+                // linked, which should not happen in theory.
+
+                this._logger.Warning?.Log( $"Could not instantiate an attribute of type '{attributeData.AttributeClass}'." );
             }
 
             var memberId = SymbolId.Create( declaringSymbol );

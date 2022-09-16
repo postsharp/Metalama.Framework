@@ -17,6 +17,7 @@ using Metalama.Framework.Engine.Fabrics;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Testing;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
@@ -132,6 +133,25 @@ namespace Metalama.Framework.Engine.Pipeline
                     GeneralDiagnosticDescriptors.CSharpVersionNotSupported.CreateRoslynDiagnostic(
                         null,
                         (languageVersion.ToDisplayString(), _supportedVersions.Select( x => x.ToDisplayString() ).ToArray()) ) );
+
+                configuration = null;
+
+                return false;
+            }
+
+            // Check the Metalama version.
+            var referencedMetalamaVersions = compilation.Compilation.SourceModule.ReferencedAssemblies
+                .Where( identity => identity.Name == "Metalama.Framework" )
+                .Select( x => x.Version )
+                .ToList();
+
+            if ( referencedMetalamaVersions.Count != 1 || referencedMetalamaVersions[0] != EngineAssemblyMetadataReader.Instance.AssemblyVersion )
+            {
+                diagnosticAdder.Report(
+                    GeneralDiagnosticDescriptors.MetalamaVersionNotSupported.CreateRoslynDiagnostic(
+                        null,
+                        (referencedMetalamaVersions.Select( x => x.ToString() ).ToArray(),
+                         EngineAssemblyMetadataReader.Instance.AssemblyVersion.ToString()) ) );
 
                 configuration = null;
 

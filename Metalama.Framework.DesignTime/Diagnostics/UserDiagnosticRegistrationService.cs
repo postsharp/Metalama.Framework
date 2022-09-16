@@ -76,6 +76,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
             {
                 // We swallow exceptions because we don't want to fail the pipeline in case of error here.
                 this._configurationManager.Logger.Error?.Log( $"Cannot register user diagnostics and registrations: {e.Message}." );
+                DesignTimeExceptionHandler.ReportException( e );
             }
         }
 

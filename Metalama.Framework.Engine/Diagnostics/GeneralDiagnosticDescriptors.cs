@@ -314,6 +314,14 @@ namespace Metalama.Framework.Engine.Diagnostics
                 "Metalama is enabled in this project, but the METALAMA preprocessor symbol is not defined.",
                 _category );
 
+        internal static readonly DiagnosticDefinition<(string[] SelectedVersions, string SupportedVersion)> MetalamaVersionNotSupported =
+            new(
+                "LAMA00054",
+                Error,
+                "The project references the version(s) {0} of Metalama.Framework, but only the version '{1}' is supported.",
+                "The project has referenced to unsupported versions of Metalama",
+                _category );
+
         // TODO: Use formattable string (C# does not seem to find extension methods).
         public static readonly DiagnosticDefinition<string>
             UnsupportedFeature = new(

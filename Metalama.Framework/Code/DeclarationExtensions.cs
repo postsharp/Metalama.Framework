@@ -43,12 +43,12 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets the declaring <see cref="INamedType"/> of a given declaration if the declaration if not an <see cref="INamedType"/>, or the <see cref="INamedType"/> itself if the given declaration is itself an <see cref="INamedType"/>. 
         /// </summary>
-        public static INamedType? GetNamedType( this IDeclaration declaration )
+        public static INamedType? GetClosestNamedType( this IDeclaration declaration )
             => declaration switch
             {
                 INamedType namedType => namedType,
                 IMember member => member.DeclaringType,
-                { ContainingDeclaration: { } containingDeclaration } => GetNamedType( containingDeclaration ),
+                { ContainingDeclaration: { } containingDeclaration } => GetClosestNamedType( containingDeclaration ),
                 _ => null
             };
 
@@ -57,7 +57,7 @@ namespace Metalama.Framework.Code
             {
                 INamedType { DeclaringType: null } namedType => namedType,
                 INamedType { DeclaringType: { } } namedType => namedType.DeclaringType.GetTopNamedType(),
-                _ => declaration.GetNamedType()?.GetTopNamedType()
+                _ => declaration.GetClosestNamedType()?.GetTopNamedType()
             };
 
         /// <summary>

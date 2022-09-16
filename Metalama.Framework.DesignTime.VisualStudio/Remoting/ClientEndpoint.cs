@@ -36,7 +36,9 @@ internal class ClientEndpoint<T> : ServiceEndpoint, IDisposable
         }
         catch ( Exception e )
         {
-            this.Logger.Error?.Log( $"Cannot connect to the endpoint '{this.PipeName}': " + e );
+            this.Logger.Error?.Log( $"Cannot connect to the endpoint '{this.PipeName}': " + e.Message );
+
+            DesignTimeExceptionHandler.ReportException( e, this.Logger );
 
             this.InitializedTask.SetException( e );
 

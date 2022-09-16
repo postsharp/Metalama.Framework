@@ -65,6 +65,7 @@ internal partial class UserProcessServiceHubEndpoint : ServerEndpoint, ICodeRefa
             this.Logger.Warning?.Log( $"The project '{projectKey}' is not registered. Waiting." );
             var waiter = this._waiters.GetOrAdd( projectKey, _ => new TaskCompletionSource<UserProcessEndpoint>() );
             endpoint = await waiter.Task.WithCancellation( cancellationToken );
+            this.Logger.Trace?.Log( $"The project '{projectKey}' is now available registered. Resuming." );
         }
 
         return endpoint;
@@ -79,7 +80,7 @@ internal partial class UserProcessServiceHubEndpoint : ServerEndpoint, ICodeRefa
 
     public async Task RegisterProjectCallbackAsync( ProjectKey projectKey, IProjectHandlerCallback callback, CancellationToken cancellationToken = default )
     {
-        this.Logger.Trace?.Log( $"Registering '{projectKey}'." );
+        this.Logger.Trace?.Log( $"Registering callback for '{projectKey}'." );
         var endpoint = await this.GetEndpointAsync( projectKey, cancellationToken );
 
         await endpoint.RegisterProjectCallbackAsync( projectKey, callback, cancellationToken );

@@ -101,11 +101,21 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
             if ( !options.IsFrameworkEnabled )
             {
                 // Metalama is not enabled for this project.
+                this._logger.Trace?.Log(
+                    $"{this.GetType().Name}.GetGeneratedSources('{options.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): Metalama not enabled." );
 
                 return SourceGeneratorResult.Empty;
             }
 
             var projectKey = compilation.GetProjectKey();
+
+            if ( !projectKey.HasHashCode )
+            {
+                this._logger.Warning?.Log(
+                    $"{this.GetType().Name}.GetGeneratedSources('{options.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): no syntax tree." );
+
+                return SourceGeneratorResult.Empty;
+            }
 
             // Get or create an IProjectHandler instance.
             if ( !this._projectHandlers.TryGetValue( projectKey, out var projectHandler ) )

@@ -16,9 +16,16 @@ internal abstract class ServerEndpoint : ServiceEndpoint, IDisposable
     /// <summary>
     /// Starts the RPC connection, but does not wait until the service is fully started.
     /// </summary>
-    public void Start()
+    public async void Start()
     {
-        _ = Task.Run( () => this.StartAsync( this._startCancellationSource.Token ) );
+        try
+        {
+            await Task.Run( () => this.StartAsync( this._startCancellationSource.Token ) );
+        }
+        catch ( Exception e )
+        {
+            DesignTimeExceptionHandler.ReportException( e, this.Logger );
+        }
     }
 
     protected abstract void ConfigureRpc( JsonRpc rpc );

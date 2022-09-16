@@ -44,7 +44,7 @@ namespace Metalama.Framework.Engine.Advising
             // In the future, AdviceFactory could work on a compilation snapshot, however we have no use case for this feature yet.
             this._compilation = state.InitialCompilation;
             this._aspectTarget = state.AspectInstance.TargetDeclaration.GetTarget( this.MutableCompilation );
-            this._aspectTargetType = this._aspectTarget.GetNamedType();
+            this._aspectTargetType = this._aspectTarget.GetClosestNamedType();
         }
 
         private DisposeAction WithNonUserCode() => this._state.ExecutionContext.WithoutDependencyCollection();

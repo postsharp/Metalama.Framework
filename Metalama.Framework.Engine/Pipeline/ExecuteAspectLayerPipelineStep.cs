@@ -39,7 +39,7 @@ internal class ExecuteAspectLayerPipelineStep : PipelineStep
             .WhereNotNull()
             .Select( a => (TargetDeclaration: a.TargetDeclaration.GetTarget( compilation ), AspectInstance: a) );
 
-        var instancesByType = aggregateInstances.GroupBy( a => a.TargetDeclaration.GetNamedType() );
+        var instancesByType = aggregateInstances.GroupBy( a => a.TargetDeclaration.GetClosestNamedType() );
 
         // This collection will contain the observable transformations that need to be replayed on the compilation.
         var observableTransformations = new ConcurrentQueue<IObservableTransformation>();
