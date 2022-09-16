@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
-using Metalama.Backstage.Extensibility;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Testing;
@@ -19,13 +18,6 @@ namespace Metalama.Framework.Tests.UnitTests
 {
     public class TestBase
     {
-        private readonly ITestOutputHelper? _testOutputHelper;
-
-        static TestBase()
-        {
-            TestingServices.Initialize();
-        }
-
         /// <summary>
         /// A value indicating whether tests that test the serialization of reflection objects like <see cref="Type"/> should use "dotnet build" to see if the
         /// resulting syntax tree actually compiles and results in valid IL. This is slow but necessary during development, at least, since an incorrect syntax tree
@@ -33,12 +25,19 @@ namespace Metalama.Framework.Tests.UnitTests
         /// </summary>
         private const bool _doCodeExecutionTests = false;
 
+        private readonly ITestOutputHelper? _testOutputHelper;
+
+        static TestBase()
+        {
+            TestingServices.Initialize();
+        }
+
         protected TestBase( ITestOutputHelper? testOutputHelper = null )
         {
             this._testOutputHelper = testOutputHelper;
         }
 
-        public ITestOutputHelper Logger => this._testOutputHelper.AssertNotNull();
+        protected ITestOutputHelper Logger => this._testOutputHelper.AssertNotNull();
 
         protected virtual ServiceProvider ConfigureServiceProvider( ServiceProvider serviceProvider )
         {

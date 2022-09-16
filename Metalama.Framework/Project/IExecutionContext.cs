@@ -34,9 +34,7 @@ namespace Metalama.Framework.Project
         IExecutionScenario ExecutionScenario { get; }
 
         /// <summary>
-        /// Disables the mechanism of dependency collection and validation in the current execution context.
-        /// This method can be used to cope with a <see cref="DeclarationOutOfScopeException"/>. However, it can cause
-        /// caching issues at design time.
+        /// Disables the mechanism of dependency collection in the current execution context.
         /// </summary>
         /// <returns>A cookie that must be restored to restore the execution context to its original state.</returns>
         IDisposable WithoutDependencyCollection();

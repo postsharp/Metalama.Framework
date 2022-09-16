@@ -26,12 +26,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTimePipeline
 {
     public class PipelineIntegrationTests : TestBase
     {
-        public PipelineIntegrationTests( ITestOutputHelper logger )
-        {
-            this.Logger = logger;
-        }
-
-        protected ITestOutputHelper Logger { get; }
+        public PipelineIntegrationTests( ITestOutputHelper logger ) : base( logger ) { }
 
         private static CSharpCompilation CreateCSharpCompilation(
             IReadOnlyDictionary<string, string> code,

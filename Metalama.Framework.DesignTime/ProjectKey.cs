@@ -34,7 +34,7 @@ public sealed class ProjectKey : IEquatable<ProjectKey>
     public string AssemblyName { get; }
 
     /// <summary>
-    /// Determines if the <see cref="ProjectKey"/> contains a valid hash code. The value can be <c>false</c> in tests
+    /// Gets a value indicating whether the <see cref="ProjectKey"/> contains a valid hash code. The value can be <c>false</c> in tests
     /// or at design time when the project has no syntax tree.
     /// </summary>
     [JsonIgnore]

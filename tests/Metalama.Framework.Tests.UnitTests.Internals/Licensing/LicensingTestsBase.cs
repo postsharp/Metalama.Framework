@@ -13,12 +13,7 @@ namespace Metalama.Framework.Tests.UnitTests.Licensing
 {
     public class LicensingTestsBase : TestBase
     {
-        protected ITestOutputHelper Logger { get; }
-
-        public LicensingTestsBase( ITestOutputHelper logger )
-        {
-            this.Logger = logger;
-        }
+        public LicensingTestsBase( ITestOutputHelper logger ) : base( logger ) { }
 
         protected async Task<DiagnosticList> GetDiagnosticsAsync( string code, string licenseKey, string? assemblyName = null )
         {

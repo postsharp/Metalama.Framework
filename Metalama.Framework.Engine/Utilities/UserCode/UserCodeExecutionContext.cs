@@ -170,9 +170,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
 
                     if ( declaringType != null && declaringType != this._targetType && !this._targetType.IsSubclassOf( declaringType ) )
                     {
-                        throw new DeclarationOutOfScopeException(
-                            UserMessageFormatter.Format(
-                                $"The current code cannot access '{declaration}'. It can only access '{this._targetType}' and its parent classes, including all nested classes." ) );
+                        this._dependencyCollector.AddDependency( this._targetType.GetSymbol(), declaringType.GetSymbol() );
                     }
                 }
             }
