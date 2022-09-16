@@ -1,16 +1,26 @@
-public class SomeDisposable : ISomeInterface
+public class TargetClass<T> : IEnumerable<T>
 {
-#if TESTRUNNER
-            void Foo()
-            {
-                Debug.Fail("");
-            }
-#endif
-
-#if !TESTRUNNER
-    void Bar()
+    [TestAspect]
+    public IEnumerator<T> GetEnumerator()
     {
-        Debug.Fail("");
+        _ = this.GetEnumerator_Source();
+        return this.GetEnumerator_Source();
     }
-#endif
+
+    private IEnumerator<T> GetEnumerator_Source()
+    {
+        return Enumerable.Empty<T>().GetEnumerator();
+    }
+
+    [TestAspect]
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        _ = this.System_Collections_IEnumerable_GetEnumerator_Source();
+        return this.System_Collections_IEnumerable_GetEnumerator_Source();
+    }
+
+    private IEnumerator System_Collections_IEnumerable_GetEnumerator_Source()
+    {
+        return this.GetEnumerator();
+    }
 }

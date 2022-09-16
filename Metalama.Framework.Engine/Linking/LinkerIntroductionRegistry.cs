@@ -31,7 +31,6 @@ namespace Metalama.Framework.Engine.Linking
         private readonly Dictionary<ISymbol, IDeclaration> _overrideTargetsByOriginalSymbol;
         private readonly Dictionary<SyntaxTree, SyntaxTree> _introducedTreeMap;
         private readonly Dictionary<IDeclaration, LinkerIntroducedMember> _builderLookup;
-        private readonly Dictionary<ISymbol, ISymbol> _intermediateSymbolMap;
 
         public LinkerIntroductionRegistry(
             CompilationModel finalCompilationModel,
@@ -46,15 +45,6 @@ namespace Metalama.Framework.Engine.Linking
             this._overrideTargetMap = new Dictionary<LinkerIntroducedMember, IDeclaration>();
             this._overrideTargetsByOriginalSymbol = new Dictionary<ISymbol, IDeclaration>( StructuralSymbolComparer.Default );
             this._builderLookup = new Dictionary<IDeclaration, LinkerIntroducedMember>();
-
-            this._intermediateSymbolMap = new Dictionary<ISymbol, ISymbol>( StructuralSymbolComparer.Default );
-
-            var walker = new SymbolDiscoveryWalker( intermediateCompilation, this._intermediateSymbolMap );
-
-            foreach ( var syntaxTree in intermediateCompilation.SyntaxTrees )
-            {
-                walker.Visit( syntaxTree.GetRoot() );
-            }
 
             foreach ( var introducedMember in introducedMembers )
             {
@@ -79,15 +69,6 @@ namespace Metalama.Framework.Engine.Linking
                     this._builderLookup[builder] = introducedMember;
                 }
             }
-        }
-
-        /// <summary>
-        /// Maps symbol from original or intermediate compilation to intermediate compilation.
-        /// </summary>
-        public T MapSymbol<T>( T symbol )
-            where T : ISymbol
-        {
-            return (T) this._intermediateSymbolMap[symbol];
         }
 
         /// <summary>
@@ -166,7 +147,7 @@ namespace Metalama.Framework.Engine.Linking
 
             if ( overrideTarget is Declaration originalDeclaration )
             {
-                return this.MapSymbol( originalDeclaration.GetSymbol().AssertNotNull() );
+                return SymbolTranslator.GetInstance( this._intermediateCompilation ).Translate( originalDeclaration.GetSymbol().AssertNotNull() );
             }
             else if ( overrideTarget is IDeclarationBuilder builder )
             {
