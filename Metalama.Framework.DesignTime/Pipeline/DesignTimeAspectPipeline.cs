@@ -81,7 +81,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             DesignTimeAspectPipelineFactory pipelineFactory,
             IProjectOptions projectOptions,
             Compilation compilation,
-            bool isTest ) : this( pipelineFactory, projectOptions, ProjectKeyExtensions.GetProjectKey( compilation ), compilation.References, isTest ) { }
+            bool isTest ) : this( pipelineFactory, projectOptions, compilation.GetProjectKey(), compilation.References, isTest ) { }
 
         public DesignTimeAspectPipeline(
             DesignTimeAspectPipelineFactory pipelineFactory,
@@ -322,7 +322,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 else
                 {
                     // It is a non-Metalama reference.
-                    var projectKey = ProjectKeyExtensions.GetProjectKey( reference.Compilation );
+                    var projectKey = reference.Compilation.GetProjectKey();
                     var projectTracker = factory.GetNonMetalamaProjectTracker( projectKey );
 
                     if ( this._currentState.CompilationVersion?.ReferencedProjectVersions == null

@@ -10,7 +10,7 @@ public interface ICompileTimeCodeEditingStatusService : IService
 
     event Action<bool>? IsEditingCompileTimeCodeChanged;
 
-    Task OnEditingCompileTimeCodeCompletedAsync();
+    Task OnEditingCompileTimeCodeCompletedAsync( CancellationToken cancellationToken );
 
     void OnUserInterfaceAttached();
 }

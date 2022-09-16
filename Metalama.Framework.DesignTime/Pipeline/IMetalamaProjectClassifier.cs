@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.DesignTime.Pipeline;
 
-internal interface IMetalamaProjectClassifier : IService
+public interface IMetalamaProjectClassifier : IService
 {
     bool IsMetalamaEnabled( Compilation compilation );
 }

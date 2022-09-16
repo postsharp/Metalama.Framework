@@ -1,6 +1,5 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Microsoft.VisualStudio.Threading;
 using StreamJsonRpc;
 using System.IO.Pipes;
 
@@ -47,7 +46,7 @@ internal class ClientEndpoint<T> : ServiceEndpoint, IDisposable
 
     public async ValueTask<T> GetServerApiAsync( CancellationToken cancellationToken = default )
     {
-        await this.WhenInitialized.WithCancellation( cancellationToken );
+        await this.WaitUntilInitializedAsync( cancellationToken );
 
         return this._server ?? throw new InvalidOperationException();
     }

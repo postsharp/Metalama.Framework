@@ -29,8 +29,24 @@ internal class VsUserProcessProjectHandler : ProjectHandler, IProjectHandlerCall
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
         this._userProcessEndpoint = serviceProvider.GetRequiredService<UserProcessServiceHubEndpoint>();
 
-        _ = this._userProcessEndpoint.RegisterProjectHandlerAsync( projectKey, this );
+        this.Initialize();
     }
+
+#pragma warning disable VSTHRD100 // Avoid "async void" methods.
+    private async void Initialize()
+    {
+        // Since this method is not awaited, we have to handle exceptions here.
+
+        try
+        {
+            await this._userProcessEndpoint.RegisterProjectCallbackAsync( this.ProjectKey, this );
+        }
+        catch ( Exception e )
+        {
+            this._logger.Error?.Log( e.ToString() );
+        }
+    }
+#pragma warning restore VSTHRD100 // Avoid "async void" methods.
 
     public override SourceGeneratorResult GenerateSources( Compilation compilation, CancellationToken cancellationToken )
     {

@@ -114,7 +114,7 @@ namespace Metalama.Framework.DesignTime
                     return;
                 }
 
-                var projectKey = ProjectKeyExtensions.GetProjectKey( compilation );
+                var projectKey = compilation.GetProjectKey();
 
                 // Call the service.
                 var result = await this._codeRefactoringDiscoveryService.ComputeRefactoringsAsync(

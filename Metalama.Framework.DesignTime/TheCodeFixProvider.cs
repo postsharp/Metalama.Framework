@@ -121,7 +121,7 @@ namespace Metalama.Framework.DesignTime
                     this._codeActionExecutionService,
                     context.Document,
                     this._logger,
-                    ProjectKeyExtensions.GetProjectKey( compilation ) );
+                    compilation.GetProjectKey() );
 
                 foreach ( var fix in codeFixes )
                 {

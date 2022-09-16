@@ -102,7 +102,7 @@ internal partial class ProjectVersionProvider
             var referenceListBuilder = ImmutableDictionary.CreateBuilder<ProjectKey, IProjectVersion>();
 
             var oldReferences = oldCompilation?.ExternalReferences.OfType<CompilationReference>()
-                .ToDictionary( x => ProjectKeyExtensions.GetProjectKey( x.Compilation ), x => x.Compilation );
+                .ToDictionary( x => x.Compilation.GetProjectKey(), x => x.Compilation );
 
             var compilationReferences = newCompilation.ExternalReferences.OfType<CompilationReference>().ToList();
 
@@ -111,7 +111,7 @@ internal partial class ProjectVersionProvider
                 ReferencedProjectChange changes;
                 IProjectVersion projectVersion;
 
-                var assemblyIdentity = ProjectKeyExtensions.GetProjectKey( reference.Compilation );
+                var assemblyIdentity = reference.Compilation.GetProjectKey();
 
                 if ( oldCompilation != null && oldReferences!.TryGetValue( assemblyIdentity, out var oldReferenceCompilation ) )
                 {
@@ -156,7 +156,7 @@ internal partial class ProjectVersionProvider
             if ( oldCompilation != null )
             {
                 var referencedAssemblyIdentifies =
-                    new HashSet<ProjectKey>( compilationReferences.Select( x => ProjectKeyExtensions.GetProjectKey( x.Compilation ) ) );
+                    new HashSet<ProjectKey>( compilationReferences.Select( x => x.Compilation.GetProjectKey() ) );
 
                 foreach ( var reference in oldReferences! )
                 {
@@ -211,7 +211,7 @@ internal partial class ProjectVersionProvider
 
                         var compilationVersion = ProjectVersion.Create(
                             newCompilation,
-                            ProjectKeyExtensions.GetProjectKey( newCompilation ),
+                            newCompilation.GetProjectKey(),
                             GetDiffStrategy(),
                             referencedCompilationChanges.References,
                             cancellationToken );
@@ -219,7 +219,7 @@ internal partial class ProjectVersionProvider
                         newList = new ChangeLinkedList( compilationVersion );
                         this._cache.Add( newCompilation, newList );
 
-                        this._lastCompilationPerProject[ProjectKeyExtensions.GetProjectKey( newCompilation )] =
+                        this._lastCompilationPerProject[newCompilation.GetProjectKey()] =
                             new WeakReference<Compilation>( newCompilation );
                     }
 
@@ -278,6 +278,8 @@ internal partial class ProjectVersionProvider
                         changeLinkedListFromOldCompilation.Insert( incrementalChanges );
                     }
 
+                    this._cache.Add( newCompilation, new ChangeLinkedList( incrementalChanges.NewProjectVersion ) );
+
                     return incrementalChanges;
                 }
                 else
@@ -305,7 +307,7 @@ internal partial class ProjectVersionProvider
                             Compilation? lastCompilationOfProject = null;
 
                             if ( this._lastCompilationPerProject.TryGetValue(
-                                    ProjectKeyExtensions.GetProjectKey( oldCompilation ),
+                                    oldCompilation.GetProjectKey(),
                                     out var lastCompilationOfProjectRef ) )
                             {
                                 _ = lastCompilationOfProjectRef.TryGetTarget( out lastCompilationOfProject );
@@ -322,14 +324,17 @@ internal partial class ProjectVersionProvider
                                     true,
                                     cancellationToken );
 
-                                this._cache.TryGetValue( oldCompilation, out changeLinkedListFromOldCompilation );
+                                if ( !this._cache.TryGetValue( oldCompilation, out changeLinkedListFromOldCompilation ) )
+                                {
+                                    throw new AssertionFailedException();
+                                }
                             }
                             else
                             {
                                 // Build oldCompilationVersion from scratch.
                                 oldProjectVersion = ProjectVersion.Create(
                                     oldCompilation,
-                                    ProjectKeyExtensions.GetProjectKey( oldCompilation ),
+                                    oldCompilation.GetProjectKey(),
                                     GetDiffStrategy(),
                                     oldReferences.References,
                                     cancellationToken );
@@ -357,7 +362,7 @@ internal partial class ProjectVersionProvider
                         {
                             this._cache.Add( newCompilation, new ChangeLinkedList( incrementalChanges.NewProjectVersion ) );
 
-                            this._lastCompilationPerProject[ProjectKeyExtensions.GetProjectKey( newCompilation )] =
+                            this._lastCompilationPerProject[newCompilation.GetProjectKey()] =
                                 new WeakReference<Compilation>( newCompilation );
                         }
                         else

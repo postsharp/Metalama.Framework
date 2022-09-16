@@ -7,5 +7,5 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime;
 public abstract class DesignTimeTestBase : TestBase
 {
     protected override ServiceProvider ConfigureServiceProvider( ServiceProvider serviceProvider )
-        => serviceProvider.WithService( new TestMetalamaProjectClassifier() );
+        => base.ConfigureServiceProvider( serviceProvider ).WithService( new TestMetalamaProjectClassifier() );
 }

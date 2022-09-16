@@ -66,7 +66,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             // We lock the dictionary because the ConcurrentDictionary does not guarantee that the creation delegate
             // is called only once, and we prefer a single instance for the simplicity of debugging. 
 
-            var compilationId = ProjectKeyExtensions.GetProjectKey( compilation );
+            var compilationId = compilation.GetProjectKey();
 
             if ( this._pipelinesByProjectKey.TryGetValue( compilationId, out var pipeline ) )
             {
@@ -109,9 +109,11 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         public event Action<bool>? IsEditingCompileTimeCodeChanged;
 
-        Task ICompileTimeCodeEditingStatusService.OnEditingCompileTimeCodeCompletedAsync()
+        Task ICompileTimeCodeEditingStatusService.OnEditingCompileTimeCodeCompletedAsync( CancellationToken cancellationToken )
         {
             Logger.DesignTime.Trace?.Log( "Received ICompileTimeCodeEditingStatusService.OnEditingCompileTimeCodeCompleted." );
+
+            // TODO: add cancellation support.
 
             var tasks = new List<Task>( this._pipelinesByProjectKey.Values.Count );
 
@@ -222,7 +224,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
         protected virtual async ValueTask<DesignTimeAspectPipeline?> GetPipelineAndWaitAsync( Compilation compilation, CancellationToken cancellationToken )
         {
-            var projectKey = ProjectKeyExtensions.GetProjectKey( compilation );
+            var projectKey = compilation.GetProjectKey();
 
             DesignTimeAspectPipeline? pipeline;
 

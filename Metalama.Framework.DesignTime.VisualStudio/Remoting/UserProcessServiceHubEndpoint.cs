@@ -27,7 +27,7 @@ internal partial class UserProcessServiceHubEndpoint : ServerEndpoint, ICodeRefa
         this._apiImplementation = new ApiImplementation( this );
     }
 
-    public ICollection<ProjectKey> RegisteredProjects => this._registeredEndpointsByProject.Keys;
+    public bool IsProjectRegistered( ProjectKey projectKey ) => this._registeredEndpointsByProject.ContainsKey( projectKey );
 
     public ICollection<UserProcessEndpoint> Endpoints => this._registeredEndpointsByPipeName.Values;
 
@@ -58,7 +58,7 @@ internal partial class UserProcessServiceHubEndpoint : ServerEndpoint, ICodeRefa
 
     private async ValueTask<UserProcessEndpoint> GetEndpointAsync( ProjectKey projectKey, CancellationToken cancellationToken )
     {
-        await this.WhenInitialized;
+        await this.WaitUntilInitializedAsync( cancellationToken );
 
         if ( !this._registeredEndpointsByProject.TryGetValue( projectKey, out var endpoint ) )
         {
@@ -77,11 +77,14 @@ internal partial class UserProcessServiceHubEndpoint : ServerEndpoint, ICodeRefa
         return await endpoint.GetServerApiAsync( cancellationToken );
     }
 
-    public async Task RegisterProjectHandlerAsync( ProjectKey projectKey, IProjectHandlerCallback callback, CancellationToken cancellationToken = default )
+    public async Task RegisterProjectCallbackAsync( ProjectKey projectKey, IProjectHandlerCallback callback, CancellationToken cancellationToken = default )
     {
+        this.Logger.Trace?.Log( $"Registering '{projectKey}'." );
         var endpoint = await this.GetEndpointAsync( projectKey, cancellationToken );
 
-        await endpoint.RegisterProjectHandlerAsync( projectKey, callback, cancellationToken );
+        await endpoint.RegisterProjectCallbackAsync( projectKey, callback, cancellationToken );
+
+        this.Logger.Trace?.Log( $"Project '{projectKey}' successfully registered." );
     }
 
     public bool TryGetUnhandledSources( ProjectKey projectKey, out ImmutableDictionary<string, string>? sources )

@@ -1,5 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Extensibility;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities;
@@ -10,11 +13,14 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
+using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests
 {
     public class TestBase
     {
+        private readonly ITestOutputHelper? _testOutputHelper;
+
         static TestBase()
         {
             TestingServices.Initialize();
@@ -27,9 +33,31 @@ namespace Metalama.Framework.Tests.UnitTests
         /// </summary>
         private const bool _doCodeExecutionTests = false;
 
-        protected TestBase() { }
+        protected TestBase( ITestOutputHelper? testOutputHelper = null )
+        {
+            this._testOutputHelper = testOutputHelper;
+        }
 
-        protected virtual ServiceProvider ConfigureServiceProvider( ServiceProvider serviceProvider ) => serviceProvider;
+        public ITestOutputHelper Logger => this._testOutputHelper.AssertNotNull();
+
+        protected virtual ServiceProvider ConfigureServiceProvider( ServiceProvider serviceProvider )
+        {
+            serviceProvider = this.AddXunitLogging( serviceProvider );
+
+            return serviceProvider;
+        }
+
+        protected ServiceProvider AddXunitLogging( ServiceProvider serviceProvider )
+        {
+            // If we have an Xunit test output, override the logger.
+            if ( this._testOutputHelper != null )
+            {
+                var loggerFactory = new XunitLoggerFactory( this._testOutputHelper );
+                serviceProvider = serviceProvider.WithUntypedService( typeof(ILoggerFactory), loggerFactory );
+            }
+
+            return serviceProvider;
+        }
 
         protected static CSharpCompilation CreateCSharpCompilation(
             string code,

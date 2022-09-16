@@ -11,7 +11,7 @@ internal class DesignTimeProjectVersion : ITransitiveAspectManifestProvider
     public IProjectVersion ProjectVersion { get; }
 
     public ImmutableDictionary<ProjectKey, DesignTimeProjectReference> References { get; }
-    
+
     public DesignTimeProjectVersion( IProjectVersion projectVersion, IEnumerable<DesignTimeProjectReference> references )
     {
         this.ProjectVersion = projectVersion;
@@ -20,7 +20,7 @@ internal class DesignTimeProjectVersion : ITransitiveAspectManifestProvider
 
     public ITransitiveAspectsManifest? GetTransitiveAspectsManifest( Compilation compilation, CancellationToken cancellationToken )
     {
-        if ( this.References.TryGetValue( ProjectKeyExtensions.GetProjectKey( compilation ), out var reference ) )
+        if ( this.References.TryGetValue( compilation.GetProjectKey(), out var reference ) )
         {
             return reference.TransitiveAspectsManifest;
         }

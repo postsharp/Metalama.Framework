@@ -17,8 +17,8 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
     private static AnalysisProcessEndpoint? _instance;
 
     private readonly ApiImplementation _apiImplementation;
-    private readonly ConcurrentDictionary<ProjectKey, ProjectKey> _connectedClients = new();
-    private readonly ConcurrentDictionary<ProjectKey, ImmutableDictionary<string, string>> _sourcesForUnconnectedClients = new();
+    private readonly ConcurrentDictionary<ProjectKey, ProjectKey> _connectedProjectCallbacks = new();
+    private readonly ConcurrentDictionary<ProjectKey, ImmutableDictionary<string, string>> _generatedSourcesForUnconnectedClients = new();
     private readonly IServiceProvider _serviceProvider;
 
     private readonly ICompileTimeCodeEditingStatusService? _compileTimeCodeEditingStatusService;
@@ -98,7 +98,7 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
         ImmutableDictionary<string, string> generatedSources,
         CancellationToken cancellationToken = default )
     {
-        if ( this.WhenInitialized.IsCompleted && this._connectedClients.ContainsKey( projectKey ) )
+        if ( this.WaitUntilInitializedAsync().IsCompleted && this._connectedProjectCallbacks.ContainsKey( projectKey ) )
         {
             this.Logger.Trace?.Log( $"Publishing source for the client '{projectKey}'." );
             await this._client!.PublishGeneratedCodeAsync( projectKey, generatedSources, cancellationToken );
@@ -108,15 +108,27 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
             Thread.MemoryBarrier();
 
             this.Logger.Warning?.Log( $"Cannot publish source for the client '{projectKey}' because it has not connected yet." );
-            this._sourcesForUnconnectedClients[projectKey] = generatedSources;
+            this._generatedSourcesForUnconnectedClients[projectKey] = generatedSources;
         }
     }
 
-    public void RegisterProject( ProjectKey projectKey ) => _ = this.RegisterProjectAsync( projectKey );
+#pragma warning disable VSTHRD100 // Avoid "async void" methods.
+    public async void RegisterProject( ProjectKey projectKey )
+    {
+        try
+        {
+            await this.RegisterProjectAsync( projectKey );
+        }
+        catch ( Exception e )
+        {
+            this.Logger.Error?.Log( e.ToString() );
+        }
+    }
+#pragma warning restore VSTHRD100 // Avoid "async void" methods.
 
     public async Task RegisterProjectAsync( ProjectKey projectKey )
     {
-        await this.WhenInitialized;
+        await this.WaitUntilInitializedAsync();
 
         var registrationServiceProvider = this._serviceProvider.GetService<IServiceHubApiProvider>();
 

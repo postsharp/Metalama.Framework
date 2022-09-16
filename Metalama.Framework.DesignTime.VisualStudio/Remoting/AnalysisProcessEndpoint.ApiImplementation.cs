@@ -24,16 +24,16 @@ internal partial class AnalysisProcessEndpoint
             this._parent = parent;
         }
 
-        public async Task OnUserProcessProjectHandlerConnectedAsync( ProjectKey projectKey, CancellationToken cancellationToken )
+        public async Task RegisterProjectCallbackAsync( ProjectKey projectKey, CancellationToken cancellationToken )
         {
-            this._parent.Logger.Trace?.Log( $"The client '{projectKey}' has connected." );
+            this._parent.Logger.Trace?.Log( $"The client '{projectKey}' has connected. Registering the callback communication." );
 
-            this._parent._connectedClients[projectKey] = projectKey;
+            this._parent._connectedProjectCallbacks[projectKey] = projectKey;
 
             Thread.MemoryBarrier();
 
             // If we received source before the client connected, publish it for the client now.
-            if ( this._parent._sourcesForUnconnectedClients.TryRemove( projectKey, out var sources ) )
+            if ( this._parent._generatedSourcesForUnconnectedClients.TryRemove( projectKey, out var sources ) )
             {
                 this._parent.Logger.Trace?.Log( $"Publishing source for the client '{projectKey}'." );
 
@@ -53,7 +53,7 @@ internal partial class AnalysisProcessEndpoint
         public async Task OnCompileTimeCodeEditingCompletedAsync( CancellationToken cancellationToken = default )
         {
             var service = this._parent._serviceProvider.GetRequiredService<ICompileTimeCodeEditingStatusService>();
-            await service.OnEditingCompileTimeCodeCompletedAsync();
+            await service.OnEditingCompileTimeCodeCompletedAsync( cancellationToken );
         }
 
         public Task OnUserInterfaceAttachedAsync( CancellationToken cancellationToken = default )

@@ -15,7 +15,7 @@ internal partial class UserProcessServiceHubEndpoint
 
         public async Task RegisterEndpointAsync( string pipeName, CancellationToken cancellationToken )
         {
-            this._parent.Logger.Trace?.Log( $"Registering the endpoint '{pipeName}' for project ''.." );
+            this._parent.Logger.Trace?.Log( $"Registering the endpoint '{pipeName}'." );
             var endpoint = new UserProcessEndpoint( this._parent._serviceProvider, pipeName );
             endpoint.IsEditingCompileTimeCodeChanged += this._parent.OnIsEditingCompileTimeCodeChanged;
             await endpoint.ConnectAsync( cancellationToken );

@@ -3,7 +3,6 @@
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.CodeFixes;
 using Microsoft.CodeAnalysis.Text;
-using Microsoft.VisualStudio.Threading;
 using StreamJsonRpc;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -30,11 +29,11 @@ internal partial class UserProcessEndpoint : ClientEndpoint<IAnalysisProcessApi>
         rpc.AddLocalRpcTarget<IProjectHandlerCallback>( this._apiImplementation, null );
     }
 
-    public async Task RegisterProjectHandlerAsync( ProjectKey projectKey, IProjectHandlerCallback callback, CancellationToken cancellationToken = default )
+    public async Task RegisterProjectCallbackAsync( ProjectKey projectKey, IProjectHandlerCallback callback, CancellationToken cancellationToken = default )
     {
-        await this.WhenInitialized.WithCancellation( cancellationToken );
+        await this.WaitUntilInitializedAsync( cancellationToken );
         this._projectHandlers[projectKey] = callback;
-        await (await this.GetServerApiAsync( cancellationToken )).OnUserProcessProjectHandlerConnectedAsync( projectKey, cancellationToken );
+        await (await this.GetServerApiAsync( cancellationToken )).RegisterProjectCallbackAsync( projectKey, cancellationToken );
     }
 
     public bool TryGetUnhandledSources( ProjectKey projectKey, out ImmutableDictionary<string, string>? sources )

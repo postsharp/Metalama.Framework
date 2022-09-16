@@ -18,7 +18,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime
     public class AttributeDeserializerTests : TestBase
     {
         protected override ServiceProvider ConfigureServiceProvider( ServiceProvider serviceProvider )
-            => serviceProvider.WithService( new HackedSystemTypeResolver( serviceProvider ) );
+            => base.ConfigureServiceProvider( serviceProvider ).WithService( new HackedSystemTypeResolver( serviceProvider ) );
 
         private object? GetDeserializedProperty( string property, string value, string? dependentCode = null, string? additionalCode = "" )
         {
