@@ -20,7 +20,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeConstructor( code );
 
             this.AssertEqual(
-                @"((global::System.Reflection.ConstructorInfo)global::Metalama.Framework.RunTime.ReflectionHelper.GetConstructor(typeof(global::Target), global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, ""Target.Target(int)""))",
+                @"((global::System.Reflection.ConstructorInfo)typeof(global::Target).GetConstructor(new[]{typeof(global::System.Int32)}))",
                 serialized );
 
             this.TestExpression<ConstructorInfo>(
@@ -40,7 +40,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeConstructor( code );
 
             this.AssertEqual(
-                @"((global::System.Reflection.ConstructorInfo)global::Metalama.Framework.RunTime.ReflectionHelper.GetConstructor(typeof(global::Target<>), global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, ""Target<T>.Target(T)""))",
+                @"((global::System.Reflection.ConstructorInfo)global::Metalama.Framework.RunTime.ReflectionHelper.GetConstructor(typeof(global::Target<>), global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, ""Void .ctor(T)""))",
                 serialized );
 
             this.TestExpression<ConstructorInfo>(
@@ -60,7 +60,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeConstructor( code );
 
             this.AssertEqual(
-                @"((global::System.Reflection.ConstructorInfo)global::Metalama.Framework.RunTime.ReflectionHelper.GetConstructor(typeof(global::Target), global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, ""Target.Target()""))",
+                @"((global::System.Reflection.ConstructorInfo)typeof(global::Target).GetConstructor(new[]{}))",
                 serialized );
 
             this.TestExpression<ConstructorInfo>(

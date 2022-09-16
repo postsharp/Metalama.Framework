@@ -18,7 +18,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeTargetDotMethod( code );
 
             Assert.Equal(
-                @"((global::System.Reflection.MethodInfo)global::Metalama.Framework.RunTime.ReflectionHelper.GetMethod(typeof(global::Target), ""Method"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static, ""Target.Method()""))",
+                @"((global::System.Reflection.MethodInfo)typeof(global::Target).GetMethod(""Method"", new[]{}))",
                 serialized );
 
             this.TestExpression<MethodInfo>(
@@ -39,7 +39,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeTargetDotMethod( code );
 
             Assert.Equal(
-                @"((global::System.Reflection.MethodInfo)global::Metalama.Framework.RunTime.ReflectionHelper.GetMethod(typeof(global::Target), ""Method"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static, ""Target.Method<T>(T)""))",
+                @"((global::System.Reflection.MethodInfo)global::Metalama.Framework.RunTime.ReflectionHelper.GetMethod(typeof(global::Target), ""Method"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static, ""T Method[T](T)""))",
                 serialized );
 
             this.TestExpression<MethodInfo>(
@@ -60,7 +60,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeTargetDotMethod( code );
 
             Assert.Equal(
-                @"((global::System.Reflection.MethodInfo)global::Metalama.Framework.RunTime.ReflectionHelper.GetMethod(typeof(global::Target), ""Method"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static, ""Target.Method(out int)""))",
+                @"((global::System.Reflection.MethodInfo)typeof(global::Target).GetMethod(""Method"", new[]{typeof(global::System.Int32).MakeByRefType()}))",
                 serialized );
 
             this.TestExpression<MethodInfo>(
