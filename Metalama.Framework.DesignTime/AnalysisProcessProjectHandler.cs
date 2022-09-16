@@ -24,7 +24,9 @@ namespace Metalama.Framework.DesignTime;
 public class AnalysisProcessProjectHandler : ProjectHandler
 {
     private readonly DesignTimeAspectPipelineFactory _pipelineFactory;
-    private readonly ILogger _logger;
+
+    protected ILogger Logger { get; }
+
     private volatile bool _disposed;
 
     private volatile CancellationTokenSource? _currentCancellationSource;
@@ -37,14 +39,14 @@ public class AnalysisProcessProjectHandler : ProjectHandler
         projectKey )
     {
         this._pipelineFactory = this.ServiceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
-        this._logger = this.ServiceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
+        this.Logger = this.ServiceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
     }
 
     public override SourceGeneratorResult GenerateSources( Compilation compilation, CancellationToken cancellationToken )
     {
         if ( this.LastSourceGeneratorResult != null )
         {
-            this._logger.Trace?.Log( "Serving the generated sources from the cache." );
+            this.Logger.Trace?.Log( "Serving the generated sources from the cache." );
 
             // Atomically cancel the previous computation and create a new cancellation token.
             CancellationToken newCancellationToken;
@@ -53,7 +55,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
             {
                 if ( this._disposed )
                 {
-                    this._logger.Trace?.Log( "The object has been disposed." );
+                    this.Logger.Trace?.Log( "The object has been disposed." );
 
                     return SourceGeneratorResult.Empty;
                 }
@@ -87,7 +89,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
         {
             // We don't have sources in the cache.
 
-            this._logger.Trace?.Log( $"No generated sources in the cache for project '{this.ProjectKey}'. Need to generate them synchronously." );
+            this.Logger.Trace?.Log( $"No generated sources in the cache for project '{this.ProjectKey}'. Need to generate them synchronously." );
 
             if ( TaskHelper.RunAndWait( () => this.ComputeAsync( compilation, cancellationToken ), cancellationToken ) )
             {
@@ -119,10 +121,10 @@ public class AnalysisProcessProjectHandler : ProjectHandler
 
         if ( compilationResult == null )
         {
-            this._logger.Warning?.Log(
-                $"{this.GetType().Name}.Execute('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): the pipeline failed." );
+            this.Logger.Warning?.Log(
+                $"{this.GetType().Name}.Execute('{this.ProjectKey}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): the pipeline failed." );
 
-            this._logger.Trace?.Log(
+            this.Logger.Trace?.Log(
                 " Compilation references: " + string.Join(
                     ", ",
                     compilation.References.GroupBy( r => r.GetType() ).Select( g => $"{g.Key.Name}: {g.Count()}" ) ) );
@@ -135,16 +137,16 @@ public class AnalysisProcessProjectHandler : ProjectHandler
         // Check if the pipeline returned any difference. If not, do not update our cache.
         if ( this.LastSourceGeneratorResult != null && this.LastSourceGeneratorResult.Equals( newSourceGeneratorResult ) )
         {
-            this._logger.Trace?.Log(
-                $"{this.GetType().Name}.Execute('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): generated sources did not change." );
+            this.Logger.Trace?.Log(
+                $"{this.GetType().Name}.Execute('{this.ProjectKey}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): generated sources did not change." );
 
             return false;
         }
 
         this.LastSourceGeneratorResult = newSourceGeneratorResult;
 
-        this._logger.Trace?.Log(
-            $"{this.GetType().Name}.Execute('{compilation.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): {newSourceGeneratorResult.AdditionalSources.Count} source(s) generated. New digest: {newSourceGeneratorResult.GetDigest()}." );
+        this.Logger.Trace?.Log(
+            $"{this.GetType().Name}.Execute('{this.ProjectKey}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): {newSourceGeneratorResult.AdditionalSources.Count} source(s) generated. New digest: {newSourceGeneratorResult.GetDigest()}." );
 
         return true;
     }
@@ -166,7 +168,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
     /// </summary>
     private async Task PublishAsync( CancellationToken cancellationToken )
     {
-        this._logger.Trace?.Log( $"{this.GetType().Name}.Publish('{this.ProjectKey}'" );
+        this.Logger.Trace?.Log( $"{this.GetType().Name}.Publish('{this.ProjectKey}')" );
 
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -176,19 +178,21 @@ public class AnalysisProcessProjectHandler : ProjectHandler
         // Notify Roslyn that we have changes.
         if ( this.ProjectOptions.SourceGeneratorTouchFile == null )
         {
-            this._logger.Error?.Log( $"Property MetalamaSourceGeneratorTouchFile cannot be null for project '{this.ProjectKey}'." );
+            this.Logger.Error?.Log( $"Property MetalamaSourceGeneratorTouchFile is null for project '{this.ProjectKey}'." );
         }
         else
         {
-            cancellationToken.ThrowIfCancellationRequested();
+            // Note that we cannot cancel here. If we have published the source code, we must also touch the file.
 
             this.UpdateTouchFile();
         }
+
+        this.Logger.Trace?.Log( $"{this.GetType().Name}.Publish('{this.ProjectKey}'): completed." );
     }
 
     protected void UpdateTouchFile()
     {
-        this._logger.Trace?.Log( $"Touching '{this.ProjectOptions.SourceGeneratorTouchFile}'." );
+        this.Logger.Trace?.Log( $"Touching '{this.ProjectOptions.SourceGeneratorTouchFile}'." );
         RetryHelper.Retry( () => File.WriteAllText( this.ProjectOptions.SourceGeneratorTouchFile!, Guid.NewGuid().ToString() ) );
     }
 
