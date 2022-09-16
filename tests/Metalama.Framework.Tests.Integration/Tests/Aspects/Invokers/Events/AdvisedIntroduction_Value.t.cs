@@ -2,9 +2,6 @@
 [Override]
 internal class TargetClass
 {
-    private global::System.EventHandler? _event;
-
-
 
     public event global::System.EventHandler? Event
     {
@@ -12,6 +9,7 @@ internal class TargetClass
         {
             global::System.Console.WriteLine("Override");
             this.Event_Source += value;
+
         }
         remove
         {
@@ -20,16 +18,5 @@ internal class TargetClass
         }
     }
 
-    private event global::System.EventHandler? Event_Source
-    {
-        add
-        {
-            this._event += value;
-        }
-
-        remove
-        {
-            this._event -= value;
-        }
-    }
+    private global::System.EventHandler? Event_Source;
 }

@@ -140,11 +140,11 @@ namespace Metalama.Framework.Engine.Linking
 
                 if ( anyRewrittenStatement )
                 {
-                    return node.Update( node.OpenBraceToken, List( finalStatements ), node.CloseBraceToken );
+                    return node.Update( this.VisitToken(node.OpenBraceToken), List( finalStatements ), this.VisitToken( node.CloseBraceToken) );
                 }
                 else
                 {
-                    return node;
+                    return node.Update( this.VisitToken( node.OpenBraceToken ), node.Statements, this.VisitToken( node.CloseBraceToken ) );
                 }
 
                 void AddFlattenedBlockStatements( BlockSyntax block, List<StatementSyntax> statements )
@@ -197,7 +197,7 @@ namespace Metalama.Framework.Engine.Linking
 
             public override SyntaxNode? VisitInvocationExpression( InvocationExpressionSyntax node )
             {
-                if ( node.Expression.GetLinkerGeneratedFlags().HasFlag( LinkerGeneratedFlags.NullAspectReferenceExpression ) )
+                if ( node.Expression.GetLinkerGeneratedFlags().HasFlagFast( LinkerGeneratedFlags.NullAspectReferenceExpression ) )
                 {
                     return IdentifierName( "__LINKER_TO_BE_REMOVED__" )
                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.NullAspectReferenceExpression );
@@ -210,18 +210,61 @@ namespace Metalama.Framework.Engine.Linking
             {
                 var transformed = (ExpressionSyntax) this.Visit( node.Expression ).AssertNotNull();
 
-                if ( transformed.GetLinkerGeneratedFlags().HasFlag( LinkerGeneratedFlags.NullAspectReferenceExpression ) )
+                if ( transformed.GetLinkerGeneratedFlags().HasFlagFast( LinkerGeneratedFlags.NullAspectReferenceExpression ) )
                 {
                     return null;
                 }
 
-                if ( node.Expression != transformed )
+                return node.Update( transformed, this.VisitToken( node.SemicolonToken ) );
+            }
+
+            public override SyntaxToken VisitToken( SyntaxToken token )
+            {
+                token = base.VisitToken( token );
+
+                if ( TryFilterTriviaList( token.LeadingTrivia, out var filteredLeadingTrivia ) )
                 {
-                    return node.WithExpression( transformed );
+                    token = token.WithLeadingTrivia( filteredLeadingTrivia );
                 }
-                else
+
+                if ( TryFilterTriviaList( token.TrailingTrivia, out var filteredTrailingTrivia ) )
                 {
-                    return node;
+                    token = token.WithTrailingTrivia( filteredTrailingTrivia );
+                }
+
+                return token;
+
+                static bool TryFilterTriviaList(SyntaxTriviaList triviaList, out SyntaxTriviaList filteredTriviaList)
+                {
+                    var anyChange = false;
+
+                    foreach (var trivia in triviaList )
+                    {
+                        if ( trivia.GetLinkerGeneratedFlags().HasFlagFast( LinkerGeneratedFlags.GeneratedSuppression) )
+                        {
+                            anyChange = true;
+                        }
+                    }
+
+                    if ( anyChange )
+                    {
+                        filteredTriviaList = TriviaList();
+
+                        foreach ( var trivia in triviaList )
+                        {
+                            if ( !trivia.GetLinkerGeneratedFlags().HasFlagFast( LinkerGeneratedFlags.GeneratedSuppression ) )
+                            {
+                                filteredTriviaList = filteredTriviaList.Add( trivia );
+                            }
+                        }
+
+                        return true;
+                    }
+                    else
+                    {
+                        filteredTriviaList = triviaList;
+                        return false;
+                    }
                 }
             }
         }

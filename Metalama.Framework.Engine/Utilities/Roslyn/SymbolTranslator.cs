@@ -27,8 +27,8 @@ internal class SymbolTranslator
         this._visitor = new Visitor( this );
     }
 
-    public T? Translate<T>( T symbol ) 
-        where T : ISymbol 
+    public T? Translate<T>( T symbol )
+        where T : ISymbol
         => (T?) this._cache.GetOrAdd( symbol, this.TranslateCore );
 
     private ISymbol? TranslateCore( ISymbol symbol ) => this._visitor.Visit( symbol );

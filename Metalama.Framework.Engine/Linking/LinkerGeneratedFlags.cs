@@ -28,6 +28,11 @@ namespace Metalama.Framework.Engine.Linking
         /// Null literal expression that replaced the original aspect reference. 
         /// It's parent statement should be removed and parent expression should be converted to "default".
         /// </summary>
-        NullAspectReferenceExpression = 8
+        NullAspectReferenceExpression = 8,
+
+        /// <summary>
+        /// Generated suppresion, which should be removed when inlined.
+        /// </summary>
+        GeneratedSuppression = 16,
     }
 }

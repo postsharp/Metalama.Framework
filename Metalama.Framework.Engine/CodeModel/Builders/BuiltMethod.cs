@@ -73,7 +73,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             => new InvokerFactory<IMethodInvoker>( ( order, invokerOperator ) => new MethodInvoker( this, order, invokerOperator ) );
 
         public IMethod? OverriddenMethod => this.Compilation.Factory.GetDeclaration( this.MethodBuilder.OverriddenMethod );
-        
+
         IMethod IMethod.MethodDefinition => this;
     }
 }

@@ -41,7 +41,7 @@ internal static class IdentifierHelper
                 return ch is >= '0' and <= '9';
 
             case < 'a':
-                return ch <= 'Z' || ch == '_'; 
+                return ch <= 'Z' || ch == '_';
 
             case <= 'z':
                 return true;

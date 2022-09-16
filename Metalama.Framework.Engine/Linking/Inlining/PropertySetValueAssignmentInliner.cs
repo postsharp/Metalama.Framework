@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -24,14 +25,15 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                 return false;
             }
 
-            if ( aspectReference.Expression.Parent == null || aspectReference.Expression.Parent is not AssignmentExpressionSyntax assignmentExpression )
+            if ( aspectReference.SourceExpression.Parent == null
+                 || aspectReference.SourceExpression.Parent is not AssignmentExpressionSyntax assignmentExpression )
             {
                 return false;
             }
 
             // Should be simple assignment and property access should be on the left.
             if ( assignmentExpression.Kind() != SyntaxKind.SimpleAssignmentExpression
-                 || assignmentExpression.Left != aspectReference.Expression )
+                 || assignmentExpression.Left != aspectReference.SourceExpression )
             {
                 return false;
             }
@@ -52,23 +54,24 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             return true;
         }
 
-        public override void Inline( InliningContext context, ResolvedAspectReference aspectReference, out SyntaxNode replacedNode, out SyntaxNode newNode )
+        public override InliningAnalysisInfo GetInliningAnalysisInfo( InliningAnalysisContext context, ResolvedAspectReference aspectReference )
         {
-            var assignmentExpression = (AssignmentExpressionSyntax) aspectReference.Expression.Parent.AssertNotNull();
+            var assignmentExpression = (AssignmentExpressionSyntax) aspectReference.SourceExpression.Parent.AssertNotNull();
             var expressionStatement = (ExpressionStatementSyntax) assignmentExpression.Parent.AssertNotNull();
 
-            var targetSymbol =
-                aspectReference.ResolvedSemantic.Symbol as IPropertySymbol
-                ?? (IPropertySymbol) ((aspectReference.ResolvedSemantic.Symbol as IMethodSymbol)?.AssociatedSymbol).AssertNotNull();
+            return new InliningAnalysisInfo( expressionStatement, null );
+        }
 
-            // Get the final inlined body of the target property setter. 
-            var inlinedTargetBody = context.GetLinkedBody( targetSymbol.SetMethod.AssertNotNull().ToSemantic( aspectReference.ResolvedSemantic.Kind ) );
-
-            // Mark the block as flattenable.
-            inlinedTargetBody = inlinedTargetBody.WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
-
-            newNode = inlinedTargetBody;
-            replacedNode = expressionStatement;
+        public override StatementSyntax Inline(
+            SyntaxGenerationContext syntaxGenerationContext,
+            InliningSpecification specification,
+            SyntaxNode currentNode,
+            StatementSyntax linkedTargetBody )
+        {
+            return
+                linkedTargetBody
+                .WithLeadingTrivia( currentNode.GetLeadingTrivia().AddRange( linkedTargetBody.GetLeadingTrivia() ) )
+                .WithTrailingTrivia( linkedTargetBody.GetTrailingTrivia().AddRange( currentNode.GetTrailingTrivia() ) );
         }
     }
 }

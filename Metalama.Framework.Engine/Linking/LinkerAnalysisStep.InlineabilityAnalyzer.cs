@@ -4,6 +4,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Linking.Inlining;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
@@ -12,295 +13,333 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal partial class LinkerAnalysisStep
     {
+        /// <summary>
+        /// Analyzes inlineability of semantics and references. Determines which semantics and references will be inlined.
+        /// </summary>
         public class InlineabilityAnalyzer
         {
             private readonly PartialCompilation _intermediateCompilation;
-            private readonly LinkerIntroductionRegistry _introductionRegistry;
-            private readonly IReadOnlyList<IntermediateSymbolSemantic> _reachableSymbolSemantics;
+            private readonly ISet<IntermediateSymbolSemantic> _reachableSymbolSemantics;
             private readonly InlinerProvider _inlinerProvider;
-            private readonly IReadOnlyDictionary<AspectReferenceTarget, IReadOnlyList<ResolvedAspectReference>> _aspectReferenceIndex;
+            private readonly IReadOnlyDictionary<AspectReferenceTarget, IReadOnlyList<ResolvedAspectReference>> _reachableReferencesByTarget;
 
             public InlineabilityAnalyzer(
                 PartialCompilation intermediateCompilation,
-                LinkerIntroductionRegistry introductionRegistry,
                 IReadOnlyList<IntermediateSymbolSemantic> reachableSymbolSemantics,
                 InlinerProvider inlinerProvider,
-                IReadOnlyDictionary<AspectReferenceTarget, IReadOnlyList<ResolvedAspectReference>> aspectReferenceIndex )
+                IReadOnlyDictionary<AspectReferenceTarget, IReadOnlyList<ResolvedAspectReference>> reachableReferencesByTarget )
             {
                 this._intermediateCompilation = intermediateCompilation;
-                this._introductionRegistry = introductionRegistry;
-                this._reachableSymbolSemantics = reachableSymbolSemantics;
+                this._reachableSymbolSemantics = new HashSet<IntermediateSymbolSemantic>( reachableSymbolSemantics );
                 this._inlinerProvider = inlinerProvider;
-                this._aspectReferenceIndex = aspectReferenceIndex;
+                this._reachableReferencesByTarget = reachableReferencesByTarget;
             }
 
-            public IEnumerable<SymbolInliningSpecification> GetInlineableSymbols()
+            private IReadOnlyList<ResolvedAspectReference> GetReachableReferencesByTarget( AspectReferenceTarget target )
             {
-                // Go through reachable symbols and try to determine whether they are inlineable.
-                foreach ( var reachableSymbolSemantic in this._reachableSymbolSemantics )
-                {
-                    if ( this.TryInline( reachableSymbolSemantic, out var inliningSpecification ) )
-                    {
-                        yield return inliningSpecification;
-                    }
-                }
-            }
-
-            private IReadOnlyList<ResolvedAspectReference> GetAspectReferences(
-                IntermediateSymbolSemantic semantic,
-                AspectReferenceTargetKind targetKind = AspectReferenceTargetKind.Self )
-            {
-                if ( !this._aspectReferenceIndex.TryGetValue(
-                        new AspectReferenceTarget( semantic.Symbol, semantic.Kind, targetKind ),
-                        out var containedReferences ) )
+                if ( !this._reachableReferencesByTarget.TryGetValue( target, out var references ) )
                 {
                     return Array.Empty<ResolvedAspectReference>();
                 }
 
-                return containedReferences;
+                return references;
             }
 
-            private bool TryInline( IntermediateSymbolSemantic semantic, [NotNullWhen( true )] out SymbolInliningSpecification? inliningSpecification )
+            /// <summary>
+            /// Gets semantics that are inlineable, i.e. are not referenced too many times and don't have inlineability explicitly suppressed.
+            /// </summary>
+            /// <returns></returns>
+            public IReadOnlyList<IntermediateSymbolSemantic> GetInlineableSemantics()
             {
-                switch ( semantic.Symbol )
+                var inlineableSemantics = new List<IntermediateSymbolSemantic>();
+
+                foreach ( var semantic in this._reachableSymbolSemantics )
                 {
-                    case IMethodSymbol:
-                        return this.TryInlineMethod( semantic.ToTyped<IMethodSymbol>(), out inliningSpecification );
-
-                    case IPropertySymbol:
-                        return this.TryInlineProperty( semantic.ToTyped<IPropertySymbol>(), out inliningSpecification );
-
-                    case IEventSymbol:
-                        return this.TryInlineEvent( semantic.ToTyped<IEventSymbol>(), out inliningSpecification );
-
-                    case IFieldSymbol:
-                        inliningSpecification = null;
-
-                        return false;
-
-                    default:
-                        throw new AssertionFailedException();
+                    if ( IsInlineable( semantic ) )
+                    {
+                        inlineableSemantics.Add( semantic );
+                    }
                 }
-            }
 
-            private bool TryInlineMethod(
-                IntermediateSymbolSemantic<IMethodSymbol> semantic,
-                [NotNullWhen( true )] out SymbolInliningSpecification? inliningSpecification )
-            {
-                switch ( semantic.Symbol.MethodKind )
+                return inlineableSemantics;
+
+                bool IsInlineable( IntermediateSymbolSemantic semantic )
                 {
-                    case MethodKind.Ordinary:
-                    case MethodKind.ExplicitInterfaceImplementation:
-                    case MethodKind.Destructor:
-                    case MethodKind.UserDefinedOperator:
-                    case MethodKind.Conversion:
-                        if ( semantic.Symbol.GetDeclarationFlags().HasFlag( LinkerDeclarationFlags.NotInlineable )
-                             || semantic.Kind == IntermediateSymbolSemanticKind.Final )
-                        {
-                            inliningSpecification = null;
+                    if ( semantic.Symbol.GetDeclarationFlags().HasFlag( LinkerDeclarationFlags.NotInlineable ) )
+                    {
+                        // Semantics marked as non-inlineable are not inlineable.
+                        return false;
+                    }
 
+                    if ( semantic.Kind == IntermediateSymbolSemanticKind.Final )
+                    {
+                        // Final semantic is never inlineable.
+                        return false;
+                    }
+
+                    switch ( semantic.Symbol )
+                    {
+                        case IMethodSymbol:
+                            return IsInlineableMethod( semantic.ToTyped<IMethodSymbol>() );
+
+                        case IPropertySymbol:
+                            return IsInlineableProperty( semantic.ToTyped<IPropertySymbol>() );
+
+                        case IEventSymbol:
+                            return IsInlineableEvent( semantic.ToTyped<IEventSymbol>() );
+
+                        case IFieldSymbol:
+                            // Fields are never inlineable.
                             return false;
-                        }
 
-                        if ( this._introductionRegistry.IsLastOverride( semantic.Symbol ) )
-                        {
-                            // Last overrides should be inlined if not marked as not-inlineable.
-                            inliningSpecification = new SymbolInliningSpecification( semantic );
+                        default:
+                            throw new AssertionFailedException();
+                    }
+                }
 
+                bool IsInlineableMethod( IntermediateSymbolSemantic<IMethodSymbol> semantic )
+                {
+                    switch ( semantic.Symbol.MethodKind )
+                    {
+                        case MethodKind.Ordinary:
+                        case MethodKind.ExplicitInterfaceImplementation:
+                        case MethodKind.Destructor:
+                        case MethodKind.UserDefinedOperator:
+                        case MethodKind.Conversion:
+                            var aspectReferences = this.GetReachableReferencesByTarget( semantic.ToAspectReferenceTarget() );
+
+                            if ( aspectReferences.Count != 1 )
+                            {
+                                return false;
+                            }
+                            else
+                            {
+                                return true;
+                            }
+
+                        case MethodKind.EventAdd:
+                        case MethodKind.EventRemove:
+                        case MethodKind.PropertyGet:
+                        case MethodKind.PropertySet:
+                            // Accessor methods are inlineable by themselves, further conditions are evaluated under inlineability of property/event.
                             return true;
-                        }
 
-                        var aspectReferences = this.GetAspectReferences( semantic );
+                        default:
+                            throw new AssertionFailedException();
+                    }
+                }
 
-                        if ( aspectReferences.Count != 1 )
+                bool IsInlineableProperty( IntermediateSymbolSemantic<IPropertySymbol> semantic )
+                {
+                    var getAspectReferences =
+                        this.GetReachableReferencesByTarget( semantic.ToAspectReferenceTarget( AspectReferenceTargetKind.PropertyGetAccessor ) );
+
+                    var setAspectReferences =
+                        this.GetReachableReferencesByTarget( semantic.ToAspectReferenceTarget( AspectReferenceTargetKind.PropertySetAccessor ) );
+
+                    if ( getAspectReferences.Count > 1 || setAspectReferences.Count > 1
+                                                       || (getAspectReferences.Count == 0 && setAspectReferences.Count == 0) )
+                    {
+                        return false;
+                    }
+
+                    return true;
+                }
+
+                bool IsInlineableEvent( IntermediateSymbolSemantic<IEventSymbol> semantic )
+                {
+                    var addAspectReferences =
+                        this.GetReachableReferencesByTarget( semantic.ToAspectReferenceTarget( AspectReferenceTargetKind.EventAddAccessor ) );
+
+                    var removeAspectReferences =
+                        this.GetReachableReferencesByTarget( semantic.ToAspectReferenceTarget( AspectReferenceTargetKind.EventRemoveAccessor ) );
+
+                    if ( addAspectReferences.Count > 1 || removeAspectReferences.Count > 1
+                                                       || (addAspectReferences.Count == 0 && removeAspectReferences.Count == 0) )
+                    {
+                        return false;
+                    }
+
+                    return true;
+                }
+            }
+
+            /// <summary>
+            /// Determines which aspect references can be inlined.
+            /// </summary>
+            /// <returns>Aspect references with selected inliners.</returns>
+            public IReadOnlyDictionary<ResolvedAspectReference, Inliner> GetInlineableReferences(
+                IReadOnlyList<IntermediateSymbolSemantic> inlineableSemantics )
+            {
+                var inlineableReferences = new Dictionary<ResolvedAspectReference, Inliner>();
+
+                foreach ( var inlineableSemantic in inlineableSemantics )
+                {
+                    foreach ( var reference in this.GetReachableReferencesByTarget( inlineableSemantic.ToAspectReferenceTarget() ) )
+                    {
+                        if ( IsInlineable( reference, out var inliner ) )
                         {
-                            inliningSpecification = null;
-
-                            return false;
+                            inlineableReferences.Add( reference, inliner );
                         }
+                    }
+                }
 
-                        if ( aspectReferences.Count != 0 && this.TryGetInliner( aspectReferences[0], out var inliner ) )
-                        {
-                            inliningSpecification = new SymbolInliningSpecification(
-                                semantic,
-                                new KeyValuePair<ResolvedAspectReference, Inliner>( aspectReferences[0], inliner ) );
+                return inlineableReferences;
 
-                            return true;
-                        }
+                bool IsInlineable( ResolvedAspectReference reference, [NotNullWhen( true )] out Inliner? inliner )
+                {
+                    if ( !reference.IsInlineable )
+                    {
+                        // References that are not marked as inlineable cannot be inlined.
+                        inliner = null;
+                        return false;
+                    }
 
-                        inliningSpecification = null;
+                    if ( !SymbolEqualityComparer.Default.Equals(
+                            reference.ContainingSemantic.Symbol.ContainingType,
+                            reference.ResolvedSemantic.Symbol.ContainingType ) )
+                    {
+                        // References between types cannot be inlined.
+                        inliner = null;
 
                         return false;
+                    }
 
-                    case MethodKind.EventAdd:
-                    case MethodKind.EventRemove:
-                    case MethodKind.PropertyGet:
-                    case MethodKind.PropertySet:
-                        // Accessor methods are not inlineable by themselves, but always through the containing event/property.
-                        inliningSpecification = null;
+                    if ( reference.SourceNode is not ExpressionSyntax )
+                    {
+                        // Use a special inliner for non-expression references.
+                        inliner = ImplicitLastOverrideReferenceInliner.Instance;
 
+                        return true;
+                    }
+
+                    var semanticModel = this._intermediateCompilation.Compilation.GetSemanticModel( reference.SourceExpression.SyntaxTree );
+
+                    return this._inlinerProvider.TryGetInliner( reference, semanticModel, out inliner );
+                }
+            }
+
+            /// <summary>
+            /// Gets all semantics that are inlined.
+            /// </summary>
+            /// <param name="inlineableSemantics"></param>
+            /// <param name="inlineableReferences"></param>
+            /// <returns></returns>
+            public IReadOnlyList<IntermediateSymbolSemantic> GetInlinedSemantics(
+                IReadOnlyList<IntermediateSymbolSemantic> inlineableSemantics,
+                IReadOnlyDictionary<ResolvedAspectReference, Inliner> inlineableReferences )
+            {
+                var inlineableSemanticHashSet = new HashSet<IntermediateSymbolSemantic>( inlineableSemantics );
+                var inlinedSemantics = new List<IntermediateSymbolSemantic>();
+
+                foreach ( var inlineableSemantic in inlineableSemantics )
+                {
+                    if ( IsInlinedSemantic( inlineableSemantic ) )
+                    {
+                        inlinedSemantics.Add( inlineableSemantic );
+                    }
+                }
+
+                return inlinedSemantics;
+
+                bool IsInlinedSemanticBody( IntermediateSymbolSemantic<IMethodSymbol> semanticBody )
+                {
+                    if ( !this._reachableReferencesByTarget.TryGetValue( semanticBody.ToAspectReferenceTarget(), out var aspectReferences ) )
+                    {
+                        // This semantic does not have any incoming reference.
                         return false;
+                    }
 
-                    default:
-                        throw new AssertionFailedException();
+                    var anyNonInlineableReference = false;
+
+                    foreach ( var reference in aspectReferences )
+                    {
+                        if ( !inlineableReferences.ContainsKey( reference ) )
+                        {
+                            anyNonInlineableReference = true;
+
+                            break;
+                        }
+                    }
+
+                    return !anyNonInlineableReference;
+                }
+
+                bool IsInlinedSemantic( IntermediateSymbolSemantic semantic )
+                {
+                    switch ( semantic.Symbol )
+                    {
+                        case IMethodSymbol
+                        {
+                            MethodKind: MethodKind.Ordinary or MethodKind.ExplicitInterfaceImplementation or MethodKind.UserDefinedOperator
+                            or MethodKind.Conversion or MethodKind.Destructor
+                        }:
+                            return IsInlinedSemanticBody( semantic.ToTyped<IMethodSymbol>() );
+
+                        case IMethodSymbol { MethodKind: MethodKind.PropertyGet or MethodKind.PropertySet } propertyAccessor:
+                            return IsInlinedSemantic( semantic.WithSymbol( propertyAccessor.AssociatedSymbol.AssertNotNull() ) );
+
+                        case IMethodSymbol { MethodKind: MethodKind.EventAdd or MethodKind.EventRemove } eventAccessor:
+                            return IsInlinedSemantic( semantic.WithSymbol( eventAccessor.AssociatedSymbol.AssertNotNull() ) );
+
+                        case IPropertySymbol property:
+                            // Property is inlined if at least one of the accessors is reachable and not inlineable.
+                            var hasNonInlinedGet =
+                                property.GetMethod != null
+                                && !IsInlinedSemanticBody( semantic.WithSymbol( property.GetMethod ) )
+                                && this._reachableSymbolSemantics.Contains( semantic.WithSymbol( property.GetMethod ) );
+
+                            var hasNonInlinedSet =
+                                property.SetMethod != null
+                                && !IsInlinedSemanticBody( semantic.WithSymbol( property.SetMethod ) )
+                                && this._reachableSymbolSemantics.Contains( semantic.WithSymbol( property.SetMethod ) );
+
+                            return inlineableSemanticHashSet.Contains( semantic ) && !hasNonInlinedGet && !hasNonInlinedSet;
+
+                        case IEventSymbol @event:
+                            // Event is inlined if at least one of the accessors is reachable and not inlineable.
+                            var hasNonInlinedAdd =
+                                !IsInlinedSemanticBody( semantic.WithSymbol( @event.AddMethod.AssertNotNull() ) )
+                                && this._reachableSymbolSemantics.Contains( semantic.WithSymbol( @event.AddMethod.AssertNotNull() ) );
+
+                            var hasNonInlinedRemove =
+                                !IsInlinedSemanticBody( semantic.WithSymbol( @event.RemoveMethod.AssertNotNull() ) )
+                                && this._reachableSymbolSemantics.Contains( semantic.WithSymbol( @event.RemoveMethod.AssertNotNull() ) );
+
+                            return inlineableSemanticHashSet.Contains( semantic ) && !hasNonInlinedAdd && !hasNonInlinedRemove;
+
+                        default:
+                            throw new AssertionFailedException();
+                    }
                 }
             }
 
-            private bool TryInlineProperty(
-                IntermediateSymbolSemantic<IPropertySymbol> semantic,
-                [NotNullWhen( true )] out SymbolInliningSpecification? inliningSpecification )
+            /// <summary>
+            /// Gets all references that are inlined.
+            /// </summary>
+            /// <param name="inlineableReferences"></param>
+            /// <param name="inlinedSemantics"></param>
+            /// <returns></returns>
+            public IReadOnlyDictionary<ResolvedAspectReference, Inliner> GetInlinedReferences(
+                IReadOnlyDictionary<ResolvedAspectReference, Inliner> inlineableReferences,
+                IReadOnlyList<IntermediateSymbolSemantic> inlinedSemantics )
             {
-                if ( semantic.Symbol.GetDeclarationFlags().HasFlag( LinkerDeclarationFlags.NotInlineable )
-                     || semantic.Kind == IntermediateSymbolSemanticKind.Final )
+                var inlinedReferences = new Dictionary<ResolvedAspectReference, Inliner>();
+
+                foreach ( var inlinedSemantic in inlinedSemantics )
                 {
-                    inliningSpecification = null;
-
-                    return false;
-                }
-
-                if ( this._introductionRegistry.IsLastOverride( semantic.Symbol ) )
-                {
-                    // Last overrides should be inlined if not marked as not-inlineable.
-                    inliningSpecification = new SymbolInliningSpecification( semantic );
-
-                    return true;
-                }
-
-                var selfAspectReferences = this.GetAspectReferences( semantic );
-                var getAspectReferences = this.GetAspectReferences( semantic, AspectReferenceTargetKind.PropertyGetAccessor );
-                var setAspectReferences = this.GetAspectReferences( semantic, AspectReferenceTargetKind.PropertySetAccessor );
-
-                if ( selfAspectReferences.Count > 0 )
-                {
-                    // TODO: We may need to deal with this case.
-                    inliningSpecification = null;
-
-                    return false;
-                }
-
-                if ( getAspectReferences.Count > 1 || setAspectReferences.Count > 1
-                                                   || (getAspectReferences.Count == 0 && setAspectReferences.Count == 0) )
-                {
-                    inliningSpecification = null;
-
-                    return false;
-                }
-
-                Inliner? getterInliner = null;
-                Inliner? setterInliner = null;
-
-                if ( (semantic.Symbol.GetMethod == null || getAspectReferences.Count == 0 || this.TryGetInliner( getAspectReferences[0], out getterInliner ))
-                     && (semantic.Symbol.SetMethod == null || setAspectReferences.Count == 0
-                                                           || this.TryGetInliner( setAspectReferences[0], out setterInliner )) )
-                {
-                    if ( getterInliner == null )
+                    foreach ( var reference in this.GetReachableReferencesByTarget( inlinedSemantic.ToAspectReferenceTarget() ) )
                     {
-                        inliningSpecification = new SymbolInliningSpecification(
-                            semantic,
-                            new KeyValuePair<ResolvedAspectReference, Inliner>( setAspectReferences[0], setterInliner.AssertNotNull() ) );
+                        if ( !inlineableReferences.TryGetValue( reference, out var inliner ) )
+                        {
+                            throw new AssertionFailedException();
+                        }
+
+                        inlinedReferences.Add( reference, inliner );
                     }
-                    else if ( setterInliner == null )
-                    {
-                        inliningSpecification = new SymbolInliningSpecification(
-                            semantic,
-                            new KeyValuePair<ResolvedAspectReference, Inliner>( getAspectReferences[0], getterInliner.AssertNotNull() ) );
-                    }
-                    else
-                    {
-                        inliningSpecification = new SymbolInliningSpecification(
-                            semantic,
-                            new KeyValuePair<ResolvedAspectReference, Inliner>( getAspectReferences[0], getterInliner.AssertNotNull() ),
-                            new KeyValuePair<ResolvedAspectReference, Inliner>( setAspectReferences[0], setterInliner.AssertNotNull() ) );
-                    }
-
-                    return true;
                 }
 
-                inliningSpecification = null;
-
-                return false;
-            }
-
-            private bool TryInlineEvent(
-                IntermediateSymbolSemantic<IEventSymbol> semantic,
-                [NotNullWhen( true )] out SymbolInliningSpecification? inliningSpecification )
-            {
-                if ( semantic.Symbol.GetDeclarationFlags().HasFlag( LinkerDeclarationFlags.NotInlineable )
-                     || semantic.Kind == IntermediateSymbolSemanticKind.Final )
-                {
-                    inliningSpecification = null;
-
-                    return false;
-                }
-
-                if ( this._introductionRegistry.IsLastOverride( semantic.Symbol ) )
-                {
-                    // Last overrides should be inlined if not marked as not-inlineable.
-                    inliningSpecification = new SymbolInliningSpecification( semantic );
-
-                    return true;
-                }
-
-                var selfAspectReferences = this.GetAspectReferences( semantic );
-                var addAspectReferences = this.GetAspectReferences( semantic, AspectReferenceTargetKind.EventAddAccessor );
-                var removeAspectReferences = this.GetAspectReferences( semantic, AspectReferenceTargetKind.EventRemoveAccessor );
-
-                if ( selfAspectReferences.Count > 0 )
-                {
-                    // TODO: We may need to deal with this case.
-                    inliningSpecification = null;
-
-                    return false;
-                }
-
-                if ( addAspectReferences.Count > 1 || removeAspectReferences.Count > 1
-                                                   || (addAspectReferences.Count == 0 && removeAspectReferences.Count == 0) )
-                {
-                    inliningSpecification = null;
-
-                    return false;
-                }
-
-                Inliner? adderInliner = null;
-                Inliner? removerInliner = null;
-
-                if ( (addAspectReferences.Count == 0 || this.TryGetInliner( addAspectReferences[0], out adderInliner ))
-                     && (removeAspectReferences.Count == 0 || this.TryGetInliner( removeAspectReferences[0], out removerInliner )) )
-                {
-                    var selectedInliners = new List<KeyValuePair<ResolvedAspectReference, Inliner>>();
-
-                    if ( adderInliner != null )
-                    {
-                        selectedInliners.Add( new KeyValuePair<ResolvedAspectReference, Inliner>( addAspectReferences[0], adderInliner ) );
-                    }
-
-                    if ( removerInliner != null )
-                    {
-                        selectedInliners.Add( new KeyValuePair<ResolvedAspectReference, Inliner>( removeAspectReferences[0], removerInliner ) );
-                    }
-
-                    inliningSpecification = new SymbolInliningSpecification( semantic, selectedInliners.ToArray() );
-
-                    return true;
-                }
-
-                inliningSpecification = null;
-
-                return false;
-            }
-
-            private bool TryGetInliner( ResolvedAspectReference aspectReference, [NotNullWhen( true )] out Inliner? inliner )
-            {
-                var semanticModel = this._intermediateCompilation.Compilation.GetSemanticModel( aspectReference.Expression.SyntaxTree );
-
-                if ( !aspectReference.Specification.Flags.HasFlag( AspectReferenceFlags.Inlineable ) )
-                {
-                    inliner = null;
-
-                    return false;
-                }
-
-                return this._inlinerProvider.TryGetInliner( aspectReference, semanticModel, out inliner );
+                return inlinedReferences;
             }
         }
     }
