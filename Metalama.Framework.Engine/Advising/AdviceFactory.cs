@@ -595,6 +595,7 @@ namespace Metalama.Framework.Engine.Advising
             string defaultTemplate,
             object? tags = null )
         {
+            using ( this.WithNonUserCode() )
             {
                 if ( this._templateInstance == null )
                 {
@@ -640,6 +641,7 @@ namespace Metalama.Framework.Engine.Advising
             object? args = null,
             object? tags = null )
         {
+            using ( this.WithNonUserCode() )
             {
                 if ( this._templateInstance == null )
                 {
