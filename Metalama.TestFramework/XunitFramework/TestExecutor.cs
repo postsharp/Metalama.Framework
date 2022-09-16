@@ -158,7 +158,15 @@ namespace Metalama.TestFramework.XunitFramework
                         };
 
                         var task = Task.Run(
-                            () => this.RunTestAsync( executionMessageSink, projectReferences, directoryOptionsReader, testCase, test, testMetrics, logger, projectMetadata.License ) );
+                            () => this.RunTestAsync(
+                                executionMessageSink,
+                                projectReferences,
+                                directoryOptionsReader,
+                                testCase,
+                                test,
+                                testMetrics,
+                                logger,
+                                projectMetadata.License ) );
 
                         if ( executionOptions.DisableParallelizationOrDefault() )
                         {
@@ -194,13 +202,6 @@ namespace Metalama.TestFramework.XunitFramework
         {
             var testStopwatch = Stopwatch.StartNew();
 
-            void OnTestSucceeded()
-            {
-                testMetrics.OnTestSucceeded( testStopwatch.Elapsed );
-
-                executionMessageSink.OnMessage( new TestPassed( test, testMetrics.ExecutionTime, logger.ToString() ) );
-            }
-
             try
             {
                 testMetrics.OnTestStarted();
@@ -218,30 +219,17 @@ namespace Metalama.TestFramework.XunitFramework
                 }
                 else
                 {
-                    try
-                    {
-                        license.ThrowIfNotLicensed();
+                    var testRunner = TestRunnerFactory.CreateTestRunner(
+                        testInput,
+                        testContext.ServiceProvider,
+                        projectReferences,
+                        logger );
 
-                        var testRunner = TestRunnerFactory.CreateTestRunner(
-                            testInput,
-                            testContext.ServiceProvider,
-                            projectReferences,
-                            logger );
+                    await testRunner.RunAndAssertAsync( testInput );
 
-                        await testRunner.RunAndAssertAsync( testInput );
+                    testMetrics.OnTestSucceeded( testStopwatch.Elapsed );
 
-                        OnTestSucceeded();
-                    }
-                    catch ( Exception e ) when ( e.GetType().FullName == testInput.Options.ExpectedException )
-                    {
-                        OnTestSucceeded();
-                        return;
-                    }
-
-                    if ( testInput.Options.ExpectedException != null )
-                    {
-                        throw new AssertActualExpectedException( testInput.Options.ExpectedException, null, "Expected exception has not been thrown." );
-                    }
+                    executionMessageSink.OnMessage( new TestPassed( test, testMetrics.ExecutionTime, logger.ToString() ) );
                 }
             }
             catch ( Exception e )

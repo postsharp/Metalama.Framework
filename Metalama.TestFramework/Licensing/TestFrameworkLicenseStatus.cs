@@ -3,12 +3,13 @@
 using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Licensing;
 using Metalama.Backstage.Licensing.Consumption;
+using Metalama.Framework.Engine.Testing;
 using System;
 using System.Collections.Generic;
 
 namespace Metalama.TestFramework.Licensing
 {
-    internal class TestFrameworkLicenseStatus
+    public class TestFrameworkLicenseStatus
     {
         public bool IsLicensed { get; }
 
@@ -16,11 +17,11 @@ namespace Metalama.TestFramework.Licensing
 
         public TestFrameworkLicenseStatus( string testAssemblyName, string? additionalLicense )
         {
-            var applicationInfo =
-                BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<IApplicationInfoProvider>().CurrentApplication;
-
             // We don't use the service BackstageServiceFactory.ServiceProvider here,
             // because the additional license is test-assembly-specific.
+            
+            var applicationInfo = new TestFrameworkApplicationInfo();
+            
             var serviceProvider = new ServiceProviderBuilder()
                 .AddBackstageServices( applicationInfo: applicationInfo, additionalLicense: additionalLicense )
                 .ServiceProvider;

@@ -15,6 +15,9 @@ namespace Metalama.TestFramework;
 /// Represents the properties read from assembly metadata and set from the MSBuild project.
 /// </summary>
 internal record TestAssemblyMetadata(
+    string ProjectDirectory,
+    ImmutableArray<string> ParserSymbols,
+    string TargetFramework,
     bool MustLaunchDebugger,
     ImmutableArray<TestAssemblyReference> AssemblyReferences,
     ImmutableArray<TestAssemblyReference> AnalyzerReferences,

@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.TestFramework.Licensing;
 using System;
 using System.Collections.Immutable;
 
@@ -25,11 +26,18 @@ namespace Metalama.TestFramework
 
         public string TargetFramework { get; }
 
-        public TestProjectProperties( string? projectDirectory, ImmutableArray<string> preprocessorSymbols, string targetFramework )
+        public TestFrameworkLicenseStatus License { get; }
+
+        public TestProjectProperties(
+            string? projectDirectory,
+            ImmutableArray<string> preprocessorSymbols,
+            string targetFramework,
+            TestFrameworkLicenseStatus license )
         {
             this._projectDirectory = projectDirectory;
             this.PreprocessorSymbols = preprocessorSymbols;
             this.TargetFramework = targetFramework;
+            this.License = license;
         }
     }
 }

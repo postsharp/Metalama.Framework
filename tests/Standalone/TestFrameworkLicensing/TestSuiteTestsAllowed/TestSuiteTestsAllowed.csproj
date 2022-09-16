@@ -1,20 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <Import Project="..\..\..\Metalama.TestFramework\Metalama.TestFramework.props" />
-    <Import Project="..\..\..\eng\Coverage.props" />
-
     <PropertyGroup>
         <TargetFrameworks>net6.0</TargetFrameworks>
         <IsPackable>false</IsPackable>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
         <MetalamaTestAutoExclude>False</MetalamaTestAutoExclude>
         <MetalamaTestGenerateDefaultRunner>False</MetalamaTestGenerateDefaultRunner>
-        <RootNamespace>Metalama.Framework.Tests.TestSuiteTestsFobidden</RootNamespace>
+        <RootNamespace>Metalama.Framework.Tests.TestSuiteTestsAllowed</RootNamespace>
     </PropertyGroup>
 
     <PropertyGroup>
-        <!-- Metalama Starter Business -->
-        <MetalamaLicense>3-ZUQQQQQQZUAEQCRCE4UW3UFEB4URXMHRB8KQBJJSB64LX7EAED3WYKF9V8KYEUMGXKBYPRQNNUVQDV3BHMGEHNJHLBKGSD57EEJQRD4F3SWWEA42CUZQQDEZJGP4Q8USJG4X6P2</MetalamaLicense>
+        <!-- Metalama Professional Business -->
+        <MetalamaLicense>4-ZQAQQQQQZTAEQCRCE4UW3UFEB4URXMHRB8KQBJJSB64LX7EAEGGU48KSPSAKJRSXFLZAF72CTB3QUMT9RR6WTPVYSNJT46PKU645EAPBXKGNFCJPVKZQQDEZJGP4Q8USJG4X6P2</MetalamaLicense>
         <!-- Use TestSuite instead of TestExecutor to tests the Rider scenario. -->
         <MetalamaTestReplaceFramework>False</MetalamaTestReplaceFramework>
     </PropertyGroup>
@@ -24,14 +21,8 @@
         <PackageReference Include="xunit" Version="$(xUnitVersion)" />
         <PackageReference Include="xunit.runner.visualstudio" Version="$(xUnitVersion)" />
         <PackageReference Include="Metalama.Compiler.Sdk" Version="$(MetalamaCompilerVersion)" />
+        <PackageReference Include="Metalama.Framework" Version="$(MetalamaVersion)" />
+        <PackageReference Include="Metalama.TestFramework" Version="$(MetalamaVersion)" />
     </ItemGroup>
-
-    <ItemGroup>
-        <ProjectReference Include="..\..\..\Metalama.Framework.Engine\Metalama.Framework.Engine.csproj" />
-        <ProjectReference Include="..\..\..\Metalama.Framework\Metalama.Framework.csproj" />
-        <ProjectReference Include="..\..\..\Metalama.TestFramework\Metalama.TestFramework.csproj" />
-    </ItemGroup>
-
-    <Import Project="..\..\..\Metalama.TestFramework\Metalama.TestFramework.targets" />
 
 </Project>

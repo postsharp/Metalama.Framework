@@ -1,8 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Backstage.Extensibility;
 using Metalama.Framework.Engine.Testing;
-using Metalama.TestFramework.Licensing;
 using Metalama.TestFramework.Utilities;
 using Metalama.TestFramework.XunitFramework;
 using System;
@@ -11,7 +9,6 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using Xunit;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
@@ -32,8 +29,7 @@ namespace Metalama.TestFramework
         private record AssemblyAssets(
             TestProjectProperties ProjectProperties,
             TestDirectoryOptionsReader OptionsReader,
-            TestProjectReferences ProjectReferences,
-            TestFrameworkLicenseStatus License );
+            TestProjectReferences ProjectReferences );
 
         private static readonly ConditionalWeakTable<Assembly, AssemblyAssets> _cache = new();
 
@@ -51,8 +47,7 @@ namespace Metalama.TestFramework
                     return new AssemblyAssets(
                         projectProperties,
                         new TestDirectoryOptionsReader( projectProperties.ProjectDirectory ),
-                        metadata.ToProjectReferences(),
-                        metadata.License );
+                        metadata.ToProjectReferences() );
                 } );
 
         protected ITestOutputHelper Logger { get; }
@@ -100,23 +95,9 @@ namespace Metalama.TestFramework
 
             var testInput = TestInput.FromFile( assemblyAssets.ProjectProperties, assemblyAssets.OptionsReader, projectRelativePath );
 
-            try
-            {
-                assemblyAssets.License.ThrowIfNotLicensed();
+            var testRunner = TestRunnerFactory.CreateTestRunner( testInput, testContext.ServiceProvider, assemblyAssets.ProjectReferences, this.Logger );
 
-                var testRunner = TestRunnerFactory.CreateTestRunner( testInput, testContext.ServiceProvider, assemblyAssets.ProjectReferences, this.Logger );
-
-                await testRunner.RunAndAssertAsync( testInput );
-            }
-            catch ( Exception e ) when ( e.GetType().FullName == testInput.Options.ExpectedException )
-            {
-                return;
-            }
-
-            if ( testInput.Options.ExpectedException != null )
-            {
-                throw new AssertActualExpectedException( testInput.Options.ExpectedException, null, "Expected exception has not been thrown." );
-            }
+            await testRunner.RunAndAssertAsync( testInput );
         }
     }
 }
