@@ -24,6 +24,7 @@ namespace Metalama.Framework.Engine.Linking
 
             return flags;
         }
+
         public static LinkerGeneratedFlags GetLinkerGeneratedFlags( this SyntaxTrivia trivia )
         {
             var annotations = trivia.GetAnnotations( AnnotationKind );

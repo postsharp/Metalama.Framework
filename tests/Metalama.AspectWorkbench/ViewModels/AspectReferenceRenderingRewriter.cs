@@ -4,6 +4,7 @@ using Metalama.Framework.Engine.Aspects;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.AspectWorkbench.ViewModels
@@ -15,23 +16,32 @@ namespace Metalama.AspectWorkbench.ViewModels
         {
             var transformedNode = base.Visit( node );
 
-            if ( node != null && transformedNode != null && node.TryGetAspectReference( out var aspectReference ) )
+            if ( node != null && transformedNode != null )
             {
-                // ReSharper disable once StringLiteralTypo
-                return transformedNode
-                    .WithLeadingTrivia(
-                        transformedNode.GetLeadingTrivia()
-                            .Add(
-                                SyntaxTrivia(
-                                    SyntaxKind.MultiLineCommentTrivia,
-                                    $"/*REF({aspectReference.ToString( true )})*/" ) ) )
-                    .WithTrailingTrivia(
-                        transformedNode.GetTrailingTrivia()
-                            .Insert(
-                                0,
-                                SyntaxTrivia(
-                                    SyntaxKind.MultiLineCommentTrivia,
-                                    "/*ENDREF*/" ) ) );
+                var annotation = node.GetAnnotations( AspectReferenceAnnotationExtensions.AnnotationKind ).FirstOrDefault();
+
+                if ( annotation != null )
+                {
+                    // ReSharper disable once StringLiteralTypo
+                    return transformedNode
+                        .WithLeadingTrivia(
+                            transformedNode.GetLeadingTrivia()
+                                .Add(
+                                    SyntaxTrivia(
+                                        SyntaxKind.MultiLineCommentTrivia,
+                                        $"/*REF({annotation.Data})*/" ) ) )
+                        .WithTrailingTrivia(
+                            transformedNode.GetTrailingTrivia()
+                                .Insert(
+                                    0,
+                                    SyntaxTrivia(
+                                        SyntaxKind.MultiLineCommentTrivia,
+                                        "/*ENDREF*/" ) ) );
+                }
+                else
+                {
+                    return transformedNode;
+                }
             }
             else
             {

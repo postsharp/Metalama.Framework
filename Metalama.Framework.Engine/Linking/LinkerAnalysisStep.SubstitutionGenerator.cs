@@ -101,7 +101,7 @@ namespace Metalama.Framework.Engine.Linking
                         {
                             AddSubstitution(
                                 inliningSpecification.ContextIdentifier,
-                                this.CreateOriginalBodySubstitution( root, symbol, inliningSpecification.ReturnVariableIdentifier ) );
+                                CreateOriginalBodySubstitution( root, symbol, inliningSpecification.ReturnVariableIdentifier ) );
                         }
                     }
 
@@ -129,7 +129,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            private SyntaxNodeSubstitution CreateOriginalBodySubstitution( SyntaxNode root, IMethodSymbol symbol, string? returnVariableIdentifier )
+            private static SyntaxNodeSubstitution CreateOriginalBodySubstitution( SyntaxNode root, IMethodSymbol symbol, string? returnVariableIdentifier )
             {
                 switch (root, symbol)
                 {

@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Linking.Inlining
 {
-    public class InliningAnalysisInfo
+    internal class InliningAnalysisInfo
     {
         public SyntaxNode ReplacedRootNode { get; }
 
