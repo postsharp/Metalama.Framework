@@ -24,7 +24,7 @@ class Target
             this.Bar_Override6 -= value;
         }
     }
-    private event EventHandler? Bar_Source;
+    private EventHandler? Bar_Source;
 
     private event EventHandler? Bar_Empty
     {

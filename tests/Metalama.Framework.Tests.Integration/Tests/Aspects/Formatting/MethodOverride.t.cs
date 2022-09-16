@@ -6,6 +6,7 @@ public class Target
     public void Foo()
     // Comment before Foo opening brace.
     { // Comment after Foo opening brace.
+      // Comment before Foo opening brace.
       // Comment before Aspect1.
         Console.WriteLine("Aspect1");
         // Comment mid Aspect1.
@@ -15,6 +16,7 @@ public class Target
         // Comment inside Foo 1.
         Console.WriteLine("Foo"); // Comment inside Foo 2.
                                   // Comment after Aspect1.
+                                  // Comment after Foo closing brace.
                                   // Comment after Aspect2.
                                   // Comment before Foo closing brace.
     } // Comment after Foo closing brace.
@@ -26,6 +28,7 @@ public class Target
     public int Bar()
     // Comment before Bar opening brace.
     { // Comment after Bar opening brace.
+      // Comment before Bar opening brace.
       // Comment before Aspect1.
         Console.WriteLine("Aspect1");
         // Comment mid Aspect1.
@@ -38,6 +41,7 @@ public class Target
         return 42; // Comment inside Bar 4.
                    // Comment after Aspect2.
                    // Comment after Aspect1.
+                   // Comment after Bar closing brace.
                    // Comment before Bar closing brace.
     } // Comment after Bar closing brace.
       // Comment after Bar.

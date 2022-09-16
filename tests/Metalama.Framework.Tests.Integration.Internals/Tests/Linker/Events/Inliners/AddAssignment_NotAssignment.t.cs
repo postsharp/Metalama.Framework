@@ -1,4 +1,3 @@
-// Warning CS8625 on `null`: `Cannot convert null literal to non-nullable reference type.`
 public class Target
 {
     event EventHandler? Foo
@@ -6,7 +5,7 @@ public class Target
         add
         {
             Console.WriteLine("Before");
-            this.Foo_Source?.Invoke(null, null);
+            this.Foo_Source?.Invoke(null, new EventArgs());
             Console.WriteLine("After");
 
         }
@@ -15,5 +14,5 @@ public class Target
         }
     }
 
-    private event EventHandler? Foo_Source;
+    private EventHandler? Foo_Source;
 }

@@ -12,7 +12,7 @@ class Target
         }
     }
 
-    private event EventHandler? Foo_Source;
+    private EventHandler? Foo_Source;
 
 
     event EventHandler? Foo_Override2
@@ -24,6 +24,7 @@ class Target
             this.Foo_Source += value;
             Console.WriteLine("After1");
 
+
             Console.WriteLine("After2");
 
         }
@@ -34,6 +35,7 @@ class Target
             Console.WriteLine("Before1");
             this.Foo_Source -= value;
             Console.WriteLine("After1");
+
             Console.WriteLine("After2");
         }
     }

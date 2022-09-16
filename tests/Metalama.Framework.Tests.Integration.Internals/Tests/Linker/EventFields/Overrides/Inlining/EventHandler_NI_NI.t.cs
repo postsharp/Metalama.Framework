@@ -12,7 +12,7 @@ class Target
         }
     }
 
-    private event EventHandler? Foo_Source;
+    private EventHandler? Foo_Source;
 
 
     event EventHandler? Foo_Override

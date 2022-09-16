@@ -136,7 +136,7 @@ class Target
         }
     }
 
-    private event EventHandler? Bar_Source;
+    private EventHandler? Bar_Source;
 
 
     public event EventHandler Bar_Override1
