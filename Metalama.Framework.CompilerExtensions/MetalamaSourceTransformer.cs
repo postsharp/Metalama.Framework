@@ -8,7 +8,7 @@ namespace Metalama.Framework.CompilerExtensions
     // ReSharper disable UnusedType.Global
 
     [Transformer]
-    [DisplayName( "Metalama.Framework" )]
+    [DisplayName( "Metalama.Framework" )] // This name is used in telemetry. Changing it causes inconsistent data.
     public sealed class MetalamaSourceTransformer : ISourceTransformer
     {
         private readonly ISourceTransformer _impl;
