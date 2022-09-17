@@ -2,8 +2,11 @@
 
 using Metalama.Backstage.Diagnostics;
 using System;
-using System.Diagnostics;
 using System.Threading;
+
+#if DEBUG
+using System.Diagnostics;
+#endif
 
 namespace Metalama.Framework.Engine.Utilities.Threading
 {
