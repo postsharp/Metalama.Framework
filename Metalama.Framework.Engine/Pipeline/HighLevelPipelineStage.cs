@@ -56,7 +56,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
             await pipelineStepsState.ExecuteAsync( cancellationToken );
 
-            return this.GetStageResult( pipelineConfiguration, input, pipelineStepsState, cancellationToken );
+            return await this.GetStageResultAsync( pipelineConfiguration, input, pipelineStepsState, cancellationToken );
         }
 
         /// <summary>
@@ -68,7 +68,7 @@ namespace Metalama.Framework.Engine.Pipeline
         /// <param name="pipelineStepsResult"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        protected abstract AspectPipelineResult GetStageResult(
+        protected abstract Task<AspectPipelineResult> GetStageResultAsync(
             AspectPipelineConfiguration pipelineConfiguration,
             AspectPipelineResult input,
             IPipelineStepsResult pipelineStepsResult,

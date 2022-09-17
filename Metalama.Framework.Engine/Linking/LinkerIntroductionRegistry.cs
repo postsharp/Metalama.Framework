@@ -2,11 +2,13 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -24,49 +26,62 @@ namespace Metalama.Framework.Engine.Linking
     {
         public const string IntroducedNodeIdAnnotationId = "AspectLinker_IntroducedNodeId";
 
+        private readonly AspectLayerIdComparer _comparer;
         private readonly Compilation _intermediateCompilation;
-        private readonly Dictionary<string, LinkerIntroducedMember> _introducedMemberLookup;
-        private readonly Dictionary<IDeclaration, List<LinkerIntroducedMember>> _overrideMap;
-        private readonly Dictionary<LinkerIntroducedMember, IDeclaration> _overrideTargetMap;
-        private readonly Dictionary<ISymbol, IDeclaration> _overrideTargetsByOriginalSymbol;
-        private readonly Dictionary<SyntaxTree, SyntaxTree> _introducedTreeMap;
-        private readonly Dictionary<IDeclaration, LinkerIntroducedMember> _builderLookup;
+        private readonly IReadOnlyDictionary<string, LinkerIntroducedMember> _introducedMemberLookup;
+        private readonly IReadOnlyDictionary<IDeclaration, UnsortedConcurrentLinkedList<LinkerIntroducedMember>> _overrideMap;
+        private readonly IReadOnlyDictionary<LinkerIntroducedMember, IDeclaration> _overrideTargetMap;
+        private readonly IReadOnlyDictionary<ISymbol, IDeclaration> _overrideTargetsByOriginalSymbol;
+        private readonly IReadOnlyDictionary<IDeclaration, LinkerIntroducedMember> _builderLookup;
+        private readonly IReadOnlyDictionary<SyntaxTree, SyntaxTree> _introducedTreeMap;
 
         public LinkerIntroductionRegistry(
+            AspectLayerIdComparer comparer,
             CompilationModel finalCompilationModel,
             Compilation intermediateCompilation,
-            Dictionary<SyntaxTree, SyntaxTree> introducedTreeMap,
-            IReadOnlyList<LinkerIntroducedMember> introducedMembers )
+            IReadOnlyDictionary<SyntaxTree, SyntaxTree> introducedTreeMap,
+            IReadOnlyCollection<LinkerIntroducedMember> introducedMembers )
         {
+            Dictionary<IDeclaration, UnsortedConcurrentLinkedList<LinkerIntroducedMember>> overrideMap;
+            Dictionary<LinkerIntroducedMember, IDeclaration> overrideTargetMap;
+            Dictionary<ISymbol, IDeclaration> overrideTargetsByOriginalSymbol;
+            Dictionary<IDeclaration, LinkerIntroducedMember> builderLookup;
+
+            this._comparer = comparer;
             this._intermediateCompilation = intermediateCompilation;
             this._introducedMemberLookup = introducedMembers.ToDictionary( x => x.LinkerNodeId, x => x );
             this._introducedTreeMap = introducedTreeMap;
-            this._overrideMap = new Dictionary<IDeclaration, List<LinkerIntroducedMember>>( finalCompilationModel.InvariantComparer );
-            this._overrideTargetMap = new Dictionary<LinkerIntroducedMember, IDeclaration>();
-            this._overrideTargetsByOriginalSymbol = new Dictionary<ISymbol, IDeclaration>( StructuralSymbolComparer.Default );
-            this._builderLookup = new Dictionary<IDeclaration, LinkerIntroducedMember>();
+            this._overrideMap = overrideMap = new Dictionary<IDeclaration, UnsortedConcurrentLinkedList<LinkerIntroducedMember>>( finalCompilationModel.InvariantComparer );
+            this._overrideTargetMap = overrideTargetMap = new Dictionary<LinkerIntroducedMember, IDeclaration>();
+            this._overrideTargetsByOriginalSymbol = overrideTargetsByOriginalSymbol = new Dictionary<ISymbol, IDeclaration>( StructuralSymbolComparer.Default );
+            this._builderLookup = builderLookup = new Dictionary<IDeclaration, LinkerIntroducedMember>();
+            
+            // TODO: This could be parallelized. The collections could be built in the LinkerIntroductionStep, it is in
+            // the same spirit as the Index* methods.
+            
+            // TODO: remove the OrderBy in the next `foreach`. It should not be necessary, but removing it breaks tests.
 
-            foreach ( var introducedMember in introducedMembers )
+            foreach ( var introducedMember in introducedMembers.OrderBy( x=>x.AspectLayerId, comparer ) )
             {
                 if ( introducedMember.Introduction is IOverriddenDeclaration overrideTransformation )
                 {
-                    if ( !this._overrideMap.TryGetValue( overrideTransformation.OverriddenDeclaration, out var overrideList ) )
+                    if ( !overrideMap.TryGetValue( overrideTransformation.OverriddenDeclaration, out var overrideList ) )
                     {
-                        this._overrideMap[overrideTransformation.OverriddenDeclaration] = overrideList = new List<LinkerIntroducedMember>();
+                        overrideMap[overrideTransformation.OverriddenDeclaration] = overrideList = new UnsortedConcurrentLinkedList<LinkerIntroducedMember>();
                     }
 
-                    this._overrideTargetMap[introducedMember] = overrideTransformation.OverriddenDeclaration;
+                    overrideTargetMap[introducedMember] = overrideTransformation.OverriddenDeclaration;
                     overrideList.Add( introducedMember );
 
                     if ( overrideTransformation.OverriddenDeclaration is Declaration declaration )
                     {
-                        this._overrideTargetsByOriginalSymbol[declaration.Symbol] = declaration;
+                        overrideTargetsByOriginalSymbol[declaration.Symbol] = declaration;
                     }
                 }
 
                 if ( introducedMember.Introduction is IDeclarationBuilder builder )
                 {
-                    this._builderLookup[builder] = introducedMember;
+                    builderLookup[builder] = introducedMember;
                 }
             }
         }
@@ -78,6 +93,9 @@ namespace Metalama.Framework.Engine.Linking
         /// <returns>List of introduced members.</returns>
         public IReadOnlyList<LinkerIntroducedMember> GetOverridesForSymbol( ISymbol referencedSymbol )
         {
+            IReadOnlyList<LinkerIntroducedMember> Sort( UnsortedConcurrentLinkedList<LinkerIntroducedMember> list )
+                => list.GetSortedItems( ( x, y ) => this._comparer.Compare( x.AspectLayerId, y.AspectLayerId ) );
+
             // TODO: Optimize.
             var declaringSyntax = referencedSymbol.GetPrimaryDeclaration();
 
@@ -101,7 +119,7 @@ namespace Metalama.Framework.Engine.Linking
                     return Array.Empty<LinkerIntroducedMember>();
                 }
 
-                return this._overrideMap[originalElement];
+                return Sort( this._overrideMap[originalElement] );
             }
             else
             {
@@ -112,7 +130,7 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     if ( this._overrideMap.TryGetValue( introducedElement, out var overrides ) )
                     {
-                        return overrides;
+                        return Sort( overrides );
                     }
                     else
                     {

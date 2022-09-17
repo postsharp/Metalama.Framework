@@ -3,6 +3,8 @@
 using Metalama.Compiler;
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Linking
 {
@@ -39,7 +41,7 @@ namespace Metalama.Framework.Engine.Linking
             this._serviceProvider = serviceProvider;
         }
 
-        public override AspectLinkerResult Execute( LinkerAnalysisStepOutput input )
+        public override Task<AspectLinkerResult> ExecuteAsync( LinkerAnalysisStepOutput input, CancellationToken cancellationToken )
         {
             var rewritingDriver = new LinkerRewritingDriver(
                 input.IntermediateCompilation.Compilation,
@@ -78,7 +80,7 @@ namespace Metalama.Framework.Engine.Linking
                 input.IntermediateCompilation
                     .Update( transformations );
 
-            return new AspectLinkerResult( linkedCompilation, input.DiagnosticSink.ToImmutable() );
+            return Task.FromResult( new AspectLinkerResult( linkedCompilation, input.DiagnosticSink.ToImmutable() ) );
         }
     }
 }

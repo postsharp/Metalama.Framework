@@ -51,20 +51,6 @@ namespace Metalama.Framework.Engine.Diagnostics
             }
         }
 
-        private static T EnsureInitialized<T>( ref T? field ) where T : class, new()
-        {
-            if ( field != null )
-            {
-                return field;
-            }
-            else
-            {
-                Interlocked.CompareExchange( ref field, new T(), field );
-
-                return field!;
-            }
-        }
-
         public UserDiagnosticSink( CompileTimeProject? compileTimeProject ) : this( compileTimeProject, null ) { }
 
         internal UserDiagnosticSink( CompileTimeProject? compileTimeProject, CodeFixFilter? codeFixFilter )
@@ -92,7 +78,7 @@ namespace Metalama.Framework.Engine.Diagnostics
 
         public void Report( Diagnostic diagnostic )
         {
-            EnsureInitialized( ref this._diagnostics ).Add( diagnostic );
+            LazyInitializer.EnsureInitialized( ref this._diagnostics )!.Add( diagnostic );
 
             if ( diagnostic.Severity == DiagnosticSeverity.Error )
             {
@@ -118,7 +104,7 @@ namespace Metalama.Framework.Engine.Diagnostics
                 {
                     if ( location != null && this._codeFixFilter( diagnosticDefinition, location ) )
                     {
-                        EnsureInitialized( ref this._codeFixes ).Add( new CodeFixInstance( diagnosticDefinition.Id, location, codeFix ) );
+                        LazyInitializer.EnsureInitialized( ref this._codeFixes )!.Add( new CodeFixInstance( diagnosticDefinition.Id, location, codeFix ) );
                     }
 
                     if ( firstTitle == null )
@@ -151,7 +137,7 @@ namespace Metalama.Framework.Engine.Diagnostics
 
         public void Suppress( ScopedSuppression suppression )
         {
-            EnsureInitialized( ref this._suppressions ).Add( suppression );
+            LazyInitializer.EnsureInitialized( ref this._suppressions )!.Add( suppression );
 
             this.Revision++;
         }
@@ -219,7 +205,7 @@ namespace Metalama.Framework.Engine.Diagnostics
         {
             foreach ( var codeFix in codeFixes )
             {
-                EnsureInitialized( ref this._codeFixes ).Add( codeFix );
+                LazyInitializer.EnsureInitialized( ref this._codeFixes )!.Add( codeFix );
 
                 this.Revision++;
             }

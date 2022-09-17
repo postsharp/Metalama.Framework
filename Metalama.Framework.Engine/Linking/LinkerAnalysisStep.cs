@@ -4,6 +4,8 @@ using Metalama.Framework.Engine.Linking.Inlining;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Linking
 {
@@ -16,7 +18,7 @@ namespace Metalama.Framework.Engine.Linking
 
         private LinkerAnalysisStep() { }
 
-        public override LinkerAnalysisStepOutput Execute( LinkerIntroductionStepOutput input )
+        public override Task<LinkerAnalysisStepOutput> ExecuteAsync( LinkerIntroductionStepOutput input, CancellationToken cancellationToken )
         {
             /*
              * Algorithm of this step:
@@ -116,12 +118,13 @@ namespace Metalama.Framework.Engine.Linking
                 inlinedSemantics,
                 substitutions );
 
-            return new LinkerAnalysisStepOutput(
-                input.DiagnosticSink,
-                input.IntermediateCompilation,
-                input.IntroductionRegistry,
-                analysisRegistry,
-                input.ProjectOptions );
+            return Task.FromResult(
+                new LinkerAnalysisStepOutput(
+                    input.DiagnosticSink,
+                    input.IntermediateCompilation,
+                    input.IntroductionRegistry,
+                    analysisRegistry,
+                    input.ProjectOptions ) );
         }
 
         private static void GetReachableReferences(

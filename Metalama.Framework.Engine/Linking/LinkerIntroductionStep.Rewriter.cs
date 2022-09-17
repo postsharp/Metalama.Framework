@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CodeModel.Builders;
@@ -12,6 +11,7 @@ using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -28,15 +28,14 @@ namespace Metalama.Framework.Engine.Linking
         private partial class Rewriter : SafeSyntaxRewriter
         {
             private readonly CompilationModel _compilation;
-            private readonly ImmutableDictionary<AspectLayerId, OrderedAspectLayer> _orderedAspectLayers;
             private readonly SyntaxGenerationContextFactory _syntaxGenerationContextFactory;
             private readonly ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> _diagnosticSuppressions;
             private readonly SyntaxTransformationCollection _introducedMemberCollection;
             private readonly IReadOnlyDictionary<SyntaxNode, MemberLevelTransformations> _symbolMemberLevelTransformations;
             private readonly IReadOnlyDictionary<IIntroduceMemberTransformation, MemberLevelTransformations> _introductionMemberLevelTransformations;
-            private readonly HashSet<SyntaxNode> _nodesWithModifiedAttributes;
+            private readonly IReadOnlySet<SyntaxNode> _nodesWithModifiedAttributes;
             private readonly SyntaxTree _syntaxTreeForGlobalAttributes;
-            private readonly Dictionary<TypeDeclarationSyntax, TypeLevelTransformations> _typeLevelTransformations;
+            private readonly IReadOnlyDictionary<TypeDeclarationSyntax, TypeLevelTransformations> _typeLevelTransformations;
 
             // Maps a diagnostic id to the number of times it has been suppressed.
             private ImmutableHashSet<string> _activeSuppressions = ImmutableHashSet.Create<string>( StringComparer.OrdinalIgnoreCase );
@@ -46,17 +45,15 @@ namespace Metalama.Framework.Engine.Linking
                 SyntaxTransformationCollection introducedMemberCollection,
                 ImmutableDictionaryOfArray<IDeclaration, ScopedSuppression> diagnosticSuppressions,
                 CompilationModel compilation,
-                IReadOnlyList<OrderedAspectLayer> inputOrderedAspectLayers,
                 IReadOnlyDictionary<SyntaxNode, MemberLevelTransformations> symbolMemberLevelTransformations,
                 IReadOnlyDictionary<IIntroduceMemberTransformation, MemberLevelTransformations> introductionMemberLevelTransformations,
-                HashSet<SyntaxNode> nodesWithModifiedAttributes,
+                IReadOnlySet<SyntaxNode> nodesWithModifiedAttributes,
                 SyntaxTree syntaxTreeForGlobalAttributes,
-                Dictionary<TypeDeclarationSyntax, TypeLevelTransformations> typeLevelTransformations )
+                IReadOnlyDictionary<TypeDeclarationSyntax, TypeLevelTransformations> typeLevelTransformations )
             {
                 this._syntaxGenerationContextFactory = new SyntaxGenerationContextFactory( compilation.RoslynCompilation, serviceProvider );
                 this._diagnosticSuppressions = diagnosticSuppressions;
                 this._compilation = compilation;
-                this._orderedAspectLayers = inputOrderedAspectLayers.ToImmutableDictionary( e => e.AspectLayerId, e => e );
                 this._introducedMemberCollection = introducedMemberCollection;
                 this._symbolMemberLevelTransformations = symbolMemberLevelTransformations;
                 this._introductionMemberLevelTransformations = introductionMemberLevelTransformations;
@@ -397,7 +394,7 @@ namespace Metalama.Framework.Engine.Linking
                             node = (T) node
                                 .WithIdentifier( node.Identifier.WithTrailingTrivia() )
                                 .WithBaseList(
-                                    BaseList( SeparatedList( additionalBaseList ) )
+                                    BaseList( SeparatedList( additionalBaseList.Select( i => i.Syntax ) ) )
                                         .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) )
                                 .WithTrailingTrivia( node.Identifier.TrailingTrivia );
                         }
@@ -407,7 +404,7 @@ namespace Metalama.Framework.Engine.Linking
                                 BaseList(
                                     node.BaseList.Types.AddRange(
                                         additionalBaseList.Select(
-                                            i => i.WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) ) ) ) );
+                                            i => i.Syntax.WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation ) ) ) ) );
                         }
                     }
 
@@ -421,12 +418,7 @@ namespace Metalama.Framework.Engine.Linking
                 // TODO: Try to avoid closure allocation.
                 void AddIntroductionsOnPosition( InsertPosition position )
                 {
-                    var comparer = new LinkerIntroducedMemberComparer( this._orderedAspectLayers );
-
-                    var membersAtPosition = this._introducedMemberCollection.GetIntroducedMembersOnPosition( position )
-                        .ToList();
-
-                    membersAtPosition.Sort( comparer );
+                    var membersAtPosition = this._introducedMemberCollection.GetIntroducedMembersOnPosition( position );
 
                     foreach ( var introducedMember in membersAtPosition )
                     {

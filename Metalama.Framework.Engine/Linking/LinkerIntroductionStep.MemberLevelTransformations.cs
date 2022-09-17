@@ -1,7 +1,13 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities.Threading;
+using System;
 using System.Collections.Immutable;
+using System.Linq;
+using System.Threading;
 
 namespace Metalama.Framework.Engine.Linking;
 
@@ -9,18 +15,52 @@ internal partial class LinkerIntroductionStep
 {
     private class MemberLevelTransformations
     {
-        public ImmutableArray<LinkerInsertedStatement> Statements { get; private set; } = ImmutableArray<LinkerInsertedStatement>.Empty;
+        private ConcurrentLinkedList<LinkerInsertedStatement>? _unorderedStatements;
+        private ConcurrentLinkedList<IntroduceParameterTransformation>? _unorderedParameters;
+        private ConcurrentLinkedList<IntroduceConstructorInitializerArgumentTransformation>? _unorderedArguments;
 
-        public ImmutableArray<IntroduceParameterTransformation> Parameters { get; private set; } = ImmutableArray<IntroduceParameterTransformation>.Empty;
+        public ImmutableArray<LinkerInsertedStatement> Statements { get; private set; }
 
-        public ImmutableArray<IntroduceConstructorInitializerArgumentTransformation> Arguments { get; private set; } =
-            ImmutableArray<IntroduceConstructorInitializerArgumentTransformation>.Empty;
+        public ImmutableArray<IntroduceParameterTransformation> Parameters { get; private set; }
 
-        public void Add( LinkerInsertedStatement statement ) => this.Statements = this.Statements.Add( statement );
+        public ImmutableArray<IntroduceConstructorInitializerArgumentTransformation> Arguments { get; private set; }
 
-        public void Add( IntroduceParameterTransformation transformation ) => this.Parameters = this.Parameters.Add( transformation );
+        private static ImmutableArray<T> Sort<T>( ConcurrentLinkedList<T>? input, Func<T, Advice> getAdvice, AspectLayerIdComparer comparer )
+        {
+            if ( input == null || input.Count == 0 )
+            {
+                return ImmutableArray<T>.Empty;
+            }
+            else if ( input.Count == 1 )
+            {
+                return input.ToImmutableArray();
+            }
+            else
+            {
+                // Insert statements must be executed in inverse order (because we need the forward execution order and not the override order)
+                // except within an aspect, where the order needs to be preserved.
+                return input.OrderBy( x => getAdvice( x ).AspectLayerId, comparer )
+                    .GroupBy( x => getAdvice(x).Aspect )
+                    .Reverse()
+                    .SelectMany( x => x )
+                    .ToImmutableArray();
+            }
+        }
 
-        public void Add( IntroduceConstructorInitializerArgumentTransformation argument ) => this.Arguments = this.Arguments.Add( argument );
+        public void Sort( AspectLayerIdComparer comparer )
+        {
+            this.Statements = Sort( this._unorderedStatements, s => s.ParentTransformation.ParentAdvice, comparer );
+            this.Arguments = Sort( this._unorderedArguments, a => a.ParentAdvice, comparer );
+            this.Parameters = Sort( this._unorderedParameters, p => p.ParentAdvice, comparer );
+        }
+
+        public void Add( LinkerInsertedStatement statement ) => LazyInitializer.EnsureInitialized( ref this._unorderedStatements )!.Add( statement );
+
+        public void Add( IntroduceParameterTransformation transformation )
+            => LazyInitializer.EnsureInitialized( ref this._unorderedParameters )!.Add( transformation );
+
+        public void Add( IntroduceConstructorInitializerArgumentTransformation argument )
+            => LazyInitializer.EnsureInitialized( ref this._unorderedArguments )!.Add( argument );
 
         public bool AddDefaultInitializer { get; set; }
     }

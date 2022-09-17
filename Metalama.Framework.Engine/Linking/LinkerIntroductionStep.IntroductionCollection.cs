@@ -1,12 +1,15 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -21,23 +24,31 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         private class SyntaxTransformationCollection
         {
-            private readonly List<LinkerIntroducedMember> _introducedMembers;
-            private readonly Dictionary<InsertPosition, List<LinkerIntroducedMember>> _introducedMembersByInsertPosition;
-            private readonly Dictionary<BaseTypeDeclarationSyntax, List<BaseTypeSyntax>> _introducedInterfacesByTargetTypeDeclaration;
-            private readonly HashSet<VariableDeclaratorSyntax> _removedVariableDeclaratorSyntax;
-            private readonly HashSet<PropertyDeclarationSyntax> _autoPropertyWithSynthesizedSetterSyntax;
+            private readonly AspectLayerIdComparer _comparer;
+            private readonly ConcurrentBag<LinkerIntroducedMember> _introducedMembers;
+            private readonly ConcurrentDictionary<InsertPosition, UnsortedConcurrentLinkedList<LinkerIntroducedMember>> _introducedMembersByInsertPosition;
+
+            private readonly ConcurrentDictionary<BaseTypeDeclarationSyntax, UnsortedConcurrentLinkedList<LinkerIntroducedInterface>>
+                _introducedInterfacesByTargetTypeDeclaration;
+
+            private readonly ConcurrentSet<VariableDeclaratorSyntax> _removedVariableDeclaratorSyntax;
+            private readonly ConcurrentSet<PropertyDeclarationSyntax> _autoPropertyWithSynthesizedSetterSyntax;
 
             private int _nextId;
 
-            public IReadOnlyList<LinkerIntroducedMember> IntroducedMembers => this._introducedMembers;
+            public IReadOnlyCollection<LinkerIntroducedMember> IntroducedMembers => this._introducedMembers;
 
-            public SyntaxTransformationCollection()
+            public SyntaxTransformationCollection( AspectLayerIdComparer comparer )
             {
-                this._introducedMembers = new List<LinkerIntroducedMember>();
-                this._introducedMembersByInsertPosition = new Dictionary<InsertPosition, List<LinkerIntroducedMember>>();
-                this._introducedInterfacesByTargetTypeDeclaration = new Dictionary<BaseTypeDeclarationSyntax, List<BaseTypeSyntax>>();
-                this._removedVariableDeclaratorSyntax = new HashSet<VariableDeclaratorSyntax>();
-                this._autoPropertyWithSynthesizedSetterSyntax = new HashSet<PropertyDeclarationSyntax>();
+                this._comparer = comparer;
+                this._introducedMembers = new ConcurrentBag<LinkerIntroducedMember>();
+                this._introducedMembersByInsertPosition = new ConcurrentDictionary<InsertPosition, UnsortedConcurrentLinkedList<LinkerIntroducedMember>>();
+
+                this._introducedInterfacesByTargetTypeDeclaration =
+                    new ConcurrentDictionary<BaseTypeDeclarationSyntax, UnsortedConcurrentLinkedList<LinkerIntroducedInterface>>();
+
+                this._removedVariableDeclaratorSyntax = new ConcurrentSet<VariableDeclaratorSyntax>();
+                this._autoPropertyWithSynthesizedSetterSyntax = new ConcurrentSet<PropertyDeclarationSyntax>();
             }
 
             public void Add( IIntroduceMemberTransformation memberIntroduction, IEnumerable<IntroducedMember> introducedMembers )
@@ -55,10 +66,9 @@ namespace Metalama.Framework.Engine.Linking
 
                     this._introducedMembers.Add( linkerIntroducedMember );
 
-                    if ( !this._introducedMembersByInsertPosition.TryGetValue( memberIntroduction.InsertPosition, out var nodes ) )
-                    {
-                        this._introducedMembersByInsertPosition[memberIntroduction.InsertPosition] = nodes = new List<LinkerIntroducedMember>();
-                    }
+                    var nodes = this._introducedMembersByInsertPosition.GetOrAdd(
+                        memberIntroduction.InsertPosition,
+                        _ => new UnsortedConcurrentLinkedList<LinkerIntroducedMember>() );
 
                     nodes.Add( linkerIntroducedMember );
                 }
@@ -71,12 +81,11 @@ namespace Metalama.Framework.Engine.Linking
                 // Heuristic: select the file with the shortest path.
                 var targetTypeDecl = (BaseTypeDeclarationSyntax) targetTypeSymbol.GetPrimaryDeclaration().AssertNotNull();
 
-                if ( !this._introducedInterfacesByTargetTypeDeclaration.TryGetValue( targetTypeDecl, out var interfaceList ) )
-                {
-                    this._introducedInterfacesByTargetTypeDeclaration[targetTypeDecl] = interfaceList = new List<BaseTypeSyntax>();
-                }
+                var interfaceList = this._introducedInterfacesByTargetTypeDeclaration.GetOrAdd(
+                    targetTypeDecl,
+                    _ => new UnsortedConcurrentLinkedList<LinkerIntroducedInterface>() );
 
-                interfaceList.Add( introducedInterface );
+                interfaceList.Add( new LinkerIntroducedInterface( interfaceImplementationIntroduction.ParentAdvice.AspectLayerId, introducedInterface ) );
             }
 
             public void AddAutoPropertyWithSynthesizedSetter( PropertyDeclarationSyntax declaration )
@@ -110,25 +119,25 @@ namespace Metalama.Framework.Engine.Linking
                 return this._autoPropertyWithSynthesizedSetterSyntax.Contains( propertyDeclaration );
             }
 
-            public IEnumerable<LinkerIntroducedMember> GetIntroducedMembersOnPosition( InsertPosition position )
+            public IReadOnlyList<LinkerIntroducedMember> GetIntroducedMembersOnPosition( InsertPosition position )
             {
                 if ( this._introducedMembersByInsertPosition.TryGetValue( position, out var introducedMembers ) )
                 {
                     // IMPORTANT - do not change the introduced node here.
-                    return introducedMembers;
+                    return introducedMembers.GetSortedItems( ( x, y ) => this._comparer.Compare( x.AspectLayerId, y.AspectLayerId ) );
                 }
 
-                return Enumerable.Empty<LinkerIntroducedMember>();
+                return Array.Empty<LinkerIntroducedMember>();
             }
 
-            public IReadOnlyList<BaseTypeSyntax> GetIntroducedInterfacesForTypeDeclaration( BaseTypeDeclarationSyntax typeDeclaration )
+            public IReadOnlyList<LinkerIntroducedInterface> GetIntroducedInterfacesForTypeDeclaration( BaseTypeDeclarationSyntax typeDeclaration )
             {
                 if ( this._introducedInterfacesByTargetTypeDeclaration.TryGetValue( typeDeclaration, out var interfaceList ) )
                 {
-                    return interfaceList;
+                    return interfaceList.GetSortedItems( ( x, y ) => this._comparer.Compare( x.AspectLayerId, y.AspectLayerId ) );
                 }
 
-                return Array.Empty<BaseTypeSyntax>();
+                return Array.Empty<LinkerIntroducedInterface>();
             }
         }
     }

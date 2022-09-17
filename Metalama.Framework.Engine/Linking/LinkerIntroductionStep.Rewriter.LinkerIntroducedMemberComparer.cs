@@ -38,9 +38,9 @@ namespace Metalama.Framework.Engine.Linking
                     { Accessibility.Private, 5 }
                 }.ToImmutableDictionary();
 
-                private readonly ImmutableDictionary<AspectLayerId, OrderedAspectLayer> _orderedAspectLayers;
+                private readonly IReadOnlyDictionary<AspectLayerId, OrderedAspectLayer> _orderedAspectLayers;
 
-                public LinkerIntroducedMemberComparer( ImmutableDictionary<AspectLayerId, OrderedAspectLayer> orderedAspectLayers )
+                public LinkerIntroducedMemberComparer( IReadOnlyDictionary<AspectLayerId, OrderedAspectLayer> orderedAspectLayers )
                 {
                     this._orderedAspectLayers = orderedAspectLayers;
                 }

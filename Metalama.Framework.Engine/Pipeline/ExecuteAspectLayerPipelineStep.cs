@@ -53,7 +53,8 @@ internal class ExecuteAspectLayerPipelineStep : PipelineStep
 
         // The processing order of types is arbitrary. Different types can be processed in parallel.
         await this._taskScheduler.RunInParallelAsync(
-            instancesByType.Select( i => new Action( () => this.ProcessType( i, compilation, observableTransformations.Enqueue, cancellationToken ) ) ),
+            instancesByType,
+            t => this.ProcessType( t, compilation, observableTransformations.Enqueue, cancellationToken ),
             cancellationToken );
 
         return compilation.WithTransformations( observableTransformations );

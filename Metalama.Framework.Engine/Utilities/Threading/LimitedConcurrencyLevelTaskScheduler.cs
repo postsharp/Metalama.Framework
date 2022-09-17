@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.Utilities.Threading;
 internal class LimitedConcurrencyLevelTaskScheduler : TaskScheduler
 {
     // Indicates whether the current thread is processing work items.
-    private ThreadLocal<bool> _currentThreadIsProcessingItems = new();
+    private readonly ThreadLocal<bool> _currentThreadIsProcessingItems = new();
 
     // The list of tasks to be executed
     private readonly LinkedList<Task> _tasks = new(); // protected by lock(_tasks)
@@ -20,7 +20,7 @@ internal class LimitedConcurrencyLevelTaskScheduler : TaskScheduler
     // The maximum concurrency level allowed by this scheduler.
 
     // Indicates whether the scheduler is currently processing work items.
-    private int _delegatesQueuedOrRunning = 0;
+    private int _delegatesQueuedOrRunning;
 
     // Creates a new instance with the specified degree of parallelism.
     public LimitedConcurrencyLevelTaskScheduler( int maxDegreeOfParallelism )
@@ -105,9 +105,9 @@ internal class LimitedConcurrencyLevelTaskScheduler : TaskScheduler
 
         // If the task was previously queued, remove it from the queue
         if ( taskWasPreviouslyQueued )
-
-            // Try to run the task.
         {
+            // Try to run the task.
+
             if ( this.TryDequeue( task ) )
             {
                 return this.TryExecuteTask( task );

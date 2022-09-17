@@ -3,6 +3,8 @@
 using Metalama.Framework.Engine.Observers;
 using Metalama.Framework.Project;
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Linking
 {
@@ -24,17 +26,17 @@ namespace Metalama.Framework.Engine.Linking
         /// Creates a set of diagnostics and final linked compilation.
         /// </summary>
         /// <returns>Linker result.</returns>
-        public AspectLinkerResult ToResult()
+        public async Task<AspectLinkerResult> ExecuteAsync( CancellationToken cancellationToken )
         {
             // First step. Adds all transformations to the compilation, resulting in intermediate compilation.
-            var introductionStepOutput = new LinkerIntroductionStep( this._serviceProvider ).Execute( this._input );
+            var introductionStepOutput = await new LinkerIntroductionStep( this._serviceProvider ).ExecuteAsync( this._input, cancellationToken );
             this._serviceProvider.GetService<ILinkerObserver>()?.OnIntermediateCompilationCreated( introductionStepOutput.IntermediateCompilation );
 
             // Second step. Count references to modified methods on semantic models of intermediate compilation and analyze method bodies.
-            var analysisStepOutput = LinkerAnalysisStep.Instance.Execute( introductionStepOutput );
+            var analysisStepOutput = await LinkerAnalysisStep.Instance.ExecuteAsync( introductionStepOutput, cancellationToken );
 
             // Third step. Link, inline and prune intermediate compilation. This results in the final compilation.
-            var linkingStepOutput = new LinkerLinkingStep( this._serviceProvider ).Execute( analysisStepOutput );
+            var linkingStepOutput = await new LinkerLinkingStep( this._serviceProvider ).ExecuteAsync( analysisStepOutput, cancellationToken );
 
             // Return the final compilation and all diagnostics from all linking steps.
             return linkingStepOutput;
