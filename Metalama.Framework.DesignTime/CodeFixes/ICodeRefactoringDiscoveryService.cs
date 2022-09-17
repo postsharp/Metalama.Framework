@@ -14,7 +14,7 @@ public interface ICodeRefactoringDiscoveryService : IService
     /// Returns the code refactorings present at a specific point of text.
     /// </summary>
     Task<ComputeRefactoringResult> ComputeRefactoringsAsync(
-        string projectId,
+        ProjectKey projectKey,
         string syntaxTreePath,
         TextSpan span,
         CancellationToken cancellationToken = default );

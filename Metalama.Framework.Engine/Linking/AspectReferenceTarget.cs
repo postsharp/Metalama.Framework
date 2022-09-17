@@ -35,8 +35,8 @@ namespace Metalama.Framework.Engine.Linking
         /// Gets the target semantic body (method, property accessor, event accessor).
         /// </summary>
         /// <returns></returns>
-        public IntermediateSymbolSemantic<IMethodSymbol> GetTargetSemanticBody 
-            => new IntermediateSymbolSemantic<IMethodSymbol>(
+        public IntermediateSymbolSemantic<IMethodSymbol> GetTargetSemanticBody
+            => new(
                 (this.Symbol, this.TargetKind) switch
                 {
                     (IMethodSymbol method, AspectReferenceTargetKind.Self) => method,

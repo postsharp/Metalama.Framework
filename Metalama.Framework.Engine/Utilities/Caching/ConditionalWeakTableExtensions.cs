@@ -3,9 +3,9 @@
 using System;
 using System.Runtime.CompilerServices;
 
-namespace Metalama.Framework.Engine.Utilities;
+namespace Metalama.Framework.Engine.Utilities.Caching;
 
-internal static class ConditionalWeakTableExtensions
+public static class ConditionalWeakTableExtensions
 {
     public static TValue GetOrAdd<TKey, TValue>( this ConditionalWeakTable<TKey, TValue> table, TKey key, Func<TKey, TValue> func )
         where TKey : class

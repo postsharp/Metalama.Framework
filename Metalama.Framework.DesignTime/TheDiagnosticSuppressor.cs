@@ -67,7 +67,7 @@ namespace Metalama.Framework.DesignTime
             {
                 this._logger.Trace?.Log( $"DesignTimeDiagnosticSuppressor.ReportSuppressions('{context.Compilation.AssemblyName}')." );
 
-                var buildOptions = new MSBuildProjectOptions( context.Options.AnalyzerConfigOptionsProvider );
+                var buildOptions = MSBuildProjectOptions.GetInstance( context.Options.AnalyzerConfigOptionsProvider );
 
                 if ( !buildOptions.IsDesignTimeEnabled )
                 {

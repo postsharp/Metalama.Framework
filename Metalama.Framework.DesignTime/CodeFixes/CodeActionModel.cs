@@ -35,7 +35,7 @@ namespace Metalama.Framework.DesignTime.CodeFixes
         private async Task<Solution> InvokeAsync( CodeActionInvocationContext invocationContext, CancellationToken cancellationToken )
         {
             // Execute the current code action locally or remotely. In case of remote execution, the code action is serialized.
-            var result = await invocationContext.Service.ExecuteCodeActionAsync( invocationContext.ProjectId, this, cancellationToken );
+            var result = await invocationContext.Service.ExecuteCodeActionAsync( invocationContext.ProjectKey, this, cancellationToken );
 
             // Apply the result to the current solution.
             var project = invocationContext.Document.Project;

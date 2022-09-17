@@ -5,6 +5,10 @@
         <PackageReference Update="Metalama.Framework.Sdk" PrivateAssets="none"/>
     </ItemGroup>
 
+    <PropertyGroup>
+        <MetalamaEnabled Condition="'$(MetalamaEnabled)'==''">True</MetalamaEnabled>
+    </PropertyGroup>
+
     <Import Project="Metalama.CompilerVisibleProperties.props"
             Condition="'$(MetalamaCompilerVisiblePropertiesProjectImported)'==''"/>
 

@@ -27,7 +27,7 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
         protected ServiceProvider ServiceProvider { get; }
 
         private readonly ILogger _logger;
-        private readonly ConcurrentDictionary<string, ProjectHandler?> _projectHandlers = new();
+        private readonly ConcurrentDictionary<ProjectKey, ProjectHandler?> _projectHandlers = new();
 
         protected BaseSourceGenerator( ServiceProvider serviceProvider )
         {
@@ -35,7 +35,7 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
         }
 
-        protected abstract ProjectHandler CreateSourceGeneratorImpl( IProjectOptions projectOptions );
+        protected abstract ProjectHandler CreateSourceGeneratorImpl( IProjectOptions projectOptions, ProjectKey projectKey );
 
         void IIncrementalGenerator.Initialize( IncrementalGeneratorInitializationContext context )
         {
@@ -50,7 +50,7 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
 
                 var source =
                     context.AnalyzerConfigOptionsProvider.Select(
-                            ( x, _ ) => (AnalyzerOptions: x.GlobalOptions, PipelineOptions: new MSBuildProjectOptions( x.GlobalOptions )) )
+                            ( x, _ ) => (AnalyzerOptions: x.GlobalOptions, PipelineOptions: MSBuildProjectOptions.GetInstance( x )) )
                         .Combine( context.CompilationProvider )
                         .Combine( context.AdditionalTextsProvider.Select( ( text, _ ) => text ).Collect() )
                         .Select( ( x, _ ) => (Compilation: x.Left.Right, x.Left.Left.AnalyzerOptions, x.Left.Left.PipelineOptions, AdditionalTexts: x.Right) )
@@ -98,29 +98,41 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
             this._logger.Trace?.Log(
                 $"{this.GetType().Name}.GetGeneratedSources('{options.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )})." );
 
-            if ( string.IsNullOrEmpty( options.ProjectId ) )
+            if ( !options.IsFrameworkEnabled )
             {
                 // Metalama is not enabled for this project.
+                this._logger.Trace?.Log(
+                    $"{this.GetType().Name}.GetGeneratedSources('{options.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): Metalama not enabled." );
+
+                return SourceGeneratorResult.Empty;
+            }
+
+            var projectKey = compilation.GetProjectKey();
+
+            if ( !projectKey.HasHashCode )
+            {
+                this._logger.Warning?.Log(
+                    $"{this.GetType().Name}.GetGeneratedSources('{options.AssemblyName}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): no syntax tree." );
 
                 return SourceGeneratorResult.Empty;
             }
 
             // Get or create an IProjectHandler instance.
-            if ( !this._projectHandlers.TryGetValue( options.ProjectId, out var projectHandler ) )
+            if ( !this._projectHandlers.TryGetValue( projectKey, out var projectHandler ) )
             {
                 projectHandler = this._projectHandlers.GetOrAdd(
-                    options.ProjectId,
+                    projectKey,
                     _ =>
                     {
                         if ( options.IsFrameworkEnabled )
                         {
                             if ( options.IsDesignTimeEnabled )
                             {
-                                return this.CreateSourceGeneratorImpl( options );
+                                return this.CreateSourceGeneratorImpl( options, projectKey );
                             }
                             else
                             {
-                                return new OfflineProjectHandler( this.ServiceProvider, options );
+                                return new OfflineProjectHandler( this.ServiceProvider, options, projectKey );
                             }
                         }
                         else

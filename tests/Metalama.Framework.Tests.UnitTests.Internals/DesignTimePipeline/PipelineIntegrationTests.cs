@@ -2,12 +2,9 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.DesignTime.Pipeline;
-using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Templating;
-using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.TestFramework;
+using Metalama.Framework.Tests.UnitTests.DesignTime;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
@@ -21,19 +18,15 @@ using Xunit;
 using Xunit.Abstractions;
 using StringExtensions = Metalama.TestFramework.Utilities.StringExtensions;
 
-#pragma warning disable IDE0079 // Remove unnecessary suppression.
-#pragma warning disable CA1307  // Specify StringComparison for clarity
+#pragma warning disable IDE0079   // Remove unnecessary suppression.
+#pragma warning disable CA1307    // Specify StringComparison for clarity
+#pragma warning disable VSTHRD200 // Warning VSTHRD200 : Use "Async" suffix in names of methods that return an awaitable type.
 
-namespace Metalama.Framework.Tests.UnitTests.DesignTime
+namespace Metalama.Framework.Tests.UnitTests.DesignTimePipeline
 {
     public class PipelineIntegrationTests : TestBase
     {
-        public PipelineIntegrationTests( ITestOutputHelper logger )
-        {
-            this.Logger = logger;
-        }
-
-        protected ITestOutputHelper Logger { get; }
+        public PipelineIntegrationTests( ITestOutputHelper logger ) : base( logger ) { }
 
         private static CSharpCompilation CreateCSharpCompilation(
             IReadOnlyDictionary<string, string> code,
@@ -61,7 +54,9 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             var compilation = CreateEmptyCompilation();
 
-            compilation = compilation.AddSyntaxTrees( code.Select( c => SyntaxFactory.ParseSyntaxTree( c.Value, path: c.Key ) ) );
+            compilation = compilation.AddSyntaxTrees(
+                code.Select(
+                    c => SyntaxFactory.ParseSyntaxTree( c.Value, path: c.Key, options: CSharpParseOptions.Default.WithPreprocessorSymbols( "METALAMA" ) ) ) );
 
             if ( !acceptErrors )
             {
@@ -116,7 +111,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             var i = 0;
 
-            foreach ( var result in results.PipelineResult.SyntaxTreeResults.Values.OrderBy( t => t.SyntaxTree.FilePath ) )
+            foreach ( var result in results.TransformationResult.SyntaxTreeResults.Values.OrderBy( t => t.SyntaxTree.FilePath ) )
             {
                 if ( i > 0 )
                 {
@@ -134,13 +129,14 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
         [Fact]
         public void NoCompileTimeCode()
         {
-            using TestProjectOptions testProjectOptions = new();
+            using var testContext = this.CreateTestContext();
+
             var compilation = CreateCSharpCompilation( new Dictionary<string, string>() { { "F1.cs", "public class X {}" } } );
-            using TestDesignTimeAspectPipelineFactory factory = new( new UnloadableCompileTimeDomain(), testProjectOptions );
-            var pipeline = factory.GetOrCreatePipeline( testProjectOptions, compilation, CancellationToken.None )!;
+            using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+            var pipeline = factory.CreatePipeline( compilation );
 
             // First execution of the pipeline.
-            Assert.True( factory.TryExecute( testProjectOptions, compilation, CancellationToken.None, out var results ) );
+            Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, CancellationToken.None, out var results ) );
             var dumpedResults = DumpResults( results! );
             this.Logger.WriteLine( dumpedResults );
 
@@ -156,14 +152,14 @@ F1.cs:
             Assert.Equal( 1, pipeline.PipelineExecutionCount );
 
             // Second execution. The result should be the same, and the number of executions should not change.
-            Assert.True( factory.TryExecute( testProjectOptions, compilation, CancellationToken.None, out var results2 ) );
+            Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, CancellationToken.None, out var results2 ) );
             var dumpedResults2 = DumpResults( results2! );
             Assert.Equal( expectedResult.Trim(), dumpedResults2 );
             Assert.Equal( 1, pipeline.PipelineExecutionCount );
         }
 
         [Fact]
-        public async Task ChangeInAspectCodeAsync()
+        public async Task ChangeInAspectCode()
         {
             var assemblyName = "test_" + RandomIdGenerator.GenerateId();
 
@@ -207,7 +203,6 @@ Target.cs:
 ";
 
             using var testContext = this.CreateTestContext();
-            var projectOptions = testContext.ProjectOptions;
 
             var compilation = CreateCSharpCompilation(
                 new Dictionary<string, string>()
@@ -216,18 +211,18 @@ Target.cs:
                 },
                 assemblyName );
 
-            using TestDesignTimeAspectPipelineFactory factory = new( new UnloadableCompileTimeDomain(), projectOptions );
-            var pipeline = factory.GetOrCreatePipeline( projectOptions, compilation, CancellationToken.None )!;
+            using TestDesignTimeAspectPipelineFactory factory = new( testContext );
+            var pipeline = factory.CreatePipeline( compilation );
 
             // First execution of the pipeline.
-            Assert.True( factory.TryExecute( projectOptions, compilation, CancellationToken.None, out var results ) );
+            Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, CancellationToken.None, out var results ) );
             var dumpedResults = DumpResults( results! );
 
             Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults );
             Assert.Equal( 1, pipeline.PipelineExecutionCount );
 
             // Second execution with the same compilation. The result should be the same, and the number of executions should not change because the result is cached.
-            Assert.True( factory.TryExecute( projectOptions, compilation, CancellationToken.None, out var results2 ) );
+            Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation, CancellationToken.None, out var results2 ) );
             var dumpedResults2 = DumpResults( results2! );
             Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "1" ).Trim(), dumpedResults2 );
             Assert.Equal( 1, pipeline.PipelineExecutionCount );
@@ -240,7 +235,7 @@ Target.cs:
                 },
                 assemblyName );
 
-            Assert.True( factory.TryExecute( projectOptions, compilation3, CancellationToken.None, out var results3 ) );
+            Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation3, CancellationToken.None, out var results3 ) );
             var dumpedResults3 = DumpResults( results3! );
 
             this.Logger.WriteLine( dumpedResults3 );
@@ -249,7 +244,7 @@ Target.cs:
             Assert.Equal( 1, pipeline.PipelineInitializationCount );
             Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "2" ).Trim(), dumpedResults3 );
 
-            // Forth execution, with modified aspect but not target code. We don't trigger a build, so we should get the old result.
+            // Forth execution, with modified aspect but not target code. This should pause the pipeline. We don't resume the pipeline, so we should get the old result.
             var compilation4 = CreateCSharpCompilation(
                 new Dictionary<string, string>()
                 {
@@ -259,7 +254,7 @@ Target.cs:
 
             var aspect4 = compilation4.SyntaxTrees.Single( t => t.FilePath == "Aspect.cs" );
 
-            Assert.True( factory.TryExecute( projectOptions, compilation4, CancellationToken.None, out var results4 ) );
+            Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation4, CancellationToken.None, out var results4 ) );
 
             Assert.Equal( DesignTimeAspectPipelineStatus.Paused, pipeline.Status );
             Assert.True( pipeline.IsCompileTimeSyntaxTreeOutdated( "Aspect.cs" ) );
@@ -291,7 +286,7 @@ Target.cs:
 
             Assert.Equal( DesignTimeAspectPipelineStatus.Paused, pipeline.Status );
 
-            Assert.True( factory.TryExecute( projectOptions, compilation5, CancellationToken.None, out var results5 ) );
+            Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation5, CancellationToken.None, out var results5 ) );
             var dumpedResults5 = DumpResults( results5! );
 
             Assert.Equal( expectedResult.Replace( "$AspectVersion$", "1" ).Replace( "$TargetVersion$", "2" ).Trim(), dumpedResults5 );
@@ -306,23 +301,11 @@ Target.cs:
                 diagnostics5,
                 d => d.Severity == DiagnosticSeverity.Error && d.Id == TemplatingDiagnosticDescriptors.CompileTimeTypeNeedsRebuild.Id );
 
-            // Build the project from the compile-time pipeline.
-            using UnloadableCompileTimeDomain domain = new();
-
-            var serviceProvider = testContext.ServiceProvider
-                .WithProjectScopedServices( compilation );
-
-            var compileTimeAspectPipeline = new CompileTimeAspectPipeline( serviceProvider, true, domain );
-            DiagnosticList compileDiagnostics = new();
-            var pipelineResult = await compileTimeAspectPipeline.ExecuteAsync( compileDiagnostics, compilation5, default, CancellationToken.None );
-
-            Assert.NotNull( pipelineResult );
-
             // Simulate an external build event. This is normally triggered by the build touch file or by a UI signal.
-            pipeline.Resume( false );
+            await pipeline.ResumeAsync( false, CancellationToken.None );
 
             // A new evaluation of the design-time pipeline should now give the new results.
-            Assert.True( factory.TryExecute( projectOptions, compilation5, CancellationToken.None, out var results6 ) );
+            Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation5, CancellationToken.None, out var results6 ) );
             var dumpedResults6 = DumpResults( results6! );
 
             Assert.Equal( expectedResult.Replace( "$AspectVersion$", "3" ).Replace( "$TargetVersion$", "2" ).Trim(), dumpedResults6 );
@@ -378,9 +361,9 @@ partial class C
 }
 ";
 
-            using TestProjectOptions projectOptions = new();
+            using var testContext = this.CreateTestContext();
 
-            using TestDesignTimeAspectPipelineFactory factory = new( new UnloadableCompileTimeDomain(), projectOptions );
+            using TestDesignTimeAspectPipelineFactory factory = new( testContext );
 
             void TestWithTargetCode( string targetCode )
             {
@@ -389,7 +372,7 @@ partial class C
                     assemblyName,
                     true );
 
-                Assert.True( factory.TryExecute( projectOptions, compilation1, CancellationToken.None, out var results ) );
+                Assert.True( factory.TryExecute( testContext.ProjectOptions, compilation1, CancellationToken.None, out var results ) );
 
                 var dumpedResults = DumpResults( results! );
 
@@ -410,10 +393,7 @@ partial class C
         {
             var context = this.CreateTestContext();
 
-            // Disposing the domain crashes the CLR in this test.
-            var domain = new UnloadableCompileTimeDomain();
-
-            using var pipelineFactory = new DesignTimeAspectPipelineFactory( context.ServiceProvider, domain, true );
+            using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( context );
 
             // The dependency cannot have a reference to Metalama.
             // It needs to define a system type that is considered as compile-time.
@@ -425,6 +405,100 @@ partial class C
                 additionalReferences: new[] { dependency.ToMetadataReference() } );
 
             Assert.True( pipelineFactory.TryExecute( context.ProjectOptions, compilation.RoslynCompilation, CancellationToken.None, out _ ) );
+        }
+
+        [Fact]
+        public void ChangeInDependency()
+        {
+            using var testContext = this.CreateTestContext();
+            var observer = new TestDesignTimePipelineObserver();
+
+            using TestDesignTimeAspectPipelineFactory factory = new( testContext, testContext.ServiceProvider.WithService( observer ) );
+
+            var dependentCode = new Dictionary<string, string>()
+            {
+                ["dependent.cs"] = @"
+using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
+using Metalama.Framework.Diagnostics;
+using Metalama.Framework.Eligibility;
+using System.Linq;
+using System;
+
+class MyAspect : MethodAspect
+{
+   private static readonly DiagnosticDefinition<string> _description = new(""MY001"", Severity.Warning, ""Fields='{0}'"" );
+   
+   public override void BuildAspect( IAspectBuilder<IMethod> aspectBuilder )
+   {
+        var allFields = string.Join( "","",  aspectBuilder.Target.DeclaringType.AllFields.Select( f => f.Name ) );
+        aspectBuilder.Diagnostics.Report( _description.WithArguments( allFields ) );
+   }
+}
+
+class C : BaseClass
+{
+   [MyAspect]
+   void M() {}
+}
+"
+            };
+
+            // First compilation.
+            var masterCode1 = new Dictionary<string, string>() { ["master.cs"] = @"public class BaseClass { public int Field1; }" };
+
+            var masterCompilation1 = CreateCSharpCompilation( masterCode1, name: "Master" );
+
+            var dependentCompilation1 = CreateCSharpCompilation(
+                dependentCode,
+                name: "Dependent",
+                additionalReferences: new[] { masterCompilation1.ToMetadataReference() } );
+
+            Assert.True( factory.TryExecute( testContext.ProjectOptions, dependentCompilation1, CancellationToken.None, out var results1 ) );
+
+            Assert.Equal( 2, observer.InitializePipelineEvents.Count );
+            Assert.Contains( "Master", observer.InitializePipelineEvents );
+            Assert.Contains( "Dependent", observer.InitializePipelineEvents );
+            observer.InitializePipelineEvents.Clear();
+
+            Assert.Contains( "Fields='Field1'", results1!.TransformationResult.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage() );
+
+            // Second compilation with a different master compilation.
+            var masterCode2 = new Dictionary<string, string>() { ["master.cs"] = @"public partial class BaseClass { public int Field2; }" };
+
+            var masterCompilation2 = CreateCSharpCompilation( masterCode2, name: "Master" );
+
+            var dependentCompilation2 = CreateCSharpCompilation(
+                dependentCode,
+                name: "Dependent",
+                additionalReferences: new[] { masterCompilation2.ToMetadataReference() } );
+
+            Assert.True( factory.TryExecute( testContext.ProjectOptions, dependentCompilation2, CancellationToken.None, out var results2 ) );
+
+            Assert.Empty( observer.InitializePipelineEvents );
+
+            Assert.Contains( "Fields='Field2'", results2!.TransformationResult.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage() );
+
+            // Third compilation. Add a syntax tree with a partial type.
+            var masterCode3 = new Dictionary<string, string>()
+            {
+                ["master.cs"] = @"public partial class BaseClass { public int Field2; }", ["partial.cs"] = "partial class BaseClass { public int Field3; }"
+            };
+
+            var masterCompilation3 = CreateCSharpCompilation( masterCode3, name: "Master" );
+
+            var dependentCompilation3 = CreateCSharpCompilation(
+                dependentCode,
+                name: "Dependent",
+                additionalReferences: new[] { masterCompilation3.ToMetadataReference() } );
+
+            observer.InitializePipelineEvents.Clear();
+
+            Assert.True( factory.TryExecute( testContext.ProjectOptions, dependentCompilation3, CancellationToken.None, out var results3 ) );
+
+            Assert.Empty( observer.InitializePipelineEvents );
+
+            Assert.Contains( "Fields='Field2,Field3'", results3!.TransformationResult.SyntaxTreeResults.Single().Value.Diagnostics.Single().GetMessage() );
         }
     }
 }

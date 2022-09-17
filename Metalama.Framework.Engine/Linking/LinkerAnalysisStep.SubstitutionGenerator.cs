@@ -141,10 +141,12 @@ namespace Metalama.Framework.Engine.Linking
 
                     case (VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax } } variableDeclarator, { AssociatedSymbol: IEventSymbol }):
                         Invariant.Assert( returnVariableIdentifier == null );
+
                         return new EventFieldSubstitution( variableDeclarator, symbol );
 
                     case (MethodDeclarationSyntax { Body: null, ExpressionBody: null } emptyVoidPartialMethod, _):
                         Invariant.Assert( returnVariableIdentifier == null );
+
                         return new EmptyVoidPartialMethodSubstitution( emptyVoidPartialMethod );
 
                     case (ParameterSyntax { Parent: ParameterListSyntax { Parent: RecordDeclarationSyntax } } recordParameter, _):

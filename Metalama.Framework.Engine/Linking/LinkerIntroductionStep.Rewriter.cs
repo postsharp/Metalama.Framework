@@ -135,21 +135,21 @@ namespace Metalama.Framework.Engine.Linking
                     var errorCodes = SeparatedList<ExpressionSyntax>( suppressionsOnThisElement.Distinct().OrderBy( e => e ).Select( IdentifierName ) );
 
                     var disable = Trivia(
-                        PragmaWarningDirectiveTrivia( Token( SyntaxKind.DisableKeyword ), true )
-                            .WithErrorCodes( errorCodes )
-                            .NormalizeWhitespace()
-                            .WithLeadingTrivia( ElasticLineFeed )
-                            .WithTrailingTrivia( ElasticLineFeed ) )
-                        .WithLinkerGeneratedFlags( LinkerGeneratedFlags.GeneratedSuppression );
-
-                    var restore =
-                        Trivia(
-                            PragmaWarningDirectiveTrivia( Token( SyntaxKind.RestoreKeyword ), true )
+                            PragmaWarningDirectiveTrivia( Token( SyntaxKind.DisableKeyword ), true )
                                 .WithErrorCodes( errorCodes )
                                 .NormalizeWhitespace()
                                 .WithLeadingTrivia( ElasticLineFeed )
                                 .WithTrailingTrivia( ElasticLineFeed ) )
                         .WithLinkerGeneratedFlags( LinkerGeneratedFlags.GeneratedSuppression );
+
+                    var restore =
+                        Trivia(
+                                PragmaWarningDirectiveTrivia( Token( SyntaxKind.RestoreKeyword ), true )
+                                    .WithErrorCodes( errorCodes )
+                                    .NormalizeWhitespace()
+                                    .WithLeadingTrivia( ElasticLineFeed )
+                                    .WithTrailingTrivia( ElasticLineFeed ) )
+                            .WithLinkerGeneratedFlags( LinkerGeneratedFlags.GeneratedSuppression );
 
                     transformedNode =
                         transformedNode

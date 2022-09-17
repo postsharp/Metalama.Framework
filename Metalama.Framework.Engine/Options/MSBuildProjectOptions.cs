@@ -2,10 +2,11 @@
 
 using Metalama.Compiler;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Caching;
 using Microsoft.CodeAnalysis.Diagnostics;
-using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace Metalama.Framework.Engine.Options
 {
@@ -18,34 +19,49 @@ namespace Metalama.Framework.Engine.Options
     // ReSharper disable once InconsistentNaming
     public partial class MSBuildProjectOptions : DefaultProjectOptions
     {
-        private readonly string _defaultProjectId = Guid.NewGuid().ToString();
+        private static readonly ConditionalWeakTable<AnalyzerConfigOptions, MSBuildProjectOptions> _cache = new();
+
         private readonly IProjectOptionsSource _source;
         private readonly TransformerOptions _transformerOptions;
 
-        public MSBuildProjectOptions( IProjectOptionsSource source, ImmutableArray<object>? plugIns, TransformerOptions? transformerOptions = null )
+        public static MSBuildProjectOptions GetInstance(
+            AnalyzerConfigOptionsProvider options,
+            ImmutableArray<object>? plugIns = null,
+            TransformerOptions? transformerOptions = null )
+            => GetInstance( options.GlobalOptions, plugIns, transformerOptions );
+
+        public static MSBuildProjectOptions GetInstance(
+            AnalyzerConfigOptions options,
+            ImmutableArray<object>? plugIns = null,
+            TransformerOptions? transformerOptions = null )
+        {
+            if ( plugIns != null || transformerOptions != null )
+            {
+                // We have a source transformer. Caching is useless.
+                return new MSBuildProjectOptions( options, plugIns, transformerOptions );
+            }
+            else
+            {
+                // At design time, we should try to cache.
+                return _cache.GetOrAdd( options, o => new MSBuildProjectOptions( o ) );
+            }
+        }
+
+        public static MSBuildProjectOptions GetInstance(
+            Microsoft.CodeAnalysis.Project project,
+            ImmutableArray<object>? plugIns = null,
+            TransformerOptions? transformerOptions = null )
+            => GetInstance( project.AnalyzerOptions.AnalyzerConfigOptionsProvider.GlobalOptions, plugIns, transformerOptions );
+
+        private MSBuildProjectOptions( IProjectOptionsSource source, ImmutableArray<object>? plugIns, TransformerOptions? transformerOptions = null )
         {
             this._source = source;
             this._transformerOptions = transformerOptions ?? TransformerOptions.Default;
             this.PlugIns = plugIns ?? ImmutableArray<object>.Empty;
         }
 
-        public MSBuildProjectOptions(
-            Microsoft.CodeAnalysis.Project project,
-            ImmutableArray<object>? plugIns = null,
-            TransformerOptions? transformerOptions = null ) :
-            this( new OptionsAdapter( project.AnalyzerOptions.AnalyzerConfigOptionsProvider ), plugIns, transformerOptions ) { }
-
-        public MSBuildProjectOptions(
-            AnalyzerConfigOptionsProvider options,
-            ImmutableArray<object>? plugIns = null,
-            TransformerOptions? transformerOptions = null ) :
+        private MSBuildProjectOptions( AnalyzerConfigOptions options, ImmutableArray<object>? plugIns = null, TransformerOptions? transformerOptions = null ) :
             this( new OptionsAdapter( options ), plugIns, transformerOptions ) { }
-
-        public MSBuildProjectOptions( AnalyzerConfigOptions options, ImmutableArray<object>? plugIns = null, TransformerOptions? transformerOptions = null ) :
-            this( new OptionsAdapter( options ), plugIns, transformerOptions ) { }
-
-        [Memo]
-        public override string ProjectId => this.GetStringOption( "MetalamaProjectId" ) ?? this._defaultProjectId;
 
         [Memo]
         public override string? BuildTouchFile => this.GetStringOption( "MetalamaBuildTouchFile" );

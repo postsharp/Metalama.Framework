@@ -17,8 +17,6 @@ public abstract class ProjectOptionsWrapper : IProjectOptions
         this.Wrapped = wrapped;
     }
 
-    public virtual string ProjectId => this.Wrapped.ProjectId;
-
     public virtual string? BuildTouchFile => this.Wrapped.BuildTouchFile;
 
     public virtual string? SourceGeneratorTouchFile => this.Wrapped.SourceGeneratorTouchFile;

@@ -15,11 +15,6 @@ namespace Metalama.Framework.Engine.Options
         {
             private readonly AnalyzerConfigOptions _options;
 
-            public OptionsAdapter( AnalyzerConfigOptionsProvider options )
-            {
-                this._options = options.GlobalOptions;
-            }
-
             public OptionsAdapter( AnalyzerConfigOptions options )
             {
                 this._options = options;

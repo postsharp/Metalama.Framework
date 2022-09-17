@@ -21,27 +21,46 @@ internal class VsUserProcessProjectHandler : ProjectHandler, IProjectHandlerCall
     private readonly ILogger _logger;
     private ImmutableDictionary<string, string>? _sources;
 
-    public VsUserProcessProjectHandler( IServiceProvider serviceProvider, IProjectOptions projectOptions ) : base( serviceProvider, projectOptions )
+    public VsUserProcessProjectHandler( IServiceProvider serviceProvider, IProjectOptions projectOptions, ProjectKey projectKey ) : base(
+        serviceProvider,
+        projectOptions,
+        projectKey )
     {
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
         this._userProcessEndpoint = serviceProvider.GetRequiredService<UserProcessServiceHubEndpoint>();
 
-        _ = this._userProcessEndpoint.RegisterProjectHandlerAsync( projectOptions.ProjectId, this );
+        this.Initialize();
     }
+
+#pragma warning disable VSTHRD100 // Avoid "async void" methods.
+    private async void Initialize()
+    {
+        // Since this method is not awaited, we have to handle exceptions here.
+
+        try
+        {
+            await this._userProcessEndpoint.RegisterProjectCallbackAsync( this.ProjectKey, this );
+        }
+        catch ( Exception e )
+        {
+            this._logger.Error?.Log( e.ToString() );
+        }
+    }
+#pragma warning restore VSTHRD100 // Avoid "async void" methods.
 
     public override SourceGeneratorResult GenerateSources( Compilation compilation, CancellationToken cancellationToken )
     {
         if ( this._sources == null )
         {
             // If we have not received the source yet, see if it was received by the client before we were created.
-            if ( this._userProcessEndpoint.TryGetUnhandledSources( this.ProjectOptions.ProjectId, out var sources ) )
+            if ( this._userProcessEndpoint.TryGetUnhandledSources( this.ProjectKey, out var sources ) )
             {
-                this._logger.Trace?.Log( $"Generated sources for '{this.ProjectOptions.ProjectId}' were retrieved from ServiceClient." );
+                this._logger.Trace?.Log( $"Generated sources for '{this.ProjectKey}' were retrieved from ServiceClient." );
                 this._sources = sources;
             }
             else
             {
-                this._logger.Warning?.Log( $"Information about generated sources for '{this.ProjectOptions.ProjectId}' is not available." );
+                this._logger.Warning?.Log( $"Information about generated sources for '{this.ProjectKey}' is not available." );
 
                 return SourceGeneratorResult.Empty;
             }
@@ -50,7 +69,10 @@ internal class VsUserProcessProjectHandler : ProjectHandler, IProjectHandlerCall
         return new TextSourceGeneratorResult( this._sources.AssertNotNull() );
     }
 
-    Task IProjectHandlerCallback.PublishGeneratedCodeAsync( string projectId, ImmutableDictionary<string, string> sources, CancellationToken cancellationToken )
+    Task IProjectHandlerCallback.PublishGeneratedCodeAsync(
+        ProjectKey projectKey,
+        ImmutableDictionary<string, string> sources,
+        CancellationToken cancellationToken )
     {
         this._sources = sources;
 

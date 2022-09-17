@@ -192,6 +192,7 @@ namespace Metalama.Framework.Engine.Linking
                     {
                         // References that are not marked as inlineable cannot be inlined.
                         inliner = null;
+
                         return false;
                     }
 

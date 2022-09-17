@@ -21,23 +21,23 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 {
     private static readonly IApplicationInfo _applicationInfo = new TestFrameworkApplicationInfo();
     private readonly ITempFileManager _backstageTempFileManager;
+    private readonly InMemoryConfigurationManager _configurationManager;
 
     public TestProjectOptions ProjectOptions { get; }
 
     public ServiceProvider ServiceProvider { get; }
 
-    public InMemoryConfigurationManager ConfigurationManager { get; }
-
-    public TestContext( TestProjectOptions? projectOptions = null, Func<ServiceProvider, ServiceProvider>? addServices = null )
+    public TestContext( TestProjectOptions projectOptions, Func<ServiceProvider, ServiceProvider>? addServices = null )
     {
         this._backstageTempFileManager = (ITempFileManager) BackstageServiceFactory.ServiceProvider.GetService( typeof(ITempFileManager) );
 
-        this.ProjectOptions = projectOptions ?? new TestProjectOptions();
-
         var backstageServiceProvider = new BackstageServiceProvider( this );
-        this.ConfigurationManager = new InMemoryConfigurationManager( backstageServiceProvider );
+        this._configurationManager = new InMemoryConfigurationManager( backstageServiceProvider );
+
+        this.ProjectOptions = projectOptions;
 
         this.ServiceProvider = ServiceProviderFactory.GetServiceProvider( backstageServiceProvider )
+            .WithService( new TestMarkerService() )
             .WithService( this.ProjectOptions )
             .WithProjectScopedServices( TestCompilationFactory.GetMetadataReferences() )
             .WithMark( ServiceProviderMark.Test );
@@ -151,7 +151,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
             }
             else if ( serviceType == typeof(IConfigurationManager) )
             {
-                return this._context.ConfigurationManager;
+                return this._context._configurationManager;
             }
             else
             {

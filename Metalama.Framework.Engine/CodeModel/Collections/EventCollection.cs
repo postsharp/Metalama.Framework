@@ -8,6 +8,6 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 {
     internal class EventCollection : MemberCollection<IEvent>, IEventCollection
     {
-        public EventCollection( INamedType declaringType, EventUpdatableCollection sourceItems ) : base( declaringType, sourceItems ) { }
+        public EventCollection( NamedType declaringType, EventUpdatableCollection sourceItems ) : base( declaringType, sourceItems ) { }
     }
 }

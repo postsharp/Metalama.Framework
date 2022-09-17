@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine;
 using Microsoft.CodeAnalysis;
+using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.Pipeline.Diff
 {
@@ -16,11 +17,6 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         public SyntaxTreeChangeKind SyntaxTreeChangeKind { get; }
 
         /// <summary>
-        /// Gets a value indicating whether the new syntax tree contain compile-time code.
-        /// </summary>
-        public bool HasCompileTimeCode { get; }
-
-        /// <summary>
         /// Gets a value indicating how the <see cref="HasCompileTimeCode"/> value has changed between the old
         /// and the new syntax tree.
         /// </summary>
@@ -31,46 +27,97 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         /// </summary>
         public string FilePath { get; }
 
+        // ReSharper disable once MemberCanBePrivate.Global
+        public readonly SyntaxTreeVersion OldSyntaxTreeVersion;
+
+        // ReSharper disable once MemberCanBePrivate.Global
+        public readonly SyntaxTreeVersion NewSyntaxTreeVersion;
+
+        /// <summary>
+        /// Gets the list of partial types that have been added between the old version and the new version.
+        /// </summary>
+        public ImmutableArray<PartialTypeChange> PartialTypeChanges { get; }
+
         /// <summary>
         /// Gets the new syntax tree, unless the current item represents a deleted tree.
         /// </summary>
-        public SyntaxTree? NewTree { get; }
+        public SyntaxTree NewTree => this.NewSyntaxTreeVersion.SyntaxTree;
 
-        public ulong OldHash { get; }
+        public ulong OldHash => this.OldSyntaxTreeVersion.DeclarationHash;
 
-        public ulong NewHash { get; }
+        public ulong NewHash => this.NewSyntaxTreeVersion.DeclarationHash;
+
+        /// <summary>
+        /// Gets a value indicating whether the new syntax tree contain compile-time code.
+        /// </summary>
+        public bool HasCompileTimeCode => this.NewSyntaxTreeVersion.HasCompileTimeCode;
+
+        public static SyntaxTreeChange NonIncremental( in SyntaxTreeVersion syntaxTreeVersion )
+            => new(
+                syntaxTreeVersion.SyntaxTree.FilePath,
+                SyntaxTreeChangeKind.Added,
+                syntaxTreeVersion.HasCompileTimeCode ? CompileTimeChangeKind.NewlyCompileTime : CompileTimeChangeKind.None,
+                default,
+                syntaxTreeVersion );
 
         public SyntaxTreeChange(
             string filePath,
             SyntaxTreeChangeKind syntaxTreeChangeKind,
-            bool hasCompileTimeCode,
             CompileTimeChangeKind compileTimeChangeKind,
-            SyntaxTree? newTree,
-            ulong oldHash,
-            ulong newHash )
+            in SyntaxTreeVersion oldSyntaxTreeVersion,
+            in SyntaxTreeVersion newSyntaxTreeVersion )
         {
             this.SyntaxTreeChangeKind = syntaxTreeChangeKind;
-            this.HasCompileTimeCode = hasCompileTimeCode;
             this.CompileTimeChangeKind = compileTimeChangeKind;
             this.FilePath = filePath;
-            this.NewTree = newTree;
-            this.OldHash = oldHash;
-            this.NewHash = newHash;
+            this.NewSyntaxTreeVersion = newSyntaxTreeVersion;
+            this.OldSyntaxTreeVersion = oldSyntaxTreeVersion;
+
+            // Detecting changes in partial types.
+            this.PartialTypeChanges = ImmutableArray<PartialTypeChange>.Empty;
+
+            switch ( syntaxTreeChangeKind )
+            {
+                case SyntaxTreeChangeKind.Changed when newSyntaxTreeVersion.PartialTypesHash != oldSyntaxTreeVersion.PartialTypesHash:
+                    foreach ( var partialType in newSyntaxTreeVersion.PartialTypes )
+                    {
+                        if ( !oldSyntaxTreeVersion.PartialTypes.Contains( partialType ) )
+                        {
+                            this.PartialTypeChanges = this.PartialTypeChanges.Add( new PartialTypeChange( partialType, PartialTypeChangeKind.Added ) );
+                        }
+                    }
+
+                    foreach ( var partialType in oldSyntaxTreeVersion.PartialTypes )
+                    {
+                        if ( !newSyntaxTreeVersion.PartialTypes.Contains( partialType ) )
+                        {
+                            this.PartialTypeChanges = this.PartialTypeChanges.Add( new PartialTypeChange( partialType, PartialTypeChangeKind.Removed ) );
+                        }
+                    }
+
+                    break;
+
+                case SyntaxTreeChangeKind.Added:
+                    this.PartialTypeChanges = newSyntaxTreeVersion.PartialTypes.Select( t => new PartialTypeChange( t, PartialTypeChangeKind.Added ) )
+                        .ToImmutableArray();
+
+                    break;
+            }
         }
 
         public override string ToString() => $"{this.FilePath}, ChangeKind={this.SyntaxTreeChangeKind}, CompileTimeChangeKind={this.CompileTimeChangeKind}";
 
-        public SyntaxTreeChange Merge( SyntaxTreeChange newChange )
+        public SyntaxTreeChange Merge( in SyntaxTreeChange newChange )
         {
             var newSyntaxTreeChangeKind = (this.SyntaxTreeChangeKind, newChange.SyntaxTreeChangeKind) switch
             {
                 (SyntaxTreeChangeKind.Added, SyntaxTreeChangeKind.Changed) => SyntaxTreeChangeKind.Added,
-                (SyntaxTreeChangeKind.Added, SyntaxTreeChangeKind.Deleted) => SyntaxTreeChangeKind.None,
+                (SyntaxTreeChangeKind.Added, SyntaxTreeChangeKind.Removed) => SyntaxTreeChangeKind.None,
                 (SyntaxTreeChangeKind.Added, SyntaxTreeChangeKind.Added) => throw new AssertionFailedException(),
-                (_, SyntaxTreeChangeKind.Deleted) => SyntaxTreeChangeKind.Deleted,
-                (SyntaxTreeChangeKind.Deleted, SyntaxTreeChangeKind.Added) when newChange.NewHash != this.OldHash => SyntaxTreeChangeKind.Changed,
-                (SyntaxTreeChangeKind.Deleted, SyntaxTreeChangeKind.Added) when newChange.NewHash == this.OldHash => SyntaxTreeChangeKind.None,
-                (SyntaxTreeChangeKind.Deleted, _) => throw new AssertionFailedException(),
+                (_, SyntaxTreeChangeKind.Removed) => SyntaxTreeChangeKind.Removed,
+                (SyntaxTreeChangeKind.Removed, SyntaxTreeChangeKind.Added) when newChange.NewHash != this.OldHash => SyntaxTreeChangeKind.Changed,
+                (SyntaxTreeChangeKind.Removed, SyntaxTreeChangeKind.Added) when newChange.NewHash == this.OldHash => SyntaxTreeChangeKind.None,
+                (SyntaxTreeChangeKind.Removed, _) => throw new AssertionFailedException(),
                 (SyntaxTreeChangeKind.Changed, SyntaxTreeChangeKind.Changed) => SyntaxTreeChangeKind.Changed,
                 _ => throw new AssertionFailedException()
             };
@@ -89,11 +136,9 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
             return new SyntaxTreeChange(
                 this.FilePath,
                 newSyntaxTreeChangeKind,
-                newChange.HasCompileTimeCode,
                 newCompileTimeChangeKind,
-                newChange.NewTree,
-                this.OldHash,
-                newChange.NewHash );
+                this.OldSyntaxTreeVersion,
+                newChange.NewSyntaxTreeVersion );
         }
     }
 }

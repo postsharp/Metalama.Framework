@@ -33,6 +33,6 @@ namespace Metalama.Framework.Engine.Linking
         /// <summary>
         /// Generated suppresion, which should be removed when inlined.
         /// </summary>
-        GeneratedSuppression = 16,
+        GeneratedSuppression = 16
     }
 }

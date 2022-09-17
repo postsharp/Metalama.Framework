@@ -33,13 +33,13 @@ namespace Metalama.Framework.Engine.Linking
                 this._rewritingDriver = rewritingDriver;
             }
 
-            public override SyntaxNode? VisitStructDeclaration( StructDeclarationSyntax node ) 
+            public override SyntaxNode? VisitStructDeclaration( StructDeclarationSyntax node )
                 => node.WithMembers( List( this.GetMembersForTypeDeclaration( node ) ) );
 
-            public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node ) 
+            public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
                 => node.WithMembers( List( this.GetMembersForTypeDeclaration( node ) ) );
 
-            public override SyntaxNode? VisitInterfaceDeclaration( InterfaceDeclarationSyntax node ) 
+            public override SyntaxNode? VisitInterfaceDeclaration( InterfaceDeclarationSyntax node )
                 => node.WithMembers( List( this.GetMembersForTypeDeclaration( node ) ) );
 
             public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node )

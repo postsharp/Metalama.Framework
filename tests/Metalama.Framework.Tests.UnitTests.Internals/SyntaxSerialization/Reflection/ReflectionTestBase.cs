@@ -8,12 +8,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
 {
     public class ReflectionTestBase : SerializerTestsBase
     {
-        public ITestOutputHelper Logger { get; }
-
-        public ReflectionTestBase( ITestOutputHelper helper )
-        {
-            this.Logger = helper;
-        }
+        public ReflectionTestBase( ITestOutputHelper helper ) : base( helper ) { }
 
         /// <summary>
         /// As <see cref="Assert.Equal{T}(T,T)"/>, except that if they are not equal, it prints the actual string on XUnit output, in verbatim string form,

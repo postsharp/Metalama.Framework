@@ -140,7 +140,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 if ( anyRewrittenStatement )
                 {
-                    return node.Update( this.VisitToken(node.OpenBraceToken), List( finalStatements ), this.VisitToken( node.CloseBraceToken) );
+                    return node.Update( this.VisitToken( node.OpenBraceToken ), List( finalStatements ), this.VisitToken( node.CloseBraceToken ) );
                 }
                 else
                 {
@@ -234,13 +234,13 @@ namespace Metalama.Framework.Engine.Linking
 
                 return token;
 
-                static bool TryFilterTriviaList(SyntaxTriviaList triviaList, out SyntaxTriviaList filteredTriviaList)
+                static bool TryFilterTriviaList( SyntaxTriviaList triviaList, out SyntaxTriviaList filteredTriviaList )
                 {
                     var anyChange = false;
 
-                    foreach (var trivia in triviaList )
+                    foreach ( var trivia in triviaList )
                     {
-                        if ( trivia.GetLinkerGeneratedFlags().HasFlagFast( LinkerGeneratedFlags.GeneratedSuppression) )
+                        if ( trivia.GetLinkerGeneratedFlags().HasFlagFast( LinkerGeneratedFlags.GeneratedSuppression ) )
                         {
                             anyChange = true;
                         }
@@ -263,6 +263,7 @@ namespace Metalama.Framework.Engine.Linking
                     else
                     {
                         filteredTriviaList = triviaList;
+
                         return false;
                     }
                 }

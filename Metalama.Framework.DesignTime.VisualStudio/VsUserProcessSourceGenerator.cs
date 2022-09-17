@@ -9,8 +9,8 @@ namespace Metalama.Framework.DesignTime.VisualStudio;
 
 public class VsUserProcessSourceGenerator : BaseSourceGenerator
 {
-    protected override ProjectHandler CreateSourceGeneratorImpl( IProjectOptions projectOptions )
-        => new VsUserProcessProjectHandler( this.ServiceProvider, projectOptions );
+    protected override ProjectHandler CreateSourceGeneratorImpl( IProjectOptions projectOptions, ProjectKey projectKey )
+        => new VsUserProcessProjectHandler( this.ServiceProvider, projectOptions, projectKey );
 
     protected override void OnGeneratedSourceRequested( Compilation compilation, MSBuildProjectOptions options, CancellationToken cancellationToken )
     {

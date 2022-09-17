@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections;
 
 internal class AllMethodsCollection : AllMembersCollection<IMethod>, IMethodCollection
 {
-    public AllMethodsCollection( INamedType declaringType ) : base( declaringType ) { }
+    public AllMethodsCollection( NamedType declaringType ) : base( declaringType ) { }
 
     protected override IMemberCollection<IMethod> GetMembers( INamedType namedType ) => namedType.Methods;
 

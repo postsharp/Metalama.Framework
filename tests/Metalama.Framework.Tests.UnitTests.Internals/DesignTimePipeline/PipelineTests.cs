@@ -1,12 +1,11 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.DesignTime.Pipeline;
-using Metalama.TestFramework;
+using Metalama.Framework.Tests.UnitTests.DesignTime;
 using System.Collections.Generic;
 using System.Threading;
 using Xunit;
 
-namespace Metalama.Framework.Tests.UnitTests.DesignTime
+namespace Metalama.Framework.Tests.UnitTests.DesignTimePipeline
 {
     public class PipelineTests : TestBase
     {
@@ -19,8 +18,8 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             var compilation = CreateCSharpCompilation( code );
 
-            using var domain = new UnloadableCompileTimeDomain();
-            using DesignTimeAspectPipeline pipeline = new( testContext.ServiceProvider, domain, compilation.References, true );
+            using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
+            var pipeline = pipelineFactory.CreatePipeline( compilation );
             Assert.True( pipeline.TryExecute( compilation, CancellationToken.None, out _ ) );
         }
 
@@ -41,8 +40,8 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
 
             var compilation = CreateCSharpCompilation( code );
 
-            using var domain = new UnloadableCompileTimeDomain();
-            using DesignTimeAspectPipeline pipeline = new( testContext.ServiceProvider, domain, compilation.References, true );
+            using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext );
+            var pipeline = pipelineFactory.CreatePipeline( compilation );
             Assert.True( pipeline.TryExecute( compilation, CancellationToken.None, out _ ) );
         }
     }

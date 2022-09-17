@@ -4,7 +4,7 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal static class LinkerGeneratedFlagsExtensions
     {
-        public static bool HasFlagFast(this LinkerGeneratedFlags value, LinkerGeneratedFlags flags)
+        public static bool HasFlagFast( this LinkerGeneratedFlags value, LinkerGeneratedFlags flags )
         {
             return (value & flags) == flags;
         }

@@ -12,7 +12,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
         [Obfuscation( Exclude = true )]
         public INamedType DeclaringType { get; }
 
-        protected MemberCollection( INamedType declaringType, UpdatableMemberCollection<TMember> sourceItems ) : base(
+        protected MemberCollection( NamedType declaringType, UpdatableMemberCollection<TMember> sourceItems ) : base(
             declaringType,
             sourceItems )
         {

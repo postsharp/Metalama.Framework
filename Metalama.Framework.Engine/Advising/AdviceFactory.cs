@@ -9,6 +9,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -31,12 +32,11 @@ namespace Metalama.Framework.Engine.Advising
         private readonly CompilationModel _compilation;
         private readonly IDeclaration _aspectTarget;
         private readonly INamedType? _aspectTargetType;
-
-        public AdviceFactoryState State { get; }
+        private readonly AdviceFactoryState _state;
 
         public AdviceFactory( AdviceFactoryState state, TemplateClassInstance? templateInstance, string? layerName )
         {
-            this.State = state;
+            this._state = state;
             this._templateInstance = templateInstance;
             this._layerName = layerName;
 
@@ -44,16 +44,18 @@ namespace Metalama.Framework.Engine.Advising
             // In the future, AdviceFactory could work on a compilation snapshot, however we have no use case for this feature yet.
             this._compilation = state.InitialCompilation;
             this._aspectTarget = state.AspectInstance.TargetDeclaration.GetTarget( this.MutableCompilation );
-            this._aspectTargetType = this._aspectTarget.GetDeclaringType();
+            this._aspectTargetType = this._aspectTarget.GetClosestNamedType();
         }
 
+        private DisposeAction WithNonUserCode() => this._state.ExecutionContext.WithoutDependencyCollection();
+
         public AdviceFactory WithTemplateClassInstance( TemplateClassInstance templateClassInstance )
-            => new( this.State, templateClassInstance, this._layerName );
+            => new( this._state, templateClassInstance, this._layerName );
 
         public IAdviceFactory WithTemplateProvider( ITemplateProvider templateProvider )
         {
             return this.WithTemplateClassInstance(
-                new TemplateClassInstance( templateProvider, this.State.PipelineConfiguration.OtherTemplateClasses[templateProvider.GetType().FullName] ) );
+                new TemplateClassInstance( templateProvider, this._state.PipelineConfiguration.OtherTemplateClasses[templateProvider.GetType().FullName] ) );
         }
 
         private TemplateMemberRef ValidateRequiredTemplateName( string? templateName, TemplateKind templateKind )
@@ -221,30 +223,30 @@ namespace Metalama.Framework.Engine.Advising
             // Initialize the advice. It should report errors for any situation that does not depend on the target declaration.
             // These errors are reported as exceptions.
             var initializationDiagnostics = new DiagnosticList();
-            advice.Initialize( this.State.ServiceProvider, initializationDiagnostics );
+            advice.Initialize( this._state.ServiceProvider, initializationDiagnostics );
 
             ThrowOnErrors( initializationDiagnostics );
-            this.State.Diagnostics.Report( initializationDiagnostics );
+            this._state.Diagnostics.Report( initializationDiagnostics );
 
             // Implement the advice. This should report errors for any situation that does depend on the target declaration.
             // These errors are reported as diagnostics.
             var result = advice.Implement(
-                this.State.ServiceProvider,
-                this.State.CurrentCompilation,
+                this._state.ServiceProvider,
+                this._state.CurrentCompilation,
                 t =>
                 {
-                    t.OrderWithinAspectInstance = this.State.GetTransformationOrder();
+                    t.OrderWithinAspectInstance = this._state.GetTransformationOrder();
                     transformations.Add( t );
                 } );
 
-            this.State.Diagnostics.Report( result.Diagnostics );
+            this._state.Diagnostics.Report( result.Diagnostics );
 
-            this.State.IntrospectionListener?.AddAdviceResult( this.State.AspectInstance, advice, result, this.State.CurrentCompilation );
+            this._state.IntrospectionListener?.AddAdviceResult( this._state.AspectInstance, advice, result, this._state.CurrentCompilation );
 
             switch ( result.Outcome )
             {
                 case AdviceOutcome.Error:
-                    this.State.SkipAspect();
+                    this._state.SkipAspect();
 
                     break;
 
@@ -252,9 +254,9 @@ namespace Metalama.Framework.Engine.Advising
                     break;
 
                 default:
-                    this.State.AddTransformations( transformations );
+                    this._state.AddTransformations( transformations );
 
-                    if ( this.State.IntrospectionListener != null )
+                    if ( this._state.IntrospectionListener != null )
                     {
                         result.Transformations = transformations.ToImmutableArray();
                     }
@@ -262,7 +264,7 @@ namespace Metalama.Framework.Engine.Advising
                     break;
             }
 
-            return new AdviceResult<T>( result.NewDeclaration.As<T>(), this._compilation, result.Outcome, this.State.AspectBuilder.AssertNotNull() );
+            return new AdviceResult<T>( result.NewDeclaration.As<T>(), this._compilation, result.Outcome, this._state.AspectBuilder.AssertNotNull() );
         }
 
         private void ValidateTarget( IDeclaration target, params IDeclaration[] otherTargets )
@@ -323,7 +325,7 @@ namespace Metalama.Framework.Engine.Advising
             return selectedTemplate;
         }
 
-        public ICompilation MutableCompilation => this.State.CurrentCompilation;
+        public ICompilation MutableCompilation => this._state.CurrentCompilation;
 
         public IOverrideAdviceResult<IMethod> Override(
             IMethod targetMethod,
@@ -331,34 +333,37 @@ namespace Metalama.Framework.Engine.Advising
             object? args = null,
             object? tags = null )
         {
-            if ( this._templateInstance == null )
+            using ( this.WithNonUserCode() )
             {
-                throw new InvalidOperationException();
+                if ( this._templateInstance == null )
+                {
+                    throw new InvalidOperationException();
+                }
+
+                if ( targetMethod.IsAbstract )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format( $"Cannot add an OverrideMethod advice to '{targetMethod}' because it is an abstract." ) );
+                }
+
+                this.ValidateTarget( targetMethod );
+
+                var template = this.SelectMethodTemplate( targetMethod, templateSelector )
+                    .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
+                    .ForOverride( targetMethod, ObjectReader.GetReader( args ) )
+                    .AssertNotNull();
+
+                var advice = new OverrideMethodAdvice(
+                    this._state.AspectInstance,
+                    this._templateInstance,
+                    targetMethod,
+                    this._compilation,
+                    template,
+                    this._layerName,
+                    ObjectReader.GetReader( tags ) );
+
+                return this.ExecuteAdvice<IMethod>( advice );
             }
-
-            if ( targetMethod.IsAbstract )
-            {
-                throw new InvalidOperationException(
-                    UserMessageFormatter.Format( $"Cannot add an OverrideMethod advice to '{targetMethod}' because it is an abstract." ) );
-            }
-
-            this.ValidateTarget( targetMethod );
-
-            var template = this.SelectMethodTemplate( targetMethod, templateSelector )
-                .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider )
-                .ForOverride( targetMethod, ObjectReader.GetReader( args ) )
-                .AssertNotNull();
-
-            var advice = new OverrideMethodAdvice(
-                this.State.AspectInstance,
-                this._templateInstance,
-                targetMethod,
-                this._compilation,
-                template,
-                this._layerName,
-                ObjectReader.GetReader( tags ) );
-
-            return this.ExecuteAdvice<IMethod>( advice );
         }
 
         public IIntroductionAdviceResult<IMethod> IntroduceMethod(
@@ -375,31 +380,34 @@ namespace Metalama.Framework.Engine.Advising
                 throw new InvalidOperationException();
             }
 
-            if ( targetType.TypeKind == TypeKind.Interface )
+            using ( this.WithNonUserCode() )
             {
-                throw new InvalidOperationException(
-                    UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
+                if ( targetType.TypeKind == TypeKind.Interface )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
+                }
+
+                this.ValidateTarget( targetType );
+
+                var template = this.ValidateTemplateName( defaultTemplate, TemplateKind.Default, true )
+                    !.Value
+                    .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+
+                var advice = new IntroduceMethodAdvice(
+                    this._state.AspectInstance,
+                    this._templateInstance,
+                    targetType,
+                    this._compilation,
+                    template.ForIntroduction( ObjectReader.GetReader( args ) ),
+                    scope,
+                    whenExists,
+                    buildMethod,
+                    this._layerName,
+                    ObjectReader.GetReader( tags ) );
+
+                return this.ExecuteAdvice<IMethod>( advice );
             }
-
-            this.ValidateTarget( targetType );
-
-            var template = this.ValidateTemplateName( defaultTemplate, TemplateKind.Default, true )
-                !.Value
-                .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
-
-            var advice = new IntroduceMethodAdvice(
-                this.State.AspectInstance,
-                this._templateInstance,
-                targetType,
-                this._compilation,
-                template.ForIntroduction( ObjectReader.GetReader( args ) ),
-                scope,
-                whenExists,
-                buildMethod,
-                this._layerName,
-                ObjectReader.GetReader( tags ) );
-
-            return this.ExecuteAdvice<IMethod>( advice );
         }
 
         public IIntroductionAdviceResult<IMethod> IntroduceFinalizer(
@@ -420,22 +428,25 @@ namespace Metalama.Framework.Engine.Advising
                     UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
             }
 
-            this.ValidateTarget( targetType );
+            using ( this.WithNonUserCode() )
+            {
+                this.ValidateTarget( targetType );
 
-            var template = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
-                .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
+                var template = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
+                    .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
 
-            var advice = new IntroduceFinalizerAdvice(
-                this.State.AspectInstance,
-                this._templateInstance,
-                targetType,
-                this._compilation,
-                template.ForIntroduction( ObjectReader.GetReader( args ) ),
-                whenExists,
-                this._layerName,
-                ObjectReader.GetReader( tags ) );
+                var advice = new IntroduceFinalizerAdvice(
+                    this._state.AspectInstance,
+                    this._templateInstance,
+                    targetType,
+                    this._compilation,
+                    template.ForIntroduction( ObjectReader.GetReader( args ) ),
+                    whenExists,
+                    this._layerName,
+                    ObjectReader.GetReader( tags ) );
 
-            return this.ExecuteAdvice<IMethod>( advice );
+                return this.ExecuteAdvice<IMethod>( advice );
+            }
         }
 
         public IIntroductionAdviceResult<IMethod> IntroduceUnaryOperator(
@@ -449,38 +460,41 @@ namespace Metalama.Framework.Engine.Advising
             object? args = null,
             object? tags = null )
         {
-            if ( this._templateInstance == null )
+            using ( this.WithNonUserCode() )
             {
-                throw new InvalidOperationException();
+                if ( this._templateInstance == null )
+                {
+                    throw new InvalidOperationException();
+                }
+
+                if ( kind.GetCategory() != OperatorCategory.Unary )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format( $"Cannot add an IntroduceUnaryOperator advice with {kind} as it is not an unary operator." ) );
+                }
+
+                this.ValidateTarget( targetType );
+
+                var template = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
+                    .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+
+                var advice = new IntroduceOperatorAdvice(
+                    this._state.AspectInstance,
+                    this._templateInstance,
+                    targetType,
+                    this._compilation,
+                    kind,
+                    inputType,
+                    null,
+                    resultType,
+                    template.ForOperatorIntroduction( kind, ObjectReader.GetReader( args ) ),
+                    whenExists,
+                    buildAction,
+                    this._layerName,
+                    ObjectReader.GetReader( tags ) );
+
+                return this.ExecuteAdvice<IMethod>( advice );
             }
-
-            if ( kind.GetCategory() != OperatorCategory.Unary )
-            {
-                throw new InvalidOperationException(
-                    UserMessageFormatter.Format( $"Cannot add an IntroduceUnaryOperator advice with {kind} as it is not an unary operator." ) );
-            }
-
-            this.ValidateTarget( targetType );
-
-            var template = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
-                .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
-
-            var advice = new IntroduceOperatorAdvice(
-                this.State.AspectInstance,
-                this._templateInstance,
-                targetType,
-                this._compilation,
-                kind,
-                inputType,
-                null,
-                resultType,
-                template.ForOperatorIntroduction( kind, ObjectReader.GetReader( args ) ),
-                whenExists,
-                buildAction,
-                this._layerName,
-                ObjectReader.GetReader( tags ) );
-
-            return this.ExecuteAdvice<IMethod>( advice );
         }
 
         public IIntroductionAdviceResult<IMethod> IntroduceBinaryOperator(
@@ -495,38 +509,41 @@ namespace Metalama.Framework.Engine.Advising
             object? args = null,
             object? tags = null )
         {
-            if ( this._templateInstance == null )
+            using ( this.WithNonUserCode() )
             {
-                throw new InvalidOperationException();
+                if ( this._templateInstance == null )
+                {
+                    throw new InvalidOperationException();
+                }
+
+                if ( kind.GetCategory() != OperatorCategory.Binary )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format( $"Cannot add an IntroduceBinaryOperator advice with {kind} as it is not a binary operator." ) );
+                }
+
+                this.ValidateTarget( targetType );
+
+                var template = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
+                    .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+
+                var advice = new IntroduceOperatorAdvice(
+                    this._state.AspectInstance,
+                    this._templateInstance,
+                    targetType,
+                    this._compilation,
+                    kind,
+                    leftType,
+                    rightType,
+                    resultType,
+                    template.ForOperatorIntroduction( kind, ObjectReader.GetReader( args ) ),
+                    whenExists,
+                    buildAction,
+                    this._layerName,
+                    ObjectReader.GetReader( tags ) );
+
+                return this.ExecuteAdvice<IMethod>( advice );
             }
-
-            if ( kind.GetCategory() != OperatorCategory.Binary )
-            {
-                throw new InvalidOperationException(
-                    UserMessageFormatter.Format( $"Cannot add an IntroduceBinaryOperator advice with {kind} as it is not a binary operator." ) );
-            }
-
-            this.ValidateTarget( targetType );
-
-            var template = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
-                .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
-
-            var advice = new IntroduceOperatorAdvice(
-                this.State.AspectInstance,
-                this._templateInstance,
-                targetType,
-                this._compilation,
-                kind,
-                leftType,
-                rightType,
-                resultType,
-                template.ForOperatorIntroduction( kind, ObjectReader.GetReader( args ) ),
-                whenExists,
-                buildAction,
-                this._layerName,
-                ObjectReader.GetReader( tags ) );
-
-            return this.ExecuteAdvice<IMethod>( advice );
         }
 
         public IIntroductionAdviceResult<IMethod> IntroduceConversionOperator(
@@ -540,34 +557,37 @@ namespace Metalama.Framework.Engine.Advising
             object? args = null,
             object? tags = null )
         {
-            if ( this._templateInstance == null )
+            using ( this.WithNonUserCode() )
             {
-                throw new InvalidOperationException();
+                if ( this._templateInstance == null )
+                {
+                    throw new InvalidOperationException();
+                }
+
+                this.ValidateTarget( targetType );
+
+                var template = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
+                    .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+
+                var operatorKind = isImplicit ? OperatorKind.ImplicitConversion : OperatorKind.ExplicitConversion;
+
+                var advice = new IntroduceOperatorAdvice(
+                    this._state.AspectInstance,
+                    this._templateInstance,
+                    targetType,
+                    this._compilation,
+                    operatorKind,
+                    fromType,
+                    null,
+                    toType,
+                    template.ForOperatorIntroduction( operatorKind, ObjectReader.GetReader( args ) ),
+                    whenExists,
+                    buildAction,
+                    this._layerName,
+                    ObjectReader.GetReader( tags ) );
+
+                return this.ExecuteAdvice<IMethod>( advice );
             }
-
-            this.ValidateTarget( targetType );
-
-            var template = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
-                .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
-
-            var operatorKind = isImplicit ? OperatorKind.ImplicitConversion : OperatorKind.ExplicitConversion;
-
-            var advice = new IntroduceOperatorAdvice(
-                this.State.AspectInstance,
-                this._templateInstance,
-                targetType,
-                this._compilation,
-                operatorKind,
-                fromType,
-                null,
-                toType,
-                template.ForOperatorIntroduction( operatorKind, ObjectReader.GetReader( args ) ),
-                whenExists,
-                buildAction,
-                this._layerName,
-                ObjectReader.GetReader( tags ) );
-
-            return this.ExecuteAdvice<IMethod>( advice );
         }
 
         public IOverrideAdviceResult<IProperty> Override(
@@ -575,39 +595,43 @@ namespace Metalama.Framework.Engine.Advising
             string defaultTemplate,
             object? tags = null )
         {
-            if ( this._templateInstance == null )
+            using ( this.WithNonUserCode() )
             {
-                throw new InvalidOperationException();
+                if ( this._templateInstance == null )
+                {
+                    throw new InvalidOperationException();
+                }
+
+                if ( targetFieldOrProperty.IsAbstract )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format(
+                            $"Cannot add an OverrideFieldOrProperty advice to '{targetFieldOrProperty}' because it is an abstract." ) );
+                }
+
+                this.ValidateTarget( targetFieldOrProperty );
+
+                // Set template represents both set and init accessors.
+                var propertyTemplate = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
+                    .GetTemplateMember<IProperty>( this._compilation, this._state.ServiceProvider );
+
+                var accessorTemplates = propertyTemplate.GetAccessorTemplates();
+                var getTemplate = accessorTemplates.Get?.ForIntroduction();
+                var setTemplate = accessorTemplates.Set?.ForIntroduction();
+
+                var advice = new OverrideFieldOrPropertyAdvice(
+                    this._state.AspectInstance,
+                    this._templateInstance,
+                    targetFieldOrProperty,
+                    this._compilation,
+                    propertyTemplate,
+                    getTemplate,
+                    setTemplate,
+                    this._layerName,
+                    ObjectReader.GetReader( tags ) );
+
+                return this.ExecuteAdvice<IProperty>( advice );
             }
-
-            if ( targetFieldOrProperty.IsAbstract )
-            {
-                throw new InvalidOperationException(
-                    UserMessageFormatter.Format( $"Cannot add an OverrideFieldOrProperty advice to '{targetFieldOrProperty}' because it is an abstract." ) );
-            }
-
-            this.ValidateTarget( targetFieldOrProperty );
-
-            // Set template represents both set and init accessors.
-            var propertyTemplate = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
-                .GetTemplateMember<IProperty>( this._compilation, this.State.ServiceProvider );
-
-            var accessorTemplates = propertyTemplate.GetAccessorTemplates();
-            var getTemplate = accessorTemplates.Get?.ForIntroduction();
-            var setTemplate = accessorTemplates.Set?.ForIntroduction();
-
-            var advice = new OverrideFieldOrPropertyAdvice(
-                this.State.AspectInstance,
-                this._templateInstance,
-                targetFieldOrProperty,
-                this._compilation,
-                propertyTemplate,
-                getTemplate,
-                setTemplate,
-                this._layerName,
-                ObjectReader.GetReader( tags ) );
-
-            return this.ExecuteAdvice<IProperty>( advice );
         }
 
         public IOverrideAdviceResult<IProperty> OverrideAccessors(
@@ -617,50 +641,53 @@ namespace Metalama.Framework.Engine.Advising
             object? args = null,
             object? tags = null )
         {
-            if ( this._templateInstance == null )
+            using ( this.WithNonUserCode() )
             {
-                throw new InvalidOperationException();
+                if ( this._templateInstance == null )
+                {
+                    throw new InvalidOperationException();
+                }
+
+                if ( targetFieldOrProperty.IsAbstract )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format(
+                            $"Cannot add an OverrideFieldOrPropertyAccessors advice to '{targetFieldOrProperty}' because it is an abstract." ) );
+                }
+
+                this.ValidateTarget( targetFieldOrProperty );
+
+                // Set template represents both set and init accessors.
+                var getTemplateRef = targetFieldOrProperty.GetMethod != null
+                    ? this.SelectGetterTemplate( targetFieldOrProperty, getTemplateSelector, setTemplate == null )
+                        ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
+                        .ForOverride( targetFieldOrProperty.GetMethod, ObjectReader.GetReader( args ) )
+                    : null;
+
+                var setTemplateRef = targetFieldOrProperty.SetMethod != null
+                    ? this.ValidateTemplateName( setTemplate, TemplateKind.Default, getTemplateSelector.IsNull )
+                        ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider )
+                        .ForOverride( targetFieldOrProperty.SetMethod, ObjectReader.GetReader( args ) )
+                    : null;
+
+                if ( getTemplateRef == null && setTemplateRef == null )
+                {
+                    throw new InvalidOperationException( "There is no accessor to override." );
+                }
+
+                var advice = new OverrideFieldOrPropertyAdvice(
+                    this._state.AspectInstance,
+                    this._templateInstance,
+                    targetFieldOrProperty,
+                    this._compilation,
+                    default,
+                    getTemplateRef,
+                    setTemplateRef,
+                    this._layerName,
+                    ObjectReader.GetReader( tags ) );
+
+                return this.ExecuteAdvice<IProperty>( advice );
             }
-
-            if ( targetFieldOrProperty.IsAbstract )
-            {
-                throw new InvalidOperationException(
-                    UserMessageFormatter.Format(
-                        $"Cannot add an OverrideFieldOrPropertyAccessors advice to '{targetFieldOrProperty}' because it is an abstract." ) );
-            }
-
-            this.ValidateTarget( targetFieldOrProperty );
-
-            // Set template represents both set and init accessors.
-            var getTemplateRef = targetFieldOrProperty.GetMethod != null
-                ? this.SelectGetterTemplate( targetFieldOrProperty, getTemplateSelector, setTemplate == null )
-                    ?.GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider )
-                    .ForOverride( targetFieldOrProperty.GetMethod, ObjectReader.GetReader( args ) )
-                : null;
-
-            var setTemplateRef = targetFieldOrProperty.SetMethod != null
-                ? this.ValidateTemplateName( setTemplate, TemplateKind.Default, getTemplateSelector.IsNull )
-                    ?.GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider )
-                    .ForOverride( targetFieldOrProperty.SetMethod, ObjectReader.GetReader( args ) )
-                : null;
-
-            if ( getTemplateRef == null && setTemplateRef == null )
-            {
-                throw new InvalidOperationException( "There is no accessor to override." );
-            }
-
-            var advice = new OverrideFieldOrPropertyAdvice(
-                this.State.AspectInstance,
-                this._templateInstance,
-                targetFieldOrProperty,
-                this._compilation,
-                default,
-                getTemplateRef,
-                setTemplateRef,
-                this._layerName,
-                ObjectReader.GetReader( tags ) );
-
-            return this.ExecuteAdvice<IProperty>( advice );
         }
 
         public IIntroductionAdviceResult<IField> IntroduceField(
@@ -671,30 +698,33 @@ namespace Metalama.Framework.Engine.Advising
             Action<IFieldBuilder>? buildField = null,
             object? tags = null )
         {
-            if ( this._templateInstance == null )
+            using ( this.WithNonUserCode() )
             {
-                throw new InvalidOperationException();
+                if ( this._templateInstance == null )
+                {
+                    throw new InvalidOperationException();
+                }
+
+                this.ValidateTarget( targetType );
+
+                var template = this.ValidateRequiredTemplateName( templateName, TemplateKind.Default )
+                    .GetTemplateMember<IField>( this._compilation, this._state.ServiceProvider );
+
+                var advice = new IntroduceFieldAdvice(
+                    this._state.AspectInstance,
+                    this._templateInstance,
+                    targetType,
+                    this._compilation,
+                    null,
+                    template,
+                    scope,
+                    whenExists,
+                    buildField,
+                    this._layerName,
+                    ObjectReader.GetReader( tags ) );
+
+                return this.ExecuteAdvice<IField>( advice );
             }
-
-            this.ValidateTarget( targetType );
-
-            var template = this.ValidateRequiredTemplateName( templateName, TemplateKind.Default )
-                .GetTemplateMember<IField>( this._compilation, this.State.ServiceProvider );
-
-            var advice = new IntroduceFieldAdvice(
-                this.State.AspectInstance,
-                this._templateInstance,
-                targetType,
-                this._compilation,
-                null,
-                template,
-                scope,
-                whenExists,
-                buildField,
-                this._layerName,
-                ObjectReader.GetReader( tags ) );
-
-            return this.ExecuteAdvice<IField>( advice );
         }
 
         public IIntroductionAdviceResult<IField> IntroduceField(
@@ -706,31 +736,34 @@ namespace Metalama.Framework.Engine.Advising
             Action<IFieldBuilder>? buildField = null,
             object? tags = null )
         {
-            if ( this._templateInstance == null )
+            using ( this.WithNonUserCode() )
             {
-                throw new InvalidOperationException();
-            }
-
-            this.ValidateTarget( targetType );
-
-            var advice = new IntroduceFieldAdvice(
-                this.State.AspectInstance,
-                this._templateInstance,
-                targetType,
-                this._compilation,
-                fieldName,
-                default,
-                scope,
-                whenExists,
-                builder =>
+                if ( this._templateInstance == null )
                 {
-                    builder.Type = fieldType;
-                    buildField?.Invoke( builder );
-                },
-                this._layerName,
-                ObjectReader.GetReader( tags ) );
+                    throw new InvalidOperationException();
+                }
 
-            return this.ExecuteAdvice<IField>( advice );
+                this.ValidateTarget( targetType );
+
+                var advice = new IntroduceFieldAdvice(
+                    this._state.AspectInstance,
+                    this._templateInstance,
+                    targetType,
+                    this._compilation,
+                    fieldName,
+                    default,
+                    scope,
+                    whenExists,
+                    builder =>
+                    {
+                        builder.Type = fieldType;
+                        buildField?.Invoke( builder );
+                    },
+                    this._layerName,
+                    ObjectReader.GetReader( tags ) );
+
+                return this.ExecuteAdvice<IField>( advice );
+            }
         }
 
         public IIntroductionAdviceResult<IField> IntroduceField(
@@ -759,30 +792,33 @@ namespace Metalama.Framework.Engine.Advising
             Action<IPropertyBuilder>? buildProperty = null,
             object? tags = null )
         {
-            if ( this._templateInstance == null )
+            using ( this.WithNonUserCode() )
             {
-                throw new InvalidOperationException();
+                if ( this._templateInstance == null )
+                {
+                    throw new InvalidOperationException();
+                }
+
+                this.ValidateTarget( targetType );
+
+                var advice = new IntroducePropertyAdvice(
+                    this._state.AspectInstance,
+                    this._templateInstance,
+                    targetType,
+                    this._compilation,
+                    propertyName,
+                    propertyType,
+                    default,
+                    default,
+                    default,
+                    scope,
+                    whenExists,
+                    buildProperty,
+                    this._layerName,
+                    ObjectReader.GetReader( tags ) );
+
+                return this.ExecuteAdvice<IProperty>( advice );
             }
-
-            this.ValidateTarget( targetType );
-
-            var advice = new IntroducePropertyAdvice(
-                this.State.AspectInstance,
-                this._templateInstance,
-                targetType,
-                this._compilation,
-                propertyName,
-                propertyType,
-                default,
-                default,
-                default,
-                scope,
-                whenExists,
-                buildProperty,
-                this._layerName,
-                ObjectReader.GetReader( tags ) );
-
-            return this.ExecuteAdvice<IProperty>( advice );
         }
 
         public IIntroductionAdviceResult<IProperty> IntroduceAutomaticProperty(
@@ -810,41 +846,44 @@ namespace Metalama.Framework.Engine.Advising
             Action<IPropertyBuilder>? buildProperty = null,
             object? tags = null )
         {
-            if ( this._templateInstance == null )
+            using ( this.WithNonUserCode() )
             {
-                throw new InvalidOperationException();
+                if ( this._templateInstance == null )
+                {
+                    throw new InvalidOperationException();
+                }
+
+                if ( targetType.TypeKind == TypeKind.Interface )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
+                }
+
+                this.ValidateTarget( targetType );
+
+                var propertyTemplate = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
+                    .GetTemplateMember<IProperty>( this._compilation, this._state.ServiceProvider );
+
+                var accessorTemplates = propertyTemplate.GetAccessorTemplates();
+
+                var advice = new IntroducePropertyAdvice(
+                    this._state.AspectInstance,
+                    this._templateInstance,
+                    targetType,
+                    this._compilation,
+                    null,
+                    null,
+                    propertyTemplate,
+                    accessorTemplates.Get?.ForIntroduction(),
+                    accessorTemplates.Set?.ForIntroduction(),
+                    scope,
+                    whenExists,
+                    buildProperty,
+                    this._layerName,
+                    ObjectReader.GetReader( tags ) );
+
+                return this.ExecuteAdvice<IProperty>( advice );
             }
-
-            if ( targetType.TypeKind == TypeKind.Interface )
-            {
-                throw new InvalidOperationException(
-                    UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
-            }
-
-            this.ValidateTarget( targetType );
-
-            var propertyTemplate = this.ValidateRequiredTemplateName( defaultTemplate, TemplateKind.Default )
-                .GetTemplateMember<IProperty>( this._compilation, this.State.ServiceProvider );
-
-            var accessorTemplates = propertyTemplate.GetAccessorTemplates();
-
-            var advice = new IntroducePropertyAdvice(
-                this.State.AspectInstance,
-                this._templateInstance,
-                targetType,
-                this._compilation,
-                null,
-                null,
-                propertyTemplate,
-                accessorTemplates.Get?.ForIntroduction(),
-                accessorTemplates.Set?.ForIntroduction(),
-                scope,
-                whenExists,
-                buildProperty,
-                this._layerName,
-                ObjectReader.GetReader( tags ) );
-
-            return this.ExecuteAdvice<IProperty>( advice );
         }
 
         public IIntroductionAdviceResult<IProperty> IntroduceProperty(
@@ -858,49 +897,52 @@ namespace Metalama.Framework.Engine.Advising
             object? args = null,
             object? tags = null )
         {
-            if ( this._templateInstance == null )
+            using ( this.WithNonUserCode() )
             {
-                throw new InvalidOperationException();
+                if ( this._templateInstance == null )
+                {
+                    throw new InvalidOperationException();
+                }
+
+                if ( targetType.TypeKind == TypeKind.Interface )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
+                }
+
+                if ( getTemplate == null && setTemplate == null )
+                {
+                    throw new ArgumentNullException( nameof(getTemplate), "Either getTemplate or setTemplate must be provided." );
+                }
+
+                this.ValidateTarget( targetType );
+
+                var getTemplateRef = this.ValidateTemplateName( getTemplate, TemplateKind.Default )
+                    ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+
+                var setTemplateRef = this.ValidateTemplateName( setTemplate, TemplateKind.Default )
+                    ?.GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+
+                var parameterReaders = ObjectReader.GetReader( args );
+
+                var advice = new IntroducePropertyAdvice(
+                    this._state.AspectInstance,
+                    this._templateInstance,
+                    targetType,
+                    this._compilation,
+                    name,
+                    null,
+                    default,
+                    getTemplateRef?.ForIntroduction( parameterReaders ),
+                    setTemplateRef?.ForIntroduction( parameterReaders ),
+                    scope,
+                    whenExists,
+                    buildProperty,
+                    this._layerName,
+                    ObjectReader.GetReader( tags ) );
+
+                return this.ExecuteAdvice<IProperty>( advice );
             }
-
-            if ( targetType.TypeKind == TypeKind.Interface )
-            {
-                throw new InvalidOperationException(
-                    UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
-            }
-
-            if ( getTemplate == null && setTemplate == null )
-            {
-                throw new ArgumentNullException( nameof(getTemplate), "Either getTemplate or setTemplate must be provided." );
-            }
-
-            this.ValidateTarget( targetType );
-
-            var getTemplateRef = this.ValidateTemplateName( getTemplate, TemplateKind.Default )
-                ?.GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
-
-            var setTemplateRef = this.ValidateTemplateName( setTemplate, TemplateKind.Default )
-                ?.GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
-
-            var parameterReaders = ObjectReader.GetReader( args );
-
-            var advice = new IntroducePropertyAdvice(
-                this.State.AspectInstance,
-                this._templateInstance,
-                targetType,
-                this._compilation,
-                name,
-                null,
-                default,
-                getTemplateRef?.ForIntroduction( parameterReaders ),
-                setTemplateRef?.ForIntroduction( parameterReaders ),
-                scope,
-                whenExists,
-                buildProperty,
-                this._layerName,
-                ObjectReader.GetReader( tags ) );
-
-            return this.ExecuteAdvice<IProperty>( advice );
         }
 
         public IOverrideAdviceResult<IEvent> OverrideAccessors(
@@ -911,48 +953,51 @@ namespace Metalama.Framework.Engine.Advising
             object? args = null,
             object? tags = null )
         {
-            if ( this._templateInstance == null )
+            using ( this.WithNonUserCode() )
             {
-                throw new InvalidOperationException();
+                if ( this._templateInstance == null )
+                {
+                    throw new InvalidOperationException();
+                }
+
+                if ( invokeTemplate != null )
+                {
+                    throw GeneralDiagnosticDescriptors.UnsupportedFeature.CreateException( $"Invoker overrides." );
+                }
+
+                if ( targetEvent.IsAbstract )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format( $"Cannot add an OverrideEventAccessors advice to '{targetEvent}' because it is an abstract." ) );
+                }
+
+                this.ValidateTarget( targetEvent );
+
+                var addTemplateRef = this.ValidateRequiredTemplateName( addTemplate, TemplateKind.Default )
+                    .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+
+                var removeTemplateRef = this.ValidateRequiredTemplateName( removeTemplate, TemplateKind.Default )
+                    .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+
+                if ( invokeTemplate != null )
+                {
+                    throw new NotImplementedException( "Support for overriding event raisers is not yet implemented." );
+                }
+
+                var advice = new OverrideEventAdvice(
+                    this._state.AspectInstance,
+                    this._templateInstance,
+                    targetEvent,
+                    this._compilation,
+                    default,
+                    addTemplateRef,
+                    removeTemplateRef,
+                    this._layerName,
+                    ObjectReader.GetReader( tags ),
+                    ObjectReader.GetReader( args ) );
+
+                return this.ExecuteAdvice<IEvent>( advice );
             }
-
-            if ( invokeTemplate != null )
-            {
-                throw GeneralDiagnosticDescriptors.UnsupportedFeature.CreateException( $"Invoker overrides." );
-            }
-
-            if ( targetEvent.IsAbstract )
-            {
-                throw new InvalidOperationException(
-                    UserMessageFormatter.Format( $"Cannot add an OverrideEventAccessors advice to '{targetEvent}' because it is an abstract." ) );
-            }
-
-            this.ValidateTarget( targetEvent );
-
-            var addTemplateRef = this.ValidateRequiredTemplateName( addTemplate, TemplateKind.Default )
-                .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
-
-            var removeTemplateRef = this.ValidateRequiredTemplateName( removeTemplate, TemplateKind.Default )
-                .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
-
-            if ( invokeTemplate != null )
-            {
-                throw new NotImplementedException( "Support for overriding event raisers is not yet implemented." );
-            }
-
-            var advice = new OverrideEventAdvice(
-                this.State.AspectInstance,
-                this._templateInstance,
-                targetEvent,
-                this._compilation,
-                default,
-                addTemplateRef,
-                removeTemplateRef,
-                this._layerName,
-                ObjectReader.GetReader( tags ),
-                ObjectReader.GetReader( args ) );
-
-            return this.ExecuteAdvice<IEvent>( advice );
         }
 
         public IIntroductionAdviceResult<IEvent> IntroduceEvent(
@@ -963,39 +1008,42 @@ namespace Metalama.Framework.Engine.Advising
             Action<IEventBuilder>? buildEvent = null,
             object? tags = null )
         {
-            if ( this._templateInstance == null )
+            using ( this.WithNonUserCode() )
             {
-                throw new InvalidOperationException();
+                if ( this._templateInstance == null )
+                {
+                    throw new InvalidOperationException();
+                }
+
+                if ( targetType.TypeKind == TypeKind.Interface )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
+                }
+
+                this.ValidateTarget( targetType );
+
+                var template = this.ValidateRequiredTemplateName( eventTemplate, TemplateKind.Default )
+                    .GetTemplateMember<IEvent>( this._compilation, this._state.ServiceProvider );
+
+                var advice = new IntroduceEventAdvice(
+                    this._state.AspectInstance,
+                    this._templateInstance,
+                    targetType,
+                    this._compilation,
+                    null,
+                    template,
+                    default,
+                    default,
+                    scope,
+                    whenExists,
+                    buildEvent,
+                    this._layerName,
+                    ObjectReader.GetReader( tags ),
+                    ObjectReader.Empty );
+
+                return this.ExecuteAdvice<IEvent>( advice );
             }
-
-            if ( targetType.TypeKind == TypeKind.Interface )
-            {
-                throw new InvalidOperationException(
-                    UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
-            }
-
-            this.ValidateTarget( targetType );
-
-            var template = this.ValidateRequiredTemplateName( eventTemplate, TemplateKind.Default )
-                .GetTemplateMember<IEvent>( this._compilation, this.State.ServiceProvider );
-
-            var advice = new IntroduceEventAdvice(
-                this.State.AspectInstance,
-                this._templateInstance,
-                targetType,
-                this._compilation,
-                null,
-                template,
-                default,
-                default,
-                scope,
-                whenExists,
-                buildEvent,
-                this._layerName,
-                ObjectReader.GetReader( tags ),
-                ObjectReader.Empty );
-
-            return this.ExecuteAdvice<IEvent>( advice );
         }
 
         public IIntroductionAdviceResult<IEvent> IntroduceEvent(
@@ -1010,42 +1058,45 @@ namespace Metalama.Framework.Engine.Advising
             object? args = null,
             object? tags = null )
         {
-            if ( this._templateInstance == null )
+            using ( this.WithNonUserCode() )
             {
-                throw new InvalidOperationException();
+                if ( this._templateInstance == null )
+                {
+                    throw new InvalidOperationException();
+                }
+
+                if ( targetType.TypeKind == TypeKind.Interface )
+                {
+                    throw new InvalidOperationException(
+                        UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
+                }
+
+                this.ValidateTarget( targetType );
+
+                var addTemplateRef = this.ValidateRequiredTemplateName( addTemplate, TemplateKind.Default )
+                    .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+
+                var removeTemplateRef = this.ValidateRequiredTemplateName( removeTemplate, TemplateKind.Default )
+                    .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+
+                var advice = new IntroduceEventAdvice(
+                    this._state.AspectInstance,
+                    this._templateInstance,
+                    targetType,
+                    this._compilation,
+                    name,
+                    default,
+                    addTemplateRef,
+                    removeTemplateRef,
+                    scope,
+                    whenExists,
+                    buildEvent,
+                    this._layerName,
+                    ObjectReader.GetReader( tags ),
+                    ObjectReader.GetReader( args ) );
+
+                return this.ExecuteAdvice<IEvent>( advice );
             }
-
-            if ( targetType.TypeKind == TypeKind.Interface )
-            {
-                throw new InvalidOperationException(
-                    UserMessageFormatter.Format( $"Cannot add an IntroduceMethod advice to '{targetType}' because it is an interface." ) );
-            }
-
-            this.ValidateTarget( targetType );
-
-            var addTemplateRef = this.ValidateRequiredTemplateName( addTemplate, TemplateKind.Default )
-                .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
-
-            var removeTemplateRef = this.ValidateRequiredTemplateName( removeTemplate, TemplateKind.Default )
-                .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
-
-            var advice = new IntroduceEventAdvice(
-                this.State.AspectInstance,
-                this._templateInstance,
-                targetType,
-                this._compilation,
-                name,
-                default,
-                addTemplateRef,
-                removeTemplateRef,
-                scope,
-                whenExists,
-                buildEvent,
-                this._layerName,
-                ObjectReader.GetReader( tags ),
-                ObjectReader.GetReader( args ) );
-
-            return this.ExecuteAdvice<IEvent>( advice );
         }
 
         public IImplementInterfaceAdviceResult ImplementInterface(
@@ -1054,25 +1105,28 @@ namespace Metalama.Framework.Engine.Advising
             OverrideStrategy whenExists = OverrideStrategy.Default,
             object? tags = null )
         {
-            if ( this._templateInstance == null )
+            using ( this.WithNonUserCode() )
             {
-                throw new InvalidOperationException();
+                if ( this._templateInstance == null )
+                {
+                    throw new InvalidOperationException();
+                }
+
+                this.ValidateTarget( targetType );
+
+                var advice = new ImplementInterfaceAdvice(
+                    this._state.AspectInstance,
+                    this._templateInstance,
+                    targetType,
+                    this._compilation,
+                    interfaceType,
+                    whenExists,
+                    null,
+                    this._layerName,
+                    ObjectReader.GetReader( tags ) );
+
+                return this.ExecuteAdvice<INamedType>( advice );
             }
-
-            this.ValidateTarget( targetType );
-
-            var advice = new ImplementInterfaceAdvice(
-                this.State.AspectInstance,
-                this._templateInstance,
-                targetType,
-                this._compilation,
-                interfaceType,
-                whenExists,
-                null,
-                this._layerName,
-                ObjectReader.GetReader( tags ) );
-
-            return this.ExecuteAdvice<INamedType>( advice );
         }
 
         public IImplementInterfaceAdviceResult ImplementInterface(
@@ -1095,23 +1149,26 @@ namespace Metalama.Framework.Engine.Advising
             OverrideStrategy whenExists = OverrideStrategy.Default,
             object? tags = null )
         {
-            if ( this._templateInstance == null )
+            using ( this.WithNonUserCode() )
             {
-                throw new InvalidOperationException();
+                if ( this._templateInstance == null )
+                {
+                    throw new InvalidOperationException();
+                }
+
+                var advice = new ImplementInterfaceAdvice(
+                    this._state.AspectInstance,
+                    this._templateInstance,
+                    targetType,
+                    this._compilation,
+                    interfaceType,
+                    whenExists,
+                    interfaceMemberSpecifications,
+                    this._layerName,
+                    ObjectReader.GetReader( tags ) );
+
+                return this.ExecuteAdvice<INamedType>( advice );
             }
-
-            var advice = new ImplementInterfaceAdvice(
-                this.State.AspectInstance,
-                this._templateInstance,
-                targetType,
-                this._compilation,
-                interfaceType,
-                whenExists,
-                interfaceMemberSpecifications,
-                this._layerName,
-                ObjectReader.GetReader( tags ) );
-
-            return this.ExecuteAdvice<INamedType>( advice );
         }
 
         public void ImplementInterface(
@@ -1136,27 +1193,30 @@ namespace Metalama.Framework.Engine.Advising
             object? tags = null,
             object? args = null )
         {
-            if ( this._templateInstance == null )
+            using ( this.WithNonUserCode() )
             {
-                throw new InvalidOperationException();
+                if ( this._templateInstance == null )
+                {
+                    throw new InvalidOperationException();
+                }
+
+                this.ValidateTarget( targetType );
+
+                var templateRef = this.ValidateRequiredTemplateName( template, TemplateKind.Default )
+                    .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+
+                var advice = new TemplateBasedInitializeAdvice(
+                    this._state.AspectInstance,
+                    this._templateInstance,
+                    targetType,
+                    this._compilation,
+                    templateRef.ForInitializer( ObjectReader.GetReader( args ) ),
+                    kind,
+                    this._layerName,
+                    ObjectReader.GetReader( tags ) );
+
+                return this.ExecuteAdvice<INamedType>( advice );
             }
-
-            this.ValidateTarget( targetType );
-
-            var templateRef = this.ValidateRequiredTemplateName( template, TemplateKind.Default )
-                .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
-
-            var advice = new TemplateBasedInitializeAdvice(
-                this.State.AspectInstance,
-                this._templateInstance,
-                targetType,
-                this._compilation,
-                templateRef.ForInitializer( ObjectReader.GetReader( args ) ),
-                kind,
-                this._layerName,
-                ObjectReader.GetReader( tags ) );
-
-            return this.ExecuteAdvice<INamedType>( advice );
         }
 
         public IAddInitializerAdviceResult AddInitializer(
@@ -1164,69 +1224,78 @@ namespace Metalama.Framework.Engine.Advising
             IStatement statement,
             InitializerKind kind )
         {
-            if ( this._templateInstance == null )
+            using ( this.WithNonUserCode() )
             {
-                throw new InvalidOperationException();
+                if ( this._templateInstance == null )
+                {
+                    throw new InvalidOperationException();
+                }
+
+                this.ValidateTarget( targetType );
+
+                var advice = new SyntaxBasedInitializeAdvice(
+                    this._state.AspectInstance,
+                    this._templateInstance,
+                    targetType,
+                    this._compilation,
+                    statement,
+                    kind,
+                    this._layerName );
+
+                return this.ExecuteAdvice<INamedType>( advice );
             }
-
-            this.ValidateTarget( targetType );
-
-            var advice = new SyntaxBasedInitializeAdvice(
-                this.State.AspectInstance,
-                this._templateInstance,
-                targetType,
-                this._compilation,
-                statement,
-                kind,
-                this._layerName );
-
-            return this.ExecuteAdvice<INamedType>( advice );
         }
 
         public IAddInitializerAdviceResult AddInitializer( IConstructor targetConstructor, string template, object? tags = null, object? args = null )
         {
-            if ( this._templateInstance == null )
+            using ( this.WithNonUserCode() )
             {
-                throw new InvalidOperationException();
+                if ( this._templateInstance == null )
+                {
+                    throw new InvalidOperationException();
+                }
+
+                this.ValidateTarget( targetConstructor );
+
+                var templateRef = this.ValidateRequiredTemplateName( template, TemplateKind.Default )
+                    .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
+
+                var advice = new TemplateBasedInitializeAdvice(
+                    this._state.AspectInstance,
+                    this._templateInstance,
+                    targetConstructor,
+                    this._compilation,
+                    templateRef.ForInitializer( ObjectReader.GetReader( args ) ),
+                    InitializerKind.BeforeInstanceConstructor,
+                    this._layerName,
+                    ObjectReader.GetReader( tags ) );
+
+                return this.ExecuteAdvice<IConstructor>( advice );
             }
-
-            this.ValidateTarget( targetConstructor );
-
-            var templateRef = this.ValidateRequiredTemplateName( template, TemplateKind.Default )
-                .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
-
-            var advice = new TemplateBasedInitializeAdvice(
-                this.State.AspectInstance,
-                this._templateInstance,
-                targetConstructor,
-                this._compilation,
-                templateRef.ForInitializer( ObjectReader.GetReader( args ) ),
-                InitializerKind.BeforeInstanceConstructor,
-                this._layerName,
-                ObjectReader.GetReader( tags ) );
-
-            return this.ExecuteAdvice<IConstructor>( advice );
         }
 
         public IAddInitializerAdviceResult AddInitializer( IConstructor targetConstructor, IStatement statement )
         {
-            if ( this._templateInstance == null )
+            using ( this.WithNonUserCode() )
             {
-                throw new InvalidOperationException();
+                if ( this._templateInstance == null )
+                {
+                    throw new InvalidOperationException();
+                }
+
+                this.ValidateTarget( targetConstructor );
+
+                var advice = new SyntaxBasedInitializeAdvice(
+                    this._state.AspectInstance,
+                    this._templateInstance,
+                    targetConstructor,
+                    this._compilation,
+                    statement,
+                    InitializerKind.BeforeInstanceConstructor,
+                    this._layerName );
+
+                return this.ExecuteAdvice<IConstructor>( advice );
             }
-
-            this.ValidateTarget( targetConstructor );
-
-            var advice = new SyntaxBasedInitializeAdvice(
-                this.State.AspectInstance,
-                this._templateInstance,
-                targetConstructor,
-                this._compilation,
-                statement,
-                InitializerKind.BeforeInstanceConstructor,
-                this._layerName );
-
-            return this.ExecuteAdvice<IConstructor>( advice );
         }
 
         private static void ThrowOnErrors( DiagnosticList diagnosticList )
@@ -1246,36 +1315,39 @@ namespace Metalama.Framework.Engine.Advising
             object? tags = null,
             object? args = null )
         {
-            if ( kind == ContractDirection.Output && targetParameter.RefKind is not RefKind.Ref or RefKind.Out )
+            using ( this.WithNonUserCode() )
             {
-                throw new ArgumentOutOfRangeException(
-                    nameof(kind),
-                    UserMessageFormatter.Format(
-                        $"Cannot add an output contract to the parameter '{targetParameter}' because it is neither 'ref' nor 'out'." ) );
-            }
+                if ( kind == ContractDirection.Output && targetParameter.RefKind is not RefKind.Ref or RefKind.Out )
+                {
+                    throw new ArgumentOutOfRangeException(
+                        nameof(kind),
+                        UserMessageFormatter.Format(
+                            $"Cannot add an output contract to the parameter '{targetParameter}' because it is neither 'ref' nor 'out'." ) );
+                }
 
-            if ( kind == ContractDirection.Input && targetParameter.RefKind is not RefKind.None or RefKind.Ref or RefKind.In )
-            {
-                throw new ArgumentOutOfRangeException(
-                    nameof(kind),
-                    UserMessageFormatter.Format( $"Cannot add an input contract to the out parameter '{targetParameter}' " ) );
-            }
+                if ( kind == ContractDirection.Input && targetParameter.RefKind is not RefKind.None or RefKind.Ref or RefKind.In )
+                {
+                    throw new ArgumentOutOfRangeException(
+                        nameof(kind),
+                        UserMessageFormatter.Format( $"Cannot add an input contract to the out parameter '{targetParameter}' " ) );
+                }
 
-            if ( kind == ContractDirection.Input && targetParameter.IsReturnParameter )
-            {
-                throw new ArgumentOutOfRangeException(
-                    nameof(kind),
-                    UserMessageFormatter.Format( $"Cannot add an input contract to the return parameter '{targetParameter}' " ) );
-            }
+                if ( kind == ContractDirection.Input && targetParameter.IsReturnParameter )
+                {
+                    throw new ArgumentOutOfRangeException(
+                        nameof(kind),
+                        UserMessageFormatter.Format( $"Cannot add an input contract to the return parameter '{targetParameter}' " ) );
+                }
 
-            if ( targetParameter.IsReturnParameter && targetParameter.Type.Is( SpecialType.Void ) )
-            {
-                throw new ArgumentOutOfRangeException(
-                    nameof(targetParameter),
-                    UserMessageFormatter.Format( $"Cannot add a contract to the return parameter of a void method." ) );
-            }
+                if ( targetParameter.IsReturnParameter && targetParameter.Type.Is( SpecialType.Void ) )
+                {
+                    throw new ArgumentOutOfRangeException(
+                        nameof(targetParameter),
+                        UserMessageFormatter.Format( $"Cannot add a contract to the return parameter of a void method." ) );
+                }
 
-            return this.AddFilterImpl<IParameter>( targetParameter, targetParameter.DeclaringMember, template, kind, tags, args );
+                return this.AddFilterImpl<IParameter>( targetParameter, targetParameter.DeclaringMember, template, kind, tags, args );
+            }
         }
 
         public IIntroductionAdviceResult<IPropertyOrIndexer> AddContract(
@@ -1307,12 +1379,12 @@ namespace Metalama.Framework.Engine.Advising
             this.ValidateTarget( targetDeclaration, targetMember );
 
             var templateRef = this.ValidateRequiredTemplateName( template, TemplateKind.Default )
-                .GetTemplateMember<IMethod>( this._compilation, this.State.ServiceProvider );
+                .GetTemplateMember<IMethod>( this._compilation, this._state.ServiceProvider );
 
-            if ( !this.State.ContractAdvices.TryGetValue( targetMember, out var advice ) )
+            if ( !this._state.ContractAdvices.TryGetValue( targetMember, out var advice ) )
             {
-                this.State.ContractAdvices[targetMember] = advice = new ContractAdvice(
-                    this.State.AspectInstance,
+                this._state.ContractAdvices[targetMember] = advice = new ContractAdvice(
+                    this._state.AspectInstance,
                     this._templateInstance,
                     targetMember,
                     this._compilation,
@@ -1324,9 +1396,9 @@ namespace Metalama.Framework.Engine.Advising
             {
                 result = new AdviceResult<T>(
                     advice.LastAdviceImplementationResult.AssertNotNull().NewDeclaration.As<T>(),
-                    this.State.CurrentCompilation,
+                    this._state.CurrentCompilation,
                     AdviceOutcome.Default,
-                    this.State.AspectBuilder.AssertNotNull() );
+                    this._state.AspectBuilder.AssertNotNull() );
             }
 
             // We keep adding contracts to the same advice instance even after it has produced a transformation because the transformation will use this list of advice.
@@ -1342,7 +1414,7 @@ namespace Metalama.Framework.Engine.Advising
         {
             return this.ExecuteAdvice<IAttribute>(
                 new AddAttributeAdvice(
-                    this.State.AspectInstance,
+                    this._state.AspectInstance,
                     this._templateInstance!,
                     targetDeclaration,
                     this._compilation,
@@ -1353,14 +1425,17 @@ namespace Metalama.Framework.Engine.Advising
 
         public IRemoveAttributesAdviceResult RemoveAttributes( IDeclaration targetDeclaration, INamedType attributeType )
         {
-            return this.ExecuteAdvice<IDeclaration>(
-                new RemoveAttributesAdvice(
-                    this.State.AspectInstance,
-                    this._templateInstance!,
-                    targetDeclaration,
-                    this._compilation,
-                    attributeType,
-                    this._layerName ) );
+            using ( this.WithNonUserCode() )
+            {
+                return this.ExecuteAdvice<IDeclaration>(
+                    new RemoveAttributesAdvice(
+                        this._state.AspectInstance,
+                        this._templateInstance!,
+                        targetDeclaration,
+                        this._compilation,
+                        attributeType,
+                        this._layerName ) );
+            }
         }
 
         public IRemoveAttributesAdviceResult RemoveAttributes( IDeclaration targetDeclaration, Type attributeType )
@@ -1374,26 +1449,29 @@ namespace Metalama.Framework.Engine.Advising
             Func<IParameter, IConstructor, PullAction>? pullAction = null,
             ImmutableArray<AttributeConstruction> attributes = default )
         {
-            if ( this._templateInstance == null )
+            using ( this.WithNonUserCode() )
             {
-                throw new InvalidOperationException();
+                if ( this._templateInstance == null )
+                {
+                    throw new InvalidOperationException();
+                }
+
+                this.ValidateTarget( constructor );
+
+                var advice = new AppendConstructorParameterAdvice(
+                    this._state.AspectInstance,
+                    this._templateInstance,
+                    constructor,
+                    this._compilation,
+                    this._layerName,
+                    parameterName,
+                    parameterType,
+                    attributes.IsDefaultOrEmpty ? null : builder => builder.AddAttributes( attributes ),
+                    pullAction,
+                    defaultValue );
+
+                return this.ExecuteAdvice<IParameter>( advice );
             }
-
-            this.ValidateTarget( constructor );
-
-            var advice = new AppendConstructorParameterAdvice(
-                this.State.AspectInstance,
-                this._templateInstance,
-                constructor,
-                this._compilation,
-                this._layerName,
-                parameterName,
-                parameterType,
-                attributes.IsDefaultOrEmpty ? null : builder => builder.AddAttributes( attributes ),
-                pullAction,
-                defaultValue );
-
-            return this.ExecuteAdvice<IParameter>( advice );
         }
 
         public IIntroductionAdviceResult<IParameter> IntroduceParameter(

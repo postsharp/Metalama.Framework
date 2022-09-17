@@ -6,233 +6,236 @@ using Xunit;
 
 namespace Metalama.Framework.Tests.UnitTests.DesignTime
 {
-    public class SyntaxTreeComparisonTests
+    public partial class CompilationChangesTests : TestBase
     {
+        private readonly DiffStrategy _strategy = new( true, true, true );
+        private readonly DiffStrategy _strategyWithoutPartialTypeDetection = new( true, true, false );
+
         [Fact]
-        public void SameTrees()
+        public void IsDifferent_SameTrees()
         {
             var syntaxTree = CSharpSyntaxTree.ParseText( @"class C {}" );
 
-            Assert.False( CompilationChangeTracker.IsDifferent( syntaxTree, syntaxTree ) );
+            Assert.False( this._strategyWithoutPartialTypeDetection.IsDifferent( syntaxTree, syntaxTree ) );
         }
 
         [Fact]
-        public void SameContent()
+        public void IsDifferent_SameContent()
         {
             var syntaxTree1 = CSharpSyntaxTree.ParseText( @"class C {}" );
             var syntaxTree2 = CSharpSyntaxTree.ParseText( @"class C {}" );
 
-            Assert.False( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( this._strategyWithoutPartialTypeDetection.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
-        public void ChangeInCommentLine()
+        public void IsDifferent_ChangeInCommentLine()
         {
             var syntaxTree1 = CSharpSyntaxTree.ParseText( "// Comment 1\nclass C {}" );
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "// Comment 2\nclass C {}" );
 
-            Assert.False( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( this._strategyWithoutPartialTypeDetection.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
-        public void TypingInCommentBlock()
+        public void IsDifferent_TypingInCommentBlock()
         {
             var syntaxTree1 = CSharpSyntaxTree.ParseText( "/* Comment */ class C {}" );
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "/* Comment 2222222222 */ class C {}" );
 
-            Assert.False( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( this._strategyWithoutPartialTypeDetection.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
-        public void DeletingInCommentBlock()
+        public void IsDifferent_DeletingInCommentBlock()
         {
             var syntaxTree1 = CSharpSyntaxTree.ParseText( "/* Comment 111111111111111111 */ class C {} " );
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "/* Comment */ class C {} " );
 
-            Assert.False( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( this._strategyWithoutPartialTypeDetection.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
-        public void CommentOutDeclaration()
+        public void IsDifferent_CommentOutDeclaration()
         {
             var syntaxTree1 = CSharpSyntaxTree.ParseText( "class C {} " );
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "// class C {}" );
 
-            Assert.True( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.True( this._strategyWithoutPartialTypeDetection.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
-        public void UncommentDeclaration()
+        public void IsDifferent_UncommentDeclaration()
         {
             var syntaxTree1 = CSharpSyntaxTree.ParseText( "// class C {}" );
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C {}" );
 
-            Assert.True( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.True( this._strategyWithoutPartialTypeDetection.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
-        public void AddingWhitespace()
+        public void IsDifferent_AddingWhitespace()
         {
             var syntaxTree1 = CSharpSyntaxTree.ParseText( "class C {}" );
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C {  }" );
 
-            Assert.False( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( this._strategyWithoutPartialTypeDetection.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
-        public void RemovingSomeWhitespace()
+        public void IsDifferent_RemovingSomeWhitespace()
         {
             var syntaxTree1 = CSharpSyntaxTree.ParseText( "class C {   }" );
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C { }" );
 
-            Assert.False( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( this._strategyWithoutPartialTypeDetection.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
-        public void RemovingAllWhitespace()
+        public void IsDifferent_RemovingAllWhitespace()
         {
             var syntaxTree1 = CSharpSyntaxTree.ParseText( "class C {   }" );
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C {}" );
 
-            Assert.False( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( this._strategyWithoutPartialTypeDetection.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
-        public void RemovingRequiredWhitespace()
+        public void IsDifferent_RemovingRequiredWhitespace()
         {
             var syntaxTree1 = CSharpSyntaxTree.ParseText( "class C {}" );
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "classC {}" );
 
-            Assert.True( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.True( this._strategyWithoutPartialTypeDetection.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
-        public void ChangeInMethodBody()
+        public void IsDifferent_ChangeInMethodBody()
         {
             var syntaxTree1 = CSharpSyntaxTree.ParseText( "class C { int M() { return 1; } }" );
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C { int M() { return 2; } }" );
 
-            Assert.False( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( this._strategyWithoutPartialTypeDetection.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
-        public void ChangeInMethodExpression()
+        public void IsDifferent_ChangeInMethodExpression()
         {
             var syntaxTree1 = CSharpSyntaxTree.ParseText( "class C { int M() => 1; } }" );
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C { int M() => 2; } }" );
 
-            Assert.False( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( this._strategyWithoutPartialTypeDetection.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
-        public void ChangeInMethodReturnType()
+        public void IsDifferent_ChangeInMethodReturnType()
         {
             var syntaxTree1 = CSharpSyntaxTree.ParseText( "class C { int M() => 1; } }" );
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C { long M() => 1; } }" );
 
-            Assert.True( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.True( this._strategyWithoutPartialTypeDetection.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
-        public void ChangeInPropertyGetterBody()
+        public void IsDifferent_ChangeInPropertyGetterBody()
         {
             var syntaxTree1 = CSharpSyntaxTree.ParseText( "class C { int M { get { return 1; } } }" );
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C { int M { get { return 2; } } }" );
 
-            Assert.False( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( this._strategyWithoutPartialTypeDetection.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
-        public void ChangeInPropertyGetterExpression()
+        public void IsDifferent_ChangeInPropertyGetterExpression()
         {
             var syntaxTree1 = CSharpSyntaxTree.ParseText( "class C { int M { get => 1; } }" );
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C { int M { get => 2; } }" );
 
-            Assert.False( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( this._strategyWithoutPartialTypeDetection.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
-        public void ChangeInPropertyExpression()
+        public void IsDifferent_ChangeInPropertyExpression()
         {
             var syntaxTree1 = CSharpSyntaxTree.ParseText( "class C { int M => 1; }" );
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C { int M => 2; }" );
 
-            Assert.False( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( this._strategyWithoutPartialTypeDetection.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
-        public void ChangeInPropertyInitializer()
+        public void IsDifferent_ChangeInPropertyInitializer()
         {
             var syntaxTree1 = CSharpSyntaxTree.ParseText( "class C { int M { get; } = 1; }" );
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C { int M { get; } = 2; }" );
 
-            Assert.False( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( this._strategyWithoutPartialTypeDetection.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
-        public void ChangeInFieldInitializer()
+        public void IsDifferent_ChangeInFieldInitializer()
         {
             var syntaxTree1 = CSharpSyntaxTree.ParseText( "class C { int M = 1; }" );
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C { int M = 2; }" );
 
-            Assert.False( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.False( this._strategyWithoutPartialTypeDetection.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact( Skip = "Adding aspects to local functions is not yet supported." )]
-        public void AddLocalFunction()
+        public void IsDifferent_AddLocalFunction()
         {
             var syntaxTree1 = CSharpSyntaxTree.ParseText( "class C { int M() {} }" );
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C { int M() { void N() {] } }" );
 
-            Assert.True( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.True( this._strategyWithoutPartialTypeDetection.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
-        public void ChangeInCompileTimeCode()
+        public void IsDifferent_ChangeInCompileTimeCode()
         {
             var syntaxTree1 = CSharpSyntaxTree.ParseText( "using Metalama.Framework.Aspects; class C { int M { get => 1; } }" );
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "using Metalama.Framework.Aspects; class C { int M { get => 2; } }" );
 
-            Assert.True( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.True( this._strategyWithoutPartialTypeDetection.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
-        public void AddPartial()
+        public void IsDifferent_AddPartial()
         {
             var syntaxTree1 = CSharpSyntaxTree.ParseText( "class C {}" );
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "partial class C {}" );
 
-            Assert.True( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.True( this._strategyWithoutPartialTypeDetection.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
 
         [Fact]
-        public void RemovePartial()
+        public void IsDifferent_RemovePartial()
         {
             var syntaxTree1 = CSharpSyntaxTree.ParseText( "partial class C {}" );
 
             var syntaxTree2 = CSharpSyntaxTree.ParseText( "class C {}" );
 
-            Assert.True( CompilationChangeTracker.IsDifferent( syntaxTree1, syntaxTree2 ) );
+            Assert.True( this._strategyWithoutPartialTypeDetection.IsDifferent( syntaxTree1, syntaxTree2 ) );
         }
     }
 }
