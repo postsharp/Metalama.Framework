@@ -1,25 +1,23 @@
-// Final Compilation.Emit failed. 
-// Error CS0102 on `Field`: `The type 'TargetClass' already contains a definition for 'Field'`
-// Error CS0229 on `Field`: `Ambiguity between 'TargetClass.Field' and 'TargetClass.Field'`
-// Error CS0229 on `Field`: `Ambiguity between 'TargetClass.Field' and 'TargetClass.Field'`
 [Introduction]
-    [Override]
-    internal class TargetClass { 
+[Override]
+internal class TargetClass
+{
 
-public global::System.Int32 Field;
+    public global::System.Int32 Field
+    {
+        get
+        {
+            global::System.Console.WriteLine("Override");
+            return this.Field_Source;
 
-public global::System.Int32 Field 
-{ get
-{ 
+        }
+        set
+        {
             global::System.Console.WriteLine("Override");
-        return this.Field;
-    
- 
+            this.Field_Source = value;
+
+        }
+    }
+    private global::System.Int32 Field_Source
+    { get; set; }
 }
-set
-{ 
-            global::System.Console.WriteLine("Override");
-        this.Field = value;
-     
-}
-}}

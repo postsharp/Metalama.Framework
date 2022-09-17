@@ -1,62 +1,61 @@
-// Final Compilation.Emit failed. 
-// Error CS0102 on `IntroducedField`: `The type 'Target' already contains a definition for 'IntroducedField'`
-// Error CS0229 on `IntroducedField`: `Ambiguity between 'Target.IntroducedField' and 'Target.IntroducedField'`
-// Error CS0229 on `IntroducedField`: `Ambiguity between 'Target.IntroducedField' and 'Target.IntroducedField'`
 [IntroduceAndFilter]
-    internal class Target
+internal class Target
+{
+
+
+    private global::System.String _existingField;
+
+
+    private global::System.String ExistingField
     {
-
-
-private global::System.String _existingField;
-
-
-private global::System.String ExistingField 
-{ get
-{ 
+        get
+        {
             global::System.String returnValue;
-returnValue=this._existingField;        if (returnValue == null)
-        {
-            throw new global::System.ArgumentNullException();
-        }
+            returnValue = this._existingField; if (returnValue == null)
+            {
+                throw new global::System.ArgumentNullException();
+            }
 
-        return returnValue;
-    
- 
-}
-set
-{ 
+            return returnValue;
+
+
+        }
+        set
+        {
             if (value == null)
-        {
-            throw new global::System.ArgumentNullException();
+            {
+                throw new global::System.ArgumentNullException();
+            }
+
+            this._existingField = value;
         }
+    }
 
-        this._existingField=value;     
-}
-}
+    private global::System.String? _introducedField;
 
-private global::System.String? IntroducedField;
 
-private global::System.String? IntroducedField 
-{ get
-{ 
-            var returnValue = this.IntroducedField;
-        if (returnValue == null)
+    private global::System.String? IntroducedField
+    {
+        get
         {
-            throw new global::System.ArgumentNullException();
-        }
+            global::System.String? returnValue;
+            returnValue = this._introducedField; if (returnValue == null)
+            {
+                throw new global::System.ArgumentNullException();
+            }
 
-        return returnValue;
-    
- 
-}
-set
-{ 
+            return returnValue;
+
+
+        }
+        set
+        {
             if (value == null)
-        {
-            throw new global::System.ArgumentNullException();
-        }
+            {
+                throw new global::System.ArgumentNullException();
+            }
 
-        this.IntroducedField = value;
-     
+            this._introducedField = value;
+        }
+    }
 }
-}    }
