@@ -1,5 +1,3 @@
-using System;
-
 class Target : ITest
 {
     int ITest.Foo
