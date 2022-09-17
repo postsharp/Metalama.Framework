@@ -5,9 +5,7 @@ internal class C
     {
         global::System.Console.WriteLine("Overridden in Layer Second");
         global::System.Console.WriteLine("Overridden in Layer First");
-        goto __aspect_return_1;
-
-    __aspect_return_1: return;
+        return;
     }
 
 

@@ -8,12 +8,13 @@ internal class TargetClass : DerivedClass
         {
             global::System.Console.WriteLine("Override.");
             this.ExistingEvent_Introduction += value;
+
         }
 
         remove
         {
             global::System.Console.WriteLine("Override.");
-            this.ExistingEvent_Introduction += value;
+            this.ExistingEvent_Introduction -= value;
         }
     }
 
@@ -52,12 +53,13 @@ internal class TargetClass : DerivedClass
         {
             global::System.Console.WriteLine("Override.");
             this.ExistingVirtualEvent_Introduction += value;
+
         }
 
         remove
         {
             global::System.Console.WriteLine("Override.");
-            this.ExistingVirtualEvent_Introduction += value;
+            this.ExistingVirtualEvent_Introduction -= value;
         }
     }
 
@@ -113,12 +115,13 @@ internal class TargetClass : DerivedClass
         {
             global::System.Console.WriteLine("Override.");
             this.BaseClassAbstractEvent_Introduction += value;
+
         }
 
         remove
         {
             global::System.Console.WriteLine("Override.");
-            this.BaseClassAbstractEvent_Introduction += value;
+            this.BaseClassAbstractEvent_Introduction -= value;
         }
     }
 
@@ -144,12 +147,13 @@ internal class TargetClass : DerivedClass
         {
             global::System.Console.WriteLine("Override.");
             this.BaseClassEvent_Introduction += value;
+
         }
 
         remove
         {
             global::System.Console.WriteLine("Override.");
-            this.BaseClassEvent_Introduction += value;
+            this.BaseClassEvent_Introduction -= value;
         }
     }
 
@@ -175,12 +179,13 @@ internal class TargetClass : DerivedClass
         {
             global::System.Console.WriteLine("Override.");
             this.BaseClassVirtualEvent_Introduction += value;
+
         }
 
         remove
         {
             global::System.Console.WriteLine("Override.");
-            this.BaseClassVirtualEvent_Introduction += value;
+            this.BaseClassVirtualEvent_Introduction -= value;
         }
     }
 
@@ -206,12 +211,13 @@ internal class TargetClass : DerivedClass
         {
             global::System.Console.WriteLine("Override.");
             this.DerivedClassEvent_Introduction += value;
+
         }
 
         remove
         {
             global::System.Console.WriteLine("Override.");
-            this.DerivedClassEvent_Introduction += value;
+            this.DerivedClassEvent_Introduction -= value;
         }
     }
 
@@ -237,12 +243,13 @@ internal class TargetClass : DerivedClass
         {
             global::System.Console.WriteLine("Override.");
             this.DerivedClassVirtualEvent_Introduction += value;
+
         }
 
         remove
         {
             global::System.Console.WriteLine("Override.");
-            this.DerivedClassVirtualEvent_Introduction += value;
+            this.DerivedClassVirtualEvent_Introduction -= value;
         }
     }
 }

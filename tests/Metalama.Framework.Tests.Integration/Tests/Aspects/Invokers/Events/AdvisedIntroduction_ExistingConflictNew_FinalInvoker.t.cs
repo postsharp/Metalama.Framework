@@ -8,12 +8,13 @@ internal class TargetClass : DerivedClass
         {
             global::System.Console.WriteLine("Override.");
             this.ExistingEvent += value;
+
         }
 
         remove
         {
             global::System.Console.WriteLine("Override.");
-            this.ExistingEvent += value;
+            this.ExistingEvent -= value;
         }
     }
 
@@ -23,12 +24,13 @@ internal class TargetClass : DerivedClass
         {
             global::System.Console.WriteLine("Override.");
             this.ExistingVirtualEvent += value;
+
         }
 
         remove
         {
             global::System.Console.WriteLine("Override.");
-            this.ExistingVirtualEvent += value;
+            this.ExistingVirtualEvent -= value;
         }
     }
 
@@ -39,12 +41,13 @@ internal class TargetClass : DerivedClass
         {
             global::System.Console.WriteLine("Override.");
             this.BaseClassAbstractEvent += value;
+
         }
 
         remove
         {
             global::System.Console.WriteLine("Override.");
-            this.BaseClassAbstractEvent += value;
+            this.BaseClassAbstractEvent -= value;
         }
     }
 
@@ -54,12 +57,13 @@ internal class TargetClass : DerivedClass
         {
             global::System.Console.WriteLine("Override.");
             this.BaseClassEvent += value;
+
         }
 
         remove
         {
             global::System.Console.WriteLine("Override.");
-            this.BaseClassEvent += value;
+            this.BaseClassEvent -= value;
         }
     }
 
@@ -69,12 +73,13 @@ internal class TargetClass : DerivedClass
         {
             global::System.Console.WriteLine("Override.");
             this.BaseClassVirtualEvent += value;
+
         }
 
         remove
         {
             global::System.Console.WriteLine("Override.");
-            this.BaseClassVirtualEvent += value;
+            this.BaseClassVirtualEvent -= value;
         }
     }
 
@@ -84,12 +89,13 @@ internal class TargetClass : DerivedClass
         {
             global::System.Console.WriteLine("Override.");
             this.DerivedClassEvent += value;
+
         }
 
         remove
         {
             global::System.Console.WriteLine("Override.");
-            this.DerivedClassEvent += value;
+            this.DerivedClassEvent -= value;
         }
     }
 
@@ -99,12 +105,13 @@ internal class TargetClass : DerivedClass
         {
             global::System.Console.WriteLine("Override.");
             this.DerivedClassVirtualEvent += value;
+
         }
 
         remove
         {
             global::System.Console.WriteLine("Override.");
-            this.DerivedClassVirtualEvent += value;
+            this.DerivedClassVirtualEvent -= value;
         }
     }
 }

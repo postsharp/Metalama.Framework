@@ -24,6 +24,13 @@ namespace Metalama.Framework.Engine.Linking
                 case ParameterSyntax { Parent: { Parent: RecordDeclarationSyntax } }:
                     return default;
 
+                case AccessorDeclarationSyntax accessorDeclaration:
+                    return accessorDeclaration.Parent.AssertNotNull().GetLinkerDeclarationFlags();
+
+                case ArrowExpressionClauseSyntax:
+                    // We cannot have flags on getter of expression-bodied property.
+                    return default;
+
                 case null:
                     return default;
 

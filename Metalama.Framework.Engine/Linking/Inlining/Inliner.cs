@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace Metalama.Framework.Engine.Linking.Inlining
 {
@@ -27,12 +29,12 @@ namespace Metalama.Framework.Engine.Linking.Inlining
         /// Determines whether an aspect reference can be inlined.
         /// </summary>
         /// <param name="aspectReference">Resolved aspect reference.</param>
-        /// <param name="semanticModel"></param>
+        /// <param name="semanticModel">Semantic model of the syntax tree that contains the reference.</param>
         /// <returns></returns>
         public virtual bool CanInline( ResolvedAspectReference aspectReference, SemanticModel semanticModel )
         {
             if ( !SymbolEqualityComparer.Default.Equals(
-                    aspectReference.ContainingSymbol.ContainingType,
+                    aspectReference.ContainingSemantic.Symbol.ContainingType,
                     aspectReference.ResolvedSemantic.Symbol.ContainingType ) )
             {
                 return false;
@@ -42,12 +44,24 @@ namespace Metalama.Framework.Engine.Linking.Inlining
         }
 
         /// <summary>
+        /// Gets the inlining info during analysis.
+        /// </summary>
+        /// <param name="context">Context.</param>
+        /// <param name="aspectReference">Aspect reference to inline.</param>
+        /// <returns>Inlining specification.</returns>
+        public abstract InliningAnalysisInfo GetInliningAnalysisInfo( InliningAnalysisContext context, ResolvedAspectReference aspectReference );
+
+        /// <summary>
         /// Inlines the target of the annotated expression by specifying node to be replaced and the replacing node.
         /// </summary>
-        /// <param name="context">Inlining context.</param>
-        /// <param name="aspectReference">Aspect reference.</param>
-        /// <param name="replacedNode">Replaced node (has to be direct ancestor of the annotated expression).</param>
-        /// <param name="newNode"></param>
-        public abstract void Inline( InliningContext context, ResolvedAspectReference aspectReference, out SyntaxNode replacedNode, out SyntaxNode newNode );
+        /// <param name="specification">Inlining specification..</param>
+        /// <param name="currentNode">Current node (after substitutions).</param>
+        /// <param name="linkedTargetBody">Linked target body that is to be inlined.</param>
+        /// <returns>Statement resulting from inlining.</returns>
+        public abstract StatementSyntax Inline(
+            SyntaxGenerationContext syntaxGenerationContext,
+            InliningSpecification specification,
+            SyntaxNode currentNode,
+            StatementSyntax linkedTargetBody );
     }
 }

@@ -29,13 +29,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.EventFields.Override
             add
             {
                 Console.WriteLine("Override2 Start");
-                link[_this.Foo, inline] += value;
+                link[_this.Foo.add, inline] += value;
                 Console.WriteLine("Override2 End");
             }
             remove
             {
                 Console.WriteLine("Override2 Start");
-                link[_this.Foo, inline] -= value;
+                link[_this.Foo.remove, inline] -= value;
                 Console.WriteLine("Override2 End");
             }
         }

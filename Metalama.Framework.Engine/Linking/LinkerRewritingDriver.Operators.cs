@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
-using Metalama.Framework.Engine.Linking.Inlining;
+using Metalama.Framework.Engine.Linking.Substitution;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -22,28 +22,28 @@ namespace Metalama.Framework.Engine.Linking
             IMethodSymbol symbol,
             SyntaxGenerationContext generationContext )
         {
-            if ( this._introductionRegistry.IsOverrideTarget( symbol ) )
+            if ( this.IntroductionRegistry.IsOverrideTarget( symbol ) )
             {
                 var members = new List<MemberDeclarationSyntax>();
-                var lastOverride = (IMethodSymbol) this._introductionRegistry.GetLastOverride( symbol );
+                var lastOverride = this.IntroductionRegistry.GetLastOverride( symbol );
 
-                if ( this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( lastOverride, IntermediateSymbolSemanticKind.Default ), out _ ) )
+                if ( this.AnalysisRegistry.IsInlined( lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final, lastOverride.IsAsync ) );
                 }
                 else
                 {
-                    members.Add( GetTrampolineOperator( operatorDeclaration, lastOverride ) );
+                    members.Add( GetTrampolineForOperator( operatorDeclaration, lastOverride ) );
                 }
 
-                if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
-                     && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
+                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
+                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     members.Add( GetOriginalImplOperator( operatorDeclaration, symbol ) );
                 }
 
-                if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ) )
-                     && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ), out _ ) )
+                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
+                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ) )
                 {
                     members.Add( GetEmptyImplOperator( operatorDeclaration, symbol ) );
                 }
@@ -57,9 +57,12 @@ namespace Metalama.Framework.Engine.Linking
 
             OperatorDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind, bool isAsync )
             {
-                var linkedBody = this.GetLinkedBody(
+                var linkedBody = this.GetSubstitutedBody(
                     symbol.ToSemantic( semanticKind ),
-                    InliningContext.Create( this, symbol, generationContext ) );
+                    new SubstitutionContext(
+                        this,
+                        generationContext,
+                        new InliningContextIdentifier( symbol.ToSemantic( semanticKind ) ) ) );
 
                 var modifiers = operatorDeclaration.Modifiers;
 
@@ -118,7 +121,9 @@ namespace Metalama.Framework.Engine.Linking
             OperatorDeclarationSyntax @operator,
             IMethodSymbol symbol )
         {
-            var emptyBody = Block().NormalizeWhitespace();
+            var emptyBody =
+                Block( ReturnStatement( DefaultExpression( @operator.ReturnType ) ) )
+                    .NormalizeWhitespace();
 
             return GetSpecialImplOperator( @operator, emptyBody, null, symbol, GetEmptyImplMemberName( symbol ) );
         }
@@ -153,6 +158,32 @@ namespace Metalama.Framework.Engine.Linking
                     .WithExpressionBody( expressionBody )
                     .WithSemicolonToken( expressionBody != null ? Token( SyntaxKind.SemicolonToken ) : default )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
+        }
+
+        private static OperatorDeclarationSyntax GetTrampolineForOperator( OperatorDeclarationSyntax @operator, IMethodSymbol targetSymbol )
+        {
+            // TODO: First override not being inlineable probably does not happen outside of specifically written linker tests, i.e. trampolines may not be needed.
+
+            return
+                @operator
+                    .WithBody( GetBody() )
+                    .NormalizeWhitespace()
+                    .WithLeadingTrivia( @operator.GetLeadingTrivia() )
+                    .WithTrailingTrivia( @operator.GetTrailingTrivia() );
+
+            BlockSyntax GetBody()
+            {
+                var invocation =
+                    InvocationExpression(
+                        IdentifierName( targetSymbol.Name ),
+                        ArgumentList() );
+
+                return Block(
+                    ReturnStatement(
+                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
+                        invocation,
+                        Token( SyntaxKind.SemicolonToken ) ) );
+            }
         }
     }
 }

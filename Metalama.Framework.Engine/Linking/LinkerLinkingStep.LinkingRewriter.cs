@@ -1,8 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
-using Metalama.Framework.Engine.Formatting;
-using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -35,24 +33,18 @@ namespace Metalama.Framework.Engine.Linking
                 this._rewritingDriver = rewritingDriver;
             }
 
-            public override SyntaxNode? VisitStructDeclaration( StructDeclarationSyntax node )
-            {
-                return this.VisitTypeDeclaration( node );
-            }
+            public override SyntaxNode? VisitStructDeclaration( StructDeclarationSyntax node ) 
+                => node.WithMembers( List( this.GetMembersForTypeDeclaration( node ) ) );
 
-            public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node )
-            {
-                return this.VisitTypeDeclaration( node );
-            }
+            public override SyntaxNode? VisitClassDeclaration( ClassDeclarationSyntax node ) 
+                => node.WithMembers( List( this.GetMembersForTypeDeclaration( node ) ) );
 
-            public override SyntaxNode? VisitInterfaceDeclaration( InterfaceDeclarationSyntax node )
-            {
-                return this.VisitTypeDeclaration( node );
-            }
+            public override SyntaxNode? VisitInterfaceDeclaration( InterfaceDeclarationSyntax node ) 
+                => node.WithMembers( List( this.GetMembersForTypeDeclaration( node ) ) );
 
             public override SyntaxNode? VisitRecordDeclaration( RecordDeclarationSyntax node )
             {
-                var recordWithTransformedMembers = (RecordDeclarationSyntax) this.VisitTypeDeclaration( node )!;
+                var transformedMembers = this.GetMembersForTypeDeclaration( node ).AssertNotNull();
 
                 if ( node.ParameterList != null )
                 {
@@ -86,54 +78,29 @@ namespace Metalama.Framework.Engine.Linking
                                     node.SyntaxTree,
                                     node.SpanStart );
 
-                            var setAccessor =
-                                node.ClassOrStructKeyword.IsKind( SyntaxKind.StructKeyword )
-                                    ? node.Modifiers.Any( m => m.IsKind( SyntaxKind.ReadOnlyKeyword ) )
-                                        ? AccessorDeclaration( SyntaxKind.InitAccessorDeclaration )
-                                        : AccessorDeclaration( SyntaxKind.SetAccessorDeclaration )
-                                    : AccessorDeclaration( SyntaxKind.InitAccessorDeclaration );
-
-                            // We need to create a "fake" syntax for the property, so we can use normal logic to process
-                            // properties with almost no change.
-                            var property = PropertyDeclaration(
-                                    default,
-                                    TokenList( Token( SyntaxKind.PublicKeyword ) ),
-                                    parameter.Type.AssertNotNull(),
-                                    default,
-                                    parameter.Identifier,
-                                    AccessorList(
-                                        List(
-                                            new[]
-                                            {
-                                                AccessorDeclaration( SyntaxKind.GetAccessorDeclaration )
-                                                    .WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) ),
-                                                setAccessor.WithSemicolonToken( Token( SyntaxKind.SemicolonToken ) )
-                                            } ) ),
-                                    null,
-                                    EqualsValueClause( IdentifierName( parameter.Identifier ) ) )
-                                .NormalizeWhitespace()
-                                .AddColoringAnnotation( TextSpanClassification.GeneratedCode );
-
-                            // Property-level custom attributes must be moved from the parameter to the new property.
-                            foreach ( var attributeList in parameter.AttributeLists )
+                            if ( this._rewritingDriver.IsRewriteTarget( propertySymbol.AssertNotNull() ) )
                             {
-                                if ( attributeList.Target != null )
-                                {
-                                    var propertyLevelAttributeList = attributeList;
-
-                                    if ( attributeList.Target.Identifier.IsKind( SyntaxKind.PropertyKeyword ) )
-                                    {
-                                        propertyLevelAttributeList = attributeList.WithTarget( default );
-                                    }
-
-                                    property = property.WithAttributeLists( property.AttributeLists.Add( propertyLevelAttributeList ) );
-                                }
+                                // Add new members that take place of synthesized positional property.
+                                newMembers.AddRange(
+                                    this._rewritingDriver.RewritePositionalProperty(
+                                        parameter,
+                                        propertySymbol.AssertNotNull(),
+                                        GetSyntaxGenerationContext() ) );
                             }
 
-                            var transformedParameter = parameter.WithAttributeLists( List( parameter.AttributeLists.Where( l => l.Target == null ) ) );
-                            transformedParametersAndCommas.Add( transformedParameter );
+                            // Remove all attributes related to properties (property/field/get/set target specifiers).
+                            var transformedParameter =
+                                parameter.WithAttributeLists(
+                                    List(
+                                        parameter.AttributeLists
+                                            .Where(
+                                                l =>
+                                                    l.Target?.Identifier.IsKind( SyntaxKind.PropertyKeyword ) != true
+                                                    && l.Target?.Identifier.IsKind( SyntaxKind.FieldKeyword ) != true
+                                                    && l.Target?.Identifier.IsKind( SyntaxKind.GetKeyword ) != true
+                                                    && l.Target?.Identifier.IsKind( SyntaxKind.SetKeyword ) != true ) ) );
 
-                            newMembers.AddRange( this._rewritingDriver.RewriteMember( property, propertySymbol, GetSyntaxGenerationContext() ) );
+                            transformedParametersAndCommas.Add( transformedParameter );
                         }
                         else
                         {
@@ -146,19 +113,19 @@ namespace Metalama.Framework.Engine.Linking
                         }
                     }
 
-                    if ( newMembers != null )
-                    {
-                        recordWithTransformedMembers = recordWithTransformedMembers.WithMembers( recordWithTransformedMembers.Members.AddRange( newMembers ) );
-                    }
+                    node = node.WithParameterList( node.ParameterList.WithParameters( SeparatedList<ParameterSyntax>( transformedParametersAndCommas ) ) );
 
-                    recordWithTransformedMembers =
-                        recordWithTransformedMembers.WithParameterList( ParameterList( SeparatedList<ParameterSyntax>( transformedParametersAndCommas ) ) );
+                    if ( newMembers != null && newMembers.Count > 0 )
+                    {
+                        transformedMembers =
+                            transformedMembers.Concat( newMembers ).ToList();
+                    }
                 }
 
-                return recordWithTransformedMembers;
+                return node.WithMembers( List( transformedMembers ) );
             }
 
-            private SyntaxNode? VisitTypeDeclaration( TypeDeclarationSyntax node )
+            private IReadOnlyList<MemberDeclarationSyntax> GetMembersForTypeDeclaration( TypeDeclarationSyntax node )
             {
                 // TODO: Other transformations than method overrides.
                 var newMembers = new List<MemberDeclarationSyntax>();
@@ -267,7 +234,7 @@ namespace Metalama.Framework.Engine.Linking
                     }
                 }
 
-                return node.WithMembers( List( newMembers ) );
+                return newMembers;
             }
         }
     }

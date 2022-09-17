@@ -6,8 +6,7 @@ internal class TargetCode
         global::System.Console.WriteLine("Before");
         global::System.Threading.Tasks.Task<global::System.Int32> result;
         result = Task.FromResult(a);
-        goto __aspect_return_1;
-    __aspect_return_1: global::System.Console.WriteLine("After");
+        global::System.Console.WriteLine("After");
         return (global::System.Threading.Tasks.Task<global::System.Int32>)result;
     }
 
@@ -17,8 +16,7 @@ internal class TargetCode
         global::System.Console.WriteLine("Before");
         global::System.Threading.Tasks.ValueTask<global::System.Int32> result;
         result = new ValueTask<int>(0);
-        goto __aspect_return_1;
-    __aspect_return_1: global::System.Console.WriteLine("After");
+        global::System.Console.WriteLine("After");
         return (global::System.Threading.Tasks.ValueTask<global::System.Int32>)result;
     }
 
@@ -28,8 +26,7 @@ internal class TargetCode
         global::System.Console.WriteLine("Before");
         global::System.Threading.Tasks.Task<TResult?> result;
         result = Task.FromResult(default(TResult));
-        goto __aspect_return_1;
-    __aspect_return_1: global::System.Console.WriteLine("After");
+        global::System.Console.WriteLine("After");
         return (global::System.Threading.Tasks.Task<TResult?>)result;
     }
 
@@ -42,8 +39,7 @@ internal class TargetCode
         global::System.Threading.Tasks.Task<TResult?> result;
         x.Dispose();
         result = Task.FromResult(default(TResult));
-        goto __aspect_return_1;
-    __aspect_return_1: global::System.Console.WriteLine("After");
+        global::System.Console.WriteLine("After");
         return (global::System.Threading.Tasks.Task<TResult?>)result;
     }
 }

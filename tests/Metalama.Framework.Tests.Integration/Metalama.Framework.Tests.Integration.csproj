@@ -25,18 +25,12 @@
         <!-- These packages ared used in tests -->
         <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
         <PackageReference Include="System.Text.Json" Version="6.0.3" />
-
     </ItemGroup>
 
     <ItemGroup>
         <!-- Exclude files that intentionally do not compile -->
         <Compile Remove="Tests\**\__*.cs" />
         <None Include="Tests\**\__*.cs" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Compile Remove="Tests\Licensing\RedistributionAllowed.t.cs" />
-      <Compile Remove="Tests\Licensing\RedistributionReported.t.cs" />
     </ItemGroup>
 
     <ItemGroup>
@@ -47,11 +41,6 @@
 
     <ItemGroup>
         <InternalsVisibleTo Include="Metalama.AspectWorkbench" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <None Include="Tests\Licensing\RedistributionAllowed.t.cs" />
-      <None Include="Tests\Licensing\RedistributionReported.t.cs" />
     </ItemGroup>
 
     <Import Project="..\..\Metalama.TestFramework\Metalama.TestFramework.targets" />
