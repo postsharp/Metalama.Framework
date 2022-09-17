@@ -322,7 +322,7 @@ namespace Metalama.TestFramework
                 default,
                 CancellationToken.None );
 
-            if ( pipelineResult == null )
+            if ( !pipelineResult.IsSuccess )
             {
                 testResult.SetFailed( "Transformation of the dependency failed." );
 
@@ -333,9 +333,9 @@ namespace Metalama.TestFramework
             var testOptions = this.BaseServiceProvider.GetRequiredService<TestProjectOptions>();
             var outputPath = Path.Combine( testOptions.BaseDirectory, name + ".dll" );
 
-            var emitResult = pipelineResult.ResultingCompilation.Compilation.Emit(
+            var emitResult = pipelineResult.Value.ResultingCompilation.Compilation.Emit(
                 outputPath,
-                manifestResources: pipelineResult.AdditionalResources.Select( r => r.Resource ) );
+                manifestResources: pipelineResult.Value.AdditionalResources.Select( r => r.Resource ) );
 
             if ( !emitResult.Success )
             {

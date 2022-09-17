@@ -13,22 +13,24 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Tests.Licensing.Sdk
 {
-    [RequireAspectWeaver("Metalama.Framework.Tests.Integration.Tests.Licensing.Sdk.AspectWeaver")]
+    [RequireAspectWeaver( "Metalama.Framework.Tests.Integration.Tests.Licensing.Sdk.AspectWeaver" )]
     internal class Aspect : MethodAspect { }
 
     [MetalamaPlugIn]
     internal class AspectWeaver : IAspectWeaver
     {
-        public void Transform(AspectWeaverContext context)
+        public Task TransformAsync( AspectWeaverContext context )
         {
-            context.RewriteAspectTargets(new Rewriter());
+            context.RewriteAspectTargets( new Rewriter() );
+
+            return Task.CompletedTask;
         }
 
         private class Rewriter : SafeSyntaxRewriter
         {
-            public override SyntaxNode? VisitMethodDeclaration(MethodDeclarationSyntax node)
+            public override SyntaxNode? VisitMethodDeclaration( MethodDeclarationSyntax node )
             {
-                return base.VisitMethodDeclaration(node)!.WithLeadingTrivia(SyntaxFactory.Comment("// Rewritten." + Environment.NewLine));
+                return base.VisitMethodDeclaration( node )!.WithLeadingTrivia( SyntaxFactory.Comment( "// Rewritten." + Environment.NewLine ) );
             }
         }
     }
@@ -37,8 +39,8 @@ namespace Metalama.Framework.Tests.Integration.Tests.Licensing.Sdk
     internal class TargetCode
     {
         [Aspect]
-        private int TransformedMethod(int a) => 0;
+        private int TransformedMethod( int a ) => 0;
 
-        private int NotTransformedMethod(int a) => 0;
+        private int NotTransformedMethod( int a ) => 0;
     }
 }

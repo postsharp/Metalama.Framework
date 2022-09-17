@@ -69,13 +69,12 @@ namespace Metalama.Framework.Engine.Pipeline
                             context.Resources.ToImmutableArray(),
                             CancellationToken.None ) );
 
-                if ( pipelineResult != null )
+                if ( pipelineResult.IsSuccess )
                 {
-                    context.AddResources( pipelineResult.AdditionalResources );
-                    context.AddSyntaxTreeTransformations( pipelineResult.SyntaxTreeTransformations );
+                    context.AddResources( pipelineResult.Value.AdditionalResources );
+                    context.AddSyntaxTreeTransformations( pipelineResult.Value.SyntaxTreeTransformations );
+                    HandleAdditionalCompilationOutputFiles( projectOptions, pipelineResult.Value );
                 }
-
-                HandleAdditionalCompilationOutputFiles( projectOptions, pipelineResult );
             }
             catch ( Exception e )
             {

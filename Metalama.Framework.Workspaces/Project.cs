@@ -7,8 +7,10 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Introspection;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Introspection;
 using System.Collections.Immutable;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Workspaces
 {
@@ -58,7 +60,9 @@ namespace Metalama.Framework.Workspaces
             var compiler = new IntrospectionCompiler( this._domain );
             this.IsMetalamaOutputEvaluated = true;
 
-            return compiler.Compile( this.Compilation, this._serviceProvider );
+            var result = TaskHelper.RunAndWait( () => compiler.CompileAsync( this.Compilation, this._serviceProvider ) );
+
+            return result;
         }
 
         public override string ToString()

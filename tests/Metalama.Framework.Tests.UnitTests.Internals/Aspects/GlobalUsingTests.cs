@@ -65,15 +65,15 @@ public class LogAttribute : OMA
     public async Task SameSyntaxTreeAsync()
     {
         var result = await this.CompileAsync( _globalUsings + _code );
-        Assert.NotNull( result );
-        Assert.Empty( result!.ResultingCompilation.Compilation.GetDiagnostics().Where( d => d.Severity >= DiagnosticSeverity.Warning ) );
+        Assert.True( result.IsSuccess );
+        Assert.Empty( result.Value.ResultingCompilation.Compilation.GetDiagnostics().Where( d => d.Severity >= DiagnosticSeverity.Warning ) );
     }
 
     [Fact]
     public async Task DifferentSyntaxTreeAsync()
     {
         var result = await this.CompileAsync( new Dictionary<string, string>() { ["usings.cs"] = _globalUsings, ["code.cs"] = _code } );
-        Assert.NotNull( result );
-        Assert.Empty( result!.ResultingCompilation.Compilation.GetDiagnostics().Where( d => d.Severity >= DiagnosticSeverity.Warning ) );
+        Assert.True( result.IsSuccess );
+        Assert.Empty( result.Value.ResultingCompilation.Compilation.GetDiagnostics().Where( d => d.Severity >= DiagnosticSeverity.Warning ) );
     }
 }

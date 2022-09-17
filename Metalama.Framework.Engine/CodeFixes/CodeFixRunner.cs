@@ -95,15 +95,17 @@ namespace Metalama.Framework.Engine.CodeFixes
 
             var designTimeConfiguration = configuration.Configuration;
 
-            if ( !codeFixPipeline.TryExecute(
-                    partialCompilation,
-                    ref designTimeConfiguration,
-                    cancellationToken,
-                    out var userCodeFixes,
-                    out _ ) )
+            var pipelineResult = await codeFixPipeline.ExecuteAsync(
+                partialCompilation,
+                designTimeConfiguration,
+                cancellationToken );
+
+            if ( !pipelineResult.IsSuccess )
             {
                 return CodeActionResult.Empty;
             }
+
+            var userCodeFixes = pipelineResult.Value.CodeFixes;
 
             if ( userCodeFixes.IsDefaultOrEmpty )
             {

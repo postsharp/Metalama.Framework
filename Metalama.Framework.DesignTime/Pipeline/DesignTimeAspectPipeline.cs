@@ -259,34 +259,44 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
         }
 
-        private bool TryExecutePartial(
+        private async Task<FallibleResult<CompilationResult>> ExecutePartialAsync(
             PartialCompilation partialCompilation,
             DesignTimeProjectVersion projectVersion,
-            CancellationToken cancellationToken,
-            [NotNullWhen( true )] out CompilationResult? compilationResult )
+            CancellationToken cancellationToken )
         {
-            var state = this._currentState;
+            var result = await PipelineState.ExecuteAsync( this._currentState, partialCompilation, projectVersion, cancellationToken );
 
-            if ( !PipelineState.TryExecute( ref state, partialCompilation, projectVersion, cancellationToken, out compilationResult ) )
+            if ( !result.IsSuccess )
             {
-                return false;
+                return default;
             }
 
             // Intentionally updating the state atomically after successful execution of the method, so the state is
             // not affected by a cancellation.
-            this.SetState( state );
+            this.SetState( result.Value.NewState );
 
-            return true;
+            return result.Value.CompilationResult;
         }
 
         // This method is for testing only.
         public bool TryExecute( Compilation compilation, CancellationToken cancellationToken, [NotNullWhen( true )] out CompilationResult? compilationResult )
         {
-            compilationResult = TaskHelper.RunAndWait(
+            var result = TaskHelper.RunAndWait(
                 () => this.ExecuteAsync( compilation, cancellationToken ),
                 cancellationToken );
 
-            return compilationResult != null;
+            if ( !result.IsSuccess )
+            {
+                compilationResult = null;
+
+                return false;
+            }
+            else
+            {
+                compilationResult = result.Value;
+
+                return true;
+            }
         }
 
         private async ValueTask<DesignTimeProjectVersion?> GetDesignTimeProjectVersionAsync(
@@ -309,15 +319,15 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     // This is a Metalama reference. We need to compile the dependency.
                     var referenceResult = await factory.ExecuteAsync( reference.Compilation, cancellationToken );
 
-                    if ( referenceResult == null )
+                    if ( !referenceResult.IsSuccess )
                     {
                         return null;
                     }
 
                     compilationReferences.Add(
                         new DesignTimeProjectReference(
-                            referenceResult.ProjectVersion,
-                            referenceResult.TransformationResult ) );
+                            referenceResult.Value.ProjectVersion,
+                            referenceResult.Value.TransformationResult ) );
                 }
                 else
                 {
@@ -345,7 +355,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             return new DesignTimeProjectVersion( compilationVersion, compilationReferences );
         }
 
-        public async ValueTask<CompilationResult?> ExecuteAsync(
+        public async ValueTask<FallibleResult<CompilationResult>> ExecuteAsync(
             Compilation compilation,
             CancellationToken cancellationToken )
         {
@@ -368,7 +378,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 if ( projectVersion == null )
                 {
                     // A dependency could not be compiled.
-                    return null;
+                    return default;
                 }
 
                 // Invalidate the cache for the new compilation.
@@ -426,9 +436,11 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     {
                         Interlocked.Increment( ref this._pipelineExecutionCount );
 
-                        if ( !this.TryExecutePartial( partialCompilation, projectVersion, cancellationToken, out compilationResult ) )
+                        var executionResult = await this.ExecutePartialAsync( partialCompilation, projectVersion, cancellationToken );
+
+                        if ( !executionResult.IsSuccess )
                         {
-                            return null;
+                            return default;
                         }
                     }
 
@@ -647,27 +659,33 @@ namespace Metalama.Framework.DesignTime.Pipeline
             // TODO: use partial compilation (it does not seem to work).
             var partialCompilation = PartialCompilation.CreateComplete( sourceCompilation );
 
-            DiagnosticList diagnosticList = new();
+            DiagnosticBag diagnosticBag = new();
 
-            var configuration = await this.GetConfigurationAsync( partialCompilation, diagnosticList, true, cancellationToken );
+            var configuration = await this.GetConfigurationAsync( partialCompilation, diagnosticBag, true, cancellationToken );
 
             if ( configuration == null )
             {
-                return (false, null, diagnosticList.ToImmutableArray());
+                return (false, null, diagnosticBag.ToImmutableArray());
             }
 
-            var result = LiveTemplateAspectPipeline.TryExecute(
+            var result = await LiveTemplateAspectPipeline.ExecuteAsync(
                 configuration.ServiceProvider,
                 this.Domain,
                 configuration,
                 x => x.AspectClasses.Single( c => c.FullName == aspectTypeName ),
                 partialCompilation,
                 sourceSymbol,
-                diagnosticList,
-                cancellationToken,
-                out var outputCompilation );
+                diagnosticBag,
+                cancellationToken );
 
-            return (result, outputCompilation, diagnosticList.ToImmutableArray());
+            if ( !result.IsSuccess )
+            {
+                return (false, null, diagnosticBag.ToImmutableArray());
+            }
+            else
+            {
+                return (true, result.Value, diagnosticBag.ToImmutableArray());
+            }
         }
     }
 }

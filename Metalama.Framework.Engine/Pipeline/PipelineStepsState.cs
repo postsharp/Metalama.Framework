@@ -16,6 +16,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Pipeline
 {
@@ -91,7 +92,7 @@ namespace Metalama.Framework.Engine.Pipeline
             this.AddValidatorSources( inputValidatorSources );
         }
 
-        public void Execute( CancellationToken cancellationToken )
+        public async Task ExecuteAsync( CancellationToken cancellationToken )
         {
             using var enumerator = this._steps.GetEnumerator();
             PipelineStep? previousStep = null;
@@ -106,7 +107,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
                 var compilation = this.LastCompilation.GetCompilationModel();
 
-                this.LastCompilation = this._currentStep!.Execute( compilation, cancellationToken );
+                this.LastCompilation = await this._currentStep!.ExecuteAsync( compilation, cancellationToken );
 
                 if ( compilation != this.LastCompilation )
                 {

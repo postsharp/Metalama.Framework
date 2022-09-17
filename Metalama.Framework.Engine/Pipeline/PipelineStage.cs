@@ -4,6 +4,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Pipeline
 {
@@ -30,13 +31,11 @@ namespace Metalama.Framework.Engine.Pipeline
         /// <param name="input">The inputs.</param>
         /// <param name="diagnostics"></param>
         /// <param name="cancellationToken"></param>
-        /// <param name="result"></param>
         /// <returns></returns>
-        public abstract bool TryExecute(
+        public abstract Task<FallibleResult<AspectPipelineResult>> ExecuteAsync(
             AspectPipelineConfiguration pipelineConfiguration,
             AspectPipelineResult input,
             IDiagnosticAdder diagnostics,
-            CancellationToken cancellationToken,
-            [NotNullWhen( true )] out AspectPipelineResult? result );
+            CancellationToken cancellationToken );
     }
 }

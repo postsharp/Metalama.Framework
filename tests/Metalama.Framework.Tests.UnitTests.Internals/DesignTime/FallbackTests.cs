@@ -156,11 +156,11 @@ public class TargetClass
                 domain,
                 ExecutionScenario.CompileTime );
 
-            var diagnosticList = new DiagnosticList();
+            var diagnosticList = new DiagnosticBag();
 
             var compileTimeResult = await compileTimePipeline.ExecuteAsync( diagnosticList, inputCompilation, default, CancellationToken.None );
 
-            if ( compileTimeResult == null )
+            if ( !compileTimeResult.IsSuccess )
             {
                 throw new AssertionFailedException( "CompileTimeAspectPipeline.ExecuteAsync failed." );
             }
@@ -168,7 +168,7 @@ public class TargetClass
             // Create a compilation from the input compilation with removed nodes plus auxiliary files.
             var resultingCompilation = inputCompilation;
 
-            foreach ( var file in compileTimeResult.AdditionalCompilationOutputFiles.Where(
+            foreach ( var file in compileTimeResult.Value.AdditionalCompilationOutputFiles.Where(
                          f => f.Kind == AdditionalCompilationOutputFileKind.DesignTimeGeneratedCode ) )
             {
                 using var outputStream = new MemoryStream();

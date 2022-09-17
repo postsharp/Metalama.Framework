@@ -7,11 +7,14 @@ using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities.Threading;
+using Metalama.Framework.Project;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Pipeline;
 
@@ -21,15 +24,19 @@ namespace Metalama.Framework.Engine.Pipeline;
 internal class ExecuteAspectLayerPipelineStep : PipelineStep
 {
     private readonly List<AspectInstance> _aspectInstances = new();
+    private readonly ITaskScheduler _taskScheduler;
 
     public ExecuteAspectLayerPipelineStep( PipelineStepsState parent, PipelineStepId stepId, OrderedAspectLayer aspectLayer ) : base(
         parent,
         stepId,
-        aspectLayer ) { }
+        aspectLayer )
+    {
+        this._taskScheduler = parent.PipelineConfiguration.ServiceProvider.GetRequiredService<ITaskScheduler>();
+    }
 
     public void AddAspectInstance( in ResolvedAspectInstance aspectInstance ) => this._aspectInstances.Add( aspectInstance.AspectInstance );
 
-    public override CompilationModel Execute(
+    public override async Task<CompilationModel> ExecuteAsync(
         CompilationModel compilation,
         CancellationToken cancellationToken )
     {
@@ -45,10 +52,9 @@ internal class ExecuteAspectLayerPipelineStep : PipelineStep
         var observableTransformations = new ConcurrentQueue<IObservableTransformation>();
 
         // The processing order of types is arbitrary. Different types can be processed in parallel.
-        foreach ( var typeGroup in instancesByType )
-        {
-            this.ProcessType( typeGroup, compilation, observableTransformations.Enqueue, cancellationToken );
-        }
+        await this._taskScheduler.RunInParallelAsync(
+            instancesByType.Select( i => new Action( () => this.ProcessType( i, compilation, observableTransformations.Enqueue, cancellationToken ) ) ),
+            cancellationToken );
 
         return compilation.WithTransformations( observableTransformations );
     }

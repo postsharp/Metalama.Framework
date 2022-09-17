@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.AspectWeavers;
@@ -15,9 +16,11 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Sdk.Simple
     [MetalamaPlugIn]
     internal class AspectWeaver : IAspectWeaver
     {
-        public void Transform( AspectWeaverContext context )
+        public Task TransformAsync( AspectWeaverContext context )
         {
             context.RewriteAspectTargets( new Rewriter() );
+
+            return Task.CompletedTask;
         }
 
         private class Rewriter : SafeSyntaxRewriter

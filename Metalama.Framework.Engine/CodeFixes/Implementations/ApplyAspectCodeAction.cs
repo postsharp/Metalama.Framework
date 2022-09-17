@@ -27,7 +27,7 @@ internal class ApplyAspectCodeAction<TTarget> : ICodeAction
         this.Aspect = aspect;
     }
 
-    public Task ExecuteAsync( CodeActionContext context )
+    public async Task ExecuteAsync( CodeActionContext context )
     {
         var compilation = context.Compilation;
 
@@ -40,24 +40,19 @@ internal class ApplyAspectCodeAction<TTarget> : ICodeAction
 
         var aspectClass = (AspectClass) context.PipelineConfiguration.BoundAspectClasses.Single<IBoundAspectClass>( c => c.Type == this.Aspect.GetType() );
 
-        if ( !LiveTemplateAspectPipeline.TryExecute(
-                context.ServiceProvider,
-                context.PipelineConfiguration.Domain,
-                context.PipelineConfiguration,
-                _ => aspectClass,
-                PartialCompilation.CreatePartial( compilation.Compilation, targetSymbol.GetPrimaryDeclaration()!.SyntaxTree ),
-                targetSymbol,
-                NullDiagnosticAdder.Instance,
-                CancellationToken.None,
-                out var outputCompilation ) )
-        {
-            return Task.FromResult( false );
-        }
-        else
-        {
-            context.ApplyModifications( outputCompilation );
+        var result = await LiveTemplateAspectPipeline.ExecuteAsync(
+            context.ServiceProvider,
+            context.PipelineConfiguration.Domain,
+            context.PipelineConfiguration,
+            _ => aspectClass,
+            PartialCompilation.CreatePartial( compilation.Compilation, targetSymbol.GetPrimaryDeclaration()!.SyntaxTree ),
+            targetSymbol,
+            NullDiagnosticAdder.Instance,
+            context.CancellationToken );
 
-            return Task.FromResult( true );
+        if ( result.IsSuccess )
+        {
+            context.ApplyModifications( result.Value );
         }
     }
 }

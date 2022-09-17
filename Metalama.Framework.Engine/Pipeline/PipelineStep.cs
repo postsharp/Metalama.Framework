@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.CodeModel;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Pipeline
 {
@@ -30,7 +31,7 @@ namespace Metalama.Framework.Engine.Pipeline
         /// <param name="compilation"></param>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
-        public abstract CompilationModel Execute(
+        public abstract Task<CompilationModel> ExecuteAsync(
             CompilationModel compilation,
             CancellationToken cancellationToken );
 

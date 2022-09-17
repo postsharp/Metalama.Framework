@@ -38,13 +38,13 @@ namespace Metalama.TestFramework
 
         public TestInput? TestInput { get; set; }
 
-        public DiagnosticList InputCompilationDiagnostics { get; } = new();
+        public DiagnosticBag InputCompilationDiagnostics { get; } = new();
 
-        public DiagnosticList OutputCompilationDiagnostics { get; } = new();
+        public DiagnosticBag OutputCompilationDiagnostics { get; } = new();
 
-        public DiagnosticList CompileTimeCompilationDiagnostics { get; } = new();
+        public DiagnosticBag CompileTimeCompilationDiagnostics { get; } = new();
 
-        public DiagnosticList PipelineDiagnostics { get; } = new();
+        public DiagnosticBag PipelineDiagnostics { get; } = new();
 
         public IEnumerable<Diagnostic> Diagnostics
             => this.OutputCompilationDiagnostics

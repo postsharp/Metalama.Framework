@@ -100,12 +100,12 @@ class A : Attribute
                     compilation.RoslynCompilation,
                     ProjectLicenseInfo.Empty,
                     null,
-                    new DiagnosticList(),
+                    new DiagnosticBag(),
                     false,
                     CancellationToken.None,
                     out _ ) );
 
-            if ( !loader.AttributeDeserializer.TryCreateAttribute( compilation.Attributes.First(), new DiagnosticList(), out var attribute ) )
+            if ( !loader.AttributeDeserializer.TryCreateAttribute( compilation.Attributes.First(), new DiagnosticBag(), out var attribute ) )
             {
                 throw new AssertionFailedException();
             }
@@ -141,14 +141,14 @@ class ReferencingClass
             using var testContext = this.CreateTestContext();
             var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
 
-            DiagnosticList diagnosticList = new();
+            DiagnosticBag diagnosticBag = new();
 
             Assert.True(
                 loader.TryGetCompileTimeProjectFromCompilation(
                     roslynCompilation,
                     ProjectLicenseInfo.Empty,
                     null,
-                    diagnosticList,
+                    diagnosticBag,
                     false,
                     CancellationToken.None,
                     out _ ) );
@@ -200,7 +200,7 @@ class ReferencingClass
                     var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
 
                     var compilation = CreateCSharpCompilation( code, additionalReferences: references );
-                    DiagnosticList diagnostics = new();
+                    DiagnosticBag diagnostics = new();
 
                     Assert.True(
                         loader.TryGetCompileTimeProjectFromCompilation(
@@ -309,14 +309,14 @@ class B
             using var testContext1 = this.CreateTestContext();
 
             var loaderV1 = CompileTimeProjectLoader.Create( domain, testContext1.ServiceProvider );
-            DiagnosticList diagnosticList = new();
+            DiagnosticBag diagnosticBag = new();
 
             Assert.True(
                 loaderV1.TryGetCompileTimeProjectFromCompilation(
                     compilationB1,
                     ProjectLicenseInfo.Empty,
                     null,
-                    diagnosticList,
+                    diagnosticBag,
                     false,
                     CancellationToken.None,
                     out var project1 ) );
@@ -331,7 +331,7 @@ class B
                     compilationB2,
                     ProjectLicenseInfo.Empty,
                     null,
-                    diagnosticList,
+                    diagnosticBag,
                     false,
                     CancellationToken.None,
                     out var project2 ) );
@@ -382,14 +382,14 @@ class C
             var compilation = CreateCSharpCompilation( code, ignoreErrors: true );
             using var testContext = this.CreateTestContext();
             var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
-            DiagnosticList diagnosticList = new();
+            DiagnosticBag diagnosticBag = new();
 
             Assert.True(
                 loader.TryGetCompileTimeProjectFromCompilation(
                     compilation,
                     ProjectLicenseInfo.Empty,
                     null,
-                    diagnosticList,
+                    diagnosticBag,
                     false,
                     CancellationToken.None,
                     out _ ) );
@@ -411,7 +411,7 @@ public class ReferencedClass
             using var testContext = this.CreateTestContext();
             var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
 
-            DiagnosticList diagnosticList = new();
+            DiagnosticBag diagnosticBag = new();
 
             // Getting from cache should fail.
             Assert.False(
@@ -419,7 +419,7 @@ public class ReferencedClass
                     roslynCompilation,
                     ProjectLicenseInfo.Empty,
                     null,
-                    diagnosticList,
+                    diagnosticBag,
                     true,
                     CancellationToken.None,
                     out _ ) );
@@ -430,7 +430,7 @@ public class ReferencedClass
                     roslynCompilation,
                     ProjectLicenseInfo.Empty,
                     null,
-                    diagnosticList,
+                    diagnosticBag,
                     false,
                     CancellationToken.None,
                     out var compileTimeProject1 ) );
@@ -441,7 +441,7 @@ public class ReferencedClass
                     roslynCompilation,
                     ProjectLicenseInfo.Empty,
                     null,
-                    diagnosticList,
+                    diagnosticBag,
                     true,
                     CancellationToken.None,
                     out var compileTimeProject2 ) );
@@ -463,7 +463,7 @@ public class ReferencedClass
             using var testContext = this.CreateTestContext();
             var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
 
-            DiagnosticList diagnosticList = new();
+            DiagnosticBag diagnosticBag = new();
 
             // Building the project should succeed.
             Assert.True(
@@ -471,7 +471,7 @@ public class ReferencedClass
                     CreateCSharpCompilation( code ),
                     ProjectLicenseInfo.Empty,
                     null,
-                    diagnosticList,
+                    diagnosticBag,
                     false,
                     CancellationToken.None,
                     out var compileTimeProject1 ) );
@@ -482,7 +482,7 @@ public class ReferencedClass
                     CreateCSharpCompilation( code ),
                     ProjectLicenseInfo.Empty,
                     null,
-                    diagnosticList,
+                    diagnosticBag,
                     true,
                     CancellationToken.None,
                     out var compileTimeProject2 ) );
@@ -501,7 +501,7 @@ public class ReferencedClass
 }
 ";
 
-            DiagnosticList diagnosticList = new();
+            DiagnosticBag diagnosticBag = new();
 
             using var testContext = this.CreateTestContext();
             var loader1 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
@@ -512,7 +512,7 @@ public class ReferencedClass
                     CreateCSharpCompilation( code ),
                     ProjectLicenseInfo.Empty,
                     null,
-                    diagnosticList,
+                    diagnosticBag,
                     false,
                     CancellationToken.None,
                     out _ ) );
@@ -525,7 +525,7 @@ public class ReferencedClass
                     CreateCSharpCompilation( code ),
                     ProjectLicenseInfo.Empty,
                     null,
-                    diagnosticList,
+                    diagnosticBag,
                     true,
                     CancellationToken.None,
                     out _ ) );
@@ -544,7 +544,7 @@ public class ReferencedClass
 
             var roslynCompilation = CreateCSharpCompilation( code );
 
-            DiagnosticList diagnosticList = new();
+            DiagnosticBag diagnosticBag = new();
 
             // We create a single testContext.ServiceProvider because we need to share the filesystem cache, and there is one per testContext.ServiceProvider
             // in test projects.
@@ -559,7 +559,7 @@ public class ReferencedClass
                     roslynCompilation,
                     ProjectLicenseInfo.Empty,
                     null,
-                    diagnosticList,
+                    diagnosticBag,
                     true,
                     CancellationToken.None,
                     out _ ) );
@@ -572,7 +572,7 @@ public class ReferencedClass
                     roslynCompilation,
                     ProjectLicenseInfo.Empty,
                     null,
-                    diagnosticList,
+                    diagnosticBag,
                     false,
                     CancellationToken.None,
                     out _ ) );
@@ -585,7 +585,7 @@ public class ReferencedClass
                     roslynCompilation,
                     ProjectLicenseInfo.Empty,
                     null,
-                    diagnosticList,
+                    diagnosticBag,
                     true,
                     CancellationToken.None,
                     out _ ) );
@@ -622,14 +622,14 @@ class ReferencingClass
             {
                 var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
 
-                DiagnosticList diagnosticList = new();
+                DiagnosticBag diagnosticBag = new();
 
                 Assert.True(
                     loader.TryGetCompileTimeProjectFromCompilation(
                         referencedCompilation,
                         ProjectLicenseInfo.Empty,
                         null,
-                        diagnosticList,
+                        diagnosticBag,
                         false,
                         CancellationToken.None,
                         out var referencedCompileTimeProject ) );
@@ -651,14 +651,14 @@ class ReferencingClass
             {
                 var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext2.ServiceProvider );
 
-                DiagnosticList diagnosticList = new();
+                DiagnosticBag diagnosticBag = new();
 
                 Assert.True(
                     loader.TryGetCompileTimeProjectFromCompilation(
                         referencingCompilation,
                         ProjectLicenseInfo.Empty,
                         null,
-                        diagnosticList,
+                        diagnosticBag,
                         false,
                         CancellationToken.None,
                         out _ ) );
@@ -685,14 +685,14 @@ public class ReferencedClass
             var referencedCompilation = CreateCSharpCompilation( referencedCode );
             var referencedPath = Path.Combine( testContext.ProjectOptions.BaseDirectory, "referenced.dll" );
 
-            DiagnosticList diagnosticList = new();
+            DiagnosticBag diagnosticBag = new();
 
             Assert.True(
                 loader.TryGetCompileTimeProjectFromCompilation(
                     referencedCompilation,
                     ProjectLicenseInfo.Empty,
                     null,
-                    diagnosticList,
+                    diagnosticBag,
                     false,
                     CancellationToken.None,
                     out var referencedCompileTimeProject ) );
@@ -712,7 +712,7 @@ public class ReferencedClass
                     CreateCSharpCompilation( referencingCode, additionalReferences: new[] { MetadataReference.CreateFromFile( referencedPath ) } ),
                     ProjectLicenseInfo.Empty,
                     null,
-                    diagnosticList,
+                    diagnosticBag,
                     false,
                     CancellationToken.None,
                     out var compileTimeProject ) );
@@ -770,14 +770,14 @@ public class CompileTimeOnlyClass
             using var testContext = this.CreateTestContext();
             var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
 
-            DiagnosticList diagnosticList = new();
+            DiagnosticBag diagnosticBag = new();
 
             Assert.True(
                 loader.TryGetCompileTimeProjectFromCompilation(
                     compilation,
                     ProjectLicenseInfo.Empty,
                     null,
-                    diagnosticList,
+                    diagnosticBag,
                     false,
                     CancellationToken.None,
                     out var compileTimeProject ) );
@@ -807,14 +807,14 @@ public class Anything
 
             var roslynCompilation = CreateCSharpCompilation( code );
             var loader1 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
-            DiagnosticList diagnosticList = new();
+            DiagnosticBag diagnosticBag = new();
 
             Assert.True(
                 loader1.TryGetCompileTimeProjectFromCompilation(
                     roslynCompilation,
                     ProjectLicenseInfo.Empty,
                     null,
-                    diagnosticList,
+                    diagnosticBag,
                     false,
                     CancellationToken.None,
                     out _ ) );
@@ -839,14 +839,14 @@ public class SomeRunTimeClass
 
             var roslynCompilation = CreateCSharpCompilation( code );
             var loader1 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
-            DiagnosticList diagnosticList = new();
+            DiagnosticBag diagnosticBag = new();
 
             Assert.True(
                 loader1.TryGetCompileTimeProjectFromCompilation(
                     roslynCompilation,
                     ProjectLicenseInfo.Empty,
                     null,
-                    diagnosticList,
+                    diagnosticBag,
                     false,
                     CancellationToken.None,
                     out var project ) );
@@ -896,14 +896,14 @@ public class MyAspect : OverrideMethodAspect
         {
             var roslynCompilation = CreateCSharpCompilation( code, outputKind: outputKind );
             var loader1 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
-            DiagnosticList diagnosticList = new();
+            DiagnosticBag diagnosticBag = new();
 
             Assert.True(
                 loader1.TryGetCompileTimeProjectFromCompilation(
                     roslynCompilation,
                     ProjectLicenseInfo.Empty,
                     null,
-                    diagnosticList,
+                    diagnosticBag,
                     false,
                     CancellationToken.None,
                     out var project ) );
@@ -1212,15 +1212,17 @@ Intentional syntax error.
                 ImmutableArray<ManagedResource>.Empty,
                 CancellationToken.None );
 
+            Assert.True( pipelineResult1.IsSuccess );
+
             var peFilePath = Path.Combine( testContext1.ProjectOptions.BaseDirectory, "reference.dll" );
 
             // ReSharper disable once UseAwaitUsing
             using ( var peFile = File.Create( peFilePath ) )
             {
                 Assert.True(
-                    pipelineResult1!.ResultingCompilation.Compilation.Emit(
+                    pipelineResult1.Value.ResultingCompilation.Compilation.Emit(
                             peFile,
-                            manifestResources: pipelineResult1.AdditionalResources.Select( x => x.Resource ) )
+                            manifestResources: pipelineResult1.Value.AdditionalResources.Select( x => x.Resource ) )
                         .Success );
             }
 
@@ -1231,8 +1233,8 @@ Intentional syntax error.
             var compilation2 = CreateCSharpCompilation( "", additionalReferences: new[] { MetadataReference.CreateFromFile( peFilePath ) } );
             using var domain2 = new UnloadableCompileTimeDomain();
             var pipeline2 = new CompileTimeAspectPipeline( testContext2.ServiceProvider, true, domain2 );
-            DiagnosticList diagnosticList = new();
-            var pipelineResult2 = await pipeline2.ExecuteAsync( diagnosticList, compilation2, ImmutableArray<ManagedResource>.Empty, CancellationToken.None );
+            DiagnosticBag diagnosticBag = new();
+            var pipelineResult2 = await pipeline2.ExecuteAsync( diagnosticBag, compilation2, ImmutableArray<ManagedResource>.Empty, CancellationToken.None );
 
             Assert.NotNull( pipelineResult2 );
         }

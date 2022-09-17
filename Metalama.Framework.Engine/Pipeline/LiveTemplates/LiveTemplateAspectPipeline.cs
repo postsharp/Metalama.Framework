@@ -12,6 +12,7 @@ using System;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Pipeline.LiveTemplates;
 
@@ -43,7 +44,7 @@ public class LiveTemplateAspectPipeline : AspectPipeline
         return (ImmutableArray.Create<IAspectSource>( new AspectSource( this, aspectClass ) ), ImmutableArray<IValidatorSource>.Empty);
     }
 
-    public static bool TryExecute(
+    public static async Task<FallibleResult<PartialCompilation>> ExecuteAsync(
         ServiceProvider serviceProvider,
         CompileTimeDomain domain,
         AspectPipelineConfiguration? pipelineConfiguration,
@@ -51,21 +52,20 @@ public class LiveTemplateAspectPipeline : AspectPipeline
         PartialCompilation inputCompilation,
         ISymbol targetSymbol,
         IDiagnosticAdder diagnosticAdder,
-        CancellationToken cancellationToken,
-        [NotNullWhen( true )] out PartialCompilation? outputCompilation )
+        CancellationToken cancellationToken )
     {
         LiveTemplateAspectPipeline pipeline = new( serviceProvider, domain, aspectSelector, targetSymbol );
 
-        if ( !pipeline.TryExecute( inputCompilation, diagnosticAdder, pipelineConfiguration, cancellationToken, out var result ) )
+        var result = await pipeline.ExecuteAsync( inputCompilation, diagnosticAdder, pipelineConfiguration, cancellationToken );
+
+        if ( !result.IsSuccess )
         {
-            outputCompilation = null;
-
-            return false;
+            return default;
         }
-
-        outputCompilation = result.Compilation;
-
-        return true;
+        else
+        {
+            return result.Value.Compilation;
+        }
     }
 
     private protected override HighLevelPipelineStage CreateHighLevelStage(

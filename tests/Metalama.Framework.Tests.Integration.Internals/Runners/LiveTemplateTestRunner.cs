@@ -39,7 +39,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             var partialCompilation = PartialCompilation.CreateComplete( testResult.InputCompilation! );
             var target = compilation.Types.OfName( "TargetClass" ).Single().Methods.OfName( "TargetMethod" ).Single().GetSymbol();
 
-            var success = LiveTemplateAspectPipeline.TryExecute(
+            var result = await LiveTemplateAspectPipeline.ExecuteAsync(
                 serviceProvider,
                 domain,
                 null,
@@ -47,14 +47,13 @@ namespace Metalama.Framework.Tests.Integration.Runners
                 partialCompilation,
                 target!,
                 testResult.PipelineDiagnostics,
-                CancellationToken.None,
-                out var outputCompilation );
+                CancellationToken.None );
 
-            if ( success )
+            if ( result.IsSuccess )
             {
                 testResult.HasOutputCode = true;
 
-                var formattedOutputCompilation = await OutputCodeFormatter.FormatToSyntaxAsync( outputCompilation!, CancellationToken.None );
+                var formattedOutputCompilation = await OutputCodeFormatter.FormatToSyntaxAsync( result.Value, CancellationToken.None );
 
                 var transformedSyntaxTree = formattedOutputCompilation.Compilation.SyntaxTrees.FirstOrDefault();
 
