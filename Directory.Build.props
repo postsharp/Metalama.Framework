@@ -5,9 +5,6 @@
         <RepoKind>AzureRepos</RepoKind>
         <Obfuscate Condition="'$(Obfuscate)'=='' AND '$(Configuration)'=='Release'">True</Obfuscate>
 
-         <!-- File header enforcement is now broken-->
-        <NoWarn>$(NoWarn);SA1636</NoWarn>
-
     </PropertyGroup>
 
     <Import Project="eng\Versions.props"/>
@@ -22,13 +19,20 @@
     <Import Sdk="PostSharp.Engineering.Sdk" Project="SourceLink.props"/>
 
     <PropertyGroup Condition="'$(Configuration)'=='Release'">
-        <!-- CS8602: Dereference of a possibly null reference.
-            CS8604: Possible null reference argument for parameter 'x' in 'y'.
+        <!--
+		
+		             The compiler will emit these warnings if we have aggressive inlining. This should not be important for code quality.    
+		    CS8600: Converting null literal or possible null value to non-nullable type.
+            CS8601: Possible null reference assignment. 
+			CS8602: Dereference of a possibly null reference.
+			CS8603: Possible null reference return. 
+			CS8604: Possible null reference argument for parameter 'x' in 'y'.
+			CS8618: Non-nullable property 'x' must contain a non-null value when exiting constructor. Consider declaring the property as nullable.			
             
-             The compiler will emit these warnings if we have aggressive inlining. This should not be important for code quality.     -->
-        <NoWarn>$(NoWarn);CS8602;CS8604</NoWarn>
-
-    </PropertyGroup>
+        -->
+		
+        <NoWarn>$(NoWarn);CS8600;CS8601;CS8602;CS8603;CS8604;CS8618</NoWarn>
+	</PropertyGroup>
 
     <PropertyGroup>
         <!--
