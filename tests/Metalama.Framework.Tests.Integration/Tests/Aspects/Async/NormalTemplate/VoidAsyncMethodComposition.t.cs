@@ -4,9 +4,9 @@ internal class TargetCode
         [Aspect2]
         private async void MethodReturningValueTaskOfInt( int a )
         {
-    global::System.Console.WriteLine("Aspect1.Before");
+            global::System.Console.WriteLine("Aspect1.Before");
     await this.MethodReturningValueTaskOfInt_Aspect2(a);
-    object result_1 = null;
+    object result = null;
     global::System.Console.WriteLine("Aspect1.After");
     return;
         }
@@ -22,7 +22,7 @@ private async global::System.Threading.Tasks.ValueTask MethodReturningValueTaskO
 {
     global::System.Console.WriteLine("Aspect2.Before");
     await this.MethodReturningValueTaskOfInt_Source(a);
-    object result = null;
+    object result_1 = null;
     global::System.Console.WriteLine("Aspect2.After");
     return;
 }    }

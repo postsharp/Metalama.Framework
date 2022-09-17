@@ -2,6 +2,28 @@ internal class TargetClass
     {
 
 
+[global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Uninlineable_Multiple.FirstOverrideAttribute]
+[global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Uninlineable_Multiple.SecondOverrideAttribute]
+public global::System.Int32 Field 
+{ get
+{ 
+            global::System.Console.WriteLine("First override.");
+        _ = this.Field_SecondOverride;
+        return this.Field_SecondOverride;
+    
+ 
+}
+set
+{ 
+            global::System.Console.WriteLine("First override.");
+        this.Field_SecondOverride= value;
+        this.Field_SecondOverride= value;
+     
+}
+}
+private global::System.Int32 Field_Source
+{ get; set; }
+
 private global::System.Int32 Field_SecondOverride
 {
     get
@@ -15,30 +37,31 @@ private global::System.Int32 Field_SecondOverride
     set
     {
             global::System.Console.WriteLine("Second override.");
-        this.Field_Source = value;
-        this.Field_Source = value;
+        this.Field_Source= value;
+        this.Field_Source= value;
         }
 }
 
 [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Uninlineable_Multiple.FirstOverrideAttribute]
 [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Uninlineable_Multiple.SecondOverrideAttribute]
-public global::System.Int32 Field 
+public global::System.Int32 StaticField 
 { get
 { 
-        global::System.Console.WriteLine("First override.");
-        _ = this.Field_SecondOverride;
-        return this.Field_SecondOverride;
-
+            global::System.Console.WriteLine("First override.");
+        _ = this.StaticField_SecondOverride;
+        return this.StaticField_SecondOverride;
+    
+ 
 }
 set
 { 
-        global::System.Console.WriteLine("First override.");
-        this.Field_SecondOverride = value;
-        this.Field_SecondOverride = value;
-
+            global::System.Console.WriteLine("First override.");
+        this.StaticField_SecondOverride= value;
+        this.StaticField_SecondOverride= value;
+     
 }
 }
-private global::System.Int32 Field_Source
+private global::System.Int32 StaticField_Source
 { get; set; }
 
 private global::System.Int32 StaticField_SecondOverride
@@ -54,31 +77,32 @@ private global::System.Int32 StaticField_SecondOverride
     set
     {
             global::System.Console.WriteLine("Second override.");
-        this.StaticField_Source = value;
-        this.StaticField_Source = value;
+        this.StaticField_Source= value;
+        this.StaticField_Source= value;
         }
 }
 
 [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Uninlineable_Multiple.FirstOverrideAttribute]
 [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Uninlineable_Multiple.SecondOverrideAttribute]
-public global::System.Int32 StaticField 
+public global::System.Int32 InitializerField 
 { get
 { 
-        global::System.Console.WriteLine("First override.");
-        _ = this.StaticField_SecondOverride;
-        return this.StaticField_SecondOverride;
-
+            global::System.Console.WriteLine("First override.");
+        _ = this.InitializerField_SecondOverride;
+        return this.InitializerField_SecondOverride;
+    
+ 
 }
 set
 { 
-        global::System.Console.WriteLine("First override.");
-        this.StaticField_SecondOverride = value;
-        this.StaticField_SecondOverride = value;
-
+            global::System.Console.WriteLine("First override.");
+        this.InitializerField_SecondOverride= value;
+        this.InitializerField_SecondOverride= value;
+     
 }
-}
-private global::System.Int32 StaticField_Source
-{ get; set; }
+} 
+private global::System.Int32 InitializerField_Source
+{ get; set; }= 42;
 
 private global::System.Int32 InitializerField_SecondOverride
 {
@@ -93,31 +117,32 @@ private global::System.Int32 InitializerField_SecondOverride
     set
     {
             global::System.Console.WriteLine("Second override.");
-        this.InitializerField_Source = value;
-        this.InitializerField_Source = value;
+        this.InitializerField_Source= value;
+        this.InitializerField_Source= value;
         }
 }
 
 [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Uninlineable_Multiple.FirstOverrideAttribute]
 [global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Uninlineable_Multiple.SecondOverrideAttribute]
-public global::System.Int32 InitializerField 
+public global::System.Int32 ReadOnlyField 
 { get
 { 
-        global::System.Console.WriteLine("First override.");
-        _ = this.InitializerField_SecondOverride;
-        return this.InitializerField_SecondOverride;
-
+            global::System.Console.WriteLine("First override.");
+        _ = this.ReadOnlyField_SecondOverride;
+        return this.ReadOnlyField_SecondOverride;
+    
+ 
 }
-set
+private init
 { 
-        global::System.Console.WriteLine("First override.");
-        this.InitializerField_SecondOverride = value;
-        this.InitializerField_SecondOverride = value;
-
+            global::System.Console.WriteLine("First override.");
+        this.ReadOnlyField_SecondOverride= value;
+        this.ReadOnlyField_SecondOverride= value;
+     
 }
-} 
-private global::System.Int32 InitializerField_Source
-{ get; set; }= 42;
+}
+private global::System.Int32 ReadOnlyField_Source
+{ get; set; }
 
 private global::System.Int32 ReadOnlyField_SecondOverride
 {
@@ -132,31 +157,10 @@ private global::System.Int32 ReadOnlyField_SecondOverride
     init
     {
             global::System.Console.WriteLine("Second override.");
-        this.ReadOnlyField_Source = value;
-        this.ReadOnlyField_Source = value;
+        this.ReadOnlyField_Source= value;
+        this.ReadOnlyField_Source= value;
         }
 }
-
-[global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Uninlineable_Multiple.FirstOverrideAttribute]
-[global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Fields.Uninlineable_Multiple.SecondOverrideAttribute]
-public global::System.Int32 ReadOnlyField 
-{ get
-{ 
-        global::System.Console.WriteLine("First override.");
-        _ = this.ReadOnlyField_SecondOverride;
-        return this.ReadOnlyField_SecondOverride;
-
-}
-private init
-{ 
-        global::System.Console.WriteLine("First override.");
-        this.ReadOnlyField_SecondOverride = value;
-        this.ReadOnlyField_SecondOverride = value;
-
-}
-}
-private global::System.Int32 ReadOnlyField_Source
-{ get; set; }
         public TargetClass()
         {
             this.ReadOnlyField = 42;

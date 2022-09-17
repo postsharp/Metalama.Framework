@@ -19,7 +19,11 @@ internal readonly struct UnsortedConcurrentLinkedList<T>
     public List<T> GetSortedItems( Comparison<T> comparison )
     {
         var list = this._linkedList.ToList();
-        list.Sort( comparison );
+
+        if ( list.Count > 1 )
+        {
+            list.Sort( comparison );
+        }
 
         return list;
     }

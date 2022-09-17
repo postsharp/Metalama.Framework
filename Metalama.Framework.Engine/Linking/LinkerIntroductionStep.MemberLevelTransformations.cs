@@ -25,7 +25,7 @@ internal partial class LinkerIntroductionStep
 
         public ImmutableArray<IntroduceConstructorInitializerArgumentTransformation> Arguments { get; private set; }
 
-        private static ImmutableArray<T> Sort<T>( ConcurrentLinkedList<T>? input, Func<T, Advice> getAdvice, AspectLayerIdComparer comparer )
+        private static ImmutableArray<T> Sort<T>( ConcurrentLinkedList<T>? input, Func<T, ITransformation> getTransformation, TransformationComparer comparer )
         {
             if ( input == null || input.Count == 0 )
             {
@@ -39,19 +39,19 @@ internal partial class LinkerIntroductionStep
             {
                 // Insert statements must be executed in inverse order (because we need the forward execution order and not the override order)
                 // except within an aspect, where the order needs to be preserved.
-                return input.OrderBy( x => getAdvice( x ).AspectLayerId, comparer )
-                    .GroupBy( x => getAdvice(x).Aspect )
+                return input.OrderBy( getTransformation, comparer )
+                    .GroupBy( x => getTransformation(x).ParentAdvice.Aspect )
                     .Reverse()
                     .SelectMany( x => x )
                     .ToImmutableArray();
             }
         }
 
-        public void Sort( AspectLayerIdComparer comparer )
+        public void Sort( TransformationComparer comparer )
         {
-            this.Statements = Sort( this._unorderedStatements, s => s.ParentTransformation.ParentAdvice, comparer );
-            this.Arguments = Sort( this._unorderedArguments, a => a.ParentAdvice, comparer );
-            this.Parameters = Sort( this._unorderedParameters, p => p.ParentAdvice, comparer );
+            this.Statements = Sort( this._unorderedStatements, s => s.ParentTransformation, comparer );
+            this.Arguments = Sort( this._unorderedArguments, a => a, comparer );
+            this.Parameters = Sort( this._unorderedParameters, p => p, comparer );
         }
 
         public void Add( LinkerInsertedStatement statement ) => LazyInitializer.EnsureInitialized( ref this._unorderedStatements )!.Add( statement );

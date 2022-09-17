@@ -1,4 +1,4 @@
-﻿[Introduction]
+[Introduction]
 [Test]
 internal class TargetClass : BaseClass
 {

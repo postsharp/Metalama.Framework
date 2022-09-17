@@ -19,7 +19,7 @@ private class Fabric : TypeFabric
 
 
 
-public global::System.String? Configuration { get; } = "Debug";
+public global::System.String? TargetFramework { get; } = "net6.0";
 
-public global::System.String? TargetFramework { get; } = "net6.0";}
+public global::System.String? Configuration { get; } = "Debug";}
 #pragma warning restore CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823 

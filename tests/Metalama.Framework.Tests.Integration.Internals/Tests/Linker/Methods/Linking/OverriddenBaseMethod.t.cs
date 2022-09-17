@@ -6,11 +6,6 @@ class Target : Base
 }
 
 
-public override void Bar()
-{
-    this.Bar_Override5();
-}
-
 public void Foo_Override0()
 {
     // Should invoke base declaration.
@@ -21,6 +16,11 @@ public void Foo_Override0()
     base.Bar();
     // Should invoke the final declaration.
     this.Bar();
+}
+
+public override void Bar()
+{
+    this.Bar_Override5();
 }
 
 public void Foo_Override2()

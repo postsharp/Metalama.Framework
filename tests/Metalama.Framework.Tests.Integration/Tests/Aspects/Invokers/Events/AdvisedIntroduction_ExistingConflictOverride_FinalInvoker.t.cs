@@ -1,4 +1,4 @@
-﻿[Introduction]
+[Introduction]
 [Override]
 internal class TargetClass : BaseClass
 {

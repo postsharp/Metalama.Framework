@@ -49,9 +49,10 @@ namespace Metalama.Framework.Engine.Linking
             // We don't use a code fix filter because the linker is not supposed to suggest code fixes. If that changes, we need to pass a filter.
             var diagnostics = new UserDiagnosticSink( input.CompileTimeProject, null );
 
-            var comparer = new AspectLayerIdComparer( input.OrderedAspectLayers );
+            var aspectLayerIdComparer = new AspectLayerIdComparer( input.OrderedAspectLayers );
+            var transformationComparer = new TransformationComparer( aspectLayerIdComparer );
             var nameProvider = new LinkerIntroductionNameProvider( input.CompilationModel );
-            var syntaxTransformationCollection = new SyntaxTransformationCollection( comparer );
+            var syntaxTransformationCollection = new SyntaxTransformationCollection( transformationComparer );
             var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
 
             var supportsNullability = input.InitialCompilation.InitialCompilation.Options.NullableContextOptions != NullableContextOptions.Disable;
@@ -103,8 +104,8 @@ namespace Metalama.Framework.Engine.Linking
             }
 
             await this._taskScheduler.RunInParallelAsync( input.Transformations, IndexTransformation, cancellationToken );
-            await this._taskScheduler.RunInParallelAsync( introductionMemberLevelTransformations.Values, t => t.Sort( comparer ), cancellationToken );
-            await this._taskScheduler.RunInParallelAsync( symbolMemberLevelTransformations.Values, t => t.Sort( comparer ), cancellationToken );
+            await this._taskScheduler.RunInParallelAsync( introductionMemberLevelTransformations.Values, t => t.Sort( transformationComparer ), cancellationToken );
+            await this._taskScheduler.RunInParallelAsync( symbolMemberLevelTransformations.Values, t => t.Sort( transformationComparer ), cancellationToken );
 
             FindPrimarySyntaxTreeForGlobalAttributes( input.CompilationModel, out var syntaxTreeForGlobalAttributes );
 
@@ -113,6 +114,7 @@ namespace Metalama.Framework.Engine.Linking
                 s => s.Declaration,
                 input.CompilationModel.InvariantComparer );
 
+            // Rewrite syntax trees.
             Rewriter rewriter = new(
                 this._serviceProvider,
                 syntaxTransformationCollection,
@@ -126,8 +128,7 @@ namespace Metalama.Framework.Engine.Linking
 
             var syntaxTreeMapping = new ConcurrentDictionary<SyntaxTree, SyntaxTree>();
 
-            // Process syntax trees one by one.
-            var intermediateCompilation = input.InitialCompilation;
+             var intermediateCompilation = input.InitialCompilation;
 
             void RewriteSyntaxTree( SyntaxTree initialSyntaxTree )
             {
@@ -154,7 +155,7 @@ namespace Metalama.Framework.Engine.Linking
             intermediateCompilation = intermediateCompilation.Update( transformations );
 
             var introductionRegistry = new LinkerIntroductionRegistry(
-                comparer,
+                transformationComparer,
                 input.CompilationModel,
                 intermediateCompilation.Compilation,
                 syntaxTreeMapping,

@@ -18,6 +18,7 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Pipeline;
 
+
 /// <summary>
 /// The <see cref="PipelineStep"/> that runs the default layer of each aspect. It runs the aspect initializer method.
 /// </summary>
@@ -72,7 +73,10 @@ internal class ExecuteAspectLayerPipelineStep : PipelineStep
 
         var index = 0;
 
-        foreach ( var aspect in aspects )
+        // Order aspects by source order, if possible.
+        var orderedAspects = aspects.OrderBy( a => a, AspectInstanceComparer.Instance );
+
+        foreach ( var aspect in orderedAspects )
         {
             // Set the aspect instance order for use by the linker.
             aspect.AspectInstance.OrderWithinTypeAndAspectLayer = index;
@@ -121,6 +125,59 @@ internal class ExecuteAspectLayerPipelineStep : PipelineStep
             }
 
             this.Parent.AddAspectInstanceResult( aspectResult );
+        }
+    }
+
+    private class AspectInstanceComparer : Comparer<(IDeclaration TargetDeclaration, IAspectInstanceInternal AspectInstance)>
+    {
+        public static AspectInstanceComparer Instance { get; } = new();
+        private AspectInstanceComparer(){}
+        public override int Compare( (IDeclaration TargetDeclaration, IAspectInstanceInternal AspectInstance) x, (IDeclaration TargetDeclaration, IAspectInstanceInternal AspectInstance) y )
+        {
+            if ( x.AspectInstance == y.AspectInstance )
+            {
+                return 0;
+            }
+            
+            var xPrimarySyntax = x.TargetDeclaration.GetPrimaryDeclarationSyntax();
+            var yPrimarySyntax = y.TargetDeclaration.GetPrimaryDeclarationSyntax();
+
+            // Source declarations come before introduced declarations.
+            if ( xPrimarySyntax != null && yPrimarySyntax == null )
+            {
+                return -1;
+            }
+            else if ( xPrimarySyntax == null && yPrimarySyntax != null )
+            {
+                return 1;
+            }
+            else if ( xPrimarySyntax != null && yPrimarySyntax != null )
+            {
+                if ( xPrimarySyntax.SyntaxTree != yPrimarySyntax.SyntaxTree )
+                {
+                    var syntaxTreeComparison = StringComparer.Ordinal.Compare( xPrimarySyntax.SyntaxTree.FilePath, yPrimarySyntax.SyntaxTree.FilePath );
+
+                    if ( syntaxTreeComparison != 0 )
+                    {
+                        return syntaxTreeComparison;
+                    }
+                }
+
+                var positionComparison = xPrimarySyntax.SpanStart.CompareTo( yPrimarySyntax.SpanStart );
+
+                if ( positionComparison != 0 )
+                {
+                    return positionComparison;
+                }
+
+                throw new AssertionFailedException();
+            }
+            else
+            {
+                // If both declarations are introduced, we compare the string rendering.
+                
+                return StringComparer.Ordinal.Compare( x.TargetDeclaration.ToString(), y.TargetDeclaration.ToString() );
+            }
         }
     }
 }

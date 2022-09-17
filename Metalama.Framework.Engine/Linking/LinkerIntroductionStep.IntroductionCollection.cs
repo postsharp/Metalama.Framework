@@ -12,7 +12,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Threading;
 
 namespace Metalama.Framework.Engine.Linking
@@ -24,7 +23,7 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         private class SyntaxTransformationCollection
         {
-            private readonly AspectLayerIdComparer _comparer;
+            private readonly TransformationComparer _comparer;
             private readonly ConcurrentBag<LinkerIntroducedMember> _introducedMembers;
             private readonly ConcurrentDictionary<InsertPosition, UnsortedConcurrentLinkedList<LinkerIntroducedMember>> _introducedMembersByInsertPosition;
 
@@ -38,7 +37,7 @@ namespace Metalama.Framework.Engine.Linking
 
             public IReadOnlyCollection<LinkerIntroducedMember> IntroducedMembers => this._introducedMembers;
 
-            public SyntaxTransformationCollection( AspectLayerIdComparer comparer )
+            public SyntaxTransformationCollection( TransformationComparer comparer )
             {
                 this._comparer = comparer;
                 this._introducedMembers = new ConcurrentBag<LinkerIntroducedMember>();
@@ -85,7 +84,7 @@ namespace Metalama.Framework.Engine.Linking
                     targetTypeDecl,
                     _ => new UnsortedConcurrentLinkedList<LinkerIntroducedInterface>() );
 
-                interfaceList.Add( new LinkerIntroducedInterface( interfaceImplementationIntroduction.ParentAdvice.AspectLayerId, introducedInterface ) );
+                interfaceList.Add( new LinkerIntroducedInterface( interfaceImplementationIntroduction, introducedInterface ) );
             }
 
             public void AddAutoPropertyWithSynthesizedSetter( PropertyDeclarationSyntax declaration )
@@ -124,7 +123,7 @@ namespace Metalama.Framework.Engine.Linking
                 if ( this._introducedMembersByInsertPosition.TryGetValue( position, out var introducedMembers ) )
                 {
                     // IMPORTANT - do not change the introduced node here.
-                    return introducedMembers.GetSortedItems( ( x, y ) => this._comparer.Compare( x.AspectLayerId, y.AspectLayerId ) );
+                    return introducedMembers.GetSortedItems( ( x, y ) => this._comparer.Compare( x.Introduction, y.Introduction ) );
                 }
 
                 return Array.Empty<LinkerIntroducedMember>();
@@ -134,7 +133,7 @@ namespace Metalama.Framework.Engine.Linking
             {
                 if ( this._introducedInterfacesByTargetTypeDeclaration.TryGetValue( typeDeclaration, out var interfaceList ) )
                 {
-                    return interfaceList.GetSortedItems( ( x, y ) => this._comparer.Compare( x.AspectLayerId, y.AspectLayerId ) );
+                    return interfaceList.GetSortedItems( ( x, y ) => this._comparer.Compare( x.Transformation, y.Transformation ) );
                 }
 
                 return Array.Empty<LinkerIntroducedInterface>();

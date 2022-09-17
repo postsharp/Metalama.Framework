@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Linking
     {
         public const string IntroducedNodeIdAnnotationId = "AspectLinker_IntroducedNodeId";
 
-        private readonly AspectLayerIdComparer _comparer;
+        private readonly TransformationComparer _comparer;
         private readonly Compilation _intermediateCompilation;
         private readonly IReadOnlyDictionary<string, LinkerIntroducedMember> _introducedMemberLookup;
         private readonly IReadOnlyDictionary<IDeclaration, UnsortedConcurrentLinkedList<LinkerIntroducedMember>> _overrideMap;
@@ -36,7 +36,7 @@ namespace Metalama.Framework.Engine.Linking
         private readonly IReadOnlyDictionary<SyntaxTree, SyntaxTree> _introducedTreeMap;
 
         public LinkerIntroductionRegistry(
-            AspectLayerIdComparer comparer,
+            TransformationComparer comparer,
             CompilationModel finalCompilationModel,
             Compilation intermediateCompilation,
             IReadOnlyDictionary<SyntaxTree, SyntaxTree> introducedTreeMap,
@@ -59,9 +59,7 @@ namespace Metalama.Framework.Engine.Linking
             // TODO: This could be parallelized. The collections could be built in the LinkerIntroductionStep, it is in
             // the same spirit as the Index* methods.
             
-            // TODO: remove the OrderBy in the next `foreach`. It should not be necessary, but removing it breaks tests.
-
-            foreach ( var introducedMember in introducedMembers.OrderBy( x=>x.AspectLayerId, comparer ) )
+            foreach ( var introducedMember in introducedMembers )
             {
                 if ( introducedMember.Introduction is IOverriddenDeclaration overrideTransformation )
                 {
@@ -94,7 +92,7 @@ namespace Metalama.Framework.Engine.Linking
         public IReadOnlyList<LinkerIntroducedMember> GetOverridesForSymbol( ISymbol referencedSymbol )
         {
             IReadOnlyList<LinkerIntroducedMember> Sort( UnsortedConcurrentLinkedList<LinkerIntroducedMember> list )
-                => list.GetSortedItems( ( x, y ) => this._comparer.Compare( x.AspectLayerId, y.AspectLayerId ) );
+                => list.GetSortedItems( ( x, y ) => this._comparer.Compare( x.Introduction, y.Introduction ) );
 
             // TODO: Optimize.
             var declaringSyntax = referencedSymbol.GetPrimaryDeclaration();

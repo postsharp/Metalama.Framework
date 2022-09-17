@@ -1,6 +1,11 @@
 [Introduction]
     internal class TargetClass
     {
+        public void IntroducedMethod_Void()
+        {
+            Console.WriteLine("This is introduced method.");
+        }
+
         public int IntroducedMethod_Int()
         {
             Console.WriteLine("This is introduced method.");
@@ -23,10 +28,5 @@
         {
             Console.WriteLine("This is introduced method.");
             return default(int);
-        }
-
-        public void IntroducedMethod_Void()
-        {
-            Console.WriteLine("This is introduced method.");
         }
     }
