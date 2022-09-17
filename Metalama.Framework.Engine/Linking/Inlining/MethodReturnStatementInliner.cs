@@ -66,10 +66,10 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             SyntaxNode currentNode,
             StatementSyntax linkedTargetBody )
         {
-            return 
+            return
                 linkedTargetBody
-                .WithLeadingTrivia( currentNode.GetLeadingTrivia().AddRange( linkedTargetBody.GetLeadingTrivia() ) )
-                .WithTrailingTrivia( linkedTargetBody.GetTrailingTrivia().AddRange( currentNode.GetTrailingTrivia() ) );
+                    .WithLeadingTrivia( currentNode.GetLeadingTrivia().AddRange( linkedTargetBody.GetLeadingTrivia() ) )
+                    .WithTrailingTrivia( linkedTargetBody.GetTrailingTrivia().AddRange( currentNode.GetTrailingTrivia() ) );
         }
     }
 }

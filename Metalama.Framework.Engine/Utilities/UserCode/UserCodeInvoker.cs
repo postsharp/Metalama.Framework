@@ -101,7 +101,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
                         reportFile = Path.Combine(
                             tempFileManager.GetTempDirectory( "CrashReports", CleanUpStrategy.Always ),
                             $"exception-{Guid.NewGuid()}.txt" );
-                        
+
                         File.WriteAllText( reportFile, e.ToString() );
                     }
                     catch ( Exception reportException )
@@ -202,7 +202,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
 
                 return true;
             }
-            catch ( Exception e ) 
+            catch ( Exception e )
             {
                 // We cannot use OnException in a `when` clause because exceptions in the OnException method will be ignored
                 // and it will be weird.

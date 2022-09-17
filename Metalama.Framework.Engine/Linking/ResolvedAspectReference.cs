@@ -50,7 +50,7 @@ namespace Metalama.Framework.Engine.Linking
                 ({ Symbol: IPropertySymbol }, AspectReferenceTargetKind.PropertySetAccessor) => true,
                 ({ Symbol: IEventSymbol }, AspectReferenceTargetKind.EventAddAccessor) => true,
                 ({ Symbol: IEventSymbol }, AspectReferenceTargetKind.EventRemoveAccessor) => true,
-                ({ Symbol: IEventSymbol }, AspectReferenceTargetKind.EventRaiseAccessor ) => false,
+                ({ Symbol: IEventSymbol }, AspectReferenceTargetKind.EventRaiseAccessor) => false,
                 ({ Symbol: IFieldSymbol }, AspectReferenceTargetKind.PropertyGetAccessor) => false,
                 ({ Symbol: IFieldSymbol }, AspectReferenceTargetKind.PropertySetAccessor) => false,
                 _ => throw new AssertionFailedException()
