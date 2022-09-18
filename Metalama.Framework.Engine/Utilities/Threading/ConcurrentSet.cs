@@ -10,10 +10,7 @@ internal class ConcurrentSet<T> : IReadOnlySet<T>
 {
     private readonly ConcurrentDictionary<T, int> _dictionary = new();
 
-    public ConcurrentSet()
-    {
-        
-    }
+    public ConcurrentSet() { }
 
     public bool Add( T value ) => this._dictionary.TryAdd( value, 0 );
 

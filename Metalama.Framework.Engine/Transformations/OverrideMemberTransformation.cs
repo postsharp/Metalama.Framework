@@ -21,9 +21,8 @@ namespace Metalama.Framework.Engine.Transformations
 
         public IMember OverriddenDeclaration { get; }
 
-        
         IDeclaration IOverriddenDeclaration.OverriddenDeclaration => this.OverriddenDeclaration;
-        
+
         public override IDeclaration TargetDeclaration => this.OverriddenDeclaration;
 
         protected OverrideMemberTransformation( Advice advice, IMember overriddenDeclaration, IObjectReader tags ) : base( advice )

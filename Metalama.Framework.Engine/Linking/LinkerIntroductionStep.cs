@@ -70,14 +70,12 @@ namespace Metalama.Framework.Engine.Linking
 
             ConcurrentSet<SyntaxNode> nodesWithModifiedAttributes = new();
 
-            
-
             void IndexTransformationsInSyntaxTree( IGrouping<SyntaxTree, ITransformation> transformationGroup )
             {
                 // Transformations need to be sorted here because some transformations require a LexicalScope to get unique name, and it
                 // will give deterministic results only when called in a deterministic order.
                 var sortedTransformations = transformationGroup.OrderBy( x => x, transformationComparer );
-                
+
                 foreach ( var transformation in transformationGroup )
                 {
                     IndexReplaceTransformation( input, transformation, syntaxTransformationCollection, replacedTransformations );
@@ -115,7 +113,12 @@ namespace Metalama.Framework.Engine.Linking
             var transformationsBySyntaxTree = input.Transformations.GroupBy( t => t.TransformedSyntaxTree );
 
             await this._taskScheduler.RunInParallelAsync( transformationsBySyntaxTree, IndexTransformationsInSyntaxTree, cancellationToken );
-            await this._taskScheduler.RunInParallelAsync( introductionMemberLevelTransformations.Values, t => t.Sort( transformationComparer ), cancellationToken );
+
+            await this._taskScheduler.RunInParallelAsync(
+                introductionMemberLevelTransformations.Values,
+                t => t.Sort( transformationComparer ),
+                cancellationToken );
+
             await this._taskScheduler.RunInParallelAsync( symbolMemberLevelTransformations.Values, t => t.Sort( transformationComparer ), cancellationToken );
 
             FindPrimarySyntaxTreeForGlobalAttributes( input.CompilationModel, out var syntaxTreeForGlobalAttributes );
@@ -139,7 +142,7 @@ namespace Metalama.Framework.Engine.Linking
 
             var syntaxTreeMapping = new ConcurrentDictionary<SyntaxTree, SyntaxTree>();
 
-             var intermediateCompilation = input.InitialCompilation;
+            var intermediateCompilation = input.InitialCompilation;
 
             void RewriteSyntaxTree( SyntaxTree initialSyntaxTree )
             {

@@ -49,6 +49,5 @@ namespace Metalama.Framework.Engine.Transformations
         }
 
         public override IDeclaration TargetDeclaration => this.TargetType;
-
     }
 }

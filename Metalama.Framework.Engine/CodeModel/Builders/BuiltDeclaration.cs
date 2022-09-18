@@ -69,7 +69,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public override IDeclaration OriginalDefinition => this.Compilation.Factory.GetDeclaration( this.Builder.OriginalDefinition );
 
         public override Location? DiagnosticLocation => this.Builder.DiagnosticLocation;
-        
+
         object? IRefImpl.Target => this;
 
         bool IRefImpl.IsDefault => false;

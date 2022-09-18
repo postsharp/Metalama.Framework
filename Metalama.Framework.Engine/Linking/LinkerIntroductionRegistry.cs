@@ -51,14 +51,17 @@ namespace Metalama.Framework.Engine.Linking
             this._intermediateCompilation = intermediateCompilation;
             this._introducedMemberLookup = introducedMembers.ToDictionary( x => x.LinkerNodeId, x => x );
             this._introducedTreeMap = introducedTreeMap;
-            this._overrideMap = overrideMap = new Dictionary<IDeclaration, UnsortedConcurrentLinkedList<LinkerIntroducedMember>>( finalCompilationModel.InvariantComparer );
+
+            this._overrideMap = overrideMap =
+                new Dictionary<IDeclaration, UnsortedConcurrentLinkedList<LinkerIntroducedMember>>( finalCompilationModel.InvariantComparer );
+
             this._overrideTargetMap = overrideTargetMap = new Dictionary<LinkerIntroducedMember, IDeclaration>();
             this._overrideTargetsByOriginalSymbol = overrideTargetsByOriginalSymbol = new Dictionary<ISymbol, IDeclaration>( StructuralSymbolComparer.Default );
             this._builderLookup = builderLookup = new Dictionary<IDeclaration, LinkerIntroducedMember>();
-            
+
             // TODO: This could be parallelized. The collections could be built in the LinkerIntroductionStep, it is in
             // the same spirit as the Index* methods.
-            
+
             foreach ( var introducedMember in introducedMembers )
             {
                 if ( introducedMember.Introduction is IOverriddenDeclaration overrideTransformation )

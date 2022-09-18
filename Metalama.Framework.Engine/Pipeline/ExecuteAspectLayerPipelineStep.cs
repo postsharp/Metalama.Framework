@@ -18,7 +18,6 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Pipeline;
 
-
 /// <summary>
 /// The <see cref="PipelineStep"/> that runs the default layer of each aspect. It runs the aspect initializer method.
 /// </summary>
@@ -131,14 +130,18 @@ internal class ExecuteAspectLayerPipelineStep : PipelineStep
     private class AspectInstanceComparer : Comparer<(IDeclaration TargetDeclaration, IAspectInstanceInternal AspectInstance)>
     {
         public static AspectInstanceComparer Instance { get; } = new();
-        private AspectInstanceComparer(){}
-        public override int Compare( (IDeclaration TargetDeclaration, IAspectInstanceInternal AspectInstance) x, (IDeclaration TargetDeclaration, IAspectInstanceInternal AspectInstance) y )
+
+        private AspectInstanceComparer() { }
+
+        public override int Compare(
+            (IDeclaration TargetDeclaration, IAspectInstanceInternal AspectInstance) x,
+            (IDeclaration TargetDeclaration, IAspectInstanceInternal AspectInstance) y )
         {
             if ( x.AspectInstance == y.AspectInstance )
             {
                 return 0;
             }
-            
+
             var xPrimarySyntax = x.TargetDeclaration.GetPrimaryDeclarationSyntax();
             var yPrimarySyntax = y.TargetDeclaration.GetPrimaryDeclarationSyntax();
 
@@ -175,7 +178,7 @@ internal class ExecuteAspectLayerPipelineStep : PipelineStep
             else
             {
                 // If both declarations are introduced, we compare the string rendering.
-                
+
                 return StringComparer.Ordinal.Compare( x.TargetDeclaration.ToString(), y.TargetDeclaration.ToString() );
             }
         }

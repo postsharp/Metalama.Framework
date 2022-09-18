@@ -81,5 +81,5 @@ internal class AdviceFactoryState
         }
     }
 
-    public int GetTransformationOrder() => this._nextTransformationOrder++; 
+    public int GetTransformationOrder() => this._nextTransformationOrder++;
 }

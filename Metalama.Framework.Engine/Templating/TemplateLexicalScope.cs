@@ -30,7 +30,6 @@ namespace Metalama.Framework.Engine.Templating
                 return hint;
             }
 
-            
             for ( var i = 1; /* Intentionally empty */; i++ )
             {
                 var name = hint + "_" + i;

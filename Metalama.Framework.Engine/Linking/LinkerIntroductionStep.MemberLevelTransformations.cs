@@ -16,7 +16,7 @@ internal partial class LinkerIntroductionStep
     private class MemberLevelTransformations
     {
         // TODO: this class is no longer used concurrently, and is being added in transformation order.
-        
+
         private ConcurrentLinkedList<LinkerInsertedStatement>? _unorderedStatements;
         private ConcurrentLinkedList<IntroduceParameterTransformation>? _unorderedParameters;
         private ConcurrentLinkedList<IntroduceConstructorInitializerArgumentTransformation>? _unorderedArguments;
@@ -42,7 +42,7 @@ internal partial class LinkerIntroductionStep
                 // Insert statements must be executed in inverse order (because we need the forward execution order and not the override order)
                 // except within an aspect, where the order needs to be preserved.
                 return input.OrderBy( getTransformation, comparer )
-                    .GroupBy( x => getTransformation(x).ParentAdvice.Aspect )
+                    .GroupBy( x => getTransformation( x ).ParentAdvice.Aspect )
                     .Reverse()
                     .SelectMany( x => x )
                     .ToImmutableArray();

@@ -45,5 +45,4 @@ internal class IntroduceParameterTransformation : BaseTransformation, IObservabl
     }
 
     public override IDeclaration TargetDeclaration => this.TargetMember;
-    
 }

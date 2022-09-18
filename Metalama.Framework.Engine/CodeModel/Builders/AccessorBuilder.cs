@@ -254,6 +254,5 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public IMember? OverriddenMember => (IMemberImpl?) this.OverriddenMethod;
 
         public override bool CanBeInherited => this.IsVirtual && !this.IsSealed && ((IDeclarationImpl) this.DeclaringType).CanBeInherited;
-
     }
 }

@@ -1,4 +1,6 @@
-﻿using Metalama.Framework.Engine.Aspects;
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Transformations;
 using System.Collections.Generic;
 
@@ -8,7 +10,7 @@ internal class TransformationComparer : Comparer<ITransformation>
 {
     private readonly AspectLayerIdComparer _aspectLayerIdComparer;
 
-    public TransformationComparer( AspectLayerIdComparer aspectLayerIdComparer ) 
+    public TransformationComparer( AspectLayerIdComparer aspectLayerIdComparer )
     {
         this._aspectLayerIdComparer = aspectLayerIdComparer;
     }
@@ -19,7 +21,7 @@ internal class TransformationComparer : Comparer<ITransformation>
         {
             return 0;
         }
-        
+
         var aspectLayerComparison = this._aspectLayerIdComparer.Compare( x.ParentAdvice.AspectLayerId, y.ParentAdvice.AspectLayerId );
 
         if ( aspectLayerComparison != 0 )
@@ -35,7 +37,7 @@ internal class TransformationComparer : Comparer<ITransformation>
             return aspectInstanceComparison;
         }
 
-        var withinAspectInstanceComparison =  x.OrderWithinAspectInstance.CompareTo( y.OrderWithinAspectInstance );
+        var withinAspectInstanceComparison = x.OrderWithinAspectInstance.CompareTo( y.OrderWithinAspectInstance );
 
         if ( withinAspectInstanceComparison == 0 )
         {
@@ -47,6 +49,5 @@ internal class TransformationComparer : Comparer<ITransformation>
         }
 
         return withinAspectInstanceComparison;
-
     }
 }

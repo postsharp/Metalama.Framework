@@ -33,7 +33,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
                 => this.Accessor.ToDisplayString( format, context ) + "@value";
-
         }
     }
 }

@@ -2,8 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
-using Metalama.Framework.Engine.CodeModel;
-using Microsoft.CodeAnalysis;
 
 namespace Metalama.Framework.Engine.Transformations;
 
@@ -17,5 +15,4 @@ internal class AddExplicitDefaultConstructorTransformation : BaseTransformation,
     public INamedType TargetType { get; }
 
     public override IDeclaration TargetDeclaration => this.TargetType;
-
 }

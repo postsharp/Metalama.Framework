@@ -77,15 +77,17 @@ namespace Metalama.TestFramework
             var assemblyAssets = GetAssemblyAssets( this.GetType().Assembly );
             var projectReferences = TestAssemblyMetadataReader.GetMetadata( new ReflectionAssemblyInfo( this.GetType().Assembly ) ).ToProjectReferences();
 
-            
             var fullPath = Path.Combine( directory, relativePath );
 
             this.Logger.WriteLine( "Test input file: " + fullPath );
             var projectRelativePath = PathUtil.GetRelativePath( assemblyAssets.ProjectProperties.ProjectDirectory, fullPath );
 
             var testInput = TestInput.FromFile( assemblyAssets.ProjectProperties, assemblyAssets.OptionsReader, projectRelativePath );
-            
-            using var testOptions = new TestProjectOptions( plugIns: projectReferences.PlugIns, requireOrderedAspects: testInput.Options.RequireOrderedAspects.GetValueOrDefault() );
+
+            using var testOptions = new TestProjectOptions(
+                plugIns: projectReferences.PlugIns,
+                requireOrderedAspects: testInput.Options.RequireOrderedAspects.GetValueOrDefault() );
+
             using var testContext = new TestContext( testOptions );
 
             var testRunner = TestRunnerFactory.CreateTestRunner( testInput, testContext.ServiceProvider, projectReferences, this.Logger );

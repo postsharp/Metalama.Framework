@@ -34,6 +34,4 @@ internal class IntroduceConstructorInitializerArgumentTransformation : BaseTrans
         => SyntaxFactory.Argument( this.Value ).WithAdditionalAnnotations( this.ParentAdvice.Aspect.AspectClass.GeneratedCodeAnnotation );
 
     public override IDeclaration TargetDeclaration => this.Constructor;
-
-    
 }

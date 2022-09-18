@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public abstract IDeclaration? ContainingDeclaration { get; }
 
-        public override IDeclaration TargetDeclaration => this.ContainingDeclaration.AssertNotNull( );
+        public override IDeclaration TargetDeclaration => this.ContainingDeclaration.AssertNotNull();
 
         IAttributeCollection IDeclaration.Attributes => this.Attributes;
 
@@ -105,7 +105,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         // TODO: should we locate diagnostic on the aspect attribute?
         public Location? DiagnosticLocation => null;
-
 
         public TExtension GetMetric<TExtension>()
             where TExtension : IMetric

@@ -104,7 +104,5 @@ namespace Metalama.Framework.Engine.Transformations
 
             return this.GetIntroducedMembersImpl( context, Block( List( statements ) ), false );
         }
-
- 
     }
 }

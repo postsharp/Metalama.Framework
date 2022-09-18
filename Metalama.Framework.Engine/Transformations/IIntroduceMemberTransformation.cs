@@ -10,7 +10,6 @@ namespace Metalama.Framework.Engine.Transformations
     /// </summary>
     internal interface IIntroduceMemberTransformation : ITransformation
     {
-    
         /// <summary>
         /// Gets the full syntax of introduced members including the body.
         /// </summary>
