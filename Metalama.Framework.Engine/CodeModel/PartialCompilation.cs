@@ -87,7 +87,7 @@ namespace Metalama.Framework.Engine.CodeModel
         // Incremental constructor.
         private PartialCompilation(
             PartialCompilation baseCompilation,
-            IReadOnlyList<SyntaxTreeTransformation>? modifications,
+            IReadOnlyCollection<SyntaxTreeTransformation>? modifications,
             ImmutableArray<ManagedResource> newResources )
         {
             this.InitialCompilation = baseCompilation.InitialCompilation;
@@ -238,7 +238,7 @@ namespace Metalama.Framework.Engine.CodeModel
         /// representing the modified object.
         /// </summary>
         public abstract PartialCompilation Update(
-            IReadOnlyList<SyntaxTreeTransformation>? transformations = null,
+            IReadOnlyCollection<SyntaxTreeTransformation>? transformations = null,
             ImmutableArray<ManagedResource> resources = default );
 
         /// <summary>
@@ -363,7 +363,7 @@ namespace Metalama.Framework.Engine.CodeModel
                    .First()
                    .Value;
 
-        private static void Validate( IReadOnlyList<SyntaxTreeTransformation>? transformations )
+        private static void Validate( IReadOnlyCollection<SyntaxTreeTransformation>? transformations )
         {
             // In production scenario, we need weavers to provide SyntaxTree instances with a valid Encoding value.
             // However, we don't need that in test scenarios, and tests currently don't set Encoding properly.

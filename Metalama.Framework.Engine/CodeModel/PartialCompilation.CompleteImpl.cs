@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             private CompleteImpl(
                 PartialCompilation baseCompilation,
-                IReadOnlyList<SyntaxTreeTransformation>? modifications,
+                IReadOnlyCollection<SyntaxTreeTransformation>? modifications,
                 ImmutableArray<ManagedResource> resources )
                 : base( baseCompilation, modifications, resources ) { }
 
@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.CodeModel
             public override bool IsPartial => false;
 
             public override PartialCompilation Update(
-                IReadOnlyList<SyntaxTreeTransformation>? transformations = null,
+                IReadOnlyCollection<SyntaxTreeTransformation>? transformations = null,
                 ImmutableArray<ManagedResource> resources = default )
             {
                 Validate( transformations );

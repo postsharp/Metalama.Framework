@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.Linking.Inlining;
 using Microsoft.CodeAnalysis;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -14,11 +15,14 @@ namespace Metalama.Framework.Engine.Linking
     /// </summary>
     internal partial class LinkerAnalysisStep : AspectLinkerPipelineStep<LinkerIntroductionStepOutput, LinkerAnalysisStepOutput>
     {
-        public static LinkerAnalysisStep Instance { get; } = new();
+        private readonly IServiceProvider _serviceProvider;
 
-        private LinkerAnalysisStep() { }
+        public LinkerAnalysisStep( IServiceProvider serviceProvider )
+        {
+            this._serviceProvider = serviceProvider;
+        }
 
-        public override Task<LinkerAnalysisStepOutput> ExecuteAsync( LinkerIntroductionStepOutput input, CancellationToken cancellationToken )
+        public override async Task<LinkerAnalysisStepOutput> ExecuteAsync( LinkerIntroductionStepOutput input, CancellationToken cancellationToken )
         {
             /*
              * Algorithm of this step:
@@ -90,41 +94,44 @@ namespace Metalama.Framework.Engine.Linking
             var nonInlinedReferencesBySource = GetNonInlinedReferences( reachableReferencesBySource, inlinedReferences );
 
             var bodyAnalyzer = new BodyAnalyzer(
+                this._serviceProvider,
                 input.IntermediateCompilation,
                 reachableSemantics );
 
-            var bodyAnalysisResults = bodyAnalyzer.Run();
+            var bodyAnalysisResults = await bodyAnalyzer.RunAsync( cancellationToken );
 
             var inliningAlgorithm = new InliningAlgorithm(
+                this._serviceProvider,
                 reachableReferencesBySource,
                 reachableSemantics,
                 inlinedSemantics,
                 inlinedReferences,
                 bodyAnalysisResults );
 
-            var inliningSpecifications = inliningAlgorithm.Run();
+            var inliningSpecifications = await inliningAlgorithm.RunAsync( cancellationToken );
 
             var substitutionGenerator = new SubstitutionGenerator(
+                this._serviceProvider,
                 syntaxHandler,
                 nonInlinedSemantics,
                 nonInlinedReferencesBySource,
                 bodyAnalysisResults,
                 inliningSpecifications );
 
-            var substitutions = substitutionGenerator.Run();
+            var substitutions = await substitutionGenerator.RunAsync( cancellationToken );
 
             var analysisRegistry = new LinkerAnalysisRegistry(
                 reachableSemantics,
                 inlinedSemantics,
                 substitutions );
 
-            return Task.FromResult(
+            return
                 new LinkerAnalysisStepOutput(
                     input.DiagnosticSink,
                     input.IntermediateCompilation,
                     input.IntroductionRegistry,
                     analysisRegistry,
-                    input.ProjectOptions ) );
+                    input.ProjectOptions );
         }
 
         private static void GetReachableReferences(

@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.Linking
             this._serviceProvider.GetService<ILinkerObserver>()?.OnIntermediateCompilationCreated( introductionStepOutput.IntermediateCompilation );
 
             // Second step. Count references to modified methods on semantic models of intermediate compilation and analyze method bodies.
-            var analysisStepOutput = await LinkerAnalysisStep.Instance.ExecuteAsync( introductionStepOutput, cancellationToken );
+            var analysisStepOutput = await new LinkerAnalysisStep( this._serviceProvider ).ExecuteAsync( introductionStepOutput, cancellationToken );
 
             // Third step. Link, inline and prune intermediate compilation. This results in the final compilation.
             var linkingStepOutput = await new LinkerLinkingStep( this._serviceProvider ).ExecuteAsync( analysisStepOutput, cancellationToken );

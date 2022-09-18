@@ -80,9 +80,9 @@ namespace Metalama.Framework.Engine.Pipeline
 
             if ( isTest )
             {
-                // We use a single-threaded task scheduler for tests because the test runner itself is already multi-threaded.
-                // A specific test can provide a different scheduler. We randomize the ordering of execution to improve the test
-                // relevance.
+                // We use a single-threaded task scheduler for tests because the test runner itself is already multi-threaded and
+                // most tests are so small that they do not allow for significant concurrency anyway. A specific test can provide a different scheduler.
+                // We randomize the ordering of execution to improve the test relevance.
 
                 if ( serviceProvider.GetService<ITaskScheduler>() == null )
                 {

@@ -3,10 +3,16 @@
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Linking.Inlining;
 using Metalama.Framework.Engine.Linking.Substitution;
+using Metalama.Framework.Engine.Utilities.Threading;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Linking
 {
@@ -22,14 +28,17 @@ namespace Metalama.Framework.Engine.Linking
             private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> _nonInlinedReferences;
             private readonly IReadOnlyList<InliningSpecification> _inliningSpecifications;
             private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, SemanticBodyAnalysisResult> _bodyAnalysisResults;
+            private readonly ITaskScheduler _taskScheduler;
 
             public SubstitutionGenerator(
+                IServiceProvider serviceProvider,
                 LinkerSyntaxHandler syntaxHandler,
                 IReadOnlyList<IntermediateSymbolSemantic> nonInlinedSemantics,
                 IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> nonInlinedReferences,
                 IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, SemanticBodyAnalysisResult> bodyAnalysisResults,
                 IReadOnlyList<InliningSpecification> inliningSpecifications )
             {
+                this._taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
                 this._syntaxHandler = syntaxHandler;
                 this._nonInlinedSemantics = nonInlinedSemantics;
                 this._nonInlinedReferences = nonInlinedReferences;
@@ -37,17 +46,18 @@ namespace Metalama.Framework.Engine.Linking
                 this._bodyAnalysisResults = bodyAnalysisResults;
             }
 
-            internal IReadOnlyDictionary<InliningContextIdentifier, IReadOnlyList<SyntaxNodeSubstitution>> Run()
+            public async Task<IReadOnlyDictionary<InliningContextIdentifier, IReadOnlyList<SyntaxNodeSubstitution>>> RunAsync(
+                CancellationToken cancellationToken )
             {
-                var substitutions = new Dictionary<InliningContextIdentifier, Dictionary<SyntaxNode, SyntaxNodeSubstitution>>();
+                var substitutions = new ConcurrentDictionary<InliningContextIdentifier, ConcurrentDictionary<SyntaxNode, SyntaxNodeSubstitution>>();
 
                 // Add substitutions to non-inlined semantics (these are always roots of inlining).
-                foreach ( var nonInlinedSemantic in this._nonInlinedSemantics )
+                void ProcessNonInlinedSemantic( IntermediateSymbolSemantic nonInlinedSemantic )
                 {
                     if ( nonInlinedSemantic.Symbol is not IMethodSymbol )
                     {
                         // Skip non-body semantics.
-                        continue;
+                        return;
                     }
 
                     var nonInlinedSemanticBody = nonInlinedSemantic.ToTyped<IMethodSymbol>();
@@ -62,8 +72,10 @@ namespace Metalama.Framework.Engine.Linking
                     }
                 }
 
+                await this._taskScheduler.RunInParallelAsync( this._nonInlinedSemantics, ProcessNonInlinedSemantic, cancellationToken );
+
                 // Add substitutions for all inlining specifications.
-                foreach ( var inliningSpecification in this._inliningSpecifications )
+                void ProcessInlinlingSpecification( InliningSpecification inliningSpecification )
                 {
                     // Add the inlining substitution itself.
                     AddSubstitution( inliningSpecification.ParentContextIdentifier, new InliningSubstitution( inliningSpecification ) );
@@ -115,17 +127,20 @@ namespace Metalama.Framework.Engine.Linking
                     }
                 }
 
+                await this._taskScheduler.RunInParallelAsync( this._inliningSpecifications, ProcessInlinlingSpecification, cancellationToken );
+
                 // TODO: We convert this later back to the dictionary, but for debugging it's better to have dictionary also here.
                 return substitutions.ToDictionary( x => x.Key, x => x.Value.Values.ToReadOnlyList() );
 
                 void AddSubstitution( InliningContextIdentifier inliningContextId, SyntaxNodeSubstitution substitution )
                 {
-                    if ( !substitutions.TryGetValue( inliningContextId, out var dictionary ) )
-                    {
-                        substitutions[inliningContextId] = dictionary = new Dictionary<SyntaxNode, SyntaxNodeSubstitution>();
-                    }
+                    var dictionary = substitutions.GetOrAdd( inliningContextId, _ => new ConcurrentDictionary<SyntaxNode, SyntaxNodeSubstitution>() );
 
-                    dictionary.Add( substitution.TargetNode, substitution );
+                    if ( !dictionary.TryAdd( substitution.TargetNode, substitution ) )
+                    {
+                        // TODO: The item was already added, but there is no logic to cover this situation.
+                        throw new AssertionFailedException();
+                    }
                 }
             }
 
