@@ -4,17 +4,28 @@ namespace Metalama.Framework.Engine.AspectOrdering
 {
     internal class OrderedAspectLayer : AspectLayer
     {
+        /// <summary>
+        /// Gets the layer order including the alphabetical criteria.
+        /// </summary>
         public int Order { get; }
 
-        public OrderedAspectLayer( int order, AspectLayer aspectLayer ) : base( aspectLayer.AspectClass, aspectLayer.LayerName )
+        /// <summary>
+        /// Gets the layer order without the alphabetical criteria. If aspects are incompletely ordered, several aspects
+        /// can have the same value of this property.
+        /// </summary>
+        public int ExplicitOrder { get; }
+
+        public OrderedAspectLayer( int order, int explicitOrder, AspectLayer aspectLayer ) : base( aspectLayer.AspectClass, aspectLayer.LayerName )
         {
             this.Order = order;
+            this.ExplicitOrder = explicitOrder;
         }
 
         // For testing only.
         internal OrderedAspectLayer( int order, string aspectName, string? layerName ) : base( aspectName, layerName )
         {
             this.Order = order;
+            this.ExplicitOrder = order;
         }
 
         public override string ToString() => base.ToString() + " => " + this.Order;

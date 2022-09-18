@@ -107,6 +107,9 @@ namespace Metalama.Framework.Engine.Options
         [Memo]
         public override bool AllowPreviewLanguageFeatures => this.GetBooleanOption( "MetalamaAllowPreviewLanguageFeatures" );
 
+        [Memo]
+        public override bool RequireOrderedAspects => this.GetBooleanOption( "MetalamaRequireOrderedAspects" );
+
         public override bool RequiresCodeCoverageAnnotations => this._transformerOptions.RequiresCodeCoverageAnnotations;
 
         public override bool TryGetProperty( string name, [NotNullWhen( true )] out string? value )

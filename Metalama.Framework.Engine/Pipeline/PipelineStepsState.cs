@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Introspection;
+using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
@@ -37,6 +38,8 @@ namespace Metalama.Framework.Engine.Pipeline
         private readonly List<IValidatorSource> _validatorSources = new();
         private readonly OverflowAspectSource _overflowAspectSource = new();
         private readonly IntrospectionPipelineListener? _introspectionListener;
+        private readonly bool _shouldDetectUnorderedAspects;
+
         private PipelineStep? _currentStep;
 
         public CompilationModel LastCompilation { get; private set; }
@@ -65,6 +68,7 @@ namespace Metalama.Framework.Engine.Pipeline
             AspectPipelineConfiguration pipelineConfiguration )
         {
             this._introspectionListener = pipelineConfiguration.ServiceProvider.GetService<IntrospectionPipelineListener>();
+            this._shouldDetectUnorderedAspects = pipelineConfiguration.ServiceProvider.GetRequiredService<IProjectOptions>().RequireOrderedAspects;
 
             this._diagnostics = new UserDiagnosticSink( pipelineConfiguration.CompileTimeProject, pipelineConfiguration.CodeFixFilter );
             this.LastCompilation = inputLastCompilation;
@@ -118,9 +122,9 @@ namespace Metalama.Framework.Engine.Pipeline
 
         private void DetectUnorderedSteps( ref PipelineStep? previousStep, PipelineStep currentStep )
         {
-            if ( previousStep != null )
+            if ( previousStep != null && this._shouldDetectUnorderedAspects )
             {
-                if ( previousStep.AspectLayer != currentStep.AspectLayer && previousStep.AspectLayer.Order >= currentStep.AspectLayer.Order )
+                if ( previousStep.AspectLayer != currentStep.AspectLayer && previousStep.AspectLayer.ExplicitOrder >= currentStep.AspectLayer.ExplicitOrder )
                 {
                     this._diagnostics.Report(
                         GeneralDiagnosticDescriptors.UnorderedLayers.CreateRoslynDiagnostic(

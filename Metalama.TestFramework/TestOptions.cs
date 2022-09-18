@@ -238,6 +238,13 @@ namespace Metalama.TestFramework
         public string? DependencyLicenseFile { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether an error should be reported if the compilation uses aspects that
+        /// are not explicitly ordered.
+        /// To enable this option in a test, add this comment to your test file: <c>// @RequireOrderedAspects</c>. 
+        /// </summary>
+        public bool? RequireOrderedAspects { get; set; }
+
+        /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
         /// that is not defined in the current object but defined in the argument.
         /// </summary>
@@ -297,6 +304,8 @@ namespace Metalama.TestFramework
             this.LicenseFile ??= baseOptions.LicenseFile;
 
             this.DependencyLicenseFile ??= baseOptions.DependencyLicenseFile;
+
+            this.RequireOrderedAspects ??= baseOptions.RequireOrderedAspects;
         }
 
         public IReadOnlyList<string> InvalidSourceOptions => this._invalidSourceOptions;
@@ -492,6 +501,11 @@ namespace Metalama.TestFramework
                     case "DependencyLicenseFile":
 
                         this.DependencyLicenseFile = optionArg;
+
+                        break;
+
+                    case "RequireOrderedAspects":
+                        this.RequireOrderedAspects = true;
 
                         break;
 

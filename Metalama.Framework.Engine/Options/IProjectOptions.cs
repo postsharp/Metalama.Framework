@@ -78,5 +78,7 @@ namespace Metalama.Framework.Engine.Options
         bool RequiresCodeCoverageAnnotations { get; }
 
         bool AllowPreviewLanguageFeatures { get; }
+
+        bool RequireOrderedAspects { get; }
     }
 }

@@ -116,7 +116,7 @@ class Aspect2 : TypeAspect { }
 ";
 
             var ordered = this.GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
-            Assert.Equal( "Aspect1 => 0, Aspect2 => 0, Aspect1:Layer1 => 1, Aspect2:Layer1 => 1", ordered );
+            Assert.Equal( "Aspect2 => 0, Aspect1 => 1, Aspect2:Layer1 => 2, Aspect1:Layer1 => 3", ordered );
         }
 
         [Fact]
@@ -182,7 +182,7 @@ class Aspect2  : TypeAspect { }
 ";
 
             var ordered = this.GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
-            Assert.Equal( "Aspect1 => 0, Aspect1:Layer1 => 1, Aspect2 => 1, Aspect2:Layer1 => 2", ordered );
+            Assert.Equal( "Aspect1 => 0, Aspect2 => 1, Aspect1:Layer1 => 2, Aspect2:Layer1 => 3", ordered );
         }
 
         [Fact]
@@ -217,7 +217,7 @@ class Aspect2 : Aspect1 {}
 ";
 
             var ordered = this.GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
-            Assert.Equal( "Aspect1 => 0, Aspect2 => 0, Aspect1:Layer1 => 1, Aspect2:Layer1 => 1", ordered );
+            Assert.Equal( "Aspect2 => 0, Aspect1 => 1, Aspect2:Layer1 => 2, Aspect1:Layer1 => 3", ordered );
         }
 
         [Fact]

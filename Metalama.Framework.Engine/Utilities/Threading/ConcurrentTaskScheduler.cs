@@ -10,6 +10,8 @@ namespace Metalama.Framework.Engine.Utilities.Threading;
 
 internal class ConcurrentTaskScheduler : ITaskScheduler
 {
+    // TODO: this could be optimized by using lightweight objects and a ConcurrentQueue instead of a set of tasks.
+
     private readonly LimitedConcurrencyLevelTaskScheduler _scheduler = new( Environment.ProcessorCount );
 
     public async Task RunInParallelAsync<T>( IEnumerable<T> items, Action<T> action, CancellationToken cancellationToken )

@@ -46,6 +46,8 @@ public abstract class DefaultProjectOptions : IProjectOptions
 
     public virtual bool AllowPreviewLanguageFeatures => false;
 
+    public virtual bool RequireOrderedAspects => false;
+
     public virtual bool IsDesignTimeEnabled => true;
 
     public virtual string? AdditionalCompilationOutputDirectory => null;
