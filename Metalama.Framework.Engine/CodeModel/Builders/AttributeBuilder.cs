@@ -5,11 +5,13 @@ using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Collections;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
 
 namespace Metalama.Framework.Engine.CodeModel.Builders
@@ -55,9 +57,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public FormattableString FormatPredecessor() => $"attribute of type '{this.Type}' on '{this.ContainingDeclaration}'";
 
-        public AttributeSyntax GetSyntax( SyntaxGenerationContext generationContext )
-        {
-            return generationContext.SyntaxGenerator.Attribute( this._attributeConstruction );
-        }
+        [Memo]
+        public override SyntaxTree TransformedSyntaxTree
+            => this.ContainingDeclaration.GetPrimarySyntaxTree() ?? this.Compilation.PartialCompilation.SyntaxTreeForCompilationLevelAttributes;
     }
 }

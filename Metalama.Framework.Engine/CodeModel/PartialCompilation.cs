@@ -345,6 +345,24 @@ namespace Metalama.Framework.Engine.CodeModel
         /// </summary>
         public Compilation InitialCompilation { get; }
 
+        /// <summary>
+        /// Gets the <see cref="SyntaxTree"/> that can be used to add new assembly- or module-level attributes.
+        /// </summary>
+        [Memo]
+        public SyntaxTree SyntaxTreeForCompilationLevelAttributes
+            => this.Compilation.Assembly.GetAttributes()
+                   .Select( a => a.ApplicationSyntaxReference )
+                   .WhereNotNull()
+                   .Select( a => a.SyntaxTree )
+                   .OrderBy( x => x.FilePath.Length )
+                   .ThenBy( x => x )
+                   .FirstOrDefault()
+               ?? this.SyntaxTrees
+                   .OrderBy( t => t.Key.Length )
+                   .ThenBy( t => t.Key )
+                   .First()
+                   .Value;
+
         private static void Validate( IReadOnlyList<SyntaxTreeTransformation>? transformations )
         {
             // In production scenario, we need weavers to provide SyntaxTree instances with a valid Encoding value.
