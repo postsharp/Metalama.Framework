@@ -4,8 +4,8 @@ internal class TargetClass
         [OuterOverride]
         public int TargetMethod_ConflictBetweenOverrides()
         {
-            int i = 27;
-        int i_1 = 42;
+            int i_1 = 27;
+        int i = 42;
                 return 42;
         }
 

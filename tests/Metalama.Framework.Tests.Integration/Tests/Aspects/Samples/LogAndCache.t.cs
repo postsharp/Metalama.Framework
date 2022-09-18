@@ -8,24 +8,24 @@ class TargetCode
             global::System.Console.WriteLine("TargetCode.Add(int, int) started.");
     try
     {
-        global::System.Int32 result;
+        global::System.Int32 result_1;
     string cacheKey = string.Format("TargetCode.Add({0}, {1})", new object[]{a, b});
     if (global::Metalama.Framework.IntegrationTests.Aspects.Overrides.Composition.LogAndCache.SampleCache.Cache.TryGetValue(cacheKey, out object? value))
     {
         global::System.Console.WriteLine("Cache hit.");
-        result = (global::System.Int32)value;
+        result_1 = (global::System.Int32)value;
     }
     else
     {
         global::System.Console.WriteLine("Cache miss.");
-        global::System.Int32 result_1;
+        global::System.Int32 result;
             Console.WriteLine("Thinking...");
-            result_1 = a + b;
-        global::Metalama.Framework.IntegrationTests.Aspects.Overrides.Composition.LogAndCache.SampleCache.Cache.TryAdd(cacheKey, result_1);
-        result = (global::System.Int32)result_1;
+            result = a + b;
+        global::Metalama.Framework.IntegrationTests.Aspects.Overrides.Composition.LogAndCache.SampleCache.Cache.TryAdd(cacheKey, result);
+        result_1 = (global::System.Int32)result;
     }
         global::System.Console.WriteLine("TargetCode.Add(int, int) succeeded.");
-        return (global::System.Int32)result;
+        return (global::System.Int32)result_1;
     }
     catch (global::System.Exception e)
     {
