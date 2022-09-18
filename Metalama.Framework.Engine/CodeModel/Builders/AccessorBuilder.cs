@@ -255,6 +255,5 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override bool CanBeInherited => this.IsVirtual && !this.IsSealed && ((IDeclarationImpl) this.DeclaringType).CanBeInherited;
 
-        public override SyntaxTree? PrimarySyntaxTree => this.ContainingMember.PrimarySyntaxTree;
     }
 }

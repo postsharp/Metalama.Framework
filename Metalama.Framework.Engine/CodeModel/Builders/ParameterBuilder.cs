@@ -109,9 +109,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null ) => this.Name;
 
         public override bool CanBeInherited => ((IDeclarationImpl) this.DeclaringMember).CanBeInherited;
-
-        public override SyntaxTree? PrimarySyntaxTree => ((IDeclarationImpl) this.DeclaringMember).PrimarySyntaxTree;
-
+        
         protected override SyntaxKind AttributeTargetSyntaxKind => this.IsReturnParameter ? SyntaxKind.ReturnKeyword : SyntaxKind.None;
     }
 }

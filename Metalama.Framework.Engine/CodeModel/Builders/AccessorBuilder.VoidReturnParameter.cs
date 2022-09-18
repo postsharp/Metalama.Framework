@@ -35,8 +35,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
                 => this.Accessor.ToDisplayString( format, context ) + "@<return>";
-
-            public override SyntaxTree? PrimarySyntaxTree => this.Accessor.PrimarySyntaxTree;
+            
         }
     }
 }

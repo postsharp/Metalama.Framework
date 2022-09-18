@@ -15,6 +15,8 @@ internal partial class LinkerIntroductionStep
 {
     private class MemberLevelTransformations
     {
+        // TODO: this class is no longer used concurrently, and is being added in transformation order.
+        
         private ConcurrentLinkedList<LinkerInsertedStatement>? _unorderedStatements;
         private ConcurrentLinkedList<IntroduceParameterTransformation>? _unorderedParameters;
         private ConcurrentLinkedList<IntroduceConstructorInitializerArgumentTransformation>? _unorderedArguments;

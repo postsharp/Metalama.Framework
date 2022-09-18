@@ -55,8 +55,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public override bool CanBeInherited => ((IDeclarationImpl) this.ContainingDeclaration).CanBeInherited;
 
-        public override SyntaxTree PrimarySyntaxTree => ((MethodBuilder) this.ContainingDeclaration).PrimarySyntaxTree.AssertNotNull();
-
+        
         public TypeParameterBuilder( MethodBuilder containingMethod, int index, string name ) : base( containingMethod.ParentAdvice )
         {
             this.ContainingDeclaration = containingMethod;

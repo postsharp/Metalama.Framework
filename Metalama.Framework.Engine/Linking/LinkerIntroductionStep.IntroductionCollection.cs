@@ -75,7 +75,7 @@ namespace Metalama.Framework.Engine.Linking
 
             public void Add( IIntroduceInterfaceTransformation interfaceImplementationIntroduction, BaseTypeSyntax introducedInterface )
             {
-                var targetTypeSymbol = ((INamedType) interfaceImplementationIntroduction.ContainingDeclaration).GetSymbol();
+                var targetTypeSymbol = ((INamedType) interfaceImplementationIntroduction.TargetDeclaration).GetSymbol();
 
                 // Heuristic: select the file with the shortest path.
                 var targetTypeDecl = (BaseTypeDeclarationSyntax) targetTypeSymbol.GetPrimaryDeclaration().AssertNotNull();

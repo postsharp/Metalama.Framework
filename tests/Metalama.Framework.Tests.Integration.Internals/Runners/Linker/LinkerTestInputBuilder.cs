@@ -453,7 +453,7 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
             SyntaxNode insertPositionNode,
             string introducedElementName )
         {
-            A.CallTo( () => observableTransformation.ContainingDeclaration ).Returns( containingDeclaration );
+            A.CallTo( () => observableTransformation.TargetDeclaration ).Returns( containingDeclaration );
 
             A.CallTo( () => ((IDeclarationImpl) observableTransformation).ToRef() )
                 .Returns( new Ref<IDeclaration>( (IDeclarationBuilder) observableTransformation ) );

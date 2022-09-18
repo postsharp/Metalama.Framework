@@ -70,7 +70,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
         }
 
-        public override SyntaxTree? PrimarySyntaxTree => this._field.PrimarySyntaxTree;
+        public override IDeclaration TargetDeclaration => this._field;
 
         public override bool IsDesignTime => false;
 

@@ -105,10 +105,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public InsertPosition InsertPosition => this.ToInsertPosition();
 
-        // TODO: This is temporary.
 
-        SyntaxTree IIntroduceMemberTransformation.TransformedSyntaxTree => this.PrimarySyntaxTree.AssertNotNull();
-
-        public override SyntaxTree? PrimarySyntaxTree => ((NamedType) this.DeclaringType).Symbol.GetPrimarySyntaxReference().AssertNotNull().SyntaxTree;
     }
 }

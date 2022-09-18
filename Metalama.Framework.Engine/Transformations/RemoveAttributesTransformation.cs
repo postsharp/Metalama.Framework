@@ -2,6 +2,9 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
+using Metalama.Framework.Engine.CodeModel;
+using Microsoft.CodeAnalysis;
+using System.Threading;
 
 namespace Metalama.Framework.Engine.Transformations;
 
@@ -18,7 +21,10 @@ internal class RemoveAttributesTransformation : BaseTransformation, IObservableT
         this.ContainingDeclaration = targetDeclaration;
     }
 
-    public IDeclaration ContainingDeclaration { get; set; }
+    public IDeclaration ContainingDeclaration { get; }
 
     public bool IsDesignTime => false;
+
+    public override IDeclaration TargetDeclaration => this.ContainingDeclaration;
+
 }

@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Utilities.Threading;
 
-internal readonly struct ConcurrentSet<T> : IReadOnlySet<T>
+internal class ConcurrentSet<T> : IReadOnlySet<T>
 {
     private readonly ConcurrentDictionary<T, int> _dictionary = new();
 

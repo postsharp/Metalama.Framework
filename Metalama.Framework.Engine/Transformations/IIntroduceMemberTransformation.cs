@@ -10,8 +10,7 @@ namespace Metalama.Framework.Engine.Transformations
     /// </summary>
     internal interface IIntroduceMemberTransformation : ITransformation
     {
-        SyntaxTree TransformedSyntaxTree { get; }
-
+    
         /// <summary>
         /// Gets the full syntax of introduced members including the body.
         /// </summary>

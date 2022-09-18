@@ -70,40 +70,51 @@ namespace Metalama.Framework.Engine.Linking
 
             ConcurrentSet<SyntaxNode> nodesWithModifiedAttributes = new();
 
-            void IndexTransformation( ITransformation transformation )
+            
+
+            void IndexTransformationsInSyntaxTree( IGrouping<SyntaxTree, ITransformation> transformationGroup )
             {
-                IndexReplaceTransformation( input, transformation, syntaxTransformationCollection, replacedTransformations );
+                // Transformations need to be sorted here because some transformations require a LexicalScope to get unique name, and it
+                // will give deterministic results only when called in a deterministic order.
+                var sortedTransformations = transformationGroup.OrderBy( x => x, transformationComparer );
+                
+                foreach ( var transformation in transformationGroup )
+                {
+                    IndexReplaceTransformation( input, transformation, syntaxTransformationCollection, replacedTransformations );
 
-                IndexOverrideTransformation(
-                    transformation,
-                    syntaxTransformationCollection,
-                    buildersWithSynthesizedSetters );
+                    IndexOverrideTransformation(
+                        transformation,
+                        syntaxTransformationCollection,
+                        buildersWithSynthesizedSetters );
 
-                this.IndexIntroduceTransformation(
-                    input,
-                    transformation,
-                    diagnostics,
-                    lexicalScopeFactory,
-                    nameProvider,
-                    aspectReferenceSyntaxProvider,
-                    buildersWithSynthesizedSetters,
-                    syntaxTransformationCollection,
-                    replacedTransformations );
+                    this.IndexIntroduceTransformation(
+                        input,
+                        transformation,
+                        diagnostics,
+                        lexicalScopeFactory,
+                        nameProvider,
+                        aspectReferenceSyntaxProvider,
+                        buildersWithSynthesizedSetters,
+                        syntaxTransformationCollection,
+                        replacedTransformations );
 
-                this.IndexMemberLevelTransformation(
-                    input,
-                    diagnostics,
-                    lexicalScopeFactory,
-                    transformation,
-                    symbolMemberLevelTransformations,
-                    introductionMemberLevelTransformations );
+                    this.IndexMemberLevelTransformation(
+                        input,
+                        diagnostics,
+                        lexicalScopeFactory,
+                        transformation,
+                        symbolMemberLevelTransformations,
+                        introductionMemberLevelTransformations );
 
-                IndexTypeLevelTransformation( transformation, symbolMemberLevelTransformations, typeLevelTransformations );
+                    IndexTypeLevelTransformation( transformation, symbolMemberLevelTransformations, typeLevelTransformations );
 
-                IndexNodesWithModifiedAttributes( transformation, nodesWithModifiedAttributes );
+                    IndexNodesWithModifiedAttributes( transformation, nodesWithModifiedAttributes );
+                }
             }
 
-            await this._taskScheduler.RunInParallelAsync( input.Transformations, IndexTransformation, cancellationToken );
+            var transformationsBySyntaxTree = input.Transformations.GroupBy( t => t.TransformedSyntaxTree );
+
+            await this._taskScheduler.RunInParallelAsync( transformationsBySyntaxTree, IndexTransformationsInSyntaxTree, cancellationToken );
             await this._taskScheduler.RunInParallelAsync( introductionMemberLevelTransformations.Values, t => t.Sort( transformationComparer ), cancellationToken );
             await this._taskScheduler.RunInParallelAsync( symbolMemberLevelTransformations.Values, t => t.Sort( transformationComparer ), cancellationToken );
 
@@ -312,6 +323,8 @@ namespace Metalama.Framework.Engine.Linking
                             this._serviceProvider,
                             input.CompilationModel );
 
+                        // TODO: the order of execution of the template expansion logic must be deterministic within a syntax tree,
+                        // otherwise LexicalScope name generator is undeterministic. 
                         var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext );
 
                         introducedMembers = PostProcessIntroducedMembers( introducedMembers );

@@ -44,7 +44,7 @@ namespace Metalama.Framework.Engine.Pipeline
                 transformations.Where( t => t is IObservableTransformation { IsDesignTime: true } and not IReplaceMemberTransformation );
 
             foreach ( var transformationGroup in
-                     observableTransformations.GroupBy( t => ((IObservableTransformation) t).ContainingDeclaration ) )
+                     observableTransformations.GroupBy( t => ((IObservableTransformation) t).TargetDeclaration ) )
             {
                 cancellationToken.ThrowIfCancellationRequested();
 

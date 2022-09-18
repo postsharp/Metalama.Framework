@@ -11,8 +11,6 @@ namespace Metalama.Framework.Engine.Transformations;
 
 internal class IntroduceParameterTransformation : BaseTransformation, IObservableTransformation, IMemberLevelTransformation
 {
-    IDeclaration IObservableTransformation.ContainingDeclaration => this.TargetMember;
-
     public bool IsDesignTime => true;
 
     public IMember TargetMember => this.Parameter.DeclaringMember;
@@ -45,4 +43,7 @@ internal class IntroduceParameterTransformation : BaseTransformation, IObservabl
 
         return syntax;
     }
+
+    public override IDeclaration TargetDeclaration => this.TargetMember;
+    
 }
