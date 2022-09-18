@@ -1236,7 +1236,7 @@ Intentional syntax error.
             DiagnosticBag diagnosticBag = new();
             var pipelineResult2 = await pipeline2.ExecuteAsync( diagnosticBag, compilation2, ImmutableArray<ManagedResource>.Empty, CancellationToken.None );
 
-            Assert.NotNull( pipelineResult2 );
+            Assert.True( pipelineResult2.IsSuccess );
         }
 
         private class Rewriter : ICompileTimeAssemblyBinaryRewriter
