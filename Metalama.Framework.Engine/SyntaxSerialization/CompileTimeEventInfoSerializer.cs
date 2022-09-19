@@ -12,7 +12,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization
 {
-    internal class CompileTimeEventInfoSerializer : ObjectSerializer<CompileTimeEventInfo>
+    internal class CompileTimeEventInfoSerializer : ObjectSerializer<CompileTimeEventInfo, EventInfo>
     {
         public override ExpressionSyntax Serialize( CompileTimeEventInfo obj, SyntaxSerializationContext serializationContext )
         {

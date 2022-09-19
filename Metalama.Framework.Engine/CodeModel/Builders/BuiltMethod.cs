@@ -42,7 +42,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         // TODO: When an interface is introduced, explicit implementation should appear here.
         public IReadOnlyList<IMethod> ExplicitInterfaceImplementations => this.MethodBuilder.ExplicitInterfaceImplementations;
 
-        public MethodInfo ToMethodInfo() => throw new NotImplementedException();
+        public MethodInfo ToMethodInfo() => this.MethodBuilder.ToMethodInfo();
 
         IMemberWithAccessors? IMethod.DeclaringMember => null;
 
@@ -73,7 +73,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             => new InvokerFactory<IMethodInvoker>( ( order, invokerOperator ) => new MethodInvoker( this, order, invokerOperator ) );
 
         public IMethod? OverriddenMethod => this.Compilation.Factory.GetDeclaration( this.MethodBuilder.OverriddenMethod );
-        
+
         IMethod IMethod.MethodDefinition => this;
     }
 }

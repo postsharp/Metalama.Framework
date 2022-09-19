@@ -23,7 +23,6 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
         public override ExpressionSyntax Serialize( CompileTimeFieldOrPropertyInfo obj, SyntaxSerializationContext serializationContext )
         {
             ExpressionSyntax propertyInfo;
-            var allBindingFlags = SyntaxUtility.CreateBindingFlags( obj.FieldOrProperty, serializationContext );
 
             switch ( obj.FieldOrProperty )
             {
@@ -34,22 +33,9 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                         break;
                     }
 
-                case Field field:
+                case IField field:
                     {
-                        var typeCreation = TypeSerializationHelper.SerializeTypeSymbolRecursive( field.DeclaringType.GetSymbol(), serializationContext );
-
-                        propertyInfo = InvocationExpression(
-                                MemberAccessExpression(
-                                    SyntaxKind.SimpleMemberAccessExpression,
-                                    typeCreation,
-                                    IdentifierName( "GetField" ) ) )
-                            .AddArgumentListArguments(
-                                Argument(
-                                    LiteralExpression(
-                                        SyntaxKind.StringLiteralExpression,
-                                        Literal( field.Name ) ) ),
-                                Argument( allBindingFlags ) )
-                            .NormalizeWhitespace();
+                        propertyInfo = CompileTimeFieldInfoSerializer.SerializeField( field, serializationContext );
 
                         break;
                     }

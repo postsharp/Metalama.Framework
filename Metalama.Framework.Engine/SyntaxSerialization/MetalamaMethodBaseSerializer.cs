@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.ReflectionMocks;
@@ -13,6 +14,7 @@ using System.Linq;
 using System.Reflection;
 using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 using MethodBase = System.Reflection.MethodBase;
+using RefKind = Metalama.Framework.Code.RefKind;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization
 {
@@ -51,16 +53,33 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
             var allBindingFlags = SyntaxUtility.CreateBindingFlags( method, serializationContext );
             var reflectionHelperTypeSyntax = serializationContext.SyntaxGenerator.Type( serializationContext.GetTypeSymbol( typeof(ReflectionHelper) ) );
 
-            var methodBaseParametersExpressions = method.Parameters.Select(
-                p => p.RefKind != Code.RefKind.None
-                    ? (ExpressionSyntax) InvocationExpression(
-                            MemberAccessExpression(
-                                SyntaxKind.SimpleMemberAccessExpression,
-                                serializationContext.SyntaxGenerator.TypeOfExpression( p.Type.GetSymbol() ),
-                                IdentifierName( "MakeByRefType" ) ) )
-                        .AddArgumentListArguments()
-                    : serializationContext.SyntaxGenerator.TypeOfExpression( p.Type.GetSymbol() ) );
-            
+            ExpressionSyntax parameterTypeArray;
+
+            if ( method.Parameters.Count > 0 )
+            {
+                var methodBaseParametersExpressions = method.Parameters.Select(
+                    p => p.RefKind != RefKind.None
+                        ? (ExpressionSyntax) InvocationExpression(
+                                MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    serializationContext.SyntaxGenerator.TypeOfExpression( p.Type.GetSymbol() ),
+                                    IdentifierName( "MakeByRefType" ) ) )
+                            .AddArgumentListArguments()
+                        : serializationContext.SyntaxGenerator.TypeOfExpression( p.Type.GetSymbol() ) );
+
+                parameterTypeArray = ImplicitArrayCreationExpression(
+                    InitializerExpression(
+                        SyntaxKind.ArrayInitializerExpression,
+                        SeparatedList( methodBaseParametersExpressions ) ) );
+            }
+            else
+            {
+                parameterTypeArray = MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    serializationContext.SyntaxGenerator.Type( serializationContext.GetTypeSymbol( typeof(Type) ) ),
+                    IdentifierName( nameof(Type.EmptyTypes) ) );
+            }
+
             ExpressionSyntax invokeGetMethod;
 
             if ( method is IConstructor constructor )
@@ -88,11 +107,8 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                                 typeCreation,
                                 IdentifierName( "GetConstructor" ) ) )
                         .AddArgumentListArguments(
-                            Argument(
-                                ImplicitArrayCreationExpression(
-                                    InitializerExpression(
-                                        SyntaxKind.ArrayInitializerExpression,
-                                        SeparatedList( methodBaseParametersExpressions ) ) ) ) );
+                            Argument( allBindingFlags ),
+                            Argument( parameterTypeArray ) );
                 }
             }
             else
@@ -128,11 +144,8 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                                 LiteralExpression(
                                     SyntaxKind.StringLiteralExpression,
                                     Literal( method.Name ) ) ),
-                            Argument(
-                                ImplicitArrayCreationExpression(
-                                    InitializerExpression(
-                                        SyntaxKind.ArrayInitializerExpression,
-                                        SeparatedList( methodBaseParametersExpressions ) ) ) ) );
+                            Argument( allBindingFlags ),
+                            Argument( parameterTypeArray ) );
                 }
             }
 
@@ -160,6 +173,6 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
         }
         */
 
-        public override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof( MemberInfo ), typeof( MethodBase ) );
+        public override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof(MemberInfo), typeof(MethodBase) );
     }
 }
