@@ -443,7 +443,7 @@ namespace Metalama.Framework.Engine.Linking
                 return;
             }
 
-            var thisTypeLevelTransformations = typeLevelTransformations.GetOrAdd( declarationSyntax, _ => new TypeLevelTransformations() );
+            var thisTypeLevelTransformations = typeLevelTransformations.GetOrAddNew( declarationSyntax );
 
             switch ( transformation )
             {
@@ -469,9 +469,7 @@ namespace Metalama.Framework.Engine.Linking
 
                                     foreach ( var variable in fieldDeclaration.Declaration.Variables )
                                     {
-                                        var fieldTransformations = symbolMemberLevelTransformations.GetOrAdd(
-                                            variable,
-                                            _ => new MemberLevelTransformations() );
+                                        var fieldTransformations = symbolMemberLevelTransformations.GetOrAddNew( variable );
 
                                         fieldTransformations.AddDefaultInitializer = true;
                                     }
@@ -482,9 +480,7 @@ namespace Metalama.Framework.Engine.Linking
 
                                     foreach ( var variable in eventFieldDeclaration.Declaration.Variables )
                                     {
-                                        var eventFieldTransformations = symbolMemberLevelTransformations.GetOrAdd(
-                                            variable,
-                                            _ => new MemberLevelTransformations() );
+                                        var eventFieldTransformations = symbolMemberLevelTransformations.GetOrAddNew( variable );
 
                                         eventFieldTransformations.AddDefaultInitializer = true;
                                     }
@@ -523,7 +519,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 if ( declarationSyntax != null )
                 {
-                    memberLevelTransformations = symbolMemberLevelTransformations.GetOrAdd( declarationSyntax, _ => new MemberLevelTransformations() );
+                    memberLevelTransformations = symbolMemberLevelTransformations.GetOrAddNew( declarationSyntax );
                 }
                 else
                 {
@@ -531,7 +527,7 @@ namespace Metalama.Framework.Engine.Linking
                                                 ?? (memberLevelTransformation.TargetMember as BuiltDeclaration)?.Builder as IIntroduceMemberTransformation)
                         .AssertNotNull();
 
-                    memberLevelTransformations = introductionMemberLevelTransformations.GetOrAdd( parentTransformation, _ => new MemberLevelTransformations() );
+                    memberLevelTransformations = introductionMemberLevelTransformations.GetOrAddNew( parentTransformation );
                 }
 
                 switch (transformation, memberLevelTransformation.TargetMember)

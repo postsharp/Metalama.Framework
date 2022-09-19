@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Pipeline
     {
         CompilationModel LastCompilation { get; }
 
-        IReadOnlyList<ITransformation> Transformations { get; }
+        IReadOnlyCollection<ITransformation> Transformations { get; }
 
         ImmutableArray<IAspectInstance> InheritableAspectInstances { get; }
 

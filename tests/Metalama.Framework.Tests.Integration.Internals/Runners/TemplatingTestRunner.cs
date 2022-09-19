@@ -309,7 +309,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
             }
 
             // ReSharper disable once SuspiciousTypeConversion.Global
-            var lexicalScope = LexicalScopeFactory.GetSourceLexicalScope( targetMethod );
+            var lexicalScope = LexicalScopeFactory.CreateLexicalScope( targetMethod );
             var syntaxGenerationContext = SyntaxGenerationContext.Create( serviceProvider, compilation.RoslynCompilation );
 
             var proceedExpression =

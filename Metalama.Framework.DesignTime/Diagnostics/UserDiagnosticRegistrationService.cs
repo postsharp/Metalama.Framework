@@ -25,7 +25,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
 
             return _instances.GetOrAdd(
                 configurationManager,
-                _ => new UserDiagnosticRegistrationService( configurationManager ) );
+                cm => new UserDiagnosticRegistrationService( cm ) );
         }
 
         private UserDiagnosticRegistrationService( IConfigurationManager configurationManager )

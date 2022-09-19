@@ -13,6 +13,7 @@ using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Validation;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
@@ -32,10 +33,10 @@ namespace Metalama.Framework.Engine.Pipeline
         private readonly SkipListDictionary<PipelineStepId, PipelineStep> _steps;
         private readonly PipelineStepIdComparer _comparer;
         private readonly UserDiagnosticSink _diagnostics;
-        private readonly List<ITransformation> _transformations = new();
-        private readonly List<IAspectInstance> _inheritableAspectInstances = new();
-        private readonly List<AspectInstanceResult> _aspectInstanceResults = new();
-        private readonly List<IValidatorSource> _validatorSources = new();
+        private readonly ConcurrentBag<ITransformation> _transformations = new();
+        private readonly ConcurrentBag<IAspectInstance> _inheritableAspectInstances = new();
+        private readonly ConcurrentBag<AspectInstanceResult> _aspectInstanceResults = new();
+        private readonly ConcurrentBag<IValidatorSource> _validatorSources = new();
         private readonly OverflowAspectSource _overflowAspectSource = new();
         private readonly IntrospectionPipelineListener? _introspectionListener;
         private readonly bool _shouldDetectUnorderedAspects;
@@ -46,7 +47,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
         public ImmutableArray<CompilationModel> Compilations { get; private set; }
 
-        public IReadOnlyList<ITransformation> Transformations => this._transformations;
+        public IReadOnlyCollection<ITransformation> Transformations => this._transformations;
 
         public ImmutableArray<IAspectInstance> InheritableAspectInstances => this._inheritableAspectInstances.ToImmutableArray();
 
@@ -206,8 +207,14 @@ namespace Metalama.Framework.Engine.Pipeline
 
             if ( !this._steps.TryGetValue( stepId, out step ) )
             {
-                step = new ExecuteAspectLayerPipelineStep( this, stepId, aspectLayer );
-                _ = this._steps.Add( stepId, step );
+                lock ( this._steps )
+                {
+                    if ( !this._steps.TryGetValue( stepId, out step ) )
+                    {
+                        step = new ExecuteAspectLayerPipelineStep( this, stepId, aspectLayer );
+                        _ = this._steps.Add( stepId, step );
+                    }
+                }
             }
 
             return true;
@@ -245,7 +252,10 @@ namespace Metalama.Framework.Engine.Pipeline
 
         public void AddInheritableAspectInstances( IReadOnlyList<AspectInstance> inheritedAspectInstances )
         {
-            this._inheritableAspectInstances.AddRange( inheritedAspectInstances );
+            foreach ( var aspectInstance in inheritedAspectInstances )
+            {
+                this._inheritableAspectInstances.Add( aspectInstance );
+            }
         }
 
         public void AddDiagnostics( ImmutableUserDiagnosticList diagnostics )
@@ -255,11 +265,20 @@ namespace Metalama.Framework.Engine.Pipeline
             this._diagnostics.AddCodeFixes( diagnostics.CodeFixes );
         }
 
-        public void AddTransformations( IEnumerable<ITransformation> transformations ) => this._transformations.AddRange( transformations );
+        public void AddTransformations( IEnumerable<ITransformation> transformations )
+        {
+            foreach ( var transformation in transformations )
+            {
+                this._transformations.Add( transformation );
+            }
+        }
 
         public bool AddValidatorSources( IEnumerable<IValidatorSource> validatorSources )
         {
-            this._validatorSources.AddRange( validatorSources );
+            foreach ( var source in validatorSources )
+            {
+                this._validatorSources.Add( source );
+            }
 
             return true;
         }

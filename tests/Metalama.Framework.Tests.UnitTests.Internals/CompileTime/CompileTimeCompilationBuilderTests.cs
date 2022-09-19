@@ -1282,7 +1282,16 @@ public class MyRunTimeAttribute : Attribute
 #endregion
 
 #region StrippedNamespace
-namespace StrippedNamespace {}
+namespace StrippedNamespace {
+#region InsideNamespace A
+#endregion
+class C {
+#region InsideClass
+#endregion
+}
+#region InsideNamespace B
+#endregion
+}
 #endregion
 ";
 

@@ -80,5 +80,7 @@ namespace Metalama.Framework.Engine.Options
         bool AllowPreviewLanguageFeatures { get; }
 
         bool RequireOrderedAspects { get; }
+
+        bool IsConcurrentBuildEnabled { get; }
     }
 }

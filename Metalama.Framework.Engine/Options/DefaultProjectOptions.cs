@@ -48,6 +48,8 @@ public abstract class DefaultProjectOptions : IProjectOptions
 
     public virtual bool RequireOrderedAspects => false;
 
+    public virtual bool IsConcurrentBuildEnabled => false;
+
     public virtual bool IsDesignTimeEnabled => true;
 
     public virtual string? AdditionalCompilationOutputDirectory => null;

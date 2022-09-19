@@ -51,7 +51,9 @@ public abstract class ProjectOptionsWrapper : IProjectOptions
 
     public virtual bool RequiresCodeCoverageAnnotations => this.Wrapped.RequiresCodeCoverageAnnotations;
 
-    public bool AllowPreviewLanguageFeatures => this.Wrapped.AllowPreviewLanguageFeatures;
+    public virtual bool AllowPreviewLanguageFeatures => this.Wrapped.AllowPreviewLanguageFeatures;
 
-    public bool RequireOrderedAspects => this.Wrapped.RequireOrderedAspects;
+    public virtual bool RequireOrderedAspects => this.Wrapped.RequireOrderedAspects;
+
+    public virtual bool IsConcurrentBuildEnabled => this.Wrapped.IsConcurrentBuildEnabled;
 }

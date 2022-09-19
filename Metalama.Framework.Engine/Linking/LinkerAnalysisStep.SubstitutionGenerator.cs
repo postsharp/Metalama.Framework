@@ -134,7 +134,7 @@ namespace Metalama.Framework.Engine.Linking
 
                 void AddSubstitution( InliningContextIdentifier inliningContextId, SyntaxNodeSubstitution substitution )
                 {
-                    var dictionary = substitutions.GetOrAdd( inliningContextId, _ => new ConcurrentDictionary<SyntaxNode, SyntaxNodeSubstitution>() );
+                    var dictionary = substitutions.GetOrAddNew( inliningContextId );
 
                     if ( !dictionary.TryAdd( substitution.TargetNode, substitution ) )
                     {

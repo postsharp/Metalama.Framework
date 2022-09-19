@@ -12,6 +12,7 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
@@ -29,7 +30,7 @@ namespace Metalama.Framework.Engine.Aspects
     {
         public IServiceProvider ServiceProvider { get; }
 
-        private readonly Dictionary<string, TemplateDriver> _templateDrivers = new( StringComparer.Ordinal );
+        private readonly ConcurrentDictionary<string, TemplateDriver> _templateDrivers = new( StringComparer.Ordinal );
 
         protected TemplateClass(
             IServiceProvider serviceProvider,
@@ -78,9 +79,16 @@ namespace Metalama.Framework.Engine.Aspects
             }
 
             templateDriver = new TemplateDriver( this.ServiceProvider, compiledTemplateMethodInfo );
-            this._templateDrivers.Add( id, templateDriver );
 
-            return templateDriver;
+            if ( this._templateDrivers.TryAdd( id, templateDriver ) )
+            {
+                return templateDriver;
+            }
+            else
+            {
+                // Another thread instantiated the same driver in the meantime.
+                return this._templateDrivers[id];
+            }
         }
 
         internal abstract CompileTimeProject? Project { get; }

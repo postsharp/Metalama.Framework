@@ -95,7 +95,8 @@ namespace Metalama.Framework.Engine.Pipeline
             }
             else
             {
-                this.ServiceProvider = this.ServiceProvider.WithService( new ConcurrentTaskScheduler() )
+                this.ServiceProvider = this.ServiceProvider
+                    .WithService( this.ProjectOptions.IsConcurrentBuildEnabled ? new ConcurrentTaskScheduler() : new SingleThreadedTaskScheduler( false ) )
                     .WithServices( executionScenario );
             }
 

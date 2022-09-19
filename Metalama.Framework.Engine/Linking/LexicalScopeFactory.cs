@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using RoslynMethodKind = Microsoft.CodeAnalysis.MethodKind;
@@ -16,30 +17,19 @@ namespace Metalama.Framework.Engine.Linking
 {
     internal sealed partial class LexicalScopeFactory : ITemplateLexicalScopeProvider
     {
-        private readonly Dictionary<IDeclaration, TemplateLexicalScope> _scopes;
+        private readonly ConcurrentDictionary<IDeclaration, TemplateLexicalScope> _scopes;
 
         public LexicalScopeFactory( CompilationModel compilation )
         {
-            this._scopes = new Dictionary<IDeclaration, TemplateLexicalScope>( compilation.InvariantComparer );
+            this._scopes = new ConcurrentDictionary<IDeclaration, TemplateLexicalScope>( compilation.InvariantComparer );
         }
 
         /// <summary>
         /// Gets a shared lexical code where consumers can add their own symbols.
         /// </summary>
-        public TemplateLexicalScope GetLexicalScope( IDeclaration declaration )
-        {
-            if ( !this._scopes.TryGetValue( declaration, out var lexicalScope ) )
-            {
-                this._scopes[declaration] = lexicalScope = GetSourceLexicalScope( declaration );
-            }
+        public TemplateLexicalScope GetLexicalScope( IDeclaration declaration ) => this._scopes.GetOrAdd( declaration, CreateLexicalScope );
 
-            return lexicalScope;
-        }
-
-        /// <summary>
-        /// Gets the lexical scope from source code.
-        /// </summary>
-        internal static TemplateLexicalScope GetSourceLexicalScope( IDeclaration declaration )
+        internal static TemplateLexicalScope CreateLexicalScope( IDeclaration declaration )
         {
             var symbol = declaration.GetSymbol();
 
