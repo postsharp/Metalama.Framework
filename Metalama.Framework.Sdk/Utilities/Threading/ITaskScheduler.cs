@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Utilities.Threading;
 
-internal interface ITaskScheduler : IService
+public interface ITaskScheduler : IService
 {
     Task RunInParallelAsync<T>( IEnumerable<T> items, Action<T> action, CancellationToken cancellationToken );
 }

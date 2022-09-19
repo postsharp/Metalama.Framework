@@ -10,18 +10,18 @@ namespace Metalama.Framework.Engine.Utilities.Threading;
 
 public class SingleThreadedTaskScheduler : ITaskScheduler
 {
-    private readonly bool _randomized;
+    private readonly bool _randomize;
 
-    public SingleThreadedTaskScheduler( bool randomized )
+    public SingleThreadedTaskScheduler( bool randomize = false )
     {
-        this._randomized = randomized;
+        this._randomize = randomize;
     }
 
     public Task RunInParallelAsync<T>( IEnumerable<T> items, Action<T> action, CancellationToken cancellationToken )
     {
         IEnumerable<T> orderedItems;
 
-        if ( this._randomized )
+        if ( this._randomize )
         {
             var random = new Random();
             orderedItems = items.ToDictionary( a => a, _ => random.NextDouble() ).OrderBy( p => p.Value ).Select( p => p.Key );

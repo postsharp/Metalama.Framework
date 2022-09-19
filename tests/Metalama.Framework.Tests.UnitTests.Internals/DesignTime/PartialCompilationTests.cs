@@ -1,13 +1,16 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.TestFramework;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -157,10 +160,10 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
             ApplySeveralModifications( PartialCompilation.CreatePartial( compilation, compilation.SyntaxTrees[0] ) );
         }
 
-        private static void ApplySeveralModifications( PartialCompilation partialCompilation1 )
+        private async Task ApplySeveralModifications( PartialCompilation partialCompilation1 )
         {
             var initialCompilation = partialCompilation1.InitialCompilation;
-
+            
             // Test the initial compilation.
             const string path1 = "1.cs";
             Assert.Single( partialCompilation1.SyntaxTrees );
@@ -181,7 +184,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
             Assert.Same( initialCompilation, partialCompilation3.InitialCompilation );
 
             // Modify syntax trees.
-            var partialCompilation4 = (PartialCompilation) partialCompilation3.RewriteSyntaxTrees( new Rewriter() );
+            var partialCompilation4 = (PartialCompilation) await partialCompilation3.RewriteSyntaxTreesAsync( new Rewriter(), ServiceProvider.Empty.WithService( new SingleThreadedTaskScheduler() ) );
             Assert.Equal( 3, partialCompilation4.SyntaxTrees.Count );
             Assert.Equal( 3, partialCompilation4.ModifiedSyntaxTrees.Count );
             Assert.Null( partialCompilation4.ModifiedSyntaxTrees[path1].OldTree );

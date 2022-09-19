@@ -152,7 +152,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                     additionalResources = additionalResources.Add( resource );
                 }
 
-                var resultingCompilation = (PartialCompilation) RunTimeAssemblyRewriter.Rewrite( resultPartialCompilation, this.ServiceProvider );
+                var resultingCompilation = (PartialCompilation) await RunTimeAssemblyRewriter.RewriteAsync( resultPartialCompilation, this.ServiceProvider );
                 var syntaxTreeTransformations = resultingCompilation.ToTransformations();
 
                 return new CompileTimeAspectPipelineResult(

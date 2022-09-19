@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
@@ -11,6 +12,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -43,7 +45,8 @@ namespace Metalama.Framework.Engine.Linking
                 ConcurrentDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>> aspectReferences = new();
 
                 // Add implicit references going from final semantic to the last override.
-                await this._taskScheduler.RunInParallelAsync( this._introductionRegistry.GetOverriddenMembers(), ProcessOverriddenMember, cancellationToken );
+                var overriddenMembers = this._introductionRegistry.GetOverriddenMembers().ToReadOnlyList();
+                await this._taskScheduler.RunInParallelAsync( overriddenMembers, ProcessOverriddenMember, cancellationToken );
 
                 void ProcessOverriddenMember( ISymbol overriddenMember )
                 {
@@ -143,7 +146,10 @@ namespace Metalama.Framework.Engine.Linking
                 }
 
                 // Analyze introduced method bodies.
-                foreach ( var introducedMember in this._introductionRegistry.GetIntroducedMembers() )
+                var introducedMembers = this._introductionRegistry.GetIntroducedMembers().ToReadOnlyList();
+                await this._taskScheduler.RunInParallelAsync( introducedMembers, ProcessIntroducedMember, cancellationToken );
+
+                void ProcessIntroducedMember( LinkerIntroducedMember introducedMember )
                 {
                     var symbol = this._introductionRegistry.GetSymbolForIntroducedMember( introducedMember );
 
@@ -185,7 +191,9 @@ namespace Metalama.Framework.Engine.Linking
                     }
                 }
 
-                foreach ( var symbol in this._introductionRegistry.GetOverriddenMembers() )
+                await this._taskScheduler.RunInParallelAsync( overriddenMembers, ProcessOverriddenMembers2, cancellationToken );
+
+                void ProcessOverriddenMembers2( ISymbol symbol )
                 {
                     switch ( symbol )
                     {

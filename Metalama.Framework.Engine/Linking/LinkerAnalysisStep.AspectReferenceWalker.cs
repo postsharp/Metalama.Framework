@@ -20,13 +20,13 @@ namespace Metalama.Framework.Engine.Linking
             private readonly SemanticModel _semanticModel;
             private readonly IMethodSymbol _containingSymbol;
 
-            public ConcurrentBag<ResolvedAspectReference> AspectReferences { get; }
+            public List<ResolvedAspectReference> AspectReferences { get; }
 
             public AspectReferenceWalker( AspectReferenceResolver referenceResolver, SemanticModel semanticModel, IMethodSymbol containingSymbol )
             {
                 this._referenceResolver = referenceResolver;
                 this._semanticModel = semanticModel;
-                this.AspectReferences = new ConcurrentBag<ResolvedAspectReference>();
+                this.AspectReferences = new List<ResolvedAspectReference>();
                 this._containingSymbol = containingSymbol;
             }
 
