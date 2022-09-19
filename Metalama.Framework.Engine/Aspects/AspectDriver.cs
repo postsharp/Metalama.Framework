@@ -44,7 +44,7 @@ namespace Metalama.Framework.Engine.Aspects
 
             // Introductions must have a deterministic order because of testing.
             var declarativeAdviceAttributes = aspectClass
-                .TemplateClasses.SelectMany( c => c.GetDeclarativeAdvices( serviceProvider, compilation ) )
+                .TemplateClasses.SelectMany( c => c.GetDeclarativeAdvice( serviceProvider, compilation ) )
                 .ToList();
 
             if ( declarativeAdviceAttributes.Count > 0 )
@@ -240,7 +240,7 @@ namespace Metalama.Framework.Engine.Aspects
 
             // Prepare declarative advice.
             var declarativeAdvice = this._aspectClass.TemplateClasses
-                .SelectMany( c => c.GetDeclarativeAdvices( serviceProvider, initialCompilationRevision ) )
+                .SelectMany( c => c.GetDeclarativeAdvice( serviceProvider, initialCompilationRevision ) )
                 .ToList();
 
             // Create the AspectBuilder.

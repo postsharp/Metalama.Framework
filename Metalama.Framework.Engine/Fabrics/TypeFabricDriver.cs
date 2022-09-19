@@ -34,7 +34,7 @@ internal class TypeFabricDriver : FabricDriver
 
         // Prepare declarative advice.
         var declarativeAdvice = templateClass
-            .GetDeclarativeAdvices( aspectBuilder.ServiceProvider, compilation )
+            .GetDeclarativeAdvice( aspectBuilder.ServiceProvider, compilation )
             .ToList();
 
         // Execute the AmendType.

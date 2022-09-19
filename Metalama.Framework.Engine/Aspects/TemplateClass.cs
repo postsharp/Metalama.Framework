@@ -262,19 +262,22 @@ namespace Metalama.Framework.Engine.Aspects
             return members.ToImmutable();
         }
 
-        internal IEnumerable<TemplateMember<IMemberOrNamedType>> GetDeclarativeAdvices( IServiceProvider serviceProvider, CompilationModel compilation )
-            => this.GetDeclarativeAdvices( serviceProvider, compilation.RoslynCompilation )
+        internal IEnumerable<TemplateMember<IMemberOrNamedType>> GetDeclarativeAdvice( IServiceProvider serviceProvider, CompilationModel compilation )
+            => this.GetDeclarativeAdvice( serviceProvider, compilation.RoslynCompilation )
                 .Select(
                     x => TemplateMemberFactory.Create(
                         (IMemberOrNamedType) compilation.Factory.GetDeclaration( x.Symbol ),
                         x.TemplateClassMember,
                         x.Attribute ) );
 
-        internal IEnumerable<(TemplateClassMember TemplateClassMember, ISymbol Symbol, DeclarativeAdviceAttribute Attribute)> GetDeclarativeAdvices(
+        private IEnumerable<(TemplateClassMember TemplateClassMember, ISymbol Symbol, DeclarativeAdviceAttribute Attribute)> GetDeclarativeAdvice(
             IServiceProvider serviceProvider,
             Compilation compilation )
         {
             TemplateAttributeFactory? templateAttributeFactory = null;
+
+            // We are sorting the declarative advice by symbol name and not by source order because the source is not available
+            // if the aspect library is a compiled assembly.
 
             return this.Members
                 .Where( m => m.Value.TemplateInfo.AttributeType == TemplateAttributeType.DeclarativeAdvice )
@@ -285,8 +288,7 @@ namespace Metalama.Framework.Engine.Aspects
 
                         return (Template: m.Value, Symbol: symbol, Syntax: symbol.GetPrimarySyntaxReference());
                     } )
-                .OrderBy( m => m.Syntax?.SyntaxTree.FilePath )
-                .ThenBy( m => m.Syntax?.Span.Start )
+                .OrderBy( m => m.Symbol, DeclarativeAdviceSymbolComparer.Instance )
                 .Select( m => (m.Template, m.Symbol, ResolveAttribute( m.Template.SymbolId )) );
 
             DeclarativeAdviceAttribute ResolveAttribute( SymbolId templateInfoSymbolId )

@@ -146,7 +146,7 @@ namespace Metalama.Framework.Engine.Linking
                 }
 
                 // Analyze introduced method bodies.
-                var introducedMembers = this._introductionRegistry.GetIntroducedMembers().ToReadOnlyList();
+                var introducedMembers = this._introductionRegistry.GetIntroducedMembers();
                 await this._taskScheduler.RunInParallelAsync( introducedMembers, ProcessIntroducedMember, cancellationToken );
 
                 void ProcessIntroducedMember( LinkerIntroducedMember introducedMember )
