@@ -3,11 +3,16 @@
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Engine.Utilities.Threading;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Linking
 {
@@ -15,11 +20,13 @@ namespace Metalama.Framework.Engine.Linking
     {
         private class AspectReferenceCollector
         {
+            private readonly ITaskScheduler _taskScheduler;
             private readonly PartialCompilation _intermediateCompilation;
             private readonly LinkerIntroductionRegistry _introductionRegistry;
             private readonly AspectReferenceResolver _referenceResolver;
 
             public AspectReferenceCollector(
+                IServiceProvider serviceProvider,
                 PartialCompilation intermediateCompilation,
                 LinkerIntroductionRegistry introductionRegistry,
                 AspectReferenceResolver referenceResolver )
@@ -27,14 +34,18 @@ namespace Metalama.Framework.Engine.Linking
                 this._intermediateCompilation = intermediateCompilation;
                 this._introductionRegistry = introductionRegistry;
                 this._referenceResolver = referenceResolver;
+                this._taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
             }
 
-            public IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> Run()
+            public async Task<IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>>> RunAsync(
+                CancellationToken cancellationToken )
             {
-                Dictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> aspectReferences = new();
+                ConcurrentDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>> aspectReferences = new();
 
                 // Add implicit references going from final semantic to the last override.
-                foreach ( var overriddenMember in this._introductionRegistry.GetOverriddenMembers() )
+                await this._taskScheduler.RunInParallelAsync( this._introductionRegistry.GetOverriddenMembers(), ProcessOverriddenMember, cancellationToken );
+
+                void ProcessOverriddenMember( ISymbol overriddenMember )
                 {
                     switch ( overriddenMember )
                     {
@@ -113,18 +124,21 @@ namespace Metalama.Framework.Engine.Linking
                                 _ => throw new AssertionFailedException()
                             };
 
-                        aspectReferences.Add(
-                            containingSemantic,
-                            new[]
-                            {
-                                new ResolvedAspectReference(
-                                    containingSemantic,
-                                    target,
-                                    lastOverrideSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
-                                    sourceNode,
-                                    targetKind,
-                                    isInlineable: true )
-                            } );
+                        if ( !aspectReferences.TryAdd(
+                                containingSemantic,
+                                new ConcurrentLinkedList<ResolvedAspectReference>()
+                                {
+                                    new(
+                                        containingSemantic,
+                                        target,
+                                        lastOverrideSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
+                                        sourceNode,
+                                        targetKind,
+                                        isInlineable: true )
+                                } ) )
+                        {
+                            throw new AssertionFailedException();
+                        }
                     }
                 }
 
@@ -209,7 +223,7 @@ namespace Metalama.Framework.Engine.Linking
                 void AnalyzeOverriddenBody( IMethodSymbol symbol )
                 {
                     var semantic = symbol.ToSemantic( IntermediateSymbolSemanticKind.Default );
-                    aspectReferences[semantic] = ImmutableArray<ResolvedAspectReference>.Empty;
+                    aspectReferences[semantic] = Array.Empty<ResolvedAspectReference>();
                 }
 
                 void AnalyzeIntroducedBody( IMethodSymbol symbol )

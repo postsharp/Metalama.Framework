@@ -62,11 +62,12 @@ namespace Metalama.Framework.Engine.Linking
                 input.IntermediateCompilation.Compilation );
 
             var aspectReferenceCollector = new AspectReferenceCollector(
+                this._serviceProvider,
                 input.IntermediateCompilation,
                 input.IntroductionRegistry,
                 referenceResolver );
 
-            var resolvedReferencesBySource = aspectReferenceCollector.Run();
+            var resolvedReferencesBySource = await aspectReferenceCollector.RunAsync( cancellationToken );
 
             var reachabilityAnalyzer = new ReachabilityAnalyzer(
                 input.IntroductionRegistry,
@@ -135,7 +136,7 @@ namespace Metalama.Framework.Engine.Linking
         }
 
         private static void GetReachableReferences(
-            IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> resolvedReferencesBySource,
+            IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>> resolvedReferencesBySource,
             HashSet<IntermediateSymbolSemantic> reachableSemantics,
             out IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> reachableReferencesBySource,
             out IReadOnlyDictionary<AspectReferenceTarget, IReadOnlyList<ResolvedAspectReference>> reachableReferencesByTarget )
