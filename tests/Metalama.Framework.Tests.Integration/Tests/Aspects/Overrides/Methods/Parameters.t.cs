@@ -102,32 +102,23 @@
         }
 
 
-public void IntroducedVoidNoParameters()
+public T IntroducedGeneric<T>(T param)
 {
-        global::System.Console.WriteLine("This is the original method.");
-    object result = null;
+    T result;
+    global::System.Console.WriteLine("This is the introduced method.");
+    result = (T)param;
     global::System.Console.WriteLine("This is the override method.");
-    global::System.Console.WriteLine($"Returns void");
-    return;
+    global::System.Console.WriteLine($"Param param = {param}");
+    global::System.Console.WriteLine($"Returns IntroduceAspectAttribute.IntroducedGeneric<T>(T)/T");
+    return (T)result;
 }
 
-public void IntroducedVoidTwoParameters(global::System.Int32 x, global::System.Int32 y)
+public void IntroducedInParameter(in global::System.DateTime x)
 {
         global::System.Console.WriteLine("This is the introduced method.");
     object result = null;
     global::System.Console.WriteLine("This is the override method.");
     global::System.Console.WriteLine($"Param x = {x}");
-    global::System.Console.WriteLine($"Param y = {y}");
-    global::System.Console.WriteLine($"Returns void");
-    return;
-}
-
-public void IntroducedVoidGeneric<T>(T param)
-{
-        global::System.Console.WriteLine("This is the introduced method.");
-    object result = null;
-    global::System.Console.WriteLine("This is the override method.");
-    global::System.Console.WriteLine($"Param param = {param}");
     global::System.Console.WriteLine($"Returns void");
     return;
 }
@@ -152,17 +143,6 @@ public global::System.Object IntroducedObjectNoParameters()
     return (global::System.Object)result;
 }
 
-public T IntroducedGeneric<T>(T param)
-{
-    T result;
-    global::System.Console.WriteLine("This is the introduced method.");
-    result = (T)param;
-    global::System.Console.WriteLine("This is the override method.");
-    global::System.Console.WriteLine($"Param param = {param}");
-    global::System.Console.WriteLine($"Returns IntroduceAspectAttribute.IntroducedGeneric<T>(T)/T");
-    return (T)result;
-}
-
 public void IntroducedOutParameter(out global::System.Int32 x)
 {
         global::System.Console.WriteLine("This is the introduced method.");
@@ -185,12 +165,32 @@ public void IntroducedRefParameter(ref global::System.Int32 x)
     return;
 }
 
-public void IntroducedInParameter(in global::System.DateTime x)
+public void IntroducedVoidGeneric<T>(T param)
+{
+        global::System.Console.WriteLine("This is the introduced method.");
+    object result = null;
+    global::System.Console.WriteLine("This is the override method.");
+    global::System.Console.WriteLine($"Param param = {param}");
+    global::System.Console.WriteLine($"Returns void");
+    return;
+}
+
+public void IntroducedVoidNoParameters()
+{
+        global::System.Console.WriteLine("This is the original method.");
+    object result = null;
+    global::System.Console.WriteLine("This is the override method.");
+    global::System.Console.WriteLine($"Returns void");
+    return;
+}
+
+public void IntroducedVoidTwoParameters(global::System.Int32 x, global::System.Int32 y)
 {
         global::System.Console.WriteLine("This is the introduced method.");
     object result = null;
     global::System.Console.WriteLine("This is the override method.");
     global::System.Console.WriteLine($"Param x = {x}");
+    global::System.Console.WriteLine($"Param y = {y}");
     global::System.Console.WriteLine($"Returns void");
     return;
 }    }

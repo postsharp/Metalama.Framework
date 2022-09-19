@@ -178,31 +178,6 @@ set
         }
 
 
-public global::System.Int32 IntroducedProperty
-{
-    get
-    {
-                global::System.Console.WriteLine("First override.");
-                    global::System.Console.WriteLine("Second override.");
-                    return (global::System.Int32)42;
-    
-
-    
-
-    
-
-
-    }
-
-    set
-    {
-                global::System.Console.WriteLine("First override.");
-                    global::System.Console.WriteLine("Second override.");
-                    
-    
-    }
-}
-
 private global::System.Int32 _introducedAutoProperty;
 
 
@@ -240,4 +215,29 @@ public global::System.Int32 IntroducedGetOnlyAutoProperty
     
  
 }
+}
+
+public global::System.Int32 IntroducedProperty
+{
+    get
+    {
+                global::System.Console.WriteLine("First override.");
+                    global::System.Console.WriteLine("Second override.");
+                    return (global::System.Int32)42;
+    
+
+    
+
+    
+
+
+    }
+
+    set
+    {
+                global::System.Console.WriteLine("First override.");
+                    global::System.Console.WriteLine("Second override.");
+                    
+    
+    }
 }    }

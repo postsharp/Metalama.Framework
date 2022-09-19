@@ -2,12 +2,6 @@
     internal class TargetClass { 
 
 [global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.CopyAttributeToIntroducedProperty.FooAttribute]
-public global::System.Int32 IntroducedProperty_Auto { get; set; }
-
-[global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.CopyAttributeToIntroducedProperty.FooAttribute]
-public global::System.Int32 IntroducedProperty_Auto_Initializer { get; set; } = (global::System.Int32)42;
-
-[global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.CopyAttributeToIntroducedProperty.FooAttribute]
 public global::System.Int32 IntroducedProperty_Accessors
 {
     [return: global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.CopyAttributeToIntroducedProperty.FooAttribute]
@@ -27,4 +21,10 @@ public global::System.Int32 IntroducedProperty_Accessors
                 global::System.Console.WriteLine(value);
     
     }
-}}
+}
+
+[global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.CopyAttributeToIntroducedProperty.FooAttribute]
+public global::System.Int32 IntroducedProperty_Auto { get; set; }
+
+[global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.CopyAttributeToIntroducedProperty.FooAttribute]
+public global::System.Int32 IntroducedProperty_Auto_Initializer { get; set; } = (global::System.Int32)42;}

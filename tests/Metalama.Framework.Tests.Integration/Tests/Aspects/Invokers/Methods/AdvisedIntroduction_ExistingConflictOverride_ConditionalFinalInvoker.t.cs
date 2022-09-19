@@ -19,12 +19,6 @@
         }
 
 
-public override void BaseClass_VoidMethod()
-{
-    this?.BaseClass_VoidMethod();
-    return;
-}
-
 public override global::System.Int32? BaseClass_ExistingMethod()
 {
     return this?.BaseClass_ExistingMethod();
@@ -33,6 +27,12 @@ public override global::System.Int32? BaseClass_ExistingMethod()
 public override global::System.Int32? BaseClass_ExistingMethod_Parameterized(global::System.Int32? x)
 {
     return this?.BaseClass_ExistingMethod_Parameterized(x);
+}
+
+public override void BaseClass_VoidMethod()
+{
+    this?.BaseClass_VoidMethod();
+    return;
 }
 
 public void Print()

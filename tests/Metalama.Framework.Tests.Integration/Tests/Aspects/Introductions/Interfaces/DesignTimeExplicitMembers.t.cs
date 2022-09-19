@@ -2,49 +2,45 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
 {
     partial class TargetClass : global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DesignTimeExplicitMembers.IInterface
     {
-        global::System.Int32 global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DesignTimeExplicitMembers.IInterface.InterfaceMethod()
+        event global::System.EventHandler global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DesignTimeExplicitMembers.IInterface.Event
         {
-            return default(global::System.Int32);
+            add
+            {
+            }
+
+            remove
+            {
+            }
         }
-    
-        global::System.Int32 global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DesignTimeExplicitMembers.IInterface.AutoProperty
+
+        event global::System.EventHandler global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DesignTimeExplicitMembers.IInterface.EventField
         {
-            get;
-            set;
+            add
+            {
+            }
+
+            remove
+            {
+            }
         }
-    
+
         global::System.Int32 global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DesignTimeExplicitMembers.IInterface.Property
         {
             get
             {
                 return default(global::System.Int32);
             }
-    
+
             set
             {
             }
         }
-    
-        event global::System.EventHandler global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DesignTimeExplicitMembers.IInterface.EventField
+
+        global::System.Int32 global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DesignTimeExplicitMembers.IInterface.AutoProperty { get; set; }
+
+        global::System.Int32 global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DesignTimeExplicitMembers.IInterface.InterfaceMethod()
         {
-            add
-            {
-            }
-    
-            remove
-            {
-            }
-        }
-    
-        event global::System.EventHandler global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DesignTimeExplicitMembers.IInterface.Event
-        {
-            add
-            {
-            }
-    
-            remove
-            {
-            }
+            return default(global::System.Int32);
         }
     }
 }

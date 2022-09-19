@@ -22,12 +22,6 @@
         }
 
 
-public new void BaseClass_VoidMethod()
-{
-    // Introduced.
-    this.BaseClass_VoidMethod();
-}
-
 public new global::System.Int32 BaseClass_ExistingMethod()
 {
     // Introduced.
@@ -38,4 +32,10 @@ public new global::System.Int32 BaseClass_ExistingMethod_Parameterized(global::S
 {
     // Introduced.
     return this.BaseClass_ExistingMethod_Parameterized(x);
+}
+
+public new void BaseClass_VoidMethod()
+{
+    // Introduced.
+    this.BaseClass_VoidMethod();
 }    }

@@ -1,11 +1,6 @@
 [Introduction]
     internal class TargetClass { 
 
-public void IntroducedMethod_Void()
-{
-    global::System.Console.WriteLine("This is introduced method.");
-    }
-
 public global::System.Int32 IntroducedMethod_Int()
 {
     global::System.Console.WriteLine("This is introduced method.");
@@ -28,4 +23,9 @@ public virtual global::System.Int32 IntroducedMethod_VirtualExplicit()
 {
     global::System.Console.WriteLine("This is introduced method.");
         return default(global::System.Int32);
-}}
+}
+
+public void IntroducedMethod_Void()
+{
+    global::System.Console.WriteLine("This is introduced method.");
+    }}

@@ -39,12 +39,6 @@ private int ExistingMethod_Parameterized_Source(int x)
         }
 
 
-public override void BaseClass_VoidMethod()
-{
-    // Introduced.
-    base.BaseClass_VoidMethod();
-}
-
 public override global::System.Int32 BaseClass_ExistingMethod()
 {
     // Introduced.
@@ -55,4 +49,10 @@ public override global::System.Int32 BaseClass_ExistingMethod_Parameterized(glob
 {
     // Introduced.
     return base.BaseClass_ExistingMethod_Parameterized(x);
+}
+
+public override void BaseClass_VoidMethod()
+{
+    // Introduced.
+    base.BaseClass_VoidMethod();
 }    }

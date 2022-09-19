@@ -23,12 +23,12 @@ internal class DeclarativeAdviceSymbolComparer : IComparer<ISymbol>
                 (SymbolKind.Field, default),
                 (SymbolKind.Method, MethodKind.StaticConstructor),
                 (SymbolKind.Method, MethodKind.Constructor),
+                (SymbolKind.Method, MethodKind.Destructor),
                 (SymbolKind.Property, default),
                 (SymbolKind.Event, default(MethodKind)),
                 (SymbolKind.Method, MethodKind.Ordinary),
                 (SymbolKind.Method, MethodKind.UserDefinedOperator),
-                (SymbolKind.Method, MethodKind.Conversion),
-                (SymbolKind.Method, MethodKind.Destructor)
+                (SymbolKind.Method, MethodKind.Conversion)
             }.Select( ( x, i ) => (Kind: x, Index: i) )
             .ToImmutableDictionary( x => x.Kind, x => x.Index );
 

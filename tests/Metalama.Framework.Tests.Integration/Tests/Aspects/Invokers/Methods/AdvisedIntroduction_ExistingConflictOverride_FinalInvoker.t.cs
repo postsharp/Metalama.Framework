@@ -22,12 +22,6 @@
         }
 
 
-public override void BaseClass_VoidMethod()
-{
-    // Introduced.
-    this.BaseClass_VoidMethod();
-}
-
 public override global::System.Int32 BaseClass_ExistingMethod()
 {
     // Introduced.
@@ -38,4 +32,10 @@ public override global::System.Int32 BaseClass_ExistingMethod_Parameterized(glob
 {
     // Introduced.
     return this.BaseClass_ExistingMethod_Parameterized(x);
+}
+
+public override void BaseClass_VoidMethod()
+{
+    // Introduced.
+    this.BaseClass_VoidMethod();
 }    }

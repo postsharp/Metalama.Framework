@@ -32,6 +32,26 @@
         }
 
 
+public new global::System.Int32 BaseClassAbstractProperty
+{
+    get
+    {
+                global::System.Console.WriteLine("This is introduced property.");
+        return base.BaseClassAbstractProperty;
+    
+    }
+}
+
+public new global::System.Int32 BaseClassAbstractSealedProperty
+{
+    get
+    {
+                global::System.Console.WriteLine("This is introduced property.");
+        return base.BaseClassAbstractSealedProperty;
+    
+    }
+}
+
 public new global::System.Int32 BaseClassProperty
 {
     get
@@ -52,42 +72,12 @@ public static new global::System.Int32 BaseClassProperty_Static
     }
 }
 
-public new global::System.Int32 HiddenBaseClassProperty
+public new global::System.Int32 BaseClassVirtualOverridenProperty
 {
     get
     {
                 global::System.Console.WriteLine("This is introduced property.");
-        return base.HiddenBaseClassProperty;
-    
-    }
-}
-
-public static new global::System.Int32 HiddenBaseClassProperty_Static
-{
-    get
-    {
-                global::System.Console.WriteLine("This is introduced property.");
-        return global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.ExistingConflictNew.DerivedClass.HiddenBaseClassProperty_Static;
-    
-    }
-}
-
-public new global::System.Int32 HiddenBaseClassVirtualProperty
-{
-    get
-    {
-                global::System.Console.WriteLine("This is introduced property.");
-        return base.HiddenBaseClassVirtualProperty;
-    
-    }
-}
-
-public new global::System.Int32 HiddenVirtualBaseClassVirtualProperty
-{
-    get
-    {
-                global::System.Console.WriteLine("This is introduced property.");
-        return base.HiddenVirtualBaseClassVirtualProperty;
+        return base.BaseClassVirtualOverridenProperty;
     
     }
 }
@@ -108,36 +98,6 @@ public new global::System.Int32 BaseClassVirtualSealedProperty
     {
                 global::System.Console.WriteLine("This is introduced property.");
         return base.BaseClassVirtualSealedProperty;
-    
-    }
-}
-
-public new global::System.Int32 BaseClassVirtualOverridenProperty
-{
-    get
-    {
-                global::System.Console.WriteLine("This is introduced property.");
-        return base.BaseClassVirtualOverridenProperty;
-    
-    }
-}
-
-public new global::System.Int32 BaseClassAbstractProperty
-{
-    get
-    {
-                global::System.Console.WriteLine("This is introduced property.");
-        return base.BaseClassAbstractProperty;
-    
-    }
-}
-
-public new global::System.Int32 BaseClassAbstractSealedProperty
-{
-    get
-    {
-                global::System.Console.WriteLine("This is introduced property.");
-        return base.BaseClassAbstractSealedProperty;
     
     }
 }
@@ -178,6 +138,46 @@ public new global::System.Int32 DerivedClassVirtualSealedProperty
     {
                 global::System.Console.WriteLine("This is introduced property.");
         return base.DerivedClassVirtualSealedProperty;
+    
+    }
+}
+
+public new global::System.Int32 HiddenBaseClassProperty
+{
+    get
+    {
+                global::System.Console.WriteLine("This is introduced property.");
+        return base.HiddenBaseClassProperty;
+    
+    }
+}
+
+public static new global::System.Int32 HiddenBaseClassProperty_Static
+{
+    get
+    {
+                global::System.Console.WriteLine("This is introduced property.");
+        return global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Properties.ExistingConflictNew.DerivedClass.HiddenBaseClassProperty_Static;
+    
+    }
+}
+
+public new global::System.Int32 HiddenBaseClassVirtualProperty
+{
+    get
+    {
+                global::System.Console.WriteLine("This is introduced property.");
+        return base.HiddenBaseClassVirtualProperty;
+    
+    }
+}
+
+public new global::System.Int32 HiddenVirtualBaseClassVirtualProperty
+{
+    get
+    {
+                global::System.Console.WriteLine("This is introduced property.");
+        return base.HiddenVirtualBaseClassVirtualProperty;
     
     }
 }

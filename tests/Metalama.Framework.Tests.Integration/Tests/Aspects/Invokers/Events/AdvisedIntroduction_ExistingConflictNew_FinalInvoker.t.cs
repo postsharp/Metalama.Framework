@@ -39,6 +39,25 @@
         }
 
 
+public new event global::System.EventHandler BaseClassAbstractEvent
+{
+    add
+    {
+                global::System.Console.WriteLine("Override.");
+        this.BaseClassAbstractEvent+= value;
+    
+
+
+    }
+
+    remove
+    {
+                global::System.Console.WriteLine("Override.");
+        this.BaseClassAbstractEvent-= value;
+    
+    }
+}
+
 public new event global::System.EventHandler BaseClassEvent
 {
     add
@@ -73,25 +92,6 @@ public new event global::System.EventHandler BaseClassVirtualEvent
     {
                 global::System.Console.WriteLine("Override.");
         this.BaseClassVirtualEvent-= value;
-    
-    }
-}
-
-public new event global::System.EventHandler BaseClassAbstractEvent
-{
-    add
-    {
-                global::System.Console.WriteLine("Override.");
-        this.BaseClassAbstractEvent+= value;
-    
-
-
-    }
-
-    remove
-    {
-                global::System.Console.WriteLine("Override.");
-        this.BaseClassAbstractEvent-= value;
     
     }
 }

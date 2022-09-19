@@ -97,6 +97,41 @@ private event global::System.EventHandler ExistingVirtualEvent_Introduction
         }
 }
 
+public new event global::System.EventHandler BaseClassAbstractEvent
+{
+    add
+    {
+                global::System.Console.WriteLine("Override.");
+        this.BaseClassAbstractEvent_Introduction+= value;
+    
+
+
+    }
+
+    remove
+    {
+                global::System.Console.WriteLine("Override.");
+        this.BaseClassAbstractEvent_Introduction-= value;
+    
+    }
+}
+
+private event global::System.EventHandler BaseClassAbstractEvent_Introduction
+{
+    add
+    {
+            global::System.Console.WriteLine("This is introduced event.");
+        base.BaseClassAbstractEvent += value;
+    
+    }
+
+    remove
+    {
+            global::System.Console.WriteLine("This is introduced event.");
+        base.BaseClassAbstractEvent -= value;
+        }
+}
+
 public new event global::System.EventHandler BaseClassEvent
 {
     add
@@ -164,41 +199,6 @@ private event global::System.EventHandler BaseClassVirtualEvent_Introduction
     {
             global::System.Console.WriteLine("This is introduced event.");
         base.BaseClassVirtualEvent -= value;
-        }
-}
-
-public new event global::System.EventHandler BaseClassAbstractEvent
-{
-    add
-    {
-                global::System.Console.WriteLine("Override.");
-        this.BaseClassAbstractEvent_Introduction+= value;
-    
-
-
-    }
-
-    remove
-    {
-                global::System.Console.WriteLine("Override.");
-        this.BaseClassAbstractEvent_Introduction-= value;
-    
-    }
-}
-
-private event global::System.EventHandler BaseClassAbstractEvent_Introduction
-{
-    add
-    {
-            global::System.Console.WriteLine("This is introduced event.");
-        base.BaseClassAbstractEvent += value;
-    
-    }
-
-    remove
-    {
-            global::System.Console.WriteLine("This is introduced event.");
-        base.BaseClassAbstractEvent -= value;
         }
 }
 

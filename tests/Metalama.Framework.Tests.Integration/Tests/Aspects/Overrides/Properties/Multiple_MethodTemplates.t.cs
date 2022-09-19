@@ -214,44 +214,6 @@ private int InitializerAutoProperty_Source
         }
 
 
-public global::System.Int32 IntroducedProperty
-{
-    get
-    {
-                global::System.Console.WriteLine("This is the overridden getter.");
-                    global::System.Console.WriteLine("This is the overridden getter.");
-        _ = this.IntroducedProperty_IntroduceAndOverride;
-        return this.IntroducedProperty_IntroduceAndOverride;
-    
-
-    
-
-
-    }
-
-    set
-    {
-                global::System.Console.WriteLine("This is the overridden setter.");
-                    global::System.Console.WriteLine("This is the overridden setter.");
-        this.IntroducedProperty_IntroduceAndOverride= value;
-    
-    
-    }
-}
-
-private global::System.Int32 IntroducedProperty_IntroduceAndOverride
-{
-    get
-    {
-            return (global::System.Int32)42;
-    
-    }
-
-    set
-    {
-            }
-}
-
 public global::System.Int32 IntroducedAutoProperty 
 { get
 { 
@@ -290,4 +252,42 @@ public global::System.Int32 IntroducedGetOnlyAutoProperty
 }
 }
 private global::System.Int32 IntroducedGetOnlyAutoProperty_Source
-{ get; }    }
+{ get; }
+
+public global::System.Int32 IntroducedProperty
+{
+    get
+    {
+                global::System.Console.WriteLine("This is the overridden getter.");
+                    global::System.Console.WriteLine("This is the overridden getter.");
+        _ = this.IntroducedProperty_IntroduceAndOverride;
+        return this.IntroducedProperty_IntroduceAndOverride;
+    
+
+    
+
+
+    }
+
+    set
+    {
+                global::System.Console.WriteLine("This is the overridden setter.");
+                    global::System.Console.WriteLine("This is the overridden setter.");
+        this.IntroducedProperty_IntroduceAndOverride= value;
+    
+    
+    }
+}
+
+private global::System.Int32 IntroducedProperty_IntroduceAndOverride
+{
+    get
+    {
+            return (global::System.Int32)42;
+    
+    }
+
+    set
+    {
+            }
+}    }

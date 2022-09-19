@@ -1,11 +1,6 @@
 [Retry]
     internal class Program { 
 
-private void IntroducedMethod1(global::System.String name)
-{
-    IntroducedProperty = name;
-}
-
 private global::System.String IntroducedProperty
 {
     get
@@ -20,4 +15,9 @@ private global::System.String IntroducedProperty
     {
             
     }
+}
+
+private void IntroducedMethod1(global::System.String name)
+{
+    IntroducedProperty = name;
 }}

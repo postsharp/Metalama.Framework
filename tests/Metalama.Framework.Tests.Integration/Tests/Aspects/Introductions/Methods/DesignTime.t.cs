@@ -6,12 +6,7 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Desi
         {
         }
 
-        public global::System.Int32 IntroducedMethod_Int()
-        {
-            return default(global::System.Int32);
-        }
-
-        public global::System.Int32 IntroducedMethod_Param(global::System.Int32 x)
+        public virtual global::System.Int32 IntroducedMethod_VirtualExplicit()
         {
             return default(global::System.Int32);
         }
@@ -21,7 +16,12 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Desi
             return default(global::System.Int32);
         }
 
-        public virtual global::System.Int32 IntroducedMethod_VirtualExplicit()
+        public global::System.Int32 IntroducedMethod_Param(global::System.Int32 x)
+        {
+            return default(global::System.Int32);
+        }
+
+        public global::System.Int32 IntroducedMethod_Int()
         {
             return default(global::System.Int32);
         }
