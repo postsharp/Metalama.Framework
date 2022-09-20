@@ -233,7 +233,7 @@ namespace Metalama.Framework.Engine.Aspects
 
                     eligibilitySuccess &= (bool)
                         _tryInitializeEligibilityMethod.MakeGenericMethod( declarationInterface )
-                            .Invoke( this, new object[] { diagnosticAdder, eligibilityRules } );
+                            .Invoke( this, new object[] { diagnosticAdder, eligibilityRules } )!;
                 }
 
                 if ( !eligibilitySuccess )
@@ -465,7 +465,7 @@ namespace Metalama.Framework.Engine.Aspects
                 executionContext );
         }
 
-        public IAspect CreateDefaultInstance() => (IAspect) Activator.CreateInstance( this.Type );
+        public IAspect CreateDefaultInstance() => (IAspect) Activator.CreateInstance( this.Type ).AssertNotNull();
 
         public override string ToString() => this.FullName;
 

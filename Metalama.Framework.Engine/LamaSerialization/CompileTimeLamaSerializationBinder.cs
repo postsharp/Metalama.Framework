@@ -8,7 +8,7 @@ namespace Metalama.Framework.Engine.LamaSerialization;
 internal class CompileTimeLamaSerializationBinder : LamaSerializationBinder
 {
     private readonly CompileTimeProject _project;
-    private static readonly string _systemAssemblyName = typeof(object).Assembly.FullName;
+    private static readonly string _systemAssemblyName = typeof(object).Assembly.FullName.AssertNotNull();
 
     public CompileTimeLamaSerializationBinder( IServiceProvider serviceProvider, CompileTimeProject project ) : base( serviceProvider )
     {

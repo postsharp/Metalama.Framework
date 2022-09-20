@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -75,7 +76,7 @@ namespace Metalama.Framework.Engine.Formatting
                             {
                                 foreach ( var c in classification.Split( '-' ) )
                                 {
-                                    classes.Add( "cs-" + c.Trim().Replace( " ", "-" ) );
+                                    classes.Add( "cs-" + c.Trim().ReplaceOrdinal( " ", "-" ) );
                                 }
                             }
                         }

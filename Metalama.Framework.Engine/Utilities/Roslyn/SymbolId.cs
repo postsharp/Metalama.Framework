@@ -26,13 +26,13 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
 
         private readonly object _symbolKey;
 
-        public string Id => this._symbolKey.ToString();
+        public string Id => this._symbolKey.ToString() ?? "";
 
         static SymbolId()
         {
-            var symbolKeyType = typeof(AdhocWorkspace).Assembly.GetType( "Microsoft.CodeAnalysis.SymbolKey" );
-            var symbolKeyResolutionType = typeof(AdhocWorkspace).Assembly.GetType( "Microsoft.CodeAnalysis.SymbolKeyResolution" );
-            var symbolKeyExtensionsType = typeof(AdhocWorkspace).Assembly.GetType( "Microsoft.CodeAnalysis.SymbolKeyExtensions" );
+            var symbolKeyType = typeof(AdhocWorkspace).Assembly.GetType( "Microsoft.CodeAnalysis.SymbolKey" ).AssertNotNull();
+            var symbolKeyResolutionType = typeof(AdhocWorkspace).Assembly.GetType( "Microsoft.CodeAnalysis.SymbolKeyResolution" ).AssertNotNull();
+            var symbolKeyExtensionsType = typeof(AdhocWorkspace).Assembly.GetType( "Microsoft.CodeAnalysis.SymbolKeyExtensions" ).AssertNotNull();
 
             // Get SymbolKey(string) constructor.
             var symbolKeyConstructor = symbolKeyType.GetConstructor( new[] { typeof(string) } ).AssertNotNull();
@@ -106,7 +106,7 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
             return symbol;
         }
 
-        public override string ToString() => this._symbolKey.ToString();
+        public override string ToString() => this._symbolKey.ToString().AssertNotNull();
 
         public static SymbolId Create( ISymbol? symbol, CancellationToken cancellationToken = default )
         {

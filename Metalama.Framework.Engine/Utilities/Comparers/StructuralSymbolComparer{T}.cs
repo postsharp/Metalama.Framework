@@ -6,7 +6,7 @@ using System.Collections.Generic;
 namespace Metalama.Framework.Engine.Utilities.Comparers
 {
     internal class StructuralSymbolComparer<T> : StructuralSymbolComparer, IEqualityComparer<T>
-        where T : ISymbol
+        where T : class, ISymbol
     {
         public static new readonly StructuralSymbolComparer<T> Default =
             new(
@@ -25,14 +25,8 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
         public StructuralSymbolComparer( StructuralSymbolComparerOptions options ) : base( options ) { }
 
-        public bool Equals( T x, T y )
-        {
-            return base.Equals( x, y );
-        }
+        public bool Equals( T? x, T? y ) => base.Equals( x, y );
 
-        public int GetHashCode( T obj )
-        {
-            return base.GetHashCode( obj );
-        }
+        public int GetHashCode( T obj ) => base.GetHashCode( obj );
     }
 }

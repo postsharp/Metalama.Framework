@@ -50,7 +50,7 @@ namespace Metalama.Framework.Engine.Fabrics
         private AspectClass GetAspectClass<TAspect>()
             where TAspect : IAspect
         {
-            var aspectClass = this._parent.AspectClasses[typeof(TAspect).FullName];
+            var aspectClass = this._parent.AspectClasses[typeof(TAspect).FullName.AssertNotNull()];
 
             if ( aspectClass.IsAbstract )
             {

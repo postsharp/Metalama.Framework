@@ -4,6 +4,7 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Compiler;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
@@ -165,7 +166,7 @@ namespace Metalama.Framework.DesignTime.SourceGeneration
                 (MSBuildProjectOptions Options, Compilation Compilation, string TouchId) y )
                 => x.TouchId == y.TouchId;
 
-            public int GetHashCode( (MSBuildProjectOptions Options, Compilation Compilation, string TouchId) obj ) => obj.TouchId.GetHashCode();
+            public int GetHashCode( (MSBuildProjectOptions Options, Compilation Compilation, string TouchId) obj ) => obj.TouchId.GetHashCodeOrdinal();
         }
 
         private static string GetTouchId(

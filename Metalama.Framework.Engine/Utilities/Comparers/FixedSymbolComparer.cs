@@ -20,8 +20,17 @@ internal class FixedSymbolComparer : IEqualityComparer<ISymbol>
         this._underlying = underlying;
     }
 
-    public bool Equals( ISymbol x, ISymbol y )
+    public bool Equals( ISymbol? x, ISymbol? y )
     {
+        if ( ReferenceEquals( x, y ) )
+        {
+            return true;
+        }
+        else if ( x == null || y == null )
+        {
+            return false;
+        }
+
         if ( this._underlying.Equals( x, y ) )
         {
             return true;

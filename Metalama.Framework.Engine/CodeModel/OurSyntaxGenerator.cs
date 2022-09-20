@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -35,7 +36,7 @@ namespace Metalama.Framework.Engine.CodeModel
                     .Single( a => string.Equals( a.Name, "Microsoft.CodeAnalysis.Workspaces", StringComparison.OrdinalIgnoreCase ) );
 
             var requiredWorkspaceImplementationAssemblyName = new AssemblyName(
-                referencedWorkspaceAssemblyName.ToString().Replace( "Microsoft.CodeAnalysis.Workspaces", "Microsoft.CodeAnalysis.CSharp.Workspaces" ) );
+                referencedWorkspaceAssemblyName.ToString().ReplaceOrdinal( "Microsoft.CodeAnalysis.Workspaces", "Microsoft.CodeAnalysis.CSharp.Workspaces" ) );
 
             // See if the assembly is already loaded in the AppDomain.
             var assembly = AppDomain.CurrentDomain
@@ -52,7 +53,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             var type = assembly.GetType( $"Microsoft.CodeAnalysis.CSharp.CodeGeneration.CSharpSyntaxGenerator" )!;
             var field = type.GetField( "Instance", BindingFlags.Public | BindingFlags.Static )!;
-            var syntaxGenerator = (SyntaxGenerator) field.GetValue( null );
+            var syntaxGenerator = (SyntaxGenerator) field.GetValue( null ).AssertNotNull();
             Default = new OurSyntaxGenerator( syntaxGenerator, true );
             NullOblivious = new OurSyntaxGenerator( syntaxGenerator, false );
         }

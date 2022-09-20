@@ -32,11 +32,11 @@ namespace Metalama.Framework.Engine.CompileTime
             this._logger = Logger.Domain;
         }
 
-        private Assembly? OnAssemblyResolve( object sender, ResolveEventArgs args )
+        private Assembly? OnAssemblyResolve( object? sender, ResolveEventArgs args )
         {
             var assemblyName = new AssemblyName( args.Name );
 
-            if ( this._assembliesByName.TryGetValue( assemblyName.Name, out var candidateAssembly )
+            if ( this._assembliesByName.TryGetValue( assemblyName.Name.AssertNotNull(), out var candidateAssembly )
                  && AssemblyName.ReferenceMatchesDefinition( assemblyName, candidateAssembly.Assembly.GetName() ) )
             {
                 return candidateAssembly.Assembly;
