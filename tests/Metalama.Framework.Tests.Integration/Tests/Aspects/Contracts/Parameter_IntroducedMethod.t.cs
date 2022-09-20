@@ -10,8 +10,7 @@ internal class Target
 
         global::System.String? returnValue;
         returnValue = param;
-        goto __aspect_return_1;
-    __aspect_return_1: if (returnValue == null)
+        if (returnValue == null)
         {
             throw new global::System.ArgumentNullException("<return>");
         }
@@ -29,8 +28,7 @@ internal class Target
 
         global::System.String? returnValue;
         returnValue = (global::System.String?)param;
-        goto __aspect_return_1;
-    __aspect_return_1: if (returnValue == null)
+        if (returnValue == null)
         {
             throw new global::System.ArgumentNullException("<return>");
         }

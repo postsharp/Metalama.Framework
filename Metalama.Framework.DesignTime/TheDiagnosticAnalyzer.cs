@@ -78,7 +78,7 @@ namespace Metalama.Framework.DesignTime
                 this._logger.Trace?.Log(
                     $"DesignTimeAnalyzer.AnalyzeSemanticModel('{syntaxTreeFilePath}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}) started." );
 
-                var projectOptions = new MSBuildProjectOptions( context.Options.AnalyzerConfigOptionsProvider );
+                var projectOptions = MSBuildProjectOptions.GetInstance( context.Options.AnalyzerConfigOptionsProvider );
 
                 if ( !projectOptions.IsDesignTimeEnabled )
                 {

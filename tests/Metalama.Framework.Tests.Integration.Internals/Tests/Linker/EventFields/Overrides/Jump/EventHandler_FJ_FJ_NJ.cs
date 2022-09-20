@@ -20,7 +20,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.EventFields.Override
                 {
                     return;
                 }
-                link[_this.Foo, inline] += value;
+                link[_this.Foo.add, inline] += value;
                 Console.WriteLine("After1");
             }
 
@@ -31,7 +31,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.EventFields.Override
                 {
                     return;
                 }
-                link[_this.Foo, inline] -= value;
+                link[_this.Foo.remove, inline] -= value;
                 Console.WriteLine("After1");
             }
         }
@@ -46,7 +46,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.EventFields.Override
                 {
                     return;
                 }
-                link[_this.Foo, inline] += value;
+                link[_this.Foo.add, inline] += value;
                 Console.WriteLine("After2");
             }
 
@@ -57,7 +57,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.EventFields.Override
                 {
                     return;
                 }
-                link[_this.Foo, inline] -= value;
+                link[_this.Foo.remove, inline] -= value;
                 Console.WriteLine("After2");
             }
         }

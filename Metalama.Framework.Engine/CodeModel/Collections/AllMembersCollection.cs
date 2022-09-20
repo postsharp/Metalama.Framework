@@ -9,11 +9,11 @@ using System.Collections.Generic;
 namespace Metalama.Framework.Engine.CodeModel.Collections;
 
 internal abstract class AllMembersCollection<T> : IMemberCollection<T>
-    where T : IMember
+    where T : class, IMember
 {
     private volatile Dictionary<T, T>? _members;
 
-    protected AllMembersCollection( INamedType declaringType )
+    protected AllMembersCollection( NamedType declaringType )
     {
         this.DeclaringType = declaringType;
     }

@@ -50,7 +50,7 @@ namespace Metalama.Framework.Engine.Fabrics
         private AspectClass GetAspectClass<TAspect>()
             where TAspect : IAspect
         {
-            var aspectClass = this._parent.AspectClasses[typeof(TAspect).FullName];
+            var aspectClass = this._parent.AspectClasses[typeof(TAspect).FullName.AssertNotNull()];
 
             if ( aspectClass.IsAbstract )
             {
@@ -63,14 +63,14 @@ namespace Metalama.Framework.Engine.Fabrics
         private void RegisterAspectSource( IAspectSource aspectSource )
         {
             this._parent.LicenseVerifier?.VerifyCanAddChildAspect( this._parent.AspectPredecessor );
-            
+
             this._parent.AddAspectSource( aspectSource );
         }
 
         private void RegisterValidatorSource( ProgrammaticValidatorSource validatorSource )
         {
             this._parent.LicenseVerifier?.VerifyCanValidator( this._parent.AspectPredecessor );
-            
+
             this._parent.AddValidatorSource( validatorSource );
         }
 
@@ -91,7 +91,7 @@ namespace Metalama.Framework.Engine.Fabrics
                     nameof(validateMethod),
                     $"The type '{this._parent.Type}' must have only one method called '{methodInfo.Name}'." );
             }
-            
+
             this.RegisterValidatorSource(
                 new ProgrammaticValidatorSource(
                     this._parent,

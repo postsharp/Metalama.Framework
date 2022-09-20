@@ -1,5 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 
@@ -8,14 +10,17 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
     /// <summary>
     /// Represents changes between two instances of the <see cref="Microsoft.CodeAnalysis.Compilation"/> class.
     /// </summary>
-    internal sealed class CompilationChanges
+    internal class CompilationChanges
     {
-        private readonly ImmutableDictionary<string, SyntaxTreeChange> _syntaxTreeChanges;
+        public ImmutableDictionary<string, SyntaxTreeChange> SyntaxTreeChanges { get; }
 
-        /// <summary>
-        /// Gets the set of syntax tree changes.
-        /// </summary>
-        public IEnumerable<SyntaxTreeChange> SyntaxTreeChanges => this._syntaxTreeChanges.Values;
+        public ProjectVersion? OldCompilationVersion { get; }
+
+        public ProjectVersion NewProjectVersion { get; }
+
+        public ImmutableDictionary<ProjectKey, ReferencedProjectChange> ReferencedCompilationChanges { get; }
+
+        public ProjectKey ProjectKey => this.NewProjectVersion.ProjectKey;
 
         /// <summary>
         /// Gets a value indicating whether the changes affects the compile-time subproject.
@@ -23,85 +28,209 @@ namespace Metalama.Framework.DesignTime.Pipeline.Diff
         public bool HasCompileTimeCodeChange { get; }
 
         public CompilationChanges(
-            IEnumerable<SyntaxTreeChange> syntaxTreeChanges,
-            bool hasCompileTimeCodeChange,
-            Compilation compilationToAnalyze,
-            bool isIncremental ) : this(
-            syntaxTreeChanges.ToImmutableDictionary( t => t.FilePath, t => t, StringComparer.Ordinal ),
-            hasCompileTimeCodeChange,
-            compilationToAnalyze,
-            isIncremental ) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CompilationChanges"/> class.
-        /// </summary>
-        private CompilationChanges(
+            ProjectVersion? oldCompilationVersion,
+            ProjectVersion newProjectVersion,
             ImmutableDictionary<string, SyntaxTreeChange> syntaxTreeChanges,
+            ImmutableDictionary<ProjectKey, ReferencedProjectChange> referencedCompilationChanges,
             bool hasCompileTimeCodeChange,
-            Compilation compilationToAnalyze,
             bool isIncremental )
         {
-            this._syntaxTreeChanges = syntaxTreeChanges;
+            this.SyntaxTreeChanges = syntaxTreeChanges;
+            this.OldCompilationVersion = oldCompilationVersion;
+            this.NewProjectVersion = newProjectVersion;
+            this.ReferencedCompilationChanges = referencedCompilationChanges;
             this.HasCompileTimeCodeChange = hasCompileTimeCodeChange;
-            this.CompilationToAnalyze = compilationToAnalyze;
             this.IsIncremental = isIncremental;
         }
 
-        public static CompilationChanges Empty( Compilation compilation ) => new( Enumerable.Empty<SyntaxTreeChange>(), false, compilation, true );
+        /// <summary>
+        /// Gets a <see cref="CompilationChanges"/> object that represents the absence of change.
+        /// </summary>
+        public static CompilationChanges Empty( ProjectVersion? oldCompilation, ProjectVersion newProject )
+            => new(
+                oldCompilation,
+                newProject,
+                ImmutableDictionary<string, SyntaxTreeChange>.Empty,
+                ImmutableDictionary<ProjectKey, ReferencedProjectChange>.Empty,
+                false,
+                oldCompilation != null );
 
-        public bool HasChange => this._syntaxTreeChanges.Count > 0 || this.HasCompileTimeCodeChange;
+        public bool HasChange => this.HasCompileTimeCodeChange || this.SyntaxTreeChanges.Count > 0 || this.ReferencedCompilationChanges.Count > 0;
 
         public bool IsIncremental { get; }
 
-        /// <summary>
-        /// Gets the <see cref="Microsoft.CodeAnalysis.Compilation"/> that must be analyzed. If <see cref="HasChange"/> is false,
-        /// this is the last compilation of <see cref="CompilationChangeTracker"/>. Otherwise, this is the new compilation. 
-        /// </summary>
-        public Compilation CompilationToAnalyze { get; }
-
-        public CompilationChanges Merge( CompilationChanges newChanges )
+        public static CompilationChanges NonIncremental( ProjectVersion projectVersion )
         {
-            if ( !this.HasChange || !newChanges.IsIncremental )
+            projectVersion.Strategy.Observer?.OnComputeNonIncrementalChanges();
+
+            var syntaxTreeChanges = projectVersion.SyntaxTrees.ToImmutableDictionary( t => t.Key, t => SyntaxTreeChange.NonIncremental( t.Value ) );
+
+            var references = projectVersion.ReferencedProjectVersions.ToImmutableDictionary(
+                x => x.Key,
+                x => new ReferencedProjectChange( null, x.Value.Compilation, ReferencedProjectChangeKind.Added ) );
+
+            return new CompilationChanges(
+                null,
+                projectVersion,
+                syntaxTreeChanges,
+                references,
+                true,
+                false );
+        }
+
+        public static CompilationChanges Incremental(
+            ProjectVersion oldProjectVersion,
+            Compilation newCompilation,
+            ImmutableDictionary<ProjectKey, IProjectVersion> newReferences,
+            ImmutableDictionary<ProjectKey, ReferencedProjectChange> referencedCompilationChanges,
+            CancellationToken cancellationToken = default )
+        {
+            if ( newCompilation == oldProjectVersion.Compilation )
             {
-                return newChanges;
+                return Empty( oldProjectVersion, oldProjectVersion.WithCompilation( newCompilation ) );
             }
-            else if ( !newChanges.HasChange )
+
+            oldProjectVersion.Strategy.Observer?.OnComputeIncrementalChanges();
+
+            var newTrees = ImmutableDictionary.CreateBuilder<string, SyntaxTreeVersion>( StringComparer.Ordinal );
+            var generatedTrees = new List<SyntaxTree>();
+
+            var syntaxTreeChanges = ImmutableDictionary.CreateBuilder<string, SyntaxTreeChange>( StringComparer.Ordinal );
+
+            var hasCompileTimeChange = referencedCompilationChanges.Any( c => c.Value.HasCompileTimeCodeChange );
+
+            // Process new trees.
+            var lastTrees = oldProjectVersion.SyntaxTrees;
+
+            foreach ( var newSyntaxTree in newCompilation.SyntaxTrees )
             {
-                return this;
+                cancellationToken.ThrowIfCancellationRequested();
+
+                CompileTimeChangeKind compileTimeChangeKind;
+
+                // Files generated by us are ignored during the comparison.
+                if ( SourceGeneratorHelper.IsGeneratedFile( newSyntaxTree ) )
+                {
+                    generatedTrees.Add( newSyntaxTree );
+
+                    continue;
+                }
+
+                // At design time, the collection of syntax trees can contain duplicates.
+                if ( newTrees.TryGetValue( newSyntaxTree.FilePath, out var existingNewTree ) )
+                {
+                    if ( existingNewTree.SyntaxTree != newSyntaxTree )
+                    {
+                        throw new AssertionFailedException();
+                    }
+
+                    continue;
+                }
+
+                SyntaxTreeVersion newSyntaxTreeVersion;
+
+                if ( lastTrees != null && lastTrees.TryGetValue( newSyntaxTree.FilePath, out var oldSyntaxTreeVersion ) )
+                {
+                    if ( oldProjectVersion.Strategy.IsDifferent(
+                            oldSyntaxTreeVersion,
+                            newSyntaxTree,
+                            newCompilation,
+                            out newSyntaxTreeVersion ) )
+                    {
+                        compileTimeChangeKind = DiffStrategy.GetCompileTimeChangeKind(
+                            oldSyntaxTreeVersion.HasCompileTimeCode,
+                            newSyntaxTreeVersion.HasCompileTimeCode );
+
+                        var change = new SyntaxTreeChange(
+                            newSyntaxTree.FilePath,
+                            SyntaxTreeChangeKind.Changed,
+                            compileTimeChangeKind,
+                            oldSyntaxTreeVersion,
+                            newSyntaxTreeVersion );
+
+                        syntaxTreeChanges.Add( newSyntaxTree.FilePath, change );
+
+                        hasCompileTimeChange |= newSyntaxTreeVersion.HasCompileTimeCode || oldSyntaxTreeVersion.HasCompileTimeCode;
+                    }
+                }
+                else
+                {
+                    // This is a new tree.
+                    newSyntaxTreeVersion = oldProjectVersion.Strategy.GetSyntaxTreeVersion( newSyntaxTree, newCompilation );
+
+                    compileTimeChangeKind = DiffStrategy.GetCompileTimeChangeKind( false, newSyntaxTreeVersion.HasCompileTimeCode );
+
+                    var change = new SyntaxTreeChange(
+                        newSyntaxTree.FilePath,
+                        SyntaxTreeChangeKind.Added,
+                        compileTimeChangeKind,
+                        default,
+                        newSyntaxTreeVersion );
+
+                    syntaxTreeChanges.Add( newSyntaxTree.FilePath, change );
+
+                    hasCompileTimeChange |= newSyntaxTreeVersion.HasCompileTimeCode;
+                }
+
+                newTrees.Add( newSyntaxTree.FilePath, newSyntaxTreeVersion );
+                lastTrees = lastTrees?.Remove( newSyntaxTree.FilePath );
+            }
+
+            // Process old trees.
+            if ( lastTrees != null )
+            {
+                foreach ( var oldSyntaxTree in lastTrees )
+                {
+                    syntaxTreeChanges.Add(
+                        oldSyntaxTree.Key,
+                        new SyntaxTreeChange(
+                            oldSyntaxTree.Key,
+                            SyntaxTreeChangeKind.Removed,
+                            DiffStrategy.GetCompileTimeChangeKind( oldSyntaxTree.Value.HasCompileTimeCode, false ),
+                            oldSyntaxTree.Value,
+                            default ) );
+                }
+            }
+
+            // Create the new CompilationVersion.
+            var syntaxTreeVersions = newTrees.ToImmutable();
+
+            // Determine which compilation should be analyzed.
+            CompilationChanges compilationChanges;
+
+            if ( !hasCompileTimeChange && syntaxTreeChanges.Count == 0 && referencedCompilationChanges.Count == 0 )
+            {
+                // There is no significant change, so we can analyze the previous compilation.
+                compilationChanges = Empty( oldProjectVersion, oldProjectVersion.WithCompilation( newCompilation ) );
             }
             else
             {
-                var mergedSyntaxTreeBuilder = this._syntaxTreeChanges.ToBuilder();
+                // We have to analyze a new compilation, however we need to remove generated trees.
 
-                foreach ( var newChange in newChanges._syntaxTreeChanges )
-                {
-                    if ( !mergedSyntaxTreeBuilder.TryGetValue( newChange.Key, out var oldChange ) )
-                    {
-                        mergedSyntaxTreeBuilder.Add( newChange.Key, newChange.Value );
-                    }
-                    else
-                    {
-                        var merged = oldChange.Merge( newChange.Value );
+                var compilationToAnalyze = newCompilation.RemoveSyntaxTrees( generatedTrees );
 
-                        if ( merged.SyntaxTreeChangeKind == SyntaxTreeChangeKind.None )
-                        {
-                            mergedSyntaxTreeBuilder.Remove( newChange.Key );
-                        }
-                        else
-                        {
-                            mergedSyntaxTreeBuilder[newChange.Key] = merged;
-                        }
-                    }
-                }
+                var newCompilationVersion = new ProjectVersion(
+                    oldProjectVersion.Strategy,
+                    oldProjectVersion.ProjectKey,
+                    newCompilation,
+                    compilationToAnalyze,
+                    syntaxTreeVersions,
+                    newReferences );
 
-                return new CompilationChanges(
-                    mergedSyntaxTreeBuilder.ToImmutable(),
-                    this.HasCompileTimeCodeChange | newChanges.HasCompileTimeCodeChange,
-                    newChanges.CompilationToAnalyze,
-                    this.IsIncremental );
+                cancellationToken.ThrowIfCancellationRequested();
+
+                compilationChanges = new CompilationChanges(
+                    oldProjectVersion,
+                    newCompilationVersion,
+                    syntaxTreeChanges.ToImmutable(),
+                    referencedCompilationChanges,
+                    hasCompileTimeChange,
+                    true );
             }
+
+            return compilationChanges;
         }
 
-        public override string ToString() => $"HasCompileTimeCodeChange={this.HasCompileTimeCodeChange}, SyntaxTreeChanges={this._syntaxTreeChanges.Count}";
+        public override string ToString() => $"HasCompileTimeCodeChange={this.HasCompileTimeCodeChange}, SyntaxTreeChanges={this.SyntaxTreeChanges.Count}";
     }
 }

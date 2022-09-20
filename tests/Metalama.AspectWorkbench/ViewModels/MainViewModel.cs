@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.AspectWorkbench.Model;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Tests.Integration.Runners;
@@ -191,7 +192,11 @@ namespace Metalama.AspectWorkbench.ViewModels
             {
                 var intermediateSyntaxTree = testResult.IntermediateLinkerCompilation.Compilation.SyntaxTrees.First();
                 var linkerProject = testRunner.CreateProject( testInput.Options );
-                var linkerDocument = linkerProject.AddDocument( "IntermediateLinkerCode.cs", await intermediateSyntaxTree.GetRootAsync() );
+
+                var linkerDocument = linkerProject.AddDocument(
+                    "IntermediateLinkerCode.cs",
+                    RenderAspectReferences( await intermediateSyntaxTree.GetRootAsync() ) );
+
                 this.IntermediateLinkerCodeCodeDocument = await syntaxColorizer.WriteSyntaxColoringAsync( linkerDocument );
             }
 
@@ -248,6 +253,8 @@ namespace Metalama.AspectWorkbench.ViewModels
                 errorsDocument.Blocks.Add( new Paragraph( new Run( "The program output code is different than expectations." ) { Foreground = Brushes.Red } ) );
             }
         }
+
+        private static SyntaxNode RenderAspectReferences( SyntaxNode rootNode ) => new AspectReferenceRenderingRewriter().Visit( rootNode ).AssertNotNull();
 
         public void NewTest( string path )
         {

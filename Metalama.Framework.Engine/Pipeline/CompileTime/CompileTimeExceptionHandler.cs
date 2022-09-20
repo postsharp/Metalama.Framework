@@ -46,13 +46,13 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
 
             var exceptionText = new StringBuilder();
 
-            exceptionText.AppendLine( $"Metalama Version: {EngineAssemblyMetadataReader.Instance.PackageVersion}" );
-            exceptionText.AppendLine( $"Runtime: {RuntimeInformation.FrameworkDescription}" );
-            exceptionText.AppendLine( $"Processor Architecture: {RuntimeInformation.ProcessArchitecture}" );
-            exceptionText.AppendLine( $"OS Description: {RuntimeInformation.OSDescription}" );
-            exceptionText.AppendLine( $"OS Architecture: {RuntimeInformation.OSArchitecture}" );
-            exceptionText.AppendLine( $"Exception type: {exception.GetType()}" );
-            exceptionText.AppendLine( $"Exception message: {exception.Message}" );
+            exceptionText.AppendLineInvariant( $"Metalama Version: {EngineAssemblyMetadataReader.Instance.PackageVersion}" );
+            exceptionText.AppendLineInvariant( $"Runtime: {RuntimeInformation.FrameworkDescription}" );
+            exceptionText.AppendLineInvariant( $"Processor Architecture: {RuntimeInformation.ProcessArchitecture}" );
+            exceptionText.AppendLineInvariant( $"OS Description: {RuntimeInformation.OSDescription}" );
+            exceptionText.AppendLineInvariant( $"OS Architecture: {RuntimeInformation.OSArchitecture}" );
+            exceptionText.AppendLineInvariant( $"Exception type: {exception.GetType()}" );
+            exceptionText.AppendLineInvariant( $"Exception message: {exception.Message}" );
 
             try
             {

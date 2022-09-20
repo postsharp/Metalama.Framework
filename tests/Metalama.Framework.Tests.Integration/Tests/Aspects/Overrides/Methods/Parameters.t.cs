@@ -39,8 +39,7 @@ internal class TargetClass
         global::System.Int32 result;
         Console.WriteLine("This is the original method.");
         result = 42;
-        goto __aspect_return_1;
-    __aspect_return_1: global::System.Console.WriteLine("This is the override method.");
+        global::System.Console.WriteLine("This is the override method.");
         global::System.Console.WriteLine($"Returns int");
         return (global::System.Int32)result;
     }
@@ -51,8 +50,7 @@ internal class TargetClass
         global::System.Object result;
         Console.WriteLine("This is the original method.");
         result = new object();
-        goto __aspect_return_1;
-    __aspect_return_1: global::System.Console.WriteLine("This is the override method.");
+        global::System.Console.WriteLine("This is the override method.");
         global::System.Console.WriteLine($"Returns object");
         return (global::System.Object)result;
     }
@@ -62,8 +60,7 @@ internal class TargetClass
         T result;
         Console.WriteLine("This is the original method.");
         result = param;
-        goto __aspect_return_1;
-    __aspect_return_1: global::System.Console.WriteLine("This is the override method.");
+        global::System.Console.WriteLine("This is the override method.");
         global::System.Console.WriteLine($"Param param = {param}");
         global::System.Console.WriteLine($"Returns TargetClass.Generic<T>(T)/T");
         return (T)result;
@@ -110,8 +107,7 @@ internal class TargetClass
         T result;
         global::System.Console.WriteLine("This is the introduced method.");
         result = (T)param;
-        goto __aspect_return_1;
-    __aspect_return_1: global::System.Console.WriteLine("This is the override method.");
+        global::System.Console.WriteLine("This is the override method.");
         global::System.Console.WriteLine($"Param param = {param}");
         global::System.Console.WriteLine($"Returns IntroduceAspectAttribute.IntroducedGeneric<T>(T)/T");
         return (T)result;
@@ -132,8 +128,7 @@ internal class TargetClass
         global::System.Int32 result;
         global::System.Console.WriteLine("This is the introduced method.");
         result = (global::System.Int32)42;
-        goto __aspect_return_1;
-    __aspect_return_1: global::System.Console.WriteLine("This is the override method.");
+        global::System.Console.WriteLine("This is the override method.");
         global::System.Console.WriteLine($"Returns int");
         return (global::System.Int32)result;
     }
@@ -143,8 +138,7 @@ internal class TargetClass
         global::System.Object result;
         global::System.Console.WriteLine("This is the introduced method.");
         result = (global::System.Object)new object();
-        goto __aspect_return_1;
-    __aspect_return_1: global::System.Console.WriteLine("This is the override method.");
+        global::System.Console.WriteLine("This is the override method.");
         global::System.Console.WriteLine($"Returns object");
         return (global::System.Object)result;
     }

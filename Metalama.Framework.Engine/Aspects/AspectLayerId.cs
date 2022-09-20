@@ -53,6 +53,9 @@ namespace Metalama.Framework.Engine.Aspects
 
         public string FullName => this.AspectName == null! ? "(null)" : this.LayerName == null ? this.AspectName : this.AspectName + ":" + this.LayerName;
 
+        public string ShortName
+            => this.AspectShortName == null! ? "(null)" : this.LayerName == null ? this.AspectShortName : this.AspectShortName + ":" + this.LayerName;
+
         public override string ToString() => this.FullName;
 
         public bool Equals( AspectLayerId other )
@@ -62,11 +65,12 @@ namespace Metalama.Framework.Engine.Aspects
             => (this.AspectName == null! ? 0 : StringComparer.Ordinal.GetHashCode( this.AspectName ))
                ^ (this.LayerName == null ? 0 : StringComparer.Ordinal.GetHashCode( this.LayerName ));
 
-        public bool Equals( AspectLayer other ) => this.Equals( other.AspectLayerId );
+        public bool Equals( AspectLayer? other ) => other != null && this.Equals( other.AspectLayerId );
 
-        public override bool Equals( object obj )
+        public override bool Equals( object? obj )
             => obj switch
             {
+                null => false,
                 AspectLayerId id => this.Equals( id ),
                 AspectLayer layer => this.Equals( layer ),
                 _ => false

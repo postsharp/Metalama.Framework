@@ -96,7 +96,7 @@ namespace Metalama.Framework.Engine.CompileTime
         /// Gets the name of all project references (a fully-qualified assembly identity) of the compile-time project.
         /// </summary>
         public IReadOnlyList<string>? References { get; }
-        
+
         public string? RedistributionLicenseKey { get; }
 
         /// <summary>

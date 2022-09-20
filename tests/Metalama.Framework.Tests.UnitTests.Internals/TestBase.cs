@@ -1,5 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Diagnostics;
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities;
@@ -10,16 +12,12 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Reflection;
+using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests
 {
     public class TestBase
     {
-        static TestBase()
-        {
-            TestingServices.Initialize();
-        }
-
         /// <summary>
         /// A value indicating whether tests that test the serialization of reflection objects like <see cref="Type"/> should use "dotnet build" to see if the
         /// resulting syntax tree actually compiles and results in valid IL. This is slow but necessary during development, at least, since an incorrect syntax tree
@@ -27,11 +25,37 @@ namespace Metalama.Framework.Tests.UnitTests
         /// </summary>
         private const bool _doCodeExecutionTests = false;
 
-        private readonly Func<ServiceProvider, ServiceProvider> _addServices;
+        private readonly ITestOutputHelper? _testOutputHelper;
 
-        protected TestBase( Func<ServiceProvider, ServiceProvider>? addServices = null )
+        static TestBase()
         {
-            this._addServices = addServices ?? new Func<ServiceProvider, ServiceProvider>( p => p );
+            TestingServices.Initialize();
+        }
+
+        protected TestBase( ITestOutputHelper? testOutputHelper = null )
+        {
+            this._testOutputHelper = testOutputHelper;
+        }
+
+        protected ITestOutputHelper Logger => this._testOutputHelper.AssertNotNull();
+
+        protected virtual ServiceProvider ConfigureServiceProvider( ServiceProvider serviceProvider )
+        {
+            serviceProvider = this.AddXunitLogging( serviceProvider );
+
+            return serviceProvider;
+        }
+
+        protected ServiceProvider AddXunitLogging( ServiceProvider serviceProvider )
+        {
+            // If we have an Xunit test output, override the logger.
+            if ( this._testOutputHelper != null )
+            {
+                var loggerFactory = new XunitLoggerFactory( this._testOutputHelper );
+                serviceProvider = serviceProvider.WithUntypedService( typeof(ILoggerFactory), loggerFactory );
+            }
+
+            return serviceProvider;
         }
 
         protected static CSharpCompilation CreateCSharpCompilation(
@@ -63,7 +87,7 @@ namespace Metalama.Framework.Tests.UnitTests
         {
             var additionalAssemblies = new[] { typeof(TestBase).Assembly };
 
-            var parseOptions = new CSharpParseOptions( preprocessorSymbols: preprocessorSymbols );
+            var parseOptions = new CSharpParseOptions( preprocessorSymbols: preprocessorSymbols ?? new[] { "METALAMA" } );
 
             var mainRoslynCompilation = TestCompilationFactory
                 .CreateEmptyCSharpCompilation( name, additionalAssemblies, addMetalamaReferences, outputKind )
@@ -149,7 +173,7 @@ class Expression
                 projectOptions ?? new TestProjectOptions( additionalAssemblies: ImmutableArray.Create( this.GetType().Assembly ) ),
                 provider =>
                 {
-                    provider = this._addServices( provider );
+                    provider = this.ConfigureServiceProvider( provider );
 
                     if ( addServices != null )
                     {
@@ -158,5 +182,7 @@ class Expression
 
                     return provider;
                 } );
+
+        protected virtual IEnumerable<Assembly> GetTestAssemblies() => new[] { this.GetType().Assembly };
     }
 }

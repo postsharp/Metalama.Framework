@@ -8,11 +8,11 @@ internal interface IServiceHubApi
 {
     Task RegisterEndpointAsync( string pipeName, CancellationToken cancellationToken );
 
-    Task RegisterProjectAsync( string projectId, string pipeName, CancellationToken cancellationToken );
+    Task RegisterProjectAsync( ProjectKey projectKey, string pipeName, CancellationToken cancellationToken );
 
     Task UnregisterEndpointAsync( string pipeName, CancellationToken cancellationToken );
 
-    Task UnregisterProjectAsync( string projectId, CancellationToken cancellationToken );
+    Task UnregisterProjectAsync( ProjectKey projectKey, CancellationToken cancellationToken );
 }
 
 internal interface IServiceHubApiProvider : IService

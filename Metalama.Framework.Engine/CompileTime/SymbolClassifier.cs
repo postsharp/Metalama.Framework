@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Roslyn;
@@ -42,7 +43,9 @@ namespace Metalama.Framework.Engine.CompileTime
                 (typeof(ParameterInfo), Scope: TemplatingScope.RunTimeOnly, true),
                 (typeof(Debugger), Scope: TemplatingScope.RunTimeOrCompileTime, false),
                 (typeof(Index), TemplatingScope.RunTimeOrCompileTime, false)
-            }.ToImmutableDictionary( t => t.ReflectionType.Name, t => (t.ReflectionType.Namespace, t.Scope, t.MembersOnly) );
+            }.ToImmutableDictionary(
+                t => t.ReflectionType.Name.AssertNotNull(),
+                t => (t.ReflectionType.Namespace.AssertNotNull(), t.Scope, t.MembersOnly) );
 
         private static readonly ImmutableDictionary<string, (TemplatingScope Scope, bool IncludeDescendants)> _wellKnownNamespaces =
             new (string Namespace, TemplatingScope Scope, bool IncludeDescendants)[]
@@ -67,6 +70,7 @@ namespace Metalama.Framework.Engine.CompileTime
         private readonly ConcurrentDictionary<ISymbol, TemplateInfo> _cacheNonInheritedTemplateInfo = new( SymbolEqualityComparer.Default );
         private readonly ReferenceAssemblyLocator _referenceAssemblyLocator;
         private readonly AttributeDeserializer _attributeDeserializer;
+        private readonly ILogger _logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SymbolClassifier"/> class.
@@ -77,13 +81,17 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             this._referenceAssemblyLocator = serviceProvider.GetRequiredService<ReferenceAssemblyLocator>();
             this._attributeDeserializer = attributeDeserializer;
+            this._logger = serviceProvider.GetLoggerFactory().GetLogger( "SymbolClassifier" );
 
             if ( compilation != null )
             {
                 this._compilation = compilation;
-                this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof(TemplateAttribute).FullName ).AssertNotNull();
-                this._declarativeAdviceAttribute = this._compilation.GetTypeByMetadataName( typeof(DeclarativeAdviceAttribute).FullName ).AssertNotNull();
-                this._abstractAttribute = this._compilation.GetTypeByMetadataName( typeof(AbstractAttribute).FullName ).AssertNotNull();
+                this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof(TemplateAttribute).FullName.AssertNotNull() ).AssertNotNull();
+
+                this._declarativeAdviceAttribute = this._compilation.GetTypeByMetadataName( typeof(DeclarativeAdviceAttribute).FullName.AssertNotNull() )
+                    .AssertNotNull();
+
+                this._abstractAttribute = this._compilation.GetTypeByMetadataName( typeof(AbstractAttribute).FullName.AssertNotNull() ).AssertNotNull();
             }
         }
 
@@ -151,6 +159,11 @@ namespace Metalama.Framework.Engine.CompileTime
             {
                 // This happens when the attribute class is defined in user code.
                 // In this case, we have to instantiate the attribute later, after we have the compile-time assembly for the user code.
+
+                // It also happens in case of mismatch between the current Metalama version and the Metalama version to which the project is
+                // linked, which should not happen in theory.
+
+                this._logger.Warning?.Log( $"Could not instantiate an attribute of type '{attributeData.AttributeClass}'." );
             }
 
             var memberId = SymbolId.Create( declaringSymbol );

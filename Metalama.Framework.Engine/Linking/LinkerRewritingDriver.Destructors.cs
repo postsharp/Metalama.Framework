@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
-using Metalama.Framework.Engine.Linking.Inlining;
+using Metalama.Framework.Engine.Linking.Substitution;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -22,12 +22,12 @@ namespace Metalama.Framework.Engine.Linking
             IMethodSymbol symbol,
             SyntaxGenerationContext generationContext )
         {
-            if ( this._introductionRegistry.IsOverrideTarget( symbol ) )
+            if ( this.IntroductionRegistry.IsOverrideTarget( symbol ) )
             {
                 var members = new List<MemberDeclarationSyntax>();
-                var lastOverride = (IMethodSymbol) this._introductionRegistry.GetLastOverride( symbol );
+                var lastOverride = this.IntroductionRegistry.GetLastOverride( symbol );
 
-                if ( this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( lastOverride, IntermediateSymbolSemanticKind.Default ), out _ ) )
+                if ( this.AnalysisRegistry.IsInlined( lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final, lastOverride.IsAsync ) );
                 }
@@ -36,14 +36,14 @@ namespace Metalama.Framework.Engine.Linking
                     members.Add( GetTrampolineDestructor( destructorDeclaration, lastOverride ) );
                 }
 
-                if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
-                     && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
+                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
+                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     members.Add( GetOriginalImplDestructor( destructorDeclaration, symbol ) );
                 }
 
-                if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ) )
-                     && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ), out _ ) )
+                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
+                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ) )
                 {
                     members.Add( GetEmptyImplDestructor( destructorDeclaration, symbol ) );
                 }
@@ -57,9 +57,12 @@ namespace Metalama.Framework.Engine.Linking
 
             DestructorDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind, bool isAsync )
             {
-                var linkedBody = this.GetLinkedBody(
+                var linkedBody = this.GetSubstitutedBody(
                     symbol.ToSemantic( semanticKind ),
-                    InliningContext.Create( this, symbol, generationContext ) );
+                    new SubstitutionContext(
+                        this,
+                        generationContext,
+                        new InliningContextIdentifier( symbol.ToSemantic( semanticKind ) ) ) );
 
                 var modifiers = destructorDeclaration.Modifiers;
 
@@ -152,6 +155,32 @@ namespace Metalama.Framework.Engine.Linking
                     .WithBody( body )
                     .WithExpressionBody( expressionBody )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
+        }
+
+        private static DestructorDeclarationSyntax GetTrampolineDestructor( DestructorDeclarationSyntax destructor, IMethodSymbol targetSymbol )
+        {
+            // TODO: First override not being inlineable probably does not happen outside of specifically written linker tests, i.e. trampolines may not be needed.
+
+            return
+                destructor
+                    .WithBody( GetBody() )
+                    .NormalizeWhitespace()
+                    .WithLeadingTrivia( destructor.GetLeadingTrivia() )
+                    .WithTrailingTrivia( destructor.GetTrailingTrivia() );
+
+            BlockSyntax GetBody()
+            {
+                var invocation =
+                    InvocationExpression(
+                        MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( targetSymbol.Name ) ),
+                        ArgumentList() );
+
+                return Block(
+                    ReturnStatement(
+                        Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
+                        invocation,
+                        Token( SyntaxKind.SemicolonToken ) ) );
+            }
         }
     }
 }

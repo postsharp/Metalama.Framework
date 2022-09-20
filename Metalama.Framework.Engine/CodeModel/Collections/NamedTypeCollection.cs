@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 {
     internal class NamedTypeCollection : MemberOrNamedTypeCollection<INamedType>, INamedTypeCollection
     {
-        public NamedTypeCollection( INamedType declaringType, UpdatableMemberCollection<INamedType> sourceItems ) :
+        public NamedTypeCollection( NamedType declaringType, UpdatableMemberCollection<INamedType> sourceItems ) :
             base( declaringType, sourceItems ) { }
 
         public NamedTypeCollection( ICompilation declaringType, UpdatableMemberCollection<INamedType> sourceItems ) :

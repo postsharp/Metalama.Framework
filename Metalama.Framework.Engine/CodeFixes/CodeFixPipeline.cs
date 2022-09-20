@@ -61,6 +61,7 @@ namespace Metalama.Framework.Engine.CodeFixes
             {
                 if ( !this.TryInitialize( NullDiagnosticAdder.Instance, partialCompilation, null, null, cancellationToken, out configuration ) )
                 {
+                    codeFixes = default;
                     compilationModel = null;
 
                     return false;

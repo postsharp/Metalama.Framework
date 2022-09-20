@@ -30,14 +30,14 @@ public abstract class BaseCodeHasher : SafeSyntaxWalker
         if ( token.RawKind != 0 )
         {
             this._hasher.Update( token.RawKind );
-            this.Log?.AppendLine( $"Adding '{token.RawKind}' to the hash." );
+            this.Log?.AppendLineInvariant( $"Adding '{token.RawKind}' to the hash." );
         }
     }
 
     protected void VisitNonTrivialToken( SyntaxToken token )
     {
         this._hasher.Update( token.Text );
-        this.Log?.AppendLine( $"Adding '{token.Text}' to the hash." );
+        this.Log?.AppendLineInvariant( $"Adding '{token.Text}' to the hash." );
     }
 
     protected void Visit<T>( in SyntaxList<T> list )
@@ -61,7 +61,7 @@ public abstract class BaseCodeHasher : SafeSyntaxWalker
     protected void Visit( in SyntaxToken token )
     {
         this._hasher.Update( token.Text );
-        this.Log?.AppendLine( $"Adding '{token.Text}' to the hash." );
+        this.Log?.AppendLineInvariant( $"Adding '{token.Text}' to the hash." );
     }
 
     protected void Visit( in SyntaxTokenList list )

@@ -35,16 +35,20 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
         private readonly StructuralSymbolComparerOptions _options;
 
-        private StructuralSymbolComparer( StructuralSymbolComparerOptions options )
+        private protected StructuralSymbolComparer( StructuralSymbolComparerOptions options )
         {
             this._options = options;
         }
 
-        public bool Equals( ISymbol x, ISymbol y )
+        public bool Equals( ISymbol? x, ISymbol? y )
         {
             if ( ReferenceEquals( x, y ) )
             {
                 return true;
+            }
+            else if ( x == null || y == null )
+            {
+                return false;
             }
 
             if ( x.Kind != y.Kind )

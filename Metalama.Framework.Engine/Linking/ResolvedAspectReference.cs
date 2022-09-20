@@ -9,9 +9,9 @@ namespace Metalama.Framework.Engine.Linking
     internal class ResolvedAspectReference
     {
         /// <summary>
-        /// Gets the symbol that contains the reference.
+        /// Gets the semantic that contains the reference.
         /// </summary>
-        public ISymbol ContainingSymbol { get; }
+        public IntermediateSymbolSemantic<IMethodSymbol> ContainingSemantic { get; }
 
         /// <summary>
         /// Gets the symbol the reference was originally pointing to.
@@ -19,32 +19,91 @@ namespace Metalama.Framework.Engine.Linking
         public ISymbol OriginalSymbol { get; }
 
         /// <summary>
-        /// Gets the symbol semantic that is the target of the reference.
+        /// Gets the symbol semantic that is the target of the reference (C# declaration, i.e. method, property or event).
         /// </summary>
         public IntermediateSymbolSemantic ResolvedSemantic { get; }
 
         /// <summary>
-        /// Gets the annotated expression.
+        /// Gets the symbol semantic for the target body (always a method).
         /// </summary>
-        public ExpressionSyntax Expression { get; }
+        public IntermediateSymbolSemantic<IMethodSymbol> ResolvedSemanticBody
+            => (this.ResolvedSemantic, this.TargetKind) switch
+            {
+                ({ Symbol: IMethodSymbol method }, AspectReferenceTargetKind.Self) =>
+                    method.ToSemantic( this.ResolvedSemantic.Kind ),
+                ({ Symbol: IPropertySymbol property }, AspectReferenceTargetKind.PropertyGetAccessor) =>
+                    property.GetMethod.AssertNotNull().ToSemantic( this.ResolvedSemantic.Kind ),
+                ({ Symbol: IPropertySymbol property }, AspectReferenceTargetKind.PropertySetAccessor) =>
+                    property.SetMethod.AssertNotNull().ToSemantic( this.ResolvedSemantic.Kind ),
+                ({ Symbol: IEventSymbol @event }, AspectReferenceTargetKind.EventAddAccessor) =>
+                    @event.AddMethod.AssertNotNull().ToSemantic( this.ResolvedSemantic.Kind ),
+                ({ Symbol: IEventSymbol @event }, AspectReferenceTargetKind.EventRemoveAccessor) =>
+                    @event.RemoveMethod.AssertNotNull().ToSemantic( this.ResolvedSemantic.Kind ),
+                _ => throw new AssertionFailedException()
+            };
+
+        public bool HasResolvedSemanticBody
+            => (this.ResolvedSemantic, this.TargetKind) switch
+            {
+                ({ Symbol: IMethodSymbol }, AspectReferenceTargetKind.Self) => true,
+                ({ Symbol: IPropertySymbol }, AspectReferenceTargetKind.PropertyGetAccessor) => true,
+                ({ Symbol: IPropertySymbol }, AspectReferenceTargetKind.PropertySetAccessor) => true,
+                ({ Symbol: IEventSymbol }, AspectReferenceTargetKind.EventAddAccessor) => true,
+                ({ Symbol: IEventSymbol }, AspectReferenceTargetKind.EventRemoveAccessor) => true,
+                ({ Symbol: IEventSymbol }, AspectReferenceTargetKind.EventRaiseAccessor) => false,
+                ({ Symbol: IFieldSymbol }, AspectReferenceTargetKind.PropertyGetAccessor) => false,
+                ({ Symbol: IFieldSymbol }, AspectReferenceTargetKind.PropertySetAccessor) => false,
+                _ => throw new AssertionFailedException()
+            };
 
         /// <summary>
-        /// Gets the original specification of the reference.
+        /// Gets the annotated expression. This is for convenience in inliners which always work with expressions.
         /// </summary>
-        public AspectReferenceSpecification Specification { get; } // TODO: Remove, all information should be translated.
+        public ExpressionSyntax SourceExpression => this.SourceNode as ExpressionSyntax ?? throw new AssertionFailedException();
+
+        /// <summary>
+        /// Gets the annotated expression.
+        /// </summary>
+        public SyntaxNode SourceNode { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the reference is inlineable.
+        /// </summary>
+        public bool IsInlineable { get; }
+
+        /// <summary>
+        /// Gets the target kind of the aspect reference.
+        /// </summary>
+        public AspectReferenceTargetKind TargetKind { get; }
 
         public ResolvedAspectReference(
-            ISymbol containingSymbol,
+            IntermediateSymbolSemantic<IMethodSymbol> containingSemantic,
             ISymbol originalSymbol,
             IntermediateSymbolSemantic resolvedSemantic,
-            ExpressionSyntax expression,
-            AspectReferenceSpecification specification )
+            SyntaxNode sourceNode,
+            AspectReferenceTargetKind targetKind,
+            bool isInlineable )
         {
-            this.ContainingSymbol = containingSymbol;
+            Invariant.AssertNot( containingSemantic.Kind != IntermediateSymbolSemanticKind.Final && sourceNode is not ExpressionSyntax );
+
+            Invariant.AssertNot(
+                resolvedSemantic.Symbol is IMethodSymbol
+                {
+                    MethodKind: not MethodKind.Ordinary and not MethodKind.ExplicitInterfaceImplementation and not MethodKind.Destructor
+                    and not MethodKind.UserDefinedOperator and not MethodKind.Conversion
+                } );
+
+            this.ContainingSemantic = containingSemantic;
             this.OriginalSymbol = originalSymbol;
             this.ResolvedSemantic = resolvedSemantic;
-            this.Expression = expression;
-            this.Specification = specification;
+            this.SourceNode = sourceNode;
+            this.IsInlineable = isInlineable;
+            this.TargetKind = targetKind;
+        }
+
+        public override string ToString()
+        {
+            return $"{this.ContainingSemantic} ({(this.SourceNode is ExpressionSyntax ? this.SourceNode : "not expression")}) -> {this.ResolvedSemantic}";
         }
     }
 }

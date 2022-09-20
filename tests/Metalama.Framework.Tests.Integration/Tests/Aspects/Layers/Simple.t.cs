@@ -5,9 +5,6 @@ internal class C
     {
         global::System.Console.WriteLine("Layer: Second");
         global::System.Console.WriteLine("Layer: ");
-        goto __aspect_return_1;
-
-    __aspect_return_1: return;
-
+        return;
     }
 }

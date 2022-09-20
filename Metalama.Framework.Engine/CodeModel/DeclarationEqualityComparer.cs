@@ -22,13 +22,16 @@ namespace Metalama.Framework.Engine.CodeModel
             this._compilation = compilation;
         }
 
-        public bool Equals( IDeclaration x, IDeclaration y ) => this._innerComparer.Equals( x.ToTypedRef(), y.ToTypedRef() );
+        public bool Equals( IDeclaration? x, IDeclaration? y )
+            => (x == null && y == null) || (x != null && y != null && this._innerComparer.Equals( x.ToTypedRef(), y.ToTypedRef() ));
 
         public int GetHashCode( IDeclaration obj ) => this._innerComparer.GetHashCode( obj.ToTypedRef() );
 
-        public bool Equals( IType x, IType y ) => SymbolEqualityComparer.Default.Equals( x.GetSymbol(), y.GetSymbol() );
+        public bool Equals( IType? x, IType? y )
+            => (x == null && y == null) || (x != null && y != null && SymbolEqualityComparer.Default.Equals( x.GetSymbol(), y.GetSymbol() ));
 
-        public bool Equals( INamedType x, INamedType y ) => SymbolEqualityComparer.Default.Equals( x.GetSymbol(), y.GetSymbol() );
+        public bool Equals( INamedType? x, INamedType? y )
+            => (x == null && y == null) || (x != null && y != null && SymbolEqualityComparer.Default.Equals( x.GetSymbol(), y.GetSymbol() ));
 
         public int GetHashCode( IType obj ) => SymbolEqualityComparer.Default.GetHashCode( obj.GetSymbol() );
 

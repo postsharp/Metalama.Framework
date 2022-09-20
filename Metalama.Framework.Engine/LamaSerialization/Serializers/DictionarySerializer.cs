@@ -7,7 +7,8 @@ using System.Collections.Generic;
 namespace Metalama.Framework.Engine.LamaSerialization.Serializers
 {
     /// <exclude/>
-    internal sealed class DictionarySerializer<TKey, TValue> : ReferenceTypeSerializer
+    internal sealed class DictionarySerializer<TKey, TValue> : ReferenceTypeSerializer 
+        where TKey : notnull
     {
         // This needs to be a public type because the type is instantiated from an activator in client assemblies.
         private const string _comparerCodeName = "c";

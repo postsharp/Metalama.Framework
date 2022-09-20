@@ -25,10 +25,32 @@ namespace Metalama.Framework.Engine.Linking
             return flags;
         }
 
+        public static LinkerGeneratedFlags GetLinkerGeneratedFlags( this SyntaxTrivia trivia )
+        {
+            var annotations = trivia.GetAnnotations( AnnotationKind );
+
+            LinkerGeneratedFlags flags = default;
+
+            foreach ( var annotation in annotations )
+            {
+                if ( annotation?.Data != null )
+                {
+                    flags |= LinkerGeneratedAnnotation.FromString( annotation.Data ).Flags;
+                }
+            }
+
+            return flags;
+        }
+
         public static T WithLinkerGeneratedFlags<T>( this T node, in LinkerGeneratedFlags flags )
             where T : SyntaxNode
         {
             return node.WithAdditionalAnnotations( new SyntaxAnnotation( AnnotationKind, new LinkerGeneratedAnnotation( flags ).ToString() ) );
+        }
+
+        public static SyntaxTrivia WithLinkerGeneratedFlags( this SyntaxTrivia trivia, in LinkerGeneratedFlags flags )
+        {
+            return trivia.WithAdditionalAnnotations( new SyntaxAnnotation( AnnotationKind, new LinkerGeneratedAnnotation( flags ).ToString() ) );
         }
     }
 }

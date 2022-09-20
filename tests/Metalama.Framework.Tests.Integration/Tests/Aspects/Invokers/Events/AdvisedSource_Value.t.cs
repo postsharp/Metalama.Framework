@@ -10,6 +10,7 @@ internal class TargetClass
             global::System.Console.WriteLine("Override");
             this.Event_Source += value;
 
+
         }
         remove
         {
@@ -24,15 +25,13 @@ internal class TargetClass
         add => _field += value;
         remove => _field -= value;
     }
-
-    private EventHandler? _eventField;
-
     public event EventHandler? EventField
     {
         add
         {
             global::System.Console.WriteLine("Override");
             this.EventField_Source += value;
+
         }
         remove
         {
@@ -41,16 +40,5 @@ internal class TargetClass
         }
     }
 
-    private event EventHandler? EventField_Source
-    {
-        add
-        {
-            this._eventField += value;
-        }
-
-        remove
-        {
-            this._eventField -= value;
-        }
-    }
+    private EventHandler? EventField_Source;
 }

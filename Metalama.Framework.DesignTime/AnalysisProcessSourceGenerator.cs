@@ -12,8 +12,8 @@ namespace Metalama.Framework.DesignTime;
 /// </summary>
 public class AnalysisProcessSourceGenerator : BaseSourceGenerator
 {
-    protected override ProjectHandler CreateSourceGeneratorImpl( IProjectOptions projectOptions )
-        => new AnalysisProcessProjectHandler( this.ServiceProvider, projectOptions );
+    protected override ProjectHandler CreateSourceGeneratorImpl( IProjectOptions projectOptions, ProjectKey projectKey )
+        => new AnalysisProcessProjectHandler( this.ServiceProvider, projectOptions, projectKey );
 
     protected override void OnGeneratedSourceRequested(
         Compilation compilation,

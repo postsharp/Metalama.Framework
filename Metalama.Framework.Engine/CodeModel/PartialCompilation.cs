@@ -3,6 +3,7 @@
 using Metalama.Compiler;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
@@ -18,7 +19,7 @@ namespace Metalama.Framework.Engine.CodeModel
     /// </summary>
     public abstract partial class PartialCompilation : IPartialCompilationInternal
     {
-        internal DerivedTypeIndex DerivedTypes { get; }
+        public DerivedTypeIndex DerivedTypes { get; }
 
         /// <summary>
         /// Gets the set of modifications present in the current compilation compared to the <see cref="InitialCompilation"/>.
@@ -186,7 +187,7 @@ namespace Metalama.Framework.Engine.CodeModel
         /// Creates a <see cref="PartialCompilation"/> that represents a complete compilation.
         /// </summary>
         public static PartialCompilation CreateComplete( Compilation compilation, ImmutableArray<ManagedResource> resources = default )
-            => new CompleteImpl( compilation, resources );
+            => new CompleteImpl( compilation, GetDerivedTypeIndex( compilation ), resources );
 
         /// <summary>
         /// Creates a <see cref="PartialCompilation"/> for a single syntax tree and its closure.
@@ -243,8 +244,7 @@ namespace Metalama.Framework.Engine.CodeModel
         /// <summary>
         /// Gets a closure of the syntax trees declaring all base types and interfaces of all types declared in input syntax trees.
         /// </summary>
-        private static (ImmutableHashSet<INamedTypeSymbol> Types, ImmutableHashSet<SyntaxTree> Trees,
-            DerivedTypeIndex DerivedTypes)
+        private static (ImmutableHashSet<INamedTypeSymbol> Types, ImmutableHashSet<SyntaxTree> Trees, DerivedTypeIndex DerivedTypes)
             GetClosure( Compilation compilation, IReadOnlyList<SyntaxTree> syntaxTrees )
         {
             var assembly = compilation.Assembly;
@@ -279,14 +279,16 @@ namespace Metalama.Framework.Engine.CodeModel
                     // Add base types recursively.
                     if ( type.BaseType != null )
                     {
-                        derivedTypesBuilder.AddDerivedType( type.BaseType.OriginalDefinition, type );
-                        AddTypeRecursive( type.BaseType.OriginalDefinition );
+                        var baseType = type.BaseType.OriginalDefinition;
+                        derivedTypesBuilder.AddDerivedType( baseType, type );
+                        AddTypeRecursive( baseType );
                     }
 
                     foreach ( var interfaceImpl in type.Interfaces )
                     {
-                        derivedTypesBuilder.AddDerivedType( interfaceImpl.OriginalDefinition, type );
-                        AddTypeRecursive( interfaceImpl.OriginalDefinition );
+                        var interfaceType = interfaceImpl.OriginalDefinition;
+                        derivedTypesBuilder.AddDerivedType( interfaceType, type );
+                        AddTypeRecursive( interfaceType );
                     }
                 }
                 else
@@ -317,6 +319,18 @@ namespace Metalama.Framework.Engine.CodeModel
             }
 
             return (types.ToImmutable(), trees.ToImmutable(), derivedTypesBuilder.ToImmutable());
+        }
+
+        private static DerivedTypeIndex GetDerivedTypeIndex( Compilation compilation )
+        {
+            DerivedTypeIndex.Builder builder = new( compilation );
+
+            foreach ( var type in compilation.Assembly.GetTypes() )
+            {
+                builder.AnalyzeType( type );
+            }
+
+            return builder.ToImmutable();
         }
 
         public ImmutableArray<SyntaxTreeTransformation> ToTransformations() => this.ModifiedSyntaxTrees.Values.ToImmutableArray();

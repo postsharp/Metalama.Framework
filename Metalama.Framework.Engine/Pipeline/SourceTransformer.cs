@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline.CompileTime;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
@@ -16,7 +17,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Pipeline
 {
@@ -52,7 +52,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
                 if ( projectOptions == null )
                 {
-                    projectOptions = new MSBuildProjectOptions( context.AnalyzerConfigOptionsProvider.GlobalOptions, context.Plugins, context.Options );
+                    projectOptions = MSBuildProjectOptions.GetInstance( context.AnalyzerConfigOptionsProvider, context.Plugins, context.Options );
                     serviceProvider = serviceProvider.WithService( projectOptions );
                 }
 
@@ -62,13 +62,12 @@ namespace Metalama.Framework.Engine.Pipeline
 
                 // ReSharper disable once AccessToDisposedClosure
                 var pipelineResult =
-                    Task.Run(
-                            () => pipeline.ExecuteAsync(
-                                new DiagnosticAdderAdapter( context.ReportDiagnostic ),
-                                context.Compilation,
-                                context.Resources.ToImmutableArray(),
-                                CancellationToken.None ) )
-                        .Result;
+                    TaskHelper.RunAndWait(
+                        () => pipeline.ExecuteAsync(
+                            new DiagnosticAdderAdapter( context.ReportDiagnostic ),
+                            context.Compilation,
+                            context.Resources.ToImmutableArray(),
+                            CancellationToken.None ) );
 
                 if ( pipelineResult != null )
                 {

@@ -38,7 +38,7 @@ namespace Metalama.Framework.Validation
         /// Gets the type containing the reference.
         /// </summary>
         public INamedType ReferencingType
-            => this.ReferencingDeclaration.GetDeclaringType()
+            => this.ReferencingDeclaration.GetClosestNamedType()
                ?? throw new InvalidOperationException( $"Don't know how to get the declaring type of '{this.ReferencingDeclaration}'." );
 
         /// <summary>

@@ -10,10 +10,10 @@ using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Linking;
 using Metalama.Framework.Engine.Transformations;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.TestFramework;
-using Metalama.TestFramework.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -189,15 +189,14 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                         insertPositionNode = insertPositionNode.Parent?.Parent.AssertNotNull();
                     }
 
-                    var overriddenMemberSymbol = containingSymbol.GetMembers()
+                    var overriddenMemberSymbol = containingSymbol
+                        .GetMembers()
                         .Where(
-                            x =>
-                                StringComparer.Ordinal.Equals( x.Name, overriddenDeclarationName )
-                                || (overriddenDeclarationName.ContainsOrdinal( '.' ) && x.Name.EndsWith(
-                                    overriddenDeclarationName,
-                                    StringComparison.Ordinal )) )
-                        .Where( x => nameObliviousSignatureComparer.Equals( x, symbolHelperSymbol ) )
-                        .SingleOrDefault();
+                            x => StringComparer.Ordinal.Equals( x.Name, overriddenDeclarationName )
+                                 || (overriddenDeclarationName.ContainsOrdinal( '.' ) && x.Name.EndsWith(
+                                     overriddenDeclarationName,
+                                     StringComparison.Ordinal )) )
+                        .SingleOrDefault( x => nameObliviousSignatureComparer.Equals( x, symbolHelperSymbol ) );
 
                     IDeclaration? overridenMember;
 
@@ -208,10 +207,10 @@ namespace Metalama.Framework.Tests.Integration.Runners.Linker
                     else
                     {
                         // Find introduction's symbol helper.
-                        var overriddenMemberSymbolHelper = containingSymbol.GetMembers()
+                        var overriddenMemberSymbolHelper = containingSymbol
+                            .GetMembers()
                             .Where( x => StringComparer.Ordinal.Equals( x.Name, GetSymbolHelperName( overriddenDeclarationName ) ) )
-                            .Where( x => nameObliviousSignatureComparer.Equals( x, symbolHelperSymbol ) )
-                            .SingleOrDefault();
+                            .SingleOrDefault( x => nameObliviousSignatureComparer.Equals( x, symbolHelperSymbol ) );
 
                         // Find the transformation for this symbol helper.
                         var overriddenMemberSymbolHelperNodeId =

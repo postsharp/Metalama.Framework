@@ -22,13 +22,13 @@ public class CodeActionInvocationContext
 
     internal ILogger Logger { get; }
 
-    internal string ProjectId { get; }
+    internal ProjectKey ProjectKey { get; }
 
-    internal CodeActionInvocationContext( ICodeActionExecutionService service, Document document, ILogger logger, string projectId )
+    internal CodeActionInvocationContext( ICodeActionExecutionService service, Document document, ILogger logger, ProjectKey projectKey )
     {
         this.Service = service;
         this.Document = document;
         this.Logger = logger;
-        this.ProjectId = projectId;
+        this.ProjectKey = projectKey;
     }
 }
