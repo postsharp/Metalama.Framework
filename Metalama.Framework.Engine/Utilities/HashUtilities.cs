@@ -19,7 +19,7 @@ namespace Metalama.Framework.Engine.Utilities
 
         public static unsafe void Update( this XXH64 hash, long value ) => hash.Update( (byte*) &value, sizeof(long) );
 
-        public static unsafe void Update( this XXH64 hash, ulong value ) => hash.Update( (byte*) &value, sizeof( ulong ) );
+        public static unsafe void Update( this XXH64 hash, ulong value ) => hash.Update( (byte*) &value, sizeof(ulong) );
 
         // The following overloads are redundant but they work around a compiler bug.
         public static void Update( this XXH64 hash, ImmutableArray<byte> bytes ) => hash.Update( bytes.AsSpan() );
