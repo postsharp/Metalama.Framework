@@ -3,6 +3,7 @@
 using Metalama.Backstage.Configuration;
 using Metalama.Backstage.Extensibility;
 using Metalama.Framework.DesignTime.Pipeline;
+using Metalama.Framework.Engine.Collections;
 using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -61,15 +62,13 @@ namespace Metalama.Framework.DesignTime.Diagnostics
                     {
                         var missing = GetMissingDiagnostics( f, pipelineResult );
 
-                        foreach ( var diagnostic in missing.Diagnostics )
+                        return f with
                         {
-                            f.Diagnostics.Add( diagnostic.Id, new UserDiagnosticRegistration( diagnostic ) );
-                        }
-
-                        foreach ( var suppression in missing.Suppressions )
-                        {
-                            f.Suppressions.Add( suppression );
-                        }
+                            Diagnostics = f.Diagnostics.AddRange(
+                                missing.Diagnostics.Select(
+                                    d => new KeyValuePair<string, UserDiagnosticRegistration>( d.Id, new UserDiagnosticRegistration( d ) ) ) ),
+                            Suppressions = f.Suppressions.AddRange( missing.Suppressions )
+                        };
                     } );
             }
             catch ( Exception e )
