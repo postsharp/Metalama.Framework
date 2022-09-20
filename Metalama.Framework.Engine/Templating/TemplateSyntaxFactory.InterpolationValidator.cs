@@ -7,7 +7,7 @@ using System.Linq;
 
 namespace Metalama.Framework.Engine.Templating;
 
-public  partial class TemplateSyntaxFactory
+public partial class TemplateSyntaxFactory
 {
     private class InterpolationValidator : SafeSyntaxVisitor<bool>
     {

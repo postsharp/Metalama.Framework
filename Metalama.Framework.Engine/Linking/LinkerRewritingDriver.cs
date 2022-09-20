@@ -429,7 +429,7 @@ namespace Metalama.Framework.Engine.Linking
                 case IMethodSymbol methodSymbol:
                     if ( methodSymbol.ExplicitInterfaceImplementations.Any() )
                     {
-                        return CreateName( symbol, GetInterfaceMemberName(methodSymbol.ExplicitInterfaceImplementations[0]), suffix );
+                        return CreateName( symbol, GetInterfaceMemberName( methodSymbol.ExplicitInterfaceImplementations[0] ), suffix );
                     }
                     else
                     {
@@ -439,7 +439,7 @@ namespace Metalama.Framework.Engine.Linking
                 case IPropertySymbol propertySymbol:
                     if ( propertySymbol.ExplicitInterfaceImplementations.Any() )
                     {
-                        return CreateName( symbol, GetInterfaceMemberName(propertySymbol.ExplicitInterfaceImplementations[0]), suffix );
+                        return CreateName( symbol, GetInterfaceMemberName( propertySymbol.ExplicitInterfaceImplementations[0] ), suffix );
                     }
                     else
                     {
@@ -449,7 +449,7 @@ namespace Metalama.Framework.Engine.Linking
                 case IEventSymbol eventSymbol:
                     if ( eventSymbol.ExplicitInterfaceImplementations.Any() )
                     {
-                        return CreateName( symbol, GetInterfaceMemberName(eventSymbol.ExplicitInterfaceImplementations[0]), suffix );
+                        return CreateName( symbol, GetInterfaceMemberName( eventSymbol.ExplicitInterfaceImplementations[0] ), suffix );
                     }
                     else
                     {
@@ -472,9 +472,10 @@ namespace Metalama.Framework.Engine.Linking
                 return hint;
             }
 
-            static string GetInterfaceMemberName(ISymbol interfaceMember)
+            static string GetInterfaceMemberName( ISymbol interfaceMember )
             {
                 var interfaceType = interfaceMember.ContainingType;
+
                 return $"{interfaceType.GetFullName().AssertNotNull().ReplaceOrdinal( ".", "_" ).ReplaceOrdinal( "`", "__" )}_{interfaceMember.Name}";
             }
         }

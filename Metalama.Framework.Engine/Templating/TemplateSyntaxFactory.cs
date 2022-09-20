@@ -463,7 +463,7 @@ namespace Metalama.Framework.Engine.Templating
         {
             // If the interpolation expression contains an alias-prefixed identifier (for instance global::System) that is not
             // in a parenthesis or a square bracket, we need to parenthesize the expression.
-            
+
             if ( InterpolationValidator.Instance.Visit( interpolation ) )
             {
                 return interpolation.WithExpression( SyntaxFactory.ParenthesizedExpression( interpolation.Expression ) );
