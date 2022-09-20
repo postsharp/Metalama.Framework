@@ -40,11 +40,15 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
             this._options = options;
         }
 
-        public bool Equals( ISymbol x, ISymbol y )
+        public bool Equals( ISymbol? x, ISymbol? y )
         {
             if ( ReferenceEquals( x, y ) )
             {
                 return true;
+            }
+            else if ( x == null || y == null )
+            {
+                return false;
             }
 
             if ( x.Kind != y.Kind )

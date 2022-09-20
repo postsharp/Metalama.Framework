@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel.Builders;
+using Metalama.Framework.Engine.SyntaxSerialization;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
@@ -160,8 +161,13 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 _ => false
             };
 
-        public bool Equals( AttributeRef other )
+        public bool Equals( AttributeRef? other )
         {
+            if ( other == null )
+            {
+                return false;
+            }
+
             switch ( this._originalTarget )
             {
                 case AttributeSyntax syntax:

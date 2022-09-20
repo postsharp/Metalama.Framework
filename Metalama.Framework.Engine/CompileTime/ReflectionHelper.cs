@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using System;
@@ -219,7 +220,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 throw new ArgumentNullException( nameof(assemblyName) );
             }
 
-            return typeName.Replace( ",", "\\," ) + ", " + assemblyName;
+            return typeName.ReplaceOrdinal( ",", "\\," ) + ", " + assemblyName;
         }
 
         internal static void VisitTypeElements( Type type, Action<Type> visitor )

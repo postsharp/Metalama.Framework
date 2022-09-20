@@ -16,6 +16,6 @@ namespace Metalama.Framework.Engine.Utilities.Comparers
 
         private ThrowingComparer() { }
 
-        public int Compare( T x, T y ) => ReferenceEquals( x, y ) ? 0 : throw new AssertionFailedException( $"'{x}' and '{y}' are not strongly ordered." );
+        public int Compare( T? x, T? y ) => ReferenceEquals( x, y ) ? 0 : throw new AssertionFailedException( $"'{x}' and '{y}' are not strongly ordered." );
     }
 }

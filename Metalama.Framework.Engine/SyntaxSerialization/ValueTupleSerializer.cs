@@ -13,7 +13,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
     {
         private ValueTupleSerializer( SyntaxSerializationService service ) : base( service ) { }
 
-        private static IEnumerable<object> GetItems( object obj )
+        private static IEnumerable<object?> GetItems( object obj )
         {
             var type = obj.GetType();
             var arity = type.GetGenericArguments().Length;

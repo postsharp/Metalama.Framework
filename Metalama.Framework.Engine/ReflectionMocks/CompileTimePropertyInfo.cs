@@ -40,10 +40,10 @@ namespace Metalama.Framework.Engine.ReflectionMocks
 
         public override MethodInfo GetSetMethod( bool nonPublic ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
-        public override object GetValue( object obj, BindingFlags invokeAttr, Binder binder, object[] index, CultureInfo culture )
+        public override object GetValue( object? obj, BindingFlags invokeAttr, Binder? binder, object?[]? index, CultureInfo? culture )
             => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
-        public override void SetValue( object obj, object value, BindingFlags invokeAttr, Binder binder, object[] index, CultureInfo culture )
+        public override void SetValue( object? obj, object? value, BindingFlags invokeAttr, Binder? binder, object?[]? index, CultureInfo? culture )
             => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
         public override PropertyAttributes Attributes => throw CompileTimeMocksHelper.CreateNotSupportedException();

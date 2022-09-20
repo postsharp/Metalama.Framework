@@ -155,7 +155,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             }
         }
 
-        private void OnPipelineResumed( object sender, EventArgs e )
+        private void OnPipelineResumed( object? sender, EventArgs e )
         {
             // If a build has started, we have to invalidate the whole cache because we have allowed
             // our cache to become inconsistent when we started to have an outdated pipeline configuration.

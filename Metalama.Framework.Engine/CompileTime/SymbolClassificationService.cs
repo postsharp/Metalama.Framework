@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.CompileTime
                 compilation,
                 c =>
                 {
-                    var hasMetalamaReference = compilation.GetTypeByMetadataName( typeof(RunTimeOrCompileTimeAttribute).FullName ) != null;
+                    var hasMetalamaReference = compilation.GetTypeByMetadataName( typeof(RunTimeOrCompileTimeAttribute).FullName.AssertNotNull() ) != null;
 
                     return hasMetalamaReference
                         ? new SymbolClassifier( this._serviceProvider, c, this._attributeDeserializer )

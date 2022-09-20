@@ -264,7 +264,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 var filePath = syntaxTree.FilePath;
                 var builder = resultBuilders[filePath];
                 builder.InheritableAspects ??= ImmutableArray.CreateBuilder<(string, InheritableAspectInstance)>();
-                builder.InheritableAspects.Add( (inheritableAspectInstance.Aspect.GetType().FullName, inheritableAspectInstance) );
+                builder.InheritableAspects.Add( (inheritableAspectInstance.Aspect.GetType().FullName.AssertNotNull(), inheritableAspectInstance) );
             }
 
             // Split validators by syntax tree.

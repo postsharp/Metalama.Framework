@@ -4,6 +4,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Linking.Substitution;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -474,7 +475,7 @@ namespace Metalama.Framework.Engine.Linking
             static string GetInterfaceMemberName(ISymbol interfaceMember)
             {
                 var interfaceType = interfaceMember.ContainingType;
-                return $"{interfaceType.GetFullName().AssertNotNull().Replace( ".", "_" ).Replace( "`", "__" )}_{interfaceMember.Name}";
+                return $"{interfaceType.GetFullName().AssertNotNull().ReplaceOrdinal( ".", "_" ).ReplaceOrdinal( "`", "__" )}_{interfaceMember.Name}";
             }
         }
 

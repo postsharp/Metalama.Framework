@@ -77,7 +77,7 @@ namespace Metalama.Framework.Engine.CodeModel
             return new TypedConstant( type, value );
         }
 
-        public override string ToString() => this.AttributeData.ToString();
+        public override string? ToString() => this.AttributeData.ToString();
 
         T IMeasurableInternal.GetMetric<T>() => throw new NotSupportedException();
 

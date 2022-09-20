@@ -31,7 +31,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
     /// Must be public because of testing.
     internal partial class DesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
     {
-        private static readonly string _sourceGeneratorAssemblyName = typeof(DesignTimeAspectPipelineFactory).Assembly.GetName().Name;
+        private static readonly string _sourceGeneratorAssemblyName = typeof(DesignTimeAspectPipelineFactory).Assembly.GetName().Name.AssertNotNull();
 
         private readonly ConditionalWeakTable<Compilation, CompilationResult> _compilationResultCache = new();
         private readonly IFileSystemWatcher? _fileSystemWatcher;

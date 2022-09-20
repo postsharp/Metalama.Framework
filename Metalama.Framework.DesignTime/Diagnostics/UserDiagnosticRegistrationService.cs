@@ -4,6 +4,7 @@ using Metalama.Backstage.Configuration;
 using Metalama.Backstage.Extensibility;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -111,9 +112,21 @@ namespace Metalama.Framework.DesignTime.Diagnostics
         {
             public static readonly DiagnosticDescriptorComparer Instance = new();
 
-            public bool Equals( DiagnosticDescriptor x, DiagnosticDescriptor y ) => x.Id == y.Id;
+            public bool Equals( DiagnosticDescriptor? x, DiagnosticDescriptor? y )
+            {
+                if ( ReferenceEquals( x, y ) )
+                {
+                    return true;
+                }
+                else if ( x == null || y == null )
+                {
+                    return false;
+                }
+                    
+                return x.Id == y.Id;
+            }
 
-            public int GetHashCode( DiagnosticDescriptor obj ) => obj.Id.GetHashCode();
+            public int GetHashCode( DiagnosticDescriptor obj ) => obj.Id.GetHashCodeOrdinal();
         }
     }
 }

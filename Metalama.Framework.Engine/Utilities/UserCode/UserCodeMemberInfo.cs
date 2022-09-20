@@ -42,7 +42,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
 
         private static string GetTypeName( Type t ) => typeof(Fabric).IsAssignableFrom( t ) ? t.FullName! : t.Name;
 
-        public string ToString( string format, IFormatProvider formatProvider )
+        public string ToString( string? format, IFormatProvider? formatProvider )
             => this._underlying switch
             {
                 Expression expression => expression.ToString(),

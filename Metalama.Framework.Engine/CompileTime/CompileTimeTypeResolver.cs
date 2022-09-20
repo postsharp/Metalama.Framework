@@ -85,7 +85,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         }
 
                         var typeArguments = CollectTypeArguments( genericType )
-                            .Select( arg => this.GetCompileTimeType( arg, false, cancellationToken ) )
+                            .Select( arg => this.GetCompileTimeType( arg, false, cancellationToken ).AssertNotNull() )
                             .ToArray();
 
                         if ( typeArguments.Contains( null ) )
