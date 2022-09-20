@@ -21,7 +21,7 @@ namespace Metalama.Framework.Tests.Integration.Templating.InterpolatedString
             // Dynamic.
             var dy = $"Value={meta.Target.Parameters[0].Value,-5:x}";
 
-            // Value
+            // Run-time expression that would cause global::.
             var rt = $"Value={Environment.Version}";
 
             // Both
