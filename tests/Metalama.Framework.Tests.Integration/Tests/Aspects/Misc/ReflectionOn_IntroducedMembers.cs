@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Metalama.Framework;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -220,7 +221,7 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Introduce_Buil
         {
             var type = meta.Target.Type;
 
-            foreach (var f in type.Fields)
+            foreach (var f in type.Fields.OrderBy(f => f.Name) )
             {
                 var fieldInfo = f.ToFieldInfo();
                 Assert.NotNull( fieldInfo );
@@ -228,13 +229,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Introduce_Buil
                 Assert.NotNull( fieldOrPropertyInfo );
             }
 
-            foreach (var e in type.Events)
+            foreach (var e in type.Events.OrderBy(f => f.Name))
             {
                 var eventInfo = e.ToEventInfo();
                 Assert.NotNull( eventInfo );
             }
 
-            foreach (var p in type.Properties)
+            foreach (var p in type.Properties.OrderBy(f => f.Name))
             {
                 var propertyInfo = p.ToPropertyInfo();
                 Assert.NotNull( propertyInfo );
@@ -242,13 +243,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.Introduce_Buil
                 Assert.NotNull( fieldOrPropertyInfo );
             }
 
-            foreach (var m in type.Methods)
+            foreach (var m in type.Methods.OrderBy(f => f.Name))
             {
                 var methodInfo = m.ToMethodInfo();
                 Assert.NotNull( methodInfo );
             }
 
-            foreach (var c in type.Constructors)
+            foreach (var c in type.Constructors.OrderBy(f => f.Name))
             {
                 var constructorInfo = c.ToConstructorInfo();
                 Assert.NotNull( constructorInfo );

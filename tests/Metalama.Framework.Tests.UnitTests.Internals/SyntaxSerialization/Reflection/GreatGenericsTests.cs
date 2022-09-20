@@ -92,7 +92,7 @@ class User {
                     Assert.Equal( typeof(float), m.ReturnType );
                     Assert.Equal( typeof(string), m.GetParameters()[0].ParameterType );
                 },
-                @"((global::System.Reflection.MethodInfo)typeof(global::Origin<global::System.String>.NestedInOrigin<global::System.Single>).GetMethod(""Method21"", new[]{typeof(global::System.String)}))" );
+                @"((global::System.Reflection.MethodInfo)typeof(global::Origin<global::System.String>.NestedInOrigin<global::System.Single>).GetMethod(""Method21"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, new[]{typeof(global::System.String)}))" );
 
             this.TestSerializable(
                 instantiatedNested.Constructors.Single(),
@@ -102,12 +102,12 @@ class User {
                     Assert.Equal( typeof(float), c.DeclaringType.GenericTypeArguments[1] );
                     Assert.Equal( typeof(int), c.DeclaringType.BaseType!.GenericTypeArguments[0] );
                 },
-                @"((global::System.Reflection.ConstructorInfo)typeof(global::Origin<global::System.String>.NestedInOrigin<global::System.Single>).GetConstructor(new[]{}))" );
+                @"((global::System.Reflection.ConstructorInfo)typeof(global::Origin<global::System.String>.NestedInOrigin<global::System.Single>).GetConstructor(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, global::System.Type.EmptyTypes))" );
 
             this.TestSerializable(
                 ((INamedType) instantiatedNested.ContainingDeclaration!).Method( "Method" ),
                 m => Assert.Equal( typeof(string), m.ReturnType ),
-                @"((global::System.Reflection.MethodInfo)typeof(global::Origin<global::System.String>).GetMethod(""Method"", new[]{typeof(global::System.String)}))" );
+                @"((global::System.Reflection.MethodInfo)typeof(global::Origin<global::System.String>).GetMethod(""Method"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, new[]{typeof(global::System.String)}))" );
 
             this.TestSerializable(
                 instantiatedDescendant.Field( "Field" ),
@@ -150,7 +150,7 @@ class User {
                     Assert.Equal( "Actioned", e.Name );
                     Assert.Equal( typeof(Action<int>), e.EventHandlerType );
                 },
-                @"typeof(global::Origin<global::System.Int32>).GetEvent(""Actioned"")" );
+                @"typeof(global::Origin<global::System.Int32>).GetEvent(""Actioned"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance)" );
         }
 
         private void TestSerializable( IType type, Action<Type> withResult, string expectedCode )

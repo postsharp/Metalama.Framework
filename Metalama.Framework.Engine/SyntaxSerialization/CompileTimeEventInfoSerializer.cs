@@ -27,7 +27,12 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                         SyntaxKind.SimpleMemberAccessExpression,
                         typeCreation,
                         IdentifierName( "GetEvent" ) ) )
-                .AddArgumentListArguments( Argument( LiteralExpression( SyntaxKind.StringLiteralExpression, Literal( eventName ) ) ) )
+                .AddArgumentListArguments(
+                    Argument(
+                        LiteralExpression(
+                            SyntaxKind.StringLiteralExpression,
+                            Literal( eventName ) ) ),
+                    Argument( SyntaxUtility.CreateBindingFlags( @event, serializationContext ) ) )
                 .NormalizeWhitespace();
         }
 
