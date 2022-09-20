@@ -1,14 +1,19 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Compiler;
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.ReflectionMocks;
+using Metalama.Framework.RunTime;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Reflection;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
+using MethodBase = System.Reflection.MethodBase;
+using RefKind = Metalama.Framework.Code.RefKind;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization
 {
@@ -22,68 +27,162 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
             ICompileTimeReflectionObject<IMethodBase> method,
             SyntaxSerializationContext serializationContext )
             => SerializeMethodBase(
-                (IMethodSymbol) method.Target.GetSymbol( serializationContext.Compilation )
+                method.Target.GetTarget( serializationContext.CompilationModel )
                     .AssertNotNull( Justifications.SerializersNotImplementedForIntroductions ),
                 serializationContext );
 
-        internal static ExpressionSyntax SerializeMethodBase( IMethodSymbol methodSymbol, SyntaxSerializationContext serializationContext )
+        internal static ExpressionSyntax SerializeMethodBase( IMethodBase method, SyntaxSerializationContext serializationContext )
         {
-            return SerializeMethodBase( methodSymbol, methodSymbol.ContainingType, serializationContext );
+            return SerializeMethodBase( method, method.DeclaringType.GetSymbol(), serializationContext );
         }
 
         private static ExpressionSyntax SerializeMethodBase(
-            IMethodSymbol methodSymbol,
+            IMethodBase method,
             ITypeSymbol? declaringGenericTypeSymbol,
             SyntaxSerializationContext serializationContext )
         {
-            methodSymbol = methodSymbol.OriginalDefinition;
-            var documentationId = DocumentationCommentId.CreateDeclarationId( methodSymbol );
+            // The following is the old code that uses Intrinsics.
+            /*
+            var methodSymbol = method.GetOriginalDefinition().GetSymbol();
+            var documentationId = DocumentationCommentId.CreateDeclarationId( methodSymbol.AssertNotNull() );
             var methodToken = IntrinsicsCaller.CreateLdTokenExpression( nameof(Intrinsics.GetRuntimeMethodHandle), documentationId );
+            */
 
-            ExpressionSyntax invokeGetMethodFromHandle;
+            var typeCreation = TypeSerializationHelper.SerializeTypeSymbolRecursive( method.DeclaringType.GetSymbol(), serializationContext );
+            var allBindingFlags = SyntaxUtility.CreateBindingFlags( method, serializationContext );
+            var reflectionHelperTypeSyntax = serializationContext.SyntaxGenerator.Type( serializationContext.GetTypeSymbol( typeof(ReflectionHelper) ) );
 
-            if ( declaringGenericTypeSymbol is INamedTypeSymbol namedType && namedType.IsGenericType )
+            ExpressionSyntax parameterTypeArray;
+
+            if ( method.Parameters.Count > 0 )
             {
-                var typeHandle = CreateTypeHandleExpression( declaringGenericTypeSymbol, serializationContext );
+                var methodBaseParametersExpressions = method.Parameters.Select(
+                    p => p.RefKind != RefKind.None
+                        ? (ExpressionSyntax) InvocationExpression(
+                                MemberAccessExpression(
+                                    SyntaxKind.SimpleMemberAccessExpression,
+                                    serializationContext.SyntaxGenerator.TypeOfExpression( p.Type.GetSymbol() ),
+                                    IdentifierName( "MakeByRefType" ) ) )
+                            .AddArgumentListArguments()
+                        : serializationContext.SyntaxGenerator.TypeOfExpression( p.Type.GetSymbol() ) );
 
-                invokeGetMethodFromHandle = SyntaxFactory.InvocationExpression(
-                        SyntaxFactory.MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            serializationContext.GetTypeSyntax( typeof(MethodBase) ),
-                            SyntaxFactory.IdentifierName( "GetMethodFromHandle" ) ) )
-                    .AddArgumentListArguments( SyntaxFactory.Argument( methodToken ), SyntaxFactory.Argument( typeHandle ) );
+                parameterTypeArray = ImplicitArrayCreationExpression(
+                    InitializerExpression(
+                        SyntaxKind.ArrayInitializerExpression,
+                        SeparatedList( methodBaseParametersExpressions ) ) );
             }
             else
             {
-                invokeGetMethodFromHandle = SyntaxFactory.InvocationExpression(
-                        SyntaxFactory.MemberAccessExpression(
-                            SyntaxKind.SimpleMemberAccessExpression,
-                            serializationContext.GetTypeSyntax( typeof(MethodBase) ),
-                            SyntaxFactory.IdentifierName( "GetMethodFromHandle" ) ) )
-                    .AddArgumentListArguments( SyntaxFactory.Argument( methodToken ) );
+                parameterTypeArray = MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    serializationContext.SyntaxGenerator.Type( serializationContext.GetTypeSymbol( typeof(Type) ) ),
+                    IdentifierName( nameof(Type.EmptyTypes) ) );
+            }
+
+            ExpressionSyntax invokeGetMethod;
+
+            if ( method is IConstructor constructor )
+            {
+                if ( ReflectionSignatureBuilder.HasTypeArgument( constructor ) )
+                {
+                    invokeGetMethod = InvocationExpression(
+                            MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                reflectionHelperTypeSyntax,
+                                IdentifierName( nameof(ReflectionHelper.GetConstructor) ) ) )
+                        .AddArgumentListArguments(
+                            Argument( typeCreation ),
+                            Argument( allBindingFlags ),
+                            Argument(
+                                LiteralExpression(
+                                    SyntaxKind.StringLiteralExpression,
+                                    Literal( ReflectionSignatureBuilder.GetConstructorSignature( constructor ) ) ) ) );
+                }
+                else
+                {
+                    invokeGetMethod = InvocationExpression(
+                            MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                typeCreation,
+                                IdentifierName( "GetConstructor" ) ) )
+                        .AddArgumentListArguments(
+                            Argument( allBindingFlags ),
+                            Argument(
+                                LiteralExpression(
+                                    SyntaxKind.NullLiteralExpression ) ),
+                            Argument( parameterTypeArray ),
+                            Argument(
+                                LiteralExpression(
+                                    SyntaxKind.NullLiteralExpression ) ) );
+                }
+            }
+            else
+            {
+                if ( ReflectionSignatureBuilder.HasTypeArgument( (IMethod) method ) )
+                {
+                    invokeGetMethod = InvocationExpression(
+                            MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                reflectionHelperTypeSyntax,
+                                IdentifierName( nameof(ReflectionHelper.GetMethod) ) ) )
+                        .AddArgumentListArguments(
+                            Argument( typeCreation ),
+                            Argument(
+                                LiteralExpression(
+                                    SyntaxKind.StringLiteralExpression,
+                                    Literal( method.Name ) ) ),
+                            Argument( allBindingFlags ),
+                            Argument(
+                                LiteralExpression(
+                                    SyntaxKind.StringLiteralExpression,
+                                    Literal( ReflectionSignatureBuilder.GetMethodSignature( (IMethod) method ) ) ) ) );
+                }
+                else
+                {
+                    invokeGetMethod = InvocationExpression(
+                            MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                typeCreation,
+                                IdentifierName( "GetMethod" ) ) )
+                        .AddArgumentListArguments(
+                            Argument(
+                                LiteralExpression(
+                                    SyntaxKind.StringLiteralExpression,
+                                    Literal( method.Name ) ) ),
+                            Argument( allBindingFlags ),
+                            Argument(
+                                LiteralExpression(
+                                    SyntaxKind.NullLiteralExpression ) ),
+                            Argument( parameterTypeArray ),
+                            Argument(
+                                LiteralExpression(
+                                    SyntaxKind.NullLiteralExpression ) ) );
+                }
             }
 
             if ( serializationContext.CompilationModel.Project.PreprocessorSymbols.Contains( "NET" ) )
             {
                 // In the new .NET, the API is marked for nullability, so we have to suppress the warning.
-                invokeGetMethodFromHandle = SyntaxFactory.PostfixUnaryExpression( SyntaxKind.SuppressNullableWarningExpression, invokeGetMethodFromHandle );
+                invokeGetMethod = PostfixUnaryExpression( SyntaxKind.SuppressNullableWarningExpression, invokeGetMethod );
             }
 
-            return invokeGetMethodFromHandle
-                .NormalizeWhitespace();
+            return invokeGetMethod.NormalizeWhitespace();
         }
 
+        // The following is the old code that was used alongside Intrinsics.
+        /*
         private static ExpressionSyntax CreateTypeHandleExpression( ITypeSymbol type, SyntaxSerializationContext serializationContext )
         {
             var typeExpression = TypeSerializationHelper.SerializeTypeSymbolRecursive( type, serializationContext );
 
-            ExpressionSyntax typeHandle = SyntaxFactory.MemberAccessExpression(
+            ExpressionSyntax typeHandle = MemberAccessExpression(
                 SyntaxKind.SimpleMemberAccessExpression,
                 typeExpression,
-                SyntaxFactory.IdentifierName( "TypeHandle" ) );
+                IdentifierName( "TypeHandle" ) );
 
             return typeHandle;
         }
+        */
 
         public override ImmutableArray<Type> AdditionalSupportedTypes => ImmutableArray.Create( typeof(MemberInfo), typeof(MethodBase) );
     }

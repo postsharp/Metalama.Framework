@@ -6,6 +6,7 @@ using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.References;
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis.CSharp;
@@ -94,14 +95,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
         }
 
-        public ConstructorInfo ToConstructorInfo()
-        {
-            throw new NotImplementedException();
-        }
+        public ConstructorInfo ToConstructorInfo() => CompileTimeConstructorInfo.Create( this );
 
-        public System.Reflection.MethodBase ToMethodBase()
-        {
-            throw new NotImplementedException();
-        }
+        public System.Reflection.MethodBase ToMethodBase() => this.ToConstructorInfo();
     }
 }

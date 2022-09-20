@@ -7,6 +7,7 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis.CSharp;
@@ -50,7 +51,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public IMethod? OverriddenMethod { get; set; }
 
-        public MethodInfo ToMethodInfo() => throw new NotImplementedException();
+        public MethodInfo ToMethodInfo() => CompileTimeMethodInfo.Create( this );
 
         IMemberWithAccessors? IMethod.DeclaringMember => null;
 

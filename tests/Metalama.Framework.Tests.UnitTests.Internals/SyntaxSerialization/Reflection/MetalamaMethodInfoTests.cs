@@ -18,7 +18,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeTargetDotMethod( code );
 
             Assert.Equal(
-                "((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(\"M:Target.Method~System.Int32\")))",
+                @"((global::System.Reflection.MethodInfo)typeof(global::Target).GetMethod(""Method"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static, null, global::System.Type.EmptyTypes, null))",
                 serialized );
 
             this.TestExpression<MethodInfo>(
@@ -39,7 +39,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeTargetDotMethod( code );
 
             Assert.Equal(
-                "((global::System.Reflection.MethodInfo)global::System.Reflection.MethodBase.GetMethodFromHandle(global::Metalama.Compiler.Intrinsics.GetRuntimeMethodHandle(\"M:Target.Method``1(``0)~``0\")))",
+                @"((global::System.Reflection.MethodInfo)global::Metalama.Framework.RunTime.ReflectionHelper.GetMethod(typeof(global::Target), ""Method"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static, ""T Method[T](T)""))",
                 serialized );
 
             this.TestExpression<MethodInfo>(
@@ -50,6 +50,27 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
                     Assert.Equal( "Target", info.DeclaringType!.Name );
                     Assert.Equal( "Method", info.Name );
                     Assert.Equal( 42, info.MakeGenericMethod( typeof(int) ).Invoke( null, new object[] { 21 } ) );
+                } );
+        }
+
+        [Fact]
+        public void TestMethodWithOutParameter()
+        {
+            var code = "class Target { public static int Method( out int x) { x = 100; return 42;  } }";
+            var serialized = this.SerializeTargetDotMethod( code );
+
+            Assert.Equal(
+                @"((global::System.Reflection.MethodInfo)typeof(global::Target).GetMethod(""Method"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static, null, new[]{typeof(global::System.Int32).MakeByRefType()}, null))",
+                serialized );
+
+            this.TestExpression<MethodInfo>(
+                code,
+                serialized,
+                info =>
+                {
+                    Assert.Equal( "Target", info.DeclaringType!.Name );
+                    Assert.Equal( "Method", info.Name );
+                    Assert.Equal( 42, info.Invoke( null, Array.Empty<object>() ) );
                 } );
         }
 

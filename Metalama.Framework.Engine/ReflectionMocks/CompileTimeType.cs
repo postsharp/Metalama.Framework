@@ -50,7 +50,7 @@ namespace Metalama.Framework.Engine.ReflectionMocks
             return new CompileTimeType( Ref.FromSymbolId<IType>( symbolId ), fullMetadataName );
         }
 
-        // For test only. This is also used from serializers but these used should be removed when serializers will stop using symbols.
+        // For test only.
         internal static Type Create( IType type )
         {
             return Create( type.GetSymbol(), type.GetCompilationModel().RoslynCompilation );

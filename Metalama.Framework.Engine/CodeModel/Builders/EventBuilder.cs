@@ -7,6 +7,7 @@ using Metalama.Framework.Code.Invokers;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.CodeModel.Invokers;
 using Metalama.Framework.Engine.Linking;
+using Metalama.Framework.Engine.ReflectionMocks;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis.CSharp;
@@ -175,7 +176,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
             }
         }
 
-        public EventInfo ToEventInfo() => throw new NotImplementedException();
+        public EventInfo ToEventInfo() => CompileTimeEventInfo.Create( this );
 
         public void SetExplicitInterfaceImplementation( IEvent interfaceEvent ) => this.ExplicitInterfaceImplementations = new[] { interfaceEvent };
 
