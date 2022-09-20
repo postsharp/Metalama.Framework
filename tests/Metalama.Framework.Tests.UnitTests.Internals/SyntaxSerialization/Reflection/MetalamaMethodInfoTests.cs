@@ -18,7 +18,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeTargetDotMethod( code );
 
             Assert.Equal(
-                @"((global::System.Reflection.MethodInfo)typeof(global::Target).GetMethod(""Method"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static, global::System.Type.EmptyTypes))",
+                @"((global::System.Reflection.MethodInfo)typeof(global::Target).GetMethod(""Method"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static, null, global::System.Type.EmptyTypes, null))",
                 serialized );
 
             this.TestExpression<MethodInfo>(
@@ -60,7 +60,7 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection
             var serialized = this.SerializeTargetDotMethod( code );
 
             Assert.Equal(
-                @"((global::System.Reflection.MethodInfo)typeof(global::Target).GetMethod(""Method"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static, new[]{typeof(global::System.Int32).MakeByRefType()}))",
+                @"((global::System.Reflection.MethodInfo)typeof(global::Target).GetMethod(""Method"", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Static, null, new[]{typeof(global::System.Int32).MakeByRefType()}, null))",
                 serialized );
 
             this.TestExpression<MethodInfo>(

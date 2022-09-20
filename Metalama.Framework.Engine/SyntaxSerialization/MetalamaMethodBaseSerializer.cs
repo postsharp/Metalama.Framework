@@ -108,7 +108,13 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                                 IdentifierName( "GetConstructor" ) ) )
                         .AddArgumentListArguments(
                             Argument( allBindingFlags ),
-                            Argument( parameterTypeArray ) );
+                            Argument(
+                                LiteralExpression(
+                                    SyntaxKind.NullLiteralExpression ) ),
+                            Argument( parameterTypeArray ),
+                            Argument(
+                                LiteralExpression(
+                                    SyntaxKind.NullLiteralExpression ) ) );
                 }
             }
             else
@@ -145,7 +151,13 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                                     SyntaxKind.StringLiteralExpression,
                                     Literal( method.Name ) ) ),
                             Argument( allBindingFlags ),
-                            Argument( parameterTypeArray ) );
+                            Argument(
+                                LiteralExpression(
+                                    SyntaxKind.NullLiteralExpression ) ),
+                            Argument( parameterTypeArray ),
+                            Argument(
+                                LiteralExpression(
+                                    SyntaxKind.NullLiteralExpression ) ) );
                 }
             }
 
