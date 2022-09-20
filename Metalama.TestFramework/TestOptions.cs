@@ -243,6 +243,8 @@ namespace Metalama.TestFramework
         /// To enable this option in a test, add this comment to your test file: <c>// @RequireOrderedAspects</c>. 
         /// </summary>
         public bool? RequireOrderedAspects { get; set; }
+        
+        public bool? EnableLogging { get; set; }
 
         /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
@@ -306,6 +308,8 @@ namespace Metalama.TestFramework
             this.DependencyLicenseFile ??= baseOptions.DependencyLicenseFile;
 
             this.RequireOrderedAspects ??= baseOptions.RequireOrderedAspects;
+
+            this.EnableLogging ??= baseOptions.EnableLogging;
         }
 
         public IReadOnlyList<string> InvalidSourceOptions => this._invalidSourceOptions;
@@ -506,6 +510,11 @@ namespace Metalama.TestFramework
 
                     case "RequireOrderedAspects":
                         this.RequireOrderedAspects = true;
+
+                        break;
+                    
+                    case "EnableLogging":
+                        this.EnableLogging = true;
 
                         break;
 

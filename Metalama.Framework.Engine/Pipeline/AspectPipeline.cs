@@ -86,7 +86,7 @@ namespace Metalama.Framework.Engine.Pipeline
 
                 if ( serviceProvider.GetService<ITaskScheduler>() == null )
                 {
-                    this.ServiceProvider = this.ServiceProvider.WithService( new SingleThreadedTaskScheduler( true ) );
+                    this.ServiceProvider = this.ServiceProvider.WithService( new RandomizingSingleThreadedTaskScheduler( serviceProvider ) );
                 }
 
                 this.ServiceProvider = this.ServiceProvider
@@ -96,7 +96,7 @@ namespace Metalama.Framework.Engine.Pipeline
             else
             {
                 this.ServiceProvider = this.ServiceProvider
-                    .WithService( this.ProjectOptions.IsConcurrentBuildEnabled ? new ConcurrentTaskScheduler() : new SingleThreadedTaskScheduler( false ) )
+                    .WithService( this.ProjectOptions.IsConcurrentBuildEnabled ? new ConcurrentTaskScheduler() : new SingleThreadedTaskScheduler() )
                     .WithServices( executionScenario );
             }
 

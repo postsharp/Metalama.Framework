@@ -64,7 +64,11 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
             // Create the linker input.
             var linkerInput = builder.ToAspectLinkerInput( PartialCompilation.CreateComplete( testResult.InputCompilation.AssertNotNull() ) );
-            var linker = new AspectLinker( testResult.ProjectScopedServiceProvider.WithService( new SingleThreadedTaskScheduler( true ) ), linkerInput );
+
+            var linker = new AspectLinker(
+                testResult.ProjectScopedServiceProvider.WithService( new RandomizingSingleThreadedTaskScheduler( this.BaseServiceProvider ) ),
+                linkerInput );
+
             var result = await linker.ExecuteAsync( CancellationToken.None );
 
             var linkedCompilation = result.Compilation;

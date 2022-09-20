@@ -2,7 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -10,26 +9,11 @@ namespace Metalama.Framework.Engine.Utilities.Threading;
 
 public class SingleThreadedTaskScheduler : ITaskScheduler
 {
-    private readonly bool _randomize;
-
-    public SingleThreadedTaskScheduler( bool randomize = false )
-    {
-        this._randomize = randomize;
-    }
+    public SingleThreadedTaskScheduler() { }
 
     public Task RunInParallelAsync<T>( IEnumerable<T> items, Action<T> action, CancellationToken cancellationToken )
     {
-        IEnumerable<T> orderedItems;
-
-        if ( this._randomize )
-        {
-            var random = new Random();
-            orderedItems = items.ToDictionary( a => a, _ => random.NextDouble() ).OrderBy( p => p.Value ).Select( p => p.Key );
-        }
-        else
-        {
-            orderedItems = items;
-        }
+        var orderedItems = this.GetOrderedItems( items );
 
         try
         {
@@ -45,4 +29,6 @@ public class SingleThreadedTaskScheduler : ITaskScheduler
             return Task.FromException( e );
         }
     }
+
+    protected virtual IEnumerable<T> GetOrderedItems<T>( IEnumerable<T> items ) => items;
 }
