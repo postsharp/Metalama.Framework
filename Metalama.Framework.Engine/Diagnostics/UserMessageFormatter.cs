@@ -24,11 +24,6 @@ namespace Metalama.Framework.Engine.Diagnostics
 
         public string Format( string? format, object? arg, IFormatProvider? formatProvider )
         {
-            if ( string.IsNullOrEmpty( format ) )
-            {
-                return "";
-            }
-
             try
             {
                 switch ( arg )

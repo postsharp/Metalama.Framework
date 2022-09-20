@@ -85,7 +85,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         }
 
                         var typeArguments = CollectTypeArguments( genericType )
-                            .Select( arg => this.GetCompileTimeType( arg, false, cancellationToken ).AssertNotNull() )
+                            .Select( arg => this.GetCompileTimeType( arg, false, cancellationToken ) )
                             .ToArray();
 
                         if ( typeArguments.Contains( null ) )
@@ -93,7 +93,7 @@ namespace Metalama.Framework.Engine.CompileTime
                             return null;
                         }
 
-                        return typeDefinition.MakeGenericType( typeArguments );
+                        return typeDefinition.MakeGenericType( typeArguments! );
                     }
 
                 case INamedTypeSymbol namedType:
