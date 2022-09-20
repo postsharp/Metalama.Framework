@@ -151,16 +151,16 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
         }
 
         [Fact]
-        public void SeveralModifications_Partial()
+        public async Task SeveralModifications_Partial()
         {
             var code = new Dictionary<string, string> { ["Class1.cs"] = "/* Intentionally empty */" };
 
             var compilation = CreateCSharpCompilation( code );
 
-            ApplySeveralModifications( PartialCompilation.CreatePartial( compilation, compilation.SyntaxTrees[0] ) );
+            await ApplySeveralModifications( PartialCompilation.CreatePartial( compilation, compilation.SyntaxTrees[0] ) );
         }
 
-        private async Task ApplySeveralModifications( PartialCompilation partialCompilation1 )
+        private static async Task ApplySeveralModifications( PartialCompilation partialCompilation1 )
         {
             var initialCompilation = partialCompilation1.InitialCompilation;
             
@@ -192,13 +192,13 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
         }
 
         [Fact]
-        public void SeveralModifications_Complete()
+        public async Task SeveralModifications_Complete()
         {
             var code = new Dictionary<string, string> { ["Class1.cs"] = "/* Intentionally empty */" };
 
             var compilation = CreateCSharpCompilation( code );
 
-            ApplySeveralModifications( PartialCompilation.CreateComplete( compilation ) );
+            await ApplySeveralModifications( PartialCompilation.CreateComplete( compilation ) );
         }
 
         private class Rewriter : SafeSyntaxRewriter

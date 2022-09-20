@@ -244,6 +244,10 @@ namespace Metalama.TestFramework
         /// </summary>
         public bool? RequireOrderedAspects { get; set; }
         
+        /// <summary>
+        /// Gets or sets a value indicating whether Metalama should produce logs and output them to the Xunit test log.
+        /// To enable this option in a test, add this comment to your test file: <c>// @EnableLogging</c>. 
+        /// </summary>
         public bool? EnableLogging { get; set; }
 
         /// <summary>
