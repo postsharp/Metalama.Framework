@@ -27,8 +27,7 @@ public class LiveTemplateAspectPipeline : AspectPipeline
         ServiceProvider serviceProvider,
         CompileTimeDomain domain,
         Func<AspectPipelineConfiguration, IAspectClass> aspectSelector,
-        ISymbol targetSymbol,
-        bool computingPreview ) : base( serviceProvider, computingPreview ? ExecutionScenario.LiveTemplatePreview : ExecutionScenario.LiveTemplate, false, domain )
+        ISymbol targetSymbol ) : base( serviceProvider, ExecutionScenario.LiveTemplate, false, domain )
     {
         this._aspectSelector = aspectSelector;
         this._targetSymbol = targetSymbol;
@@ -51,12 +50,11 @@ public class LiveTemplateAspectPipeline : AspectPipeline
         Func<AspectPipelineConfiguration, IAspectClass> aspectSelector,
         PartialCompilation inputCompilation,
         ISymbol targetSymbol,
-        bool computingPreview,
         IDiagnosticAdder diagnosticAdder,
         CancellationToken cancellationToken,
         [NotNullWhen( true )] out PartialCompilation? outputCompilation )
     {
-        LiveTemplateAspectPipeline pipeline = new( serviceProvider, domain, aspectSelector, targetSymbol, computingPreview );
+        LiveTemplateAspectPipeline pipeline = new( serviceProvider, domain, aspectSelector, targetSymbol );
 
         if ( !pipeline.TryExecute( inputCompilation, diagnosticAdder, pipelineConfiguration, cancellationToken, out var result ) )
         {

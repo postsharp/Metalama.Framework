@@ -544,7 +544,6 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 x => x.AspectClasses.Single( c => c.FullName == aspectTypeName ),
                 partialCompilation,
                 sourceSymbol,
-                computingPreview,
                 diagnosticList,
                 cancellationToken,
                 out outputCompilation );

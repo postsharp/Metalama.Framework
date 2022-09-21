@@ -16,38 +16,30 @@ namespace Metalama.Framework.Engine.CodeModel
 
         public bool CapturesCodeFixTitles { get; }
 
-        public bool RequiresLicense { get; }
+        public static IExecutionScenario DesignTime { get; } = new ExecutionScenario( nameof(DesignTime), true, false, true, false );
 
-        public static IExecutionScenario DesignTime { get; } = new ExecutionScenario( nameof( DesignTime ), true, false, true, false, false );
+        public static IExecutionScenario Preview { get; } = new ExecutionScenario( nameof(Preview), true, true, false, false );
 
-        public static IExecutionScenario Preview { get; } = new ExecutionScenario( nameof( Preview ), true, true, false, false, false );
+        public static IExecutionScenario LiveTemplate { get; } = new ExecutionScenario( nameof(LiveTemplate), true, true, false, false );
 
-        public static IExecutionScenario LiveTemplate { get; } = new ExecutionScenario( nameof( LiveTemplate ), true, true, false, false, true );
+        public static IExecutionScenario CompileTime { get; } = new ExecutionScenario( nameof(CompileTime), false, true, false, false );
 
-        public static IExecutionScenario LiveTemplatePreview { get; } = new ExecutionScenario( nameof( LiveTemplatePreview ), true, true, false, false, false );
+        public static IExecutionScenario CodeFix { get; } = new ExecutionScenario( nameof(CodeFix), true, false, true, true );
 
-        public static IExecutionScenario CompileTime { get; } = new ExecutionScenario( nameof( CompileTime ), false, true, false, false, true );
-
-        public static IExecutionScenario CodeFix { get; } = new ExecutionScenario( nameof( CodeFix ), true, false, true, true, true );
-
-        public static IExecutionScenario CodeFixPreview { get; } = new ExecutionScenario( nameof( CodeFixPreview ), true, false, true, true, false );
-
-        public static IExecutionScenario Introspection { get; } = new ExecutionScenario( nameof( Introspection ), false, true, true, false, false );
+        public static IExecutionScenario Introspection { get; } = new ExecutionScenario( nameof(Introspection), false, true, true, false );
 
         private ExecutionScenario(
             string name,
             bool isDesignTime,
             bool capturesNonObservableTransformations,
             bool capturesCodeFixTitles,
-            bool capturesCodeFixImplementations,
-            bool requiresLicense )
+            bool capturesCodeFixImplementations )
         {
             this.Name = name;
             this.IsDesignTime = isDesignTime;
             this.CapturesNonObservableTransformations = capturesNonObservableTransformations;
             this.CapturesCodeFixImplementations = capturesCodeFixImplementations;
             this.CapturesCodeFixTitles = capturesCodeFixTitles;
-            this.RequiresLicense = requiresLicense;
         }
     }
 }

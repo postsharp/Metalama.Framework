@@ -60,7 +60,7 @@ namespace Metalama.Framework.Engine.CodeFixes
                 return CodeActionResult.Empty;
             }
 
-            return await this.ExecuteCodeFixAsync( compilation, syntaxTree, diagnostic.Id, diagnostic.Location.SourceSpan, codeFixTitle, computingPreview, cancellationToken );
+            return await this.ExecuteCodeFixAsync( compilation, syntaxTree, diagnostic.Id, diagnostic.Location.SourceSpan, codeFixTitle, cancellationToken );
         }
 
         public async Task<CodeActionResult> ExecuteCodeFixAsync(
@@ -69,7 +69,6 @@ namespace Metalama.Framework.Engine.CodeFixes
             string diagnosticId,
             TextSpan diagnosticSpan,
             string codeFixTitle,
-            bool computingPreview,
             CancellationToken cancellationToken )
         {
             // Get a compilation _without_ generated code, and map the target symbol.
@@ -89,7 +88,6 @@ namespace Metalama.Framework.Engine.CodeFixes
             // Execute the compile-time pipeline with the design-time project configuration.
             var codeFixPipeline = new CodeFixPipeline(
                 serviceProvider,
-                computingPreview,
                 false,
                 domain,
                 diagnosticId,
@@ -123,8 +121,8 @@ namespace Metalama.Framework.Engine.CodeFixes
                 // but in this case this would also be confusing for the end user.
                 return CodeActionResult.Empty;
             }
-
-            var context = new CodeActionContext( partialCompilation, designTimeConfiguration!, computingPreview, cancellationToken );
+            
+            var context = new CodeActionContext( partialCompilation, designTimeConfiguration!, cancellationToken );
 
             var codeFixBuilder = new CodeActionBuilder( context );
 

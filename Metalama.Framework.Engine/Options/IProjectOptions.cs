@@ -80,5 +80,14 @@ namespace Metalama.Framework.Engine.Options
         bool RequiresCodeCoverageAnnotations { get; }
 
         bool AllowPreviewLanguageFeatures { get; }
+
+        /// <summary>
+        /// Additional license. In production, the value gets populated from <c>MetalamaLicense</c> MSBuild property.
+        /// </summary>
+        /// <remarks>
+        /// This value is used in design-time. In compile-time, the license consumption manager comes from
+        /// Metalama.Compiler, which already has the additional license set.
+        /// </remarks>
+        string? AdditionalLicense { get; }
     }
 }

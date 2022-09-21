@@ -104,7 +104,7 @@ internal class LicenseVerifier : IService
             .Where( c => c.Project != null )
             .Select( c => c.Project! )
             .Distinct()
-            .Where( p => IsProjectWithValidRedistributionLicense( p ) )
+            .Where( IsProjectWithValidRedistributionLicense )
             .ToHashSet();
 
         nonRedistributionAspectClasses.RemoveWhere(

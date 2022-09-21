@@ -22,6 +22,8 @@ namespace Metalama.Framework.Engine.Diagnostics
     {
         private readonly DiagnosticManifest? _diagnosticManifest;
         private readonly CodeFixFilter _codeFixFilter;
+        private readonly string? _sourceAssemblyName;
+        private readonly string? _sourceRedistributionLicenseKey;
         private ImmutableArray<Diagnostic>.Builder? _diagnostics;
         private ImmutableArray<ScopedSuppression>.Builder? _suppressions;
         private ImmutableArray<CodeFixInstance>.Builder? _codeFixes;
@@ -55,6 +57,8 @@ namespace Metalama.Framework.Engine.Diagnostics
         {
             this._diagnosticManifest = compileTimeProject?.ClosureDiagnosticManifest;
             this._codeFixFilter = codeFixFilter ?? (( _, _ ) => false);
+            this._sourceRedistributionLicenseKey = compileTimeProject?.ProjectLicenseInfo.RedistributionLicenseKey;
+            this._sourceAssemblyName = compileTimeProject?.RunTimeIdentity.Name;
         }
 
         // This overload is used for tests only.
@@ -90,11 +94,11 @@ namespace Metalama.Framework.Engine.Diagnostics
         /// <summary>
         /// Returns a string containing all code fix titles and captures the code fixes if we should.  
         /// </summary>
-        private CodeFixTitles ProcessCodeFix( IDiagnosticDefinition diagnosticDefinition, Location? location, ImmutableArray<CodeFix> codeFixes )
+        private CodeFixDiagnosticInfo ProcessCodeFix( IDiagnosticDefinition diagnosticDefinition, Location? location, ImmutableArray<CodeFix> codeFixes )
         {
             if ( !codeFixes.IsDefaultOrEmpty )
             {
-                // This code implements an optimization to allow allocating a StringBuilder if there is a single code fix. 
+                // This code implements an optimization to avoid allocating a StringBuilder if there is a single code fix. 
                 string? firstTitle = null;
                 StringBuilder? stringBuilder = null;
 
@@ -122,12 +126,12 @@ namespace Metalama.Framework.Engine.Diagnostics
                         }
 
                         // This gets executed for all code fixes but the first one.
-                        stringBuilder.Append( CodeFixTitles.Separator );
+                        stringBuilder.Append( CodeFixDiagnosticInfo.Separator );
                         stringBuilder.Append( codeFix.Title );
                     }
                 }
 
-                return new CodeFixTitles( stringBuilder?.ToString() ?? firstTitle );
+                return new CodeFixDiagnosticInfo( stringBuilder?.ToString() ?? firstTitle, this._sourceAssemblyName, this._sourceRedistributionLicenseKey );
             }
             else
             {
@@ -182,9 +186,9 @@ namespace Metalama.Framework.Engine.Diagnostics
             this.ValidateUserReport( diagnostic.Definition );
 
             var resolvedLocation = GetLocation( location );
-            var codeFixTitles = this.ProcessCodeFix( diagnostic.Definition, resolvedLocation, diagnostic.CodeFixes );
+            var codeFixDiagnosticInfo = this.ProcessCodeFix( diagnostic.Definition, resolvedLocation, diagnostic.CodeFixes );
 
-            this.Report( diagnostic.Definition.CreateRoslynDiagnosticImpl( resolvedLocation, diagnostic.Arguments, codeFixes: codeFixTitles ) );
+            this.Report( diagnostic.Definition.CreateRoslynDiagnosticImpl( resolvedLocation, diagnostic.Arguments, codeFixes: codeFixDiagnosticInfo ) );
         }
 
         public void Suppress( SuppressionDefinition suppression, IDeclaration scope )
@@ -197,9 +201,9 @@ namespace Metalama.Framework.Engine.Diagnostics
         {
             var definition = GeneralDiagnosticDescriptors.SuggestedCodeFix;
             var resolvedLocation = GetLocation( location );
-            var codeFixTitles = this.ProcessCodeFix( definition, resolvedLocation, ImmutableArray.Create( codeFix ) );
+            var codeFixDiagnosticInfo = this.ProcessCodeFix( definition, resolvedLocation, ImmutableArray.Create( codeFix ) );
 
-            this.Report( definition.CreateRoslynDiagnostic( resolvedLocation, codeFixTitles.Value!, codeFixes: codeFixTitles ) );
+            this.Report( definition.CreateRoslynDiagnostic( resolvedLocation, codeFixDiagnosticInfo.Titles!, codeFixes: codeFixDiagnosticInfo ) );
         }
 
         public void AddCodeFixes( IEnumerable<CodeFixInstance> codeFixes )

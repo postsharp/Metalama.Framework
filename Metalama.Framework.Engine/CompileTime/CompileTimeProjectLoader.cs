@@ -1,7 +1,10 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Options;
+using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Templating.Mapping;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
@@ -229,9 +232,17 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
                 return this.TryGetCompileTimeProjectFromPath( filePath, diagnosticSink, cancellationToken, out referencedProject );
 
             case CompilationReference compilationReference:
+                var partialCompilation = PartialCompilation.CreateComplete( compilationReference.Compilation );
+
+                this._serviceProvider.GetRequiredService<IAspectPipelineConfigurationProvider>()
+                    .TryGetConfiguration( partialCompilation, diagnosticSink, cancellationToken, out var referenceConfiguration );
+
+                // TODO: Using the project directly breaks the pipeline.
+                referencedProject = referenceConfiguration.ServiceProvider.GetRequiredService<CompileTimeProject>();
+
                 return this.TryGetCompileTimeProjectFromCompilation(
                     compilationReference.Compilation,
-                    null,
+                    referencedProject.ProjectLicenseInfo,
                     null,
                     diagnosticSink,
                     cacheOnly,
@@ -386,7 +397,9 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
                 syntaxTrees,
                 manifest.SourceHash,
                 referenceProjects,
-                string.IsNullOrEmpty( manifest.RedistributionLicenseKey ) ? null : new ProjectLicenseInfo( manifest.RedistributionLicenseKey ),
+                string.IsNullOrEmpty( manifest.RedistributionLicenseKey )
+                    ? null
+                    : new ProjectLicenseInfo( runTimeAssemblyIdentity.Name, manifest.RedistributionLicenseKey ),
                 diagnosticAdder,
                 cancellationToken,
                 out var assemblyPath,

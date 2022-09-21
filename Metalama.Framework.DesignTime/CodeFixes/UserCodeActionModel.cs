@@ -19,7 +19,14 @@ internal class UserCodeActionModel : CodeActionModel
         this.SyntaxTreeFilePath = null!;
     }
 
-    public UserCodeActionModel( string title, Diagnostic diagnostic ) : base( title )
+    public UserCodeActionModel(
+        string title,
+        Diagnostic diagnostic,
+        string? sourceAssemblyName,
+        string? sourceRedistributionLicenseKey ) : base(
+        title,
+        sourceAssemblyName,
+        sourceRedistributionLicenseKey )
     {
         this.DiagnosticId = diagnostic.Id;
         this.DiagnosticSpan = diagnostic.Location.SourceSpan;
@@ -63,6 +70,6 @@ internal class UserCodeActionModel : CodeActionModel
 
         var codeFixRunner = new DesignTimeCodeFixRunner( executionContext.ServiceProvider );
 
-        return await codeFixRunner.ExecuteCodeFixAsync( compilation, syntaxTree, this.DiagnosticId, this.DiagnosticSpan, this.Title, executionContext.ComputingPreview, cancellationToken );
+        return await codeFixRunner.ExecuteCodeFixAsync( compilation, syntaxTree, this.DiagnosticId, this.DiagnosticSpan, this.Title, cancellationToken );
     }
 }

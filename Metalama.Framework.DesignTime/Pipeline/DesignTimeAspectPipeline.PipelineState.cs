@@ -2,6 +2,7 @@
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.Diagnostics;
+using Metalama.Framework.DesignTime.Licensing;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Aspects;
@@ -12,6 +13,7 @@ using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Engine.Validation;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
@@ -304,10 +306,14 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                     var compileTimeTrees = GetCompileTimeSyntaxTrees( ref state, compilation.Compilation, cancellationToken );
 
+                    var licenseVerifier = state._pipeline.ServiceProvider.GetRequiredService<DesignTimeLicenseVerifier>();
+                    var redistributionLicenseKey = licenseVerifier?.RedistributionLicenseKey;
+                    var projectLicenseInfo = string.IsNullOrEmpty( redistributionLicenseKey ) ? ProjectLicenseInfo.Empty : new ProjectLicenseInfo( redistributionLicenseKey );
+                    
                     if ( !state._pipeline.TryInitialize(
                             diagnosticAdder,
                             compilation,
-                            null, // Redistribution licenses are ignored at design time.
+                            projectLicenseInfo,
                             compileTimeTrees,
                             cancellationToken,
                             out configuration ) )

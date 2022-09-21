@@ -28,8 +28,14 @@ internal class AddAspectAttributeCodeActionModel : CodeActionModel
     /// </summary>
     public string SyntaxTreeFilePath { get; set; }
 
-    public AddAspectAttributeCodeActionModel( string aspectTypeName, SymbolId targetSymbolId, string syntaxTreeFilePath ) : base(
-        $"Add [{AttributeHelper.GetShortName( aspectTypeName )}]" )
+    public AddAspectAttributeCodeActionModel(
+        string aspectTypeName,
+        SymbolId targetSymbolId,
+        string syntaxTreeFilePath,
+        string? sourceRedistributionLicenseKey ) : base(
+        $"Add [{AttributeHelper.GetShortName( aspectTypeName )}]",
+        aspectTypeName,
+        sourceRedistributionLicenseKey )
     {
         this.AspectTypeName = aspectTypeName;
         this.TargetSymbolId = targetSymbolId;

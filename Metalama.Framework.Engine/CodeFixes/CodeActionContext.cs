@@ -31,19 +31,15 @@ namespace Metalama.Framework.Engine.CodeFixes
 
         public AspectPipelineConfiguration PipelineConfiguration { get; }
 
-        internal bool ComputingPreview { get; }
-
         public CancellationToken CancellationToken { get; }
 
         public CodeActionContext(
             PartialCompilation compilation,
             AspectPipelineConfiguration pipelineConfiguration,
-            bool computingPreview,
             CancellationToken cancellationToken )
         {
             this.Compilation = compilation;
             this.PipelineConfiguration = pipelineConfiguration;
-            this.ComputingPreview = computingPreview;
             this.CancellationToken = cancellationToken;
         }
 

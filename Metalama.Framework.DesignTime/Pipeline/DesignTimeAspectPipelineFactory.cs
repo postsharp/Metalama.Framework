@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Framework.DesignTime.Licensing;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
@@ -79,7 +80,12 @@ namespace Metalama.Framework.DesignTime.Pipeline
                         return pipeline;
                     }
 
-                    var serviceProvider = ServiceProviderFactory.GetServiceProvider().WithServices( projectOptions, this );
+                    var serviceProvider = ServiceProviderFactory.GetServiceProvider()
+                        .WithServices( projectOptions, this );
+
+                    serviceProvider = serviceProvider
+                        .WithService( new DesignTimeLicenseVerifier( serviceProvider ) );
+                    
                     pipeline = new DesignTimeAspectPipeline( serviceProvider, this.Domain, compilation.References, this._isTest );
                     pipeline.PipelineResumed += this.OnPipelineResumed;
                     pipeline.StatusChanged += this.OnPipelineStatusChanged;

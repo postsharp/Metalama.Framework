@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.Diagnostics
             Location? location,
             T arguments,
             IEnumerable<Location>? additionalLocations = null,
-            CodeFixTitles codeFixes = default,
+            CodeFixDiagnosticInfo codeFixes = default,
             ImmutableDictionary<string, string?>? properties = null )
             where T : notnull
         {
@@ -48,7 +48,7 @@ namespace Metalama.Framework.Engine.Diagnostics
             Location? location,
             object? arguments,
             IEnumerable<Location>? additionalLocations = null,
-            CodeFixTitles codeFixes = default,
+            CodeFixDiagnosticInfo codeFixes = default,
             ImmutableDictionary<string, string?>? properties = null )
         {
             var argumentArray = ConvertDiagnosticArguments( arguments );
@@ -86,15 +86,23 @@ namespace Metalama.Framework.Engine.Diagnostics
             Location? location,
             object?[] arguments,
             IEnumerable<Location>? additionalLocations,
-            CodeFixTitles codeFixes = default,
+            CodeFixDiagnosticInfo codeFixes = default,
             ImmutableDictionary<string, string?>? properties = null )
         {
             var propertiesWithCodeFixes = properties;
 
-            if ( codeFixes.Value != null )
+            if ( codeFixes.Titles != null )
             {
                 propertiesWithCodeFixes ??= ImmutableDictionary.Create<string, string?>();
-                propertiesWithCodeFixes = propertiesWithCodeFixes.Add( CodeFixTitles.DiagnosticPropertyKey, codeFixes.Value );
+                propertiesWithCodeFixes = propertiesWithCodeFixes.Add( CodeFixDiagnosticInfo.TitlesPropertyKey, codeFixes.Titles );
+
+                propertiesWithCodeFixes = propertiesWithCodeFixes.Add(
+                    CodeFixDiagnosticInfo.SourceAssemblyNamePropertyKey,
+                    codeFixes.SourceAssemblyName ?? "" );
+
+                propertiesWithCodeFixes = propertiesWithCodeFixes.Add(
+                    CodeFixDiagnosticInfo.RedistributionLicenseKeyPropertyKey,
+                    codeFixes.SourceRedistributionLicenseKey ?? "" );
             }
 
             return Diagnostic.Create(

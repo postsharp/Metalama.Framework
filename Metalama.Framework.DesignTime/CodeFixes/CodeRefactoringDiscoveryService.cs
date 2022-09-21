@@ -77,7 +77,13 @@ public class CodeRefactoringDiscoveryService : ICodeRefactoringDiscoveryService
         foreach ( var aspect in eligibleAspects )
         {
             var targetSymbolId = SymbolId.Create( symbol );
-            aspectActions.Items.Add( new AddAspectAttributeCodeActionModel( aspect.FullName, targetSymbolId, syntaxTreePath ) );
+
+            aspectActions.Items.Add(
+                new AddAspectAttributeCodeActionModel(
+                    aspect.FullName,
+                    targetSymbolId,
+                    syntaxTreePath,
+                    aspect.Pro?.ProjectLicenseInfo.RedistributionLicenseKey ) );
 
             if ( aspect.IsLiveTemplate )
             {
@@ -86,7 +92,8 @@ public class CodeRefactoringDiscoveryService : ICodeRefactoringDiscoveryService
                         aspect.DisplayName,
                         aspect.FullName,
                         targetSymbolId,
-                        syntaxTreePath ) );
+                        syntaxTreePath,
+                        aspect.Pro?.ProjectLicenseInfo.RedistributionLicenseKey ) );
             }
         }
 

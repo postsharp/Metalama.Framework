@@ -12,8 +12,18 @@ namespace Metalama.Framework.DesignTime.CodeFixes
     /// </summary>
     public abstract class CodeActionModel : CodeActionBaseModel
     {
-        protected CodeActionModel( string title ) : base( title ) { }
+        // TODO: SourceAssemblyName and SourceRedistributionLicenseKey can be encapsulated to a record.
+        internal string? SourceAssemblyName { get; }
 
+        internal string? SourceRedistributionLicenseKey { get; }
+
+        protected CodeActionModel( string title, string? sourceAssemblyName, string? sourceRedistributionLicenseKey ) : base( title )
+        {
+            this.SourceAssemblyName = sourceAssemblyName;
+            this.SourceRedistributionLicenseKey = sourceRedistributionLicenseKey;
+        }
+
+        // Deserialization constructor.
         protected CodeActionModel() { }
 
         /// <summary>

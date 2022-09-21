@@ -60,6 +60,9 @@ namespace Metalama.Framework.Engine.Aspects
         public string? WeaverType { get; }
 
         internal override CompileTimeProject? Project { get; }
+        
+        // TODO: Get the licence another way
+        public CompileTimeProject? Pro => this.Project;
 
         CompileTimeProject? IAspectClassImpl.Project => this.Project;
 

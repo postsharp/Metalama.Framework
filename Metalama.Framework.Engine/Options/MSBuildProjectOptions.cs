@@ -93,6 +93,9 @@ namespace Metalama.Framework.Engine.Options
 
         public override bool RequiresCodeCoverageAnnotations => this._transformerOptions.RequiresCodeCoverageAnnotations;
 
+        [Memo]
+        public override string? AdditionalLicense => this.GetStringOption( "MetalamaLicense" );
+
         public override bool TryGetProperty( string name, [NotNullWhen( true )] out string? value )
         {
             value = this.GetStringOption( name );

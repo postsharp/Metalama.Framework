@@ -92,7 +92,7 @@ namespace Metalama.Framework.DesignTime
                     context.Diagnostics );
             }
 
-            if ( context.Diagnostics.Any( d => d.Properties.ContainsKey( CodeFixTitles.DiagnosticPropertyKey ) ) )
+            if ( context.Diagnostics.Any( d => d.Properties.ContainsKey( CodeFixDiagnosticInfo.TitlesPropertyKey ) ) )
             {
                 // We have a user diagnostics where a code fix provider was specified. We need to execute the CodeFix pipeline to gather
                 // the actual code fixes.
@@ -188,10 +188,16 @@ namespace Metalama.Framework.DesignTime
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                if ( diagnostic.Properties.TryGetValue( CodeFixTitles.DiagnosticPropertyKey, out var codeFixTitles ) &&
+                if ( diagnostic.Properties.TryGetValue( CodeFixDiagnosticInfo.TitlesPropertyKey, out var codeFixTitles ) &&
                      !string.IsNullOrEmpty( codeFixTitles ) )
                 {
-                    var splitTitles = codeFixTitles!.Split( CodeFixTitles.Separator );
+                    _ = diagnostic.Properties.TryGetValue( CodeFixDiagnosticInfo.SourceAssemblyNamePropertyKey, out var sourceAssemblyName );
+
+                    _ = diagnostic.Properties.TryGetValue(
+                        CodeFixDiagnosticInfo.RedistributionLicenseKeyPropertyKey,
+                        out var sourceTypeRedistributionLicenseKey );
+
+                    var splitTitles = codeFixTitles!.Split( CodeFixDiagnosticInfo.Separator );
 
                     foreach ( var codeFixTitle in splitTitles )
                     {
@@ -200,7 +206,9 @@ namespace Metalama.Framework.DesignTime
 
                         var codeAction = new UserCodeActionModel(
                             codeFixTitle,
-                            diagnostic );
+                            diagnostic,
+                            sourceAssemblyName,
+                            sourceTypeRedistributionLicenseKey );
 
                         codeFixesBuilder.Add( new CodeFixModel( codeAction, ImmutableArray.Create( diagnostic ) ) );
                     }

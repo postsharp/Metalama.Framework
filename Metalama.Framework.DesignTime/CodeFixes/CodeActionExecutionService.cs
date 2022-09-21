@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Framework.DesignTime.Licensing;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.CodeModel;
@@ -54,12 +55,13 @@ public class CodeActionExecutionService : ICodeActionExecutionService
 
         if ( !computingPreview )
         {
-            // This place can handle all design-time restrictions, which are code-fixes and live templates. (Which are code-fixes as well.)
-            // TODO:
-            // Should we check here or in TryGetConfiguration?
-            // Do we want to use the license from MSBuild?
-            // Do we want to keep the change of ExecutionScenario?
-            throw new NotImplementedException( "Check license." );
+            var licenseVerifier = configuration.ServiceProvider.GetRequiredService<DesignTimeLicenseVerifier>();
+
+            if ( !licenseVerifier.CanExecuteCodeAction( codeActionModel, compilation.AssemblyName ) )
+            {
+                // TODO: Give a message.
+                return CodeActionResult.Empty;
+            }
         }
 
         var compilationModel = CompilationModel.CreateInitialInstance( configuration.ProjectModel, partialCompilation );

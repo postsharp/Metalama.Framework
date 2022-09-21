@@ -22,7 +22,12 @@ internal class ApplyLiveTemplateCodeActionModel : CodeActionModel
         this.SyntaxTreeFilePath = null!;
     }
 
-    public ApplyLiveTemplateCodeActionModel( string title, string aspectTypeName, SymbolId targetSymbolId, string syntaxTreeFilePath ) : base( title )
+    public ApplyLiveTemplateCodeActionModel(
+        string title,
+        string aspectTypeName,
+        SymbolId targetSymbolId,
+        string syntaxTreeFilePath,
+        string? sourceRedistributionLicenseKey ) : base( title, aspectTypeName, sourceRedistributionLicenseKey )
     {
         this.AspectTypeName = aspectTypeName;
         this.TargetSymbolId = targetSymbolId;

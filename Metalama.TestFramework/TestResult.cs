@@ -372,7 +372,7 @@ namespace Metalama.TestFramework
         {
             yield return $"// {d.Severity} {d.Id} on `{this.GetTextUnderDiagnostic( d )}`: `{CleanMessage( d.GetMessage() )}`\n";
 
-            foreach ( var codeFix in CodeFixTitles.GetCodeFixTitles( d ) )
+            foreach ( var codeFix in CodeFixDiagnosticInfo.GetCodeFixTitles( d ) )
             {
                 yield return $"//    CodeFix: {codeFix}`\n";
             }
