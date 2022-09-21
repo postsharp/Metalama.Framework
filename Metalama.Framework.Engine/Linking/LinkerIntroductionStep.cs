@@ -76,7 +76,7 @@ namespace Metalama.Framework.Engine.Linking
                 // will give deterministic results only when called in a deterministic order.
                 var sortedTransformations = transformationGroup.OrderBy( x => x, transformationComparer );
 
-                foreach ( var transformation in transformationGroup )
+                foreach ( var transformation in sortedTransformations )
                 {
                     IndexReplaceTransformation( input, transformation, syntaxTransformationCollection, replacedTransformations );
 
