@@ -35,7 +35,8 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
                 .MakeGenericType( keyType, valueType )
                 .GetProperty( nameof(Dictionary<int, int>.Comparer), BindingFlags.Public | BindingFlags.Instance )
                 .AssertNotNull()
-                .GetValue( dictionary );
+                .GetValue( dictionary )
+                .AssertNotNull();
 
             if ( keyType == typeof(string) )
             {

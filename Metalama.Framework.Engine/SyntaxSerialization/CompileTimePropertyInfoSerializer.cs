@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Reflection;
+using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace Metalama.Framework.Engine.SyntaxSerialization
 {
@@ -20,62 +21,59 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
         {
             var property = obj.Target.GetTarget( serializationContext.CompilationModel ).AssertNotNull();
 
-            return this.SerializeProperty( property, serializationContext );
+            return SerializeProperty( property, serializationContext );
         }
 
-        public ExpressionSyntax SerializeProperty( IPropertyOrIndexer propertyOrIndexer, SyntaxSerializationContext serializationContext )
+        public static ExpressionSyntax SerializeProperty( IPropertyOrIndexer propertyOrIndexer, SyntaxSerializationContext serializationContext )
         {
-            var typeCreation = this.Service.Serialize( CompileTimeType.Create( propertyOrIndexer.DeclaringType ), serializationContext );
+            var typeCreation = TypeSerializationHelper.SerializeTypeSymbolRecursive( propertyOrIndexer.DeclaringType.GetSymbol(), serializationContext );
 
             if ( propertyOrIndexer is IProperty )
             {
-                return SyntaxFactory.InvocationExpression(
-                        SyntaxFactory.MemberAccessExpression(
+                return InvocationExpression(
+                        MemberAccessExpression(
                             SyntaxKind.SimpleMemberAccessExpression,
                             typeCreation,
-                            SyntaxFactory.IdentifierName( "GetProperty" ) ) )
+                            IdentifierName( "GetProperty" ) ) )
                     .AddArgumentListArguments(
-                        SyntaxFactory.Argument(
-                            SyntaxFactory.LiteralExpression(
+                        Argument(
+                            LiteralExpression(
                                 SyntaxKind.StringLiteralExpression,
-                                SyntaxFactory.Literal( propertyOrIndexer.Name ) ) ),
-                        SyntaxFactory.Argument( SyntaxUtility.CreateBindingFlags( serializationContext ) ) );
+                                Literal( propertyOrIndexer.Name ) ) ),
+                        Argument( SyntaxUtility.CreateBindingFlags( propertyOrIndexer, serializationContext ) ) );
             }
             else if ( propertyOrIndexer is IIndexer indexer )
             {
-                var returnTypeCreation = this.Service.Serialize( CompileTimeType.Create( propertyOrIndexer.Type ), serializationContext );
+                var returnTypeCreation = TypeSerializationHelper.SerializeTypeSymbolRecursive( propertyOrIndexer.Type.GetSymbol(), serializationContext );
                 var parameterTypes = new List<ExpressionSyntax>();
 
                 foreach ( var parameter in indexer.Parameters )
                 {
-                    parameterTypes.Add( this.Service.Serialize( CompileTimeType.Create( parameter.Type ), serializationContext ) );
+                    var parameterType = TypeSerializationHelper.SerializeTypeSymbolRecursive( parameter.Type.GetSymbol(), serializationContext );
+                    parameterTypes.Add( parameterType );
                 }
 
-                var propertyName = propertyOrIndexer.GetSymbol().AssertNotNull().MetadataName;
-
-                return SyntaxFactory.InvocationExpression(
-                            SyntaxFactory.MemberAccessExpression(
+                return InvocationExpression(
+                            MemberAccessExpression(
                                 SyntaxKind.SimpleMemberAccessExpression,
                                 typeCreation,
-                                SyntaxFactory.IdentifierName( "GetProperty" ) ) )
+                                IdentifierName( "GetProperty" ) ) )
                         .AddArgumentListArguments(
-                            SyntaxFactory.Argument(
-                                SyntaxFactory.LiteralExpression(
+                            Argument(
+                                LiteralExpression(
                                     SyntaxKind.StringLiteralExpression,
-                                    SyntaxFactory.Literal( propertyName ) ) ),
-                            SyntaxFactory.Argument( returnTypeCreation ),
-                            SyntaxFactory.Argument(
-                                SyntaxFactory.ArrayCreationExpression(
-                                        SyntaxFactory.ArrayType( serializationContext.GetTypeSyntax( typeof(Type) ) )
+                                    Literal( propertyOrIndexer.Name ) ) ),
+                            Argument( returnTypeCreation ),
+                            Argument(
+                                ArrayCreationExpression(
+                                        ArrayType( serializationContext.GetTypeSyntax( typeof(Type) ) )
                                             .WithRankSpecifiers(
-                                                SyntaxFactory.SingletonList(
-                                                    SyntaxFactory.ArrayRankSpecifier(
-                                                        SyntaxFactory.SingletonSeparatedList<ExpressionSyntax>(
-                                                            SyntaxFactory.OmittedArraySizeExpression() ) ) ) ) )
+                                                SingletonList(
+                                                    ArrayRankSpecifier( SingletonSeparatedList<ExpressionSyntax>( OmittedArraySizeExpression() ) ) ) ) )
                                     .WithInitializer(
-                                        SyntaxFactory.InitializerExpression(
+                                        InitializerExpression(
                                             SyntaxKind.ArrayInitializerExpression,
-                                            SyntaxFactory.SeparatedList( parameterTypes ) ) ) ) )
+                                            SeparatedList( parameterTypes ) ) ) ) )
                     ;
             }
             else

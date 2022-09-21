@@ -267,7 +267,7 @@ namespace Metalama.Framework.Engine.Advising
                                 return AdviceImplementationResult.Success( AdviceOutcome.Override );
                             }
                         }
-                        else if ( existingDeclaration.IsSealed || !existingDeclaration.IsVirtual )
+                        else if ( existingDeclaration.IsSealed || !existingDeclaration.IsOverridable() )
                         {
                             return
                                 AdviceImplementationResult.Failed(

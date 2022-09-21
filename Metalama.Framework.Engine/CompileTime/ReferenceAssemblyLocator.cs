@@ -89,7 +89,7 @@ namespace Metalama.Framework.Engine.CompileTime
             // Get Metalama implementation assemblies (but not the public API, for which we need a special compile-time build).
             var metalamaImplementationAssemblies =
                 new[] { typeof(IAspectWeaver), typeof(TemplateSyntaxFactory) }.ToDictionary(
-                    x => x.Assembly.GetName().Name,
+                    x => x.Assembly.GetName().Name.AssertNotNull(),
                     x => x.Assembly.Location );
 
             // Force Metalama.Compiler.Interface to be loaded in the AppDomain.
@@ -98,7 +98,7 @@ namespace Metalama.Framework.Engine.CompileTime
             // Add the Metalama.Compiler.Interface" assembly. We cannot get it through typeof because types are directed to Microsoft.CodeAnalysis at compile time.
             // Strangely, there can be many instances of this same assembly.
             var metalamaCompilerInterfaceAssembly = AppDomainUtility
-                .GetLoadedAssemblies( a => a.FullName.StartsWith( "Metalama.Compiler.Interface,", StringComparison.Ordinal ) )
+                .GetLoadedAssemblies( a => a.FullName != null && a.FullName.StartsWith( "Metalama.Compiler.Interface,", StringComparison.Ordinal ) )
                 .OrderByDescending( a => a.GetName().Version )
                 .FirstOrDefault();
 
@@ -128,13 +128,13 @@ namespace Metalama.Framework.Engine.CompileTime
             this.SystemAssemblyPaths = this.GetSystemAssemblyPaths().ToImmutableArray();
 
             this.SystemAssemblyNames = this.SystemAssemblyPaths
-                .Select( Path.GetFileNameWithoutExtension )
+                .Select( x => Path.GetFileNameWithoutExtension( x ).AssertNotNull() )
                 .ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
 
             // Sets the collection of all standard assemblies, i.e. system assemblies and ours.
             this.StandardAssemblyNames = this.MetalamaImplementationAssemblyNames
                 .Concat( new[] { _compileTimeFrameworkAssemblyName } )
-                .Concat( this.SystemAssemblyPaths.Select( Path.GetFileNameWithoutExtension ) )
+                .Concat( this.SystemAssemblyPaths.Select( x => Path.GetFileNameWithoutExtension( x ).AssertNotNull() ) )
                 .ToImmutableHashSet( StringComparer.OrdinalIgnoreCase );
 
             // Also provide our embedded assemblies.
@@ -215,8 +215,14 @@ namespace Metalama.Framework.Engine.CompileTime
                 var process = Process.Start( psi ).AssertNotNull();
 
                 var lines = new List<string>();
-                process.OutputDataReceived += ( _, e ) => lines.Add( e.Data );
-                process.ErrorDataReceived += ( _, e ) => lines.Add( e.Data );
+
+                void OnProcessDataReceived( object sender, DataReceivedEventArgs e )
+                {
+                    lines.Add( e.Data ?? "" );
+                }
+
+                process.OutputDataReceived += OnProcessDataReceived;
+                process.ErrorDataReceived += OnProcessDataReceived;
 
                 process.BeginOutputReadLine();
                 process.WaitForExit();

@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities.Threading;
+using Metalama.Framework.Engine.Utilities;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -33,7 +34,7 @@ namespace Metalama.Framework.Engine.Linking
             if ( overriddenMember.IsExplicitInterfaceImplementation )
             {
                 var interfaceMember = overriddenMember.GetExplicitInterfaceImplementation();
-                var cleanInterfaceName = interfaceMember.DeclaringType.Name.Replace( "_", "__" ).Replace( ".", "_" );
+                var cleanInterfaceName = interfaceMember.DeclaringType.Name.ReplaceOrdinal( "_", "__" ).ReplaceOrdinal( ".", "_" );
 
                 nameHint =
                     shortLayerName != null
@@ -83,7 +84,7 @@ namespace Metalama.Framework.Engine.Linking
             };
 
             // TODO: Not optimal.
-            var reasonName = reason.ToString().Replace( ", ", "_" );
+            var reasonName = reason.ToString().ReplaceOrdinal( ", ", "_" );
 
             var nameHint =
                 shortLayerName != null

@@ -123,7 +123,7 @@ namespace Metalama.Framework.Engine.Testing
             _ = typeof(DynamicAttribute);
 
             var systemLibraries = AppDomainUtility.GetLoadedAssemblies(
-                    a => !a.IsDynamic && _allowedSystemAssemblies.Contains( a.GetName().Name )
+                    a => !a.IsDynamic && _allowedSystemAssemblies.Contains( a.GetName().Name.AssertNotNull() )
                                       && !string.IsNullOrEmpty( a.Location ) )
                 .Concat( metalamaLibraries ?? Enumerable.Empty<Assembly>() )
                 .Concat( additionalAssemblies ?? Enumerable.Empty<Assembly>() )

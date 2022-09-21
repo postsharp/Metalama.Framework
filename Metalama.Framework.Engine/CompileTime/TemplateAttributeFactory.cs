@@ -23,7 +23,7 @@ internal class TemplateAttributeFactory : IService
     public TemplateAttributeFactory( IServiceProvider serviceProvider, Compilation compilation )
     {
         this._compilation = compilation;
-        this._adviceAttributeType = this._compilation.GetTypeByMetadataName( typeof(IAdviceAttribute).FullName ).AssertNotNull();
+        this._adviceAttributeType = this._compilation.GetTypeByMetadataName( typeof(IAdviceAttribute).FullName.AssertNotNull() ).AssertNotNull();
         this._attributeDeserializer = serviceProvider.GetRequiredService<CompileTimeProjectLoader>().AttributeDeserializer;
     }
 

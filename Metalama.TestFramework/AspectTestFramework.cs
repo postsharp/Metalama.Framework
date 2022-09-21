@@ -11,7 +11,7 @@ using Xunit.Sdk;
 namespace Metalama.TestFramework
 {
     /// <summary>
-    /// Implementation of a Xunit test framework for Metalama. Fall backs to the default XUnit framework in Resharper or Rider.
+    /// Implementation of a Xunit test framework for Metalama. Falls back to the default XUnit framework in Resharper or Rider.
     /// </summary>
     [ExcludeFromCodeCoverage]
     public class AspectTestFramework : ITestFramework

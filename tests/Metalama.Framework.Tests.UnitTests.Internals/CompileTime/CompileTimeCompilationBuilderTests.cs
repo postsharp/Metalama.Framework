@@ -9,7 +9,6 @@ using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.TestFramework;
-using Metalama.TestFramework.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;

@@ -18,11 +18,11 @@ namespace Metalama.Framework.Engine.Diagnostics
 
         private UserMessageFormatter() : base( InvariantCulture.Name ) { }
 
-        public override object? GetFormat( Type formatType ) => formatType == typeof(ICustomFormatter) ? this : base.GetFormat( formatType );
+        public override object? GetFormat( Type? formatType ) => formatType == typeof(ICustomFormatter) ? this : base.GetFormat( formatType );
 
         public static string Format( FormattableString message ) => message.ToString( Instance );
 
-        public string Format( string format, object? arg, IFormatProvider formatProvider )
+        public string Format( string? format, object? arg, IFormatProvider? formatProvider )
         {
             try
             {
@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.Diagnostics
                         }
                         catch
                         {
-                            return displayable.ToString();
+                            return displayable.ToString() ?? "";
                         }
 
                     case DeclarationKind declarationKind:
@@ -90,7 +90,7 @@ namespace Metalama.Framework.Engine.Diagnostics
 
             try
             {
-                return arg != null ? arg.ToString() : string.Empty;
+                return arg != null ? arg.ToString() ?? string.Empty : string.Empty;
             }
             catch
             {

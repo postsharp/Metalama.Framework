@@ -55,7 +55,9 @@ namespace Metalama.Framework.Engine.Advising
         public IAdviceFactory WithTemplateProvider( ITemplateProvider templateProvider )
         {
             return this.WithTemplateClassInstance(
-                new TemplateClassInstance( templateProvider, this._state.PipelineConfiguration.OtherTemplateClasses[templateProvider.GetType().FullName] ) );
+                new TemplateClassInstance(
+                    templateProvider,
+                    this._state.PipelineConfiguration.OtherTemplateClasses[templateProvider.GetType().FullName.AssertNotNull()] ) );
         }
 
         private TemplateMemberRef ValidateRequiredTemplateName( string? templateName, TemplateKind templateKind )

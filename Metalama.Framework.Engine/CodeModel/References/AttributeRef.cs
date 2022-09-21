@@ -160,8 +160,13 @@ namespace Metalama.Framework.Engine.CodeModel.References
                 _ => false
             };
 
-        public bool Equals( AttributeRef other )
+        public bool Equals( AttributeRef? other )
         {
+            if ( other == null )
+            {
+                return false;
+            }
+
             switch ( this._originalTarget )
             {
                 case AttributeSyntax syntax:

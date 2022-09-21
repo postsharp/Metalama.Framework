@@ -739,7 +739,7 @@ namespace Metalama.Framework.Engine.Linking
                 return this.CompareTo( other ) == 0;
             }
 
-            public override bool Equals( object obj )
+            public override bool Equals( object? obj )
             {
                 return obj is MemberLayerIndex mli && this.Equals( mli );
             }

@@ -7,6 +7,7 @@ using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -93,7 +94,7 @@ namespace Metalama.Framework.Engine.Templating
             while ( true )
             {
                 var old = statementComment;
-                statementComment = statementComment.Replace( "  ", " " );
+                statementComment = statementComment.ReplaceOrdinal( "  ", " " );
 
                 if ( old == statementComment )
                 {
@@ -1470,6 +1471,18 @@ namespace Metalama.Framework.Engine.Templating
             this.Unindent();
 
             return callRender;
+        }
+
+        protected override ExpressionSyntax TransformInterpolation( InterpolationSyntax node )
+        {
+            var transformedNode = base.TransformInterpolation( node ).AssertNotNull();
+
+            var fixedNode = InvocationExpression(
+                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.FixInterpolationSyntax) ),
+                    ArgumentList( SingletonSeparatedList( Argument( transformedNode ) ) ) )
+                .NormalizeWhitespace();
+
+            return fixedNode;
         }
 
         public override SyntaxNode VisitSwitchStatement( SwitchStatementSyntax node )

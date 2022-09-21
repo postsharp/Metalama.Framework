@@ -605,7 +605,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
 
                     if ( elementType.IsValueType )
                     {
-                        this.WriteValue( value, elementIntrinsicType, false, newCause );
+                        this.WriteValue( value!, elementIntrinsicType, false, newCause );
                     }
                     else if ( value == null )
                     {
@@ -645,7 +645,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
 
         private sealed class CanonicalComparer : IEqualityComparer<object>
         {
-            bool IEqualityComparer<object>.Equals( object x, object y )
+            bool IEqualityComparer<object>.Equals( object? x, object? y )
             {
                 return ReferenceEquals( x, y );
             }

@@ -47,11 +47,24 @@ namespace Metalama.Framework.Engine.Linking
 
                 private OrderedAspectLayer GetAspectLayer( LinkerIntroducedMember m ) => this._orderedAspectLayers[m.Introduction.ParentAdvice.AspectLayerId];
 
-                public int Compare( LinkerIntroducedMember x, LinkerIntroducedMember y )
+                public int Compare( LinkerIntroducedMember? x, LinkerIntroducedMember? y )
                 {
                     if ( x == y )
                     {
                         return 0;
+                    }
+
+                    if ( x == null && y == null )
+                    {
+                        return 0;
+                    }
+                    else if ( x == null )
+                    {
+                        return 1;
+                    }
+                    else if ( y == null )
+                    {
+                        return -1;
                     }
 
                     var declaration = GetDeclaration( x );

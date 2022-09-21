@@ -13,7 +13,6 @@ using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -135,13 +134,6 @@ internal class LicenseVerifier : IService
         }
 
         // The count of aspect classes is not covered by the available licenses. Report an error.
-        var maxAspectsCountDescriptions = new List<string>();
-
-        if ( maxAspectsCount > 0 )
-        {
-            maxAspectsCountDescriptions.Add( maxAspectsCount.ToString( CultureInfo.InvariantCulture ) );
-        }
-
         static string GetNames( IEnumerable<IAspectClass> aspectClasses )
         {
             var aspectClassesList = aspectClasses.Select( a => $"'{a.ShortName}'" ).ToList();

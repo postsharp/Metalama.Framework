@@ -17,7 +17,7 @@ namespace Metalama.Framework.Engine.ReflectionMocks
             this.Target = @event.ToTypedRef();
         }
 
-        public static CompileTimeEventInfo Create( IEvent @event )
+        public static EventInfo Create( IEvent @event )
         {
             return new CompileTimeEventInfo( @event );
         }

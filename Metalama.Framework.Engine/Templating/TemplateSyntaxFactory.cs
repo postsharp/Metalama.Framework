@@ -8,6 +8,7 @@ using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Templating.Expressions;
+using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -30,7 +31,7 @@ namespace Metalama.Framework.Engine.Templating
     /// without analysing impact on generated code.
     /// </summary>
     [Obfuscation( Exclude = true )]
-    public static class TemplateSyntaxFactory
+    public static partial class TemplateSyntaxFactory
     {
         private static readonly SyntaxAnnotation _flattenBlockAnnotation = new( "Metalama_Flatten" );
 
@@ -57,7 +58,7 @@ namespace Metalama.Framework.Engine.Templating
         {
             static IEnumerable<SyntaxTrivia> CreateTrivia( string comment )
             {
-                if ( comment.Contains( '\n' ) || comment.Contains( '\r' ) )
+                if ( comment.ContainsOrdinal( '\n' ) || comment.ContainsOrdinal( '\r' ) )
                 {
                     yield return SyntaxFactory.ElasticCarriageReturnLineFeed;
                     yield return SyntaxFactory.Comment( "/* " + comment + " */" );
@@ -351,7 +352,7 @@ namespace Metalama.Framework.Engine.Templating
                             var appendedText = previousText.TextToken.ValueText + text.TextToken.ValueText;
 
                             var escapedTextWithQuotes =
-                                SyntaxFactory.Literal( appendedText ).Text.Replace( "{", "{{" ).Replace( "}", "}}" );
+                                SyntaxFactory.Literal( appendedText ).Text.ReplaceOrdinal( "{", "{{" ).ReplaceOrdinal( "}", "}}" );
 
                             var escapedText = escapedTextWithQuotes.Substring( 1, escapedTextWithQuotes.Length - 2 );
 
@@ -456,6 +457,21 @@ namespace Metalama.Framework.Engine.Templating
             }
 
             return TemplateExpansionContext.Current.SyntaxGenerationContext.SyntaxGenerator.TypeOfExpression( type, substitutions );
+        }
+
+        public static InterpolationSyntax FixInterpolationSyntax( InterpolationSyntax interpolation )
+        {
+            // If the interpolation expression contains an alias-prefixed identifier (for instance global::System) that is not
+            // in a parenthesis or a square bracket, we need to parenthesize the expression.
+
+            if ( InterpolationValidator.Instance.Visit( interpolation ) )
+            {
+                return interpolation.WithExpression( SyntaxFactory.ParenthesizedExpression( interpolation.Expression ) );
+            }
+            else
+            {
+                return interpolation;
+            }
         }
     }
 }

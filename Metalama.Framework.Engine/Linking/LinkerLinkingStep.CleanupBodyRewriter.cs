@@ -123,19 +123,16 @@ namespace Metalama.Framework.Engine.Linking
                     }
                 }
 
-                if ( overflowingTrivia != null )
+                if ( finalStatements.Count > 0 )
                 {
-                    if ( finalStatements.Count > 0 )
-                    {
-                        finalStatements[finalStatements.Count - 1] =
-                            finalStatements[finalStatements.Count - 1]
-                                .WithTrailingTrivia( finalStatements[finalStatements.Count - 1].GetTrailingTrivia().AddRange( overflowingTrivia ) );
-                    }
-                    else
-                    {
-                        node = node.WithCloseBraceToken(
-                            node.CloseBraceToken.WithLeadingTrivia( overflowingTrivia.AddRange( node.CloseBraceToken.LeadingTrivia ) ) );
-                    }
+                    finalStatements[finalStatements.Count - 1] =
+                        finalStatements[finalStatements.Count - 1]
+                            .WithTrailingTrivia( finalStatements[finalStatements.Count - 1].GetTrailingTrivia().AddRange( overflowingTrivia ) );
+                }
+                else
+                {
+                    node = node.WithCloseBraceToken(
+                        node.CloseBraceToken.WithLeadingTrivia( overflowingTrivia.AddRange( node.CloseBraceToken.LeadingTrivia ) ) );
                 }
 
                 if ( anyRewrittenStatement )

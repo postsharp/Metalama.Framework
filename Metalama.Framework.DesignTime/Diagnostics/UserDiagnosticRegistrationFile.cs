@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Configuration;
+using System.Collections.Immutable;
 using System.Reflection;
 
 namespace Metalama.Framework.DesignTime.Diagnostics
@@ -10,28 +11,11 @@ namespace Metalama.Framework.DesignTime.Diagnostics
     /// </summary>
     [Obfuscation( Exclude = true /* JSON */ )]
     [ConfigurationFile( "userDiagnostics.json" )]
-    internal class UserDiagnosticRegistrationFile : ConfigurationFile
+    internal record UserDiagnosticRegistrationFile : ConfigurationFile
     {
-        public Dictionary<string, UserDiagnosticRegistration> Diagnostics { get; } = new( StringComparer.OrdinalIgnoreCase );
+        public ImmutableDictionary<string, UserDiagnosticRegistration> Diagnostics { get; init; } =
+            ImmutableDictionary<string, UserDiagnosticRegistration>.Empty.WithComparers( StringComparer.Ordinal );
 
-        public HashSet<string> Suppressions { get; } = new( StringComparer.OrdinalIgnoreCase );
-
-        public override void CopyFrom( ConfigurationFile configurationFile )
-        {
-            var source = (UserDiagnosticRegistrationFile) configurationFile;
-
-            this.Diagnostics.Clear();
-            this.Suppressions.Clear();
-
-            foreach ( var diagnostic in source.Diagnostics )
-            {
-                this.Diagnostics.Add( diagnostic.Key, diagnostic.Value );
-            }
-
-            foreach ( var suppression in source.Suppressions )
-            {
-                this.Suppressions.Add( suppression );
-            }
-        }
+        public ImmutableHashSet<string> Suppressions { get; init; } = ImmutableHashSet<string>.Empty.WithComparer( StringComparer.Ordinal );
     }
 }

@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis.Text;
 using System;
 using System.Collections.Immutable;
@@ -92,7 +93,7 @@ namespace Metalama.Framework.Engine.Formatting
 
         public override string ToString()
         {
-            var s = this.Span.ToString().Replace( "2147483647" /* int.Max */, "inf" ) + "=>" + this.Classification;
+            var s = this.Span.ToString().ReplaceOrdinal( "2147483647" /* int.Max */, "inf" ) + "=>" + this.Classification;
 
             foreach ( var tag in this.Tags )
             {

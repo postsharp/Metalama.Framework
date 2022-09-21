@@ -178,6 +178,7 @@ namespace Metalama.Framework.Engine.AspectOrdering
                         additionalLocations );
 
                 diagnosticAdder.Report( diagnostic );
+                sortedAspectLayers = default;
 
                 return false;
             }

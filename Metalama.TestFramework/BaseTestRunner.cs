@@ -25,6 +25,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
+using Xunit.Sdk;
 using Document = Microsoft.CodeAnalysis.Document;
 
 namespace Metalama.TestFramework
@@ -85,11 +86,24 @@ namespace Metalama.TestFramework
 
         private async Task RunAndAssertCoreAsync( TestInput testInput )
         {
-            Dictionary<string, object?> state = new( StringComparer.Ordinal );
-            using var testResult = new TestResult();
-            await this.RunAsync( testInput, testResult, state );
-            this.SaveResults( testInput, testResult, state );
-            this.ExecuteAssertions( testInput, testResult, state );
+            try
+            {
+                testInput.ProjectProperties.License.ThrowIfNotLicensed();
+                Dictionary<string, object?> state = new( StringComparer.Ordinal );
+                using var testResult = new TestResult();
+                await this.RunAsync( testInput, testResult, state );
+                this.SaveResults( testInput, testResult, state );
+                this.ExecuteAssertions( testInput, testResult, state );
+            }
+            catch ( Exception e ) when ( e.GetType().FullName == testInput.Options.ExpectedException )
+            {
+                return;
+            }
+
+            if ( testInput.Options.ExpectedException != null )
+            {
+                throw new AssertActualExpectedException( testInput.Options.ExpectedException, null, "Expected exception has not been thrown." );
+            }
         }
 
         public Task RunAsync( TestInput testInput, TestResult testResult )

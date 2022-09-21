@@ -29,7 +29,7 @@ public class TestContext : IDisposable, ITempFileManager, IApplicationInfoProvid
 
     public TestContext( TestProjectOptions projectOptions, Func<ServiceProvider, ServiceProvider>? addServices = null )
     {
-        this._backstageTempFileManager = (ITempFileManager) BackstageServiceFactory.ServiceProvider.GetService( typeof(ITempFileManager) );
+        this._backstageTempFileManager = BackstageServiceFactory.ServiceProvider.GetRequiredBackstageService<ITempFileManager>();
 
         var backstageServiceProvider = new BackstageServiceProvider( this );
         this._configurationManager = new InMemoryConfigurationManager( backstageServiceProvider );

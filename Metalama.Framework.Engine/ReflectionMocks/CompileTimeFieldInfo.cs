@@ -38,9 +38,9 @@ namespace Metalama.Framework.Engine.ReflectionMocks
 
         public override Type FieldType => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
-        public override object GetValue( object obj ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
+        public override object GetValue( object? obj ) => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
-        public override void SetValue( object obj, object value, BindingFlags invokeAttr, Binder binder, CultureInfo culture )
+        public override void SetValue( object? obj, object? value, BindingFlags invokeAttr, Binder? binder, CultureInfo? culture )
             => throw CompileTimeMocksHelper.CreateNotSupportedException();
     }
 }

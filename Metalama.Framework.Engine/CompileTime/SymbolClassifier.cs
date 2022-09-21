@@ -43,7 +43,9 @@ namespace Metalama.Framework.Engine.CompileTime
                 (typeof(ParameterInfo), Scope: TemplatingScope.RunTimeOnly, true),
                 (typeof(Debugger), Scope: TemplatingScope.RunTimeOrCompileTime, false),
                 (typeof(Index), TemplatingScope.RunTimeOrCompileTime, false)
-            }.ToImmutableDictionary( t => t.ReflectionType.Name, t => (t.ReflectionType.Namespace, t.Scope, t.MembersOnly) );
+            }.ToImmutableDictionary(
+                t => t.ReflectionType.Name.AssertNotNull(),
+                t => (t.ReflectionType.Namespace.AssertNotNull(), t.Scope, t.MembersOnly) );
 
         private static readonly ImmutableDictionary<string, (TemplatingScope Scope, bool IncludeDescendants)> _wellKnownNamespaces =
             new (string Namespace, TemplatingScope Scope, bool IncludeDescendants)[]
@@ -84,9 +86,12 @@ namespace Metalama.Framework.Engine.CompileTime
             if ( compilation != null )
             {
                 this._compilation = compilation;
-                this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof(TemplateAttribute).FullName ).AssertNotNull();
-                this._declarativeAdviceAttribute = this._compilation.GetTypeByMetadataName( typeof(DeclarativeAdviceAttribute).FullName ).AssertNotNull();
-                this._abstractAttribute = this._compilation.GetTypeByMetadataName( typeof(AbstractAttribute).FullName ).AssertNotNull();
+                this._templateAttribute = this._compilation.GetTypeByMetadataName( typeof(TemplateAttribute).FullName.AssertNotNull() ).AssertNotNull();
+
+                this._declarativeAdviceAttribute = this._compilation.GetTypeByMetadataName( typeof(DeclarativeAdviceAttribute).FullName.AssertNotNull() )
+                    .AssertNotNull();
+
+                this._abstractAttribute = this._compilation.GetTypeByMetadataName( typeof(AbstractAttribute).FullName.AssertNotNull() ).AssertNotNull();
             }
         }
 

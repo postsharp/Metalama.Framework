@@ -7,35 +7,35 @@ using Metalama.Framework.Aspects;
 
 namespace Metalama.Framework.Tests.Integration.Templating.InterpolatedString
 {
-    class Aspect
+    internal class Aspect
     {
         [TestTemplate]
-        dynamic? Template()
+        private dynamic? Template()
         {
-        
             // Neutral
             var neutral = $"Zero={0,-5:x}";
-            
+
             // Compile-time with formatting
             var ct = $"ParameterCount={meta.Target.Parameters.Count,-5:x}";
-          
-            // Run-time
-            var rt = $"Value={meta.Target.Parameters[0].Value,-5:x}";
-            
+
+            // Dynamic.
+            var dy = $"Value={meta.Target.Parameters[0].Value,-5:x}";
+
+            // Run-time expression that would cause global::.
+            var rt = $"Value={Environment.Version}";
+
             // Both
             var both = $"{meta.Target.Type.Fields.Single().Name}={meta.Target.Parameters[0].Value}";
 
-            
-          
             return meta.Proceed();
         }
     }
 
-    class TargetCode
+    internal class TargetCode
     {
         private int field;
-        
-        int Method(int a)
+
+        private int Method( int a )
         {
             return a;
         }

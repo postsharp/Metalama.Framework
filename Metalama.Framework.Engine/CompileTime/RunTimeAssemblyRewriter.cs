@@ -84,7 +84,7 @@ namespace Metalama.Compiler
         private RunTimeAssemblyRewriter( Compilation runTimeCompilation, IServiceProvider serviceProvider )
         {
             this._rewriterHelper = new RewriterHelper( runTimeCompilation, serviceProvider );
-            this._aspectDriverSymbol = runTimeCompilation.GetTypeByMetadataName( typeof(IAspectDriver).FullName );
+            this._aspectDriverSymbol = runTimeCompilation.GetTypeByMetadataName( typeof(IAspectDriver).FullName.AssertNotNull() );
             this._removeCompileTimeOnlyCode = serviceProvider.GetRequiredService<IProjectOptions>().RemoveCompileTimeOnlyCode;
             this._syntaxGenerationContextFactory = new SyntaxGenerationContextFactory( this.RunTimeCompilation, serviceProvider );
         }
