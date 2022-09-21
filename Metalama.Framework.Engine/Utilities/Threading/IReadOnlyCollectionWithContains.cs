@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Utilities.Threading;
 
-internal interface IReadOnlySet<T> : IReadOnlyCollection<T>
+internal interface IReadOnlyCollectionWithContains<T> : IReadOnlyCollection<T>
 {
     bool Contains( T item );
 }

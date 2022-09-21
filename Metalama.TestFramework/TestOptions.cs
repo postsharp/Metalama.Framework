@@ -526,7 +526,6 @@ namespace Metalama.TestFramework
 
                         break;
                     
-                    
                     case "RequireOrderedAspects":
                         this.RequireOrderedAspects = true;
 
@@ -536,7 +535,6 @@ namespace Metalama.TestFramework
                         this.EnableLogging = true;
                         
                         break;
-
 
                     default:
                         this._invalidSourceOptions.Add( "@" + optionName );
