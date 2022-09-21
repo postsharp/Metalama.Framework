@@ -6,8 +6,8 @@ class TargetCode
         {
             await global::System.Threading.Tasks.Task.Yield();
     await this.AsyncMethod_Aspect2();
-    object result = null;
-    global::System.Console.WriteLine($"result={result}");
+    object result_1 = null;
+    global::System.Console.WriteLine($"result={result_1}");
     return;
         }
 
@@ -21,7 +21,7 @@ private async global::System.Threading.Tasks.ValueTask AsyncMethod_Aspect2()
 {
     await global::System.Threading.Tasks.Task.Yield();
     await this.AsyncMethod_Source();
-    object result_1 = null;
-    global::System.Console.WriteLine($"result={result_1}");
+    object result = null;
+    global::System.Console.WriteLine($"result={result}");
     return;
 }    }
