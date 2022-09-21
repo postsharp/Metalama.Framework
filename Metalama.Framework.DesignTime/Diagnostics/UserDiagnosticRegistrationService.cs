@@ -122,7 +122,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
                 {
                     return false;
                 }
-                    
+
                 return x.Id == y.Id;
             }
 

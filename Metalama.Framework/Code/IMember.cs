@@ -10,6 +10,7 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets a value indicating whether the member is <c>virtual</c>.
         /// </summary>
+        /// <seealso cref="MemberExtensions.IsOverridable"/>
         bool IsVirtual { get; }
 
         /// <summary>
@@ -20,6 +21,7 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets a value indicating whether the member is <c>override</c>.
         /// </summary>
+        /// <seealso cref="MemberExtensions.IsOverridable"/>
         bool IsOverride { get; }
 
         /// <summary>

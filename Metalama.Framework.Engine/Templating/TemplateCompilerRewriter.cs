@@ -1473,6 +1473,18 @@ namespace Metalama.Framework.Engine.Templating
             return callRender;
         }
 
+        protected override ExpressionSyntax TransformInterpolation( InterpolationSyntax node )
+        {
+            var transformedNode = base.TransformInterpolation( node ).AssertNotNull();
+
+            var fixedNode = InvocationExpression(
+                    this._templateMetaSyntaxFactory.TemplateSyntaxFactoryMember( nameof(TemplateSyntaxFactory.FixInterpolationSyntax) ),
+                    ArgumentList( SingletonSeparatedList( Argument( transformedNode ) ) ) )
+                .NormalizeWhitespace();
+
+            return fixedNode;
+        }
+
         public override SyntaxNode VisitSwitchStatement( SwitchStatementSyntax node )
         {
             if ( this.GetTransformationKind( node ) == TransformationKind.Transform )
