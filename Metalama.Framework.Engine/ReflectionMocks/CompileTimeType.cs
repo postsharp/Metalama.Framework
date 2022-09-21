@@ -50,7 +50,7 @@ namespace Metalama.Framework.Engine.ReflectionMocks
             return new CompileTimeType( Ref.FromSymbolId<IType>( symbolId ), fullMetadataName );
         }
 
-        // For test only. This is also used from serializers but these used should be removed when serializers will stop using symbols.
+        // For test only.
         internal static Type Create( IType type )
         {
             return Create( type.GetSymbol(), type.GetCompilationModel().RoslynCompilation );
@@ -92,10 +92,10 @@ namespace Metalama.Framework.Engine.ReflectionMocks
 
         protected override ConstructorInfo GetConstructorImpl(
             BindingFlags bindingAttr,
-            Binder binder,
+            Binder? binder,
             CallingConventions callConvention,
             Type[] types,
-            ParameterModifier[] modifiers )
+            ParameterModifier[]? modifiers )
         {
             throw CompileTimeMocksHelper.CreateNotSupportedException();
         }
@@ -138,10 +138,10 @@ namespace Metalama.Framework.Engine.ReflectionMocks
         protected override MethodInfo GetMethodImpl(
             string name,
             BindingFlags bindingAttr,
-            Binder binder,
+            Binder? binder,
             CallingConventions callConvention,
-            Type[] types,
-            ParameterModifier[] modifiers )
+            Type[]? types,
+            ParameterModifier[]? modifiers )
         {
             throw CompileTimeMocksHelper.CreateNotSupportedException();
         }
@@ -159,12 +159,12 @@ namespace Metalama.Framework.Engine.ReflectionMocks
         public override object InvokeMember(
             string name,
             BindingFlags invokeAttr,
-            Binder binder,
-            object target,
-            object[] args,
-            ParameterModifier[] modifiers,
-            CultureInfo culture,
-            string[] namedParameters )
+            Binder? binder,
+            object? target,
+            object?[]? args,
+            ParameterModifier[]? modifiers,
+            CultureInfo? culture,
+            string[]? namedParameters )
         {
             throw CompileTimeMocksHelper.CreateNotSupportedException();
         }
@@ -207,10 +207,10 @@ namespace Metalama.Framework.Engine.ReflectionMocks
         protected override PropertyInfo GetPropertyImpl(
             string name,
             BindingFlags bindingAttr,
-            Binder binder,
-            Type returnType,
-            Type[] types,
-            ParameterModifier[] modifiers )
+            Binder? binder,
+            Type? returnType,
+            Type[]? types,
+            ParameterModifier[]? modifiers )
         {
             throw CompileTimeMocksHelper.CreateNotSupportedException();
         }

@@ -8,6 +8,6 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 {
     internal class FieldCollection : MemberCollection<IField>, IFieldCollection
     {
-        public FieldCollection( INamedType declaringType, FieldUpdatableCollection sourceItems ) : base( declaringType, sourceItems ) { }
+        public FieldCollection( NamedType declaringType, FieldUpdatableCollection sourceItems ) : base( declaringType, sourceItems ) { }
     }
 }

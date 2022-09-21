@@ -3,7 +3,6 @@
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.CodeFixes;
 using Microsoft.CodeAnalysis.Text;
-using Microsoft.VisualStudio.Threading;
 using StreamJsonRpc;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -16,8 +15,8 @@ namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
 internal partial class UserProcessEndpoint : ClientEndpoint<IAnalysisProcessApi>, ICodeRefactoringDiscoveryService, ICodeActionExecutionService
 {
     private readonly ApiImplementation _apiImplementation;
-    private readonly ConcurrentDictionary<string, ImmutableDictionary<string, string>> _unhandledSources = new();
-    private readonly ConcurrentDictionary<string, IProjectHandlerCallback> _projectHandlers = new();
+    private readonly ConcurrentDictionary<ProjectKey, ImmutableDictionary<string, string>> _unhandledSources = new();
+    private readonly ConcurrentDictionary<ProjectKey, IProjectHandlerCallback> _projectHandlers = new();
 
     public UserProcessEndpoint( IServiceProvider serviceProvider, string pipeName ) : base( serviceProvider, pipeName )
     {
@@ -30,20 +29,20 @@ internal partial class UserProcessEndpoint : ClientEndpoint<IAnalysisProcessApi>
         rpc.AddLocalRpcTarget<IProjectHandlerCallback>( this._apiImplementation, null );
     }
 
-    public async Task RegisterProjectHandlerAsync( string projectId, IProjectHandlerCallback callback, CancellationToken cancellationToken = default )
+    public async Task RegisterProjectCallbackAsync( ProjectKey projectKey, IProjectHandlerCallback callback, CancellationToken cancellationToken = default )
     {
-        await this.WhenInitialized.WithCancellation( cancellationToken );
-        this._projectHandlers[projectId] = callback;
-        await (await this.GetServerApiAsync( cancellationToken )).OnUserProcessProjectHandlerConnectedAsync( projectId, cancellationToken );
+        await this.WaitUntilInitializedAsync( cancellationToken );
+        this._projectHandlers[projectKey] = callback;
+        await (await this.GetServerApiAsync( cancellationToken )).RegisterProjectCallbackAsync( projectKey, cancellationToken );
     }
 
-    public bool TryGetUnhandledSources( string projectId, out ImmutableDictionary<string, string>? sources )
-        => this._unhandledSources.TryRemove( projectId, out sources );
+    public bool TryGetUnhandledSources( ProjectKey projectKey, out ImmutableDictionary<string, string>? sources )
+        => this._unhandledSources.TryRemove( projectKey, out sources );
 
     public event Action<bool>? IsEditingCompileTimeCodeChanged;
 
     async Task<ComputeRefactoringResult> ICodeRefactoringDiscoveryService.ComputeRefactoringsAsync(
-        string projectId,
+        ProjectKey projectKey,
         string syntaxTreePath,
         TextSpan span,
         CancellationToken cancellationToken )
@@ -51,20 +50,20 @@ internal partial class UserProcessEndpoint : ClientEndpoint<IAnalysisProcessApi>
         var peer = await this.GetServerApiAsync( cancellationToken );
 
         return await peer.ComputeRefactoringsAsync(
-            projectId,
+            projectKey,
             syntaxTreePath,
             span,
             cancellationToken );
     }
 
     async Task<CodeActionResult> ICodeActionExecutionService.ExecuteCodeActionAsync(
-        string projectId,
+        ProjectKey projectKey,
         CodeActionModel codeActionModel,
         bool computingPreview,
         CancellationToken cancellationToken )
     {
         var peer = await this.GetServerApiAsync( cancellationToken );
 
-        return await peer.ExecuteCodeActionAsync( projectId, codeActionModel, computingPreview, cancellationToken );
+        return await peer.ExecuteCodeActionAsync( projectKey, codeActionModel, computingPreview, cancellationToken );
     }
 }

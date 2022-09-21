@@ -61,7 +61,7 @@ namespace Metalama.Framework.Code
         /// Gets a value indicating the type of operator the methods represents.
         /// </summary>
         OperatorKind OperatorKind { get; }
- 
+
         /// <summary>
         /// Gets the method definition with unassigned type parameters. When the current <see cref="IMethod"/> is neither a generic method instance
         /// nor a method of a generic type, returns the current <see cref="IMethod"/>.

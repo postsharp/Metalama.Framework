@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
@@ -17,7 +16,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
     /// <summary>
     /// Caches the pipeline results for each syntax tree.
     /// </summary>
-    internal sealed class CompilationPipelineResult : ITransitiveAspectsManifest
+    internal sealed partial class CompilationPipelineResult : ITransitiveAspectsManifest
     {
         private static readonly ImmutableDictionary<string, SyntaxTreePipelineResult> _emptySyntaxTreeResults =
             ImmutableDictionary.Create<string, SyntaxTreePipelineResult>( StringComparer.Ordinal );
@@ -34,8 +33,6 @@ namespace Metalama.Framework.DesignTime.Pipeline
         private readonly long _id = Interlocked.Increment( ref _nextId );
 
         internal DesignTimeValidatorCollection Validators { get; } = DesignTimeValidatorCollection.Empty;
-
-        public bool IsDirty { get; } = true;
 
         public ImmutableDictionary<string, IntroducedSyntaxTree> IntroducedSyntaxTrees { get; } = _emptyIntroducedSyntaxTrees;
 
@@ -56,15 +53,13 @@ namespace Metalama.Framework.DesignTime.Pipeline
             ImmutableDictionary<string, SyntaxTreePipelineResult> invalidSyntaxTreeResults,
             ImmutableDictionary<string, IntroducedSyntaxTree> introducedSyntaxTrees,
             ImmutableDictionaryOfHashSet<string, InheritableAspectInstance> inheritableAspects,
-            DesignTimeValidatorCollection validators,
-            bool isDirty )
+            DesignTimeValidatorCollection validators )
         {
             this.SyntaxTreeResults = syntaxTreeResults;
             this._invalidSyntaxTreeResults = invalidSyntaxTreeResults;
             this.IntroducedSyntaxTrees = introducedSyntaxTrees;
             this._inheritableAspects = inheritableAspects;
             this.Validators = validators;
-            this.IsDirty = isDirty;
 
             Logger.DesignTime.Trace?.Log(
                 $"CompilationPipelineResult {this._id} created with {this.SyntaxTreeResults.Count} syntax trees and {this._invalidSyntaxTreeResults.Count} introduced syntax trees." );
@@ -183,8 +178,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 ImmutableDictionary<string, SyntaxTreePipelineResult>.Empty,
                 introducedTrees,
                 inheritableAspects,
-                validators,
-                false );
+                validators );
         }
 
         /// <summary>
@@ -197,7 +191,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
         {
             var resultBuilders = pipelineResults
                 .InputSyntaxTrees
-                .ToDictionary( r => r.Key, syntaxTree => new SyntaxTreePipelineResultBuilder( syntaxTree.Value ) );
+                .ToDictionary( r => r.Key, syntaxTree => new SyntaxTreePipelineResult.Builder( syntaxTree.Value ) );
 
             // Split diagnostic by syntax tree.
             foreach ( var diagnostic in pipelineResults.Diagnostics.ReportedDiagnostics )
@@ -270,7 +264,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 var filePath = syntaxTree.FilePath;
                 var builder = resultBuilders[filePath];
                 builder.InheritableAspects ??= ImmutableArray.CreateBuilder<(string, InheritableAspectInstance)>();
-                builder.InheritableAspects.Add( (inheritableAspectInstance.Aspect.GetType().FullName, inheritableAspectInstance) );
+                builder.InheritableAspects.Add( (inheritableAspectInstance.Aspect.GetType().FullName.AssertNotNull(), inheritableAspectInstance) );
             }
 
             // Split validators by syntax tree.
@@ -300,68 +294,14 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             foreach ( var empty in inputTreesWithoutOutput )
             {
-                resultBuilders.Add( empty.Key, new SyntaxTreePipelineResultBuilder( empty.Value ) );
+                resultBuilders.Add( empty.Key, new SyntaxTreePipelineResult.Builder( empty.Value ) );
             }
 
             // Return an immutable copy.
             return resultBuilders.Select( b => b.Value.ToImmutable( compilation.Compilation ) );
         }
 
-        internal CompilationPipelineResult Invalidate( CompilationChanges compilationChanges )
-        {
-            if ( !compilationChanges.HasChange )
-            {
-                // Nothing to do.
-                return this;
-            }
-            else if ( compilationChanges.HasCompileTimeCodeChange )
-            {
-                return this.Clear();
-            }
-            else
-            {
-                var syntaxTreeBuilders = this.SyntaxTreeResults.ToBuilder();
-                var invalidSyntaxTreeBuilders = this._invalidSyntaxTreeResults.ToBuilder();
-
-                foreach ( var change in compilationChanges.SyntaxTreeChanges )
-                {
-                    switch ( change.SyntaxTreeChangeKind )
-                    {
-                        case SyntaxTreeChangeKind.Added:
-                            break;
-
-                        case SyntaxTreeChangeKind.Deleted:
-                        case SyntaxTreeChangeKind.Changed:
-                            Logger.DesignTime.Trace?.Log( $"DesignTimeSyntaxTreeResultCache.InvalidateCache({change.FilePath}): removed from cache." );
-
-                            if ( syntaxTreeBuilders.TryGetValue( change.FilePath, out var oldSyntaxTreeResult ) )
-                            {
-                                syntaxTreeBuilders.Remove( change.FilePath );
-                                invalidSyntaxTreeBuilders.Add( change.FilePath, oldSyntaxTreeResult );
-                            }
-
-                            break;
-                    }
-                }
-
-                return new CompilationPipelineResult(
-                    syntaxTreeBuilders.ToImmutable(),
-                    invalidSyntaxTreeBuilders.ToImmutable(),
-                    this.IntroducedSyntaxTrees,
-                    this._inheritableAspects,
-                    this.Validators,
-                    true );
-            }
-        }
-
-#pragma warning disable CA1822
-        public CompilationPipelineResult Clear()
-#pragma warning restore CA1822
-        {
-            Logger.DesignTime.Trace?.Log( $"DesignTimeSyntaxTreeResultCache.Clear()." );
-
-            return new CompilationPipelineResult();
-        }
+        public Invalidator ToInvalidator() => new( this );
 
         internal (ImmutableArray<Diagnostic> Diagnostics, ImmutableArray<CacheableScopedSuppression> Suppressions) GetDiagnosticsOnSyntaxTree( string path )
         {

@@ -2,7 +2,7 @@
 
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Formatting;
-using Metalama.Framework.Engine.Linking.Inlining;
+using Metalama.Framework.Engine.Linking.Substitution;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Linking
             IMethodSymbol symbol,
             SyntaxGenerationContext generationContext )
         {
-            if ( this._introductionRegistry.IsOverrideTarget( symbol ) )
+            if ( this.IntroductionRegistry.IsOverrideTarget( symbol ) )
             {
                 if ( symbol.IsPartialDefinition && symbol.PartialImplementationPart != null )
                 {
@@ -38,35 +38,35 @@ namespace Metalama.Framework.Engine.Linking
                     members.Add( methodDeclaration );
                 }
 
-                var lastOverride = (IMethodSymbol) this._introductionRegistry.GetLastOverride( symbol );
+                var lastOverride = this.IntroductionRegistry.GetLastOverride( symbol );
 
-                if ( this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( lastOverride, IntermediateSymbolSemanticKind.Default ), out _ ) )
+                if ( this.AnalysisRegistry.IsInlined( lastOverride.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     members.Add( GetLinkedDeclaration( IntermediateSymbolSemanticKind.Final, lastOverride.IsAsync ) );
                 }
                 else
                 {
-                    members.Add( GetTrampolineMethod( methodDeclaration, lastOverride ) );
+                    members.Add( GetTrampolineForMethod( methodDeclaration, lastOverride ) );
                 }
 
-                if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
-                     && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
+                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
+                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     members.Add( GetOriginalImplMethod( methodDeclaration, symbol, generationContext ) );
                 }
 
-                if ( this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ) )
-                     && !this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Base ), out _ ) )
+                if ( this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) )
+                     && !this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Base ) ) )
                 {
                     members.Add( GetEmptyImplMethod( methodDeclaration, symbol, generationContext ) );
                 }
 
                 return members;
             }
-            else if ( this._introductionRegistry.IsOverride( symbol ) )
+            else if ( this.IntroductionRegistry.IsOverride( symbol ) )
             {
-                if ( !this._analysisRegistry.IsReachable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ) )
-                     || this._analysisRegistry.IsInlineable( new IntermediateSymbolSemantic( symbol, IntermediateSymbolSemanticKind.Default ), out _ ) )
+                if ( !this.AnalysisRegistry.IsReachable( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) )
+                     || this.AnalysisRegistry.IsInlined( symbol.ToSemantic( IntermediateSymbolSemanticKind.Default ) ) )
                 {
                     return Array.Empty<MemberDeclarationSyntax>();
                 }
@@ -80,9 +80,12 @@ namespace Metalama.Framework.Engine.Linking
 
             MethodDeclarationSyntax GetLinkedDeclaration( IntermediateSymbolSemanticKind semanticKind, bool isAsync )
             {
-                var linkedBody = this.GetLinkedBody(
+                var linkedBody = this.GetSubstitutedBody(
                     symbol.ToSemantic( semanticKind ),
-                    InliningContext.Create( this, symbol, generationContext ) );
+                    new SubstitutionContext(
+                        this,
+                        generationContext,
+                        new InliningContextIdentifier( symbol.ToSemantic( semanticKind ) ) ) );
 
                 var modifiers = methodDeclaration.Modifiers;
 
@@ -197,6 +200,51 @@ namespace Metalama.Framework.Engine.Linking
                     .WithExpressionBody( expressionBody )
                     .WithSemicolonToken( expressionBody != null ? Token( SyntaxKind.SemicolonToken ) : default )
                     .WithGeneratedCodeAnnotation( FormattingAnnotations.SystemGeneratedCodeAnnotation );
+        }
+
+        private static MethodDeclarationSyntax GetTrampolineForMethod( MethodDeclarationSyntax method, IMethodSymbol targetSymbol )
+        {
+            // TODO: First override not being inlineable probably does not happen outside of specifically written linker tests, i.e. trampolines may not be needed.
+
+            return method
+                .WithBody( GetBody() )
+                .WithModifiers( TokenList( method.Modifiers.Where( m => !m.IsKind( SyntaxKind.AsyncKeyword ) ) ) )
+                .NormalizeWhitespace()
+                .WithLeadingTrivia( method.GetLeadingTrivia() )
+                .WithTrailingTrivia( method.GetTrailingTrivia() );
+
+            BlockSyntax GetBody()
+            {
+                var invocation =
+                    InvocationExpression(
+                        GetInvocationTarget(),
+                        ArgumentList( SeparatedList( method.ParameterList.Parameters.Select( x => Argument( IdentifierName( x.Identifier ) ) ) ) ) );
+
+                if ( !targetSymbol.ReturnsVoid )
+                {
+                    return Block(
+                        ReturnStatement(
+                            Token( SyntaxKind.ReturnKeyword ).WithTrailingTrivia( ElasticSpace ),
+                            invocation,
+                            Token( SyntaxKind.SemicolonToken ) ) );
+                }
+                else
+                {
+                    return Block( ExpressionStatement( invocation ) );
+                }
+
+                ExpressionSyntax GetInvocationTarget()
+                {
+                    if ( targetSymbol.IsStatic )
+                    {
+                        return IdentifierName( targetSymbol.Name );
+                    }
+                    else
+                    {
+                        return MemberAccessExpression( SyntaxKind.SimpleMemberAccessExpression, ThisExpression(), IdentifierName( targetSymbol.Name ) );
+                    }
+                }
+            }
         }
     }
 }

@@ -43,7 +43,7 @@ internal class UserCodeActionModel : CodeActionModel
     {
         var pipelineFactory = executionContext.ServiceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
 
-        if ( !pipelineFactory.TryGetPipeline( executionContext.ProjectId, out var pipeline ) )
+        if ( !pipelineFactory.TryGetPipeline( executionContext.ProjectKey, out var pipeline ) )
         {
             executionContext.Logger.Warning?.Log( "Could not get the pipeline." );
 

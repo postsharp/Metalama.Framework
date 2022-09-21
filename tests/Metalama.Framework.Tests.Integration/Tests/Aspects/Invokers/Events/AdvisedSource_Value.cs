@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using Metalama.Framework.Aspects;
 
 #pragma warning disable CS0067

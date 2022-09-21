@@ -2,6 +2,7 @@
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.Utilities;
+using Microsoft.VisualStudio.Threading;
 using Newtonsoft.Json;
 using StreamJsonRpc;
 using System.Diagnostics;
@@ -21,11 +22,21 @@ internal class ServiceEndpoint
 
     protected ServiceEndpoint( IServiceProvider serviceProvider, string pipeName )
     {
-        this.Logger = serviceProvider.GetLoggerFactory().GetLogger( "Remoting" );
+        this.Logger = serviceProvider.GetLoggerFactory().GetLogger( this.GetType().Name );
         this.PipeName = pipeName;
     }
 
-    public Task WhenInitialized => this.InitializedTask.Task;
+    protected async ValueTask WaitUntilInitializedAsync( CancellationToken cancellationToken = default )
+    {
+        if ( this.InitializedTask.Task.IsCompleted )
+        {
+            return;
+        }
+
+        this.Logger.Trace?.Log( $"Waiting for the endpoint '{this.PipeName}' to be initialized." );
+
+        await this.InitializedTask.Task.WithCancellation( cancellationToken );
+    }
 
     protected enum ServiceRole
     {

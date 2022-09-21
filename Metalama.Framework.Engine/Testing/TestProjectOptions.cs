@@ -41,8 +41,6 @@ namespace Metalama.Framework.Engine.Testing
             this.AdditionalAssemblies = additionalAssemblies;
         }
 
-        public override string ProjectId { get; } = Guid.NewGuid().ToString();
-
         private static Lazy<string> CreateDirectoryLazy( string path )
             => new(
                 () =>

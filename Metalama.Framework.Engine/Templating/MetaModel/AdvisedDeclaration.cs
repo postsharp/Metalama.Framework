@@ -53,7 +53,7 @@ namespace Metalama.Framework.Engine.Templating.MetaModel
 
         public IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => this.Underlying.GetDerivedDeclarations();
 
-        public override string ToString() => this.Underlying.ToString();
+        public override string? ToString() => this.Underlying.ToString();
 
         public TExtension GetMetric<TExtension>()
             where TExtension : IMetric

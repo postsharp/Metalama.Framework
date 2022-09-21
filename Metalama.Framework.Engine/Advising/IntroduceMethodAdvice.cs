@@ -217,7 +217,7 @@ namespace Metalama.Framework.Engine.Advising
 
                             return AdviceImplementationResult.Success( AdviceOutcome.Override );
                         }
-                        else if ( existingMethod.IsSealed || !existingMethod.IsVirtual )
+                        else if ( existingMethod.IsSealed || !existingMethod.IsOverridable() )
                         {
                             return
                                 AdviceImplementationResult.Failed(

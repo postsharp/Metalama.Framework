@@ -41,7 +41,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public override DeclarationKind DeclarationKind => DeclarationKind.Attribute;
 
         public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
-            => this._attributeConstruction.ToString();
+            => this._attributeConstruction.ToString() ?? "";
 
         public INamedType Type => this.Constructor.DeclaringType;
 

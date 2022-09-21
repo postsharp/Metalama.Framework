@@ -20,12 +20,13 @@ namespace Metalama.Framework.Engine.LamaSerialization
 
         static LamaSerializationBinder()
         {
-            var assemblyNames = typeof(LamaSerializationBinder).Assembly.GetReferencedAssemblies().Concat( typeof(LamaSerializationBinder).Assembly.GetName() );
+            var assemblyNames = typeof(LamaSerializationBinder).Assembly.GetReferencedAssemblies()
+                .Concat( typeof(LamaSerializationBinder).Assembly.GetName().AssertNotNull() );
 
             // The AppDomain may contain several versions of Metalama, so we need to be careful when choosing the assembly version to which we bind.
             // Instead of looking at the AppDomain, we look at the assemblies that the current specific version references. This should work for Metalama
             // and system assemblies. User assemblies are covered by CompileTimeLamaSerializationBinder. 
-            _ourAssemblyVersions = assemblyNames.GroupBy( a => a.Name )
+            _ourAssemblyVersions = assemblyNames.GroupBy( a => a.Name.AssertNotNull() )
                 .ToImmutableDictionary( x => x.Key, x => x.OrderByDescending( a => a.Version ).First().ToString() );
         }
 
@@ -74,7 +75,7 @@ namespace Metalama.Framework.Engine.LamaSerialization
             // Versioning and version update, if necessary, should be taken care of upstream, and not by the formatter.
             // When deserializing, we will assume that a compatible assembly version has been loaded in the AppDomain.
 
-            assemblyName = type.Assembly.GetName().Name;
+            assemblyName = type.Assembly.GetName().Name.AssertNotNull();
         }
     }
 }

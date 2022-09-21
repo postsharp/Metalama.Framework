@@ -8,5 +8,5 @@ namespace Metalama.Framework.Engine.CompileTime;
 /// <param name="RedistributionLicenseKey"></param>
 public record ProjectLicenseInfo( string? AssemblyName, string? RedistributionLicenseKey )
 {
-    public static ProjectLicenseInfo Empty { get; } = new ProjectLicenseInfo( default(string), default(string) );
+    public static ProjectLicenseInfo Empty { get; } = new( default(string), default(string) );
 }

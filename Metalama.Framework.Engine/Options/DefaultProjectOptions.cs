@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using System;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.Engine.Options;
@@ -10,8 +9,6 @@ namespace Metalama.Framework.Engine.Options;
 /// </summary>
 public abstract class DefaultProjectOptions : IProjectOptions
 {
-    public virtual string ProjectId => throw new NotSupportedException();
-
     public virtual string? BuildTouchFile => null;
 
     public virtual string? SourceGeneratorTouchFile => null;

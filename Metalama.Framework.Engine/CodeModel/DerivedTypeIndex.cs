@@ -2,44 +2,44 @@
 
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Transformations;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
-    internal class DerivedTypeIndex
+    public sealed partial class DerivedTypeIndex
     {
         private readonly Compilation _compilation;
 
-        public ImmutableDictionaryOfArray<INamedTypeSymbol, INamedTypeSymbol> Relationships { get; }
-
-        public ImmutableHashSet<INamedTypeSymbol> ExternalBaseTypes { get; }
+        // Maps a base type to direct derived types.
+        private readonly ImmutableDictionaryOfArray<INamedTypeSymbol, INamedTypeSymbol> _relationships;
+        private readonly ImmutableHashSet<INamedTypeSymbol> _externalBaseTypes;
 
         private DerivedTypeIndex(
             Compilation compilation,
             ImmutableDictionaryOfArray<INamedTypeSymbol, INamedTypeSymbol> relationships,
             ImmutableHashSet<INamedTypeSymbol> externalBaseTypes )
         {
-            this.Relationships = relationships;
-            this.ExternalBaseTypes = externalBaseTypes;
+            this._relationships = relationships;
+            this._externalBaseTypes = externalBaseTypes;
             this._compilation = compilation;
         }
 
         public ImmutableArray<INamedTypeSymbol> GetDerivedTypes( INamedTypeSymbol baseType, bool deep )
             => deep
-                ? this.Relationships[baseType].SelectManyRecursive( t => this.Relationships[t] ).ToImmutableArray()
-                : this.Relationships[baseType];
+                ? this._relationships[baseType].SelectManyRecursive( t => this._relationships[t] ).ToImmutableArray()
+                : this._relationships[baseType];
 
-        public DerivedTypeIndex WithIntroducedInterfaces( IEnumerable<IIntroduceInterfaceTransformation> introducedInterfaces )
+        internal DerivedTypeIndex WithIntroducedInterfaces( IEnumerable<IIntroduceInterfaceTransformation> introducedInterfaces )
         {
             Builder? builder = null;
 
             foreach ( var introducedInterface in introducedInterfaces )
             {
-                builder ??= new Builder( this._compilation, this.Relationships.ToBuilder(), this.ExternalBaseTypes.ToBuilder() );
+                builder ??= new Builder( this._compilation, this._relationships.ToBuilder(), this._externalBaseTypes.ToBuilder() );
 
                 var introducedInterfaceSymbol = introducedInterface.InterfaceType.GetSymbol().AssertNotNull();
 
@@ -62,68 +62,23 @@ namespace Metalama.Framework.Engine.CodeModel
             }
         }
 
-        public class Builder
+        public void PopulateDependencies( IDependencyCollector collector )
         {
-            private readonly Compilation _compilation;
-            private readonly ImmutableDictionaryOfArray<INamedTypeSymbol, INamedTypeSymbol>.Builder _relationships;
-
-            private readonly ImmutableHashSet<INamedTypeSymbol>.Builder _processedTypes;
-
-            public Builder( Compilation compilation )
+            foreach ( var baseType in this._relationships.Keys )
             {
-                this._compilation = compilation;
-                this._relationships = new ImmutableDictionaryOfArray<INamedTypeSymbol, INamedTypeSymbol>.Builder( SymbolEqualityComparer.Default );
-                this._processedTypes = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>( SymbolEqualityComparer.Default );
-            }
-
-            internal Builder(
-                Compilation compilation,
-                ImmutableDictionaryOfArray<INamedTypeSymbol, INamedTypeSymbol>.Builder relationships,
-                ImmutableHashSet<INamedTypeSymbol>.Builder processedTypes )
-            {
-                this._compilation = compilation;
-                this._relationships = relationships;
-                this._processedTypes = processedTypes;
-            }
-
-            public void AnalyzeType( INamedTypeSymbol type )
-            {
-                if ( !this._processedTypes.Add( type ) )
+                if ( !baseType.OriginalDefinition.DeclaringSyntaxReferences.IsDefaultOrEmpty )
                 {
-                    return;
-                }
-
-                if ( type.BaseType != null )
-                {
-                    var baseType = type.BaseType.OriginalDefinition;
-                    this._relationships.Add( baseType, type );
-                    this.AnalyzeType( baseType );
-                }
-
-                foreach ( var interfaceImpl in type.Interfaces )
-                {
-                    var interfaceType = interfaceImpl.OriginalDefinition;
-                    this._relationships.Add( interfaceType, type );
-                    this.AnalyzeType( interfaceType );
-                }
-
-                foreach ( var nestedType in type.GetTypeMembers() )
-                {
-                    this.AnalyzeType( nestedType );
+                    this.PopulateDependenciesCore( collector, baseType, baseType );
                 }
             }
+        }
 
-            public void AddDerivedType( INamedTypeSymbol baseType, INamedTypeSymbol derivedType ) => this._relationships.Add( baseType, derivedType );
-
-            public DerivedTypeIndex ToImmutable()
+        private void PopulateDependenciesCore( IDependencyCollector collector, INamedTypeSymbol rootType, INamedTypeSymbol baseType )
+        {
+            foreach ( var derivedType in this._relationships[baseType] )
             {
-                var externalBaseTypes = this._processedTypes.Where( t => !t.ContainingAssembly.Equals( this._compilation.Assembly ) )
-                    .ToImmutableHashSet<INamedTypeSymbol>( SymbolEqualityComparer.Default );
-
-                return new DerivedTypeIndex(
-                    this._compilation,
-                    this._relationships.ToImmutable(),
-                    externalBaseTypes );
+                collector.AddDependency( rootType, derivedType );
+                this.PopulateDependenciesCore( collector, rootType, derivedType );
             }
         }
     }

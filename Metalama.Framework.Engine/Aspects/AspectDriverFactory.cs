@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.Aspects
             this._serviceProvider = serviceProvider;
 
             this._weaverTypes = plugins.OfType<IAspectDriver>()
-                .ToImmutableDictionary( weaver => weaver.GetType().FullName );
+                .ToImmutableDictionary( weaver => weaver.GetType().FullName.AssertNotNull() );
         }
 
         public IAspectDriver GetAspectDriver( AspectClass aspectClass )

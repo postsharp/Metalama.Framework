@@ -1,0 +1,81 @@
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using System.Collections.Immutable;
+
+namespace Metalama.Framework.DesignTime.Pipeline.Dependencies;
+
+internal readonly partial struct DependencyGraph
+{
+    public struct Builder
+    {
+        private readonly DependencyGraph _dependencyGraph;
+        private ImmutableDictionary<ProjectKey, DependencyGraphByDependentProject>.Builder? _dependenciesByCompilationBuilder;
+
+        public Builder( DependencyGraph dependencyGraph )
+        {
+            this._dependencyGraph = dependencyGraph;
+            this._dependenciesByCompilationBuilder = null;
+        }
+
+        private ImmutableDictionary<ProjectKey, DependencyGraphByDependentProject>.Builder GetDependenciesByCompilationBuilder()
+            => this._dependenciesByCompilationBuilder ??= this._dependencyGraph.DependenciesByCompilation.ToBuilder();
+
+        private IReadOnlyDictionary<ProjectKey, DependencyGraphByDependentProject> GetDependenciesByCompilation()
+            => (IReadOnlyDictionary<ProjectKey, DependencyGraphByDependentProject>?) this._dependenciesByCompilationBuilder
+               ?? this._dependencyGraph.DependenciesByCompilation;
+
+        public void RemoveDependentSyntaxTree( string path )
+        {
+            foreach ( var compilationDependencies in this.GetDependenciesByCompilation() )
+            {
+                if ( compilationDependencies.Value.TryRemoveDependentSyntaxTree( path, out var newDependencies ) )
+                {
+                    if ( newDependencies.IsEmpty )
+                    {
+                        this.GetDependenciesByCompilationBuilder().Remove( compilationDependencies.Key );
+                    }
+                    else
+                    {
+                        this.GetDependenciesByCompilationBuilder()[compilationDependencies.Key] = newDependencies;
+                    }
+                }
+            }
+        }
+
+        public void RemoveProject( ProjectKey projectKey )
+        {
+            if ( this.GetDependenciesByCompilation().ContainsKey( projectKey ) )
+            {
+                this.GetDependenciesByCompilationBuilder().Remove( projectKey );
+            }
+        }
+
+        public void UpdateDependencies(
+            ProjectKey projectKey,
+            string dependentFilePath,
+            DependencyCollectorByDependentSyntaxTreeAndMasterProject dependencies )
+        {
+            if ( !this.GetDependenciesByCompilation().TryGetValue( projectKey, out var currentDependenciesOfCompilation ) )
+            {
+                currentDependenciesOfCompilation = new DependencyGraphByDependentProject( projectKey );
+            }
+
+            if ( currentDependenciesOfCompilation.TryUpdateDependencies(
+                    dependentFilePath,
+                    dependencies,
+                    out var newDependenciesOfCompilation ) )
+            {
+                this.GetDependenciesByCompilationBuilder()[projectKey] = newDependenciesOfCompilation;
+            }
+            else
+            {
+                // The dependencies have not changed.
+            }
+        }
+
+        public DependencyGraph ToImmutable()
+            => this._dependenciesByCompilationBuilder != null
+                ? new DependencyGraph( this._dependenciesByCompilationBuilder.ToImmutable() )
+                : this._dependencyGraph;
+    }
+}

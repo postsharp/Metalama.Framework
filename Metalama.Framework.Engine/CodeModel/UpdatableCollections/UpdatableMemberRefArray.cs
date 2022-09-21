@@ -12,30 +12,28 @@ internal class UpdatableMemberRefArray<T>
     // This is the only compilation in which the current object is mutable. It should not be mutable in other transformations.
     public CompilationModel ParentCompilation { get; }
 
-    private ImmutableArray<MemberRef<T>> _array;
-
     public UpdatableMemberRefArray( ImmutableArray<MemberRef<T>> array, CompilationModel parentCompilation )
     {
-        this._array = array;
+        this.Array = array;
         this.ParentCompilation = parentCompilation;
     }
 
-    public ImmutableArray<MemberRef<T>> Array => this._array;
+    public ImmutableArray<MemberRef<T>> Array { get; private set; }
 
     public void Add( MemberRef<T> member )
     {
-        this._array = this._array.Add( member );
+        this.Array = this.Array.Add( member );
     }
 
     public void Remove( MemberRef<T> member )
     {
-        var index = this._array.IndexOf( member, MemberRefEqualityComparer<T>.Default );
+        var index = this.Array.IndexOf( member, MemberRefEqualityComparer<T>.Default );
 
         if ( index < 0 )
         {
             throw new AssertionFailedException();
         }
 
-        this._array = this._array.RemoveAt( index );
+        this.Array = this.Array.RemoveAt( index );
     }
 }

@@ -1,0 +1,19 @@
+﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
+
+using Metalama.Framework.Project;
+
+namespace Metalama.Framework.DesignTime.Pipeline.Diff;
+
+/// <summary>
+/// An observer interface used for testing this namespace.
+/// </summary>
+public interface IDifferObserver : IService
+{
+    void OnNewCompilation();
+
+    void OnComputeIncrementalChanges();
+
+    void OnComputeNonIncrementalChanges();
+
+    void OnMergeCompilationChanges();
+}

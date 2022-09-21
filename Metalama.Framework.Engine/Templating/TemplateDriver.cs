@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.Templating
             using ( meta.WithImplementation( templateExpansionContext.MetaApi ) )
             {
                 if ( !this._userCodeInvoker.TryInvoke(
-                        () => (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, templateArguments ),
+                        () => (SyntaxNode) this._templateMethod.Invoke( templateExpansionContext.TemplateInstance, templateArguments ).AssertNotNull(),
                         templateExpansionContext,
                         out var output ) )
                 {

@@ -14,9 +14,17 @@ internal class StructuralDictionaryComparer<TKey, TValue> : IEqualityComparer<IR
         this._valueComparer = valueComparer;
     }
 
-    public bool Equals( IReadOnlyDictionary<TKey, TValue> x, IReadOnlyDictionary<TKey, TValue> y )
+    public bool Equals( IReadOnlyDictionary<TKey, TValue>? x, IReadOnlyDictionary<TKey, TValue>? y )
     {
-        if ( x.Count != y.Count )
+        if ( ReferenceEquals( x, y ) )
+        {
+            return true;
+        }
+        else if ( x == null || y == null )
+        {
+            return false;
+        }
+        else if ( x.Count != y.Count )
         {
             return false;
         }

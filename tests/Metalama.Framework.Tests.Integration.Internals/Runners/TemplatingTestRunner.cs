@@ -317,7 +317,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
                     GetProceedInvocation( targetMethod ),
                     targetMethod.ReturnType );
 
-            var augmentedServiceProvider = serviceProvider.WithService( new AspectPipelineDescription( ExecutionScenario.CompileTime, true ) );
+            var augmentedServiceProvider = serviceProvider.WithService( ExecutionScenario.CompileTime.WithTest() );
 
             var metaApi = MetaApi.ForMethod(
                 targetMethod,

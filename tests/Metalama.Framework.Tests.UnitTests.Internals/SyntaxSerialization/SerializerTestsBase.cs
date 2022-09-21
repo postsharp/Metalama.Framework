@@ -5,6 +5,7 @@ using Metalama.Framework.Engine.SyntaxSerialization;
 using Metalama.Framework.Engine.Testing;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
+using Xunit.Abstractions;
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
 {
@@ -16,6 +17,8 @@ namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization
 
         private protected SerializerTestContext CreateSerializationTestContext( CompilationModel compilation )
             => new( compilation, this.CreateProjectOptions() );
+
+        protected SerializerTestsBase( ITestOutputHelper? logger = null ) : base( logger ) { }
 
         private protected class SerializerTestContext : TestContext
         {

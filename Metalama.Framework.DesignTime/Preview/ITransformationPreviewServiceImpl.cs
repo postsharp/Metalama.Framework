@@ -7,5 +7,5 @@ namespace Metalama.Framework.DesignTime.Preview;
 
 public interface ITransformationPreviewServiceImpl : IService
 {
-    Task<PreviewTransformationResult> PreviewTransformationAsync( string projectId, string syntaxTreeName, CancellationToken cancellationToken );
+    Task<PreviewTransformationResult> PreviewTransformationAsync( ProjectKey projectKey, string syntaxTreeName, CancellationToken cancellationToken );
 }

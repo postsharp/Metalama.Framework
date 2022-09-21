@@ -20,7 +20,7 @@ namespace Metalama.Framework.Engine.Linking
     /// <summary>
     /// Stores information about introductions and intermediate compilation.
     /// </summary>
-    internal class LinkerIntroductionRegistry
+    internal partial class LinkerIntroductionRegistry
     {
         public const string IntroducedNodeIdAnnotationId = "AspectLinker_IntroducedNodeId";
 
@@ -28,7 +28,7 @@ namespace Metalama.Framework.Engine.Linking
         private readonly Dictionary<string, LinkerIntroducedMember> _introducedMemberLookup;
         private readonly Dictionary<IDeclaration, List<LinkerIntroducedMember>> _overrideMap;
         private readonly Dictionary<LinkerIntroducedMember, IDeclaration> _overrideTargetMap;
-        private readonly Dictionary<ISymbol, IDeclaration> _overrideTargetsByOriginalSymbolName;
+        private readonly Dictionary<ISymbol, IDeclaration> _overrideTargetsByOriginalSymbol;
         private readonly Dictionary<SyntaxTree, SyntaxTree> _introducedTreeMap;
         private readonly Dictionary<IDeclaration, LinkerIntroducedMember> _builderLookup;
 
@@ -43,7 +43,7 @@ namespace Metalama.Framework.Engine.Linking
             this._introducedTreeMap = introducedTreeMap;
             this._overrideMap = new Dictionary<IDeclaration, List<LinkerIntroducedMember>>( finalCompilationModel.InvariantComparer );
             this._overrideTargetMap = new Dictionary<LinkerIntroducedMember, IDeclaration>();
-            this._overrideTargetsByOriginalSymbolName = new Dictionary<ISymbol, IDeclaration>( StructuralSymbolComparer.Default );
+            this._overrideTargetsByOriginalSymbol = new Dictionary<ISymbol, IDeclaration>( StructuralSymbolComparer.Default );
             this._builderLookup = new Dictionary<IDeclaration, LinkerIntroducedMember>();
 
             foreach ( var introducedMember in introducedMembers )
@@ -60,7 +60,7 @@ namespace Metalama.Framework.Engine.Linking
 
                     if ( overrideTransformation.OverriddenDeclaration is Declaration declaration )
                     {
-                        this._overrideTargetsByOriginalSymbolName[declaration.Symbol] = declaration;
+                        this._overrideTargetsByOriginalSymbol[declaration.Symbol] = declaration;
                     }
                 }
 
@@ -96,7 +96,7 @@ namespace Metalama.Framework.Engine.Linking
             {
                 // Original code declaration - we should be able to get ICodeElement by symbol name.
 
-                if ( !this._overrideTargetsByOriginalSymbolName.TryGetValue( referencedSymbol, out var originalElement ) )
+                if ( !this._overrideTargetsByOriginalSymbol.TryGetValue( referencedSymbol, out var originalElement ) )
                 {
                     return Array.Empty<LinkerIntroducedMember>();
                 }
@@ -147,7 +147,7 @@ namespace Metalama.Framework.Engine.Linking
 
             if ( overrideTarget is Declaration originalDeclaration )
             {
-                return originalDeclaration.GetSymbol();
+                return SymbolTranslator.GetInstance( this._intermediateCompilation ).Translate( originalDeclaration.GetSymbol().AssertNotNull() );
             }
             else if ( overrideTarget is IDeclarationBuilder builder )
             {
@@ -265,9 +265,11 @@ namespace Metalama.Framework.Engine.Linking
 
                 if ( this.IsOverride( symbol ) )
                 {
-                    if ( returned.Add( symbol ) )
+                    var overrideTarget = this.GetOverrideTarget( symbol ).AssertNotNull();
+
+                    if ( returned.Add( overrideTarget ) )
                     {
-                        yield return this.GetOverrideTarget( symbol ).AssertNotNull();
+                        yield return overrideTarget;
                     }
                 }
             }
@@ -337,6 +339,16 @@ namespace Metalama.Framework.Engine.Linking
 
                     return this.GetSymbolForIntroducedMember( lastOverride );
             }
+        }
+
+        /// <summary>
+        /// Gets the last (outermost) override of the method.
+        /// </summary>
+        /// <param name="symbol">Method symbol.</param>
+        /// <returns>Symbol.</returns>
+        public IMethodSymbol GetLastOverride( IMethodSymbol symbol )
+        {
+            return (IMethodSymbol) this.GetLastOverride( (ISymbol) symbol );
         }
 
         /// <summary>

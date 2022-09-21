@@ -17,8 +17,8 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
     private static AnalysisProcessEndpoint? _instance;
 
     private readonly ApiImplementation _apiImplementation;
-    private readonly ConcurrentDictionary<string, string> _connectedClients = new();
-    private readonly ConcurrentDictionary<string, ImmutableDictionary<string, string>> _sourcesForUnconnectedClients = new();
+    private readonly ConcurrentDictionary<ProjectKey, ProjectKey> _connectedProjectCallbacks = new();
+    private readonly ConcurrentDictionary<ProjectKey, ImmutableDictionary<string, string>> _generatedSourcesForUnconnectedClients = new();
     private readonly IServiceProvider _serviceProvider;
 
     private readonly ICompileTimeCodeEditingStatusService? _compileTimeCodeEditingStatusService;
@@ -71,8 +71,13 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
 
         if ( registrationServiceProvider != null )
         {
+            this.Logger.Trace?.Log( $"Registering the endpoint '{this.PipeName}' on the hub." );
             var registrationService = await registrationServiceProvider.GetApiAsync( cancellationToken );
             await registrationService.RegisterEndpointAsync( this.PipeName, cancellationToken );
+        }
+        else
+        {
+            this.Logger.Warning?.Log( "Hub service not available." );
         }
     }
 
@@ -94,36 +99,64 @@ internal partial class AnalysisProcessEndpoint : ServerEndpoint, IService
     public event EventHandler<ClientConnectedEventArgs>? ClientConnected;
 
     public async Task PublishGeneratedSourcesAsync(
-        string projectId,
+        ProjectKey projectKey,
         ImmutableDictionary<string, string> generatedSources,
         CancellationToken cancellationToken = default )
     {
-        if ( this.WhenInitialized.IsCompleted && this._connectedClients.ContainsKey( projectId ) )
+        void StoreWhenUnconnected()
         {
-            this.Logger.Trace?.Log( $"Publishing source for the client '{projectId}'." );
-            await this._client!.PublishGeneratedCodeAsync( projectId, generatedSources, cancellationToken );
+            Thread.MemoryBarrier();
+            this._generatedSourcesForUnconnectedClients[projectKey] = generatedSources;
+        }
+
+        if ( !this.WaitUntilInitializedAsync( cancellationToken ).IsCompleted )
+        {
+            this.Logger.Warning?.Log( $"Cannot publish source for the client '{projectKey}' because the endpoint initialization has not completed." );
+
+            StoreWhenUnconnected();
+        }
+        else if ( !this._connectedProjectCallbacks.ContainsKey( projectKey ) )
+        {
+            this.Logger.Warning?.Log( $"Cannot publish source for the client '{projectKey}' because the callback interface has not connected yet." );
+
+            StoreWhenUnconnected();
         }
         else
         {
-            Thread.MemoryBarrier();
-
-            this.Logger.Warning?.Log( $"Cannot publish source for the client '{projectId}' because it has not connected yet." );
-            this._sourcesForUnconnectedClients[projectId] = generatedSources;
+            this.Logger.Trace?.Log( $"Publishing source for the client '{projectKey}'." );
+            await this._client!.PublishGeneratedCodeAsync( projectKey, generatedSources, cancellationToken );
         }
     }
 
-    public void RegisterProject( string projectId ) => _ = this.RegisterProjectAsync( projectId );
-
-    public async Task RegisterProjectAsync( string projectId )
+#pragma warning disable VSTHRD100 // Avoid "async void" methods.
+    public async void RegisterProject( ProjectKey projectKey )
     {
-        await this.WhenInitialized;
+        try
+        {
+            await this.RegisterProjectAsync( projectKey );
+        }
+        catch ( Exception e )
+        {
+            DesignTimeExceptionHandler.ReportException( e, this.Logger );
+        }
+    }
+#pragma warning restore VSTHRD100 // Avoid "async void" methods.
+
+    public async Task RegisterProjectAsync( ProjectKey projectKey )
+    {
+        await this.WaitUntilInitializedAsync();
 
         var registrationServiceProvider = this._serviceProvider.GetService<IServiceHubApiProvider>();
 
         if ( registrationServiceProvider != null )
         {
+            this.Logger.Trace?.Log( $"Registering the project '{projectKey}' on the hub." );
             var registrationService = await registrationServiceProvider.GetApiAsync( CancellationToken.None );
-            await registrationService.RegisterProjectAsync( projectId, this.PipeName, CancellationToken.None );
+            await registrationService.RegisterProjectAsync( projectKey, this.PipeName, CancellationToken.None );
+        }
+        else
+        {
+            this.Logger.Trace?.Log( $"The project '{projectKey}' was not registered on the hub because there is no hub service." );
         }
     }
 }

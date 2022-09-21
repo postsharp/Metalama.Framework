@@ -96,7 +96,7 @@ namespace Metalama.Framework.Engine.Transformations
             this.Kind = kind;
         }
 
-        public override string ToString() => this.Introduction.ToString();
+        public override string? ToString() => this.Introduction.ToString();
 
         internal IntroducedMember WithSyntax( MemberDeclarationSyntax newSyntax )
         {

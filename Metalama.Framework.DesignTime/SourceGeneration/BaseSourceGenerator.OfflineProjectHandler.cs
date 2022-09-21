@@ -15,7 +15,10 @@ public partial class BaseSourceGenerator
     {
         private readonly ILogger _logger;
 
-        public OfflineProjectHandler( IServiceProvider serviceProvider, IProjectOptions projectOptions ) : base( serviceProvider, projectOptions )
+        public OfflineProjectHandler( IServiceProvider serviceProvider, IProjectOptions projectOptions, ProjectKey projectKey ) : base(
+            serviceProvider,
+            projectOptions,
+            projectKey )
         {
             this._logger = serviceProvider.GetLoggerFactory().GetLogger( "DesignTime" );
         }

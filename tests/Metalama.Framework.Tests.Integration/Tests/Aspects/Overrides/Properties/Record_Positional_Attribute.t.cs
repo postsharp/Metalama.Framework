@@ -10,6 +10,7 @@ internal record MyRecord(int A, int B)
             global::System.Console.WriteLine("Sob");
             return this._b;
         }
+
         init
         {
             this._b = value;

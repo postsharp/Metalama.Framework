@@ -3,6 +3,8 @@
 using Metalama.Backstage.Configuration;
 using Metalama.Backstage.Extensibility;
 using Metalama.Framework.DesignTime.Pipeline;
+using Metalama.Framework.Engine.Collections;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
@@ -61,21 +63,20 @@ namespace Metalama.Framework.DesignTime.Diagnostics
                     {
                         var missing = GetMissingDiagnostics( f, pipelineResult );
 
-                        foreach ( var diagnostic in missing.Diagnostics )
+                        return f with
                         {
-                            f.Diagnostics.Add( diagnostic.Id, new UserDiagnosticRegistration( diagnostic ) );
-                        }
-
-                        foreach ( var suppression in missing.Suppressions )
-                        {
-                            f.Suppressions.Add( suppression );
-                        }
+                            Diagnostics = f.Diagnostics.AddRange(
+                                missing.Diagnostics.Select(
+                                    d => new KeyValuePair<string, UserDiagnosticRegistration>( d.Id, new UserDiagnosticRegistration( d ) ) ) ),
+                            Suppressions = f.Suppressions.AddRange( missing.Suppressions )
+                        };
                     } );
             }
             catch ( Exception e )
             {
                 // We swallow exceptions because we don't want to fail the pipeline in case of error here.
                 this._configurationManager.Logger.Error?.Log( $"Cannot register user diagnostics and registrations: {e.Message}." );
+                DesignTimeExceptionHandler.ReportException( e );
             }
         }
 
@@ -111,9 +112,21 @@ namespace Metalama.Framework.DesignTime.Diagnostics
         {
             public static readonly DiagnosticDescriptorComparer Instance = new();
 
-            public bool Equals( DiagnosticDescriptor x, DiagnosticDescriptor y ) => x.Id == y.Id;
+            public bool Equals( DiagnosticDescriptor? x, DiagnosticDescriptor? y )
+            {
+                if ( ReferenceEquals( x, y ) )
+                {
+                    return true;
+                }
+                else if ( x == null || y == null )
+                {
+                    return false;
+                }
 
-            public int GetHashCode( DiagnosticDescriptor obj ) => obj.Id.GetHashCode();
+                return x.Id == y.Id;
+            }
+
+            public int GetHashCode( DiagnosticDescriptor obj ) => obj.Id.GetHashCodeOrdinal();
         }
     }
 }

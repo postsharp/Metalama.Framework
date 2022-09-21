@@ -9,14 +9,23 @@ using System.Collections.Generic;
 namespace Metalama.Framework.Engine.Utilities.Comparers
 {
     internal class MemberComparer<T> : IEqualityComparer<T>
-        where T : IMember
+        where T : class, IMember
     {
         private MemberComparer() { }
 
         public static MemberComparer<T> Instance { get; } = new();
 
-        public bool Equals( T x, T y )
+        public bool Equals( T? x, T? y )
         {
+            if ( ReferenceEquals( x, y ) )
+            {
+                return true;
+            }
+            else if ( x == null || y == null )
+            {
+                return false;
+            }
+
             if ( x.Name != y.Name )
             {
                 return false;

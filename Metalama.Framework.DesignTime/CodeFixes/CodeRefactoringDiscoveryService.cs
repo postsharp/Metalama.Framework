@@ -25,14 +25,14 @@ public class CodeRefactoringDiscoveryService : ICodeRefactoringDiscoveryService
     }
 
     public async Task<ComputeRefactoringResult> ComputeRefactoringsAsync(
-        string projectId,
+        ProjectKey projectKey,
         string syntaxTreePath,
         TextSpan span,
         CancellationToken cancellationToken )
     {
-        if ( !this._pipelineFactory.TryGetPipeline( projectId, out var pipeline ) )
+        if ( !this._pipelineFactory.TryGetPipeline( projectKey, out var pipeline ) )
         {
-            this._logger.Warning?.Log( $"ComputeRefactorings('{projectId}', '{syntaxTreePath}'): cannot get the pipeline for project '{projectId}'." );
+            this._logger.Warning?.Log( $"ComputeRefactorings('{projectKey}', '{syntaxTreePath}'): cannot get the pipeline for project '{projectKey}'." );
 
             return ComputeRefactoringResult.Empty;
         }
@@ -41,7 +41,7 @@ public class CodeRefactoringDiscoveryService : ICodeRefactoringDiscoveryService
 
         if ( compilation == null )
         {
-            this._logger.Warning?.Log( $"ComputeRefactorings('{projectId}', '{syntaxTreePath}'): cannot get the compilation for project '{projectId}'." );
+            this._logger.Warning?.Log( $"ComputeRefactorings('{projectKey}', '{syntaxTreePath}'): cannot get the compilation for project '{projectKey}'." );
 
             return ComputeRefactoringResult.Empty;
         }
@@ -51,7 +51,7 @@ public class CodeRefactoringDiscoveryService : ICodeRefactoringDiscoveryService
         if ( syntaxTree == null )
         {
             this._logger.Warning?.Log(
-                $"ComputeRefactorings('{projectId}', '{syntaxTreePath}'): cannot get the SyntaxTree '{syntaxTreePath}' in project '{projectId}'." );
+                $"ComputeRefactorings('{projectKey}', '{syntaxTreePath}'): cannot get the SyntaxTree '{syntaxTreePath}' in project '{projectKey}'." );
 
             return ComputeRefactoringResult.Empty;
         }

@@ -25,6 +25,7 @@ namespace Metalama.Framework.Code
         /// <summary>
         /// Gets a value indicating whether the member is <c>sealed</c>.
         /// </summary>
+        /// <seealso cref="MemberExtensions.IsOverridable"/>
         bool IsSealed { get; }
 
         /// <summary>

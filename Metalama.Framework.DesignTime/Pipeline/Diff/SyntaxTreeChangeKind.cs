@@ -2,11 +2,14 @@
 
 namespace Metalama.Framework.DesignTime.Pipeline.Diff
 {
+    /// <summary>
+    /// Kinds of <see cref="SyntaxTreeChange"/>.
+    /// </summary>
     internal enum SyntaxTreeChangeKind
     {
         None,
         Added,
         Changed,
-        Deleted
+        Removed
     }
 }

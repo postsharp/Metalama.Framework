@@ -3,7 +3,6 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Engine.CodeModel.Collections;
-using System;
 using System.Linq;
 using System.Reflection;
 
@@ -24,11 +23,11 @@ internal class BuiltConstructor : BuiltMember, IConstructorImpl
 
     public IParameterList Parameters => ParameterList.Empty;
 
-    public System.Reflection.MethodBase ToMethodBase() => throw new NotImplementedException();
+    public System.Reflection.MethodBase ToMethodBase() => this.ToConstructorInfo();
 
     public ConstructorInitializerKind InitializerKind => this.ConstructorBuilder.InitializerKind;
 
-    public ConstructorInfo ToConstructorInfo() => throw new NotImplementedException();
+    public ConstructorInfo ToConstructorInfo() => this.ConstructorBuilder.ToConstructorInfo();
 
     public IConstructor? GetBaseConstructor()
     {

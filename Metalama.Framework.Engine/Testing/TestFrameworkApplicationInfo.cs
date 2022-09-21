@@ -4,7 +4,7 @@ using Metalama.Backstage.Extensibility;
 
 namespace Metalama.Framework.Engine.Testing;
 
-internal class TestFrameworkApplicationInfo : ApplicationInfoBase
+public class TestFrameworkApplicationInfo : ApplicationInfoBase
 {
     public TestFrameworkApplicationInfo() : base( typeof(TestFrameworkApplicationInfo).Assembly ) { }
 

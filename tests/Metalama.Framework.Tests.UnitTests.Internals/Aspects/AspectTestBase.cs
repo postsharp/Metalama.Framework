@@ -13,7 +13,7 @@ namespace Metalama.Framework.Tests.UnitTests.Aspects;
 
 public class AspectTestBase : TestBase
 {
-    public async Task<CompileTimeAspectPipelineResult?> CompileAsync( string code )
+    public async Task<CompileTimeAspectPipelineResult?> CompileAsync( string code, bool throwOnError = true )
     {
         using var domain = new UnloadableCompileTimeDomain();
         var testContext = this.CreateTestContext();
@@ -22,10 +22,17 @@ public class AspectTestBase : TestBase
         var pipeline = new CompileTimeAspectPipeline( testContext.ServiceProvider, true, domain );
         var diagnostics = new DiagnosticList();
 
-        return await pipeline.ExecuteAsync( diagnostics, compilation, ImmutableArray<ManagedResource>.Empty, CancellationToken.None );
+        var result = await pipeline.ExecuteAsync( diagnostics, compilation, ImmutableArray<ManagedResource>.Empty, CancellationToken.None );
+
+        if ( result == null && throwOnError )
+        {
+            throw new DiagnosticException( "The Metalama pipeline failed.", diagnostics.ToImmutableArray() );
+        }
+
+        return result;
     }
 
-    public async Task<CompileTimeAspectPipelineResult?> CompileAsync( IReadOnlyDictionary<string, string> code )
+    public async Task<CompileTimeAspectPipelineResult?> CompileAsync( IReadOnlyDictionary<string, string> code, bool throwOnError = true )
     {
         using var domain = new UnloadableCompileTimeDomain();
         var testContext = this.CreateTestContext();
@@ -34,6 +41,13 @@ public class AspectTestBase : TestBase
         var pipeline = new CompileTimeAspectPipeline( testContext.ServiceProvider, true, domain );
         var diagnostics = new DiagnosticList();
 
-        return await pipeline.ExecuteAsync( diagnostics, compilation, ImmutableArray<ManagedResource>.Empty, CancellationToken.None );
+        var result = await pipeline.ExecuteAsync( diagnostics, compilation, ImmutableArray<ManagedResource>.Empty, CancellationToken.None );
+
+        if ( result == null && throwOnError )
+        {
+            throw new DiagnosticException( "The Metalama pipeline failed.", diagnostics.ToImmutableArray() );
+        }
+
+        return result;
     }
 }

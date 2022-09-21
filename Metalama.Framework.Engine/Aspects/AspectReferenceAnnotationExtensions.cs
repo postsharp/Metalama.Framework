@@ -8,7 +8,7 @@ namespace Metalama.Framework.Engine.Aspects
     /// <summary>
     /// Provides extension methods for handling of aspect reference annotations.
     /// </summary>
-    internal static class AspectReferenceAnnotationExtensions
+    public static class AspectReferenceAnnotationExtensions
     {
         public const string AnnotationKind = "MetalamaAspectReference";
 
@@ -18,7 +18,7 @@ namespace Metalama.Framework.Engine.Aspects
         /// <param name="node">Syntax node.</param>
         /// <param name="specification">Specification of the aspect reference.</param>
         /// <returns></returns>
-        public static bool TryGetAspectReference( this SyntaxNode node, out AspectReferenceSpecification specification )
+        internal static bool TryGetAspectReference( this SyntaxNode node, out AspectReferenceSpecification specification )
         {
             var annotationValue = node.GetAnnotations( AnnotationKind ).SingleOrDefault()?.Data;
 
@@ -43,7 +43,7 @@ namespace Metalama.Framework.Engine.Aspects
         /// <param name="node"></param>
         /// <param name="annotation"></param>
         /// <returns>Annotated syntax node.</returns>
-        public static T WithAspectReferenceAnnotation<T>( this T node, in AspectReferenceSpecification annotation )
+        internal static T WithAspectReferenceAnnotation<T>( this T node, in AspectReferenceSpecification annotation )
             where T : SyntaxNode
         {
             return node.WithAdditionalAnnotations( new SyntaxAnnotation( AnnotationKind, annotation.ToString() ) );
@@ -59,7 +59,7 @@ namespace Metalama.Framework.Engine.Aspects
         /// <param name="targetKind">Target kind. For example self or property get accessor.</param>
         /// <param name="flags">Flags.</param>
         /// <returns>Annotated syntax node.</returns>
-        public static T WithAspectReferenceAnnotation<T>(
+        internal static T WithAspectReferenceAnnotation<T>(
             this T node,
             AspectLayerId aspectLayerId,
             AspectReferenceOrder order,

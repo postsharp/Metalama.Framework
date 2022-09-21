@@ -14,13 +14,13 @@ internal interface IAnalysisProcessApi : ICodeRefactoringDiscoveryService, ICode
     /// Notifies the analysis process that the user process is now ready to process notifications for a given project, which means that the analysis process will start
     /// calling <see cref="IProjectHandlerCallback.PublishGeneratedCodeAsync"/> for this project.
     /// </summary>
-    Task OnUserProcessProjectHandlerConnectedAsync( string projectId, CancellationToken cancellationToken = default );
+    Task RegisterProjectCallbackAsync( ProjectKey projectKey, CancellationToken cancellationToken = default );
 
     /// <summary>
     /// Computes the transformed code by running the pipeline, and returns the result.
     /// </summary>
     Task<PreviewTransformationResult> PreviewTransformationAsync(
-        string projectId,
+        ProjectKey projectKey,
         string syntaxTreeName,
         CancellationToken cancellationToken );
 

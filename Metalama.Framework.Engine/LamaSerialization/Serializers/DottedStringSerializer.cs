@@ -9,7 +9,7 @@ namespace Metalama.Framework.Engine.LamaSerialization.Serializers
     {
         public override object Convert( object value, Type targetType )
         {
-            return (DottedString) System.Convert.ToString( value, CultureInfo.InvariantCulture );
+            return (DottedString) System.Convert.ToString( value, CultureInfo.InvariantCulture ).AssertNotNull();
         }
     }
 }

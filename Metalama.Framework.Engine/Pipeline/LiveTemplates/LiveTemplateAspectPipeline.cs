@@ -99,7 +99,7 @@ public class LiveTemplateAspectPipeline : AspectPipeline
                 {
                     ((AspectClass) aspectClass).CreateAspectInstance(
                         targetDeclaration,
-                        (IAspect) Activator.CreateInstance( this.AspectClasses[0].Type ),
+                        (IAspect) Activator.CreateInstance( this.AspectClasses[0].Type ).AssertNotNull(),
                         default )
                 } );
         }

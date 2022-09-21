@@ -5,6 +5,8 @@
         <RootNamespace>Metalama.SourceTransformer</RootNamespace>
         <!-- The next line does not seem to work. -->
         <ProduceReferenceAssembly>True</ProduceReferenceAssembly>
+        <!-- This avoids licensing this source transformer as a PostSharp product. -->
+        <Company>PostSharp Technologies - Internal</Company>
     </PropertyGroup>
 
     <ItemGroup>

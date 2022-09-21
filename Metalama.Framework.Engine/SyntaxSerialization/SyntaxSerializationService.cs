@@ -86,6 +86,7 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
             this.RegisterSerializer( new CompileTimeParameterInfoSerializer( this ) );
             this.RegisterSerializer( new CompileTimeReturnParameterInfoSerializer( this ) );
             this.RegisterSerializer( new CompileTimeFieldOrPropertyInfoSerializer( this ) );
+            this.RegisterSerializer( new CompileTimeFieldInfoSerializer( this ) );
 
             // Tuples.
             this.RegisterSerializer( new ValueTupleSerializer.Size1( this ) );
