@@ -50,7 +50,7 @@ namespace Metalama.Framework.Engine.Linking
             var diagnostics = new UserDiagnosticSink( input.CompileTimeProject, null );
 
             var aspectLayerIdComparer = new AspectLayerIdComparer( input.OrderedAspectLayers );
-            var transformationComparer = new TransformationComparer( aspectLayerIdComparer );
+            var transformationComparer = new TransformationLinkerOrderComparer( aspectLayerIdComparer );
             var nameProvider = new LinkerIntroductionNameProvider( input.CompilationModel );
             var syntaxTransformationCollection = new SyntaxTransformationCollection( transformationComparer );
             var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
@@ -121,7 +121,7 @@ namespace Metalama.Framework.Engine.Linking
 
             await this._taskScheduler.RunInParallelAsync( symbolMemberLevelTransformations.Values, t => t.Sort( transformationComparer ), cancellationToken );
 
-            FindPrimarySyntaxTreeForGlobalAttributes( input.CompilationModel, out var syntaxTreeForGlobalAttributes );
+            var syntaxTreeForGlobalAttributes = input.CompilationModel.PartialCompilation.SyntaxTreeForCompilationLevelAttributes;
 
             // Group diagnostic suppressions by target.
             var suppressionsByTarget = input.DiagnosticSuppressions.ToMultiValueDictionary(
@@ -187,17 +187,7 @@ namespace Metalama.Framework.Engine.Linking
                     projectOptions );
         }
 
-        private static void FindPrimarySyntaxTreeForGlobalAttributes( CompilationModel compilation, out SyntaxTree globalAttributeSyntaxTree )
-        {
-            globalAttributeSyntaxTree =
-                compilation.Attributes.SelectMany( a => a.GetDeclaringSyntaxReferences() )
-                    .Select( x => x.SyntaxTree )
-                    .OrderByDescending( t => t.FilePath.Length )
-                    .FirstOrDefault()
-                ?? compilation.PartialCompilation.SyntaxTrees.OrderByDescending( t => t.Key.Length )
-                    .FirstOrDefault()
-                    .Value;
-        }
+       
 
         private static void IndexNodesWithModifiedAttributes(
             ITransformation transformation,
@@ -326,8 +316,6 @@ namespace Metalama.Framework.Engine.Linking
                             this._serviceProvider,
                             input.CompilationModel );
 
-                        // TODO: the order of execution of the template expansion logic must be deterministic within a syntax tree,
-                        // otherwise LexicalScope name generator is undeterministic. 
                         var introducedMembers = memberIntroduction.GetIntroducedMembers( introductionContext );
 
                         introducedMembers = PostProcessIntroducedMembers( introducedMembers );

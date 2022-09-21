@@ -23,7 +23,7 @@ namespace Metalama.Framework.Engine.Linking
         /// </summary>
         private class SyntaxTransformationCollection
         {
-            private readonly TransformationComparer _comparer;
+            private readonly TransformationLinkerOrderComparer _comparer;
             private readonly ConcurrentBag<LinkerIntroducedMember> _introducedMembers;
             private readonly ConcurrentDictionary<InsertPosition, UnsortedConcurrentLinkedList<LinkerIntroducedMember>> _introducedMembersByInsertPosition;
 
@@ -37,7 +37,7 @@ namespace Metalama.Framework.Engine.Linking
 
             public IReadOnlyCollection<LinkerIntroducedMember> IntroducedMembers => this._introducedMembers;
 
-            public SyntaxTransformationCollection( TransformationComparer comparer )
+            public SyntaxTransformationCollection( TransformationLinkerOrderComparer comparer )
             {
                 this._comparer = comparer;
                 this._introducedMembers = new ConcurrentBag<LinkerIntroducedMember>();

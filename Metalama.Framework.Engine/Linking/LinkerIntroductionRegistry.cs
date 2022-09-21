@@ -26,7 +26,7 @@ namespace Metalama.Framework.Engine.Linking
     {
         public const string IntroducedNodeIdAnnotationId = "AspectLinker_IntroducedNodeId";
 
-        private readonly TransformationComparer _comparer;
+        private readonly TransformationLinkerOrderComparer _comparer;
         private readonly Compilation _intermediateCompilation;
         private readonly IReadOnlyDictionary<string, LinkerIntroducedMember> _introducedMemberLookup;
         private readonly IReadOnlyDictionary<IDeclaration, UnsortedConcurrentLinkedList<LinkerIntroducedMember>> _overrideMap;
@@ -36,7 +36,7 @@ namespace Metalama.Framework.Engine.Linking
         private readonly IReadOnlyDictionary<SyntaxTree, SyntaxTree> _introducedTreeMap;
 
         public LinkerIntroductionRegistry(
-            TransformationComparer comparer,
+            TransformationLinkerOrderComparer comparer,
             CompilationModel finalCompilationModel,
             Compilation intermediateCompilation,
             IReadOnlyDictionary<SyntaxTree, SyntaxTree> introducedTreeMap,

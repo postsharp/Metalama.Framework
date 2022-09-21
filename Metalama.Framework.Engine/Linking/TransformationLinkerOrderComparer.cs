@@ -6,11 +6,11 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Linking;
 
-internal class TransformationComparer : Comparer<ITransformation>
+internal class TransformationLinkerOrderComparer : Comparer<ITransformation>
 {
     private readonly AspectLayerIdComparer _aspectLayerIdComparer;
 
-    public TransformationComparer( AspectLayerIdComparer aspectLayerIdComparer )
+    public TransformationLinkerOrderComparer( AspectLayerIdComparer aspectLayerIdComparer )
     {
         this._aspectLayerIdComparer = aspectLayerIdComparer;
     }
