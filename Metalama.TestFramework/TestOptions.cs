@@ -238,6 +238,12 @@ namespace Metalama.TestFramework
         public string? DependencyLicenseFile { get; set; }
 
         /// <summary>
+        /// Gets or sets the fully qualified name of expected exception type to be thrown.
+        /// To set this option in a test, add this comment to your test file: <c>// @ExpectedException(fully qualified exception type name)</c>.
+        /// </summary>
+        public string? ExpectedException { get; set; }
+
+        /// <summary>
         /// Applies <see cref="TestDirectoryOptions"/> to the current object by overriding any property
         /// that is not defined in the current object but defined in the argument.
         /// </summary>
@@ -297,6 +303,8 @@ namespace Metalama.TestFramework
             this.LicenseFile ??= baseOptions.LicenseFile;
 
             this.DependencyLicenseFile ??= baseOptions.DependencyLicenseFile;
+
+            this.ExpectedException ??= baseOptions.ExpectedException;
         }
 
         public IReadOnlyList<string> InvalidSourceOptions => this._invalidSourceOptions;
@@ -492,6 +500,12 @@ namespace Metalama.TestFramework
                     case "DependencyLicenseFile":
 
                         this.DependencyLicenseFile = optionArg;
+
+                        break;
+
+                    case "ExpectedException":
+
+                        this.ExpectedException = optionArg;
 
                         break;
 

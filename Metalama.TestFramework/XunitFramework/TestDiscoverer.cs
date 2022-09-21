@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.Versioning;
 using System.Threading;
@@ -48,57 +47,9 @@ namespace Metalama.TestFramework.XunitFramework
 
         public TestProjectProperties GetTestProjectProperties()
         {
-            var customAttributes = this._assembly
-                .GetCustomAttributes( typeof(AssemblyMetadataAttribute) )
-                .ToList();
+            var metadata = TestAssemblyMetadataReader.GetMetadata( this._assembly );
 
-            string? GetValue( string key, bool required, string? defaultValue = null )
-            {
-                var attributes = customAttributes
-                    .Where( a => string.Equals( (string) a.GetConstructorArguments().First(), key, StringComparison.Ordinal ) )
-                    .ToList();
-
-                if ( attributes.Count == 0 && !required )
-                {
-                    return defaultValue;
-                }
-
-                if ( attributes.Count != 1 )
-                {
-                    throw new InvalidOperationException(
-                        $"The assembly '{this._assembly.AssemblyPath}' must have a single AssemblyMetadataAttribute with Key = \"{key}\" but it has {attributes.Count}." );
-                }
-
-                var value = (string?) attributes[0].GetConstructorArguments().ElementAt( 1 );
-
-                if ( string.IsNullOrEmpty( value ) )
-                {
-                    if ( required )
-                    {
-                        throw new InvalidOperationException(
-                            $"The assembly '{this._assembly.AssemblyPath}' AssemblyMetadataAttribute with Key = \"{key}\" has a null or empty value." );
-                    }
-                    else
-                    {
-                        return defaultValue;
-                    }
-                }
-
-                return value;
-            }
-
-            var projectDirectory = GetValue( "ProjectDirectory", true ).NotNull();
-
-            var parserSymbols = GetValue( "DefineConstants", false, "" )
-                .NotNull()
-                .Split( ';' )
-                .Select( s => s.Trim() )
-                .Where( s => !string.IsNullOrEmpty( s ) )
-                .ToImmutableArray();
-
-            var targetFramework = GetValue( "TargetFramework", true ).NotNull();
-
-            return new TestProjectProperties( projectDirectory, parserSymbols, targetFramework );
+            return new TestProjectProperties( metadata.ProjectDirectory, metadata.ParserSymbols, metadata.TargetFramework, metadata.License );
         }
 
         public List<TestCase> Discover( string subDirectory, ImmutableHashSet<string> excludedDirectories )

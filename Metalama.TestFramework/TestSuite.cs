@@ -26,7 +26,10 @@ namespace Metalama.TestFramework
             TestingServices.Initialize();
         }
 
-        private record AssemblyAssets( TestProjectProperties ProjectProperties, TestDirectoryOptionsReader OptionsReader );
+        private record AssemblyAssets(
+            TestProjectProperties ProjectProperties,
+            TestDirectoryOptionsReader OptionsReader,
+            TestProjectReferences ProjectReferences );
 
         private static readonly ConditionalWeakTable<Assembly, AssemblyAssets> _cache = new();
 
@@ -36,11 +39,15 @@ namespace Metalama.TestFramework
                 a =>
                 {
                     var assemblyInfo = new ReflectionAssemblyInfo( a );
+                    var metadata = TestAssemblyMetadataReader.GetMetadata( new ReflectionAssemblyInfo( a ) );
                     var discoverer = new TestDiscoverer( assemblyInfo );
 
                     var projectProperties = discoverer.GetTestProjectProperties();
 
-                    return new AssemblyAssets( projectProperties, new TestDirectoryOptionsReader( projectProperties.ProjectDirectory ) );
+                    return new AssemblyAssets(
+                        projectProperties,
+                        new TestDirectoryOptionsReader( projectProperties.ProjectDirectory ),
+                        metadata.ToProjectReferences() );
                 } );
 
         protected ITestOutputHelper Logger { get; }
@@ -73,11 +80,12 @@ namespace Metalama.TestFramework
         /// <param name="relativePath">Relative path of the file relatively to the directory of the caller code.</param>
         protected async Task RunTestAsync( string relativePath, [CallerMemberName] string? callerMemberName = null )
         {
-            var directory = this.GetDirectory( callerMemberName! );
-            var assemblyAssets = GetAssemblyAssets( this.GetType().Assembly );
-            var projectReferences = TestAssemblyMetadataReader.GetMetadata( new ReflectionAssemblyInfo( this.GetType().Assembly ) ).ToProjectReferences();
+            var testSuiteAssembly = this.GetType().Assembly;
+            var assemblyAssets = GetAssemblyAssets( testSuiteAssembly );
 
-            using var testOptions = new TestProjectOptions( plugIns: projectReferences.PlugIns );
+            var directory = this.GetDirectory( callerMemberName! );
+
+            using var testOptions = new TestProjectOptions( plugIns: assemblyAssets.ProjectReferences.PlugIns );
             using var testContext = new TestContext( testOptions );
 
             var fullPath = Path.Combine( directory, relativePath );
@@ -86,7 +94,9 @@ namespace Metalama.TestFramework
             var projectRelativePath = PathUtil.GetRelativePath( assemblyAssets.ProjectProperties.ProjectDirectory, fullPath );
 
             var testInput = TestInput.FromFile( assemblyAssets.ProjectProperties, assemblyAssets.OptionsReader, projectRelativePath );
-            var testRunner = TestRunnerFactory.CreateTestRunner( testInput, testContext.ServiceProvider, projectReferences, this.Logger );
+
+            var testRunner = TestRunnerFactory.CreateTestRunner( testInput, testContext.ServiceProvider, assemblyAssets.ProjectReferences, this.Logger );
+
             await testRunner.RunAndAssertAsync( testInput );
         }
     }
