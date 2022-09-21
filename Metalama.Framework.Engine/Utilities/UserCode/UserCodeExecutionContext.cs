@@ -4,7 +4,7 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Pipeline;
+using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Project;
 using System;
 using System.Globalization;
@@ -19,14 +19,31 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
     internal class UserCodeExecutionContext : IExecutionContext
     {
         private readonly IDiagnosticAdder? _diagnosticAdder;
-
+        private readonly IDependencyCollector? _dependencyCollector;
+        private readonly INamedType? _targetType;
         private UserCodeMemberInfo? _invokedMember;
-
-        private IExecutionScenario? _executionScenario;
+        private bool _collectDependencyDisabled;
 
         public static UserCodeExecutionContext Current => (UserCodeExecutionContext) MetalamaExecutionContext.Current ?? throw new InvalidOperationException();
 
         public static UserCodeExecutionContext? CurrentInternal => (UserCodeExecutionContext?) MetalamaExecutionContext.CurrentOrNull;
+
+        IDisposable IExecutionContext.WithoutDependencyCollection() => this.WithoutDependencyCollection();
+
+        internal DisposeAction WithoutDependencyCollection()
+        {
+            if ( this._dependencyCollector == null )
+            {
+                return default;
+            }
+            else
+            {
+                var previousValue = this._collectDependencyDisabled;
+                this._collectDependencyDisabled = true;
+
+                return new DisposeAction( () => this._collectDependencyDisabled = previousValue );
+            }
+        }
 
         internal static DisposeAction WithContext( UserCodeExecutionContext? context )
         {
@@ -62,6 +79,8 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             this.AspectLayerId = aspectAspectLayerId;
             this.Compilation = compilationModel;
             this.TargetDeclaration = targetDeclaration;
+            this._dependencyCollector = serviceProvider.GetService<IDependencyCollector>();
+            this._targetType = targetDeclaration?.GetTopNamedType();
         }
 
         /// <summary>
@@ -82,6 +101,8 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             this._diagnosticAdder = diagnostics;
             this.InvokedMember = invokedMember;
             this.TargetDeclaration = targetDeclaration;
+            this._dependencyCollector = serviceProvider.GetService<IDependencyCollector>();
+            this._targetType = targetDeclaration?.GetTopNamedType();
         }
 
         public IDiagnosticAdder Diagnostics
@@ -105,8 +126,8 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
 
         public ICompilation? Compilation { get; }
 
-        public IExecutionScenario ExecutionScenario
-            => this._executionScenario ??= this.ServiceProvider.GetRequiredService<AspectPipelineDescription>().ExecutionScenario;
+        [Memo]
+        public IExecutionScenario ExecutionScenario => this.ServiceProvider.GetRequiredService<ExecutionScenario>();
 
         ICompilation IExecutionContext.Compilation
             => this.Compilation ?? throw new InvalidOperationException( "There is no compilation in the current execution context" );
@@ -128,5 +149,35 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
                 this.AspectLayerId,
                 this.Compilation,
                 this.TargetDeclaration );
+
+        public void AddDependency( IDeclaration declaration )
+        {
+            // Prevent infinite recursion while getting the declaring type.
+            // We assume that there is one instance of this class per execution context and that it is single-threaded.
+
+            if ( this._collectDependencyDisabled )
+            {
+                return;
+            }
+
+            this._collectDependencyDisabled = true;
+
+            try
+            {
+                if ( this._dependencyCollector != null && this._targetType != null )
+                {
+                    var declaringType = declaration.GetTopNamedType();
+
+                    if ( declaringType != null && declaringType != this._targetType && !this._targetType.IsSubclassOf( declaringType ) )
+                    {
+                        this._dependencyCollector.AddDependency( this._targetType.GetSymbol(), declaringType.GetSymbol() );
+                    }
+                }
+            }
+            finally
+            {
+                this._collectDependencyDisabled = false;
+            }
+        }
     }
 }

@@ -17,6 +17,7 @@ using Metalama.Framework.Engine.Templating.Mapping;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Roslyn;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -279,7 +280,7 @@ namespace Metalama.Framework.Engine.CompileTime
             if ( assemblyName.StartsWith( _compileTimeAssemblyPrefix, StringComparison.OrdinalIgnoreCase ) )
             {
                 var parsedAssemblyName = new AssemblyName( assemblyName );
-                var shortName = parsedAssemblyName.Name;
+                var shortName = parsedAssemblyName.Name.AssertNotNull();
 
                 runTimeAssemblyName = shortName.Substring(
                     _compileTimeAssemblyPrefix.Length,
@@ -828,10 +829,10 @@ namespace Metalama.Framework.Engine.CompileTime
 
                         textMapDirectory.Write( outputPaths.Directory );
 
-                        var aspectType = compileTimeCompilation.GetTypeByMetadataName( typeof(IAspect).FullName );
-                        var fabricType = compileTimeCompilation.GetTypeByMetadataName( typeof(Fabric).FullName );
-                        var transitiveFabricType = compileTimeCompilation.GetTypeByMetadataName( typeof(TransitiveProjectFabric).FullName );
-                        var templateProviderType = compileTimeCompilation.GetTypeByMetadataName( typeof(ITemplateProvider).FullName );
+                        var aspectType = compileTimeCompilation.GetTypeByMetadataName( typeof(IAspect).FullName.AssertNotNull() );
+                        var fabricType = compileTimeCompilation.GetTypeByMetadataName( typeof(Fabric).FullName.AssertNotNull() );
+                        var transitiveFabricType = compileTimeCompilation.GetTypeByMetadataName( typeof(TransitiveProjectFabric).FullName.AssertNotNull() );
+                        var templateProviderType = compileTimeCompilation.GetTypeByMetadataName( typeof(ITemplateProvider).FullName.AssertNotNull() );
 
                         var aspectTypes = compileTimeCompilation.Assembly.GetTypes()
                             .Where( t => compileTimeCompilation.HasImplicitConversion( t, aspectType ) )

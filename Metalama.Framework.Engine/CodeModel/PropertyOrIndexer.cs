@@ -47,7 +47,7 @@ internal abstract class PropertyOrIndexer : Member, IPropertyOrIndexer
 
     public PropertyInfo ToPropertyInfo() => CompileTimePropertyInfo.Create( this );
 
-    public override string ToString() => this.PropertySymbol.ToString();
+    public override string ToString() => this.PropertySymbol.ToString().AssertNotNull();
 
     [Memo]
     public Writeability Writeability

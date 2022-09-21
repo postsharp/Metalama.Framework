@@ -61,7 +61,7 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public MethodKind MethodKind => this.AccessorBuilder.MethodKind;
 
         public OperatorKind OperatorKind => this.AccessorBuilder.OperatorKind;
-        
+
         IMethod IMethod.MethodDefinition => this;
 
         [Memo]

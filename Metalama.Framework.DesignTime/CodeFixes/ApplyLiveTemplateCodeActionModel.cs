@@ -29,37 +29,37 @@ internal class ApplyLiveTemplateCodeActionModel : CodeActionModel
         this.SyntaxTreeFilePath = syntaxTreeFilePath;
     }
 
-    public override Task<CodeActionResult> ExecuteAsync( CodeActionExecutionContext executionContext, CancellationToken cancellationToken )
+    public override async Task<CodeActionResult> ExecuteAsync( CodeActionExecutionContext executionContext, CancellationToken cancellationToken )
     {
         var compilation = executionContext.Compilation.RoslynCompilation;
         var pipelineFactory = executionContext.ServiceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
 
-        if ( !pipelineFactory.TryGetPipeline( executionContext.ProjectId, out var pipeline ) )
+        if ( !pipelineFactory.TryGetPipeline( executionContext.ProjectKey, out var pipeline ) )
         {
-            return Task.FromResult( CodeActionResult.Empty );
+            return CodeActionResult.Empty;
         }
 
         var targetSymbol = this.TargetSymbolId.Resolve( compilation, cancellationToken: cancellationToken );
 
         if ( targetSymbol == null )
         {
-            return Task.FromResult( CodeActionResult.Empty );
+            return CodeActionResult.Empty;
         }
 
-        if ( pipeline.TryApplyAspectToCode(
-                this.AspectTypeName,
-                compilation,
-                targetSymbol,
-                cancellationToken,
-                out var outputCompilation,
-                out _ ) )
+        var result = await pipeline.ApplyAspectToCodeAsync(
+            this.AspectTypeName,
+            compilation,
+            targetSymbol,
+            cancellationToken );
+
+        if ( result.Success )
         {
-            return Task.FromResult( new CodeActionResult( outputCompilation.ModifiedSyntaxTrees.Values.Select( x => x.NewTree.AssertNotNull() ) ) );
+            return new CodeActionResult( result.Compilation!.ModifiedSyntaxTrees.Values.Select( x => x.NewTree.AssertNotNull() ) );
         }
         else
         {
             // How to report errors here? We will add a comment to the target symbol.
-            return Task.FromResult( CodeActionResult.Empty );
+            return CodeActionResult.Empty;
         }
     }
 }

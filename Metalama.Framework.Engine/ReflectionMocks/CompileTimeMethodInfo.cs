@@ -39,7 +39,7 @@ namespace Metalama.Framework.Engine.ReflectionMocks
 
         public override ParameterInfo[] GetParameters() => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
-        public override object Invoke( object obj, BindingFlags invokeAttr, Binder binder, object[] parameters, CultureInfo culture )
+        public override object Invoke( object? obj, BindingFlags invokeAttr, Binder? binder, object?[]? parameters, CultureInfo? culture )
             => throw CompileTimeMocksHelper.CreateNotSupportedException();
 
         public override MethodAttributes Attributes => throw CompileTimeMocksHelper.CreateNotSupportedException();

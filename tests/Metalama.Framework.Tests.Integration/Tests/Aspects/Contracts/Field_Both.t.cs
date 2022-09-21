@@ -10,14 +10,14 @@ internal class Target
     {
         get
         {
-            global::System.String returnValue; returnValue = this._q1;
-            goto __aspect_return_1;
-        __aspect_return_1: if (returnValue == null)
+            global::System.String returnValue;
+            returnValue = this._q1; if (returnValue == null)
             {
                 throw new global::System.ArgumentNullException();
             }
 
             return returnValue;
+
 
         }
         set
@@ -44,14 +44,14 @@ internal struct TargetStruct
     {
         get
         {
-            global::System.String returnValue; returnValue = this._q1;
-            goto __aspect_return_1;
-        __aspect_return_1: if (returnValue == null)
+            global::System.String returnValue;
+            returnValue = this._q1; if (returnValue == null)
             {
                 throw new global::System.ArgumentNullException();
             }
 
             return returnValue;
+
 
         }
         set

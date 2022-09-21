@@ -11,7 +11,6 @@ using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Validation;
-using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Generic;
 using System.Collections.Immutable;
@@ -30,7 +29,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             ServiceProvider serviceProvider,
             bool isTest,
             CompileTimeDomain? domain = null,
-            IExecutionScenario? executionScenario = null ) : base(
+            ExecutionScenario? executionScenario = null ) : base(
             serviceProvider,
             executionScenario ?? ExecutionScenario.CompileTime,
             isTest,
@@ -52,6 +51,14 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                     ImmutableArray<ManagedResource>.Empty,
                     partialCompilation,
                     ImmutableArray<AdditionalCompilationOutputFile>.Empty );
+            }
+
+            // Report error if the compilation does not have the METALAMA preprocessor symbol.
+            if ( !(compilation.SyntaxTrees.FirstOrDefault()?.Options.PreprocessorSymbolNames.Contains( "METALAMA" ) ?? false) )
+            {
+                diagnosticAdder.Report( GeneralDiagnosticDescriptors.MissingMetalamaPreprocessorSymbol.CreateRoslynDiagnosticImpl( null, null ) );
+
+                return null;
             }
 
             // Validate the code (some validations are not done by the template compiler).
@@ -77,7 +84,10 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
 
             var licenseConsumptionManager = this.ServiceProvider.GetBackstageService<ILicenseConsumptionManager>();
             var redistributionLicenseKey = licenseConsumptionManager?.RedistributionLicenseKey;
-            var projectLicenseInfo = string.IsNullOrEmpty( redistributionLicenseKey ) ? ProjectLicenseInfo.Empty : new ProjectLicenseInfo( redistributionLicenseKey );
+
+            var projectLicenseInfo = string.IsNullOrEmpty( redistributionLicenseKey )
+                ? ProjectLicenseInfo.Empty
+                : new ProjectLicenseInfo( redistributionLicenseKey );
 
             // Initialize the pipeline and generate the compile-time project.
             if ( !this.TryInitialize( diagnosticAdder, partialCompilation, projectLicenseInfo, null, cancellationToken, out var configuration ) )

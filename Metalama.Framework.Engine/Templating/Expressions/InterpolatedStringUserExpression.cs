@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -33,8 +34,8 @@ namespace Metalama.Framework.Engine.Templating.Expressions
                 if ( textAccumulator.Length > 0 )
                 {
                     var text = textAccumulator.ToString()
-                        .Replace( "{", "{{" )
-                        .Replace( "}", "}}" );
+                        .ReplaceOrdinal( "{", "{{" )
+                        .ReplaceOrdinal( "}", "}}" );
 
                     var literal = SyntaxFactory.Literal( text );
                     var escapedText = literal.Text.Substring( 1, literal.Text.Length - 2 );

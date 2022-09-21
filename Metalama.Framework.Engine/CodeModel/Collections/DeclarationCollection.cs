@@ -23,6 +23,13 @@ namespace Metalama.Framework.Engine.CodeModel.Collections
 
         protected DeclarationCollection( IDeclaration containingDeclaration, IReadOnlyList<TRef> source )
         {
+#if DEBUG
+            if ( containingDeclaration is NamedTypeImpl )
+            {
+                throw new ArgumentOutOfRangeException( nameof(containingDeclaration) );
+            }
+#endif
+
             this.Source = source;
 
             this.ContainingDeclaration = containingDeclaration;

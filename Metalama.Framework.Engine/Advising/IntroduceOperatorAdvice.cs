@@ -132,7 +132,7 @@ namespace Metalama.Framework.Engine.Advising
 
                             return AdviceImplementationResult.Success( AdviceOutcome.Override );
                         }
-                        else if ( existingOperator.IsSealed || !existingOperator.IsVirtual )
+                        else if ( existingOperator.IsSealed || !existingOperator.IsOverridable() )
                         {
                             return
                                 AdviceImplementationResult.Failed(

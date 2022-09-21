@@ -1,5 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.CodeModel;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -26,7 +27,8 @@ namespace Metalama.Framework.Engine.Linking.Inlining
                 return false;
             }
 
-            if ( aspectReference.Expression.Parent == null || aspectReference.Expression.Parent is not InvocationExpressionSyntax invocationExpression )
+            if ( aspectReference.SourceExpression.AssertNotNull().Parent == null
+                 || aspectReference.SourceExpression.AssertNotNull().Parent is not InvocationExpressionSyntax invocationExpression )
             {
                 return false;
             }
@@ -60,7 +62,7 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             }
 
             // The invocation needs to be inlineable in itself.
-            if ( !IsInlineableInvocation( semanticModel, (IMethodSymbol) aspectReference.ContainingSymbol, invocationExpression ) )
+            if ( !IsInlineableInvocation( semanticModel, aspectReference.ContainingSemantic.Symbol, invocationExpression ) )
             {
                 return false;
             }
@@ -68,26 +70,25 @@ namespace Metalama.Framework.Engine.Linking.Inlining
             return true;
         }
 
-        public override void Inline( InliningContext context, ResolvedAspectReference aspectReference, out SyntaxNode replacedNode, out SyntaxNode newNode )
+        public override InliningAnalysisInfo GetInliningAnalysisInfo( InliningAnalysisContext context, ResolvedAspectReference aspectReference )
         {
-            var invocationExpression = (InvocationExpressionSyntax) aspectReference.Expression.Parent.AssertNotNull();
+            var invocationExpression = (InvocationExpressionSyntax) aspectReference.SourceExpression.AssertNotNull().Parent.AssertNotNull();
             var assignmentExpression = (AssignmentExpressionSyntax) invocationExpression.Parent.AssertNotNull();
             var expressionStatement = (ExpressionStatementSyntax) assignmentExpression.Parent.AssertNotNull();
 
-            var targetSymbol = (aspectReference.ResolvedSemantic.Symbol as IMethodSymbol).AssertNotNull();
+            return new InliningAnalysisInfo( expressionStatement, null );
+        }
 
-            // Change the target local variable.
-            var contextWithDiscard = context.WithDiscard( targetSymbol );
-
-            // Get the final inlined body of the target method. 
-            var inlinedTargetBody = contextWithDiscard.GetLinkedBody( targetSymbol.ToSemantic( aspectReference.ResolvedSemantic.Kind ) );
-
-            // Mark the block as flattenable.
-            inlinedTargetBody = inlinedTargetBody.WithLinkerGeneratedFlags( LinkerGeneratedFlags.FlattenableBlock );
-
-            // We're replacing the whole return statement.
-            newNode = inlinedTargetBody;
-            replacedNode = expressionStatement;
+        public override StatementSyntax Inline(
+            SyntaxGenerationContext syntaxGenerationContext,
+            InliningSpecification specification,
+            SyntaxNode currentNode,
+            StatementSyntax linkedTargetBody )
+        {
+            return
+                linkedTargetBody
+                    .WithLeadingTrivia( currentNode.GetLeadingTrivia().AddRange( linkedTargetBody.GetLeadingTrivia() ) )
+                    .WithTrailingTrivia( linkedTargetBody.GetTrailingTrivia().AddRange( currentNode.GetTrailingTrivia() ) );
         }
     }
 }

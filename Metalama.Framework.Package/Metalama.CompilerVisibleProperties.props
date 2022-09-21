@@ -4,7 +4,6 @@
     </PropertyGroup>
     <!-- Exports the properties to the compiler -->
     <ItemGroup>
-        <CompilerVisibleProperty Include="MetalamaProjectId"/>
         <CompilerVisibleProperty Include="MetalamaBuildTouchFile"/>
         <CompilerVisibleProperty Include="MetalamaSourceGeneratorTouchFile"/>
         <CompilerVisibleProperty Include="MetalamaEnabled"/>

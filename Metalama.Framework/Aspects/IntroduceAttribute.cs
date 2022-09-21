@@ -69,7 +69,7 @@ namespace Metalama.Framework.Aspects
                     EligibleScenarios.Inheritance,
                     x =>
                     {
-                        var t = x.GetDeclaringType();
+                        var t = x.GetClosestNamedType();
 
                         return t != null && t.TypeKind != TypeKind.Interface;
                     },

@@ -7,7 +7,7 @@ namespace Metalama.Framework.Engine.CodeModel.Collections;
 
 internal class AllEventsCollection : AllMembersCollection<IEvent>, IEventCollection
 {
-    public AllEventsCollection( INamedType declaringType ) : base( declaringType ) { }
+    public AllEventsCollection( NamedType declaringType ) : base( declaringType ) { }
 
     protected override IMemberCollection<IEvent> GetMembers( INamedType namedType ) => namedType.Events;
 }

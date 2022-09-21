@@ -9,7 +9,6 @@ using Metalama.Framework.Engine.Pipeline.CompileTime;
 using Metalama.Framework.Engine.Testing;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.TestFramework;
-using Metalama.TestFramework.Utilities;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -98,7 +97,7 @@ class A : Attribute
             Assert.True(
                 loader.TryGetCompileTimeProjectFromCompilation(
                     compilation.RoslynCompilation,
-                    ProjectLicenseInfo.Empty, 
+                    ProjectLicenseInfo.Empty,
                     null,
                     new DiagnosticList(),
                     false,
@@ -142,7 +141,16 @@ class ReferencingClass
             var loader = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
 
             DiagnosticList diagnosticList = new();
-            Assert.True( loader.TryGetCompileTimeProjectFromCompilation( roslynCompilation, ProjectLicenseInfo.Empty, null, diagnosticList, false, CancellationToken.None, out _ ) );
+
+            Assert.True(
+                loader.TryGetCompileTimeProjectFromCompilation(
+                    roslynCompilation,
+                    ProjectLicenseInfo.Empty,
+                    null,
+                    diagnosticList,
+                    false,
+                    CancellationToken.None,
+                    out _ ) );
         }
 
         [Fact]
@@ -196,7 +204,7 @@ class ReferencingClass
                     Assert.True(
                         loader.TryGetCompileTimeProjectFromCompilation(
                             compilation,
-                            ProjectLicenseInfo.Empty, 
+                            ProjectLicenseInfo.Empty,
                             null,
                             diagnostics,
                             false,
@@ -303,7 +311,14 @@ class B
             DiagnosticList diagnosticList = new();
 
             Assert.True(
-                loaderV1.TryGetCompileTimeProjectFromCompilation( compilationB1, ProjectLicenseInfo.Empty, null, diagnosticList, false, CancellationToken.None, out var project1 ) );
+                loaderV1.TryGetCompileTimeProjectFromCompilation(
+                    compilationB1,
+                    ProjectLicenseInfo.Empty,
+                    null,
+                    diagnosticList,
+                    false,
+                    CancellationToken.None,
+                    out var project1 ) );
 
             ExecuteAssertions( project1!, 1 );
 
@@ -311,7 +326,14 @@ class B
             var loader2 = CompileTimeProjectLoader.Create( domain, testContext2.ServiceProvider );
 
             Assert.True(
-                loader2.TryGetCompileTimeProjectFromCompilation( compilationB2, ProjectLicenseInfo.Empty, null, diagnosticList, false, CancellationToken.None, out var project2 ) );
+                loader2.TryGetCompileTimeProjectFromCompilation(
+                    compilationB2,
+                    ProjectLicenseInfo.Empty,
+                    null,
+                    diagnosticList,
+                    false,
+                    CancellationToken.None,
+                    out var project2 ) );
 
             ExecuteAssertions( project2!, 2 );
 
@@ -360,7 +382,16 @@ class C
             using var testContext = this.CreateTestContext();
             var loader = CompileTimeProjectLoader.Create( domain, testContext.ServiceProvider );
             DiagnosticList diagnosticList = new();
-            Assert.True( loader.TryGetCompileTimeProjectFromCompilation( compilation, ProjectLicenseInfo.Empty, null, diagnosticList, false, CancellationToken.None, out _ ) );
+
+            Assert.True(
+                loader.TryGetCompileTimeProjectFromCompilation(
+                    compilation,
+                    ProjectLicenseInfo.Empty,
+                    null,
+                    diagnosticList,
+                    false,
+                    CancellationToken.None,
+                    out _ ) );
         }
 
         [Fact]
@@ -382,7 +413,15 @@ public class ReferencedClass
             DiagnosticList diagnosticList = new();
 
             // Getting from cache should fail.
-            Assert.False( loader.TryGetCompileTimeProjectFromCompilation( roslynCompilation, ProjectLicenseInfo.Empty, null, diagnosticList, true, CancellationToken.None, out _ ) );
+            Assert.False(
+                loader.TryGetCompileTimeProjectFromCompilation(
+                    roslynCompilation,
+                    ProjectLicenseInfo.Empty,
+                    null,
+                    diagnosticList,
+                    true,
+                    CancellationToken.None,
+                    out _ ) );
 
             // Building the project should succeed.
             Assert.True(
@@ -399,7 +438,7 @@ public class ReferencedClass
             Assert.True(
                 loader.TryGetCompileTimeProjectFromCompilation(
                     roslynCompilation,
-                    ProjectLicenseInfo.Empty, 
+                    ProjectLicenseInfo.Empty,
                     null,
                     diagnosticList,
                     true,
@@ -429,7 +468,7 @@ public class ReferencedClass
             Assert.True(
                 loader.TryGetCompileTimeProjectFromCompilation(
                     CreateCSharpCompilation( code ),
-                    ProjectLicenseInfo.Empty, 
+                    ProjectLicenseInfo.Empty,
                     null,
                     diagnosticList,
                     false,
@@ -440,7 +479,7 @@ public class ReferencedClass
             Assert.True(
                 loader.TryGetCompileTimeProjectFromCompilation(
                     CreateCSharpCompilation( code ),
-                    ProjectLicenseInfo.Empty, 
+                    ProjectLicenseInfo.Empty,
                     null,
                     diagnosticList,
                     true,
@@ -470,7 +509,7 @@ public class ReferencedClass
             Assert.True(
                 loader1.TryGetCompileTimeProjectFromCompilation(
                     CreateCSharpCompilation( code ),
-                    ProjectLicenseInfo.Empty, 
+                    ProjectLicenseInfo.Empty,
                     null,
                     diagnosticList,
                     false,
@@ -483,7 +522,7 @@ public class ReferencedClass
             Assert.False(
                 loader2.TryGetCompileTimeProjectFromCompilation(
                     CreateCSharpCompilation( code ),
-                    ProjectLicenseInfo.Empty, 
+                    ProjectLicenseInfo.Empty,
                     null,
                     diagnosticList,
                     true,
@@ -513,15 +552,42 @@ public class ReferencedClass
             // Getting from cache should fail.
 
             var loader1 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
-            Assert.False( loader1.TryGetCompileTimeProjectFromCompilation( roslynCompilation, ProjectLicenseInfo.Empty, null, diagnosticList, true, CancellationToken.None, out _ ) );
+
+            Assert.False(
+                loader1.TryGetCompileTimeProjectFromCompilation(
+                    roslynCompilation,
+                    ProjectLicenseInfo.Empty,
+                    null,
+                    diagnosticList,
+                    true,
+                    CancellationToken.None,
+                    out _ ) );
 
             // Building the project should succeed.
             var loader2 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
-            Assert.True( loader2.TryGetCompileTimeProjectFromCompilation( roslynCompilation, ProjectLicenseInfo.Empty, null, diagnosticList, false, CancellationToken.None, out _ ) );
+
+            Assert.True(
+                loader2.TryGetCompileTimeProjectFromCompilation(
+                    roslynCompilation,
+                    ProjectLicenseInfo.Empty,
+                    null,
+                    diagnosticList,
+                    false,
+                    CancellationToken.None,
+                    out _ ) );
 
             // After building, getting from cache should succeed.
             var loader3 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
-            Assert.True( loader3.TryGetCompileTimeProjectFromCompilation( roslynCompilation, ProjectLicenseInfo.Empty, null, diagnosticList, true, CancellationToken.None, out _ ) );
+
+            Assert.True(
+                loader3.TryGetCompileTimeProjectFromCompilation(
+                    roslynCompilation,
+                    ProjectLicenseInfo.Empty,
+                    null,
+                    diagnosticList,
+                    true,
+                    CancellationToken.None,
+                    out _ ) );
         }
 
         [Fact]
@@ -560,7 +626,7 @@ class ReferencingClass
                 Assert.True(
                     loader.TryGetCompileTimeProjectFromCompilation(
                         referencedCompilation,
-                        ProjectLicenseInfo.Empty, 
+                        ProjectLicenseInfo.Empty,
                         null,
                         diagnosticList,
                         false,
@@ -589,7 +655,7 @@ class ReferencingClass
                 Assert.True(
                     loader.TryGetCompileTimeProjectFromCompilation(
                         referencingCompilation,
-                        ProjectLicenseInfo.Empty, 
+                        ProjectLicenseInfo.Empty,
                         null,
                         diagnosticList,
                         false,
@@ -623,7 +689,7 @@ public class ReferencedClass
             Assert.True(
                 loader.TryGetCompileTimeProjectFromCompilation(
                     referencedCompilation,
-                    ProjectLicenseInfo.Empty, 
+                    ProjectLicenseInfo.Empty,
                     null,
                     diagnosticList,
                     false,
@@ -643,7 +709,7 @@ public class ReferencedClass
             Assert.True(
                 loader.TryGetCompileTimeProjectFromCompilation(
                     CreateCSharpCompilation( referencingCode, additionalReferences: new[] { MetadataReference.CreateFromFile( referencedPath ) } ),
-                    ProjectLicenseInfo.Empty, 
+                    ProjectLicenseInfo.Empty,
                     null,
                     diagnosticList,
                     false,
@@ -708,7 +774,7 @@ public class CompileTimeOnlyClass
             Assert.True(
                 loader.TryGetCompileTimeProjectFromCompilation(
                     compilation,
-                    ProjectLicenseInfo.Empty, 
+                    ProjectLicenseInfo.Empty,
                     null,
                     diagnosticList,
                     false,
@@ -741,7 +807,16 @@ public class Anything
             var roslynCompilation = CreateCSharpCompilation( code );
             var loader1 = CompileTimeProjectLoader.Create( new CompileTimeDomain(), testContext.ServiceProvider );
             DiagnosticList diagnosticList = new();
-            Assert.True( loader1.TryGetCompileTimeProjectFromCompilation( roslynCompilation, ProjectLicenseInfo.Empty, null, diagnosticList, false, CancellationToken.None, out _ ) );
+
+            Assert.True(
+                loader1.TryGetCompileTimeProjectFromCompilation(
+                    roslynCompilation,
+                    ProjectLicenseInfo.Empty,
+                    null,
+                    diagnosticList,
+                    false,
+                    CancellationToken.None,
+                    out _ ) );
 
             Assert.True( rewriter.IsInvoked );
         }
@@ -766,7 +841,14 @@ public class SomeRunTimeClass
             DiagnosticList diagnosticList = new();
 
             Assert.True(
-                loader1.TryGetCompileTimeProjectFromCompilation( roslynCompilation, ProjectLicenseInfo.Empty, null, diagnosticList, false, CancellationToken.None, out var project ) );
+                loader1.TryGetCompileTimeProjectFromCompilation(
+                    roslynCompilation,
+                    ProjectLicenseInfo.Empty,
+                    null,
+                    diagnosticList,
+                    false,
+                    CancellationToken.None,
+                    out var project ) );
 
             Assert.NotNull( project );
             Assert.Single( project!.References );
@@ -816,7 +898,14 @@ public class MyAspect : OverrideMethodAspect
             DiagnosticList diagnosticList = new();
 
             Assert.True(
-                loader1.TryGetCompileTimeProjectFromCompilation( roslynCompilation, ProjectLicenseInfo.Empty, null, diagnosticList, false, CancellationToken.None, out var project ) );
+                loader1.TryGetCompileTimeProjectFromCompilation(
+                    roslynCompilation,
+                    ProjectLicenseInfo.Empty,
+                    null,
+                    diagnosticList,
+                    false,
+                    CancellationToken.None,
+                    out var project ) );
 
             Assert.NotNull( project );
             Assert.NotNull( project!.Directory );
@@ -1111,7 +1200,7 @@ Intentional syntax error.
 #endif
 ";
 
-            var compilation1 = CreateCSharpCompilation( code1, preprocessorSymbols: new[] { "SYMBOL" } );
+            var compilation1 = CreateCSharpCompilation( code1, preprocessorSymbols: new[] { "METALAMA", "SYMBOL" } );
 
             using var domain1 = new UnloadableCompileTimeDomain();
             var pipeline1 = new CompileTimeAspectPipeline( testContext1.ServiceProvider, true, domain1 );

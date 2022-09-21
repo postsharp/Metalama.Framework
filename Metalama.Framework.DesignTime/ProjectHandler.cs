@@ -15,10 +15,13 @@ public abstract class ProjectHandler : IDisposable
 
     protected IProjectOptions ProjectOptions { get; }
 
-    protected ProjectHandler( IServiceProvider serviceProvider, IProjectOptions projectOptions )
+    public ProjectKey ProjectKey { get; }
+
+    protected ProjectHandler( IServiceProvider serviceProvider, IProjectOptions projectOptions, ProjectKey projectKey )
     {
         this.ServiceProvider = serviceProvider;
         this.ProjectOptions = projectOptions;
+        this.ProjectKey = projectKey;
     }
 
     public abstract SourceGeneratorResult GenerateSources( Compilation compilation, CancellationToken cancellationToken );

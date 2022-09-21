@@ -23,10 +23,13 @@ public class TransformationPreviewServiceImpl : ITransformationPreviewServiceImp
         this._designTimeAspectPipelineFactory = serviceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
     }
 
-    public async Task<PreviewTransformationResult> PreviewTransformationAsync( string projectId, string syntaxTreeName, CancellationToken cancellationToken )
+    public async Task<PreviewTransformationResult> PreviewTransformationAsync(
+        ProjectKey projectKey,
+        string syntaxTreeName,
+        CancellationToken cancellationToken )
     {
         // Get the pipeline for the compilation.
-        if ( !this._designTimeAspectPipelineFactory.TryGetPipeline( projectId, out var pipeline )
+        if ( !this._designTimeAspectPipelineFactory.TryGetPipeline( projectKey, out var pipeline )
              || pipeline.LastCompilation == null )
         {
             // We cannot create the pipeline because we don't have all options.
@@ -55,7 +58,9 @@ public class TransformationPreviewServiceImpl : ITransformationPreviewServiceImp
         DiagnosticList diagnostics = new();
 
         // Get the pipeline configuration from the design-time pipeline.
-        if ( !pipeline.TryGetConfiguration( partialCompilation, diagnostics, true, cancellationToken, out var designTimeConfiguration ) )
+        var designTimeConfiguration = await pipeline.GetConfigurationAsync( partialCompilation, diagnostics, true, cancellationToken );
+
+        if ( designTimeConfiguration == null )
         {
             return PreviewTransformationResult.Failure(
                 diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error ).Select( d => d.ToString() ).ToArray() );

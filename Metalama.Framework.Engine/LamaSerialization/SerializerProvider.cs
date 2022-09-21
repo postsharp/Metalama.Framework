@@ -57,10 +57,10 @@ namespace Metalama.Framework.Engine.LamaSerialization
                 throw new LamaSerializationException( string.Format( CultureInfo.InvariantCulture, "Cannot find a serializer for type '{0}'.", objectType ) );
             }
 
-            return serializer;
+            return serializer.AssertNotNull();
         }
 
-        public bool TryGetSerializer( Type objectType, out ISerializer serializer )
+        public bool TryGetSerializer( Type objectType, out ISerializer? serializer )
         {
             if ( objectType.HasElementType )
             {

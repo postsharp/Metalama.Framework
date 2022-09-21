@@ -2,8 +2,6 @@
 
 using Metalama.Backstage.Configuration;
 using Metalama.Framework.DesignTime.Diagnostics;
-using Metalama.Framework.DesignTime.Pipeline;
-using Metalama.TestFramework;
 using System.Collections.Generic;
 using System.Threading;
 using Xunit;
@@ -117,8 +115,8 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime.TestCode
             var configurationManager = new InMemoryConfigurationManager( testContext.ServiceProvider );
             var serviceProvider = testContext.ServiceProvider.WithUntypedService( typeof(IConfigurationManager), configurationManager );
 
-            using var domain = new UnloadableCompileTimeDomain();
-            using DesignTimeAspectPipeline pipeline = new( serviceProvider, domain, compilation.References, true );
+            using var pipelineFactory = new TestDesignTimeAspectPipelineFactory( testContext, serviceProvider );
+            using var pipeline = pipelineFactory.CreatePipeline( compilation );
 
             Assert.True( pipeline.TryExecute( compilation, CancellationToken.None, out _ ) );
 

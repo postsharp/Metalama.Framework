@@ -25,8 +25,8 @@ internal static partial class SyntaxFactoryEx
 
         private LiteralFormatter()
         {
-            var objectDisplayType = typeof(CSharpSyntaxNode).Assembly.GetType( "Microsoft.CodeAnalysis.CSharp.ObjectDisplay" );
-            var objectDisplayOptionsType = typeof(SyntaxNode).Assembly.GetType( "Microsoft.CodeAnalysis.ObjectDisplayOptions" );
+            var objectDisplayType = typeof(CSharpSyntaxNode).Assembly.GetType( "Microsoft.CodeAnalysis.CSharp.ObjectDisplay" ).AssertNotNull();
+            var objectDisplayOptionsType = typeof(SyntaxNode).Assembly.GetType( "Microsoft.CodeAnalysis.ObjectDisplayOptions" ).AssertNotNull();
             var objectDisplayTypeMethods = objectDisplayType.GetMethods( BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic );
             var formatPrimitiveMethod = objectDisplayTypeMethods.Single( m => m.Name == "FormatLiteral" && m.GetParameters()[0].ParameterType == typeof(T) );
 

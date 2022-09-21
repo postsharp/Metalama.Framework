@@ -1,7 +1,7 @@
 ﻿using System;
 using static Metalama.Framework.Tests.Integration.Tests.Linker.Api;
 
-#pragma warning disable CS0067
+#pragma warning disable CS0067, CS0649
 
 namespace Metalama.Framework.Tests.Integration.Tests.Linker.Events.Inliners.RemoveAssignment_NotAssignment
 {
@@ -15,11 +15,13 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.Events.Inliners.Remo
         {
             add
             {
+            }
+            remove
+            {
                 Console.WriteLine("Before");
-                link[_this.Foo.add, inline](null, null);
+                link[_this.Foo.add, inline]?.Invoke(null, new EventArgs());
                 Console.WriteLine("After");
             }
-            remove { }
         }
     }
 }

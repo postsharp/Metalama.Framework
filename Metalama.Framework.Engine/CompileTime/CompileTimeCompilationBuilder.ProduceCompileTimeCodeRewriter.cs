@@ -1011,7 +1011,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     return visitedConstructor;
                 }
             }
-            
+
             public override SyntaxNode? VisitNamespaceDeclaration( NamespaceDeclarationSyntax node )
             {
                 var transformedMembers = this.VisitTypeOrNamespaceMembers( node.Members );

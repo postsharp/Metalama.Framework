@@ -1313,8 +1313,8 @@ namespace Metalama.Framework.Engine.Templating
         {
             var symbol = this._syntaxTreeAnnotationMap.GetSymbol( node.Name );
 
-            if ( symbol is IMethodSymbol constructor
-                 && constructor.ContainingNamespace.ToString().StartsWith( "Metalama.Framework", StringComparison.Ordinal ) )
+            if ( symbol is IMethodSymbol { ContainingNamespace: { } } constructor
+                 && (constructor.ContainingNamespace.ToString()?.StartsWith( "Metalama.Framework", StringComparison.Ordinal ) ?? false) )
             {
                 node = node.AddColoringAnnotation( TextSpanClassification.CompileTime );
             }

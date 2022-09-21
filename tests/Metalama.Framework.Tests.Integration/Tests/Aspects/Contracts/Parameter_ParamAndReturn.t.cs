@@ -15,8 +15,7 @@ internal class Target
 
         global::System.String? returnValue;
         returnValue = param1 + param2.ToString();
-        goto __aspect_return_1;
-    __aspect_return_1: if (returnValue == null)
+        if (returnValue == null)
         {
             throw new global::System.ArgumentNullException("<return>");
         }

@@ -11,6 +11,6 @@ public class VsAnalysisProcessSourceGenerator : AnalysisProcessSourceGenerator
 
     public VsAnalysisProcessSourceGenerator( ServiceProvider serviceProvider ) : base( serviceProvider ) { }
 
-    protected override ProjectHandler CreateSourceGeneratorImpl( IProjectOptions projectOptions )
-        => new VsAnalysisProcessProjectHandler( this.ServiceProvider, projectOptions );
+    protected override ProjectHandler CreateSourceGeneratorImpl( IProjectOptions projectOptions, ProjectKey projectKey )
+        => new VsAnalysisProcessProjectHandler( this.ServiceProvider, projectOptions, projectKey );
 }

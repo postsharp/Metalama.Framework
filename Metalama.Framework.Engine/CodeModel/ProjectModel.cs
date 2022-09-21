@@ -61,7 +61,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
         private ProjectExtension CreateProjectExtension( Type t )
         {
-            var data = (ProjectExtension) Activator.CreateInstance( t );
+            var data = (ProjectExtension) Activator.CreateInstance( t ).AssertNotNull();
             data.Initialize( this, this._isFrozen );
 
             return data;

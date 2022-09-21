@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.CompileTime;
+using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Engine.Utilities.Comparers;
 using Microsoft.CodeAnalysis;
 using System;
@@ -27,8 +28,8 @@ internal class SymbolTranslator
         this._visitor = new Visitor( this );
     }
 
-    public T? Translate<T>( T symbol ) 
-        where T : ISymbol 
+    public T? Translate<T>( T symbol )
+        where T : ISymbol
         => (T?) this._cache.GetOrAdd( symbol, this.TranslateCore );
 
     private ISymbol? TranslateCore( ISymbol symbol ) => this._visitor.Visit( symbol );

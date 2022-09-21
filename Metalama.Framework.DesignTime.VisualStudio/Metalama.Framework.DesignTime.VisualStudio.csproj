@@ -3,8 +3,6 @@
     <Import Project="..\Build\RoslynVersion\Latest.imports" />
 
     <PropertyGroup>
-        <!-- This project never executes under .NET 6.0 in production, but we are including the framework
-             for simplicity because the tests also run under .NET 5.0. -->
         <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
@@ -16,7 +14,7 @@
         <ProjectReference Include="..\Metalama.Framework.DesignTime$(ThisRoslynVersionProjectSuffix)\Metalama.Framework.DesignTime$(ThisRoslynVersionProjectSuffix).csproj" />
         <PackageReference Include="StreamJsonRpc" Version="$(StreamJsonRpcVersion)" />
         <InternalsVisibleTo Include="Metalama.Framework.Tests.UnitTests.Internals" />
-        <ProjectReference Include="..\Metalama.SystemTypes\Metalama.SystemTypes.csproj" Condition="'$(TargetFramework)'=='netstandard2.0'" />
+        <ProjectReference Include="..\Metalama.SystemTypes\Metalama.SystemTypes.csproj"/>
     </ItemGroup>
 
 </Project>

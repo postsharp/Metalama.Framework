@@ -17,14 +17,14 @@ namespace Metalama.Framework.Tests.Integration.Tests.Linker.EventFields.Override
             add
             {
                 Console.WriteLine("Before");
-                link[_this.Foo] += value;
+                link[_this.Foo.add] += value;
                 Console.WriteLine("After");
             }
 
             remove
             {
                 Console.WriteLine("Before");
-                link[_this.Foo] -= value;
+                link[_this.Foo.remove] -= value;
                 Console.WriteLine("After");
             }
         }

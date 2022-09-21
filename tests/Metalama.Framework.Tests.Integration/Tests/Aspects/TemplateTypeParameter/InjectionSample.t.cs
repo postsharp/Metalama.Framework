@@ -16,6 +16,7 @@ internal partial class Greeter
 
             return (global::System.IO.TextWriter)value;
 
+
         }
         set
         {

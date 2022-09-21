@@ -32,6 +32,9 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             this._hook = serviceProvider.GetService<IUserCodeInvokerHook>();
         }
 
+        /// <summary>
+        /// Handles an exception and returns a value indicating whether the exception can be ignored.
+        /// </summary>
         private static bool OnException( Exception e, in UserCodeExecutionContext context )
         {
             var compileTimeProject = context.ServiceProvider.GetService<CompileTimeProject>();
@@ -93,8 +96,18 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
 
                 if ( applicationInfoProvider.CurrentApplication.ShouldCreateLocalCrashReports )
                 {
-                    reportFile = tempFileManager.GetTempDirectory( "CrashReports", CleanUpStrategy.Always );
-                    File.WriteAllText( reportFile, e.ToString() );
+                    try
+                    {
+                        reportFile = Path.Combine(
+                            tempFileManager.GetTempDirectory( "CrashReports", CleanUpStrategy.Always ),
+                            $"exception-{Guid.NewGuid()}.txt" );
+
+                        File.WriteAllText( reportFile, e.ToString() );
+                    }
+                    catch ( Exception reportException )
+                    {
+                        reportFile = $"(cannot report: {reportException.Message})";
+                    }
                 }
                 else
                 {
@@ -138,11 +151,20 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
 
                 return true;
             }
-            catch ( Exception e ) when ( OnException( e, context ) )
+            catch ( Exception e )
             {
-                result = default;
+                // We cannot use OnException in a `when` clause because exceptions in the OnException method will be ignored
+                // and it will be weird.
+                if ( OnException( e, context ) )
+                {
+                    result = default;
 
-                return false;
+                    return false;
+                }
+                else
+                {
+                    throw;
+                }
             }
         }
 
@@ -162,20 +184,38 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
                         result.Add( this.Invoke( () => enumerator.Current, context ) );
                     }
                 }
-                catch ( Exception e ) when ( OnException( e, context ) )
+                catch ( Exception e )
                 {
-                    result = null;
+                    // We cannot use OnException in a `when` clause because exceptions in the OnException method will be ignored
+                    // and it will be weird.
+                    if ( OnException( e, context ) )
+                    {
+                        result = default;
 
-                    return false;
+                        return false;
+                    }
+                    else
+                    {
+                        throw;
+                    }
                 }
 
                 return true;
             }
-            catch ( Exception e ) when ( OnException( e, context ) )
+            catch ( Exception e )
             {
-                result = default;
+                // We cannot use OnException in a `when` clause because exceptions in the OnException method will be ignored
+                // and it will be weird.
+                if ( OnException( e, context ) )
+                {
+                    result = default;
 
-                return false;
+                    return false;
+                }
+                else
+                {
+                    throw;
+                }
             }
         }
 
