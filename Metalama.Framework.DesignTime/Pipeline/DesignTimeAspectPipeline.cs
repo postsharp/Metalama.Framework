@@ -9,6 +9,7 @@ using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Options;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Pipeline.DesignTime;
@@ -655,6 +656,19 @@ namespace Metalama.Framework.DesignTime.Pipeline
             if ( configuration == null )
             {
                 return (false, null, diagnosticList.ToImmutableArray());
+            }
+
+            var licenseVerifier = configuration.ServiceProvider.GetService<LicenseVerifier>();
+
+            if ( licenseVerifier != null )
+            {
+                var aspectClass = configuration.AspectClasses.Single( x => x.FullName == aspectTypeName );
+                
+
+                if ( !licenseVerifier.CanSuggestCodeFix( aspectClass ) )
+                {
+                    return (false, null, TODO);
+                }
             }
 
             var result = LiveTemplateAspectPipeline.TryExecute(

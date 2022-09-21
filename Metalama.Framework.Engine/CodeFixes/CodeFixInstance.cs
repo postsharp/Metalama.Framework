@@ -24,12 +24,15 @@ namespace Metalama.Framework.Engine.CodeFixes
         /// Gets the location of the diagnostic for which the code fix was suggested.
         /// </summary>
         public Location Location { get; }
+        
+        public bool IsLicensed { get; }
 
-        internal CodeFixInstance( string diagnosticId, Location location, CodeFix codeFix )
+        internal CodeFixInstance( string diagnosticId, Location location, CodeFix codeFix, bool isLicensed )
         {
             this.DiagnosticId = diagnosticId;
             this.Location = location;
             this.CodeFix = codeFix;
+            this.IsLicensed = isLicensed;
         }
     }
 }

@@ -26,15 +26,17 @@ internal class ApplyLiveTemplateCodeActionModel : CodeActionModel
         string title,
         string aspectTypeName,
         SymbolId targetSymbolId,
-        string syntaxTreeFilePath,
-        string? sourceRedistributionLicenseKey ) : base( title, aspectTypeName, sourceRedistributionLicenseKey )
+        string syntaxTreeFilePath ) : base( title )
     {
         this.AspectTypeName = aspectTypeName;
         this.TargetSymbolId = targetSymbolId;
         this.SyntaxTreeFilePath = syntaxTreeFilePath;
     }
 
-    public override async Task<CodeActionResult> ExecuteAsync( CodeActionExecutionContext executionContext, CancellationToken cancellationToken )
+    public override async Task<CodeActionResult> ExecuteAsync(
+        CodeActionExecutionContext executionContext,
+        bool computingPreview,
+        CancellationToken cancellationToken )
     {
         var compilation = executionContext.Compilation.RoslynCompilation;
         var pipelineFactory = executionContext.ServiceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
@@ -60,12 +62,11 @@ internal class ApplyLiveTemplateCodeActionModel : CodeActionModel
 
         if ( result.Success )
         {
-            return new CodeActionResult( result.Compilation!.ModifiedSyntaxTrees.Values.Select( x => x.NewTree.AssertNotNull() ) );
+            return CodeActionResult.Success( result.Compilation!.ModifiedSyntaxTrees.Values.Select( x => x.NewTree.AssertNotNull() ) );
         }
         else
         {
-            // How to report errors here? We will add a comment to the target symbol.
-            return CodeActionResult.Empty;
+            return CodeActionResult.Error( string.Join( " ", result.Diagnostics.Select( x => x.GetMessage() ) ) );
         }
     }
 }

@@ -69,6 +69,6 @@ public class CodeActionExecutionService : ICodeActionExecutionService
 
         var executionContext = new CodeActionExecutionContext( configuration.ServiceProvider, compilationModel, this._logger, projectKey, computingPreview );
 
-        return await codeActionModel.ExecuteAsync( executionContext, cancellationToken );
+        return await codeActionModel.ExecuteAsync( executionContext, computingPreview, cancellationToken );
     }
 }

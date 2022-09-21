@@ -31,11 +31,8 @@ internal class AddAspectAttributeCodeActionModel : CodeActionModel
     public AddAspectAttributeCodeActionModel(
         string aspectTypeName,
         SymbolId targetSymbolId,
-        string syntaxTreeFilePath,
-        string? sourceRedistributionLicenseKey ) : base(
-        $"Add [{AttributeHelper.GetShortName( aspectTypeName )}]",
-        aspectTypeName,
-        sourceRedistributionLicenseKey )
+        string syntaxTreeFilePath ) : base(
+        $"Add [{AttributeHelper.GetShortName( aspectTypeName )}]" )
     {
         this.AspectTypeName = aspectTypeName;
         this.TargetSymbolId = targetSymbolId;
@@ -49,7 +46,10 @@ internal class AddAspectAttributeCodeActionModel : CodeActionModel
         this.SyntaxTreeFilePath = null!;
     }
 
-    public override async Task<CodeActionResult> ExecuteAsync( CodeActionExecutionContext executionContext, CancellationToken cancellationToken )
+    public override async Task<CodeActionResult> ExecuteAsync(
+        CodeActionExecutionContext executionContext,
+        bool computingPreview,
+        CancellationToken cancellationToken )
     {
         AttributeHelper.Parse( this.AspectTypeName, out var ns, out _, out var shortName );
 
@@ -86,6 +86,6 @@ internal class AddAspectAttributeCodeActionModel : CodeActionModel
             return CodeActionResult.Empty;
         }
 
-        return new CodeActionResult( ImmutableArray.Create( new SerializableSyntaxTree( syntaxTree.FilePath, newSyntaxRoot ) ) );
+        return CodeActionResult.Success( ImmutableArray.Create( new SerializableSyntaxTree( syntaxTree.FilePath, newSyntaxRoot ) ) );
     }
 }

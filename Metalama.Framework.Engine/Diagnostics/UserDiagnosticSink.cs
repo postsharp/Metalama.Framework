@@ -22,8 +22,7 @@ namespace Metalama.Framework.Engine.Diagnostics
     {
         private readonly DiagnosticManifest? _diagnosticManifest;
         private readonly CodeFixFilter _codeFixFilter;
-        private readonly string? _sourceAssemblyName;
-        private readonly string? _sourceRedistributionLicenseKey;
+        private readonly bool _canSuggestCodeFix;
         private ImmutableArray<Diagnostic>.Builder? _diagnostics;
         private ImmutableArray<ScopedSuppression>.Builder? _suppressions;
         private ImmutableArray<CodeFixInstance>.Builder? _codeFixes;
@@ -53,12 +52,11 @@ namespace Metalama.Framework.Engine.Diagnostics
 
         public UserDiagnosticSink( CompileTimeProject? compileTimeProject ) : this( compileTimeProject, null ) { }
 
-        internal UserDiagnosticSink( CompileTimeProject? compileTimeProject, CodeFixFilter? codeFixFilter )
+        internal UserDiagnosticSink( CompileTimeProject? compileTimeProject, CodeFixFilter? codeFixFilter, bool canSuggestCodeFix = true )
         {
             this._diagnosticManifest = compileTimeProject?.ClosureDiagnosticManifest;
             this._codeFixFilter = codeFixFilter ?? (( _, _ ) => false);
-            this._sourceRedistributionLicenseKey = compileTimeProject?.ProjectLicenseInfo.RedistributionLicenseKey;
-            this._sourceAssemblyName = compileTimeProject?.RunTimeIdentity.Name;
+            this._canSuggestCodeFix = canSuggestCodeFix;
         }
 
         // This overload is used for tests only.
@@ -108,7 +106,7 @@ namespace Metalama.Framework.Engine.Diagnostics
                     if ( location != null && this._codeFixFilter( diagnosticDefinition, location ) )
                     {
                         this._codeFixes ??= ImmutableArray.CreateBuilder<CodeFixInstance>();
-                        this._codeFixes.Add( new CodeFixInstance( diagnosticDefinition.Id, location, codeFix ) );
+                        this._codeFixes.Add( new CodeFixInstance( diagnosticDefinition.Id, location, codeFix, this._canSuggestCodeFix ) );
                     }
 
                     if ( firstTitle == null )
@@ -131,7 +129,7 @@ namespace Metalama.Framework.Engine.Diagnostics
                     }
                 }
 
-                return new CodeFixDiagnosticInfo( stringBuilder?.ToString() ?? firstTitle, this._sourceAssemblyName, this._sourceRedistributionLicenseKey );
+                return new CodeFixDiagnosticInfo( stringBuilder?.ToString() ?? firstTitle );
             }
             else
             {

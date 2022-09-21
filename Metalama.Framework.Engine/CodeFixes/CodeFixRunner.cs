@@ -123,19 +123,26 @@ namespace Metalama.Framework.Engine.CodeFixes
                 // but in this case this would also be confusing for the end user.
                 return CodeActionResult.Empty;
             }
-            
-            var context = new CodeActionContext( partialCompilation, designTimeConfiguration!, cancellationToken );
+            else if ( !codeFix.IsLicensed && !isComputingPreview )
+            {
+                return CodeActionResult.Error( "License error (TODO)." );
+            }
+            else
+            {
 
-            var codeFixBuilder = new CodeActionBuilder( context );
+                var context = new CodeActionContext( partialCompilation, designTimeConfiguration!, cancellationToken );
 
-            var userCodeExecutionContext = new UserCodeExecutionContext(
-                configuration.ServiceProvider!,
-                NullDiagnosticAdder.Instance,
-                UserCodeMemberInfo.FromDelegate( codeFix.CodeFix.CodeAction ) );
+                var codeFixBuilder = new CodeActionBuilder( context );
 
-            await this._userCodeInvoker.InvokeAsync( () => codeFix.CodeFix.CodeAction( codeFixBuilder ), userCodeExecutionContext );
+                var userCodeExecutionContext = new UserCodeExecutionContext(
+                    configuration.ServiceProvider!,
+                    NullDiagnosticAdder.Instance,
+                    UserCodeMemberInfo.FromDelegate( codeFix.CodeFix.CodeAction ) );
 
-            return context.ToCodeActionResult();
+                await this._userCodeInvoker.InvokeAsync( () => codeFix.CodeFix.CodeAction( codeFixBuilder ), userCodeExecutionContext );
+
+                return context.ToCodeActionResult();
+            }
         }
     }
 }

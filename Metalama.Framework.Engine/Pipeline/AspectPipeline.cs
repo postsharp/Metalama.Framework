@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
+using Metalama.Backstage.Extensibility;
+using Metalama.Backstage.Licensing.Consumption;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code.Collections;
 using Metalama.Framework.Diagnostics;
@@ -249,6 +251,25 @@ namespace Metalama.Framework.Engine.Pipeline
             {
                 compilerPlugIns = this.ProjectOptions.PlugIns;
             }
+            
+            // Initialize the licensing service with redistribution licenses.
+            // Add the license verifier.
+            var licenseConsumptionManager = projectServiceProviderWithProject.GetBackstageService<ILicenseConsumptionManager>();
+
+            if ( licenseConsumptionManager != null )
+            {
+                var licenseVerifier = new LicenseVerifier( licenseConsumptionManager );
+
+                if ( !licenseVerifier.TryInitialize( compileTimeProject, diagnosticAdder ) )
+                {
+                    configuration = null;
+                    
+                    return false;
+                }
+                
+                projectServiceProviderWithProject = projectServiceProviderWithProject.WithService( licenseVerifier );
+            }
+
 
             // Creates a project model that includes the final service provider.
             var projectModel = new ProjectModel( compilation.Compilation, projectServiceProviderWithProject );

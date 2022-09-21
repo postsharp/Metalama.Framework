@@ -21,12 +21,8 @@ internal class UserCodeActionModel : CodeActionModel
 
     public UserCodeActionModel(
         string title,
-        Diagnostic diagnostic,
-        string? sourceAssemblyName,
-        string? sourceRedistributionLicenseKey ) : base(
-        title,
-        sourceAssemblyName,
-        sourceRedistributionLicenseKey )
+        Diagnostic diagnostic) : base(
+        title )
     {
         this.DiagnosticId = diagnostic.Id;
         this.DiagnosticSpan = diagnostic.Location.SourceSpan;
@@ -39,7 +35,10 @@ internal class UserCodeActionModel : CodeActionModel
 
     public string SyntaxTreeFilePath { get; init; }
 
-    public override async Task<CodeActionResult> ExecuteAsync( CodeActionExecutionContext executionContext, CancellationToken cancellationToken )
+    public override async Task<CodeActionResult> ExecuteAsync(
+        CodeActionExecutionContext executionContext,
+        bool computingPreview,
+        CancellationToken cancellationToken )
     {
         var pipelineFactory = executionContext.ServiceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
 

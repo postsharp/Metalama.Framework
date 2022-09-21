@@ -1,8 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeFixes;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
+using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.CodeFixes
@@ -12,15 +14,10 @@ namespace Metalama.Framework.DesignTime.CodeFixes
     /// </summary>
     public abstract class CodeActionModel : CodeActionBaseModel
     {
-        // TODO: SourceAssemblyName and SourceRedistributionLicenseKey can be encapsulated to a record.
-        internal string? SourceAssemblyName { get; }
+  
 
-        internal string? SourceRedistributionLicenseKey { get; }
-
-        protected CodeActionModel( string title, string? sourceAssemblyName, string? sourceRedistributionLicenseKey ) : base( title )
+        protected CodeActionModel( string title) : base( title )
         {
-            this.SourceAssemblyName = sourceAssemblyName;
-            this.SourceRedistributionLicenseKey = sourceRedistributionLicenseKey;
         }
 
         // Deserialization constructor.
@@ -29,7 +26,10 @@ namespace Metalama.Framework.DesignTime.CodeFixes
         /// <summary>
         /// Executes the code action. This method is invoked in the analysis process.
         /// </summary>
-        public abstract Task<CodeActionResult> ExecuteAsync( CodeActionExecutionContext executionContext, CancellationToken cancellationToken );
+        public abstract Task<CodeActionResult> ExecuteAsync(
+            CodeActionExecutionContext executionContext,
+            bool computingPreview,
+            CancellationToken cancellationToken );
 
         public override ImmutableArray<CodeAction> ToCodeActions( CodeActionInvocationContext invocationContext, string titlePrefix = "" )
         {
@@ -47,10 +47,33 @@ namespace Metalama.Framework.DesignTime.CodeFixes
             // Execute the current code action locally or remotely. In case of remote execution, the code action is serialized.
             var result = await invocationContext.Service.ExecuteCodeActionAsync( invocationContext.ProjectKey, this, computingPreview, cancellationToken );
 
-            // Apply the result to the current solution.
-            var project = invocationContext.Document.Project;
+            if ( result.IsSuccess )
+            {
+                // Apply the result to the current solution.
+                var project = invocationContext.Document.Project;
 
-            return await result.ApplyAsync( project, invocationContext.Logger, true, cancellationToken );
+                return await result.ApplyAsync( project, invocationContext.Logger, true, cancellationToken );
+            }
+            else
+            {
+                return this.ReportErrorMessage( invocationContext, result.ErrorMessage.AssertNotNull() );
+            }
+        }
+
+        private Solution ReportErrorMessage( CodeActionInvocationContext context, string errorMessage )
+        {
+            var oldNode = context.SyntaxNode;
+            var oldRoot = oldNode.SyntaxTree.GetRoot();
+
+            var newNode = oldNode.WithLeadingTrivia(
+                oldNode.GetLeadingTrivia()
+                    .AddRange( new[] { SyntaxFactory.CarriageReturnLineFeed, SyntaxFactory.Comment( $"Cannot apply the code fix: {errorMessage}" ) } ) );
+
+            var newRoot = oldRoot.ReplaceNode( oldNode, newNode );
+
+            var newDocument = context.Document.WithSyntaxRoot( newRoot );
+
+            return newDocument.Project.Solution;
         }
     }
 }

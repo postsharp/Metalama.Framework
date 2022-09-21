@@ -10,6 +10,7 @@ using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Templating.Expressions;
 using Metalama.Framework.Engine.Transformations;
@@ -31,12 +32,14 @@ namespace Metalama.Framework.Engine.Aspects
     {
         private readonly ReflectionMapper _reflectionMapper;
         private readonly IAspectClassImpl _aspectClass;
+        private readonly bool _canSuggestCodeFixes;
 
         public IEligibilityRule<IDeclaration>? EligibilityRule { get; }
 
         public AspectDriver( IServiceProvider serviceProvider, IAspectClassImpl aspectClass, CompilationModel compilation )
         {
             this._reflectionMapper = serviceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( compilation.RoslynCompilation );
+            
             this._aspectClass = aspectClass;
 
             // We don't store the IServiceProvider because the AspectDriver is created during the pipeline initialization but used
@@ -59,6 +62,18 @@ namespace Metalama.Framework.Engine.Aspects
 
                     this.EligibilityRule = eligibilityBuilder.Build();
                 }
+            }
+            
+            // Determine the licensing abilities of the current aspect class.
+            var licenseVerifier = serviceProvider.GetService<LicenseVerifier>();
+
+            if ( licenseVerifier != null )
+            {
+                this._canSuggestCodeFixes = licenseVerifier.CanSuggestCodeFix( aspectClass );
+            }
+            else
+            {
+                this._canSuggestCodeFixes = true;
             }
         }
 
@@ -213,7 +228,7 @@ namespace Metalama.Framework.Engine.Aspects
                 return CreateResultForError( diagnostic );
             }
 
-            var diagnosticSink = new UserDiagnosticSink( this._aspectClass.Project, pipelineConfiguration.CodeFixFilter );
+            var diagnosticSink = new UserDiagnosticSink( this._aspectClass.Project, pipelineConfiguration.CodeFixFilter, this._canSuggestCodeFixes );
 
             var executionContext = new UserCodeExecutionContext(
                 serviceProvider,

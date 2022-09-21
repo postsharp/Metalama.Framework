@@ -82,8 +82,7 @@ public class CodeRefactoringDiscoveryService : ICodeRefactoringDiscoveryService
                 new AddAspectAttributeCodeActionModel(
                     aspect.FullName,
                     targetSymbolId,
-                    syntaxTreePath,
-                    aspect.Pro?.ProjectLicenseInfo.RedistributionLicenseKey ) );
+                    syntaxTreePath ) );
 
             if ( aspect.IsLiveTemplate )
             {
@@ -92,8 +91,7 @@ public class CodeRefactoringDiscoveryService : ICodeRefactoringDiscoveryService
                         aspect.DisplayName,
                         aspect.FullName,
                         targetSymbolId,
-                        syntaxTreePath,
-                        aspect.Pro?.ProjectLicenseInfo.RedistributionLicenseKey ) );
+                        syntaxTreePath ) );
             }
         }
 

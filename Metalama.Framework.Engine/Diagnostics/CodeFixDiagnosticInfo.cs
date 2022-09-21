@@ -9,21 +9,13 @@ namespace Metalama.Framework.Engine.Diagnostics
     public readonly struct CodeFixDiagnosticInfo
     {
         public const string TitlesPropertyKey = "Metalama.CodeFixes";
-        public const string SourceAssemblyNamePropertyKey = "Metalama.SourceAssembly";
-        public const string RedistributionLicenseKeyPropertyKey = "Metalama.RedistributionLicenseKey";
         public const char Separator = '\n';
 
         internal string? Titles { get; }
 
-        internal string? SourceAssemblyName { get; }
-
-        internal string? SourceRedistributionLicenseKey { get; }
-
-        internal CodeFixDiagnosticInfo( string? titles, string? sourceAssemblyName, string? sourceRedistributionLicenseKey )
+        internal CodeFixDiagnosticInfo( string? titles )
         {
             this.Titles = titles;
-            this.SourceAssemblyName = sourceAssemblyName;
-            this.SourceRedistributionLicenseKey = sourceRedistributionLicenseKey;
         }
 
         public static IReadOnlyList<string> GetCodeFixTitles( Diagnostic diagnostic )

@@ -4,6 +4,7 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.Formatting;
 using Microsoft.CodeAnalysis;
 using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -15,20 +16,31 @@ namespace Metalama.Framework.Engine.CodeFixes;
 public class CodeActionResult
 {
     public ImmutableArray<SerializableSyntaxTree> SyntaxTreeChanges { get; }
+    
+    public string? ErrorMessage { get; }
+
+    public bool IsSuccess => this.ErrorMessage == null;
 
     [JsonConstructor]
-    public CodeActionResult( ImmutableArray<SerializableSyntaxTree> syntaxTreeChanges )
+    private CodeActionResult( ImmutableArray<SerializableSyntaxTree> syntaxTreeChanges, string? errorMessage = null )
     {
         this.SyntaxTreeChanges = syntaxTreeChanges;
+        this.ErrorMessage = errorMessage;
     }
 
-    public CodeActionResult( IEnumerable<SyntaxTree> modifiedTrees ) :
-        this( modifiedTrees.Select( x => new SerializableSyntaxTree( x ) ).ToImmutableArray() ) { }
-
+    public static CodeActionResult Success( ImmutableArray<SerializableSyntaxTree> syntaxTreeChanges ) => new CodeActionResult( syntaxTreeChanges );
+    public static CodeActionResult Success( IEnumerable<SyntaxTree> modifiedTrees ) => Success( modifiedTrees.Select( x => new SerializableSyntaxTree( x ) ).ToImmutableArray() );
+    public static CodeActionResult Error( string message ) => new CodeActionResult( ImmutableArray<SerializableSyntaxTree>.Empty, message );
+    
     public static CodeActionResult Empty { get; } = new( ImmutableArray<SerializableSyntaxTree>.Empty );
 
     public async ValueTask<Solution> ApplyAsync( Microsoft.CodeAnalysis.Project project, ILogger logger, bool format, CancellationToken cancellationToken )
     {
+        if ( !this.IsSuccess )
+        {
+            throw new InvalidOperationException();
+        }
+        
         var solution = project.Solution;
 
         // Apply changes.
