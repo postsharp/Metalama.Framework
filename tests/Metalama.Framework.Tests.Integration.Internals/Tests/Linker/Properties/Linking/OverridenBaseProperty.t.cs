@@ -10,6 +10,15 @@ class Target : Base
 }}
 
 
+public override int Bar
+{get
+{
+    return this.Bar_Override5;
+}set
+{
+    this.Bar_Override5 = value;
+}}
+
 public int Foo_Override0
 {
     get
@@ -38,15 +47,6 @@ public int Foo_Override0
         this.Bar= value;
         }
 }
-
-public override int Bar
-{get
-{
-    return this.Bar_Override5;
-}set
-{
-    this.Bar_Override5 = value;
-}}
 
 public int Foo_Override2
 {

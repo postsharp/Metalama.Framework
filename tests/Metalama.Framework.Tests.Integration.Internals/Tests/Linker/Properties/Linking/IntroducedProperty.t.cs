@@ -10,6 +10,28 @@ class Target
 }}
 
 
+public int Bar
+{get
+{
+    return this.Bar_Override5;
+}set
+{
+    this.Bar_Override5 = value;
+}}
+private int Bar_Empty
+{
+    get
+    {
+        Console.WriteLine("This is introduced code (discarded).");
+        return 0;
+    }
+
+    set
+    {
+        Console.WriteLine("This is introduced code (discarded).");
+    }
+}
+
 public int Foo_Override0
 {
     get
@@ -37,28 +59,6 @@ public int Foo_Override0
         // Should invoke the final declaration.
         this.Bar= value;
         }
-}
-
-public int Bar
-{get
-{
-    return this.Bar_Override5;
-}set
-{
-    this.Bar_Override5 = value;
-}}
-private int Bar_Empty
-{
-    get
-    {
-        Console.WriteLine("This is introduced code (discarded).");
-        return 0;
-    }
-
-    set
-    {
-        Console.WriteLine("This is introduced code (discarded).");
-    }
 }
 
 public int Foo_Override2

@@ -8,11 +8,13 @@ class Target
 {
     this.Foo_Override6 = value;
 }}
-    
-    
+
+
 public int Foo_Override0
-{get    {
-        // Should invoke source code.
+{
+    get
+    {
+            // Should invoke source code.
         _ = this.Bar_Source;
         // Should invoke source code.
         _ = this.Bar_Source;
@@ -21,10 +23,12 @@ public int Foo_Override0
         // Should invoke the final declaration.
         _ = this.Bar;
         return 42;
-    }
     
-set    {
-        // Should invoke source code.
+    }
+
+    set
+    {
+            // Should invoke source code.
         this.Bar_Source= value;
         // Should invoke source code.
         this.Bar_Source= value;
@@ -32,12 +36,14 @@ set    {
         this.Bar_Source= value;
         // Should invoke the final declaration.
         this.Bar= value;
-    }
+        }
 }
-    
+
 public int Foo_Override2
-{get    {
-        // Should invoke source code.
+{
+    get
+    {
+            // Should invoke source code.
         _ = this.Bar_Source;
         // Should invoke override 1.
         _ = this.Bar_Override1;
@@ -46,10 +52,12 @@ public int Foo_Override2
         // Should invoke the final declaration.
         _ = this.Bar;
         return 42;
-    }
     
-set    {
-        // Should invoke source code.
+    }
+
+    set
+    {
+            // Should invoke source code.
         this.Bar_Source= value;
         // Should invoke override 1.
         this.Bar_Override1= value;
@@ -57,12 +65,14 @@ set    {
         this.Bar_Override1= value;
         // Should invoke the final declaration.
         this.Bar= value;
-    }
+        }
 }
-    
+
 public int Foo_Override4
-{get    {
-        // Should invoke source code.
+{
+    get
+    {
+            // Should invoke source code.
         _ = this.Bar_Source;
         // Should invoke override 3.
         _ = this.Bar_Override3;
@@ -71,10 +81,12 @@ public int Foo_Override4
         // Should invoke the final declaration.
         _ = this.Bar;
         return 42;
-    }
     
-set    {
-        // Should invoke source code.
+    }
+
+    set
+    {
+            // Should invoke source code.
         this.Bar_Source= value;
         // Should invoke override 3.
         this.Bar_Override3= value;
@@ -82,12 +94,14 @@ set    {
         this.Bar_Override3= value;
         // Should invoke the final declaration.
         this.Bar= value;
-    }
+        }
 }
-    
+
 public int Foo_Override6
-{get    {
-        // Should invoke source code.
+{
+    get
+    {
+            // Should invoke source code.
         _ = this.Bar_Source;
         // Should invoke the final declaration.
         _ = this.Bar;
@@ -96,10 +110,12 @@ public int Foo_Override6
         // Should invoke the final declaration.
         _ = this.Bar;
         return 42;
-    }
     
-set    {
-        // Should invoke source code.
+    }
+
+    set
+    {
+            // Should invoke source code.
         this.Bar_Source= value;
         // Should invoke the final declaration.
         this.Bar= value;
@@ -107,7 +123,7 @@ set    {
         this.Bar= value;
         // Should invoke the final declaration.
         this.Bar= value;
-    }
+        }
 }
         public int Bar
 {get
@@ -117,7 +133,7 @@ set    {
 {
     this.Bar_Override5 = value;
 }}
-    
+
 private int Bar_Source
         {
             get
@@ -125,17 +141,19 @@ private int Bar_Source
                 Console.WriteLine("This is original code.");
                 return 0;
             }
-    
+
             set
             {
                 Console.WriteLine("This is original code.");
             }
         }
-    
-    
+
+
 public int Bar_Override1
-{get    {
-        // Should invoke source code.
+{
+    get
+    {
+            // Should invoke source code.
         _ = this.Bar_Source;
         // Should invoke source code.
         _ = this.Bar_Source;
@@ -144,10 +162,12 @@ public int Bar_Override1
         // Should invoke the final declaration.
         _ = this.Bar;
         return 42;
-    }
     
-set    {
-        // Should invoke source code.
+    }
+
+    set
+    {
+            // Should invoke source code.
         this.Bar_Source= value;
         // Should invoke source code.
         this.Bar_Source= value;
@@ -155,12 +175,14 @@ set    {
         this.Bar_Override1= value;
         // Should invoke the final declaration.
         this.Bar= value;
-    }
+        }
 }
-    
+
 public int Bar_Override3
-{get    {
-        // Should invoke source code.
+{
+    get
+    {
+            // Should invoke source code.
         _ = this.Bar_Source;
         // Should invoke override 1.
         _ = this.Bar_Override1;
@@ -169,10 +191,12 @@ public int Bar_Override3
         // Should invoke the final declaration.
         _ = this.Bar;
         return 42;
-    }
     
-set    {
-        // Should invoke source code.
+    }
+
+    set
+    {
+            // Should invoke source code.
         this.Bar_Source= value;
         // Should invoke override 1.
         this.Bar_Override1= value;
@@ -180,12 +204,14 @@ set    {
         this.Bar_Override3= value;
         // Should invoke the final declaration.
         this.Bar= value;
-    }
+        }
 }
-    
+
 public int Bar_Override5
-{get    {
-        // Should invoke source code.
+{
+    get
+    {
+            // Should invoke source code.
         _ = this.Bar_Source;
         // Should invoke override 3.
         _ = this.Bar_Override3;
@@ -194,10 +220,12 @@ public int Bar_Override5
         // Should invoke the final declaration.
         _ = this.Bar;
         return 42;
-    }
     
-set    {
-        // Should invoke source code.
+    }
+
+    set
+    {
+            // Should invoke source code.
         this.Bar_Source= value;
         // Should invoke override 3.
         this.Bar_Override3= value;
@@ -205,5 +233,5 @@ set    {
         this.Bar= value;
         // Should invoke the final declaration.
         this.Bar= value;
-    }
+        }
 }    }

@@ -10,6 +10,26 @@ class Target
 }}
 
 
+public event EventHandler? Bar{add
+{
+    this.Bar_Override6 += value;
+}remove
+{
+    this.Bar_Override6 -= value;
+}}
+private EventHandler? Bar_Source;
+
+private event EventHandler? Bar_Empty
+{
+    add
+    {
+    }
+
+    remove
+    {
+    }
+}
+
 public event EventHandler Foo_Override0
 {
     add
@@ -36,26 +56,6 @@ public event EventHandler Foo_Override0
         // Should invoke the final declaration.
         this.Bar-= value;
         }
-}
-
-public event EventHandler? Bar{add
-{
-    this.Bar_Override6 += value;
-}remove
-{
-    this.Bar_Override6 -= value;
-}}
-private EventHandler? Bar_Source;
-
-private event EventHandler? Bar_Empty
-{
-    add
-    {
-    }
-
-    remove
-    {
-    }
 }
 
 public event EventHandler Foo_Override3

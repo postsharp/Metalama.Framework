@@ -10,6 +10,15 @@ class Target : Base
 }}
 
 
+public override event EventHandler Bar
+{add
+{
+    this.Bar_Override5 += value;
+}remove
+{
+    this.Bar_Override5 -= value;
+}}
+
 public event EventHandler Foo_Override0
 {
     add
@@ -37,15 +46,6 @@ public event EventHandler Foo_Override0
         this.Bar-= value;
         }
 }
-
-public override event EventHandler Bar
-{add
-{
-    this.Bar_Override5 += value;
-}remove
-{
-    this.Bar_Override5 -= value;
-}}
 
 public event EventHandler Foo_Override2
 {
