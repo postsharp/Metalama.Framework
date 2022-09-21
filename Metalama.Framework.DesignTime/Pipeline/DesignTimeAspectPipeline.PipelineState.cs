@@ -362,7 +362,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                     var licenseVerifier = state._pipeline.ServiceProvider.GetRequiredService<DesignTimeLicenseVerifier>();
                     var redistributionLicenseKey = licenseVerifier?.RedistributionLicenseKey;
-                    var projectLicenseInfo = string.IsNullOrEmpty( redistributionLicenseKey ) ? ProjectLicenseInfo.Empty : new ProjectLicenseInfo( redistributionLicenseKey );
+
+                    // TODO: Assembly name
+                    var projectLicenseInfo = string.IsNullOrEmpty( redistributionLicenseKey ) ? ProjectLicenseInfo.Empty : new ProjectLicenseInfo( "", redistributionLicenseKey );
                     
                     if ( !state._pipeline.TryInitialize(
                             diagnosticAdder,

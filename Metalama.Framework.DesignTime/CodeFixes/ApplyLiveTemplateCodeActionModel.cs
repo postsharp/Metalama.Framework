@@ -51,12 +51,14 @@ internal class ApplyLiveTemplateCodeActionModel : CodeActionModel
             return CodeActionResult.Empty;
         }
 
-        var result = await pipeline.TryApplyAspectToCode(
+        var result = await pipeline.ApplyAspectToCodeAsync(
                 this.AspectTypeName,
                 compilation,
                 targetSymbol,
                 executionContext.ComputingPreview,
-                cancellationToken ) )
+                cancellationToken );
+
+        if ( result.Success )
         {
             return new CodeActionResult( result.Compilation!.ModifiedSyntaxTrees.Values.Select( x => x.NewTree.AssertNotNull() ) );
         }

@@ -87,11 +87,6 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
                     pipeline = new DesignTimeAspectPipeline( this, projectOptions, compilationId, compilation.References, this._isTest );
 
-
-                    // TODO: Remove                    serviceProvider = this
-                        .WithService( new DesignTimeLicenseVerifier( serviceProvider ) );
-                    
-                    pipeline = new DesignTimeAspectPipeline( serviceProvider, this.Domain, compilation.References, this._isTest );
                     pipeline.PipelineResumed += this.OnPipelineResumed;
                     pipeline.StatusChanged += this.OnPipelineStatusChanged;
 

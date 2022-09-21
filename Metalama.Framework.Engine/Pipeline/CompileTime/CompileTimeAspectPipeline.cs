@@ -86,7 +86,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             var redistributionLicenseKey = licenseConsumptionManager?.RedistributionLicenseKey;
 
             // TODO: Get runtime assembly short name.
-            var runtimeAssemblyName = ?;
+            var runtimeAssemblyName = "";
             var projectLicenseInfo = string.IsNullOrEmpty( redistributionLicenseKey ) ? ProjectLicenseInfo.Empty : new ProjectLicenseInfo( runtimeAssemblyName, redistributionLicenseKey );
 
             // Initialize the pipeline and generate the compile-time project.

@@ -9,6 +9,8 @@ using Metalama.Framework.Project;
 
 namespace Metalama.Framework.DesignTime.Licensing;
 
+// TODO: Remove
+
 public class DesignTimeLicenseVerifier : IService
 {
     private readonly ILicenseConsumptionManager _licenseConsumptionManager;
@@ -19,7 +21,7 @@ public class DesignTimeLicenseVerifier : IService
     {
         var projectOptions = serviceProvider.GetRequiredService<IProjectOptions>();
 
-        this._licenseConsumptionManager = BackstageServiceFactory.CreateLicenseConsumptionManager( true, additionalLicense: projectOptions.AdditionalLicense );
+        // this._licenseConsumptionManager = BackstageServiceFactory.CreateLicenseConsumptionManager( true, additionalLicense: projectOptions.AdditionalLicense );
     }
 
     public bool CanExecuteCodeAction( CodeActionModel codeAction, string? targetAssemblyName )

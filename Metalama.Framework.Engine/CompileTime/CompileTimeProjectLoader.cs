@@ -232,17 +232,9 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
                 return this.TryGetCompileTimeProjectFromPath( filePath, diagnosticSink, cancellationToken, out referencedProject );
 
             case CompilationReference compilationReference:
-                var partialCompilation = PartialCompilation.CreateComplete( compilationReference.Compilation );
-
-                this._serviceProvider.GetRequiredService<IAspectPipelineConfigurationProvider>()
-                    .TryGetConfiguration( partialCompilation, diagnosticSink, cancellationToken, out var referenceConfiguration );
-
-                // TODO: Using the project directly breaks the pipeline.
-                referencedProject = referenceConfiguration.ServiceProvider.GetRequiredService<CompileTimeProject>();
-
                 return this.TryGetCompileTimeProjectFromCompilation(
                     compilationReference.Compilation,
-                    referencedProject.ProjectLicenseInfo,
+                    null,
                     null,
                     diagnosticSink,
                     cacheOnly,
