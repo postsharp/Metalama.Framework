@@ -38,6 +38,7 @@ internal class ExecuteAspectLayerPipelineStep : PipelineStep
 
     public override async Task<CompilationModel> ExecuteAsync(
         CompilationModel compilation,
+        int stepIndex,
         CancellationToken cancellationToken )
     {
         var aggregateInstances = this._aspectInstances
@@ -54,7 +55,7 @@ internal class ExecuteAspectLayerPipelineStep : PipelineStep
         // The processing order of types is arbitrary. Different types can be processed in parallel.
         await this._taskScheduler.RunInParallelAsync(
             instancesByType,
-            t => this.ProcessType( t, compilation, observableTransformations.Enqueue, cancellationToken ),
+            t => this.ProcessType( t, compilation, stepIndex, observableTransformations.Enqueue, cancellationToken ),
             cancellationToken );
 
         return compilation.WithTransformations( observableTransformations );
@@ -63,6 +64,7 @@ internal class ExecuteAspectLayerPipelineStep : PipelineStep
     private void ProcessType(
         IEnumerable<(IDeclaration TargetDeclaration, IAspectInstanceInternal AspectInstance)> aspects,
         CompilationModel compilation,
+        int stepIndex,
         Action<IObservableTransformation> addTransformation,
         CancellationToken cancellationToken )
     {
@@ -70,7 +72,7 @@ internal class ExecuteAspectLayerPipelineStep : PipelineStep
 
         var currentCompilation = compilation;
 
-        var index = 0;
+        var indexWithinType = 0;
 
         // Order aspects by source order, if possible.
         var orderedAspects = aspects.OrderBy( a => a, AspectInstanceComparer.Instance );
@@ -78,8 +80,7 @@ internal class ExecuteAspectLayerPipelineStep : PipelineStep
         foreach ( var aspect in orderedAspects )
         {
             // Set the aspect instance order for use by the linker.
-            aspect.AspectInstance.OrderWithinTypeAndAspectLayer = index;
-            index++;
+            indexWithinType++;
 
             // Create a snapshot of the compilation.
             var mutableCompilationForThisAspect = currentCompilation.CreateMutableClone();
@@ -91,6 +92,8 @@ internal class ExecuteAspectLayerPipelineStep : PipelineStep
                 currentCompilation,
                 mutableCompilationForThisAspect,
                 this.Parent.PipelineConfiguration,
+                stepIndex,
+                indexWithinType,
                 cancellationToken );
 
             mutableCompilationForThisAspect.Freeze();

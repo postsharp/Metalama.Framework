@@ -29,6 +29,7 @@ internal class EvaluateAspectSourcesPipelineStep : PipelineStep
 
     public override Task<CompilationModel> ExecuteAsync(
         CompilationModel compilation,
+        int stepIndex,
         CancellationToken cancellationToken )
     {
         var aspectClass = this.AspectLayer.AspectClass;

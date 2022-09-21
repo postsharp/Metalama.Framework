@@ -49,8 +49,7 @@ namespace Metalama.Framework.Engine.Linking
             // We don't use a code fix filter because the linker is not supposed to suggest code fixes. If that changes, we need to pass a filter.
             var diagnostics = new UserDiagnosticSink( input.CompileTimeProject, null );
 
-            var aspectLayerIdComparer = new AspectLayerIdComparer( input.OrderedAspectLayers );
-            var transformationComparer = new TransformationLinkerOrderComparer( aspectLayerIdComparer );
+            var transformationComparer =  TransformationLinkerOrderComparer.Instance;
             var nameProvider = new LinkerIntroductionNameProvider( input.CompilationModel );
             var syntaxTransformationCollection = new SyntaxTransformationCollection( transformationComparer );
             var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
@@ -186,8 +185,6 @@ namespace Metalama.Framework.Engine.Linking
                     input.OrderedAspectLayers,
                     projectOptions );
         }
-
-       
 
         private static void IndexNodesWithModifiedAttributes(
             ITransformation transformation,

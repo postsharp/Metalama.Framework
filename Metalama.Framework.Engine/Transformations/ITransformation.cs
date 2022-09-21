@@ -4,19 +4,22 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Engine.Advising;
 using Microsoft.CodeAnalysis;
 
-namespace Metalama.Framework.Engine.Transformations
+namespace Metalama.Framework.Engine.Transformations;
+
+/// <summary>
+/// Represents any transformation.
+/// </summary>
+internal interface ITransformation
 {
-    /// <summary>
-    /// Represents any transformation.
-    /// </summary>
-    internal interface ITransformation
-    {
-        SyntaxTree TransformedSyntaxTree { get; }
+    SyntaxTree TransformedSyntaxTree { get; }
 
-        IDeclaration TargetDeclaration { get; }
+    IDeclaration TargetDeclaration { get; }
 
-        Advice ParentAdvice { get; }
+    Advice ParentAdvice { get; }
 
-        int OrderWithinAspectInstance { get; set; }
-    }
+    int OrderWithinPipelineStepAndTypAndAspectInstance { get; set; }
+
+    int OrderWithinPipelineStepAndType { get; set; }
+
+    int OrderWithinPipeline { get; set; }
 }

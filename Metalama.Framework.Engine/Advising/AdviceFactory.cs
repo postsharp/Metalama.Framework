@@ -237,7 +237,7 @@ namespace Metalama.Framework.Engine.Advising
                 this._state.CurrentCompilation,
                 t =>
                 {
-                    t.OrderWithinAspectInstance = this._state.GetTransformationOrder();
+                    this._state.SetOrders( t );
                     transformations.Add( t );
                 } );
 

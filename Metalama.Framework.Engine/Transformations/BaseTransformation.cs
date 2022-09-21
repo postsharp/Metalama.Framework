@@ -23,5 +23,9 @@ internal abstract class BaseTransformation : ITransformation
 
     public Advice ParentAdvice { get; }
 
-    public int OrderWithinAspectInstance { get; set; }
+    public int OrderWithinPipelineStepAndTypAndAspectInstance { get; set; }
+
+    public int OrderWithinPipelineStepAndType { get; set; }
+
+    public int OrderWithinPipeline { get; set; }
 }
