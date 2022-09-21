@@ -31,22 +31,12 @@ internal class TransformationLinkerOrderComparer : Comparer<ITransformation>
             return -1;
         }
 
-        // Sort by pipeline order.
+        // Sort by pipeline order, i.e. aspect layer and depth.
         var aspectLayerComparison = x.OrderWithinPipeline.CompareTo( y.OrderWithinPipeline );
 
         if ( aspectLayerComparison != 0 )
         {
             return aspectLayerComparison;
-        }
-
-        // Sort by target type (the aspect framework process all types of the same pipeline step in parallel, but at this point we need strong ordering). 
-        var targetTypeComparison = StringComparer.Ordinal.Compare(
-            x.TargetDeclaration.GetClosestNamedType()?.FullName,
-            y.TargetDeclaration.GetClosestNamedType()?.FullName );
-
-        if ( targetTypeComparison != 0 )
-        {
-            return targetTypeComparison;
         }
 
         // Sort by processing order within the type (as set with the pipeline).
@@ -66,7 +56,8 @@ internal class TransformationLinkerOrderComparer : Comparer<ITransformation>
             return aspectInstanceComparison;
         }
 
-        // At this point, there should be no ambiguity.
-        throw new AssertionFailedException();
+        // There may still be some non-determinism at this point because types of the same depth are not ordered,
+        // however this non-determinism should not affect the output of the linker.
+        return 0;
     }
 }
