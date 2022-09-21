@@ -27,6 +27,15 @@ private global::System.Int32 TargetClassProperty_Introduction
         }
 }
 
+private global::System.Int32 BaseClassProperty_Introduction
+{
+    get
+    {
+            global::System.Console.WriteLine("This is introduced property.");
+        return base.BaseClassProperty;
+        }
+}
+
 public new global::System.Int32 BaseClassProperty
 {
     get
@@ -35,13 +44,4 @@ public new global::System.Int32 BaseClassProperty
         return this.BaseClassProperty_Introduction;
     
     }
-}
-
-private global::System.Int32 BaseClassProperty_Introduction
-{
-    get
-    {
-            global::System.Console.WriteLine("This is introduced property.");
-        return base.BaseClassProperty;
-        }
 }    }

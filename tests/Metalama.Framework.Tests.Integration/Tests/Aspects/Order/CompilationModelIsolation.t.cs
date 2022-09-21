@@ -11,14 +11,14 @@ internal class Foo
     }
 
 
+public static void IntroducedMethod1()
+{
+    global::System.Console.WriteLine("Method introduced by Aspect1.");
+}
+
 public static void IntroducedMethod2()
 {
     global::System.Console.WriteLine("Executing Aspect1 on IntroducedMethod2. Methods present before applying Aspect1: IntroducedMethod2, SourceMethod");
         global::System.Console.WriteLine("Method introduced by Aspect2.");
     return;
-}
-
-public static void IntroducedMethod1()
-{
-    global::System.Console.WriteLine("Method introduced by Aspect1.");
 }}

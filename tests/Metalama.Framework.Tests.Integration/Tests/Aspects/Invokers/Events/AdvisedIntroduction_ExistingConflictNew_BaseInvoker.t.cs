@@ -97,6 +97,22 @@ private event global::System.EventHandler ExistingVirtualEvent_Introduction
         }
 }
 
+private event global::System.EventHandler BaseClassAbstractEvent_Introduction
+{
+    add
+    {
+            global::System.Console.WriteLine("This is introduced event.");
+        base.BaseClassAbstractEvent += value;
+    
+    }
+
+    remove
+    {
+            global::System.Console.WriteLine("This is introduced event.");
+        base.BaseClassAbstractEvent -= value;
+        }
+}
+
 public new event global::System.EventHandler BaseClassAbstractEvent
 {
     add
@@ -116,19 +132,19 @@ public new event global::System.EventHandler BaseClassAbstractEvent
     }
 }
 
-private event global::System.EventHandler BaseClassAbstractEvent_Introduction
+private event global::System.EventHandler BaseClassEvent_Introduction
 {
     add
     {
             global::System.Console.WriteLine("This is introduced event.");
-        base.BaseClassAbstractEvent += value;
+        base.BaseClassEvent += value;
     
     }
 
     remove
     {
             global::System.Console.WriteLine("This is introduced event.");
-        base.BaseClassAbstractEvent -= value;
+        base.BaseClassEvent -= value;
         }
 }
 
@@ -151,19 +167,19 @@ public new event global::System.EventHandler BaseClassEvent
     }
 }
 
-private event global::System.EventHandler BaseClassEvent_Introduction
+private event global::System.EventHandler BaseClassVirtualEvent_Introduction
 {
     add
     {
             global::System.Console.WriteLine("This is introduced event.");
-        base.BaseClassEvent += value;
+        base.BaseClassVirtualEvent += value;
     
     }
 
     remove
     {
             global::System.Console.WriteLine("This is introduced event.");
-        base.BaseClassEvent -= value;
+        base.BaseClassVirtualEvent -= value;
         }
 }
 
@@ -186,19 +202,19 @@ public new event global::System.EventHandler BaseClassVirtualEvent
     }
 }
 
-private event global::System.EventHandler BaseClassVirtualEvent_Introduction
+private event global::System.EventHandler DerivedClassEvent_Introduction
 {
     add
     {
             global::System.Console.WriteLine("This is introduced event.");
-        base.BaseClassVirtualEvent += value;
+        base.DerivedClassEvent += value;
     
     }
 
     remove
     {
             global::System.Console.WriteLine("This is introduced event.");
-        base.BaseClassVirtualEvent -= value;
+        base.DerivedClassEvent -= value;
         }
 }
 
@@ -221,19 +237,19 @@ public new event global::System.EventHandler DerivedClassEvent
     }
 }
 
-private event global::System.EventHandler DerivedClassEvent_Introduction
+private event global::System.EventHandler DerivedClassVirtualEvent_Introduction
 {
     add
     {
             global::System.Console.WriteLine("This is introduced event.");
-        base.DerivedClassEvent += value;
+        base.DerivedClassVirtualEvent += value;
     
     }
 
     remove
     {
             global::System.Console.WriteLine("This is introduced event.");
-        base.DerivedClassEvent -= value;
+        base.DerivedClassVirtualEvent -= value;
         }
 }
 
@@ -254,20 +270,4 @@ public new event global::System.EventHandler DerivedClassVirtualEvent
         this.DerivedClassVirtualEvent_Introduction-= value;
     
     }
-}
-
-private event global::System.EventHandler DerivedClassVirtualEvent_Introduction
-{
-    add
-    {
-            global::System.Console.WriteLine("This is introduced event.");
-        base.DerivedClassVirtualEvent += value;
-    
-    }
-
-    remove
-    {
-            global::System.Console.WriteLine("This is introduced event.");
-        base.DerivedClassVirtualEvent -= value;
-        }
 }    }

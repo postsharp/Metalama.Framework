@@ -254,6 +254,19 @@ public global::System.Int32 IntroducedGetOnlyAutoProperty
 private global::System.Int32 IntroducedGetOnlyAutoProperty_Source
 { get; }
 
+private global::System.Int32 IntroducedProperty_IntroduceAndOverride
+{
+    get
+    {
+            return (global::System.Int32)42;
+    
+    }
+
+    set
+    {
+            }
+}
+
 public global::System.Int32 IntroducedProperty
 {
     get
@@ -277,17 +290,4 @@ public global::System.Int32 IntroducedProperty
     
     
     }
-}
-
-private global::System.Int32 IntroducedProperty_IntroduceAndOverride
-{
-    get
-    {
-            return (global::System.Int32)42;
-    
-    }
-
-    set
-    {
-            }
 }    }

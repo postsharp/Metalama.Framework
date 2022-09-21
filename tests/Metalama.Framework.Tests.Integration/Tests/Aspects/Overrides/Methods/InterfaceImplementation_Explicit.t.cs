@@ -23,11 +23,11 @@
         }
 
 
-void global::Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.InterfaceImplementation_Explicit.IntroducedInterface.IntroducedVoidMethod()
+T global::Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.InterfaceImplementation_Explicit.IntroducedInterface.IntroducedGenericMethod<T>(T value)
 {
     global::System.Console.WriteLine("Override.");
         global::System.Console.WriteLine("Introduced");
-    return;
+    return (T)value;
 }
 
 global::System.Int32 global::Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.InterfaceImplementation_Explicit.IntroducedInterface.IntroducedMethod()
@@ -37,11 +37,11 @@ global::System.Int32 global::Metalama.Framework.Tests.Integration.Tests.Aspects.
     return (global::System.Int32)42;
 }
 
-T global::Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.InterfaceImplementation_Explicit.IntroducedInterface.IntroducedGenericMethod<T>(T value)
+void global::Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Methods.InterfaceImplementation_Explicit.IntroducedInterface.IntroducedVoidMethod()
 {
     global::System.Console.WriteLine("Override.");
         global::System.Console.WriteLine("Introduced");
-    return (T)value;
+    return;
 }
         //async Task Interface.AsyncVoidMethod()
         //{

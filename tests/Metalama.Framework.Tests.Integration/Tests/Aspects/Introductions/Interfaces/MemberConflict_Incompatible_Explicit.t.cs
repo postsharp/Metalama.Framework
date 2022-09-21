@@ -34,12 +34,6 @@
         }
 
 
-global::System.Int32 global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.MemberConflict_Incompatible_Explicit.IInterface.Method()
-{
-    global::System.Console.WriteLine("This is introduced interface method.");
-    return (global::System.Int32)42;
-}
-
 global::System.Int32 global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.MemberConflict_Incompatible_Explicit.IInterface.Property
 {
     get
@@ -56,6 +50,12 @@ global::System.Int32 global::Metalama.Framework.Tests.Integration.TestInputs.Asp
                 global::System.Console.WriteLine("This is introduced interface property.");
     
     }
+}
+
+global::System.Int32 global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.MemberConflict_Incompatible_Explicit.IInterface.Method()
+{
+    global::System.Console.WriteLine("This is introduced interface method.");
+    return (global::System.Int32)42;
 }
 
 event global::System.EventHandler global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.MemberConflict_Incompatible_Explicit.IInterface.Event

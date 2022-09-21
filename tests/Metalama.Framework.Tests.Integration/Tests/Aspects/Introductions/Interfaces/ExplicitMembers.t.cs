@@ -1,11 +1,7 @@
 [Introduction]
     public class TargetClass:global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers.IInterface{ 
 
-global::System.Int32 global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers.IInterface.InterfaceMethod()
-{
-    global::System.Console.WriteLine("This is introduced interface member.");
-        return default(global::System.Int32);
-}
+global::System.Int32 global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers.IInterface.AutoProperty { get; set; }
 
 global::System.Int32 global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers.IInterface.Property
 {
@@ -24,7 +20,11 @@ global::System.Int32 global::Metalama.Framework.Tests.Integration.TestInputs.Asp
                 }
 }
 
-global::System.Int32 global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers.IInterface.AutoProperty { get; set; }
+global::System.Int32 global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers.IInterface.InterfaceMethod()
+{
+    global::System.Console.WriteLine("This is introduced interface member.");
+        return default(global::System.Int32);
+}
 
 event global::System.EventHandler global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ExplicitMembers.IInterface.Event
 {

@@ -33,6 +33,25 @@
         }
 
 
+public void IntroducedMethod1()
+{
+    global::System.Console.Write("This is introduced by the first aspect.");
+}
+
+public void IntroducedMethod2()
+{
+    try
+    {
+        global::System.Console.Write("This is overridden by the first aspect.");
+            global::System.Console.Write("This is introduced by the second aspect.");
+        return;
+    }
+    finally
+    {
+        global::System.Console.Write("This is overridden by the first aspect.");
+    }
+}
+
 public void IntroducedMethod3()
 {
     try
@@ -53,23 +72,4 @@ public void IntroducedMethod3()
     {
         global::System.Console.Write("This is overridden by the first aspect.");
     }
-}
-
-public void IntroducedMethod2()
-{
-    try
-    {
-        global::System.Console.Write("This is overridden by the first aspect.");
-            global::System.Console.Write("This is introduced by the second aspect.");
-        return;
-    }
-    finally
-    {
-        global::System.Console.Write("This is overridden by the first aspect.");
-    }
-}
-
-public void IntroducedMethod1()
-{
-    global::System.Console.Write("This is introduced by the first aspect.");
 }    }

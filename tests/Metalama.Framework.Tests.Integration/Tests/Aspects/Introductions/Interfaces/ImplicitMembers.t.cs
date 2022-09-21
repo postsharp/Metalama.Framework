@@ -1,11 +1,7 @@
 [Introduction]
     public class TargetClass:global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.ImplicitMembers.IInterface{ 
 
-public global::System.Int32 InterfaceMethod()
-{
-    global::System.Console.WriteLine("This is introduced interface member.");
-        return default(global::System.Int32);
-}
+public global::System.Int32 AutoProperty { get; set; }
 
 public global::System.Int32 Property
 {
@@ -25,7 +21,11 @@ public global::System.Int32 Property
     }
 }
 
-public global::System.Int32 AutoProperty { get; set; }
+public global::System.Int32 InterfaceMethod()
+{
+    global::System.Console.WriteLine("This is introduced interface member.");
+        return default(global::System.Int32);
+}
 
 public event global::System.EventHandler Event
 {

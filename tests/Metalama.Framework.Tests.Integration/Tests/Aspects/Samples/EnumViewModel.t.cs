@@ -9,11 +9,11 @@
         }
 
 
-public global::System.Boolean IsVisible
+public global::System.Boolean IsCollapsed
 {
     get
     {
-                return (global::System.Boolean)(this._value == global::Metalama.Framework.Tests.Integration.Aspects.Samples.EnumViewModel.Visibility.Visible);
+                return (global::System.Boolean)(this._value == global::Metalama.Framework.Tests.Integration.Aspects.Samples.EnumViewModel.Visibility.Collapsed);
     
     }
 }
@@ -27,11 +27,11 @@ public global::System.Boolean IsHidden
     }
 }
 
-public global::System.Boolean IsCollapsed
+public global::System.Boolean IsVisible
 {
     get
     {
-                return (global::System.Boolean)(this._value == global::Metalama.Framework.Tests.Integration.Aspects.Samples.EnumViewModel.Visibility.Collapsed);
+                return (global::System.Boolean)(this._value == global::Metalama.Framework.Tests.Integration.Aspects.Samples.EnumViewModel.Visibility.Visible);
     
     }
 }    }

@@ -156,8 +156,6 @@ public static global::System.Int32 IntroducedProperty_Auto_Static { get; set; }
 
 private static global::System.Int32 IntroducedProperty_Auto_Static_Private { get; set; }
 
-public event global::System.EventHandler? EventField;
-
 public T GenericMethod<T>(T a)
 {
     return (T)a;
@@ -226,4 +224,6 @@ public global::System.Int32 RefMethod(ref global::System.Int32 x)
 {
     x += 42;
     return (global::System.Int32)42;
-}    }
+}
+
+public event global::System.EventHandler? EventField;    }

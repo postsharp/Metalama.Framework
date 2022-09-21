@@ -23,11 +23,11 @@
         }
 
 
-public void IntroducedVoidMethod()
+public T IntroducedGenericMethod<T>(T value)
 {
     global::System.Console.WriteLine("Override.");
         global::System.Console.WriteLine("Introduced");
-    return;
+    return (T)value;
 }
 
 public global::System.Int32 IntroducedMethod()
@@ -37,11 +37,11 @@ public global::System.Int32 IntroducedMethod()
     return (global::System.Int32)42;
 }
 
-public T IntroducedGenericMethod<T>(T value)
+public void IntroducedVoidMethod()
 {
     global::System.Console.WriteLine("Override.");
         global::System.Console.WriteLine("Introduced");
-    return (T)value;
+    return;
 }
         //public async Task AsyncVoidMethod()
         //{
