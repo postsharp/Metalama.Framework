@@ -125,7 +125,7 @@ namespace Metalama.Framework.Engine.CodeFixes
                 return CodeActionResult.Empty;
             }
 
-            var context = new CodeActionContext( partialCompilation, designTimeConfiguration!, cancellationToken );
+            var context = new CodeActionContext( partialCompilation, pipelineResult.Value.Configuration, cancellationToken );
 
             var codeFixBuilder = new CodeActionBuilder( context );
 
