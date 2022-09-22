@@ -60,7 +60,7 @@ internal class DeclarativeAdviceSymbolComparer : IComparer<ISymbol>
         {
             return -1;
         }
-        
+
         var compareByKind = GetOrderByKind( x ).CompareTo( GetOrderByKind( y ) );
 
         if ( compareByKind != 0 )

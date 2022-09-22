@@ -4,9 +4,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Threading;
 
-namespace Metalama.Framework.Engine.Utilities.Threading;
+namespace Metalama.Framework.Engine.Collections;
 
-internal class ConcurrentLinkedList<T> : IReadOnlyCollection<T>
+internal sealed class ConcurrentLinkedList<T> : IReadOnlyCollection<T>
 {
     private volatile Node? _head;
     private int _count;
@@ -46,7 +46,7 @@ internal class ConcurrentLinkedList<T> : IReadOnlyCollection<T>
 
         for ( var i = 0; i < count; i++ )
         {
-            list.Add( node.AssertNotNull().Value );
+            list.Add( node!.Value );
             node = node!.Next;
         }
 

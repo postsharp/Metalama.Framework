@@ -4,9 +4,9 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Engine.Utilities.Threading;
+namespace Metalama.Framework.Engine.Collections;
 
-internal class ConcurrentSet<T> : IReadOnlyCollectionWithContains<T> 
+internal sealed class ConcurrentSet<T> : IReadOnlyCollectionWithContains<T>
     where T : notnull
 {
     private readonly ConcurrentDictionary<T, int> _dictionary = new();
