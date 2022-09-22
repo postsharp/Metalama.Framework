@@ -136,16 +136,14 @@ namespace Metalama.Framework.Engine.Pipeline
                 var generatedSyntaxTree = SyntaxTree( compilationUnit.NormalizeWhitespace(), encoding: Encoding.UTF8 );
                 var syntaxTreeName = declaringType.FullName + ".cs";
 
-                for ( var i = 1; additionalSyntaxTreeDictionary.ContainsKey( syntaxTreeName ); i++ )
-                {
-                    syntaxTreeName = $"{declaringType.FullName}_{i}.cs";
-                }
+                var index = 1;
 
-                if ( !additionalSyntaxTreeDictionary.TryAdd(
-                        syntaxTreeName,
-                        new IntroducedSyntaxTree( syntaxTreeName, originalSyntaxTree, generatedSyntaxTree ) ) )
+                while ( !additionalSyntaxTreeDictionary.TryAdd(
+                           syntaxTreeName,
+                           new IntroducedSyntaxTree( syntaxTreeName, originalSyntaxTree, generatedSyntaxTree ) ) )
                 {
-                    throw new AssertionFailedException();
+                    index++;
+                    syntaxTreeName = $"{declaringType.FullName}_{index}.cs";
                 }
             }
 
