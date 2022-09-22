@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 namespace Metalama.Framework.Tests.Integration.Tests.Aspects.Misc.TransformTemplateAccessibility
 {
   /*
- Tests that the visibility of all templates, including accessors, is set to 'public', and
- that an [Accessibility] attribute is added.
- */
+    Tests that the visibility of all templates, including accessors, is set to 'public', and
+    that an [Accessibility] attribute is added.
+     */
 #pragma warning disable CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823
   internal class MyAspect : Framework.Aspects.TypeAspect
   {

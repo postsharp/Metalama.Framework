@@ -436,7 +436,8 @@ namespace Metalama.TestFramework
 
             var testOutputs = testResult.GetTestOutputsWithDiagnostics();
             var actualTransformedNonNormalizedText = JoinSyntaxTrees( testOutputs );
-            var actualTransformedNormalizedSourceText = NormalizeTestOutput( actualTransformedNonNormalizedText, formatCode, true );
+            var actualTransformedSourceTextForComparison = NormalizeTestOutput( actualTransformedNonNormalizedText, formatCode, true );
+            var actualTransformedSourceTextForStorage = NormalizeTestOutput( actualTransformedNonNormalizedText, formatCode, false );
 
             // If the expectation file does not exist, create it with some placeholder content.
             if ( !File.Exists( expectedTransformedPath ) )
@@ -467,9 +468,9 @@ namespace Metalama.TestFramework
             var storedTransformedSourceText =
                 File.Exists( actualTransformedPath ) ? File.ReadAllText( actualTransformedPath ) : null;
 
-            if ( storedTransformedSourceText != expectedSourceTextForStorage )
+            if ( storedTransformedSourceText != actualTransformedSourceTextForStorage )
             {
-                File.WriteAllText( actualTransformedPath, expectedSourceTextForStorage );
+                File.WriteAllText( actualTransformedPath, actualTransformedSourceTextForStorage );
             }
 
             if ( this.Logger != null )
@@ -490,7 +491,7 @@ namespace Metalama.TestFramework
             }
 
             state["expectedTransformedSourceText"] = expectedSourceTextForComparison;
-            state["actualTransformedNormalizedSourceText"] = actualTransformedNormalizedSourceText;
+            state["actualTransformedNormalizedSourceText"] = actualTransformedSourceTextForComparison;
 
             static string JoinSyntaxTrees( IReadOnlyList<SyntaxTree> compilationUnits )
             {

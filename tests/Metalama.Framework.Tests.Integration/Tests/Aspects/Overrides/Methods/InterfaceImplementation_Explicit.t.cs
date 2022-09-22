@@ -39,24 +39,24 @@ public class Target : Interface, global::Metalama.Framework.Tests.Integration.Te
   }
 //async Task Interface.AsyncVoidMethod()
 //{
-// Console.WriteLine("Original");
-// await Task.Yield();
+//    Console.WriteLine("Original");
+//    await Task.Yield();
 //}
 //async Task<int> Interface.AsyncMethod()
 //{
-// Console.WriteLine("Original");
-// await Task.Yield();
-// return 42;
+//    Console.WriteLine("Original");
+//    await Task.Yield();
+//    return 42;
 //}
 //IEnumerable<int> Interface.IteratorMethod()
 //{
-// Console.WriteLine("Original");
-// yield return 42;
+//    Console.WriteLine("Original");
+//    yield return 42;
 //}
 //async IAsyncEnumerable<int> Interface.AsyncIteratorMethod()
 //{
-// Console.WriteLine("Original");
-// await Task.Yield();
-// yield return 42;
+//    Console.WriteLine("Original");
+//    await Task.Yield();
+//    yield return 42;
 //}
 }

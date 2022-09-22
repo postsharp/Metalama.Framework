@@ -7,8 +7,8 @@ using Metalama.TestFramework;
 namespace Metalama.Framework.IntegrationTests.Aspects.Fabrics.ProjectFabricTopLevelStatements
 {
   /*
- * Tests that applying an override on all methods does not target the Main method containing top-level statements.
- */
+     * Tests that applying an override on all methods does not target the Main method containing top-level statements.
+     */
 #pragma warning disable CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823
   public class OverrideAttribute : OverrideMethodAspect
   {

@@ -14,13 +14,13 @@ internal class TargetCode
   }
   private async IAsyncEnumerable<int> AsyncEnumerable_Source(int a)
   {
-    Console.WriteLine(" Yield 1");
+    Console.WriteLine("   Yield 1");
     yield return 1;
     await Task.Yield();
-    Console.WriteLine(" Yield 2");
+    Console.WriteLine("   Yield 2");
     yield return 2;
     await Task.Yield();
-    Console.WriteLine(" Yield 3");
+    Console.WriteLine("   Yield 3");
     yield return 3;
   }
   [Aspect]
@@ -37,13 +37,13 @@ internal class TargetCode
   }
   private async IAsyncEnumerable<int> AsyncEnumerableCancellable_Source(int a, [EnumeratorCancellation] CancellationToken token)
   {
-    Console.WriteLine(" Yield 1");
+    Console.WriteLine("   Yield 1");
     yield return 1;
     await Task.Yield();
-    Console.WriteLine(" Yield 2");
+    Console.WriteLine("   Yield 2");
     yield return 2;
     await Task.Yield();
-    Console.WriteLine(" Yield 3");
+    Console.WriteLine("   Yield 3");
     yield return 3;
   }
   [Aspect]
@@ -63,12 +63,12 @@ internal class TargetCode
   }
   private async IAsyncEnumerator<int> AsyncEnumerator_Source(int a)
   {
-    Console.WriteLine(" Yield 1");
+    Console.WriteLine("   Yield 1");
     yield return 1;
     await Task.Yield();
-    Console.WriteLine(" Yield 2");
+    Console.WriteLine("   Yield 2");
     yield return 2;
-    Console.WriteLine(" Yield 3");
+    Console.WriteLine("   Yield 3");
     await Task.Yield();
     yield return 3;
   }
@@ -89,12 +89,12 @@ internal class TargetCode
   }
   private async IAsyncEnumerator<int> AsyncEnumeratorCancellable_Source(int a, CancellationToken token)
   {
-    Console.WriteLine(" Yield 1");
+    Console.WriteLine("   Yield 1");
     yield return 1;
     await Task.Yield();
-    Console.WriteLine(" Yield 2");
+    Console.WriteLine("   Yield 2");
     yield return 2;
-    Console.WriteLine(" Yield 3");
+    Console.WriteLine("   Yield 3");
     await Task.Yield();
     yield return 3;
   }

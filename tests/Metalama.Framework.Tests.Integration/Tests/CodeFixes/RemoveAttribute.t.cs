@@ -1,5 +1,5 @@
 // Warning MY001 on `Method1`: `Add some attribute`
-// CodeFix: Remove [My] from 'T.TargetCode'`
+//    CodeFix: Remove [My] from 'T.TargetCode'`
 internal class T
 {
   internal partial class TargetCode

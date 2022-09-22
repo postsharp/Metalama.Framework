@@ -100,7 +100,7 @@ public class Target
       // Comment mid Aspect2.
       // Before Baz.get expression.
       return // Before Baz.get expression.
- 42 // After Baz.get expression.
+      42 // After Baz.get expression.
       ; // After Baz.get expression.
     // Comment after Aspect2.
     // Comment after Aspect1.

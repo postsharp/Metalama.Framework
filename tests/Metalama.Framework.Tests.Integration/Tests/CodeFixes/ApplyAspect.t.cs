@@ -1,5 +1,5 @@
 // Warning MY001 on `Method`: `Apply Aspect2`
-// CodeFix: Apply`
+//    CodeFix: Apply`
 internal class TargetCode
 {
   [Aspect1]
