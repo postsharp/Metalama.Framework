@@ -71,13 +71,18 @@ namespace Metalama.Framework.Engine.Linking
 
             void IndexTransformationsInSyntaxTree( IGrouping<SyntaxTree, ITransformation> transformationGroup )
             {
-                // Transformations need to be sorted here because some transformations require a LexicalScope to get unique name, and it
+                // Transformations need to be sorted here because some transformations require a LexicalScope to get an unique name, and it
                 // will give deterministic results only when called in a deterministic order.
-                var sortedTransformations = transformationGroup.OrderBy( x => x, transformationComparer );
+                var sortedTransformations = transformationGroup.OrderBy( x => x, transformationComparer ).ToArray();
 
+                // Replace transformations need to be indexed first.
                 foreach ( var transformation in sortedTransformations )
                 {
                     IndexReplaceTransformation( input, transformation, syntaxTransformationCollection, replacedTransformations );
+                }
+
+                foreach ( var transformation in sortedTransformations )
+                {
 
                     IndexOverrideTransformation(
                         transformation,
