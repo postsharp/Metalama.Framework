@@ -1,9 +1,9 @@
 class TargetCode
-    {
-        [LogAttribute]
-        int Method(int a)
-        {
+{
+  [LogAttribute]
+  int Method(int a)
+  {
     global::System.Console.ForegroundColor = global::System.ConsoleColor.Blue;
-                return a;
-        }
-    }
+    return a;
+  }
+}

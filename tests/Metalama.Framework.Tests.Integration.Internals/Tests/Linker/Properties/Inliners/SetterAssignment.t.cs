@@ -1,13 +1,14 @@
 class Target
+{
+  int field;
+  int Foo
+  {
+    set
     {
-        int field;
-
-        int Foo
-{set    {
-        Console.WriteLine("Before");
-                Console.WriteLine( "Original");
-                this.field = value;
-        Console.WriteLine("After");
+      Console.WriteLine("Before");
+      Console.WriteLine("Original");
+      this.field = value;
+      Console.WriteLine("After");
     }
+  }
 }
-    }

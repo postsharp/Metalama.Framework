@@ -1,4 +1,4 @@
-// CompileTimeAspectPipeline.ExecuteAsync failed. 
+// CompileTimeAspectPipeline.ExecuteAsync failed.
 // Error LAMA0517 on `TargetRecord`: `The aspect '<Fabric>' cannot override 'TargetRecord.<Clone>$()' because it is implicitly declared.`
 // Error LAMA0517 on `TargetRecord`: `The aspect '<Fabric>' cannot override 'TargetRecord.Equals(TargetRecord?)' because it is implicitly declared.`
 // Error LAMA0517 on `TargetRecord`: `The aspect '<Fabric>' cannot override 'TargetRecord.Equals(object?)' because it is implicitly declared.`

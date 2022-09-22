@@ -1,10 +1,9 @@
 class Target
-    {
-
-        int Foo()
 {
+  int Foo()
+  {
     Console.WriteLine("Before");
-            Console.WriteLine( "Original");
-            return 42;
+    Console.WriteLine("Original");
+    return 42;
+  }
 }
-    }

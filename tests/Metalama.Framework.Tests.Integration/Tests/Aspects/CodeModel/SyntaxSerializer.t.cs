@@ -1,13 +1,13 @@
 internal class TargetClass
-    {
-        public TargetClass( int x ) { }
-
-        public int Field;
-        public int Property { get; set; }
-        
-        [Override]
-        public void TargetMethod_Void(int x)
 {
+  public TargetClass(int x)
+  {
+  }
+  public int Field;
+  public int Property { get; set; }
+  [Override]
+  public void TargetMethod_Void(int x)
+  {
     var methodInfo = ((global::System.Reflection.MethodInfo)typeof(global::Metalama.Framework.IntegrationTests.Aspects.CodeModel.SyntaxSerializer.TargetClass).GetMethod("TargetMethod_Void", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new[]{typeof(global::System.Int32)}, null)!);
     var methodBase = ((global::System.Reflection.MethodInfo)typeof(global::Metalama.Framework.IntegrationTests.Aspects.CodeModel.SyntaxSerializer.TargetClass).GetMethod("TargetMethod_Void", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new[]{typeof(global::System.Int32)}, null)!);
     var memberInfo = ((global::System.Reflection.MethodInfo)typeof(global::Metalama.Framework.IntegrationTests.Aspects.CodeModel.SyntaxSerializer.TargetClass).GetMethod("TargetMethod_Void", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new[]{typeof(global::System.Int32)}, null)!);
@@ -21,10 +21,9 @@ internal class TargetClass
     var constructorParameter = typeof(global::Metalama.Framework.IntegrationTests.Aspects.CodeModel.SyntaxSerializer.TargetClass).GetConstructor(global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new[]{typeof(global::System.Int32)}, null)!.GetParameters()[0];
     var array = new global::System.Reflection.MemberInfo[]{((global::System.Reflection.MethodInfo)typeof(global::Metalama.Framework.IntegrationTests.Aspects.CodeModel.SyntaxSerializer.TargetClass).GetMethod("TargetMethod_Void", global::System.Reflection.BindingFlags.Public | global::System.Reflection.BindingFlags.Instance, null, new[]{typeof(global::System.Int32)}, null)!), typeof(global::Metalama.Framework.IntegrationTests.Aspects.CodeModel.SyntaxSerializer.TargetClass)};
     return;
+  }
+  public int TargetMethod_Int(int x)
+  {
+    return 0;
+  }
 }
-
-        public int TargetMethod_Int(int x)
-        {
-           return 0;
-        }
-    }

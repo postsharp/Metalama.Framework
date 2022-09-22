@@ -1,37 +1,32 @@
 internal class Target
 {
-    private string q;
-
-    [NotNull]
-    public string P
+  private string q;
+  [NotNull]
+  public string P
+  {
+    get
     {
-        get
-        {
-            global::System.String returnValue;
-            returnValue = "p";
-            if (returnValue == null)
-            {
-                throw new global::System.ArgumentNullException();
-            }
-
-            return returnValue;
-
-        }
+      global::System.String returnValue;
+      returnValue = "p";
+      if (returnValue == null)
+      {
+        throw new global::System.ArgumentNullException();
+      }
+      return returnValue;
     }
-
-    [NotNull]
-    public string Q
+  }
+  [NotNull]
+  public string Q
+  {
+    get
     {
-        get
-        {
-            global::System.String returnValue;
-            returnValue = q;
-            if (returnValue == null)
-            {
-                throw new global::System.ArgumentNullException();
-            }
-
-            return returnValue;
-        }
+      global::System.String returnValue;
+      returnValue = q;
+      if (returnValue == null)
+      {
+        throw new global::System.ArgumentNullException();
+      }
+      return returnValue;
     }
+  }
 }

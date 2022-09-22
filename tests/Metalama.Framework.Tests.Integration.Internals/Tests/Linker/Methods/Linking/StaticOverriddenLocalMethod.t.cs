@@ -1,13 +1,11 @@
 class Target
-    {
-        public static void Foo()
 {
+  public static void Foo()
+  {
     Foo_Override6();
-}
-
-
-public static void Foo_Override0()
-{
+  }
+  public static void Foo_Override0()
+  {
     // Should invoke source code.
     Target.Bar_Source();
     // Should invoke source code.
@@ -16,10 +14,9 @@ public static void Foo_Override0()
     Target.Bar_Source();
     // Should invoke the final declaration.
     Target.Bar();
-}
-
-public static void Foo_Override2()
-{
+  }
+  public static void Foo_Override2()
+  {
     // Should invoke source code.
     Target.Bar_Source();
     // Should invoke override 1.
@@ -28,10 +25,9 @@ public static void Foo_Override2()
     Target.Bar_Override1();
     // Should invoke the final declaration.
     Target.Bar();
-}
-
-public static void Foo_Override4()
-{
+  }
+  public static void Foo_Override4()
+  {
     // Should invoke source code.
     Target.Bar_Source();
     // Should invoke override 3.
@@ -40,10 +36,9 @@ public static void Foo_Override4()
     Target.Bar_Override3();
     // Should invoke the final declaration.
     Target.Bar();
-}
-
-public static void Foo_Override6()
-{
+  }
+  public static void Foo_Override6()
+  {
     // Should invoke source code.
     Target.Bar_Source();
     // Should invoke the final declaration.
@@ -52,20 +47,17 @@ public static void Foo_Override6()
     Target.Bar();
     // Should invoke the final declaration.
     Target.Bar();
-}
-        static void Bar()
-{
+  }
+  static void Bar()
+  {
     Bar_Override5();
-}
-
-private static void Bar_Source()
-        {
-            Console.WriteLine("This is original code.");
-        }
-
-
-static void Bar_Override1()
-{
+  }
+  private static void Bar_Source()
+  {
+    Console.WriteLine("This is original code.");
+  }
+  static void Bar_Override1()
+  {
     // Should invoke source code.
     Target.Bar_Source();
     // Should invoke source code.
@@ -74,10 +66,9 @@ static void Bar_Override1()
     Target.Bar_Override1();
     // Should invoke the final declaration.
     Target.Bar();
-}
-
-static void Bar_Override3()
-{
+  }
+  static void Bar_Override3()
+  {
     // Should invoke source code.
     Target.Bar_Source();
     // Should invoke override 1.
@@ -86,10 +77,9 @@ static void Bar_Override3()
     Target.Bar_Override3();
     // Should invoke the final declaration.
     Target.Bar();
-}
-
-static void Bar_Override5()
-{
+  }
+  static void Bar_Override5()
+  {
     // Should invoke source code.
     Target.Bar_Source();
     // Should invoke override 3.
@@ -98,4 +88,5 @@ static void Bar_Override5()
     Target.Bar();
     // Should invoke the final declaration.
     Target.Bar();
-}    }
+  }
+}

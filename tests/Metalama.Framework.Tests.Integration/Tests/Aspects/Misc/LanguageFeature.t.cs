@@ -1,2 +1,4 @@
 [MyAspect]
-internal class C { }
+internal class C
+{
+}

@@ -1,15 +1,15 @@
 class Target
 {
-    int Foo
+  int Foo
+  {
+    get
     {
-        get
-        {
-            Console.WriteLine("Before");
-            int x;
-            Console.WriteLine("Original");
-            x = 42;
-            Console.WriteLine("After");
-            return x;
-        }
+      Console.WriteLine("Before");
+      int x;
+      Console.WriteLine("Original");
+      x = 42;
+      Console.WriteLine("After");
+      return x;
     }
+  }
 }

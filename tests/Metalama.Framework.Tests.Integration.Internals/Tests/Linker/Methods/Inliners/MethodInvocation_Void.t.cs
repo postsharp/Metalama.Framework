@@ -1,9 +1,9 @@
 class Target
-    {
-        void Foo()
 {
+  void Foo()
+  {
     Console.WriteLine("Before");
-            Console.WriteLine( "Original");
+    Console.WriteLine("Original");
     Console.WriteLine("After");
+  }
 }
-    }
