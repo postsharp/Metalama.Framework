@@ -2,16 +2,11 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
 {
   partial class TargetClass : global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DesignTimeImplicitMembers.IInterface
   {
-    public event global::System.EventHandler Event
+    public global::System.Int32 InterfaceMethod()
     {
-      add
-      {
-      }
-      remove
-      {
-      }
+      return default(global::System.Int32);
     }
-    public event global::System.EventHandler EventField;
+    public global::System.Int32 AutoProperty { get; set; }
     public global::System.Int32 Property
     {
       get
@@ -22,10 +17,15 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
       {
       }
     }
-    public global::System.Int32 AutoProperty { get; set; }
-    public global::System.Int32 InterfaceMethod()
+    public event global::System.EventHandler EventField;
+    public event global::System.EventHandler Event
     {
-      return default(global::System.Int32);
+      add
+      {
+      }
+      remove
+      {
+      }
     }
   }
 }

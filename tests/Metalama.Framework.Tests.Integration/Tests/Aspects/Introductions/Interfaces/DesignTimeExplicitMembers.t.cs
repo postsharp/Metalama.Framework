@@ -2,12 +2,18 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
 {
   partial class TargetClass : global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DesignTimeExplicitMembers.IInterface
   {
-    event global::System.EventHandler global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DesignTimeExplicitMembers.IInterface.Event
+    global::System.Int32 global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DesignTimeExplicitMembers.IInterface.InterfaceMethod()
     {
-      add
+      return default(global::System.Int32);
+    }
+    global::System.Int32 global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DesignTimeExplicitMembers.IInterface.AutoProperty { get; set; }
+    global::System.Int32 global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DesignTimeExplicitMembers.IInterface.Property
+    {
+      get
       {
+        return default(global::System.Int32);
       }
-      remove
+      set
       {
       }
     }
@@ -20,20 +26,14 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.
       {
       }
     }
-    global::System.Int32 global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DesignTimeExplicitMembers.IInterface.Property
+    event global::System.EventHandler global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DesignTimeExplicitMembers.IInterface.Event
     {
-      get
-      {
-        return default(global::System.Int32);
-      }
-      set
+      add
       {
       }
-    }
-    global::System.Int32 global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DesignTimeExplicitMembers.IInterface.AutoProperty { get; set; }
-    global::System.Int32 global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Interfaces.DesignTimeExplicitMembers.IInterface.InterfaceMethod()
-    {
-      return default(global::System.Int32);
+      remove
+      {
+      }
     }
   }
 }

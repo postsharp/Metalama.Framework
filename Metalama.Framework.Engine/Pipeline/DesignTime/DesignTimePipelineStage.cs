@@ -24,7 +24,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
             : base( compileTimeProject, aspectLayers, serviceProvider ) { }
 
         /// <inheritdoc/>
-        protected override Task<AspectPipelineResult> GetStageResultAsync(
+        protected override async Task<AspectPipelineResult> GetStageResultAsync(
             AspectPipelineConfiguration pipelineConfiguration,
             AspectPipelineResult input,
             IPipelineStepsResult pipelineStepsResult,
@@ -52,16 +52,15 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
 
             // Generate the additional syntax trees.
 
-            DesignTimeSyntaxTreeGenerator.GenerateDesignTimeSyntaxTrees(
+            var additionalSyntaxTrees = await DesignTimeSyntaxTreeGenerator.GenerateDesignTimeSyntaxTreesAsync(
                 input.Compilation,
                 pipelineStepsResult.LastCompilation,
                 pipelineStepsResult.Transformations,
                 this.ServiceProvider,
                 diagnosticSink,
-                cancellationToken,
-                out var additionalSyntaxTrees );
+                cancellationToken );
 
-            return Task.FromResult(
+            return
                 new AspectPipelineResult(
                     input.Compilation,
                     input.Project,
@@ -73,7 +72,7 @@ namespace Metalama.Framework.Engine.Pipeline.DesignTime
                     pipelineStepsResult.InheritableAspectInstances,
                     referenceValidators,
                     input.AdditionalSyntaxTrees.AddRange( additionalSyntaxTrees ),
-                    input.AspectInstanceResults.AddRange( pipelineStepsResult.AspectInstanceResults ) ) );
+                    input.AspectInstanceResults.AddRange( pipelineStepsResult.AspectInstanceResults ) );
         }
     }
 }
