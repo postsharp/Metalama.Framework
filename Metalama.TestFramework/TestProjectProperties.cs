@@ -6,7 +6,6 @@ using System.Collections.Immutable;
 
 namespace Metalama.TestFramework;
 
-// ReSharper disable once CommentTypo
 /// <summary>
 /// Properties of a test project.
 /// </summary>

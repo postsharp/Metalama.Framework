@@ -2,12 +2,12 @@
 
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.CodeFixes;
+using Metalama.Framework.Engine.Collections;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Threading;
 using StreamJsonRpc;
 using System.Collections.Concurrent;
 using System.Collections.Immutable;
-using Metalama.Framework.Engine.Collections;
 
 namespace Metalama.Framework.DesignTime.VisualStudio.Remoting;
 

@@ -46,8 +46,21 @@ internal class DeclarativeAdviceSymbolComparer : IComparer<ISymbol>
         }
     }
 
-    public int Compare( ISymbol x, ISymbol y )
+    public int Compare( ISymbol? x, ISymbol? y )
     {
+        if ( ReferenceEquals( x, y ) )
+        {
+            return 0;
+        }
+        else if ( x == null )
+        {
+            return 1;
+        }
+        else if ( y == null )
+        {
+            return -1;
+        }
+        
         var compareByKind = GetOrderByKind( x ).CompareTo( GetOrderByKind( y ) );
 
         if ( compareByKind != 0 )

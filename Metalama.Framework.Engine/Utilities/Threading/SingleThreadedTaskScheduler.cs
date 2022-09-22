@@ -9,9 +9,8 @@ namespace Metalama.Framework.Engine.Utilities.Threading;
 
 public class SingleThreadedTaskScheduler : ITaskScheduler
 {
-    public SingleThreadedTaskScheduler() { }
-
-    public Task RunInParallelAsync<T>( IEnumerable<T> items, Action<T> action, CancellationToken cancellationToken )
+    public Task RunInParallelAsync<T>( IEnumerable<T> items, Action<T> action, CancellationToken cancellationToken ) 
+        where T : notnull
     {
         var orderedItems = this.GetOrderedItems( items );
 
@@ -30,5 +29,6 @@ public class SingleThreadedTaskScheduler : ITaskScheduler
         }
     }
 
-    protected virtual IEnumerable<T> GetOrderedItems<T>( IEnumerable<T> items ) => items;
+    protected virtual IEnumerable<T> GetOrderedItems<T>( IEnumerable<T> items ) 
+        where T : notnull => items;
 }
