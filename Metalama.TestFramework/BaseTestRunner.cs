@@ -36,7 +36,7 @@ namespace Metalama.TestFramework
     public abstract partial class BaseTestRunner
     {
         private static readonly Regex _spaceRegex = new( " +", RegexOptions.Compiled );
-        private static readonly Regex _newLineRegex = new( "(\\s*(\r\n|\r|\n))", RegexOptions.Compiled | RegexOptions.Multiline);
+        private static readonly Regex _newLineRegex = new( "(\\s*(\r\n|\r|\n))", RegexOptions.Compiled | RegexOptions.Multiline );
         private static readonly AsyncLocal<bool> _isTestRunning = new();
 
         private static readonly RemovePreprocessorDirectivesRewriter _removePreprocessorDirectivesRewriter =
@@ -88,7 +88,7 @@ namespace Metalama.TestFramework
         {
             try
             {
-                testInput.ProjectProperties.License.ThrowIfNotLicensed();
+                testInput.ProjectProperties.License?.ThrowIfNotLicensed();
                 Dictionary<string, object?> state = new( StringComparer.Ordinal );
                 using var testResult = new TestResult();
                 await this.RunAsync( testInput, testResult, state );
@@ -386,7 +386,7 @@ namespace Metalama.TestFramework
 
         protected static string NormalizeEndOfLines( string? s ) => string.IsNullOrWhiteSpace( s ) ? "" : _newLineRegex.Replace( s, "\n" ).Trim();
 
-        private static string? NormalizeTestOutput( string? s, bool preserveFormatting, bool forComparison )
+        public static string? NormalizeTestOutput( string? s, bool preserveFormatting, bool forComparison )
             => s == null ? null : NormalizeTestOutput( CSharpSyntaxTree.ParseText( s ).GetRoot(), preserveFormatting, forComparison );
 
         private static string? NormalizeTestOutput( SyntaxNode syntaxNode, bool preserveFormatting, bool forComparison )
@@ -452,8 +452,7 @@ namespace Metalama.TestFramework
             // Read expectations from the file.
             var expectedSourceText = File.ReadAllText( expectedTransformedPath );
             var expectedSourceTextForComparison = NormalizeTestOutput( expectedSourceText, formatCode, true );
-            var expectedSourceTextForStorage = NormalizeTestOutput( expectedSourceText, formatCode, false );
-
+            
             // Update the file in obj/transformed if it is different.
             var actualTransformedPath = Path.Combine(
                 this.ProjectDirectory,

@@ -26,13 +26,13 @@ namespace Metalama.TestFramework
 
         public string TargetFramework { get; }
 
-        public TestFrameworkLicenseStatus License { get; }
+        public TestFrameworkLicenseStatus? License { get; }
 
         public TestProjectProperties(
             string? projectDirectory,
             ImmutableArray<string> preprocessorSymbols,
             string targetFramework,
-            TestFrameworkLicenseStatus license )
+            TestFrameworkLicenseStatus? license = null )
         {
             this._projectDirectory = projectDirectory;
             this.PreprocessorSymbols = preprocessorSymbols;
