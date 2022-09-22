@@ -1,57 +1,55 @@
 [Override]
 internal partial class TargetClass
 {
-    public event EventHandler TargetEvent1
+  public event EventHandler TargetEvent1
+  {
+    add
     {
-        add
-        {
-            global::System.Console.WriteLine($"This is the override of TargetEvent1.");
-            Console.WriteLine("This is TargetEvent1."); return;
-
-        }
-        remove
-        {
-            global::System.Console.WriteLine($"This is the override of TargetEvent1.");
-            Console.WriteLine("This is TargetEvent1."); return;
-
-        }
+      global::System.Console.WriteLine($"This is the override of TargetEvent1.");
+      Console.WriteLine("This is TargetEvent1.");
+      return;
     }
+    remove
+    {
+      global::System.Console.WriteLine($"This is the override of TargetEvent1.");
+      Console.WriteLine("This is TargetEvent1.");
+      return;
+    }
+  }
 }
-
 internal partial class TargetClass
 {
-    public event EventHandler TargetEvent2
+  public event EventHandler TargetEvent2
+  {
+    add
     {
-        add
-        {
-            global::System.Console.WriteLine($"This is the override of TargetEvent2.");
-            Console.WriteLine("This is TargetEvent2."); return;
-
-        }
-        remove
-        {
-            global::System.Console.WriteLine($"This is the override of TargetEvent2.");
-            Console.WriteLine("This is TargetEvent2."); return;
-
-        }
+      global::System.Console.WriteLine($"This is the override of TargetEvent2.");
+      Console.WriteLine("This is TargetEvent2.");
+      return;
     }
+    remove
+    {
+      global::System.Console.WriteLine($"This is the override of TargetEvent2.");
+      Console.WriteLine("This is TargetEvent2.");
+      return;
+    }
+  }
 }
-
 internal partial class TargetClass
 {
-    public event EventHandler TargetEvent3
+  public event EventHandler TargetEvent3
+  {
+    add
     {
-        add
-        {
-            global::System.Console.WriteLine($"This is the override of TargetEvent3.");
-            Console.WriteLine("This is TargetEvent3."); return;
-
-        }
-        remove
-        {
-            global::System.Console.WriteLine($"This is the override of TargetEvent3.");
-            Console.WriteLine("This is TargetEvent3."); return;
-
-        }
+      global::System.Console.WriteLine($"This is the override of TargetEvent3.");
+      Console.WriteLine("This is TargetEvent3.");
+      return;
     }
+    remove
+    {
+      global::System.Console.WriteLine($"This is the override of TargetEvent3.");
+      Console.WriteLine("This is TargetEvent3.");
+      return;
+    }
+  }
 }

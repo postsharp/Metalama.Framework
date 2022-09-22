@@ -1,21 +1,20 @@
 internal class TestClass
 {
-    [TestAspect]
-    private async void Execute(bool param)
+  [TestAspect]
+  private async void Execute(bool param)
+  {
+    try
     {
-        try
-        {
-            await this.Execute_Source(param);
-            return;
-        }
-        catch (global::System.Exception) when (param)
-        {
-            return;
-        }
+      await this.Execute_Source(param);
+      return;
     }
-
-    private async global::System.Threading.Tasks.ValueTask Execute_Source(bool param)
+    catch (global::System.Exception)when (param)
     {
-        await Task.CompletedTask;
+      return;
     }
+  }
+  private async global::System.Threading.Tasks.ValueTask Execute_Source(bool param)
+  {
+    await Task.CompletedTask;
+  }
 }

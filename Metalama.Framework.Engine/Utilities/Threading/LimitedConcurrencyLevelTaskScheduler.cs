@@ -79,7 +79,7 @@ internal class LimitedConcurrencyLevelTaskScheduler : TaskScheduler
                             }
 
                             // Get the next item from the queue
-                            item = this._tasks.First.Value;
+                            item = this._tasks.First.AssertNotNull().Value;
                             this._tasks.RemoveFirst();
                         }
 

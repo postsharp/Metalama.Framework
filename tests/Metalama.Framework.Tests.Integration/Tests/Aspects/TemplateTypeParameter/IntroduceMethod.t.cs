@@ -1,10 +1,8 @@
 [Aspect]
 public class Target
 {
-
-
-    private global::Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParameters.IntroduceMethod.Target Method(global::Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParameters.IntroduceMethod.Target p, global::Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParameters.IntroduceMethod.Target[] p2, global::System.Collections.Generic.List<global::Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParameters.IntroduceMethod.Target> p3)
-    {
-        return (global::Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParameters.IntroduceMethod.Target)default(global::Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParameters.IntroduceMethod.Target);
-    }
+  private global::Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParameters.IntroduceMethod.Target Method(global::Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParameters.IntroduceMethod.Target p, global::Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParameters.IntroduceMethod.Target[] p2, global::System.Collections.Generic.List<global::Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParameters.IntroduceMethod.Target> p3)
+  {
+    return (global::Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParameters.IntroduceMethod.Target)default(global::Metalama.Framework.Tests.Integration.Tests.Aspects.TemplateTypeParameters.IntroduceMethod.Target);
+  }
 }

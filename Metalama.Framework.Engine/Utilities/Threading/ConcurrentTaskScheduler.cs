@@ -15,6 +15,7 @@ internal class ConcurrentTaskScheduler : ITaskScheduler
     private readonly LimitedConcurrencyLevelTaskScheduler _scheduler = new( Environment.ProcessorCount );
 
     public async Task RunInParallelAsync<T>( IEnumerable<T> items, Action<T> action, CancellationToken cancellationToken )
+        where T : notnull
     {
         var tasks = new List<Task>();
 

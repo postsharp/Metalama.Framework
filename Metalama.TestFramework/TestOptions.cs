@@ -243,7 +243,7 @@ namespace Metalama.TestFramework
         /// To enable this option in a test, add this comment to your test file: <c>// @RequireOrderedAspects</c>. 
         /// </summary>
         public bool? RequireOrderedAspects { get; set; }
-        
+
         /// <summary>
         /// Gets or sets a value indicating whether Metalama should produce logs and output them to the Xunit test log.
         /// To enable this option in a test, add this comment to your test file: <c>// @EnableLogging</c>. 
@@ -320,7 +320,7 @@ namespace Metalama.TestFramework
             this.RequireOrderedAspects ??= baseOptions.RequireOrderedAspects;
 
             this.EnableLogging ??= baseOptions.EnableLogging;
-            
+
             this.ExpectedException ??= baseOptions.ExpectedException;
         }
 
@@ -525,15 +525,15 @@ namespace Metalama.TestFramework
                         this.ExpectedException = optionArg;
 
                         break;
-                    
+
                     case "RequireOrderedAspects":
                         this.RequireOrderedAspects = true;
 
                         break;
-                    
+
                     case "EnableLogging":
                         this.EnableLogging = true;
-                        
+
                         break;
 
                     default:

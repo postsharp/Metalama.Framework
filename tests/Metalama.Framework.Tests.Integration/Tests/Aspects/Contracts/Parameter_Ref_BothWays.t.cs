@@ -1,16 +1,15 @@
 internal class Target
 {
-    private void M( [NotNull] ref string m )
-    {
+  private void M([NotNull] ref string m)
+  {
     if (m == null)
     {
-        throw new global::System.ArgumentNullException("m");
+      throw new global::System.ArgumentNullException("m");
     }
-
-            m = "";
+    m = "";
     if (m == null)
     {
-        throw new global::System.ArgumentNullException("m");
+      throw new global::System.ArgumentNullException("m");
     }
-    }
+  }
 }

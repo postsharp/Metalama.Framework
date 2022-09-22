@@ -2,23 +2,20 @@
 [Test]
 internal class TargetClass : BaseClass
 {
-    public int TargetClassProperty
+  public int TargetClassProperty
+  {
+    get
     {
-        get
-        {
-            global::System.Console.WriteLine("Override");
-            return this.TargetClassProperty;
-
-        }
+      global::System.Console.WriteLine("Override");
+      return this.TargetClassProperty;
     }
-
-
-    public new global::System.Int32 BaseClassProperty
+  }
+  public new global::System.Int32 BaseClassProperty
+  {
+    get
     {
-        get
-        {
-            global::System.Console.WriteLine("Override");
-            return this.BaseClassProperty;
-        }
+      global::System.Console.WriteLine("Override");
+      return this.BaseClassProperty;
     }
+  }
 }

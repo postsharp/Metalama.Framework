@@ -1,10 +1,9 @@
-private int Method( int a )
+private int Method(int a)
 {
-    for (;;)
-    {
-    }
-
-    return 5;
-    a.ToString();
-    return default;
+  for (;;)
+  {
+  }
+  return 5;
+  a.ToString();
+  return default;
 }

@@ -10,5 +10,6 @@ namespace Metalama.Framework.Engine.Utilities.Threading;
 
 public interface ITaskScheduler : IService
 {
-    Task RunInParallelAsync<T>( IEnumerable<T> items, Action<T> action, CancellationToken cancellationToken );
+    Task RunInParallelAsync<T>( IEnumerable<T> items, Action<T> action, CancellationToken cancellationToken )
+        where T : notnull;
 }

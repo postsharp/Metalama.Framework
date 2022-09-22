@@ -49,7 +49,7 @@ namespace Metalama.Framework.Engine.Linking
             // We don't use a code fix filter because the linker is not supposed to suggest code fixes. If that changes, we need to pass a filter.
             var diagnostics = new UserDiagnosticSink( input.CompileTimeProject, null );
 
-            var transformationComparer =  TransformationLinkerOrderComparer.Instance;
+            var transformationComparer = TransformationLinkerOrderComparer.Instance;
             var nameProvider = new LinkerIntroductionNameProvider( input.CompilationModel );
             var syntaxTransformationCollection = new SyntaxTransformationCollection( transformationComparer );
             var lexicalScopeFactory = new LexicalScopeFactory( input.CompilationModel );
@@ -83,7 +83,6 @@ namespace Metalama.Framework.Engine.Linking
 
                 foreach ( var transformation in sortedTransformations )
                 {
-
                     IndexOverrideTransformation(
                         transformation,
                         syntaxTransformationCollection,

@@ -6,8 +6,6 @@ namespace Metalama.TestFramework.Licensing
 {
     public sealed class InvalidLicenseException : Exception
     {
-        public InvalidLicenseException( string message ) : base( message )
-        {
-        }
+        public InvalidLicenseException( string message ) : base( message ) { }
     }
 }

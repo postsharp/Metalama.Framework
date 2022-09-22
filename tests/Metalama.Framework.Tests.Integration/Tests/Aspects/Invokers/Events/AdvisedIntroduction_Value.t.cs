@@ -2,21 +2,18 @@
 [Override]
 internal class TargetClass
 {
-
-    public event global::System.EventHandler? Event
+  public event global::System.EventHandler? Event
+  {
+    add
     {
-        add
-        {
-            global::System.Console.WriteLine("Override");
-            this.Event_Source += value;
-
-        }
-        remove
-        {
-            global::System.Console.WriteLine("Override");
-            this.Event_Source -= value;
-        }
+      global::System.Console.WriteLine("Override");
+      this.Event_Source += value;
     }
-
-    private global::System.EventHandler? Event_Source;
+    remove
+    {
+      global::System.Console.WriteLine("Override");
+      this.Event_Source -= value;
+    }
+  }
+  private global::System.EventHandler? Event_Source;
 }

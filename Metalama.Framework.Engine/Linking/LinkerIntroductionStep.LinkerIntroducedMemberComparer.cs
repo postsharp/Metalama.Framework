@@ -1,8 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Metalama.Framework.Engine.AspectOrdering;
-using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.Transformations;
 using Metalama.Framework.Engine.Utilities;
@@ -36,10 +34,7 @@ internal partial class LinkerIntroductionStep
             { Accessibility.Private, 5 }
         }.ToImmutableDictionary();
 
-        public static LinkerIntroducedMemberComparer Instance
-        {
-            get;
-        } = new();
+        public static LinkerIntroducedMemberComparer Instance { get; } = new();
 
         private LinkerIntroducedMemberComparer() { }
 
@@ -154,7 +149,8 @@ internal partial class LinkerIntroductionStep
             }
 
             // Order by adding order within the aspect instance.
-            var adviceOrderComparison = x.Introduction.OrderWithinPipelineStepAndTypAndAspectInstance.CompareTo( y.Introduction.OrderWithinPipelineStepAndTypAndAspectInstance );
+            var adviceOrderComparison =
+                x.Introduction.OrderWithinPipelineStepAndTypAndAspectInstance.CompareTo( y.Introduction.OrderWithinPipelineStepAndTypAndAspectInstance );
 
             if ( adviceOrderComparison != 0 )
             {
@@ -185,9 +181,8 @@ internal partial class LinkerIntroductionStep
             }
 
             // TODO: At this point, all should be sorted, but mocks are not setting the order properties.
-            //throw new AssertionFailedException( $"'{x}' and '{y}' are not strongly ordered" );
-            return x.Syntax.ToString().CompareTo( y.Syntax.ToString() );
-
+            // throw new AssertionFailedException( $"'{x}' and '{y}' are not strongly ordered" );
+            return StringComparer.Ordinal.Compare( x.Syntax.ToString(), y.Syntax.ToString() );
         }
 
         private static int GetKindOrder( DeclarationKind kind ) => _orderedDeclarationKinds.TryGetValue( kind, out var order ) ? order : 10;

@@ -25,7 +25,10 @@ internal partial class LinkerIntroductionStep
 
         public ImmutableArray<IntroduceConstructorInitializerArgumentTransformation> Arguments { get; private set; }
 
-        private static ImmutableArray<T> Sort<T>( ConcurrentLinkedList<T>? input, Func<T, ITransformation> getTransformation, TransformationLinkerOrderComparer comparer )
+        private static ImmutableArray<T> Sort<T>(
+            ConcurrentLinkedList<T>? input,
+            Func<T, ITransformation> getTransformation,
+            TransformationLinkerOrderComparer comparer )
         {
             if ( input == null || input.Count == 0 )
             {

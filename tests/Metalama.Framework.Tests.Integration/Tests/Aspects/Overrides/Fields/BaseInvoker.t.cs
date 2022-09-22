@@ -1,21 +1,16 @@
 class TargetCode
 {
-
-
-    [global::Metalama.Framework.Tests.PublicPipeline.Aspects.Overrides.Fields.BaseInvoker.Aspect]
-    private global::System.Int32 field
+  [global::Metalama.Framework.Tests.PublicPipeline.Aspects.Overrides.Fields.BaseInvoker.Aspect]
+  private global::System.Int32 field
+  {
+    get
     {
-        get
-        {
-            return this.field_Source;
-
-        }
-        set
-        {
-            this.field_Source = value;
-
-        }
+      return this.field_Source;
     }
-    private global::System.Int32 field_Source
-    { get; set; }
+    set
+    {
+      this.field_Source = value;
+    }
+  }
+  private global::System.Int32 field_Source { get; set; }
 }

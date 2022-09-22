@@ -60,7 +60,7 @@ public static class ReflectionSignatureBuilder
 
     private class StringBuildingVisitor : SymbolVisitor
     {
-        private readonly StringBuilder _stringBuilder = new StringBuilder();
+        private readonly StringBuilder _stringBuilder = new();
         private bool _isTypeArgument;
 
         public void BuildSignature( IMethod method )
@@ -203,7 +203,7 @@ public static class ReflectionSignatureBuilder
                     {
                         this._stringBuilder.Append( ',' );
                     }
-                    
+
                     this.Visit( typeArgument );
                 }
 

@@ -1,17 +1,16 @@
 namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Introductions.Events.DesignTime
 {
-    partial class TargetClass
+  partial class TargetClass
+  {
+    public event global::System.EventHandler? Event
     {
-        public event global::System.EventHandler? EventField;
-        public event global::System.EventHandler? Event
-        {
-            add
-            {
-            }
-
-            remove
-            {
-            }
-        }
+      add
+      {
+      }
+      remove
+      {
+      }
     }
+    public event global::System.EventHandler? EventField;
+  }
 }

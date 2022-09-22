@@ -22,7 +22,8 @@ public class ReflectionSignatureBuilderTests : TestBase
         var compilation = testContext.CreateCompilationModel( "" );
         var modelType = (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(C<>) );
 
-        foreach ( var reflectionMethod in typeof(C<>).GetMethods( BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly ) )
+        foreach ( var reflectionMethod in typeof(C<>).GetMethods(
+                     BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly ) )
         {
             var modelMethod = modelType.Methods.OfName( reflectionMethod.Name ).Single();
 
@@ -41,7 +42,8 @@ public class ReflectionSignatureBuilderTests : TestBase
 
         var parametersCount = 0;
 
-        foreach ( var reflectionConstructor in typeof(C<>).GetConstructors( BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly ) )
+        foreach ( var reflectionConstructor in typeof(C<>).GetConstructors(
+                     BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly ) )
         {
             var modelConstructor = modelType.Constructors.Single( c => c.Parameters.Count == parametersCount );
 
@@ -51,7 +53,7 @@ public class ReflectionSignatureBuilderTests : TestBase
             parametersCount++;
         }
     }
-    
+
     [Fact]
     public void TestMethodHasTypeArgument()
     {
@@ -59,7 +61,8 @@ public class ReflectionSignatureBuilderTests : TestBase
         var compilation = testContext.CreateCompilationModel( "" );
         var modelType = (INamedType) compilation.Factory.GetTypeByReflectionType( typeof(C<>) );
 
-        foreach ( var reflectionMethod in typeof(C<>).GetMethods( BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly ) )
+        foreach ( var reflectionMethod in typeof(C<>).GetMethods(
+                     BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly ) )
         {
             var modelMethod = modelType.Methods.OfName( reflectionMethod.Name ).Single();
 
@@ -78,7 +81,8 @@ public class ReflectionSignatureBuilderTests : TestBase
 
         var parametersCount = 0;
 
-        foreach ( var reflectionConstructor in typeof(C<>).GetConstructors( BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly ) )
+        foreach ( var reflectionConstructor in typeof(C<>).GetConstructors(
+                     BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly ) )
         {
             var modelConstructor = modelType.Constructors.Single( c => c.Parameters.Count == parametersCount );
 

@@ -19,9 +19,9 @@ namespace Metalama.TestFramework.Licensing
         {
             // We don't use the service BackstageServiceFactory.ServiceProvider here,
             // because the additional license is test-assembly-specific.
-            
+
             var applicationInfo = new TestFrameworkApplicationInfo();
-            
+
             var serviceProvider = new ServiceProviderBuilder()
                 .AddBackstageServices( applicationInfo: applicationInfo, additionalLicense: additionalLicense )
                 .ServiceProvider;

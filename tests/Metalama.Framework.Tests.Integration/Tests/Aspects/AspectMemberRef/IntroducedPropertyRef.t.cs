@@ -1,23 +1,18 @@
 [Retry]
-    internal class Program { 
-
-private global::System.String IntroducedProperty
+internal class Program
 {
+  private global::System.String IntroducedProperty
+  {
     get
     {
-                return "Program";
-    
-
-
+      return "Program";
     }
-
     set
     {
-            
     }
-}
-
-private void IntroducedMethod1(global::System.String name)
-{
+  }
+  private void IntroducedMethod1(global::System.String name)
+  {
     IntroducedProperty = name;
-}}
+  }
+}

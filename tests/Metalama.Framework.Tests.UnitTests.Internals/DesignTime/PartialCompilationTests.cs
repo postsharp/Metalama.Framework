@@ -163,7 +163,7 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
         private static async Task ApplySeveralModifications( PartialCompilation partialCompilation1 )
         {
             var initialCompilation = partialCompilation1.InitialCompilation;
-            
+
             // Test the initial compilation.
             const string path1 = "1.cs";
             Assert.Single( partialCompilation1.SyntaxTrees );
@@ -184,7 +184,10 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
             Assert.Same( initialCompilation, partialCompilation3.InitialCompilation );
 
             // Modify syntax trees.
-            var partialCompilation4 = (PartialCompilation) await partialCompilation3.RewriteSyntaxTreesAsync( new Rewriter(), ServiceProvider.Empty.WithService( new SingleThreadedTaskScheduler() ) );
+            var partialCompilation4 = (PartialCompilation) await partialCompilation3.RewriteSyntaxTreesAsync(
+                new Rewriter(),
+                ServiceProvider.Empty.WithService( new SingleThreadedTaskScheduler() ) );
+
             Assert.Equal( 3, partialCompilation4.SyntaxTrees.Count );
             Assert.Equal( 3, partialCompilation4.ModifiedSyntaxTrees.Count );
             Assert.Null( partialCompilation4.ModifiedSyntaxTrees[path1].OldTree );

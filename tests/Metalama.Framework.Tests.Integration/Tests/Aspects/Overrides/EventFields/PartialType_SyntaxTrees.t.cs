@@ -1,72 +1,61 @@
 // --- PartialType_SyntaxTrees.cs ---
-
 [Override]
 internal partial class TargetClass
 {
-
-    private EventHandler? _targetEvent1;
-
-    public event EventHandler? TargetEvent1
+  private EventHandler? _targetEvent1;
+  public event EventHandler? TargetEvent1
+  {
+    add
     {
-        add
-        {
-            global::System.Console.WriteLine($"This is the override of TargetEvent1.");
-            this._targetEvent1 += value;
-            return;
-        }
-        remove
-        {
-            global::System.Console.WriteLine($"This is the override of TargetEvent1.");
-            this._targetEvent1 -= value;
-            return;
-        }
+      global::System.Console.WriteLine($"This is the override of TargetEvent1.");
+      this._targetEvent1 += value;
+      return;
     }
+    remove
+    {
+      global::System.Console.WriteLine($"This is the override of TargetEvent1.");
+      this._targetEvent1 -= value;
+      return;
+    }
+  }
 }
-
 // --- PartialType_SyntaxTrees.1.cs ---
-
 internal partial class TargetClass
 {
-
-    private EventHandler? _targetEvent2;
-
-    public event EventHandler? TargetEvent2
+  private EventHandler? _targetEvent2;
+  public event EventHandler? TargetEvent2
+  {
+    add
     {
-        add
-        {
-            global::System.Console.WriteLine($"This is the override of TargetEvent2.");
-            this._targetEvent2 += value;
-            return;
-        }
-        remove
-        {
-            global::System.Console.WriteLine($"This is the override of TargetEvent2.");
-            this._targetEvent2 -= value;
-            return;
-        }
+      global::System.Console.WriteLine($"This is the override of TargetEvent2.");
+      this._targetEvent2 += value;
+      return;
     }
+    remove
+    {
+      global::System.Console.WriteLine($"This is the override of TargetEvent2.");
+      this._targetEvent2 -= value;
+      return;
+    }
+  }
 }
-
 // --- PartialType_SyntaxTrees.2.cs ---
-
 internal partial class TargetClass
 {
-
-    private EventHandler? _targetEvent3;
-
-    public event EventHandler? TargetEvent3
+  private EventHandler? _targetEvent3;
+  public event EventHandler? TargetEvent3
+  {
+    add
     {
-        add
-        {
-            global::System.Console.WriteLine($"This is the override of TargetEvent3.");
-            this._targetEvent3 += value;
-            return;
-        }
-        remove
-        {
-            global::System.Console.WriteLine($"This is the override of TargetEvent3.");
-            this._targetEvent3 -= value;
-            return;
-        }
+      global::System.Console.WriteLine($"This is the override of TargetEvent3.");
+      this._targetEvent3 += value;
+      return;
     }
+    remove
+    {
+      global::System.Console.WriteLine($"This is the override of TargetEvent3.");
+      this._targetEvent3 -= value;
+      return;
+    }
+  }
 }

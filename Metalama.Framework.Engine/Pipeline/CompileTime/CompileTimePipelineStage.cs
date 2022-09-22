@@ -69,7 +69,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
 
             if ( projectOptions is { IsDesignTimeEnabled: false } )
             {
-                additionalCompilationOutputFiles = this.GenerateAdditionalCompilationOutputFiles(
+                additionalCompilationOutputFiles = await this.GenerateAdditionalCompilationOutputFilesAsync(
                     input,
                     pipelineStepsResult,
                     cancellationToken );
@@ -94,7 +94,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                     aspectInstanceResults: input.AspectInstanceResults.AddRange( pipelineStepsResult.AspectInstanceResults ) );
         }
 
-        private IReadOnlyList<AdditionalCompilationOutputFile> GenerateAdditionalCompilationOutputFiles(
+        private async Task<IReadOnlyList<AdditionalCompilationOutputFile>> GenerateAdditionalCompilationOutputFilesAsync(
             AspectPipelineResult input,
             IPipelineStepsResult pipelineStepResult,
             CancellationToken cancellationToken )
@@ -104,14 +104,13 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             // TODO: We don't need these diagnostics, but we cannot pass NullDiagnosticAdder here.
             var diagnostics = new UserDiagnosticSink();
 
-            DesignTimeSyntaxTreeGenerator.GenerateDesignTimeSyntaxTrees(
+            var additionalSyntaxTrees = await DesignTimeSyntaxTreeGenerator.GenerateDesignTimeSyntaxTreesAsync(
                 input.Compilation,
                 pipelineStepResult.LastCompilation,
                 pipelineStepResult.Transformations,
                 this.ServiceProvider,
                 diagnostics,
-                cancellationToken,
-                out var additionalSyntaxTrees );
+                cancellationToken );
 
             // Ignore diagnostics, because these will be coming from the analyzer.
             var uniquePaths = new HashSet<string>();

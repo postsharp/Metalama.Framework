@@ -1,53 +1,45 @@
 [Introduction]
-    internal class TargetClass : DerivedClass
-    {
-        // All methods in this class should contain a comment describing the correct output.
-
-        public static int ExistingMethod()
-        {
-            // No new keyword, return a constant.
-                return 27;
-        }
-
-
-public global::System.Int32 BaseClassInaccessibleMethod()
+internal class TargetClass : DerivedClass
 {
+  // All methods in this class should contain a comment describing the correct output.
+  public static int ExistingMethod()
+  {
+    // No new keyword, return a constant.
+    return 27;
+  }
+  public global::System.Int32 BaseClassInaccessibleMethod()
+  {
     // No new keyword, return a default value.
-        return default(global::System.Int32);
-}
-
-public static new global::System.Int32 BaseClassMethod()
-{
+    return default(global::System.Int32);
+  }
+  public static new global::System.Int32 BaseClassMethod()
+  {
     // New keyword, call the base class method of the same name.
     return global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.ExistingConflictNewStatic.BaseClass.BaseClassMethod();
-}
-
-public static new global::System.Int32 BaseClassMethodHiddenByInaccessibleMethod()
-{
+  }
+  public static new global::System.Int32 BaseClassMethodHiddenByInaccessibleMethod()
+  {
     // New keyword, call the base class method of the same name.
     return global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.ExistingConflictNewStatic.BaseClass.BaseClassMethodHiddenByInaccessibleMethod();
-}
-
-public static new global::System.Int32 BaseClassMethodHiddenByMethod()
-{
+  }
+  public static new global::System.Int32 BaseClassMethodHiddenByMethod()
+  {
     // New keyword, call the derived class method of the same name.
     return global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.ExistingConflictNewStatic.DerivedClass.BaseClassMethodHiddenByMethod();
-}
-
-public static global::System.Int32 DerivedClassInaccessibleMethod()
-{
+  }
+  public static global::System.Int32 DerivedClassInaccessibleMethod()
+  {
     // No new keyword, return a default value.
-        return default(global::System.Int32);
-}
-
-public static new global::System.Int32 DerivedClassMethod()
-{
+    return default(global::System.Int32);
+  }
+  public static new global::System.Int32 DerivedClassMethod()
+  {
     // New keyword, call the derived class method of the same name.
     return global::Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.ExistingConflictNewStatic.DerivedClass.DerivedClassMethod();
-}
-
-public static global::System.Int32 NonExistentMethod()
-{
+  }
+  public static global::System.Int32 NonExistentMethod()
+  {
     // No new keyword, return a default value.
-        return default(global::System.Int32);
-}    }
+    return default(global::System.Int32);
+  }
+}

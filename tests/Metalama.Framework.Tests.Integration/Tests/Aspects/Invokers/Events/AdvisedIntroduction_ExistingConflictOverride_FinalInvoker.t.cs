@@ -2,57 +2,48 @@
 [Override]
 internal class TargetClass : BaseClass
 {
-    public override event EventHandler BaseClassAbstractEvent
+  public override event EventHandler BaseClassAbstractEvent
+  {
+    add
     {
-        add
-        {
-            this.BaseClassAbstractEvent += value;
-        }
-
-        remove
-        {
-            this.BaseClassAbstractEvent -= value;
-        }
-
+      this.BaseClassAbstractEvent += value;
     }
-
-    public event EventHandler ExistingEvent
+    remove
     {
-        add
-        {
-            this.ExistingEvent += value;
-        }
-
-        remove
-        {
-            this.ExistingEvent -= value;
-        }
+      this.BaseClassAbstractEvent -= value;
     }
-
-    public event EventHandler ExistingVirtualEvent
+  }
+  public event EventHandler ExistingEvent
+  {
+    add
     {
-        add
-        {
-            this.ExistingVirtualEvent += value;
-        }
-
-        remove
-        {
-            this.ExistingVirtualEvent -= value;
-        }
+      this.ExistingEvent += value;
     }
-
-
-    public override event global::System.EventHandler BaseClassVirtualEvent
+    remove
     {
-        add
-        {
-            this.BaseClassVirtualEvent += value;
-        }
-
-        remove
-        {
-            this.BaseClassVirtualEvent -= value;
-        }
+      this.ExistingEvent -= value;
     }
+  }
+  public event EventHandler ExistingVirtualEvent
+  {
+    add
+    {
+      this.ExistingVirtualEvent += value;
+    }
+    remove
+    {
+      this.ExistingVirtualEvent -= value;
+    }
+  }
+  public override event global::System.EventHandler BaseClassVirtualEvent
+  {
+    add
+    {
+      this.BaseClassVirtualEvent += value;
+    }
+    remove
+    {
+      this.BaseClassVirtualEvent -= value;
+    }
+  }
 }

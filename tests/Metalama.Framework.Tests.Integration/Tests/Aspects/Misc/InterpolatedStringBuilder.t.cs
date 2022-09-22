@@ -1,23 +1,22 @@
 class Program
 {
-    [Log]
-    static void MyMethod( string who )
-{
+  [Log]
+  static void MyMethod(string who)
+  {
     global::System.Console.WriteLine("Entering " + $"MyMethod( who = {who} )");
     try
     {
-        // Some very typical business code.
-        Console.WriteLine($"Hello, {who}!");
-        return;
+      // Some very typical business code.
+      Console.WriteLine($"Hello, {who}!");
+      return;
     }
     finally
     {
-        global::System.Console.WriteLine("Leaving " + $"MyMethod( who = {who} )");
+      global::System.Console.WriteLine("Leaving " + $"MyMethod( who = {who} )");
     }
-}
-
-    static void Main()
-    {
-        MyMethod("Lama");
-    }
+  }
+  static void Main()
+  {
+    MyMethod("Lama");
+  }
 }

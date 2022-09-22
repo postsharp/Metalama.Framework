@@ -14,32 +14,29 @@
 // Warning MY001 on `ValidatedClass.Method`: `Reference constraint of type 'Invocation' in declaration 'ReferencingClass.ReferencingMethod()'.`
 // Warning MY001 on `ValidatedClass`: `Reference constraint of type 'TypeOf' in declaration 'ReferencingClass.ReferencingMethod()'.`
 internal class ValidatedClass
-    {
-        public static void Method( object o ) { }
-    }
-
+{
+  public static void Method(object o)
+  {
+  }
+}
 internal class DerivedClass : ValidatedClass
-    {
-        // Field type.
-        private ValidatedClass _field1;
-
-        // Typeof in field initializer.
-        private Type _field2 = typeof(ValidatedClass);
-
-        private ValidatedClass? Method( ValidatedClass[] param1, List<ValidatedClass> param2 )
-        {
-            ValidatedClass variable;
-            Method( typeof(ValidatedClass) );
-
-            return null;
-        }
-    }
-
+{
+  // Field type.
+  private ValidatedClass _field1;
+  // Typeof in field initializer.
+  private Type _field2 = typeof(ValidatedClass);
+  private ValidatedClass? Method(ValidatedClass[] param1, List<ValidatedClass> param2)
+  {
+    ValidatedClass variable;
+    Method(typeof(ValidatedClass));
+    return null;
+  }
+}
 internal class ReferencingClass
-    {
-        private void ReferencingMethod()
-        {
-            ValidatedClass variable;
-            ValidatedClass.Method( typeof(ValidatedClass) );
-        }
-    }
+{
+  private void ReferencingMethod()
+  {
+    ValidatedClass variable;
+    ValidatedClass.Method(typeof(ValidatedClass));
+  }
+}
