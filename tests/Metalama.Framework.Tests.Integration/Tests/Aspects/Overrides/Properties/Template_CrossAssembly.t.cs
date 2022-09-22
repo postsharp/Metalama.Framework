@@ -1,62 +1,54 @@
 [TestAspect]
 internal class TargetClass
 {
-    public string Property
+  public string Property
+  {
+    get
     {
-        get
-        {
-            global::System.Console.WriteLine("Aspect code");
-            Console.WriteLine("Aspect code");
-            return "Test";
-        }
-
-        set
-        {
-            global::System.Console.WriteLine("Aspect code");
-            Console.WriteLine("Aspect code");
-        }
+      global::System.Console.WriteLine("Aspect code");
+      Console.WriteLine("Aspect code");
+      return "Test";
     }
-
-    public string ExpressionProperty
+    set
     {
-        get
-        {
-            global::System.Console.WriteLine("Aspect code");
-            return "Test";
-        }
+      global::System.Console.WriteLine("Aspect code");
+      Console.WriteLine("Aspect code");
     }
-
-
-    private string? _autoProperty;
-
-    public string? AutoProperty
+  }
+  public string ExpressionProperty
+  {
+    get
     {
-        get
-        {
-            global::System.Console.WriteLine("Aspect code");
-            return this._autoProperty;
-        }
-        set
-        {
-            global::System.Console.WriteLine("Aspect code");
-            this._autoProperty = value;
-        }
+      global::System.Console.WriteLine("Aspect code");
+      return "Test";
     }
-
-
-    private string _autoPropertyWithInitializer = "Test";
-
-    public string AutoPropertyWithInitializer
+  }
+  private string? _autoProperty;
+  public string? AutoProperty
+  {
+    get
     {
-        get
-        {
-            global::System.Console.WriteLine("Aspect code");
-            return this._autoPropertyWithInitializer;
-        }
-        set
-        {
-            global::System.Console.WriteLine("Aspect code");
-            this._autoPropertyWithInitializer = value;
-        }
+      global::System.Console.WriteLine("Aspect code");
+      return this._autoProperty;
     }
+    set
+    {
+      global::System.Console.WriteLine("Aspect code");
+      this._autoProperty = value;
+    }
+  }
+  private string _autoPropertyWithInitializer = "Test";
+  public string AutoPropertyWithInitializer
+  {
+    get
+    {
+      global::System.Console.WriteLine("Aspect code");
+      return this._autoPropertyWithInitializer;
+    }
+    set
+    {
+      global::System.Console.WriteLine("Aspect code");
+      this._autoPropertyWithInitializer = value;
+    }
+  }
 }

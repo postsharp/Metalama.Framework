@@ -1,4 +1,4 @@
 int Method(int a)
 {
-    return default;
+  return default;
 }

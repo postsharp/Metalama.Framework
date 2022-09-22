@@ -1,22 +1,21 @@
-﻿[Introduction]
+[Introduction]
 [Test]
 internal class TargetClass : BaseClass
 {
-    public int TargetClassProperty
+  public int TargetClassProperty
+  {
+    get
     {
-        get
-        {
-            global::System.Console.WriteLine("This is introduced property.");
-            return this.TargetClassProperty;
-        }
+      global::System.Console.WriteLine("This is introduced property.");
+      return this.TargetClassProperty;
     }
-
-    public override global::System.Int32 BaseClassProperty
+  }
+  public override global::System.Int32 BaseClassProperty
+  {
+    get
     {
-        get
-        {
-            global::System.Console.WriteLine("This is introduced property.");
-            return base.BaseClassProperty;
-        }
+      global::System.Console.WriteLine("This is introduced property.");
+      return base.BaseClassProperty;
     }
+  }
 }

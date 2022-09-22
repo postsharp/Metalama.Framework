@@ -1,7 +1,7 @@
 class Target
-    {
-        int Foo(int x)
 {
-            return x;
+  int Foo(int x)
+  {
+    return x;
+  }
 }
-    }

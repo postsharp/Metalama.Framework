@@ -19,59 +19,44 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Fabrics;
 using Metalama.Framework.Validation;
-
-#pragma warning disable CS0168,CS8618,CS0169
-
+#pragma warning disable CS0168, CS8618, CS0169
 namespace Metalama.Framework.Tests.Integration.Validation.TypeFabric_
 {
-    
-#pragma warning disable CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823 
-internal class ValidatedClass
+#pragma warning disable CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823
+  internal class ValidatedClass
+  {
+    public static void Method(object o)
     {
-        public static void Method( object o ) { }
-
-        
-#pragma warning disable CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823 
-private class Fabric : TypeFabric
-        {
-            private static readonly DiagnosticDefinition<(ReferenceKinds ReferenceKinds, IDeclaration Declaration)> _warning =
-                new( "MY001", Severity.Warning, "Reference constraint of type '{0}' in declaration '{1}'." );
-
-            public override void AmendType(ITypeAmender amender) => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
-
-
-            private static void Validate(in ReferenceValidationContext context) => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
-
-        }
-#pragma warning restore CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823 
-
     }
-#pragma warning restore CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823 
-
-
-    internal class DerivedClass : ValidatedClass
+#pragma warning disable CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823
+    private class Fabric : TypeFabric
     {
-        // Field type.
-        private ValidatedClass _field1;
-
-        // Typeof in field initializer.
-        private Type _field2 = typeof(ValidatedClass);
-
-        private ValidatedClass? Method( ValidatedClass[] param1, List<ValidatedClass> param2 )
-        {
-            ValidatedClass variable;
-            Method( typeof(ValidatedClass) );
-
-            return null;
-        }
+      private static readonly DiagnosticDefinition<(ReferenceKinds ReferenceKinds, IDeclaration Declaration)> _warning = new("MY001", Severity.Warning, "Reference constraint of type '{0}' in declaration '{1}'.");
+      public override void AmendType(ITypeAmender amender) => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
+      private static void Validate(in ReferenceValidationContext context) => throw new System.NotSupportedException("Compile-time-only code cannot be called at run-time.");
     }
-
-    internal class ReferencingClass
+#pragma warning restore CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823
+  }
+#pragma warning restore CS0067, CS8618, CS0162, CS0169, CS0414, CA1822, CA1823
+  internal class DerivedClass : ValidatedClass
+  {
+    // Field type.
+    private ValidatedClass _field1;
+    // Typeof in field initializer.
+    private Type _field2 = typeof(ValidatedClass);
+    private ValidatedClass? Method(ValidatedClass[] param1, List<ValidatedClass> param2)
     {
-        private void ReferencingMethod()
-        {
-            ValidatedClass variable;
-            ValidatedClass.Method( typeof(ValidatedClass) );
-        }
+      ValidatedClass variable;
+      Method(typeof(ValidatedClass));
+      return null;
     }
+  }
+  internal class ReferencingClass
+  {
+    private void ReferencingMethod()
+    {
+      ValidatedClass variable;
+      ValidatedClass.Method(typeof(ValidatedClass));
+    }
+  }
 }

@@ -1,4 +1,4 @@
-private void Method( int a )
+private void Method(int a)
 {
-    throw new global::System.Exception();
+  throw new global::System.Exception();
 }

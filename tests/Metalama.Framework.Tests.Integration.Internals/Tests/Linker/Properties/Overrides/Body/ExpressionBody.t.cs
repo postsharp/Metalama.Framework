@@ -1,12 +1,12 @@
 class Target
 {
-    int _foo = 0;
-    int Foo
+  int _foo = 0;
+  int Foo
+  {
+    get
     {
-        get
-        {
-            Console.WriteLine("Get");
-            return this._foo;
-        }
+      Console.WriteLine("Get");
+      return this._foo;
     }
+  }
 }

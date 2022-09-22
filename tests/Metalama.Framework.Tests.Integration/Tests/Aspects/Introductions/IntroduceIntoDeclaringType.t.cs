@@ -1,9 +1,10 @@
 internal class TargetCode
-    {
-        [Aspect]
-        private void M() { }
-
-
-private void NewMethod()
 {
-}    }
+  [Aspect]
+  private void M()
+  {
+  }
+  private void NewMethod()
+  {
+  }
+}

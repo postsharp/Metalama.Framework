@@ -1,15 +1,12 @@
 [IntroduceAspect]
-public class TestClass : IExistingInterface
-, global::Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Interfaces.TargetType_ExistingInterface.IIntroducedInterface
+public class TestClass : IExistingInterface, global::Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Interfaces.TargetType_ExistingInterface.IIntroducedInterface
 {
-    public void ExistingMethod()
-    {
-        Console.WriteLine("Original interface member.");
-    }
-
-
-    public void IntroducedMethod()
-    {
-        global::System.Console.WriteLine("Introduced interface member.");
-    }
+  public void ExistingMethod()
+  {
+    Console.WriteLine("Original interface member.");
+  }
+  public void IntroducedMethod()
+  {
+    global::System.Console.WriteLine("Introduced interface member.");
+  }
 }

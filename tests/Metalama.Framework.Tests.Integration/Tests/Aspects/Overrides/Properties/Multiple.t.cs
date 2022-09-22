@@ -1,228 +1,167 @@
 [IntroduceAndOverride]
 internal class TargetClass
 {
-
-
-    private global::System.Int32 _field1;
-
-
-    private global::System.Int32 _field
+  private global::System.Int32 _field1;
+  private global::System.Int32 _field
+  {
+    get
     {
-        get
-        {
-            global::System.Console.WriteLine("First override.");
-            global::System.Console.WriteLine("Second override.");
-            return this._field1;
-
-
-        }
-        set
-        {
-            global::System.Console.WriteLine("First override.");
-            global::System.Console.WriteLine("Second override.");
-            this._field1 = value;
-
-        }
+      global::System.Console.WriteLine("First override.");
+      global::System.Console.WriteLine("Second override.");
+      return this._field1;
     }
-    public int Property
+    set
     {
-        get
-        {
-            global::System.Console.WriteLine("First override.");
-            global::System.Console.WriteLine("Second override.");
-            return _field;
-
-
-        }
-
-        set
-        {
-            global::System.Console.WriteLine("First override.");
-            global::System.Console.WriteLine("Second override.");
-            _field = value;
-
-        }
+      global::System.Console.WriteLine("First override.");
+      global::System.Console.WriteLine("Second override.");
+      this._field1 = value;
     }
-
-
-    private static global::System.Int32 _staticField1;
-
-
-    private static global::System.Int32 _staticField
+  }
+  public int Property
+  {
+    get
     {
-        get
-        {
-            global::System.Console.WriteLine("First override.");
-            global::System.Console.WriteLine("Second override.");
-            return global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Multiple.TargetClass._staticField1;
-
-
-        }
-        set
-        {
-            global::System.Console.WriteLine("First override.");
-            global::System.Console.WriteLine("Second override.");
-            global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Multiple.TargetClass._staticField1 = value;
-
-        }
+      global::System.Console.WriteLine("First override.");
+      global::System.Console.WriteLine("Second override.");
+      return _field;
     }
-    public static int StaticProperty
+    set
     {
-        get
-        {
-            global::System.Console.WriteLine("First override.");
-            global::System.Console.WriteLine("Second override.");
-            return _staticField;
-
-
-        }
-
-        set
-        {
-            global::System.Console.WriteLine("First override.");
-            global::System.Console.WriteLine("Second override.");
-            _staticField = value;
-
-        }
+      global::System.Console.WriteLine("First override.");
+      global::System.Console.WriteLine("Second override.");
+      _field = value;
     }
-
-    public int ExpressionBodiedProperty
+  }
+  private static global::System.Int32 _staticField1;
+  private static global::System.Int32 _staticField
+  {
+    get
     {
-        get
-        {
-            global::System.Console.WriteLine("First override.");
-            global::System.Console.WriteLine("Second override.");
-            return 42;
-
-        }
+      global::System.Console.WriteLine("First override.");
+      global::System.Console.WriteLine("Second override.");
+      return global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Multiple.TargetClass._staticField1;
     }
-
-
-    private int _autoProperty;
-
-    public int AutoProperty
+    set
     {
-        get
-        {
-            global::System.Console.WriteLine("First override.");
-            global::System.Console.WriteLine("Second override.");
-            return this._autoProperty;
-
-
-        }
-        set
-        {
-            global::System.Console.WriteLine("First override.");
-            global::System.Console.WriteLine("Second override.");
-            this._autoProperty = value;
-
-        }
+      global::System.Console.WriteLine("First override.");
+      global::System.Console.WriteLine("Second override.");
+      global::Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Properties.Multiple.TargetClass._staticField1 = value;
     }
-
-
-    private readonly int _getOnlyAutoProperty;
-
-    public int GetOnlyAutoProperty
+  }
+  public static int StaticProperty
+  {
+    get
     {
-        get
-        {
-            global::System.Console.WriteLine("First override.");
-            global::System.Console.WriteLine("Second override.");
-            return this._getOnlyAutoProperty;
-
-
-        }
-        private init
-        {
-            global::System.Console.WriteLine("First override.");
-            global::System.Console.WriteLine("Second override.");
-            this._getOnlyAutoProperty = value;
-
-        }
+      global::System.Console.WriteLine("First override.");
+      global::System.Console.WriteLine("Second override.");
+      return _staticField;
     }
-
-
-    private int _initializerAutoProperty = 42;
-
-    public int InitializerAutoProperty
+    set
     {
-        get
-        {
-            global::System.Console.WriteLine("First override.");
-            global::System.Console.WriteLine("Second override.");
-            return this._initializerAutoProperty;
-
-
-        }
-        set
-        {
-            global::System.Console.WriteLine("First override.");
-            global::System.Console.WriteLine("Second override.");
-            this._initializerAutoProperty = value;
-
-        }
+      global::System.Console.WriteLine("First override.");
+      global::System.Console.WriteLine("Second override.");
+      _staticField = value;
     }
-    public TargetClass()
+  }
+  public int ExpressionBodiedProperty
+  {
+    get
     {
-        this.GetOnlyAutoProperty = 42;
+      global::System.Console.WriteLine("First override.");
+      global::System.Console.WriteLine("Second override.");
+      return 42;
     }
-
-
-    private global::System.Int32 _introducedAutoProperty;
-
-
-    public global::System.Int32 IntroducedAutoProperty
+  }
+  private int _autoProperty;
+  public int AutoProperty
+  {
+    get
     {
-        get
-        {
-            global::System.Console.WriteLine("First override.");
-            global::System.Console.WriteLine("Second override.");
-            return this._introducedAutoProperty;
-
-
-        }
-        set
-        {
-            global::System.Console.WriteLine("First override.");
-            global::System.Console.WriteLine("Second override.");
-            this._introducedAutoProperty = value;
-
-        }
+      global::System.Console.WriteLine("First override.");
+      global::System.Console.WriteLine("Second override.");
+      return this._autoProperty;
     }
-
-    private readonly global::System.Int32 _introducedGetOnlyAutoProperty;
-
-
-    public global::System.Int32 IntroducedGetOnlyAutoProperty
+    set
     {
-        get
-        {
-            global::System.Console.WriteLine("First override.");
-            global::System.Console.WriteLine("Second override.");
-            return this._introducedGetOnlyAutoProperty;
-
-
-        }
+      global::System.Console.WriteLine("First override.");
+      global::System.Console.WriteLine("Second override.");
+      this._autoProperty = value;
     }
-
-    public global::System.Int32 IntroducedProperty
+  }
+  private readonly int _getOnlyAutoProperty;
+  public int GetOnlyAutoProperty
+  {
+    get
     {
-        get
-        {
-            global::System.Console.WriteLine("First override.");
-            global::System.Console.WriteLine("Second override.");
-            return (global::System.Int32)42;
-
-
-
-
-        }
-
-        set
-        {
-            global::System.Console.WriteLine("First override.");
-            global::System.Console.WriteLine("Second override.");
-
-        }
+      global::System.Console.WriteLine("First override.");
+      global::System.Console.WriteLine("Second override.");
+      return this._getOnlyAutoProperty;
     }
+    private init
+    {
+      global::System.Console.WriteLine("First override.");
+      global::System.Console.WriteLine("Second override.");
+      this._getOnlyAutoProperty = value;
+    }
+  }
+  private int _initializerAutoProperty = 42;
+  public int InitializerAutoProperty
+  {
+    get
+    {
+      global::System.Console.WriteLine("First override.");
+      global::System.Console.WriteLine("Second override.");
+      return this._initializerAutoProperty;
+    }
+    set
+    {
+      global::System.Console.WriteLine("First override.");
+      global::System.Console.WriteLine("Second override.");
+      this._initializerAutoProperty = value;
+    }
+  }
+  public TargetClass()
+  {
+    this.GetOnlyAutoProperty = 42;
+  }
+  private global::System.Int32 _introducedAutoProperty;
+  public global::System.Int32 IntroducedAutoProperty
+  {
+    get
+    {
+      global::System.Console.WriteLine("First override.");
+      global::System.Console.WriteLine("Second override.");
+      return this._introducedAutoProperty;
+    }
+    set
+    {
+      global::System.Console.WriteLine("First override.");
+      global::System.Console.WriteLine("Second override.");
+      this._introducedAutoProperty = value;
+    }
+  }
+  private readonly global::System.Int32 _introducedGetOnlyAutoProperty;
+  public global::System.Int32 IntroducedGetOnlyAutoProperty
+  {
+    get
+    {
+      global::System.Console.WriteLine("First override.");
+      global::System.Console.WriteLine("Second override.");
+      return this._introducedGetOnlyAutoProperty;
+    }
+  }
+  public global::System.Int32 IntroducedProperty
+  {
+    get
+    {
+      global::System.Console.WriteLine("First override.");
+      global::System.Console.WriteLine("Second override.");
+      return (global::System.Int32)42;
+    }
+    set
+    {
+      global::System.Console.WriteLine("First override.");
+      global::System.Console.WriteLine("Second override.");
+    }
+  }
 }

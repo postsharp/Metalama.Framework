@@ -1,15 +1,16 @@
-    internal class Targets
+internal class Targets
+{
+  private interface I
+  {
+    [Aspect]
+    void M();
+  }
+  private class C : I
+  {
+    public void M()
     {
-        private interface I
-        {
-            [Aspect]
-            void M();
-        }
-
-        private class C : I
-        {
-            public void M() {     global::System.Console.WriteLine("Overridden!");
-        return;
-}
-        }
+      global::System.Console.WriteLine("Overridden!");
+      return;
     }
+  }
+}

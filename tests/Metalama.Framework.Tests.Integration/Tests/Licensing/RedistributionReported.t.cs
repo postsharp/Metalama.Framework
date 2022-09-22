@@ -1,2 +1,2 @@
-// CompileTimeAspectPipeline.ExecuteAsync failed. 
+// CompileTimeAspectPipeline.ExecuteAsync failed.
 // Error LAMA0800 on ``: `You have 4 aspect classes used in the project but only 3 are allowed by your license. The aspect classes are: 'NonredistributionAspect1', 'NonredistributionAspect2', 'NonredistributionAspect3', aspects from 'dependency_XXXXXXXXXXXXXXXX' assembly counted as one ('RedistributionAspect1', 'RedistributionAspect2', 'RedistributionAspect3', 'RedistributionAspect4').`

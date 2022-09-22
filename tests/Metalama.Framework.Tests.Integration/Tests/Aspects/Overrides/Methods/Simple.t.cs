@@ -1,68 +1,61 @@
-    internal class TargetClass
-    {
-        [Override]
-        public void TargetMethod_Void()
-        {
+internal class TargetClass
+{
+  [Override]
+  public void TargetMethod_Void()
+  {
     global::System.Console.WriteLine("This is the overriding method.");
-                Console.WriteLine("This is the original method.");
+    Console.WriteLine("This is the original method.");
     return;
-        }
-
-        [Override]
-        public void TargetMethod_Void(int x, int y)
-        {
+  }
+  [Override]
+  public void TargetMethod_Void(int x, int y)
+  {
     global::System.Console.WriteLine("This is the overriding method.");
-                Console.WriteLine($"This is the original method {x} {y}.");
+    Console.WriteLine($"This is the original method {x} {y}.");
     return;
-        }
-
-        [Override]
-        public int TargetMethod_Int()
-        {
+  }
+  [Override]
+  public int TargetMethod_Int()
+  {
     global::System.Console.WriteLine("This is the overriding method.");
-                Console.WriteLine("This is the original method.");
-            return 42;
-        }
-
-        [Override]
-        public int TargetMethod_Int(int x, int y)
-        {
+    Console.WriteLine("This is the original method.");
+    return 42;
+  }
+  [Override]
+  public int TargetMethod_Int(int x, int y)
+  {
     global::System.Console.WriteLine("This is the overriding method.");
-                Console.WriteLine($"This is the original method {x} {y}.");
-            return x + y;
-        }
-
-        [Override]
-        public static void TargetMethod_Static()
-        {
+    Console.WriteLine($"This is the original method {x} {y}.");
+    return x + y;
+  }
+  [Override]
+  public static void TargetMethod_Static()
+  {
     global::System.Console.WriteLine("This is the overriding method.");
-                Console.WriteLine("This is the original static method.");
+    Console.WriteLine("This is the original static method.");
     return;
-        }
-
-        [Override]
-        public void TargetMethod_Out(out int x)
-        {
+  }
+  [Override]
+  public void TargetMethod_Out(out int x)
+  {
     global::System.Console.WriteLine("This is the overriding method.");
-                Console.WriteLine("This is the original method.");
-            x = 42;
+    Console.WriteLine("This is the original method.");
+    x = 42;
     return;
-        }
-
-        [Override]
-        public void TargetMethod_Ref(ref int x)
-        {
+  }
+  [Override]
+  public void TargetMethod_Ref(ref int x)
+  {
     global::System.Console.WriteLine("This is the overriding method.");
-                Console.WriteLine($"This is the original method {x}.");
-            x = 42;
+    Console.WriteLine($"This is the original method {x}.");
+    x = 42;
     return;
-        }
-
-        [Override]
-        public void TargetMethod_In(in DateTime x)
-        {
+  }
+  [Override]
+  public void TargetMethod_In(in DateTime x)
+  {
     global::System.Console.WriteLine("This is the overriding method.");
-                Console.WriteLine($"This is the original method {x}.");
+    Console.WriteLine($"This is the original method {x}.");
     return;
-        }
-    }
+  }
+}

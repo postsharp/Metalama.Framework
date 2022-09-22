@@ -1,5 +1,5 @@
 void Method(int a)
 {
-    this.Method(a);
-    return;
+  this.Method(a);
+  return;
 }

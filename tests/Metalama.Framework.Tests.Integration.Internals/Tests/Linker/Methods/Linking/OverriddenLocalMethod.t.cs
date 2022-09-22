@@ -1,13 +1,11 @@
 class Target
-    {
-        public void Foo()
 {
+  public void Foo()
+  {
     this.Foo_Override6();
-}
-
-
-public void Foo_Override0()
-{
+  }
+  public void Foo_Override0()
+  {
     // Should invoke source code.
     this.Bar_Source();
     // Should invoke source code.
@@ -16,10 +14,9 @@ public void Foo_Override0()
     this.Bar_Source();
     // Should invoke the final declaration.
     this.Bar();
-}
-
-public void Foo_Override2()
-{
+  }
+  public void Foo_Override2()
+  {
     // Should invoke source code.
     this.Bar_Source();
     // Should invoke override 1.
@@ -28,10 +25,9 @@ public void Foo_Override2()
     this.Bar_Override1();
     // Should invoke the final declaration.
     this.Bar();
-}
-
-public void Foo_Override4()
-{
+  }
+  public void Foo_Override4()
+  {
     // Should invoke source code.
     this.Bar_Source();
     // Should invoke override 3.
@@ -40,10 +36,9 @@ public void Foo_Override4()
     this.Bar_Override3();
     // Should invoke the final declaration.
     this.Bar();
-}
-
-public void Foo_Override6()
-{
+  }
+  public void Foo_Override6()
+  {
     // Should invoke source code.
     this.Bar_Source();
     // Should invoke the final declaration.
@@ -52,20 +47,17 @@ public void Foo_Override6()
     this.Bar();
     // Should invoke the final declaration.
     this.Bar();
-}
-        void Bar()
-{
+  }
+  void Bar()
+  {
     this.Bar_Override5();
-}
-
-private void Bar_Source()
-        {
-            Console.WriteLine("This is original code.");
-        }
-
-
-void Bar_Override1()
-{
+  }
+  private void Bar_Source()
+  {
+    Console.WriteLine("This is original code.");
+  }
+  void Bar_Override1()
+  {
     // Should invoke source code.
     this.Bar_Source();
     // Should invoke source code.
@@ -74,10 +66,9 @@ void Bar_Override1()
     this.Bar_Override1();
     // Should invoke the final declaration.
     this.Bar();
-}
-
-void Bar_Override3()
-{
+  }
+  void Bar_Override3()
+  {
     // Should invoke source code.
     this.Bar_Source();
     // Should invoke override 1.
@@ -86,10 +77,9 @@ void Bar_Override3()
     this.Bar_Override3();
     // Should invoke the final declaration.
     this.Bar();
-}
-
-void Bar_Override5()
-{
+  }
+  void Bar_Override5()
+  {
     // Should invoke source code.
     this.Bar_Source();
     // Should invoke override 3.
@@ -98,4 +88,5 @@ void Bar_Override5()
     this.Bar();
     // Should invoke the final declaration.
     this.Bar();
-}    }
+  }
+}
