@@ -20,13 +20,11 @@ public static class ReflectionHelper
         }
         else if ( methods.Count == 0 )
         {
-            throw new InvalidOperationException(
-                $"The type '{type}' does not contain a method with signature '{signature}'." );
+            throw new InvalidOperationException( $"The type '{type}' does not contain a method with signature '{signature}'." );
         }
         else
         {
-            throw new AmbiguousMatchException(
-                $"There is more than one method in type '{type}' with signature '{signature}'." );
+            throw new AmbiguousMatchException( $"There is more than one method in type '{type}' with signature '{signature}'." );
         }
     }
 
@@ -42,13 +40,11 @@ public static class ReflectionHelper
         }
         else if ( constructors.Count == 0 )
         {
-            throw new InvalidOperationException(
-                $"The type '{type}' does not contain a constructor with signature '{signature}'." );
+            throw new InvalidOperationException( $"The type '{type}' does not contain a constructor with signature '{signature}'." );
         }
         else
         {
-            throw new AmbiguousMatchException(
-                $"There is more than one constructor in type '{type}' with signature '{signature}'." );
+            throw new AmbiguousMatchException( $"There is more than one constructor in type '{type}' with signature '{signature}'." );
         }
     }
 }

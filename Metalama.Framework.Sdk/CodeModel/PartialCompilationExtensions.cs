@@ -89,8 +89,8 @@ namespace Metalama.Framework.Engine.CodeModel
             var modifiedSyntaxTrees = new ConcurrentBag<SyntaxTreeTransformation>();
 
             await taskScheduler.RunInParallelAsync( compilation.SyntaxTrees.Values, RewriteSyntaxTree, cancellationToken );
-            
-            void RewriteSyntaxTree ( SyntaxTree tree )
+
+            void RewriteSyntaxTree( SyntaxTree tree )
             {
                 cancellationToken.ThrowIfCancellationRequested();
 

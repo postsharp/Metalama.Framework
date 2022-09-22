@@ -154,7 +154,8 @@ internal partial class LinkerIntroductionStep
             }
 
             // Order by adding order within the aspect instance.
-            var adviceOrderComparison = x.Introduction.OrderWithinPipelineStepAndTypAndAspectInstance.CompareTo( y.Introduction.OrderWithinPipelineStepAndTypAndAspectInstance );
+            var adviceOrderComparison =
+                x.Introduction.OrderWithinPipelineStepAndTypAndAspectInstance.CompareTo( y.Introduction.OrderWithinPipelineStepAndTypAndAspectInstance );
 
             if ( adviceOrderComparison != 0 )
             {
@@ -187,7 +188,6 @@ internal partial class LinkerIntroductionStep
             // TODO: At this point, all should be sorted, but mocks are not setting the order properties.
             //throw new AssertionFailedException( $"'{x}' and '{y}' are not strongly ordered" );
             return x.Syntax.ToString().CompareTo( y.Syntax.ToString() );
-
         }
 
         private static int GetKindOrder( DeclarationKind kind ) => _orderedDeclarationKinds.TryGetValue( kind, out var order ) ? order : 10;

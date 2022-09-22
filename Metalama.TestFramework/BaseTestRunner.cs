@@ -385,25 +385,25 @@ public abstract partial class BaseTestRunner
 
     protected static string NormalizeEndOfLines( string? s ) => string.IsNullOrWhiteSpace( s ) ? "" : _newLineRegex.Replace( s, "\n" ).Trim();
 
-        public static string? NormalizeTestOutput( string? s, bool preserveFormatting, bool forComparison )
-            => s == null ? null : NormalizeTestOutput( CSharpSyntaxTree.ParseText( s ).GetRoot(), preserveFormatting, forComparison );
+    public static string? NormalizeTestOutput( string? s, bool preserveFormatting, bool forComparison )
+        => s == null ? null : NormalizeTestOutput( CSharpSyntaxTree.ParseText( s ).GetRoot(), preserveFormatting, forComparison );
 
-        private static string? NormalizeTestOutput( SyntaxNode syntaxNode, bool preserveFormatting, bool forComparison )
+    private static string? NormalizeTestOutput( SyntaxNode syntaxNode, bool preserveFormatting, bool forComparison )
+    {
+        if ( preserveFormatting )
         {
-            if ( preserveFormatting )
+            return syntaxNode.ToFullString().ReplaceOrdinal( "\r\n", "\n" );
+        }
+        else
+        {
+            var s = syntaxNode.NormalizeWhitespace( "  ", "\n" ).ToFullString();
+
+            s = NormalizeEndOfLines( s );
+
+            if ( forComparison )
             {
-                return syntaxNode.ToFullString().ReplaceOrdinal( "\r\n", "\n" );
+                s = _spaceRegex.Replace( s, " " );
             }
-            else
-            {
-                var s = syntaxNode.NormalizeWhitespace( "  ", "\n" ).ToFullString();
-
-                s = NormalizeEndOfLines( s );
-
-                if ( forComparison )
-                {
-                    s = _spaceRegex.Replace( s, " " );
-                }
 
             return s;
         }
@@ -433,10 +433,10 @@ public abstract partial class BaseTestRunner
             Path.GetDirectoryName( sourceAbsolutePath )!,
             Path.GetFileNameWithoutExtension( sourceAbsolutePath ) + FileExtensions.TransformedCode );
 
-            var testOutputs = testResult.GetTestOutputsWithDiagnostics();
-            var actualTransformedNonNormalizedText = JoinSyntaxTrees( testOutputs );
-            var actualTransformedSourceTextForComparison = NormalizeTestOutput( actualTransformedNonNormalizedText, formatCode, true );
-            var actualTransformedSourceTextForStorage = NormalizeTestOutput( actualTransformedNonNormalizedText, formatCode, false );
+        var testOutputs = testResult.GetTestOutputsWithDiagnostics();
+        var actualTransformedNonNormalizedText = JoinSyntaxTrees( testOutputs );
+        var actualTransformedSourceTextForComparison = NormalizeTestOutput( actualTransformedNonNormalizedText, formatCode, true );
+        var actualTransformedSourceTextForStorage = NormalizeTestOutput( actualTransformedNonNormalizedText, formatCode, false );
 
         // If the expectation file does not exist, create it with some placeholder content.
         if ( !File.Exists( expectedTransformedPath ) )
@@ -448,28 +448,28 @@ public abstract partial class BaseTestRunner
                 "// TODO: Replace this file with the correct transformed code. See the test output for the actual transformed code." );
         }
 
-            // Read expectations from the file.
-            var expectedSourceText = File.ReadAllText( expectedTransformedPath );
-            var expectedSourceTextForComparison = NormalizeTestOutput( expectedSourceText, formatCode, true );
-            
-            // Update the file in obj/transformed if it is different.
-            var actualTransformedPath = Path.Combine(
-                this.ProjectDirectory,
-                "obj",
-                "transformed",
-                testInput.ProjectProperties.TargetFramework,
-                Path.GetDirectoryName( testInput.RelativePath ) ?? "",
-                Path.GetFileNameWithoutExtension( testInput.RelativePath ) + FileExtensions.TransformedCode );
+        // Read expectations from the file.
+        var expectedSourceText = File.ReadAllText( expectedTransformedPath );
+        var expectedSourceTextForComparison = NormalizeTestOutput( expectedSourceText, formatCode, true );
+
+        // Update the file in obj/transformed if it is different.
+        var actualTransformedPath = Path.Combine(
+            this.ProjectDirectory,
+            "obj",
+            "transformed",
+            testInput.ProjectProperties.TargetFramework,
+            Path.GetDirectoryName( testInput.RelativePath ) ?? "",
+            Path.GetFileNameWithoutExtension( testInput.RelativePath ) + FileExtensions.TransformedCode );
 
         Directory.CreateDirectory( Path.GetDirectoryName( actualTransformedPath )! );
 
-            var storedTransformedSourceText =
-                File.Exists( actualTransformedPath ) ? File.ReadAllText( actualTransformedPath ) : null;
+        var storedTransformedSourceText =
+            File.Exists( actualTransformedPath ) ? File.ReadAllText( actualTransformedPath ) : null;
 
-            if ( storedTransformedSourceText != actualTransformedSourceTextForStorage )
-            {
-                File.WriteAllText( actualTransformedPath, actualTransformedSourceTextForStorage );
-            }
+        if ( storedTransformedSourceText != actualTransformedSourceTextForStorage )
+        {
+            File.WriteAllText( actualTransformedPath, actualTransformedSourceTextForStorage );
+        }
 
         if ( this.Logger != null )
         {
@@ -488,8 +488,8 @@ public abstract partial class BaseTestRunner
             }
         }
 
-            state["expectedTransformedSourceText"] = expectedSourceTextForComparison;
-            state["actualTransformedNormalizedSourceText"] = actualTransformedSourceTextForComparison;
+        state["expectedTransformedSourceText"] = expectedSourceTextForComparison;
+        state["actualTransformedNormalizedSourceText"] = actualTransformedSourceTextForComparison;
 
         static string JoinSyntaxTrees( IReadOnlyList<SyntaxTree> compilationUnits )
         {

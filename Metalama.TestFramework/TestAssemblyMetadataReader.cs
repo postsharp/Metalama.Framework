@@ -76,8 +76,7 @@ namespace Metalama.TestFramework
 
             string? GetGlobalUsingsFile() => GetOptionalAssemblyMetadataValue( "GlobalUsingsFile" );
 
-            TestFrameworkLicenseStatus GetLicense()
-                => new TestFrameworkLicenseStatus( GetShortAssemblyName(), GetOptionalAssemblyMetadataValue( "MetalamaLicense" ) );
+            TestFrameworkLicenseStatus GetLicense() => new( GetShortAssemblyName(), GetOptionalAssemblyMetadataValue( "MetalamaLicense" ) );
 
             var projectDirectory = GetProjectDirectory();
 
