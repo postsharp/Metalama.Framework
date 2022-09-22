@@ -1,1 +1,3 @@
-internal class T { }
+internal class T
+{
+}

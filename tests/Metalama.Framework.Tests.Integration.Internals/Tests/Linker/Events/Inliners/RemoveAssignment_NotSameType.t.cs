@@ -1,14 +1,15 @@
-    public class Target : Base
+public class Target : Base
+{
+  protected override event EventHandler Foo
+  {
+    add
     {
-
-
-protected override event EventHandler Foo
-{add    {
     }
-
-remove    {
-        Console.WriteLine("Before");
-        base.Foo -= value;
-        Console.WriteLine("After");
+    remove
+    {
+      Console.WriteLine("Before");
+      base.Foo -= value;
+      Console.WriteLine("After");
     }
-}    }
+  }
+}

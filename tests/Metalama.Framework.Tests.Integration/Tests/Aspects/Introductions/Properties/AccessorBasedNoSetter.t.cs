@@ -1,12 +1,11 @@
 [MyAspect]
 internal class C
 {
-
-    public global::System.Int32 TheProperty
+  public global::System.Int32 TheProperty
+  {
+    get
     {
-        get
-        {
-            return (global::System.Int32)5;
-        }
+      return (global::System.Int32)5;
     }
+  }
 }

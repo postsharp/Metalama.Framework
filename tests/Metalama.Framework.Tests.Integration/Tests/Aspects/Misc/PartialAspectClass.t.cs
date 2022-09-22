@@ -1,8 +1,8 @@
 [MyAspect]
 internal class C
 {
-    private void M()
-    {
-        return;
-    }
+  private void M()
+  {
+    return;
+  }
 }

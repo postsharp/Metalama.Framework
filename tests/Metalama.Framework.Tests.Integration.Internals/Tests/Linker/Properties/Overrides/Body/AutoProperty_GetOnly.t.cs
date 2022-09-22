@@ -1,19 +1,17 @@
 class Target
 {
-
-
-    private readonly int _foo;
-    int Foo
+  private readonly int _foo;
+  int Foo
+  {
+    get
     {
-        get
-        {
-            Console.WriteLine("Get");
-            return this._foo;
-        }
-        init
-        {
-            Console.WriteLine("Set");
-            this._foo = value;
-        }
+      Console.WriteLine("Get");
+      return this._foo;
     }
+    init
+    {
+      Console.WriteLine("Set");
+      this._foo = value;
+    }
+  }
 }

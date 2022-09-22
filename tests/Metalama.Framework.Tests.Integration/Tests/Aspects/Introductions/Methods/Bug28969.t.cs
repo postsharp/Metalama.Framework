@@ -1,6 +1,7 @@
 [MyAspect]
-    internal class TargetCode { 
-
-public virtual void Method()
+internal class TargetCode
 {
-}}
+  public virtual void Method()
+  {
+  }
+}

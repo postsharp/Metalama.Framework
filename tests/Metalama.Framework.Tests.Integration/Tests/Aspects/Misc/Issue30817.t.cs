@@ -1,6 +1,5 @@
 [MyAspect]
 public class C
 {
-
-    public static readonly global::System.Object TheProperty = null!;
+  public static readonly global::System.Object TheProperty = null !;
 }

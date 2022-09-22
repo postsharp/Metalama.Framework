@@ -1,12 +1,12 @@
 namespace Metalama.Framework.IntegrationTests.Aspects.DesignTime.ClassInStruct
 {
-    partial struct TargetStruct
+  partial struct TargetStruct
+  {
+    partial class Nested
     {
-        partial class Nested
-        {
-            public void M()
-            {
-            }
-        }
+      public void M()
+      {
+      }
     }
+  }
 }

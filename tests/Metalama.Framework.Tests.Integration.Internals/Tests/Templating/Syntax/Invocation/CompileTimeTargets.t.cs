@@ -1,4 +1,5 @@
 [Aspect]
-        public static void Method( int a, int b ) {
-    return;
+public static void Method(int a, int b)
+{
+  return;
 }

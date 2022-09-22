@@ -1,4 +1,4 @@
-// CompileTimeAspectPipeline.ExecuteAsync failed. 
+// CompileTimeAspectPipeline.ExecuteAsync failed.
 // Error LAMA0517 on `TargetRecordStruct`: `The aspect '<Fabric>' cannot override 'TargetRecordStruct.Equals(TargetRecordStruct)' because it is implicitly declared.`
 // Error LAMA0517 on `TargetRecordStruct`: `The aspect '<Fabric>' cannot override 'TargetRecordStruct.Equals(object)' because it is implicitly declared.`
 // Error LAMA0517 on `TargetRecordStruct`: `The aspect '<Fabric>' cannot override 'TargetRecordStruct.GetHashCode()' because it is implicitly declared.`

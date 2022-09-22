@@ -1,59 +1,51 @@
 public interface Interface
 {
-
-    [Override]
-    private int PrivateProperty
+  [Override]
+  private int PrivateProperty
+  {
+    get
     {
-        get
-        {
-            global::System.Console.WriteLine("Override.");
-            Console.WriteLine("Original implementation");
-            return 42;
-        }
-
-        set
-        {
-            global::System.Console.WriteLine("Override.");
-            Console.WriteLine("Original implementation");
-        }
+      global::System.Console.WriteLine("Override.");
+      Console.WriteLine("Original implementation");
+      return 42;
     }
-
-
-    private static int _staticAutoProperty;
-
-    [Override]
-    public static int StaticAutoProperty
+    set
     {
-        get
-        {
-            global::System.Console.WriteLine("Override.");
-            return global::Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Properties.InterfaceMembers.Interface._staticAutoProperty;
-        }
-        set
-        {
-            global::System.Console.WriteLine("Override.");
-            global::Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Properties.InterfaceMembers.Interface._staticAutoProperty = value;
-        }
+      global::System.Console.WriteLine("Override.");
+      Console.WriteLine("Original implementation");
     }
-
-    [Override]
-    public static int StaticProperty
+  }
+  private static int _staticAutoProperty;
+  [Override]
+  public static int StaticAutoProperty
+  {
+    get
     {
-        get
-        {
-            global::System.Console.WriteLine("Override.");
-            Console.WriteLine("Original implementation");
-            return 42;
-        }
-
-        set
-        {
-            global::System.Console.WriteLine("Override.");
-            Console.WriteLine("Original implementation");
-        }
+      global::System.Console.WriteLine("Override.");
+      return global::Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Properties.InterfaceMembers.Interface._staticAutoProperty;
     }
+    set
+    {
+      global::System.Console.WriteLine("Override.");
+      global::Metalama.Framework.Tests.Integration.Tests.Aspects.Overrides.Properties.InterfaceMembers.Interface._staticAutoProperty = value;
+    }
+  }
+  [Override]
+  public static int StaticProperty
+  {
+    get
+    {
+      global::System.Console.WriteLine("Override.");
+      Console.WriteLine("Original implementation");
+      return 42;
+    }
+    set
+    {
+      global::System.Console.WriteLine("Override.");
+      Console.WriteLine("Original implementation");
+    }
+  }
 }
-
 public class TargetClass : Interface
 {
 }

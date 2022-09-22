@@ -36,7 +36,7 @@ namespace Metalama.TestFramework
     public abstract partial class BaseTestRunner
     {
         private static readonly Regex _spaceRegex = new( " +", RegexOptions.Compiled );
-        private static readonly Regex _newLineRegex = new( "( *[\n|\r])+", RegexOptions.Compiled );
+        private static readonly Regex _newLineRegex = new( "(\\s*(\r\n|\r|\n))", RegexOptions.Compiled | RegexOptions.Multiline);
         private static readonly AsyncLocal<bool> _isTestRunning = new();
 
         private static readonly RemovePreprocessorDirectivesRewriter _removePreprocessorDirectivesRewriter =
@@ -386,10 +386,10 @@ namespace Metalama.TestFramework
 
         protected static string NormalizeEndOfLines( string? s ) => string.IsNullOrWhiteSpace( s ) ? "" : _newLineRegex.Replace( s, "\n" ).Trim();
 
-        public static string? NormalizeTestOutput( string? s, bool preserveFormatting )
-            => s == null ? null : NormalizeTestOutput( CSharpSyntaxTree.ParseText( s ).GetRoot(), preserveFormatting );
+        private static string? NormalizeTestOutput( string? s, bool preserveFormatting, bool forComparison )
+            => s == null ? null : NormalizeTestOutput( CSharpSyntaxTree.ParseText( s ).GetRoot(), preserveFormatting, forComparison );
 
-        private static string? NormalizeTestOutput( SyntaxNode syntaxNode, bool preserveFormatting )
+        private static string? NormalizeTestOutput( SyntaxNode syntaxNode, bool preserveFormatting, bool forComparison )
         {
             if ( preserveFormatting )
             {
@@ -397,10 +397,14 @@ namespace Metalama.TestFramework
             }
             else
             {
-                var s = syntaxNode.NormalizeWhitespace().ToFullString();
+                var s = syntaxNode.NormalizeWhitespace( "  ", "\n" ).ToFullString();
 
                 s = NormalizeEndOfLines( s );
-                s = _spaceRegex.Replace( s, " " );
+
+                if ( forComparison )
+                {
+                    s = _spaceRegex.Replace( s, " " );
+                }
 
                 return s;
             }
@@ -432,7 +436,7 @@ namespace Metalama.TestFramework
 
             var testOutputs = testResult.GetTestOutputsWithDiagnostics();
             var actualTransformedNonNormalizedText = JoinSyntaxTrees( testOutputs );
-            var actualTransformedNormalizedSourceText = NormalizeTestOutput( actualTransformedNonNormalizedText, formatCode );
+            var actualTransformedNormalizedSourceText = NormalizeTestOutput( actualTransformedNonNormalizedText, formatCode, true );
 
             // If the expectation file does not exist, create it with some placeholder content.
             if ( !File.Exists( expectedTransformedPath ) )
@@ -445,8 +449,9 @@ namespace Metalama.TestFramework
             }
 
             // Read expectations from the file.
-            var expectedNonNormalizedSourceText = File.ReadAllText( expectedTransformedPath );
-            var expectedTransformedSourceText = NormalizeTestOutput( expectedNonNormalizedSourceText, formatCode );
+            var expectedSourceText = File.ReadAllText( expectedTransformedPath );
+            var expectedSourceTextForComparison = NormalizeTestOutput( expectedSourceText, formatCode, true );
+            var expectedSourceTextForStorage = NormalizeTestOutput( expectedSourceText, formatCode, false );
 
             // Update the file in obj/transformed if it is different.
             var actualTransformedPath = Path.Combine(
@@ -460,21 +465,11 @@ namespace Metalama.TestFramework
             Directory.CreateDirectory( Path.GetDirectoryName( actualTransformedPath )! );
 
             var storedTransformedSourceText =
-                File.Exists( actualTransformedPath ) ? NormalizeTestOutput( File.ReadAllText( actualTransformedPath ), formatCode ) : null;
+                File.Exists( actualTransformedPath ) ? File.ReadAllText( actualTransformedPath ) : null;
 
-            if ( expectedTransformedSourceText == actualTransformedNormalizedSourceText
-                 && storedTransformedSourceText != expectedNonNormalizedSourceText
-                 && !formatCode )
+            if ( storedTransformedSourceText != expectedSourceTextForStorage )
             {
-                // Update the obj/transformed file to the non-normalized expected text, so that future call to update_transformed.txt
-                // does not overwrite any whitespace change.
-                File.WriteAllText( actualTransformedPath, expectedNonNormalizedSourceText );
-            }
-            else if ( storedTransformedSourceText == null || storedTransformedSourceText != actualTransformedNormalizedSourceText )
-            {
-                // Coverage: ignore
-
-                File.WriteAllText( actualTransformedPath, actualTransformedNonNormalizedText );
+                File.WriteAllText( actualTransformedPath, expectedSourceTextForStorage );
             }
 
             if ( this.Logger != null )
@@ -494,7 +489,7 @@ namespace Metalama.TestFramework
                 }
             }
 
-            state["expectedTransformedSourceText"] = expectedTransformedSourceText;
+            state["expectedTransformedSourceText"] = expectedSourceTextForComparison;
             state["actualTransformedNormalizedSourceText"] = actualTransformedNormalizedSourceText;
 
             static string JoinSyntaxTrees( IReadOnlyList<SyntaxTree> compilationUnits )

@@ -1,15 +1,14 @@
 int Method(int a)
 {
-    for (int i = 0; i < 3; i++)
+  for (int i = 0; i < 3; i++)
+  {
+    try
     {
-        try
-        {
-            return this.Method(a);
-        }
-        catch
-        {
-        }
+      return this.Method(a);
     }
-
-    throw new global::System.Exception();
+    catch
+    {
+    }
+  }
+  throw new global::System.Exception();
 }

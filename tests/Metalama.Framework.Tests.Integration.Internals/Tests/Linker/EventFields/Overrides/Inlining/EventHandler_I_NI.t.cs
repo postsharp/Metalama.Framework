@@ -1,21 +1,19 @@
 class Target
 {
-    event EventHandler? Foo
+  event EventHandler? Foo
+  {
+    add
     {
-        add
-        {
-            Console.WriteLine("Before");
-            this.Foo_Source += value;
-            Console.WriteLine("After");
-
-        }
-        remove
-        {
-            Console.WriteLine("Before");
-            this.Foo_Source -= value;
-            Console.WriteLine("After");
-        }
+      Console.WriteLine("Before");
+      this.Foo_Source += value;
+      Console.WriteLine("After");
     }
-
-    private EventHandler? Foo_Source;
+    remove
+    {
+      Console.WriteLine("Before");
+      this.Foo_Source -= value;
+      Console.WriteLine("After");
+    }
+  }
+  private EventHandler? Foo_Source;
 }

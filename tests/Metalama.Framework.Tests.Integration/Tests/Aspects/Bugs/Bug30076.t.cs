@@ -1,19 +1,21 @@
 class Target
-    {
-        [Log]
-        void M() {     var errorColour = global::System.ConsoleColor.Red;
+{
+  [Log]
+  void M()
+  {
+    var errorColour = global::System.ConsoleColor.Red;
     var resultColour = global::System.ConsoleColor.Green;
     global::System.Console.WriteLine($"Target.M() started.");
     try
     {
-        object result = null;
-        global::Metalama.Framework.Tests.Integration.Aspects.Bugs.Bug30076.LoggingHelper.Log($"{$"Target.M() succeeded."}", resultColour);
-        return;
-            }
+      object result = null;
+      global::Metalama.Framework.Tests.Integration.Aspects.Bugs.Bug30076.LoggingHelper.Log($"{$"Target.M() succeeded."}", resultColour);
+      return;
+    }
     catch (global::System.Exception e)
     {
-        global::Metalama.Framework.Tests.Integration.Aspects.Bugs.Bug30076.LoggingHelper.Log($"{$"Target.M() failed: {e.Message}"}", errorColour);
-        throw;
+      global::Metalama.Framework.Tests.Integration.Aspects.Bugs.Bug30076.LoggingHelper.Log($"{$"Target.M() failed: {e.Message}"}", errorColour);
+      throw;
     }
+  }
 }
-    }

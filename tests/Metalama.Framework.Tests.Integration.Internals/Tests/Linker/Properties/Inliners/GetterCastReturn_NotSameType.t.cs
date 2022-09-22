@@ -1,10 +1,11 @@
-    class Target : Base
+class Target : Base
+{
+  public override int Foo
+  {
+    get
     {
-
-
-public override int Foo
-{get    {
-        Console.WriteLine("Before");
-        return (int)base.Foo;
+      Console.WriteLine("Before");
+      return (int)base.Foo;
     }
-}    }
+  }
+}
