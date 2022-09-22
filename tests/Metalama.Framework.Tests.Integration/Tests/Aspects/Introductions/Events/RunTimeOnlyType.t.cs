@@ -5,13 +5,9 @@ public class RunTimeClass
   {
     add
     {
-            
-
-
     }
     remove
     {
-            
     }
   }
   internal event global::System.EventHandler<global::Metalama.Framework.Tests.Integration.Tests.Aspects.Introductions.Events.RunTimeOnlyType.RunTimeClass>? FieldLikeEvent;
