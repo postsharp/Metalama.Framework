@@ -50,6 +50,7 @@ namespace Metalama.Framework.Engine.Linking
                 CancellationToken cancellationToken )
             {
                 var substitutions = new ConcurrentDictionary<InliningContextIdentifier, ConcurrentDictionary<SyntaxNode, SyntaxNodeSubstitution>>();
+                var inliningTargetNodes = this._inliningSpecifications.Select( x => (x.ParentContextIdentifier, x.ReplacedRootNode) ).ToHashSet();
 
                 // Add substitutions to non-inlined semantics (these are always roots of inlining).
                 void ProcessNonInlinedSemantic( IntermediateSymbolSemantic nonInlinedSemantic )
@@ -88,6 +89,12 @@ namespace Metalama.Framework.Engine.Linking
                         // Add substitutions of return statements contained in the inlined body.
                         foreach ( var returnStatementRecord in bodyAnalysisResult.ReturnStatements )
                         {
+                            // If the return statement is target of inlining, we don't create substitution for it.
+                            if ( inliningTargetNodes.Contains( (inliningSpecification.ContextIdentifier, returnStatementRecord.Key) ) )
+                            {
+                                continue;
+                            }
+
                             var returnStatement = returnStatementRecord.Key;
                             var returnStatementProperties = returnStatementRecord.Value;
 

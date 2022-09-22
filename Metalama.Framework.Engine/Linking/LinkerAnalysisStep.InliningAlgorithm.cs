@@ -181,6 +181,8 @@ namespace Metalama.Framework.Engine.Linking
                                         ? context.AllocateReturnLabel()
                                         : null;
 
+                                var returnVariableIdentifier = info.ReturnVariableIdentifier ?? context.ReturnVariableIdentifier;
+
                                 inliningSpecifications.Add(
                                     new InliningSpecification(
                                         destinationSemantic,
@@ -191,11 +193,11 @@ namespace Metalama.Framework.Engine.Linking
                                         info.ReplacedRootNode,
                                         false,
                                         context.DeclaredReturnVariable,
-                                        info.ReturnVariableIdentifier,
+                                        returnVariableIdentifier,
                                         returnLabelIdentifier,
                                         targetSemantic ) );
 
-                                VisitSemanticBody( destinationSemantic, targetSemantic, context.RecurseWithComplexInlining() );
+                                VisitSemanticBody( destinationSemantic, targetSemantic, context.RecurseWithComplexInlining( returnVariableIdentifier ) );
                             }
                         }
                     }
