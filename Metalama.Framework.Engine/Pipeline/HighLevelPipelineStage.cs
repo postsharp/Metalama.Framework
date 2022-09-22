@@ -9,7 +9,6 @@ using Metalama.Framework.Engine.Observers;
 using Metalama.Framework.Project;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 

@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Engine.Utilities.Threading;
 using System;
 using System.Collections.Immutable;
 using System.Linq;
