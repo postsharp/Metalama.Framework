@@ -33,7 +33,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
     {
         private static readonly string _sourceGeneratorAssemblyName = typeof(DesignTimeAspectPipelineFactory).Assembly.GetName().Name.AssertNotNull();
 
+#pragma warning disable CA1805 // Do not initialize unnecessarily
         private readonly WeakCache<Compilation, CompilationResult> _compilationResultCache = new();
+#pragma warning restore CA1805 // Do not initialize unnecessarily
         private readonly IFileSystemWatcher? _fileSystemWatcher;
         private readonly ProjectKey _projectKey;
 
