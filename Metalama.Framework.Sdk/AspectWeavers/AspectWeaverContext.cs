@@ -3,7 +3,9 @@
 using Metalama.Compiler;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.Formatting;
+using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -11,6 +13,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.AspectWeavers
 {
@@ -62,28 +66,47 @@ namespace Metalama.Framework.Engine.AspectWeavers
 
         public IAspectWeaverHelper Helper { get; }
 
+        private CancellationToken GetCancellationToken( in CancellationToken cancellationToken )
+            => cancellationToken == default ? this.CancellationToken : cancellationToken;
+
         /// <summary>
-        /// Rewrites the syntax trees affected by aspects.
+        /// Rewrites all syntax trees in the compilation.
+        /// </summary>
+        /// <param name="rewriter">A <see cref="CSharpSyntaxRewriter"/> called for each <see cref="SyntaxTree"/> in the compilation.</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken"/>.</param>
+        public async Task RewriteSyntaxTrees( CSharpSyntaxRewriter rewriter, CancellationToken cancellationToken = default )
+            => this.Compilation = await this.Compilation.RewriteSyntaxTreesAsync(
+                rewriter,
+                this.ServiceProvider,
+                this.GetCancellationToken( cancellationToken ) );
+
+        /// <summary>
+        /// Rewrites the syntax nodes targeted by aspects.
         /// </summary>
         /// <param name="rewriter">A <see cref="CSharpSyntaxRewriter"/> whose <c>Visit</c> method is invoked for all declarations
         /// that are the target of aspects handled by the current <see cref="IAspectWeaver"/> (see <see cref="AspectInstances"/>).
         /// In case of partial classes or methods, the <c>Visit</c> method is invoked for each partial declaration.
         /// </param>
-        public void RewriteAspectTargets( CSharpSyntaxRewriter rewriter )
+        public async Task RewriteAspectTargetsAsync( CSharpSyntaxRewriter rewriter, CancellationToken cancellationToken = default )
         {
-            // TODO: Parallel version of this method.
-            // TODO: Deterministic ordering.
-            
-            var nodes = this.AspectInstances.Values
+            cancellationToken = this.GetCancellationToken( cancellationToken );
+
+            var taskScheduler = this.ServiceProvider.GetRequiredService<ITaskScheduler>();
+
+            var nodesBySyntaxTree = this.AspectInstances.Values
                 .Select( a => a.TargetDeclaration.GetSymbol( this._compilation.Compilation ) )
                 .Where( s => s != null )
                 .SelectMany( s => s!.DeclaringSyntaxReferences )
                 .GroupBy( r => r.SyntaxTree );
 
-            List<SyntaxTreeTransformation> modifiedSyntaxTrees = new();
+            ConcurrentLinkedList<SyntaxTreeTransformation> modifiedSyntaxTrees = new();
 
-            foreach ( var group in nodes )
+            await taskScheduler.RunInParallelAsync( nodesBySyntaxTree, ProcessSyntaxTree, cancellationToken );
+
+            void ProcessSyntaxTree( IGrouping<SyntaxTree, SyntaxReference> group )
             {
+                cancellationToken.ThrowIfCancellationRequested();
+
                 var oldTree = @group.Key;
                 var outerRewriter = new Rewriter( group.Select( r => r.GetSyntax() ).ToImmutableHashSet(), rewriter );
                 var oldRoot = oldTree.GetRoot();
@@ -95,7 +118,7 @@ namespace Metalama.Framework.Engine.AspectWeavers
                 }
             }
 
-            this.Compilation = this.Compilation.WithSyntaxTreeTransformations( modifiedSyntaxTrees );
+            this.Compilation = this.Compilation.WithSyntaxTreeTransformations( modifiedSyntaxTrees.ToList() );
         }
 
         internal AspectWeaverContext(
@@ -106,7 +129,8 @@ namespace Metalama.Framework.Engine.AspectWeavers
             IAspectWeaverHelper helper,
             IServiceProvider serviceProvider,
             IProject project,
-            SyntaxAnnotation generatedCodeAnnotation )
+            SyntaxAnnotation generatedCodeAnnotation,
+            CancellationToken cancellationToken )
         {
             this.AspectClass = aspectClass;
             this.AspectInstances = aspectInstances;
@@ -114,6 +138,7 @@ namespace Metalama.Framework.Engine.AspectWeavers
             this._addDiagnostic = addDiagnostic;
             this.Project = project;
             this.GeneratedCodeAnnotation = generatedCodeAnnotation;
+            this.CancellationToken = cancellationToken;
             this.Helper = helper;
             this.ServiceProvider = serviceProvider;
         }
@@ -130,6 +155,8 @@ namespace Metalama.Framework.Engine.AspectWeavers
         /// method must be called.
         /// </summary>
         public SyntaxAnnotation GeneratedCodeAnnotation { get; }
+
+        public CancellationToken CancellationToken { get; }
 
         // TODO: add support for suppressions.
     }

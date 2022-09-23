@@ -18,9 +18,7 @@ namespace Metalama.Framework.Tests.PublicPipeline.Aspects.Sdk.Simple
     {
         public Task TransformAsync( AspectWeaverContext context )
         {
-            context.RewriteAspectTargets( new Rewriter() );
-
-            return Task.CompletedTask;
+            return context.RewriteAspectTargetsAsync( new Rewriter() );
         }
 
         private class Rewriter : SafeSyntaxRewriter
