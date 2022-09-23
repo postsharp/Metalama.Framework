@@ -23,6 +23,10 @@
         <Compile Remove="Tests\**\__*.cs" />
         <None Include="Tests\**\__*.cs" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="Tests\Linker\Methods\Overrides\TargetBody\ReturnsVoid_ExpressionBody - Copy.t.cs" />
+    </ItemGroup>
   
     <ItemGroup>
         <PackageReference Include="FakeItEasy" Version="6.2.1" />
@@ -78,6 +82,12 @@
     <!-- Ignore project if the build is obfuscated because this project relies on obfuscated internals -->
     <ItemGroup Condition="'$(Obfuscate)'=='True'">
         <Compile Remove="**\*" />
+    </ItemGroup>
+    <ItemGroup>
+      <None Include="Tests\Linker\Methods\Overrides\TargetBody\UsingStatement_Jump.t.cs">
+        <SubType>Code</SubType>
+        <DependentUpon>UsingStatement_Jump.cs</DependentUpon>
+      </None>
     </ItemGroup>
 
 </Project>

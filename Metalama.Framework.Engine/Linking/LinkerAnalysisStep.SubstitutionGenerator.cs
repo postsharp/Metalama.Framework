@@ -108,6 +108,14 @@ namespace Metalama.Framework.Engine.Linking
                                     inliningSpecification.ReturnVariableIdentifier,
                                     inliningSpecification.ReturnLabelIdentifier ) );
                         }
+
+                        if ( inliningSpecification.ReturnLabelIdentifier != null &&
+                            this._bodyAnalysisResults.TryGetValue( inliningSpecification.TargetSemantic, out var bodyAnalysisResults ) && bodyAnalysisResults.RootBlockWithUsingLocal != null )
+                        {
+                            AddSubstitution(
+                                inliningSpecification.ContextIdentifier,
+                                new RootWithUsingLocalSubstitution( bodyAnalysisResults.RootBlockWithUsingLocal ) );
+                        }
                     }
 
                     // Add substitution that transforms original non-block body into a statement.
