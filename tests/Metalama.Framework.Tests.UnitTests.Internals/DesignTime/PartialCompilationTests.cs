@@ -204,6 +204,37 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTime
             await ApplySeveralModifications( PartialCompilation.CreateComplete( compilation ) );
         }
 
+        [Fact]
+        public void SyntaxTreeForCompilationLevelAttributes_WithAssemblyInfo()
+        {
+            var code = new Dictionary<string, string>()
+            {
+                ["AssemblyInfo.cs"] = "[assembly: System.Reflection.AssemblyCompanyAttribute(\"Foo\")]", ["AAA.cs"] = ""
+            };
+
+            var compilation = PartialCompilation.CreateComplete( CreateCSharpCompilation( code ) );
+
+            Assert.Equal( "AssemblyInfo.cs", compilation.SyntaxTreeForCompilationLevelAttributes.FilePath );
+        }
+
+        [Fact]
+        public void SyntaxTreeForCompilationLevelAttributes_WithoutAssemblyInfo()
+        {
+            var code = new Dictionary<string, string>() { ["AAA.cs"] = "", ["AA.cs"] = "" };
+            var compilation = PartialCompilation.CreateComplete( CreateCSharpCompilation( code ) );
+
+            Assert.Equal( "AA.cs", compilation.SyntaxTreeForCompilationLevelAttributes.FilePath );
+        }
+        
+        [Fact]
+        public void SyntaxTreeForCompilationLevelAttributes_WithoutAssemblyInfo_SameLength()
+        {
+            var code = new Dictionary<string, string>() { ["BB.cs"] = "", ["AA.cs"] = "" };
+            var compilation = PartialCompilation.CreateComplete( CreateCSharpCompilation( code ) );
+
+            Assert.Equal( "AA.cs", compilation.SyntaxTreeForCompilationLevelAttributes.FilePath );
+        }
+
         private class Rewriter : SafeSyntaxRewriter
         {
             // Apply some arbitrary transformation.
