@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Testing;
+using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.TestFramework.Utilities;
 using Metalama.TestFramework.XunitFramework;
 using System;
@@ -31,10 +32,12 @@ public abstract class TestSuite
         TestDirectoryOptionsReader OptionsReader,
         TestProjectReferences ProjectReferences );
 
-    private static readonly ConditionalWeakTable<Assembly, AssemblyAssets> _cache = new();
+#pragma warning disable CA1805 // Do not initialize unnecessarily
+    private static readonly WeakCache<Assembly, AssemblyAssets> _cache = new();
+#pragma warning restore CA1805 // Do not initialize unnecessarily
 
     private static AssemblyAssets GetAssemblyAssets( Assembly assembly )
-        => _cache.GetValue(
+        => _cache.GetOrAdd(
             assembly,
             a =>
             {

@@ -510,12 +510,6 @@ namespace Metalama.Framework.Engine.CompileTime
                 return scope;
             }
 
-            if ( symbol is ITypeParameterSymbol )
-            {
-                // We can't decide. It creates loops.
-                return null;
-            }
-
             // From cache.
             if ( this._cacheScopeFromAttributes.TryGetValue( symbol, out var scopeFromCache ) )
             {

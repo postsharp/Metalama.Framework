@@ -6,7 +6,6 @@ using Metalama.Framework.Engine.Utilities.Caching;
 using Microsoft.CodeAnalysis.Diagnostics;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 
 namespace Metalama.Framework.Engine.Options
 {
@@ -19,7 +18,9 @@ namespace Metalama.Framework.Engine.Options
     // ReSharper disable once InconsistentNaming
     public partial class MSBuildProjectOptions : DefaultProjectOptions
     {
-        private static readonly ConditionalWeakTable<AnalyzerConfigOptions, MSBuildProjectOptions> _cache = new();
+#pragma warning disable CA1805 // Do not initialize unnecessarily
+        private static readonly WeakCache<AnalyzerConfigOptions, MSBuildProjectOptions> _cache = new();
+#pragma warning restore CA1805 // Do not initialize unnecessarily
 
         private readonly IProjectOptionsSource _source;
         private readonly TransformerOptions _transformerOptions;

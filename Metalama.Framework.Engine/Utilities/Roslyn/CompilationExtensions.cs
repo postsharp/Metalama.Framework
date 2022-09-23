@@ -9,7 +9,9 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
 public static class CompilationExtensions
 {
-    private static readonly ConditionalWeakTable<Compilation, ImmutableDictionary<string, SyntaxTree>> _indexedSyntaxTreesCache = new();
+#pragma warning disable CA1805 // Do not initialize unnecessarily
+    private static readonly WeakCache<Compilation, ImmutableDictionary<string, SyntaxTree>> _indexedSyntaxTreesCache = new();
+#pragma warning restore CA1805 // Do not initialize unnecessarily
 
     public static ImmutableDictionary<string, SyntaxTree> GetIndexedSyntaxTrees( this Compilation compilation )
         => _indexedSyntaxTreesCache.GetOrAdd( compilation, GetIndexedSyntaxTreesCore );

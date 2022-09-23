@@ -20,9 +20,11 @@ namespace Metalama.Framework.DesignTime;
 /// </summary>
 public sealed class ProjectKey : IEquatable<ProjectKey>
 {
-    private static readonly ConditionalWeakTable<Compilation, ProjectKey> _cache = new();
+#pragma warning disable CA1805 // Do not initialize unnecessarily
+    private static readonly WeakCache<Compilation, ProjectKey> _cache = new();
 
-    private static readonly ConditionalWeakTable<ParseOptions, StrongBox<ulong>> _preprocessorSymbolHashCodeCache = new();
+    private static readonly WeakCache<ParseOptions, StrongBox<ulong>> _preprocessorSymbolHashCodeCache = new();
+#pragma warning restore CA1805 // Do not initialize unnecessarily
 
     // We compare equality of two projects that have the same assembly name by hashing their preprocessor 
     // symbols. There are typically very few compilations of the same assembly name in a solution (one for each different platform)

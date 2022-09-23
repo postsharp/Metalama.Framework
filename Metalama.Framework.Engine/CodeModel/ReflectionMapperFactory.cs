@@ -1,8 +1,8 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
-using System.Runtime.CompilerServices;
 
 namespace Metalama.Framework.Engine.CodeModel
 {
@@ -10,27 +10,13 @@ namespace Metalama.Framework.Engine.CodeModel
     {
         // We need a ConditionalWeakTable because of DesignTimeAspectPipeline, which stores the ReflectionMapperFactory service for a long time.
 
-        private readonly ConditionalWeakTable<Compilation, ReflectionMapper> _instances = new();
+#pragma warning disable CA1805 // Do not initialize unnecessarily
+        private readonly WeakCache<Compilation, ReflectionMapper> _instances = new();
+#pragma warning restore CA1805 // Do not initialize unnecessarily
 
         /// <summary>
         /// Gets a <see cref="ReflectionMapper"/> instance for a given <see cref="Compilation"/>.
         /// </summary>
-        public ReflectionMapper GetInstance( Compilation compilation )
-        {
-            // ReSharper disable once InconsistentlySynchronizedField
-            if ( !this._instances.TryGetValue( compilation, out var value ) )
-            {
-                lock ( this._instances )
-                {
-                    if ( !this._instances.TryGetValue( compilation, out value ) )
-                    {
-                        value = new ReflectionMapper( compilation );
-                        this._instances.Add( compilation, value );
-                    }
-                }
-            }
-
-            return value;
-        }
+        public ReflectionMapper GetInstance( Compilation compilation ) => this._instances.GetOrAdd( compilation, c => new ReflectionMapper( c ) );
     }
 }

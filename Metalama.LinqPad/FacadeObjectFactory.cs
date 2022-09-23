@@ -1,10 +1,10 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Utilities.Caching;
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
-using System.Runtime.CompilerServices;
 
 namespace Metalama.LinqPad
 {
@@ -13,7 +13,9 @@ namespace Metalama.LinqPad
     /// </summary>
     internal class FacadeObjectFactory
     {
-        private static readonly ConditionalWeakTable<object, FacadeObject> _objectFacades = new();
+#pragma warning disable CA1805 // Do not initialize unnecessarily
+        private static readonly WeakCache<object, FacadeObject> _objectFacades = new();
+#pragma warning restore CA1805 // Do not initialize unnecessarily
         private static readonly ConcurrentDictionary<Type, FacadeType> _types = new();
 
         public Func<IDeclaration, GetCompilationInfo> GetGetCompilationInfo { get; }
@@ -35,13 +37,7 @@ namespace Metalama.LinqPad
             }
             else
             {
-                if ( !_objectFacades.TryGetValue( instance!, out var proxy ) )
-                {
-                    proxy = new FacadeObject( this.GetFormatterType( instance!.GetType() ), instance );
-                    _objectFacades.AddOrUpdate( instance, proxy );
-                }
-
-                return proxy;
+                return _objectFacades.GetOrAdd( instance!, i => new FacadeObject( this.GetFormatterType( i.GetType() ), i ) );
             }
         }
 

@@ -4,6 +4,7 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating.Mapping;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -15,6 +16,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.Versioning;
 using System.Text;
 using System.Threading;
@@ -84,25 +86,30 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
         }
 
         // The type is not a system one. Check if it is a compile-time one.
-        if ( !this.Cache.TryGetValue( typeSymbol, out var type ) )
+        if ( this.Cache.TryGetValue( typeSymbol, out var type ) )
         {
-            var assemblySymbol = typeSymbol.ContainingAssembly;
+            return type.Value;
+        }
+        else
+        {
+            return this.Cache.GetOrAdd( typeSymbol, _ => new StrongBox<Type?>( this.GetCompileTimeNamedTypeCore( typeSymbol, cancellationToken ) ) ).Value;
+        }
+    }
 
-            var compileTimeProject = this.GetCompileTimeProject( assemblySymbol.Identity, cancellationToken );
+    private Type? GetCompileTimeNamedTypeCore( ITypeSymbol typeSymbol, CancellationToken cancellationToken )
+    {
+        var assemblySymbol = typeSymbol.ContainingAssembly;
 
-            var reflectionName = typeSymbol.GetReflectionName();
+        var compileTimeProject = this.GetCompileTimeProject( assemblySymbol.Identity, cancellationToken );
 
-            if ( reflectionName == null )
-            {
-                return null;
-            }
+        var reflectionName = typeSymbol.GetReflectionName();
 
-            type = compileTimeProject?.GetTypeOrNull( reflectionName );
-
-            this.Cache.Add( typeSymbol, type );
+        if ( reflectionName == null )
+        {
+            return null;
         }
 
-        return type;
+        return compileTimeProject?.GetTypeOrNull( reflectionName );
     }
 
     /// <summary>
