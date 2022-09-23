@@ -276,7 +276,7 @@ namespace Metalama.Framework.Engine.CompileTime
                     return TemplatingScope.Dynamic;
 
                 case ITypeParameterSymbol typeParameterSymbol:
-                    var scopeFromAttribute = this.GetScopeFromAttributes( typeParameterSymbol );
+                    var scopeFromAttribute = this.GetScopeFromAttributes( typeParameterSymbol, ImmutableArray<ISymbol>.Empty, recursion + 1 );
 
                     if ( scopeFromAttribute != null )
                     {
@@ -410,7 +410,7 @@ namespace Metalama.Framework.Engine.CompileTime
             }
 
             // From attributes.
-            var scopeFromAttributes = this.GetScopeFromAttributes( symbol ) ?? TemplatingScope.RunTimeOnly;
+            var scopeFromAttributes = this.GetScopeFromAttributes( symbol, ImmutableArray<ISymbol>.Empty, recursion + 1 ) ?? TemplatingScope.RunTimeOnly;
 
             if ( scopeFromAttributes != TemplatingScope.RunTimeOrCompileTime )
             {
@@ -483,8 +483,26 @@ namespace Metalama.Framework.Engine.CompileTime
             }
         }
 
-        private TemplatingScope? GetScopeFromAttributes( ISymbol symbol )
+        private TemplatingScope? GetScopeFromAttributes( ISymbol symbol, ImmutableArray<ISymbol> symbolsBeingProcessed, int recursion )
         {
+            if ( recursion > 32 )
+            {
+                throw new AssertionFailedException();
+            }
+
+            // Check if we have a cyclic reference. This happens for instance in `class C : IEquatable<C>`. When evaluating IEquatable<C>,
+            // C is non determined.
+            if ( !symbolsBeingProcessed.IsDefaultOrEmpty )
+            {
+                foreach ( var symbolBeingProcessed in symbolsBeingProcessed )
+                {
+                    if ( symbol.Equals( symbolBeingProcessed ) )
+                    {
+                        return null;
+                    }
+                }
+            }
+
             TemplatingScope? AddToCache( TemplatingScope? scope )
             {
                 this._cacheScopeFromAttributes[symbol] = scope;
@@ -492,14 +510,17 @@ namespace Metalama.Framework.Engine.CompileTime
                 return scope;
             }
 
+            if ( symbol is ITypeParameterSymbol )
+            {
+                // We can't decide. It creates loops.
+                return null;
+            }
+
             // From cache.
             if ( this._cacheScopeFromAttributes.TryGetValue( symbol, out var scopeFromCache ) )
             {
                 return scopeFromCache;
             }
-
-            // Add the symbol being processed to the cache temporarily to avoid an infinite recursion.
-            _ = AddToCache( null );
 
             // From attributes.
             var compileTimeReturnsRunTimeOnly = symbol is ITypeParameterSymbol;
@@ -514,10 +535,12 @@ namespace Metalama.Framework.Engine.CompileTime
                 return AddToCache( scopeFromAttributes.Value );
             }
 
+            var symbolsBeingProcessPlusCurrent = symbolsBeingProcessed.Add( symbol );
+
             // From overridden method.
             if ( symbol is IMethodSymbol { OverriddenMethod: { } overriddenMethod } )
             {
-                var scopeFromOverriddenMethod = this.GetScopeFromAttributes( overriddenMethod );
+                var scopeFromOverriddenMethod = this.GetScopeFromAttributes( overriddenMethod, symbolsBeingProcessPlusCurrent, recursion + 1 );
 
                 if ( scopeFromOverriddenMethod != null )
                 {
@@ -528,7 +551,7 @@ namespace Metalama.Framework.Engine.CompileTime
             // From declaring type.
             if ( symbol.ContainingType != null )
             {
-                var scopeFromContainingType = this.GetScopeFromAttributes( symbol.ContainingType );
+                var scopeFromContainingType = this.GetScopeFromAttributes( symbol.ContainingType, symbolsBeingProcessPlusCurrent, recursion + 1 );
 
                 if ( scopeFromContainingType != null )
                 {
@@ -559,7 +582,7 @@ namespace Metalama.Framework.Engine.CompileTime
                         // From base type.
                         if ( namedType.BaseType != null )
                         {
-                            var scopeFromBaseType = this.GetScopeFromAttributes( namedType.BaseType );
+                            var scopeFromBaseType = this.GetScopeFromAttributes( namedType.BaseType, symbolsBeingProcessPlusCurrent, recursion + 1 );
 
                             if ( scopeFromBaseType != null )
                             {
@@ -567,10 +590,10 @@ namespace Metalama.Framework.Engine.CompileTime
                             }
                         }
 
-                        // From interfaces.
+                        // From implemented interfaces.
                         foreach ( var @interface in namedType.AllInterfaces )
                         {
-                            var scopeFromInterface = this.GetScopeFromAttributes( @interface );
+                            var scopeFromInterface = this.GetScopeFromAttributes( @interface, symbolsBeingProcessPlusCurrent, recursion + 1 );
 
                             if ( scopeFromInterface != null )
                             {
@@ -579,13 +602,16 @@ namespace Metalama.Framework.Engine.CompileTime
                         }
 
                         // From generic arguments.
-                        foreach ( var genericArgument in namedType.TypeArguments )
+                        if ( !namedType.IsGenericTypeDefinition() )
                         {
-                            var scopeFromGenericArgument = this.GetScopeFromAttributes( genericArgument );
-
-                            if ( scopeFromGenericArgument != null )
+                            foreach ( var genericArgument in namedType.TypeArguments )
                             {
-                                return AddToCache( scopeFromGenericArgument );
+                                var scopeFromGenericArgument = this.GetScopeFromAttributes( genericArgument, symbolsBeingProcessPlusCurrent, recursion + 1 );
+
+                                if ( scopeFromGenericArgument != null )
+                                {
+                                    return AddToCache( scopeFromGenericArgument );
+                                }
                             }
                         }
 
