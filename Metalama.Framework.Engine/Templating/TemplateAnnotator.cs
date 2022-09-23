@@ -1357,7 +1357,7 @@ namespace Metalama.Framework.Engine.Templating
                 {
                     // We don't want to visit the whole member because only the implementation must be annotated and transformed
                     // as a template.
-                    return visitImplementation( node )!.AddIsTemplateAnnotation();
+                    return visitImplementation( node ).AddIsTemplateAnnotation();
                 }
                 finally
                 {

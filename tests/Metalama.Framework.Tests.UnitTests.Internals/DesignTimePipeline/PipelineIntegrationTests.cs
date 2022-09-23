@@ -77,26 +77,25 @@ namespace Metalama.Framework.Tests.UnitTests.DesignTimePipeline
             stringBuilder.AppendLine( syntaxTreeResult.SyntaxTree.FilePath + ":" );
 
             // Diagnostics
-            StringExtensions.AppendLineInvariant( stringBuilder, $"{syntaxTreeResult.Diagnostics.Length} diagnostic(s):" );
+            stringBuilder.AppendLineInvariant( $"{syntaxTreeResult.Diagnostics.Length} diagnostic(s):" );
 
             foreach ( var diagnostic in syntaxTreeResult.Diagnostics )
             {
-                StringExtensions.AppendLineInvariant(
-                    stringBuilder,
+                stringBuilder.AppendLineInvariant(
                     $"   {diagnostic.Severity} {diagnostic.Id} on `{GetTextUnderDiagnostic( diagnostic )}`: `{diagnostic.GetMessage()}`" );
             }
 
             // Suppressions
-            StringExtensions.AppendLineInvariant( stringBuilder, $"{syntaxTreeResult.Suppressions.Length} suppression(s):" );
+            stringBuilder.AppendLineInvariant( $"{syntaxTreeResult.Suppressions.Length} suppression(s):" );
 
             foreach ( var suppression in syntaxTreeResult.Suppressions )
             {
-                StringExtensions.AppendLineInvariant( stringBuilder, $"   {suppression.Definition.SuppressedDiagnosticId} on {suppression.SymbolId}" );
+                stringBuilder.AppendLineInvariant( $"   {suppression.Definition.SuppressedDiagnosticId} on {suppression.SymbolId}" );
             }
 
             // Introductions
 
-            StringExtensions.AppendLineInvariant( stringBuilder, $"{syntaxTreeResult.Introductions.Length} introductions(s):" );
+            stringBuilder.AppendLineInvariant( $"{syntaxTreeResult.Introductions.Length} introductions(s):" );
 
             foreach ( var introduction in syntaxTreeResult.Introductions )
             {
