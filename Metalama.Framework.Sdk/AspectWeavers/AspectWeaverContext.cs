@@ -71,6 +71,9 @@ namespace Metalama.Framework.Engine.AspectWeavers
         /// </param>
         public void RewriteAspectTargets( CSharpSyntaxRewriter rewriter )
         {
+            // TODO: Parallel version of this method.
+            // TODO: Deterministic ordering.
+            
             var nodes = this.AspectInstances.Values
                 .Select( a => a.TargetDeclaration.GetSymbol( this._compilation.Compilation ) )
                 .Where( s => s != null )
