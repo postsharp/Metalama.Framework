@@ -31,6 +31,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public abstract IDeclaration? ContainingDeclaration { get; }
 
+        public override IDeclaration TargetDeclaration => this.ContainingDeclaration.AssertNotNull();
+
         IAttributeCollection IDeclaration.Attributes => this.Attributes;
 
         public AttributeBuilderCollection Attributes { get; } = new();
@@ -91,6 +93,8 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         public abstract bool CanBeInherited { get; }
 
+        public SyntaxTree? PrimarySyntaxTree => this.TransformedSyntaxTree;
+
         public IEnumerable<IDeclaration> GetDerivedDeclarations( bool deep = true ) => throw new NotImplementedException();
 
         public override string ToString() => this.ToDisplayString( CodeDisplayFormat.MinimallyQualified );
@@ -101,8 +105,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
         // TODO: should we locate diagnostic on the aspect attribute?
         public Location? DiagnosticLocation => null;
-
-        public abstract SyntaxTree? PrimarySyntaxTree { get; }
 
         public TExtension GetMetric<TExtension>()
             where TExtension : IMetric

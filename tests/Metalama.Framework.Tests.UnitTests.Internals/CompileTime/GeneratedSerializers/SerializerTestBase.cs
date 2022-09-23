@@ -23,7 +23,7 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
                 name: "test_A" );
 
             var compileTimeCompilationBuilder = new CompileTimeCompilationBuilder( testContext.ServiceProvider, domain );
-            DiagnosticList diagnosticList = new();
+            DiagnosticBag diagnosticBag = new();
 
             Assert.True(
                 compileTimeCompilationBuilder.TryGetCompileTimeProject(
@@ -31,11 +31,11 @@ namespace Metalama.Framework.Tests.UnitTests.CompileTime.GeneratedSerializers
                     ProjectLicenseInfo.Empty,
                     null,
                     Array.Empty<CompileTimeProject>(),
-                    diagnosticList,
+                    diagnosticBag,
                     false,
                     CancellationToken.None,
                     out var project ),
-                string.Join( "\n", diagnosticList.Select( x => x.ToString() ) ) );
+                string.Join( "\n", diagnosticBag.Select( x => x.ToString() ) ) );
 
             return project!;
         }

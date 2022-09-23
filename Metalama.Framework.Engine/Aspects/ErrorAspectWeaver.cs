@@ -2,6 +2,7 @@
 
 using Metalama.Framework.Engine.AspectWeavers;
 using Metalama.Framework.Engine.Diagnostics;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Aspects;
 
@@ -17,9 +18,11 @@ internal class ErrorAspectWeaver : IAspectWeaver
         this._aspectClass = aspectClass;
     }
 
-    public void Transform( AspectWeaverContext context )
+    public Task TransformAsync( AspectWeaverContext context )
     {
         context.ReportDiagnostic(
             GeneralDiagnosticDescriptors.CannotFindAspectWeaver.CreateRoslynDiagnostic( null, (this._aspectClass.WeaverType!, this._aspectClass.ShortName) ) );
+
+        return Task.CompletedTask;
     }
 }

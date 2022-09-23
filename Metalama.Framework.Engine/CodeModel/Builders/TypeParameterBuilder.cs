@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using SpecialType = Metalama.Framework.Code.SpecialType;
@@ -54,8 +53,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public override DeclarationKind DeclarationKind => DeclarationKind.TypeParameter;
 
         public override bool CanBeInherited => ((IDeclarationImpl) this.ContainingDeclaration).CanBeInherited;
-
-        public override SyntaxTree PrimarySyntaxTree => ((MethodBuilder) this.ContainingDeclaration).PrimarySyntaxTree.AssertNotNull();
 
         public TypeParameterBuilder( MethodBuilder containingMethod, int index, string name ) : base( containingMethod.ParentAdvice )
         {

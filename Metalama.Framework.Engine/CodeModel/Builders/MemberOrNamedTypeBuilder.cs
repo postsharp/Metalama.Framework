@@ -4,8 +4,6 @@ using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.Transformations;
-using Metalama.Framework.Engine.Utilities.Roslyn;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -104,11 +102,5 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
         public abstract IEnumerable<IntroducedMember> GetIntroducedMembers( MemberIntroductionContext context );
 
         public InsertPosition InsertPosition => this.ToInsertPosition();
-
-        // TODO: This is temporary.
-
-        SyntaxTree IIntroduceMemberTransformation.TransformedSyntaxTree => this.PrimarySyntaxTree.AssertNotNull();
-
-        public override SyntaxTree? PrimarySyntaxTree => ((NamedType) this.DeclaringType).Symbol.GetPrimarySyntaxReference().AssertNotNull().SyntaxTree;
     }
 }

@@ -6,6 +6,7 @@ using Metalama.Framework.Engine.Diagnostics;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Pipeline.DesignTime;
 
@@ -13,9 +14,9 @@ public class TestDesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
 {
     public TestDesignTimeAspectPipeline( ServiceProvider serviceProvider, CompileTimeDomain? domain ) : base( serviceProvider, true, domain ) { }
 
-    public TestDesignTimeAspectPipelineResult Execute( Compilation inputCompilation )
+    public async Task<TestDesignTimeAspectPipelineResult> ExecuteAsync( Compilation inputCompilation )
     {
-        var diagnosticList = new DiagnosticList();
+        var diagnosticList = new DiagnosticBag();
 
         var partialCompilation = PartialCompilation.CreateComplete( inputCompilation );
 
@@ -24,15 +25,17 @@ public class TestDesignTimeAspectPipeline : BaseDesignTimeAspectPipeline
             return new TestDesignTimeAspectPipelineResult( false, diagnosticList.ToImmutableArray(), ImmutableArray<IntroducedSyntaxTree>.Empty );
         }
 
-        if ( !this.TryExecute( partialCompilation, diagnosticList, configuration, CancellationToken.None, out var stageResult ) )
+        var stageResult = await this.ExecuteAsync( partialCompilation, diagnosticList, configuration, CancellationToken.None );
+
+        if ( !stageResult.IsSuccess )
         {
             return new TestDesignTimeAspectPipelineResult( false, diagnosticList.ToImmutableArray(), ImmutableArray<IntroducedSyntaxTree>.Empty );
         }
 
         return new TestDesignTimeAspectPipelineResult(
             true,
-            stageResult.Diagnostics.ReportedDiagnostics,
-            stageResult.AdditionalSyntaxTrees );
+            stageResult.Value.Diagnostics.ReportedDiagnostics,
+            stageResult.Value.AdditionalSyntaxTrees );
     }
 }
 

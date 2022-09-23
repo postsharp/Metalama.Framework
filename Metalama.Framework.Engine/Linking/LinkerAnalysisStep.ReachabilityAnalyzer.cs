@@ -11,11 +11,13 @@ namespace Metalama.Framework.Engine.Linking
         private class ReachabilityAnalyzer
         {
             private readonly LinkerIntroductionRegistry _introductionRegistry;
-            private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> _aspectReferencesBySemantic;
+
+            private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>>
+                _aspectReferencesBySemantic;
 
             public ReachabilityAnalyzer(
                 LinkerIntroductionRegistry introductionRegistry,
-                IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> aspectReferencesBySemantic )
+                IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyCollection<ResolvedAspectReference>> aspectReferencesBySemantic )
             {
                 this._introductionRegistry = introductionRegistry;
                 this._aspectReferencesBySemantic = aspectReferencesBySemantic;

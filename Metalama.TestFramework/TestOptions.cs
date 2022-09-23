@@ -238,6 +238,19 @@ namespace Metalama.TestFramework
         public string? DependencyLicenseFile { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether an error should be reported if the compilation uses aspects that
+        /// are not explicitly ordered.
+        /// To enable this option in a test, add this comment to your test file: <c>// @RequireOrderedAspects</c>. 
+        /// </summary>
+        public bool? RequireOrderedAspects { get; set; }
+
+        /// <summary>
+        /// Gets or sets a value indicating whether Metalama should produce logs and output them to the Xunit test log.
+        /// To enable this option in a test, add this comment to your test file: <c>// @EnableLogging</c>. 
+        /// </summary>
+        public bool? EnableLogging { get; set; }
+
+        /// <summary>
         /// Gets or sets the fully qualified name of expected exception type to be thrown.
         /// To set this option in a test, add this comment to your test file: <c>// @ExpectedException(fully qualified exception type name)</c>.
         /// </summary>
@@ -303,6 +316,10 @@ namespace Metalama.TestFramework
             this.LicenseFile ??= baseOptions.LicenseFile;
 
             this.DependencyLicenseFile ??= baseOptions.DependencyLicenseFile;
+
+            this.RequireOrderedAspects ??= baseOptions.RequireOrderedAspects;
+
+            this.EnableLogging ??= baseOptions.EnableLogging;
 
             this.ExpectedException ??= baseOptions.ExpectedException;
         }
@@ -506,6 +523,16 @@ namespace Metalama.TestFramework
                     case "ExpectedException":
 
                         this.ExpectedException = optionArg;
+
+                        break;
+
+                    case "RequireOrderedAspects":
+                        this.RequireOrderedAspects = true;
+
+                        break;
+
+                    case "EnableLogging":
+                        this.EnableLogging = true;
 
                         break;
 

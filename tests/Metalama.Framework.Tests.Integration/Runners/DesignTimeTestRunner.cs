@@ -32,7 +32,7 @@ namespace Metalama.Framework.Tests.Integration.Runners
 
             using var pipeline = new TestDesignTimeAspectPipeline( testResult.ProjectScopedServiceProvider, domain );
 
-            var pipelineResult = pipeline.Execute( testResult.InputCompilation! );
+            var pipelineResult = await pipeline.ExecuteAsync( testResult.InputCompilation! );
 
             testResult.PipelineDiagnostics.Report( pipelineResult.Diagnostics );
 

@@ -2,6 +2,7 @@
 
 using Metalama.Framework.DesignTime.CodeFixes;
 using Metalama.Framework.Engine.CodeFixes;
+using Metalama.Framework.Engine.Collections;
 using Microsoft.CodeAnalysis.Text;
 using Microsoft.VisualStudio.Threading;
 using StreamJsonRpc;
@@ -63,7 +64,7 @@ internal partial class UserProcessServiceHubEndpoint : ServerEndpoint, ICodeRefa
         if ( !this._registeredEndpointsByProject.TryGetValue( projectKey, out var endpoint ) )
         {
             this.Logger.Warning?.Log( $"The project '{projectKey}' is not registered. Waiting." );
-            var waiter = this._waiters.GetOrAdd( projectKey, _ => new TaskCompletionSource<UserProcessEndpoint>() );
+            var waiter = this._waiters.GetOrAddNew( projectKey );
             endpoint = await waiter.Task.WithCancellation( cancellationToken );
             this.Logger.Trace?.Log( $"The project '{projectKey}' is now available registered. Resuming." );
         }

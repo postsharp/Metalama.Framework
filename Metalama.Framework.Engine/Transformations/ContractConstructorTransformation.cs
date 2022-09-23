@@ -16,7 +16,7 @@ internal class ContractConstructorTransformation : BaseTransformation, IInsertSt
         this.TargetMember = constructor;
     }
 
-    public IMember TargetMember { get; set; }
+    public IMember TargetMember { get; }
 
     public IMemberOrNamedType ContextDeclaration => this.TargetMember;
 
@@ -37,4 +37,6 @@ internal class ContractConstructorTransformation : BaseTransformation, IInsertSt
             return inputFilterBodies.Select( x => new InsertedStatement( x, this.TargetMember ) );
         }
     }
+
+    public override IDeclaration TargetDeclaration => this.TargetMember;
 }

@@ -16,6 +16,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Pipeline.CompileTime
 {
@@ -36,7 +37,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
         }
 
         /// <inheritdoc/>
-        protected override AspectPipelineResult GetStageResult(
+        protected override async Task<AspectPipelineResult> GetStageResultAsync(
             AspectPipelineConfiguration pipelineConfiguration,
             AspectPipelineResult input,
             IPipelineStepsResult pipelineStepsResult,
@@ -60,7 +61,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                         .Concat( validationResult.Diagnostics.DiagnosticSuppressions ),
                     this._compileTimeProject ) );
 
-            var linkerResult = linker.ToResult();
+            var linkerResult = await linker.ExecuteAsync( cancellationToken );
 
             // Generate additional output files.
             var projectOptions = this.ServiceProvider.GetService<IProjectOptions>();
@@ -68,30 +69,32 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
 
             if ( projectOptions is { IsDesignTimeEnabled: false } )
             {
-                additionalCompilationOutputFiles = this.GenerateAdditionalCompilationOutputFiles(
+                additionalCompilationOutputFiles = await this.GenerateAdditionalCompilationOutputFilesAsync(
                     input,
                     pipelineStepsResult,
                     cancellationToken );
             }
 
             // Return the result.
-            return new AspectPipelineResult(
-                linkerResult.Compilation,
-                input.Project,
-                input.AspectLayers,
-                input.CompilationModels.AddRange( pipelineStepsResult.Compilations ),
-                pipelineStepsResult.Diagnostics.Concat( linkerResult.Diagnostics ).Concat( validationResult.Diagnostics ),
-                pipelineStepsResult.ExternalAspectSources,
-                input.ValidatorSources.AddRange( pipelineStepsResult.ValidatorSources ),
-                input.ExternallyInheritableAspects.AddRange( pipelineStepsResult.InheritableAspectInstances.Select( i => new InheritableAspectInstance( i ) ) ),
-                validationResult.ExternallyVisibleValidations,
-                additionalCompilationOutputFiles: additionalCompilationOutputFiles != null
-                    ? input.AdditionalCompilationOutputFiles.AddRange( additionalCompilationOutputFiles )
-                    : input.AdditionalCompilationOutputFiles,
-                aspectInstanceResults: input.AspectInstanceResults.AddRange( pipelineStepsResult.AspectInstanceResults ) );
+            return
+                new AspectPipelineResult(
+                    linkerResult.Compilation,
+                    input.Project,
+                    input.AspectLayers,
+                    input.CompilationModels.AddRange( pipelineStepsResult.Compilations ),
+                    pipelineStepsResult.Diagnostics.Concat( linkerResult.Diagnostics ).Concat( validationResult.Diagnostics ),
+                    pipelineStepsResult.ExternalAspectSources,
+                    input.ValidatorSources.AddRange( pipelineStepsResult.ValidatorSources ),
+                    input.ExternallyInheritableAspects.AddRange(
+                        pipelineStepsResult.InheritableAspectInstances.Select( i => new InheritableAspectInstance( i ) ) ),
+                    validationResult.ExternallyVisibleValidations,
+                    additionalCompilationOutputFiles: additionalCompilationOutputFiles != null
+                        ? input.AdditionalCompilationOutputFiles.AddRange( additionalCompilationOutputFiles )
+                        : input.AdditionalCompilationOutputFiles,
+                    aspectInstanceResults: input.AspectInstanceResults.AddRange( pipelineStepsResult.AspectInstanceResults ) );
         }
 
-        private IReadOnlyList<AdditionalCompilationOutputFile> GenerateAdditionalCompilationOutputFiles(
+        private async Task<IReadOnlyList<AdditionalCompilationOutputFile>> GenerateAdditionalCompilationOutputFilesAsync(
             AspectPipelineResult input,
             IPipelineStepsResult pipelineStepResult,
             CancellationToken cancellationToken )
@@ -101,14 +104,13 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             // TODO: We don't need these diagnostics, but we cannot pass NullDiagnosticAdder here.
             var diagnostics = new UserDiagnosticSink();
 
-            DesignTimeSyntaxTreeGenerator.GenerateDesignTimeSyntaxTrees(
+            var additionalSyntaxTrees = await DesignTimeSyntaxTreeGenerator.GenerateDesignTimeSyntaxTreesAsync(
                 input.Compilation,
                 pipelineStepResult.LastCompilation,
                 pipelineStepResult.Transformations,
                 this.ServiceProvider,
                 diagnostics,
-                cancellationToken,
-                out var additionalSyntaxTrees );
+                cancellationToken );
 
             // Ignore diagnostics, because these will be coming from the analyzer.
             var uniquePaths = new HashSet<string>();

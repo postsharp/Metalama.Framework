@@ -12,6 +12,7 @@ using Metalama.Framework.Engine.Utilities.Roslyn;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
@@ -29,7 +30,7 @@ namespace Metalama.Framework.Engine.Aspects
     {
         public IServiceProvider ServiceProvider { get; }
 
-        private readonly Dictionary<string, TemplateDriver> _templateDrivers = new( StringComparer.Ordinal );
+        private readonly ConcurrentDictionary<string, TemplateDriver> _templateDrivers = new( StringComparer.Ordinal );
 
         protected TemplateClass(
             IServiceProvider serviceProvider,
@@ -78,9 +79,16 @@ namespace Metalama.Framework.Engine.Aspects
             }
 
             templateDriver = new TemplateDriver( this.ServiceProvider, compiledTemplateMethodInfo );
-            this._templateDrivers.Add( id, templateDriver );
 
-            return templateDriver;
+            if ( this._templateDrivers.TryAdd( id, templateDriver ) )
+            {
+                return templateDriver;
+            }
+            else
+            {
+                // Another thread instantiated the same driver in the meantime.
+                return this._templateDrivers[id];
+            }
         }
 
         internal abstract CompileTimeProject? Project { get; }
@@ -254,19 +262,22 @@ namespace Metalama.Framework.Engine.Aspects
             return members.ToImmutable();
         }
 
-        internal IEnumerable<TemplateMember<IMemberOrNamedType>> GetDeclarativeAdvices( IServiceProvider serviceProvider, CompilationModel compilation )
-            => this.GetDeclarativeAdvices( serviceProvider, compilation.RoslynCompilation )
+        internal IEnumerable<TemplateMember<IMemberOrNamedType>> GetDeclarativeAdvice( IServiceProvider serviceProvider, CompilationModel compilation )
+            => this.GetDeclarativeAdvice( serviceProvider, compilation.RoslynCompilation )
                 .Select(
                     x => TemplateMemberFactory.Create(
                         (IMemberOrNamedType) compilation.Factory.GetDeclaration( x.Symbol ),
                         x.TemplateClassMember,
                         x.Attribute ) );
 
-        internal IEnumerable<(TemplateClassMember TemplateClassMember, ISymbol Symbol, DeclarativeAdviceAttribute Attribute)> GetDeclarativeAdvices(
+        private IEnumerable<(TemplateClassMember TemplateClassMember, ISymbol Symbol, DeclarativeAdviceAttribute Attribute)> GetDeclarativeAdvice(
             IServiceProvider serviceProvider,
             Compilation compilation )
         {
             TemplateAttributeFactory? templateAttributeFactory = null;
+
+            // We are sorting the declarative advice by symbol name and not by source order because the source is not available
+            // if the aspect library is a compiled assembly.
 
             return this.Members
                 .Where( m => m.Value.TemplateInfo.AttributeType == TemplateAttributeType.DeclarativeAdvice )
@@ -277,8 +288,7 @@ namespace Metalama.Framework.Engine.Aspects
 
                         return (Template: m.Value, Symbol: symbol, Syntax: symbol.GetPrimarySyntaxReference());
                     } )
-                .OrderBy( m => m.Syntax?.SyntaxTree.FilePath )
-                .ThenBy( m => m.Syntax?.Span.Start )
+                .OrderBy( m => m.Symbol, DeclarativeAdviceSymbolComparer.Instance )
                 .Select( m => (m.Template, m.Symbol, ResolveAttribute( m.Template.SymbolId )) );
 
             DeclarativeAdviceAttribute ResolveAttribute( SymbolId templateInfoSymbolId )

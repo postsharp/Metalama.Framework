@@ -42,4 +42,6 @@ internal class SyntaxBasedInitializationTransformation : BaseTransformation, IIn
                 this.ContextDeclaration )
         };
     }
+
+    public override IDeclaration TargetDeclaration => this.TargetMember;
 }

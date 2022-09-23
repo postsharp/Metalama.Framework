@@ -5,12 +5,14 @@ using Metalama.Framework.CodeFixes;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Text;
+using System.Threading;
 
 namespace Metalama.Framework.Engine.Diagnostics
 {
@@ -22,9 +24,9 @@ namespace Metalama.Framework.Engine.Diagnostics
     {
         private readonly DiagnosticManifest? _diagnosticManifest;
         private readonly CodeFixFilter _codeFixFilter;
-        private ImmutableArray<Diagnostic>.Builder? _diagnostics;
-        private ImmutableArray<ScopedSuppression>.Builder? _suppressions;
-        private ImmutableArray<CodeFixInstance>.Builder? _codeFixes;
+        private ConcurrentLinkedList<Diagnostic>? _diagnostics;
+        private ConcurrentLinkedList<ScopedSuppression>? _suppressions;
+        private ConcurrentLinkedList<CodeFixInstance>? _codeFixes;
 
         public bool IsEmpty
         {
@@ -65,9 +67,9 @@ namespace Metalama.Framework.Engine.Diagnostics
 
         public void Reset()
         {
-            this._diagnostics?.Clear();
-            this._suppressions?.Clear();
-            this._codeFixes?.Clear();
+            this._diagnostics = null;
+            this._suppressions = null;
+            this._codeFixes = null;
         }
 
         public int ErrorCount { get; private set; }
@@ -76,8 +78,7 @@ namespace Metalama.Framework.Engine.Diagnostics
 
         public void Report( Diagnostic diagnostic )
         {
-            this._diagnostics ??= ImmutableArray.CreateBuilder<Diagnostic>();
-            this._diagnostics.Add( diagnostic );
+            LazyInitializer.EnsureInitialized( ref this._diagnostics )!.Add( diagnostic );
 
             if ( diagnostic.Severity == DiagnosticSeverity.Error )
             {
@@ -103,8 +104,7 @@ namespace Metalama.Framework.Engine.Diagnostics
                 {
                     if ( location != null && this._codeFixFilter( diagnosticDefinition, location ) )
                     {
-                        this._codeFixes ??= ImmutableArray.CreateBuilder<CodeFixInstance>();
-                        this._codeFixes.Add( new CodeFixInstance( diagnosticDefinition.Id, location, codeFix ) );
+                        LazyInitializer.EnsureInitialized( ref this._codeFixes )!.Add( new CodeFixInstance( diagnosticDefinition.Id, location, codeFix ) );
                     }
 
                     if ( firstTitle == null )
@@ -137,8 +137,7 @@ namespace Metalama.Framework.Engine.Diagnostics
 
         public void Suppress( ScopedSuppression suppression )
         {
-            this._suppressions ??= ImmutableArray.CreateBuilder<ScopedSuppression>();
-            this._suppressions.Add( suppression );
+            LazyInitializer.EnsureInitialized( ref this._suppressions )!.Add( suppression );
 
             this.Revision++;
         }
@@ -152,7 +151,7 @@ namespace Metalama.Framework.Engine.Diagnostics
         }
 
         public ImmutableUserDiagnosticList ToImmutable()
-            => new( this._diagnostics?.ToImmutable(), this._suppressions?.ToImmutable(), this._codeFixes?.ToImmutable() );
+            => new( this._diagnostics?.ToImmutableArray(), this._suppressions?.ToImmutableArray(), this._codeFixes?.ToImmutableArray() );
 
         public override string ToString()
             => $"Diagnostics={this._diagnostics?.Count ?? 0}, Suppressions={this._suppressions?.Count ?? 0}, CodeFixes={this._codeFixes?.Count ?? 0}";
@@ -206,8 +205,7 @@ namespace Metalama.Framework.Engine.Diagnostics
         {
             foreach ( var codeFix in codeFixes )
             {
-                this._codeFixes ??= ImmutableArray.CreateBuilder<CodeFixInstance>();
-                this._codeFixes.Add( codeFix );
+                LazyInitializer.EnsureInitialized( ref this._codeFixes )!.Add( codeFix );
 
                 this.Revision++;
             }

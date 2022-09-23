@@ -224,7 +224,7 @@ namespace Metalama.Framework.Engine.Advising
 
             // Initialize the advice. It should report errors for any situation that does not depend on the target declaration.
             // These errors are reported as exceptions.
-            var initializationDiagnostics = new DiagnosticList();
+            var initializationDiagnostics = new DiagnosticBag();
             advice.Initialize( this._state.ServiceProvider, initializationDiagnostics );
 
             ThrowOnErrors( initializationDiagnostics );
@@ -237,7 +237,7 @@ namespace Metalama.Framework.Engine.Advising
                 this._state.CurrentCompilation,
                 t =>
                 {
-                    t.OrderWithinAspectInstance = this._state.GetTransformationOrder();
+                    this._state.SetOrders( t );
                     transformations.Add( t );
                 } );
 
@@ -1300,13 +1300,13 @@ namespace Metalama.Framework.Engine.Advising
             }
         }
 
-        private static void ThrowOnErrors( DiagnosticList diagnosticList )
+        private static void ThrowOnErrors( DiagnosticBag diagnosticBag )
         {
-            if ( diagnosticList.HasErrors() )
+            if ( diagnosticBag.HasError() )
             {
                 throw new DiagnosticException(
                     "Errors have occured while creating advice.",
-                    diagnosticList.Where( d => d.Severity == DiagnosticSeverity.Error ).ToImmutableArray() );
+                    diagnosticBag.Where( d => d.Severity == DiagnosticSeverity.Error ).ToImmutableArray() );
             }
         }
 

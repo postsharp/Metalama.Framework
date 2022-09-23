@@ -51,5 +51,12 @@ namespace Metalama.Framework.Engine.Utilities.Roslyn
                 ParenthesizedExpressionSyntax parenthesized => parenthesized.Expression.RemoveParenthesis(),
                 _ => node
             };
+
+        public static TypeDeclarationSyntax? GetDeclaringType( this SyntaxNode node )
+            => node switch
+            {
+                TypeDeclarationSyntax type => type,
+                _ => node.Parent?.GetDeclaringType()
+            };
     }
 }

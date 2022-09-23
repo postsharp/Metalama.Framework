@@ -17,6 +17,8 @@ namespace Metalama.Framework.Engine.Advising;
 
 internal class AdviceFactoryState
 {
+    private readonly int _pipelineStepIndex;
+    private readonly int _orderWithinType;
     private int _nextTransformationOrder;
 
     public Dictionary<IMember, ContractAdvice> ContractAdvices { get; }
@@ -50,8 +52,12 @@ internal class AdviceFactoryState
         IAspectInstanceInternal aspectInstance,
         IDiagnosticAdder diagnostics,
         AspectPipelineConfiguration pipelineConfiguration,
-        UserCodeExecutionContext executionContext )
+        UserCodeExecutionContext executionContext,
+        int pipelineStepIndex,
+        int orderWithinType )
     {
+        this._pipelineStepIndex = pipelineStepIndex;
+        this._orderWithinType = orderWithinType;
         this.InitialCompilation = initialCompilation;
         this.CurrentCompilation = currentCompilation;
         this.AspectInstance = aspectInstance;
@@ -63,10 +69,7 @@ internal class AdviceFactoryState
         this.ExecutionContext = executionContext;
     }
 
-    public void SkipAspect()
-    {
-        this.IsAspectSkipped = true;
-    }
+    public void SkipAspect() => this.IsAspectSkipped = true;
 
     public void AddTransformations( List<ITransformation> transformations )
     {
@@ -81,5 +84,10 @@ internal class AdviceFactoryState
         }
     }
 
-    public int GetTransformationOrder() => this._nextTransformationOrder++;
+    public void SetOrders( ITransformation transformation )
+    {
+        transformation.OrderWithinPipelineStepAndTypAndAspectInstance = this._nextTransformationOrder++;
+        transformation.OrderWithinPipelineStepAndType = this._orderWithinType;
+        transformation.OrderWithinPipeline = this._pipelineStepIndex;
+    }
 }

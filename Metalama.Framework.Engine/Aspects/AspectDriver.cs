@@ -22,150 +22,74 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
 
-namespace Metalama.Framework.Engine.Aspects
+namespace Metalama.Framework.Engine.Aspects;
+
+/// <summary>
+/// Executes aspects.
+/// </summary>
+internal class AspectDriver : IAspectDriver
 {
-    /// <summary>
-    /// Executes aspects.
-    /// </summary>
-    internal class AspectDriver : IAspectDriver
+    private readonly ReflectionMapper _reflectionMapper;
+    private readonly IAspectClassImpl _aspectClass;
+
+    public IEligibilityRule<IDeclaration>? EligibilityRule { get; }
+
+    public AspectDriver( IServiceProvider serviceProvider, IAspectClassImpl aspectClass, CompilationModel compilation )
     {
-        private readonly ReflectionMapper _reflectionMapper;
-        private readonly IAspectClassImpl _aspectClass;
+        this._reflectionMapper = serviceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( compilation.RoslynCompilation );
+        this._aspectClass = aspectClass;
 
-        public IEligibilityRule<IDeclaration>? EligibilityRule { get; }
+        // We don't store the IServiceProvider because the AspectDriver is created during the pipeline initialization but used
+        // during pipeline execution, and execution has a different service provider.
 
-        public AspectDriver( IServiceProvider serviceProvider, IAspectClassImpl aspectClass, CompilationModel compilation )
+        // Introductions must have a deterministic order because of testing.
+        var declarativeAdviceAttributes = aspectClass
+            .TemplateClasses.SelectMany( c => c.GetDeclarativeAdvice( serviceProvider, compilation ) )
+            .ToList();
+
+        if ( declarativeAdviceAttributes.Count > 0 )
         {
-            this._reflectionMapper = serviceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( compilation.RoslynCompilation );
-            this._aspectClass = aspectClass;
-
-            // We don't store the IServiceProvider because the AspectDriver is created during the pipeline initialization but used
-            // during pipeline execution, and execution has a different service provider.
-
-            // Introductions must have a deterministic order because of testing.
-            var declarativeAdviceAttributes = aspectClass
-                .TemplateClasses.SelectMany( c => c.GetDeclarativeAdvices( serviceProvider, compilation ) )
-                .ToList();
-
-            if ( declarativeAdviceAttributes.Count > 0 )
+            foreach ( var declarativeAdvice in declarativeAdviceAttributes )
             {
-                foreach ( var declarativeAdvice in declarativeAdviceAttributes )
-                {
-                    var eligibilityBuilder = new EligibilityBuilder<IDeclaration>();
+                var eligibilityBuilder = new EligibilityBuilder<IDeclaration>();
 
-                    ((DeclarativeAdviceAttribute) declarativeAdvice.AdviceAttribute!).BuildAspectEligibility(
-                        eligibilityBuilder,
-                        declarativeAdvice.Declaration );
+                ((DeclarativeAdviceAttribute) declarativeAdvice.AdviceAttribute!).BuildAspectEligibility(
+                    eligibilityBuilder,
+                    declarativeAdvice.Declaration );
 
-                    this.EligibilityRule = eligibilityBuilder.Build();
-                }
+                this.EligibilityRule = eligibilityBuilder.Build();
             }
         }
+    }
 
-        public AspectInstanceResult ExecuteAspect(
-            IAspectInstanceInternal aspectInstance,
-            string? layer,
-            CompilationModel initialCompilationRevision,
-            CompilationModel currentCompilationRevision,
-            AspectPipelineConfiguration pipelineConfiguration,
-            CancellationToken cancellationToken )
+    public AspectInstanceResult ExecuteAspect(
+        IAspectInstanceInternal aspectInstance,
+        string? layer,
+        CompilationModel initialCompilationRevision,
+        CompilationModel currentCompilationRevision,
+        AspectPipelineConfiguration pipelineConfiguration,
+        int pipelineStepIndex,
+        int indexWithinType,
+        CancellationToken cancellationToken )
+    {
+        var target = aspectInstance.TargetDeclaration.GetTarget( initialCompilationRevision );
+
+        return target switch
         {
-            var target = aspectInstance.TargetDeclaration.GetTarget( initialCompilationRevision );
+            ICompilation compilation => EvaluateAspectImpl( compilation ),
+            INamedType type => EvaluateAspectImpl( type ),
+            IMethod method => EvaluateAspectImpl( method ),
+            IField field => EvaluateAspectImpl( field ),
+            IProperty property => EvaluateAspectImpl( property ),
+            IConstructor constructor => EvaluateAspectImpl( constructor ),
+            IParameter parameter => EvaluateAspectImpl( parameter ),
+            ITypeParameter genericParameter => EvaluateAspectImpl( genericParameter ),
+            IEvent @event => EvaluateAspectImpl( @event ),
+            INamespace ns => EvaluateAspectImpl( ns ),
+            _ => throw new NotSupportedException( $"Cannot add an aspect to a declaration of type {target.DeclarationKind}." )
+        };
 
-            return target switch
-            {
-                ICompilation compilation => this.EvaluateAspect(
-                    compilation,
-                    layer,
-                    aspectInstance,
-                    initialCompilationRevision,
-                    currentCompilationRevision,
-                    pipelineConfiguration,
-                    cancellationToken ),
-                INamedType type => this.EvaluateAspect(
-                    type,
-                    layer,
-                    aspectInstance,
-                    initialCompilationRevision,
-                    currentCompilationRevision,
-                    pipelineConfiguration,
-                    cancellationToken ),
-                IMethod method => this.EvaluateAspect(
-                    method,
-                    layer,
-                    aspectInstance,
-                    initialCompilationRevision,
-                    currentCompilationRevision,
-                    pipelineConfiguration,
-                    cancellationToken ),
-                IField field => this.EvaluateAspect(
-                    field,
-                    layer,
-                    aspectInstance,
-                    initialCompilationRevision,
-                    currentCompilationRevision,
-                    pipelineConfiguration,
-                    cancellationToken ),
-                IProperty property => this.EvaluateAspect(
-                    property,
-                    layer,
-                    aspectInstance,
-                    initialCompilationRevision,
-                    currentCompilationRevision,
-                    pipelineConfiguration,
-                    cancellationToken ),
-                IConstructor constructor => this.EvaluateAspect(
-                    constructor,
-                    layer,
-                    aspectInstance,
-                    initialCompilationRevision,
-                    currentCompilationRevision,
-                    pipelineConfiguration,
-                    cancellationToken ),
-                IParameter parameter => this.EvaluateAspect(
-                    parameter,
-                    layer,
-                    aspectInstance,
-                    initialCompilationRevision,
-                    currentCompilationRevision,
-                    pipelineConfiguration,
-                    cancellationToken ),
-                ITypeParameter genericParameter => this.EvaluateAspect(
-                    genericParameter,
-                    layer,
-                    aspectInstance,
-                    initialCompilationRevision,
-                    currentCompilationRevision,
-                    pipelineConfiguration,
-                    cancellationToken ),
-                IEvent @event => this.EvaluateAspect(
-                    @event,
-                    layer,
-                    aspectInstance,
-                    initialCompilationRevision,
-                    currentCompilationRevision,
-                    pipelineConfiguration,
-                    cancellationToken ),
-                INamespace ns => this.EvaluateAspect(
-                    ns,
-                    layer,
-                    aspectInstance,
-                    initialCompilationRevision,
-                    currentCompilationRevision,
-                    pipelineConfiguration,
-                    cancellationToken ),
-                _ => throw new NotSupportedException( $"Cannot add an aspect to a declaration of type {target.DeclarationKind}." )
-            };
-        }
-
-        private AspectInstanceResult EvaluateAspect<T>(
-            T targetDeclaration,
-            string? layer,
-            IAspectInstanceInternal aspectInstance,
-            CompilationModel initialCompilationRevision,
-            CompilationModel currentCompilationRevision,
-            AspectPipelineConfiguration pipelineConfiguration,
-            CancellationToken cancellationToken )
+        AspectInstanceResult EvaluateAspectImpl<T>( T targetDeclaration )
             where T : class, IDeclaration
         {
             if ( aspectInstance.IsSkipped )
@@ -231,7 +155,9 @@ namespace Metalama.Framework.Engine.Aspects
                 aspectInstance,
                 diagnosticSink,
                 pipelineConfiguration,
-                executionContext );
+                executionContext,
+                pipelineStepIndex,
+                indexWithinType );
 
             var adviceFactory = new AdviceFactory(
                 adviceFactoryState,
@@ -240,7 +166,7 @@ namespace Metalama.Framework.Engine.Aspects
 
             // Prepare declarative advice.
             var declarativeAdvice = this._aspectClass.TemplateClasses
-                .SelectMany( c => c.GetDeclarativeAdvices( serviceProvider, initialCompilationRevision ) )
+                .SelectMany( c => c.GetDeclarativeAdvice( serviceProvider, initialCompilationRevision ) )
                 .ToList();
 
             // Create the AspectBuilder.

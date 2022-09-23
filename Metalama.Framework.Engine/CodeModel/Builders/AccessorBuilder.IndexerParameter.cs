@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
-using Microsoft.CodeAnalysis;
 using System;
 using RefKind = Metalama.Framework.Code.RefKind;
 using TypedConstant = Metalama.Framework.Code.TypedConstant;
@@ -34,8 +33,6 @@ namespace Metalama.Framework.Engine.CodeModel.Builders
 
             public override string ToDisplayString( CodeDisplayFormat? format = null, CodeDisplayContext? context = null )
                 => throw new NotImplementedException();
-
-            public override SyntaxTree? PrimarySyntaxTree => this.Accessor.PrimarySyntaxTree;
         }
     }
 }

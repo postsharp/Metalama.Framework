@@ -2,6 +2,7 @@
 
 using Microsoft.CodeAnalysis;
 using System;
+using System.Threading;
 
 namespace Metalama.Framework.Engine.Diagnostics
 {
@@ -19,7 +20,7 @@ namespace Metalama.Framework.Engine.Diagnostics
         {
             if ( diagnostic.Severity == DiagnosticSeverity.Error )
             {
-                this._errors++;
+                Interlocked.Increment( ref this._errors );
             }
 
             this._action( diagnostic );

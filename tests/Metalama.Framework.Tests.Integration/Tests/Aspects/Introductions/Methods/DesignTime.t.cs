@@ -2,9 +2,6 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Desi
 {
   partial class TargetClass
   {
-    public void IntroducedMethod_Void()
-    {
-    }
     public global::System.Int32 IntroducedMethod_Int()
     {
       return default(global::System.Int32);
@@ -20,6 +17,9 @@ namespace Metalama.Framework.IntegrationTests.Aspects.Introductions.Methods.Desi
     public virtual global::System.Int32 IntroducedMethod_VirtualExplicit()
     {
       return default(global::System.Int32);
+    }
+    public void IntroducedMethod_Void()
+    {
     }
   }
 }

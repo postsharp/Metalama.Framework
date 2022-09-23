@@ -9,6 +9,7 @@ using Metalama.Framework.Introspection;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Introspection;
 
@@ -20,9 +21,9 @@ internal class IntrospectionAspectPipeline : AspectPipeline
     private protected override HighLevelPipelineStage CreateHighLevelStage( PipelineStageConfiguration configuration, CompileTimeProject compileTimeProject )
         => new CompileTimePipelineStage( compileTimeProject, configuration.AspectLayers, this.ServiceProvider );
 
-    public IntrospectionCompilationResultModel Execute( CompilationModel compilation, CancellationToken cancellationToken )
+    public async Task<IntrospectionCompilationResultModel> ExecuteAsync( CompilationModel compilation, CancellationToken cancellationToken )
     {
-        DiagnosticList diagnostics = new();
+        DiagnosticBag diagnostics = new();
 
         ImmutableArray<IIntrospectionDiagnostic> MapDiagnostics()
         {
@@ -40,26 +41,28 @@ internal class IntrospectionAspectPipeline : AspectPipeline
         var serviceProvider = configuration.ServiceProvider.WithService( introspectionAspectInstanceFactory );
         serviceProvider = serviceProvider.WithService( new IntrospectionPipelineListener( serviceProvider ) );
 
-        var success = this.TryExecute(
+        var pipelineResult = await this.ExecuteAsync(
             compilation,
             diagnostics,
             configuration.WithServiceProvider( serviceProvider ),
-            cancellationToken,
-            out var pipelineResult );
+            cancellationToken );
 
-        CompilationModel outputCompilationModel;
-
-        if ( pipelineResult != null )
+        if ( !pipelineResult.IsSuccess )
         {
-            outputCompilationModel = CompilationModel.CreateInitialInstance(
-                configuration.ProjectModel,
-                pipelineResult.Compilation );
+            return new IntrospectionCompilationResultModel( false, compilation, MapDiagnostics(), introspectionAspectInstanceFactory );
         }
         else
         {
-            outputCompilationModel = compilation;
-        }
+            var outputCompilationModel = CompilationModel.CreateInitialInstance(
+                configuration.ProjectModel,
+                pipelineResult.Value.Compilation );
 
-        return new IntrospectionCompilationResultModel( success, outputCompilationModel, MapDiagnostics(), introspectionAspectInstanceFactory, pipelineResult );
+            return new IntrospectionCompilationResultModel(
+                true,
+                outputCompilationModel,
+                MapDiagnostics(),
+                introspectionAspectInstanceFactory,
+                pipelineResult.Value );
+        }
     }
 }

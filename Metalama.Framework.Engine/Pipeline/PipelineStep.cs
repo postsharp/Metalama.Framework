@@ -3,37 +3,39 @@
 using Metalama.Framework.Engine.AspectOrdering;
 using Metalama.Framework.Engine.CodeModel;
 using System.Threading;
+using System.Threading.Tasks;
 
-namespace Metalama.Framework.Engine.Pipeline
+namespace Metalama.Framework.Engine.Pipeline;
+
+/// <summary>
+/// A step executed by <see cref="HighLevelPipelineStage"/>.
+/// </summary>
+internal abstract class PipelineStep
 {
-    /// <summary>
-    /// A step executed by <see cref="HighLevelPipelineStage"/>.
-    /// </summary>
-    internal abstract class PipelineStep
+    public PipelineStepId Id { get; }
+
+    public OrderedAspectLayer AspectLayer { get; }
+
+    protected PipelineStepsState Parent { get; }
+
+    public PipelineStep( PipelineStepsState parent, PipelineStepId id, OrderedAspectLayer aspectLayer )
     {
-        public PipelineStepId Id { get; }
-
-        public OrderedAspectLayer AspectLayer { get; }
-
-        protected PipelineStepsState Parent { get; }
-
-        public PipelineStep( PipelineStepsState parent, PipelineStepId id, OrderedAspectLayer aspectLayer )
-        {
-            this.Id = id;
-            this.AspectLayer = aspectLayer;
-            this.Parent = parent;
-        }
-
-        /// <summary>
-        /// Executes the step.
-        /// </summary>
-        /// <param name="compilation"></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns></returns>
-        public abstract CompilationModel Execute(
-            CompilationModel compilation,
-            CancellationToken cancellationToken );
-
-        public override string ToString() => this.Id.ToString();
+        this.Id = id;
+        this.AspectLayer = aspectLayer;
+        this.Parent = parent;
     }
+
+    /// <summary>
+    /// Executes the step.
+    /// </summary>
+    /// <param name="compilation"></param>
+    /// <param name="stepIndex"></param>
+    /// <param name="cancellationToken"></param>
+    /// <returns></returns>
+    public abstract Task<CompilationModel> ExecuteAsync(
+        CompilationModel compilation,
+        int stepIndex,
+        CancellationToken cancellationToken );
+
+    public override string ToString() => this.Id.ToString();
 }

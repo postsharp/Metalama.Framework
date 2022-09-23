@@ -18,7 +18,9 @@ internal class RemoveAttributesTransformation : BaseTransformation, IObservableT
         this.ContainingDeclaration = targetDeclaration;
     }
 
-    public IDeclaration ContainingDeclaration { get; set; }
+    public IDeclaration ContainingDeclaration { get; }
 
     public bool IsDesignTime => false;
+
+    public override IDeclaration TargetDeclaration => this.ContainingDeclaration;
 }

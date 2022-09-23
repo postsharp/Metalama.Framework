@@ -278,6 +278,7 @@ internal partial class ProjectVersionProvider
                         changeLinkedListFromOldCompilation.Insert( incrementalChanges );
                     }
 
+                    // TODO #31094: can throw duplicate key
                     this._cache.Add( newCompilation, new ChangeLinkedList( incrementalChanges.NewProjectVersion ) );
 
                     return incrementalChanges;

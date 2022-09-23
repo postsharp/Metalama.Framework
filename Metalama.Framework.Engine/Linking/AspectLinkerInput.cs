@@ -27,7 +27,7 @@ namespace Metalama.Framework.Engine.Linking
         /// <summary>
         /// Gets a list of non-observable transformations.
         /// </summary>
-        public IReadOnlyList<ITransformation> Transformations { get; }
+        public IReadOnlyCollection<ITransformation> Transformations { get; }
 
         /// <summary>
         /// Gets a list of ordered aspect layers.
@@ -41,7 +41,7 @@ namespace Metalama.Framework.Engine.Linking
         public AspectLinkerInput(
             PartialCompilation initialCompilation,
             CompilationModel compilationModel,
-            IReadOnlyList<ITransformation> transformations,
+            IReadOnlyCollection<ITransformation> transformations,
             IReadOnlyList<OrderedAspectLayer> orderedAspectLayers,
             IReadOnlyList<ScopedSuppression> suppressions,
             CompileTimeProject compileTimeProject )

@@ -17,7 +17,7 @@ namespace Metalama.Framework.Tests.UnitTests
 {
     public class AspectOrderingTests : TestBase
     {
-        private bool TryGetOrderedAspectLayers( string code, string[] aspectNames, DiagnosticList diagnostics, [NotNullWhen( true )] out string? sortedAspects )
+        private bool TryGetOrderedAspectLayers( string code, string[] aspectNames, DiagnosticBag diagnostics, [NotNullWhen( true )] out string? sortedAspects )
         {
             using var testContext = this.CreateTestContext();
 
@@ -31,7 +31,7 @@ namespace Metalama.Framework.Tests.UnitTests
                     compilation.RoslynCompilation,
                     null,
                     null,
-                    new DiagnosticList(),
+                    new DiagnosticBag(),
                     false,
                     CancellationToken.None,
                     out var compileTimeProject ) );
@@ -71,7 +71,7 @@ namespace Metalama.Framework.Tests.UnitTests
 
         private string GetOrderedAspectLayers( string code, params string[] aspectNames )
         {
-            var diagnostics = new DiagnosticList();
+            var diagnostics = new DiagnosticBag();
             Assert.True( this.TryGetOrderedAspectLayers( code, aspectNames, diagnostics, out var sortedAspects ) );
             Assert.Empty( diagnostics );
 
@@ -116,7 +116,7 @@ class Aspect2 : TypeAspect { }
 ";
 
             var ordered = this.GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
-            Assert.Equal( "Aspect1 => 0, Aspect2 => 0, Aspect1:Layer1 => 1, Aspect2:Layer1 => 1", ordered );
+            Assert.Equal( "Aspect2 => 0, Aspect1 => 1, Aspect2:Layer1 => 2, Aspect1:Layer1 => 3", ordered );
         }
 
         [Fact]
@@ -182,7 +182,7 @@ class Aspect2  : TypeAspect { }
 ";
 
             var ordered = this.GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
-            Assert.Equal( "Aspect1 => 0, Aspect1:Layer1 => 1, Aspect2 => 1, Aspect2:Layer1 => 2", ordered );
+            Assert.Equal( "Aspect1 => 0, Aspect2 => 1, Aspect1:Layer1 => 2, Aspect2:Layer1 => 3", ordered );
         }
 
         [Fact]
@@ -217,7 +217,7 @@ class Aspect2 : Aspect1 {}
 ";
 
             var ordered = this.GetOrderedAspectLayers( code, "Aspect1", "Aspect2" );
-            Assert.Equal( "Aspect1 => 0, Aspect2 => 0, Aspect1:Layer1 => 1, Aspect2:Layer1 => 1", ordered );
+            Assert.Equal( "Aspect2 => 0, Aspect1 => 1, Aspect2:Layer1 => 2, Aspect1:Layer1 => 3", ordered );
         }
 
         [Fact]
@@ -250,7 +250,7 @@ class Aspect1 : TypeAspect { }
 class Aspect2 : TypeAspect { }
 ";
 
-            var diagnostics = new DiagnosticList();
+            var diagnostics = new DiagnosticBag();
             Assert.False( this.TryGetOrderedAspectLayers( code, new[] { "Aspect1", "Aspect2" }, diagnostics, out _ ) );
             Assert.Single( diagnostics.Select( d => d.Id ), GeneralDiagnosticDescriptors.CycleInAspectOrdering.Id );
         }
@@ -274,7 +274,7 @@ class Aspect2 : TypeAspect { }
 class Aspect3 : TypeAspect { }
 ";
 
-            var diagnostics = new DiagnosticList();
+            var diagnostics = new DiagnosticBag();
             Assert.False( this.TryGetOrderedAspectLayers( code, new[] { "Aspect1", "Aspect2", "Aspect3" }, diagnostics, out _ ) );
             Assert.Single( diagnostics.Select( d => d.Id ), GeneralDiagnosticDescriptors.CycleInAspectOrdering.Id );
         }

@@ -46,5 +46,7 @@ namespace Metalama.Framework.Engine.Transformations
             // The type already implements the interface members itself.
             return SimpleBaseType( generationContext.SyntaxGenerator.Type( this.InterfaceType.GetSymbol() ) );
         }
+
+        public override IDeclaration TargetDeclaration => this.TargetType;
     }
 }

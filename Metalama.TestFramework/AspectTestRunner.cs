@@ -78,6 +78,7 @@ namespace Metalama.TestFramework
 
             if ( testInput.Options.LicenseFile != null )
             {
+                // ReSharper disable once MethodHasAsyncOverload
                 var licenseKey = File.ReadAllText( Path.Combine( testInput.ProjectDirectory, testInput.Options.LicenseFile ) );
 
                 serviceProviderForThisTest = serviceProviderForThisTest.AddTestLicenseVerifier( licenseKey );
@@ -93,7 +94,7 @@ namespace Metalama.TestFramework
                 default,
                 CancellationToken.None );
 
-            if ( pipelineResult != null )
+            if ( pipelineResult.IsSuccess && !testResult.PipelineDiagnostics.HasError )
             {
                 if ( testInput.Options.ApplyCodeFix.GetValueOrDefault() )
                 {
@@ -105,7 +106,7 @@ namespace Metalama.TestFramework
                 }
                 else
                 {
-                    if ( !await this.ProcessCompileTimePipelineOutputAsync( testInput, testResult, pipelineResult ) )
+                    if ( !await this.ProcessCompileTimePipelineOutputAsync( testInput, testResult, pipelineResult.Value ) )
                     {
                         return;
                     }

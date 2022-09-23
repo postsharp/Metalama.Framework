@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.CodeFixes
 {
@@ -19,22 +20,23 @@ namespace Metalama.Framework.Engine.CodeFixes
         public CodeFixPipelineStage( CompileTimeProject compileTimeProject, IReadOnlyList<OrderedAspectLayer> aspectLayers, IServiceProvider serviceProvider ) :
             base( compileTimeProject, aspectLayers, serviceProvider ) { }
 
-        protected override AspectPipelineResult GetStageResult(
+        protected override Task<AspectPipelineResult> GetStageResultAsync(
             AspectPipelineConfiguration pipelineConfiguration,
             AspectPipelineResult input,
             IPipelineStepsResult pipelineStepsResult,
             CancellationToken cancellationToken )
-            => new(
-                input.Compilation,
-                input.Project,
-                input.AspectLayers,
-                input.CompilationModels.AddRange( pipelineStepsResult.Compilations ),
-                input.Diagnostics.Concat( pipelineStepsResult.Diagnostics ).Concat( pipelineStepsResult.Diagnostics ),
-                input.AspectSources.AddRange( pipelineStepsResult.ExternalAspectSources ),
-                default,
-                pipelineStepsResult.InheritableAspectInstances,
-                ImmutableArray<ReferenceValidatorInstance>.Empty,
-                input.AdditionalSyntaxTrees,
-                input.AspectInstanceResults );
+            => Task.FromResult(
+                new AspectPipelineResult(
+                    input.Compilation,
+                    input.Project,
+                    input.AspectLayers,
+                    input.CompilationModels.AddRange( pipelineStepsResult.Compilations ),
+                    input.Diagnostics.Concat( pipelineStepsResult.Diagnostics ).Concat( pipelineStepsResult.Diagnostics ),
+                    input.AspectSources.AddRange( pipelineStepsResult.ExternalAspectSources ),
+                    default,
+                    pipelineStepsResult.InheritableAspectInstances,
+                    ImmutableArray<ReferenceValidatorInstance>.Empty,
+                    input.AdditionalSyntaxTrees,
+                    input.AspectInstanceResults ) );
     }
 }

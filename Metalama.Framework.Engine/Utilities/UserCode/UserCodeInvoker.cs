@@ -4,6 +4,7 @@ using Metalama.Backstage.Extensibility;
 using Metalama.Backstage.Maintenance;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -35,7 +36,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
         /// <summary>
         /// Handles an exception and returns a value indicating whether the exception can be ignored.
         /// </summary>
-        private static bool OnException( Exception e, in UserCodeExecutionContext context )
+        private static bool OnException( Exception e, UserCodeExecutionContext context )
         {
             var compileTimeProject = context.ServiceProvider.GetService<CompileTimeProject>();
 
@@ -249,7 +250,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             return this.Invoke( adapter.UserCodeFunc, ref adapter, context );
         }
 
-        public TResult Invoke<TResult, TPayload>( UserCodeFunc<TResult, TPayload> func, ref TPayload payload, UserCodeExecutionContext? context )
+        public TResult Invoke<TResult, TPayload>( UserCodeFunc<TResult, TPayload> func, ref TPayload payload, UserCodeExecutionContext context )
         {
             using ( UserCodeExecutionContext.WithContext( context ) )
             {
@@ -264,7 +265,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             }
         }
 
-        public Task InvokeAsync( Func<Task> func, UserCodeExecutionContext? context )
+        public Task InvokeAsync( Func<Task> func, UserCodeExecutionContext context )
         {
             async Task<bool> Wrapper()
             {
@@ -276,7 +277,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             return this.InvokeAsync( Wrapper, context );
         }
 
-        public async Task<TResult> InvokeAsync<TResult>( Func<Task<TResult>> func, UserCodeExecutionContext? context )
+        public async Task<TResult> InvokeAsync<TResult>( Func<Task<TResult>> func, UserCodeExecutionContext context )
         {
             using ( UserCodeExecutionContext.WithContext( context ) )
             {
@@ -287,6 +288,51 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
                 else
                 {
                     return await func();
+                }
+            }
+        }
+
+        public async Task<bool> TryInvokeAsync( Func<Task> func, UserCodeExecutionContext context )
+        {
+            async Task<bool> Wrapper()
+            {
+                await func();
+
+                return true;
+            }
+
+            var result = await this.TryInvokeAsync( Wrapper, context );
+
+            return result.IsSuccess;
+        }
+
+        public async Task<FallibleResult<TResult>> TryInvokeAsync<TResult>( Func<Task<TResult>> func, UserCodeExecutionContext context )
+        {
+            using ( UserCodeExecutionContext.WithContext( context ) )
+            {
+                try
+                {
+                    if ( this._hook != null )
+                    {
+                        return await this._hook.InvokeAsync( func );
+                    }
+                    else
+                    {
+                        return await func();
+                    }
+                }
+                catch ( Exception e )
+                {
+                    // We cannot use OnException in a `when` clause because exceptions in the OnException method will be ignored
+                    // and it will be weird.
+                    if ( OnException( e, context ) )
+                    {
+                        return default;
+                    }
+                    else
+                    {
+                        throw;
+                    }
                 }
             }
         }

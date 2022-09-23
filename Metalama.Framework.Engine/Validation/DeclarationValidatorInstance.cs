@@ -22,7 +22,7 @@ internal class DeclarationValidatorInstance : ValidatorInstance
         this._driver = driver;
     }
 
-    public void Validate( IDiagnosticSink diagnosticAdder, UserCodeInvoker userCodeInvoker, UserCodeExecutionContext? userCodeExecutionContext )
+    public void Validate( IDiagnosticSink diagnosticAdder, UserCodeInvoker userCodeInvoker, UserCodeExecutionContext userCodeExecutionContext )
     {
         var validationContext = new DeclarationValidationContext(
             this.ValidatedDeclaration,

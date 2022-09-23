@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Utilities.Caching;
 
+/// <summary>
+/// A fixed-capacity cache with a LRU clean up algorithm.
+/// </summary>
 internal class FixedCapacityCache<T>
 {
     private readonly ConcurrentDictionary<string, Entry> _cache = new( StringComparer.Ordinal );

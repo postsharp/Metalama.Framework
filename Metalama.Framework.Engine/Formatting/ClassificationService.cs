@@ -25,7 +25,7 @@ namespace Metalama.Framework.Engine.Formatting
         public ClassifiedTextSpanCollection GetClassifiedTextSpans( SemanticModel model, CancellationToken cancellationToken )
         {
             var syntaxRoot = model.SyntaxTree.GetRoot();
-            var diagnostics = new DiagnosticList();
+            var diagnostics = new DiagnosticBag();
 
             var templateCompiler = new TemplateCompiler( this._serviceProvider, model.Compilation );
 

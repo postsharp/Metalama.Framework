@@ -172,8 +172,8 @@ namespace Metalama.Framework.Engine.Diagnostics
             "LAMA0035",
             _category,
             "The aspect layers '{0}' and '{1}' are not strongly ordered. Add an [assembly: " + nameof(AspectOrderAttribute) +
-            "(...)] attribute to specify the order relationship between these two layers, otherwise the compilation will be non-deterministic.",
-            Warning,
+            "(...)] attribute to specify the order relationship between these two layers or disable the MetalamaRequireOrderedAspects build option.",
+            Error,
             "Two layers are not strongly ordered." );
 
         internal static readonly DiagnosticDefinition<(string TemplateName, string ClassName, string BaseClassName)>

@@ -119,7 +119,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
                 compilation,
                 cancellationToken );
 
-        if ( compilationResult == null )
+        if ( !compilationResult.IsSuccess )
         {
             this.Logger.Warning?.Log(
                 $"{this.GetType().Name}.Execute('{this.ProjectKey}', CompilationId = {DebuggingHelper.GetObjectId( compilation )}): the pipeline failed." );
@@ -132,7 +132,7 @@ public class AnalysisProcessProjectHandler : ProjectHandler
             return false;
         }
 
-        var newSourceGeneratorResult = new SyntaxTreeSourceGeneratorResult( compilationResult.TransformationResult.IntroducedSyntaxTrees );
+        var newSourceGeneratorResult = new SyntaxTreeSourceGeneratorResult( compilationResult.Value.TransformationResult.IntroducedSyntaxTrees );
 
         // Check if the pipeline returned any difference. If not, do not update our cache.
         if ( this.LastSourceGeneratorResult != null && this.LastSourceGeneratorResult.Equals( newSourceGeneratorResult ) )

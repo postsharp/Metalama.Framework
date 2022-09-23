@@ -1,10 +1,16 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Linking.Inlining;
+using Metalama.Framework.Engine.Utilities.Threading;
+using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Metalama.Framework.Engine.Linking
 {
@@ -12,6 +18,8 @@ namespace Metalama.Framework.Engine.Linking
     {
         private class InliningAlgorithm
         {
+            private readonly ITaskScheduler _taskScheduler;
+
             private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>>
                 _aspectReferencesByContainingSemantic;
 
@@ -21,12 +29,14 @@ namespace Metalama.Framework.Engine.Linking
             private readonly IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, SemanticBodyAnalysisResult> _bodyAnalysisResults;
 
             public InliningAlgorithm(
+                IServiceProvider serviceProvider,
                 IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, IReadOnlyList<ResolvedAspectReference>> aspectReferencesByContainingSemantic,
                 IReadOnlyList<IntermediateSymbolSemantic> reachableSemantics,
                 IReadOnlyList<IntermediateSymbolSemantic> inlinedSemantics,
                 IReadOnlyDictionary<ResolvedAspectReference, Inliner> inlinedReferences,
                 IReadOnlyDictionary<IntermediateSymbolSemantic<IMethodSymbol>, SemanticBodyAnalysisResult> bodyAnalysisResults )
             {
+                this._taskScheduler = serviceProvider.GetRequiredService<ITaskScheduler>();
                 this._aspectReferencesByContainingSemantic = aspectReferencesByContainingSemantic;
                 this._reachableSemantics = reachableSemantics;
                 this._inlinedSemantics = new HashSet<IntermediateSymbolSemantic>( inlinedSemantics );
@@ -34,21 +44,21 @@ namespace Metalama.Framework.Engine.Linking
                 this._bodyAnalysisResults = bodyAnalysisResults;
             }
 
-            internal IReadOnlyList<InliningSpecification> Run()
+            internal async Task<IReadOnlyList<InliningSpecification>> RunAsync( CancellationToken cancellationToken )
             {
-                var inliningSpecifications = new List<InliningSpecification>();
+                var inliningSpecifications = new ConcurrentBag<InliningSpecification>();
 
-                foreach ( var semantic in this._reachableSemantics )
+                void ProcessSemantic( IntermediateSymbolSemantic semantic )
                 {
                     if ( semantic.Symbol is not IMethodSymbol )
                     {
-                        continue;
+                        return;
                     }
 
                     if ( this._inlinedSemantics.Contains( semantic ) )
                     {
                         // Inlined semantics are not destinations of inlining.
-                        continue;
+                        return;
                     }
 
                     // Allocate labels for the whole final method. This would be a problem only if we allow inlining multiple references in one body.
@@ -57,7 +67,9 @@ namespace Metalama.Framework.Engine.Linking
                     VisitSemantic( semantic, inliningContext );
                 }
 
-                return inliningSpecifications;
+                await this._taskScheduler.RunInParallelAsync( this._reachableSemantics, ProcessSemantic, cancellationToken );
+
+                return inliningSpecifications.ToList();
 
                 void VisitSemantic( IntermediateSymbolSemantic semantic, InliningAnalysisContext context )
                 {
@@ -169,6 +181,8 @@ namespace Metalama.Framework.Engine.Linking
                                         ? context.AllocateReturnLabel()
                                         : null;
 
+                                var returnVariableIdentifier = info.ReturnVariableIdentifier ?? context.ReturnVariableIdentifier;
+
                                 inliningSpecifications.Add(
                                     new InliningSpecification(
                                         destinationSemantic,
@@ -179,11 +193,11 @@ namespace Metalama.Framework.Engine.Linking
                                         info.ReplacedRootNode,
                                         false,
                                         context.DeclaredReturnVariable,
-                                        info.ReturnVariableIdentifier,
+                                        returnVariableIdentifier,
                                         returnLabelIdentifier,
                                         targetSemantic ) );
 
-                                VisitSemanticBody( destinationSemantic, targetSemantic, context.RecurseWithComplexInlining() );
+                                VisitSemanticBody( destinationSemantic, targetSemantic, context.RecurseWithComplexInlining( returnVariableIdentifier ) );
                             }
                         }
                     }

@@ -35,7 +35,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             isTest,
             domain ) { }
 
-        public async Task<CompileTimeAspectPipelineResult?> ExecuteAsync(
+        public async Task<FallibleResult<CompileTimeAspectPipelineResult>> ExecuteAsync(
             IDiagnosticAdder diagnosticAdder,
             Compilation compilation,
             ImmutableArray<ManagedResource> resources,
@@ -58,28 +58,19 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             {
                 diagnosticAdder.Report( GeneralDiagnosticDescriptors.MissingMetalamaPreprocessorSymbol.CreateRoslynDiagnosticImpl( null, null ) );
 
-                return null;
+                return default;
             }
 
             // Validate the code (some validations are not done by the template compiler).
-            var isTemplatingCodeValidatorSuccessful = true;
-
-            foreach ( var syntaxTree in compilation.SyntaxTrees )
-            {
-                var semanticModel = compilation.GetSemanticModel( syntaxTree );
-
-                isTemplatingCodeValidatorSuccessful &= TemplatingCodeValidator.Validate(
-                    this.ServiceProvider,
-                    semanticModel,
-                    diagnosticAdder.Report,
-                    false,
-                    false,
-                    cancellationToken );
-            }
+            var isTemplatingCodeValidatorSuccessful = await TemplatingCodeValidator.ValidateAsync(
+                compilation,
+                diagnosticAdder,
+                this.ServiceProvider,
+                cancellationToken );
 
             if ( !isTemplatingCodeValidatorSuccessful )
             {
-                return null;
+                return default;
             }
 
             var licenseConsumptionManager = this.ServiceProvider.GetBackstageService<ILicenseConsumptionManager>();
@@ -92,7 +83,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             // Initialize the pipeline and generate the compile-time project.
             if ( !this.TryInitialize( diagnosticAdder, partialCompilation, projectLicenseInfo, null, cancellationToken, out var configuration ) )
             {
-                return null;
+                return default;
             }
 
             // Run the pipeline.
@@ -104,7 +95,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 cancellationToken );
         }
 
-        public async Task<CompileTimeAspectPipelineResult?> ExecuteCoreAsync(
+        public async Task<FallibleResult<CompileTimeAspectPipelineResult>> ExecuteCoreAsync(
             IDiagnosticAdder diagnosticAdder,
             PartialCompilation compilation,
             ImmutableArray<ManagedResource> resources,
@@ -114,15 +105,17 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
             try
             {
                 // Execute the pipeline.
-                if ( !this.TryExecute( compilation, diagnosticAdder, configuration, cancellationToken, out var result ) )
+                var result = await this.ExecuteAsync( compilation, diagnosticAdder, configuration, cancellationToken );
+
+                if ( !result.IsSuccess )
                 {
-                    return null;
+                    return default;
                 }
 
-                var resultPartialCompilation = result.Compilation;
+                var resultPartialCompilation = result.Value.Compilation;
 
                 // Execute validators.
-                IReadOnlyList<ReferenceValidatorInstance> referenceValidators = result.ExternallyVisibleValidators;
+                IReadOnlyList<ReferenceValidatorInstance> referenceValidators = result.Value.ExternallyVisibleValidators;
 
                 // Format the output.
                 if ( this.ProjectOptions.FormatOutput && OutputCodeFormatter.CanFormat )
@@ -149,24 +142,24 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                 }
 
                 // Create a manifest for transitive aspects and validators.
-                if ( result.ExternallyInheritableAspects.Length > 0 || referenceValidators.Count > 0 )
+                if ( result.Value.ExternallyInheritableAspects.Length > 0 || referenceValidators.Count > 0 )
                 {
                     var inheritedAspectsManifest = TransitiveAspectsManifest.Create(
-                        result.ExternallyInheritableAspects.Select( i => new InheritableAspectInstance( i ) ).ToImmutableArray(),
+                        result.Value.ExternallyInheritableAspects.Select( i => new InheritableAspectInstance( i ) ).ToImmutableArray(),
                         referenceValidators.Select( i => new TransitiveValidatorInstance( i ) ).ToImmutableArray() );
 
                     var resource = inheritedAspectsManifest.ToResource( configuration.ServiceProvider );
                     additionalResources = additionalResources.Add( resource );
                 }
 
-                var resultingCompilation = (PartialCompilation) RunTimeAssemblyRewriter.Rewrite( resultPartialCompilation, this.ServiceProvider );
+                var resultingCompilation = (PartialCompilation) await RunTimeAssemblyRewriter.RewriteAsync( resultPartialCompilation, this.ServiceProvider );
                 var syntaxTreeTransformations = resultingCompilation.ToTransformations();
 
                 return new CompileTimeAspectPipelineResult(
                     syntaxTreeTransformations,
                     additionalResources,
                     resultingCompilation,
-                    result.AdditionalCompilationOutputFiles );
+                    result.Value.AdditionalCompilationOutputFiles );
             }
             catch ( DiagnosticException exception )
             {
@@ -175,7 +168,7 @@ namespace Metalama.Framework.Engine.Pipeline.CompileTime
                     diagnosticAdder.Report( diagnostic );
                 }
 
-                return null;
+                return default;
             }
         }
 

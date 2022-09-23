@@ -10,5 +10,5 @@ internal abstract class ValidatorDriver<TContext> : ValidatorDriver
         ValidatorImplementation implementation,
         in TContext context,
         UserCodeInvoker invoker,
-        UserCodeExecutionContext? executionContext );
+        UserCodeExecutionContext executionContext );
 }
