@@ -100,6 +100,12 @@ public readonly struct WeakCache<TKey, TValue>
                 {
                     cancellationToken.ThrowIfCancellationRequested();
                     value = func( key, cancellationToken );
+                    
+                    // In case the func() implementation added the value, return it.
+                    if ( this.TryGetValue( key, out var value2 ) )
+                    {
+                        return value2;
+                    }
 
                     this._cache.Add( key, new StrongBox<TValue>( value ) );
 
