@@ -38,7 +38,7 @@ namespace Metalama.Framework.Engine.CompileTime
         {
             if ( !this.Cache.TryGetValue( typeSymbol, out var typeBox ) )
             {
-                typeBox = this.Cache.GetOrAdd( typeSymbol, _ => new StrongBox<Type?>( this.GetCompileTimeTypeCore( typeSymbol, cancellationToken ) ) );
+                typeBox = this.Cache.GetOrAdd( typeSymbol, ( t, ct ) => new StrongBox<Type?>( this.GetCompileTimeTypeCore( t, ct ) ), cancellationToken );
             }
 
             if ( typeBox.Value == null && fallbackToMock )

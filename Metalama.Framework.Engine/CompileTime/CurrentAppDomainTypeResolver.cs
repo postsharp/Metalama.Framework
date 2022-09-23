@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Framework.Engine.Utilities.Caching;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Reflection;
@@ -29,7 +28,7 @@ internal class CurrentAppDomainTypeResolver : CompileTimeTypeResolver
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            typeBox = this.Cache.GetOrAdd( typeSymbol, _ => new StrongBox<Type?>( this.GetCompileTimeNamedTypeCore( typeSymbol, cancellationToken ) ) );
+            typeBox = this.Cache.GetOrAdd( typeSymbol, ( t, ct ) => new StrongBox<Type?>( this.GetCompileTimeNamedTypeCore( (INamedTypeSymbol) t, ct ) ), cancellationToken );
         }
 
         return typeBox.Value;

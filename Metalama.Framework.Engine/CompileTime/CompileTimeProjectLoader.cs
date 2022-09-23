@@ -4,7 +4,6 @@ using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Templating.Mapping;
 using Metalama.Framework.Engine.Utilities;
-using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
@@ -92,7 +91,7 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
         }
         else
         {
-            return this.Cache.GetOrAdd( typeSymbol, _ => new StrongBox<Type?>( this.GetCompileTimeNamedTypeCore( typeSymbol, cancellationToken ) ) ).Value;
+            return this.Cache.GetOrAdd( typeSymbol, ( t, ct ) => new StrongBox<Type?>( this.GetCompileTimeNamedTypeCore( t, ct ) ), cancellationToken ).Value;
         }
     }
 

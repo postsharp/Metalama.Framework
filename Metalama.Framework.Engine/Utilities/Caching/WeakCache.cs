@@ -21,7 +21,7 @@ public readonly struct WeakCache<TKey, TValue>
         // ReSharper disable once InconsistentlySynchronizedField
         if ( this._cache.TryGetValue( key, out var box ) )
         {
-            value = box.AssertNotNull().Value;
+            value = box.AssertNotNull().Value!;
 
             return true;
         }

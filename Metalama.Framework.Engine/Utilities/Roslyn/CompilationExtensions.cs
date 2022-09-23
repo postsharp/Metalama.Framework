@@ -3,7 +3,6 @@
 using Metalama.Framework.Engine.Utilities.Caching;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
-using System.Runtime.CompilerServices;
 
 namespace Metalama.Framework.Engine.Utilities.Roslyn;
 
