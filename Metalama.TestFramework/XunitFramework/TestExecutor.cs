@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Testing;
-using Metalama.TestFramework.Licensing;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -165,8 +164,7 @@ namespace Metalama.TestFramework.XunitFramework
                                 testCase,
                                 test,
                                 testMetrics,
-                                logger,
-                                projectMetadata.License ) );
+                                logger ) );
 
                         if ( executionOptions.DisableParallelizationOrDefault() )
                         {
@@ -197,8 +195,7 @@ namespace Metalama.TestFramework.XunitFramework
             ITestCase testCase,
             Test test,
             Metrics testMetrics,
-            TestOutputHelper logger,
-            TestFrameworkLicenseStatus license )
+            TestOutputHelper logger )
         {
             var testStopwatch = Stopwatch.StartNew();
 

@@ -21,7 +21,7 @@ namespace Metalama.Framework.Engine.Linking
     /// <summary>
     /// Stores information about introductions and intermediate compilation.
     /// </summary>
-    internal partial class LinkerIntroductionRegistry
+    internal class LinkerIntroductionRegistry
     {
         public const string IntroducedNodeIdAnnotationId = "AspectLinker_IntroducedNodeId";
 

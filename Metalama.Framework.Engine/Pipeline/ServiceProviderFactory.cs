@@ -60,7 +60,7 @@ namespace Metalama.Framework.Engine.Pipeline
         public static ServiceProvider GlobalProvider
             => LazyInitializer.EnsureInitialized(
                 ref _globalInstance,
-                () => CreateBaseServiceProvider( null ).WithMark( ServiceProviderMark.Global ) )!;
+                () => CreateBaseServiceProvider( null ).WithMark( ServiceProviderMark.Global ) );
 
         internal static ServiceProvider AsyncLocalProvider => _asyncLocalInstance.Value ??= GlobalProvider;
 

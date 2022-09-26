@@ -9,6 +9,8 @@ using System.Linq;
 using System.Reflection;
 using Xunit;
 
+// ReSharper disable UnusedTypeParameter
+// ReSharper disable UnusedParameter.Local
 // ReSharper disable MemberCanBePrivate.Global
 
 namespace Metalama.Framework.Tests.UnitTests.SyntaxSerialization.Reflection;
@@ -94,6 +96,7 @@ public class ReflectionSignatureBuilderTests : TestBase
     }
 
     // The class and the methods must be public otherwise they are not present in the reference assembly that visible from the compilation model.
+    // ReSharper disable InconsistentNaming
     public class C<TypeArgument1>
     {
         // Methods.
@@ -142,4 +145,6 @@ public class ReflectionSignatureBuilderTests : TestBase
 
         public C( int p1, object p2, bool p3, byte p4, byte p5, sbyte p6 ) { }
     }
+
+    // ReSharper restore InconsistentNaming
 }

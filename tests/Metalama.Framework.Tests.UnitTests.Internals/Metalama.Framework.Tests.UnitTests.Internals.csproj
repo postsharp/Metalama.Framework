@@ -2,6 +2,8 @@
 
     <Import Project="..\..\eng\Coverage.props" />
 
+    <!-- Only analyze nullability in the high target framework -->
+    <Import Project="..\..\eng\DisableNullabilityWarnings.props" Condition="'$(TargetFramework)'!='net6.0'"/>
 
     <PropertyGroup>
         <TargetFrameworks>net6.0;netframework4.8</TargetFrameworks>

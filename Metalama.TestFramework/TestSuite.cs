@@ -29,8 +29,7 @@ public abstract class TestSuite
 
     private record AssemblyAssets(
         TestProjectProperties ProjectProperties,
-        TestDirectoryOptionsReader OptionsReader,
-        TestProjectReferences ProjectReferences );
+        TestDirectoryOptionsReader OptionsReader );
 
 #pragma warning disable CA1805 // Do not initialize unnecessarily
     private static readonly WeakCache<Assembly, AssemblyAssets> _cache = new();
@@ -42,15 +41,13 @@ public abstract class TestSuite
             a =>
             {
                 var assemblyInfo = new ReflectionAssemblyInfo( a );
-                var metadata = TestAssemblyMetadataReader.GetMetadata( new ReflectionAssemblyInfo( a ) );
                 var discoverer = new TestDiscoverer( assemblyInfo );
 
                 var projectProperties = discoverer.GetTestProjectProperties();
 
                 return new AssemblyAssets(
                     projectProperties,
-                    new TestDirectoryOptionsReader( projectProperties.ProjectDirectory ),
-                    metadata.ToProjectReferences() );
+                    new TestDirectoryOptionsReader( projectProperties.ProjectDirectory ) );
             } );
 
     protected ITestOutputHelper Logger { get; }

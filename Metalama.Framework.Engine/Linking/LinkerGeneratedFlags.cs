@@ -31,7 +31,7 @@ namespace Metalama.Framework.Engine.Linking
         NullAspectReferenceExpression = 8,
 
         /// <summary>
-        /// Generated suppresion, which should be removed when inlined.
+        /// Generated suppression, which should be removed when inlined.
         /// </summary>
         GeneratedSuppression = 16
     }

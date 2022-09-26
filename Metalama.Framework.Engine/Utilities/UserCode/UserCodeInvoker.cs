@@ -343,7 +343,7 @@ namespace Metalama.Framework.Engine.Utilities.UserCode
             // to perform the mapping here.
 
             // Get the syntax tree where the exception happened.
-            var stackFrames = stackTrace.GetFrames() ?? Array.Empty<StackFrame>();
+            var stackFrames = stackTrace.GetFrames();
 
             var frame =
                 stackFrames

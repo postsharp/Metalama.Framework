@@ -78,7 +78,7 @@ namespace Metalama.Framework.Engine.Diagnostics
 
         public void Report( Diagnostic diagnostic )
         {
-            LazyInitializer.EnsureInitialized( ref this._diagnostics )!.Add( diagnostic );
+            LazyInitializer.EnsureInitialized( ref this._diagnostics ).Add( diagnostic );
 
             if ( diagnostic.Severity == DiagnosticSeverity.Error )
             {
@@ -104,7 +104,7 @@ namespace Metalama.Framework.Engine.Diagnostics
                 {
                     if ( location != null && this._codeFixFilter( diagnosticDefinition, location ) )
                     {
-                        LazyInitializer.EnsureInitialized( ref this._codeFixes )!.Add( new CodeFixInstance( diagnosticDefinition.Id, location, codeFix ) );
+                        LazyInitializer.EnsureInitialized( ref this._codeFixes ).Add( new CodeFixInstance( diagnosticDefinition.Id, location, codeFix ) );
                     }
 
                     if ( firstTitle == null )
@@ -137,7 +137,7 @@ namespace Metalama.Framework.Engine.Diagnostics
 
         public void Suppress( ScopedSuppression suppression )
         {
-            LazyInitializer.EnsureInitialized( ref this._suppressions )!.Add( suppression );
+            LazyInitializer.EnsureInitialized( ref this._suppressions ).Add( suppression );
 
             this.Revision++;
         }
@@ -205,7 +205,7 @@ namespace Metalama.Framework.Engine.Diagnostics
         {
             foreach ( var codeFix in codeFixes )
             {
-                LazyInitializer.EnsureInitialized( ref this._codeFixes )!.Add( codeFix );
+                LazyInitializer.EnsureInitialized( ref this._codeFixes ).Add( codeFix );
 
                 this.Revision++;
             }

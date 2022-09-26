@@ -5,7 +5,6 @@ using Metalama.Backstage.Licensing.Consumption;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.AspectWeavers;
-using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Fabrics;
@@ -84,7 +83,7 @@ internal class LicenseVerifier : IService
 
             var projectAssemblyName = NormalizeAssemblyName( project.RunTimeIdentity.Name );
 
-            if ( !this._licenseConsumptionManager.ValidateRedistributionLicenseKey( licenseKey!, projectAssemblyName ) )
+            if ( !this._licenseConsumptionManager.ValidateRedistributionLicenseKey( licenseKey, projectAssemblyName ) )
             {
                 diagnostics.Report(
                     LicensingDiagnosticDescriptors.RedistributionLicenseInvalid.CreateRoslynDiagnostic( null, NormalizeAssemblyName( projectAssemblyName ) ) );
@@ -103,7 +102,7 @@ internal class LicenseVerifier : IService
             .Where( c => c.Project != null )
             .Select( c => c.Project! )
             .Distinct()
-            .Where( p => IsProjectWithValidRedistributionLicense( p ) )
+            .Where( IsProjectWithValidRedistributionLicense )
             .ToHashSet();
 
         nonRedistributionAspectClasses.RemoveWhere(
