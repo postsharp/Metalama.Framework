@@ -54,11 +54,11 @@ internal class ApplyLiveTemplateCodeActionModel : CodeActionModel
         }
 
         var result = await pipeline.ApplyAspectToCodeAsync(
-                this.AspectTypeName,
-                compilation,
-                targetSymbol,
-                executionContext.ComputingPreview,
-                cancellationToken );
+            this.AspectTypeName,
+            compilation,
+            targetSymbol,
+            executionContext.ComputingPreview,
+            cancellationToken );
 
         if ( result.Success )
         {
@@ -66,7 +66,7 @@ internal class ApplyLiveTemplateCodeActionModel : CodeActionModel
         }
         else
         {
-            return CodeActionResult.Error( string.Join( " ", result.Diagnostics.Select( x => x.GetMessage() ) ) );
+            return CodeActionResult.Error( result.Diagnostics );
         }
     }
 }

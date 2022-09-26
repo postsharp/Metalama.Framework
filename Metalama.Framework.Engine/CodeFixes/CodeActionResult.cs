@@ -17,20 +17,31 @@ public class CodeActionResult
 {
     public ImmutableArray<SerializableSyntaxTree> SyntaxTreeChanges { get; }
     
-    public string? ErrorMessage { get; }
+    public ImmutableArray<string>? ErrorMessages { get; }
 
-    public bool IsSuccess => this.ErrorMessage == null;
+    public bool IsSuccess => this.ErrorMessages == null;
 
     [JsonConstructor]
-    private CodeActionResult( ImmutableArray<SerializableSyntaxTree> syntaxTreeChanges, string? errorMessage = null )
+    private CodeActionResult( ImmutableArray<SerializableSyntaxTree> syntaxTreeChanges, ImmutableArray<string>? errorMessages = null )
     {
         this.SyntaxTreeChanges = syntaxTreeChanges;
-        this.ErrorMessage = errorMessage;
+        this.ErrorMessages = errorMessages;
     }
 
     public static CodeActionResult Success( ImmutableArray<SerializableSyntaxTree> syntaxTreeChanges ) => new CodeActionResult( syntaxTreeChanges );
-    public static CodeActionResult Success( IEnumerable<SyntaxTree> modifiedTrees ) => Success( modifiedTrees.Select( x => new SerializableSyntaxTree( x ) ).ToImmutableArray() );
-    public static CodeActionResult Error( string message ) => new CodeActionResult( ImmutableArray<SerializableSyntaxTree>.Empty, message );
+
+    public static CodeActionResult Success( IEnumerable<SyntaxTree> modifiedTrees )
+        => Success( modifiedTrees.Select( x => new SerializableSyntaxTree( x ) ).ToImmutableArray() );
+
+    public static CodeActionResult Error( string message ) => Error( new[] { message } );
+
+    public static CodeActionResult Error( IEnumerable<string> messages )
+        => new CodeActionResult( ImmutableArray<SerializableSyntaxTree>.Empty, messages.ToImmutableArray() );
+
+    public static CodeActionResult Error( Diagnostic diagnostic ) => Error( new[] { diagnostic } );
+
+    public static CodeActionResult Error( IEnumerable<Diagnostic> diagnostic )
+        => Error( diagnostic.Where( d => d.Severity == DiagnosticSeverity.Error ).Select( CodeFixHelper.GetDiagnosticMessage ) );
     
     public static CodeActionResult Empty { get; } = new( ImmutableArray<SerializableSyntaxTree>.Empty );
 

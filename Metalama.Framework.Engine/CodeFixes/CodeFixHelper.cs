@@ -1,10 +1,9 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Engine.Diagnostics;
-using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using System.Collections.Immutable;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,16 +15,14 @@ namespace Metalama.Framework.Engine.CodeFixes
     /// </summary>
     public static class CodeFixHelper
     {
-        public static async Task<Solution> ReportErrorAsCommentsAsync(
-            ISymbol targetSymbol,
+        public static async Task<Solution> ReportErrorsAsCommentsAsync(
+            SyntaxNode targetNode,
             Document targetDocument,
-            string error,
+            IEnumerable<string> errors,
             CancellationToken cancellationToken )
         {
-            var targetNode = await targetSymbol.GetPrimarySyntaxReference().AssertNotNull().GetSyntaxAsync( cancellationToken );
-
             var commentedNode = targetNode.WithLeadingTrivia(
-                targetNode.GetLeadingTrivia().AddRange( new[] { SyntaxFactory.Comment( "// " + error ), SyntaxFactory.LineFeed } ) );
+                targetNode.GetLeadingTrivia().Concat( errors.SelectMany( e => new[] { SyntaxFactory.Comment( "// " + e ), SyntaxFactory.LineFeed } ) ) );
 
             var newSyntaxRoot = (await targetDocument.GetSyntaxRootAsync( cancellationToken ))!.ReplaceNode( targetNode, commentedNode );
 
@@ -34,26 +31,6 @@ namespace Metalama.Framework.Engine.CodeFixes
             return newDocument.Project.Solution;
         }
 
-        public static async Task<Solution> ReportDiagnosticsAsCommentsAsync(
-            ISymbol targetSymbol,
-            Document targetDocument,
-            ImmutableArray<Diagnostic> diagnostics,
-            CancellationToken cancellationToken )
-        {
-            var targetNode = await targetSymbol.GetPrimarySyntaxReference().AssertNotNull().GetSyntaxAsync( cancellationToken );
-
-            var commentedNode = targetNode.WithLeadingTrivia(
-                targetNode.GetLeadingTrivia()
-                    .Concat(
-                        diagnostics.Where( d => d.Severity == DiagnosticSeverity.Error )
-                            .SelectMany(
-                                d => new[] { SyntaxFactory.Comment( "// " + d.GetMessage( UserMessageFormatter.Instance ) ), SyntaxFactory.LineFeed } ) ) );
-
-            var newSyntaxRoot = (await targetDocument.GetSyntaxRootAsync( cancellationToken ))!.ReplaceNode( targetNode, commentedNode );
-
-            var newDocument = targetDocument.WithSyntaxRoot( newSyntaxRoot );
-
-            return newDocument.Project.Solution;
-        }
+        public static string GetDiagnosticMessage( Diagnostic diagnostic ) => diagnostic.GetMessage( UserMessageFormatter.Instance );
     }
 }

@@ -4,7 +4,6 @@ using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeFixes;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
-using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.CodeFixes
@@ -14,11 +13,7 @@ namespace Metalama.Framework.DesignTime.CodeFixes
     /// </summary>
     public abstract class CodeActionModel : CodeActionBaseModel
     {
-  
-
-        protected CodeActionModel( string title) : base( title )
-        {
-        }
+        protected CodeActionModel( string title) : base( title ) { }
 
         // Deserialization constructor.
         protected CodeActionModel() { }
@@ -56,24 +51,12 @@ namespace Metalama.Framework.DesignTime.CodeFixes
             }
             else
             {
-                return this.ReportErrorMessage( invocationContext, result.ErrorMessage.AssertNotNull() );
+                return await CodeFixHelper.ReportErrorsAsCommentsAsync(
+                    invocationContext.SyntaxNode,
+                    invocationContext.Document,
+                    result.ErrorMessages.AssertNotNull(),
+                    cancellationToken );
             }
-        }
-
-        private Solution ReportErrorMessage( CodeActionInvocationContext context, string errorMessage )
-        {
-            var oldNode = context.SyntaxNode;
-            var oldRoot = oldNode.SyntaxTree.GetRoot();
-
-            var newNode = oldNode.WithLeadingTrivia(
-                oldNode.GetLeadingTrivia()
-                    .AddRange( new[] { SyntaxFactory.CarriageReturnLineFeed, SyntaxFactory.Comment( $"Cannot apply the code fix: {errorMessage}" ) } ) );
-
-            var newRoot = oldRoot.ReplaceNode( oldNode, newNode );
-
-            var newDocument = context.Document.WithSyntaxRoot( newRoot );
-
-            return newDocument.Project.Solution;
         }
     }
 }

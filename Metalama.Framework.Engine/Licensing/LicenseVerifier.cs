@@ -74,7 +74,7 @@ public class LicenseVerifier : IService
                 return false;
             }
 
-            this._redistributionLicenseFeaturesByProject.Add( closureProject, new RedistributionLicenseFeatures() );
+            this._redistributionLicenseFeaturesByProject.Add( closureProject, default );
         }
 
         return true;
