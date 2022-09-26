@@ -34,7 +34,7 @@ namespace Metalama.Framework.Engine.Diagnostics
             Location? location,
             T arguments,
             IEnumerable<Location>? additionalLocations = null,
-            CodeFixDiagnosticInfo codeFixes = default,
+            CodeFixTitles codeFixes = default,
             ImmutableDictionary<string, string?>? properties = null )
             where T : notnull
         {
@@ -48,7 +48,7 @@ namespace Metalama.Framework.Engine.Diagnostics
             Location? location,
             object? arguments,
             IEnumerable<Location>? additionalLocations = null,
-            CodeFixDiagnosticInfo codeFixes = default,
+            CodeFixTitles codeFixes = default,
             ImmutableDictionary<string, string?>? properties = null )
         {
             var argumentArray = ConvertDiagnosticArguments( arguments );
@@ -86,23 +86,15 @@ namespace Metalama.Framework.Engine.Diagnostics
             Location? location,
             object?[] arguments,
             IEnumerable<Location>? additionalLocations,
-            CodeFixDiagnosticInfo codeFixes = default,
+            CodeFixTitles codeFixes = default,
             ImmutableDictionary<string, string?>? properties = null )
         {
             var propertiesWithCodeFixes = properties;
 
-            if ( codeFixes.Titles != null )
+            if ( codeFixes.Value != null )
             {
                 propertiesWithCodeFixes ??= ImmutableDictionary.Create<string, string?>();
-                propertiesWithCodeFixes = propertiesWithCodeFixes.Add( CodeFixDiagnosticInfo.TitlesPropertyKey, codeFixes.Titles );
-
-                propertiesWithCodeFixes = propertiesWithCodeFixes.Add(
-                    CodeFixDiagnosticInfo.SourceAssemblyNamePropertyKey,
-                    codeFixes.SourceAssemblyName ?? "" );
-
-                propertiesWithCodeFixes = propertiesWithCodeFixes.Add(
-                    CodeFixDiagnosticInfo.RedistributionLicenseKeyPropertyKey,
-                    codeFixes.SourceRedistributionLicenseKey ?? "" );
+                propertiesWithCodeFixes = propertiesWithCodeFixes.Add( CodeFixTitles.DiagnosticPropertyKey, codeFixes.Value );
             }
 
             return Diagnostic.Create(

@@ -2,6 +2,7 @@
 
 using Metalama.Backstage.Utilities;
 using Metalama.Framework.Code;
+using Metalama.Framework.DesignTime.Licensing;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.DesignTime.Utilities;
 using Metalama.Framework.Eligibility;
@@ -91,7 +92,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
             IEnumerable<MetadataReference> metadataReferences,
             bool isTest )
             : base(
-                pipelineFactory.ServiceProvider.WithService( projectOptions ).WithProjectScopedServices( metadataReferences ),
+                pipelineFactory.ServiceProvider.WithService( projectOptions )
+                    .WithService( new DesignTimeLicenseConsumptionManagerProvider( projectOptions.AdditionalLicense ) )
+                    .WithProjectScopedServices( metadataReferences ),
                 isTest,
                 pipelineFactory.Domain )
         {
@@ -660,14 +663,18 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             var licenseVerifier = configuration.ServiceProvider.GetService<LicenseVerifier>();
 
-            if ( licenseVerifier != null )
+            if ( !computingPreview && licenseVerifier != null )
             {
                 var aspectClass = configuration.AspectClasses.Single( x => x.FullName == aspectTypeName );
-                
 
                 if ( !licenseVerifier.CanSuggestCodeFix( aspectClass ) )
                 {
-                    return (false, null, TODO);
+                    return (false, null, new[]
+                    {
+                        LicensingDiagnosticDescriptors.CodeActionNotAvailable.CreateRoslynDiagnostic(
+                            targetSymbol.GetDiagnosticLocation(),
+                            $"Apply [{aspectClass.DisplayName}] aspect" )
+                    }.ToImmutableArray());
                 }
             }
 

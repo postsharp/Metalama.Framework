@@ -92,7 +92,7 @@ namespace Metalama.Framework.Engine.Diagnostics
         /// <summary>
         /// Returns a string containing all code fix titles and captures the code fixes if we should.  
         /// </summary>
-        private CodeFixDiagnosticInfo ProcessCodeFix( IDiagnosticDefinition diagnosticDefinition, Location? location, ImmutableArray<CodeFix> codeFixes )
+        private CodeFixTitles ProcessCodeFix( IDiagnosticDefinition diagnosticDefinition, Location? location, ImmutableArray<CodeFix> codeFixes )
         {
             if ( !codeFixes.IsDefaultOrEmpty )
             {
@@ -124,12 +124,12 @@ namespace Metalama.Framework.Engine.Diagnostics
                         }
 
                         // This gets executed for all code fixes but the first one.
-                        stringBuilder.Append( CodeFixDiagnosticInfo.Separator );
+                        stringBuilder.Append( CodeFixTitles.Separator );
                         stringBuilder.Append( codeFix.Title );
                     }
                 }
 
-                return new CodeFixDiagnosticInfo( stringBuilder?.ToString() ?? firstTitle );
+                return new CodeFixTitles( stringBuilder?.ToString() ?? firstTitle );
             }
             else
             {
@@ -199,9 +199,9 @@ namespace Metalama.Framework.Engine.Diagnostics
         {
             var definition = GeneralDiagnosticDescriptors.SuggestedCodeFix;
             var resolvedLocation = GetLocation( location );
-            var codeFixDiagnosticInfo = this.ProcessCodeFix( definition, resolvedLocation, ImmutableArray.Create( codeFix ) );
+            var codeFixes = this.ProcessCodeFix( definition, resolvedLocation, ImmutableArray.Create( codeFix ) );
 
-            this.Report( definition.CreateRoslynDiagnostic( resolvedLocation, codeFixDiagnosticInfo.Titles!, codeFixes: codeFixDiagnosticInfo ) );
+            this.Report( definition.CreateRoslynDiagnostic( resolvedLocation, codeFixes.Value!, codeFixes: codeFixes ) );
         }
 
         public void AddCodeFixes( IEnumerable<CodeFixInstance> codeFixes )

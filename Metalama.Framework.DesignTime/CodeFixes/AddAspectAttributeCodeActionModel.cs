@@ -48,7 +48,7 @@ internal class AddAspectAttributeCodeActionModel : CodeActionModel
 
     public override async Task<CodeActionResult> ExecuteAsync(
         CodeActionExecutionContext executionContext,
-        bool computingPreview,
+        bool isComputingPreview,
         CancellationToken cancellationToken )
     {
         AttributeHelper.Parse( this.AspectTypeName, out var ns, out _, out var shortName );

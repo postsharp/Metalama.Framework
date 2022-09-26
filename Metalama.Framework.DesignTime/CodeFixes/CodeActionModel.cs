@@ -28,7 +28,7 @@ namespace Metalama.Framework.DesignTime.CodeFixes
         /// </summary>
         public abstract Task<CodeActionResult> ExecuteAsync(
             CodeActionExecutionContext executionContext,
-            bool computingPreview,
+            bool isComputingPreview,
             CancellationToken cancellationToken );
 
         public override ImmutableArray<CodeAction> ToCodeActions( CodeActionInvocationContext invocationContext, string titlePrefix = "" )

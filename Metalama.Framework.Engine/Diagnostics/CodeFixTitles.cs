@@ -6,21 +6,21 @@ using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Diagnostics
 {
-    public readonly struct CodeFixDiagnosticInfo
+    public readonly struct CodeFixTitles
     {
-        public const string TitlesPropertyKey = "Metalama.CodeFixes";
+        public const string DiagnosticPropertyKey = "Metalama.CodeFixes";
         public const char Separator = '\n';
 
-        internal string? Titles { get; }
+        internal string? Value { get; }
 
-        internal CodeFixDiagnosticInfo( string? titles )
+        internal CodeFixTitles( string? value )
         {
-            this.Titles = titles;
+            this.Value = value;
         }
 
         public static IReadOnlyList<string> GetCodeFixTitles( Diagnostic diagnostic )
         {
-            if ( diagnostic.Properties.TryGetValue( TitlesPropertyKey, out var values ) && values != null )
+            if ( diagnostic.Properties.TryGetValue( DiagnosticPropertyKey, out var values ) && values != null )
             {
                 return values.Split( Separator );
             }

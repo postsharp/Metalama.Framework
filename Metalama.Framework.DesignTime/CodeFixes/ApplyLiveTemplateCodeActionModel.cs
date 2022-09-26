@@ -35,7 +35,7 @@ internal class ApplyLiveTemplateCodeActionModel : CodeActionModel
 
     public override async Task<CodeActionResult> ExecuteAsync(
         CodeActionExecutionContext executionContext,
-        bool computingPreview,
+        bool isComputingPreview,
         CancellationToken cancellationToken )
     {
         var compilation = executionContext.Compilation.RoslynCompilation;

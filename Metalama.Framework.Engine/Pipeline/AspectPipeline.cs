@@ -254,11 +254,11 @@ namespace Metalama.Framework.Engine.Pipeline
             
             // Initialize the licensing service with redistribution licenses.
             // Add the license verifier.
-            var licenseConsumptionManager = projectServiceProviderWithProject.GetBackstageService<ILicenseConsumptionManager>();
+            var licenseConsumptionManager = projectServiceProviderWithProject.GetService<ILicenseConsumptionManagerProvider>()?.LicenseConsumptionManager;
 
             if ( licenseConsumptionManager != null )
             {
-                var licenseVerifier = new LicenseVerifier( licenseConsumptionManager );
+                var licenseVerifier = new LicenseVerifier( licenseConsumptionManager, compilation.Compilation.AssemblyName );
 
                 if ( !licenseVerifier.TryInitialize( compileTimeProject, diagnosticAdder ) )
                 {
@@ -269,7 +269,6 @@ namespace Metalama.Framework.Engine.Pipeline
                 
                 projectServiceProviderWithProject = projectServiceProviderWithProject.WithService( licenseVerifier );
             }
-
 
             // Creates a project model that includes the final service provider.
             var projectModel = new ProjectModel( compilation.Compilation, projectServiceProviderWithProject );

@@ -3,6 +3,7 @@
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.UserCode;
@@ -40,7 +41,7 @@ namespace Metalama.Framework.Engine.CodeFixes
             Document document,
             Diagnostic diagnostic,
             string codeFixTitle,
-            bool computingPreview,
+            bool isComputingPreview,
             CancellationToken cancellationToken )
         {
             var project = document.Project;
@@ -58,7 +59,14 @@ namespace Metalama.Framework.Engine.CodeFixes
                 return CodeActionResult.Empty;
             }
 
-            return await this.ExecuteCodeFixAsync( compilation, syntaxTree, diagnostic.Id, diagnostic.Location.SourceSpan, codeFixTitle, cancellationToken );
+            return await this.ExecuteCodeFixAsync(
+                compilation,
+                syntaxTree,
+                diagnostic.Id,
+                diagnostic.Location.SourceSpan,
+                codeFixTitle,
+                isComputingPreview,
+                cancellationToken );
         }
 
         public async Task<CodeActionResult> ExecuteCodeFixAsync(
@@ -67,6 +75,7 @@ namespace Metalama.Framework.Engine.CodeFixes
             string diagnosticId,
             TextSpan diagnosticSpan,
             string codeFixTitle,
+            bool isComputingPreview,
             CancellationToken cancellationToken )
         {
             // Get a compilation _without_ generated code, and map the target symbol.
@@ -125,11 +134,11 @@ namespace Metalama.Framework.Engine.CodeFixes
             }
             else if ( !codeFix.IsLicensed && !isComputingPreview )
             {
-                return CodeActionResult.Error( "License error (TODO)." );
+                return CodeActionResult.Error(
+                    LicensingDiagnosticDescriptors.CodeActionNotAvailable.CreateRoslynDiagnostic( null, codeFixTitle ).GetMessage() );
             }
             else
             {
-
                 var context = new CodeActionContext( partialCompilation, designTimeConfiguration!, cancellationToken );
 
                 var codeFixBuilder = new CodeActionBuilder( context );

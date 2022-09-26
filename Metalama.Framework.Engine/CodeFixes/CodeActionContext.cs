@@ -72,6 +72,7 @@ namespace Metalama.Framework.Engine.CodeFixes
             }
         }
 
-        internal CodeActionResult ToCodeActionResult() => new( this._changedSyntaxTrees.Select( x => this.Compilation.SyntaxTrees[x] ).ToImmutableArray() );
+        internal CodeActionResult ToCodeActionResult()
+            => CodeActionResult.Success( this._changedSyntaxTrees.Select( x => this.Compilation.SyntaxTrees[x] ).ToImmutableArray() );
     }
 }

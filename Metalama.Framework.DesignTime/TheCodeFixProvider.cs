@@ -62,17 +62,16 @@ namespace Metalama.Framework.DesignTime
 
         public override async Task RegisterCodeFixesAsync( CodeFixContext context )
         {
-            this._logger.Trace?.Log( $"DesignTimeCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}')" );
+            this._logger.Trace?.Log( $"TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' )" );
 
             this._logger.Trace?.Log(
-                $"DesignTimeCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}'): input diagnostics = {context.Diagnostics.Select( x => x.Id ).Distinct()}" );
+                $"TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' ): input diagnostics = {context.Diagnostics.Select( x => x.Id ).Distinct()}" );
 
             var projectOptions = MSBuildProjectOptions.GetInstance( context.Document.Project );
 
             if ( !projectOptions.IsFrameworkEnabled )
             {
-                this._logger.Trace?.Log(
-                    "DesignTimeCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}'): not a Metalama project." );
+                this._logger.Trace?.Log( $"TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' ): not a Metalama project." );
 
                 return;
             }
@@ -82,7 +81,7 @@ namespace Metalama.Framework.DesignTime
                 // This is a hard-coded code fix. It may need to be refactored with our framework.
 
                 this._logger.Trace?.Log(
-                    "DesignTimeCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}'): registering 'make partial'" );
+                    $"TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' ): registering 'make partial'" );
 
                 context.RegisterCodeFix(
                     CodeAction.Create(
@@ -92,13 +91,13 @@ namespace Metalama.Framework.DesignTime
                     context.Diagnostics );
             }
 
-            if ( context.Diagnostics.Any( d => d.Properties.ContainsKey( CodeFixDiagnosticInfo.TitlesPropertyKey ) ) )
+            if ( context.Diagnostics.Any( d => d.Properties.ContainsKey( CodeFixTitles.DiagnosticPropertyKey ) ) )
             {
                 // We have a user diagnostics where a code fix provider was specified. We need to execute the CodeFix pipeline to gather
                 // the actual code fixes.
 
                 this._logger.Trace?.Log(
-                    "DesignTimeCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}'): relevant diagnostic ID detected." );
+                    $"TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' ): relevant diagnostic ID detected." );
 
                 var codeFixes = ProvideCodeFixes(
                     context.Diagnostics,
@@ -110,6 +109,19 @@ namespace Metalama.Framework.DesignTime
                     return;
                 }
 
+                // Find the declaring node.
+                var syntaxRoot = await context.Document.GetSyntaxRootAsync( context.CancellationToken );
+
+                if ( syntaxRoot == null )
+                {
+                    this._logger.Trace?.Log(
+                        $"TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' ): no syntax root for '{context.Document.Name}'." );
+
+                    return;
+                }
+
+                var node = syntaxRoot.FindNode( context.Span );
+
                 var compilation = await context.Document.Project.GetCompilationAsync( context.CancellationToken );
 
                 if ( compilation == null )
@@ -120,6 +132,7 @@ namespace Metalama.Framework.DesignTime
                 var invocationContext = new CodeActionInvocationContext(
                     this._codeActionExecutionService,
                     context.Document,
+                    node,
                     this._logger,
                     compilation.GetProjectKey() );
 
@@ -128,7 +141,7 @@ namespace Metalama.Framework.DesignTime
                     foreach ( var codeAction in ((CodeActionBaseModel) fix.CodeAction).ToCodeActions( invocationContext ) )
                     {
                         this._logger.Trace?.Log(
-                            $"DesignTimeCodeFixProvider.RegisterCodeFixesAsync( project='{{context.Document.Project.Name}}'): registering '{codeAction.Title}'." );
+                            $"TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' ): registering '{codeAction.Title}'." );
 
                         context.RegisterCodeFix( codeAction, fix.Diagnostic );
                     }
@@ -137,7 +150,7 @@ namespace Metalama.Framework.DesignTime
             else
             {
                 this._logger.Trace?.Log(
-                    "DesignTimeCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}'): no relevant diagnostic ID detected" );
+                    "TheCodeFixProvider.RegisterCodeFixesAsync( project='{context.Document.Project.Name}' ): no relevant diagnostic ID detected" );
             }
         }
 
@@ -193,16 +206,10 @@ namespace Metalama.Framework.DesignTime
             {
                 cancellationToken.ThrowIfCancellationRequested();
 
-                if ( diagnostic.Properties.TryGetValue( CodeFixDiagnosticInfo.TitlesPropertyKey, out var codeFixTitles ) &&
+                if ( diagnostic.Properties.TryGetValue( CodeFixTitles.DiagnosticPropertyKey, out var codeFixTitles ) &&
                      !string.IsNullOrEmpty( codeFixTitles ) )
                 {
-                    _ = diagnostic.Properties.TryGetValue( CodeFixDiagnosticInfo.SourceAssemblyNamePropertyKey, out var sourceAssemblyName );
-
-                    _ = diagnostic.Properties.TryGetValue(
-                        CodeFixDiagnosticInfo.RedistributionLicenseKeyPropertyKey,
-                        out var sourceTypeRedistributionLicenseKey );
-
-                    var splitTitles = codeFixTitles!.Split( CodeFixDiagnosticInfo.Separator );
+                    var splitTitles = codeFixTitles!.Split( CodeFixTitles.Separator );
 
                     foreach ( var codeFixTitle in splitTitles )
                     {
@@ -211,9 +218,7 @@ namespace Metalama.Framework.DesignTime
 
                         var codeAction = new UserCodeActionModel(
                             codeFixTitle,
-                            diagnostic,
-                            sourceAssemblyName,
-                            sourceTypeRedistributionLicenseKey );
+                            diagnostic );
 
                         codeFixesBuilder.Add( new CodeFixModel( codeAction, ImmutableArray.Create( diagnostic ) ) );
                     }

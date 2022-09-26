@@ -391,7 +391,7 @@ internal sealed class CompileTimeProjectLoader : CompileTimeTypeResolver, IServi
                 referenceProjects,
                 string.IsNullOrEmpty( manifest.RedistributionLicenseKey )
                     ? null
-                    : new ProjectLicenseInfo( runTimeAssemblyIdentity.Name, manifest.RedistributionLicenseKey ),
+                    : new ProjectLicenseInfo( manifest.RedistributionLicenseKey ),
                 diagnosticAdder,
                 cancellationToken,
                 out var assemblyPath,

@@ -37,7 +37,7 @@ internal class UserCodeActionModel : CodeActionModel
 
     public override async Task<CodeActionResult> ExecuteAsync(
         CodeActionExecutionContext executionContext,
-        bool computingPreview,
+        bool isComputingPreview,
         CancellationToken cancellationToken )
     {
         var pipelineFactory = executionContext.ServiceProvider.GetRequiredService<DesignTimeAspectPipelineFactory>();
@@ -69,6 +69,13 @@ internal class UserCodeActionModel : CodeActionModel
 
         var codeFixRunner = new DesignTimeCodeFixRunner( executionContext.ServiceProvider );
 
-        return await codeFixRunner.ExecuteCodeFixAsync( compilation, syntaxTree, this.DiagnosticId, this.DiagnosticSpan, this.Title, cancellationToken );
+        return await codeFixRunner.ExecuteCodeFixAsync(
+            compilation,
+            syntaxTree,
+            this.DiagnosticId,
+            this.DiagnosticSpan,
+            this.Title,
+            isComputingPreview,
+            cancellationToken );
     }
 }

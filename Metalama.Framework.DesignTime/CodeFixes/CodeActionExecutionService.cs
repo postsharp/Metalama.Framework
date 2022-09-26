@@ -1,7 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Backstage.Diagnostics;
-using Metalama.Framework.DesignTime.Licensing;
 using Metalama.Framework.DesignTime.Pipeline;
 using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.CodeModel;
@@ -27,7 +26,7 @@ public class CodeActionExecutionService : ICodeActionExecutionService
         {
             this._logger.Error?.Log( "Cannot get the pipeline." );
 
-            return CodeActionResult.Empty;
+            return CodeActionResult.Error( "The Metalama code action execution service failed to get the aspect pipeline." );
         }
 
         var compilation = pipeline.LastCompilation;
@@ -36,7 +35,7 @@ public class CodeActionExecutionService : ICodeActionExecutionService
         {
             this._logger.Error?.Log( "Cannot get the compilation." );
 
-            return CodeActionResult.Empty;
+            return CodeActionResult.Error( "The Metalama code action execution service failed to get the compilation." );
         }
 
         var partialCompilation = PartialCompilation.CreateComplete( compilation );
@@ -51,18 +50,7 @@ public class CodeActionExecutionService : ICodeActionExecutionService
         {
             this._logger.Error?.Log( "Cannot initialize the pipeline." );
 
-            return CodeActionResult.Empty;
-        }
-
-        if ( !computingPreview )
-        {
-            var licenseVerifier = configuration.ServiceProvider.GetRequiredService<DesignTimeLicenseVerifier>();
-
-            if ( !licenseVerifier.CanExecuteCodeAction( codeActionModel, compilation.AssemblyName ) )
-            {
-                // TODO: Give a message.
-                return CodeActionResult.Empty;
-            }
+            return CodeActionResult.Error( "The Metalama code action execution service failed to initialize the aspect pipeline." );
         }
 
         var compilationModel = CompilationModel.CreateInitialInstance( configuration.ProjectModel, partialCompilation );

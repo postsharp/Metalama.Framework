@@ -6,7 +6,7 @@ namespace Metalama.Framework.Engine.CompileTime;
 /// Encapsulates the license information that is specific to the project, not to the user profile.
 /// </summary>
 /// <param name="RedistributionLicenseKey"></param>
-public record ProjectLicenseInfo( string? AssemblyName, string? RedistributionLicenseKey )
+public record ProjectLicenseInfo( string? RedistributionLicenseKey )
 {
-    public static ProjectLicenseInfo Empty { get; } = new( default(string), default(string) );
+    public static ProjectLicenseInfo Empty { get; } = new( default(string) );
 }

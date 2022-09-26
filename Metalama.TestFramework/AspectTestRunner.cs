@@ -80,7 +80,7 @@ namespace Metalama.TestFramework
             {
                 var licenseKey = File.ReadAllText( Path.Combine( testInput.ProjectDirectory, testInput.Options.LicenseFile ) );
 
-                serviceProviderForThisTest = serviceProviderForThisTest.AddTestLicenseVerifier( licenseKey );
+                serviceProviderForThisTest = serviceProviderForThisTest.AddTestLicenseVerifier( licenseKey, null );
             }
 
             using var domain = new UnloadableCompileTimeDomain();
@@ -131,7 +131,7 @@ namespace Metalama.TestFramework
             ServiceProvider serviceProvider,
             bool computingPreview )
         {
-            var codeFixes = testResult.PipelineDiagnostics.SelectMany( d => CodeFixDiagnosticInfo.GetCodeFixTitles( d ).Select( t => (Diagnostic: d, Title: t) ) );
+            var codeFixes = testResult.PipelineDiagnostics.SelectMany( d => CodeFixTitles.GetCodeFixTitles( d ).Select( t => (Diagnostic: d, Title: t) ) );
             var codeFix = codeFixes.ElementAt( testInput.Options.AppliedCodeFixIndex.GetValueOrDefault() );
             var codeFixRunner = new StandaloneCodeFixRunner( domain, serviceProvider );
 

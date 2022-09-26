@@ -2,7 +2,6 @@
 
 using Metalama.Backstage.Diagnostics;
 using Metalama.Framework.DesignTime.Diagnostics;
-using Metalama.Framework.DesignTime.Licensing;
 using Metalama.Framework.DesignTime.Pipeline.Dependencies;
 using Metalama.Framework.DesignTime.Pipeline.Diff;
 using Metalama.Framework.Engine;
@@ -10,6 +9,7 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.CodeModel;
 using Metalama.Framework.Engine.CompileTime;
 using Metalama.Framework.Engine.Diagnostics;
+using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Threading;
@@ -357,15 +357,14 @@ namespace Metalama.Framework.DesignTime.Pipeline
                     // If we don't have any configuration, we will build one, because this is the first time we are called.
 
                     var compileTimeTrees = GetCompileTimeSyntaxTrees( ref state, compilation.Compilation, cancellationToken );
-
+                    
                     state._pipeline.Observer?.OnInitializePipeline( compilation.Compilation );
 
-                    var licenseVerifier = state._pipeline.ServiceProvider.GetRequiredService<DesignTimeLicenseVerifier>();
-                    var redistributionLicenseKey = licenseVerifier?.RedistributionLicenseKey;
+                    var licenseConsumptionManager = state._pipeline.ServiceProvider.GetService<ILicenseConsumptionManagerProvider>()?.LicenseConsumptionManager;
+                    var redistributionLicenseKey = licenseConsumptionManager?.RedistributionLicenseKey;
 
-                    // TODO: Assembly name
-                    var projectLicenseInfo = string.IsNullOrEmpty( redistributionLicenseKey ) ? ProjectLicenseInfo.Empty : new ProjectLicenseInfo( "", redistributionLicenseKey );
-                    
+                    var projectLicenseInfo = string.IsNullOrEmpty( redistributionLicenseKey ) ? ProjectLicenseInfo.Empty : new ProjectLicenseInfo( redistributionLicenseKey );
+
                     if ( !state._pipeline.TryInitialize(
                             diagnosticAdder,
                             compilation,
