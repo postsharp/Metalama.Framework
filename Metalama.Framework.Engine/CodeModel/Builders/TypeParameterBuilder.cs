@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.DeclarationBuilders;
-using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using SpecialType = Metalama.Framework.Code.SpecialType;

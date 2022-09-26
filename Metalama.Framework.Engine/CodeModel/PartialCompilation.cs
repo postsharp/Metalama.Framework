@@ -355,7 +355,7 @@ namespace Metalama.Framework.Engine.CodeModel
                    .WhereNotNull()
                    .Select( a => a.SyntaxTree )
                    .OrderBy( x => x.FilePath.Length )
-                   .ThenBy( x => x )
+                   .ThenBy( x => x.FilePath )
                    .FirstOrDefault()
                ?? this.SyntaxTrees
                    .OrderBy( t => t.Key.Length )

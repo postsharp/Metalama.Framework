@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Code;
+using Metalama.Framework.Engine.Utilities.Caching;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Diagnostics.CodeAnalysis;
@@ -27,7 +28,9 @@ namespace Metalama.Framework.Engine.CodeModel
         }
 
         // Caches the result type of an awaitable for a type, or null if the type is not awaitable.
-        private static readonly ConditionalWeakTable<INamedTypeSymbol, AsyncInfoSymbol?> _cache = new();
+#pragma warning disable CA1805
+        private static readonly WeakCache<INamedTypeSymbol, AsyncInfoSymbol?> _cache = new();
+#pragma warning restore CA1805
 
         /// <summary>
         /// Gets the type of the result of an awaitable.
@@ -62,7 +65,7 @@ namespace Metalama.Framework.Engine.CodeModel
 
             // We're caching because we're always requesting the same few types.
             // ReSharper disable once InconsistentlySynchronizedField
-            var cached = _cache.GetValue( namedType, GetAwaitableResultTypeCore );
+            var cached = _cache.GetOrAdd( namedType, GetAwaitableResultTypeCore );
 
             if ( cached != null )
             {

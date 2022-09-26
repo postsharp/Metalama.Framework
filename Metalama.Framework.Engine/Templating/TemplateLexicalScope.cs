@@ -2,7 +2,6 @@
 
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Threading;
 
 namespace Metalama.Framework.Engine.Templating
 {

@@ -5,6 +5,10 @@ using System.IO;
 
 namespace Metalama.Framework.Engine.Utilities.Caching;
 
+/// <summary>
+/// A cache where the key is a file and the last write time of that file.
+/// </summary>
+/// <typeparam name="T"></typeparam>
 internal class FileBasedCache<T>
 {
     private readonly FixedCapacityCache<CacheEntry> _cache = new( 500 );

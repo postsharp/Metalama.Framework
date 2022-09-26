@@ -2,7 +2,7 @@
 
 using System.Collections.Generic;
 
-namespace Metalama.Framework.Engine.Utilities.Threading;
+namespace Metalama.Framework.Engine.Collections;
 
 internal interface IReadOnlyCollectionWithContains<T> : IReadOnlyCollection<T>
 {

@@ -5,10 +5,10 @@ using Metalama.Framework.CodeFixes;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Collections;
 using Metalama.Framework.Engine.CompileTime;
 using Microsoft.CodeAnalysis;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Text;
@@ -24,9 +24,9 @@ namespace Metalama.Framework.Engine.Diagnostics
     {
         private readonly DiagnosticManifest? _diagnosticManifest;
         private readonly CodeFixFilter _codeFixFilter;
-        private ConcurrentBag<Diagnostic>? _diagnostics;
-        private ConcurrentBag<ScopedSuppression>? _suppressions;
-        private ConcurrentBag<CodeFixInstance>? _codeFixes;
+        private ConcurrentLinkedList<Diagnostic>? _diagnostics;
+        private ConcurrentLinkedList<ScopedSuppression>? _suppressions;
+        private ConcurrentLinkedList<CodeFixInstance>? _codeFixes;
 
         public bool IsEmpty
         {

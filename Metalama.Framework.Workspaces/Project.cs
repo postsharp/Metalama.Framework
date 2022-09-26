@@ -10,7 +10,6 @@ using Metalama.Framework.Engine.Utilities;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Introspection;
 using System.Collections.Immutable;
-using System.Threading.Tasks;
 
 namespace Metalama.Framework.Workspaces
 {

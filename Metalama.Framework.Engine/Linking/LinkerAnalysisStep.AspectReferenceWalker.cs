@@ -4,7 +4,6 @@ using Metalama.Framework.Engine.Aspects;
 using Metalama.Framework.Engine.Utilities.Roslyn;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 
 namespace Metalama.Framework.Engine.Linking

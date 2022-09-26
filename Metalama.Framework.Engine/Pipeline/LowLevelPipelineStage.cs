@@ -10,7 +10,6 @@ using Metalama.Framework.Engine.Utilities.UserCode;
 using Metalama.Framework.Project;
 using System;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -63,7 +62,8 @@ internal sealed class LowLevelPipelineStage : PipelineStage
             new AspectWeaverHelper( pipelineConfiguration.ServiceProvider, compilation ),
             pipelineConfiguration.ServiceProvider,
             input.Project,
-            this._aspectClass.GeneratedCodeAnnotation );
+            this._aspectClass.GeneratedCodeAnnotation,
+            cancellationToken );
 
         var executionContext = new UserCodeExecutionContext(
             this.ServiceProvider,

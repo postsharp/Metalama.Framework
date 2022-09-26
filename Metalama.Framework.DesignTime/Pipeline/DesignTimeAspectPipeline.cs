@@ -15,13 +15,13 @@ using Metalama.Framework.Engine.Pipeline.DesignTime;
 using Metalama.Framework.Engine.Pipeline.LiveTemplates;
 using Metalama.Framework.Engine.Templating;
 using Metalama.Framework.Engine.Utilities;
+using Metalama.Framework.Engine.Utilities.Caching;
 using Metalama.Framework.Engine.Utilities.Diagnostics;
 using Metalama.Framework.Engine.Utilities.Threading;
 using Metalama.Framework.Project;
 using Microsoft.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.CompilerServices;
 
 namespace Metalama.Framework.DesignTime.Pipeline
 {
@@ -33,7 +33,9 @@ namespace Metalama.Framework.DesignTime.Pipeline
     {
         private static readonly string _sourceGeneratorAssemblyName = typeof(DesignTimeAspectPipelineFactory).Assembly.GetName().Name.AssertNotNull();
 
-        private readonly ConditionalWeakTable<Compilation, CompilationResult> _compilationResultCache = new();
+#pragma warning disable CA1805 // Do not initialize unnecessarily
+        private readonly WeakCache<Compilation, CompilationResult> _compilationResultCache = new();
+#pragma warning restore CA1805 // Do not initialize unnecessarily
         private readonly IFileSystemWatcher? _fileSystemWatcher;
         private readonly ProjectKey _projectKey;
 
@@ -451,7 +453,10 @@ namespace Metalama.Framework.DesignTime.Pipeline
                         this._currentState.ValidationResult,
                         this._currentState.Configuration?.CompileTimeProject );
 
-                    this._compilationResultCache.Add( compilation, compilationResult );
+                    if ( !this._compilationResultCache.TryAdd( compilation, compilationResult ) )
+                    {
+                        throw new AssertionFailedException();
+                    }
 
                     return compilationResult;
                 }

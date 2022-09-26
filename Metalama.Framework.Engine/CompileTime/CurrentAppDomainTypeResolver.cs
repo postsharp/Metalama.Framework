@@ -3,6 +3,7 @@
 using Microsoft.CodeAnalysis;
 using System;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace Metalama.Framework.Engine.CompileTime;
@@ -23,19 +24,17 @@ internal class CurrentAppDomainTypeResolver : CompileTimeTypeResolver
 
     protected override Type? GetCompileTimeNamedType( INamedTypeSymbol typeSymbol, CancellationToken cancellationToken = default )
     {
-        if ( !this.Cache.TryGetValue( typeSymbol, out var type ) )
+        if ( !this.Cache.TryGetValue( typeSymbol, out var typeBox ) )
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            type = this.GetCompileTimeNamedTypeCore( typeSymbol );
-
-            this.Cache.Add( typeSymbol, type );
+            typeBox = this.Cache.GetOrAdd( typeSymbol, ( t, ct ) => new StrongBox<Type?>( this.GetCompileTimeNamedTypeCore( (INamedTypeSymbol) t, ct ) ), cancellationToken );
         }
 
-        return type;
+        return typeBox.Value;
     }
 
-    private Type? GetCompileTimeNamedTypeCore( INamedTypeSymbol typeSymbol )
+    private Type? GetCompileTimeNamedTypeCore( INamedTypeSymbol typeSymbol, CancellationToken cancellationToken )
     {
         var typeName = typeSymbol.GetReflectionName();
 
@@ -43,6 +42,8 @@ internal class CurrentAppDomainTypeResolver : CompileTimeTypeResolver
         {
             return null;
         }
+
+        cancellationToken.ThrowIfCancellationRequested();
 
         if ( typeSymbol.ContainingAssembly != null )
         {
