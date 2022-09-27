@@ -115,14 +115,9 @@ public class LicenseVerifier : IService
         }
     }
 
-    public bool CanSuggestCodeFix( IAspectClass aspectClass )
+    public bool CanApplyCodeFix( IAspectClass aspectClass )
         => aspectClass switch
         {
-            FabricAggregateAspectClass =>
-
-                // TODO: depends on the product?
-                true,
-
             IAspectClassImpl aspectClassImpl when aspectClassImpl.Project != null
                                                   && this.IsProjectWithValidRedistributionLicense( aspectClassImpl.Project )
                 => true,

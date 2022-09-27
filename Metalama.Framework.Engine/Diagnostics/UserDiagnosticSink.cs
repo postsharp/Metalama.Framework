@@ -22,7 +22,7 @@ namespace Metalama.Framework.Engine.Diagnostics
     {
         private readonly DiagnosticManifest? _diagnosticManifest;
         private readonly CodeFixFilter _codeFixFilter;
-        private readonly bool _canSuggestCodeFix;
+        private readonly CodeFixAvailability _codeFixAvailability;
         private ImmutableArray<Diagnostic>.Builder? _diagnostics;
         private ImmutableArray<ScopedSuppression>.Builder? _suppressions;
         private ImmutableArray<CodeFixInstance>.Builder? _codeFixes;
@@ -52,11 +52,11 @@ namespace Metalama.Framework.Engine.Diagnostics
 
         public UserDiagnosticSink( CompileTimeProject? compileTimeProject ) : this( compileTimeProject, null ) { }
 
-        internal UserDiagnosticSink( CompileTimeProject? compileTimeProject, CodeFixFilter? codeFixFilter, bool canSuggestCodeFix = true )
+        internal UserDiagnosticSink( CompileTimeProject? compileTimeProject, CodeFixFilter? codeFixFilter, CodeFixAvailability codeFixAvailability = CodeFixAvailability.PreviewAndApply )
         {
             this._diagnosticManifest = compileTimeProject?.ClosureDiagnosticManifest;
             this._codeFixFilter = codeFixFilter ?? (( _, _ ) => false);
-            this._canSuggestCodeFix = canSuggestCodeFix;
+            this._codeFixAvailability = codeFixAvailability;
         }
 
         // This overload is used for tests only.
@@ -94,7 +94,7 @@ namespace Metalama.Framework.Engine.Diagnostics
         /// </summary>
         private CodeFixTitles ProcessCodeFix( IDiagnosticDefinition diagnosticDefinition, Location? location, ImmutableArray<CodeFix> codeFixes )
         {
-            if ( !codeFixes.IsDefaultOrEmpty )
+            if ( !codeFixes.IsDefaultOrEmpty && this._codeFixAvailability != CodeFixAvailability.None )
             {
                 // This code implements an optimization to avoid allocating a StringBuilder if there is a single code fix. 
                 string? firstTitle = null;
@@ -106,7 +106,13 @@ namespace Metalama.Framework.Engine.Diagnostics
                     if ( location != null && this._codeFixFilter( diagnosticDefinition, location ) )
                     {
                         this._codeFixes ??= ImmutableArray.CreateBuilder<CodeFixInstance>();
-                        this._codeFixes.Add( new CodeFixInstance( diagnosticDefinition.Id, location, codeFix, this._canSuggestCodeFix ) );
+
+                        this._codeFixes.Add(
+                            new CodeFixInstance(
+                                diagnosticDefinition.Id,
+                                location,
+                                codeFix,
+                                this._codeFixAvailability == CodeFixAvailability.PreviewAndApply ) );
                     }
 
                     if ( firstTitle == null )

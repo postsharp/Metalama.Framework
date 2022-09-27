@@ -4,6 +4,7 @@ using Metalama.Framework.Engine;
 using Metalama.Framework.Engine.CodeFixes;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CodeActions;
+using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Immutable;
 
 namespace Metalama.Framework.DesignTime.CodeFixes
@@ -13,7 +14,7 @@ namespace Metalama.Framework.DesignTime.CodeFixes
     /// </summary>
     public abstract class CodeActionModel : CodeActionBaseModel
     {
-        protected CodeActionModel( string title) : base( title ) { }
+        protected CodeActionModel( string title ) : base( title ) { }
 
         // Deserialization constructor.
         protected CodeActionModel() { }
@@ -51,12 +52,28 @@ namespace Metalama.Framework.DesignTime.CodeFixes
             }
             else
             {
-                return await CodeFixHelper.ReportErrorsAsCommentsAsync(
+                return await ReportErrorsAsCommentsAsync(
                     invocationContext.SyntaxNode,
                     invocationContext.Document,
                     result.ErrorMessages.AssertNotNull(),
                     cancellationToken );
             }
+        }
+
+        private static async Task<Solution> ReportErrorsAsCommentsAsync(
+            SyntaxNode targetNode,
+            Document targetDocument,
+            IEnumerable<string> errors,
+            CancellationToken cancellationToken )
+        {
+            var commentedNode = targetNode.WithLeadingTrivia(
+                targetNode.GetLeadingTrivia().Concat( errors.SelectMany( e => new[] { SyntaxFactory.Comment( "// " + e ), SyntaxFactory.LineFeed } ) ) );
+
+            var newSyntaxRoot = (await targetDocument.GetSyntaxRootAsync( cancellationToken ))!.ReplaceNode( targetNode, commentedNode );
+
+            var newDocument = targetDocument.WithSyntaxRoot( newSyntaxRoot );
+
+            return newDocument.Project.Solution;
         }
     }
 }

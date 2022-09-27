@@ -667,7 +667,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             {
                 var aspectClass = configuration.AspectClasses.Single( x => x.FullName == aspectTypeName );
 
-                if ( !licenseVerifier.CanSuggestCodeFix( aspectClass ) )
+                if ( !licenseVerifier.CanApplyCodeFix( aspectClass ) )
                 {
                     return (false, null, new[]
                     {

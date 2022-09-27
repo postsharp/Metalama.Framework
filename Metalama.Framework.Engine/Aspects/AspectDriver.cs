@@ -1,5 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Backstage.Configuration;
+using Metalama.Backstage.Extensibility;
 using Metalama.Framework.Advising;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
@@ -8,7 +10,9 @@ using Metalama.Framework.Eligibility;
 using Metalama.Framework.Eligibility.Implementation;
 using Metalama.Framework.Engine.Advising;
 using Metalama.Framework.Engine.AspectWeavers;
+using Metalama.Framework.Engine.CodeFixes;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Framework.Engine.Configuration;
 using Metalama.Framework.Engine.Diagnostics;
 using Metalama.Framework.Engine.Licensing;
 using Metalama.Framework.Engine.Pipeline;
@@ -32,14 +36,14 @@ namespace Metalama.Framework.Engine.Aspects
     {
         private readonly ReflectionMapper _reflectionMapper;
         private readonly IAspectClassImpl _aspectClass;
-        private readonly bool _canSuggestCodeFixes;
+        private readonly CodeFixAvailability _codeFixAvailability;
 
         public IEligibilityRule<IDeclaration>? EligibilityRule { get; }
 
         public AspectDriver( IServiceProvider serviceProvider, IAspectClassImpl aspectClass, CompilationModel compilation )
         {
             this._reflectionMapper = serviceProvider.GetRequiredService<ReflectionMapperFactory>().GetInstance( compilation.RoslynCompilation );
-            
+
             this._aspectClass = aspectClass;
 
             // We don't store the IServiceProvider because the AspectDriver is created during the pipeline initialization but used
@@ -63,17 +67,28 @@ namespace Metalama.Framework.Engine.Aspects
                     this.EligibilityRule = eligibilityBuilder.Build();
                 }
             }
-            
-            // Determine the licensing abilities of the current aspect class.
-            var licenseVerifier = serviceProvider.GetService<LicenseVerifier>();
 
-            if ( licenseVerifier != null )
+            // Determine the licensing abilities of the current aspect class.
+            var licensingConfiguration = serviceProvider.GetRequiredBackstageService<IConfigurationManager>().Get<DesignTimeConfiguration>();
+
+            if ( licensingConfiguration.HideUnlicensedCodeActions )
             {
-                this._canSuggestCodeFixes = licenseVerifier.CanSuggestCodeFix( aspectClass );
+                this._codeFixAvailability = CodeFixAvailability.None;
             }
             else
             {
-                this._canSuggestCodeFixes = true;
+                var licenseVerifier = serviceProvider.GetService<LicenseVerifier>();
+
+                if ( licenseVerifier != null )
+                {
+                    this._codeFixAvailability = licenseVerifier.CanApplyCodeFix( aspectClass )
+                        ? CodeFixAvailability.PreviewAndApply
+                        : CodeFixAvailability.PreviewOnly;
+                }
+                else
+                {
+                    this._codeFixAvailability = CodeFixAvailability.PreviewAndApply;
+                }
             }
         }
 
@@ -228,7 +243,7 @@ namespace Metalama.Framework.Engine.Aspects
                 return CreateResultForError( diagnostic );
             }
 
-            var diagnosticSink = new UserDiagnosticSink( this._aspectClass.Project, pipelineConfiguration.CodeFixFilter, this._canSuggestCodeFixes );
+            var diagnosticSink = new UserDiagnosticSink( this._aspectClass.Project, pipelineConfiguration.CodeFixFilter, this._codeFixAvailability );
 
             var executionContext = new UserCodeExecutionContext(
                 serviceProvider,
