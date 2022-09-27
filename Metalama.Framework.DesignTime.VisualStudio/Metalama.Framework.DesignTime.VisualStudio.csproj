@@ -2,9 +2,6 @@
 
     <Import Project="..\Build\RoslynVersion\Latest.imports" />
 
-    <!-- Only analyze nullability in the high target framework -->
-    <Import Project="..\eng\DisableNullabilityWarnings.props" Condition="'$(TargetFramework)'!='net6.0'"/>
-
     <PropertyGroup>
         <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
         <ImplicitUsings>enable</ImplicitUsings>

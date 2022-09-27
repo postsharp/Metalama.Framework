@@ -10,16 +10,17 @@
     <Import Project="eng\Versions.props"/>
     <Import Project="eng\StrongName.props"/>
     <Import Project="eng\Packaging.props"/>
+    <Import Sdk="PostSharp.Engineering.Sdk" Project="TeamCity.props"/>
 
     <!-- We don't want nullability warnings in the Release build since the inlining AssertNotNull creates issues to anayzers -->
-    <Import Project="eng\DisableNullabilityWarnings.props" Condition="'$(Configuration)'=='Release' OR '$(DisableNullabilityWarnings)'=='True'"/>
-
+    <PropertyGroup Condition="'$(Configuration)'=='Release' OR ( '$(TargetFramework)'!='net6.0' AND '$(TargetFramework)'!='net5.0' AND '$(TargetFramework)'!='net6.0' )">
+        <DisableCodeQuality>True</DisableCodeQuality>
+    </PropertyGroup>
 
     <!-- Imports a script that exports a few MSBuild properties to the compiler. We try to import and not to copy to avoid duplication. -->
     <Import Project="Metalama.Framework.Package\Metalama.CompilerVisibleProperties.props"/>
 
     <Import Sdk="PostSharp.Engineering.Sdk" Project="BuildOptions.props"/>
-    <Import Sdk="PostSharp.Engineering.Sdk" Project="CodeQuality.props"/>
     <Import Sdk="PostSharp.Engineering.Sdk" Project="SourceLink.props"/>
 
     

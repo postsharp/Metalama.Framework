@@ -10,7 +10,6 @@
         <ChangeDynamicToObject>True</ChangeDynamicToObject>
 
         <GenerateDocumentationFile>False</GenerateDocumentationFile>
-        <NoWarn>$(NoWarn);SA0001</NoWarn>
         <IsPackable>False</IsPackable>
         <UseMetalamaCompiler>Private</UseMetalamaCompiler>
     </PropertyGroup>
