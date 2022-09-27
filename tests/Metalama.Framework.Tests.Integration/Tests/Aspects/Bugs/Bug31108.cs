@@ -1,5 +1,5 @@
 ﻿#if TEST_OPTIONS
-// Skipped(#31108)
+// @Skipped(#31108)
 #endif
 
 using Metalama.Framework.Aspects;
