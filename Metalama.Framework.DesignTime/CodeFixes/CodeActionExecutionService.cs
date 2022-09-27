@@ -20,7 +20,7 @@ public class CodeActionExecutionService : ICodeActionExecutionService
         this._logger = serviceProvider.GetLoggerFactory().GetLogger( "CodeAction" );
     }
 
-    public async Task<CodeActionResult> ExecuteCodeActionAsync( ProjectKey projectKey, CodeActionModel codeActionModel, bool computingPreview, CancellationToken cancellationToken )
+    public async Task<CodeActionResult> ExecuteCodeActionAsync( ProjectKey projectKey, CodeActionModel codeActionModel, bool isComputingPreview, CancellationToken cancellationToken )
     {
         if ( !this._pipelineFactory.TryGetPipeline( projectKey, out var pipeline ) )
         {
@@ -55,8 +55,8 @@ public class CodeActionExecutionService : ICodeActionExecutionService
 
         var compilationModel = CompilationModel.CreateInitialInstance( configuration.ProjectModel, partialCompilation );
 
-        var executionContext = new CodeActionExecutionContext( configuration.ServiceProvider, compilationModel, this._logger, projectKey, computingPreview );
+        var executionContext = new CodeActionExecutionContext( configuration.ServiceProvider, compilationModel, this._logger, projectKey, isComputingPreview );
 
-        return await codeActionModel.ExecuteAsync( executionContext, computingPreview, cancellationToken );
+        return await codeActionModel.ExecuteAsync( executionContext, isComputingPreview, cancellationToken );
     }
 }

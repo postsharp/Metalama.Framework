@@ -31,9 +31,7 @@ namespace Metalama.Framework.Engine.CodeFixes
                     input.Project,
                     input.AspectLayers,
                     input.CompilationModels.AddRange( pipelineStepsResult.Compilations ),
-
-                    // TODO: Is this twice intentionally?
-                    input.Diagnostics.Concat( pipelineStepsResult.Diagnostics ).Concat( pipelineStepsResult.Diagnostics ),
+                    input.Diagnostics.Concat( pipelineStepsResult.Diagnostics ),
                     input.AspectSources.AddRange( pipelineStepsResult.ExternalAspectSources ),
                     default,
                     pipelineStepsResult.InheritableAspectInstances,

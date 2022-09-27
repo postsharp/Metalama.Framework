@@ -128,7 +128,7 @@ namespace Metalama.TestFramework
             TestResult testResult,
             CompileTimeDomain domain,
             ServiceProvider serviceProvider,
-            bool computingPreview )
+            bool isComputingPreview )
         {
             var codeFixes = testResult.PipelineDiagnostics.SelectMany( d => CodeFixTitles.GetCodeFixTitles( d ).Select( t => (Diagnostic: d, Title: t) ) );
             var codeFix = codeFixes.ElementAt( testInput.Options.AppliedCodeFixIndex.GetValueOrDefault() );
@@ -140,7 +140,7 @@ namespace Metalama.TestFramework
                 inputDocument,
                 codeFix.Diagnostic,
                 codeFix.Title,
-                computingPreview,
+                isComputingPreview,
                 CancellationToken.None );
 
             var transformedSolution = await codeActionResult.ApplyAsync( testResult.InputProject!, NullLogger.Instance, true, CancellationToken.None );

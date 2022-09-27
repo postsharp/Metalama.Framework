@@ -119,12 +119,12 @@ internal partial class UserProcessServiceHubEndpoint : ServerEndpoint, ICodeRefa
     async Task<CodeActionResult> ICodeActionExecutionService.ExecuteCodeActionAsync(
         ProjectKey projectKey,
         CodeActionModel codeActionModel,
-        bool computingPreview,
+        bool isComputingPreview,
         CancellationToken cancellationToken )
     {
         var api = await this.GetApiAsync( projectKey, cancellationToken );
 
-        return await api.ExecuteCodeActionAsync( projectKey, codeActionModel, computingPreview, cancellationToken );
+        return await api.ExecuteCodeActionAsync( projectKey, codeActionModel, isComputingPreview, cancellationToken );
     }
 
     private void OnIsEditingCompileTimeCodeChanged( bool value )

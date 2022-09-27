@@ -57,7 +57,7 @@ internal class ApplyLiveTemplateCodeActionModel : CodeActionModel
             this.AspectTypeName,
             compilation,
             targetSymbol,
-            executionContext.ComputingPreview,
+            executionContext.IsComputingPreview,
             cancellationToken );
 
         if ( result.Success )

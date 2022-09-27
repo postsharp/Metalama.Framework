@@ -54,5 +54,5 @@ public abstract class DefaultProjectOptions : IProjectOptions
 
     public virtual string? AdditionalCompilationOutputDirectory => null;
 
-    public virtual string? AdditionalLicense => null;
+    public virtual string? License => null;
 }

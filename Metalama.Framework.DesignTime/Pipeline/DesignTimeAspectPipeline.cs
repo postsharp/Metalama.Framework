@@ -95,7 +95,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             bool isTest )
             : base(
                 pipelineFactory.ServiceProvider.WithService( projectOptions )
-                    .WithService( new DesignTimeLicenseConsumptionManagerProvider( projectOptions.AdditionalLicense ) )
+                    .WithService( new DesignTimeLicenseConsumptionManagerProvider( projectOptions.License ) )
                     .WithProjectScopedServices( metadataReferences ),
                 isTest,
                 pipelineFactory.Domain )
@@ -655,7 +655,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
             string aspectTypeName,
             Compilation inputCompilation,
             ISymbol targetSymbol,
-            bool computingPreview,
+            bool isComputingPreview,
             CancellationToken cancellationToken )
         {
             // Get a compilation _without_ generated code, and map the target symbol.
@@ -680,7 +680,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
 
             var licenseVerifier = configuration.ServiceProvider.GetService<LicenseVerifier>();
 
-            if ( !computingPreview && licenseVerifier != null )
+            if ( !isComputingPreview && licenseVerifier != null )
             {
                 var aspectClass = configuration.AspectClasses.Single( x => x.FullName == aspectTypeName );
 

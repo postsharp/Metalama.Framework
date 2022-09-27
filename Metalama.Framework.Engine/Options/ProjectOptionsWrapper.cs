@@ -57,5 +57,5 @@ public abstract class ProjectOptionsWrapper : IProjectOptions
 
     public virtual bool IsConcurrentBuildEnabled => this.Wrapped.IsConcurrentBuildEnabled;
 
-    public virtual string? AdditionalLicense => this.Wrapped.AdditionalLicense;
+    public virtual string? License => this.Wrapped.License;
 }

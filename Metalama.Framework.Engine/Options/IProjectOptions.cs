@@ -84,12 +84,12 @@ namespace Metalama.Framework.Engine.Options
         bool IsConcurrentBuildEnabled { get; }
 
         /// <summary>
-        /// Gets the additional license. In production, the value gets populated from <c>MetalamaLicense</c> MSBuild property.
+        /// Gets the license set for the project. In production, the value gets populated from <c>MetalamaLicense</c> MSBuild property.
         /// </summary>
         /// <remarks>
         /// This value is used in design-time. In compile-time, the license consumption manager comes from
         /// Metalama.Compiler, which already has the additional license set.
         /// </remarks>
-        string? AdditionalLicense { get; }
+        string? License { get; }
     }
 }
