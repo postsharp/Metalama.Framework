@@ -97,8 +97,6 @@ namespace Metalama.TestFramework
             {
                 if ( testInput.Options.ApplyCodeFix.GetValueOrDefault() )
                 {
-                    throw new NotImplementedException( "TODO: implement testing of code fix preview." );
-
                     // When we test code fixes, we don't apply the pipeline output, but we apply the code fix instead.
                     if ( !await ApplyCodeFixAsync( testInput, testResult, domain, serviceProviderForThisTest, false ) )
                     {
