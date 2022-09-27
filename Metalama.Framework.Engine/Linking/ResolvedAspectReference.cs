@@ -57,14 +57,19 @@ namespace Metalama.Framework.Engine.Linking
             };
 
         /// <summary>
-        /// Gets the annotated expression. This is for convenience in inliners which always work with expressions.
+        /// Gets the source expression. This is for convenience in inliners which always work with expressions.
         /// </summary>
         public ExpressionSyntax SourceExpression => this.SourceNode as ExpressionSyntax ?? throw new AssertionFailedException();
 
         /// <summary>
-        /// Gets the annotated expression.
+        /// Gets the source node.
         /// </summary>
         public SyntaxNode SourceNode { get; }
+
+        /// <summary>
+        /// Gets the annotated node.
+        /// </summary>
+        public SyntaxNode AnnotatedNode { get; }
 
         /// <summary>
         /// Gets a value indicating whether the reference is inlineable.
@@ -80,6 +85,7 @@ namespace Metalama.Framework.Engine.Linking
             IntermediateSymbolSemantic<IMethodSymbol> containingSemantic,
             ISymbol originalSymbol,
             IntermediateSymbolSemantic resolvedSemantic,
+            SyntaxNode annotatedNode,
             SyntaxNode sourceNode,
             AspectReferenceTargetKind targetKind,
             bool isInlineable )
@@ -96,6 +102,7 @@ namespace Metalama.Framework.Engine.Linking
             this.ContainingSemantic = containingSemantic;
             this.OriginalSymbol = originalSymbol;
             this.ResolvedSemantic = resolvedSemantic;
+            this.AnnotatedNode = annotatedNode;
             this.SourceNode = sourceNode;
             this.IsInlineable = isInlineable;
             this.TargetKind = targetKind;
@@ -103,7 +110,7 @@ namespace Metalama.Framework.Engine.Linking
 
         public override string ToString()
         {
-            return $"{this.ContainingSemantic} ({(this.SourceNode is ExpressionSyntax ? this.SourceNode : "not expression")}) -> {this.ResolvedSemantic}";
+            return $"{this.ContainingSemantic} ({(this.AnnotatedNode is ExpressionSyntax ? this.AnnotatedNode : "not expression")}) -> {this.ResolvedSemantic}";
         }
     }
 }

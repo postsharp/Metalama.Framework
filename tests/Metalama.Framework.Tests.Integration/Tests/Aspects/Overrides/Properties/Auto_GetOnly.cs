@@ -31,9 +31,15 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         }
     }
 
+    internal abstract class BaseClass
+    {
+        public abstract int AbstractBaseProperty { get; }
+
+        public abstract int AbstractBaseInitializerProperty { get; }
+    }
 
     // <target>
-    internal class TargetClass
+    internal class TargetClass : BaseClass
     {
         [Override]
         public int Property { get; }
@@ -47,10 +53,18 @@ namespace Metalama.Framework.Tests.Integration.TestInputs.Aspects.Overrides.Prop
         [Override]
         public static int StaticInitializerProperty { get; } = 42;
 
+        [Override]
+        public override int AbstractBaseProperty { get; }
+
+        [Override]
+        public override int AbstractBaseInitializerProperty { get; } = 42;
+
         public TargetClass()
         {
             this.Property = 27;
             this.InitializerProperty = 27;
+            this.AbstractBaseProperty = 27;
+            this.AbstractBaseInitializerProperty = 27;
         }
 
         static TargetClass()

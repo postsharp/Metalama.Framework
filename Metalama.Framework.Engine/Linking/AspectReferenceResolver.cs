@@ -101,11 +101,13 @@ namespace Metalama.Framework.Engine.Linking
             IntermediateSymbolSemantic<IMethodSymbol> containingSemantic,
             ISymbol referencedSymbol,
             ExpressionSyntax expression,
-            AspectReferenceSpecification referenceSpecification )
+            AspectReferenceSpecification referenceSpecification,
+            SemanticModel semanticModel )
         {
-            // Get the local symbol that is referenced.
+            // Get the local symbol that is referenced and reference root.
             // E.g. explicit interface implementation must be referenced as interface member reference.
-            referencedSymbol = GetLocalReferencedSymbol( containingSemantic.Symbol, referencedSymbol );
+            ResolveReferencedSymbol( containingSemantic.Symbol, referencedSymbol, expression, semanticModel, out var resolvedReferencedSymbol, out var resolvedReferenceRoot );
+
             var targetKind = referenceSpecification.TargetKind;
             var isInlineable = (referenceSpecification.Flags & AspectReferenceFlags.Inlineable) != 0;
 
@@ -475,7 +477,24 @@ namespace Metalama.Framework.Engine.Linking
             return annotationLayerIndex;
         }
 
-        private static ISymbol GetLocalReferencedSymbol( ISymbol containingSymbol, ISymbol referencedSymbol )
+        /// <summary>
+        /// Resolves target symbol of the reference.
+        /// </summary>
+        /// <param name="containingSymbol">Symbol contains the reference.</param>
+        /// <param name="referencedSymbol">Symbol that is referenced.</param>
+        /// <param name="expression">Annotated expression.</param>
+        /// <param name="semanticModel">Semantic model.</param>
+        /// <param name="referenceRoot">Root of the reference that need to be rewritten (usually equal to the annotated expression).</param>
+        /// <param name="targetSymbol">Symbol that the reference targets (the target symbol of the reference).</param>
+        /// <param name="targetSymbolSource">Expression that identifies the target symbol (usually equal to the annotated expression).</param>
+        private static void ResolveTarget( 
+            ISymbol containingSymbol, 
+            ISymbol referencedSymbol, 
+            ExpressionSyntax expression, 
+            SemanticModel semanticModel,
+            out ExpressionSyntax referenceRoot,
+            out ISymbol targetSymbol,
+            out ExpressionSyntax targetSymbolSource )
         {
             // Check whether we are referencing explicit interface implementation.
             if ( (!SymbolEqualityComparer.Default.Equals( containingSymbol.ContainingType, referencedSymbol.ContainingType )
@@ -492,7 +511,10 @@ namespace Metalama.Framework.Engine.Linking
                 // to the real member (explicit implementation) of the type before doing the rest of resolution.
 
                 // Replace the referenced symbol with the overridden interface implementation.                
-                return containingSymbol.ContainingType.AssertNotNull().FindImplementationForInterfaceMember( referencedSymbol ).AssertNotNull();
+                referenceRoot = expression;
+                targetSymbol = containingSymbol.ContainingType.AssertNotNull().FindImplementationForInterfaceMember( referencedSymbol ).AssertNotNull();
+                targetSymbolSource = expression;
+                return;
             }
 
             if ( referencedSymbol is IMethodSymbol { ContainingType: { Name: LinkerAspectReferenceSyntaxProvider.HelperTypeName } } helperMethod )
@@ -501,14 +523,35 @@ namespace Metalama.Framework.Engine.Linking
                 {
                     case { Name: LinkerAspectReferenceSyntaxProvider.FinalizeMemberName }:
                         // Referencing type's finalizer.
-                        return containingSymbol.ContainingType.GetMembers( "Finalize" )
+                        referenceRoot = expression;
+                        targetSymbol = containingSymbol.ContainingType.GetMembers( "Finalize" )
                             .OfType<IMethodSymbol>()
                             .Single( m => m.Parameters.Length == 0 && m.TypeParameters.Length == 0 );
+                        targetSymbolSource = expression;
+                        return;
+
+                    case { Name: LinkerAspectReferenceSyntaxProvider.PropertyMemberName }:
+                        // Referencing a property.
+                        switch ( expression.Parent )
+                        {
+                            case InvocationExpressionSyntax { ArgumentList: { Arguments: { } arguments } } invocationExpression
+                                when arguments.Count == 1 && arguments[0].Expression is MemberAccessExpressionSyntax memberAccess:
+
+                                referenceRoot = invocationExpression;
+                                targetSymbol = semanticModel.GetSymbolInfo( memberAccess ).Symbol.AssertNotNull();
+                                targetSymbolSource = memberAccess;
+                                return;
+
+                            default:
+                                throw new AssertionFailedException();
+                        }
 
                     case { } when SymbolHelpers.GetOperatorKindFromName( helperMethod.Name ) is not OperatorKind.None and var operatorKind:
+                        // Referencing an operator.
                         if ( operatorKind.GetCategory() == OperatorCategory.Binary )
                         {
-                            return containingSymbol.ContainingType.GetMembers( referencedSymbol.Name )
+                            referenceRoot = expression;
+                            targetSymbol = containingSymbol.ContainingType.GetMembers( referencedSymbol.Name )
                                 .OfType<IMethodSymbol>()
                                 .Single(
                                     m =>
@@ -516,16 +559,21 @@ namespace Metalama.Framework.Engine.Linking
                                         && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[0].Type, helperMethod.Parameters[0].Type )
                                         && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[1].Type, helperMethod.Parameters[1].Type )
                                         && SignatureTypeSymbolComparer.Instance.Equals( m.ReturnType, helperMethod.ReturnType ) );
+                            targetSymbolSource = expression;
+                            return;
                         }
                         else
                         {
-                            return containingSymbol.ContainingType.GetMembers( referencedSymbol.Name )
+                            referenceRoot = expression;
+                            targetSymbol = containingSymbol.ContainingType.GetMembers( referencedSymbol.Name )
                                 .OfType<IMethodSymbol>()
                                 .Single(
                                     m =>
                                         m.Parameters.Length == 1
                                         && SignatureTypeSymbolComparer.Instance.Equals( m.Parameters[0].Type, helperMethod.Parameters[0].Type )
                                         && SignatureTypeSymbolComparer.Instance.Equals( m.ReturnType, helperMethod.ReturnType ) );
+                            targetSymbolSource = expression;
+                            return;
                         }
 
                     default:
@@ -533,19 +581,10 @@ namespace Metalama.Framework.Engine.Linking
                 }
             }
 
-            if ( referencedSymbol is IMethodSymbol
-                {
-                    Name: LinkerAspectReferenceSyntaxProvider.FinalizeMemberName,
-                    ContainingType: { Name: LinkerAspectReferenceSyntaxProvider.HelperTypeName }
-                } )
-            {
-                // Referencing type's finalizer.
-                return containingSymbol.ContainingType.GetMembers( "Finalize" )
-                    .OfType<IMethodSymbol>()
-                    .Single( m => m.Parameters.Length == 0 && m.TypeParameters.Length == 0 );
-            }
-
-            return referencedSymbol;
+            referenceRoot = expression;
+            targetSymbol = referencedSymbol;
+            targetSymbolSource = expression;
+            return;
         }
 
         private static AspectReferenceTargetKind ResolveExpressionTarget( ISymbol referencedSymbol, ExpressionSyntax expression )

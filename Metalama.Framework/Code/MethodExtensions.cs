@@ -1,5 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
+
 namespace Metalama.Framework.Code
 {
     /// <summary>
@@ -13,8 +15,10 @@ namespace Metalama.Framework.Code
         /// </summary>
         /// <param name="method"></param>
         /// <returns></returns>
+        [CompileTime]
         public static IteratorInfo GetIteratorInfo( this IMethod method ) => ((ICompilationInternal) method.Compilation).Helpers.GetIteratorInfo( method );
 
+        [CompileTime]
         public static AsyncInfo GetAsyncInfo( this IMethod method ) => ((ICompilationInternal) method.Compilation).Helpers.GetAsyncInfo( method );
     }
 }

@@ -19,6 +19,7 @@ namespace Metalama.Framework.Engine.Linking
     {
         public const string HelperTypeName = "__LinkerIntroductionHelpers__";
         public const string FinalizeMemberName = "__Finalize";
+        public const string PropertyMemberName = "__Property";
         public const string SyntaxTreeName = "__LinkerIntroductionHelpers__.cs";
 
         private static readonly ConcurrentDictionary<LanguageOptions, SyntaxTree> _linkerHelperSyntaxTreeCache = new();
@@ -42,6 +43,30 @@ namespace Metalama.Framework.Engine.Linking
                         AspectReferenceOrder.Base,
                         AspectReferenceTargetKind.Self,
                         flags: AspectReferenceFlags.Inlineable ) );
+
+        public override ExpressionSyntax GetPropertyReference( AspectLayerId aspectLayer, IProperty overriddenProperty, OurSyntaxGenerator syntaxGenerator )
+            => InvocationExpression(
+                MemberAccessExpression(
+                        SyntaxKind.SimpleMemberAccessExpression,
+                        IdentifierName( HelperTypeName ),
+                        IdentifierName( PropertyMemberName ) )
+                    .WithAspectReferenceAnnotation(
+                        aspectLayer,
+                        AspectReferenceOrder.Base,
+                        AspectReferenceTargetKind.Self,
+                        flags: AspectReferenceFlags.Inlineable ),
+                ArgumentList(
+                    SingletonSeparatedList(
+                        Argument(
+                            overriddenProperty.IsStatic
+                            ? MemberAccessExpression(
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                syntaxGenerator.Type( overriddenProperty.DeclaringType.GetSymbol() ),
+                                IdentifierName( overriddenProperty.Name ) )
+                            : MemberAccessExpression( 
+                                SyntaxKind.SimpleMemberAccessExpression,
+                                ThisExpression(),
+                                IdentifierName( overriddenProperty.Name ) ) ) ) ) );
 
         public override ExpressionSyntax GetOperatorReference( AspectLayerId aspectLayer, IMethod overriddenOperator, OurSyntaxGenerator syntaxGenerator )
         {
@@ -95,9 +120,15 @@ namespace Metalama.Framework.Engine.Linking
 internal class {HelperTypeName}
 {{
     public static void {FinalizeMemberName}() {{}}
+    public static ref T {PropertyMemberName}<T>(T value) => ref Dummy<T>.Field;
     {string.Join( "\n    ", binaryOperators )}
     {string.Join( "\n    ", unaryOperators )}
     {string.Join( "\n    ", conversionOperators )}
+
+    public class Dummy<T>
+    {{
+        public static T? Field;
+    }}
 }}
                 ";
 

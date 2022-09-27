@@ -1,5 +1,6 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Framework.Aspects;
 using System;
 
 namespace Metalama.Framework.Code
@@ -7,6 +8,7 @@ namespace Metalama.Framework.Code
     /// <summary>
     /// Information about an iterator method, returned by the <see cref="MethodExtensions.GetIteratorInfo"/> extension method of <see cref="IMethod"/>.
     /// </summary>
+    [CompileTime]
     public readonly struct IteratorInfo
     {
         private readonly IMethod? _method;

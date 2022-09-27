@@ -68,7 +68,8 @@ namespace Metalama.Framework.Engine.Linking
                         this._containingSymbol.ToSemantic( IntermediateSymbolSemanticKind.Default ),
                         referencedSymbol,
                         (ExpressionSyntax) node,
-                        aspectReference );
+                        aspectReference, 
+                        this._semanticModel );
 
                     this.AspectReferences.Add( resolvedReference );
                 }
