@@ -61,7 +61,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     throw new AssertionFailedException();
             }
 
-            UsingStatementSyntax Translate( LocalDeclarationStatementSyntax local, List<StatementSyntax> statements )
+            static UsingStatementSyntax Translate( LocalDeclarationStatementSyntax local, List<StatementSyntax> statements )
             {
                 return
                     UsingStatement(

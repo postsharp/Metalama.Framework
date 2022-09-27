@@ -159,7 +159,14 @@ namespace Metalama.Framework.Engine.Linking
                         var rootBlockCfa = semanticModel.AnalyzeControlFlow( rootBlock );
                         var exitFlowingStatements = new HashSet<StatementSyntax>();
                         var returnStatementProperties = new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>();
+
+/* Unmerged change from project 'Metalama.Framework.Engine (net6.0)'
+Before:
                         var rootBlockWithEmptyUsingStatement = this.GetRootBlockWithUsingLocal( rootBlock );
+After:
+                        var rootBlockWithEmptyUsingStatement = BodyAnalyzer.GetRootBlockWithUsingLocal( rootBlock );
+*/
+                        var rootBlockWithEmptyUsingStatement = GetRootBlockWithUsingLocal( rootBlock );
 
                         // Get all statements that flow to exit (blocks, ifs, trys, etc.).
                         DiscoverExitFlowingStatements( rootBlock, exitFlowingStatements );
@@ -405,7 +412,7 @@ namespace Metalama.Framework.Engine.Linking
                     };
             }
 
-            private BlockSyntax? GetRootBlockWithUsingLocal( BlockSyntax rootBlock )
+            private static BlockSyntax? GetRootBlockWithUsingLocal( BlockSyntax rootBlock )
             {
                 foreach ( var statement in rootBlock.Statements )
                 {
