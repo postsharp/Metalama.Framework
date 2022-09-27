@@ -5,7 +5,7 @@ using Metalama.Framework.Code;
 namespace Metalama.Framework.Engine.CodeModel
 {
     internal class CompilationHelpers : ICompilationHelpers
-    {        
+    {
         public IteratorInfo GetIteratorInfo( IMethod method ) => method.GetIteratorInfoImpl();
 
         public AsyncInfo GetAsyncInfo( IMethod method ) => method.GetAsyncInfoImpl();

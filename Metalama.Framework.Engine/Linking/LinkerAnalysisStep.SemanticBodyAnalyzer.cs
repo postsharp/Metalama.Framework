@@ -407,9 +407,9 @@ namespace Metalama.Framework.Engine.Linking
 
             private BlockSyntax? GetRootBlockWithUsingLocal( BlockSyntax rootBlock )
             {
-                foreach (var statement in rootBlock.Statements )
+                foreach ( var statement in rootBlock.Statements )
                 {
-                    if (statement is LocalDeclarationStatementSyntax local && local.UsingKeyword != default )
+                    if ( statement is LocalDeclarationStatementSyntax local && local.UsingKeyword != default )
                     {
                         return rootBlock;
                     }

@@ -9,9 +9,9 @@ namespace Metalama.Framework.Engine.Linking.Substitution
 {
     internal class RootWithUsingLocalSubstitution : SyntaxNodeSubstitution
     {
-        public BlockSyntax RootBlock { get; }       
+        public BlockSyntax RootBlock { get; }
 
-        public RootWithUsingLocalSubstitution(BlockSyntax rootBlock)
+        public RootWithUsingLocalSubstitution( BlockSyntax rootBlock )
         {
             this.RootBlock = rootBlock;
         }
@@ -27,7 +27,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     var initialStatements = new List<StatementSyntax>();
                     var tailStatements = new List<StatementSyntax>();
 
-                    foreach (var statement in rootBlock.Statements)
+                    foreach ( var statement in rootBlock.Statements )
                     {
                         if ( firstUsingLocalStatement == null )
                         {
@@ -61,7 +61,7 @@ namespace Metalama.Framework.Engine.Linking.Substitution
                     throw new AssertionFailedException();
             }
 
-            UsingStatementSyntax Translate(LocalDeclarationStatementSyntax local, List<StatementSyntax> statements )
+            UsingStatementSyntax Translate( LocalDeclarationStatementSyntax local, List<StatementSyntax> statements )
             {
                 return
                     UsingStatement(

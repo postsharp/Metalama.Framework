@@ -110,7 +110,8 @@ namespace Metalama.Framework.Engine.Linking
                         }
 
                         if ( inliningSpecification.ReturnLabelIdentifier != null &&
-                            this._bodyAnalysisResults.TryGetValue( inliningSpecification.TargetSemantic, out var bodyAnalysisResults ) && bodyAnalysisResults.RootBlockWithUsingLocal != null )
+                             this._bodyAnalysisResults.TryGetValue( inliningSpecification.TargetSemantic, out var bodyAnalysisResults )
+                             && bodyAnalysisResults.RootBlockWithUsingLocal != null )
                         {
                             AddSubstitution(
                                 inliningSpecification.ContextIdentifier,

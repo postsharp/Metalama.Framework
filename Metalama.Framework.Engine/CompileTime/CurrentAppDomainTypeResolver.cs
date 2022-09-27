@@ -28,7 +28,10 @@ internal class CurrentAppDomainTypeResolver : CompileTimeTypeResolver
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            typeBox = this.Cache.GetOrAdd( typeSymbol, ( t, ct ) => new StrongBox<Type?>( this.GetCompileTimeNamedTypeCore( (INamedTypeSymbol) t, ct ) ), cancellationToken );
+            typeBox = this.Cache.GetOrAdd(
+                typeSymbol,
+                ( t, ct ) => new StrongBox<Type?>( this.GetCompileTimeNamedTypeCore( (INamedTypeSymbol) t, ct ) ),
+                cancellationToken );
         }
 
         return typeBox.Value;
