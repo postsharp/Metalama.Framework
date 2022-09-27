@@ -183,9 +183,9 @@ namespace Metalama.Framework.Engine.Diagnostics
             this.ValidateUserReport( diagnostic.Definition );
 
             var resolvedLocation = GetLocation( location );
-            var codeFixDiagnosticInfo = this.ProcessCodeFix( diagnostic.Definition, resolvedLocation, diagnostic.CodeFixes );
+            var codeFixTitles = this.ProcessCodeFix( diagnostic.Definition, resolvedLocation, diagnostic.CodeFixes );
 
-            this.Report( diagnostic.Definition.CreateRoslynDiagnosticImpl( resolvedLocation, diagnostic.Arguments, codeFixes: codeFixDiagnosticInfo ) );
+            this.Report( diagnostic.Definition.CreateRoslynDiagnosticImpl( resolvedLocation, diagnostic.Arguments, codeFixes: codeFixTitles ) );
         }
 
         public void Suppress( SuppressionDefinition suppression, IDeclaration scope )
