@@ -1,8 +1,5 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-    <!-- Only analyze nullability in the high target framework -->
-    <Import Project="..\eng\DisableNullabilityWarnings.props" Condition="'$(TargetFramework)'!='net6.0'"/>
-
     <PropertyGroup>
         <!-- We are targeting .NET 5.0 because we can provide an unloadable implementation of CompileTimeDomain. -->
         <TargetFrameworks>netstandard2.0;net472;net6.0</TargetFrameworks>

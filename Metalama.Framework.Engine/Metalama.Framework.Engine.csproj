@@ -2,9 +2,6 @@
 
     <Import Project="..\Build\RoslynVersion\Latest.imports" />
     
-    <!-- Only analyze nullability in the high target framework -->
-    <Import Project="..\eng\DisableNullabilityWarnings.props" Condition="'$(TargetFramework)'!='net6.0'"/>
-    
     <PropertyGroup>
         <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -14,6 +11,7 @@
         <PackageId>Metalama.Framework.Engine</PackageId>
 		<!-- We need to pack Metalama.SystemTypes.dll because the test projects will not include it if they do not target .NET Standard 2.0 themselves. -->
 		<PackMetalamaSystemTypes>True</PackMetalamaSystemTypes>
+        
     </PropertyGroup>
 
 
