@@ -28,7 +28,7 @@ internal class DesignTimeClassificationService : IClassificationService
     public IDesignTimeClassifiedTextCollection GetClassifiedTextSpans( SemanticModel model, CancellationToken cancellationToken )
     {
         if ( model.Compilation.ExternalReferences.IsDefaultOrEmpty
-             || (!this._projectClassifier.IsMetalamaEnabled( model.Compilation )) )
+             || !this._projectClassifier.IsMetalamaEnabled( model.Compilation ) )
         {
             // Do not return anything if the compilation is not initialized or is not a Metalama project.
             return EmptyDesignTimeClassifiedTextCollection.Instance;

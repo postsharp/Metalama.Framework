@@ -1,5 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+    <!-- Only analyze nullability in the high target framework -->
+    <Import Project="..\eng\DisableNullabilityWarnings.props" Condition="'$(TargetFramework)'!='net6.0'"/>    
+
     <PropertyGroup>
         <!-- We need to target .NET Standard 2.0 and .NET 6.0 separately because of NullableAttributes.cs. We don't want these
            types to be in a .NET 6 build, otherwise it would conflict with the types in System.Runtime. -->

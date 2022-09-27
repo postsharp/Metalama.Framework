@@ -27,6 +27,7 @@ namespace Metalama.Framework.DesignTime.Diagnostics
         /// </summary>
         public ImmutableDictionary<string, SuppressionDescriptor> SupportedSuppressionDescriptors { get; }
 
+        // ReSharper disable once RedundantSuppressNullableWarningExpression
         public static DesignTimeDiagnosticDefinitions GetInstance()
             => LazyInitializer.EnsureInitialized( ref _instance, () => new DesignTimeDiagnosticDefinitions() )!;
 

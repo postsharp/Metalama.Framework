@@ -87,7 +87,7 @@ namespace Metalama.Framework.Engine.Linking
                         case IPropertySymbol property:
                             Invariant.Assert( false ); // temp.
 
-                            if ( property.GetMethod != null )
+                            if ( property.GetMethod != null! )
                             {
                                 VisitSemanticBody(
                                     property.GetMethod.ToSemantic( semantic.Kind ),
@@ -95,7 +95,7 @@ namespace Metalama.Framework.Engine.Linking
                                     context );
                             }
 
-                            if ( property.SetMethod != null )
+                            if ( property.SetMethod != null! )
                             {
                                 VisitSemanticBody(
                                     property.SetMethod.ToSemantic( semantic.Kind ),

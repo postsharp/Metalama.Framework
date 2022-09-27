@@ -483,6 +483,7 @@ namespace Metalama.Framework.Engine.CompileTime
             }
         }
 
+        // ReSharper disable once ParameterOnlyUsedForPreconditionCheck.Local
         private TemplatingScope? GetScopeFromAttributes( ISymbol symbol, ImmutableArray<ISymbol> symbolsBeingProcessed, int recursion )
         {
             if ( recursion > 32 )

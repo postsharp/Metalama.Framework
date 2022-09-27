@@ -10,7 +10,7 @@ namespace Metalama.Framework.Engine.Templating
     /// </summary>
     /// <remarks>
     /// The implementation is intentionally single-threaded because using it in a concurrent condition would cause
-    /// the generation of non-determistic symbol names.
+    /// the generation of non-deterministic symbol names.
     /// </remarks>
     internal class TemplateLexicalScope
     {
@@ -33,7 +33,7 @@ namespace Metalama.Framework.Engine.Templating
             {
                 var name = hint + "_" + i;
 
-                if ( !this._sourceSymbols.Contains( name ) && this._newSymbols!.Add( name ) )
+                if ( !this._sourceSymbols.Contains( name ) && this._newSymbols.Add( name ) )
                 {
                     return name;
                 }

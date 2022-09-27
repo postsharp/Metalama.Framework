@@ -33,14 +33,6 @@ namespace Metalama.Framework.Engine.SyntaxSerialization
 
         internal static ExpressionSyntax SerializeMethodBase( IMethodBase method, SyntaxSerializationContext serializationContext )
         {
-            return SerializeMethodBase( method, method.DeclaringType.GetSymbol(), serializationContext );
-        }
-
-        private static ExpressionSyntax SerializeMethodBase(
-            IMethodBase method,
-            ITypeSymbol? declaringGenericTypeSymbol,
-            SyntaxSerializationContext serializationContext )
-        {
             // The following is the old code that uses Intrinsics.
             /*
             var methodSymbol = method.GetOriginalDefinition().GetSymbol();

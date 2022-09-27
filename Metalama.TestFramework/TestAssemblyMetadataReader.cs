@@ -71,7 +71,7 @@ namespace Metalama.TestFramework
             {
                 var value = GetOptionalAssemblyMetadataValue( "MetalamaDebugTestFramework" );
 
-                return !string.IsNullOrEmpty( value ) && value!.ToLowerInvariant().Trim() == "true";
+                return !string.IsNullOrEmpty( value ) && value.ToLowerInvariant().Trim() == "true";
             }
 
             string? GetGlobalUsingsFile() => GetOptionalAssemblyMetadataValue( "GlobalUsingsFile" );

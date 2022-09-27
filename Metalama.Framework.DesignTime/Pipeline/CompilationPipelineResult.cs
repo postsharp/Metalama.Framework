@@ -219,7 +219,7 @@ namespace Metalama.Framework.DesignTime.Pipeline
                 {
                     if ( !string.IsNullOrEmpty( path ) )
                     {
-                        var builder = resultBuilders[path!];
+                        var builder = resultBuilders[path];
                         builder.Suppressions ??= ImmutableArray.CreateBuilder<CacheableScopedSuppression>();
                         builder.Suppressions.Add( new CacheableScopedSuppression( suppression ) );
                     }

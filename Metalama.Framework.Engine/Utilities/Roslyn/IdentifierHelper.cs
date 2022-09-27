@@ -72,7 +72,7 @@ internal static class IdentifierHelper
             return false;
         }
 
-        if ( !IsIdentifierStartCharacter( name![0] ) )
+        if ( !IsIdentifierStartCharacter( name[0] ) )
         {
             return false;
         }
