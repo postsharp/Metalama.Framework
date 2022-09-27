@@ -23,12 +23,16 @@ namespace Metalama.Framework.Engine.Linking
             /// </summary>
             public bool HasReachableEndPoint { get; }
 
+            public BlockSyntax? RootBlockWithUsingLocal { get; }
+
             public SemanticBodyAnalysisResult(
                 IReadOnlyDictionary<ReturnStatementSyntax, ReturnStatementProperties> returnStatements,
-                bool hasReachableEndPoint )
+                bool hasReachableEndPoint,
+                BlockSyntax? rootBlockWithUsingLocal )
             {
                 this.ReturnStatements = returnStatements;
                 this.HasReachableEndPoint = hasReachableEndPoint;
+                this.RootBlockWithUsingLocal = rootBlockWithUsingLocal;
             }
         }
     }

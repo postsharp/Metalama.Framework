@@ -52,7 +52,7 @@ namespace Metalama.Framework.Engine.Linking
                             {
                                 case IMethodSymbol:
                                     results[semantic.ToTyped<IMethodSymbol>()] =
-                                        new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
+                                        new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false, null );
 
                                     break;
 
@@ -60,13 +60,13 @@ namespace Metalama.Framework.Engine.Linking
                                     if ( propertySymbol.GetMethod != null )
                                     {
                                         results[semantic.WithSymbol( propertySymbol.GetMethod )] =
-                                            new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
+                                            new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false, null );
                                     }
 
                                     if ( propertySymbol.SetMethod != null )
                                     {
                                         results[semantic.WithSymbol( propertySymbol.SetMethod )] =
-                                            new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
+                                            new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false, null );
                                     }
 
                                     break;
@@ -75,13 +75,13 @@ namespace Metalama.Framework.Engine.Linking
                                     if ( @eventSymbol.AddMethod != null )
                                     {
                                         results[semantic.WithSymbol( @eventSymbol.AddMethod )] =
-                                            new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
+                                            new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false, null );
                                     }
 
                                     if ( @eventSymbol.RemoveMethod != null )
                                     {
                                         results[semantic.WithSymbol( @eventSymbol.RemoveMethod )] =
-                                            new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
+                                            new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false, null );
                                     }
 
                                     break;
@@ -160,6 +160,14 @@ namespace Metalama.Framework.Engine.Linking
                         var exitFlowingStatements = new HashSet<StatementSyntax>();
                         var returnStatementProperties = new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>();
 
+/* Unmerged change from project 'Metalama.Framework.Engine (net6.0)'
+Before:
+                        var rootBlockWithEmptyUsingStatement = this.GetRootBlockWithUsingLocal( rootBlock );
+After:
+                        var rootBlockWithEmptyUsingStatement = BodyAnalyzer.GetRootBlockWithUsingLocal( rootBlock );
+*/
+                        var rootBlockWithEmptyUsingStatement = GetRootBlockWithUsingLocal( rootBlock );
+
                         // Get all statements that flow to exit (blocks, ifs, trys, etc.).
                         DiscoverExitFlowingStatements( rootBlock, exitFlowingStatements );
 
@@ -228,22 +236,22 @@ namespace Metalama.Framework.Engine.Linking
                             }
                         }
 
-                        return new SemanticBodyAnalysisResult( returnStatementProperties, rootBlockCfa.EndPointIsReachable );
+                        return new SemanticBodyAnalysisResult( returnStatementProperties, rootBlockCfa.EndPointIsReachable, rootBlockWithEmptyUsingStatement );
 
                     case ArrowExpressionClauseSyntax:
-                        return new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
+                        return new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false, null );
 
                     case MethodDeclarationSyntax { Body: null, ExpressionBody: null }:
-                        return new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
+                        return new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false, null );
 
                     case AccessorDeclarationSyntax { Body: null, ExpressionBody: null }:
-                        return new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
+                        return new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false, null );
 
                     case VariableDeclaratorSyntax { Parent: { Parent: EventFieldDeclarationSyntax } }:
-                        return new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
+                        return new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false, null );
 
                     case ParameterSyntax { Parent: ParameterListSyntax { Parent: RecordDeclarationSyntax } }:
-                        return new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false );
+                        return new SemanticBodyAnalysisResult( new Dictionary<ReturnStatementSyntax, ReturnStatementProperties>(), false, null );
 
                     default:
                         throw new AssertionFailedException();
@@ -402,6 +410,19 @@ namespace Metalama.Framework.Engine.Linking
                         ParameterSyntax { Parent: ParameterListSyntax { Parent: RecordDeclarationSyntax } } recordParameter => recordParameter,
                         _ => throw new AssertionFailedException()
                     };
+            }
+
+            private static BlockSyntax? GetRootBlockWithUsingLocal( BlockSyntax rootBlock )
+            {
+                foreach ( var statement in rootBlock.Statements )
+                {
+                    if ( statement is LocalDeclarationStatementSyntax local && local.UsingKeyword != default )
+                    {
+                        return rootBlock;
+                    }
+                }
+
+                return null;
             }
         }
     }
