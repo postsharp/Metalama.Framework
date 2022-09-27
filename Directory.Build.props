@@ -4,7 +4,7 @@
         <RepoDirectory>$(MSBuildThisFileDirectory)</RepoDirectory>
         <RepoKind>AzureRepos</RepoKind>
         <Obfuscate Condition="'$(Obfuscate)'=='' AND '$(Configuration)'=='Release'">True</Obfuscate>
-
+        <GenerateDocumentationFile>True</GenerateDocumentationFile>
     </PropertyGroup>
 
     <Import Project="eng\Versions.props"/>
